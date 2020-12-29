@@ -1,20 +1,20 @@
 ---
 subcategory: "Cloud SQL"
 layout: "google"
-page_title: "Google: google_sql_database_instance_backup_run"
-sidebar_current: "docs-google-datasource-sql-database-instance_backup_run"
+page_title: "Google: google_sql_backup_run"
+sidebar_current: "docs-google-datasource-sql-backup-run"
 description: |-
-  Get a  SQL database instance backup run in Google Cloud SQL.
+  Get a  SQL backup run in Google Cloud SQL.
 ---
 
-# google\_sql\_database\_instance\_backup\_run
+# google\_sql\_backup\_run
 
 Use this data source to get information about a Cloud SQL instance backup run.
 
 ## Example Usage 
 
 ```hcl
-data "google_sql_database_instance_backup_run" "backup" {
+data "google_sql_backup_run" "backup" {
 	instance = google_sql_database_instance.master.name
 	most_recent = true
 }

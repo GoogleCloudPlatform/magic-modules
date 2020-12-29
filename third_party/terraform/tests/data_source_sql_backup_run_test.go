@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataSourceSqlDatabaseInstanceBackupRun_basic(t *testing.T) {
+func TestAccDataSourceSqlBackupRun_basic(t *testing.T) {
 	t.Parallel()
 
 	instance := BootstrapSharedSQLInstanceBackupRun(t)
@@ -19,14 +19,14 @@ func TestAccDataSourceSqlDatabaseInstanceBackupRun_basic(t *testing.T) {
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceSqlDatabaseInstanceBackupRun_basic(instance),
-				Check:  resource.TestMatchResourceAttr("data.google_sql_database_instance_backup_run.backup", "status", regexp.MustCompile("SUCCESSFUL")),
+				Config: testAccDataSourceSqlBackupRun_basic(instance),
+				Check:  resource.TestMatchResourceAttr("data.google_sql_backup_run.backup", "status", regexp.MustCompile("SUCCESSFUL")),
 			},
 		},
 	})
 }
 
-func TestAccDataSourceSqlDatabaseInstanceBackupRun_notFound(t *testing.T) {
+func TestAccDataSourceSqlBackupRun_notFound(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -39,23 +39,23 @@ func TestAccDataSourceSqlDatabaseInstanceBackupRun_notFound(t *testing.T) {
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccDataSourceSqlDatabaseInstanceBackupRun_notFound(context),
+				Config:      testAccDataSourceSqlBackupRun_notFound(context),
 				ExpectError: regexp.MustCompile("No backups found for SQL Database Instance"),
 			},
 		},
 	})
 }
 
-func testAccDataSourceSqlDatabaseInstanceBackupRun_basic(instance string) string {
+func testAccDataSourceSqlBackupRun_basic(instance string) string {
 	return fmt.Sprintf(`
-data "google_sql_database_instance_backup_run" "backup" {
+data "google_sql_backup_run" "backup" {
 	instance = "%s"
 	most_recent = true
 }
 `, instance)
 }
 
-func testAccDataSourceSqlDatabaseInstanceBackupRun_notFound(context map[string]interface{}) string {
+func testAccDataSourceSqlBackupRun_notFound(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-instance-%{random_suffix}"
@@ -72,7 +72,7 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
 }
 
-data "google_sql_database_instance_backup_run" "backup" {
+data "google_sql_backup_run" "backup" {
 	instance = google_sql_database_instance.instance.name
 	most_recent = true
 	depends_on = [google_sql_database_instance.instance]

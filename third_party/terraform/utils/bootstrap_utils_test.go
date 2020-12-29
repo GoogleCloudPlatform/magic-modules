@@ -337,7 +337,8 @@ func BootstrapConfig(t *testing.T) *Config {
 	return config
 }
 
-const SharedTestSQLInstanceName = "tf-bootstrap-sql-instance"
+// SQL Instance names are not reusable for a week after deletion
+const SharedTestSQLInstanceName = "tf-bootstrap-do-not-delete"
 
 // BootstrapSharedSQLInstanceBackupRun will return a shared SQL db instance that
 // has a backup created for it.
@@ -371,20 +372,20 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 				return operr
 			}, time.Duration(5)*time.Minute, isSqlOperationInProgressError)
 			if err != nil {
-				t.Errorf("Error, failed to create instance %s: %s", instance.Name, err)
+				t.Fatalf("Error, failed to create instance %s: %s", instance.Name, err)
 			}
 			err = sqlAdminOperationWaitTime(config, op, project, "Create Instance", config.userAgent, time.Duration(5)*time.Minute)
 			if err != nil {
-				t.Errorf("Error, failed to create instance %s: %s", instance.Name, err)
+				t.Fatalf("Error, failed to create instance %s: %s", instance.Name, err)
 			}
 		} else {
-			t.Errorf("Unable to bootstrap SQL Instance. Cannot retrieve instance: %s", err)
+			t.Fatalf("Unable to bootstrap SQL Instance. Cannot retrieve instance: %s", err)
 		}
 	}
 
 	res, err := config.NewSqlAdminClient(config.userAgent).BackupRuns.List(project, instance.Name).Do()
 	if err != nil {
-		t.Errorf("Unable to bootstrap SQL Instance. Cannot retrieve backup list: %s", err)
+		t.Fatalf("Unable to bootstrap SQL Instance. Cannot retrieve backup list: %s", err)
 	}
 	backupsList := res.Items
 	if len(backupsList) == 0 {
@@ -399,11 +400,11 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 			return operr
 		}, time.Duration(5)*time.Minute, isSqlOperationInProgressError)
 		if err != nil {
-			t.Errorf("Error, failed to create instance backup: %s", err)
+			t.Fatalf("Error, failed to create instance backup: %s", err)
 		}
 		err = sqlAdminOperationWaitTime(config, op, project, "Backup Instance", config.userAgent, time.Duration(5)*time.Minute)
 		if err != nil {
-			t.Errorf("Error, failed to create instance backup: %s", err)
+			t.Fatalf("Error, failed to create instance backup: %s", err)
 		}
 	}
 

@@ -7,10 +7,10 @@ import (
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
-func dataSourceSqlDatabaseInstanceBackupRun() *schema.Resource {
+func dataSourceSqlBackupRun() *schema.Resource {
 
 	return &schema.Resource{
-		Read: dataSourceSqlDatabaseInstanceBackupRunRead,
+		Read: dataSourceSqlBackupRunRead,
 
 		Schema: map[string]*schema.Schema{
 			"backup_id": {
@@ -48,7 +48,7 @@ func dataSourceSqlDatabaseInstanceBackupRun() *schema.Resource {
 	}
 }
 
-func dataSourceSqlDatabaseInstanceBackupRunRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceSqlBackupRunRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
@@ -78,7 +78,7 @@ func dataSourceSqlDatabaseInstanceBackupRunRead(d *schema.ResourceData, meta int
 		} else if len(backupsList) > 1 {
 			mostRecent := d.Get("most_recent").(bool)
 			if !mostRecent {
-				return fmt.Errorf("Multiple SQL Database Instance backups listed. Consider setting most_recent or specifying a backup_id.")
+				return fmt.Errorf("Multiple SQL backup runs listed for Instance %s. Consider setting most_recent or specifying a backup_id", instance)
 			}
 		}
 		backup = backupsList[0]
