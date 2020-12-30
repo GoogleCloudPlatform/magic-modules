@@ -3615,7 +3615,6 @@ objects:
             mirrored even if a PacketMirroring rule applies to them. This
             can only be set to true for load balancers that have their
             loadBalancingScheme set to INTERNAL.
-        min_version: beta
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
@@ -8839,7 +8838,6 @@ objects:
         item_type: Api::Type::String
   - !ruby/object:Api::Resource
     name: 'PacketMirroring'
-    min_version: beta
     base_url: projects/{{project}}/regions/{{region}}/packetMirrorings
     update_verb: :PATCH
     self_link: projects/{{project}}/regions/{{region}}/packetMirrorings/{{name}}
@@ -8944,6 +8942,14 @@ objects:
                 IP CIDR ranges that apply as a filter on the source (ingress) or
                 destination (egress) IP in the IP header. Only IPv4 is supported.
             item_type: Api::Type::String
+          - !ruby/object:Api::Type::Enum
+            name: direction
+            description: Direction of traffic to mirror.
+            values:
+              - :INGRESS
+              - :EGRESS
+              - :BOTH
+            default_value: :BOTH
       - !ruby/object:Api::Type::NestedObject
         name: mirroredResources
         required: true
