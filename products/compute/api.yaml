@@ -3274,6 +3274,11 @@ objects:
           resource: 'ResourcePolicy'
           imports: 'selfLink'
           description: 'A resource policy applied to this disk for automatic snapshot creations.'
+      - !ruby/object:Api::Type::Boolean
+        name: 'multiWriter'
+        description: |
+          Indicates whether or not the disk can be read/write attached to more than one instance.
+        min_version: beta
   - !ruby/object:Api::Resource
     name: 'Firewall'
     kind: 'compute#firewall'
