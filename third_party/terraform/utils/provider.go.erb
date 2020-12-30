@@ -333,9 +333,9 @@ end     # products.each do
 				"google_bigtable_instance_iam_member":          ResourceIamMember(IamBigtableInstanceSchema, NewBigtableInstanceUpdater, BigtableInstanceIdParseFunc),
 				"google_bigtable_instance_iam_policy":          ResourceIamPolicy(IamBigtableInstanceSchema, NewBigtableInstanceUpdater, BigtableInstanceIdParseFunc),
 				"google_bigtable_table":                        resourceBigtableTable(),
-			"google_bigtable_table_iam_binding":                ResourceIamBinding(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc),
-			"google_bigtable_table_iam_member":                 ResourceIamMember(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc),
-			"google_bigtable_table_iam_policy":                 ResourceIamPolicy(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc),
+				"google_bigtable_table_iam_binding":            ResourceIamBinding(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc),
+				"google_bigtable_table_iam_member":             ResourceIamMember(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc),
+				"google_bigtable_table_iam_policy":             ResourceIamPolicy(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc),
 				"google_bigquery_dataset_iam_binding":          ResourceIamBinding(IamBigqueryDatasetSchema, NewBigqueryDatasetIamUpdater, BigqueryDatasetIdParseFunc),
 				"google_bigquery_dataset_iam_member":           ResourceIamMember(IamBigqueryDatasetSchema, NewBigqueryDatasetIamUpdater, BigqueryDatasetIdParseFunc),
 				"google_bigquery_dataset_iam_policy":           ResourceIamPolicy(IamBigqueryDatasetSchema, NewBigqueryDatasetIamUpdater, BigqueryDatasetIdParseFunc),
@@ -348,7 +348,7 @@ end     # products.each do
 				"google_compute_attached_disk":                 resourceComputeAttachedDisk(),
 				"google_compute_instance":                      resourceComputeInstance(),
 				<% unless version == 'ga' -%>
-				"google_compute_instance_from_machine_image":    resourceComputeInstanceFromMachineImage(),
+				"google_compute_instance_from_machine_image":   resourceComputeInstanceFromMachineImage(),
 				<% end -%>
 				"google_compute_instance_from_template":        resourceComputeInstanceFromTemplate(),
 				"google_compute_instance_group":                resourceComputeInstanceGroup(),
@@ -459,11 +459,11 @@ end     # products.each do
 				"google_service_account_key":                   resourceGoogleServiceAccountKey(),
 				"google_storage_bucket":                        resourceStorageBucket(),
 				"google_storage_bucket_acl":                    resourceStorageBucketAcl(),
-				"google_storage_bucket_object":      resourceStorageBucketObject(),
-				"google_storage_object_acl":         resourceStorageObjectAcl(),
-				"google_storage_default_object_acl": resourceStorageDefaultObjectAcl(),
-				"google_storage_notification":       resourceStorageNotification(),
-				"google_storage_transfer_job":       resourceStorageTransferJob(),
+				"google_storage_bucket_object":                 resourceStorageBucketObject(),
+				"google_storage_object_acl":                    resourceStorageObjectAcl(),
+				"google_storage_default_object_acl":            resourceStorageDefaultObjectAcl(),
+				"google_storage_notification":                  resourceStorageNotification(),
+				"google_storage_transfer_job":                  resourceStorageTransferJob(),
 			},
 		)
 }

@@ -132,18 +132,6 @@ var DefaultClientScopes = []string{
 }
 
 func (c *Config) LoadAndValidate(ctx context.Context) error {
-	if len(c.Scopes) == 0 {
-		c.Scopes = DefaultClientScopes
-	}
-
-	c.context = ctx
-
-	tokenSource, err := c.getTokenSource(c.Scopes)
-	if err != nil {
-		return err
-	}
-	c.tokenSource = tokenSource
-
 	cleanCtx := context.WithValue(ctx, oauth2.HTTPClient, cleanhttp.DefaultClient())
 
 	// 1. OAUTH2 TRANSPORT/CLIENT - sets up proper auth headers
@@ -158,20 +146,31 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// See ClientWithAdditionalRetries
 	retryTransport := NewTransportWithDefaultRetries(loggingTransport)
 
+	// 4. Header Transport - outter wrapper to inject additional headers we want to apply
+	// before making requests
+	headerTransport := headerTrasportLayer(retryTransport)
+
 	// Set final transport value.
 	client.Transport = retryTransport
 
 	// This timeout is a timeout per HTTP request, not per logical operation.
 	client.Timeout = c.synchronousTimeout()
 
+	if len(c.Scopes) == 0 {
+		c.Scopes = DefaultClientScopes
+	}
+
+	tokenSource, err := c.getTokenSource(c.Scopes)
+	if err != nil {
+		return err
+	}
+
+	c.tokenSource = tokenSource
 	c.client = client
 	c.context = ctx
-
 	c.Region = GetRegionFromRegionSelfLink(c.Region)
-
 	c.requestBatcherServiceUsage = NewRequestBatcher("Service Usage", ctx, c.BatchingConfig)
 	c.requestBatcherIam = NewRequestBatcher("IAM", ctx, c.BatchingConfig)
-
 	c.PollInterval = 10 * time.Second
 
 	return nil
