@@ -60,6 +60,7 @@ func ResourceLoggingBucketConfig(parentType string, parentSpecificSchema map[str
 			State: resourceLoggingBucketConfigImportState(parentType),
 		},
 		Schema: mergeSchemas(loggingBucketConfigSchema, parentSpecificSchema),
+		UseJSONNumber: true,
 	}
 }
 

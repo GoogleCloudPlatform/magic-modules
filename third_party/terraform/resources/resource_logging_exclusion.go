@@ -45,6 +45,7 @@ func ResourceLoggingExclusion(parentSpecificSchema map[string]*schema.Schema, ne
 		},
 
 		Schema: mergeSchemas(LoggingExclusionBaseSchema, parentSpecificSchema),
+		UseJSONNumber: true,
 	}
 }
 
