@@ -133,6 +133,10 @@ var DefaultClientScopes = []string{
 
 func (c *Config) LoadAndValidate(ctx context.Context) error {
 	cleanCtx := context.WithValue(ctx, oauth2.HTTPClient, cleanhttp.DefaultClient())
+	tokenSource, err := c.getTokenSource(c.Scopes)
+	if err != nil {
+		return err
+	}
 
 	// 1. OAUTH2 TRANSPORT/CLIENT - sets up proper auth headers
 	client := oauth2.NewClient(cleanCtx, tokenSource)
@@ -148,7 +152,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 
 	// 4. Header Transport - outter wrapper to inject additional headers we want to apply
 	// before making requests
-	headerTransport := headerTrasportLayer(retryTransport)
+	headerTransport := newTransportWithHeaders(retryTransport)
 
 	// Set final transport value.
 	client.Transport = retryTransport
@@ -158,11 +162,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 
 	if len(c.Scopes) == 0 {
 		c.Scopes = DefaultClientScopes
-	}
-
-	tokenSource, err := c.getTokenSource(c.Scopes)
-	if err != nil {
-		return err
 	}
 
 	c.tokenSource = tokenSource
