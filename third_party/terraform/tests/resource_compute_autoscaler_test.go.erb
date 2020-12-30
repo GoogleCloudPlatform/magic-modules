@@ -112,7 +112,7 @@ func TestAccComputeAutoscaler_scalingSchedule(t *testing.T) {
 		CheckDestroy: testAccCheckComputeAutoscalerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccComputeAutoscaler_scaleDownControl(itName, tpName, igmName, autoscalerName),
+				Config: testAccComputeAutoscaler_scalingSchedule(itName, tpName, igmName, autoscalerName),
 			},
 			resource.TestStep{
 				ResourceName:      "google_compute_autoscaler.foobar",
