@@ -9,6 +9,8 @@ import (
 )
 
 func TestAccDataSourceSqlBackupRun_basic(t *testing.T) {
+	// Sqladmin client
+	skipIfVcr(t)
 	t.Parallel()
 
 	instance := BootstrapSharedSQLInstanceBackupRun(t)
@@ -27,6 +29,8 @@ func TestAccDataSourceSqlBackupRun_basic(t *testing.T) {
 }
 
 func TestAccDataSourceSqlBackupRun_notFound(t *testing.T) {
+	// Sqladmin client
+	skipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
