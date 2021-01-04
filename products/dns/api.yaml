@@ -463,6 +463,9 @@ objects:
         name: 'name'
         description: For example, www.example.com.
         required: true
+      - !ruby/object:Api::Type::String
+          name: kind
+          description: This is always set to dns#resourceRecordSet  
       - !ruby/object:Api::Type::Enum
         name: 'type'
         values:
@@ -493,3 +496,64 @@ objects:
         description: |
           As defined in RFC 1035 (section 5) and RFC 1034 (section 3.6.1)
         api_name: rrdatas
+  - !ruby/object:Api::Resource
+    name: 'ResourceDnsRecordSet'
+    kind: 'dns#resourceRecordSet'
+    min_version: beta
+    description: |
+      A single DNS record that exists on a domain name (i.e. in a managed zone).
+      This record defines the information about the domain and where the
+      domain / subdomains direct to.
+
+      The record will include the domain/subdomain name, a type (i.e. A, AAA,
+      CAA, MX, CNAME, NS, etc)
+    base_url: 'projects/{{project}}/managedZones/{{managed_zone}}/rrsets'
+    self_link: 'projects/{{project}}/managedZones/{{managed_zone}}/rrsets/{{name}}/{{type}}'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'managed_zone'
+        description: |
+          Identifies the managed zone addressed by this request.
+        required: true
+        resource: 'ManagedZone'
+        imports: 'name'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: For example, www.example.com.
+        required: true
+      - !ruby/object:Api::Type::String
+          name: kind
+          description: This is always set to dns#resourceRecordSet  
+      - !ruby/object:Api::Type::Enum
+        name: 'type'
+        values:
+          - :A
+          - :AAAA
+          - :CAA
+          - :CNAME
+          - :MX
+          - :NAPTR
+          - :NS
+          - :PTR
+          - :SOA
+          - :SPF
+          - :SRV
+          - :TLSA
+          - :TXT
+        description: One of valid DNS resource types.
+        # TODO(nelsonjr): Enforce required in provider manifest
+        required: true
+      - !ruby/object:Api::Type::Integer
+        name: 'ttl'
+        description: |
+          Number of seconds that this ResourceRecordSet can be cached by
+          resolvers.
+      - !ruby/object:Api::Type::Array
+        name: rrdatas
+        input: true
+        description: |
+          As defined in RFC 1035 (section 5) and RFC 1034 (section 3.6.1).
+          examples: https://cloud.google.com/dns/docs/reference/json-record.
+        item_type: Api::Type::String
+
