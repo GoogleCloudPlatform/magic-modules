@@ -1167,7 +1167,7 @@ objects:
                   name: enabled
                   default_value: true
                   description: |
-                    Enable availability sli
+                    Whether an availability SLI is enabled or not. Defaults to `true`.
         - !ruby/object:Api::Type::NestedObject
           name: requestBasedSli
           api_name: 'requestBased'

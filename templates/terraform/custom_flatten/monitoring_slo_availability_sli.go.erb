@@ -16,18 +16,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
     if v == nil {
 		return nil
 	}
-	original := v.(map[string]interface{})
 	transformed := make(map[string]interface{})
-	transformed["enabled"] =
-		flattenMonitoringSloServiceLevelIndicatorBasicSliAvailabilityEnabled(original["enabled"], d, config)
+	transformed["enabled"] = true
 	return []interface{}{transformed}
-}
-
-
-func flattenMonitoringSloServiceLevelIndicatorBasicSliAvailabilityEnabled(v interface{}, d *schema.ResourceData, config *Config) interface{} {
-	if v == nil || isEmptyValue(reflect.ValueOf(v)) {
-		return true
-	}
-
-	return v
 }
