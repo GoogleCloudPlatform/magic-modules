@@ -62,11 +62,13 @@ func datasourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interfac
 		if mostRecent {
 			sort.Sort(ByCreationTimestamp(templates.Items))
 		}
-		if len(templates.Items) == 1 || mostRecent {
+
+		count := len(templates.Items)
+		if count == 1 || count > 1 && mostRecent {
 			return retrieveInstance(d, meta, project, templates.Items[0].Name)
 		}
 
-		return fmt.Errorf("your filter has returned %q instance template(s). Please refine your filter or set most_recent to return exactly one instance template", len(templates.Items))
+		return fmt.Errorf("your filter has returned %d instance template(s). Please refine your filter or set most_recent to return exactly one instance template", len(templates.Items))
 	}
 
 	return fmt.Errorf("one of name or filters must be set")
