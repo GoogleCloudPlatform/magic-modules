@@ -160,8 +160,8 @@ data "google_compute_instance_template" "default" {
 
   depends_on = [
     google_compute_instance_template.a,
-	google_compute_instance_template.b,
-	google_compute_instance_template.c,
+    google_compute_instance_template.b,
+    google_compute_instance_template.c,
   ]
 }
 `, map[string]interface{}{"project": project, "suffix": suffix})
@@ -229,7 +229,7 @@ resource "google_compute_instance_template" "c" {
 
   depends_on = [
     google_compute_instance_template.a,
-	google_compute_instance_template.b,
+    google_compute_instance_template.b,
   ]
 }
 
@@ -240,8 +240,8 @@ data "google_compute_instance_template" "default" {
 
   depends_on = [
     google_compute_instance_template.a,
-	google_compute_instance_template.b,
-	google_compute_instance_template.c,
+    google_compute_instance_template.b,
+    google_compute_instance_template.c,
   ]
 }
 `, map[string]interface{}{"project": project, "suffix": suffix})
