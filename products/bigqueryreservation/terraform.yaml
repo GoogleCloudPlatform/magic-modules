@@ -17,7 +17,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Reservation: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        min_version: beta
         name: "bigquery_reservation_basic"
         primary_resource_id: "reservation"
         vars:
