@@ -91,8 +91,8 @@ func valueIsInArray(value interface{}, array []interface{}) bool {
 
 func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interface{}) bool {
 	// we rely on the fallback to nil if the object does not have the key
-	valA, _ := objectA[key]
-	valB, _ := objectB[key]
+	valA := objectA[key]
+	valB := objectB[key]
 	switch key {
 	case "mode":
 		equivelentSet := []interface{}{nil, "NULLABLE"}
