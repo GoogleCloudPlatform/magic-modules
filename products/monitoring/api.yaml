@@ -767,10 +767,11 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: documentation
         description: |
-          A short name or phrase used to identify the policy in dashboards,
-          notifications, and incidents. To avoid confusion, don't use the same
-          display name for multiple policies in the same project. The name is
-          limited to 512 Unicode characters.
+          Documentation that is included with notifications and incidents related
+          to this policy. Best practice is for the documentation to include information
+          to help responders understand, mitigate, escalate, and correct the underlying
+          problems detected by the alerting policy. Notification channels that have
+          limited capacity might not show this documentation.
         properties:
           - !ruby/object:Api::Type::String
            name: content
@@ -1704,7 +1705,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: requestMethod
         input: true
-        description: The HTTP request method to use for the check. If set to 
+        description: The HTTP request method to use for the check. If set to
           METHOD_UNSPECIFIED then requestMethod defaults to GET.
         default_value: :GET
         values:
@@ -1882,7 +1883,7 @@ objects:
         description: Values for all of the labels listed in the associated
           monitored resource descriptor. For example, Compute Engine VM instances use
           the labels "project_id", "instance_id", and "zone".
-          
+
   - !ruby/object:Api::Resource
     name: MetricDescriptor
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -1906,11 +1907,11 @@ objects:
       name: type
       input: true
       required: true
-      description: The metric type, including its DNS name prefix. The type is not 
-        URL-encoded. All service defined metrics must be prefixed with the service name, 
-        in the format of {service name}/{relative metric name}, such as 
-        cloudsql.googleapis.com/database/cpu/utilization. The relative metric name must 
-        have only upper and lower-case letters, digits, '/' and underscores '_' are 
+      description: The metric type, including its DNS name prefix. The type is not
+        URL-encoded. All service defined metrics must be prefixed with the service name,
+        in the format of {service name}/{relative metric name}, such as
+        cloudsql.googleapis.com/database/cpu/utilization. The relative metric name must
+        have only upper and lower-case letters, digits, '/' and underscores '_' are
         allowed. Additionally, the maximum number of characters allowed for the
         relative_metric_name is 100. All user-defined metric types have the DNS name
         custom.googleapis.com, external.googleapis.com, or logging.googleapis.com/user/.
@@ -1925,8 +1926,8 @@ objects:
           name: key
           required: true
           description: The key for this label. The key must not exceed 100 characters. The
-            first character of the key must be an upper- or lower-case letter, the remaining 
-            characters must be letters, digits or underscores, and the key must match the 
+            first character of the key must be an upper- or lower-case letter, the remaining
+            characters must be letters, digits or underscores, and the key must match the
             regular expression [a-zA-Z][a-zA-Z0-9_]*
         - !ruby/object:Api::Type::Enum
           name: valueType
@@ -1967,24 +1968,24 @@ objects:
       input: true
       description: |
         The units in which the metric value is reported. It is only applicable if the
-        valueType is INT64, DOUBLE, or DISTRIBUTION. The unit defines the representation of 
-        the stored metric values. 
-  
-        Different systems may scale the values to be more easily displayed (so a value of 
-        0.02KBy might be displayed as 20By, and a value of 3523KBy might be displayed as 
-        3.5MBy). However, if the unit is KBy, then the value of the metric is always in 
-        thousands of bytes, no matter how it may be displayed. 
-  
-        If you want a custom metric to record the exact number of CPU-seconds used by a job, 
-        you can create an INT64 CUMULATIVE metric whose unit is s{CPU} (or equivalently 
-        1s{CPU} or just s). If the job uses 12,005 CPU-seconds, then the value is written as 
-        12005. 
+        valueType is INT64, DOUBLE, or DISTRIBUTION. The unit defines the representation of
+        the stored metric values.
 
-        Alternatively, if you want a custom metric to record data in a more granular way, you 
-        can create a DOUBLE CUMULATIVE metric whose unit is ks{CPU}, and then write the value 
-        12.005 (which is 12005/1000), or use Kis{CPU} and write 11.723 (which is 12005/1024). 
+        Different systems may scale the values to be more easily displayed (so a value of
+        0.02KBy might be displayed as 20By, and a value of 3523KBy might be displayed as
+        3.5MBy). However, if the unit is KBy, then the value of the metric is always in
+        thousands of bytes, no matter how it may be displayed.
+
+        If you want a custom metric to record the exact number of CPU-seconds used by a job,
+        you can create an INT64 CUMULATIVE metric whose unit is s{CPU} (or equivalently
+        1s{CPU} or just s). If the job uses 12,005 CPU-seconds, then the value is written as
+        12005.
+
+        Alternatively, if you want a custom metric to record data in a more granular way, you
+        can create a DOUBLE CUMULATIVE metric whose unit is ks{CPU}, and then write the value
+        12.005 (which is 12005/1000), or use Kis{CPU} and write 11.723 (which is 12005/1024).
         The supported units are a subset of The Unified Code for Units of Measure standard.
-        More info can be found in the API documentation 
+        More info can be found in the API documentation
         (https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors).
     - !ruby/object:Api::Type::String
       name: description
@@ -1995,7 +1996,7 @@ objects:
       name: displayName
       input: true
       required: true
-      description: A concise name for the metric, which can be displayed in user interfaces. 
+      description: A concise name for the metric, which can be displayed in user interfaces.
         Use sentence case without an ending period, for example "Request count".
     - !ruby/object:Api::Type::NestedObject
       name: metadata
@@ -2007,19 +2008,19 @@ objects:
         at_least_one_of:
           - metadata.0.sample_period
           - metadata.0.ingest_delay
-        description: The sampling period of metric data points. For metrics which are 
-          written periodically, consecutive data points are stored at this time interval, 
-          excluding data loss due to errors. Metrics with a higher granularity have a 
-          smaller sampling period. In 
+        description: The sampling period of metric data points. For metrics which are
+          written periodically, consecutive data points are stored at this time interval,
+          excluding data loss due to errors. Metrics with a higher granularity have a
+          smaller sampling period. In
           `[duration format](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf?&_ga=2.264881487.1507873253.1593446723-935052455.1591817775#google.protobuf.Duration)`.
       - !ruby/object:Api::Type::String
         name: ingestDelay
         at_least_one_of:
           - metadata.0.sample_period
           - metadata.0.ingest_delay
-        description: The delay of data points caused by ingestion. Data points older than 
-          this age are guaranteed to be ingested and available to be read, excluding data 
-          loss due to errors. In 
+        description: The delay of data points caused by ingestion. Data points older than
+          this age are guaranteed to be ingested and available to be read, excluding data
+          loss due to errors. In
           `[duration format](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf?&_ga=2.264881487.1507873253.1593446723-935052455.1591817775#google.protobuf.Duration)`.
     - !ruby/object:Api::Type::Enum
       name: launchStage
@@ -2037,8 +2038,8 @@ objects:
     - !ruby/object:Api::Type::Array
       name: monitoredResourceTypes
       output: true
-      description: If present, then a time series, which is identified partially by 
-        a metric type and a MonitoredResourceDescriptor, that is associated with this metric 
+      description: If present, then a time series, which is identified partially by
+        a metric type and a MonitoredResourceDescriptor, that is associated with this metric
         type can only be associated with one of the monitored resource types listed here.
         This field allows time series to be associated with the intersection of this metric
         type and the monitored resource types in this list.
