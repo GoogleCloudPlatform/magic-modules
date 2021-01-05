@@ -34,19 +34,6 @@ effect, an issue solved in one tool will be solved for each other tool.
 
 ## Getting Started with Magic Modules
 
-We've prepared a codelab to introduce you to Magic Modules:
-
-[![Magic Modules Codelab](images/mm-codelab.png)](https://codelabs.developers.google.com/codelabs/magic-modules/index.html)
-
-It will walk you through adding a GCP service as a product to Magic Modules.
-It's more extensive than the contents of this README, and will help you if
-you're interested in adding a new resource or if you're modifying generated ones.
-
-If you're in this repo to modify a handwritten Terraform resource, or you just
-need a refresher, you can read the shorter quickstart below.
-
----
-
 You can try out Magic Modules immediately with Open in Cloud Shell below; if
 you're getting set up on a local workstation, this guide serves as a reference
 to help you get it set up.
@@ -75,13 +62,6 @@ To get started right away, use the bootstrap script with:
 ---
 
 Otherwise, follow the manual steps below:
-
-If you're developing Ansible or Inspec, we use submodules to manage the Magic
-Modules generated outputs:
-
-```
-git submodule update --init
-```
 
 If you're generating the Terraform providers (`google` and `google-beta`),
 you'll need to check out the repo(s) you're generating in your GOPATH. For
@@ -119,14 +99,9 @@ correctly, you'll get no errors when you run a command:
 bundle exec compiler -a -v "ga" -e {{tool}} -o "{{output_folder}}"
 ```
 
-Generally, you'll want to generate into the same output; here's a reference of
-common commands
-
-{{tool}}  | {{output_folder}}
-----------|----------
-terraform | $GOPATH/src/github.com/hashicorp/terraform-provider-google
-ansible   | build/ansible
-inspec    | build/inspec
+Generally, you'll want to generate into the same output.  For terraform, that
+will be `$GOPATH/src/github.com/hashicorp/terraform-provider-google` (optionally `-beta`).
+For Ansible and Inspec, wherever you have cloned those repositories.
 
 For example, to generate Terraform:
 
