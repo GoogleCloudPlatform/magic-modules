@@ -42,7 +42,7 @@ resource "google_bigtable_gc_policy" "policy" {
   column_family = "name"
 
   max_age {
-    days = 7
+    duration = "168h"
   }
 }
 ```
@@ -58,7 +58,7 @@ resource "google_bigtable_gc_policy" "policy" {
   mode = "UNION"
 
   max_age {
-    days = 7
+    duration = "168h" # 7 days
   }
 
   max_version {
@@ -89,7 +89,9 @@ The following arguments are supported:
 
 `max_age` supports the following arguments:
 
-* `days` - (Required) Number of days before applying GC policy.
+* `days` - (Optional, Deprecated in favor of duration) Number of days before applying GC policy.
+
+* `duration` - (Optional) Duration before applying GC policy (ex. "8h"). This is required when `days` isn't set
 
 -----
 
