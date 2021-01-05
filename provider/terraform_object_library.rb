@@ -59,6 +59,8 @@ module Provider
                            'third_party/terraform/utils/compute_operation.go.erb'],
                           ['google/config.go',
                            'third_party/terraform/utils/config.go.erb'],
+                          ['google/header_transport.go',
+                           'third_party/terraform/utils/header_transport.go'],
                           ['google/utils.go',
                            'third_party/terraform/utils/utils.go.erb'],
                           ['google/compute_instance_helpers.go',
