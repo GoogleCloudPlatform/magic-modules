@@ -1056,8 +1056,6 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	// TODO if d.HasChange("settings") doesn't work, so we just send an empty request if only restoring from backup
-
 	// Update only updates the settings, so they are all we need to set.
 	instance := &sqladmin.DatabaseInstance{
 		Settings: expandSqlDatabaseInstanceSettings(d.Get("settings").([]interface{}), !isFirstGen(d)),
