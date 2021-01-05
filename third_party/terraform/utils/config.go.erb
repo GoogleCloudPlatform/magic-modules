@@ -155,7 +155,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	headerTransport := newTransportWithHeaders(retryTransport)
 
 	// Set final transport value.
-	client.Transport = retryTransport
+	client.Transport = headerTransport
 
 	// This timeout is a timeout per HTTP request, not per logical operation.
 	client.Timeout = c.synchronousTimeout()
