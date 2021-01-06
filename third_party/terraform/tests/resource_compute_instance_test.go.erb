@@ -1289,8 +1289,6 @@ func TestAccComputeInstance_shieldedVmConfig(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
-
 func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 	t.Parallel()
 
@@ -1299,7 +1297,7 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
+		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1312,8 +1310,6 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 		},
 	})
 }
-
-<% end -%>
 
 func TestAccComputeInstance_enableDisplay(t *testing.T) {
 	t.Parallel()
@@ -2612,7 +2608,6 @@ func testAccCheckComputeInstanceHasShieldedVmConfig(instance *computeBeta.Instan
 	}
 }
 
-<% unless version == 'ga' -%>
 func testAccCheckComputeInstanceHasConfidentialInstanceConfig(instance *computeBeta.Instance, EnableConfidentialCompute bool) resource.TestCheckFunc {
 
 	return func(s *terraform.State) error {
@@ -2623,7 +2618,6 @@ func testAccCheckComputeInstanceHasConfidentialInstanceConfig(instance *computeB
 		return nil
 	}
 }
-<% end -%>
 
 func testAccCheckComputeInstanceLacksShieldedVmConfig(instance *computeBeta.Instance) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -4644,17 +4638,14 @@ resource "google_compute_instance" "foobar" {
 `, instance, enableSecureBoot, enableVtpm, enableIntegrityMonitoring)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeInstanceConfidentialInstanceConfig(instance string, enableConfidentialCompute bool) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  provider  = google-beta
   family    = "ubuntu-2004-lts"
   project   = "ubuntu-os-cloud"
 }
 
 resource "google_compute_instance" "foobar" {
-  provider     = google-beta
   name         = "%s"
   machine_type = "n2d-standard-2"
   zone         = "us-central1-a"
@@ -4680,7 +4671,6 @@ resource "google_compute_instance" "foobar" {
 }
 `, instance, enableConfidentialCompute)
 }
-<% end -%>
 
 func testAccComputeInstance_enableDisplay(instance string) string {
 	return fmt.Sprintf(`

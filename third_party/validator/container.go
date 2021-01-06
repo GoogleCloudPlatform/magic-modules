@@ -835,13 +835,6 @@ func expandContainerClusterAddonsConfig(v interface{}, d TerraformResourceData, 
 		transformed["horizontalPodAutoscaling"] = transformedHorizontalPodAutoscaling
 	}
 
-	transformedKubernetesDashboard, err := expandContainerClusterAddonsConfigKubernetesDashboard(original["kubernetes_dashboard"], d, config)
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedKubernetesDashboard); val.IsValid() && !isEmptyValue(val) {
-		transformed["kubernetesDashboard"] = transformedKubernetesDashboard
-	}
-
 	transformedNetworkPolicyConfig, err := expandContainerClusterAddonsConfigNetworkPolicyConfig(original["network_policy_config"], d, config)
 	if err != nil {
 		return nil, err
@@ -895,29 +888,6 @@ func expandContainerClusterAddonsConfigHorizontalPodAutoscaling(v interface{}, d
 }
 
 func expandContainerClusterAddonsConfigHorizontalPodAutoscalingDisabled(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	return v, nil
-}
-
-func expandContainerClusterAddonsConfigKubernetesDashboard(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	l := v.([]interface{})
-	if len(l) == 0 || l[0] == nil {
-		return nil, nil
-	}
-	raw := l[0]
-	original := raw.(map[string]interface{})
-	transformed := make(map[string]interface{})
-
-	transformedDisabled, err := expandContainerClusterAddonsConfigKubernetesDashboardDisabled(original["disabled"], d, config)
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedDisabled); val.IsValid() && !isEmptyValue(val) {
-		transformed["disabled"] = transformedDisabled
-	}
-
-	return transformed, nil
-}
-
-func expandContainerClusterAddonsConfigKubernetesDashboardDisabled(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	return v, nil
 }
 
