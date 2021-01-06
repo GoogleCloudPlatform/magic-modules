@@ -1270,6 +1270,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'GcpUserAccessBinding'
     base_url: "organizations/{{organization_id}}/gcpUserAccessBindings"
+    self_link: "{{name}}"
     update_verb: :PATCH
     update_mask: true
     description: |
