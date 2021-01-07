@@ -378,6 +378,13 @@ to work, cannot be updated, and supports:
 * `verify_server_certificate` - (Optional) True if the master's common name
     value is checked during the SSL handshake.
 
+The optional `clone` supports and is required if the settings block is not set:
+
+* `source_instance_name` - (Required) Name of the source instance which will be cloned.
+
+* `pitr_timestamp_ms` -  (Optional) Timestamp of the point in time that should be restored,
+    requires the instance to have point in time recovery enabled.
+
 The optional `restore_backup_context` block supports:
 **NOTE:** Restoring from a backup is an imperative action and not recommended via Terraform. Adding or modifying this
 block during resource creation/update will trigger the restore action after the resource is created/updated. 
