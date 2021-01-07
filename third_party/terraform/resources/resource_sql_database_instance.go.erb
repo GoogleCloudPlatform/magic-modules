@@ -365,7 +365,7 @@ settings.backup_configuration.binary_log_enabled are both set to true.`,
 				Optional:    true,
 				Default:     "MYSQL_5_6",
 				ForceNew:    true,
-				Description: `The MySQL, PostgreSQL or SQL Server (beta) version to use. Supported values include MYSQL_5_6, MYSQL_5_7, POSTGRES_9_6,POSTGRES_11, SQLSERVER_2017_STANDARD, SQLSERVER_2017_ENTERPRISE, SQLSERVER_2017_EXPRESS, SQLSERVER_2017_WEB. Database Version Policies includes an up-to-date reference of supported versions.`,
+				Description: `The MySQL, PostgreSQL or SQL Server (beta) version to use. Supported values include MYSQL_5_6, MYSQL_5_7, MYSQL_8_0, POSTGRES_9_6,POSTGRES_11, SQLSERVER_2017_STANDARD, SQLSERVER_2017_ENTERPRISE, SQLSERVER_2017_EXPRESS, SQLSERVER_2017_WEB. Database Version Policies includes an up-to-date reference of supported versions.`,
 			},
 
             <% unless version == 'ga' -%>
@@ -625,8 +625,8 @@ func privateNetworkCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta
 }
 
 // Point in time recovery for MySQL database instances needs binary_log_enabled set to true and
-// not point_in_time_recovery_enabled, which is confusing to users. This checks for 
-// point_in_time_recovery_enabled being set to a non-PostgreSQL database instance and suggests 
+// not point_in_time_recovery_enabled, which is confusing to users. This checks for
+// point_in_time_recovery_enabled being set to a non-PostgreSQL database instance and suggests
 // binary_log_enabled.
 func pitrPostgresOnlyCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
 	pitr := diff.Get("settings.0.backup_configuration.0.point_in_time_recovery_enabled").(bool)
@@ -1068,7 +1068,7 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 	}
 
 	// Check if deletion protection is enabled.
- 
+
 	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("Error, failed to delete instance because deletion_protection is set to true. Set it to false to proceed with instance deletion")
 	}
