@@ -780,6 +780,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
+	// Perform a backup restore if the backup context exists
 	if r, ok := d.GetOk("restore_backup_context"); ok {
 		err = sqlDatabaseInstanceRestoreFromBackup(d, config, userAgent, project, name, r)
 		if err != nil {
@@ -1082,6 +1083,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
+	// Perform a backup restore if the backup context exists and has changed
 	if r, ok := d.GetOk("restore_backup_context"); ok {
 		if d.HasChange("restore_backup_context") {
 			err = sqlDatabaseInstanceRestoreFromBackup(d, config, userAgent, project, d.Get("name").(string), r)

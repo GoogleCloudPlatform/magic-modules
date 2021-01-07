@@ -384,7 +384,8 @@ block during resource creation/update will trigger the restore action after the 
 
 * `backup_run_id` - (Required) The ID of the backup run to restore from.
 
-* `instance_id` - (Optional) The ID of the instance that the backup was taken from.
+* `instance_id` - (Optional) The ID of the instance that the backup was taken from. If left empty,
+    this instance's ID will be used.
 
 * `project` - (Optional) The full project ID of the source instance.`
 
