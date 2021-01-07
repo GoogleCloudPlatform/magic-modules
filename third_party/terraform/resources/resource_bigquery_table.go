@@ -12,16 +12,9 @@ import (
 	"google.golang.org/api/bigquery/v2"
 )
 
-func checkNameExists(jsonList []interface{}) error {
-	for _, m := range jsonList {
-		if _, ok := m.(map[string]interface{})["name"]; !ok {
-			return fmt.Errorf("No name in schema %+v", m)
-		}
-	}
-
-	return nil
-}
-
+// Compares two json's while optionally taking in a compareMapKeyVal function.
+// This function will override any comparison of a given map[string]interface{}
+// on a specific key value allowing for a separate equality in specific scenarios
 func jsonCompareWithMapKeyOverride(a, b interface{}, compareMapKeyVal func(key string, val1, val2 map[string]interface{}) bool) (bool, error) {
 	switch a.(type) {
 	case []interface{}:
@@ -74,7 +67,8 @@ func jsonCompareWithMapKeyOverride(a, b interface{}, compareMapKeyVal func(key s
 	case string, float64, bool, nil:
 		return a == b, nil
 	default:
-		return false, errors.New("tried to iterate through json but encountered a non native type to json deserialization... please ensure you are passing a json object from json.Unmarshall")
+		log.Printf("[DEBUG] tried to iterate through json but encountered a non native type to json deserialization... please ensure you are passing a json object from json.Unmarshall")
+		return false, errors.New("unable to compare values")
 	}
 }
 
@@ -122,8 +116,12 @@ func bigQueryTableSchemaDiffSuppress(_, old, new string, _ *schema.ResourceData)
 		old = "[]"
 	}
 	var a, b interface{}
-	json.Unmarshal([]byte(old), &a)
-	json.Unmarshal([]byte(new), &b)
+	if err := json.Unmarshal([]byte(old), &a); err != nil {
+		log.Printf("[DEBUG] unable to unmarshal json - %v", err)
+	}
+	if err := json.Unmarshal([]byte(new), &b); err != nil {
+		log.Printf("[DEBUG] unable to unmarshal json - %v", err)
+	}
 
 	eq, err := jsonCompareWithMapKeyOverride(a, b, bigQueryTableMapKeyOverride)
 	if err != nil {

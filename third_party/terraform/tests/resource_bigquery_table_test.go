@@ -417,7 +417,7 @@ func TestAccBigQueryDataTable_sheet(t *testing.T) {
 	})
 }
 
-func TestAccBigQueryDataTable_jsonEquivelency(t *testing.T) {
+func TestAccBigQueryDataTable_jsonEquivalency(t *testing.T) {
 	t.Parallel()
 
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
@@ -450,30 +450,34 @@ func TestAccBigQueryDataTable_jsonEquivelency(t *testing.T) {
 	})
 }
 
-func TestUnitBigQueryDataTable_jsonEquivelency(t *testing.T) {
+func TestUnitBigQueryDataTable_jsonEquivalency(t *testing.T) {
 	t.Parallel()
 
-	for i, testcase := range testUnitBigQueryDataTableJSONEquivelencyTestCases {
+	for i, testcase := range testUnitBigQueryDataTableJSONEquivalencyTestCases {
 		var a, b interface{}
-		json.Unmarshal([]byte(testcase.jsonA), &a)
-		json.Unmarshal([]byte(testcase.jsonB), &b)
+		if err := json.Unmarshal([]byte(testcase.jsonA), &a); err != nil {
+			panic(fmt.Sprintf("unable to unmarshal json - %v", err))
+		}
+		if err := json.Unmarshal([]byte(testcase.jsonB), &b); err != nil {
+			panic(fmt.Sprintf("unable to unmarshal json - %v", err))
+		}
 		eq, err := jsonCompareWithMapKeyOverride(a, b, bigQueryTableMapKeyOverride)
 		if err != nil {
 			t.Errorf("ahhhh an error I did not expect this! especially not on testscase %v - %s", i, err)
 		}
 		if eq != testcase.equivalent {
-			t.Errorf("expected equivelency result of %v but got %v for testcase number %v", testcase.equivalent, eq, i)
+			t.Errorf("expected equivalency result of %v but got %v for testcase number %v", testcase.equivalent, eq, i)
 		}
 	}
 }
 
-type testUnitBigQueryDataTableJSONEquivelencyTestCase struct {
+type testUnitBigQueryDataTableJSONEquivalencyTestCase struct {
 	jsonA      string
 	jsonB      string
 	equivalent bool
 }
 
-var testUnitBigQueryDataTableJSONEquivelencyTestCases = []testUnitBigQueryDataTableJSONEquivelencyTestCase{
+var testUnitBigQueryDataTableJSONEquivalencyTestCases = []testUnitBigQueryDataTableJSONEquivalencyTestCase{
 	{
 		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"finalKey\" : {} }]",
 		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"finalKey\" : {} }]",
