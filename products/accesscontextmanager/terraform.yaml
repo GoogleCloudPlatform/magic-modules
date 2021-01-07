@@ -235,6 +235,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_resource.go.erb
   GcpUserAccessBinding: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
+    import_format: ["{{name}}"]
     autogen_async: true
     exclude_validator: true
     examples:
@@ -251,6 +252,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
           org_domain: :ORG_DOMAIN
           cust_id: :CUST_ID
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
