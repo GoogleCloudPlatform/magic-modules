@@ -568,9 +568,9 @@ type testUnitBigQueryDataTableJSONEquivalencyTestCase struct {
 }
 
 type testUnitBigQueryDataTableJSONChangeableTestCase struct {
-	name      string
-	jsonOld   string
-	jsonNew   string
+	name       string
+	jsonOld    string
+	jsonNew    string
 	changeable bool
 }
 
