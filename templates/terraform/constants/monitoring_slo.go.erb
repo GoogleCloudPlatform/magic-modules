@@ -5,3 +5,10 @@ func validateMonitoringSloGoal(v interface{}, k string) (warnings []string, erro
 	}
 	return
 }
+
+func validateAvailabilitySli(v interface{}, key string) (ws []string, errs []error) {
+		if v.(bool) == false {
+			errs = append(errs, fmt.Errorf("%q must be set to true, got: %v", key, v))
+		}
+		return
+}
