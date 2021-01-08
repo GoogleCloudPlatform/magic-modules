@@ -535,7 +535,7 @@ func TestUnitBigQueryDataTable_schemaIsChangable(t *testing.T) {
 			testcase.name + "Nested",
 			fmt.Sprintf("[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"fields\" : %s }]", testcase.jsonOld),
 			fmt.Sprintf("[{\"name\": \"someValue\", \"type\" : \"INT64\", \"fields\" : %s }]", testcase.jsonNew),
-			testcase.changable,
+			testcase.changeable,
 		}
 		testcaseNested.check(t)
 	}
@@ -546,12 +546,12 @@ func TestUnitBigQueryDataTable_customizedDiffSchema(t *testing.T) {
 
 	tcs := testUnitBigQueryDataCustomDiffFieldChangeTestcases
 
-	for _, changableTestcase := range testUnitBigQueryDataTableIsChangableTestCases {
+	for _, changeableTestcase := range testUnitBigQueryDataTableIsChangableTestCases {
 		extraTestcase := testUnitBigQueryDataCustomDiffFieldChangeTestcase{
-			name:           changableTestcase.name,
-			schemaBefore:   changableTestcase.jsonOld,
-			schemaAfter:    changableTestcase.jsonNew,
-			shouldForceNew: !changableTestcase.changable,
+			name:           changeableTestcase.name,
+			schemaBefore:   changeableTestcase.jsonOld,
+			schemaAfter:    changeableTestcase.jsonNew,
+			shouldForceNew: !changeableTestcase.changeable,
 		}
 		tcs = append(tcs, extraTestcase)
 	}
@@ -571,7 +571,7 @@ type testUnitBigQueryDataTableJSONChangeableTestCase struct {
 	name      string
 	jsonOld   string
 	jsonNew   string
-	changable bool
+	changeable bool
 }
 
 type testUnitBigQueryDataCustomDiffField struct {
@@ -596,12 +596,12 @@ func (testcase *testUnitBigQueryDataTableJSONChangeableTestCase) check(t *testin
 	if err := json.Unmarshal([]byte(testcase.jsonNew), &new); err != nil {
 		panic(fmt.Sprintf("unable to unmarshal json - %v", err))
 	}
-	changable, err := resourceBigQueryTableSchemaIsChangable(old, new)
+	changeable, err := resourceBigQueryTableSchemaIsChangable(old, new)
 	if err != nil {
 		t.Errorf("ahhhh an error I did not expect this! especially not on testscase %s - %s", testcase.name, err)
 	}
-	if changable != testcase.changable {
-		t.Errorf("expected changable result of %v but got %v for testcase %s", testcase.changable, changable, testcase.name)
+	if changeable != testcase.changeable {
+		t.Errorf("expected changeable result of %v but got %v for testcase %s", testcase.changeable, changeable, testcase.name)
 	}
 }
 

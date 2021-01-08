@@ -159,17 +159,17 @@ func bigQueryTableModeIsForceNew(old, new interface{}) bool {
 }
 
 // Compares two existing schema implementations and decides if
-// it is changable.. pairs with a force new on not changable
+// it is changeable.. pairs with a force new on not changeable
 func resourceBigQueryTableSchemaIsChangable(old, new interface{}) (bool, error) {
 	switch old.(type) {
 	case []interface{}:
 		arrayOld := old.([]interface{})
 		arrayNew, ok := new.([]interface{})
 		if !ok {
-			// if not both arrays not changable
+			// if not both arrays not changeable
 			return false, nil
 		} else if len(arrayOld) > len(arrayNew) {
-			// if not growing not changable
+			// if not growing not changeable
 			return false, nil
 		}
 		for i := range arrayOld {
@@ -215,7 +215,7 @@ func resourceBigQueryTableSchemaIsChangable(old, new interface{}) (bool, error) 
 				return resourceBigQueryTableSchemaIsChangable(valOld, valNew)
 
 				// other parameters: description, policyTags and
-				// policyTags.names[] are changable
+				// policyTags.names[] are changeable
 			}
 		}
 		return true, nil
@@ -232,8 +232,12 @@ func resourceBigQueryTableSchemaIsChangable(old, new interface{}) (bool, error) 
 func resourceBigQueryTableSchemaCustomizeDiffFunc(d TerraformResourceDiff) error {
 	if _, hasSchema := d.GetOk("schema"); hasSchema {
 		if _, hasfield := d.GetOk("field.#"); hasfield {
-			d.ForceNew("schema")
-			d.ForceNew("field.#")
+			if err := d.ForceNew("schema"); err != nil {
+				return err
+			}
+			if err := d.ForceNew("field.#"); err != nil {
+				return err
+			}
 		} else {
 			oldSchema, newSchema := d.GetChange("schema")
 			oldSchemaText := oldSchema.(string)
@@ -252,20 +256,26 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d TerraformResourceDiff) error
 			if err != nil {
 				return err
 			} else if !isChangable {
-				d.ForceNew("schema")
+				if err := d.ForceNew("schema"); err != nil {
+					return err
+				}
 			}
 		}
 	} else {
 		oldCount, newCount := d.GetChange("field.#")
 		if oldCount.(int) > newCount.(int) {
-			// if array is shrinking not changable
-			d.ForceNew("field.#")
+			// if array is shrinking not changeable
+			if err := d.ForceNew("field.#"); err != nil {
+				return err
+			}
 		}
 		for i := 0; i < oldCount.(int); i++ {
 			modeKey := fmt.Sprintf("field.%d.mode", i)
 			oldMode, newMode := d.GetChange(modeKey)
 			if bigQueryTableModeIsForceNew(oldMode, newMode) {
-				d.ForceNew(modeKey)
+				if err := d.ForceNew(modeKey); err != nil {
+					return err
+				}
 			}
 		}
 	}
