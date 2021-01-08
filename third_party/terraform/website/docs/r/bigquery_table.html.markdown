@@ -41,6 +41,33 @@ resource "google_bigquery_table" "default" {
     env = "default"
   }
 
+  field {
+    name        = "permalink"
+    type        = "STRING"
+    mode        = "NULLABLE"
+    description = "The Permalink"
+  }
+
+  field {
+    name        = "state"
+    type        = "STRING"
+    mode        = "NULLABLE"
+    description = "State where the head office is located"
+  }
+}
+
+resource "google_bigquery_table" "default_schema_implementation" {
+  dataset_id = google_bigquery_dataset.default.dataset_id
+  table_id   = "bar"
+
+  time_partitioning {
+    type = "DAY"
+  }
+
+  labels = {
+    env = "default"
+  }
+
   schema = <<EOF
 [
   {
@@ -92,7 +119,7 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
-* `description` - (Optional) The field description.
+* `description` - (Optional) A description of the table.
 
 * `expiration_time` - (Optional) The time when this table expires, in
     milliseconds since the epoch. If not present, the table will persist
@@ -176,7 +203,11 @@ The `external_data_configuration` block supports:
     any changes on the configured value will force the table to be recreated.
     This schema is effectively only applied when creating a table from an external
     datasource, after creation the computed schema will be stored in
-    `google_bigquery_table.schema`
+    `google_bigquery_table.schema`. Conflicts with `field`.
+
+* `field` (Optional) - A nested configuration block (described below)
+  defining a field in the table's schema. Multiple `field` arguments are supported.
+  Conflicts with `schema`.
 
 * `source_format` (Required) - The data format. Supported values are:
     "CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "PARQUET", "ORC"
@@ -258,6 +289,18 @@ The `time_partitioning` block supports:
 * `require_partition_filter` - (Optional) If set to true, queries over this table
     require a partition filter that can be used for partition elimination to be
     specified.
+
+The `field` block supports:
+
+* `name` - (Required) The name of the field. The name must contain only letters (a-z, A-Z),
+    numbers (0-9), or underscores (_), and must start with a letter or underscore. The maximum length is 128 characters.
+
+* `type` - (Required) The type of the field. Must be a
+  [valid BigQuery data type](https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types).
+
+* `mode` - (Optional) One of `NULLABLE`, `REQUIRED`, or `REPEATED`. Default is `NULLABLE`.
+
+* `description` - (Optional) The field's description. The maximum length is 1,024 characters.
 
 The `range_partitioning` block supports:
 
