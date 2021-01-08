@@ -253,7 +253,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_domain: :ORG_DOMAIN
           cust_id: :CUST_ID
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.erb
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
