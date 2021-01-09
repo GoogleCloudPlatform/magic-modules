@@ -45,6 +45,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       min_version: beta
 
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/apigee_organization.go.erb
       encoder: templates/terraform/encoders/apigee_organization.go.erb
 
 files: !ruby/object:Provider::Config::Files
