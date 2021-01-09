@@ -5168,7 +5168,7 @@ resource "google_compute_instance" "foobar" {
 }
 
 func testAccComputeInstance_reservationAffinity_specificReservationConfig(instanceName string) string {
-	return `
+	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-9"
   project = "debian-cloud"
