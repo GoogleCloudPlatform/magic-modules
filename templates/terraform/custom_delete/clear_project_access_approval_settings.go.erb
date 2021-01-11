@@ -2,7 +2,7 @@ obj := make(map[string]interface{})
 obj["notificationEmails"] = []string{}
 obj["enrolledServices"] = []string{}
 
-url, err := replaceVars(d, config, "{{AccessApprovalBasePath}}projects/{{project}}/accessApprovalSettings")
+url, err := replaceVars(d, config, "{{AccessApprovalBasePath}}projects/{{project_id}}/accessApprovalSettings")
 if err != nil {
 	return err
 }
