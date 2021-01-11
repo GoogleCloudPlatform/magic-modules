@@ -30,8 +30,11 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
 
 func create<%= product_name %>Waiter(config *Config, op map[string]interface{}, <% if has_project -%> project, <% end -%> activity, userAgent string) (*<%=product_name%>OperationWaiter, error) {
   if val, ok := op["name"]; !ok || val == "" {
-    // This was a synchronous call - there is no operation to wait for.
-    return nil, nil
+    // An operation could also be indicated with a "metadata" field.
+    if _, ok := op["metadata"]; !ok {
+      // This was a synchronous call - there is no operation to wait for.
+      return nil, nil
+    }
   }
   w := &<%= product_name -%>OperationWaiter{
     Config:    config,
