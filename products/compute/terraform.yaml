@@ -1510,6 +1510,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           template_name: "my-template"
           igm_name: "my-igm"
     properties:
+      zone: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        ignore_read: true
       preservedState.disk: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         custom_flatten: templates/terraform/custom_flatten/preserved_state_disks.go.erb
@@ -1577,6 +1580,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           template_name: "my-template"
           igm_name: "my-rigm"
     properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        ignore_read: true
+        default_from_api: true
       preservedState.disk: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         custom_flatten: templates/terraform/custom_flatten/preserved_state_disks.go.erb

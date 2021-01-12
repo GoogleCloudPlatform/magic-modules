@@ -47,7 +47,6 @@ resource "google_compute_disk" "default" {
 }
 
 resource "google_compute_per_instance_config" "with_disk" {
-  zone = google_compute_instance_group_manager.igm.zone
   instance_group_manager = google_compute_instance_group_manager.igm.name
   name = "instance-1"
   preserved_state {
