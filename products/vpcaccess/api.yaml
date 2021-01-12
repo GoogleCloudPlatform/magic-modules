@@ -57,8 +57,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'region'
         description: |
-          Region where the VPC Access connector resides
-        required: true
+          Region where the VPC Access connector resides. If it is not provided, the provider region is used.
         input: true
         url_param_only: true
     properties:

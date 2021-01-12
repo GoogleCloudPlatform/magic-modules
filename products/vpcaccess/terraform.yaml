@@ -42,6 +42,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validation.IntBetween(200, 1000)'
       state: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: false
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       selfLink: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
 
