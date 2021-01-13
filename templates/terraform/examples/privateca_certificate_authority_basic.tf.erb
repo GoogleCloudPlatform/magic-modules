@@ -4,6 +4,9 @@ resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id]
   location = "us-central1"
   config {
     subject_config {
+      subject {
+        organization = "HashiCorp"
+      }
       common_name = "my-certificate-authority"
       subject_alt_name {
         dns_names = ["hashicorp.com"]

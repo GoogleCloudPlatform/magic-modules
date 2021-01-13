@@ -81,7 +81,6 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'type'
         description: The Type of this CertificateAuthority.
-        required: true
         input: true
         values:
           - :SELF_SIGNED
@@ -89,7 +88,6 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'tier'
         description: The Tier of this CertificateAuthority.
-        required: true
         input: true
         values:
           - :ENTERPRISE
@@ -174,7 +172,6 @@ objects:
           The desired lifetime of the CA certificate. Used to create the "notBeforeTime" and
           "notAfterTime" fields inside an X.509 certificate. A duration in seconds with up to nine
           fractional digits, terminated by 's'. Example: "3.5s".
-        required: true
         default_value: 315360000s  # 10 years
       - !ruby/object:Api::Type::NestedObject
         name: 'keySpec'
@@ -212,7 +209,6 @@ objects:
             When true, includes a URL to the issuing CA certificate in the "authority
             information access" X.509 extension.
           default_value: true
-          required: true
         - !ruby/object:Api::Type::Boolean
           name: 'includeCrlAccessUrl'
           description: |
@@ -220,7 +216,6 @@ objects:
             CertificateAuthority. CRLs will expire 7 days from their creation. However, we will
             rebuild daily. CRLs are also rebuilt shortly after a certificate is revoked.
           default_value: false
-          required: true
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: The State for this CertificateAuthority.
