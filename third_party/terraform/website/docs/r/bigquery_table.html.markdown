@@ -14,7 +14,7 @@ Creates a table resource in a dataset for Google BigQuery. For more information 
 [API](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables).
 
 
-## Example Usage
+## Example Usage - field implementation
 
 ```hcl
 resource "google_bigquery_dataset" "default" {
@@ -55,6 +55,22 @@ resource "google_bigquery_table" "default" {
     description = "State where the head office is located"
   }
 }
+```
+
+## Example Usage - schema implementation
+
+```hcl
+resource "google_bigquery_dataset" "default" {
+  dataset_id                  = "foo"
+  friendly_name               = "test"
+  description                 = "This is a test description"
+  location                    = "EU"
+  default_table_expiration_ms = 3600000
+
+  labels = {
+    env = "default"
+  }
+}
 
 resource "google_bigquery_table" "default_schema_implementation" {
   dataset_id = google_bigquery_dataset.default.dataset_id
@@ -68,23 +84,37 @@ resource "google_bigquery_table" "default_schema_implementation" {
     env = "default"
   }
 
-  schema = <<EOF
-[
-  {
-    "name": "permalink",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "The Permalink"
-  },
-  {
-    "name": "state",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "State where the head office is located"
-  }
-]
-EOF
+  schema = jsonencode(
+    [
+      {
+        name        = "permalink"
+        type        = "STRING"
+        mode        = "NULLABLE"
+        description = "The Permalink"
+      },
+      {
+        name        = "state",
+        type        = "STRING",
+        mode        = "NULLABLE",
+        description = "State where the head office is located"
+      }
+    ])
+}
+```
 
+## Example Usage - external data configuration implementation
+
+```hcl
+resource "google_bigquery_dataset" "default" {
+  dataset_id                  = "foo"
+  friendly_name               = "test"
+  description                 = "This is a test description"
+  location                    = "EU"
+  default_table_expiration_ms = 3600000
+
+  labels = {
+    env = "default"
+  }
 }
 
 resource "google_bigquery_table" "sheet" {

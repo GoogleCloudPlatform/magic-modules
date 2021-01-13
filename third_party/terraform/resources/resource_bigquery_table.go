@@ -94,8 +94,8 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 		eq := bigQueryTableModeEq(valA, valB)
 		return eq
 	case "description":
-		equivelentSet := []interface{}{nil, ""}
-		eq := valueIsInArray(valA, equivelentSet) && valueIsInArray(valB, equivelentSet)
+		equivalentSet := []interface{}{nil, ""}
+		eq := valueIsInArray(valA, equivalentSet) && valueIsInArray(valB, equivalentSet)
 		return eq
 	case "type":
 		return bigQueryTableTypeEq(valA, valB)
@@ -129,21 +129,21 @@ func bigQueryTableSchemaDiffSuppress(_, old, new string, _ *schema.ResourceData)
 }
 
 func bigQueryTableTypeEq(old, new interface{}) bool {
-	equivelentSet1 := []interface{}{"INTEGER", "INT64"}
-	equivelentSet2 := []interface{}{"FLOAT", "FLOAT64"}
-	equivelentSet3 := []interface{}{"BOOLEAN", "BOOL"}
+	equivalentSet1 := []interface{}{"INTEGER", "INT64"}
+	equivalentSet2 := []interface{}{"FLOAT", "FLOAT64"}
+	equivalentSet3 := []interface{}{"BOOLEAN", "BOOL"}
 	eq0 := old == new
-	eq1 := valueIsInArray(old, equivelentSet1) && valueIsInArray(new, equivelentSet1)
-	eq2 := valueIsInArray(old, equivelentSet2) && valueIsInArray(new, equivelentSet2)
-	eq3 := valueIsInArray(old, equivelentSet3) && valueIsInArray(new, equivelentSet3)
+	eq1 := valueIsInArray(old, equivalentSet1) && valueIsInArray(new, equivalentSet1)
+	eq2 := valueIsInArray(old, equivalentSet2) && valueIsInArray(new, equivalentSet2)
+	eq3 := valueIsInArray(old, equivalentSet3) && valueIsInArray(new, equivalentSet3)
 	eq := eq0 || eq1 || eq2 || eq3
 	return eq
 }
 
 func bigQueryTableModeEq(old, new interface{}) bool {
-	equivelentSet := []interface{}{nil, "NULLABLE"}
+	equivalentSet := []interface{}{nil, "NULLABLE"}
 	eq0 := old == new
-	eq1 := valueIsInArray(old, equivelentSet) && valueIsInArray(new, equivelentSet)
+	eq1 := valueIsInArray(old, equivalentSet) && valueIsInArray(new, equivalentSet)
 	eq := eq0 || eq1
 	return eq
 }
@@ -160,7 +160,7 @@ func bigQueryTableModeIsForceNew(old, new interface{}) bool {
 
 // Compares two existing schema implementations and decides if
 // it is changeable.. pairs with a force new on not changeable
-func resourceBigQueryTableSchemaIsChangable(old, new interface{}) (bool, error) {
+func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error) {
 	switch old.(type) {
 	case []interface{}:
 		arrayOld := old.([]interface{})
@@ -173,7 +173,7 @@ func resourceBigQueryTableSchemaIsChangable(old, new interface{}) (bool, error) 
 			return false, nil
 		}
 		for i := range arrayOld {
-			isChangable, err := resourceBigQueryTableSchemaIsChangable(arrayOld[i], arrayNew[i])
+			isChangable, err := resourceBigQueryTableSchemaIsChangeable(arrayOld[i], arrayNew[i])
 			if err != nil || !isChangable {
 				return false, err
 			}
@@ -212,7 +212,7 @@ func resourceBigQueryTableSchemaIsChangable(old, new interface{}) (bool, error) 
 					return false, nil
 				}
 			case "fields":
-				return resourceBigQueryTableSchemaIsChangable(valOld, valNew)
+				return resourceBigQueryTableSchemaIsChangeable(valOld, valNew)
 
 				// other parameters: description, policyTags and
 				// policyTags.names[] are changeable
@@ -238,30 +238,33 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d TerraformResourceDiff) error
 			if err := d.ForceNew("field.#"); err != nil {
 				return err
 			}
-		} else {
-			oldSchema, newSchema := d.GetChange("schema")
-			oldSchemaText := oldSchema.(string)
-			newSchemaText := newSchema.(string)
-			if oldSchemaText == "null" {
-				oldSchemaText = "[]"
-			}
-			var old, new interface{}
-			if err := json.Unmarshal([]byte(oldSchemaText), &old); err != nil {
-				log.Printf("[DEBUG] unable to unmarshal json customized diff - %v", err)
-			}
-			if err := json.Unmarshal([]byte(newSchemaText), &new); err != nil {
-				log.Printf("[DEBUG] unable to unmarshal json customized diff - %v", err)
-			}
-			isChangable, err := resourceBigQueryTableSchemaIsChangable(old, new)
-			if err != nil {
+			return nil
+		}
+		oldSchema, newSchema := d.GetChange("schema")
+		oldSchemaText := oldSchema.(string)
+		newSchemaText := newSchema.(string)
+		if oldSchemaText == "null" {
+			// The API can return an empty schema which gets encoded to "null" during read.
+			oldSchemaText = "[]"
+		}
+		var old, new interface{}
+		if err := json.Unmarshal([]byte(oldSchemaText), &old); err != nil {
+			log.Printf("[DEBUG] unable to unmarshal json customized diff - %v", err)
+		}
+		if err := json.Unmarshal([]byte(newSchemaText), &new); err != nil {
+			log.Printf("[DEBUG] unable to unmarshal json customized diff - %v", err)
+		}
+		isChangable, err := resourceBigQueryTableSchemaIsChangeable(old, new)
+		if err != nil {
+			return err
+		}
+		if !isChangable {
+			if err := d.ForceNew("schema"); err != nil {
 				return err
-			} else if !isChangable {
-				if err := d.ForceNew("schema"); err != nil {
-					return err
-				}
 			}
 		}
-	} else {
+		return nil
+	} else if _, hasfield := d.GetOk("field.#"); hasfield {
 		oldCount, newCount := d.GetChange("field.#")
 		if oldCount.(int) > newCount.(int) {
 			// if array is shrinking not changeable

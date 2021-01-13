@@ -596,7 +596,7 @@ func (testcase *testUnitBigQueryDataTableJSONChangeableTestCase) check(t *testin
 	if err := json.Unmarshal([]byte(testcase.jsonNew), &new); err != nil {
 		panic(fmt.Sprintf("unable to unmarshal json - %v", err))
 	}
-	changeable, err := resourceBigQueryTableSchemaIsChangable(old, new)
+	changeable, err := resourceBigQueryTableSchemaIsChangeable(old, new)
 	if err != nil {
 		t.Errorf("ahhhh an error I did not expect this! especially not on testscase %s - %s", testcase.name, err)
 	}
