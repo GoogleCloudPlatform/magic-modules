@@ -207,6 +207,7 @@ objects:
             When true, includes a URL to the issuing CA certificate in the "authority
             information access" X.509 extension.
           default_value: true
+          required: true
         - !ruby/object:Api::Type::Boolean
           name: 'includeCrlAccessUrl'
           description: |
