@@ -69,8 +69,8 @@ objects:
       - !ruby/object:Api::Type::String
         name: certificateAuthorityId
         description: GCP region of the Realm.
-        input: true
         required: true
+        input: true
         url_param_only: true
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -81,6 +81,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'type'
         description: The Type of this CertificateAuthority.
+        required: true
         input: true
         values:
           - :SELF_SIGNED
@@ -88,6 +89,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'tier'
         description: The Tier of this CertificateAuthority.
+        required: true
         input: true
         values:
           - :ENTERPRISE
@@ -108,6 +110,7 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: 'subject'
             description: Contains distinguished name fields such as the location and organization.
+            required: true
             properties:
             - !ruby/object:Api::Type::String
               name: 'countryCode'
@@ -164,12 +167,14 @@ objects:
               description: |
                 A resource path to a ReusableConfig in the format
                 projects/*/locations/*/reusableConfigs/*.
+              required: true
       - !ruby/object:Api::Type::String
         name: 'lifetime'
         description: |
           The desired lifetime of the CA certificate. Used to create the "notBeforeTime" and
           "notAfterTime" fields inside an X.509 certificate. A duration in seconds with up to nine
           fractional digits, terminated by 's'. Example: "3.5s".
+        required: true
         default_value: 315360000s  # 10 years
       - !ruby/object:Api::Type::NestedObject
         name: 'keySpec'
@@ -247,8 +252,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'accessUrls'
         description: |
-          Output only. URLs for accessing content published by this CA, such as the CA certificate
-          and CRLs.
+          URLs for accessing content published by this CA, such as the CA certificate and CRLs.
         output: true
         properties:
         - !ruby/object:Api::Type::String
@@ -263,6 +267,26 @@ objects:
             The URL where this CertificateAuthority's CRLs are published. This will only be set for
             CAs that have been activated.
           output: true
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        description: |
+          The time at which this CertificateAuthority was created.
+
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
+          fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        description: |
+          The time at which this CertificateAuthority was updated.
+
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
+          fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+        output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: labels
-        description: Labels with user-defined metadata.
+        description: |
+          Labels with user-defined metadata.
+
+          An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass":
+          "1.3kg", "count": "3" }.
