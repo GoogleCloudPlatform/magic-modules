@@ -132,11 +132,20 @@ var DefaultClientScopes = []string{
 }
 
 func (c *Config) LoadAndValidate(ctx context.Context) error {
-	cleanCtx := context.WithValue(ctx, oauth2.HTTPClient, cleanhttp.DefaultClient())
+	if len(c.Scopes) == 0 {
+		c.Scopes = DefaultClientScopes
+	}
+
+	c.context = ctx
+
 	tokenSource, err := c.getTokenSource(c.Scopes)
 	if err != nil {
 		return err
 	}
+
+	c.tokenSource = tokenSource
+
+	cleanCtx := context.WithValue(ctx, oauth2.HTTPClient, cleanhttp.DefaultClient())
 
 	// 1. OAUTH2 TRANSPORT/CLIENT - sets up proper auth headers
 	client := oauth2.NewClient(cleanCtx, tokenSource)
@@ -160,11 +169,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// This timeout is a timeout per HTTP request, not per logical operation.
 	client.Timeout = c.synchronousTimeout()
 
-	if len(c.Scopes) == 0 {
-		c.Scopes = DefaultClientScopes
-	}
-
-	c.tokenSource = tokenSource
 	c.client = client
 	c.context = ctx
 	c.Region = GetRegionFromRegionSelfLink(c.Region)
