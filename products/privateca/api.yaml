@@ -178,6 +178,7 @@ objects:
           is a self-signed CertificateAuthority, this key is also used to sign the self-signed CA
           certificate. Otherwise, it is used to sign a CSR.
         required: true
+        input: true
         properties:
         - !ruby/object:Api::Type::Enum
           name: 'algorithm'
@@ -262,4 +263,3 @@ objects:
       - !ruby/object:Api::Type::KeyValuePairs
         name: labels
         description: Labels with user-defined metadata.
-
