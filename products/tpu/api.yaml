@@ -55,8 +55,7 @@ objects:
       - !ruby/object:Api::Type::String # TODO: resourceref?
         name: 'zone'
         description: |
-          The GCP location for the TPU.
-        required: true
+          The GCP location for the TPU. If it is not provided, the provider zone is used.
         input: true
         url_param_only: true
     properties:

@@ -43,7 +43,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants:  'templates/terraform/constants/tpu_node.erb'
       resource_definition: 'templates/terraform/resource_definition/tpu_node.erb'

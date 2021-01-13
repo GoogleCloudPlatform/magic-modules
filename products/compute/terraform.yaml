@@ -308,6 +308,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           region_backend_service_name: "region-service"
           health_check_name: "rbs-health-check"
+        min_version: beta
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_round_robin"
         primary_resource_id: "default"
@@ -1467,7 +1468,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "compute_packet_mirroring_full"
         primary_resource_id: "foobar"
-        min_version: 'beta'
         vars:
           instance_name: "my-instance"
           subnetwork_name: "my-subnetwork"

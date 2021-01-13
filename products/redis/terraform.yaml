@@ -14,6 +14,9 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      optional_properties: |
+        * `auth_string` - (Optional) AUTH String set on the instance. This field will only be populated if auth_enabled is true.
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 10
       update_minutes: 10
@@ -21,6 +24,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/redis_location_id_for_fallback_zone.go.erb
+      decoder: templates/terraform/decoders/redis_instance.go.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/redis_instance.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "redis_instance_basic"

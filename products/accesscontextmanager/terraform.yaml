@@ -233,6 +233,28 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           service_perimeter_name: "restrict_all"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_resource.go.erb
+  GcpUserAccessBinding: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
+    autogen_async: true
+    exclude_validator: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "access_context_manager_gcp_user_access_binding_basic"
+        # Has a handwritten test due to AccessPolicy-related tests needing to run synchronously
+        skip_test: true
+        primary_resource_id: "gcp_user_access_binding"
+        vars:
+          group_id: "my-identity-group"
+          access_level_id: "access_level_id_for_user_access_binding"
+          access_level_name: "chromeos_no_lock"
+        test_env_vars:
+          org_id: :ORG_ID
+          org_domain: :ORG_DOMAIN
+          cust_id: :CUST_ID
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.erb
+
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

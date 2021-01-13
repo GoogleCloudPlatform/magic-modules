@@ -35,7 +35,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         is_set: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
+        default_from_api: true
       parameters: !ruby/object:Overrides::Terraform::PropertyOverride
         name: memcacheParameters
 
