@@ -204,6 +204,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       # excluding kind from Terraform code because this is a static, hardcoded value
       kind: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      managed_zone: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true 
   Project: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
 
