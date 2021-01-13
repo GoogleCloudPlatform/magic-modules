@@ -393,11 +393,19 @@ resource "google_compute_autoscaler" "foobar" {
     }
     scaling_schedules {
       name = "every-weekday-morning"
-      description = "Increase to 2 every weekday at 7AM for 12 hours."
+      description = "Increase to 2 every weekday at 7AM for 6 hours."
       min_required_replicas = 2
       schedule = "0 7 * * MON-FRI"
       time_zone = "America/New_York"
-      duration_sec = 43200
+      duration_sec = 21600
+    }
+    scaling_schedules {
+      name = "every-weekday-afternoon"
+      description = "Increase to 2 every weekday at 7PM for 6 hours."
+      min_required_replicas = 2
+      schedule = "0 19 * * MON-FRI"
+      time_zone = "America/New_York"
+      duration_sec = 21600
     }
   }
 }
