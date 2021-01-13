@@ -215,6 +215,7 @@ objects:
             CertificateAuthority. CRLs will expire 7 days from their creation. However, we will
             rebuild daily. CRLs are also rebuilt shortly after a certificate is revoked.
           default_value: false
+          required: true
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: The State for this CertificateAuthority.
