@@ -11,7 +11,7 @@ import (
 )
 
 // The service account TF uses needs the permission granted in the configs
-// but it will get deleted by parallel tests, so they need to be ran serially.
+// but it will get deleted by parallel tests, so they need to be run serially.
 func TestAccBigqueryDataTransferConfig(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		"basic":           testAccBigqueryDataTransferConfig_scheduledQuery_basic,
@@ -33,6 +33,8 @@ func TestAccBigqueryDataTransferConfig(t *testing.T) {
 }
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
+	// Uses time.Now
+	skipIfVcr(t)
 	random_suffix := randString(t, 10)
 	now := time.Now().UTC()
 	start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
@@ -57,6 +59,8 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
 }
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_update(t *testing.T) {
+	// Uses time.Now
+	skipIfVcr(t)
 	random_suffix := randString(t, 10)
 	now := time.Now().UTC()
 	first_start_time := now.Add(1 * time.Hour).Format(time.RFC3339)

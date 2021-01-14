@@ -38,7 +38,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         set_hash_func: accessApprovalEnrolledServicesHash
   ProjectSettings: !ruby/object:Overrides::Terraform::ResourceOverride
     legacy_name: "google_project_access_approval_settings"
-    import_format: ["projects/{{project}}/accessApprovalSettings"]
+    import_format: ["projects/{{project_id}}/accessApprovalSettings"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         skip_test: true

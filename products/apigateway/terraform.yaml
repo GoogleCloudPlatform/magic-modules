@@ -112,6 +112,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: "api-gw"
     properties:
+      apiConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: compareResourceNames
       displayName: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
