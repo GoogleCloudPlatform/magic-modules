@@ -159,7 +159,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// See ClientWithAdditionalRetries
 	retryTransport := NewTransportWithDefaultRetries(loggingTransport)
 
-	// 4. Header Transport - outter wrapper to inject additional headers we want to apply
+	// 4. Header Transport - outer wrapper to inject additional headers we want to apply
 	// before making requests
 	headerTransport := newTransportWithHeaders(retryTransport)
 
