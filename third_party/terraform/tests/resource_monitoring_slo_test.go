@@ -124,6 +124,17 @@ func TestAccMonitoringSlo_availabilitySli(t *testing.T) {
 				// Ignore input-only field for import
 				ImportStateVerifyIgnore: []string{"service"},
 			},
+			{
+				Config: testAccMonitoringSlo_basicUpdate(),
+				Check:  testCheckMonitoringSloIdAfterUpdate("google_monitoring_slo.primary", &generatedId),
+			},
+			{
+				ResourceName:      "google_monitoring_slo.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Ignore input-only field for import
+				ImportStateVerifyIgnore: []string{"service"},
+			},
 		},
 	})
 }
@@ -451,6 +462,7 @@ resource "google_monitoring_slo" "primary" {
 }
 `
 }
+
 func testAccMonitoringSloForSli(randSuffix, sliConfig string) string {
 	return fmt.Sprintf(`
 resource "google_monitoring_custom_service" "srv" {

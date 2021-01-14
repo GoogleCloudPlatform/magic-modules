@@ -13,7 +13,7 @@
 	# limitations under the License.
 -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
-    if v == nil {
+	if v == nil {
 		return nil
 	}
 	transformed := make(map[string]interface{})
