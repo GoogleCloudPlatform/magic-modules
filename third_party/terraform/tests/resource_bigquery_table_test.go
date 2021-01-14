@@ -527,35 +527,9 @@ func TestUnitBigQueryDataTable_jsonEquivalency(t *testing.T) {
 	}
 }
 
-func TestUnitBigQueryDataTable_schemaIsChangable(t *testing.T) {
+func TestUnitBigQueryDataTable_customizedDiffFields(t *testing.T) {
 	t.Parallel()
-	for _, testcase := range testUnitBigQueryDataTableIsChangableTestCases {
-		testcase.check(t)
-		testcaseNested := &testUnitBigQueryDataTableJSONChangeableTestCase{
-			testcase.name + "Nested",
-			fmt.Sprintf("[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"fields\" : %s }]", testcase.jsonOld),
-			fmt.Sprintf("[{\"name\": \"someValue\", \"type\" : \"INT64\", \"fields\" : %s }]", testcase.jsonNew),
-			testcase.changeable,
-		}
-		testcaseNested.check(t)
-	}
-}
-
-func TestUnitBigQueryDataTable_customizedDiffSchema(t *testing.T) {
-	t.Parallel()
-
 	tcs := testUnitBigQueryDataCustomDiffFieldChangeTestcases
-
-	for _, changeableTestcase := range testUnitBigQueryDataTableIsChangableTestCases {
-		extraTestcase := testUnitBigQueryDataCustomDiffFieldChangeTestcase{
-			name:           changeableTestcase.name,
-			schemaBefore:   changeableTestcase.jsonOld,
-			schemaAfter:    changeableTestcase.jsonNew,
-			shouldForceNew: !changeableTestcase.changeable,
-		}
-		tcs = append(tcs, extraTestcase)
-	}
-
 	for _, testcase := range tcs {
 		testcase.check(t)
 	}
@@ -567,13 +541,6 @@ type testUnitBigQueryDataTableJSONEquivalencyTestCase struct {
 	equivalent bool
 }
 
-type testUnitBigQueryDataTableJSONChangeableTestCase struct {
-	name       string
-	jsonOld    string
-	jsonNew    string
-	changeable bool
-}
-
 type testUnitBigQueryDataCustomDiffField struct {
 	mode        string
 	description string
@@ -583,26 +550,7 @@ type testUnitBigQueryDataCustomDiffFieldChangeTestcase struct {
 	name           string
 	fieldBefore    []testUnitBigQueryDataCustomDiffField
 	fieldAfter     []testUnitBigQueryDataCustomDiffField
-	schemaBefore   string
-	schemaAfter    string
 	shouldForceNew bool
-}
-
-func (testcase *testUnitBigQueryDataTableJSONChangeableTestCase) check(t *testing.T) {
-	var old, new interface{}
-	if err := json.Unmarshal([]byte(testcase.jsonOld), &old); err != nil {
-		panic(fmt.Sprintf("unable to unmarshal json - %v", err))
-	}
-	if err := json.Unmarshal([]byte(testcase.jsonNew), &new); err != nil {
-		panic(fmt.Sprintf("unable to unmarshal json - %v", err))
-	}
-	changeable, err := resourceBigQueryTableSchemaIsChangeable(old, new)
-	if err != nil {
-		t.Errorf("ahhhh an error I did not expect this! especially not on testscase %s - %s", testcase.name, err)
-	}
-	if changeable != testcase.changeable {
-		t.Errorf("expected changeable result of %v but got %v for testcase %s", testcase.changeable, changeable, testcase.name)
-	}
 }
 
 func (testcase *testUnitBigQueryDataCustomDiffFieldChangeTestcase) check(t *testing.T) {
@@ -624,89 +572,14 @@ func (testcase *testUnitBigQueryDataCustomDiffFieldChangeTestcase) check(t *test
 			d.After[fmt.Sprintf("field.%d.description", i)] = f.description
 		}
 	}
-	if testcase.schemaBefore != "" {
-		d.Before["schema"] = testcase.schemaBefore
-	}
-	if testcase.schemaAfter != "" {
-		d.After["schema"] = testcase.schemaAfter
-	}
 
-	err := resourceBigQueryTableSchemaCustomizeDiffFunc(d)
+	err := resourceBigQueryTableFieldsCustomizeDiffFunc(d)
 	if err != nil {
 		t.Errorf("error on testcase %s - %w", testcase.name, err)
 	}
 	if testcase.shouldForceNew != d.IsForceNew {
 		t.Errorf("%s: expected d.IsForceNew to be %v, but was %v", testcase.name, testcase.shouldForceNew, d.IsForceNew)
 	}
-}
-
-var testUnitBigQueryDataTableIsChangableTestCases = []testUnitBigQueryDataTableJSONChangeableTestCase{
-	{
-		"defaultEquality",
-		"[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
-		"[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
-		true,
-	},
-	{
-		"arraySizeIncreases",
-		"[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
-		"[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }, {\"name\": \"someValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
-		true,
-	},
-	{
-		"arraySizeDecreases",
-		"[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }, {\"name\": \"someValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
-		"[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
-		false,
-	},
-	{
-		"descriptionChanges",
-		"[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
-		"[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"some new value\" }]",
-		true,
-	},
-	{
-		"typeInteger",
-		"[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
-		"[{\"name\": \"someValue\", \"type\" : \"INT64\", \"mode\" : \"NULLABLE\", \"description\" : \"some new value\" }]",
-		true,
-	},
-	{
-		"typeFloat",
-		"[{\"name\": \"someValue\", \"type\" : \"FLOAT\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
-		"[{\"name\": \"someValue\", \"type\" : \"FLOAT64\", \"mode\" : \"NULLABLE\", \"description\" : \"some new value\" }]",
-		true,
-	},
-	{
-		"typeBool",
-		"[{\"name\": \"someValue\", \"type\" : \"BOOLEAN\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
-		"[{\"name\": \"someValue\", \"type\" : \"BOOL\", \"mode\" : \"NULLABLE\", \"description\" : \"some new value\" }]",
-		true,
-	},
-	{
-		"typeRandom",
-		"[{\"name\": \"someValue\", \"type\" : \"BOOLEAN\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
-		"[{\"name\": \"someValue\", \"type\" : \"DATETIME\", \"mode\" : \"NULLABLE\", \"description\" : \"some new value\" }]",
-		false,
-	},
-	{
-		"typeModeReqToNull",
-		"[{\"name\": \"someValue\", \"type\" : \"BOOLEAN\", \"mode\" : \"REQUIRED\", \"description\" : \"someVal\" }]",
-		"[{\"name\": \"someValue\", \"type\" : \"BOOLEAN\", \"mode\" : \"NULLABLE\", \"description\" : \"some new value\" }]",
-		true,
-	},
-	{
-		"typeModeRandom",
-		"[{\"name\": \"someValue\", \"type\" : \"BOOLEAN\", \"mode\" : \"REQUIRED\", \"description\" : \"someVal\" }]",
-		"[{\"name\": \"someValue\", \"type\" : \"BOOLEAN\", \"mode\" : \"REPEATED\", \"description\" : \"some new value\" }]",
-		false,
-	},
-	{
-		"typeModeOmission",
-		"[{\"name\": \"someValue\", \"type\" : \"BOOLEAN\", \"mode\" : \"REQUIRED\", \"description\" : \"someVal\" }]",
-		"[{\"name\": \"someValue\", \"type\" : \"BOOLEAN\", \"description\" : \"some new value\" }]",
-		false,
-	},
 }
 
 var testUnitBigQueryDataCustomDiffFieldChangeTestcases = []testUnitBigQueryDataCustomDiffFieldChangeTestcase{
@@ -850,7 +723,7 @@ var testUnitBigQueryDataTableJSONEquivalencyTestCases = []testUnitBigQueryDataTa
 	},
 	{
 		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"BOOLEAN\"  }]",
-		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"BALLOON\" }]",
 		false,
 	},
 	{

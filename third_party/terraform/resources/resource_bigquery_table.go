@@ -128,6 +128,20 @@ func bigQueryTableSchemaDiffSuppress(_, old, new string, _ *schema.ResourceData)
 	return eq
 }
 
+func bigQueryTableModeEq(old, new interface{}) bool {
+	equivalentSet := []interface{}{nil, "NULLABLE"}
+	eq0 := old == new
+	eq1 := valueIsInArray(old, equivalentSet) && valueIsInArray(new, equivalentSet)
+	eq := eq0 || eq1
+	return eq
+}
+
+func bigQueryTableModeIsForceNew(old, new interface{}) bool {
+	eq := bigQueryTableModeEq(old, new)
+	reqToNull := old == "REQUIRED" && new == "NULLABLE"
+	return !eq && !reqToNull
+}
+
 func bigQueryTableTypeEq(old, new interface{}) bool {
 	equivalentSet1 := []interface{}{"INTEGER", "INT64"}
 	equivalentSet2 := []interface{}{"FLOAT", "FLOAT64"}
@@ -140,134 +154,22 @@ func bigQueryTableTypeEq(old, new interface{}) bool {
 	return eq
 }
 
-func bigQueryTableModeEq(old, new interface{}) bool {
-	equivalentSet := []interface{}{nil, "NULLABLE"}
-	eq0 := old == new
-	eq1 := valueIsInArray(old, equivalentSet) && valueIsInArray(new, equivalentSet)
-	eq := eq0 || eq1
-	return eq
-}
-
 func bigQueryTableTypeDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	return bigQueryTableTypeEq(old, new)
 }
 
-func bigQueryTableModeIsForceNew(old, new interface{}) bool {
-	eq := bigQueryTableModeEq(old, new)
-	reqToNull := old == "REQUIRED" && new == "NULLABLE"
-	return !eq && !reqToNull
-}
+func resourceBigQueryTableFieldsCustomizeDiffFunc(d TerraformResourceDiff) error {
+	_, hasSchema := d.GetOk("schema")
+	_, hasfield := d.GetOk("field.#")
 
-// Compares two existing schema implementations and decides if
-// it is changeable.. pairs with a force new on not changeable
-func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error) {
-	switch old.(type) {
-	case []interface{}:
-		arrayOld := old.([]interface{})
-		arrayNew, ok := new.([]interface{})
-		if !ok {
-			// if not both arrays not changeable
-			return false, nil
-		} else if len(arrayOld) > len(arrayNew) {
-			// if not growing not changeable
-			return false, nil
-		}
-		for i := range arrayOld {
-			isChangable, err := resourceBigQueryTableSchemaIsChangeable(arrayOld[i], arrayNew[i])
-			if err != nil || !isChangable {
-				return false, err
-			}
-		}
-		return true, nil
-	case map[string]interface{}:
-		objectOld := old.(map[string]interface{})
-		objectNew, ok := new.(map[string]interface{})
-		if !ok {
-			// if both aren't objects
-			return false, nil
-		}
-
-		var unionOfKeys map[string]bool = make(map[string]bool)
-		for key := range objectOld {
-			unionOfKeys[key] = true
-		}
-		for key := range objectNew {
-			unionOfKeys[key] = true
-		}
-
-		for key := range unionOfKeys {
-			valOld := objectOld[key]
-			valNew := objectNew[key]
-			switch key {
-			case "name":
-				if valOld != valNew {
-					return false, nil
-				}
-			case "type":
-				if !bigQueryTableTypeEq(valOld, valNew) {
-					return false, nil
-				}
-			case "mode":
-				if bigQueryTableModeIsForceNew(valOld, valNew) {
-					return false, nil
-				}
-			case "fields":
-				return resourceBigQueryTableSchemaIsChangeable(valOld, valNew)
-
-				// other parameters: description, policyTags and
-				// policyTags.names[] are changeable
-			}
-		}
-		return true, nil
-	case string, float64, bool, nil:
-		// realistically this shouldn't hit
-		log.Printf("[DEBUG] comparison of generics hit... not expected")
-		return old == new, nil
-	default:
-		log.Printf("[DEBUG] tried to iterate through json but encountered a non native type to json deserialization... please ensure you are passing a json object from json.Unmarshall")
-		return false, errors.New("unable to compare values")
-	}
-}
-
-func resourceBigQueryTableSchemaCustomizeDiffFunc(d TerraformResourceDiff) error {
-	if _, hasSchema := d.GetOk("schema"); hasSchema {
-		if _, hasfield := d.GetOk("field.#"); hasfield {
-			if err := d.ForceNew("schema"); err != nil {
-				return err
-			}
-			if err := d.ForceNew("field.#"); err != nil {
-				return err
-			}
-			return nil
-		}
-		oldSchema, newSchema := d.GetChange("schema")
-		oldSchemaText := oldSchema.(string)
-		newSchemaText := newSchema.(string)
-		if oldSchemaText == "null" {
-			// The API can return an empty schema which gets encoded to "null" during read.
-			oldSchemaText = "[]"
-		}
-		var old, new interface{}
-		if err := json.Unmarshal([]byte(oldSchemaText), &old); err != nil {
-			log.Printf("[DEBUG] unable to unmarshal json customized diff - %v", err)
-		}
-		if err := json.Unmarshal([]byte(newSchemaText), &new); err != nil {
-			log.Printf("[DEBUG] unable to unmarshal json customized diff - %v", err)
-		}
-		isChangable, err := resourceBigQueryTableSchemaIsChangeable(old, new)
-		if err != nil {
-			return err
-		}
-		if !isChangable {
-			if err := d.ForceNew("schema"); err != nil {
-				return err
-			}
-		}
-		return nil
-	} else if _, hasfield := d.GetOk("field.#"); hasfield {
+	if hasfield {
 		oldCount, newCount := d.GetChange("field.#")
-		if oldCount.(int) > newCount.(int) {
-			// if array is shrinking not changeable
+		if oldCount.(int) > newCount.(int) || (hasSchema && oldCount.(int) == 0 && newCount.(int) > 0) {
+			// if array is shrinking not changeable or
+			// if we are going from 0 to n assume that
+			// we are transitioning from one definition to another
+			// require force new... this is needed since schema
+			// is a computed field
 			if err := d.ForceNew("field.#"); err != nil {
 				return err
 			}
@@ -285,8 +187,8 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d TerraformResourceDiff) error
 	return nil
 }
 
-func resourceBigQueryTableSchemaCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	return resourceBigQueryTableSchemaCustomizeDiffFunc(d)
+func resourceBigQueryTableFieldsCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	return resourceBigQueryTableFieldsCustomizeDiffFunc(d)
 }
 
 func resourceBigQueryTable() *schema.Resource {
@@ -299,7 +201,7 @@ func resourceBigQueryTable() *schema.Resource {
 			State: resourceBigQueryTableImport,
 		},
 		CustomizeDiff: customdiff.All(
-			resourceBigQueryTableSchemaCustomizeDiff,
+			resourceBigQueryTableFieldsCustomizeDiff,
 		),
 		Schema: map[string]*schema.Schema{
 			// TableId: [Required] The ID of the table. The ID must contain only
@@ -1151,7 +1053,7 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 			if err := d.Set("schema", schema); err != nil {
 				return fmt.Errorf("Error setting schema: %s", err)
 			}
-		} else {
+		} else if hasFields {
 			if err := d.Set("field", flattenTableFields(res.Schema.Fields)); err != nil {
 				return fmt.Errorf("Error setting fields: %s", err)
 			}
