@@ -18,18 +18,15 @@ func instanceSchedulingNodeAffinitiesElemSchema() *schema.Resource {
 			"key": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"operator": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"IN", "NOT_IN"}, false),
 			},
 			"values": {
 				Type:     schema.TypeSet,
 				Required: true,
-				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
@@ -381,32 +378,36 @@ func flattenEnableDisplay(displayDevice *computeBeta.DisplayDevice) interface{} 
 
 // Terraform doesn't correctly calculate changes on schema.Set, so we do it manually
 // https://github.com/hashicorp/terraform-plugin-sdk/issues/98
-func schedulingHasChange(d *schema.ResourceData) bool {
+// 1st bool is a change that requires a reboot and the second bool is a change that doesn't
+func schedulingHasChange(d *schema.ResourceData) (bool, bool) {
 	if !d.HasChange("scheduling") {
 		// This doesn't work correctly, which is why this method exists
 		// But it is here for posterity
-		return false
+		return false, false
 	}
 	o, n := d.GetChange("scheduling")
 	oScheduling := o.([]interface{})[0].(map[string]interface{})
 	newScheduling := n.([]interface{})[0].(map[string]interface{})
 	originalNa := oScheduling["node_affinities"].(*schema.Set)
 	newNa := newScheduling["node_affinities"].(*schema.Set)
+	if !reflect.DeepEqual(newNa, originalNa) {
+		return true, false
+	}
 	if oScheduling["automatic_restart"] != newScheduling["automatic_restart"] {
-		return true
+		return false, true
 	}
 
 	if oScheduling["preemptible"] != newScheduling["preemptible"] {
-		return true
+		return false, true
 	}
 
 	if oScheduling["on_host_maintenance"] != newScheduling["on_host_maintenance"] {
-		return true
+		return false, true
 	}
 
 	if oScheduling["min_node_cpus"] != newScheduling["min_node_cpus"] {
-		return true
+		return false, true
 	}
 
-	return reflect.DeepEqual(newNa, originalNa)
+	return false, false
 }
