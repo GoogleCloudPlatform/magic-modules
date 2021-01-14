@@ -155,7 +155,7 @@ resource "google_compute_instance_template" "c" {
 }
 
 data "google_compute_instance_template" "default" {
-  // Hack to prevent depends_on bug triggering datasource recreate
+  // Hack to prevent depends_on bug triggering datasource recreate due to https://github.com/hashicorp/terraform/issues/11806
   project = "%{project}${replace(google_compute_instance_template.a.id, "/.*/", "")}${replace(google_compute_instance_template.b.id, "/.*/", "")}${replace(google_compute_instance_template.c.id, "/.*/", "")}"
   filter  = "name eq test-template-c-.*"
 }
@@ -229,7 +229,7 @@ resource "google_compute_instance_template" "c" {
 }
 
 data "google_compute_instance_template" "default" {
-  // Hack to prevent depends_on bug triggering datasource recreate
+  // Hack to prevent depends_on bug triggering datasource recreate due to https://github.com/hashicorp/terraform/issues/11806
   project = "%{project}${replace(google_compute_instance_template.c.id, "/.*/", "")}"
   filter      = "name eq test-template-.*"
   most_recent = true
