@@ -63,6 +63,7 @@ func resourceBigtableInstance() *schema.Resource {
 						"zone": {
 							Type:        schema.TypeString,
 							Computed:    true,
+							Optional:    true,
 							Description: `The zone to create the Cloud Bigtable cluster in. Each cluster must have a different zone in the same region. Zones that support Bigtable instances are noted on the Cloud Bigtable locations page.`,
 						},
 						"num_nodes": {
