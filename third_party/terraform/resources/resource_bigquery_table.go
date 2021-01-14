@@ -164,13 +164,14 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error)
 		if !ok {
 			// if not both arrays not changeable
 			return false, nil
-		} else if len(arrayOld) > len(arrayNew) {
+		}
+		if len(arrayOld) > len(arrayNew) {
 			// if not growing not changeable
 			return false, nil
 		}
 		for i := range arrayOld {
-			isChangable, err := resourceBigQueryTableSchemaIsChangeable(arrayOld[i], arrayNew[i])
-			if err != nil || !isChangable {
+			if isChangable, err :=
+				resourceBigQueryTableSchemaIsChangeable(arrayOld[i], arrayNew[i]); err != nil || !isChangable {
 				return false, err
 			}
 		}
@@ -237,15 +238,17 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d TerraformResourceDiff) error
 		var old, new interface{}
 		if err := json.Unmarshal([]byte(oldSchemaText), &old); err != nil {
 			log.Printf("[DEBUG] unable to unmarshal json customized diff - %v", err)
+			return err
 		}
 		if err := json.Unmarshal([]byte(newSchemaText), &new); err != nil {
 			log.Printf("[DEBUG] unable to unmarshal json customized diff - %v", err)
+			return err
 		}
-		isChangable, err := resourceBigQueryTableSchemaIsChangeable(old, new)
+		isChangeable, err := resourceBigQueryTableSchemaIsChangeable(old, new)
 		if err != nil {
 			return err
 		}
-		if !isChangable {
+		if !isChangeable {
 			if err := d.ForceNew("schema"); err != nil {
 				return err
 			}
