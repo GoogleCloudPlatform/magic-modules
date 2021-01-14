@@ -148,10 +148,6 @@ func bigQueryTableModeEq(old, new interface{}) bool {
 	return eq
 }
 
-func bigQueryTableTypeDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
-	return bigQueryTableTypeEq(old, new)
-}
-
 func bigQueryTableModeIsForceNew(old, new interface{}) bool {
 	eq := bigQueryTableModeEq(old, new)
 	reqToNull := old == "REQUIRED" && new == "NULLABLE"
@@ -231,15 +227,6 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error)
 
 func resourceBigQueryTableSchemaCustomizeDiffFunc(d TerraformResourceDiff) error {
 	if _, hasSchema := d.GetOk("schema"); hasSchema {
-		if _, hasfield := d.GetOk("field.#"); hasfield {
-			if err := d.ForceNew("schema"); err != nil {
-				return err
-			}
-			if err := d.ForceNew("field.#"); err != nil {
-				return err
-			}
-			return nil
-		}
 		oldSchema, newSchema := d.GetChange("schema")
 		oldSchemaText := oldSchema.(string)
 		newSchemaText := newSchema.(string)
@@ -264,23 +251,6 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d TerraformResourceDiff) error
 			}
 		}
 		return nil
-	} else if _, hasfield := d.GetOk("field.#"); hasfield {
-		oldCount, newCount := d.GetChange("field.#")
-		if oldCount.(int) > newCount.(int) {
-			// if array is shrinking not changeable
-			if err := d.ForceNew("field.#"); err != nil {
-				return err
-			}
-		}
-		for i := 0; i < oldCount.(int); i++ {
-			modeKey := fmt.Sprintf("field.%d.mode", i)
-			oldMode, newMode := d.GetChange(modeKey)
-			if bigQueryTableModeIsForceNew(oldMode, newMode) {
-				if err := d.ForceNew(modeKey); err != nil {
-					return err
-				}
-			}
-		}
 	}
 	return nil
 }
@@ -581,39 +551,6 @@ func resourceBigQueryTable() *schema.Resource {
 				},
 				DiffSuppressFunc: bigQueryTableSchemaDiffSuppress,
 				Description:      `A JSON schema for the table.`,
-				ConflictsWith:    []string{"field"},
-			},
-			// Field: A field in the table's schema.
-			"field": {
-				Type:          schema.TypeList,
-				Optional:      true,
-				ConflictsWith: []string{"schema"},
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"name": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-						},
-						"type": {
-							Type:             schema.TypeString,
-							Required:         true,
-							DiffSuppressFunc: bigQueryTableTypeDiffSuppress,
-							ForceNew:         true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Computed: true,
-							Optional: true,
-						},
-						"mode": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Default:      "NULLABLE",
-							ValidateFunc: validation.StringInSlice([]string{"NULLABLE", "REQUIRED", "REPEATED"}, false),
-						},
-					},
-				},
 			},
 			// View: [Optional] If specified, configures this table as a view.
 			"view": {
@@ -954,12 +891,6 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 			return nil, err
 		}
 		table.Schema = schema
-	} else if v, ok := d.GetOk("field"); ok {
-		schema, err := expandFields(v)
-		if err != nil {
-			return nil, err
-		}
-		table.Schema = schema
 	}
 
 	if v, ok := d.GetOk("time_partitioning"); ok {
@@ -1141,20 +1072,12 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if res.Schema != nil {
-		_, hasSchema := d.GetOk("schema")
-		_, hasFields := d.GetOk("field.#")
-		if hasSchema || !hasFields {
-			schema, err := flattenSchema(res.Schema)
-			if err != nil {
-				return err
-			}
-			if err := d.Set("schema", schema); err != nil {
-				return fmt.Errorf("Error setting schema: %s", err)
-			}
-		} else {
-			if err := d.Set("field", flattenTableFields(res.Schema.Fields)); err != nil {
-				return fmt.Errorf("Error setting fields: %s", err)
-			}
+		schema, err := flattenSchema(res.Schema)
+		if err != nil {
+			return err
+		}
+		if err := d.Set("schema", schema); err != nil {
+			return fmt.Errorf("Error setting schema: %s", err)
 		}
 	}
 
@@ -1490,31 +1413,6 @@ func expandTimePartitioning(configured interface{}) *bigquery.TimePartitioning {
 	return tp
 }
 
-func expandFields(raw interface{}) (*bigquery.TableSchema, error) {
-	fields, ok := raw.([]interface{})
-	if !ok {
-		log.Printf("[DEBUG] - unable to cast schema fields to array")
-		return nil, errors.New("unable to cast schema fields to array")
-	}
-	tableSchema := &bigquery.TableSchema{}
-	tableSchema.Fields = make([]*bigquery.TableFieldSchema, len(fields))
-	for i, v := range fields {
-		field, ok := v.(map[string]interface{})
-		if !ok {
-			log.Printf("[DEBUG] - unable to cast schema field to map")
-			return nil, errors.New("unable to cast schema field to map")
-		}
-		log.Printf("[DEBUG] - raw - %s, cast - %s", raw, fields)
-		tableSchema.Fields[i] = &bigquery.TableFieldSchema{
-			Name:        field["name"].(string),
-			Type:        field["type"].(string),
-			Description: field["description"].(string),
-			Mode:        field["mode"].(string),
-		}
-	}
-	return tableSchema, nil
-}
-
 func expandRangePartitioning(configured interface{}) (*bigquery.RangePartitioning, error) {
 	if configured == nil {
 		return nil, nil
@@ -1627,19 +1525,6 @@ func flattenMaterializedView(mvd *bigquery.MaterializedViewDefinition) []map[str
 	result["refresh_interval_ms"] = mvd.RefreshIntervalMs
 
 	return []map[string]interface{}{result}
-}
-
-func flattenTableFields(fields []*bigquery.TableFieldSchema) []map[string]interface{} {
-	result := make([]map[string]interface{}, 0, len(fields))
-	for _, field := range fields {
-		fieldMap := make(map[string]interface{})
-		fieldMap["name"] = field.Name
-		fieldMap["type"] = field.Type
-		fieldMap["description"] = field.Description
-		fieldMap["mode"] = field.Mode
-		result = append(result, fieldMap)
-	}
-	return result
 }
 
 func resourceBigQueryTableImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
