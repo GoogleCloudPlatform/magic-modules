@@ -292,6 +292,7 @@ func resourceBigQueryTableFieldsCustomizeDiffFunc(d TerraformResourceDiff) error
 			}
 		}
 	}
+	return nil
 }
 
 func resourceBigQueryTableFieldsCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
