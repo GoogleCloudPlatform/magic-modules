@@ -165,7 +165,34 @@ module Provider
 
     def generate_resource_tests(pwd, data) end
 
-    def generate_iam_policy(pwd, data, generate_code, generate_docs) end
+    # Generate the IAM policy for this object. This is used to query and test
+    # IAM policies separately from the resource itself
+    # Docs are generated for the terraform provider, not here.
+    def generate_iam_policy(pwd, data, generate_code, generate_docs)
+      if generate_code
+        target_folder = File.join(data.output_folder, 'google')
+        name = data.object.filename_override || data.object.name.underscore
+        product_name = data.product.name.underscore
+
+        FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
+        data.generate(pwd,
+                      'templates/terraform/iam_policy.go.erb',
+                      "#{target_folder}/iam_#{product_name}_#{name}.go",
+                      self)
+
+        # Only generate test if testable examples exist.
+        unless data.object.examples.reject(&:skip_test).empty?
+          data.generate(
+            pwd,
+            'templates/terraform/examples/base_configs/iam_test_file.go.erb',
+            "#{target_folder}/iam_#{product_name}_#{name}_generated_test.go",
+            self
+          )
+        end
+      end
+
+      return
+    end
 
     def generate_resource_sweepers(pwd, data) end
   end
