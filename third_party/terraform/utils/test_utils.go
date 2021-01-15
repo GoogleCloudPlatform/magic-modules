@@ -39,11 +39,6 @@ func (d *ResourceDataMock) GetOk(key string) (interface{}, bool) {
 	}
 }
 
-func (d *ResourceDiffMock) GetOk(key string) (interface{}, bool) {
-	v, ok := d.After[key]
-	return v, ok
-}
-
 func (d *ResourceDataMock) GetOkExists(key string) (interface{}, bool) {
 	for k, v := range d.FieldsInSchema {
 		if key == k {
@@ -89,6 +84,11 @@ func (d *ResourceDiffMock) HasChange(key string) bool {
 
 func (d *ResourceDiffMock) Get(key string) interface{} {
 	return d.After[key]
+}
+
+func (d *ResourceDiffMock) GetOk(key string) (interface{}, bool) {
+	v, ok := d.After[key]
+	return v, ok
 }
 
 func (d *ResourceDiffMock) Clear(key string) error {

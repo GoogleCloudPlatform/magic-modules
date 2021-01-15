@@ -124,6 +124,8 @@ module Provider
                         'third_party/terraform/utils/self_link_helpers.go'],
                        ['google/transport.go',
                         'third_party/terraform/utils/transport.go'],
+                       ['google/header_transport.go',
+                        'third_party/terraform/utils/header_transport.go'],
                        ['google/bigtable_client_factory.go',
                         'third_party/terraform/utils/bigtable_client_factory.go'],
                        ['google/common_operation.go',

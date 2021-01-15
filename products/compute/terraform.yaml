@@ -308,6 +308,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           region_backend_service_name: "region-service"
           health_check_name: "rbs-health-check"
+        min_version: beta
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_round_robin"
         primary_resource_id: "default"
@@ -990,6 +991,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'portDiffSuppress'
       grpcHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
+      logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/health_check_log_config.go.erb'
   Image: !ruby/object:Overrides::Terraform::ResourceOverride
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/compute.imageUser'
@@ -1516,6 +1520,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           template_name: "my-template"
           igm_name: "my-igm"
     properties:
+      zone: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        ignore_read: true
       preservedState.disk: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         custom_flatten: templates/terraform/custom_flatten/preserved_state_disks.go.erb
@@ -1583,6 +1590,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           template_name: "my-template"
           igm_name: "my-rigm"
     properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        ignore_read: true
+        default_from_api: true
       preservedState.disk: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         custom_flatten: templates/terraform/custom_flatten/preserved_state_disks.go.erb

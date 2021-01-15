@@ -5,14 +5,14 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   template {
     spec {
       containers {
-        image = "gcr.io/cloudrun/hello"
+        image = "us-docker.pkg.dev/cloudrun/container/hello"
       }
     }
 
     metadata {
       annotations = {
         "autoscaling.knative.dev/maxScale"      = "1000"
-        "run.googleapis.com/cloudsql-instances" = "<%= ctx[:test_env_vars]['project'] %>:us-central1:${google_sql_database_instance.instance.name}"
+        "run.googleapis.com/cloudsql-instances" = google_sql_database_instance.instance.connection_name
         "run.googleapis.com/client-name"        = "terraform"
       }
     }
