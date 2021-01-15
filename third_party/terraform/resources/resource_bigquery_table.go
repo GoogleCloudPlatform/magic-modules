@@ -237,12 +237,13 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d TerraformResourceDiff) error
 		}
 		var old, new interface{}
 		if err := json.Unmarshal([]byte(oldSchemaText), &old); err != nil {
+			// don't return error, its possible we are going from no schema to schema
+			// this case will be cover on the conparision regardless.
 			log.Printf("[DEBUG] unable to unmarshal json customized diff - %v", err)
-			return err
 		}
 		if err := json.Unmarshal([]byte(newSchemaText), &new); err != nil {
+			// same as above
 			log.Printf("[DEBUG] unable to unmarshal json customized diff - %v", err)
-			return err
 		}
 		isChangeable, err := resourceBigQueryTableSchemaIsChangeable(old, new)
 		if err != nil {
