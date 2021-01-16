@@ -184,15 +184,8 @@ module Provider
                       "#{target_folder}/iam_#{product_name}_#{name}.go",
                       self)
 
-        # Only generate test if testable examples exist.
-        unless data.object.examples.reject(&:skip_test).empty?
-          data.generate(
-            pwd,
-            'templates/terraform/examples/base_configs/iam_test_file.go.erb',
-            "#{target_folder}/iam_#{product_name}_#{name}_generated_test.go",
-            self
-          )
-        end
+        # Don't generate tests - we can rely on the terraform provider
+        # to test these.
       end
 
       return
