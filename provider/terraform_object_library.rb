@@ -114,6 +114,8 @@ module Provider
                         'third_party/validator/monitoring_slo_helper.go'],
                        ['google/image.go',
                         'third_party/terraform/utils/image.go'],
+                       ['google/import.go',
+                        'third_party/terraform/utils/import.go'],
                        ['google/disk_type.go',
                         'third_party/terraform/utils/disk_type.go'],
                        ['google/validation.go',
