@@ -15,6 +15,12 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   CertificateAuthority: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
+    description: |
+      {{description}}
+      
+      ~> **Warning:** Please remember that all resources created during preview (via the terraform-provider-google-beta)
+      will be deleted when CA service transitions to General Availability (GA). Relying on these
+      certificate authorities for production traffic is discouraged.
     import_format: ["projects/{{project}}/locations/{{location}}/certificateAuthorities/{{certificate_authority_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -29,6 +35,38 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           certificate_authority_id: "my-certificate-authority"
+      - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
+        name: "privateca_certificate_authority_cmek"
+        min_version: "beta"
+        primary_resource_id: "default"
+        vars:
+          kms_key_name: "projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key"
+        test_vars_overrides:
+          kms_key_name: 'BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN", "us-central1").CryptoKey.Name'
+    virtual_fields:
+      - !ruby/object:Api::Type::Boolean
+        name: 'disable_on_delete'
+        default_value: false
+        description: |
+          If set to `true`, the Certificate Authority will be disabled
+          on delete. If the Certitificate Authorities is not disabled,
+          it cannot be deleted. Use with care. Defaults to `false`.
+    properties:
+      type: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          {{description}}
+          
+          ~> **Note:** For `SUBORDINATE` Certificate Authorities, they need to
+          be manually activated (via Cloud Console of `gcloud`) before they can
+          issue certificates.
+      config.reusableConfig.reusableConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          {{description}}. Alternatively, one of the short names
+          found by running `gcloud beta privateca reusable-configs list`.
+        diff_suppress_func: 'certificateAuthorityReusableConfigDiffSuppress'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/certificate_authority.go.erb
+      encoder: templates/terraform/encoders/certificate_authority.go.erb
       pre_delete: templates/terraform/pre_delete/privateca_certificate_authority.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate_authority.go.erb

@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: Privateca
-display_name: Certificate Authority
+display_name: Certificate Authority Service
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
@@ -53,6 +53,8 @@ objects:
     self_link: projects/{{project}}/locations/{{location}}/certificateAuthorities/{{certificate_authority_id}}
     min_version: beta
     create_verb: :POST
+    update_verb: :PATCH
+    update_mask: true
     delete_url: '{{name}}:scheduleDelete'
     delete_verb: :POST
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -63,12 +65,15 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: location
-        description: Location of the Certificate Authority.
+        description:  |
+          Location of the CertificateAuthority. A full list of valid locations can be found by
+          running `gcloud beta privateca locations list`.
         required: true
+        input: true
         url_param_only: true
       - !ruby/object:Api::Type::String
         name: certificateAuthorityId
-        description: GCP region of the Realm.
+        description: The user provided Resource ID for this Certificate Authority.
         required: true
         input: true
         url_param_only: true
@@ -84,10 +89,14 @@ objects:
         input: true
         values:
           - :SELF_SIGNED
+          - :SUBORDINATE
         default_value: :SELF_SIGNED
       - !ruby/object:Api::Type::Enum
         name: 'tier'
-        description: The Tier of this CertificateAuthority.
+        description: |
+          The Tier of this CertificateAuthority. `ENTERPRISE` Certificate Authorities track
+          server side certificates issued, and support certificate revocation. For more details,
+          please check the [associated documentation](https://cloud.google.com/certificate-authority-service/docs/tiers).
         input: true
         values:
           - :ENTERPRISE
@@ -113,27 +122,36 @@ objects:
             - !ruby/object:Api::Type::String
               name: 'countryCode'
               description: The country code of the subject.
+              input: true
             - !ruby/object:Api::Type::String
               name: 'organization'
               description: The organization of the subject.
+              input: true
+              required: true
             - !ruby/object:Api::Type::String
               name: 'organizationalUnit'
               description: The organizational unit of the subject.
+              input: true
             - !ruby/object:Api::Type::String
               name: 'locality'
               description: The locality or city of the subject.
+              input: true
             - !ruby/object:Api::Type::String
               name: 'province'
               description: The province, territory, or regional state of the subject.
+              input: true
             - !ruby/object:Api::Type::String
               name: 'streetAddress'
               description: The street address of the subject.
+              input: true
             - !ruby/object:Api::Type::String
               name: 'postalCode'
               description: The postal code of the subject.
+              input: true
           - !ruby/object:Api::Type::String
             name: 'commonName'
             description: The common name of the distinguished name.
+            required: true
           - !ruby/object:Api::Type::NestedObject
             name: 'subjectAltName'
             description: The subject alternative name fields.
@@ -142,18 +160,42 @@ objects:
               name: 'dnsNames'
               description: Contains only valid, fully-qualified host names.
               item_type: Api::Type::String
+              at_least_one_of:
+              - config.0.subject_config.0.subject_alt_name.0.dns_names
+              - config.0.subject_config.0.subject_alt_name.0.uris
+              - config.0.subject_config.0.subject_alt_name.0.email_addresses
+              - config.0.subject_config.0.subject_alt_name.0.ip_addresses
+              input: true
             - !ruby/object:Api::Type::Array
               name: 'uris'
               description: Contains only valid RFC 3986 URIs.
               item_type: Api::Type::String
+              at_least_one_of:
+              - config.0.subject_config.0.subject_alt_name.0.dns_names
+              - config.0.subject_config.0.subject_alt_name.0.uris
+              - config.0.subject_config.0.subject_alt_name.0.email_addresses
+              - config.0.subject_config.0.subject_alt_name.0.ip_addresses
+              input: true
             - !ruby/object:Api::Type::Array
               name: 'emailAddresses'
               description: Contains only valid RFC 2822 E-mail addresses.
               item_type: Api::Type::String
+              at_least_one_of:
+              - config.0.subject_config.0.subject_alt_name.0.dns_names
+              - config.0.subject_config.0.subject_alt_name.0.uris
+              - config.0.subject_config.0.subject_alt_name.0.email_addresses
+              - config.0.subject_config.0.subject_alt_name.0.ip_addresses
+              input: true
             - !ruby/object:Api::Type::Array
               name: 'ipAddresses'
               description: Contains only valid 32-bit IPv4 addresses or RFC 4291 IPv6 addresses.
               item_type: Api::Type::String
+              at_least_one_of:
+              - config.0.subject_config.0.subject_alt_name.0.dns_names
+              - config.0.subject_config.0.subject_alt_name.0.uris
+              - config.0.subject_config.0.subject_alt_name.0.email_addresses
+              - config.0.subject_config.0.subject_alt_name.0.ip_addresses
+              input: true
         - !ruby/object:Api::Type::NestedObject
           name: 'reusableConfig'
           description: |
@@ -164,8 +206,9 @@ objects:
               name: 'reusableConfig'
               description: |
                 A resource path to a ReusableConfig in the format
-                projects/*/locations/*/reusableConfigs/*.
+                `projects/*/locations/*/reusableConfigs/*`.
               required: true
+              input: true
       - !ruby/object:Api::Type::String
         name: 'lifetime'
         description: |
@@ -173,6 +216,7 @@ objects:
           "notAfterTime" fields inside an X.509 certificate. A duration in seconds with up to nine
           fractional digits, terminated by 's'. Example: "3.5s".
         default_value: 315360000s  # 10 years
+        input: true
       - !ruby/object:Api::Type::NestedObject
         name: 'keySpec'
         description: |
@@ -182,12 +226,19 @@ objects:
         required: true
         input: true
         properties:
+        - !ruby/object:Api::Type::String
+          name: 'cloudKmsKeyVersion'
+          description: |
+            The resource name for an existing Cloud KMS CryptoKeyVersion in the format
+            `projects/*/locations/*/keyRings/*/cryptoKeys/*/cryptoKeyVersions/*`.
+          exactly_one_of:
+          - key_spec.0.cloud_kms_key_version
+          - key_spec.0.algorithm
         - !ruby/object:Api::Type::Enum
           name: 'algorithm'
           description: |
             The algorithm to use for creating a managed Cloud KMS key for a for a simplified
             experience. All managed keys will be have their ProtectionLevel as HSM.
-          required: true
           values:
             - :SIGN_HASH_ALGORITHM_UNSPECIFIED
             - :RSA_PSS_2048_SHA256
@@ -198,6 +249,9 @@ objects:
             - :RSA_PKCS1_4096_SHA256
             - :EC_P256_SHA256
             - :EC_P384_SHA384
+          exactly_one_of:
+          - key_spec.0.cloud_kms_key_version
+          - key_spec.0.algorithm
       - !ruby/object:Api::Type::NestedObject
         name: 'issuingOptions'
         description: |
@@ -240,8 +294,8 @@ objects:
         description: |
           The name of a Cloud Storage bucket where this CertificateAuthority will publish content,
           such as the CA certificate and CRLs. This must be a bucket name, without any prefixes
-          (such as gs://) or suffixes (such as .googleapis.com). For example, to use a bucket named
-          my-bucket, you would simply specify my-bucket. If not specified, a managed bucket will be
+          (such as `gs://`) or suffixes (such as `.googleapis.com`). For example, to use a bucket named
+          my-bucket, you would simply specify `my-bucket`. If not specified, a managed bucket will be
           created.
         input: true
       - !ruby/object:Api::Type::NestedObject
