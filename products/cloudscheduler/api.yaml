@@ -29,7 +29,7 @@ objects:
     name: 'Job'
     base_url: projects/{{project}}/locations/{{region}}/jobs
     self_link: projects/{{project}}/locations/{{region}}/jobs/{{name}}
-    input: true
+    update_verb: :PATCH
     description: |
       A scheduled job that can publish a pubsub message or a http request
       every X interval of time, using crontab format string.
@@ -62,20 +62,17 @@ objects:
           A human-readable description for the job. 
           This string must not contain more than 500 characters.
         required: false
-        input: true
       - !ruby/object:Api::Type::String
         name: schedule
         description: |
           Describes the schedule on which the job will be executed.
         required: false
-        input: true
       - !ruby/object:Api::Type::String
         name: timeZone
         description: |
           Specifies the time zone to be used in interpreting schedule.
           The value of this field must be a time zone name from the tz database.
         required: false
-        input: true
         default_value: 'Etc/UTC'
       - !ruby/object:Api::Type::String
         name: attemptDeadline
@@ -89,7 +86,6 @@ objects:
           * **Note**: For PubSub targets, this field is ignored - setting it will introduce an unresolvable diff.
           A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s"
         required: false
-        input: true
         default_value: '180s'
       - !ruby/object:Api::Type::NestedObject
         name: retryConfig
@@ -98,7 +94,6 @@ objects:
           meaning that an acknowledgement is not received from the handler, 
           then it will be retried with exponential backoff according to the settings
         required: false
-        input: true
         properties:
           - !ruby/object:Api::Type::Integer
             name: retryCount
@@ -107,7 +102,6 @@ objects:
               job using the exponential backoff procedure described by maxDoublings.
               Values greater than 5 and negative values are not allowed.
             required: false
-            input: true
             at_least_one_of:
               - retry_config.0.retry_count
               - retry_config.0.max_retry_duration
@@ -121,7 +115,6 @@ objects:
               If specified with retryCount, the job will be retried until both limits are reached.
               A duration in seconds with up to nine fractional digits, terminated by 's'.
             required: false
-            input: true
             at_least_one_of:
               - retry_config.0.retry_count
               - retry_config.0.max_retry_duration
@@ -134,7 +127,6 @@ objects:
               The minimum amount of time to wait before retrying a job after it fails.
               A duration in seconds with up to nine fractional digits, terminated by 's'.
             required: false
-            input: true
             at_least_one_of:
               - retry_config.0.retry_count
               - retry_config.0.max_retry_duration
@@ -147,7 +139,6 @@ objects:
               The maximum amount of time to wait before retrying a job after it fails.
               A duration in seconds with up to nine fractional digits, terminated by 's'.
             required: false
-            input: true
             at_least_one_of:
               - retry_config.0.retry_count
               - retry_config.0.max_retry_duration
@@ -162,7 +153,6 @@ objects:
               then doubles maxDoublings times, then increases linearly, 
               and finally retries retries at intervals of maxBackoffDuration up to retryCount times.
             required: false
-            input: true
             at_least_one_of:
               - retry_config.0.retry_count
               - retry_config.0.max_retry_duration
@@ -175,7 +165,6 @@ objects:
           Pub/Sub target
           If the job providers a Pub/Sub target the cron will publish
           a message to the provided topic
-        input: true
         exactly_one_of:
           - pubsub_target
           - http_target
@@ -189,28 +178,24 @@ objects:
               The topic name must be in the same format as required by PubSub's
               PublishRequest.name, e.g. `projects/my-project/topics/my-topic`.
             required: true
-            input: true
           - !ruby/object:Api::Type::String
             name: data
             description: |
               The message payload for PubsubMessage.
               Pubsub message must contain either non-empty data, or at least one attribute.
             required: false
-            input: true
           - !ruby/object:Api::Type::KeyValuePairs
             name: attributes
             description: |
               Attributes for PubsubMessage.
               Pubsub message must contain either non-empty data, or at least one attribute.
             required: false
-            input: true
       - !ruby/object:Api::Type::NestedObject
         name: appEngineHttpTarget
         description: |
           App Engine HTTP target.
           If the job providers a App Engine HTTP target the cron will 
           send a request to the service instance
-        input: true
         exactly_one_of:
           - pubsub_target
           - http_target
@@ -221,13 +206,11 @@ objects:
             description: |
               Which HTTP method to use for the request.
             required: false
-            input: true
           - !ruby/object:Api::Type::NestedObject
             name: appEngineRouting
             description: |
               App Engine Routing setting for the job.
             required: false
-            input: true
             properties:
               - !ruby/object:Api::Type::String
                 name: service
@@ -239,7 +222,6 @@ objects:
                   - app_engine_http_target.0.app_engine_routing.0.version
                   - app_engine_http_target.0.app_engine_routing.0.instance
                 required: false
-                input: true
               - !ruby/object:Api::Type::String
                 name: version
                 description: |
@@ -250,7 +232,6 @@ objects:
                   - app_engine_http_target.0.app_engine_routing.0.version
                   - app_engine_http_target.0.app_engine_routing.0.instance
                 required: false
-                input: true
               - !ruby/object:Api::Type::String
                 name: instance
                 description: |
@@ -261,7 +242,6 @@ objects:
                   - app_engine_http_target.0.app_engine_routing.0.version
                   - app_engine_http_target.0.app_engine_routing.0.instance
                 required: false
-                input: true
           - !ruby/object:Api::Type::String
             name: relativeUri
             description: |
@@ -280,7 +260,6 @@ objects:
 
               A base64-encoded string.
             required: false
-            input: true
           - !ruby/object:Api::Type::KeyValuePairs
             name: headers
             description: |
@@ -288,14 +267,12 @@ objects:
               This map contains the header field names and values. 
               Headers can be set when the job is created.
             required: false
-            input: true
       - !ruby/object:Api::Type::NestedObject
         name: httpTarget
         description: |
           HTTP target.
           If the job providers a http_target the cron will 
           send a request to the targeted url
-        input: true
         exactly_one_of:
           - pubsub_target
           - http_target
@@ -331,7 +308,6 @@ objects:
             description: |
               Contains information needed for generating an OAuth token.
               This type of authorization should be used when sending requests to a GCP endpoint.
-            input: true
             properties:
               - !ruby/object:Api::Type::String
                 name: serviceAccountEmail
@@ -349,7 +325,6 @@ objects:
             description: |
               Contains information needed for generating an OpenID Connect token.
               This type of authorization should be used when sending requests to third party endpoints or Cloud Run.
-            input: true
             properties:
               - !ruby/object:Api::Type::String
                 name: serviceAccountEmail
