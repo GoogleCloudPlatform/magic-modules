@@ -509,6 +509,7 @@ objects:
       CAA, MX, CNAME, NS, etc)
     base_url: 'projects/{{project}}/managedZones/{{managed_zone}}/rrsets'
     self_link: 'projects/{{project}}/managedZones/{{managed_zone}}/rrsets/{{name}}/{{type}}'
+    update_verb: :PATCH
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'managed_zone'
