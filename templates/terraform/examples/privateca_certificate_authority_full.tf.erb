@@ -34,4 +34,5 @@ resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id]
   key_spec {
     algorithm = "EC_P256_SHA256"
   }
+  disable_on_delete = true
 }
