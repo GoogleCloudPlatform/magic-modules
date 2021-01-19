@@ -1,0 +1,13 @@
+func ipv6AddressforDnsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+    if d.Get("type") == "AAAA" {
+        return AddressDiffSuppress(k, old, new, d)
+    }
+    return false
+}
+
+func AddressDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	oldIp := net.ParseIP(old)
+	newIp := net.ParseIP(new)
+
+	return oldIp.Equal(newIp)
+}
