@@ -109,7 +109,7 @@ For example, to generate Terraform:
 bundle exec compiler -a -v "ga" -e terraform -o "$GOPATH/src/github.com/hashicorp/terraform-provider-google"
 ```
 
-It's worth noting that Magic Modules will only generate new files when ran
+It's worth noting that Magic Modules will only generate new files when run
 locally. The "Magician"- the Magic Modules CI system- handles deletion of old
 files when creating PRs.
 
