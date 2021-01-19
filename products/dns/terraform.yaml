@@ -204,8 +204,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           zone_name: "my-zone"
     properties:
       # excluding kind from Terraform code because this is a static, hardcoded value
-      kind: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
       rrdatas: !ruby/object:Overrides::Terraform::PropertyOverride
           diff_suppress_func: 'ipv6AddressforDnsDiffSuppress'
       managed_zone: !ruby/object:Overrides::Terraform::PropertyOverride
