@@ -25,8 +25,6 @@ func TestAccBillingBudget_billingBudgetCurrencycode(t *testing.T) {
 			{
 				Config: testAccBillingBudget_billingBudgetCurrencycode(context),
 				Check: resource.ComposeTestCheckFunc(
-					// currency_code is returned when it is not included in the request
-					resource.TestCheckResourceAttrSet("google_billing_budget.budget", "amount.0.specified_amount.0.currency_code"),
 				),
 			},
 		},
