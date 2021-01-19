@@ -24,8 +24,7 @@ func TestAccBillingBudget_billingBudgetCurrencycode(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBillingBudget_billingBudgetCurrencycode(context),
-				Check: resource.ComposeTestCheckFunc(
-				),
+				Check:  resource.ComposeTestCheckFunc(),
 			},
 		},
 	})
