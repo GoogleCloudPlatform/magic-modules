@@ -18,6 +18,11 @@ and
 ## Example Usage
 
 ```hcl
+resource "google_service_account" "default" {
+  account_id   = "service_account_id"
+  display_name = "Service Account"
+}
+
 resource "google_compute_instance" "default" {
   name         = "test"
   machine_type = "e2-medium"
@@ -51,7 +56,9 @@ resource "google_compute_instance" "default" {
   metadata_startup_script = "echo hi > /test.txt"
 
   service_account {
-    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
+    email  = google_service_account.default.email
+    scopes = ["cloud-platform"]
   }
 }
 ```
@@ -74,7 +81,7 @@ The following arguments are supported:
 * `name` - (Required) A unique name for the resource, required by GCE.
     Changing this forces a new resource to be created.
 
-* `zone` - (Required) The zone that the machine should be created in.
+* `zone` - (Optional) The zone that the machine should be created in. If it is not provided, the provider zone is used.
 
 * `network_interface` - (Required) Networks to attach to the instance. This can
     be specified multiple times. Structure is documented below.
@@ -165,7 +172,7 @@ The following arguments are supported:
 
 * `resource_policies` (Optional) -- A list of short names or self_links of resource policies to attach to the instance. Modifying this list will cause the instance to recreate. Currently a max of 1 resource policy is supported.
 
-* `confidential_instance_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - Enable [Confidential Mode](https://cloud.google.com/compute/confidential-vm/docs/about-cvm) on this VM.
+* `confidential_instance_config` (Optional) - Enable [Confidential Mode](https://cloud.google.com/compute/confidential-vm/docs/about-cvm) on this VM.
 
 ---
 
@@ -353,7 +360,7 @@ The `shielded_instance_config` block supports:
 
 The `confidential_instance_config` block supports:
 
-* `enable_confidential_compute` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Defines whether the instance should have confidential compute enabled. [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
+* `enable_confidential_compute` (Optional) Defines whether the instance should have confidential compute enabled. [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
 
 ## Attributes Reference
 

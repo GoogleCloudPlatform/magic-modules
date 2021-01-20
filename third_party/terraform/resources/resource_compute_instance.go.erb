@@ -641,7 +641,6 @@ func resourceComputeInstance() *schema.Resource {
 					},
 				},
 			},
-<% unless version == 'ga' -%>
 			"confidential_instance_config": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
@@ -659,7 +658,6 @@ func resourceComputeInstance() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 			"desired_status": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -750,6 +748,7 @@ func resourceComputeInstance() *schema.Resource {
 			desiredStatusDiff,
 			forceNewIfNetworkIPNotUpdatable,
 		),
+		UseJSONNumber: true,
 	}
 }
 
@@ -874,9 +873,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *Confi
 		DeletionProtection: d.Get("deletion_protection").(bool),
 		Hostname:           d.Get("hostname").(string),
 		ForceSendFields:    []string{"CanIpForward", "DeletionProtection"},
-<% unless version == 'ga' -%>
 		ConfidentialInstanceConfig:  expandConfidentialInstanceConfig(d),
-<% end -%>
 		ShieldedInstanceConfig:   expandShieldedVmConfigs(d),
 		DisplayDevice:      expandDisplayDevice(d),
 		ResourcePolicies:   convertStringArr(d.Get("resource_policies").([]interface{})),
@@ -1230,11 +1227,9 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("current_status", instance.Status); err != nil {
 		return fmt.Errorf("Error setting current_status: %s", err)
 	}
- 	<% unless version == 'ga' -%>
 	if err := d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(instance.ConfidentialInstanceConfig)); err != nil {
 		return fmt.Errorf("Error setting confidential_instance_config: %s", err)
 	}
-    <% end -%>
 	if d.Get("desired_status") != "" {
 		if err := d.Set("desired_status", instance.Status); err != nil {
 			return fmt.Errorf("Error setting desired_status: %s", err)

@@ -18,14 +18,6 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://cloudbuild.googleapis.com/v1/
-  - !ruby/object:Api::Product::Version
-    name: beta
-    # This is correct even though it's the same base_url as v1.
-    # Some features in this API are beta, even though they're all
-    # released as v1.  This is not ideal, but it's not something
-    # we can fix - we just want to protect our users from APIs that
-    # might change unexpectedly.
-    base_url: https://cloudbuild.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -173,7 +165,6 @@ objects:
         name: 'github'
         description: |
             Describes the configuration of a trigger that creates a build whenever a GitHub event is received.
-        min_version: beta
         exactly_one_of:
           - trigger_template
           - github
@@ -392,7 +383,8 @@ objects:
                     the builder service account's credentials if necessary.
 
                     The Docker daemon's cache will already have the latest versions of all of
-                    the officially supported build steps (https://github.com/GoogleCloudPlatform/cloud-builders).
+                    the officially supported build steps (see https://github.com/GoogleCloudPlatform/cloud-builders 
+                    for images and examples).
                     The Docker daemon will also have cached many of the layers for some popular
                     images, like "ubuntu", "debian", but they will be refreshed at the time
                     you attempt to use them.

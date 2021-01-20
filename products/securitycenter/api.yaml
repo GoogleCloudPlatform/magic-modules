@@ -35,7 +35,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
-          'https://cloud.google.com/binary-authorization/'
+          'https://cloud.google.com/security-command-center/docs'
       api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1beta1/organizations.sources'
     parameters:
       - !ruby/object:Api::Type::String

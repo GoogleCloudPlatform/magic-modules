@@ -57,6 +57,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       spec.routeName: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.erb'
         diff_suppress_func: 'compareSelfLinkOrResourceName'
+      spec.forceOverride: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/cloudrun_ignore_force_override.go.erb
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "locations/{{location}}/namespaces/{{project}}/services/{{name}}"
     import_format: ["locations/{{location}}/namespaces/{{project}}/services/{{name}}"]
@@ -88,8 +90,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         oics_vars_overrides:
           deletion_protection: "false"
-        test_env_vars:
-          project: :PROJECT_NAME
         ignore_read_extra:
           - "autogenerate_revision_name"
       - !ruby/object:Provider::Terraform::Examples

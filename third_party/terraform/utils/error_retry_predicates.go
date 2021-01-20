@@ -228,6 +228,17 @@ func isMonitoringConcurrentEditError(err error) (bool, string) {
 	return false, ""
 }
 
+// Retry if filestore operation returns a 429 with a specific message for
+// concurrent operations.
+func isNotFilestoreQuotaError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 429 {
+			return false, ""
+		}
+	}
+	return isCommonRetryableErrorCode(err)
+}
+
 // Retry if App Engine operation returns a 409 with a specific message for
 // concurrent operations.
 func isAppEngineRetryableError(err error) (bool, string) {
@@ -258,13 +269,6 @@ func isNotFoundRetryableError(opType string) RetryErrorPredicateFunc {
 		}
 		return false, ""
 	}
-}
-
-func isStoragePreconditionError(err error) (bool, string) {
-	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 412 {
-		return true, fmt.Sprintf("Retry on storage precondition not met")
-	}
-	return false, ""
 }
 
 func isDataflowJobUpdateRetryableError(err error) (bool, string) {
@@ -307,6 +311,15 @@ func iapClient409Operation(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 409 && strings.Contains(strings.ToLower(gerr.Body), "operation was aborted") {
 			return true, "operation was aborted possibly due to concurrency issue - retrying"
+		}
+	}
+	return false, ""
+}
+
+func healthcareDatasetNotInitialized(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 404 && strings.Contains(strings.ToLower(gerr.Body), "dataset not initialized") {
+			return true, "dataset not initialized - retrying"
 		}
 	}
 	return false, ""

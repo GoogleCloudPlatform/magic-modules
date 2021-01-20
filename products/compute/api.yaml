@@ -490,6 +490,46 @@ objects:
                 Fraction of backend capacity utilization (set in HTTP(s) load
                 balancing configuration) that autoscaler should maintain. Must
                 be a positive float value. If not defined, the default is 0.8.
+          - !ruby/object:Api::Type::Map
+            name: 'scalingSchedules'
+            min_version: beta
+            description: |
+              Scaling schedules defined for an autoscaler. Multiple schedules can be set on an autoscaler and they can overlap.
+            key_name: name
+            key_description: |
+              A name for the schedule.
+            value_type: !ruby/object:Api::Type::NestedObject
+              name: scalingSchedule
+              properties:
+                - !ruby/object:Api::Type::Integer
+                  name: 'minRequiredReplicas'
+                  description: |
+                    Minimum number of VM instances that autoscaler will recommend in time intervals starting according to schedule.
+                  required: true
+                - !ruby/object:Api::Type::String
+                  name: 'schedule'
+                  description: |
+                    The start timestamps of time intervals when this scaling schedule should provide a scaling signal. This field uses the extended cron format (with an optional year field). 
+                  required: true
+                - !ruby/object:Api::Type::String
+                  name: 'timeZone'
+                  default_value: UTC
+                  description: |
+                    The time zone to be used when interpreting the schedule. The value of this field must be a time zone name from the tz database: http://en.wikipedia.org/wiki/Tz_database.
+                - !ruby/object:Api::Type::Integer
+                  name: 'durationSec'
+                  description: |
+                    The duration of time intervals (in seconds) for which this scaling schedule will be running. The minimum allowed value is 300.
+                  required: true
+                - !ruby/object:Api::Type::Boolean
+                  name: 'disabled'
+                  description: |
+                    A boolean value that specifies if a scaling schedule can influence autoscaler recommendations. If set to true, then a scaling schedule has no effect. 
+                  default_value: false
+                - !ruby/object:Api::Type::String
+                  name: 'description'
+                  description: |
+                    A description of a scaling schedule.
       - !ruby/object:Api::Type::ResourceRef
         name: 'target'
         resource: 'InstanceGroupManager'
@@ -3274,6 +3314,11 @@ objects:
           resource: 'ResourcePolicy'
           imports: 'selfLink'
           description: 'A resource policy applied to this disk for automatic snapshot creations.'
+      - !ruby/object:Api::Type::Boolean
+        name: 'multiWriter'
+        description: |
+          Indicates whether or not the disk can be read/write attached to more than one instance.
+        min_version: beta
   - !ruby/object:Api::Resource
     name: 'Firewall'
     kind: 'compute#firewall'
@@ -3610,7 +3655,6 @@ objects:
             mirrored even if a PacketMirroring rule applies to them. This
             can only be set to true for load balancers that have their
             loadBalancingScheme set to INTERNAL.
-        min_version: beta
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
@@ -8834,7 +8878,6 @@ objects:
         item_type: Api::Type::String
   - !ruby/object:Api::Resource
     name: 'PacketMirroring'
-    min_version: beta
     base_url: projects/{{project}}/regions/{{region}}/packetMirrorings
     update_verb: :PATCH
     self_link: projects/{{project}}/regions/{{region}}/packetMirrorings/{{name}}
@@ -8939,6 +8982,14 @@ objects:
                 IP CIDR ranges that apply as a filter on the source (ingress) or
                 destination (egress) IP in the IP header. Only IPv4 is supported.
             item_type: Api::Type::String
+          - !ruby/object:Api::Type::Enum
+            name: direction
+            description: Direction of traffic to mirror.
+            values:
+              - :INGRESS
+              - :EGRESS
+              - :BOTH
+            default_value: :BOTH
       - !ruby/object:Api::Type::NestedObject
         name: mirroredResources
         required: true
@@ -9700,6 +9751,46 @@ objects:
                 Fraction of backend capacity utilization (set in HTTP(s) load
                 balancing configuration) that autoscaler should maintain. Must
                 be a positive float value. If not defined, the default is 0.8.
+          - !ruby/object:Api::Type::Map
+            name: 'scalingSchedules'
+            min_version: beta
+            description: |
+              Scaling schedules defined for an autoscaler. Multiple schedules can be set on an autoscaler and they can overlap.
+            key_name: name
+            key_description: |
+              A name for the schedule.
+            value_type: !ruby/object:Api::Type::NestedObject
+              name: scalingSchedule
+              properties:
+                - !ruby/object:Api::Type::Integer
+                  name: 'minRequiredReplicas'
+                  description: |
+                    Minimum number of VM instances that autoscaler will recommend in time intervals starting according to schedule.
+                  required: true
+                - !ruby/object:Api::Type::String
+                  name: 'schedule'
+                  description: |
+                    The start timestamps of time intervals when this scaling schedule should provide a scaling signal. This field uses the extended cron format (with an optional year field). 
+                  required: true
+                - !ruby/object:Api::Type::String
+                  name: 'timeZone'
+                  default_value: UTC
+                  description: |
+                    The time zone to be used when interpreting the schedule. The value of this field must be a time zone name from the tz database: http://en.wikipedia.org/wiki/Tz_database.
+                - !ruby/object:Api::Type::Integer
+                  name: 'durationSec'
+                  description: |
+                    The duration of time intervals (in seconds) for which this scaling schedule will be running. The minimum allowed value is 300.
+                  required: true
+                - !ruby/object:Api::Type::Boolean
+                  name: 'disabled'
+                  description: |
+                    A boolean value that specifies if a scaling schedule can influence autoscaler recommendations. If set to true, then a scaling schedule has no effect. 
+                  default_value: false
+                - !ruby/object:Api::Type::String
+                  name: 'description'
+                  description: |
+                    A description of a scaling schedule.
       - !ruby/object:Api::Type::String
         name: 'target'
         # TODO(#303): resourceref once RegionIGM exists
@@ -10152,7 +10243,6 @@ objects:
               exactly_one_of:
                 - path_matchers.0.default_service
                 - path_matchers.0.default_url_redirect
-              required: true
               resource: 'RegionBackendService'
               imports: 'selfLink'
               description: |
@@ -12979,6 +13069,13 @@ objects:
               - :ERRORS_ONLY
               - :TRANSLATIONS_ONLY
               - :ALL
+      - !ruby/object:Api::Type::Boolean
+        name: enableEndpointIndependentMapping
+        description: |
+          Specifies if endpoint independent mapping is enabled. This is enabled by default. For more information
+          see the [official documentation](https://cloud.google.com/nat/docs/overview#specs-rfcs).
+        default_value: true
+        send_empty_value: true
   - !ruby/object:Api::Resource
     name: 'RouterBgpPeer'
     base_url: projects/{{project}}/regions/{{region}}/routers/{{router}}

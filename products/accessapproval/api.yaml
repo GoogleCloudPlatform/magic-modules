@@ -111,8 +111,8 @@ objects:
           If the field is true, that indicates that at least one service is enrolled for Access Approval in one or more ancestors of the Folder.
   - !ruby/object:Api::Resource
     name: ProjectSettings
-    base_url: "projects/{{project}}/accessApprovalSettings"
-    self_link: 'projects/{{project}}/accessApprovalSettings'
+    base_url: "projects/{{project_id}}/accessApprovalSettings"
+    self_link: 'projects/{{project_id}}/accessApprovalSettings'
     create_verb: :PATCH
     update_verb: :PATCH
     update_mask: true
@@ -132,7 +132,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: name
         description: |
-          The resource name of the settings. Format is "projects/{project_id/accessApprovalSettings"
+          The resource name of the settings. Format is "projects/{project_id}/accessApprovalSettings"
         output: true
       - !ruby/object:Api::Type::Array
         name: notificationEmails
@@ -180,6 +180,11 @@ objects:
         output: true
         description: |
           If the field is true, that indicates that at least one service is enrolled for Access Approval in one or more ancestors of the Project.
+      - !ruby/object:Api::Type::String
+        name: project
+        description: |
+          Deprecated in favor of `project_id`
+        deprecation_message: Deprecated in favor of `project_id`
   - !ruby/object:Api::Resource
     name: OrganizationSettings
     base_url: "organizations/{{organization_id}}/accessApprovalSettings"
