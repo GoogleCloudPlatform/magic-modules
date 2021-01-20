@@ -337,11 +337,6 @@ func resourceDataflowJobRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error setting additional_experiments: %s", err)
 	}
 
-	if _, ok := dataflowTerminalStatesMap[job.CurrentState]; ok {
-		log.Printf("[DEBUG] Removing resource '%s' because it is in state %s.\n", job.Name, job.CurrentState)
-		d.SetId("")
-		return nil
-	}
 	d.SetId(job.Id)
 
 	return nil
