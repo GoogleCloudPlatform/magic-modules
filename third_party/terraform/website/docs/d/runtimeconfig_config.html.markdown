@@ -20,7 +20,6 @@ To get more information about RuntimeConfigs, see:
 ```hcl
 data "google_runtimeconfig_config" "run-service" {
   name = "my-service"
-  description = "foobat"
 }
 ```
 
@@ -37,4 +36,4 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-See [google_runtimeconfig_config](https://www.terraform.io/docs/providers/google/r/google_runtimeconfig_config.html#argument-reference) resource for details of the available attributes.
+See [google_runtimeconfig_config](https://www.terraform.io/docs/providers/google/r/runtimeconfig_config.html#argument-reference) resource for details of the available attributes.
