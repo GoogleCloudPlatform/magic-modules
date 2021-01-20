@@ -172,7 +172,7 @@ module Provider
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
     # Docs are generated for the terraform provider, not here.
-    def generate_iam_policy(pwd, data, generate_code, generate_docs)
+    def generate_iam_policy(pwd, data, generate_code, _generate_docs)
       if generate_code
         target_folder = File.join(data.output_folder, 'google')
         name = data.object.filename_override || data.object.name.underscore
@@ -187,8 +187,6 @@ module Provider
         # Don't generate tests - we can rely on the terraform provider
         # to test these.
       end
-
-      return
     end
 
     def generate_resource_sweepers(pwd, data) end
