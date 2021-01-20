@@ -16,6 +16,8 @@ For a list of services available, visit the
 
 Requires [Service Usage API](https://console.cloud.google.com/apis/library/serviceusage.googleapis.com).
 
+~> **Note:** Previous (pre-3.0.0) versions of the provider had a `google_project_services` resource, which was authoritative over the list of GCP services enabled on a project, so that services not explicitly set would be removed by Terraform. However, this was dangerous to use in practice. Services have dependencies that are automatically enabled alongside them and GCP will add dependencies to services out of band, enabling them. If a user ran Terraform after this, Terraform would disable the service and implicitly disable any service that relied on it.The `google_project_service` resource is a much better match for most users' intent, managing a single service at a time. Setting several `google_project_service` resources is an assertion that "these services are set on this project", while `google_project_services` was an assertion that "only these services are set on this project".
+
 ## Example Usage
 
 ```hcl
