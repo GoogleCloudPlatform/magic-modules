@@ -450,6 +450,62 @@ func TestAccBigQueryDataTable_jsonEquivalency(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryDataTable_schemaToFieldsAndBack(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTable_jsonEq(datasetID, tableID),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time"},
+			},
+			{
+				Config: testAccBigQueryTable_fields(datasetID, tableID),
+				Check:  testAccCheckBigQueryTableFields(t),
+			},
+			{
+				Config: testAccBigQueryTable_jsonEq(datasetID, tableID),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time"},
+			},
+		},
+	})
+}
+
+func TestAccBigQueryDataTable_fields(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTable_fields(datasetID, tableID),
+				Check:  testAccCheckBigQueryTableFields(t),
+			},
+		},
+	})
+}
+
 func TestUnitBigQueryDataTable_jsonEquivalency(t *testing.T) {
 	t.Parallel()
 
@@ -485,6 +541,14 @@ func TestUnitBigQueryDataTable_schemaIsChangable(t *testing.T) {
 	}
 }
 
+func TestUnitBigQueryDataTable_customizedDiffFields(t *testing.T) {
+	t.Parallel()
+	tcs := testUnitBigQueryDataCustomDiffFieldChangeTestcases
+	for _, testcase := range tcs {
+		testcase.check(t)
+	}
+}
+
 type testUnitBigQueryDataTableJSONEquivalencyTestCase struct {
 	jsonA      string
 	jsonB      string
@@ -496,6 +560,47 @@ type testUnitBigQueryDataTableJSONChangeableTestCase struct {
 	jsonOld    string
 	jsonNew    string
 	changeable bool
+}
+
+type testUnitBigQueryDataCustomDiffField struct {
+	mode        string
+	description string
+}
+
+type testUnitBigQueryDataCustomDiffFieldChangeTestcase struct {
+	name           string
+	fieldBefore    []testUnitBigQueryDataCustomDiffField
+	fieldAfter     []testUnitBigQueryDataCustomDiffField
+	shouldForceNew bool
+}
+
+func (testcase *testUnitBigQueryDataCustomDiffFieldChangeTestcase) check(t *testing.T) {
+	d := &ResourceDiffMock{
+		Before: map[string]interface{}{},
+		After:  map[string]interface{}{},
+	}
+	if testcase.fieldBefore != nil {
+		d.Before["field.#"] = len(testcase.fieldBefore)
+		for i, f := range testcase.fieldBefore {
+			d.Before[fmt.Sprintf("field.%d.mode", i)] = f.mode
+			d.Before[fmt.Sprintf("field.%d.description", i)] = f.description
+		}
+	}
+	if testcase.fieldAfter != nil {
+		d.After["field.#"] = len(testcase.fieldAfter)
+		for i, f := range testcase.fieldAfter {
+			d.After[fmt.Sprintf("field.%d.mode", i)] = f.mode
+			d.After[fmt.Sprintf("field.%d.description", i)] = f.description
+		}
+	}
+
+	err := resourceBigQueryTableFieldsCustomizeDiffFunc(d)
+	if err != nil {
+		t.Errorf("error on testcase %s - %w", testcase.name, err)
+	}
+	if testcase.shouldForceNew != d.IsForceNew {
+		t.Errorf("%s: expected d.IsForceNew to be %v, but was %v", testcase.name, testcase.shouldForceNew, d.IsForceNew)
+	}
 }
 
 func (testcase *testUnitBigQueryDataTableJSONChangeableTestCase) check(t *testing.T) {
@@ -658,7 +763,7 @@ var testUnitBigQueryDataTableJSONEquivalencyTestCases = []testUnitBigQueryDataTa
 	},
 	{
 		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"BOOLEAN\"  }]",
-		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"BALLOON\" }]",
 		false,
 	},
 	{
@@ -670,6 +775,89 @@ var testUnitBigQueryDataTableJSONEquivalencyTestCases = []testUnitBigQueryDataTa
 		"[1,2,3]",
 		"[1,2,\"banana\"]",
 		false,
+	},
+}
+
+var testUnitBigQueryDataCustomDiffFieldChangeTestcases = []testUnitBigQueryDataCustomDiffFieldChangeTestcase{
+	{
+		name: "control",
+		fieldBefore: []testUnitBigQueryDataCustomDiffField{{
+			mode:        "Nullable",
+			description: "someValue",
+		}},
+		fieldAfter: []testUnitBigQueryDataCustomDiffField{{
+			mode:        "Nullable",
+			description: "someValue",
+		}},
+		shouldForceNew: false,
+	},
+	{
+		name: "requiredToNullable",
+		fieldBefore: []testUnitBigQueryDataCustomDiffField{{
+			mode:        "REQUIRED",
+			description: "someValue",
+		}},
+		fieldAfter: []testUnitBigQueryDataCustomDiffField{{
+			mode:        "NULLABLE",
+			description: "someValue",
+		}},
+		shouldForceNew: false,
+	},
+	{
+		name: "descriptionChanged",
+		fieldBefore: []testUnitBigQueryDataCustomDiffField{{
+			mode:        "REQUIRED",
+			description: "someValue",
+		}},
+		fieldAfter: []testUnitBigQueryDataCustomDiffField{{
+			mode:        "REQUIRED",
+			description: "some other value",
+		}},
+		shouldForceNew: false,
+	},
+	{
+		name: "nullToRequired",
+		fieldBefore: []testUnitBigQueryDataCustomDiffField{{
+			mode:        "NULLABLE",
+			description: "someValue",
+		}},
+		fieldAfter: []testUnitBigQueryDataCustomDiffField{{
+			mode:        "REQUIRED",
+			description: "someValue",
+		}},
+		shouldForceNew: true,
+	},
+	{
+		name: "arraySizeIncreases",
+		fieldBefore: []testUnitBigQueryDataCustomDiffField{{
+			mode:        "REQUIRED",
+			description: "someValue",
+		}},
+		fieldAfter: []testUnitBigQueryDataCustomDiffField{{
+			mode:        "REQUIRED",
+			description: "someValue",
+		},
+			{
+				mode:        "REQUIRED",
+				description: "some other value",
+			}},
+		shouldForceNew: false,
+	},
+	{
+		name: "arraySizeDecreases",
+		fieldBefore: []testUnitBigQueryDataCustomDiffField{{
+			mode:        "REQUIRED",
+			description: "someValue",
+		},
+			{
+				mode:        "REQUIRED",
+				description: "someValue",
+			}},
+		fieldAfter: []testUnitBigQueryDataCustomDiffField{{
+			mode:        "REQUIRED",
+			description: "someValue",
+		}},
+		shouldForceNew: true,
 	},
 }
 
@@ -715,6 +903,25 @@ func testAccCheckBigQueryTableDestroyProducer(t *testing.T) func(s *terraform.St
 			}
 		}
 
+		return nil
+	}
+}
+
+func testAccCheckBigQueryTableFields(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_bigquery_table" {
+				continue
+			}
+			config := googleProviderConfig(t)
+			bqt, err := config.NewBigQueryClient(config.userAgent).Tables.Get(config.Project, rs.Primary.Attributes["dataset_id"], rs.Primary.Attributes["table_id"]).Do()
+			if err != nil {
+				return err
+			}
+			if bqt.Schema.Fields[1].Description != "testegg" {
+				t.Errorf("schema field not set to testegg for fields scenario")
+			}
+		}
 		return nil
 	}
 }
@@ -1366,6 +1573,37 @@ resource "google_bigquery_table" "test" {
         type        = "TIMESTAMP"
       },
     ])
+}
+`, datasetID, tableID)
+}
+
+func testAccBigQueryTable_fields(datasetID, tableID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+
+  friendly_name = "bigquerytest"
+  labels = {
+    "terrafrom_managed" = "true"
+	}
+
+	field {
+		description = "Time snapshot was taken, in Epoch milliseconds. Same across all rows and all tables in the snapshot, and uniquely defines a particular snapshot."
+		name        = "snapshot_timestamp"
+		mode        = "NULLABLE"
+		type        = "INTEGER"
+	}
+
+	field {
+		description = "testegg"
+		name        = "creation_time"
+		type        = "TIMESTAMP"
+	}
 }
 `, datasetID, tableID)
 }
