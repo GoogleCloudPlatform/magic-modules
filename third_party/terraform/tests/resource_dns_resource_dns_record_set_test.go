@@ -63,7 +63,7 @@ func TestAccDNSResourceRecordSet_basic(t *testing.T) {
 	})
 }
 
-func TestAccDNSResourceRecordSet_modify(t *testing.T) {
+func TestAccDNSResourceRecordSet_Update(t *testing.T) {
 	t.Parallel()
 
 	zoneName := fmt.Sprintf("dnszone-test-%s", randString(t, 10))
