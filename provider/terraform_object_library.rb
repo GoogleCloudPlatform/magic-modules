@@ -173,20 +173,20 @@ module Provider
     # IAM policies separately from the resource itself
     # Docs are generated for the terraform provider, not here.
     def generate_iam_policy(pwd, data, generate_code, _generate_docs)
-      if generate_code
-        target_folder = File.join(data.output_folder, 'google')
-        name = data.object.filename_override || data.object.name.underscore
-        product_name = data.product.name.underscore
+      return unless generate_code
 
-        FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
-        data.generate(pwd,
-                      'templates/terraform/iam_policy.go.erb',
-                      "#{target_folder}/iam_#{product_name}_#{name}.go",
-                      self)
+      target_folder = File.join(data.output_folder, 'google')
+      name = data.object.filename_override || data.object.name.underscore
+      product_name = data.product.name.underscore
 
-        # Don't generate tests - we can rely on the terraform provider
-        # to test these.
-      end
+      FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
+      data.generate(pwd,
+                    'templates/terraform/iam_policy.go.erb',
+                    "#{target_folder}/iam_#{product_name}_#{name}.go",
+                    self)
+
+      # Don't generate tests - we can rely on the terraform provider
+      # to test these.
     end
 
     def generate_resource_sweepers(pwd, data) end
