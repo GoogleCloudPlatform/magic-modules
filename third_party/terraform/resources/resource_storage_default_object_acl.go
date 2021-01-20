@@ -15,9 +15,10 @@ func resourceStorageDefaultObjectAcl() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"bucket": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: `The name of the bucket it applies to.`,
 			},
 
 			"role_entity": {
@@ -28,6 +29,7 @@ func resourceStorageDefaultObjectAcl() *schema.Resource {
 					Type:         schema.TypeString,
 					ValidateFunc: validateRoleEntityPair,
 				},
+				Description: `List of role/entity pairs in the form ROLE:entity. See GCS Object ACL documentation for more details. Omitting the field is the same as providing an empty list.`,
 			},
 		},
 		UseJSONNumber: true,
