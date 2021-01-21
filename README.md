@@ -53,6 +53,13 @@ To get started, you'll need:
 
 ### Preparing Magic Modules / One-time setup
 
+**Important:**
+Compiling Magic Modules can be done directly from the `mmv1` directory within this repository.
+In the future we will add hybrid generation with multiple generators. All the information below
+pertains only to the contents of the `mmv1` directory, and commands should be executed from
+that directory.
+
+
 To get started right away, use the bootstrap script with:
 
 ```bash
