@@ -76,6 +76,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       amount.lastPeriodAmount: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bool_to_object.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/object_to_bool.go.erb'
+      amount.specifiedAmount.currencyCode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
