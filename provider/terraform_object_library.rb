@@ -163,7 +163,13 @@ module Provider
                        ['google/mutexkv.go',
                         'third_party/terraform/utils/mutexkv.go'],
                        ['google/hashcode.go',
-                        'third_party/terraform/utils/hashcode.go']
+                        'third_party/terraform/utils/hashcode.go'],
+                       ['google/iam_organization.go',
+                        'third_party/terraform/utils/iam_organization.go'],
+                       ['google/iam_folder.go',
+                        'third_party/terraform/utils/iam_folder.go'],
+                       ['google/iam_project.go',
+                        'third_party/terraform/utils/iam_project.go'],
                      ])
     end
 
