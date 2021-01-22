@@ -68,6 +68,9 @@ clone_repo
 git config --local user.name "Modular Magician"
 git config --local user.email "magic-modules@google.com"
 
+# MMv1 now lives inside a sub-folder
+pushd mmv1
+
 if [ "$COMMAND" == "head" ]; then
     BRANCH=auto-pr-$REFERENCE
     COMMIT_MESSAGE="New generated code for MM PR $REFERENCE."
@@ -104,6 +107,8 @@ else
         bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION
     fi
 fi
+
+popd
 
 pushd $LOCAL_PATH
 
