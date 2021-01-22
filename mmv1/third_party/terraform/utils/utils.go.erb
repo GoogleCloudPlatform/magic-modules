@@ -29,6 +29,7 @@ type TerraformResourceData interface {
 	SetId(string)
 	Id() string
 	GetProviderMeta(interface{}) error
+	Timeout(key string) time.Duration
 }
 
 type TerraformResourceDiff interface {
