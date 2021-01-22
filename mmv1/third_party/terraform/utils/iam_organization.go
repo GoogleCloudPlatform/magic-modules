@@ -30,7 +30,7 @@ func NewOrganizationIamUpdater(d TerraformResourceData, config *Config) (Resourc
 	}, nil
 }
 
-func OrgIdParseFunc(d TerraformResourceData, _ *Config) error {
+func OrgIdParseFunc(d *schema.ResourceData, _ *Config) error {
 	if err := d.Set("org_id", d.Id()); err != nil {
 		return fmt.Errorf("Error setting org_id: %s", err)
 	}
