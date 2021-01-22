@@ -1,0 +1,8 @@
+- type: CUSTOM_NAME
+  field: policy
+  details:
+    name: parent
+- type: NO_SWEEPER
+- type: CUSTOM_IMPORT_FUNCTION
+  details:
+    function: servicePerimeterImport

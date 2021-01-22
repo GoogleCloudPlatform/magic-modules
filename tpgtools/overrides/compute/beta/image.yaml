@@ -1,0 +1,19 @@
+- type: CUSTOM_NAME
+  field: license
+  details:
+    name: licenses
+- type: CUSTOM_NAME
+  field: guest_os_feature
+  details:
+    name: guest_os_features
+- type: IGNORE_READ
+  field: raw_disk
+- type: CUSTOM_NAME
+  field: raw_disk.sha1
+  details:
+    name: raw_disk.sha1Checksum
+- type: CUSTOM_NAME
+  field: guest_os_features.type
+  details:
+    name: guest_os_features
+

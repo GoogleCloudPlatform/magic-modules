@@ -1,0 +1,14 @@
+- type: CUSTOM_NAME
+  field: id
+  details:
+    name: certificate_id
+- type: EXCLUDE
+  field: subject_alternative_names
+- type: EXCLUDE
+  field: expire_time
+- type: EXCLUDE
+  field: type
+- type: NAME_PREFIX
+  field: name
+- type: COLLAPSED_OBJECT
+  field: self_managed

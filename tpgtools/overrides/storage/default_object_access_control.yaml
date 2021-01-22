@@ -1,0 +1,5 @@
+- type: DIFF_SUPPRESS_FUNC
+  field: bucket
+  details:
+    diffsuppressfunc: compareSelfLinkOrResourceName
+- type: NO_SWEEPER

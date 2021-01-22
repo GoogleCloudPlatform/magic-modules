@@ -1,0 +1,4 @@
+- type: DIFF_SUPPRESS_FUNC
+  field: parent_name
+  details:
+    diffsuppressfunc: compareSelfLinkRelativePaths

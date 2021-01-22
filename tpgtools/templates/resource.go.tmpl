@@ -1,0 +1,554 @@
+package google
+
+import(
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+{{- if $.CustomizeDiff }}
+	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
+{{- end }}
+{{- range $pkg := $.AdditionalFileImports }}
+  "{{ $pkg }}"
+{{- end }}
+
+	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
+	{{$.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$.DCLPackage}}"
+
+)
+
+func resource{{$.PathType}}() *schema.Resource {
+	return &schema.Resource{
+		Create: resource{{$.PathType}}Create,
+		Read:   resource{{$.PathType}}Read,
+{{- if $.Updatable }}
+		Update: resource{{$.PathType}}Update,
+{{- end }}
+		Delete: resource{{$.PathType}}Delete,
+
+		Importer: &schema.ResourceImporter{
+			State: resource{{$.PathType}}Import,
+		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout({{$.InsertTimeoutMinutes}} * time.Minute),
+{{- if $.Updatable }}
+			Update: schema.DefaultTimeout({{$.UpdateTimeoutMinutes}} * time.Minute),
+{{- end }}
+			Delete: schema.DefaultTimeout({{$.DeleteTimeoutMinutes}} * time.Minute),
+		},
+
+{{- if $.CustomizeDiff }}
+		CustomizeDiff: customdiff.All(
+ {{- range $cdf := $.CustomizeDiff }}
+			{{$cdf }},
+ {{- end }}
+		),
+{{- end }}
+
+		Schema: map[string]*schema.Schema{
+{{- range $p := $.SchemaProperties }}
+			"{{$p.Name}}": {
+				Type: schema.{{$p.Type}},
+	{{- if $p.Required }}
+				Required: true,
+	{{- end }}
+	{{- if $p.Computed }}
+				Computed: true,
+	{{- end }}
+	{{- if $p.Optional }}
+				Optional: true,
+	{{- end }}
+	{{- if $p.ForceNew }}
+				ForceNew: true,
+	{{- end }}
+	{{- if $p.Sensitive}}
+				Sensitive: true,
+	{{- end }}
+	{{- if $p.DiffSuppressFunc }}
+				DiffSuppressFunc: {{$p.DiffSuppressFunc}},
+	{{- end }}
+				Description: `{{/* TODO fix formatting for $p.Description */}}`,
+	{{- if $p.MaxItems }}
+				MaxItems: {{$p.MaxItems}},
+	{{- end }}
+	{{- if $p.Elem }}
+				Elem: {{$p.Elem}},
+	{{- end }}
+	{{- if $p.Default }}
+				Default: {{$p.Default}},
+	{{- end }}
+	{{- if $p.ConflictsWith }}
+				ConflictsWith: {{$p.ConflictsWith}},
+	{{- end }}
+	{{- if $p.ValidateFunc }}
+				ValidateFunc: {{$p.ValidateFunc}},
+	{{- end }}
+	{{- if $p.SetHashFunc }}
+				Set: {{$p.SetHashFunc}},
+	{{- end }}
+	{{- if $p.ConfigMode }}
+				ConfigMode: {{$p.ConfigMode}},
+	{{- end }}
+	{{- if $p.Removed }}
+				Removed: "{{$p.Removed}}",
+	{{- end }}
+	{{- if $p.Deprecated }}
+				Deprecated: "{{$p.Deprecated}}",
+	{{- end }}
+			},
+{{ end }}
+		},
+	}
+}
+
+{{ range $v := .Objects }}
+	{{ if $v.ShouldGenerateNestedSchema }}
+func {{$.PathType}}{{$v.PackagePath}}Schema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+	{{- range $p := $v.Properties }}
+			"{{$p.Name}}": {
+				Type: schema.{{$p.Type}},
+		{{- if $p.Required }}
+				Required: true,
+		{{- end }}
+		{{- if $p.Computed }}
+					Computed: true,
+		{{- end }}
+		{{- if $p.Optional }}
+					Optional: true,
+		{{- end }}
+		{{- if $p.ForceNew }}
+					ForceNew: true,
+		{{- end }}
+		{{- if $p.Sensitive }}
+					Sensitive: true,
+		{{- end }}
+		{{- if $p.DiffSuppressFunc }}
+					DiffSuppressFunc: {{$p.DiffSuppressFunc}},
+		{{- end }}
+					Description: `{{/* TODO fix formatting for $p.Description */}}`,
+		{{- if $p.MaxItems }}
+					MaxItems: {{$p.MaxItems}},
+		{{- end }}
+		{{- if $p.Elem }}
+					Elem: {{$p.Elem}},
+		{{- end }}
+		{{- if $p.Default }}
+					Default: {{$p.Default}},
+		{{- end }}
+		{{- if $p.ConflictsWith }}
+					ConflictsWith: {{$p.ConflictsWith}},
+		{{- end }}
+		{{- if $p.ValidateFunc }}
+					ValidateFunc: {{$p.ValidateFunc}},
+		{{- end }}
+		{{- if $p.SetHashFunc }}
+					Set: {{$p.SetHashFunc}},
+		{{- end }}
+		{{- if $p.ConfigMode }}
+					ConfigMode: {{$p.ConfigMode}},
+		{{- end }}
+		{{- if $p.Removed }}
+					Removed: "{{$p.Removed}}",
+		{{- end }}
+		{{- if $p.Deprecated }}
+					Deprecated: "{{$p.Deprecated}}",
+		{{- end }}
+				},
+	{{ end }}
+		},
+	}
+}
+	{{ end -}}
+{{ end }}
+
+func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+
+{{- range $v := .Properties }}
+	{{- if and ($v.IdentityGetter) ($v.Settable) }}
+	{{$v.Name}}, err := {{$v.IdentityGetter}}
+	if err != nil {
+		return err
+	}
+	{{- end -}}
+{{ end }}
+
+	obj := &{{$.Package}}.{{$.Type}}{
+{{- range $v := .Properties }}
+	{{- if and ($v.Settable) ($v.StateGetter) }}
+	{{$v.PackageName}}: {{$v.StateGetter}},
+	{{- end -}}
+{{ end }}
+	}
+
+{{- if $.Mutex }}
+	lockName, err := {{ $.IdFunction }}(d, config, "{{$.Mutex}}")
+	if err != nil {
+		return err
+	}
+	mutexKV.Lock(lockName)
+	defer mutexKV.Unlock(lockName)
+{{ end }}
+
+{{ if $.PreCreateFunction }}
+	if err := {{$.PreCreateFunction}}(d, config, obj); err != nil {
+		return fmt.Errorf("error encountered in pre-create: %v", err)
+	}
+{{ end }}
+
+	id, err := {{ $.IdFunction }}(d, config, "{{$.ID}}")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+
+{{- if $.CustomCreateDirectiveFunction }}
+  createDirective := {{ $.CustomCreateDirectiveFunction }}(obj)
+{{- else }}
+  createDirective := CreateDirective
+{{- end }}
+	res, err := config.client{{$.PackageType}}DCL.Apply{{$.Type}}(context.Background(), obj, createDirective...)
+	if err != nil {
+		// The resource didn't actually create
+		d.SetId("")
+		return fmt.Errorf("Error creating {{$.Type}}: %s", err)
+	}
+
+	log.Printf("[DEBUG] Finished creating {{$.Type}} %q: %#v", d.Id(), res)
+
+{{ if $.HasServerGeneratedName }}
+  {{ range $v := .Properties -}}
+	  {{- if ($v.IsServerGeneratedName) }}
+	if err = {{$v.StateSetter}}; err != nil {
+		return fmt.Errorf("error setting {{$v.Name}} in state: %s", err)
+	}
+	  {{- end -}}
+  {{- end }}
+  // Id has a server-generated value, set again after creation
+	id, err = {{ $.IdFunction }}(d, config, "{{$.ID}}")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+{{ end }}
+
+{{ if $.PostCreateFunction }}
+	if err := {{$.PostCreateFunction}}(d, config, res); err != nil {
+		return fmt.Errorf("error encountered in post-create: %v", err)
+	}
+{{ end }}
+
+	return resource{{$.PathType}}Read(d, meta)
+}
+
+func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+
+{{- range $v := .Properties }}
+	{{- if $v.IdentityGetter }}
+	{{$v.Name}}, err := {{$v.IdentityGetter}}
+	if err != nil {
+		return err
+	}
+	{{- end -}}
+{{ end }}
+
+	obj := &{{$.Package}}.{{$.Type}}{
+{{- range $v := .Properties }}
+	{{- if ($v.StateGetter) }}
+	{{$v.PackageName}}: {{$v.StateGetter}},
+	{{- end -}}
+{{ end }}
+	}
+
+	res, err := config.client{{$.PackageType}}DCL.Get{{$.Type}}(context.Background(), obj)
+	if err != nil {
+		// Resource not found
+		d.SetId("")
+		return err
+	}
+
+{{ range $v := .Properties -}}
+	{{- if ($v.StateSetter) }}
+	if err = {{$v.StateSetter}}; err != nil {
+		return fmt.Errorf("error setting {{$v.Name}} in state: %s", err)
+	}
+	{{- end -}}
+{{- end }}
+
+	return nil
+}
+
+{{- if $.Updatable }}
+func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+
+{{- range $v := .Properties }}
+	{{- if and ($v.IdentityGetter) ($v.Settable) }}
+	{{$v.Name}}, err := {{$v.IdentityGetter}}
+	if err != nil {
+		return err
+	}
+	{{- end -}}
+{{ end }}
+
+	obj := &{{$.Package}}.{{$.Type}}{
+{{- range $v := .Properties }}
+	{{- if ($v.StateGetter) }}
+	{{$v.PackageName}}: {{$v.StateGetter}},
+	{{- end -}}
+{{ end }}
+	}
+
+{{- if $.StateHint }}
+  // Construct state hint from old values
+  old := &{{$.Package}}.{{$.Type}}{
+  {{- range $v := .Properties }}
+    {{- if ($v.StateGetter) }}
+    {{$v.PackageName}}: {{$v.ChangeStateGetter}},
+    {{- end }}
+  {{- end }}
+  }
+{{- end }}
+
+{{- if $.Mutex }}
+	lockName, err := {{ $.IdFunction }}(d, config, "{{$.Mutex}}")
+	if err != nil {
+		return err
+	}
+	mutexKV.Lock(lockName)
+	defer mutexKV.Unlock(lockName)
+
+{{ end }}
+	directive := UpdateDirective
+	{{- if $.StateHint }}
+	directive = append(UpdateDirective, dcl.WithStateHint(old))
+	{{- end }}
+	res, err := config.client{{$.PackageType}}DCL.Apply{{$.Type}}(context.Background(), obj, directive...)
+	if err != nil {
+		return fmt.Errorf("Error updating {{$.Type}}: %s", err)
+	}
+
+	log.Printf("[DEBUG] Finished creating {{$.Type}} %q: %#v", d.Id(), res)
+
+	return resource{{$.PathType}}Read(d, meta)
+}
+{{- end }}
+
+func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+
+{{- range $v := .Properties }}
+	{{- if $v.IdentityGetter }}
+	{{$v.Name}}, err := {{$v.IdentityGetter}}
+	if err != nil {
+		return err
+	}
+	{{- end -}}
+{{ end }}
+
+	obj := &{{$.Package}}.{{$.Type}}{
+{{- range $v := .Properties }}
+	{{- if ($v.StateGetter) }}
+	{{$v.PackageName}}: {{$v.StateGetter}},
+	{{- end -}}
+{{ end }}
+	}
+
+{{- if $.Mutex }}
+	lockName, err := {{ $.IdFunction }}(d, config, "{{$.Mutex}}")
+	if err != nil {
+		return err
+	}
+	mutexKV.Lock(lockName)
+	defer mutexKV.Unlock(lockName)
+
+{{ end }}
+{{ if $.PreDeleteFunction }}
+	if err := {{$.PreDeleteFunction}}(d, config, obj); err != nil {
+		return fmt.Errorf("error encountered in pre-delete: %v", err)
+	}
+{{ end }}
+
+{{- if $.SkipDeleteFunction }}
+  skip, err := {{$.SkipDeleteFunction}}(config, obj)
+  if err != nil {
+    return fmt.Errorf("error encountered in skip-delete: %v", err)
+  }
+  if skip {
+    return nil
+  }
+{{- end}}
+
+	log.Printf("[DEBUG] Deleting {{$.Type}} %q", d.Id())
+	if err := config.client{{$.PackageType}}DCL.Delete{{$.Type}}(context.Background(), obj); err != nil {
+		return fmt.Errorf("Error deleting {{$.Type}}: %s", err)
+	}
+
+	log.Printf("[DEBUG] Finished deleting {{$.Type}} %q", d.Id())
+	return nil
+}
+
+func resource{{$.PathType}}Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	config := meta.(*Config)
+{{ if $.CustomImportFunction }}
+	if err := {{$.CustomImportFunction}}(d, config); err != nil {
+		return nil, fmt.Errorf("error encountered in import: %v", err)
+	}
+{{ else -}}
+	if err := parseImportId([]string{
+	{{- range $format := $.ImportFormats }}
+	"{{patternToRegex $format}}",
+	{{- end }}
+	}, d, config); err != nil {
+		return nil, err
+	}
+
+	// Replace import id for the resource id
+	id, err := {{ $.IdFunction }}(d, config, "{{$.ID}}")
+	if err != nil {
+		return nil, fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+
+	{{- range $v := .Properties }}
+		{{- if and (not $v.StateSetter) ($v.Default) }}
+	d.Set("{{$v.Name}}", {{$v.Default}})
+		{{- end -}}
+	{{ end }}
+
+{{ end }}
+	return []*schema.ResourceData{d}, nil
+}
+
+{{ range $v := .Objects -}}
+	{{ if $v.Settable -}}
+		{{ if $v.Collapsed -}}
+func expand{{$.PathType}}{{$v.PackagePath}}Collapsed(d *schema.ResourceData) *{{$.Package}}.{{$.Type}}{{$v.PackagePath}} {
+	collapsed := {{$.Package}}.{{$.Type}}{{$v.PackagePath}}{
+			{{- range $p := $v.Properties }}
+				{{- if and ($p.Settable) ($p.StateGetter) }}
+		{{$p.PackageName}}: {{$p.StateGetter}},
+				{{- end -}}
+			{{ end }}
+	}
+	// Return nil if empty
+	if ({{$.Package}}.{{$.Type}}{{$v.PackagePath}}{}) == collapsed {
+		return nil
+	}
+	return &collapsed
+}
+		{{ else -}}
+
+		{{ if $v.IsArray -}}
+func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.{{$.Type}}{{$v.PackagePath}} {
+	if o == nil {
+		return nil
+	}
+
+			{{ if $v.IsSet -}}
+	o = o.(*schema.Set).List()
+			{{- end }}
+
+	objs := o.([]interface{})
+	if len(objs) == 0 {
+		return nil
+	}
+
+	items := make([]{{$.Package}}.{{$.Type}}{{$v.PackagePath}}, 0, len(objs))
+	for _, item := range objs {
+		i := expand{{$.PathType}}{{$v.PackagePath}}(item)
+		items = append(items, *i)
+	}
+
+	return items
+}
+		{{- end }}
+
+func expand{{$.PathType}}{{$v.PackagePath}}(o interface{}) *{{$.Package}}.{{$.Type}}{{$v.PackagePath}} {
+	if o == nil {
+		return nil
+	}
+	{{ if $v.IsObject -}}
+	objArr := o.([]interface{})
+	if len(objArr) == 0 {
+		return nil
+	}
+	obj := objArr[0].(map[string]interface{})
+	{{- else }}
+	obj := o.(map[string]interface{})
+	{{- end }}
+	return &{{$.Package}}.{{$.Type}}{{$v.PackagePath}}{
+	{{- range $p := $v.Properties }}
+		{{- if and ($p.Settable) ($p.ExpandGetter) }}
+		{{$p.PackageName}}: {{$p.ExpandGetter}},
+		{{- end -}}
+	{{ end }}
+	}
+}
+	{{- end }}
+{{- end }}
+
+	{{ if $v.IsArray -}}
+func flatten{{$.PathType}}{{$v.PackagePath}}Array(objs []{{$.Package}}.{{$.Type}}{{$v.PackagePath}}) []interface{} {
+	if objs == nil {
+		return nil
+	}
+
+	items := []interface{}{}
+	for _, item := range objs {
+		i := flatten{{$.PathType}}{{$v.PackagePath}}(&item)
+		items = append(items, i)
+	}
+
+	return items
+}
+	{{- end }}
+
+func flatten{{$.PathType}}{{$v.PackagePath}}(obj *{{$.Package}}.{{$.Type}}{{$v.PackagePath}}) interface{} {
+	if obj == nil {
+		return nil
+	}
+	transformed := map[string]interface{}{
+{{- range $p := $v.Properties }}
+	{{- if ($p.FlattenGetter) }}
+		"{{$p.Name}}": {{$p.FlattenGetter}},
+	{{- end -}}
+{{ end }}
+	}
+{{ if $v.IsObject }}
+	return []interface{}{transformed}
+{{ else }}
+	return transformed
+{{ end }}
+}
+{{ end -}}
+
+{{ range $v := .EnumArrays -}}
+func flatten{{$.PathType}}{{$v.PackagePath}}Array(obj []{{$.Package}}.{{$.Type}}{{$v.PackagePath}}Enum) interface{} {
+	if obj == nil {
+		return nil
+	}
+	items := []string{}
+	for _, item := range obj {
+		items = append(items, string(item))
+	}
+	return items
+}
+
+func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.{{$.Type}}{{$v.PackagePath}}Enum {
+	objs := o.([]interface{})
+	items := make([]{{$.Package}}.{{$.Type}}{{$v.PackagePath}}Enum, 0, len(objs))
+	for _, item := range objs {
+		i := {{$.Package}}.{{$.Type}}{{$v.PackagePath}}EnumRef(item.(string))
+		items = append(items, *i)
+	}
+  return items
+}
+{{ end }}
+
