@@ -34,6 +34,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       zones: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         is_set: true
+      authorizedNetwork: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true  
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       parameters: !ruby/object:Overrides::Terraform::PropertyOverride
