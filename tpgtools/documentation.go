@@ -1,0 +1,104 @@
+package main
+
+import (
+	"bytes"
+	"fmt"
+	"io/ioutil"
+	"path"
+	"sort"
+	"text/template"
+
+	"github.com/golang/glog"
+)
+
+// Merges beta and GA resources for doc generation for a particular resource.
+func mergeResource(res *Resource, resources map[Version][]*Resource, version *Version) *Resource {
+	resourceAcrossVersions := make(map[Version]*Resource)
+	for v, resList := range resources {
+		for _, r := range resList {
+			// Name is not unique, TerraformName must be
+			if r.TerraformName() == res.TerraformName() {
+				resourceAcrossVersions[v] = r
+			}
+		}
+	}
+	ga, gaExists := resourceAcrossVersions[GA_VERSION]
+	beta, betaExists := resourceAcrossVersions[BETA_VERSION]
+	if gaExists {
+		if betaExists {
+			return mergeResources(ga, beta)
+		}
+		return ga
+	}
+	beta.Description = "Beta only"
+	return beta
+}
+
+func mergeResources(ga, beta *Resource) *Resource {
+	beta.Properties = mergeProperties(ga.Properties, beta.Properties)
+
+	return beta
+}
+
+// Marks any sub properties as beta only
+func mergeProperties(ga, beta []Property) []Property {
+	gaProps := make(map[string]Property)
+	for _, p := range ga {
+		gaProps[p.title] = p
+	}
+	betaProps := make(map[string]Property)
+	for _, p := range beta {
+		betaProps[p.title] = p
+	}
+	inOrder := make([]string, 0)
+	for k, _ := range betaProps {
+		inOrder = append(inOrder, k)
+	}
+	sort.Strings(inOrder)
+	modifiedProps := make([]Property, 0)
+	for _, name := range inOrder {
+		v := betaProps[name]
+		if gaProp, ok := gaProps[name]; !ok {
+			v.Description = fmt.Sprintf("(Beta only) %s", v.Description)
+		} else if len(v.Properties) != 0 {
+			// Look for sub-properties that might be beta only.
+			// If the top-level property is beta only, sub-properties don't need to be marked
+			v.Properties = mergeProperties(gaProp.Properties, v.Properties)
+		}
+		modifiedProps = append(modifiedProps, v)
+	}
+
+	return modifiedProps
+}
+
+func generateResourceWebsiteFile(res *Resource, resources map[Version][]*Resource, version *Version) {
+	res = mergeResource(res, resources, version)
+	// Generate resource website file
+	tmplInput := ResourceInput{
+		Resource: *res,
+	}
+
+	tmpl, err := template.New("resource.html.markdown.tmpl").Funcs(TemplateFunctions).ParseFiles(
+		"templates/resource.html.markdown.tmpl",
+	)
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	contents := bytes.Buffer{}
+	if err = tmpl.ExecuteTemplate(&contents, "resource.html.markdown.tmpl", tmplInput); err != nil {
+		glog.Exit(err)
+	}
+
+	source := contents.Bytes()
+
+	if oPath == nil || *oPath == "" {
+		fmt.Printf("%v\n", string(source))
+	} else {
+		outname := fmt.Sprintf("%s_%s.html.markdown", res.Package, res.Name())
+		err := ioutil.WriteFile(path.Join(*oPath, "website/docs/r", outname), source, 0644)
+		if err != nil {
+			glog.Exit(err)
+		}
+	}
+}
