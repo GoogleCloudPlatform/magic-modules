@@ -157,7 +157,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 			// Assume for now that all fields are exact snake_case versions of the API fields.
 			// This won't necessarily always be true, but it serves as a good approximation and
 			// can be adjusted later as we discover issues.
-			instance.ForceSendFields = append(instance.ForceSendFields, PascalCase(f))
+			instance.ForceSendFields = append(instance.ForceSendFields, SnakeToPascalCase(f))
 		}
 	}
 

@@ -598,10 +598,10 @@ func TestConflictError(t *testing.T) {
 	// skipping negative tests as other cases may be added later.
 }
 
-func TestPascalCase(t *testing.T) {
+func TestSnakeToPascalCase(t *testing.T) {
 	input := "boot_disk"
 	expected := "BootDisk"
-	actual := PascalCase(input)
+	actual := SnakeToPascalCase(input)
 
 	if actual != expected {
 		t.Fatalf("(%s) did not match expected value: %s", actual, expected)
