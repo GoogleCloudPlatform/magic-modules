@@ -784,7 +784,6 @@ func TestAccContainerCluster_withPrivateClusterConfigMissingCidrBlock(t *testing
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withIntraNodeVisibility(t *testing.T) {
 	t.Parallel()
 
@@ -820,7 +819,6 @@ func TestAccContainerCluster_withIntraNodeVisibility(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerCluster_withVersion(t *testing.T) {
 	t.Parallel()
@@ -2890,6 +2888,7 @@ resource "google_container_cluster" "with_tpu" {
 `, containerNetName, clusterName)
 }
 
+<% end -%>
 func testAccContainerCluster_withIntraNodeVisibility(clusterName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_intranode_visibility" {
@@ -2911,8 +2910,6 @@ resource "google_container_cluster" "with_intranode_visibility" {
 }
 `, clusterName)
 }
-
-<% end -%>
 
 func testAccContainerCluster_withVersion(clusterName string) string {
 	return fmt.Sprintf(`
