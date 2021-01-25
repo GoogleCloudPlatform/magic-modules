@@ -38,11 +38,11 @@ Thumbs.db
 
 final_api.yaml
 # Ansible PR Script
-tools/ansible-pr/templates/*
-!tools/ansible-pr/templates/.keep
+mmv1/tools/ansible-pr/templates/*
+!mmv1/tools/ansible-pr/templates/.keep
 
 # Used by OiCS tutorial
-build/*
+mmv1/build/*
 
 # vscode workspace settings
 .vscode

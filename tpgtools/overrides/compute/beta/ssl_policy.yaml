@@ -1,0 +1,10 @@
+- type: CUSTOM_NAME
+  field: custom_feature
+  details:
+    name: custom_features
+- type: CUSTOM_NAME
+  field: enabled_feature
+  details:
+    name: enabled_features
+- type: EXCLUDE
+  field: id
