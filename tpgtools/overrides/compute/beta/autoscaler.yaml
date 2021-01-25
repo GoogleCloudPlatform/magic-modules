@@ -1,0 +1,74 @@
+# Shared Locational Overrides
+- type: EXCLUDE
+  field: id
+- type: EXCLUDE
+  field: recommended_size
+- type: EXCLUDE
+  field: status
+- type: EXCLUDE
+  field: status_details
+- type: EXCLUDE
+  field: autoscaling_policy.scale_in_control.max_scaled_in_replicas.calculated
+- type: CUSTOM_NAME
+  field: autoscaling_policy.cool_down_period_sec
+  details:
+    name: cooldown_period
+- type: CUSTOM_NAME
+  field: autoscaling_policy.custom_metric_utilizations
+  details:
+    name: metric
+- type: CUSTOM_NAME
+  field: autoscaling_policy.custom_metric_utilizations.metric
+  details:
+    name: name
+- type: CUSTOM_NAME
+  field: autoscaling_policy.custom_metric_utilizations.utilization_target
+  details:
+    name: target
+- type: CUSTOM_NAME
+  field: autoscaling_policy.custom_metric_utilizations.utilization_target_type
+  details:
+    name: type
+- type: CUSTOM_NAME
+  field: autoscaling_policy.max_num_replicas
+  details:
+    name: max_replicas
+- type: CUSTOM_NAME
+  field: autoscaling_policy.min_num_replicas
+  details:
+    name: min_replicas
+- type: CUSTOM_NAME
+  field: autoscaling_policy.scale_in_control
+  details:
+    name: scale_down_control
+- type: CUSTOM_NAME
+  field: autoscaling_policy.scale_in_control.max_scaled_in_replicas
+  details:
+    name: max_scaled_down_replicas
+- type: CUSTOM_NAME
+  field: autoscaling_policy.utilization_target
+  details:
+    name: target
+- type: CUSTOM_NAME
+  field: autoscaling_policy.load_balancing_utilization.utilization_target
+  details:
+    name: target
+- type: CUSTOM_NAME
+  field: autoscaling_policy.cpu_utilization.utilization_target
+  details:
+    name: target
+- type: NO_SWEEPER
+
+# Region Overrides
+- type: EXCLUDE
+  location: region
+  field: zone
+- type: CUSTOM_ID
+  location: region
+  details:
+    id: 'projects/{{project}}/regions/{{region}}/autoscalers/{{name}}'
+
+# Zonal Overrides
+- type: EXCLUDE
+  location: zone
+  field: region

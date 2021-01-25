@@ -1,0 +1,37 @@
+- type: CUSTOM_VALIDATION
+  field: ip_cidr_range
+  details:
+    function: validateIpCidrRange
+- type: CUSTOM_VALIDATION
+  field: name
+  details:
+    function: validateGCPName
+- type: CUSTOM_VALIDATION
+  field: secondary_ip_range.ip_cidr_range
+  details:
+    function: validateIpCidrRange
+- type: CUSTOM_VALIDATION
+  field: secondary_ip_range.range_name
+  details:
+    function: validateGCPName
+- type: CUSTOMIZE_DIFF
+  details:
+    functions:
+    - 'customdiff.ForceNewIfChange("ip_cidr_range", isShrinkageIpCidr)'
+    - 'resourceComputeSubnetworkSecondaryIpRangeSetStyleDiff'
+- type: CUSTOM_CONFIG_MODE
+  field: secondary_ip_range
+  details:
+    mode: schema.SchemaConfigModeAttr
+- type: DEPRECATED
+  field: fingerprint
+  details:
+    message: >-
+      This field is not useful for users, and has been removed as an output.
+- type: REMOVED
+  field: enable_flow_logs
+  details:
+    message: >-
+      This field is being removed in favor of log_config.
+      If log_config is present, flow logs are enabled.
+      Please remove this field.

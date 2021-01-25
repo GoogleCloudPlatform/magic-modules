@@ -1,0 +1,19 @@
+- type: CUSTOM_RESOURCE_NAME
+  details:
+    title: haVpnGateway
+- type: DIFF_SUPPRESS_FUNC
+  field: region
+  details:
+    diffsuppressfunc: compareSelfLinkOrResourceName
+- type: CUSTOM_NAME
+  field: vpn_interface
+  details:
+    name: vpn_interfaces
+- type: EXCLUDE
+  field: id
+- type: EXCLUDE
+  field: labels
+- type: CUSTOM_VALIDATION
+  field: name
+  details:
+    function: validateGCPName

@@ -1,0 +1,25 @@
+- type: CUSTOM_NAME
+  field: license
+  details:
+    name: licenses
+- type: CUSTOM_NAME
+  field: id
+  details:
+    name: snapshot_id
+- type: IGNORE_READ
+  field: zone
+- type: VIRTUAL_FIELD
+  details:
+    name: label_fingerprint
+    type: string
+- type: VIRTUAL_FIELD
+  details:
+    name:   creation_timestamp
+    type:   string
+    output: true
+- type: VIRTUAL_FIELD
+  details:
+    # TODO(rileykarson): Output the link to the disk in this field
+    name:   source_disk_link
+    type:   string
+    output: true
