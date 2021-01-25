@@ -109,6 +109,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       vmImage: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+      shieldedInstanceConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   Location: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
