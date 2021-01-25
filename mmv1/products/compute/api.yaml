@@ -14239,6 +14239,7 @@ objects:
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
         description: The private IPv6 google access type for the VMs in this subnet. 
+        fingerprint_name: 'fingerprint'
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
         resource: 'Region'
