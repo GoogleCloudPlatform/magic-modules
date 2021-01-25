@@ -211,6 +211,14 @@ objects:
             the same project, but you must have the service account user
             permission to use the instance. If not specified,
             the Compute Engine default service account is used.
+      - !ruby/object:Api::Type::Array
+        name: 'serviceAccountScopes'
+        description: |
+            Optional. The URIs of service account scopes to be included in Compute Engine instances.
+            If not specified, the following scopes are defined:
+            - https://www.googleapis.com/auth/cloud-platform
+            - https://www.googleapis.com/auth/userinfo.email
+        item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: 'acceleratorConfig'
         description: |
@@ -235,6 +243,7 @@ objects:
               - NVIDIA_TESLA_T4_VWS
               - NVIDIA_TESLA_P100_VWS
               - NVIDIA_TESLA_P4_VWS
+              - NVIDIA_TESLA_A100
               - TPU_V2
               - TPU_V3
             required: true
@@ -245,6 +254,33 @@ objects:
             required: true
             description: |
               Count of cores of this accelerator.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'shieldedInstanceConfig'
+        description: |
+            A set of Shielded Instance options. Check [Images using supported Shielded VM features]
+            Not all combinations are valid
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enableIntegrityMonitoring'
+            description: |
+              Defines whether the instance has integrity monitoring enabled. Enables monitoring and attestation of the
+              boot integrity of the instance. The attestation is performed against the integrity policy baseline.
+              This baseline is initially derived from the implicitly trusted boot image when the instance is created.
+              Enabled by default.
+            default_value: true
+          - !ruby/object:Api::Type::Boolean
+            name: 'enableSecureBoot'
+            description: |
+              Defines whether the instance has Secure Boot enabled. Secure Boot helps ensure that the system only runs
+              authentic software by verifying the digital signature of all boot components, and halting the boot process
+              if signature verification fails.
+              Disabled by default.
+          - !ruby/object:Api::Type::Boolean
+            name: 'enableVtpm'
+            description: |
+              Defines whether the instance has the vTPM enabled.
+              Enabled by default.
+            default_value: true
       - !ruby/object:Api::Type::String
         name: 'state'
         description: |
@@ -313,11 +349,11 @@ objects:
       - !ruby/object:Api::Type::Boolean
         name: 'noPublicIp'
         description: |
-            no public IP will be assigned to this instance.
+            No public IP will be assigned to this instance.
       - !ruby/object:Api::Type::Boolean
         name: 'noProxyAccess'
         description: |
-            the notebook instance will not register with the proxy..
+            The notebook instance will not register with the proxy..
       - !ruby/object:Api::Type::String
         name: 'network'
         description: |
@@ -335,6 +371,11 @@ objects:
             An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
         update_verb: :PATCH
         update_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}:setLabels'
+      - !ruby/object:Api::Type::Array
+        name: 'tags'
+        description: |
+            The Compute Engine tags to add to runtime.
+        item_type: Api::Type::String
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'metadata'
         description: |

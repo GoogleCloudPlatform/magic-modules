@@ -1,0 +1,17 @@
+- type: CUSTOM_RESOURCE_NAME
+  details:
+    title: trigger
+- type: CUSTOM_NAME
+  details:
+    name: secret
+  field: build.secrets
+- type: CUSTOM_NAME
+  details:
+    name: step
+  field: build.steps
+- type: CUSTOM_NAME
+  details:
+    name: trigger_id
+  field: id
+- type: GENERATE_IF_NOT_SET
+  field: name
