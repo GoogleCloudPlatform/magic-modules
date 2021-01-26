@@ -1,0 +1,44 @@
+AllCops:
+  Exclude:
+    - 'build/**/*'
+    # We do not validate the templates as they will have code that will only be
+    # properly formatted when compiled for the target module. These files should
+    # be checked in their final generated form.
+    - 'products/**/files/*'
+    - 'products/**/examples/**/*'
+    - 'templates/**/*'
+    # TravisCI is installing the bundle deps in that directory.
+    - 'vendor/**/*'
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/ClassLength:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/ModuleLength:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+Naming/MemoizedInstanceVariableName:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Metrics/LineLength:
+  Max: 100
+
+Style/CommandLiteral:
+  EnforcedStyle: percent_x
+
+Metrics/ParameterLists:
+  Enabled: false

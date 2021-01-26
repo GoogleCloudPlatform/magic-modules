@@ -1,0 +1,8 @@
+- type: CUSTOM_NAME
+  field: policy
+  details:
+    name: parent
+- type: CUSTOM_ID
+  details:
+    id: '{{name}}'
+- type: NO_SWEEPER

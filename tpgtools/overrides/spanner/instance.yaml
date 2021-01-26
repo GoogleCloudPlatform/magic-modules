@@ -1,0 +1,6 @@
+- type: CUSTOM_NAME
+  field: node_count
+  details:
+    name: num_nodes
+- type: GENERATE_IF_NOT_SET
+  field: name

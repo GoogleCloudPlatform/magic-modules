@@ -1,0 +1,10 @@
+- type: EXCLUDE
+  field: id
+- type: CUSTOM_STATE_GETTER
+  field: region
+  details:
+    function: expandComputeVpnTunnelRegion(region, d, config)
+- type: CUSTOM_STATE_GETTER
+  field: vpnGatewayInterface
+  details:
+    function: dcl.Int64(int64(d.Get("vpn_gateway_interface").(int)))
