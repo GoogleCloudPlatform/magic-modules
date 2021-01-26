@@ -1,0 +1,26 @@
+- type: CUSTOM_NAME
+  field: tag
+  details:
+    name: tags
+- type: EXCLUDE
+  field: id
+- type: DIFF_SUPPRESS_FUNC
+  field: next_hop_gateway
+  details:
+    diffsuppressfunc: compareSelfLinkOrResourceName
+- type: DIFF_SUPPRESS_FUNC
+  field: next_hop_vpn_tunnel
+  details:
+    diffsuppressfunc: compareSelfLinkOrResourceName
+- type: DIFF_SUPPRESS_FUNC
+  field: network
+  details:
+    diffsuppressfunc: compareSelfLinkOrResourceName
+- type: VIRTUAL_FIELD
+  details:
+    name: next_hop_instance_zone
+    type: string
+- type: CUSTOM_STATE_GETTER
+  field: next_hop_instance
+  details:
+    function: expandComputeRouteNextHopInstance(d.Get("next_hop_instance"), d, config)

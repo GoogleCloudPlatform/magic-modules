@@ -1,0 +1,12 @@
+- type: CUSTOM_NAME
+  field: location
+  details:
+    name: region
+- type: CUSTOM_VALIDATION
+  field: min_throughput
+  details:
+    function: validation.IntBetween(200, 1000)
+- type: CUSTOM_VALIDATION
+  field: max_throughput
+  details:
+    function: validation.IntBetween(200, 1000)

@@ -1,0 +1,9 @@
+- type: CUSTOM_NAME
+  field: id
+  details:
+    name: gateway_id
+- type: CUSTOM_RESOURCE_NAME
+  details:
+    title: vpnGateway
+- type: EXCLUDE
+  field: forwardingRule

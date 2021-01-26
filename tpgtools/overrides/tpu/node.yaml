@@ -1,0 +1,32 @@
+- type: EXCLUDE
+  field: create_time
+- type: EXCLUDE
+  field: health
+- type: EXCLUDE
+  field: health_description
+- type: EXCLUDE
+  field: ip_address
+- type: EXCLUDE
+  field: port
+- type: EXCLUDE
+  field: state
+- type: EXCLUDE
+  field: symptoms
+- type: EXCLUDE
+  field: use_service_networking
+- type: EXCLUDE
+  field: scheduling_config.reserved
+
+- type: CUSTOM_NAME
+  field: location
+  details:
+    name: zone
+
+- type: DIFF_SUPPRESS_FUNC
+  field: scheduling_config
+  details:
+    diffsuppressfunc: compareTpuNodeSchedulingConfig
+- type: DIFF_SUPPRESS_FUNC
+  field: scheduling_config.preemptible
+  details:
+    diffsuppressfunc: compareTpuNodeSchedulingConfig

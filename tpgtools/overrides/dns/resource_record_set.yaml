@@ -1,0 +1,34 @@
+- type: CUSTOM_RESOURCE_NAME
+  details:
+    title: recordSet
+- type: CUSTOM_NAME
+  field: dns_name
+  details:
+    name: name
+- type: CUSTOM_NAME
+  field: dns_type
+  details:
+    name: type
+- type: CUSTOM_NAME
+  field: target
+  details:
+    name: rrdatas
+- type: DIFF_SUPPRESS_FUNC
+  field: target
+  details:
+    diffsuppressfunc: dnsRecordSetRrefsDiffSuppress
+- type: DIFF_SUPPRESS_FUNC
+  field: managed_zone
+  details:
+    diffsuppressfunc: compareSelfLinkOrResourceName
+- type: DIFF_SUPPRESS_FUNC
+  field: target.elem
+  details:
+    diffsuppressfunc: rrefDiffSuppressfunc
+- type: SKIP_DELETE_FUNCTION
+  details:
+    function: rrefSkipDelete
+- type: CUSTOM_CREATE_DIRECTIVE_FUNCTION
+  details:
+    function: rrefCreateDirective
+- type: NO_SWEEPER

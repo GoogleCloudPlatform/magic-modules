@@ -1,0 +1,20 @@
+- type: VIRTUAL_FIELD
+  details:
+    name: force_destroy
+    type: boolean
+- type: PRE_DELETE_FUNCTION
+  details:
+    function: forceDestroyBucketObjects
+- type: CUSTOM_DESCRIPTION
+  field: location
+  details:
+    description: This is a field.
+- type: CUSTOM_DESCRIPTION
+  field: lifecycle.rule.condition.age
+  details:
+    description: This is also a field.
+- type: CUSTOM_NAME
+  field: lifecycle
+  details:
+    name: llifecyle
+- type: NO_SWEEPER
