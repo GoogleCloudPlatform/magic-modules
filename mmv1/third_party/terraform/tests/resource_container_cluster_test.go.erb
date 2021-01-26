@@ -784,7 +784,6 @@ func TestAccContainerCluster_withPrivateClusterConfigMissingCidrBlock(t *testing
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withIntraNodeVisibility(t *testing.T) {
 	t.Parallel()
 
@@ -820,7 +819,6 @@ func TestAccContainerCluster_withIntraNodeVisibility(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerCluster_withVersion(t *testing.T) {
 	t.Parallel()
@@ -1933,7 +1931,6 @@ func TestAccContainerCluster_withDatabaseEncryption(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withAdvancedDatapath(t *testing.T) {
 	t.Parallel()
 
@@ -1955,7 +1952,6 @@ func TestAccContainerCluster_withAdvancedDatapath(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerCluster_withResourceUsageExportConfig(t *testing.T) {
 	t.Parallel()
@@ -2892,6 +2888,7 @@ resource "google_container_cluster" "with_tpu" {
 `, containerNetName, clusterName)
 }
 
+<% end -%>
 func testAccContainerCluster_withIntraNodeVisibility(clusterName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_intranode_visibility" {
@@ -2913,8 +2910,6 @@ resource "google_container_cluster" "with_intranode_visibility" {
 }
 `, clusterName)
 }
-
-<% end -%>
 
 func testAccContainerCluster_withVersion(clusterName string) string {
 	return fmt.Sprintf(`
@@ -4026,10 +4021,10 @@ resource "google_container_cluster" "with_private_cluster" {
 
 <% unless version == 'ga' -%>
   networking_mode = "VPC_NATIVE"
+<% end -%>
   default_snat_status {
     disabled = true
   }
-<% end -%>
   network    = google_compute_network.container_network.name
   subnetwork = google_compute_subnetwork.container_subnetwork.name
 
@@ -4037,11 +4032,9 @@ resource "google_container_cluster" "with_private_cluster" {
     enable_private_endpoint = true
     enable_private_nodes    = true
     master_ipv4_cidr_block  = "10.42.0.0/28"
-<% unless version == 'ga' -%>
     master_global_access_config {
       enabled = true
 	}
-<% end -%>
   }
   master_authorized_networks_config {
   }
@@ -4388,7 +4381,6 @@ resource "google_container_cluster" "primary" {
 `, kmsData.KeyRing.Name, kmsData.CryptoKey.Name, clusterName)
 }
 
-<% unless version == 'ga' -%>
 func testAccContainerCluster_withDatapathProvider(clusterName, datapathProvider string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
@@ -4406,7 +4398,6 @@ resource "google_container_cluster" "primary" {
 }
 `, clusterName, datapathProvider)
 }
-<% end -%>
 
 func testAccContainerCluster_withMasterAuthorizedNetworksDisabled(containerNetName string, clusterName string) string {
 	return fmt.Sprintf(`
