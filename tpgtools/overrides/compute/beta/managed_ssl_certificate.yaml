@@ -1,0 +1,5 @@
+- type: CUSTOM_NAME
+  field: id
+  details:
+    name: certificate_id
+

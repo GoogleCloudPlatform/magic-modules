@@ -1,0 +1,7 @@
+- type: MUTEX
+  details:
+    mutex: google-sql-database-instance-{{project}}-{{instance}}
+- type: CUSTOM_NAME
+  field: name
+  details:
+    name: sha1_fingerprint
