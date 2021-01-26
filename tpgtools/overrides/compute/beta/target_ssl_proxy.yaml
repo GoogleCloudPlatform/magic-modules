@@ -1,0 +1,6 @@
+- type: EXCLUDE
+  field: id
+- type: CUSTOM_NAME
+  field: service
+  details:
+    name: backend_service

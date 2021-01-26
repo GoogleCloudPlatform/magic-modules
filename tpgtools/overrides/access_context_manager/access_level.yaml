@@ -1,0 +1,12 @@
+- type: CUSTOM_NAME
+  field: policy
+  details:
+    name: parent
+- type: CUSTOM_NAME
+  field: basic.conditions.device_policy.require_screenlock
+  details:
+    name: require_screen_lock
+- type: NO_SWEEPER
+- type: CUSTOM_IMPORT_FUNCTION
+  details:
+    function: accessLevelImport

@@ -1,0 +1,2 @@
+- type: EXCLUDE
+  field: cdn_policy.signed_url_key_names
