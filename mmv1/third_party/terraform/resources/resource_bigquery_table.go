@@ -670,6 +670,7 @@ func resourceBigQueryTable() *schema.Resource {
 						"expiration_ms": {
 							Type:        schema.TypeInt,
 							Optional:    true,
+							Computed:    true,
 							Description: `Number of milliseconds for which to keep the storage for a partition.`,
 						},
 
