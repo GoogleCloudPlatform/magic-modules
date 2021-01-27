@@ -1,0 +1,10 @@
+- type: CUSTOM_RESOURCE_NAME
+  details:
+    title: repository
+- type: SET_HASH_FUNC
+  field: pubsub_configs
+  details:
+    function: resourceSourceRepoRepositoryPubSubConfigsHash
+- type: CUSTOM_IMPORT_FUNCTION
+  details:
+    function: sourceRepoImport

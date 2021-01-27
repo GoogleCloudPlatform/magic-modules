@@ -3,7 +3,7 @@
 
 # Magic Modules
 
-<img src="images/magic-modules.svg" alt="Magic Modules Logo" width="300" align="right" />
+<img src="mmv1/images/magic-modules.svg" alt="Magic Modules Logo" width="300" align="right" />
 
 ## Overview
 
@@ -38,7 +38,7 @@ You can try out Magic Modules immediately with Open in Cloud Shell below; if
 you're getting set up on a local workstation, this guide serves as a reference
 to help you get it set up.
 
-[![Open in Cloud Shell](http://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/magic-modules&tutorial=TUTORIAL.md)
+[![Open in Cloud Shell](http://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/magic-modules&tutorial=mmv1/TUTORIAL.md)
 
 ### Requirements
 
@@ -52,6 +52,13 @@ To get started, you'll need:
   * Mac OSX: `ulimit -n 1000`
 
 ### Preparing Magic Modules / One-time setup
+
+**Important:**
+Compiling Magic Modules can be done directly from the `mmv1` directory within this repository.
+In the future we will add hybrid generation with multiple generators. All the information below
+pertains only to the contents of the `mmv1` directory, and commands should be executed from
+that directory.
+
 
 To get started right away, use the bootstrap script with:
 
@@ -129,8 +136,8 @@ Once again, see the Open in Cloud Shell example above for an interactive example
 of making a Magic Modules change; this section will serve as a reference more
 than a specific example.
 
-Magic Modules mirrors the GCP REST API; there are [products](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/api/product.rb)
-such as Compute or Container (GKE) that contains [resources](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/api/resource.rb),
+Magic Modules mirrors the GCP REST API; there are [products](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/mmv1/api/product.rb)
+such as Compute or Container (GKE) that contains [resources](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/mmv1/api/resource.rb),
 [GCP resources](https://cloud.google.com/docs/overview/#gcp_resources) such as
 Compute VM Instances or GKE Clusters.
 
@@ -139,9 +146,9 @@ file named `api.yaml` that contains the resources that make up the API
 definition.
 
 Resources are made up of some metadata like their `"name"` in the API such as
-Address or Instance, some additional metadata (see the fields in [resource.rb](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/api/resource.rb)),
+Address or Instance, some additional metadata (see the fields in [resource.rb](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/mmv1/api/resource.rb)),
 and the meat of a resource, its fields. They're represented by `properties` in
-Magic Modules, an array of [types](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/api/type.rb).
+Magic Modules, an array of [types](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/mmv1/api/type.rb).
 
 Adding a new field to a resource in Magic Modules is often as easy as adding a
 `type` to the `properties` array for the resource. See [this example](https://github.com/GoogleCloudPlatform/magic-modules/pull/1126/files#diff-fb4f76e7d870258668a3beac48bf164c)
