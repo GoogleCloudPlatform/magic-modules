@@ -15,13 +15,13 @@ import (
 	"google.golang.org/api/bigquery/v2"
 )
 
-func sortArrayByName(array []interface{}) {
+func bigQueryTableSortArrayByName(array []interface{}) {
 	sort.Slice(array, func(i, k int) bool {
 		return array[i].(map[string]interface{})["name"].(string) < array[k].(map[string]interface{})["name"].(string)
 	})
 }
 
-func checkNameExists(jsonList []interface{}) error {
+func bigQueryTablecheckNameExists(jsonList []interface{}) error {
 	for _, m := range jsonList {
 		if _, ok := m.(map[string]interface{})["name"]; !ok {
 			return fmt.Errorf("No name in schema %+v", m)
@@ -44,14 +44,14 @@ func jsonCompareWithMapKeyOverride(a, b interface{}, compareMapKeyVal func(key s
 		} else if len(arrayA) != len(arrayB) {
 			return false, nil
 		}
-		if err := checkNameExists(arrayA); err != nil {
+		if err := bigQueryTablecheckNameExists(arrayA); err != nil {
 			return false, err
 		}
-		sortArrayByName(arrayA)
-		if err := checkNameExists(arrayB); err != nil {
+		bigQueryTableSortArrayByName(arrayA)
+		if err := bigQueryTablecheckNameExists(arrayB); err != nil {
 			return false, err
 		}
-		sortArrayByName(arrayB)
+		bigQueryTableSortArrayByName(arrayB)
 		for i := range arrayA {
 			eq, err := jsonCompareWithMapKeyOverride(arrayA[i], arrayB[i], compareMapKeyVal)
 			if err != nil {
@@ -194,14 +194,14 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error)
 			// if not growing not changeable
 			return false, nil
 		}
-		if err := checkNameExists(arrayOld); err != nil {
+		if err := bigQueryTablecheckNameExists(arrayOld); err != nil {
 			return false, err
 		}
-		sortArrayByName(arrayOld)
-		if err := checkNameExists(arrayNew); err != nil {
+		bigQueryTableSortArrayByName(arrayOld)
+		if err := bigQueryTablecheckNameExists(arrayNew); err != nil {
 			return false, err
 		}
-		sortArrayByName(arrayNew)
+		bigQueryTableSortArrayByName(arrayNew)
 		for i := range arrayOld {
 			if isChangable, err :=
 				resourceBigQueryTableSchemaIsChangeable(arrayOld[i], arrayNew[i]); err != nil || !isChangable {
