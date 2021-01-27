@@ -12,17 +12,11 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-// Name/Service Level Objective ID is a query parameter and cannot
-// be given in data
-delete(obj, "sloId")
-Sli := obj["serviceLevelIndicator"].(map[string]interface{})
-if basicSli, ok := Sli["basicSli"].(map[string]interface{}); ok {
-	//Removing the dummy `enabled` attribute
-	if availability, ok := basicSli["availability"]; ok {
-		transAvailability := availability.(map[string]interface{})
-		delete(transAvailability, "enabled")
-		basicSli["availability"] = transAvailability
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+	if v == nil {
+		return nil
 	}
+	transformed := make(map[string]interface{})
+	transformed["enabled"] = true
+	return []interface{}{transformed}
 }
-return obj, nil
-
