@@ -438,13 +438,39 @@ func TestAccBigQueryDataTable_jsonEquivalency(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"etag", "last_modified_time"},
 			},
 			{
-				Config: testAccBigQueryTable_jsonEqUpdate(datasetID, tableID),
+				Config: testAccBigQueryTable_jsonEqModeRemoved(datasetID, tableID),
 			},
 			{
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "last_modified_time"},
+			},
+		},
+	})
+}
+
+func TestAccBigQueryDataTable_canReorderParameters(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// we don't run any checks because the resource will error out if
+				// it attempts to destory/tear down.
+				Config: testAccBigQueryTable_jsonPreventDestroy(datasetID, tableID),
+			},
+			{
+				Config: testAccBigQueryTable_jsonPreventDestroyOrderChanged(datasetID, tableID),
+			},
+			{
+				Config: testAccBigQueryTable_jsonEq(datasetID, tableID),
 			},
 		},
 	})
@@ -1362,7 +1388,7 @@ resource "google_bigquery_table" "test" {
 `, datasetID, tableID)
 }
 
-func testAccBigQueryTable_jsonEqUpdate(datasetID, tableID string) string {
+func testAccBigQueryTable_jsonEqModeRemoved(datasetID, tableID string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "test" {
   dataset_id = "%s"
@@ -1388,6 +1414,78 @@ resource "google_bigquery_table" "test" {
         description = "Timestamp of dataset creation"
         name        = "creation_time"
         type        = "TIMESTAMP"
+      },
+    ])
+}
+`, datasetID, tableID)
+}
+
+func testAccBigQueryTable_jsonPreventDestroy(datasetID, tableID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  table_id   = "%s"
+	dataset_id = google_bigquery_dataset.test.dataset_id
+	lifecycle {
+		prevent_destroy = true
+	}
+
+  friendly_name = "bigquerytest"
+  labels = {
+    "terrafrom_managed" = "true"
+  }
+
+  schema = jsonencode(
+    [
+      {
+        description = "Time snapshot was taken, in Epoch milliseconds. Same across all rows and all tables in the snapshot, and uniquely defines a particular snapshot."
+        name        = "snapshot_timestamp"
+        mode        = "NULLABLE"
+        type        = "INTEGER"
+      },
+      {
+        description = "Timestamp of dataset creation"
+        name        = "creation_time"
+        type        = "TIMESTAMP"
+      },
+    ])
+}
+`, datasetID, tableID)
+}
+
+func testAccBigQueryTable_jsonPreventDestroyOrderChanged(datasetID, tableID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  table_id   = "%s"
+	dataset_id = google_bigquery_dataset.test.dataset_id
+	lifecycle {
+		prevent_destroy = true
+	}
+
+  friendly_name = "bigquerytest"
+  labels = {
+    "terrafrom_managed" = "true"
+  }
+
+  schema = jsonencode(
+    [
+      {
+        description = "Timestamp of dataset creation"
+        name        = "creation_time"
+        type        = "TIMESTAMP"
+			},
+			{
+        description = "Time snapshot was taken, in Epoch milliseconds. Same across all rows and all tables in the snapshot, and uniquely defines a particular snapshot."
+        name        = "snapshot_timestamp"
+        mode        = "NULLABLE"
+        type        = "INTEGER"
       },
     ])
 }
