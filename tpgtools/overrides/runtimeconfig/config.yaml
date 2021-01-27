@@ -1,0 +1,4 @@
+- type: CUSTOM_VALIDATION
+  field: name
+  details:
+    function: validateRegexp("[0-9A-Za-z](?:[_.A-Za-z0-9-]{0,62}[_.A-Za-z0-9])?")

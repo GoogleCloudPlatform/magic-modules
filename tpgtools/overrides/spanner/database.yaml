@@ -1,0 +1,4 @@
+- type: IMPORT_FORMAT
+  details:
+    formats: ["projects/{{project}}/instances/{{instance}}/databases/{{name}}", "instances/{{instance}}/databases/{{name}}", "{{project}}/{{instance}}/{{name}}", "{{instance}}/{{name}}"]
+- type: NO_SWEEPER

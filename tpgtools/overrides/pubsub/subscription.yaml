@@ -1,0 +1,8 @@
+- type: DIFF_SUPPRESS_FUNC
+  field: topic
+  details:
+    diffsuppressfunc: compareSelfLinkOrResourceName
+- type: DIFF_SUPPRESS_FUNC
+  field: expiration_policy.ttl
+  details:
+    diffsuppressfunc: comparePubsubSubscriptionExpirationPolicy

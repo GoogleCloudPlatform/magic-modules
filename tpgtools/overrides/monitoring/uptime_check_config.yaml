@@ -1,0 +1,30 @@
+- type: DIFF_SUPPRESS_FUNC
+  field: resource_group.group_id
+  details:
+    diffsuppressfunc: compareResourceNames
+- type: EXCLUDE
+  field: checker_type
+- type: EXCLUDE
+  field: customer_id
+- type: EXCLUDE
+  field: private_checkers
+- type: EXCLUDE
+  field: project_number
+- type: EXCLUDE
+  field: legacy_check_id
+- type: EXCLUDE
+  field: log_check_failures
+- type: EXCLUDE
+  field: internal_checkers.state
+# TODO (camthornton) was supposed to be removed from TPGB in 3.0.0
+- type: REMOVED
+  field: is_internal
+  details:
+    message: >-
+      This field never worked, and will be removed in 3.0.0.
+# TODO (camthornton) was supposed to be removed from TPGB in 3.0.0
+- type: REMOVED
+  field: internal_checkers
+  details:
+    message: >-
+      This field never worked, and will be removed in 3.0.0.
