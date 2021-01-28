@@ -56,9 +56,7 @@ var (
 <% unless version == "ga" -%>
 		"config.0.database_config",
 		"config.0.web_server_config",
-<% end -%>
-<% unless version == "ga" -%>
-                "config.0.encryption_config",
+    "config.0.encryption_config",
 <% end -%>
 	}
 
@@ -436,8 +434,6 @@ func resourceComposerEnvironment() *schema.Resource {
 								},
 							},
 						},
-<% end -%>
-<% unless version == "ga" -%>
 						"encryption_config": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -724,18 +720,6 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			}
 		}
 <% end -%>
-<% unless version == "ga" -%>
-		if d.HasChange("config.0.encryption_config.0.kms_key_name") {
-			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
-			if config != nil {
-				patchObj.Config.EncryptionConfig = config.EncryptionConfig
-			}
-			err = resourceComposerEnvironmentPatchField("config.encryptionConfig.kmsKeyName", userAgent, patchObj, d, tfConfig)
-			if err != nil {
-				return err
-			}
-		}
-<% end -%>
 	}
 
 	if d.HasChange("labels") {
@@ -860,8 +844,6 @@ func flattenComposerEnvironmentConfig(envCfg *composer.EnvironmentConfig) interf
 <% unless version == "ga" -%>
 	transformed["database_config"] = flattenComposerEnvironmentConfigDatabaseConfig(envCfg.DatabaseConfig)
 	transformed["web_server_config"] = flattenComposerEnvironmentConfigWebServerConfig(envCfg.WebServerConfig)
-<% end -%>
-<% unless version == "ga" -%>
 	transformed["encryption_config"] = flattenComposerEnvironmentConfigEncryptionConfig(envCfg.EncryptionConfig)
 <% end -%>
 
@@ -913,9 +895,7 @@ func flattenComposerEnvironmentConfigWebServerConfig(webServerCfg *composer.WebS
 
 	return []interface{}{transformed}
 }
-<% end -%>
 
-<% unless version == "ga" -%>
 func flattenComposerEnvironmentConfigEncryptionConfig(encryptionCfg *composer.EncryptionConfig) interface{} {
 	if encryptionCfg == nil {
 		return nil
@@ -1056,9 +1036,6 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 	}
 	transformed.WebServerConfig = transformedWebServerConfig
 
-<% end -%>
-
-<% unless version == "ga" -%>
 	transformedEncryptionConfig, err := expandComposerEnvironmentConfigEncryptionConfig(original["encryption_config"], d, config)
 	if err != nil {
 		return nil, err
