@@ -463,7 +463,7 @@ func TestAccBigQueryDataTable_canReorderParameters(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// we don't run any checks because the resource will error out if
-				// it attempts to destory/tear down.
+				// it attempts to destroy/tear down.
 				Config: testAccBigQueryTable_jsonPreventDestroy(datasetID, tableID),
 			},
 			{
