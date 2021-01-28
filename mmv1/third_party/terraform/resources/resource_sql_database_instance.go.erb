@@ -613,25 +613,25 @@ settings.backup_configuration.binary_log_enabled are both set to true.`,
 					},
 				},
 			},
-		},
-		"clone": {
-			Type:        schema.TypeList,
-			Optional:    true,
-			Computed:    false,
-			Description: `Configuration for creating a new instance as a clone of another instance.`,
-			MaxItems:    1,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"source_instance_name": {
-						Type:        schema.TypeString,
-						Required:    true,
-						Description: `The name of the instance from which the point in time should be restored.`,
-					},
-					"point_in_time": {
-						Type:         schema.TypeInt,
-						Required:     true,
-						DiffSuppressFunc: timestampDiffSuppress(time.RFC3339Nano),
-						Description:  `The timestamp of the point in time that should be restored.`,
+			"clone": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    false,
+				Description: `Configuration for creating a new instance as a clone of another instance.`,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"source_instance_name": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: `The name of the instance from which the point in time should be restored.`,
+						},
+						"point_in_time": {
+							Type:             schema.TypeString,
+							Required:     true,
+							DiffSuppressFunc: timestampDiffSuppress(time.RFC3339Nano),
+							Description:  `The timestamp of the point in time that should be restored.`,
+						},
 					},
 				},
 			},
@@ -737,9 +737,9 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 
 	cloneContext, cloneSource := expandCloneContext(d.Get("clone").([]interface{}))
 
-	desiredSettings := expandSqlDatabaseInstanceSettings(d.Get("settings").([]interface{}), !isFirstGen(d))
-
-	if s, ok := d.GetOk("settings"); ok {
+    s, ok := d.GetOk("settings")
+	desiredSettings := expandSqlDatabaseInstanceSettings(s.([]interface{}), !isFirstGen(d))
+	if ok {
 		instance.Settings = desiredSettings
 	}
 
@@ -796,7 +796,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	// If we've created an instance as a clone, we need to update it to set the correct settings
-	if s, ok = d.GetOk("settings"); ok && cloneContext != nil {
+	if s, ok := d.GetOk("settings"); ok && cloneContext != nil {
 		instance := &sqladmin.DatabaseInstance{
 			Settings: desiredSettings,
 		}
@@ -804,14 +804,14 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		instance.Settings.SettingsVersion = int64(_settings["version"].(int))
 		var op *sqladmin.Operation
 		err = retryTimeDuration(func() (rerr error) {
-			op, rerr = config.clientSqlAdmin.Instances.Update(project, name, instance).Do()
+			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Update(project, name, instance).Do()
 			return rerr
 		}, d.Timeout(schema.TimeoutUpdate), isSqlOperationInProgressError)
 		if err != nil {
 			return fmt.Errorf("Error, failed to update instance settings for %s: %s", instance.Name, err)
 		}
 
-		err = sqlAdminOperationWaitTime(config, op, project, "Update Instance", d.Timeout(schema.TimeoutUpdate))
+		err = sqlAdminOperationWaitTime(config, op, project, "Update Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -926,7 +926,7 @@ func expandCloneContext(configured []interface{}) (*sqladmin.CloneContext, strin
 	_cloneConfiguration := configured[0].(map[string]interface{})
 
 	return &sqladmin.CloneContext{
-		PointInTime: _cloneConfiguration["pitr_timestamp_ms"].(string),
+		PointInTime: _cloneConfiguration["point_in_time"].(string),
 	}, _cloneConfiguration["source_instance_name"].(string)
 }
 

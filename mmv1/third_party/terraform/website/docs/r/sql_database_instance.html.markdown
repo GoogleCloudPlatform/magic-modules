@@ -382,8 +382,9 @@ The optional `clone` supports and is required if the settings block is not set:
 
 * `source_instance_name` - (Required) Name of the source instance which will be cloned.
 
-* `pitr_timestamp_ms` -  (Optional) Timestamp of the point in time that should be restored,
-    requires the instance to have point in time recovery enabled.
+* `point_in_time` -  (Optional) The timestamp of the point in time that should be restored.
+
+    A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
 
 The optional `restore_backup_context` block supports:
 **NOTE:** Restoring from a backup is an imperative action and not recommended via Terraform. Adding or modifying this
