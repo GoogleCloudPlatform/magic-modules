@@ -711,16 +711,6 @@ var testUnitBigQueryDataTableJSONEquivalencyTestCases = []testUnitBigQueryDataTa
 		"[{\"name\": \"value2\", \"2\" : \"random\" },{\"name\": \"value1\", \"1\" : \"1\" }]",
 		false,
 	},
-	{
-		"[1,2,3]",
-		"[1,2,3]",
-		true,
-	},
-	{
-		"[1,2,3]",
-		"[1,2,\"banana\"]",
-		false,
-	},
 }
 
 func testAccCheckBigQueryExtData(t *testing.T, expectedQuoteChar string) resource.TestCheckFunc {
