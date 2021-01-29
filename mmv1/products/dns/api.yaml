@@ -463,9 +463,6 @@ objects:
         name: 'name'
         description: For example, www.example.com.
         required: true
-      - !ruby/object:Api::Type::String
-          name: kind
-          description: This is always set to dns#resourceRecordSet  
       - !ruby/object:Api::Type::Enum
         name: 'type'
         values:
