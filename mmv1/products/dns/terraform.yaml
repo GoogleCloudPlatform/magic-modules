@@ -210,7 +210,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
   Project: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
-
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
