@@ -191,10 +191,10 @@ The following arguments are supported:
     region is not supported with Cloud SQL. If you choose not to provide the `region` argument for this resource,
     make sure you understand this.
 
-* `settings` - (Required) The settings to use for the database. The
-    configuration is detailed below.
-
 - - -
+
+* `settings` - (Optional) The settings to use for the database. The
+    configuration is detailed below. Required if `clone` is not set.
 
 * `database_version` - (Optional, Default: `MYSQL_5_6`) The MySQL, PostgreSQL or
 SQL Server (beta) version to use. Supported values include `MYSQL_5_6`,
@@ -238,6 +238,10 @@ in Terraform state, a `terraform destroy` or `terraform apply` command that dele
     cause Terraform to trigger the database to restore from the backup run indicated. The configuration is detailed below.
     **NOTE:** Restoring from a backup is an imperative action and not recommended via Terraform. Adding or modifying this
     block during resource creation/update will trigger the restore action after the resource is created/updated. 
+
+* `clone` - (Optional) The context needed to create this instance as a clone of another instance. When this field is set during 
+    resource creation, Terraform will attempt to clone another instance as indicated in the context. The
+    configuration is detailed below.
 
 The required `settings` block supports:
 

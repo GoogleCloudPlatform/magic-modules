@@ -117,6 +117,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 			"settings": {
 				Type:     schema.TypeList,
 				Optional:     true,
+				Computed:     true,
 				AtLeastOneOf: []string{"settings", "clone"},
 				MaxItems: 1,
 				Elem: &schema.Resource{
@@ -617,6 +618,7 @@ settings.backup_configuration.binary_log_enabled are both set to true.`,
 				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    false,
+				AtLeastOneOf: []string{"settings", "clone"},
 				Description: `Configuration for creating a new instance as a clone of another instance.`,
 				MaxItems:    1,
 				Elem: &schema.Resource{
@@ -654,6 +656,9 @@ func suppressFirstGen(k, old, new string, d *schema.ResourceData) bool {
 // Detects whether a database is 1st Generation by inspecting the tier name
 func isFirstGen(d *schema.ResourceData) bool {
 	settingsList := d.Get("settings").([]interface{})
+	if len(settingsList) == 0 {
+		return false
+	}
 	settings := settingsList[0].(map[string]interface{})
 	tier := settings["tier"].(string)
 
