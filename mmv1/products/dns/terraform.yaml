@@ -199,7 +199,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         min_version: beta
-        name: "dns_resource_dns_record_set_basic"
+        skip_test: true
+        name: "dns_record_set_basic"
         primary_resource_id: "resource-recordset"
         vars:
           zone_name: "my-zone"
