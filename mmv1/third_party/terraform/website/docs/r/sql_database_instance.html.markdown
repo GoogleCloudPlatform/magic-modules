@@ -243,7 +243,7 @@ in Terraform state, a `terraform destroy` or `terraform apply` command that dele
     resource creation, Terraform will attempt to clone another instance as indicated in the context. The
     configuration is detailed below.
 
-The required `settings` block supports:
+The `settings` block supports:
 
 * `tier` - (Required) The machine type to use. See [tiers](https://cloud.google.com/sql/docs/admin-api/v1beta4/tiers)
     for more details and supported versions. Postgres supports only shared-core machine types such as `db-f1-micro`,
@@ -382,7 +382,7 @@ to work, cannot be updated, and supports:
 * `verify_server_certificate` - (Optional) True if the master's common name
     value is checked during the SSL handshake.
 
-The optional `clone` supports and is required if the settings block is not set:
+The optional `clone` block supports:
 
 * `source_instance_name` - (Required) Name of the source instance which will be cloned.
 
