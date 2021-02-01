@@ -76,3 +76,31 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/certificate_authority.go.erb
       pre_delete: templates/terraform/pre_delete/privateca_certificate_authority.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate_authority.go.erb
+
+  Certificate: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    description: |
+      {{description}}
+      
+      ~> **Warning:** Please remember that all resources created during preview (via the terraform-provider-google-beta)
+      will be deleted when CA service transitions to General Availability (GA). Relying on these
+      certificate authorities for production traffic is discouraged.
+    import_format: ["projects/{{project}}/locations/{{location}}/certificateAuthorities/{{certificate_authority}}/certificates/{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "privateca_certificate_config"
+        min_version: "beta"
+        primary_resource_id: "default"
+        vars:
+          certificate_authority_id: "my-certificate-authority" 
+          certificate_name: "my-certificate"    
+      - !ruby/object:Provider::Terraform::Examples
+        name: "privateca_certificate_csr"
+        min_version: "beta"
+        primary_resource_id: "default"
+        vars:
+          certificate_name: "my-certificate"
+          certificate_authority_id: "my-certificate-authority"                 
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate.go.erb
+
