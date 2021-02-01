@@ -142,6 +142,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 						"authorized_gae_applications": {
 							Type:        schema.TypeList,
 							Optional:    true,
+							Computed:    true,
 							Elem:        &schema.Schema{Type: schema.TypeString},
 							Deprecated:  "This property is only applicable to First Generation instances, and First Generation instances are now deprecated.",
 							Description: `This property is only applicable to First Generation instances. First Generation instances are now deprecated, see https://cloud.google.com/sql/docs/mysql/deprecation-notice for information on how to upgrade to Second Generation instances. A list of Google App Engine project names that are allowed to access this instance.`,
@@ -353,6 +354,7 @@ settings.backup_configuration.binary_log_enabled are both set to true.`,
 						"user_labels": {
 							Type:        schema.TypeMap,
 							Optional:    true,
+							Computed:    true,
 							Elem:        &schema.Schema{Type: schema.TypeString},
 							Description: `A set of key/value user label pairs to assign to the instance.`,
 						},
@@ -800,16 +802,18 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
+	// Refresh settings from read as they may have defaulted from the API
+	s = d.Get("settings")
 	// If we've created an instance as a clone, we need to update it to set the correct settings
-	if s, ok := d.GetOk("settings"); ok && cloneContext != nil {
-		instance := &sqladmin.DatabaseInstance{
+	if len(s.([]interface{})) != 0 && cloneContext != nil {
+		instanceUpdate := &sqladmin.DatabaseInstance{
 			Settings: desiredSettings,
 		}
 		_settings := s.([]interface{})[0].(map[string]interface{})
-		instance.Settings.SettingsVersion = int64(_settings["version"].(int))
+		instanceUpdate.Settings.SettingsVersion = int64(_settings["version"].(int))
 		var op *sqladmin.Operation
 		err = retryTimeDuration(func() (rerr error) {
-			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Update(project, name, instance).Do()
+			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Update(project, name, instanceUpdate).Do()
 			return rerr
 		}, d.Timeout(schema.TimeoutUpdate), isSqlOperationInProgressError)
 		if err != nil {
@@ -817,6 +821,12 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		}
 
 		err = sqlAdminOperationWaitTime(config, op, project, "Update Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return err
+		}
+
+		// Refresh the state of the instance after updating the settings
+		err = resourceSqlDatabaseInstanceRead(d, meta)
 		if err != nil {
 			return err
 		}
