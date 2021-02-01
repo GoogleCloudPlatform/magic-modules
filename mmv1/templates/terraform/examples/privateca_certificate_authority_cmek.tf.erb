@@ -3,11 +3,20 @@ resource "google_project_service_identity" "privateca_sa" {
   service  = "privateca.googleapis.com"
 }
 
-resource "google_kms_crypto_key_iam_binding" "privateca_sa_keyuser" {
+resource "google_kms_crypto_key_iam_binding" "privateca_sa_keyuser_signerverifier" {
   provider      = google-beta
   crypto_key_id = "<%= ctx[:vars]['kms_key_name'] %>"
   role          = "roles/cloudkms.signerVerifier"
 
+  members = [
+    "serviceAccount:${google_project_service_identity.privateca_sa.email}",
+  ]
+}
+
+resource "google_kms_crypto_key_iam_binding" "privateca_sa_keyuser_viewer" {
+  provider      = google-beta
+  crypto_key_id = "<%= ctx[:vars]['kms_key_name'] %>"
+  role          = "roles/viewer"
   members = [
     "serviceAccount:${google_project_service_identity.privateca_sa.email}",
   ]
@@ -36,7 +45,8 @@ resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id]
   }
 
   depends_on = [
-    google_kms_crypto_key_iam_binding.privateca_sa_keyuser,
+    google_kms_crypto_key_iam_binding.privateca_sa_keyuser_signerverifier,
+    google_kms_crypto_key_iam_binding.privateca_sa_keyuser_viewer,
   ]
 
   disable_on_delete = true
