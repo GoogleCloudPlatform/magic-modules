@@ -198,4 +198,5 @@ objects:
           - SERVER_AUTHENTICATION: Client to Server traffic encryption enabled with server authentcation
         values:
           - :SERVER_AUTHENTICATION
+          - :DISABLED
         default_value: :DISABLED
