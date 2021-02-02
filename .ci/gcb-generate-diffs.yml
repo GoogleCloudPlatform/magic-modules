@@ -217,7 +217,7 @@ steps:
           - $_PR_NUMBER
 
 # Long timeout to enable waiting on VCR test
-timeout: 8000s
+timeout: 20000s
 options:
     machineType: 'N1_HIGHCPU_32'
 
