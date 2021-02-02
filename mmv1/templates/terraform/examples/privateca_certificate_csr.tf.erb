@@ -26,7 +26,7 @@ resource "google_privateca_certificate_authority" "test-ca" {
 
 
 
-resource "google_privateca_certificate" "<%= ctx[:vars]["certificate_name"] %>" {
+resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   project = "<%= ctx[:test_env_vars]['project'] %>"
   location = "us-central1"

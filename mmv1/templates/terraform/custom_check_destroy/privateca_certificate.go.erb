@@ -13,7 +13,7 @@ if err != nil {
 
 
 if _, ok := res["revocationDetails"]; !ok {
-    return fmt.Errorf("CertificateAuthority.Certificate Revocation expected  %s got %s, want revocationDetails.revocationTime", url, s)
+    return fmt.Errorf("CertificateAuthority.Certificate Revocation expected %s got %s, want revocationDetails.revocationTime", url, s)
 }
 
 return nil

@@ -79,9 +79,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
 
   Certificate: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
+    # This resource is a child resource
+    skip_sweeper: true
     description: |
       {{description}}
-      
+
+      ~> **Note:** The Certificate Authority that is referenced by this resource **must** be 
+      `tier = "ENTERPRISE"`
+
       ~> **Warning:** Please remember that all resources created during preview (via the terraform-provider-google-beta)
       will be deleted when CA service transitions to General Availability (GA). Relying on these
       certificate authorities for production traffic is discouraged.
@@ -93,14 +98,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           certificate_authority_id: "my-certificate-authority" 
-          certificate_name: "my-certificate"    
+          certificate_name: "my-certificate"
+        test_env_vars:
+          project: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_csr"
         min_version: "beta"
         primary_resource_id: "default"
         vars:
           certificate_name: "my-certificate"
-          certificate_authority_id: "my-certificate-authority"                 
+          certificate_authority_id: "my-certificate-authority"
+        test_env_vars:
+          project: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate.go.erb
 
