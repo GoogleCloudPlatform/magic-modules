@@ -62,8 +62,8 @@ Within each product directory, each provider has its own `[provider].yaml` file 
 specific to that provider.
 
 Let's look at
-<walkthrough-editor-open-file filePath="magic-modules/products/pubsub/ansible.yaml"
-                              text="products/pubsub/ansible.yaml">
+<walkthrough-editor-open-file filePath="magic-modules/products/pubsub/terraform.yaml"
+                              text="products/pubsub/terraform.yaml">
 </walkthrough-editor-open-file>.
 
 This file consists of information that is specific to Ansible, like Ansible version numbers,
@@ -90,15 +90,15 @@ instead of SSH. You will probably not have to do this in your typical developmen
 
 Run the compiler:
 ```bash
-ruby compiler.rb -p products/pubsub -e ansible -o build/ansible
+ruby compiler.rb -p products/pubsub -e terraform -o build/terraform
 ```
 
 This command tells us to run the compiler for the pubsub API, and generate Ansible into the
-`build/ansible/plugins/modules` directory.
+`build/terraform/plugins/modules` directory.
 
 Let's see our changes! Navigate to the Ansible folder
 ```bash
-cd build/ansible/plugins/modules/
+cd build/terraform/plugins/modules/
 // view gcp_pubsub_topic.py in editor of your choice.
 ```
 
