@@ -190,3 +190,18 @@ objects:
           - :STANDARD_HA
         default_value: :BASIC
         input: true
+      - !ruby/object:Api::Type::Enum
+        name: transitEncryptionMode
+        description: |
+          The TLS encryption mode of the Redis instance. Must be one of:
+
+          - TRANSIT_ENCRYPTION_MODE_UNSPECIFIED
+          - SERVER_AUTHENTICATION
+          - DISABLED
+        values:
+          - :TRANSIT_ENCRYPTION_MODE_UNSPECIFIED
+          - :SERVER_AUTHENTICATION
+          - :DISABLED
+        default_value: :SERVER_AUTHENTICATION
+        input: true
+        
