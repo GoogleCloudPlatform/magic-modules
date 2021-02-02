@@ -144,7 +144,6 @@ func absoluteDomainSuppress(k, old, new string, _ *schema.ResourceData) bool {
 	return old == new
 }
 
-<% unless version == 'ga' -%>
 func timestampDiffSuppress(format string) schema.SchemaDiffSuppressFunc {
 	return func(_, old, new string, _ *schema.ResourceData) bool {
 		oldT, err := time.Parse(format, old)
@@ -160,4 +159,3 @@ func timestampDiffSuppress(format string) schema.SchemaDiffSuppressFunc {
 		return oldT == newT
 	}
 }
-<% end -%>
