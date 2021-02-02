@@ -44,7 +44,7 @@ resource "google_compute_instance_template" "default" {
 
   // Create a new boot disk from an image
   disk {
-    source_image = "debian-cloud/debian-9"
+    source_image = "debian-cloud/debian-10"
     auto_delete  = true
     boot         = true
   }
@@ -86,6 +86,63 @@ resource "google_compute_disk" "foobar" {
 }
 ```
 
+## Example Usage - Automatic Envoy deployment for Traffic Director
+
+```hcl
+# https://cloud.google.com/traffic-director/docs/auto-vms-options
+# You can determine the values by adding --log-http to the gcloud commands to
+# see the JSON Payload of the template created by gcloud and match it in terraform.
+
+resource "google_service_account" "default" {
+  account_id   = "service-account-id"
+  display_name = "Service Account"
+}
+
+resource "google_compute_instance_template" "default" {
+  name        = "appserver-template"
+  description = "This template is used to create app server instances."
+
+  tags = ["foo", "bar"]
+
+  labels = {
+    gce-service-proxy = "on"
+  }
+
+  instance_description = "description assigned to instances"
+  machine_type         = "e2-medium"
+  can_ip_forward       = false
+
+  scheduling {
+    automatic_restart   = true
+    on_host_maintenance = "MIGRATE"
+  }
+
+  // Create a new boot disk from an image
+  disk {
+    source_image = "debian-cloud/debian-10"
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    enable-guest-attributes = "TRUE"
+    enable-os-config = true
+    gce-service-proxy = "{\"api-version\": \"0.2\", \"service\": {\"serving-ports\": [8080]}, \"labels\": {\"version\": \"canary\"}, \"proxy-spec\": {\"proxy-port\": 15001, \"tracing\": \"ON\", \"network\": \"\"}}"
+    gce-software-declaration = "{\"softwareRecipes\": [{\"name\": \"install-gce-service-proxy-agent\", \"desired_state\": \"INSTALLED\", \"installSteps\": [{\"scriptRun\": {\"script\": \"#! /bin/bash\\nZONE=$( curl --silent http://metadata.google.internal/computeMetadata/v1/instance/zone -H Metadata-Flavor:Google | cut -d/ -f4 )\\nexport SERVICE_PROXY_AGENT_DIRECTORY=$(mktemp -d)\\nsudo gsutil cp   gs://gce-service-proxy-${ZONE}/service-proxy-agent/releases/service-proxy-agent-0.2.tgz   ${SERVICE_PROXY_AGENT_DIRECTORY}   || sudo gsutil cp     gs://gce-service-proxy/service-proxy-agent/releases/service-proxy-agent-0.2.tgz     ${SERVICE_PROXY_AGENT_DIRECTORY}\\nsudo tar -xzf ${SERVICE_PROXY_AGENT_DIRECTORY}/service-proxy-agent-0.2.tgz -C ${SERVICE_PROXY_AGENT_DIRECTORY}\\n${SERVICE_PROXY_AGENT_DIRECTORY}/service-proxy-agent/service-proxy-agent-bootstrap.sh\"}}]}]}"
+  }
+
+  service_account {
+    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
+    email  = google_service_account.default.email
+    scopes = ["cloud-platform"]
+  }
+}
+
+```
 ## Using with Instance Group Manager
 
 Instance Templates cannot be updated after creation with the Google
