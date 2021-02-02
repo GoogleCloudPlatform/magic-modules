@@ -40,9 +40,6 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
   Instance: !ruby/object:Overrides::Ansible::ResourceOverride
-    properties:
-      replicaConfiguration.mysqlReplicationConfiguration: !ruby/object:Overrides::Ansible::PropertyOverride
-        no_log: true
     access_api_results: true
     custom_code: !ruby/object:Provider::Ansible::CustomCode
       return_if_object: |
