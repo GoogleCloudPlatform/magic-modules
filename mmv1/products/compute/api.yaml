@@ -7299,7 +7299,6 @@ objects:
       - !ruby/object:Api::Type::Boolean
         name: 'adminEnabled'
         send_empty_value: true
-        default_value: true
         description: |
           Whether the VLAN attachment is enabled or disabled.  When using
           PARTNER type this will Pre-Activate the interconnect attachment
@@ -7360,10 +7359,8 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'pairingKey'
         description: |
-          [Output only for type PARTNER. Not present for DEDICATED]. The opaque
-          identifier of an PARTNER attachment used to initiate provisioning with
-          a selected partner. Of the form "XXXXX/region/domain"
-        output: true
+          [Output only for type PARTNER. Input only for PARTNER_PROVIDER. Not present for DEDICATED]. The opaque identifier of an PARTNER attachment used to initiate provisioning with a selected partner. Of the form "XXXXX/region/domain"
+        input: true
       - !ruby/object:Api::Type::String
         name: 'partnerAsn'
         description: |
