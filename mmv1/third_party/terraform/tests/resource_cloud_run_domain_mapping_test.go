@@ -63,23 +63,6 @@ resource "google_cloud_run_service" "default" {
       }
     }
   }
-  
-  resource "google_cloud_run_service" "default2" {
-    name     = "tf-test-cloudrun-srv%{random_suffix}"
-    location = "us-west1"
-    
-    metadata {
-      namespace = "%{namespace}"
-    }
-    
-    template {
-      spec {
-        containers {
-          image = "us-docker.pkg.dev/cloudrun/container/hello"
-        }
-      }
-    }
-  }
 
 resource "google_cloud_run_domain_mapping" "default" {
   location = "us-central1"
@@ -105,25 +88,11 @@ resource "google_cloud_run_service" "default" {
 
   metadata {
     namespace = "%{namespace}"
-  }
-
-  template {
-    spec {
-      containers {
-        image = "us-docker.pkg.dev/cloudrun/container/hello"
-      }
+    labels = {
+      "my-label" = "my-value"
     }
   }
-}
 
-resource "google_cloud_run_service" "default2" {
-  name     = "tf-test-cloudrun-srv%{random_suffix}"
-  location = "us-west1"
-  
-  metadata {
-    namespace = "%{namespace}"
-  }
-  
   template {
     spec {
       containers {
@@ -134,7 +103,7 @@ resource "google_cloud_run_service" "default2" {
 }
 
 resource "google_cloud_run_domain_mapping" "default" {
-  location = "us-west1"
+  location = "us-central1"
   name     = "tf-test-domain%{random_suffix}.gcp.tfacc.hashicorptest.com"
 
   metadata {
@@ -142,7 +111,7 @@ resource "google_cloud_run_domain_mapping" "default" {
   }
 
   spec {
-    route_name = google_cloud_run_service.default2.name
+    route_name = google_cloud_run_service.default.name
   }
 }
 `, context)
