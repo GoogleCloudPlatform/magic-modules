@@ -206,7 +206,7 @@ steps:
       id: tpg-vcr-test
       secretEnv: ["TEAMCITY_TOKEN", "GITHUB_TOKEN"]
       waitFor: ["diff"]
-      timeout: 6000s
+      timeout: 12000s
       args:
           - $_PR_NUMBER
 
