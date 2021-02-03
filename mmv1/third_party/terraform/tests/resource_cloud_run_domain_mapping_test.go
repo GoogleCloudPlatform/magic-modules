@@ -88,9 +88,6 @@ resource "google_cloud_run_service" "default" {
 
   metadata {
     namespace = "%{namespace}"
-    labels = {
-      "my-label" = "my-value"
-    }
   }
 
   template {
@@ -108,6 +105,9 @@ resource "google_cloud_run_domain_mapping" "default" {
 
   metadata {
     namespace = "%{namespace}"
+    labels = {
+      "my-label" = "my-value"
+    }
   }
 
   spec {
