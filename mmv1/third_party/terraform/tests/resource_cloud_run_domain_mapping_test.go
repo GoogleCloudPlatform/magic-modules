@@ -30,7 +30,7 @@ func TestAccCloudRunDomainMapping_foregroundDeletion(t *testing.T) {
 				ResourceName:            "google_cloud_run_domain_mapping.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "location"},
+				ImportStateVerifyIgnore: []string{"name", "location", "status", "metadata.0.resource_version"},
 			},
 			{
 				Config: testAccCloudRunDomainMapping_cloudRunDomainMappingUpdated2(context),
@@ -39,7 +39,7 @@ func TestAccCloudRunDomainMapping_foregroundDeletion(t *testing.T) {
 				ResourceName:            "google_cloud_run_domain_mapping.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "location"},
+				ImportStateVerifyIgnore: []string{"name", "location", "status", "metadata.0.resource_version"},
 			},
 		},
 	})
