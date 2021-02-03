@@ -446,6 +446,7 @@ func resourceComposerEnvironment() *schema.Resource {
 									"kms_key_name": {
 										Type:         schema.TypeString,
 										Required:     true,
+										ForceNew:     true,
 										Description: `Optional. Customer-managed Encryption Key available through Google's Key Management Service. Cannot be updated.`,
 									},
 								},
