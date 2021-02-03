@@ -7356,6 +7356,29 @@ objects:
           selected availability domain will be provided to the Partner via the
           pairing key so that the provisioned circuit will lie in the specified
           domain. If not specified, the value will default to AVAILABILITY_DOMAIN_ANY.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'partnerMetadata'
+        description: |
+          Informational metadata about Partner attachments from Partners to display
+          to customers. Output only for for PARTNER type, mutable for PARTNER_PROVIDER,
+          not available for DEDICATED.
+        input: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: partnerName
+            description: |
+              Plain text name of the Partner providing this attachment. This value may be validated to match approved Partner values.
+            input: true
+          - !ruby/object:Api::Type::String
+            name: interconnectName
+            description: |
+              Plain text name of the Interconnect this attachment is connected to, as displayed in the Partner's portal. For instance "Chicago 1". This value may be validated to match approved Partner values.
+            input: true
+          - !ruby/object:Api::Type::String
+            name: portalUrl
+            description: |
+              URL of the Partner's portal for this Attachment. Partners may customise this to be a deep link to the specific resource on the Partner portal. This value may be validated to match approved Partner values.
+            input: true
       - !ruby/object:Api::Type::String
         name: 'pairingKey'
         description: |
