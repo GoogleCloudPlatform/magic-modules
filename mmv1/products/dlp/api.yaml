@@ -763,8 +763,8 @@ objects:
           User set display name of the info type.
       - !ruby/object:Api::Type::NestedObject
         name: 'regex'
-        input: true
         description: Regular expression which defines the rule.
+        input: true
         exactly_one_of:
           - dictionary
           - regex
