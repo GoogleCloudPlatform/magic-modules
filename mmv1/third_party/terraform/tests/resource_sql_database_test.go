@@ -16,7 +16,7 @@ func TestAccSqlDatabase_basic(t *testing.T) {
 	var database sqladmin.Database
 
 	resourceName := "google_sql_database.database"
-	instanceName := fmt.Sprintf("sqldatabasetest-%d", randInt(t))
+	instanceName := fmt.Sprintf("sqldatabasetest123-%d", randInt(t))
 	dbName := fmt.Sprintf("sqldatabasetest-%d", randInt(t))
 
 	vcrTest(t, resource.TestCase{
