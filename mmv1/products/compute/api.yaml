@@ -7448,7 +7448,6 @@ objects:
           the same region as this InterconnectAttachment. The InterconnectAttachment will
           automatically connect the Interconnect to the network & region within which the
           Cloud Router is configured.
-        required: true
         input: true
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
