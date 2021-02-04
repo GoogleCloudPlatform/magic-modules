@@ -146,6 +146,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           account_name: "bqowner"
         ignore_read_extra:
           - "etag"
+          - "status.0.state"
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_job_query_table_reference"
         primary_resource_id: "job"
@@ -156,6 +157,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "etag"
           - "query.0.default_dataset.0.dataset_id"
           - "query.0.destination_table.0.table_id"
+          - "status.0.state"
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_job_load"
         primary_resource_id: "job"
@@ -163,6 +165,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           job_id: "job_load"
         ignore_read_extra:
           - "etag"
+          - "status.0.state"
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_job_load_table_reference"
         primary_resource_id: "job"
@@ -171,6 +174,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "etag"
           - "load.0.destination_table.0.table_id"
+          - "status.0.state"
         skip_docs: true  # there are a lot of examples for this resource, so omitting some that are similar to others
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_job_copy"
@@ -184,6 +188,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project: :PROJECT_NAME
         ignore_read_extra:
           - "etag"
+          - "status.0.state"
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_job_copy_table_reference"
         primary_resource_id: "job"
@@ -199,6 +204,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "copy.0.destination_table.0.table_id"
           - "copy.0.source_tables.0.table_id"
           - "copy.0.source_tables.1.table_id"
+          - "status.0.state"
         skip_docs: true  # there are a lot of examples for this resource, so omitting some that are similar to others
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_job_extract"
@@ -208,6 +214,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           account_name: "bqowner"
         ignore_read_extra:
           - "etag"
+          - "status.0.state"
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_job_extract_table_reference"
         primary_resource_id: "job"
@@ -217,6 +224,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "etag"
           - "extract.0.source_table.0.table_id"
+          - "status.0.state"
         skip_docs: true  # there are a lot of examples for this resource, so omitting some that are similar to others
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
