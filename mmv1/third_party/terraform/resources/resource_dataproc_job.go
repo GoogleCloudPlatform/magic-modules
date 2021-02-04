@@ -1121,11 +1121,12 @@ func flattenJobReference(r *dataproc.JobReference) []map[string]interface{} {
 }
 
 func flattenJobScheduling(r *dataproc.JobScheduling) []map[string]interface{} {
-	return []map[string]interface{}{
-		{
-			"max_failures_per_hour": r.MaxFailuresPerHour,
-		},
+	jobScheduling := []map[string]interface{}{}
+
+	if r != nil {
+		jobScheduling = append(jobScheduling, map[string]interface{}{"max_failures_per_hour": r.MaxFailuresPerHour})
 	}
+	return jobScheduling
 }
 
 func flattenJobStatus(s *dataproc.JobStatus) []map[string]interface{} {
