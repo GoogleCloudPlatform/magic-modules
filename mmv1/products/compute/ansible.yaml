@@ -271,9 +271,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           SSH already configured
   InstanceTemplate: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
-      diskEncryptionKey: !ruby/object:Overrides::Ansible::PropertyOverride
+      properties.disks.diskEncryptionKey: !ruby/object:Overrides::Ansible::PropertyOverride
         no_log: true
-      initializeParams.sourceImageEncryptionKey: !ruby/object:Overrides::Ansible::PropertyOverride
+      properties.disks.initializeParams.sourceImageEncryptionKey: !ruby/object:Overrides::Ansible::PropertyOverride
         no_log: true
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
