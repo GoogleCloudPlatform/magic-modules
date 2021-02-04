@@ -209,6 +209,12 @@ func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 	if v, ok := d.GetOk("reference.0.job_id"); ok {
 		submitReq.Job.Reference.JobId = v.(string)
 	}
+
+	if v, ok := d.GetOk("scheduling.0.max_failures_per_hour"); ok {
+		submitReq.Job.Scheduling = &dataproc.JobScheduling{
+			MaxFailuresPerHour: int64(v.(int)),
+		}
+	}
 	if _, ok := d.GetOk("labels"); ok {
 		submitReq.Job.Labels = expandLabels(d)
 	}
@@ -302,6 +308,9 @@ func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error setting status: %s", err)
 	}
 	if err := d.Set("reference", flattenJobReference(job.Reference)); err != nil {
+		return fmt.Errorf("Error setting reference: %s", err)
+	}
+	if err := d.Set("scheduling", flattenJobScheduling(job.Scheduling)); err != nil {
 		return fmt.Errorf("Error setting reference: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
@@ -1107,6 +1116,14 @@ func flattenJobReference(r *dataproc.JobReference) []map[string]interface{} {
 	return []map[string]interface{}{
 		{
 			"job_id": r.JobId,
+		},
+	}
+}
+
+func flattenJobScheduling(r *dataproc.JobScheduling) []map[string]interface{} {
+	return []map[string]interface{}{
+		{
+			"max_failures_per_hour": r.MaxFailuresPerHour,
 		},
 	}
 }
