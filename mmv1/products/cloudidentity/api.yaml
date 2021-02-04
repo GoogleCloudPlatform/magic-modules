@@ -37,6 +37,11 @@ objects:
     update_mask: true
     description: |
       A Cloud Identity resource representing a Group.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/identity/docs/how-to/setup'
+      api: 'https://cloud.google.com/identity/docs/reference/rest/v1beta1/groups'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -122,6 +127,11 @@ objects:
     self_link: '{{name}}'
     description: |
       A Membership defines a relationship between a Group and an entity belonging to that Group, referred to as a "member".
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/identity/docs/how-to/memberships-google-groups'
+      api: 'https://cloud.google.com/identity/docs/reference/rest/v1/groups.memberships'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'group'
