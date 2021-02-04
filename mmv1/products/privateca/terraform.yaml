@@ -46,6 +46,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "privateca_certificate_authority_cmek"
         min_version: "beta"
         primary_resource_id: "default"
+        # Multiple IAM bindings on the same key cause non-determinism
+        skip_vcr: true
         vars:
           kms_key_name: "projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key"
         test_vars_overrides:
