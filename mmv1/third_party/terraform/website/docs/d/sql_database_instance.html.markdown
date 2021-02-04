@@ -179,3 +179,13 @@ The `replica_configuration` block contains:
 * `server_ca_cert.0.expiration_time` - Expiration time of the CA Cert.
 
 * `server_ca_cert.0.sha1_fingerprint` - SHA Fingerprint of the CA Cert.
+
+The `settings.insights_config` subblock for instances declares [Query Insights](https://cloud.google.com/sql/docs/postgres/insights-overview) configuration. It contains:
+
+* `query_insights_enabled` - True if Query Insights feature is enabled.
+
+* `query_string_length` - Maximum query length stored in bytes. Between 256 and 4500. Default to 1024.
+
+* `record_application_tags` - True if Query Insights will record application tags from query when enabled.
+
+* `record_client_address` - True if Query Insights will record client address when enabled.
