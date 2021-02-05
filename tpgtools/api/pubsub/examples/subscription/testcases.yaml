@@ -1,0 +1,13 @@
+- name: "Pub/Sub Subscription Push"
+  description: "Example configuration for a Pub/Sub push subscription and topic."
+  dependency: 
+    - "push.pubsub.subscription.json"
+    - "basic.pubsub.topic.json"
+  resource: "push.pubsub.subscription.json"
+  extra_substitutions:
+    - substitution: "subscription_name"
+      test_value: "dcl-test-{{suffix}}"
+      docs_value: "example-subscription"
+    - substitution: "topic_name"
+      test_value: "dcl-test-{{suffix}}"
+      docs_value: "example-topic"

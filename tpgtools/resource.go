@@ -1,11 +1,11 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -117,6 +117,8 @@ type Resource struct {
 	// object and config and returns a boolean for if Terraform should make
 	// the delete call for the resource
 	SkipDeleteFunction *string
+
+	Samples []Sample
 }
 
 // Name is the shortname of a resource. For example, "instance".
@@ -306,7 +308,7 @@ func (r Resource) RegisterReusedType(p Property) []Property {
 	return r.ReusedTypes
 }
 
-func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides Overrides, packagePath string, location string) (*Resource, error) {
+func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides Overrides, samples []Sample, packagePath string, location string) (*Resource, error) {
 	pkg := strings.Split(packagePath, "/")[0]
 	resourceTitle := schema.Title
 
@@ -327,6 +329,7 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 		InsertTimeoutMinutes: 10,
 		UpdateTimeoutMinutes: 10,
 		DeleteTimeoutMinutes: 10,
+		Samples:              samples,
 	}
 
 	crname := CustomResourceNameDetails{}

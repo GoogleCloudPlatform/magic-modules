@@ -25,10 +25,15 @@ description: |-
 
 {{$.Description}}
 
-{{/* TODO version notice */}}
-{{/* TODO references */}}
-{{/* TODO warning */}}
-{{/* TODO examples */}}
+{{- /* TODO version notice */}}
+{{- /* TODO references */}}
+{{- /* TODO warning */}}
+{{- range $s := $.Samples}}
+## Example Usage - {{$s.Name}}
+{{$s.Description}}
+
+{{$s.GenerateDocsHCL}}
+{{- end }}
 
 ## Argument Reference
 

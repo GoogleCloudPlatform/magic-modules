@@ -1,11 +1,11 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,11 +16,14 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"go/format"
 	"strconv"
 	"strings"
 
+	"github.com/GoogleCloudPlatform/declarative-resource-client-library/serialization"
+	"github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/pubsub"
 	"github.com/kylelemons/godebug/pretty"
 )
 
@@ -103,4 +106,26 @@ func renderDefault(t Type, val string) (string, error) {
 		return fmt.Sprintf("%q", val), nil
 	}
 	return "", fmt.Errorf("Failed to find default format for type: %v", t)
+}
+
+// ConvertSampleJSONToDCLResource unmarshals json to a DCL resource specified by th resource type
+// TODO: This should be generated upstream in the DCL, it overlaps with TFJSONToDCL
+func ConvertSampleJSONToHCL(resourceType string, b []byte) (string, error) {
+	var hcl string
+	var err error
+	switch resourceType {
+	case "PubsubSubscription":
+		r := &pubsub.Subscription{}
+		if err = json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		hcl, err = serialization.PubsubSubscriptionAsHCL(*r)
+	case "PubsubTopic":
+		r := &pubsub.Topic{}
+		if err = json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		hcl, err = serialization.PubsubTopicAsHCL(*r)
+	}
+	return hcl, err
 }

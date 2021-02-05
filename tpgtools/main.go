@@ -1,11 +1,11 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -71,7 +71,7 @@ func main() {
 			generateResourceFile(resource)
 			generateSweeperFile(resource)
 			// Disabled to allow handwriting files until samples exist
-			// generateResourceWebsiteFile(resource, resources, version)
+			generateResourceWebsiteFile(resource, resources, version)
 		}
 
 		if oPath == nil || *oPath == "" {
@@ -162,6 +162,33 @@ func loadAndModelResources() map[Version][]*Resource {
 					}
 				}
 
+				samples := Samples{}
+				samplesPath := path.Join(*fPath, packagePath, "examples", strings.Split(f.Name(), ".")[0])
+				tc, err := ioutil.ReadFile(path.Join(samplesPath, "testcases.yaml"))
+				if err != nil {
+					// ignore the error if the file just doesn't exist
+					if !os.IsNotExist(err) {
+						glog.Exit(err)
+					}
+				} else {
+					err = yaml.UnmarshalStrict(tc, &samples)
+					if err != nil {
+						glog.Exit(err)
+					}
+					for index, sample := range samples {
+						var dependencies []Dependency
+						for _, dFileName := range sample.DependencyFileNames {
+							dependencyBytes, err := ioutil.ReadFile(path.Join(samplesPath, dFileName))
+							d, err := BuildDependency(dFileName, dependencyBytes)
+							if err != nil {
+								glog.Exit(err)
+							}
+							dependencies = append(dependencies, *d)
+						}
+						samples[index].Dependencies = dependencies
+					}
+				}
+
 				titleParts := strings.Split(document.Info.Title, "/")
 
 				var schema *openapi.Schema
@@ -196,7 +223,7 @@ func loadAndModelResources() map[Version][]*Resource {
 				}
 
 				for _, l := range locations {
-					res, err := createResource(schema, typeFetcher, overrides, packagePath, l)
+					res, err := createResource(schema, typeFetcher, overrides, samples, packagePath, l)
 					if err != nil {
 						glog.Exit(err)
 					}

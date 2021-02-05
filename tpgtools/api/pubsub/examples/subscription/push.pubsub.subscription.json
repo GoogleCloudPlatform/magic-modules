@@ -1,0 +1,14 @@
+{
+    "name": "{{subscription_name}}",
+    "topic": "{{ref:basic.pubsub.topic.json:name}}",
+    "ackDeadlineSeconds": 20,
+    "labels": {
+        "foo": "bar"
+    },
+    "pushConfig": {
+        "pushEndpoint": "https://example.com/push",
+        "attributes": {
+            "x-goog-version": "v1"
+        }
+    }
+}
