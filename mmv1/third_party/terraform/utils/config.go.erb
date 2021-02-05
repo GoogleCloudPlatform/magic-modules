@@ -62,6 +62,10 @@ import (
 	"google.golang.org/api/storage/v1"
 	"google.golang.org/api/storagetransfer/v1"
 	"google.golang.org/api/transport"
+<% unless version == 'ga' -%>
+	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
+	eventarcDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc/beta"
+<% end -%>
 )
 
 type providerMeta struct {
@@ -112,9 +116,16 @@ type Config struct {
 	ServiceNetworkingBasePath string
 	StorageTransferBasePath string
 	BigtableAdminBasePath string
+	EventarcBasePath string
 
 	requestBatcherServiceUsage *RequestBatcher
 	requestBatcherIam          *RequestBatcher
+
+	// start DCL clients
+<% unless version == 'ga' -%>
+	dclConfig *dcl.Config
+	clientEventarcDCL *eventarcDcl.Client
+<% end -%>
 }
 
 // Generated product base paths
@@ -175,6 +186,13 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	c.requestBatcherServiceUsage = NewRequestBatcher("Service Usage", ctx, c.BatchingConfig)
 	c.requestBatcherIam = NewRequestBatcher("IAM", ctx, c.BatchingConfig)
 	c.PollInterval = 10 * time.Second
+
+	// Start DCL client instantiation
+<% unless version == 'ga' -%>
+	// TODO(slevenick): handle user agents
+	c.dclConfig = dcl.NewConfig(dcl.WithHTTPClient(client), dcl.WithUserAgent(c.userAgent), dcl.WithLogger(dclLogger{}))
+	c.clientEventarcDCL = eventarcDcl.NewClient(c.dclConfig)
+<% end -%>
 
 	return nil
 }

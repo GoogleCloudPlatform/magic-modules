@@ -486,8 +486,11 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			}
 
 			p.Properties = props
-			mi := int64(1)
-			p.MaxItems = &mi
+			if !v.ReadOnly {
+				// Computed fields cannot specify MaxItems
+				mi := int64(1)
+				p.MaxItems = &mi
+			}
 			e := fmt.Sprintf("%s%sSchema()", resource.PathType(), p.PackagePath())
 			p.Elem = &e
 			p.ElemIsBasicType = false
