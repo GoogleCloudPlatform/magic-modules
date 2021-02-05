@@ -114,7 +114,7 @@ func loadAndModelResources() map[Version][]*Resource {
 				}
 				// if a filter is specified, skip filtered resources
 				resName := stripExt(f.Name())
-				if rFilter != nil && *rFilter != "" && *rFilter != resName {
+				if rFilter != nil && *rFilter != "" && strings.ToLower(*rFilter) != strings.ToLower(resName) {
 					continue
 				}
 
