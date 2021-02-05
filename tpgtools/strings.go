@@ -70,3 +70,22 @@ func jsonToSnakeCase(s string) string {
 	result := regexp.MustCompile("(.)([A-Z][^A-Z]+)").ReplaceAllString(s, "${1}_${2}")
 	return strings.ToLower(regexp.MustCompile("([a-z0-9])([A-Z])").ReplaceAllString(result, "${1}_${2}"))
 }
+
+func sampleNameToTitleCase(s string) string {
+	return strings.Join(sampleNameToTitleParts(s), "")
+}
+
+func sampleNameToTitleParts(s string) []string {
+	parts := []string{}
+	s = strings.ReplaceAll(s, "/", "")
+	segments := strings.Split(s, " ")
+	for _, seg := range segments {
+		if v, ok := initialisms[seg]; ok {
+			parts = append(parts, v)
+		} else {
+			parts = append(parts, strings.ToUpper(seg[0:1])+seg[1:])
+		}
+	}
+
+	return parts
+}
