@@ -92,7 +92,7 @@ func funcAccTestEventarcTriggerCheckDestroy(t *testing.T) func(s *terraform.Stat
 
       config := googleProviderConfig(t)
 
-      url, err := replaceVarsForTest(config, rs, "{{EventarcBasePath}}projects/{{project}}/triggers/{{name}}")
+      url, err := replaceVarsForTest(config, rs, "{{EventarcBasePath}}projects/{{project}}/locations/{{location}}/triggers/{{name}}")
       if err != nil {
         return err
       }
