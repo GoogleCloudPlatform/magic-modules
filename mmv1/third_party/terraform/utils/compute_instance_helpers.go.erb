@@ -249,13 +249,20 @@ func expandNetworkInterfaces(d TerraformResourceData, config *Config) ([]*comput
 			return nil, fmt.Errorf("cannot determine self_link for subnetwork %q: %s", subnetwork, err)
 		}
 
+		var nt string
+		if data["nic_type"] != nil {
+			nt = data["nic_type"].(string)
+		} else {
+			nt = ""
+		}
+
 		ifaces[i] = &computeBeta.NetworkInterface{
 			NetworkIP:     data["network_ip"].(string),
 			Network:       nf.RelativeLink(),
 			Subnetwork:    sf.RelativeLink(),
 			AccessConfigs: expandAccessConfigs(data["access_config"].([]interface{})),
 			AliasIpRanges: expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
-			NicType:       data["nic_type"].(string),
+			NicType:       nt,
 		}
 
 	}
