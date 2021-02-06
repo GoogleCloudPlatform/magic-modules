@@ -74,7 +74,7 @@ If you're generating the Terraform providers (`google` and `google-beta`),
 you'll need to check out the repo(s) you're generating in your GOPATH. For
 example:
 
-```
+```bash
 git clone https://github.com/hashicorp/terraform-provider-google.git $GOPATH/src/github.com/hashicorp/terraform-provider-google
 git clone https://github.com/hashicorp/terraform-provider-google-beta.git $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
 ```
@@ -86,7 +86,8 @@ Terraform provider are running on up to date copies of `master`.
 Once you've prepared the target folders for the tools, run the following to
 finish getting Magic Modules set up by installing the Ruby gems it needs to run:
 
-```
+```bash
+cd mmv1
 bundle install
 ```
 

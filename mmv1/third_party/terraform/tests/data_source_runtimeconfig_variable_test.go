@@ -15,7 +15,7 @@ func TestAccRuntimeconfigVariableDatasource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRuntimeconfigDatasourceConfig(randString(t, 10)),
+				Config: testAccRuntimeconfigDatasourceVariable(randString(t, 10), randString(t, 10), randString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceState("data.google_runtimeconfig_variable.default", "google_runtimeconfig_variable.default"),
 				),
@@ -24,22 +24,30 @@ func TestAccRuntimeconfigVariableDatasource_basic(t *testing.T) {
 	})
 }
 
-func testAccRuntimeconfigDatasourceConfig(suffix string) string {
+func testAccRuntimeconfigDatasourceVariable(suffix string, name string, text string) string {
 	return fmt.Sprintf(`
+	resource "google_project_service" "default" {
+		service = "runtimeconfig.googleapis.com"
+	}
+
 	resource "google_runtimeconfig_config" "default" {
+		project     = google_project_service.default.project
 		name        = "runtime-%s"
 		description = "runtime-%s"
+		depends_on  = [ google_project_service.default ]
 	}
 
 	resource "google_runtimeconfig_variable" "default" {
-		parent = google_runtimeconfig_config.default.name
-		name   = "%s"
-		value  = "%s"
+		project = google_project_service.default.project
+		parent  = google_runtimeconfig_config.default.name
+		name    = "%s"
+		text    = "%s"
 	}
 
 	data "google_runtimeconfig_variable" "default" {
-		name   = google_runtimeconfig_variable.default.name
-		parent = google_runtimeconfig_config.default.name
+		project = google_project_service.default.project
+		name    = google_runtimeconfig_variable.default.name
+		parent  = google_runtimeconfig_config.default.name
 	}
-`, suffix, suffix, suffix, suffix)
+`, suffix, suffix, name, text)
 }
