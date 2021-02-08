@@ -66,7 +66,9 @@ module Provider
                           ['google/compute_instance_helpers.go',
                            'third_party/terraform/utils/compute_instance_helpers.go.erb'],
                           ['google/provider_handwritten_endpoint.go',
-                           'third_party/terraform/utils/provider_handwritten_endpoint.go.erb']
+                           'third_party/terraform/utils/provider_handwritten_endpoint.go.erb'],
+                          ['google/transport.go',
+                           'third_party/terraform/utils/transport.go.erb'],
                         ],
                         file_template)
     end
@@ -126,8 +128,6 @@ module Provider
                         'third_party/terraform/utils/field_helpers.go'],
                        ['google/self_link_helpers.go',
                         'third_party/terraform/utils/self_link_helpers.go'],
-                       ['google/transport.go',
-                        'third_party/terraform/utils/transport.go'],
                        ['google/header_transport.go',
                         'third_party/terraform/utils/header_transport.go'],
                        ['google/bigtable_client_factory.go',
