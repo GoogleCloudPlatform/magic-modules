@@ -72,7 +72,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_test: true
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
-        * `self_link`: The self link of the created CryptoKey. Its format is `{{key_ring}}/cryptoKeys/{{name}}`.
+        * `self_link`: Deprecated in favor of `id`, which contains an identical value. This field will be removed in the next major release of the provider.
     properties:
       createTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
