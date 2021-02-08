@@ -1,0 +1,10 @@
+- type: CUSTOM_NAME
+  field: runtime_config
+  details:
+    name: parent
+- type: CUSTOM_IMPORT_FUNCTION
+  details:
+    function: runtimeconfigVariableImport
+- type: PRE_CREATE_FUNCTION
+  details:
+   function: runtimeconfigVariableValidateTextOrValueSet

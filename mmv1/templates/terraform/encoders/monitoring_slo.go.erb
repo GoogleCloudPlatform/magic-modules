@@ -15,4 +15,14 @@
 // Name/Service Level Objective ID is a query parameter and cannot
 // be given in data
 delete(obj, "sloId")
+Sli := obj["serviceLevelIndicator"].(map[string]interface{})
+if basicSli, ok := Sli["basicSli"].(map[string]interface{}); ok {
+	//Removing the dummy `enabled` attribute
+	if availability, ok := basicSli["availability"]; ok {
+		transAvailability := availability.(map[string]interface{})
+		delete(transAvailability, "enabled")
+		basicSli["availability"] = transAvailability
+	}
+}
 return obj, nil
+

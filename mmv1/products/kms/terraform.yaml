@@ -72,7 +72,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_test: true
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
-        * `self_link`: The self link of the created CryptoKey. Its format is `{{key_ring}}/cryptoKeys/{{name}}`.
+        * `self_link`: Deprecated in favor of `id`, which contains an identical value. This field will be removed in the next major release of the provider.
     properties:
       createTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -168,6 +168,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: templates/terraform/custom_expand/base64.go.erb
       ciphertext: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateBase64String'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/kms_secret_ciphertext.go.erb
       decoder: templates/terraform/decoders/noop.go.erb

@@ -1,0 +1,52 @@
+- type: CUSTOM_NAME
+  field: allowed
+  details:
+    name: allow
+- type: SET_HASH_FUNC
+  field: allowed
+  details:
+    function: resourceComputeFirewallRuleHash
+- type: CUSTOM_NAME
+  field: allowed.ip_protocol
+  details:
+    name: protocol
+- type: DIFF_SUPPRESS_FUNC
+  field: allowed.ip_protocol
+  details:
+    diffsuppressfunc: caseDiffSuppress
+- type: EXCLUDE
+  field: allowed.ip_protocol_alt
+- type: CUSTOM_NAME
+  field: denied
+  details:
+    name: deny
+- type: SET_HASH_FUNC
+  field: denied
+  details:
+    function: resourceComputeFirewallRuleHash
+- type: CUSTOM_NAME
+  field: denied.ip_protocol
+  details:
+    name: protocol
+- type: DIFF_SUPPRESS_FUNC
+  field: denied.ip_protocol
+  details:
+    diffsuppressfunc: caseDiffSuppress
+- type: EXCLUDE
+  field: denied.ip_protocol_alt
+- type: EXCLUDE
+  field: id
+- type: COLLAPSED_OBJECT
+  field: log_config
+- type: CUSTOM_NAME
+  field: log_config.enable
+  details:
+    name: enable_logging
+- type: CUSTOM_VALIDATION
+  field: name
+  details:
+    function: validateGCPName
+- type: CUSTOM_VALIDATION
+  field: priority
+  details:
+    function: validation.IntBetween(0, 65535)

@@ -1,0 +1,4 @@
+- type: SET_HASH_FUNC
+  field: private_visibility_config.networks
+  details:
+    function: resourceDNSManagedZoneNetworkHash

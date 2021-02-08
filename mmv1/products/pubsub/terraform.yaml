@@ -113,7 +113,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           subscription_name: "example-subscription"
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
-        * `path`: Path of the subscription in the format `projects/{project}/subscriptions/{name}`
+        * `path`: Deprecated in favor of `id`, which contains an identical value. This field will be removed in the next major release of the provider.
       note: |
         You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding 
         by using the `google_project_service_identity` resource.

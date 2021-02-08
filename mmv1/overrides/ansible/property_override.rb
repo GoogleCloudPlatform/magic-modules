@@ -24,6 +24,7 @@ module Overrides
         %i[
           aliases
           contain_extra_docs
+          no_log
         ]
       end
 
@@ -34,6 +35,7 @@ module Overrides
 
         check :aliases, type: ::Array, item_type: ::String
         check :contain_extra_docs, type: :boolean, default: true
+        check :no_log, type: :boolean, default: false
       end
     end
   end

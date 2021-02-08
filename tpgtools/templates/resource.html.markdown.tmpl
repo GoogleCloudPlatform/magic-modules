@@ -1,0 +1,115 @@
+---
+{{/* TODO Autogen notice */}}
+subcategory: "{{/* TODO display name */}}"
+layout: "google"
+page_title: "Google: {{$.TerraformName}}"
+sidebar_current: "{{$.SidebarCurrent}}"
+description: |-
+{{$.Description}}
+---
+
+# {{ replace $.TerraformName "_" "\\_" -1 }}
+
+{{$.Description}}
+
+{{/* TODO version notice */}}
+{{/* TODO references */}}
+{{/* TODO warning */}}
+{{/* TODO examples */}}
+
+## Argument Reference
+
+The following arguments are supported:
+{{ range $p := $.SchemaProperties }}
+  {{- if $p.Required }}
+* `{{$p.Name}}` -
+  (Required)
+  {{$p.Description}}
+    {{- if ($p.Default) }}
+  Default value is {{$p.Default}}.
+    {{- end }}
+  {{ end }}
+{{- end }}
+
+{{ range $v := $.Objects }}
+  {{- if and ($v.Required) ($v.ShouldGenerateNestedSchema) -}}
+The `{{$v.Name}}` block supports:
+    {{ range $p := $v.Properties }}
+* `{{$p.Name}}` -
+      {{- if $p.Required }}
+  (Required)
+      {{- end }}
+      {{- if $p.Optional }}
+  (Optional)
+      {{- end }}
+  {{$p.Description}}
+      {{- if $p.Default }}
+  Default value is {{$p.Default}}.
+      {{- end }}
+    {{ end }}
+  {{- end }}
+{{- end }}
+- - -
+{{ range $p := $.SchemaProperties }}
+  {{- if $p.Optional }}
+* `{{$p.Name}}` -
+  (Optional)
+  {{$p.Description}}
+    {{- if ($p.Default) }}
+  Default value is {{$p.Default}}.
+    {{- end }}
+  {{ end }}
+{{- end }}
+
+{{ range $v := $.Objects }}
+  {{- if and ($v.Optional) ($v.ShouldGenerateNestedSchema) -}}
+The `{{$v.Name}}` block supports:
+    {{ range $p := $v.Properties }}
+* `{{$p.Name}}` -
+      {{- if $p.Required }}
+  (Required)
+      {{- end }}
+      {{- if $p.Optional }}
+  (Optional)
+      {{- end }}
+  {{$p.Description}}
+      {{- if $p.Default }}
+  Default value is {{$p.Default}}.
+      {{- end }}
+    {{ end }}
+  {{- end }}
+{{- end }}
+## Attributes Reference
+
+In addition to the arguments listed above, the following computed attributes are exported:
+
+* `id` - an identifier for the resource with format `{{$.ID}}`
+{{ range $p := $.SchemaProperties }}
+  {{- if and ($p.Computed) (and (not $p.Required) (not $p.Optional)) }}
+* `{{$p.Name}}` -
+  {{$p.Description}}
+  {{ end }}
+{{- end }}
+## Timeouts
+
+This resource provides the following
+[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+
+- `create` - Default is {{$.InsertTimeoutMinutes}} minutes.
+{{- if $.Updatable }}
+- `update` - Default is {{$.UpdateTimeoutMinutes}} minutes.
+{{- end }}
+- `delete` - Default is {{$.DeleteTimeoutMinutes}} minutes.
+
+## Import
+{{/* TODO excluded imports */}}
+{{$.Type}} can be imported using any of these accepted formats:
+
+```
+{{- range $format := $.ImportFormats }}
+$ terraform import {{$.TerraformName}}.default {{$format}}
+{{- end }}
+```
+
+{{/* TODO project overrides */}}
+

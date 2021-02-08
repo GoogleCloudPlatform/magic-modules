@@ -1,0 +1,8 @@
+- type: CUSTOM_NAME
+  field: name
+  details:
+    name: realm_id
+- type: EXCLUDE
+  field: create_time
+- type: EXCLUDE
+  field: update_time
