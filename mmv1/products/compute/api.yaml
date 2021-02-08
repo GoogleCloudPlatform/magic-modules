@@ -7356,6 +7356,10 @@ objects:
           selected availability domain will be provided to the Partner via the
           pairing key so that the provisioned circuit will lie in the specified
           domain. If not specified, the value will default to AVAILABILITY_DOMAIN_ANY.
+        values:
+          - :ZONE_1
+          - :ZONE_2
+          - :ZONE_ANY
       - !ruby/object:Api::Type::NestedObject
         name: 'partnerMetadata'
         description: |
