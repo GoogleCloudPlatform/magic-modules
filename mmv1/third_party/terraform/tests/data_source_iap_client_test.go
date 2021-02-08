@@ -37,7 +37,7 @@ func TestAccIapClient_Datasource_basic(t *testing.T) {
 }
 
 func testAccIapClientDatasourceConfig(context map[string]interface{}) string {
-	return fmt.Sprintf(`
+	return Nprintf(`
 resource "google_project" "project" {
   project_id = "tf-test%{random_suffix}"
   name       = "tf-test%{random_suffix}"
