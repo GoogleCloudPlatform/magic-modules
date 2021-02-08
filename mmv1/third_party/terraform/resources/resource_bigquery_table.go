@@ -857,6 +857,13 @@ func resourceBigQueryTable() *schema.Resource {
 				Computed:    true,
 				Description: `Describes the table type.`,
 			},
+
+			"deletion_protection": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: `Whether or not to allow Terraform to destroy the instance. Unless this field is set to false in Terraform state, a terraform destroy or terraform apply that would delete the instance will fail.`,
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -1167,6 +1174,9 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error {
+	if d.Get("deletion_protection").(bool) {
+		return fmt.Errorf("cannot destroy instance without setting deletion_protection=false and running `terraform apply`")
+	}
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {

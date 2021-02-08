@@ -3,6 +3,7 @@ resource "google_bigquery_dataset" "test" {
 }
 
 resource "google_bigquery_table" "test" {
+	deletion_protection = false
 	table_id   = "<%= ctx[:vars]['table_id'] %>"
 	dataset_id = google_bigquery_dataset.test.dataset_id
 	time_partitioning {
