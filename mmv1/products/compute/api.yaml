@@ -7346,7 +7346,7 @@ objects:
           - :BPS_10G
           - :BPS_20G
           - :BPS_50G
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Enum
         name: 'edgeAvailabilityDomain'
         input: true
         description: |
@@ -7357,9 +7357,9 @@ objects:
           pairing key so that the provisioned circuit will lie in the specified
           domain. If not specified, the value will default to AVAILABILITY_DOMAIN_ANY.
         values:
-          - :ZONE_1
-          - :ZONE_2
-          - :ZONE_ANY
+          - :AVAILABILITY_DOMAIN_1
+          - :AVAILABILITY_DOMAIN_2
+          - :AVAILABILITY_DOMAIN_ANY
       - !ruby/object:Api::Type::NestedObject
         name: 'partnerMetadata'
         description: |
