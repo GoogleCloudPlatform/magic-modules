@@ -107,7 +107,8 @@ else
         # Previously we had many resources committed to tpgtools that were not
         # ready for generation. Block generation until these are removed
         set +e
-        if [ 0 -eq $(git merge-base --is-ancestor 0be5f0c31a6e69474b14e91b12c0bbc1e550df9c HEAD) ]; then
+        git merge-base --is-ancestor 0be5f0c31a6e69474b14e91b12c0bbc1e550df9c HEAD
+        if [ $? == 0 ]; then
             pushd ../
             make tpgtools OUTPUT_PATH=$LOCAL_PATH VERSION=$VERSION
             popd
@@ -119,7 +120,8 @@ else
         # Previously we had many resources committed to tpgtools that were not
         # ready for generation. Block generation until these are removed
         set +e
-        if [ 0 -eq $(git merge-base --is-ancestor 0be5f0c31a6e69474b14e91b12c0bbc1e550df9c HEAD) ]; then
+        git merge-base --is-ancestor 0be5f0c31a6e69474b14e91b12c0bbc1e550df9c HEAD
+        if [ $? == 0 ]; then
             pushd ../
             make tpgtools OUTPUT_PATH=$LOCAL_PATH VERSION=$VERSION
             popd
