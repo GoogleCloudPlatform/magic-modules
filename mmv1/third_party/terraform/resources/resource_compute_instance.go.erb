@@ -297,7 +297,7 @@ func resourceComputeInstance() *schema.Resource {
 							Computed:    true,
 							Description: `The name of the interface`,
 						},
-
+<% unless version == 'ga' -%>
 						"nic_type": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -305,7 +305,7 @@ func resourceComputeInstance() *schema.Resource {
 							ValidateFunc: validation.StringInSlice([]string{"GVNIC", "VIRTIO_NET"}, false),
 							Description:  `The type of vNIC to be used on this interface. Possible values:GVNIC, VIRTIO_NET`,
 						},
-
+<% end -%>
 						"access_config": {
 							Type:        schema.TypeList,
 							Optional:    true,
