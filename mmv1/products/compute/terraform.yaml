@@ -1102,6 +1102,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
       pairingKey: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        diff_suppress_func: 'suppressPartnerProviderPairingKey'
       partnerMetadata: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
