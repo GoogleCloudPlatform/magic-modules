@@ -15,7 +15,7 @@ else
 fi
 
 SCRATCH_PATH=https://$SCRATCH_OWNER:$GITHUB_TOKEN@github.com/$SCRATCH_OWNER/$GH_REPO
-LOCAL_PATH=$GOPATH/src/github.com/hashicorp/$GH_REPO
+LOCAL_PATH=$GOPATH/src/github.com/terraform-providers/$GH_REPO
 mkdir -p "$(dirname $LOCAL_PATH)"
 git clone $SCRATCH_PATH $LOCAL_PATH --single-branch --branch "auto-pr-$REFERENCE" --depth 1
 pushd $LOCAL_PATH
