@@ -1,4 +1,6 @@
 "path": &schema.Schema{
 	Type:     schema.TypeString,
 	Computed: true,
+	Deprecated:  "Deprecated in favor of id, which contains an identical value. This field will be removed in the next major release of the provider.",
+	Description: " Path of the subscription in the format projects/{project}/subscriptions/{name}",
 },
