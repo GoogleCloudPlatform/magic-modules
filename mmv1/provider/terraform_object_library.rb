@@ -68,7 +68,7 @@ module Provider
                           ['google/provider_handwritten_endpoint.go',
                            'third_party/terraform/utils/provider_handwritten_endpoint.go.erb'],
                           ['google/transport.go',
-                           'third_party/terraform/utils/transport.go.erb'],
+                           'third_party/terraform/utils/transport.go.erb']
                         ],
                         file_template)
     end
