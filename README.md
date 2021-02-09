@@ -103,7 +103,7 @@ Before making any changes, you can compile the "downstream" tool you're working
 on by running the following command. If Magic Modules has been installed
 correctly, you'll get no errors when you run a command:
 
-```
+```bash
 bundle exec compiler -a -v "ga" -e {{tool}} -o "{{output_folder}}"
 ```
 
@@ -113,7 +113,7 @@ For Ansible and Inspec, wherever you have cloned those repositories.
 
 For example, to generate Terraform:
 
-```
+```bash
 bundle exec compiler -a -v "ga" -e terraform -o "$GOPATH/src/github.com/hashicorp/terraform-provider-google"
 ```
 
@@ -127,7 +127,7 @@ Terraform is the only tool to handle Beta features right now; you can generate
 `google-beta` by running the following, substitution `"beta"` for the version
 and using the repository for the `google-beta` provider.
 
-```
+```besh
 bundle exec compiler -a -v "beta" -e terraform -o "$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
 ```
 
@@ -246,6 +246,7 @@ Once you've gotten approvals from the primary reviewer and the reviewers for
 any affected tools, the primary reviewer will merge your changes.
 
 ## Glossary
+
 The maintainers of the repository will tend to use specific jargon to describe
 concepts related to Magic Modules; here's a quick reference of what some of
 those terms are.
