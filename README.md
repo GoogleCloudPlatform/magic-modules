@@ -127,7 +127,7 @@ Terraform is the only tool to handle Beta features right now; you can generate
 `google-beta` by running the following, substitution `"beta"` for the version
 and using the repository for the `google-beta` provider.
 
-```besh
+```bash
 bundle exec compiler -a -v "beta" -e terraform -o "$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
 ```
 
