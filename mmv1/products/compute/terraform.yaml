@@ -1105,6 +1105,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'suppressPartnerProviderPairingKey'
       partnerMetadata: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        properties:
+          partnerName: !ruby/object:Overrides::Terraform::PropertyOverride
+            default_from_api: true
+          interconnectName: !ruby/object:Overrides::Terraform::PropertyOverride
+            default_from_api: true
+          portalUrl: !ruby/object:Overrides::Terraform::PropertyOverride
+            default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
