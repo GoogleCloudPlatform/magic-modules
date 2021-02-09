@@ -1094,6 +1094,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           interconnect_attachment_name: "on-prem-attachment"
           router_name: "router"
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        If you are using the resource with type 'PARTNER_PROVIDER', you will not be able to create a new 
+        interconnect_attachment when passing in a new pairing key. If you want to destroy and create a new 
+        interconnect_attachment, you must also change the name. This only applies when the type is 'PARTNER_PROVIDER'
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
