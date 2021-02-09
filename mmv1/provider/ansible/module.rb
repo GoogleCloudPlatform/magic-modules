@@ -32,6 +32,7 @@ module Provider
             'required' => (true if prop.required && !prop.default_value),
             'default' => prop.default_value,
             'type' => python_type(prop),
+            'no_log' => prop.no_log,
             'elements' => (python_type(prop.item_type) \
               if prop.is_a?(Api::Type::Array) && python_type(prop.item_type)),
             'aliases' => prop.aliases,

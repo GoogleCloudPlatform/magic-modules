@@ -191,10 +191,10 @@ The following arguments are supported:
     region is not supported with Cloud SQL. If you choose not to provide the `region` argument for this resource,
     make sure you understand this.
 
-* `settings` - (Required) The settings to use for the database. The
-    configuration is detailed below.
-
 - - -
+
+* `settings` - (Optional) The settings to use for the database. The
+    configuration is detailed below. Required if `clone` is not set.
 
 * `database_version` - (Optional, Default: `MYSQL_5_6`) The MySQL, PostgreSQL or
 SQL Server (beta) version to use. Supported values include `MYSQL_5_6`,
@@ -239,7 +239,11 @@ in Terraform state, a `terraform destroy` or `terraform apply` command that dele
     **NOTE:** Restoring from a backup is an imperative action and not recommended via Terraform. Adding or modifying this
     block during resource creation/update will trigger the restore action after the resource is created/updated. 
 
-The required `settings` block supports:
+* `clone` - (Optional) The context needed to create this instance as a clone of another instance. When this field is set during 
+    resource creation, Terraform will attempt to clone another instance as indicated in the context. The
+    configuration is detailed below.
+
+The `settings` block supports:
 
 * `tier` - (Required) The machine type to use. See [tiers](https://cloud.google.com/sql/docs/admin-api/v1beta4/tiers)
     for more details and supported versions. Postgres supports only shared-core machine types such as `db-f1-micro`,
@@ -349,16 +353,16 @@ to work, cannot be updated, and supports:
 * `ca_certificate` - (Optional) PEM representation of the trusted CA's x509
     certificate.
 
-* `client_certificate` - (Optional) PEM representation of the slave's x509
+* `client_certificate` - (Optional) PEM representation of the replica's x509
     certificate.
 
-* `client_key` - (Optional) PEM representation of the slave's private key. The
+* `client_key` - (Optional) PEM representation of the replica's private key. The
     corresponding public key in encoded in the `client_certificate`.
 
 * `connect_retry_interval` - (Optional, Default: 60) The number of seconds
     between connect retries.
 
-* `dump_file_path` - (Optional) Path to a SQL file in GCS from which slave
+* `dump_file_path` - (Optional) Path to a SQL file in GCS from which replica
     instances are created. Format is `gs://bucket/filename`.
 
 * `failover_target` - (Optional) Specifies if the replica is the failover target.
@@ -377,6 +381,14 @@ to work, cannot be updated, and supports:
 
 * `verify_server_certificate` - (Optional) True if the master's common name
     value is checked during the SSL handshake.
+
+The optional `clone` block supports:
+
+* `source_instance_name` - (Required) Name of the source instance which will be cloned.
+
+* `point_in_time` -  (Optional) The timestamp of the point in time that should be restored.
+
+    A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
 
 The optional `restore_backup_context` block supports:
 **NOTE:** Restoring from a backup is an imperative action and not recommended via Terraform. Adding or modifying this
