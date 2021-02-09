@@ -7381,6 +7381,7 @@ objects:
               URL of the Partner's portal for this Attachment. Partners may customise this to be a deep link to the specific resource on the Partner portal. This value may be validated to match approved Partner values.
       - !ruby/object:Api::Type::String
         name: 'pairingKey'
+        input: true
         description: |
           [Output only for type PARTNER. Input only for PARTNER_PROVIDER. Not present for DEDICATED]. The opaque identifier of an PARTNER attachment used to initiate provisioning with a selected partner. Of the form "XXXXX/region/domain"
       - !ruby/object:Api::Type::String
