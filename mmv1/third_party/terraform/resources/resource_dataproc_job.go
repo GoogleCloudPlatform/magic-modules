@@ -153,10 +153,17 @@ func resourceDataprocJob() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"max_failures_per_hour": {
 							Type:         schema.TypeInt,
-							Description:  "Maximum number of times per hour a driver may be restarted as a result of driver terminating with non-zero code before job is reported failed.",
+							Description:  "Maximum number of times per hour a driver may be restarted as a result of driver exiting with non-zero code before job is reported failed.",
 							Required:     true,
 							ForceNew:     true,
 							ValidateFunc: validation.IntAtMost(10),
+						},
+						"max_failures_total": {
+							Type:         schema.TypeInt,
+							Description:  "Maximum number of times in total a driver may be restarted as a result of driver exiting with non-zero code before job is reported failed.",
+							Required:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.IntAtMost(240),
 						},
 					},
 				},
@@ -210,11 +217,11 @@ func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 		submitReq.Job.Reference.JobId = v.(string)
 	}
 
-	if v, ok := d.GetOk("scheduling.0.max_failures_per_hour"); ok {
-		submitReq.Job.Scheduling = &dataproc.JobScheduling{
-			MaxFailuresPerHour: int64(v.(int)),
-		}
+	if v, ok := d.GetOk("scheduling"); ok {
+		config := extractFirstMapConfig(v.([]interface{}))
+		submitReq.Job.Scheduling = expandJobScheduling(config)
 	}
+
 	if _, ok := d.GetOk("labels"); ok {
 		submitReq.Job.Labels = expandLabels(d)
 	}
@@ -537,6 +544,17 @@ func expandPySparkJob(config map[string]interface{}) *dataproc.PySparkJob {
 
 	return job
 
+}
+
+func expandJobScheduling(config map[string]interface{}) *dataproc.JobScheduling {
+	jobScheduling := &dataproc.JobScheduling{}
+	if v, ok := config["max_failures_per_hour"]; ok {
+		jobScheduling.MaxFailuresPerHour = int64(v.(int))
+	}
+	if v, ok := config["max_failures_total"]; ok {
+		jobScheduling.MaxFailuresTotal = int64(v.(int))
+	}
+	return jobScheduling
 }
 
 // ---- Spark Job ----
@@ -1124,7 +1142,11 @@ func flattenJobScheduling(r *dataproc.JobScheduling) []map[string]interface{} {
 	jobScheduling := []map[string]interface{}{}
 
 	if r != nil {
-		jobScheduling = append(jobScheduling, map[string]interface{}{"max_failures_per_hour": r.MaxFailuresPerHour})
+		jobScheduling = append(jobScheduling,
+			map[string]interface{}{
+				"max_failures_per_hour": r.MaxFailuresPerHour,
+				"max_failures_total":    r.MaxFailuresTotal,
+			})
 	}
 	return jobScheduling
 }
