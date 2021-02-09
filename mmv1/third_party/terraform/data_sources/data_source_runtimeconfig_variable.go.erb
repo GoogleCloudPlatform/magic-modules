@@ -1,7 +1,10 @@
+<% autogen_exception -%>
 package google
 
+<% unless version == 'ga' -%>
+
 import (
-	"fmt"
+  "fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -29,3 +32,5 @@ func dataSourceGoogleRuntimeconfigVariableRead(d *schema.ResourceData, meta inte
 	d.SetId(id)
 	return resourceRuntimeconfigVariableRead(d, meta)
 }
+
+<% end -%>

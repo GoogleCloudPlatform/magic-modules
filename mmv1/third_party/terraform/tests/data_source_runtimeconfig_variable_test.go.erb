@@ -1,4 +1,7 @@
+<% autogen_exception -%>
 package google
+
+<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -51,3 +54,5 @@ func testAccRuntimeconfigDatasourceVariable(suffix string, name string, text str
 	}
 `, suffix, suffix, name, text)
 }
+
+<% end -%>
