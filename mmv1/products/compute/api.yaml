@@ -12522,7 +12522,7 @@ objects:
         conflicts:
           - 'snapshot_schedule_policy'
         description: |
-          Policy for creating snapshots of persistent disks.
+          Resource policy for instances used for placement configuration.
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'vmCount'
