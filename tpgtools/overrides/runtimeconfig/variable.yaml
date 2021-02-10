@@ -7,4 +7,4 @@
     function: runtimeconfigVariableImport
 - type: PRE_CREATE_FUNCTION
   details:
-   function: runtimeconfigVariableValidateTextOrValueSet
+    function: runtimeconfigVariableValidateTextOrValueSet
