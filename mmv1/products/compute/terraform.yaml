@@ -762,6 +762,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           global_address_name: "global-appserver-ip"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "global_address_private_services_connect"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          global_address_name: "global-psconnect-ip"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -795,6 +801,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           http_proxy_name: "target-proxy"
           backend_service_name: "backend"
           igm_name: "igm-internal"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "global_forwarding_rule_private_services_connect"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          global_address_name: "global-psconnect-ip"
+          forwarding_rule_name: "globalrule"
     properties:
       creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -802,8 +815,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       IPAddress: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-        validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateIpAddress'
+        diff_suppress_func: 'internalIpDiffSuppress'
         description: |
           The IP address that this forwarding rule is serving on behalf of.
 
