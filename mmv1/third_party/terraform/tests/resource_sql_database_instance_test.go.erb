@@ -1348,7 +1348,7 @@ resource "google_sql_database_instance" "instance" {
 
 var testGoogleSqlDatabaseInstance_insights = `
 resource "google_sql_database_instance" "instance" {
-  name   = "tf-lw-%d"
+  name   = "tf-test-%d"
   region = "us-central1"
   database_version = "POSTGRES_9_6"
   deletion_protection = false
