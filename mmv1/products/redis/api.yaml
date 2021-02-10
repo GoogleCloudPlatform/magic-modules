@@ -192,6 +192,7 @@ objects:
         input: true
       - !ruby/object:Api::Type::Enum
         name: transitEncryptionMode
+        min_version: beta
         input: true
         description: |
           The TLS mode of the Redis instance, If not provided, TLS is disabled for the instance.
@@ -201,3 +202,31 @@ objects:
           - :SERVER_AUTHENTICATION
           - :DISABLED
         default_value: :DISABLED
+      - !ruby/object:Api::Type::Array
+        name: 'serverCaCerts'
+        min_version: beta
+        description: |
+          List of server CA certificates for the instance.
+        output: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'serialNumber'
+              description: |
+                Serial number, as extracted from the certificate.
+            - !ruby/object:Api::Type::String
+              name: 'cert'
+              description: |
+                Serial number, as extracted from the certificate.
+            - !ruby/object:Api::Type::String
+              name: 'createTime'
+              description: |
+                The time when the certificate was created.
+            - !ruby/object:Api::Type::String
+              name: 'expireTime'
+              description: |
+                The time when the certificate expires.
+            - !ruby/object:Api::Type::String
+              name: 'sha1Fingerprint'
+              description: |
+                Sha1 Fingerprint of the certificate.
