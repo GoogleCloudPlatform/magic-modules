@@ -192,6 +192,7 @@ objects:
         input: true
       - !ruby/object:Api::Type::Enum
         name: transitEncryptionMode
+        input: true
         description: |
           The TLS mode of the Redis instance, If not provided, TLS is disabled for the instance.
 
