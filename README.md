@@ -121,15 +121,22 @@ It's worth noting that Magic Modules will only generate new files when ran
 locally. The "Magician"- the Magic Modules CI system- handles deletion of old
 files when creating PRs.
 
-#### Terraform's `google-beta` provider
+#### Compiler options
 
-Terraform is the only tool to handle Beta features right now; you can generate
-`google-beta` by running the following, substitution `"beta"` for the version
-and using the repository for the `google-beta` provider.
+`-e`, `-v`, and `-f` let you select which project should be generated.
 
-```bash
-bundle exec compiler -a -v "beta" -e terraform -o "$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
-```
+Target                      | compiler options
+----------------------------|-----------------
+ansible                     | `-e ansible`
+inspec                      | `-e inspec -v "beta"`
+terraform                   | `-e terraform -v "ga"`
+terraform (beta)            | `-e terraform -v "beta"`
+terraform-google-conversion | `-e terraform -f validator`
+
+Other important options are:
+
+- `-a` Generate for all products
+- `-p products/<folder_name>` Generate for a specific project, i.e. `-p products/appengine`
 
 ### Making changes to resources
 
