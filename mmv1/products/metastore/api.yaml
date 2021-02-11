@@ -78,16 +78,6 @@ objects:
         output: true
         description: |
           The relative resource name of the metastore service.
-      - !ruby/object:Api::Type::Time
-        name: 'createTime'
-        description: |
-          Time the AccessPolicy was created in UTC.
-        output: true
-      - !ruby/object:Api::Type::Time
-        name: 'updateTime'
-        description: |
-          Time the AccessPolicy was updated in UTC.
-        output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: 'User-defined labels for the metastore service.'
@@ -108,7 +98,6 @@ objects:
         name: 'port'
         description: |
           The TCP port at which the metastore service is reached. Default: 9083.
-        default_value: 9083
       - !ruby/object:Api::Type::String
         name: 'state'
         output: true
@@ -128,9 +117,7 @@ objects:
         name: 'tier'
         description: |
           The tier of the service.
-        default_value: :TIER_UNSPECIFIED
         values:
-          - :TIER_UNSPECIFIED
           - :DEVELOPER
           - :ENTERPRISE
       - !ruby/object:Api::Type::NestedObject
@@ -140,11 +127,11 @@ objects:
           This specifies when the service can be restarted for maintenance purposes in UTC time.
         properties:
           - !ruby/object:Api::Type::Integer
-            name: 'dayOfWeek'
+            name: 'hourOfDay'
             description: |
               The hour of day (0-23) when the window starts.
           - !ruby/object:Api::Type::Enum
-              name: 'optionalComponents'
+              name: 'dayOfWeek'
               description: |
                 The day of week, when the window starts.
               default_value: :DAY_OF_WEEK_UNSPECIFIED
@@ -157,13 +144,9 @@ objects:
               - :FRIDAY
               - :SATURDAY
               - :SUNDAY
-      - !ruby/object:Api::Type::String
-        name: 'uid'
-        output: true
-        description: |
-          The globally unique resource identifier of the metastore service.
       - !ruby/object:Api::Type::NestedObject
         name: 'metadataManagementActivity'
+        output: true
         description: |
          The metadata management activities of the metastore service.
         properties:
@@ -202,6 +185,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'version'
             input: true
+            required: true
             description: |
               The Hive metastore schema version.
           - !ruby/object:Api::Type::KeyValuePairs
