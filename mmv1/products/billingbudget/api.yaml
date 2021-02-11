@@ -69,7 +69,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::Array
             name: projects
-            input: true
+            send_empty_value: true
             at_least_one_of:
               - budget_filter.0.projects
               - budget_filter.0.credit_types_treatment
