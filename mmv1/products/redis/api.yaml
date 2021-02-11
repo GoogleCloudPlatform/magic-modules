@@ -212,21 +212,26 @@ objects:
           properties:
             - !ruby/object:Api::Type::String
               name: 'serialNumber'
+              output: true
               description: |
                 Serial number, as extracted from the certificate.
             - !ruby/object:Api::Type::String
               name: 'cert'
+              output: true
               description: |
                 Serial number, as extracted from the certificate.
             - !ruby/object:Api::Type::String
               name: 'createTime'
+              output: true
               description: |
                 The time when the certificate was created.
             - !ruby/object:Api::Type::String
               name: 'expireTime'
+              output: true
               description: |
                 The time when the certificate expires.
             - !ruby/object:Api::Type::String
               name: 'sha1Fingerprint'
+              output: true
               description: |
                 Sha1 Fingerprint of the certificate.
