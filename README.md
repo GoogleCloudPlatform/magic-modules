@@ -128,7 +128,7 @@ files when creating PRs.
 Target                      | compiler options
 ----------------------------|-----------------
 ansible                     | `-e ansible`
-inspec                      | `-e inspec`
+inspec                      | `-e inspec -v "beta"`
 terraform                   | `-e terraform -v "ga"`
 terraform (beta)            | `-e terraform -v "beta"`
 terraform-google-conversion | `-e terraform -f validator`
