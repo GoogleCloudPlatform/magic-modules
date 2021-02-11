@@ -1585,6 +1585,11 @@ func resourceBigQueryTableImport(d *schema.ResourceData, meta interface{}) ([]*s
 		return nil, err
 	}
 
+	// Explicitly set virtual fields to default values on import
+	if err := d.Set("deletion_protection", true); err != nil {
+		return nil, fmt.Errorf("Error setting deletion_protection: %s", err)
+	}
+
 	// Replace import id for the resource id
 	id, err := replaceVars(d, config, "projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
 	if err != nil {

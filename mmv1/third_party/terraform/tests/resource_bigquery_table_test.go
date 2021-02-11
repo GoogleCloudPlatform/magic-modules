@@ -814,7 +814,7 @@ resource "google_bigquery_dataset" "test" {
 }
 
 resource "google_bigquery_table" "test" {
-	deletion_protection = false
+  deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
 
@@ -881,7 +881,7 @@ resource "google_kms_crypto_key_iam_member" "allow" {
 }
 
 resource "google_bigquery_table" "test" {
-	deletion_protection = false
+  deletion_protection = false
   table_id   = "%s"
   dataset_id = "${google_bigquery_dataset.test.dataset_id}"
 
@@ -944,7 +944,7 @@ resource "google_bigquery_dataset" "test" {
 }
 
 resource "google_bigquery_table" "test" {
-	deletion_protection = false
+  deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
 
@@ -982,7 +982,7 @@ resource "google_bigquery_dataset" "test" {
 }
 
 resource "google_bigquery_table" "test" {
-	deletion_protection = false
+  deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
 
@@ -1021,7 +1021,7 @@ func testAccBigQueryTableRangePartitioning(datasetID, tableID string) string {
   }
 
   resource "google_bigquery_table" "test" {
-		deletion_protection = false
+	  deletion_protection = false
     table_id   = "%s"
     dataset_id = google_bigquery_dataset.test.dataset_id
 
@@ -1057,7 +1057,7 @@ resource "google_bigquery_dataset" "test" {
 }
 
 resource "google_bigquery_table" "test" {
-	deletion_protection = false
+  deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
 
@@ -1080,7 +1080,7 @@ resource "google_bigquery_dataset" "test" {
 }
 
 resource "google_bigquery_table" "test" {
-	deletion_protection = false
+  deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
 
@@ -1103,7 +1103,7 @@ resource "google_bigquery_dataset" "test" {
 }
 
 resource "google_bigquery_table" "test" {
-	deletion_protection = false
+  deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
 
@@ -1153,7 +1153,7 @@ EOH
 }
 
 resource "google_bigquery_table" "mv_test" {
-	deletion_protection = false
+  deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
 
@@ -1180,7 +1180,7 @@ resource "google_bigquery_dataset" "test" {
 }
 
 resource "google_bigquery_table" "test" {
-	deletion_protection = false
+  deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
 
@@ -1230,7 +1230,7 @@ EOH
 }
 
 resource "google_bigquery_table" "mv_test" {
-	deletion_protection = false
+  deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
 
@@ -1259,7 +1259,7 @@ resource "google_bigquery_dataset" "test" {
 }
 
 resource "google_bigquery_table" "test" {
-	deletion_protection = false
+  deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
 
@@ -1335,7 +1335,7 @@ EOF
 }
 
 resource "google_bigquery_table" "test" {
-	deletion_protection = false
+  deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
   external_data_configuration {
@@ -1357,7 +1357,7 @@ resource "google_bigquery_table" "test" {
 func testAccBigQueryTableFromSheet(context map[string]interface{}) string {
 	return Nprintf(`
   resource "google_bigquery_table" "table" {
-		deletion_protection = false
+	  deletion_protection = false
     dataset_id = google_bigquery_dataset.dataset.dataset_id
     table_id   = "tf_test_sheet_%{random_suffix}"
 
@@ -1414,7 +1414,7 @@ resource "google_bigquery_dataset" "test" {
 }
 
 resource "google_bigquery_table" "test" {
-	deletion_protection = false
+  deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
 
@@ -1448,7 +1448,7 @@ resource "google_bigquery_dataset" "test" {
 }
 
 resource "google_bigquery_table" "test" {
-	deletion_protection = false
+  deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
 
@@ -1481,7 +1481,7 @@ resource "google_bigquery_dataset" "test" {
 }
 
 resource "google_bigquery_table" "test" {
-	deletion_protection = false
+  deletion_protection = false
   table_id   = "%s"
 	dataset_id = google_bigquery_dataset.test.dataset_id
 	lifecycle {
@@ -1518,7 +1518,7 @@ resource "google_bigquery_dataset" "test" {
 }
 
 resource "google_bigquery_table" "test" {
-	deletion_protection = false
+  deletion_protection = false
   table_id   = "%s"
 	dataset_id = google_bigquery_dataset.test.dataset_id
 	lifecycle {
@@ -1587,7 +1587,7 @@ resource "google_bigquery_dataset" "test" {
 }
 
 resource "google_bigquery_table" "test" {
-	deletion_protection = false
+  deletion_protection = false
   table_id   = "%s"
 	dataset_id = google_bigquery_dataset.test.dataset_id
   friendly_name = "bigquerytest"
