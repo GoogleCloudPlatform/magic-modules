@@ -123,3 +123,80 @@ objects:
         'Creating an API organization':
           'https://cloud.google.com/apigee/docs/api-platform/get-started/create-org'
       api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations'
+######### Apigee Instance  
+  - !ruby/object:Api::Resource
+    name: 'Instance'
+    base_url: 'instances'
+    create_url: 'organizations?parent=organizations/{{org_id}}'
+    self_link: 'instances'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    description: |
+      An `Instance` is the runtime dataplane in Apigee.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Resource ID of the instance.
+        required: true
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: ‘location’
+        description: |
+          Compute Engine location where the instance resides.
+        required: true
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: ‘description’
+        description: |
+          Description of the instance.
+        required: false
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: ‘displayName’
+        description: |
+          Display name of the instance.
+        required: false
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: ‘diskEncryptionKeyName’
+        description: |
+          Customer Managed Encryption Key (CMEK) used for disk and volume encryption.
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'host'
+        description: |
+          Output only. Hostname or IP address of the exposed Apigee endpoint used by clients to connect to the service.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'port'
+        description: |
+          Output only. Port number of the exposed Apigee endpoint.
+        output: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating a runtime instance':
+          'https://cloud.google.com/apigee/docs/api-platform/get-started/create-instance'
+      api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances/create'
