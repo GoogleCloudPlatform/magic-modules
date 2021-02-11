@@ -141,20 +141,20 @@ resource "google_billing_budget" "budget" {
   display_name    = "Example Billing Budget%{random_suffix}"
 
   budget_filter {
-    credit_types_treatment = "EXCLUDE_ALL_CREDITS"
+    credit_types_treatment = "INCLUDE_SPECIFIED_CREDITS"
   }
 
   amount {
     specified_amount {
-      units         = "100000"
+      units         = "1000000"
     }
   }
 
   threshold_rules {
-    threshold_percent = 1.0
+    threshold_percent = 0.5
   }
   threshold_rules {
-    threshold_percent = 1.0
+    threshold_percent = 0.3
     spend_basis       = "FORECASTED_SPEND"
   }
 }
