@@ -3,11 +3,12 @@ resource "google_compute_global_address" "default" {
   name          = "<%= ctx[:vars]['global_address_name'] %>"
   address_type  = "INTERNAL"
   purpose       = "PRIVATE_SERVICE_CONNECT"
-  network       = data.google_compute_network.network.id
+  network       = google_compute_network.network.id
   address       = "100.100.100.105"
 }
 
-data "google_compute_network" "network" {
+resource "google_compute_network" "network" {
   provider      = google-beta
-  name          = "default"
+  name          = "tf-test%{random_suffix}"
+  auto_create_subnetworks = false
 }
