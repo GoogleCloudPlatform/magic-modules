@@ -336,10 +336,10 @@ func isCloudRunCreationConflict(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 409 {
 			return true, "saw a 409 - waiting until background deletion completes"
-                }
-        }
+		}
+	}
 
-        return false, ""
+	return false, ""
 }
 
 // If a service account is deleted in the middle of updating an IAM policy
