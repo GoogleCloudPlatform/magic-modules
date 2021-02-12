@@ -354,6 +354,9 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 	log.Printf("[DEBUG] Getting list of existing sql instances")
 
 	instances, err := config.NewSqlAdminClient(config.userAgent).Instances.List(project).Do()
+	if err != nil {
+		t.Fatalf("Unable to bootstrap SQL Instance. Cannot retrieve instance list: %s", err)
+	}
 
 	var bootstrapInstance *sqladmin.DatabaseInstance
 
