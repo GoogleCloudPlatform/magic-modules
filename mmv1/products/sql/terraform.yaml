@@ -45,6 +45,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       charset: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        diff_suppress_func: 'caseDiffSuppress'
   SourceRepresentationInstance: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
