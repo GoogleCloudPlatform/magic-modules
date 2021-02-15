@@ -94,6 +94,10 @@ module Provider
                         'third_party/validator/storage_bucket.go'],
                        ['google/storage_bucket_iam.go',
                         'third_party/validator/storage_bucket_iam.go'],
+                       ['google/bigquery_table.go',
+                        'third_party/validator/bigquery_table.go'],
+                       ['google/cloudfunctions_function.go',
+                        'third_party/validator/cloudfunctions_function.go'],
                        ['google/iam_helpers.go',
                         'third_party/validator/iam_helpers.go'],
                        ['google/iam_helpers_test.go',
@@ -169,7 +173,13 @@ module Provider
                        ['google/iam_folder.go',
                         'third_party/terraform/utils/iam_folder.go'],
                        ['google/iam_project.go',
-                        'third_party/terraform/utils/iam_project.go']
+                        'third_party/terraform/utils/iam_project.go'],
+                       ['google/iam_bigquery_dataset.go',
+                        'third_party/terraform/utils/iam_bigquery_dataset.go'],
+                       ['google/iam_bigtable_table.go',
+                        'third_party/terraform/utils/iam_bigtable_table.go'],
+                       ['google/iam_pubsub_subscription.go',
+                        'third_party/terraform/utils/iam_pubsub_subscription.go'],
                      ])
     end
 
