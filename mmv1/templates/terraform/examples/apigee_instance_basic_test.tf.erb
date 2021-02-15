@@ -42,7 +42,7 @@ resource "google_service_networking_connection" "apigee_vpc_connection" {
   depends_on              = [google_project_service.servicenetworking]
 }
 
-resource "google_apigee_organization" "<%= ctx[:primary_resource_id] %>" {
+resource "google_apigee_organization" "apigee_org" {
   analytics_region   = "us-central1"
   project_id         = google_project.project.project_id
   authorized_network = google_compute_network.apigee_network.id
@@ -52,27 +52,9 @@ resource "google_apigee_organization" "<%= ctx[:primary_resource_id] %>" {
   ]
 }
 
-######## Instance
-
-resource "google_kms_key_ring" "apigee_instance_keyring" {
-  name     = "apigee-instance-keyring"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "apigee_instance_key" {
-  name            = "apigee-instance-key"
-  key_ring        = google_kms_key_ring.apigee_instance_keyring.id
-
-  lifecycle {
-    prevent_destroy = true
-  }
-}
-
-resource "google_apigee_organization_instance" "ins" {
-  name                  = "instance_1"
-  location              = "us-central1"
-  description           = "Apigee runtime instance"
-  display_name          = "instance_1"
-  disk_encryption_key_name = google_kms_key.apigee_instance_key.id
+resource "google_apigee_instance" "<%= ctx[:primary_resource_id] %>" {
+  name     = "tf-test%{random_suffix}"
+  location = "us-central1-b"
+  org_id   = google_apigee_organization.apigee_org.id
 }
 

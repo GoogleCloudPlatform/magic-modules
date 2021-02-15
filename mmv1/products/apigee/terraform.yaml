@@ -47,31 +47,47 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       min_version: beta
       # Resource creation race
       skip_vcr: true
-
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/apigee_organization.go.erb
       encoder: templates/terraform/encoders/apigee_organization.go.erb
-############## Apigee Instance
-
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
+    import_format: ["{{org_id}}/instances/{{name}}", "{{org_id}}/{{name}}"]
     examples:
     - !ruby/object:Provider::Terraform::Examples
-      name: "apigee_organization_instance_cloud"
+      name: "apigee_instance_basic"
       skip_test: true
     - !ruby/object:Provider::Terraform::Examples
       # This is a more verbose version of the above that creates all
       # the resources needed for the acceptance test.
-      name: "apigee_organization_instance_cloud_test"
-      primary_resource_id: "org"
+      name: "apigee_instance_basic_test"
+      primary_resource_id: "apigee_instance"
       test_env_vars:
         org_id: :ORG_ID
         billing_account: :BILLING_ACCT
       skip_docs: true
-
-    #custom_code: !ruby/object:Provider::Terraform::CustomCode
-     # custom_import: templates/terraform/custom_import/apigee_organization_instance.go.erb
-     # encoder: templates/terraform/encoders/apigee_organization_instance.go.erb
+      # Resource creation race
+      skip_vcr: true
+    - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_instance_full"
+      skip_test: true
+    - !ruby/object:Provider::Terraform::Examples
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
+      name: "apigee_instance_full_test"
+      primary_resource_id: "apigee_instance"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_docs: true
+      min_version: beta
+      # Resource creation race
+      skip_vcr: true
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 30
+      delete_minutes: 30
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/apigee_instance.go.erb
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
