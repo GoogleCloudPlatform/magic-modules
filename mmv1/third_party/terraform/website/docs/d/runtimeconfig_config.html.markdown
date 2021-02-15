@@ -27,7 +27,7 @@ data "google_runtimeconfig_config" "run-service" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the Cloud Run Service.
+* `name` - (Required) The name of the Runtime Configurator configuration.
 
 - - -
 

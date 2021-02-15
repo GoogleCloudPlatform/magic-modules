@@ -978,6 +978,50 @@ objects:
             description: |
               The geographic location of the job. The default value is US.
             default_value: 'US'
+      - !ruby/object:Api::Type::NestedObject
+        name: 'status'
+        output: true
+        description: |
+          The status of this job. Examine this value when polling an asynchronous job to see if the job is complete.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'errorResult'
+            output: true
+            description: |
+              Final error result of the job. If present, indicates that the job has completed and was unsuccessful.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'reason'
+                description: A short error code that summarizes the error.
+              - !ruby/object:Api::Type::String
+                name: 'location'
+                description: Specifies where the error occurred, if present.
+              - !ruby/object:Api::Type::String
+                name: 'message'
+                description: A human-readable description of the error.
+          - !ruby/object:Api::Type::Array
+            name: 'errors'
+            output: true
+            description: |
+              The first errors encountered during the running of the job. The final message
+              includes the number of errors that caused the process to stop. Errors here do
+              not necessarily mean that the job has not completed or was unsuccessful.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'reason'
+                  description: A short error code that summarizes the error.
+                - !ruby/object:Api::Type::String
+                  name: 'location'
+                  description: Specifies where the error occurred, if present.
+                - !ruby/object:Api::Type::String
+                  name: 'message'
+                  description: A human-readable description of the error.
+          - !ruby/object:Api::Type::String
+            name: 'state'
+            output: true
+            description: |
+              Running state of the job. Valid states include 'PENDING', 'RUNNING', and 'DONE'.
   - !ruby/object:Api::Resource
     name: 'Table'
     kind: 'bigquery#table'
