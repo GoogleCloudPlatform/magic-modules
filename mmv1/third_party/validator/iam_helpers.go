@@ -67,6 +67,7 @@ func mergeIamAssets(
 	return existing
 }
 
+// incoming is the last known state of an asset prior to deletion
 func mergeDeleteIamAssets(
 	existing, incoming Asset,
 	mergeBindings func(existing, incoming []IAMBinding) []IAMBinding,
@@ -111,7 +112,7 @@ func mergeAdditiveBindings(existing, incoming []IAMBinding) []IAMBinding {
 }
 
 // mergeDeleteAdditiveBindings eliminates listed members from roles in the
-// existing list.
+// existing list. incoming is the last known state of the bindings being deleted.
 func mergeDeleteAdditiveBindings(existing, incoming []IAMBinding) []IAMBinding {
 	toDelete := make(map[string]struct{})
 	for _, binding := range incoming {
@@ -167,7 +168,8 @@ func mergeAuthoritativeBindings(existing, incoming []IAMBinding) []IAMBinding {
 }
 
 // mergeDeleteAuthoritativeBindings eliminates any bindings with matching roles
-// in the existing list.
+// in the existing list. incoming is the last known state of the bindings being
+// deleted.
 func mergeDeleteAuthoritativeBindings(existing, incoming []IAMBinding) []IAMBinding {
 	toDelete := make(map[string]struct{})
 	for _, binding := range incoming {
