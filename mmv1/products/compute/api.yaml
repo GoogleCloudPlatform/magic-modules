@@ -3983,7 +3983,8 @@ objects:
           The prefix length of the IP range. If not present, it means the
           address field is a single IP address.
 
-          This field is not applicable to addresses with addressType=EXTERNAL.
+          This field is not applicable to addresses with addressType=EXTERNAL,
+          or addressType=INTERNAL when purpose=PRIVATE_SERVICE_CONNECT
       - !ruby/object:Api::Type::Enum
         name: 'addressType'
         description: |
@@ -4001,10 +4002,12 @@ objects:
           The purpose of the resource. For global internal addresses it can be
 
           * VPC_PEERING - for peer networks
+          * PRIVATE_SERVICE_CONNECT - for ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) only) Private Service Connect networks
 
           This should only be set when using an Internal address.
         values:
         - :VPC_PEERING
+        - :PRIVATE_SERVICE_CONNECT
       - !ruby/object:Api::Type::ResourceRef
         name: 'network'
         resource: 'Network'
@@ -4082,6 +4085,10 @@ objects:
           static IP address), with a purpose of GCE_END_POINT and addressType
           of INTERNAL.
 
+          ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) only) This must be a URL reference to an existing Address
+          resource (internal global static IP address), with a purpose of
+          PRIVATE_SERVICE_CONNECT and addressType of INTERNAL.
+
           An address can be specified either by a literal IP address or a URL
           reference to an existing Address resource. The following examples are
           all valid:
@@ -4097,7 +4104,9 @@ objects:
         name: 'IPProtocol'
         description: |
           The IP protocol to which this rule applies. When the load balancing scheme is
-          INTERNAL_SELF_MANAGED, only TCP is valid.
+          INTERNAL_SELF_MANAGED, only TCP is valid. This field must not be set if the
+          global address is configured as a purpose of PRIVATE_SERVICE_CONNECT
+          and addressType of INTERNAL
         values:
           - :TCP
           - :UDP
@@ -4136,8 +4145,8 @@ objects:
           will be used for External Global Load Balancing (HTTP(S) LB,
           External TCP/UDP LB, SSL Proxy)
 
-          NOTE: Currently global forwarding rules cannot be used for INTERNAL
-          load balancing.
+          ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) only) Note: This field must be set "" if the global address is
+          configured as a purpose of PRIVATE_SERVICE_CONNECT and addressType of INTERNAL.
         default_value: :EXTERNAL
         values:
           - :EXTERNAL
@@ -4260,6 +4269,9 @@ objects:
           The forwarded traffic must be of a type appropriate to the target object.
           For INTERNAL_SELF_MANAGED load balancing, only HTTP and HTTPS targets
           are valid.
+
+          ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) only) For global address with a purpose of PRIVATE_SERVICE_CONNECT and
+          addressType of INTERNAL, only "all-apis" and "vpc-sc" are valid.
         update_verb: :POST
         update_url: 'projects/{{project}}/global/forwardingRules/{{name}}/setTarget'
   - !ruby/object:Api::Resource
@@ -12522,7 +12534,7 @@ objects:
         conflicts:
           - 'snapshot_schedule_policy'
         description: |
-          Policy for creating snapshots of persistent disks.
+          Resource policy for instances used for placement configuration.
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'vmCount'

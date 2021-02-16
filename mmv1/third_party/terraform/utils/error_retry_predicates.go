@@ -240,11 +240,14 @@ func isNotFilestoreQuotaError(err error) (bool, string) {
 }
 
 // Retry if App Engine operation returns a 409 with a specific message for
-// concurrent operations.
+// concurrent operations, or a 404 indicating p4sa has not yet propagated.
 func isAppEngineRetryableError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 409 && strings.Contains(strings.ToLower(gerr.Body), "operation is already in progress") {
 			return true, "Waiting for other concurrent App Engine changes to finish"
+		}
+		if gerr.Code == 404 && strings.Contains(strings.ToLower(gerr.Body), "unable to retrieve p4sa") {
+			return true, "Waiting for P4SA propagation to GAIA"
 		}
 	}
 	return false, ""
@@ -322,5 +325,19 @@ func healthcareDatasetNotInitialized(err error) (bool, string) {
 			return true, "dataset not initialized - retrying"
 		}
 	}
+	return false, ""
+}
+
+// Cloud Run APIs may return a 409 on create to indicate that a resource has been deleted in the foreground
+// (eg GET and LIST) but not the backing apiserver. When we encounter a 409, we can retry it.
+// Note that due to limitations in MMv1's error_retry_predicates this is currently applied to all requests.
+// We only expect to receive it on create, though.
+func isCloudRunCreationConflict(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 409 {
+			return true, "saw a 409 - waiting until background deletion completes"
+		}
+	}
+
 	return false, ""
 }

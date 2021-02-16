@@ -206,7 +206,7 @@ steps:
       id: tpg-vcr-test
       secretEnv: ["TEAMCITY_TOKEN", "GITHUB_TOKEN"]
       waitFor: ["diff"]
-      timeout: 6000s
+      timeout: 12000s
       args:
           - $_PR_NUMBER
 
@@ -217,7 +217,7 @@ steps:
           - $_PR_NUMBER
 
 # Long timeout to enable waiting on VCR test
-timeout: 8000s
+timeout: 20000s
 options:
     machineType: 'N1_HIGHCPU_32'
 
