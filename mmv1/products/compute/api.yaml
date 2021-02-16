@@ -12523,6 +12523,7 @@ objects:
                 item_type: Api::Type::String
               - !ruby/object:Api::Type::Boolean
                 name: 'guestFlush'
+                send_empty_value: true
                 at_least_one_of:
                   - snapshot_schedule_policy.0.snapshot_properties.0.labels
                   - snapshot_schedule_policy.0.snapshot_properties.0.storage_locations
