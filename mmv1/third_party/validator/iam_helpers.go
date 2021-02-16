@@ -67,6 +67,16 @@ func mergeIamAssets(
 	return existing
 }
 
+func mergeDeleteIamAssets(
+	existing, incoming Asset,
+	mergeBindings func(existing, incoming []IAMBinding) []IAMBinding,
+) Asset {
+	if existing.IAMPolicy != nil {
+		existing.IAMPolicy.Bindings = mergeBindings(existing.IAMPolicy.Bindings, incoming.IAMPolicy.Bindings)
+	}
+	return existing
+}
+
 // mergeAdditiveBindings adds members to bindings with the same roles and adds new
 // bindings for roles that dont exist.
 func mergeAdditiveBindings(existing, incoming []IAMBinding) []IAMBinding {
@@ -100,6 +110,38 @@ func mergeAdditiveBindings(existing, incoming []IAMBinding) []IAMBinding {
 	return existing
 }
 
+// mergeDeleteAdditiveBindings eliminates listed members from roles in the
+// existing list.
+func mergeDeleteAdditiveBindings(existing, incoming []IAMBinding) []IAMBinding {
+	toDelete := make(map[string]struct{})
+	for _, binding := range incoming {
+		for _, m := range binding.Members {
+			key := binding.Role + "-" + m
+			toDelete[key] = struct{}{}
+		}
+	}
+
+	var newExisting []IAMBinding
+	for _, binding := range existing {
+		var newMembers []string
+		for _, m := range binding.Members {
+			key := binding.Role + "-" + m
+			_, delete := toDelete[key]
+			if !delete {
+				newMembers = append(newMembers, m)
+			}
+		}
+		if newMembers != nil {
+			newExisting = append(newExisting, IAMBinding{
+				Role: binding.Role,
+				Members: newMembers,
+			})
+		}
+	}
+
+	return newExisting
+}
+
 // mergeAuthoritativeBindings clobbers members to bindings with the same roles
 // and adds new bindings for roles that dont exist.
 func mergeAuthoritativeBindings(existing, incoming []IAMBinding) []IAMBinding {
@@ -122,4 +164,25 @@ func mergeAuthoritativeBindings(existing, incoming []IAMBinding) []IAMBinding {
 	}
 
 	return existing
+}
+
+// mergeDeleteAuthoritativeBindings eliminates any bindings with matching roles
+// in the existing list.
+func mergeDeleteAuthoritativeBindings(existing, incoming []IAMBinding) []IAMBinding {
+	toDelete := make(map[string]struct{})
+	for _, binding := range incoming {
+		key := binding.Role
+		toDelete[key] = struct{}{}
+	}
+
+	var newExisting []IAMBinding
+	for _, binding := range existing {
+		key := binding.Role
+		_, delete := toDelete[key]
+		if !delete {
+			newExisting = append(newExisting, binding)
+		}
+	}
+
+	return newExisting
 }
