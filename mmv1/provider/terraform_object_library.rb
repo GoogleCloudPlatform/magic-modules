@@ -181,13 +181,7 @@ module Provider
                        ['google/iam_folder.go',
                         'third_party/terraform/utils/iam_folder.go'],
                        ['google/iam_project.go',
-                        'third_party/terraform/utils/iam_project.go'],
-                       ['google/iam_bigquery_dataset.go',
-                        'third_party/terraform/utils/iam_bigquery_dataset.go'],
-                       ['google/iam_bigtable_table.go',
-                        'third_party/terraform/utils/iam_bigtable_table.go'],
-                       ['google/iam_pubsub_subscription.go',
-                        'third_party/terraform/utils/iam_pubsub_subscription.go'],
+                        'third_party/terraform/utils/iam_project.go']
                      ])
     end
 
