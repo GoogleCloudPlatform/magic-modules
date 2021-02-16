@@ -537,7 +537,6 @@ objects:
           - :TLSA
           - :TXT
         description: One of valid DNS resource types.
-        # TODO(nelsonjr): Enforce required in provider manifest
         required: true
       - !ruby/object:Api::Type::Integer
         name: 'ttl'
