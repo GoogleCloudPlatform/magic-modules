@@ -119,7 +119,7 @@ func PollCheckForExistence(_ map[string]interface{}, respErr error) PollResult {
 
 // PollCheckForExistenceWith403 waits for a successful response, continues polling on 404 or 403,
 // and returns any other error.
-func PollCheckForExistence(_ map[string]interface{}, respErr error) PollResult {
+func PollCheckForExistenceWith403(_ map[string]interface{}, respErr error) PollResult {
 	if respErr != nil {
 		if isGoogleApiErrorWithCode(respErr, 404) || isGoogleApiErrorWithCode(respErr, 403) {
 			return PendingStatusPollResult("not found")
@@ -128,7 +128,6 @@ func PollCheckForExistence(_ map[string]interface{}, respErr error) PollResult {
 	}
 	return SuccessPollResult()
 }
-
 
 // PollCheckForAbsence waits for a 404 response, continues polling on a successful
 // response, and returns any other error.
