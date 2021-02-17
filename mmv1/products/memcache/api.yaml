@@ -51,7 +51,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/memcache/docs/creating-instances'
-      api: 'https://cloud.google.com/memorystore/docs/memcached/reference/rest'
+      api: 'https://cloud.google.com/memorystore/docs/memcached/reference/rest/v1beta2/projects.locations.instances'
     parameters:
       - !ruby/object:Api::Type::String
         name: 'region'

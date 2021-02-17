@@ -225,7 +225,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/run/docs/'
-      api: 'https://cloud.google.com/run/docs/reference/rest/v1/projects.locations.services'
+      api: 'https://cloud.google.com/run/docs/reference/rest/v1/namespaces.services'
   description: |-
     Service acts as a top-level container that manages a set of Routes and
     Configurations which implement a network service. Service exists to provide a
