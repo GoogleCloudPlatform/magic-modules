@@ -375,9 +375,14 @@ func (p Property) GetRequiredFileImports() (imports []string) {
 func (p Property) DefaultSetHashFunc() *string {
 	switch p.Type.String() {
 	case SchemaTypeSet:
-		shf := "schema.HashString"
+		if p.ElemIsBasicType {
+			shf := "schema.HashString"
+			return &shf
+		}
+		shf := fmt.Sprintf("schema.HashResource(%s)", *p.Elem)
 		return &shf
 	}
+	glog.Fatalf("Failed to find valid hash func")
 	return nil
 }
 
