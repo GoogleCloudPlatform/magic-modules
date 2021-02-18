@@ -363,7 +363,7 @@ func expandNodeConfig(v interface{}) *containerBeta.NodeConfig {
 	if v, ok := nodeConfig["ephemeral_storage_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		nc.EphemeralStorageConfig = &containerBeta.EphemeralStorageConfig{
-			LocalSsdCount: conf["local_ssd_count"].(int64),
+			LocalSsdCount: int64(conf["local_ssd_count"].(int)),
 		}
 	}
 <% end -%>
