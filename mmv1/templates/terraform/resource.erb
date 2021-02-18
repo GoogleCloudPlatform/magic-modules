@@ -254,6 +254,8 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
     d.SetId(id)
 
+<%= lines(compile(pwd + '/' + object.custom_code.post_create)) if object.custom_code.post_create -%>
+
 <%  if object.async&.allow?('create') -%>
 <%    if object.async.is_a? Provider::Terraform::PollAsync -%>
     err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Creating <%= object.name -%>", d.Timeout(schema.TimeoutCreate), <%= object.async.target_occurrences -%>)
@@ -342,8 +344,6 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%  end -%>
 
     log.Printf("[DEBUG] Finished creating <%= object.name -%> %q: %#v", d.Id(), res)
-
-<%= lines(compile(pwd + '/' + object.custom_code.post_create)) if object.custom_code.post_create -%>
 
     return resource<%= resource_name -%>Read(d, meta)
 <%  end # if custom_create  -%>
