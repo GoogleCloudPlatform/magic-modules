@@ -344,11 +344,12 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
 
 <%    end -%>
+<% end -%>
+
     log.Printf("[DEBUG] Finished creating <%= object.name -%> %q: %#v", d.Id(), res)
 
     return resource<%= resource_name -%>Read(d, meta)
 <%  end # if custom_create  -%>
-<% end -%>
 }
 
 <%  if object.async&.is_a? Provider::Terraform::PollAsync -%>
