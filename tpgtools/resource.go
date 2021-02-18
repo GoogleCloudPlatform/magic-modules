@@ -23,7 +23,7 @@ import (
 	"github.com/nasa9084/go-openapi"
 )
 
-const GoPkgTerraformSdkValidation = "github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+const GoPkgTerraformSdkValidation = "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 // Resource is tpgtools' model of what a information is necessary to generate a
 // resource in TPG.

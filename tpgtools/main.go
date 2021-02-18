@@ -70,7 +70,8 @@ func main() {
 			}
 			generateResourceFile(resource)
 			generateSweeperFile(resource)
-			generateResourceWebsiteFile(resource, resources, version)
+			// Disabled to allow handwriting files until samples exist
+			// generateResourceWebsiteFile(resource, resources, version)
 		}
 
 		if oPath == nil || *oPath == "" {
