@@ -2602,6 +2602,9 @@ func resourceContainerClusterDelete(d *schema.ResourceData, meta interface{}) er
 	clusterName := d.Get("name").(string)
 
 	if _, err := containerClusterAwaitRestingState(config, project, location, clusterName, userAgent, d.Timeout(schema.TimeoutDelete)); err != nil {
+		if !isGoogleApiErrorWithCode(err, 404) {
+				return nil
+			}
 		return err
 	}
 
