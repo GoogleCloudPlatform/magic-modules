@@ -359,12 +359,14 @@ func expandNodeConfig(v interface{}) *containerBeta.NodeConfig {
 		nc.LocalSsdCount = int64(v.(int))
 	}
 
+<% unless version == 'ga' -%>
 	if v, ok := nodeConfig["ephemeral_storage_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		nc.EphemeralStorageConfig = &containerBeta.EphemeralStorageConfig{
 			LocalSsdCount: conf["local_ssd_count"].(int64),
 		}
 	}
+<% end -%>
 
 	if scopes, ok := nodeConfig["oauth_scopes"]; ok {
 		scopesSet := scopes.(*schema.Set)
@@ -600,6 +602,7 @@ func flattenShieldedInstanceConfig(c *containerBeta.ShieldedInstanceConfig) []ma
 	return result
 }
 
+<% unless version == 'ga' -%>
 func flattenEphemeralStorageConfig(c *containerBeta.EphemeralStorageConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
@@ -609,6 +612,7 @@ func flattenEphemeralStorageConfig(c *containerBeta.EphemeralStorageConfig) []ma
 	}
 	return result
 }
+<% end -%>
 
 func flattenTaints(c []*containerBeta.NodeTaint) []map[string]interface{} {
 	result := []map[string]interface{}{}
