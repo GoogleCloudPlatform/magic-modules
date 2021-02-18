@@ -86,6 +86,7 @@ func mergeProperties(ga, beta []Property) []Property {
 }
 
 func generateResourceWebsiteFile(res *Resource, resources map[Version][]*Resource, version *Version) {
+	
 	res = mergeResource(res, resources, version)
 	// Generate resource website file
 	tmplInput := ResourceInput{
