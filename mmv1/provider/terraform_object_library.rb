@@ -96,6 +96,8 @@ module Provider
                         'third_party/validator/storage_bucket.go'],
                        ['google/storage_bucket_iam.go',
                         'third_party/validator/storage_bucket_iam.go'],
+                       ['google/cloudfunctions_function.go',
+                        'third_party/validator/cloudfunctions_function.go'],
                        ['google/iam_helpers.go',
                         'third_party/validator/iam_helpers.go'],
                        ['google/iam_helpers_test.go',
