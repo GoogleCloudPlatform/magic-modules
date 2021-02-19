@@ -327,3 +327,35 @@ func healthcareDatasetNotInitialized(err error) (bool, string) {
 	}
 	return false, ""
 }
+
+// Cloud Run APIs may return a 409 on create to indicate that a resource has been deleted in the foreground
+// (eg GET and LIST) but not the backing apiserver. When we encounter a 409, we can retry it.
+// Note that due to limitations in MMv1's error_retry_predicates this is currently applied to all requests.
+// We only expect to receive it on create, though.
+func isCloudRunCreationConflict(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 409 {
+			return true, "saw a 409 - waiting until background deletion completes"
+		}
+	}
+
+	return false, ""
+}
+
+// If a service account is deleted in the middle of updating an IAM policy
+// it can cause the API to return an error. In fine-grained IAM resources we
+// read the policy, modify it, then send it back to the API. Retrying is
+// useful particularly in high-traffic projects.
+// We don't want to retry _every_ time we see this error because the
+// user-provided SA could trigger this too. At the callsite, we should check
+// if the current etag matches the old etag and short-circuit if they do as
+// that indicates the new config is the likely problem.
+func iamServiceAccountNotFound(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 400 && strings.Contains(gerr.Body, "Service account") && strings.Contains(gerr.Body, "does not exist") {
+			return true, "service account not found in IAM"
+		}
+	}
+
+	return false, ""
+}

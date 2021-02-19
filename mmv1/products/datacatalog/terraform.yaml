@@ -201,7 +201,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/extract_taxonomy.go.erb
+      custom_import: templates/terraform/custom_import/data_catalog_taxonomy.go.erb
   PolicyTag: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{name}}"]
     examples:

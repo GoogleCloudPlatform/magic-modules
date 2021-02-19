@@ -1,8 +1,9 @@
 package google
 
 import (
-	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMergeBindings(t *testing.T) {
@@ -150,27 +151,150 @@ func TestMergeBindings(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			assertEqual(t,
+		t.Run(c.name+"/mergeAdditiveBindings", func(t *testing.T) {
+			assert.EqualValues(t,
 				c.expectedAdditive,
 				mergeAdditiveBindings(c.existing, c.incoming),
-				"mergeAdditiveBindings",
 			)
-			assertEqual(t,
+		})
+		t.Run(c.name+"/mergeAuthoritativeBindings", func(t *testing.T) {
+			assert.EqualValues(t,
 				c.expectedAuthoritative,
 				mergeAuthoritativeBindings(c.existing, c.incoming),
-				"mergeAuthoritativeBindings",
 			)
 		})
 	}
 }
 
-// assertEqual compares two values by converting them to strings.
-func assertEqual(t *testing.T, exp, got interface{}, name string) {
-	expS, gotS := fmt.Sprintf("%+v", exp),
-		fmt.Sprintf("%+v", got)
-
-	if expS != gotS {
-		t.Errorf("%s: expected %s, got %s", name, expS, gotS)
+func TestMergeDeleteBindings(t *testing.T) {
+	cases := []struct {
+		name string
+		// Inputs
+		existing []IAMBinding
+		incoming []IAMBinding
+		// Expected outputs
+		expectedDeleteAdditive      []IAMBinding
+		expectedDeleteAuthoritative []IAMBinding
+	}{
+		{
+			name:                        "EmptyDeleteEmpty",
+			existing:                    []IAMBinding{},
+			incoming:                    []IAMBinding{},
+			expectedDeleteAdditive:      nil,
+			expectedDeleteAuthoritative: nil,
+		},
+		{
+			name:     "EmptyDeleteOne",
+			existing: []IAMBinding{},
+			incoming: []IAMBinding{
+				{
+					Role:    "role-a",
+					Members: []string{"member-a"},
+				},
+			},
+			expectedDeleteAdditive:      nil,
+			expectedDeleteAuthoritative: nil,
+		},
+		{
+			name: "OneDeleteEmpty",
+			existing: []IAMBinding{
+				{
+					Role:    "role-a",
+					Members: []string{"member-a"},
+				},
+			},
+			incoming: []IAMBinding{},
+			expectedDeleteAdditive: []IAMBinding{
+				{
+					Role:    "role-a",
+					Members: []string{"member-a"},
+				},
+			},
+			expectedDeleteAuthoritative: []IAMBinding{
+				{
+					Role:    "role-a",
+					Members: []string{"member-a"},
+				},
+			},
+		},
+		{
+			name: "OneDeleteOne",
+			existing: []IAMBinding{
+				{
+					Role:    "role-a",
+					Members: []string{"member-a", "member-b"},
+				},
+			},
+			incoming: []IAMBinding{
+				{
+					Role:    "role-a",
+					Members: []string{"member-b"},
+				},
+			},
+			expectedDeleteAdditive: []IAMBinding{
+				{
+					Role:    "role-a",
+					Members: []string{"member-a"},
+				},
+			},
+			expectedDeleteAuthoritative: nil,
+		},
+		{
+			name: "GrandFinale",
+			existing: []IAMBinding{
+				{
+					Role:    "role-a",
+					Members: []string{"member-a", "member-b"},
+				},
+				{
+					Role:    "role-b",
+					Members: []string{"member-c", "member-d"},
+				},
+				{
+					Role:    "role-c",
+					Members: []string{"member-c"},
+				},
+			},
+			incoming: []IAMBinding{
+				{
+					Role:    "role-a",
+					Members: []string{"member-a", "member-b", "member-c"},
+				},
+				{
+					Role:    "role-b",
+					Members: []string{"member-b", "member-c"},
+				},
+			},
+			expectedDeleteAdditive: []IAMBinding{
+				{
+					Role:    "role-b",
+					Members: []string{"member-d"},
+				},
+				{
+					Role:    "role-c",
+					Members: []string{"member-c"},
+				},
+			},
+			expectedDeleteAuthoritative: []IAMBinding{
+				{
+					Role:    "role-c",
+					Members: []string{"member-c"},
+				},
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name+"/mergeDeleteAdditiveBindings", func(t *testing.T) {
+			assert.EqualValues(t,
+				c.expectedDeleteAdditive,
+				mergeDeleteAdditiveBindings(c.existing, c.incoming),
+			)
+		})
+		t.Run(c.name+"/mergeDeleteAuthoritativeBindings", func(t *testing.T) {
+			assert.EqualValues(t,
+				c.expectedDeleteAuthoritative,
+				mergeDeleteAuthoritativeBindings(c.existing, c.incoming),
+			)
+		})
 	}
 }

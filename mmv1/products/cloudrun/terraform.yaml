@@ -16,6 +16,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   DomainMapping: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}"
     import_format: ["locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}"]
+    error_retry_predicates: ["isCloudRunCreationConflict"]
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckKnativeStatus
       actions: ['create', 'update']
@@ -62,6 +63,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "locations/{{location}}/namespaces/{{project}}/services/{{name}}"
     import_format: ["locations/{{location}}/namespaces/{{project}}/services/{{name}}"]
+    error_retry_predicates: ["isCloudRunCreationConflict"]
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckKnativeStatus
       actions: ['create', 'update']
