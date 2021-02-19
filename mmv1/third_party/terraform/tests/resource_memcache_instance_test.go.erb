@@ -79,7 +79,7 @@ resource "google_memcache_instance" "test" {
 data "google_compute_network" "memcache_network" {
   name = "%s"
 }
-`, prefix, prefix, name, network)
+`, prefix, name, network)
 }
 
 func testAccMemcacheInstance_update2(prefix, name, network string) string {
@@ -120,6 +120,6 @@ resource "google_memcache_instance" "test" {
 data "google_compute_network" "memcache_network" {
   name = "%s"
 }
-`, prefix, prefix, name, network)
+`, prefix, name, network)
 }
 <% end -%>
