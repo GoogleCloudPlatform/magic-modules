@@ -130,13 +130,13 @@ objects:
             name: 'hourOfDay'
             description: |
               The hour of day (0-23) when the window starts.
+            required: true
           - !ruby/object:Api::Type::Enum
               name: 'dayOfWeek'
               description: |
                 The day of week, when the window starts.
-              default_value: :DAY_OF_WEEK_UNSPECIFIED
+              required: true
               values:
-              - :DAY_OF_WEEK_UNSPECIFIED
               - :MONDAY
               - :TUESDAY
               - :WEDNESDAY
@@ -144,39 +144,6 @@ objects:
               - :FRIDAY
               - :SATURDAY
               - :SUNDAY
-      - !ruby/object:Api::Type::NestedObject
-        name: 'metadataManagementActivity'
-        output: true
-        description: |
-         The metadata management activities of the metastore service.
-        properties:
-          - !ruby/object:Api::Type::Array
-            name: metadataExports
-            output: true
-            description: |
-              The latest metadata exports of the metastore service.
-            item_type: !ruby/object:Api::Type::NestedObject
-              properties:
-                - !ruby/object:Api::Type::Time
-                  name: 'startTime'
-                  description: |
-                    The time when the export started..
-                  output: true
-                - !ruby/object:Api::Type::Time
-                    name: 'endTime'
-                    description: |
-                      The time when the export ended.
-                    output: true
-                - !ruby/object:Api::Type::String
-                  name: 'state'
-                  description: |
-                    The current state of the export.
-                  output: true
-                - !ruby/object:Api::Type::String
-                  name: 'destinationGcsUri'
-                  description: |
-                     A Cloud Storage URI of a folder that metadata are exported to, in the form of `gs://<bucket_name>/<path_inside_bucket>/<export_folder>`.
-                  output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'hiveMetastoreConfig'
         description: |
@@ -200,10 +167,12 @@ objects:
             properties:
               - !ruby/object:Api::Type::NestedObject
                 name: 'keytab'
+                required: true
                 description: |
                   A Kerberos keytab file that can be used to authenticate a service principal with a Kerberos Key Distribution Center (KDC).
                 properties:
                   - !ruby/object:Api::Type::String
+                    required: true
                     name: 'cloudSecret'
                     description: |
                       The relative resource name of a Secret Manager secret version, in the following form:
@@ -211,9 +180,11 @@ objects:
                       "projects/{projectNumber}/secrets/{secret_id}/versions/{version_id}".
               - !ruby/object:Api::Type::String
                 name: 'principal'
+                required: true
                 description: |
                   A Kerberos principal that exists in the both the keytab the KDC to authenticate as. A typical principal is of the form "primary/instance@REALM", but there is no exact format.
               - !ruby/object:Api::Type::String
                 name: 'krb5ConfigGcsUri'
+                required: true
                 description: |
                   A Cloud Storage URI that specifies the path to a krb5.conf file. It is of the form gs://{bucket_name}/path/to/krb5.conf, although the file does not need to be named krb5.conf explicitly.
