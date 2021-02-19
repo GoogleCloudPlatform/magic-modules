@@ -43,6 +43,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "redis_instance_private_service"
         primary_resource_id: "cache"
+        vars:
+          instance_name: "private-cache"
+          address_name: "address"
+          network_name: "redis-test-network"
+        test_vars_overrides:
+          network_name: 'BootstrapSharedTestNetwork(t, "redis-private")'
     properties:
       alternativeLocationId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
