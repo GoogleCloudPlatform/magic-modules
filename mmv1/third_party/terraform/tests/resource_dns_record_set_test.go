@@ -282,7 +282,7 @@ resource "google_dns_record_set" "foobar" {
   managed_zone = google_dns_managed_zone.parent-zone.name
   name         = "test-record.%s.hashicorptest.com."
   type         = "TXT"
-  rrdatas      = ["\"test text\"", "\"quoted test\""]
+  rrdatas      = ["test", "\"quoted test\""]
   ttl          = %d
 }
 `, name, name, name, ttl)
@@ -301,11 +301,11 @@ resource "google_dns_record_set" "foobar" {
   name         = "test-record.%s.hashicorptest.com."
   type         = "MX"
   rrdatas = [
-    "1 aspmx.l.google.com.",
-	"5 alt1.aspmx.l.google.com.",
-	"5 alt2.aspmx.l.google.com.",
-	"10 aspmx2.googlemail.com.",
-	"10 aspmx3.googlemail.com.",
+	"1 ASPMX.L.GOOGLE.COM.",
+	"5 ALT1.ASPMX.L.GOOGLE.COM.",
+    "5 ALT2.ASPMX.L.GOOGLE.COM.",
+    "10 ASPMX2.GOOGLEMAIL.COM.",
+    "10 ASPMX3.GOOGLEMAIL.COM.",
   ]
   ttl = %d
 }
