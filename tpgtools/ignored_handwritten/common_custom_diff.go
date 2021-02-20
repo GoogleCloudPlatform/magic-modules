@@ -5,7 +5,7 @@ import (
 	"net"
 
 	"github.com/apparentlymart/go-cidr/cidr"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func isShrinkageIpCidr(old, new, _ interface{}) bool {

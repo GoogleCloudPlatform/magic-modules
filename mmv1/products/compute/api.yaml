@@ -12523,6 +12523,7 @@ objects:
                 item_type: Api::Type::String
               - !ruby/object:Api::Type::Boolean
                 name: 'guestFlush'
+                send_empty_value: true
                 at_least_one_of:
                   - snapshot_schedule_policy.0.snapshot_properties.0.labels
                   - snapshot_schedule_policy.0.snapshot_properties.0.storage_locations
@@ -15027,11 +15028,10 @@ objects:
         update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setBackendService'
       - !ruby/object:Api::Type::Array
         name: 'sslCertificates'
-        max_size: 1
         description: |
           A list of SslCertificate resources that are used to authenticate
-          connections between users and the load balancer. Currently, exactly
-          one SSL certificate must be specified.
+          connections between users and the load balancer. At least one
+          SSL certificate must be specified.
         required: true
         update_verb: :POST
         update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setSslCertificates'

@@ -1052,7 +1052,7 @@ func TestAccComputeInstance_multiNic(t *testing.T) {
 		},
 	})
 }
-<% unless version == 'ga' -%>
+
 func TestAccComputeInstance_nictype_update(t *testing.T) {
 	t.Parallel()
 
@@ -1081,7 +1081,6 @@ func TestAccComputeInstance_nictype_update(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccComputeInstance_guestAccelerator(t *testing.T) {
 	t.Parallel()
@@ -4170,7 +4169,6 @@ resource "google_compute_subnetwork" "inst-test-subnetwork" {
 `, instance, network, subnetwork)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeInstance_nictype(image, instance, nictype string) string {
 	return fmt.Sprintf(`
 resource "google_compute_image" "example" {
@@ -4225,7 +4223,6 @@ resource "google_compute_instance" "foobar" {
 }
 `, image, instance, nictype)
 }
-<% end -%>
 
 func testAccComputeInstance_guestAccelerator(instance string, count uint8) string {
 	return fmt.Sprintf(`

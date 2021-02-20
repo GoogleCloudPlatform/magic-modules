@@ -25,6 +25,7 @@ apis_required:
     name: Artifact Registry API
     url: https://console.cloud.google.com/apis/library/artifactregistry.googleapis.com/
 async: !ruby/object:Api::OpAsync
+  actions: ['create', 'delete']
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
@@ -47,6 +48,8 @@ objects:
     base_url: projects/{{project}}/locations/{{location}}/repositories
     create_url: projects/{{project}}/locations/{{location}}/repositories?repository_id={{repository_id}}
     self_link: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
+    update_verb: :PATCH
+    update_mask: true
     min_version: beta
     description: A repository for storing artifacts
     references: !ruby/object:Api::Resource::ReferenceLinks

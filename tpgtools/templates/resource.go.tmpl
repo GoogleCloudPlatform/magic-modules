@@ -33,9 +33,9 @@ import(
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 {{- if $.CustomizeDiff }}
-	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 {{- end }}
 {{- range $pkg := $.AdditionalFileImports }}
   "{{ $pkg }}"

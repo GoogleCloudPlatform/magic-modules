@@ -6,8 +6,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	compute "github.com/GoogleCloudPlatform/declarative-resource-client-library/google/compute/beta"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	compute "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/compute/beta"
 )
 
 func deleteComputeNetworkDefaultRoutes(d *schema.ResourceData, config *Config, res *compute.Network) error {
