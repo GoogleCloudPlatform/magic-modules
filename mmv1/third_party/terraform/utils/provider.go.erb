@@ -163,6 +163,7 @@ func Provider() *schema.Provider {
 			ServiceUsageCustomEndpointEntryKey:           ServiceUsageCustomEndpointEntry,
 			StorageTransferCustomEndpointEntryKey:        StorageTransferCustomEndpointEntry,
 			BigtableAdminCustomEndpointEntryKey:          BigtableAdminCustomEndpointEntry,
+			EventarcCustomEndpointEntryKey:               EventarcCustomEndpointEntry,
 		},
 
 		ProviderMetaSchema: map[string]*schema.Schema{
@@ -226,6 +227,7 @@ func Provider() *schema.Provider {
 			"google_iam_workload_identity_pool":                dataSourceIAMBetaWorkloadIdentityPool(),
 			"google_iam_workload_identity_pool_provider":       dataSourceIAMBetaWorkloadIdentityPoolProvider(),
 			<% end -%>
+			"google_iap_client":                                dataSourceGoogleIapClient(),
 			"google_kms_crypto_key":                            dataSourceGoogleKmsCryptoKey(),
 			"google_kms_crypto_key_version":                    dataSourceGoogleKmsCryptoKeyVersion(),
 			"google_kms_key_ring":                              dataSourceGoogleKmsKeyRing(),
@@ -249,6 +251,9 @@ func Provider() *schema.Provider {
 			"google_project_organization_policy":               dataSourceGoogleProjectOrganizationPolicy(),
 			"google_pubsub_topic":                              dataSourceGooglePubsubTopic(),
 			"google_runtimeconfig_config":                      dataSourceGoogleRuntimeconfigConfig(),
+			<% unless version == 'ga' -%>
+			"google_runtimeconfig_variable":                    dataSourceGoogleRuntimeconfigVariable(),
+			<% end -%>
 			"google_secret_manager_secret_version":             dataSourceSecretManagerSecretVersion(),
 			"google_service_account":                           dataSourceGoogleServiceAccount(),
 			"google_service_account_access_token":              dataSourceGoogleServiceAccountAccessToken(),
@@ -385,6 +390,9 @@ end     # products.each do
 				"google_dataproc_job_iam_policy":               ResourceIamPolicy(IamDataprocJobSchema, NewDataprocJobUpdater, DataprocJobIdParseFunc),
 				"google_dns_record_set":                        resourceDnsRecordSet(),
 				"google_endpoints_service":                     resourceEndpointsService(),
+				<% unless version == 'ga' -%>
+				"google_eventarc_trigger":                      resourceEventarcTrigger(),
+				<% end -%>
 				"google_folder":                                resourceGoogleFolder(),
 				"google_folder_iam_binding":                    ResourceIamBinding(IamFolderSchema, NewFolderIamUpdater, FolderIdParseFunc),
 				"google_folder_iam_member":                     ResourceIamMember(IamFolderSchema, NewFolderIamUpdater, FolderIdParseFunc),
@@ -548,6 +556,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.ServiceUsageBasePath = d.Get(ServiceUsageCustomEndpointEntryKey).(string)
 	config.StorageTransferBasePath = d.Get(StorageTransferCustomEndpointEntryKey).(string)
 	config.BigtableAdminBasePath = d.Get(BigtableAdminCustomEndpointEntryKey).(string)
+	config.EventarcBasePath = d.Get(EventarcCustomEndpointEntryKey).(string)
 
 	stopCtx, ok := schema.StopContext(ctx)
 	if !ok {

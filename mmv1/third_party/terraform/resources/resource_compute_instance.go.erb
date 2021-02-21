@@ -297,7 +297,13 @@ func resourceComputeInstance() *schema.Resource {
 							Computed:    true,
 							Description: `The name of the interface`,
 						},
-
+						"nic_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew:     true,
+							ValidateFunc: validation.StringInSlice([]string{"GVNIC", "VIRTIO_NET"}, false),
+							Description:  `The type of vNIC to be used on this interface. Possible values:GVNIC, VIRTIO_NET`,
+						},
 						"access_config": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -2026,7 +2032,12 @@ func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) err
 		// Wait for the operation to complete
 		opErr := computeOperationWaitTime(config, op, project, "instance to delete", userAgent, d.Timeout(schema.TimeoutDelete))
 		if opErr != nil {
-			return opErr
+			// Refresh operation to check status
+			op, _ = config.NewComputeClient(userAgent).ZoneOperations.Get(project, zone, strconv.FormatUint(op.Id, 10)).Do()
+			// Do not return an error if the operation actually completed
+			if op == nil || op.Status != "DONE" {
+				return opErr
+			}
 		}
 
 		d.SetId("")

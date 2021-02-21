@@ -1,3 +1,17 @@
+// Copyright 2021 Google LLC. All Rights Reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package main
 
 import (
@@ -361,9 +375,14 @@ func (p Property) GetRequiredFileImports() (imports []string) {
 func (p Property) DefaultSetHashFunc() *string {
 	switch p.Type.String() {
 	case SchemaTypeSet:
-		shf := "schema.HashString"
+		if p.ElemIsBasicType {
+			shf := "schema.HashString"
+			return &shf
+		}
+		shf := fmt.Sprintf("schema.HashResource(%s)", *p.Elem)
 		return &shf
 	}
+	glog.Fatalf("Failed to find valid hash func")
 	return nil
 }
 
@@ -464,6 +483,41 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			p.customName = cn.Name
 		}
 
+		if p.Type.String() == SchemaTypeMap {
+			e := "&schema.Schema{Type: schema.TypeString}"
+			p.Elem = &e
+			p.ElemIsBasicType = true
+		}
+
+		if sens, ok := v.Extension["x-dcl-sensitive"].(bool); ok {
+			p.Sensitive = sens
+		}
+
+		if sendEmpty, ok := v.Extension["x-dcl-send-empty"].(bool); ok {
+			p.sendEmpty = sendEmpty
+		}
+
+		if v, ok := v.Extension["x-dcl-conflicts"].([]interface{}); ok {
+			for _, ci := range v {
+				p.ConflictsWith = append(p.ConflictsWith, ci.(string))
+			}
+		}
+
+		// Do this before handling properties so we can check if the parent is readOnly
+		isSGP := false
+		if sgp, ok := v.Extension["x-dcl-server-generated-parameter"].(bool); ok {
+			isSGP = sgp
+		}
+		if v.ReadOnly || isSGP || (parent != nil && parent.Computed) {
+			p.Computed = true
+
+			if stringInSlice(p.Name(), identityFields) {
+				sg := p.DefaultStateGetter()
+				p.StateGetter = &sg
+			}
+		}
+
+
 		// Handle object properties
 		if len(v.Properties) > 0 {
 			props, err := createPropertiesFromSchema(v, typeFetcher, overrides, resource, &p, location)
@@ -472,8 +526,11 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			}
 
 			p.Properties = props
-			mi := int64(1)
-			p.MaxItems = &mi
+			if !p.Computed {
+				// Computed fields cannot specify MaxItems
+				mi := int64(1)
+				p.MaxItems = &mi
+			}
 			e := fmt.Sprintf("%s%sSchema()", resource.PathType(), p.PackagePath())
 			p.Elem = &e
 			p.ElemIsBasicType = false
@@ -504,38 +561,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			}
 		}
 
-		if p.Type.String() == SchemaTypeMap {
-			e := "&schema.Schema{Type: schema.TypeString}"
-			p.Elem = &e
-			p.ElemIsBasicType = true
-		}
-
-		if sens, ok := v.Extension["x-dcl-sensitive"].(bool); ok {
-			p.Sensitive = sens
-		}
-
-		if sendEmpty, ok := v.Extension["x-dcl-send-empty"].(bool); ok {
-			p.sendEmpty = sendEmpty
-		}
-
-		if v, ok := v.Extension["x-dcl-conflicts"].([]interface{}); ok {
-			for _, ci := range v {
-				p.ConflictsWith = append(p.ConflictsWith, ci.(string))
-			}
-		}
-
-		isSGP := false
-		if sgp, ok := v.Extension["x-dcl-server-generated-parameter"].(bool); ok {
-			isSGP = sgp
-		}
-		if v.ReadOnly || isSGP {
-			p.Computed = true
-
-			if stringInSlice(p.Name(), identityFields) {
-				sg := p.DefaultStateGetter()
-				p.StateGetter = &sg
-			}
-		} else {
+		if !p.Computed {
 			glog.Infof("Looking for %q in %v.", v.Title, schema.Required)
 			if stringInSlice(v.Title, schema.Required) {
 				p.Required = true
@@ -587,6 +613,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				p.StateGetter = &sg
 			}
 		}
+
 
 		ss := p.DefaultStateSetter()
 		p.StateSetter = &ss

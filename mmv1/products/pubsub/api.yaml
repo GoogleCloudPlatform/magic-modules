@@ -57,7 +57,6 @@ objects:
           (`service-{{PROJECT_NUMBER}}@gcp-sa-pubsub.iam.gserviceaccount.com`) must have
           `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
           The expected format is `projects/*/locations/*/keyRings/*/cryptoKeys/*`
-        input: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
