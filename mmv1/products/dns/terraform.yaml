@@ -194,7 +194,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     legacy_name: "google_dns_record_set"
     import_format: ["projects/{{project}}/managedZones/{{managed_zone}}/rrsets/{{name}}/{{type}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      encoder: 'templates/terraform/encoders/dns_resource_record_set.go.erb'
       constants: 'templates/terraform/constants/resource_dns_resource_record_set.go.erb'
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -206,7 +205,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           zone_name: "my-zone"
     properties:
       rrdatas: !ruby/object:Overrides::Terraform::PropertyOverride
-          diff_suppress_func: 'ipv6AddressforDnsDiffSuppress'
+          diff_suppress_func: 'rrdatasDnsDiffSuppress'
       managed_zone: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
   Project: !ruby/object:Overrides::Terraform::ResourceOverride

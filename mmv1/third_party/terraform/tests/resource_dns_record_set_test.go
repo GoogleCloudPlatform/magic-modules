@@ -27,7 +27,7 @@ func TestIpv6AddressDiffSuppress(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		shouldSuppress := AddressDiffSuppress("", tc.Old, tc.New, nil)
+		shouldSuppress := ipv6AddressforDnsDiffSuppress("", tc.Old, tc.New, nil)
 		if shouldSuppress != tc.ShouldSuppress {
 			t.Errorf("%s: expected %t", tn, tc.ShouldSuppress)
 		}
