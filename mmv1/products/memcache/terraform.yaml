@@ -22,6 +22,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         min_version: beta
+        # Temporary as CI has used up servicenetworking quota
+        skip_vcr: true
         name: "memcache_instance_basic"
         primary_resource_id: "instance"
         vars:

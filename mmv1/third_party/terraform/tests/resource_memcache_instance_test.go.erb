@@ -11,6 +11,8 @@ import (
 
 func TestAccMemcacheInstance_update(t *testing.T) {
 	t.Parallel()
+  // Temporary as CI has used up servicenetworking quota
+  skipIfVcr(t)
 
 	prefix := fmt.Sprintf("%d", randInt(t))
 	name := fmt.Sprintf("tf-test-%s", prefix)
