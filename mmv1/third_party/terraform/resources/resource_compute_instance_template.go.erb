@@ -330,15 +330,6 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							Computed:    true,
 							Description: `The name of the network_interface.`,
 						},
-<% unless version == 'ga' -%>
-						"nic_type": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew:     true,
-							ValidateFunc: validation.StringInSlice([]string{"GVNIC", "VIRTIO_NET"}, false),
-							Description:  `The type of vNIC to be used on this interface. Possible values:GVNIC, VIRTIO_NET`,
-						},
-<% end -%>
 						"access_config": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -869,7 +860,7 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	networks, err := expandNetworkInterfaces(d, config)
+	networks, err := expandComputeInstanceTemplateNetworkInterfaces(d, config)
 	if err != nil {
 		return err
 	}
@@ -1233,7 +1224,7 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("Error setting project: %s", err)
 	}
 	if instanceTemplate.Properties.NetworkInterfaces != nil {
-		networkInterfaces, region, _, _, err := flattenNetworkInterfaces(d, config, instanceTemplate.Properties.NetworkInterfaces)
+		networkInterfaces, region, _, _, err := flattenComputeInstanceTemplateNetworkInterfaces(d, config, instanceTemplate.Properties.NetworkInterfaces)
 		if err != nil {
 			return err
 		}
