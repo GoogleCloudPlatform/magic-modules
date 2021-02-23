@@ -68,6 +68,9 @@ clone_repo
 git config --local user.name "Modular Magician"
 git config --local user.email "magic-modules@google.com"
 
+# MMv1 now lives inside a sub-folder
+pushd mmv1
+
 if [ "$COMMAND" == "head" ]; then
     BRANCH=auto-pr-$REFERENCE
     COMMIT_MESSAGE="New generated code for MM PR $REFERENCE."
@@ -100,10 +103,34 @@ else
     if [ "$REPO" == "terraform" ] && [ "$VERSION" == "ga" ]; then
         bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION --no-docs
         bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v beta --no-code
+        # TODO(slevenick): remove this check when it is safe (~1 month from commit)
+        # Previously we had many resources committed to tpgtools that were not
+        # ready for generation. Block generation until these are removed
+        set +e
+        git merge-base --is-ancestor 0be5f0c31a6e69474b14e91b12c0bbc1e550df9c HEAD
+        if [ $? == 0 ]; then
+            pushd ../
+            make tpgtools OUTPUT_PATH=$LOCAL_PATH VERSION=$VERSION
+            popd
+        fi
+        set -e
     else
         bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION
+        # TODO(slevenick): remove this check when it is safe (~1 month from commit)
+        # Previously we had many resources committed to tpgtools that were not
+        # ready for generation. Block generation until these are removed
+        set +e
+        git merge-base --is-ancestor 0be5f0c31a6e69474b14e91b12c0bbc1e550df9c HEAD
+        if [ $? == 0 ]; then
+            pushd ../
+            make tpgtools OUTPUT_PATH=$LOCAL_PATH VERSION=$VERSION
+            popd
+        fi
+        set -e
     fi
 fi
+
+popd
 
 pushd $LOCAL_PATH
 
