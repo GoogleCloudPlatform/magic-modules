@@ -1,4 +1,4 @@
-resource "google_service_account" "test-account" {
+resource "google_service_account" "test_account" {
   account_id   = "<%= ctx[:vars]['account_id'] %>"
   display_name = "Test Service Account"
 }
@@ -12,6 +12,6 @@ resource "google_sourcerepo_repository" "<%= ctx[:primary_resource_id] %>" {
   pubsub_configs {
       topic = google_pubsub_topic.topic.id
       message_format = "JSON"
-      service_account_email = google_service_account.test-account.email
+      service_account_email = google_service_account.test_account.email
   }
 }

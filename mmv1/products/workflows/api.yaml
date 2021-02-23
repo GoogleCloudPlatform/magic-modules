@@ -18,6 +18,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://workflows.googleapis.com/v1beta/
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://workflows.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -44,14 +47,13 @@ async: !ruby/object:Api::OpAsync
 objects:
   - !ruby/object:Api::Resource
     name: 'Workflow'
-    min_version: beta
     description: |
       Workflow program to be executed by Workflows.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Managing Workflows':
           'https://cloud.google.com/workflows/docs/creating-updating-workflow'
-      api: 'https://cloud.google.com/workflows/docs/reference/rest/v1beta/projects.locations.workflows'
+      api: 'https://cloud.google.com/workflows/docs/reference/rest/v1/projects.locations.workflows'
     base_url: projects/{{project}}/locations/{{region}}/workflows
     create_url: projects/{{project}}/locations/{{region}}/workflows?workflowId={{name}}
     self_link: '{{name}}'
@@ -76,12 +78,12 @@ objects:
         name: 'createTime'
         output: true
         description: |
-          The timestamp of when the workflow was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. 
+          The timestamp of when the workflow was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
       - !ruby/object:Api::Type::String
         name: 'updateTime'
         output: true
         description: |
-          The timestamp of when the workflow was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. 
+          The timestamp of when the workflow was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
       - !ruby/object:Api::Type::String
         name: 'state'
         output: true
@@ -93,7 +95,6 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'serviceAccount'
         input: true
-        pattern: 'projects/*/serviceAccounts/{{service_account}}'
         description: |
           Name of the service account associated with the latest workflow version. This service account represents the identity of the workflow and determines what permissions the workflow has.
       - !ruby/object:Api::Type::String
