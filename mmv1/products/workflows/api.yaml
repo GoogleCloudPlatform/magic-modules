@@ -69,7 +69,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: Name of the Workflow.
-        output: true
+        input: true
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
@@ -96,7 +96,10 @@ objects:
         name: 'serviceAccount'
         input: true
         description: |
-          Name of the service account associated with the latest workflow version. This service account represents the identity of the workflow and determines what permissions the workflow has.
+          Name of the service account associated with the latest workflow version. This service
+          account represents the identity of the workflow and determines what permissions the workflow has.
+
+          Format: projects/{project}/serviceAccounts/{account}.
       - !ruby/object:Api::Type::String
         name: 'sourceContents'
         input: true
