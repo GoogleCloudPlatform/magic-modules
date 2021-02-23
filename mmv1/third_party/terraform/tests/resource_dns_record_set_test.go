@@ -301,8 +301,8 @@ resource "google_dns_record_set" "foobar" {
   name         = "test-record.%s.hashicorptest.com."
   type         = "MX"
   rrdatas = [
-	"1 ASPMX.L.GOOGLE.COM.",
-	"5 ALT1.ASPMX.L.GOOGLE.COM.",
+    "1 ASPMX.L.GOOGLE.COM.",
+    "5 ALT1.ASPMX.L.GOOGLE.COM.",
     "5 ALT2.ASPMX.L.GOOGLE.COM.",
     "10 ASPMX2.GOOGLEMAIL.COM.",
     "10 ASPMX3.GOOGLEMAIL.COM.",
