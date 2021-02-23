@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: MediaEdge
+name: NetworkServices
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
@@ -21,11 +21,12 @@ scopes:
   - https://www.googleapis.com/auth/cloud-identity
 apis_required:
   - !ruby/object:Api::Product::ApiReference
-    name: Media Edge API
+    name: Network Services API
     url: https://pantheon.corp.google.com/apis/library/networkservices.googleapis.com
 objects:
   - !ruby/object:Api::Resource
     name: 'EdgeCacheKeyset'
+    min_version: beta
     base_url: 'projects/{{project}}/locations/global/edgeCacheKeysets'
     create_url: 'projects/{{project}}/locations/global/edgeCacheKeysets?edgeCacheKeysetId={{edge_cache_keyset_id}}'
     self_link: 'projects/{{project}}/locations/global/edgeCacheKeysets/{{edge_cache_keyset_id}}'
@@ -38,6 +39,7 @@ objects:
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
+        wait_ms: 1000
       result: !ruby/object:Api::OpAsync::Result
         path: 'response'
       status: !ruby/object:Api::OpAsync::Status
@@ -72,9 +74,6 @@ objects:
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: 'Set of label tags associated with the EdgeCache resource.'
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: 'labels'
-        description: 'Set of label tags associated with the EdgeCache resource.'
       - !ruby/object:Api::Type::Array
         name: publicKeys
         description: |
@@ -102,6 +101,7 @@ objects:
                 Representations or encodings of the public key other than this will be rejected with an error.
   - !ruby/object:Api::Resource
     name: 'EdgeCacheOrigin'
+    min_version: beta
     base_url: 'projects/{{project}}/locations/global/edgeCacheOrigins'
     create_url: 'projects/{{project}}/locations/global/edgeCacheOrigins?edgeCacheKeysetId={{edge_cache_origin_id}}'
     self_link: 'projects/{{project}}/locations/global/edgeCacheOrigins/{{edge_cache_origin_id}}'
@@ -114,6 +114,7 @@ objects:
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
+        wait_ms: 1000
       result: !ruby/object:Api::OpAsync::Result
         path: 'response'
       status: !ruby/object:Api::OpAsync::Status
@@ -188,17 +189,14 @@ objects:
           If no origin returns a valid response, an HTTP 503 will be returned to the client.
 
           Defaults to 1. Must be a value greater than 0 and less than 4.
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::String
         name: 'failoverOrigin'
-        resource: 'EdgeCacheOrigin'
-        imports: 'id'
         description: |
           The Origin resource to try when the current origin cannot be reached.
           After maxAttempts is reached, the configured failoverOrigin will be used to fulfil the request.
 
           The value of timeout.maxAttemptsTimeout dictates the timeout across all origins.
           A reference to a Topic resource.
-        pattern: 'projects/{{project}}/global/edgeCacheOrigins/{{edge_cache_origin_id}}'
       - !ruby/object:Api::Type::Array
         name: 'retryConditions' # default CONNECT_FAILURE from api
         description: |
@@ -255,6 +253,7 @@ objects:
               Defaults to 5 seconds. The timeout must be a value between 1s and 30s.
   - !ruby/object:Api::Resource
     name: 'EdgeCacheService'
+    min_version: beta
     base_url: 'projects/{{project}}/locations/global/edgeCacheServices'
     create_url: 'projects/{{project}}/locations/global/edgeCacheServices?edgeCacheKeysetId={{edge_cache_service_id}}'
     self_link: 'projects/{{project}}/locations/global/edgeCacheServices/{{edge_cache_service_id}}'
@@ -267,6 +266,7 @@ objects:
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
+        wait_ms: 1000
       result: !ruby/object:Api::OpAsync::Result
         path: 'response'
       status: !ruby/object:Api::OpAsync::Status
@@ -512,7 +512,7 @@ objects:
                                   description: |
                                     The value of the header to add.
                                 - !ruby/object:Api::Type::Boolean
-                                  name: headerName # default from api
+                                  name: replace # default from api
                                   description: |
                                     Whether to replace all existing headers with the same name.
                           - !ruby/object:Api::Type::Array
@@ -536,7 +536,7 @@ objects:
                                   description: |
                                     The value of the header to add.
                                 - !ruby/object:Api::Type::Boolean
-                                  name: headerName # default from api
+                                  name: replace # default from api
                                   description: |
                                     Whether to replace all existing headers with the same name.
                           - !ruby/object:Api::Type::Array
