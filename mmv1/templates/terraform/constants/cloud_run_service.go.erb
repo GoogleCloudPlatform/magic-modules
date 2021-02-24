@@ -22,3 +22,20 @@ func cloudrunAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) 
 	// For other keys, don't suppress diff.
 	return false
 }
+
+var cloudRunGoogleProvidedLabels = regexp.MustCompile(`cloud\\.googleapis\\.com/(?:(?:location))`)
+
+func cloudrunLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Suppress diffs for the labels provided by Google
+	if cloudRunGoogleProvidedLabels.MatchString(k) && new == "" {
+		return true
+	}
+
+	// Let diff be determined by labels (above)
+	if strings.Contains(k, "labels.%") {
+		return true
+	}
+
+	// For other keys, don't suppress diff.
+	return false
+}
