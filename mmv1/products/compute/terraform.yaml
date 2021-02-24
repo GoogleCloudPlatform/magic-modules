@@ -121,6 +121,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       autoscalingPolicy.cpuUtilization.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
         name: target
         required: true # See comment for minReplicas
+      autoscalingPolicy.cpuUtilization.predictiveMethod: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       autoscalingPolicy.customMetricUtilizations: !ruby/object:Overrides::Terraform::PropertyOverride
         name: metric
       autoscalingPolicy.customMetricUtilizations.metric: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -1693,6 +1695,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       autoscalingPolicy.cpuUtilization.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
         name: target
         required: true # See comment for minReplicas
+      autoscalingPolicy.cpuUtilization.predictiveMethod: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       autoscalingPolicy.customMetricUtilizations: !ruby/object:Overrides::Terraform::PropertyOverride
         name: metric
       autoscalingPolicy.customMetricUtilizations.metric: !ruby/object:Overrides::Terraform::PropertyOverride
