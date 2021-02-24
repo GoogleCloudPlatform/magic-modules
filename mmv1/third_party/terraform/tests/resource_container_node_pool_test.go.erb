@@ -886,7 +886,6 @@ resource "google_container_node_pool" "np" {
   location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
-  min_master_version = "1.18"
 
   node_config {
     machine_type = "n1-standard-1"
