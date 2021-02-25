@@ -150,7 +150,6 @@ objects:
           The resource name of the Membership, of the form groups/{group_id}/memberships/{membership_id}.
       - !ruby/object:Api::Type::NestedObject
         name: 'memberKey'
-        min_version: beta
         input: true
         description: |
           EntityKey of the member.
