@@ -1,0 +1,62 @@
+resource "google_access_context_manager_service_perimeter" "<%= ctx[:primary_resource_id] %>" {
+  parent = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}"
+  name   = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}/servicePerimeters/<%= ctx[:vars]['service_perimeter_name'] %>"
+  title  = "<%= ctx[:vars]['service_perimeter_name'] %>"
+
+  status {
+    resources           = ["<%= ctx[:vars]['service_perimeter_project_number'] %>"]
+    restricted_services = ["storage.googleapis.com"]
+    access_levels       = []
+
+    ingress_policies {
+      ingress_from {
+        sources {
+          resource = "<%= ctx[:vars]['ingress_project_number'] %>"
+        }
+        identity_type = "ANY_SERVICE_ACCOUNT"
+      }
+
+      ingress_to {
+        resources = ["<%= ctx[:vars]['service_perimeter_project_number'] %>"]
+
+        operations {
+          service_name = "storage.googleapis.com"
+
+          method_selectors {
+            method = "google.storage.objects.list"
+          }
+          method_selectors {
+            method = "google.storage.objects.get"
+          }
+
+          # This syntax is accepted, but the API does not support any permissions yet.
+          # See https://cloud.google.com/vpc-service-controls/docs/supported-method-restrictions
+          # method_selectors {
+          #   permission = "storage.buckets.list"
+          # }
+        }
+      }
+    }
+
+    egress_policies {
+      egress_from {
+        identities = ["serviceAccount:my-workload@my-project.iam.gserviceaccount.com"]
+      }
+
+      egress_to {
+        resources = ["<%= ctx[:vars]['egress_project_number'] %>"]
+        operations {
+          service_name = "storage.googleapis.com"
+          method_selectors {
+            method = "*"
+          }
+        }
+      }
+    }
+  }
+}
+
+resource "google_access_context_manager_access_policy" "access-policy" {
+  parent = "organizations/123456789"
+  title  = "my policy"
+}

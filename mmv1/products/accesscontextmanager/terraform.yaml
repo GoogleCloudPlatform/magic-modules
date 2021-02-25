@@ -163,6 +163,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "service-perimeter"
         vars:
           service_perimeter_name: "restrict_bigquery_dryrun_storage"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "access_context_manager_service_perimeter_ingress_and_egress_policies"
+        skip_test: true
+        primary_resource_id: "service-perimeter"
+        vars:
+          service_perimeter_name: "ingress_egress_policy_examples"
+          service_perimeter_project_number: "projects/123456789"
+          ingress_project_number: "projects/111111111"
+          egress_project_number: "projects/222222222"
     properties:
       parent: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
