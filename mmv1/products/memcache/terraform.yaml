@@ -22,10 +22,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         min_version: beta
+        # Temporary as CI has used up servicenetworking quota
+        skip_vcr: true
         name: "memcache_instance_basic"
         primary_resource_id: "instance"
         vars:
           instance_name: "test-instance"
+          network_name: "test-network"
+          address_name: "address"
+        test_vars_overrides:
+          network_name: 'BootstrapSharedTestNetwork(t, "memcache-private")'
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
