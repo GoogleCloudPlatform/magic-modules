@@ -915,6 +915,7 @@ objects:
                 name: ingressTo
                 description: Defines the conditions on the ApiOperation and request destination
                   that cause this IngressPolicy to apply.
+                required: true
                 properties:
                 - !ruby/object:Api::Type::Array
                   name: resources
@@ -925,11 +926,13 @@ objects:
                     for resources, then this IngressTo rule will authorize access to all
                     resources inside the perimeter, provided that the request also matches
                     the `operations` field.
+                  required: true
                   item_type: Api::Type::String
                 - !ruby/object:Api::Type::Array
                   name: operations
                   description: A list of ApiOperations the sources specified in corresponding
                     IngressFrom are allowed to perform in this ServicePerimeter.
+                  required: true
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                     - !ruby/object:Api::Type::Array
@@ -939,38 +942,51 @@ objects:
                         single MethodSelector entry with `*` specified for the `method`
                         field will allow all methods AND permissions for the service specified
                         in `service_name`.
+                      required: true
                       item_type: !ruby/object:Api::Type::NestedObject
                         properties:
                         - !ruby/object:Api::Type::String
                           name: permission
                           description: Value for `permission` should be a valid Cloud IAM
                             permission for the corresponding `service_name` in ApiOperation.
+                          exactly_one_of:
+                            - permission
+                            - method
                         - !ruby/object:Api::Type::String
                           name: method
                           description: Value for `method` should be a valid method name
                             for the corresponding `service_name` in ApiOperation. If `*`
                             used as value for `method`, then ALL methods and permissions
                             are allowed.
+                          exactly_one_of:
+                            - permission
+                            - method
                     - !ruby/object:Api::Type::String
                       name: serviceName
                       description: The name of the API whose methods or permissions the
                         IngressPolicy or EgressPolicy want to allow. A single ApiOperation
                         with `service_name` field set to `*` will allow all methods AND
                         permissions for all services.
+                      required: true
               - !ruby/object:Api::Type::NestedObject
                 name: ingressFrom
                 description: Defines the conditions on the source of a request causing this
                   IngressPolicy to apply.
+                required: true
                 properties:
                 - !ruby/object:Api::Type::Array
                   name: identities
                   description: A list of identities that are allowed access through this
                     ingress policy. Should be in the format of email address. The email
                     address should represent individual user or service account only.
+                  exactly_one_of:
+                    - identities
+                    - identity_type
                   item_type: Api::Type::String
                 - !ruby/object:Api::Type::Array
                   name: sources
                   description: Sources that this IngressPolicy authorizes access from.
+                  required: true
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                     - !ruby/object:Api::Type::String
@@ -981,6 +997,9 @@ objects:
                         The project may be in any Google Cloud organization, not just the
                         organization that the perimeter is defined in. `*` is not allowed,
                         the case of allowing all Google Cloud resources only is not supported.'
+                      exactly_one_of:
+                        - resource
+                        - access_level
                     - !ruby/object:Api::Type::String
                       name: accessLevel
                       description: 'An AccessLevel resource name that allow resources within
@@ -991,11 +1010,17 @@ objects:
                         via Google Cloud calls with request origins within the perimeter.
                         Example: `accessPolicies/MY_POLICY/accessLevels/MY_LEVEL`. If `*`
                         is specified, then all IngressSources will be allowed.'
+                      exactly_one_of:
+                        - resource
+                        - access_level
                 - !ruby/object:Api::Type::Enum
                   name: identityType
                   description: Specifies the type of identities that are allowed access
                     from outside the perimeter. If left unspecified, then members of `identities`
                     field will be allowed access.
+                  exactly_one_of:
+                    - identities
+                    - identity_type
                   values:
                   - :IDENTITY_TYPE_UNSPECIFIED
                   - :ANY_IDENTITY
@@ -1013,18 +1038,25 @@ objects:
                 name: egressFrom
                 description: Defines conditions on the source of a request causing this
                   EgressPolicy to apply.
+                required: true
                 properties:
                 - !ruby/object:Api::Type::Array
                   name: identities
                   description: A list of identities that are allowed access through this
                     [EgressPolicy]. Should be in the format of email address. The email
                     address should represent individual user or service account only.
+                  exactly_one_of:
+                    - identities
+                    - identity_type
                   item_type: Api::Type::String
                 - !ruby/object:Api::Type::Enum
                   name: identityType
                   description: Specifies the type of identities that are allowed access
                     to outside the perimeter. If left unspecified, then members of `identities`
                     field will be allowed access.
+                  exactly_one_of:
+                    - identities
+                    - identity_type
                   values:
                   - :IDENTITY_TYPE_UNSPECIFIED
                   - :ANY_IDENTITY
@@ -1034,6 +1066,7 @@ objects:
                 name: egressTo
                 description: Defines the conditions on the ApiOperation and destination
                   resources that cause this EgressPolicy to apply.
+                required: true
                 properties:
                 - !ruby/object:Api::Type::Array
                   name: resources
@@ -1041,11 +1074,13 @@ objects:
                     `projects/`, that match this to stanza. A request matches if it contains
                     a resource in this list. If `*` is specified for resources, then this
                     EgressTo rule will authorize access to all resources outside the perimeter.
+                  required: true
                   item_type: Api::Type::String
                 - !ruby/object:Api::Type::Array
                   name: operations
                   description: A list of ApiOperations that this egress rule applies to.
                     A request matches if it contains an operation/service in this list.
+                  required: true
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                     - !ruby/object:Api::Type::Array
@@ -1055,24 +1090,32 @@ objects:
                         single MethodSelector entry with `*` specified for the `method`
                         field will allow all methods AND permissions for the service specified
                         in `service_name`.
+                      required: true
                       item_type: !ruby/object:Api::Type::NestedObject
                         properties:
                         - !ruby/object:Api::Type::String
                           name: permission
                           description: Value for `permission` should be a valid Cloud IAM
                             permission for the corresponding `service_name` in ApiOperation.
+                          exactly_one_of:
+                            - permission
+                            - method
                         - !ruby/object:Api::Type::String
                           name: method
                           description: Value for `method` should be a valid method name
                             for the corresponding `service_name` in ApiOperation. If `*`
                             used as value for `method`, then ALL methods and permissions
                             are allowed.
+                          exactly_one_of:
+                            - permission
+                            - method
                     - !ruby/object:Api::Type::String
                       name: serviceName
                       description: The name of the API whose methods or permissions the
                         IngressPolicy or EgressPolicy want to allow. A single ApiOperation
                         with `service_name` field set to `*` will allow all methods AND
                         permissions for all services.
+                      required: true
       - !ruby/object:Api::Type::NestedObject
         name: 'spec'
         description: |
@@ -1153,6 +1196,7 @@ objects:
                 name: ingressTo
                 description: Defines the conditions on the ApiOperation and request destination
                   that cause this IngressPolicy to apply.
+                required: true
                 properties:
                 - !ruby/object:Api::Type::Array
                   name: resources
@@ -1163,11 +1207,13 @@ objects:
                     for resources, then this IngressTo rule will authorize access to all
                     resources inside the perimeter, provided that the request also matches
                     the `operations` field.
+                  required: true
                   item_type: Api::Type::String
                 - !ruby/object:Api::Type::Array
                   name: operations
                   description: A list of ApiOperations the sources specified in corresponding
                     IngressFrom are allowed to perform in this ServicePerimeter.
+                  required: true
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                     - !ruby/object:Api::Type::Array
@@ -1177,38 +1223,51 @@ objects:
                         single MethodSelector entry with `*` specified for the `method`
                         field will allow all methods AND permissions for the service specified
                         in `service_name`.
+                      required: true
                       item_type: !ruby/object:Api::Type::NestedObject
                         properties:
                         - !ruby/object:Api::Type::String
                           name: permission
                           description: Value for `permission` should be a valid Cloud IAM
                             permission for the corresponding `service_name` in ApiOperation.
+                          exactly_one_of:
+                            - permission
+                            - method
                         - !ruby/object:Api::Type::String
                           name: method
                           description: Value for `method` should be a valid method name
                             for the corresponding `service_name` in ApiOperation. If `*`
                             used as value for `method`, then ALL methods and permissions
                             are allowed.
+                          exactly_one_of:
+                            - permission
+                            - method
                     - !ruby/object:Api::Type::String
                       name: serviceName
                       description: The name of the API whose methods or permissions the
                         IngressPolicy or EgressPolicy want to allow. A single ApiOperation
                         with `service_name` field set to `*` will allow all methods AND
                         permissions for all services.
+                      required: true
               - !ruby/object:Api::Type::NestedObject
                 name: ingressFrom
                 description: Defines the conditions on the source of a request causing this
                   IngressPolicy to apply.
+                required: true
                 properties:
                 - !ruby/object:Api::Type::Array
                   name: identities
                   description: A list of identities that are allowed access through this
                     ingress policy. Should be in the format of email address. The email
                     address should represent individual user or service account only.
+                  exactly_one_of:
+                    - identities
+                    - identity_type
                   item_type: Api::Type::String
                 - !ruby/object:Api::Type::Array
                   name: sources
                   description: Sources that this IngressPolicy authorizes access from.
+                  required: true
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                     - !ruby/object:Api::Type::String
@@ -1219,6 +1278,9 @@ objects:
                         The project may be in any Google Cloud organization, not just the
                         organization that the perimeter is defined in. `*` is not allowed,
                         the case of allowing all Google Cloud resources only is not supported.'
+                      exactly_one_of:
+                        - resource
+                        - access_level
                     - !ruby/object:Api::Type::String
                       name: accessLevel
                       description: 'An AccessLevel resource name that allow resources within
@@ -1229,11 +1291,17 @@ objects:
                         via Google Cloud calls with request origins within the perimeter.
                         Example: `accessPolicies/MY_POLICY/accessLevels/MY_LEVEL`. If `*`
                         is specified, then all IngressSources will be allowed.'
+                      exactly_one_of:
+                        - resource
+                        - access_level
                 - !ruby/object:Api::Type::Enum
                   name: identityType
                   description: Specifies the type of identities that are allowed access
                     from outside the perimeter. If left unspecified, then members of `identities`
                     field will be allowed access.
+                  exactly_one_of:
+                    - identities
+                    - identity_type
                   values:
                   - :IDENTITY_TYPE_UNSPECIFIED
                   - :ANY_IDENTITY
@@ -1251,18 +1319,25 @@ objects:
                 name: egressFrom
                 description: Defines conditions on the source of a request causing this
                   EgressPolicy to apply.
+                required: true
                 properties:
                 - !ruby/object:Api::Type::Array
                   name: identities
                   description: A list of identities that are allowed access through this
                     [EgressPolicy]. Should be in the format of email address. The email
                     address should represent individual user or service account only.
+                  exactly_one_of:
+                    - identities
+                    - identity_type
                   item_type: Api::Type::String
                 - !ruby/object:Api::Type::Enum
                   name: identityType
                   description: Specifies the type of identities that are allowed access
                     to outside the perimeter. If left unspecified, then members of `identities`
                     field will be allowed access.
+                  exactly_one_of:
+                    - identities
+                    - identity_type
                   values:
                   - :IDENTITY_TYPE_UNSPECIFIED
                   - :ANY_IDENTITY
@@ -1272,6 +1347,7 @@ objects:
                 name: egressTo
                 description: Defines the conditions on the ApiOperation and destination
                   resources that cause this EgressPolicy to apply.
+                required: true
                 properties:
                 - !ruby/object:Api::Type::Array
                   name: resources
@@ -1279,11 +1355,13 @@ objects:
                     `projects/`, that match this to stanza. A request matches if it contains
                     a resource in this list. If `*` is specified for resources, then this
                     EgressTo rule will authorize access to all resources outside the perimeter.
+                  required: true
                   item_type: Api::Type::String
                 - !ruby/object:Api::Type::Array
                   name: operations
                   description: A list of ApiOperations that this egress rule applies to.
                     A request matches if it contains an operation/service in this list.
+                  required: true
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                     - !ruby/object:Api::Type::Array
@@ -1293,24 +1371,32 @@ objects:
                         single MethodSelector entry with `*` specified for the `method`
                         field will allow all methods AND permissions for the service specified
                         in `service_name`.
+                      required: true
                       item_type: !ruby/object:Api::Type::NestedObject
                         properties:
                         - !ruby/object:Api::Type::String
                           name: permission
                           description: Value for `permission` should be a valid Cloud IAM
                             permission for the corresponding `service_name` in ApiOperation.
+                          exactly_one_of:
+                            - permission
+                            - method
                         - !ruby/object:Api::Type::String
                           name: method
                           description: Value for `method` should be a valid method name
                             for the corresponding `service_name` in ApiOperation. If `*`
                             used as value for `method`, then ALL methods and permissions
                             are allowed.
+                          exactly_one_of:
+                            - permission
+                            - method
                     - !ruby/object:Api::Type::String
                       name: serviceName
                       description: The name of the API whose methods or permissions the
                         IngressPolicy or EgressPolicy want to allow. A single ApiOperation
                         with `service_name` field set to `*` will allow all methods AND
                         permissions for all services.
+                      required: true
       - !ruby/object:Api::Type::Boolean
         name: 'useExplicitDryRunSpec'
         description: |
