@@ -18,6 +18,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://accesscontextmanager.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://accesscontextmanager.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 async: !ruby/object:Api::OpAsync
@@ -901,6 +904,7 @@ objects:
               item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
             name: ingressPolicies
+            min_version: beta
             description: List of IngressPolicies to apply to the perimeter. A perimeter
               may have multiple IngressPolicies, each of which is evaluated separately.
               Access is granted if any Ingress Policy grants it. Must be empty for a perimeter
@@ -999,6 +1003,7 @@ objects:
                   - :ANY_SERVICE_ACCOUNT
           - !ruby/object:Api::Type::Array
             name: egressPolicies
+            min_version: beta
             description: List of EgressPolicies to apply to the perimeter. A perimeter may
               have multiple EgressPolicies, each of which is evaluated separately. Access
               is granted if any EgressPolicy grants it. Must be empty for a perimeter bridge.
@@ -1137,6 +1142,7 @@ objects:
               item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
             name: ingressPolicies
+            min_version: beta
             description: List of IngressPolicies to apply to the perimeter. A perimeter
               may have multiple IngressPolicies, each of which is evaluated separately.
               Access is granted if any Ingress Policy grants it. Must be empty for a perimeter
@@ -1235,6 +1241,7 @@ objects:
                   - :ANY_SERVICE_ACCOUNT
           - !ruby/object:Api::Type::Array
             name: egressPolicies
+            min_version: beta
             description: List of EgressPolicies to apply to the perimeter. A perimeter may
               have multiple EgressPolicies, each of which is evaluated separately. Access
               is granted if any EgressPolicy grants it. Must be empty for a perimeter bridge.
