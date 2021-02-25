@@ -9,7 +9,7 @@ description: |-
 
 # google_service_account_key
 
-Creates and manages service account keys, which allow the uses of a service account outside of Google Cloud. 
+Creates and manages service account keys, which allow the use of a service account outside of Google Cloud. 
 
 * [API documentation](https://cloud.google.com/iam/reference/rest/v1/projects.serviceAccounts.keys)
 * How-to Guides

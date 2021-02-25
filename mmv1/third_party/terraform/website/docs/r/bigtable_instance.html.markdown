@@ -13,7 +13,7 @@ Creates a Google Bigtable instance. For more information see:
 
 * [API documentation](https://cloud.google.com/bigtable/docs/reference/admin/rest/v2/projects.instances.clusters)
 * How-to Guides
-    * [Official Documentation](https://cloud.google.com/composer/docs)
+    * [Official Documentation](https://cloud.google.com/bigtable/docs)
 
 
 -> **Note**: It is strongly recommended to set `lifecycle { prevent_destroy = true }`
