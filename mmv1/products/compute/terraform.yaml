@@ -2104,6 +2104,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validateRFC1035Name(2, 63)'
       natIps: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
+        set_hash_func: computeRouterNatIPsHash
       drainNatIps: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
       subnetwork: !ruby/object:Overrides::Terraform::PropertyOverride
