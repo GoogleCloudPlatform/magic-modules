@@ -23,7 +23,7 @@ func cloudrunAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) 
 	return false
 }
 
-var cloudRunGoogleProvidedLabels = regexp.MustCompile(`cloud\\.googleapis\\.com/(?:(?:location))`)
+var cloudRunGoogleProvidedLabels = regexp.MustCompile(`cloud\.googleapis\.com/(?:(?:location))`)
 
 func cloudrunLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// Suppress diffs for the labels provided by Google
