@@ -15,7 +15,7 @@ Environments run Apache Airflow software on Google infrastructure.
 
 To get more information about Environments, see:
 
-* [API documentation](https://cloud.google.com/composer/docs/reference/rest/)
+* [API documentation](https://cloud.google.com/composer/docs/reference/rest/v1/projects.locations.environments)
 * How-to Guides
     * [Official Documentation](https://cloud.google.com/composer/docs)
     * [Configuring Shared VPC for Composer Environments](https://cloud.google.com/composer/docs/how-to/managing/configuring-shared-vpc)
@@ -178,6 +178,10 @@ The `config` block supports:
 * `web_server_config` -
   (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
   The configuration settings for the Airflow web server App Engine instance.
+
+* `encryption_config` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  The encryption options for the Cloud Composer environment and its dependencies.
 
 The `node_config` block supports:
 
@@ -390,6 +394,13 @@ The `web_server_config` block supports:
   Value custom is returned only in response, if Airflow web server parameters were
   manually changed to a non-standard values.
 
+The `encryption_config` block supports:
+
+* `kms_key_name` -
+  (Required)
+  Customer-managed Encryption Key available through Google's Key Management Service. It must
+  be the fully qualified resource name, 
+  i.e. projects/project-id/locations/location/keyRings/keyring/cryptoKeys/key. Cannot be updated.
 
 
 ## Attributes Reference

@@ -79,7 +79,7 @@ type RestoreDefault struct {
 func assetName(d TerraformResourceData, config *Config, linkTmpl string) (string, error) {
 	re := regexp.MustCompile("{{([[:word:]]+)}}")
 
-	f, err := buildReplacementFunc(re, d, config, linkTmpl)
+	f, err := buildReplacementFunc(re, d, config, linkTmpl, false)
 	if err != nil {
 		return "", err
 	}

@@ -88,3 +88,12 @@ func computeRouterNatSubnetworkHash(v interface{}) int {
 	
 	return schema.HashString(NameFromSelfLinkStateFunc(name)) + sourceIpRangesHash + secondaryIpRangeHash
 }
+
+func computeRouterNatIPsHash(v interface{}) int {
+	val := (v.(string))
+	newParts := strings.Split(val, "/")
+	if len(newParts) == 1 {
+		return schema.HashString(newParts[0])
+	}
+	return schema.HashString(GetResourceNameFromSelfLink(val))
+}

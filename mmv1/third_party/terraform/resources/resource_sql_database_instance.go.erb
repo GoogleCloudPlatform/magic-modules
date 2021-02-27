@@ -72,6 +72,13 @@ var (
 		"replica_configuration.0.username",
 		"replica_configuration.0.verify_server_certificate",
 	}
+
+	insightsConfigKeys = []string{
+		"settings.0.insights_config.0.query_insights_enabled",
+		"settings.0.insights_config.0.query_string_length",
+		"settings.0.insights_config.0.record_application_tags",
+		"settings.0.insights_config.0.record_client_address",
+  }
 )
 
 func resourceSqlDatabaseInstance() *schema.Resource {
@@ -93,7 +100,9 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			customdiff.ForceNewIfChange("settings.0.disk_size", isDiskShrinkage),
 			privateNetworkCustomizeDiff,
-			pitrPostgresOnlyCustomizeDiff),
+			pitrPostgresOnlyCustomizeDiff,
+			insightsPostgresOnlyCustomizeDiff,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -111,7 +120,9 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 			},
 			"settings": {
 				Type:     schema.TypeList,
-				Required: true,
+				Optional:     true,
+				Computed:     true,
+				AtLeastOneOf: []string{"settings", "clone"},
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -135,6 +146,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 						"authorized_gae_applications": {
 							Type:        schema.TypeList,
 							Optional:    true,
+							Computed:    true,
 							Elem:        &schema.Schema{Type: schema.TypeString},
 							Deprecated:  "This property is only applicable to First Generation instances, and First Generation instances are now deprecated.",
 							Description: `This property is only applicable to First Generation instances. First Generation instances are now deprecated, see https://cloud.google.com/sql/docs/mysql/deprecation-notice for information on how to upgrade to Second Generation instances. A list of Google App Engine project names that are allowed to access this instance.`,
@@ -346,8 +358,45 @@ settings.backup_configuration.binary_log_enabled are both set to true.`,
 						"user_labels": {
 							Type:        schema.TypeMap,
 							Optional:    true,
+							Computed:    true,
 							Elem:        &schema.Schema{Type: schema.TypeString},
 							Description: `A set of key/value user label pairs to assign to the instance.`,
+						},
+						"insights_config": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"query_insights_enabled": {
+										Type:         schema.TypeBool,
+										Optional:     true,
+										AtLeastOneOf: insightsConfigKeys,
+										Description:  `True if Query Insights feature is enabled.`,
+									},
+									"query_string_length": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Default:      1024,
+										ValidateFunc: validation.IntBetween(256, 4500),
+										AtLeastOneOf: insightsConfigKeys,
+										Description:  `Maximum query length stored in bytes. Between 256 and 4500. Default to 1024.`,
+									},
+									"record_application_tags": {
+										Type:         schema.TypeBool,
+										Optional:     true,
+										AtLeastOneOf: insightsConfigKeys,
+										Description:  `True if Query Insights will record application tags from query when enabled.`,
+									},
+									"record_client_address": {
+										Type:         schema.TypeBool,
+										Optional:     true,
+										AtLeastOneOf: insightsConfigKeys,
+										Description:  `True if Query Insights will record client address when enabled.`,
+									},
+								},
+							},
+							Description: `Configuration of Query Insights.`,
 						},
 					},
 				},
@@ -470,14 +519,14 @@ settings.backup_configuration.binary_log_enabled are both set to true.`,
 							Optional:     true,
 							ForceNew:     true,
 							AtLeastOneOf: replicaConfigurationKeys,
-							Description:  `PEM representation of the slave's x509 certificate.`,
+							Description:  `PEM representation of the replica's x509 certificate.`,
 						},
 						"client_key": {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ForceNew:     true,
 							AtLeastOneOf: replicaConfigurationKeys,
-							Description:  `PEM representation of the slave's private key. The corresponding public key in encoded in the client_certificate.`,
+							Description:  `PEM representation of the replica's private key. The corresponding public key in encoded in the client_certificate.`,
 						},
 						"connect_retry_interval": {
 							Type:         schema.TypeInt,
@@ -491,7 +540,7 @@ settings.backup_configuration.binary_log_enabled are both set to true.`,
 							Optional:     true,
 							ForceNew:     true,
 							AtLeastOneOf: replicaConfigurationKeys,
-							Description:  `Path to a SQL file in Google Cloud Storage from which slave instances are created. Format is gs://bucket/filename.`,
+							Description:  `Path to a SQL file in Google Cloud Storage from which replica instances are created. Format is gs://bucket/filename.`,
 						},
 						"failover_target": {
 							Type:         schema.TypeBool,
@@ -607,6 +656,29 @@ settings.backup_configuration.binary_log_enabled are both set to true.`,
 					},
 				},
 			},
+			"clone": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    false,
+				AtLeastOneOf: []string{"settings", "clone"},
+				Description: `Configuration for creating a new instance as a clone of another instance.`,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"source_instance_name": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: `The name of the instance from which the point in time should be restored.`,
+						},
+						"point_in_time": {
+							Type:             schema.TypeString,
+							Required:     true,
+							DiffSuppressFunc: timestampDiffSuppress(time.RFC3339Nano),
+							Description:  `The timestamp of the point in time that should be restored.`,
+						},
+					},
+				},
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -626,6 +698,9 @@ func suppressFirstGen(k, old, new string, d *schema.ResourceData) bool {
 // Detects whether a database is 1st Generation by inspecting the tier name
 func isFirstGen(d *schema.ResourceData) bool {
 	settingsList := d.Get("settings").([]interface{})
+	if len(settingsList) == 0 {
+		return false
+	}
 	settings := settingsList[0].(map[string]interface{})
 	tier := settings["tier"].(string)
 
@@ -657,6 +732,15 @@ func pitrPostgresOnlyCustomizeDiff(_ context.Context, diff *schema.ResourceDiff,
 	dbVersion := diff.Get("database_version").(string)
 	if pitr && !strings.Contains(dbVersion, "POSTGRES") {
 		return fmt.Errorf("point_in_time_recovery_enabled is only available for Postgres. You may want to consider using binary_log_enabled instead.")
+	}
+	return nil
+}
+
+func insightsPostgresOnlyCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
+	insights := diff.Get("settings.0.insights_config.0.query_insights_enabled").(bool)
+	dbVersion := diff.Get("database_version").(string)
+	if insights && !strings.Contains(dbVersion, "POSTGRES") {
+		return fmt.Errorf("query_insights_enabled is only available for Postgres now.")
 	}
 	return nil
 }
@@ -702,10 +786,17 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	instance := &sqladmin.DatabaseInstance{
 		Name:                 name,
 		Region:               region,
-		Settings:             expandSqlDatabaseInstanceSettings(d.Get("settings").([]interface{}), !isFirstGen(d)),
 		DatabaseVersion:      d.Get("database_version").(string),
 		MasterInstanceName:   d.Get("master_instance_name").(string),
 		ReplicaConfiguration: expandReplicaConfiguration(d.Get("replica_configuration").([]interface{})),
+	}
+
+	cloneContext, cloneSource := expandCloneContext(d.Get("clone").([]interface{}))
+
+    s, ok := d.GetOk("settings")
+	desiredSettings := expandSqlDatabaseInstanceSettings(s.([]interface{}), !isFirstGen(d))
+	if ok {
+		instance.Settings = desiredSettings
 	}
 
 	// MSSQL Server require rootPassword to be set
@@ -730,7 +821,13 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 
 	var op *sqladmin.Operation
 	err = retryTimeDuration(func() (operr error) {
-		op, operr = config.NewSqlAdminClient(userAgent).Instances.Insert(project, instance).Do()
+		if cloneContext != nil {
+			cloneContext.DestinationInstanceName = name
+			clodeReq := sqladmin.InstancesCloneRequest{CloneContext: cloneContext}
+			op, operr = config.NewSqlAdminClient(userAgent).Instances.Clone(project, cloneSource, &clodeReq).Do()
+		} else {
+			op, operr = config.NewSqlAdminClient(userAgent).Instances.Insert(project, instance).Do()
+		}
 		return operr
 	}, d.Timeout(schema.TimeoutCreate), isSqlOperationInProgressError)
 	if err != nil {
@@ -752,6 +849,36 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	err = resourceSqlDatabaseInstanceRead(d, meta)
 	if err != nil {
 		return err
+	}
+
+	// Refresh settings from read as they may have defaulted from the API
+	s = d.Get("settings")
+	// If we've created an instance as a clone, we need to update it to set any user defined settings
+	if len(s.([]interface{})) != 0 && cloneContext != nil && desiredSettings != nil {
+		instanceUpdate := &sqladmin.DatabaseInstance{
+			Settings: desiredSettings,
+		}
+		_settings := s.([]interface{})[0].(map[string]interface{})
+		instanceUpdate.Settings.SettingsVersion = int64(_settings["version"].(int))
+		var op *sqladmin.Operation
+		err = retryTimeDuration(func() (rerr error) {
+			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Update(project, name, instanceUpdate).Do()
+			return rerr
+		}, d.Timeout(schema.TimeoutUpdate), isSqlOperationInProgressError)
+		if err != nil {
+			return fmt.Errorf("Error, failed to update instance settings for %s: %s", instance.Name, err)
+		}
+
+		err = sqlAdminOperationWaitTime(config, op, project, "Update Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return err
+		}
+
+		// Refresh the state of the instance after updating the settings
+		err = resourceSqlDatabaseInstanceRead(d, meta)
+		if err != nil {
+			return err
+		}
 	}
 
 	// If a default root user was created with a wildcard ('%') hostname, delete it.
@@ -817,6 +944,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, secondGen bool)
 		IpConfiguration:             expandIpConfiguration(_settings["ip_configuration"].([]interface{})),
 		LocationPreference:          expandLocationPreference(_settings["location_preference"].([]interface{})),
 		MaintenanceWindow:           expandMaintenanceWindow(_settings["maintenance_window"].([]interface{})),
+		InsightsConfig:              expandInsightsConfig(_settings["insights_config"].([]interface{})),
 	}
 
 	// 1st Generation instances don't support the disk_autoresize parameter
@@ -853,6 +981,18 @@ func expandReplicaConfiguration(configured []interface{}) *sqladmin.ReplicaConfi
 			VerifyServerCertificate: _replicaConfiguration["verify_server_certificate"].(bool),
 		},
 	}
+}
+
+func expandCloneContext(configured []interface{}) (*sqladmin.CloneContext, string) {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil, ""
+	}
+
+	_cloneConfiguration := configured[0].(map[string]interface{})
+
+	return &sqladmin.CloneContext{
+		PointInTime: _cloneConfiguration["point_in_time"].(string),
+	}, _cloneConfiguration["source_instance_name"].(string)
 }
 
 func expandMaintenanceWindow(configured []interface{}) *sqladmin.MaintenanceWindow {
@@ -944,6 +1084,20 @@ func expandBackupConfiguration(configured []interface{}) *sqladmin.BackupConfigu
 		Location:                   _backupConfiguration["location"].(string),
 		PointInTimeRecoveryEnabled: _backupConfiguration["point_in_time_recovery_enabled"].(bool),
 		ForceSendFields:            []string{"BinaryLogEnabled", "Enabled", "PointInTimeRecoveryEnabled"},
+	}
+}
+
+func expandInsightsConfig(configured []interface{}) *sqladmin.InsightsConfig {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+
+	_insightsConfig := configured[0].(map[string]interface{})
+	return &sqladmin.InsightsConfig{
+		QueryInsightsEnabled:  _insightsConfig["query_insights_enabled"].(bool),
+		QueryStringLength:     int64(_insightsConfig["query_string_length"].(int)),
+		RecordApplicationTags: _insightsConfig["record_application_tags"].(bool),
+		RecordClientAddress:   _insightsConfig["record_client_address"].(bool),
 	}
 }
 
@@ -1198,6 +1352,10 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 		data["maintenance_window"] = flattenMaintenanceWindow(settings.MaintenanceWindow)
 	}
 
+	if settings.InsightsConfig != nil {
+		data["insights_config"] = flattenInsightsConfig(settings.InsightsConfig)
+	}
+
 	data["disk_autoresize"] = settings.StorageAutoResize
 
 	if settings.UserLabels != nil {
@@ -1345,6 +1503,17 @@ func flattenServerCaCerts(caCerts []*sqladmin.SslCert) []map[string]interface{} 
 	}
 
 	return certs
+}
+
+func flattenInsightsConfig(insightsConfig *sqladmin.InsightsConfig) interface{} {
+	data := map[string]interface{}{
+		"query_insights_enabled":  insightsConfig.QueryInsightsEnabled,
+		"query_string_length":     insightsConfig.QueryStringLength,
+		"record_application_tags": insightsConfig.RecordApplicationTags,
+		"record_client_address":   insightsConfig.RecordClientAddress,
+	}
+
+	return []map[string]interface{}{data}
 }
 
 func instanceMutexKey(project, instance_name string) string {

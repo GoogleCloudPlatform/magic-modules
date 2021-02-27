@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sort"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -13,6 +14,22 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/bigquery/v2"
 )
+
+func bigQueryTableSortArrayByName(array []interface{}) {
+	sort.Slice(array, func(i, k int) bool {
+		return array[i].(map[string]interface{})["name"].(string) < array[k].(map[string]interface{})["name"].(string)
+	})
+}
+
+func bigQueryTablecheckNameExists(jsonList []interface{}) error {
+	for _, m := range jsonList {
+		if _, ok := m.(map[string]interface{})["name"]; !ok {
+			return fmt.Errorf("No name in schema %+v", m)
+		}
+	}
+
+	return nil
+}
 
 // Compares two json's while optionally taking in a compareMapKeyVal function.
 // This function will override any comparison of a given map[string]interface{}
@@ -27,6 +44,14 @@ func jsonCompareWithMapKeyOverride(a, b interface{}, compareMapKeyVal func(key s
 		} else if len(arrayA) != len(arrayB) {
 			return false, nil
 		}
+		if err := bigQueryTablecheckNameExists(arrayA); err != nil {
+			return false, err
+		}
+		bigQueryTableSortArrayByName(arrayA)
+		if err := bigQueryTablecheckNameExists(arrayB); err != nil {
+			return false, err
+		}
+		bigQueryTableSortArrayByName(arrayB)
 		for i := range arrayA {
 			eq, err := jsonCompareWithMapKeyOverride(arrayA[i], arrayB[i], compareMapKeyVal)
 			if err != nil {
@@ -169,6 +194,14 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error)
 			// if not growing not changeable
 			return false, nil
 		}
+		if err := bigQueryTablecheckNameExists(arrayOld); err != nil {
+			return false, err
+		}
+		bigQueryTableSortArrayByName(arrayOld)
+		if err := bigQueryTablecheckNameExists(arrayNew); err != nil {
+			return false, err
+		}
+		bigQueryTableSortArrayByName(arrayNew)
 		for i := range arrayOld {
 			if isChangable, err :=
 				resourceBigQueryTableSchemaIsChangeable(arrayOld[i], arrayNew[i]); err != nil || !isChangable {
@@ -824,6 +857,13 @@ func resourceBigQueryTable() *schema.Resource {
 				Computed:    true,
 				Description: `Describes the table type.`,
 			},
+
+			"deletion_protection": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: `Whether or not to allow Terraform to destroy the instance. Unless this field is set to false in Terraform state, a terraform destroy or terraform apply that would delete the instance will fail.`,
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -1134,6 +1174,9 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error {
+	if d.Get("deletion_protection").(bool) {
+		return fmt.Errorf("cannot destroy instance without setting deletion_protection=false and running `terraform apply`")
+	}
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
@@ -1540,6 +1583,11 @@ func resourceBigQueryTableImport(d *schema.ResourceData, meta interface{}) ([]*s
 		"(?P<dataset_id>[^/]+)/(?P<table_id>[^/]+)",
 	}, d, config); err != nil {
 		return nil, err
+	}
+
+	// Explicitly set virtual fields to default values on import
+	if err := d.Set("deletion_protection", true); err != nil {
+		return nil, fmt.Errorf("Error setting deletion_protection: %s", err)
 	}
 
 	// Replace import id for the resource id
