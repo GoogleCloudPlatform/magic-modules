@@ -388,6 +388,16 @@ objects:
                 scales up until it reaches the maximum number of instances you
                 specified or until the average utilization reaches the target
                 utilization.
+            - !ruby/object:Api::Type::String
+              name: 'predictiveMethod'
+              min_version: beta
+              default_value: NONE
+              description: |
+                Indicates whether predictive autoscaling based on CPU metric is enabled. Valid values are:
+
+                - NONE (default). No predictive method is used. The autoscaler scales the group to meet current demand based on real-time metrics.
+                
+                - OPTIMIZE_AVAILABILITY. Predictive autoscaling improves availability by monitoring daily and weekly load patterns and scaling out ahead of anticipated demand.
           - !ruby/object:Api::Type::Array
             name: 'customMetricUtilizations'
             description: |
@@ -7338,6 +7348,11 @@ objects:
         name: 'description'
         description: |
           An optional description of this resource.
+      - !ruby/object:Api::Type::String
+        name: 'mtu'
+        description: |
+          Maximum Transmission Unit (MTU), in bytes, of packets passing through
+          this interconnect attachment. Currently, only 1440 and 1500 are allowed. If not specified, the value will default to 1440.
       - !ruby/object:Api::Type::Enum
         name: 'bandwidth'
         description: |
@@ -9661,6 +9676,16 @@ objects:
                 scales up until it reaches the maximum number of instances you
                 specified or until the average utilization reaches the target
                 utilization.
+            - !ruby/object:Api::Type::String
+              name: 'predictiveMethod'
+              min_version: beta
+              default_value: NONE
+              description: |
+                Indicates whether predictive autoscaling based on CPU metric is enabled. Valid values are:
+
+                - NONE (default). No predictive method is used. The autoscaler scales the group to meet current demand based on real-time metrics.
+                
+                - OPTIMIZE_AVAILABILITY. Predictive autoscaling improves availability by monitoring daily and weekly load patterns and scaling out ahead of anticipated demand.
           - !ruby/object:Api::Type::Array
             name: 'customMetricUtilizations'
             description: |

@@ -67,5 +67,6 @@ objects:
         item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'languageTag'
+        required: true
         description: |
           The preferred language for notifications, as a ISO 639-1 language code. See Supported languages for a list of supported languages.

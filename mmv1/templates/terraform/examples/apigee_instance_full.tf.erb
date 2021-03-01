@@ -1,7 +1,7 @@
 data "google_client_config" "current" {}
 
 resource "google_compute_network" "apigee_network" {
-  name       = "apigee-network"
+  name = "apigee-network"
 }
 
 resource "google_compute_global_address" "apigee_range" {
@@ -47,7 +47,7 @@ resource "google_kms_crypto_key_iam_binding" "apigee_sa_keyuser" {
   ]
 }
 
-resource "google_apigee_organization" "org" {
+resource "google_apigee_organization" "apigee_org" {
   analytics_region                     = "us-central1"
   display_name                         = "apigee-org"
   description                          = "Terraform-provisioned Apigee Org."
@@ -59,4 +59,13 @@ resource "google_apigee_organization" "org" {
     google_service_networking_connection.apigee_vpc_connection,
     google_kms_crypto_key_iam_binding.apigee_sa_keyuser,
   ]
+}
+
+resource "google_apigee_instance" "apigee_instance" {
+  name                     = "tf-test%{random_suffix}"
+  location                 = "us-central1-b"
+  description	             = "Terraform-managed Apigee Runtime Instance"
+  display_name             = "tf-test%{random_suffix}"
+  org_id                   = google_apigee_organization.apigee_org.id
+  disk_encryption_key_name = google_kms_crypto_key.apigee_key.id
 }
