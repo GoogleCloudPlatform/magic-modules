@@ -255,20 +255,6 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     d.SetId(id)
 
 <%  if object.async&.allow?('create') -%>
-<%    if object.async.is_a? Provider::Terraform::PollAsync -%>
-    err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Creating <%= object.name -%>", d.Timeout(schema.TimeoutCreate), <%= object.async.target_occurrences -%>)
-    if err != nil {
-<%      if object.async.suppress_error -%>
-        log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
-<%      else -%>
-<%        if object.custom_code.post_create_failure -%>
-        resource<%= resource_name -%>PostCreateFailure(d, meta)
-<%        end -%>
-        return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
-<%      end -%>
-    }
-
-<%    end -%>
 <%    if object.async.is_a? Api::OpAsync -%>
 <%      if object.async.result.resource_inside_response and not object.identity.empty? -%>
     // Use the resource in the operation response to populate
@@ -341,9 +327,26 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%  end -%>
 <%  end -%>
 
-    log.Printf("[DEBUG] Finished creating <%= object.name -%> %q: %#v", d.Id(), res)
-
 <%= lines(compile(pwd + '/' + object.custom_code.post_create)) if object.custom_code.post_create -%>
+
+<%  if object.async&.allow?('create') -%>
+<%    if object.async.is_a? Provider::Terraform::PollAsync -%>
+    err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Creating <%= object.name -%>", d.Timeout(schema.TimeoutCreate), <%= object.async.target_occurrences -%>)
+    if err != nil {
+<%      if object.async.suppress_error -%>
+        log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
+<%      else -%>
+<%        if object.custom_code.post_create_failure -%>
+        resource<%= resource_name -%>PostCreateFailure(d, meta)
+<%        end -%>
+        return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
+<%      end -%>
+    }
+
+<%    end -%>
+<% end -%>
+
+    log.Printf("[DEBUG] Finished creating <%= object.name -%> %q: %#v", d.Id(), res)
 
     return resource<%= resource_name -%>Read(d, meta)
 <%  end # if custom_create  -%>
