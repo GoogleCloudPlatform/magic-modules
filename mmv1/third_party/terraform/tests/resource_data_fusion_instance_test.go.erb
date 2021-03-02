@@ -55,7 +55,7 @@ func testAccDataFusionInstance_updated(instanceName string) string {
 resource "google_data_fusion_instance" "foobar" {
   name                          = "%s"
   region                        = "us-central1"
-  type                          = "BASIC"
+  type                          = "DEVELOPER"
   enable_stackdriver_monitoring = true
   enable_stackdriver_logging    = true
 
@@ -63,7 +63,7 @@ resource "google_data_fusion_instance" "foobar" {
     label1 = "value1"
     label2 = "value2"
   }
-  version = "6.1.1"
+  version = "6.2.0"
 }
 `, instanceName)
 }
