@@ -25,18 +25,10 @@ resource "google_apigee_organization" "apigee_org" {
   depends_on         = [google_service_networking_connection.apigee_vpc_connection]
 }
 
-resource "google_apigee_instance" "apigee_instance" {
-  name     = "tf-test%{random_suffix}"
-  location = "us-central1-b"
-  org_id   = google_apigee_organization.apigee_org.id
-}
-
-
-###### Environment
-
 resource "google_apigee_environment" "env" {
-  name                  = "tf-test%{random_suffix}"
-  description           = "Apigee Environment"
-  displayName           = "environment_1"
+  name        = "tf-test%{random_suffix}"
+  description = "Apigee Environment"
+  displayName = "environment-1"
+  org_id      = google_apigee_organization.apigee_org.id
 }
 

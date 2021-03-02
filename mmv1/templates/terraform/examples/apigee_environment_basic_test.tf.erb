@@ -52,16 +52,9 @@ resource "google_apigee_organization" "apigee_org" {
   ]
 }
 
-resource "google_apigee_instance" "<%= ctx[:primary_resource_id] %>" {
-  name     = "tf-test%{random_suffix}"
-  location = "us-central1-b"
+resource "google_apigee_environment" "<%= ctx[:primary_resource_id] %>" {
   org_id   = google_apigee_organization.apigee_org.id
-}
-
-######### Environment
-
-resource "google_apigee_environment" "env" {
-  name                  = "tf-test%{random_suffix}"
-  description           = "Apigee Environment"
-  displayName           = "environment_1"
+  name         = "tf-test%{random_suffix}"
+  description  = "Apigee Environment"
+  display_name = "environment-1"
 }

@@ -234,13 +234,19 @@ objects:
       An `Environment` in Apigee.
     parameters:
       - !ruby/object:Api::Type::String
+        name: 'orgId'
+        description: |
+          The Apigee Organization associated with the Apigee environment,
+          in the format `organizations/{{org_name}}`.
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
         name: 'name'
         description: |
           The resource ID of the environment.
         required: true
-        # input: true : It is not true as env name can be updated
-        url_param_only: true
-    properties:
       - !ruby/object:Api::Type::String
         name: 'displayName'
         description: |
