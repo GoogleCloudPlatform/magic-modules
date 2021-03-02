@@ -61,7 +61,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/certificate-authority-service'
-      api: 'https://https://cloud.google.com/certificate-authority-service/docs/reference/rest'
+      api: 'https://cloud.google.com/certificate-authority-service/docs/reference/rest'
     properties:
       - !ruby/object:Api::Type::String
         name: location
