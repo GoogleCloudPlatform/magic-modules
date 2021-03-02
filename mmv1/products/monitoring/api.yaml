@@ -1168,7 +1168,7 @@ objects:
                   name: enabled
                   default_value: true
                   description: |
-                    Whether an availability SLI is enabled or not. Must be set to `true. Defaults to `true`.
+                    Whether an availability SLI is enabled or not. Must be set to true. Defaults to `true`.
         - !ruby/object:Api::Type::NestedObject
           name: requestBasedSli
           api_name: 'requestBased'
@@ -1511,9 +1511,11 @@ objects:
                       item_type: Api::Type::String
                     - !ruby/object:Api::Type::NestedObject
                       name: latency
-                      required: true
                       description: |
                         Parameters for a latency threshold SLI.
+                      exactly_one_of:
+                        - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.basic_sli_performance.0.latency
+                        - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.basic_sli_performance.0.availability
                       properties:
                         - !ruby/object:Api::Type::String
                           required: true
@@ -1522,6 +1524,19 @@ objects:
                             A duration string, e.g. 10s.
                             Good service is defined to be the count of requests made to
                             this service that return in no more than threshold.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: availability
+                      description: |
+                        Availability based SLI, dervied from count of requests made to this service that return successfully.
+                      exactly_one_of:
+                        - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.basic_sli_performance.0.latency
+                        - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.basic_sli_performance.0.availability
+                      properties:
+                        - !ruby/object:Api::Type::Boolean
+                          name: enabled
+                          default_value: true
+                          description: |
+                            Whether an availability SLI is enabled or not. Must be set to `true. Defaults to `true`.        
             - !ruby/object:Api::Type::NestedObject
               name: metricMeanInRange
               exactly_one_of:
