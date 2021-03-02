@@ -1,7 +1,6 @@
 package google
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 )
@@ -30,11 +29,6 @@ func (h headerTransportLayer) RoundTrip(req *http.Request) (*http.Response, erro
 		// only set headers that are not previously defined
 		if _, ok := req.Header[key]; !ok {
 			req.Header[key] = value
-		} else if key == "User-Agent" {
-			ua := req.Header.Get(key)
-			ext := h.Header.Get(key)
-			newUa := fmt.Sprintf("%s %s", ua, ext)
-			req.Header.Set(key, newUa)
 		}
 	}
 	return h.baseTransit.RoundTrip(req)
