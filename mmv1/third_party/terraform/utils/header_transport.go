@@ -21,10 +21,6 @@ func newTransportWithHeaders(baseTransit http.RoundTripper) headerTransportLayer
 	if requestReason := os.Getenv("CLOUDSDK_CORE_REQUEST_REASON"); requestReason != "" {
 		headers.Set("X-Goog-Request-Reason", requestReason)
 	}
-	// opt in extension for adding to the User-Agent header
-	if ext := os.Getenv("GOOGLE_TPG_USERAGENT_EXTENSION"); ext != "" {
-		headers.Set("User-Agent", ext)
-	}
 
 	return headerTransportLayer{Header: headers, baseTransit: baseTransit}
 }

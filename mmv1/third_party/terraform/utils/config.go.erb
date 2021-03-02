@@ -173,6 +173,10 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// 4. Header Transport - outer wrapper to inject additional headers we want to apply
 	// before making requests
 	headerTransport := newTransportWithHeaders(retryTransport)
+	// opt in extension for adding to the User-Agent header
+	if ext := os.Getenv("GOOGLE_TPG_USERAGENT_EXTENSION"); ext != "" {
+		headerTransport.Set("User-Agent", ext)
+	}
 
 	// Set final transport value.
 	client.Transport = headerTransport
