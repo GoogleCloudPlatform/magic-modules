@@ -33,6 +33,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       protocol: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      maxAttempts: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+         function: 'validation.IntBetween(0, 4)'
       port: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       retryConditions: !ruby/object:Overrides::Terraform::PropertyOverride
