@@ -36,6 +36,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           org_id: :ORG_ID
       - !ruby/object:Provider::Terraform::Examples
+        name: "consumer_quota_override_zero_value"
+        primary_resource_id: "override"
+        min_version: 'beta'
+        skip_docs: true
+        vars:
+          project_id: "quota"
+        test_env_vars:
+          org_id: :ORG_ID
+      - !ruby/object:Provider::Terraform::Examples
         name: "region_consumer_quota_override"
         primary_resource_id: "override"
         min_version: 'beta'
