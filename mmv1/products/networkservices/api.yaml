@@ -28,8 +28,8 @@ objects:
     name: 'EdgeCacheKeyset'
     min_version: beta
     base_url: 'projects/{{project}}/locations/global/edgeCacheKeysets'
-    create_url: 'projects/{{project}}/locations/global/edgeCacheKeysets?edgeCacheKeysetId={{edge_cache_keyset_id}}'
-    self_link: 'projects/{{project}}/locations/global/edgeCacheKeysets/{{edge_cache_keyset_id}}'
+    create_url: 'projects/{{project}}/locations/global/edgeCacheKeysets?edgeCacheKeysetId={{name}}'
+    self_link: 'projects/{{project}}/locations/global/edgeCacheKeysets/{{name}}'
     update_verb: :PATCH
     update_mask: true
     min_version: beta
@@ -53,20 +53,15 @@ objects:
         message: 'message'
     parameters:
       - !ruby/object:Api::Type::String
-        name: 'edgeCacheKeysetId'
+        name: 'name'
         required: true
         input: true
         url_param_only: true
         description: |
-          Short name of the EdgeCacheKeyset resource to be created. E.g. "MyEdgeCacheKeyset".
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        required: true
-        description: |
           Name of the resource; provided by the client when the resource is created.
           The name must be 1-64 characters long, and match the regular expression [a-zA-Z][a-zA-Z0-9_-]* which means the first character must be a letter,
           and all following characters must be a dash, underscore, letter or digit.
+    properties:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
@@ -103,8 +98,8 @@ objects:
     name: 'EdgeCacheOrigin'
     min_version: beta
     base_url: 'projects/{{project}}/locations/global/edgeCacheOrigins'
-    create_url: 'projects/{{project}}/locations/global/edgeCacheOrigins?edgeCacheKeysetId={{edge_cache_origin_id}}'
-    self_link: 'projects/{{project}}/locations/global/edgeCacheOrigins/{{edge_cache_origin_id}}'
+    create_url: 'projects/{{project}}/locations/global/edgeCacheOrigins?edgeCacheOriginId={{name}}'
+    self_link: 'projects/{{project}}/locations/global/edgeCacheOrigins/{{name}}'
     update_verb: :PATCH
     update_mask: true
     min_version: beta
@@ -128,20 +123,15 @@ objects:
         message: 'message'
     parameters:
       - !ruby/object:Api::Type::String
-        name: 'edgeCacheOriginId'
+        name: 'name'
         required: true
         input: true
         url_param_only: true
         description: |
-           Short name of the EdgeCacheOrigin resource to be created. E.g. "MyEdgeCacheOrigin".
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        required: true
-        description: |
           Name of the resource; provided by the client when the resource is created.
           The name must be 1-64 characters long, and match the regular expression [a-zA-Z][a-zA-Z0-9_-]* which means the first character must be a letter,
           and all following characters must be a dash, underscore, letter or digit.
+    properties:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
@@ -239,24 +229,36 @@ objects:
               The maximum duration to wait for the origin connection to be established, including DNS lookup, TLS handshake and TCP/QUIC connection establishment.
 
               Defaults to 5 seconds. The timeout must be a value between 1s and 15s.
+            at_least_one_of:
+              - timeout.0.connect_timeout
+              - timeout.0.max_attempts_timeout
+              - timeout.0.response_timeout
           - !ruby/object:Api::Type::String
             name: 'maxAttemptsTimeout'
             description: |
               The maximum time across all connection attempts to the origin, including failover origins, before returning an error to the client. A HTTP 503 will be returned if the timeout is reached before a response is returned.
 
               Defaults to 5 seconds. The timeout must be a value between 1s and 15s.
+            at_least_one_of:
+              - timeout.0.connect_timeout
+              - timeout.0.max_attempts_timeout
+              - timeout.0.response_timeout
           - !ruby/object:Api::Type::String
             name: 'responseTimeout'
             description: |
               The maximum duration to wait for data to arrive when reading from the HTTP connection/stream.
 
               Defaults to 5 seconds. The timeout must be a value between 1s and 30s.
+            at_least_one_of:
+              - timeout.0.connect_timeout
+              - timeout.0.max_attempts_timeout
+              - timeout.0.response_timeout
   - !ruby/object:Api::Resource
     name: 'EdgeCacheService'
     min_version: beta
     base_url: 'projects/{{project}}/locations/global/edgeCacheServices'
-    create_url: 'projects/{{project}}/locations/global/edgeCacheServices?edgeCacheKeysetId={{edge_cache_service_id}}'
-    self_link: 'projects/{{project}}/locations/global/edgeCacheServices/{{edge_cache_service_id}}'
+    create_url: 'projects/{{project}}/locations/global/edgeCacheServices?edgeCacheServiceId={{name}}'
+    self_link: 'projects/{{project}}/locations/global/edgeCacheServices/{{name}}'
     update_verb: :PATCH
     update_mask: true
     min_version: beta
@@ -280,20 +282,15 @@ objects:
         message: 'message'
     parameters:
       - !ruby/object:Api::Type::String
-        name: 'edgeCacheServiceId'
+        name: 'name'
         required: true
         input: true
         url_param_only: true
         description: |
-           Short name of the EdgeCacheOrigin resource to be created. E.g. "MyEdgeService".
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        required: true
-        description: |
           Name of the resource; provided by the client when the resource is created.
           The name must be 1-64 characters long, and match the regular expression [a-zA-Z][a-zA-Z0-9_-]* which means the first character must be a letter,
           and all following characters must be a dash, underscore, letter or digit.
+    properties:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
