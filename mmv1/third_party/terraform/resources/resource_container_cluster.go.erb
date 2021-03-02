@@ -1058,11 +1058,13 @@ func resourceContainerCluster() *schema.Resource {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
+				Description: `Configuration for the use of Kubernetes Service Accounts in GCP IAM policies.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"identity_namespace": {
 							Type:     schema.TypeString,
 							Required: true,
+							Description: `Enables workload identity.`,
 						},
 					},
 				},
@@ -1125,6 +1127,7 @@ func resourceContainerCluster() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true,
+				Description: `Telemetry integration for the cluster.`,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -1132,6 +1135,7 @@ func resourceContainerCluster() *schema.Resource {
 							Type:             schema.TypeString,
 							Required:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"DISABLED","ENABLED","SYSTEM_ONLY"}, false),
+							Description:      `Type of the integration.`,
 						},
 					},
 				},
