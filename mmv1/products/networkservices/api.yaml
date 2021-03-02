@@ -26,9 +26,6 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'EdgeCacheOrigin'
-    docs: !ruby/object:Provider::Terraform::Docs
-      warning: |
-        These resources require allow-listing to use, and are not openly available to all Cloud customers. Engage with your Cloud account team to discuss how to onboard.
     min_version: beta
     base_url: 'projects/{{project}}/locations/global/edgeCacheOrigins'
     create_url: 'projects/{{project}}/locations/global/edgeCacheOrigins?edgeCacheOriginId={{name}}'
