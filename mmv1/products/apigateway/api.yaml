@@ -152,7 +152,7 @@ objects:
             required: true
             description: |
               Google Cloud IAM service account used to sign OIDC tokens for backends that have authentication configured
-              (https://cloud.google.com/service-infrastructure/docs/service-management/reference/rest/v1/services.configs#backend). 
+              (https://cloud.google.com/service-infrastructure/docs/service-management/reference/rest/v1/services.configs#backend).
       - !ruby/object:Api::Type::Array
         name: 'openapiDocuments'
         description: |
@@ -219,7 +219,6 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'apiConfig'
         required: true
-        input: true
         description: |
           Resource name of the API Config for this Gateway. Format: projects/{project}/locations/global/apis/{api}/configs/{apiConfig}
       - !ruby/object:Api::Type::String
