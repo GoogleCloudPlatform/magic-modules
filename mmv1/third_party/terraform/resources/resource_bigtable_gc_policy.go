@@ -16,11 +16,40 @@ const (
 	GCPolicyModeUnion        = "UNION"
 )
 
+func resourceBigtableGCPolicyCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	count := diff.Get("max_age.#").(int)
+	if count < 1 {
+		return nil
+	}
+
+	oldDays, newDays := diff.GetChange("max_age.0.days")
+	oldDuration, newDuration := diff.GetChange("max_age.0.duration")
+	log.Printf("days: %v %v", oldDays, newDays)
+	log.Printf("duration: %v %v", oldDuration, newDuration)
+
+	if oldDuration == "" && newDuration != "" {
+		// flatten the old days and the new duration to duration... if they are
+		// equal then do nothing.
+		do, err := time.ParseDuration(newDuration.(string))
+		if err != nil {
+			return err
+		}
+		dn := time.Hour * 24 * time.Duration(oldDays.(int))
+		if do == dn {
+			diff.Clear("max_age.0.days")
+			diff.Clear("max_age.0.duration")
+		}
+	}
+
+	return nil
+}
+
 func resourceBigtableGCPolicy() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceBigtableGCPolicyCreate,
-		Read:   resourceBigtableGCPolicyRead,
-		Delete: resourceBigtableGCPolicyDestroy,
+		Create:        resourceBigtableGCPolicyCreate,
+		Read:          resourceBigtableGCPolicyRead,
+		Delete:        resourceBigtableGCPolicyDestroy,
+		CustomizeDiff: resourceBigtableGCPolicyCustomizeDiff,
 
 		Schema: map[string]*schema.Schema{
 			"instance_name": {
@@ -64,6 +93,7 @@ func resourceBigtableGCPolicy() *schema.Resource {
 						"days": {
 							Type:         schema.TypeInt,
 							Optional:     true,
+							Computed:     true,
 							ForceNew:     true,
 							Deprecated:   "Deprecated in favor of duration",
 							Description:  `Number of days before applying GC policy.`,
@@ -72,6 +102,7 @@ func resourceBigtableGCPolicy() *schema.Resource {
 						"duration": {
 							Type:         schema.TypeString,
 							Optional:     true,
+							Computed:     true,
 							ForceNew:     true,
 							Description:  `Duration before applying GC policy`,
 							ValidateFunc: validateDuration(),
