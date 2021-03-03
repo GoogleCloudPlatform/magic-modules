@@ -48,7 +48,7 @@ func TestAccStorageObject_basic(t *testing.T) {
 	})
 }
 
-func TestAccStorageObject_ecreate(t *testing.T) {
+func TestAccStorageObject_recreate(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
