@@ -49,8 +49,6 @@ import (
 	"google.golang.org/api/dataproc/v1"
 	dataprocBeta "google.golang.org/api/dataproc/v1beta2"
 	"google.golang.org/api/dns/v1"
-	dnsBeta "google.golang.org/api/dns/v1beta2"
-	file "google.golang.org/api/file/v1beta1"
 	healthcare "google.golang.org/api/healthcare/v1"
 	"google.golang.org/api/iam/v1"
 	iamcredentials "google.golang.org/api/iamcredentials/v1"
@@ -321,21 +319,6 @@ func (c *Config) NewDnsClient(userAgent string) *dns.Service {
 	clientDns.BasePath = dnsClientBasePath
 
 	return clientDns
-}
-
-func (c *Config) NewDnsBetaClient(userAgent string) *dnsBeta.Service {
-	dnsBetaClientBasePath := removeBasePathVersion(c.DnsBetaBasePath)
-	dnsBetaClientBasePath = strings.ReplaceAll(dnsBetaClientBasePath, "/dns/", "")
-	log.Printf("[INFO] Instantiating Google Cloud DNS Beta client for path %s", dnsBetaClientBasePath)
-	clientDnsBeta, err := dnsBeta.NewService(c.context, option.WithHTTPClient(c.client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client dns beta: %s", err)
-		return nil
-	}
-	clientDnsBeta.UserAgent = userAgent
-	clientDnsBeta.BasePath = dnsBetaClientBasePath
-
-	return clientDnsBeta
 }
 
 func (c *Config) NewKmsClient(userAgent string) *cloudkms.Service {
@@ -632,20 +615,6 @@ func (c *Config) NewDataprocBetaClient(userAgent string) *dataprocBeta.Service {
 	clientDataprocBeta.BasePath = dataprocBetaClientBasePath
 
 	return clientDataprocBeta
-}
-
-func (c *Config) NewFilestoreClient(userAgent string) *file.Service {
-	filestoreClientBasePath := removeBasePathVersion(c.FilestoreBasePath)
-	log.Printf("[INFO] Instantiating Filestore client for path %s", filestoreClientBasePath)
-	clientFilestore, err := file.NewService(c.context, option.WithHTTPClient(c.client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client filestore: %s", err)
-		return nil
-	}
-	clientFilestore.UserAgent = userAgent
-	clientFilestore.BasePath = filestoreClientBasePath
-
-	return clientFilestore
 }
 
 func (c *Config) NewCloudIoTClient(userAgent string) *cloudiot.Service {
