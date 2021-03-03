@@ -11,8 +11,18 @@ import (
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+<% if version == "ga" -%>
+	"google.golang.org/api/composer/v1"
+<% else -%>
 	"google.golang.org/api/composer/v1beta1"
+<% end -%>
 )
+<% if version == "ga" -%>
+<% client = "NewContainerClient" -%>
+<% else -%>
+<% client = "NewContainerBetaClient" -%>
+<% end -%>
 
 const (
 	composerEnvironmentEnvVariablesRegexp          = "[a-zA-Z_][a-zA-Z0-9_]*."
