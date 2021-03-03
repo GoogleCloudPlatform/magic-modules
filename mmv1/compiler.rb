@@ -128,9 +128,11 @@ if override_dir
 end
 
 products_to_generate = all_product_files if all_products
+products_to_generate = products_to_generate & all_product_files
 raise 'No api.yaml files found. Check your provider (-e) name.' if products_to_generate.empty?
 
 start_time = Time.now
+starting_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 Google::LOGGER.info "Generating MM output to '#{output_path}'"
 Google::LOGGER.info "Using #{version} version"
 
@@ -139,7 +141,7 @@ Google::LOGGER.info "Using #{version} version"
 products_for_version = []
 provider = nil
 # rubocop:disable Metrics/BlockLength
-all_product_files.each do |product_name|
+products_to_generate.each do |product_name|
   product_override_path = ''
   product_override_path = File.join(override_dir, product_name, 'api.yaml') if override_dir
   product_yaml_path = File.join(product_name, 'api.yaml')
@@ -182,6 +184,7 @@ all_product_files.each do |product_name|
     next
   end
 
+  Google::LOGGER.info "#{provider_yaml_path}: Parsing config too get api"
   if File.exist?(provider_yaml_path)
     product_api, provider_config, = \
       Provider::Config.parse(provider_yaml_path, product_api, version)
@@ -216,11 +219,6 @@ all_product_files.each do |product_name|
 
   # provider_config is mutated by instantiating a provider
   products_for_version.push(definitions: product_api, overrides: provider_config)
-
-  unless products_to_generate.include?(product_name)
-    Google::LOGGER.info "#{product_name}: Not specified, skipping generation"
-    next
-  end
 
   Google::LOGGER.info \
     "#{product_name}: Generating types: #{types_to_generate.empty? ? 'ALL' : types_to_generate}"
@@ -258,3 +256,7 @@ if generate_code
   end
 end
 # rubocop:enable Metrics/BlockLength
+
+ending_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+elapsed = ending_timestamp - starting_timestamp
+Google::LOGGER.info "Completed in #{elapsed} seconds"
