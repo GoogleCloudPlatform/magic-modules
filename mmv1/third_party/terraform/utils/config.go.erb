@@ -34,7 +34,7 @@ import (
 	"google.golang.org/api/cloudiot/v1"
 	"google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
-	resourceManagerV2Beta1 "google.golang.org/api/cloudresourcemanager/v2beta1"
+	resourceManagerV2 "google.golang.org/api/cloudresourcemanager/v2"
 <% if version == "ga" -%>
 	"google.golang.org/api/composer/v1"
 <% else -%>
@@ -112,7 +112,7 @@ type Config struct {
 	DataflowBasePath string
 	DnsBetaBasePath string
 	IamCredentialsBasePath string
-	ResourceManagerV2Beta1BasePath string
+	ResourceManagerV2BasePath string
 	IAMBasePath string
 	CloudIoTBasePath string
 	ServiceNetworkingBasePath string
@@ -420,18 +420,18 @@ func (c *Config) NewResourceManagerClient(userAgent string) *cloudresourcemanage
 	return clientResourceManager
 }
 
-func (c *Config) NewResourceManagerV2Beta1Client(userAgent string) *resourceManagerV2Beta1.Service {
-	resourceManagerV2Beta1BasePath := removeBasePathVersion(c.ResourceManagerV2Beta1BasePath)
-	log.Printf("[INFO] Instantiating Google Cloud ResourceManager V client for path %s", resourceManagerV2Beta1BasePath)
-	clientResourceManagerV2Beta1, err := resourceManagerV2Beta1.NewService(c.context, option.WithHTTPClient(c.client))
+func (c *Config) NewResourceManagerV2Client(userAgent string) *resourceManagerV2.Service {
+	resourceManagerV2BasePath := removeBasePathVersion(c.ResourceManagerV2BasePath)
+	log.Printf("[INFO] Instantiating Google Cloud ResourceManager V client for path %s", resourceManagerV2BasePath)
+	clientResourceManagerV2, err := resourceManagerV2.NewService(c.context, option.WithHTTPClient(c.client))
 	if err != nil {
-		log.Printf("[WARN] Error creating client resource manager v2beta1: %s", err)
+		log.Printf("[WARN] Error creating client resource manager v2: %s", err)
 		return nil
 	}
-	clientResourceManagerV2Beta1.UserAgent = userAgent
-	clientResourceManagerV2Beta1.BasePath = resourceManagerV2Beta1BasePath
+	clientResourceManagerV2.UserAgent = userAgent
+	clientResourceManagerV2.BasePath = resourceManagerV2BasePath
 
-	return clientResourceManagerV2Beta1
+	return clientResourceManagerV2
 }
 
 func (c *Config) NewRuntimeconfigClient(userAgent string) *runtimeconfig.Service {
@@ -439,7 +439,7 @@ func (c *Config) NewRuntimeconfigClient(userAgent string) *runtimeconfig.Service
 	log.Printf("[INFO] Instantiating Google Cloud Runtimeconfig client for path %s", runtimeConfigClientBasePath)
 	clientRuntimeconfig, err := runtimeconfig.NewService(c.context, option.WithHTTPClient(c.client))
 	if err != nil {
-		log.Printf("[WARN] Error creating client resource manager v2beta1: %s", err)
+		log.Printf("[WARN] Error creating client runtime config: %s", err)
 		return nil
 	}
 	clientRuntimeconfig.UserAgent = userAgent
@@ -860,7 +860,7 @@ func ConfigureBasePaths(c *Config) {
 	c.DataflowBasePath = DataflowDefaultBasePath
 	c.DnsBetaBasePath = DnsBetaDefaultBasePath
 	c.IamCredentialsBasePath = IamCredentialsDefaultBasePath
-	c.ResourceManagerV2Beta1BasePath = ResourceManagerV2Beta1DefaultBasePath
+	c.ResourceManagerV2BasePath = ResourceManagerV2DefaultBasePath
 	c.IAMBasePath = IAMDefaultBasePath
 	c.ServiceNetworkingBasePath = ServiceNetworkingDefaultBasePath
 	c.BigQueryBasePath = BigQueryDefaultBasePath
