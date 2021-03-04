@@ -1,0 +1,75 @@
+<% autogen_exception -%>
+package google
+
+<% unless version == "ga" -%>
+import (
+	"fmt"
+	"strings"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+)
+
+func TestAccTagsTagKey_basicTest(t *testing.T) {
+	skipIfVcr(t)
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        getTestOrgFromEnv(t),
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProvidersOiCS,
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
+		CheckDestroy: testAccCheckTagsTagKeyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsTagKey_basic(context),
+			},
+			{
+				ResourceName:      "google_tags_tag_key.key",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccTagsTagKey_basicUpdated(context),
+			},
+			{
+				ResourceName:      "google_tags_tag_key.key",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccTagsTagKey_basic(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_tags_tag_key" "key" {
+  provider = google-beta
+
+  parent = "organizations/%{org_id}"
+  short_name = "foo%{random_suffix}"
+  description = "For foo%{random_suffix} resources."
+}
+`, context)
+}
+
+func testAccTagsTagKey_basicUpdated(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_tags_tag_key" "key" {
+  provider = google-beta
+
+  parent = "organizations/%{org_id}"
+  short_name = "foo%{random_suffix}"
+  description = "Anything related to foo%{random_suffix}"
+}
+`, context)
+}
+
+<% end %>
