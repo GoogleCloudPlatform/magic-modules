@@ -483,7 +483,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
 
           ~>**NOTE** If you change the size, Terraform updates the disk size
           if upsizing is detected but recreates the disk if downsizing is requested.
-          You can add `lifecycle.prevent_destroy` in the config to prevent destroy.
+          You can add `lifecycle.prevent_destroy` in the config to prevent destroying
+          and recreating.
       sourceSnapshot: !ruby/object:Overrides::Terraform::PropertyOverride
         name: snapshot
         description: |
