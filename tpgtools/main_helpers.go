@@ -109,7 +109,7 @@ func renderDefault(t Type, val string) (string, error) {
 }
 
 // ConvertSampleJSONToDCLResource unmarshals json to a DCL resource specified by th resource type
-// TODO: This should be generated upstream in the DCL, it overlaps with TFJSONToDCL
+// TODO: This should be generated in serialization template
 func ConvertSampleJSONToHCL(resourceType string, b []byte) (string, error) {
 	var hcl string
 	var err error
