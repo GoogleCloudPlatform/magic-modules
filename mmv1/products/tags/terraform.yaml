@@ -15,8 +15,6 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   TagKey: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
-    id_format: "{{name}}"
-    import_format: ["{{name}}"]
     properties:
       etag: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true

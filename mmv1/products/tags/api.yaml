@@ -41,6 +41,7 @@ objects:
     name: 'TagKey'
     min_version: beta
     base_url: tagKeys
+    self_link: "{{name}}"
     update_verb: :PATCH
     update_mask: true
     description: A TagKey, used to group a set of TagValues.
