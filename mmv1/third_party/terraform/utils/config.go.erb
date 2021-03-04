@@ -106,7 +106,6 @@ type Config struct {
 	ContainerBetaBasePath string
 	DataprocBetaBasePath string
 	DataflowBasePath string
-	DnsBetaBasePath string
 	IamCredentialsBasePath string
 	ResourceManagerV2BasePath string
 	IAMBasePath string
@@ -854,7 +853,6 @@ func ConfigureBasePaths(c *Config) {
 	c.ContainerBetaBasePath = ContainerBetaDefaultBasePath
 	c.DataprocBasePath = DataprocDefaultBasePath
 	c.DataflowBasePath = DataflowDefaultBasePath
-	c.DnsBetaBasePath = DnsBetaDefaultBasePath
 	c.IamCredentialsBasePath = IamCredentialsDefaultBasePath
 	c.ResourceManagerV2BasePath = ResourceManagerV2DefaultBasePath
 	c.IAMBasePath = IAMDefaultBasePath
