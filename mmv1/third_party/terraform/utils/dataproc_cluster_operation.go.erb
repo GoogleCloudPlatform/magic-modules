@@ -12,11 +12,6 @@ import (
 	dataproc "google.golang.org/api/dataproc/v1beta2"
 <% end -%>
 )
-<% if version == "ga" -%>
-<% client = "NewDataprocClient" -%>
-<% else -%>
-<% client = "NewDataprocBetaClient" -%>
-<% end -%>
 
 type DataprocClusterOperationWaiter struct {
 	Service *dataproc.Service
@@ -32,7 +27,7 @@ func (w *DataprocClusterOperationWaiter) QueryOp() (interface{}, error) {
 
 func dataprocClusterOperationWait(config *Config, op *dataproc.Operation, activity, userAgent string, timeout time.Duration) error {
 	w := &DataprocClusterOperationWaiter{
-		Service: config.<%= client -%>(userAgent),
+		Service: config.NewDataprocClient(userAgent),
 	}
 	if err := w.SetOp(op); err != nil {
 		return err

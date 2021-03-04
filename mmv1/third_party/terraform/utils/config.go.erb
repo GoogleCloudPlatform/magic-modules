@@ -42,8 +42,11 @@ import (
 	"google.golang.org/api/container/v1"
 	containerBeta "google.golang.org/api/container/v1beta1"
 	dataflow "google.golang.org/api/dataflow/v1b3"
+<% unless version == 'ga' -%>
+	dataproc "google.golang.org/api/dataproc/v1beta2"
+<% else -%>
 	"google.golang.org/api/dataproc/v1"
-	dataprocBeta "google.golang.org/api/dataproc/v1beta2"
+<% end -%>
 	"google.golang.org/api/dns/v1"
 	healthcare "google.golang.org/api/healthcare/v1"
 	"google.golang.org/api/iam/v1"
@@ -596,20 +599,6 @@ func (c *Config) NewDataprocClient(userAgent string) *dataproc.Service {
 	clientDataproc.BasePath = dataprocClientBasePath
 
 	return clientDataproc
-}
-
-func (c *Config) NewDataprocBetaClient(userAgent string) *dataprocBeta.Service {
-	dataprocBetaClientBasePath := removeBasePathVersion(c.DataprocBetaBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud Dataproc Beta client for path %s", dataprocBetaClientBasePath)
-	clientDataprocBeta, err := dataprocBeta.NewService(c.context, option.WithHTTPClient(c.client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client dataproc beta: %s", err)
-		return nil
-	}
-	clientDataprocBeta.UserAgent = userAgent
-	clientDataprocBeta.BasePath = dataprocBetaClientBasePath
-
-	return clientDataprocBeta
 }
 
 func (c *Config) NewCloudIoTClient(userAgent string) *cloudiot.Service {
