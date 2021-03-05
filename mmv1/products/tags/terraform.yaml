@@ -16,7 +16,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   TagKey: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     id_format: "{{name}}"
-    import_format: ["{{name}}"]
     properties:
       etag: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -30,3 +29,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           short_name: "foo"
         test_env_vars:
           org_id: :ORG_ID
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.erb
