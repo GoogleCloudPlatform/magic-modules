@@ -16,7 +16,7 @@ const (
 	GCPolicyModeUnion        = "UNION"
 )
 
-func resourceBigtableGCPolicyCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+func resourceBigtableGCPolicyCustomizeDiffFunc(diff TerraformResourceDiff) error {
 	count := diff.Get("max_age.#").(int)
 	if count < 1 {
 		return nil
@@ -48,6 +48,10 @@ func resourceBigtableGCPolicyCustomizeDiff(_ context.Context, diff *schema.Resou
 	}
 
 	return nil
+}
+
+func resourceBigtableGCPolicyCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	return resourceBigtableGCPolicyCustomizeDiffFunc(d)
 }
 
 func resourceBigtableGCPolicy() *schema.Resource {
