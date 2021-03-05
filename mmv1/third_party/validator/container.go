@@ -83,13 +83,13 @@ func expandContainerNodePoolNodeConfigOauthScopes(v interface{}, d TerraformReso
 	return canonicalizeServiceScopesFromSet(scopesSet)
 }
 
-func GetContainerClusterCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+func GetContainerClusterCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{name}}")
 	if err != nil {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 	if obj, err := GetContainerClusterApiObject(d, config); err == nil {
-		return Asset{
+		return []Asset{{
 			Name: name,
 			Type: "container.googleapis.com/Cluster",
 			Resource: &AssetResource{
@@ -98,9 +98,9 @@ func GetContainerClusterCaiObject(d TerraformResourceData, config *Config) (Asse
 				DiscoveryName:        "Cluster",
 				Data:                 obj,
 			},
-		}, nil
+		}}, nil
 	} else {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 }
 
@@ -1164,13 +1164,13 @@ func expandContainerClusterKubectlContext(v interface{}, d TerraformResourceData
 	return v, nil
 }
 
-func GetContainerNodePoolCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+func GetContainerNodePoolCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}")
 	if err != nil {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 	if obj, err := GetContainerNodePoolApiObject(d, config); err == nil {
-		return Asset{
+		return []Asset{{
 			Name: name,
 			Type: "container.googleapis.com/NodePool",
 			Resource: &AssetResource{
@@ -1179,9 +1179,9 @@ func GetContainerNodePoolCaiObject(d TerraformResourceData, config *Config) (Ass
 				DiscoveryName:        "NodePool",
 				Data:                 obj,
 			},
-		}, nil
+		}}, nil
 	} else {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 }
 

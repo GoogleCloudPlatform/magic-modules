@@ -17,13 +17,13 @@ import (
 	"google.golang.org/api/googleapi"
 )
 
-func GetComputeInstanceCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+func GetComputeInstanceCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//compute.googleapis.com/projects/{{project}}/zones/{{zone}}/instances/{{name}}")
 	if err != nil {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 	if obj, err := GetComputeInstanceApiObject(d, config); err == nil {
-		return Asset{
+		return []Asset{{
 			Name: name,
 			Type: "compute.googleapis.com/Instance",
 			Resource: &AssetResource{
@@ -32,9 +32,9 @@ func GetComputeInstanceCaiObject(d TerraformResourceData, config *Config) (Asset
 				DiscoveryName:        "Instance",
 				Data:                 obj,
 			},
-		}, nil
+		}}, nil
 	} else {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 }
 
