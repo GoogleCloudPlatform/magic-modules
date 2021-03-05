@@ -8,15 +8,15 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
-func GetProjectCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+func GetProjectCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	// NOTE: asset.name should use the project number, but we use project_id b/c
 	// the number is computed server-side.
 	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project_id_or_project}}")
 	if err != nil {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 	if obj, err := GetProjectApiObject(d, config); err == nil {
-		return Asset{
+		return []Asset{{
 			Name: name,
 			Type: "cloudresourcemanager.googleapis.com/Project",
 			Resource: &AssetResource{
@@ -25,9 +25,9 @@ func GetProjectCaiObject(d TerraformResourceData, config *Config) (Asset, error)
 				DiscoveryName:        "Project",
 				Data:                 obj,
 			},
-		}, nil
+		}}, nil
 	} else {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 }
 
@@ -75,13 +75,13 @@ func getParentResourceId(d TerraformResourceData, p *cloudresourcemanager.Projec
 	return nil
 }
 
-func GetProjectBillingInfoCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+func GetProjectBillingInfoCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//cloudbilling.googleapis.com/projects/{{project_id_or_project}}/billingInfo")
 	if err != nil {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 	if obj, err := GetProjectBillingInfoApiObject(d, config); err == nil {
-		return Asset{
+		return []Asset{{
 			Name: name,
 			Type: "cloudbilling.googleapis.com/ProjectBillingInfo",
 			Resource: &AssetResource{
@@ -89,10 +89,10 @@ func GetProjectBillingInfoCaiObject(d TerraformResourceData, config *Config) (As
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/cloudbilling/v1/rest",
 				DiscoveryName:        "ProjectBillingInfo",
 				Data:                 obj,
-			},
+			}},
 		}, nil
 	} else {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 }
 

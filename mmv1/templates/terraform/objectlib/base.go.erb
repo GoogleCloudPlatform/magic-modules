@@ -30,13 +30,13 @@ import (
 
 <%= lines(compile(pwd + '/' + object.custom_code.constants)) if object.custom_code.constants -%>
 
-func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
     name, err := assetName(d, config, "<%= asset_name_template -%>")
     if err != nil {
-        return Asset{}, err
+        return []Asset{}, err
     }
     if obj, err := Get<%= resource_name -%>ApiObject(d, config); err == nil {
-        return Asset{
+        return []Asset{{
             Name: name,
             Type: "<%= product_ns.downcase -%>.googleapis.com/<%= object.name -%>",
             Resource: &AssetResource{
@@ -45,9 +45,9 @@ func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *Config) 
                 DiscoveryName: "<%= object.name -%>",
                 Data: obj,
             },
-        }, nil
+        }}, nil
     } else {
-        return Asset{}, err
+        return []Asset{}, err
     }
 }
 

@@ -16,13 +16,13 @@ import (
 	"google.golang.org/api/storage/v1"
 )
 
-func GetStorageBucketCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+func GetStorageBucketCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//storage.googleapis.com/{{name}}")
 	if err != nil {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 	if obj, err := GetStorageBucketApiObject(d, config); err == nil {
-		return Asset{
+		return []Asset{{
 			Name: name,
 			Type: "storage.googleapis.com/Bucket",
 			Resource: &AssetResource{
@@ -31,9 +31,9 @@ func GetStorageBucketCaiObject(d TerraformResourceData, config *Config) (Asset, 
 				DiscoveryName:        "Bucket",
 				Data:                 obj,
 			},
-		}, nil
+		}}, nil
 	} else {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 }
 

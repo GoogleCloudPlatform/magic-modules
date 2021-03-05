@@ -7,19 +7,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func GetProjectOrgPolicyCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+func GetProjectOrgPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project}}")
 	if err != nil {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 	if obj, err := GetProjectOrgPolicyApiObject(d, config); err == nil {
-		return Asset{
+		return []Asset{{
 			Name:      name,
 			Type:      "cloudresourcemanager.googleapis.com/Project",
 			OrgPolicy: []*OrgPolicy{&obj},
-		}, nil
+		}}, nil
 	} else {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 }
 
