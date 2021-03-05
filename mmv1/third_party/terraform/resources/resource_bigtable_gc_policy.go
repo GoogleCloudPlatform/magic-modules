@@ -36,8 +36,14 @@ func resourceBigtableGCPolicyCustomizeDiff(_ context.Context, diff *schema.Resou
 		}
 		dn := time.Hour * 24 * time.Duration(oldDays.(int))
 		if do == dn {
-			diff.Clear("max_age.0.days")
+			err := diff.Clear("max_age.0.days")
+			if err != nil {
+				return err
+			}
 			diff.Clear("max_age.0.duration")
+			if err != nil {
+				return err
+			}
 		}
 	}
 
