@@ -41,12 +41,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       minThroughput: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(200, 1000)'
+      minInstances: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       maxThroughput: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(200, 1000)'
+      maxInstances: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       state: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: false
       region: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      subnet.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       selfLink: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
