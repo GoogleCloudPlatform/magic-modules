@@ -3,7 +3,7 @@
 
 # Magic Modules
 
-<img src="images/magic-modules.svg" alt="Magic Modules Logo" width="300" align="right" />
+<img src="mmv1/images/magic-modules.svg" alt="Magic Modules Logo" width="300" align="right" />
 
 ## Overview
 
@@ -38,7 +38,7 @@ You can try out Magic Modules immediately with Open in Cloud Shell below; if
 you're getting set up on a local workstation, this guide serves as a reference
 to help you get it set up.
 
-[![Open in Cloud Shell](http://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/magic-modules&tutorial=TUTORIAL.md)
+[![Open in Cloud Shell](http://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/magic-modules&tutorial=mmv1/TUTORIAL.md)
 
 ### Requirements
 
@@ -52,6 +52,13 @@ To get started, you'll need:
   * Mac OSX: `ulimit -n 1000`
 
 ### Preparing Magic Modules / One-time setup
+
+**Important:**
+Compiling Magic Modules can be done directly from the `mmv1` directory within this repository.
+In the future we will add hybrid generation with multiple generators. All the information below
+pertains only to the contents of the `mmv1` directory, and commands should be executed from
+that directory.
+
 
 To get started right away, use the bootstrap script with:
 
@@ -67,7 +74,7 @@ If you're generating the Terraform providers (`google` and `google-beta`),
 you'll need to check out the repo(s) you're generating in your GOPATH. For
 example:
 
-```
+```bash
 git clone https://github.com/hashicorp/terraform-provider-google.git $GOPATH/src/github.com/hashicorp/terraform-provider-google
 git clone https://github.com/hashicorp/terraform-provider-google-beta.git $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
 ```
@@ -79,7 +86,8 @@ Terraform provider are running on up to date copies of `master`.
 Once you've prepared the target folders for the tools, run the following to
 finish getting Magic Modules set up by installing the Ruby gems it needs to run:
 
-```
+```bash
+cd mmv1
 bundle install
 ```
 
@@ -95,7 +103,7 @@ Before making any changes, you can compile the "downstream" tool you're working
 on by running the following command. If Magic Modules has been installed
 correctly, you'll get no errors when you run a command:
 
-```
+```bash
 bundle exec compiler -a -v "ga" -e {{tool}} -o "{{output_folder}}"
 ```
 
@@ -105,7 +113,7 @@ For Ansible and Inspec, wherever you have cloned those repositories.
 
 For example, to generate Terraform:
 
-```
+```bash
 bundle exec compiler -a -v "ga" -e terraform -o "$GOPATH/src/github.com/hashicorp/terraform-provider-google"
 ```
 
@@ -113,15 +121,22 @@ It's worth noting that Magic Modules will only generate new files when ran
 locally. The "Magician"- the Magic Modules CI system- handles deletion of old
 files when creating PRs.
 
-#### Terraform's `google-beta` provider
+#### Compiler options
 
-Terraform is the only tool to handle Beta features right now; you can generate
-`google-beta` by running the following, substitution `"beta"` for the version
-and using the repository for the `google-beta` provider.
+`-e`, `-v`, and `-f` let you select which project should be generated.
 
-```
-bundle exec compiler -a -v "beta" -e terraform -o "$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
-```
+Target                      | compiler options
+----------------------------|-----------------
+ansible                     | `-e ansible`
+inspec                      | `-e inspec -v "beta"`
+terraform                   | `-e terraform -v "ga"`
+terraform (beta)            | `-e terraform -v "beta"`
+terraform-google-conversion | `-e terraform -f validator`
+
+Other important options are:
+
+- `-a` Generate for all products
+- `-p products/<folder_name>` Generate for a specific project, i.e. `-p products/appengine`
 
 ### Making changes to resources
 
@@ -129,8 +144,8 @@ Once again, see the Open in Cloud Shell example above for an interactive example
 of making a Magic Modules change; this section will serve as a reference more
 than a specific example.
 
-Magic Modules mirrors the GCP REST API; there are [products](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/api/product.rb)
-such as Compute or Container (GKE) that contains [resources](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/api/resource.rb),
+Magic Modules mirrors the GCP REST API; there are [products](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/mmv1/api/product.rb)
+such as Compute or Container (GKE) that contains [resources](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/mmv1/api/resource.rb),
 [GCP resources](https://cloud.google.com/docs/overview/#gcp_resources) such as
 Compute VM Instances or GKE Clusters.
 
@@ -139,9 +154,9 @@ file named `api.yaml` that contains the resources that make up the API
 definition.
 
 Resources are made up of some metadata like their `"name"` in the API such as
-Address or Instance, some additional metadata (see the fields in [resource.rb](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/api/resource.rb)),
+Address or Instance, some additional metadata (see the fields in [resource.rb](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/mmv1/api/resource.rb)),
 and the meat of a resource, its fields. They're represented by `properties` in
-Magic Modules, an array of [types](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/api/type.rb).
+Magic Modules, an array of [types](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/mmv1/api/type.rb).
 
 Adding a new field to a resource in Magic Modules is often as easy as adding a
 `type` to the `properties` array for the resource. See [this example](https://github.com/GoogleCloudPlatform/magic-modules/pull/1126/files#diff-fb4f76e7d870258668a3beac48bf164c)
@@ -238,6 +253,7 @@ Once you've gotten approvals from the primary reviewer and the reviewers for
 any affected tools, the primary reviewer will merge your changes.
 
 ## Glossary
+
 The maintainers of the repository will tend to use specific jargon to describe
 concepts related to Magic Modules; here's a quick reference of what some of
 those terms are.
@@ -249,3 +265,25 @@ provider      | Synonym for tool as referred to inside the codebase
 downstream(s) | A PR created by the Magician against a tool
 upstream      | A PR created against Magic Modules or the Magic Modules repo
 The Magician  | The Magic Modules CI system that drives the GitHub robot `modular-magician`
+
+## Compiling MMv1 + tpgtools
+
+We are currently developing a new generation tool for Terraform called tpgtools.
+This relies on a [declarative client library](https://github.com/GoogleCloudPlatform/declarative-resource-client-library)
+that handles the actuation of GCP resources. We plan to gradually move resources
+from being generated by the existing Magic Modules Ruby code (mmv1) to using
+tpgtools. While we move resources over there will be a period of time when
+both generators are in use. To assist with generation we have a series of `make`
+targets that will run the compilers in tandem to generate the Terraform provider.
+
+Sample Usage to compile at beta:
+`make OUTPUT_PATH=/path/to/terraform-provider-google-beta VERSION=beta`
+
+Target single product:
+`make OUTPUT_PATH=/path/to/terraform-provider-google VERSION=ga PRODUCT=compute`
+
+Target single resource
+`make OUTPUT_PATH=/path/to/terraform-provider-google VERSION=ga PRODUCT=compute RESOURCE=image`
+
+For more advanced usage of mmv1 compiler flags, please execute the compiler directly
+from within the mmv1 directory.

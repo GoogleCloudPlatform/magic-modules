@@ -18,7 +18,14 @@ else
 		echo "User is a GCP org member, exiting"
 		exit 0
 	else
-		echo "User is not a GCP org member"
+		echo "Checking googlers org membership"
+		GOOGLERS_MEMBER=$(curl -sw '%{http_code}' -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/orgs/googlers/members/$USER -o /dev/null)
+		if [ "$GOOGLERS_MEMBER" != "404" ]; then
+			echo "User is a googlers org member, exiting"
+			exit 0
+		else
+			echo "User is not a GCP org member or a googlers org member"
+		fi
 	fi
 fi
 
