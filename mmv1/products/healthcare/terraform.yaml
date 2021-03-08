@@ -142,21 +142,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_consent_store_basic"
-        min_version: "beta"
         primary_resource_id: "my-consent"
         vars:
           dataset_id: "my-dataset"
           consent_id: "my-consent-store"
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_consent_store_full"
-        min_version: "beta"
         primary_resource_id: "my-consent"
         vars:
           dataset_id: "my-dataset"
           consent_id: "my-consent-store"
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_consent_store_iam"
-        min_version: "beta"
         primary_resource_id: "my-consent"
         vars:
           dataset_id: "my-dataset"
