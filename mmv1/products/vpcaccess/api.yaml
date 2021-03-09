@@ -72,15 +72,16 @@ objects:
       - !ruby/object:Api::Type::String
         name: network
         description: |
-          Name of a VPC network.
-        required: true
+          Name of the VPC network. Required if `ip_cidr_range` is set.
+        exactly_one_of:
+          - network
+          - subnet.0.name
       - !ruby/object:Api::Type::String
         name: ipCidrRange
         description: |
           The range of internal addresses that follows RFC 4632 notation. Example: `10.132.0.0/28`.
-        at_least_one_of:
-          - ip_cidr_range
-          - subnet.0.name
+        required_with:
+          - network
       - !ruby/object:Api::Type::Enum
         name: state
         description: |
@@ -131,15 +132,15 @@ objects:
         input: true
         min_version: beta
         description: |
-          Sets the scheduling options for this TPU instance.
+          The subnet in which to house the connector
         properties:
           - !ruby/object:Api::Type::String
             name: 'name'
             description: |
               Subnet name (relative, not fully qualified). E.g. if the full subnet selfLink is
               https://compute.googleapis.com/compute/v1/projects/{project}/regions/{region}/subnetworks/{subnetName} the correct input for this field would be {subnetName}"
-            at_least_one_of:
-              - ip_cidr_range
+            exactly_one_of:
+              - network
               - subnet.0.name
             input: true
             min_version: beta

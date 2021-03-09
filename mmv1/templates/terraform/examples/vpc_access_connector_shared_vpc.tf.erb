@@ -1,7 +1,6 @@
 resource "google_vpc_access_connector" "connector" {
   provider      = google-beta
   name          = "<%= ctx[:vars]['name'] %>"
-  network       = google_compute_network.custom_test.id
   subnet {
     name = google_compute_subnetwork.custom_test.name
   }
