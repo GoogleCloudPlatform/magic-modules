@@ -13,13 +13,13 @@ if $(echo $USER | fgrep -wq -e ndmckinley -e danawillow -e emilymye -e megan07 -
 	exit 0
 else
 	echo "Checking GCP org membership"
-	GCP_MEMBER=$(curl -sw '%{http_code}' -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/orgs/GoogleCloudPlatform/members/$USER -o /dev/null)
+	GCP_MEMBER=$(curl -Lsw '%{http_code}' -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/orgs/GoogleCloudPlatform/members/$USER -o /dev/null)
 	if [ "$GCP_MEMBER" != "404" ]; then
 		echo "User is a GCP org member, exiting"
 		exit 0
 	else
 		echo "Checking googlers org membership"
-		GOOGLERS_MEMBER=$(curl -sw '%{http_code}' -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/orgs/googlers/members/$USER -o /dev/null)
+		GOOGLERS_MEMBER=$(curl -Lsw '%{http_code}' -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/orgs/googlers/members/$USER -o /dev/null)
 		if [ "$GOOGLERS_MEMBER" != "404" ]; then
 			echo "User is a googlers org member, exiting"
 			exit 0
