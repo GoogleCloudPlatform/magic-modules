@@ -40,7 +40,7 @@ func resourceBigtableGCPolicyCustomizeDiffFunc(diff TerraformResourceDiff) error
 			if err != nil {
 				return err
 			}
-			diff.Clear("max_age.0.duration")
+			err = diff.Clear("max_age.0.duration")
 			if err != nil {
 				return err
 			}
