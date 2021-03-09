@@ -2,15 +2,15 @@ package google
 
 import "fmt"
 
-func GetBucketIamPolicyCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+func GetBucketIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return newBucketIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetBucketIamBindingCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+func GetBucketIamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return newBucketIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetBucketIamMemberCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+func GetBucketIamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return newBucketIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -31,22 +31,22 @@ func newBucketIamAsset(
 	d TerraformResourceData,
 	config *Config,
 	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
-) (Asset, error) {
+) ([]Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
-		return Asset{}, fmt.Errorf("expanding bindings: %v", err)
+		return []Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
 	name, err := assetName(d, config, "//storage.googleapis.com/{{name}}")
 	if err != nil {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 
-	return Asset{
+	return []Asset{{
 		Name: name,
 		Type: "storage.googleapis.com/Bucket",
 		IAMPolicy: &IAMPolicy{
 			Bindings: bindings,
 		},
-	}, nil
+	}}, nil
 }

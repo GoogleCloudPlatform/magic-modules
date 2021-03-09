@@ -5,13 +5,13 @@ import (
 	"reflect"
 )
 
-func GetServiceUsageCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+func GetServiceUsageCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//serviceusage.googleapis.com/projects/{{project}}/services/{{service}}")
 	if err != nil {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 	if obj, err := GetServiceUsageApiObject(d, config); err == nil {
-		return Asset{
+		return []Asset{{
 			Name: name,
 			Type: "serviceusage.googleapis.com/Service",
 			Resource: &AssetResource{
@@ -19,10 +19,10 @@ func GetServiceUsageCaiObject(d TerraformResourceData, config *Config) (Asset, e
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/serviceusage/v1/rest",
 				DiscoveryName:        "Service",
 				Data:                 obj,
-			},
+			}},
 		}, nil
 	}
-	return Asset{}, err
+	return []Asset{}, err
 }
 
 func GetServiceUsageApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
