@@ -7,7 +7,7 @@ if err := parseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
 
 nameParts := strings.Split(d.Get("name").(string), "/")
 if len(nameParts) == 4 {
-	// `organizations/{{org_name}}/environments/{{name}}`
+	// `organizations/{{org_name}}/envgroups/{{name}}`
 	orgId := fmt.Sprintf("organizations/%s", nameParts[1])
 	if err := d.Set("org_id", orgId); err != nil {
 		return nil, fmt.Errorf("Error setting org_id: %s", err)
