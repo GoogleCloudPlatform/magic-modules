@@ -105,7 +105,7 @@ func isCommonRetryableErrorCode(err error) (bool, string) {
 		return false, ""
 	}
 
-	if gerr.Code == 429 || gerr.Code == 500 || gerr.Code == 502 || gerr.Code == 503 || gerr.Code == 10 {
+	if gerr.Code == 429 || gerr.Code == 500 || gerr.Code == 502 || gerr.Code == 503 {
 		log.Printf("[DEBUG] Dismissed an error as retryable based on error code: %s", err)
 		return true, fmt.Sprintf("Retryable error code %d", gerr.Code)
 	}

@@ -52,7 +52,7 @@ func TestIsAppEngineRetryableError_serverError(t *testing.T) {
 }
 
 func TestIsCommonRetryableErrorCode_retryableErrorCode(t *testing.T) {
-	codes := []int{10, 429, 500, 502, 503}
+	codes := []int{429, 500, 502, 503}
 	for _, code := range codes {
 		code := code
 		t.Run(strconv.Itoa(code), func(t *testing.T) {
