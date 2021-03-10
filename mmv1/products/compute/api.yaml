@@ -14205,13 +14205,10 @@ objects:
           Only networks that are in the distributed mode can have subnetworks.
         input: true
         required: true
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'purpose'
         min_version: beta
         input: true
-        values:
-          - :INTERNAL_HTTPS_LOAD_BALANCER
-          - :PRIVATE
         description: |
           The purpose of the resource. This field can be either PRIVATE
           or INTERNAL_HTTPS_LOAD_BALANCER. A subnetwork with purpose set to
@@ -14219,7 +14216,7 @@ objects:
           reserved for Internal HTTP(S) Load Balancing. If unspecified, the
           purpose defaults to PRIVATE.
 
-          If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set the role.
+          If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set `role`.
       - !ruby/object:Api::Type::Enum
         name: 'role'
         min_version: beta
