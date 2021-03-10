@@ -40,7 +40,6 @@ func isRetryableError(topErr error, customPredicates ...RetryErrorPredicateFunc)
 		customPredicates...)
 
 	// Check all wrapped errors for a retryable error status.
-	log.Printf("[DEBUG] Checking if error is retryable: %+v", topErr)
 	isRetryable := false
 	errwrap.Walk(topErr, func(werr error) {
 		for _, pred := range retryPredicates {
