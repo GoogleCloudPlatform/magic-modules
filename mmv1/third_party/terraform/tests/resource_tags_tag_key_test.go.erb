@@ -11,7 +11,64 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccTagsTagKey_basicTest(t *testing.T) {
+// Tags tests cannot be run in parallel without running into Error Code 10: ABORTED
+// See https://github.com/hashicorp/terraform-provider-google/issues/8637
+
+func TestAccTags(t *testing.T) {
+	testCases := map[string]func(t *testing.T){
+		"basic":  testAccTagsTagKey_tagKeyBasic,
+		"update": testAccTagsTagKey_update,
+	}
+
+	for name, tc := range testCases {
+		// shadow the tc variable into scope so that when
+		// the loop continues, if t.Run hasn't executed tc(t)
+		// yet, we don't have a race condition
+		// see https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			tc(t)
+		})
+	}
+}
+
+func testAccTagsTagKey_tagKeyBasic(t *testing.T) {
+	skipIfVcr(t)
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        getTestOrgFromEnv(t),
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProvidersOiCS,
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
+		CheckDestroy: testAccCheckTagsTagKeyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsTagKey_tagKeyBasicExample(context),
+			},
+		},
+	})
+}
+
+func testAccTagsTagKey_tagKeyBasicExample(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_tags_tag_key" "key" {
+  provider = google-beta
+
+  parent = "organizations/%{org_id}"
+  short_name = "foo%{random_suffix}"
+  description = "For foo%{random_suffix} resources."
+}
+`, context)
+}
+
+func testAccTagsTagKey_update(t *testing.T) {
 	skipIfVcr(t)
 	t.Parallel()
 
@@ -70,6 +127,39 @@ resource "google_tags_tag_key" "key" {
   description = "Anything related to foo%{random_suffix}"
 }
 `, context)
+}
+
+func testAccCheckTagsTagKeyDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_tags_tag_key" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := googleProviderConfig(t)
+
+			url, err := replaceVarsForTest(config, rs, "{{TagsBasePath}}{{name}}")
+			if err != nil {
+				return err
+			}
+
+			billingProject := ""
+
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+
+			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			if err == nil {
+				return fmt.Errorf("TagsTagKey still exists at %s", url)
+			}
+		}
+
+		return nil
+	}
 }
 
 <% end %>

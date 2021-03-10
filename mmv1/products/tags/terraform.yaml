@@ -25,6 +25,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "tag_key_basic"
         min_version: 'beta'
         skip_vcr: true
+        skip_test: true
         primary_resource_id: "key"
         vars:
           short_name: "foo"
