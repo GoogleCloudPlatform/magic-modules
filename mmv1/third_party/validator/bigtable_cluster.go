@@ -35,11 +35,11 @@ func GetBigtableClusterCaiObject(d TerraformResourceData, config *Config) ([]Ass
 }
 
 func GetBigtableClusterApiObjects(d TerraformResourceData, config *Config) ([]map[string]interface{}, error) {
-	return expandBigtablClusters(d.Get("cluster"), d, config)
+	return expandBigtableClusters(d.Get("cluster"), d, config)
 	
 }
 
-func expandBigtablClusters(v interface{}, d TerraformResourceData, config *Config) ([]map[string]interface{}, error) {
+func expandBigtableClusters(v interface{}, d TerraformResourceData, config *Config) ([]map[string]interface{}, error) {
 	l := v.([]interface{})
   	if len(l) == 0 || l[0] == nil {
     	return nil, nil
