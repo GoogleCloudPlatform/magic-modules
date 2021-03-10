@@ -14,7 +14,7 @@ func GetBigtableClusterCaiObject(d TerraformResourceData, config *Config) ([]Ass
 
     assets := []Asset{}
 	for _, obj := range objs {
-		name, err := assetName(d, config, "//bigtable.googleapis.com/projects/{{.Provider.project}}/instances/{{name}}/clusters/{{cluster_id}}")
+		name, err := assetName(d, config, "//bigtable.googleapis.com/projects/{{project}}/instances/{{name}}/clusters/{{cluster_id}}")
 		if err != nil {
 			return []Asset{}, err
 		}
