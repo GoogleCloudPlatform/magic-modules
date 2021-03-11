@@ -138,7 +138,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_import: templates/terraform/custom_import/healthcare_hl7_v2_store.go.erb
   ConsentStore: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{dataset}}/consentStores/{{name}}"
-    import_format: ["{{dataset}}/consentStores/{{name}}", "{{name}}"]
+    import_format: ["{{dataset}}/consentStores/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_consent_store_basic"
