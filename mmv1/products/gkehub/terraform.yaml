@@ -36,6 +36,28 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     skip_sweeper: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
+  Feature: !ruby/object:Overrides::Terraform::ResourceOverride
+    properties:
+      authorizerFeatureSpec: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/object_to_bool.go.erb
+        custom_expand: templates/terraform/custom_expand/bool_to_object.go.erb
+    autogen_async: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
+        name: "gkehub_feature_basic"
+        primary_resource_id: "basic_auth_feature"
+        vars:
+          name: "auth"
+      - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
+        name: "gkehub_feature_basic_mci"
+        primary_resource_id: "basic_mci_feature"
+        vars:
+          name: "basic"
+          cluster_name: "basiccluster"
+    id_format: "projects/{{project}}/locations/global/features/{{feature_id}}"
+    import_format: ["projects/{{project}}/locations/global/features/{{feature_id}}"]
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
