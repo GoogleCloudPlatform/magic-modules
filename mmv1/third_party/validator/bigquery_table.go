@@ -5,7 +5,7 @@ import (
 )
 
 func GetBigQueryTableCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
-	name, err := assetName(d, config, "//bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
+	name, err := assetName(d, config, "//bigquery.googleapis.com/projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
 
 	if err != nil {
 		return Asset{}, err
