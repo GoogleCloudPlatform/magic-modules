@@ -121,6 +121,7 @@ Dir['products/**/api.yaml'].each do |file_path|
 end
 
 if override_dir
+  Google::LOGGER.info "Using override directory '#{override_dir}'"
   Dir["#{override_dir}/products/**/api.yaml"].each do |file_path|
     product = File.dirname(Pathname.new(file_path).relative_path_from(override_dir))
     all_product_files.push(product) unless all_product_files.include? product
