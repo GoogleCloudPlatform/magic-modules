@@ -15,7 +15,7 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   TagKey: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
-    mutex: tagKey/{{organization}}
+    mutex: tagKey/{{parent}}
     id_format: "{{name}}"
     properties:
       etag: !ruby/object:Overrides::Terraform::PropertyOverride
