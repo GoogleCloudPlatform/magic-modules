@@ -552,10 +552,10 @@ objects:
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       method_name_separator: ':'
       fetch_iam_policy_verb: :GET
-      parent_resource_attribute: 'name'
-      import_format: ["{{dataset}}/consentStores/{{name}}"]
-      base_url: "{{dataset}}/consentStores/{{name}}"
-      self_link: "{{dataset}}/consentStores/{{name}}"
+      parent_resource_attribute: 'consent_store_id'
+      import_format: ["{{%dataset}}/consentStores/{{name}}", "{{name}}"]
+      base_url: "{{%dataset}}/consentStores/{{name}}"
+      self_link: "{{%dataset}}/consentStores/{{name}}"
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: "dataset"

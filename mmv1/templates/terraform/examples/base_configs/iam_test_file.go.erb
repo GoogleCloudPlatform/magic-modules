@@ -31,7 +31,7 @@ else
 	import_format = individual_url
 end
 params = extract_identifiers(import_format.gsub('{{name}}', "{{#{object.name.underscore}}}"))
-import_url = import_format.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.base_url, '')
+import_url = import_format.gsub(/({{)%?(\w+)(}})/, '%s').gsub(object.__product.base_url, '')
 -%>
 <% import_qualifiers = [] -%>
 <% params.each_with_index do |param, i| -%>
