@@ -33,9 +33,6 @@ func TestAccTags(t *testing.T) {
 }
 
 func testAccTagsTagKey_tagKeyBasic(t *testing.T) {
-	skipIfVcr(t)
-	t.Parallel()
-
 	context := map[string]interface{}{
 		"org_id":        getTestOrgFromEnv(t),
 		"random_suffix": randString(t, 10),
@@ -69,9 +66,6 @@ resource "google_tags_tag_key" "key" {
 }
 
 func testAccTagsTagKey_update(t *testing.T) {
-	skipIfVcr(t)
-	t.Parallel()
-
 	context := map[string]interface{}{
 		"org_id":        getTestOrgFromEnv(t),
 		"random_suffix": randString(t, 10),
