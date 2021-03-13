@@ -35,8 +35,8 @@ func dataSourceGoogleKmsSecretAsymmetric() *schema.Resource {
 			},
 			"crc32": {
 				Type:         schema.TypeString,
-				Description:  "The crc32 checksum of the ciphertext, hexidecimal encoding",
-				ValidateFunc: validateUint32,
+				Description:  "The crc32 checksum of the ciphertext, hexadecimal encoding",
+				ValidateFunc: validateHexadecimalUint32,
 				Optional:     true,
 			},
 			"plaintext": {
@@ -130,7 +130,7 @@ func validateBase64WithWhitespaces(i interface{}, val string) ([]string, []error
 	return nil, nil
 }
 
-func validateUint32(i interface{}, val string) ([]string, []error) {
+func validateHexadecimalUint32(i interface{}, val string) ([]string, []error) {
 	_, err := strconv.ParseUint(i.(string), 16, 32)
 	if err != nil {
 		return nil, []error{fmt.Errorf("could not decode %q as a unsigned 32 bit hexadecimal integer", val)}
