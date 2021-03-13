@@ -39,6 +39,10 @@ resource "google_kms_crypto_key" "my_crypto_key" {
     algorithm = "RSA_DECRYPT_OAEP_4096_SHA256"
   }
 }
+
+data "google_kms_crypto_key" "my_crypto_key" {
+  crypto_key = google_kms_crypto_key.my_crypto_key.id
+}
 ```
 
 Next, use the [Cloud SDK](https://cloud.google.com/kms/docs/encrypt-decrypt-rsa#kms-encrypt-asymmetric-cli) to encrypt 
