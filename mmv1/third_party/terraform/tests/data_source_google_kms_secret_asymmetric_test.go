@@ -116,7 +116,6 @@ data "google_kms_secret_asymmetric" "acceptance_with_crc" {
 `, cryptoKeyTerraformID, ciphertext, crc)
 }
 
-
 func kmsCryptoKeyAsymmetricDecryptBasic(projectID, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
