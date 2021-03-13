@@ -92,7 +92,7 @@ Finally, reference the encrypted ciphertext in your resource definitions:
 
 ```hcl
 data "google_kms_secret_asymmetric" "sql_user_password" {
-  crypto_key = google_kms_crypto_key.my_crypto_key.self_link
+  crypto_key = data.google_kms_crypto_key_version.my_crypto_key.id
   crc32      = "12c59e54"
   ciphertext = <<EOT
     M7nUoba9EGVTu2LjNjBKGdGVBYjyS/i/AY+4yQMQF0Qf/RfUfX31Jw6+VO9OuThq

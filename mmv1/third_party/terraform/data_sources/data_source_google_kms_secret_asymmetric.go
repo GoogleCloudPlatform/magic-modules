@@ -90,7 +90,9 @@ func dataSourceGoogleKmsSecretAsymmetricRead(ctx context.Context, d *schema.Reso
 		}
 		ciphertextCRC32C = uint32(u)
 	} else {
-		d.Set("crc32", fmt.Sprintf("%x", ciphertextCRC32C))
+		if err := d.Set("crc32", fmt.Sprintf("%x", ciphertextCRC32C)); err != nil {
+			return fmt.Errorf("failed to set crc32, %s", err)
+		}
 	}
 
 	req := &kmspb.AsymmetricDecryptRequest{
@@ -105,7 +107,7 @@ func dataSourceGoogleKmsSecretAsymmetricRead(ctx context.Context, d *schema.Reso
 		return fmt.Errorf("failed to decrypt ciphertext: %v", err)
 	}
 
-	if result.VerifiedCiphertextCrc32C == false || int64(crc32c(result.Plaintext)) != result.PlaintextCrc32C.Value {
+	if !result.VerifiedCiphertextCrc32C || int64(crc32c(result.Plaintext)) != result.PlaintextCrc32C.Value {
 		return fmt.Errorf("asymmetricDecrypt request corrupted in-transit")
 	}
 
