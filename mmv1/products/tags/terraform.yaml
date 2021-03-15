@@ -16,10 +16,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   TagKey: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     mutex: tagKey/{{parent}}
-    id_format: "{{name}}"
+    id_format: "tagKey/{{name}}"
+    import_format: ["tagKey/{{name}}", "{{name}}"]
     properties:
       etag: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "tag_key_basic"
