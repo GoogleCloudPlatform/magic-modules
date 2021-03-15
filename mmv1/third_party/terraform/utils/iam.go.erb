@@ -267,13 +267,13 @@ func createIamBindingsMap(bindings []*cloudresourcemanager.Binding) map[iamBindi
 				if len(pieces) > 2 {
 					pieces[2] = strings.ToLower(pieces[2])
 				}
-			} else {
+			} else if !strings.HasPrefix(m, "principalSet:") && !strings.HasPrefix(m, "principal:") {
 				pieces = strings.SplitN(m, ":", 2)
 				if len(pieces) > 1 {
 					pieces[1] = strings.ToLower(pieces[1])
 				}
 			}
-			
+
 			m = strings.Join(pieces, ":")
 
 			// Add the member
