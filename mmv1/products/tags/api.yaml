@@ -54,18 +54,18 @@ objects:
       - !ruby/object:Api::Type::String
         name: name
         description: |
-          Immutable. The resource name for a TagKey. Must be in the format tagKeys/{tag_key_id}, where tag_key_id is the generated numeric id for the TagKey.
+          The generated numeric id for the TagKey.
         output: true
       - !ruby/object:Api::Type::String
         name: parent
         description: |
-          Immutable. The resource name of the new TagKey's parent. Must be of the form organizations/{org_id}.
+          Input only. The resource name of the new TagKey's parent. Must be of the form organizations/{org_id}.
         input: true
         required: true
       - !ruby/object:Api::Type::String
         name: shortName
         description: |
-          Required. Immutable. The user friendly name for a TagKey. The short name should be unique for TagKeys within the same tag namespace.
+          Input only. The user friendly name for a TagKey. The short name should be unique for TagKeys within the same tag namespace.
 
           The short name must be 1-63 characters, beginning and ending with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.
         input: true
@@ -73,12 +73,12 @@ objects:
       - !ruby/object:Api::Type::String
         name: namespacedName
         description: |
-          Output only. Immutable. Namespaced name of the TagKey.
+          Output only. Namespaced name of the TagKey.
         output: true
       - !ruby/object:Api::Type::String
         name: description
         description: |
-          Optional. User-assigned description of the TagKey. Must not exceed 256 characters.
+          User-assigned description of the TagKey. Must not exceed 256 characters.
       - !ruby/object:Api::Type::String
         name: createTime
         description: |
