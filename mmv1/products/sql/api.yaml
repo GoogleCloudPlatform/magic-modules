@@ -57,6 +57,7 @@ objects:
       hosted in Google's cloud. The Instances resource provides methods for
       common configuration and management tasks.
     collection_url_key: 'items'
+    update_verb: :PATCH
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'backendType'
