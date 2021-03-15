@@ -1,5 +1,3 @@
-// <% autogen_exception -%>
-
 package google
 
 import (
@@ -4601,9 +4599,7 @@ resource "google_compute_node_template" "nodetmpl" {
 
   node_type = "n1-node-96-624"
 
-<% unless version == 'ga' -%>
   cpu_overcommit_type = "ENABLED"
-<% end -%>
 }
 
 resource "google_compute_node_group" "nodes" {
@@ -4671,9 +4667,7 @@ resource "google_compute_node_template" "nodetmpl" {
 
   node_type = "n1-node-96-624"
 
-<% unless version == 'ga' -%>
   cpu_overcommit_type = "ENABLED"
-<% end -%>
 }
 
 resource "google_compute_node_group" "nodes" {
