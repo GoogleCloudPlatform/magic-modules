@@ -4,13 +4,13 @@ import (
 	"reflect"
 )
 
-func GetCloudFunctionsFunctionCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+func GetCloudFunctionsFunctionCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//cloudfunctions.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/functions/{{name}}")
 	if err != nil {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 	if obj, err := GetCloudFunctionsFunctionApiObject(d, config); err == nil {
-		return Asset{
+		return []Asset{{
 			Name: name,
 			Type: "cloudfunctions.googleapis.com/CloudFunction",
 			Resource: &AssetResource{
@@ -19,9 +19,9 @@ func GetCloudFunctionsFunctionCaiObject(d TerraformResourceData, config *Config)
 				DiscoveryName:        "CloudFunction",
 				Data:                 obj,
 			},
-		}, nil
+		}}, nil
 	} else {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 }
 

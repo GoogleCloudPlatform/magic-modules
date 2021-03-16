@@ -154,9 +154,8 @@ func Provider() *schema.Provider {
 			ContainerBetaCustomEndpointEntryKey:          ContainerBetaCustomEndpointEntry,
 			DataprocBetaCustomEndpointEntryKey:           DataprocBetaCustomEndpointEntry,
 			DataflowCustomEndpointEntryKey:               DataflowCustomEndpointEntry,
-			DnsBetaCustomEndpointEntryKey:                DnsBetaCustomEndpointEntry,
 			IamCredentialsCustomEndpointEntryKey:         IamCredentialsCustomEndpointEntry,
-			ResourceManagerV2Beta1CustomEndpointEntryKey: ResourceManagerV2Beta1CustomEndpointEntry,
+			ResourceManagerV2CustomEndpointEntryKey:      ResourceManagerV2CustomEndpointEntry,
 			RuntimeConfigCustomEndpointEntryKey:          RuntimeConfigCustomEndpointEntry,
 			IAMCustomEndpointEntryKey:                    IAMCustomEndpointEntry,
 			ServiceNetworkingCustomEndpointEntryKey:      ServiceNetworkingCustomEndpointEntry,
@@ -496,6 +495,12 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
         <% end -%>
 	}
 
+	// opt in extension for adding to the User-Agent header
+	if ext := os.Getenv("GOOGLE_TERRAFORM_USERAGENT_EXTENSION"); ext != "" {
+		ua := config.userAgent
+		config.userAgent = fmt.Sprintf("%s %s", ua, ext)
+	}
+
 	if v, ok := d.GetOk("request_timeout"); ok {
 		var err error
 		config.RequestTimeout, err = time.ParseDuration(v.(string))
@@ -549,9 +554,8 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.ContainerBetaBasePath = d.Get(ContainerBetaCustomEndpointEntryKey).(string)
 	config.DataprocBetaBasePath = d.Get(DataprocBetaCustomEndpointEntryKey).(string)
 	config.DataflowBasePath = d.Get(DataflowCustomEndpointEntryKey).(string)
-	config.DnsBetaBasePath = d.Get(DnsBetaCustomEndpointEntryKey).(string)
 	config.IamCredentialsBasePath = d.Get(IamCredentialsCustomEndpointEntryKey).(string)
-	config.ResourceManagerV2Beta1BasePath = d.Get(ResourceManagerV2Beta1CustomEndpointEntryKey).(string)
+	config.ResourceManagerV2BasePath = d.Get(ResourceManagerV2CustomEndpointEntryKey).(string)
 	config.RuntimeConfigBasePath = d.Get(RuntimeConfigCustomEndpointEntryKey).(string)
 	config.IAMBasePath = d.Get(IAMCustomEndpointEntryKey).(string)
 	config.ServiceNetworkingBasePath = d.Get(ServiceNetworkingCustomEndpointEntryKey).(string)
