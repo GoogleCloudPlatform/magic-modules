@@ -58,6 +58,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           cluster_name: "basiccluster"
     id_format: "projects/{{project}}/locations/global/features/{{feature_id}}"
     import_format: ["projects/{{project}}/locations/global/features/{{feature_id}}"]
+  Membership: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
+        name: "gkehub_membership_basic"
+        primary_resource_id: "basic_membership"
+        vars:
+          name: "basic"
+          cluster_name: "basiccluster"
+    # Skip sweeper gen since this is a child resource.
+    skip_sweeper: true
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
