@@ -50,12 +50,13 @@ data "google_compute_image" "my_image" {
 resource "google_compute_disk" "foobar" {
   name  = "%s"
   image = data.google_compute_image.my_image.self_link
-  size  = 50
-  type  = "pd-ssd"
+  size  = 100
+  type  = "pd-extreme"
   zone  = "us-central1-a"
   labels = {
     my-label = "my-label-value"
   }
+  provisioned_iops = 10000
 }
 
 resource "google_compute_resource_policy" "foobar" {
