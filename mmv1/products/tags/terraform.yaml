@@ -32,5 +32,3 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           short_name: "foo"
         test_env_vars:
           org_id: :ORG_ID
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.erb
