@@ -2505,6 +2505,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
+      proxyBind: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   TargetHttpsProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -2522,6 +2524,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       quicOverride: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: :NONE
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+      proxyBind: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   RegionTargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -2642,6 +2646,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: backendService
       proxyHeader: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: :NONE
+      proxyBind: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   TargetVpnGateway: !ruby/object:Overrides::Terraform::ResourceOverride
     name: 'VpnGateway'
     docs: !ruby/object:Provider::Terraform::Docs
