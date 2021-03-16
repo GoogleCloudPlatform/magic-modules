@@ -14436,6 +14436,11 @@ objects:
         required: true
         update_verb: :POST
         update_url: 'projects/{{project}}/targetHttpProxies/{{name}}/setUrlMap'
+      - !ruby/object:Api::Type::Boolean
+        name: 'proxyBind'
+        description: |
+          This field only applies when the forwarding rule that references
+          this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
   - !ruby/object:Api::Resource
     name: 'TargetHttpsProxy'
     kind: 'compute#targetHttpsProxy'
@@ -14544,6 +14549,11 @@ objects:
         required: true
         update_verb: :POST
         update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setUrlMap'
+      - !ruby/object:Api::Type::Boolean
+        name: 'proxyBind'
+        description: |
+          This field only applies when the forwarding rule that references
+          this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
   - !ruby/object:Api::Resource
     name: 'RegionTargetHttpProxy'
     kind: 'compute#targetHttpProxy'
@@ -15149,6 +15159,11 @@ objects:
         required: true
         update_verb: :POST
         update_url: 'projects/{{project}}/global/targetTcpProxies/{{name}}/setBackendService'
+      - !ruby/object:Api::Type::Boolean
+        name: 'proxyBind'
+        description: |
+          This field only applies when the forwarding rule that references
+          this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
   - !ruby/object:Api::Resource
     name: 'TargetVpnGateway'
     kind: 'compute#targetVpnGateway'
