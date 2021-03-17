@@ -84,7 +84,7 @@ A9XFJmOVdkvRY9nnz/iVLAdd0Q3vFtLqCdUYsNN2yh4=
 
 ## optionally calculate the CRC32 of the ciphertext  
 $ go get github.com/binxio/crc32 
-$ $GOPATH/bin/crc32 < my-secret-password.enc
+$ $GOPATH/bin/crc32 -polynomial castagnoli < my-secret-password.enc
 12c59e54
 ```
 
