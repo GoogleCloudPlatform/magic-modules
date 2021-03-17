@@ -138,7 +138,7 @@ The following arguments are supported:
 * `ciphertext` (Required) - The ciphertext to be decrypted, encoded in base64
 * `crypto_key_version` (Required) - The id of the CryptoKey version that will be used to
   decrypt the provided ciphertext. This is represented by the format
-  `projects/{project}/locations/{location}/keyRings/{keyring}}/cryptoKeys/{key}}/cryptoKeyVersions/{version}`.
+  `projects/{project}/locations/{location}/keyRings/{keyring}/cryptoKeys/{key}/cryptoKeyVersions/{version}`.
 * `crc32` (Optional) - The crc32 checksum of the `ciphertext` in hexadecimal notation.
 
 ## Attributes Reference
