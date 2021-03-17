@@ -242,6 +242,10 @@ func subtractFromBindings(bindings []*cloudresourcemanager.Binding, toRemove ...
 	return listFromIamBindingMap(currMap)
 }
 
+func iamMemberIsCaseSensitive(member string) bool {
+	return strings.HasPrefix(member, "principalSet:") || strings.HasPrefix(member, "principal:") || strings.HasPrefix(member, "principalHierarchy:")
+}
+
 // Construct map of role to set of members from list of bindings.
 func createIamBindingsMap(bindings []*cloudresourcemanager.Binding) map[iamBindingKey]map[string]struct{} {
 	bm := make(map[iamBindingKey]map[string]struct{})
@@ -267,14 +271,16 @@ func createIamBindingsMap(bindings []*cloudresourcemanager.Binding) map[iamBindi
 				if len(pieces) > 2 {
 					pieces[2] = strings.ToLower(pieces[2])
 				}
-			} else if !strings.HasPrefix(m, "principalSet:") && !strings.HasPrefix(m, "principal:") {
+			} else if !iamMemberIsCaseSensitive(m) {
 				pieces = strings.SplitN(m, ":", 2)
 				if len(pieces) > 1 {
 					pieces[1] = strings.ToLower(pieces[1])
 				}
 			}
 
-			m = strings.Join(pieces, ":")
+			if len(pieces) > 0 {
+				m = strings.Join(pieces, ":")
+			}
 
 			// Add the member
 			members[m] = struct{}{}
