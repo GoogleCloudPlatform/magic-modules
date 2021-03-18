@@ -16,10 +16,10 @@ import (
 
 func TestAccTags(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"basic":  testAccTagsTagKey_tagKeyBasic,
-		"update": testAccTagsTagKey_update,
-		"basic":  testAccTagsTagValue_tagValueBasic,
-		"update": testAccTagsTagValue_update,
+		"tagKeyBasic":  testAccTagsTagKey_tagKeyBasic,
+		"tagKeyUpdate": testAccTagsTagKey_tagKeyUpdate,
+		"tagValueBasic":  testAccTagsTagValue_tagValueBasic,
+		"tagValueUpdate": testAccTagsTagValue_tagValueUpdate,
 	}
 
 	for name, tc := range testCases {
@@ -67,7 +67,7 @@ resource "google_tags_tag_key" "key" {
 `, context)
 }
 
-func testAccTagsTagKey_update(t *testing.T) {
+func testAccTagsTagKey_tagKeyUpdate(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":        getTestOrgFromEnv(t),
 		"random_suffix": randString(t, 10),
@@ -199,7 +199,7 @@ resource "google_tags_tag_value" "value" {
 `, context)
 }
 
-func testAccTagsTagValue_update(t *testing.T) {
+func testAccTagsTagValue_tagValueUpdate(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":        getTestOrgFromEnv(t),
 		"random_suffix": randString(t, 10),
