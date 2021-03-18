@@ -861,7 +861,7 @@ func TestIamMember_MemberDiffSuppress(t *testing.T) {
 	}
 
 	for _, testcase := range iamMemberTestcases {
-		areEqual := iamMember_caseDiffSuppress("", testcase.old, testcase.new, &schema.ResourceData{})
+		areEqual := iamMemberCaseDiffSuppress("", testcase.old, testcase.new, &schema.ResourceData{})
 		if areEqual != testcase.equal {
 			t.Errorf("Testcase %s failed: expected equality to be %t but got %t", testcase.name, testcase.equal, areEqual)
 		}

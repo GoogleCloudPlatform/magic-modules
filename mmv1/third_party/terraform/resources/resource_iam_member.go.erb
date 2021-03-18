@@ -12,7 +12,7 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
-func iamMember_caseDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+func iamMemberCaseDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	isCaseSensitive := iamMemberIsCaseSensitive(old) || iamMemberIsCaseSensitive(new)
 	if isCaseSensitive {
 		return old == new
@@ -30,7 +30,7 @@ var IamMemberBaseSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Required:         true,
 		ForceNew:         true,
-		DiffSuppressFunc: iamMember_caseDiffSuppress,
+		DiffSuppressFunc: iamMemberCaseDiffSuppress,
 		ValidateFunc:     validation.StringDoesNotMatch(regexp.MustCompile("^deleted:"), "Terraform does not support IAM members for deleted principals"),
 	},
 	"condition": {
