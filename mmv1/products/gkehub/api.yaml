@@ -38,8 +38,8 @@ objects:
       Membership contains information about a member cluster.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
-        'Official Documentation':
-          'https://cloud.google.com/gkehub/docs/'
+        'Registering a Cluster':
+          'https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster'
       api: 'https://cloud.google.com/gkehub/docs/reference/rest/v1beta1/projects.locations.memberships'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
@@ -77,26 +77,10 @@ objects:
         name: 'description'
         description: |
           The name of this entity type to be displayed on the console.
-        required: true
-        input: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
           Labels to apply to this membership.
-      - !ruby/object:Api::Type::String
-        name: 'externalId'
-        description: |
-          An externally-generated and managed ID for this Membership.
-          This ID may still be modified after creation but it is not recommended to do so.
-          The ID must match the regex: `[a-zA-Z0-9][a-zA-Z0-9_\-\.]*` If this Membership
-          represents a Kubernetes cluster, this value should be set to the UUID of the
-          kube-system namespace object.
-        required: true
-      - !ruby/object:Api::Type::String
-        name: 'uniqueId'
-        description: |
-          Output only. Google-generated UUID for this resource.
-        output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'endpoint'
         input: true
@@ -117,3 +101,17 @@ objects:
                   It can be at the most 1000 characters in length.  If the cluster is provisioned with Terraform,
                   this is `"//container.googleapis.com/${google_container_cluster.my-cluster.id}"`.
                 input: true
+                required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'authority'
+        description: |
+          Authority encodes how Google will recognize identities from this Membership.
+          See the workload identity documentation for more details:
+          https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'issuer'
+            required: true
+            description: |
+              A JSON Web Token (JWT) issuer URI. `issuer` must start with `https://` and // be a valid 
+              with length <2000 characters.
