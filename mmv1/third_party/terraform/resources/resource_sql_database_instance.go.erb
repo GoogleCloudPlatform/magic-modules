@@ -960,7 +960,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, secondGen bool)
 		// Version is unset in Create but is set during update
 		SettingsVersion:             int64(_settings["version"].(int)),
 		Tier:                        _settings["tier"].(string),
-		ForceSendFields:             []string{"StorageAutoResize"},
+		ForceSendFields:             []string{"StorageAutoResize", "IpConfiguration", "DatabaseFlags", "LocationPreference", "MaintenanceWindow", "PricingPlan", "InsightsConfig"},
 		ActivationPolicy:            _settings["activation_policy"].(string),
 		AvailabilityType:            _settings["availability_type"].(string),
 		CrashSafeReplicationEnabled: _settings["crash_safe_replication"].(bool),
@@ -1049,6 +1049,7 @@ func expandLocationPreference(configured []interface{}) *sqladmin.LocationPrefer
 	return &sqladmin.LocationPreference{
 		FollowGaeApplication: _locationPreference["follow_gae_application"].(string),
 		Zone:                 _locationPreference["zone"].(string),
+		ForceSendFields:      []string{"FollowGaeApplication", "Zone"},
 	}
 }
 
@@ -1064,7 +1065,7 @@ func expandIpConfiguration(configured []interface{}) *sqladmin.IpConfiguration {
 		RequireSsl:         _ipConfiguration["require_ssl"].(bool),
 		PrivateNetwork:     _ipConfiguration["private_network"].(string),
 		AuthorizedNetworks: expandAuthorizedNetworks(_ipConfiguration["authorized_networks"].(*schema.Set).List()),
-		ForceSendFields:    []string{"Ipv4Enabled", "RequireSsl"},
+		ForceSendFields:    []string{"Ipv4Enabled", "RequireSsl", "AuthorizedNetworks", "PrivateNetwork"},
 	}
 }
 func expandAuthorizedNetworks(configured []interface{}) []*sqladmin.AclEntry {
@@ -1260,6 +1261,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	// Update only updates the settings, so they are all we need to set.
 	instance := &sqladmin.DatabaseInstance{
 		Settings: expandSqlDatabaseInstanceSettings(d.Get("settings").([]interface{}), !isFirstGen(d)),
+		ForceSendFields: []string{"Settings"},
 	}
 
 	// Lock on the master_instance_name just in case updating any replica
