@@ -950,6 +950,48 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	return nil
 }
 
+
+func expandForceSendFieldsFromResourceModel(target string, resource *schema.Resource) []string {
+	targets := strings.Split(target, ".")
+	out, err := expandForceSendFieldsFromSchemaRecursive(targets, resource.Schema)
+	if err != nil {
+		log.Fatal(fmt.Errorf("unable to find target from schema - %w", err))
+	}
+	return out
+}
+
+func expandForceSendFieldsFromSchemaRecursive(targets []string, parentSchema map[string]*schema.Schema) ([]string, error) {
+	if parentSchema == nil {
+		return nil, errors.New("error itterating schema, found nil value")
+	}
+	// if we haven't found the target schema
+	if len(targets) > 0 {
+		target, additionalTargets := targets[0], targets[1:]
+		for k, s := range parentSchema {
+			if k == target {
+				castedElement, ok := s.Elem.(*schema.Resource)
+				if !ok {
+					return nil, fmt.Errorf("error itterating schema, can't index into element type of target %s", target)
+				}
+				return expandForceSendFieldsFromSchemaRecursive(additionalTargets, castedElement.Schema)
+			}
+		}
+		return nil, fmt.Errorf("error itterating schema, unable to find target %s", target)
+	}
+
+	// found the target
+	var out []string
+	for k, s := range parentSchema {
+		// enumerated the target's field names
+		if !s.Required {
+			out = append(out, k)
+		}
+	}
+
+	return out, nil
+}
+
+
 func expandSqlDatabaseInstanceSettings(configured []interface{}, secondGen bool) *sqladmin.Settings {
 	if len(configured) == 0 || configured[0] == nil {
 		return nil
@@ -960,7 +1002,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, secondGen bool)
 		// Version is unset in Create but is set during update
 		SettingsVersion:             int64(_settings["version"].(int)),
 		Tier:                        _settings["tier"].(string),
-		ForceSendFields:             []string{"StorageAutoResize", "IpConfiguration", "DatabaseFlags", "LocationPreference", "MaintenanceWindow", "PricingPlan", "InsightsConfig"},
+		ForceSendFields:             expandForceSendFieldsFromResourceModel("settings", resourceSqlDatabaseInstance()),
 		ActivationPolicy:            _settings["activation_policy"].(string),
 		AvailabilityType:            _settings["availability_type"].(string),
 		CrashSafeReplicationEnabled: _settings["crash_safe_replication"].(bool),
@@ -1036,7 +1078,7 @@ func expandMaintenanceWindow(configured []interface{}) *sqladmin.MaintenanceWind
 		Day:             int64(window["day"].(int)),
 		Hour:            int64(window["hour"].(int)),
 		UpdateTrack:     window["update_track"].(string),
-		ForceSendFields: []string{"Hour"},
+		ForceSendFields: expandForceSendFieldsFromResourceModel("settings.maintenance_window", resourceSqlDatabaseInstance()),
 	}
 }
 
@@ -1049,7 +1091,7 @@ func expandLocationPreference(configured []interface{}) *sqladmin.LocationPrefer
 	return &sqladmin.LocationPreference{
 		FollowGaeApplication: _locationPreference["follow_gae_application"].(string),
 		Zone:                 _locationPreference["zone"].(string),
-		ForceSendFields:      []string{"FollowGaeApplication", "Zone"},
+		ForceSendFields:      expandForceSendFieldsFromResourceModel("settings.location_preference", resourceSqlDatabaseInstance()),
 	}
 }
 
@@ -1065,7 +1107,7 @@ func expandIpConfiguration(configured []interface{}) *sqladmin.IpConfiguration {
 		RequireSsl:         _ipConfiguration["require_ssl"].(bool),
 		PrivateNetwork:     _ipConfiguration["private_network"].(string),
 		AuthorizedNetworks: expandAuthorizedNetworks(_ipConfiguration["authorized_networks"].(*schema.Set).List()),
-		ForceSendFields:    []string{"Ipv4Enabled", "RequireSsl", "AuthorizedNetworks", "PrivateNetwork"},
+		ForceSendFields:    expandForceSendFieldsFromResourceModel("settings.ip_configuration", resourceSqlDatabaseInstance()),
 	}
 }
 func expandAuthorizedNetworks(configured []interface{}) []*sqladmin.AclEntry {
@@ -1096,9 +1138,10 @@ func expandDatabaseFlags(configured []interface{}) []*sqladmin.DatabaseFlags {
 		_entry := _flag.(map[string]interface{})
 
 		databaseFlags = append(databaseFlags, &sqladmin.DatabaseFlags{
-			Name:  _entry["name"].(string),
-			Value: _entry["value"].(string),
-		})
+			Name:            _entry["name"].(string),
+			Value:           _entry["value"].(string),
+		  ForceSendFields: expandForceSendFieldsFromResourceModel("settings.database_flags", resourceSqlDatabaseInstance()),
+	})
 	}
 	return databaseFlags
 }
@@ -1117,7 +1160,7 @@ func expandBackupConfiguration(configured []interface{}) *sqladmin.BackupConfigu
 		Location:                    _backupConfiguration["location"].(string),
 		TransactionLogRetentionDays: int64(_backupConfiguration["transaction_log_retention_days"].(int)),
 		PointInTimeRecoveryEnabled:  _backupConfiguration["point_in_time_recovery_enabled"].(bool),
-		ForceSendFields:             []string{"BinaryLogEnabled", "Enabled", "PointInTimeRecoveryEnabled"},
+		ForceSendFields:             expandForceSendFieldsFromResourceModel("settings.backup_configuration", resourceSqlDatabaseInstance()),
 	}
 }
 
@@ -1130,6 +1173,7 @@ func expandBackupRetentionSettings(configured interface{}) *sqladmin.BackupReten
 	return &sqladmin.BackupRetentionSettings{
 		RetainedBackups: int64(config["retained_backups"].(int)),
 		RetentionUnit:   config["retention_unit"].(string),
+		ForceSendFields: expandForceSendFieldsFromResourceModel("settings.backup_configuration.backup_retention_settings", resourceSqlDatabaseInstance()),
 	}
 }
 
@@ -1144,6 +1188,7 @@ func expandInsightsConfig(configured []interface{}) *sqladmin.InsightsConfig {
 		QueryStringLength:     int64(_insightsConfig["query_string_length"].(int)),
 		RecordApplicationTags: _insightsConfig["record_application_tags"].(bool),
 		RecordClientAddress:   _insightsConfig["record_client_address"].(bool),
+		ForceSendFields: expandForceSendFieldsFromResourceModel("settings.insights_config", resourceSqlDatabaseInstance()),
 	}
 }
 
