@@ -58,6 +58,7 @@ resource "google_eventarc_trigger" "trigger" {
 }
 
 resource "google_pubsub_topic" "foo" {
+  provider = google-beta
   name = "topic%{random_suffix}"
 }
 
