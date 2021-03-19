@@ -1,0 +1,126 @@
+<% autogen_exception -%>
+package google
+<% unless version == 'ga' -%>
+import (
+  "testing"
+
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+)
+
+func TestAccEventarcTrigger_basic(t *testing.T) {
+  // DCL currently fails due to transport modification
+  skipIfVcr(t)
+  t.Parallel()
+
+  context := map[string]interface{}{
+    "random_suffix": randString(t, 10),
+    "project": getTestProjectFromEnv(),
+  }
+
+  vcrTest(t, resource.TestCase{
+    PreCheck:          func() { testAccPreCheck(t) },
+    Providers:         testAccProvidersOiCS,
+    CheckDestroy:      funcAccTestEventarcTriggerCheckDestroy(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccEventarcTrigger_basic(context),
+      },
+      {
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ResourceName:            "google_eventarc_trigger.trigger",
+      },
+    },
+  })
+}
+
+func testAccEventarcTrigger_basic(context map[string]interface{}) string {
+  return Nprintf(`
+resource "google_eventarc_trigger" "trigger" {
+  provider = google-beta
+  name = "trigger%{random_suffix}"
+  location = "us-central1"
+  matching_criteria {
+    attribute = "type"
+    value = "google.cloud.pubsub.topic.v1.messagePublished"
+  }
+  destination {
+    cloud_run_service {
+      service = google_cloud_run_service.default.name
+      region = "us-central1"
+    }
+  }
+  transport {
+    pubsub {
+      topic = google_pubsub_topic.foo.id
+    }
+  }
+}
+
+resource "google_pubsub_topic" "foo" {
+  name = "topic%{random_suffix}"
+}
+
+resource "google_cloud_run_service" "default" {
+  provider = google-beta
+  name     = "service-eventarc%{random_suffix}"
+  location = "us-central1"
+
+  metadata {
+    namespace = "%{project}"
+  }
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+        args  = ["arrgs"]
+      }
+    container_concurrency = 50
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+}
+`, context)
+}
+
+func funcAccTestEventarcTriggerCheckDestroy(t *testing.T) func(s *terraform.State) error {
+  return func(s *terraform.State) error {
+    for name, rs := range s.RootModule().Resources {
+      if rs.Type != "google_eventarc_trigger" {
+        continue
+      }
+      if strings.HasPrefix(name, "data.") {
+        continue
+      }
+
+      config := googleProviderConfig(t)
+
+      url, err := replaceVarsForTest(config, rs, "{{EventarcBasePath}}projects/{{project}}/locations/{{location}}/triggers/{{name}}")
+      if err != nil {
+        return err
+      }
+
+      billingProject := ""
+
+      if config.BillingProject != "" {
+        billingProject = config.BillingProject
+      }
+
+      _, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+      if err == nil {
+        return fmt.Errorf("EventarcTrigger still exists at %s", url)
+      }
+    }
+
+    return nil
+  }
+}
+
+<% else %>
+// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
+<% end -%>
