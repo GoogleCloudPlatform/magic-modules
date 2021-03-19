@@ -3,6 +3,24 @@ func revisionNameCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v i
 	if autogen && diff.HasChange("template.0.metadata.0.name") {
 		return fmt.Errorf("google_cloud_run_service: `template.metadata.name` cannot be set while `autogenerate_revision_name` is true. Please remove the field or set `autogenerate_revision_name` to false.")
 	}
+
+	if diff.HasChange("template.0.metadata.0.annotations") {
+		old, new := diff.GetChange("template.0.metadata.0.annotations")
+
+		omap := old.(map[string]interface{})
+		nmap := new.(map[string]interface{})
+
+		for k, v := range omap {
+			if _, ok := nmap[k]; !ok {
+				if k == "run.googleapis.com/sandbox" {
+					nmap[k] = v
+				}
+			}
+		}
+		diff.SetNew("template.0.metadata.0.annotations", nmap)
+		diff.Clear("template.0.metadata.0.annotations")
+	}
+
 	return nil
 }
 
