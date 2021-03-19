@@ -50,6 +50,15 @@ resource "google_eventarc_trigger" "trigger" {
       region = "us-central1"
     }
   }
+  transport {
+    pubsub {
+      topic = google_pubsub_topic.foo.id
+    }
+  }
+}
+
+resource "google_pubsub_topic" "foo" {
+  name = "topic%{random_suffix}"
 }
 
 resource "google_cloud_run_service" "default" {
