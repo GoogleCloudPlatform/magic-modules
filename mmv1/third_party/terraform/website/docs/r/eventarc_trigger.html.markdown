@@ -89,7 +89,7 @@ The following arguments are supported:
   
 * `matching_criteria` -
   (Required)
-  Required. The criteria by which events are filtered. Only events that match with this criteria will be sent to the destination.
+  Required. null The criteria by which events are filtered. Only events that match with this criteria will be sent to the destination.
   
 * `name` -
   (Required)
@@ -144,6 +144,19 @@ The `cloud_run_service` block supports:
 * `region` -
   (Optional)
   Required. The region the Cloud Run service is deployed in.
+    The `transport` block supports:
+    
+* `pubsub` -
+  (Optional)
+  The Pub/Sub topic and subscription used by Eventarc as delivery intermediary.
+    The `pubsub` block supports:
+    
+* `topic` -
+  (Optional)
+  Optional. The name of the Pub/Sub topic created and managed by Eventarc system as a transport for the event delivery. Format: `projects/{PROJECT_ID}/topics/{TOPIC_NAME}`. You may set an existing topic for triggers of the type `google.cloud.pubsub.topic.v1.messagePublished` only. The topic you provide here will not be deleted by Eventarc at trigger deletion.
+    
+* `subscription` -
+  Output only. The name of the Pub/Sub subscription created and managed by Eventarc system as a transport for the event delivery. Format: `projects/{PROJECT_ID}/subscriptions/{SUBSCRIPTION_NAME}`.
     
 The `transport` block supports:
     
