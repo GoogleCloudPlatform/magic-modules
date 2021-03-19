@@ -37,13 +37,11 @@ components:
                     "route", "route/subroute".'
                   type: string
                   x-dcl-go-name: Path
-                  x-kubernetes-immutable: true
                 region:
                   description: Required. The region the Cloud Run service is deployed
                     in.
                   type: string
                   x-dcl-go-name: Region
-                  x-kubernetes-immutable: true
                 service:
                   description: Required. The name of the Cloud run service being addressed
                     (see https://cloud.google.com/run/docs/reference/rest/v1/namespaces.services).
@@ -54,14 +52,12 @@ components:
                   x-dcl-references:
                   - field: selfLink
                     resource: Run/Service
-                  x-kubernetes-immutable: true
               required:
               - service
               - region
               type: object
               x-dcl-go-name: CloudRunService
               x-dcl-go-type: TriggerDestinationCloudRunService
-              x-kubernetes-immutable: true
           type: object
           x-dcl-go-name: Destination
           x-dcl-go-type: TriggerDestination
@@ -73,14 +69,21 @@ components:
           type: string
           x-dcl-go-name: Etag
           x-kubernetes-immutable: true
+        labels:
+          additionalProperties:
+            type: string
+          description: Optional. User labels attached to the triggers that can be
+            used to group resources.
+          type: object
+          x-dcl-go-name: Labels
         location:
           description: The location for the resource
           type: string
           x-dcl-go-name: Location
           x-kubernetes-immutable: true
         matchingCriteria:
-          description: Required. The criteria by which events are filtered. Only events
-            that match with this criteria will be sent to the destination.
+          description: Required. null The criteria by which events are filtered. Only
+            events that match with this criteria will be sent to the destination.
           items:
             properties:
               attribute:
@@ -89,12 +92,10 @@ components:
                   provide a matching criteria for the 'type' attribute.
                 type: string
                 x-dcl-go-name: Attribute
-                x-kubernetes-immutable: true
               value:
                 description: Required. The value for the attribute.
                 type: string
                 x-dcl-go-name: Value
-                x-kubernetes-immutable: true
             required:
             - attribute
             - value
@@ -105,7 +106,7 @@ components:
           x-dcl-list-type: set
         name:
           description: Required. The resource name of the trigger. Must be unique
-            within the location on the project and must be in \`projects/{project}/locations/{location}/triggers/{trigger}\`
+            within the location on the project and must be in \\\`projects/{project}/locations/{location}/triggers/{trigger}\\\`
             format.
           type: string
           x-dcl-go-name: Name
@@ -113,17 +114,21 @@ components:
           description: The project for the resource
           type: string
           x-dcl-go-name: Project
+          x-dcl-references:
+          - field: name
+            parent: true
+            resource: Cloudresourcemanager/Project
           x-kubernetes-immutable: true
         serviceAccount:
           description: Optional. The IAM service account email associated with the
             trigger. The service account represents the identity of the trigger. The
-            principal who calls this API must have \`iam.serviceAccounts.actAs\` permission
-            in the service account. See https://cloud.google.com/iam/docs/understanding-service-accounts?hl=en#sa\_common
+            principal who calls this API must have \\\`iam.serviceAccounts.actAs\\\`
+            permission in the service account. See https://cloud.google.com/iam/docs/understanding-service-accounts?hl=en#sa\\\_common
             for more information. For Cloud Run destinations, this service account
             is used to generate identity tokens when invoking the service. See https://cloud.google.com/run/docs/triggering/pubsub-push#create-service-account
             for information on how to invoke authenticated Cloud Run services. In
             order to create Audit Log triggers, the service account should also have
-            'eventarc.events.receiveAuditLogV1Written' permission.
+            \\\`roles/eventarc.eventReceiver\\\` IAM role.
           type: string
           x-dcl-go-name: ServiceAccount
           x-dcl-references:
@@ -142,30 +147,25 @@ components:
                 subscription:
                   description: 'Output only. The name of the Pub/Sub subscription
                     created and managed by Eventarc system as a transport for the
-                    event delivery. Format: \`projects/{PROJECT\_ID}/subscriptions/{SUBSCRIPTION\_NAME}\`.'
+                    event delivery. Format: \\\\\\\\\\`projects/{PROJECT\\\\\\\\\\_ID}/subscriptions/{SUBSCRIPTION\\\\\\\\\\_NAME}\\\\\\\\\\`.'
                   readOnly: true
                   type: string
                   x-dcl-go-name: Subscription
-                  x-kubernetes-immutable: true
                 topic:
                   description: 'Optional. The name of the Pub/Sub topic created and
                     managed by Eventarc system as a transport for the event delivery.
-                    Format: \`projects/{PROJECT\_ID}/topics/{TOPIC\_NAME}\`. You may
-                    set an existing topic for triggers of the type \`google.cloud.pubsub.topic.v1.messagePublished\`
+                    Format: \\\\\\\\\\`projects/{PROJECT\\\\\\\\\\_ID}/topics/{TOPIC\\\\\\\\\\_NAME}\\\\\\\\\\`.
+                    You may set an existing topic for triggers of the type \\\\\\\\\\`google.cloud.pubsub.topic.v1.messagePublished\\\\\\\\\\`
                     only. The topic you provide here will not be deleted by Eventarc
                     at trigger deletion.'
                   type: string
                   x-dcl-go-name: Topic
-                  x-kubernetes-immutable: true
               type: object
               x-dcl-go-name: Pubsub
               x-dcl-go-type: TriggerTransportPubsub
-              x-kubernetes-immutable: true
-          readOnly: true
           type: object
           x-dcl-go-name: Transport
           x-dcl-go-type: TriggerTransport
-          x-kubernetes-immutable: true
         updateTime:
           description: Output only. The last-modified time.
           format: date-time
@@ -182,6 +182,7 @@ components:
       title: Trigger
       type: object
       x-dcl-id: projects/{{project}}/locations/{{location}}/triggers/{{name}}
+      x-dcl-labels: labels
       x-dcl-locations: []
       x-dcl-parent-container: project
       x-dcl-uses-state-hint: false
@@ -190,10 +191,43 @@ info:
   title: Eventarc/Trigger
   x-dcl-has-iam: false
 paths:
-  list:
-    description: The function called used to list information about many Trigger
+  apply:
+    description: The function used to apply information about a Trigger
+    parameters:
+    - description: A full instance of a Trigger
+      name: Trigger
+      required: true
+  delete:
+    description: The function used to delete a Trigger
+    parameters:
+    - description: A full instance of a Trigger
+      name: Trigger
+      required: true
+  deleteAll:
+    description: The function used to delete all Trigger
     parameters:
     - name: project
       required: true
+      schema:
+        type: string
     - name: location
       required: true
+      schema:
+        type: string
+  get:
+    description: The function used to get information about a Trigger
+    parameters:
+    - description: A full instance of a Trigger
+      name: Trigger
+      required: true
+  list:
+    description: The function used to list information about many Trigger
+    parameters:
+    - name: project
+      required: true
+      schema:
+        type: string
+    - name: location
+      required: true
+      schema:
+        type: string
