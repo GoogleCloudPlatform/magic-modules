@@ -107,6 +107,9 @@ func GetStorageBucketApiObject(d TerraformResourceData, config *Config) (map[str
 }
 
 func expandCors(configured []interface{}) []*storage.BucketCors {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
 	corsRules := make([]*storage.BucketCors, 0, len(configured))
 	for _, raw := range configured {
 		data := raw.(map[string]interface{})
@@ -156,7 +159,7 @@ func expandBucketLogging(configured interface{}) *storage.BucketLogging {
 
 func expandBucketVersioning(configured interface{}) *storage.BucketVersioning {
 	versionings := configured.([]interface{})
-	if len(versionings) == 0 {
+	if len(versionings) == 0 || versionings[0] == nil  {
 		return nil
 	}
 
