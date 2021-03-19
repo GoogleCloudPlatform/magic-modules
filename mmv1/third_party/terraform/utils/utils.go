@@ -481,14 +481,6 @@ func SnakeToPascalCase(s string) string {
 	return strings.Join(split, "")
 }
 
-func checkStringMap(v interface{}) map[string]string {
-	m, ok := v.(map[string]string)
-	if ok {
-		return m
-	}
-	return convertStringMap(v.(map[string]interface{}))
-}
-
 func multiEnvSearch(ks []string) string {
 	for _, k := range ks {
 		if v := os.Getenv(k); v != "" {
@@ -496,4 +488,12 @@ func multiEnvSearch(ks []string) string {
 		}
 	}
 	return ""
+}
+
+func checkStringMap(v interface{}) map[string]string {
+	m, ok := v.(map[string]string)
+	if ok {
+		return m
+	}
+	return convertStringMap(v.(map[string]interface{}))
 }
