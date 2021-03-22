@@ -29,26 +29,18 @@ func TestAccRuntimeconfigVariableDatasource_basic(t *testing.T) {
 
 func testAccRuntimeconfigDatasourceVariable(suffix string, name string, text string) string {
 	return fmt.Sprintf(`
-	resource "google_project_service" "default" {
-		service = "runtimeconfig.googleapis.com"
-	}
-
 	resource "google_runtimeconfig_config" "default" {
-		project     = google_project_service.default.project
 		name        = "runtime-%s"
 		description = "runtime-%s"
-		depends_on  = [ google_project_service.default ]
 	}
 
 	resource "google_runtimeconfig_variable" "default" {
-		project = google_project_service.default.project
 		parent  = google_runtimeconfig_config.default.name
 		name    = "%s"
 		text    = "%s"
 	}
 
 	data "google_runtimeconfig_variable" "default" {
-		project = google_project_service.default.project
 		name    = google_runtimeconfig_variable.default.name
 		parent  = google_runtimeconfig_config.default.name
 	}

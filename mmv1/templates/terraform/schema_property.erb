@@ -177,6 +177,9 @@
 <% unless property.exactly_one_of_list().empty? -%>
     ExactlyOneOf: <%= go_literal(property.exactly_one_of_list.map {|sp| get_property_schema_path(sp, object) }.compact) -%>,
 <% end -%>
+<% unless property.required_with_list().empty? -%>
+    RequiredWith: <%= go_literal(property.required_with_list.map {|sp| get_property_schema_path(sp, object) }.compact) -%>,
+<% end -%>
 },
 <% else -%>
   // TODO: Property '<%= property.name -%>' of type <%= property.class -%> is not supported

@@ -1,6 +1,6 @@
 package google
 
-import "github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 // compareTpuNodeSchedulingConfig diff suppresses for the default
 // scheduling, i.e. if preemptible is false, the API may either return no

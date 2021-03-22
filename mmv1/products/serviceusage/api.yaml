@@ -38,7 +38,7 @@ objects:
     delete_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/{{name}}
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
-        'Getting Started': 'https://cloud.google.com/service-usage/docs/getting-started'
+        'Getting Started': 'https://cloud.google.com/service-usage/docs/manage-quota#create_consumer_quota_override'
         'REST API documentation': 'https://cloud.google.com/service-usage/docs/reference/rest/v1beta1/services.consumerQuotaMetrics.limits.adminOverrides'
     nested_query: !ruby/object:Api::Resource::NestedQuery
       kind: 'serviceusage#overridesList'

@@ -8,15 +8,21 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
-func GetProjectCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
-	// NOTE: asset.name should use the project number, but we use project_id b/c
-	// the number is computed server-side.
-	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project_id_or_project}}")
+func GetProjectCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+	// use project number if it's available; otherwise, fill in project id so that we
+	// keep the CAI assets apart for different uncreated projects.
+	var linkTmpl string
+	if _, ok := d.GetOk("number"); ok {
+		linkTmpl = "//cloudresourcemanager.googleapis.com/projects/{{number}}"
+	} else {
+		linkTmpl = "//cloudresourcemanager.googleapis.com/projects/{{project_id_or_project}}"
+	}
+	name, err := assetName(d, config, linkTmpl)
 	if err != nil {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 	if obj, err := GetProjectApiObject(d, config); err == nil {
-		return Asset{
+		return []Asset{{
 			Name: name,
 			Type: "cloudresourcemanager.googleapis.com/Project",
 			Resource: &AssetResource{
@@ -25,9 +31,9 @@ func GetProjectCaiObject(d TerraformResourceData, config *Config) (Asset, error)
 				DiscoveryName:        "Project",
 				Data:                 obj,
 			},
-		}, nil
+		}}, nil
 	} else {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 }
 
@@ -75,13 +81,21 @@ func getParentResourceId(d TerraformResourceData, p *cloudresourcemanager.Projec
 	return nil
 }
 
-func GetProjectBillingInfoCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
-	name, err := assetName(d, config, "//cloudbilling.googleapis.com/projects/{{project_id_or_project}}/billingInfo")
+func GetProjectBillingInfoCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+	// use project number if it's available; otherwise, fill in project id so that we
+	// keep the CAI assets apart for different uncreated projects.
+	var linkTmpl string
+	if _, ok := d.GetOk("number"); ok {
+		linkTmpl = "//cloudbilling.googleapis.com/projects/{{number}}/billingInfo"
+	} else {
+		linkTmpl = "//cloudbilling.googleapis.com/projects/{{project_id_or_project}}/billingInfo"
+	}
+	name, err := assetName(d, config, linkTmpl)
 	if err != nil {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 	if obj, err := GetProjectBillingInfoApiObject(d, config); err == nil {
-		return Asset{
+		return []Asset{{
 			Name: name,
 			Type: "cloudbilling.googleapis.com/ProjectBillingInfo",
 			Resource: &AssetResource{
@@ -89,10 +103,10 @@ func GetProjectBillingInfoCaiObject(d TerraformResourceData, config *Config) (As
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/cloudbilling/v1/rest",
 				DiscoveryName:        "ProjectBillingInfo",
 				Data:                 obj,
-			},
+			}},
 		}, nil
 	} else {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 }
 
@@ -103,9 +117,16 @@ func GetProjectBillingInfoApiObject(d TerraformResourceData, config *Config) (ma
 		return nil, ErrNoConversion
 	}
 
+	var name string
+	if number, ok := d.GetOk("number"); ok {
+		name = fmt.Sprintf("projects/%s/billingInfo", number)
+	} else {
+		name = fmt.Sprintf("projects/%s/billingInfo", d.Get("project_id"))
+	}
+
 	ba := &cloudbilling.ProjectBillingInfo{
 		BillingAccountName: fmt.Sprintf("billingAccounts/%s", d.Get("billing_account")),
-		Name:               fmt.Sprintf("projects/%s/billingInfo", d.Get("project_id")),
+		Name:               name,
 		ProjectId:          d.Get("project_id").(string),
 	}
 

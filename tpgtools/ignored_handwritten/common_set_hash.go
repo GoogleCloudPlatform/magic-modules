@@ -6,8 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform/helper/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceComputeFirewallRuleHash(v interface{}) int {
@@ -26,7 +25,7 @@ func resourceComputeFirewallRuleHash(v interface{}) int {
 		}
 	}
 
-	return hashcode.String(buf.String())
+	return hashcode(buf.String())
 }
 func resourceDNSManagedZoneNetworkHash(v interface{}) int {
 	if v == nil {
@@ -38,7 +37,7 @@ func resourceDNSManagedZoneNetworkHash(v interface{}) int {
 	}
 	var buf bytes.Buffer
 	schema.SerializeResourceForHash(&buf, raw, DnsManagedZonePrivateVisibilityConfigNetworksSchema())
-	return hashcode.String(buf.String())
+	return hashcode(buf.String())
 }
 
 func resourceSourceRepoRepositoryPubSubConfigsHash(v interface{}) int {
@@ -55,5 +54,5 @@ func resourceSourceRepoRepositoryPubSubConfigsHash(v interface{}) int {
 		buf.WriteString(fmt.Sprintf("%s-", v.(string)))
 	}
 
-	return hashcode.String(buf.String())
+	return hashcode(buf.String())
 }

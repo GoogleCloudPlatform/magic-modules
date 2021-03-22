@@ -121,6 +121,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       autoscalingPolicy.cpuUtilization.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
         name: target
         required: true # See comment for minReplicas
+      autoscalingPolicy.cpuUtilization.predictiveMethod: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       autoscalingPolicy.customMetricUtilizations: !ruby/object:Overrides::Terraform::PropertyOverride
         name: metric
       autoscalingPolicy.customMetricUtilizations.metric: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -478,6 +480,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           If you specify this field along with `image` or `snapshot`,
           the value must not be less than the size of the image
           or the size of the snapshot.
+
+          ~>**NOTE** If you change the size, Terraform updates the disk size
+          if upsizing is detected but recreates the disk if downsizing is requested.
+          You can add `lifecycle.prevent_destroy` in the config to prevent destroying
+          and recreating.
       sourceSnapshot: !ruby/object:Overrides::Terraform::PropertyOverride
         name: snapshot
         description: |
@@ -1129,6 +1136,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       edgeAvailabilityDomain: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      mtu: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/interconnect_attachment.go.erb
       post_create: templates/terraform/post_create/interconnect_attachment.go.erb
@@ -1399,7 +1408,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           template_name: "soletenant-tmpl"
       - !ruby/object:Provider::Terraform::Examples
         name: "node_template_server_binding"
-        min_version: beta
         primary_resource_id: "template"
         vars:
           template_name: "soletenant-with-licenses"
@@ -1693,6 +1701,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       autoscalingPolicy.cpuUtilization.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
         name: target
         required: true # See comment for minReplicas
+      autoscalingPolicy.cpuUtilization.predictiveMethod: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       autoscalingPolicy.customMetricUtilizations: !ruby/object:Overrides::Terraform::PropertyOverride
         name: metric
       autoscalingPolicy.customMetricUtilizations.metric: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -2098,6 +2108,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validateRFC1035Name(2, 63)'
       natIps: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
+        set_hash_func: computeRouterNatIPsHash
       drainNatIps: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
       subnetwork: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -2505,6 +2516,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
+      proxyBind: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   TargetHttpsProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -2522,6 +2535,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       quicOverride: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: :NONE
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+      proxyBind: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   RegionTargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -2642,6 +2657,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: backendService
       proxyHeader: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: :NONE
+      proxyBind: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   TargetVpnGateway: !ruby/object:Overrides::Terraform::ResourceOverride
     name: 'VpnGateway'
     docs: !ruby/object:Provider::Terraform::Docs

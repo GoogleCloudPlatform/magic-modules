@@ -388,6 +388,16 @@ objects:
                 scales up until it reaches the maximum number of instances you
                 specified or until the average utilization reaches the target
                 utilization.
+            - !ruby/object:Api::Type::String
+              name: 'predictiveMethod'
+              min_version: beta
+              default_value: NONE
+              description: |
+                Indicates whether predictive autoscaling based on CPU metric is enabled. Valid values are:
+
+                - NONE (default). No predictive method is used. The autoscaler scales the group to meet current demand based on real-time metrics.
+
+                - OPTIMIZE_AVAILABILITY. Predictive autoscaling improves availability by monitoring daily and weekly load patterns and scaling out ahead of anticipated demand.
           - !ruby/object:Api::Type::Array
             name: 'customMetricUtilizations'
             description: |
@@ -509,7 +519,7 @@ objects:
                 - !ruby/object:Api::Type::String
                   name: 'schedule'
                   description: |
-                    The start timestamps of time intervals when this scaling schedule should provide a scaling signal. This field uses the extended cron format (with an optional year field). 
+                    The start timestamps of time intervals when this scaling schedule should provide a scaling signal. This field uses the extended cron format (with an optional year field).
                   required: true
                 - !ruby/object:Api::Type::String
                   name: 'timeZone'
@@ -524,7 +534,7 @@ objects:
                 - !ruby/object:Api::Type::Boolean
                   name: 'disabled'
                   description: |
-                    A boolean value that specifies if a scaling schedule can influence autoscaler recommendations. If set to true, then a scaling schedule has no effect. 
+                    A boolean value that specifies if a scaling schedule can influence autoscaler recommendations. If set to true, then a scaling schedule has no effect.
                   default_value: false
                 - !ruby/object:Api::Type::String
                   name: 'description'
@@ -597,7 +607,7 @@ objects:
           name: 'defaultTtl'
           min_version: beta
           description: |
-            Specifies the default TTL for cached content served by this origin for responses 
+            Specifies the default TTL for cached content served by this origin for responses
             that do not have an existing valid TTL (max-age or s-max-age).
         - !ruby/object:Api::Type::Integer
           name: 'maxTtl'
@@ -648,7 +658,7 @@ objects:
           name: 'serveWhileStale'
           min_version: beta
           description: |
-            Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache. 
+            Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
 
       - !ruby/object:Api::Type::Array
         name: 'customResponseHeaders'
@@ -1199,7 +1209,7 @@ objects:
             name: 'defaultTtl'
             min_version: beta
             description: |
-              Specifies the default TTL for cached content served by this origin for responses 
+              Specifies the default TTL for cached content served by this origin for responses
               that do not have an existing valid TTL (max-age or s-max-age).
           - !ruby/object:Api::Type::Integer
             name: 'maxTtl'
@@ -1250,7 +1260,7 @@ objects:
             name: 'serveWhileStale'
             min_version: beta
             description: |
-              Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache. 
+              Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
       - !ruby/object:Api::Type::NestedObject
         name: 'connectionDraining'
         description: |
@@ -2179,7 +2189,7 @@ objects:
             name: 'defaultTtl'
             min_version: beta
             description: |
-              Specifies the default TTL for cached content served by this origin for responses 
+              Specifies the default TTL for cached content served by this origin for responses
               that do not have an existing valid TTL (max-age or s-max-age).
           - !ruby/object:Api::Type::Integer
             name: 'maxTtl'
@@ -2230,7 +2240,7 @@ objects:
             name: 'serveWhileStale'
             min_version: beta
             description: |
-              Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache. 
+              Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
 
       - !ruby/object:Api::Type::NestedObject
         name: 'connectionDraining'
@@ -2317,7 +2327,7 @@ objects:
         description: |
            The set of URLs to HealthCheck resources for health checking
            this RegionBackendService. Currently at most one health
-           check can be specified. 
+           check can be specified.
 
            A health check must be specified unless the backend service uses an internet
            or serverless NEG as a backend.
@@ -3165,7 +3175,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'kmsKeyServiceAccount'
             description: |
-              The service account used for the encryption request for the given KMS key. 
+              The service account used for the encryption request for the given KMS key.
               If absent, the Compute Engine Service Agent service account is used.
         input: true
       - !ruby/object:Api::Type::String
@@ -5178,8 +5188,8 @@ objects:
                 - grpc_health_check.0.port_specification
                 - grpc_health_check.0.grpc_service_name
               description: |
-                The port number for the health check request. 
-                Must be specified if portName and portSpecification are not set 
+                The port number for the health check request.
+                Must be specified if portName and portSpecification are not set
                 or if port_specification is USE_FIXED_PORT. Valid values are 1 through 65535.
             - !ruby/object:Api::Type::String
               name: 'portName'
@@ -5225,7 +5235,7 @@ objects:
                 - grpc_health_check.0.port_specification
                 - grpc_health_check.0.grpc_service_name
               description: |
-                The gRPC service name for the health check. 
+                The gRPC service name for the health check.
                 The value of grpcServiceName has the following meanings by convention:
                   - Empty serviceName means the overall status of all services at the backend.
                   - Non-empty serviceName means the health of that gRPC service, as defined by the owner of the service.
@@ -7338,6 +7348,11 @@ objects:
         name: 'description'
         description: |
           An optional description of this resource.
+      - !ruby/object:Api::Type::String
+        name: 'mtu'
+        description: |
+          Maximum Transmission Unit (MTU), in bytes, of packets passing through
+          this interconnect attachment. Currently, only 1440 and 1500 are allowed. If not specified, the value will default to 1440.
       - !ruby/object:Api::Type::Enum
         name: 'bandwidth'
         description: |
@@ -7573,7 +7588,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'kmsKeyServiceAccount'
             description: |
-              The service account used for the encryption request for the given KMS key. 
+              The service account used for the encryption request for the given KMS key.
               If absent, the Compute Engine Service Agent service account is used.
   - !ruby/object:Api::Resource
     name: 'MachineType'
@@ -8249,7 +8264,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'service'
-            at_least_one_of: 
+            at_least_one_of:
               - cloud_run.0.service
               - cloud_run.0.url_mask
             description: |
@@ -8265,18 +8280,18 @@ objects:
               Example value: "revision-0010".
           - !ruby/object:Api::Type::String
             name: 'urlMask'
-            at_least_one_of: 
+            at_least_one_of:
               - cloud_run.0.service
               - cloud_run.0.url_mask
             description: |
-              A template to parse service and tag fields from a request URL. 
-              URL mask allows for routing to multiple Run services without having 
+              A template to parse service and tag fields from a request URL.
+              URL mask allows for routing to multiple Run services without having
               to create multiple network endpoint groups and backend services.
 
-              For example, request URLs "foo1.domain.com/bar1" and "foo1.domain.com/bar2" 
-              an be backed by the same Serverless Network Endpoint Group (NEG) with 
-              URL mask ".domain.com/". The URL mask will parse them to { service="bar1", tag="foo1" } 
-              and { service="bar2", tag="foo2" } respectively. 
+              For example, request URLs "foo1.domain.com/bar1" and "foo1.domain.com/bar2"
+              an be backed by the same Serverless Network Endpoint Group (NEG) with
+              URL mask ".domain.com/". The URL mask will parse them to { service="bar1", tag="foo1" }
+              and { service="bar2", tag="foo2" } respectively.
       - !ruby/object:Api::Type::NestedObject
         name: 'appEngine'
         exactly_one_of:
@@ -8306,7 +8321,7 @@ objects:
               A template to parse service and version fields from a request URL.
               URL mask allows for routing to multiple App Engine services without
               having to create multiple Network Endpoint Groups and backend services.
-              
+
               For example, the request URLs "foo1-dot-appname.appspot.com/v1" and
               "foo1-dot-appname.appspot.com/v2" can be backed by the same Serverless NEG with
               URL mask "-dot-appname.appspot.com/". The URL mask will parse
@@ -8323,7 +8338,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'function'
-            at_least_one_of: 
+            at_least_one_of:
               - cloud_function.0.function
               - cloud_function.0.url_mask
             description: |
@@ -8332,7 +8347,7 @@ objects:
               Example value: "func1".
           - !ruby/object:Api::Type::String
             name: 'urlMask'
-            at_least_one_of: 
+            at_least_one_of:
               - cloud_function.0.function
               - cloud_function.0.url_mask
             description: |
@@ -8614,7 +8629,6 @@ objects:
             output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'serverBinding'
-        min_version: beta
         description: |
           The server binding policy for nodes using this template. Determines
           where the nodes should restart following a maintenance event.
@@ -8642,7 +8656,6 @@ objects:
         name: 'cpuOvercommitType'
         description: |
           CPU overcommit.
-        min_version: beta
         values:
           - :ENABLED
           - :NONE
@@ -8847,7 +8860,7 @@ objects:
                       is only applicable for UDP or TCP protocol. Each entry must be
                       either an integer or a range. If not specified, this rule
                       applies to connections through any port.
-                      
+
                       Example inputs include: ["22"], ["80","443"], and
                       ["12345-12349"].
       - !ruby/object:Api::Type::String
@@ -9661,6 +9674,16 @@ objects:
                 scales up until it reaches the maximum number of instances you
                 specified or until the average utilization reaches the target
                 utilization.
+            - !ruby/object:Api::Type::String
+              name: 'predictiveMethod'
+              min_version: beta
+              default_value: NONE
+              description: |
+                Indicates whether predictive autoscaling based on CPU metric is enabled. Valid values are:
+
+                - NONE (default). No predictive method is used. The autoscaler scales the group to meet current demand based on real-time metrics.
+
+                - OPTIMIZE_AVAILABILITY. Predictive autoscaling improves availability by monitoring daily and weekly load patterns and scaling out ahead of anticipated demand.
           - !ruby/object:Api::Type::Array
             name: 'customMetricUtilizations'
             description: |
@@ -9782,7 +9805,7 @@ objects:
                 - !ruby/object:Api::Type::String
                   name: 'schedule'
                   description: |
-                    The start timestamps of time intervals when this scaling schedule should provide a scaling signal. This field uses the extended cron format (with an optional year field). 
+                    The start timestamps of time intervals when this scaling schedule should provide a scaling signal. This field uses the extended cron format (with an optional year field).
                   required: true
                 - !ruby/object:Api::Type::String
                   name: 'timeZone'
@@ -9797,7 +9820,7 @@ objects:
                 - !ruby/object:Api::Type::Boolean
                   name: 'disabled'
                   description: |
-                    A boolean value that specifies if a scaling schedule can influence autoscaler recommendations. If set to true, then a scaling schedule has no effect. 
+                    A boolean value that specifies if a scaling schedule can influence autoscaler recommendations. If set to true, then a scaling schedule has no effect.
                   default_value: false
                 - !ruby/object:Api::Type::String
                   name: 'description'
@@ -10945,14 +10968,14 @@ objects:
                           The HTTP Status code to use for this RedirectAction. Supported values are:
 
                           * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-                          
+
                           * FOUND, which corresponds to 302.
-                          
+
                           * SEE_OTHER which corresponds to 303.
-                          
+
                           * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
                           will be retained.
-                          
+
                           * PERMANENT_REDIRECT, which corresponds to 308. In this case,
                           the request method will be retained.
                         skip_docs_values: true
@@ -11371,14 +11394,14 @@ objects:
                           The HTTP Status code to use for this RedirectAction. Supported values are:
 
                           * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-                          
+
                           * FOUND, which corresponds to 302.
-                          
+
                           * SEE_OTHER which corresponds to 303.
-                          
+
                           * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
                           will be retained.
-                          
+
                           * PERMANENT_REDIRECT, which corresponds to 308. In this case,
                           the request method will be retained.
                         skip_docs_values: true
@@ -11438,16 +11461,16 @@ objects:
                   name: 'redirectResponseCode'
                   description: |
                     The HTTP Status code to use for this RedirectAction. Supported values are:
-                    
+
                     * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-                    
+
                     * FOUND, which corresponds to 302.
-                    
+
                     * SEE_OTHER which corresponds to 303.
-                    
+
                     * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
                     will be retained.
-                    
+
                     * PERMANENT_REDIRECT, which corresponds to 308. In this case,
                     the request method will be retained.
                   skip_docs_values: true
@@ -11533,16 +11556,16 @@ objects:
             name: 'redirectResponseCode'
             description: |
               The HTTP Status code to use for this RedirectAction. Supported values are:
-              
+
               * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
 
               * FOUND, which corresponds to 302.
 
               * SEE_OTHER which corresponds to 303.
-              
+
               * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
               will be retained.
-              
+
               * PERMANENT_REDIRECT, which corresponds to 308. In this case,
               the request method will be retained.
             skip_docs_values: true
@@ -12273,8 +12296,8 @@ objects:
                 - grpc_health_check.0.port_specification
                 - grpc_health_check.0.grpc_service_name
               description: |
-                The port number for the health check request. 
-                Must be specified if portName and portSpecification are not set 
+                The port number for the health check request.
+                Must be specified if portName and portSpecification are not set
                 or if port_specification is USE_FIXED_PORT. Valid values are 1 through 65535.
             - !ruby/object:Api::Type::String
               name: 'portName'
@@ -12320,7 +12343,7 @@ objects:
                 - grpc_health_check.0.port_specification
                 - grpc_health_check.0.grpc_service_name
               description: |
-                The gRPC service name for the health check. 
+                The gRPC service name for the health check.
                 The value of grpcServiceName has the following meanings by convention:
 
                 * Empty serviceName means the overall status of all services at the backend.
@@ -12523,6 +12546,7 @@ objects:
                 item_type: Api::Type::String
               - !ruby/object:Api::Type::Boolean
                 name: 'guestFlush'
+                send_empty_value: true
                 at_least_one_of:
                   - snapshot_schedule_policy.0.snapshot_properties.0.labels
                   - snapshot_schedule_policy.0.snapshot_properties.0.storage_locations
@@ -14179,13 +14203,10 @@ objects:
           Only networks that are in the distributed mode can have subnetworks.
         input: true
         required: true
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'purpose'
         min_version: beta
         input: true
-        values:
-          - :INTERNAL_HTTPS_LOAD_BALANCER
-          - :PRIVATE
         description: |
           The purpose of the resource. This field can be either PRIVATE
           or INTERNAL_HTTPS_LOAD_BALANCER. A subnetwork with purpose set to
@@ -14193,7 +14214,7 @@ objects:
           reserved for Internal HTTP(S) Load Balancing. If unspecified, the
           purpose defaults to PRIVATE.
 
-          If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set the role.
+          If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set `role`.
       - !ruby/object:Api::Type::Enum
         name: 'role'
         min_version: beta
@@ -14250,7 +14271,7 @@ objects:
         name: 'privateIpv6GoogleAccess'
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
-        description: The private IPv6 google access type for the VMs in this subnet. 
+        description: The private IPv6 google access type for the VMs in this subnet.
         fingerprint_name: 'fingerprint'
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
@@ -14415,6 +14436,11 @@ objects:
         required: true
         update_verb: :POST
         update_url: 'projects/{{project}}/targetHttpProxies/{{name}}/setUrlMap'
+      - !ruby/object:Api::Type::Boolean
+        name: 'proxyBind'
+        description: |
+          This field only applies when the forwarding rule that references
+          this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
   - !ruby/object:Api::Resource
     name: 'TargetHttpsProxy'
     kind: 'compute#targetHttpsProxy'
@@ -14523,6 +14549,11 @@ objects:
         required: true
         update_verb: :POST
         update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setUrlMap'
+      - !ruby/object:Api::Type::Boolean
+        name: 'proxyBind'
+        description: |
+          This field only applies when the forwarding rule that references
+          this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
   - !ruby/object:Api::Resource
     name: 'RegionTargetHttpProxy'
     kind: 'compute#targetHttpProxy'
@@ -15027,11 +15058,10 @@ objects:
         update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setBackendService'
       - !ruby/object:Api::Type::Array
         name: 'sslCertificates'
-        max_size: 1
         description: |
           A list of SslCertificate resources that are used to authenticate
-          connections between users and the load balancer. Currently, exactly
-          one SSL certificate must be specified.
+          connections between users and the load balancer. At least one
+          SSL certificate must be specified.
         required: true
         update_verb: :POST
         update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setSslCertificates'
@@ -15129,6 +15159,11 @@ objects:
         required: true
         update_verb: :POST
         update_url: 'projects/{{project}}/global/targetTcpProxies/{{name}}/setBackendService'
+      - !ruby/object:Api::Type::Boolean
+        name: 'proxyBind'
+        description: |
+          This field only applies when the forwarding rule that references
+          this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
   - !ruby/object:Api::Resource
     name: 'TargetVpnGateway'
     kind: 'compute#targetVpnGateway'
@@ -16775,7 +16810,7 @@ objects:
                           * FOUND, which corresponds to 302.
 
                           * SEE_OTHER which corresponds to 303.
-                          
+
                           * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method will be retained.
 
                           * PERMANENT_REDIRECT, which corresponds to 308. In this case, the request method will be retained.
@@ -16839,16 +16874,16 @@ objects:
                   name: 'redirectResponseCode'
                   description: |
                     The HTTP Status code to use for this RedirectAction. Supported values are:
-                    
+
                     * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-                    
+
                     * FOUND, which corresponds to 302.
-                    
+
                     * SEE_OTHER which corresponds to 303.
-                    
+
                     * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
                     will be retained.
-                    
+
                     * PERMANENT_REDIRECT, which corresponds to 308. In this case,
                     the request method will be retained.
                   skip_docs_values: true
@@ -17252,14 +17287,14 @@ objects:
               The HTTP Status code to use for this RedirectAction. Supported values are:
 
               * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-              
+
               * FOUND, which corresponds to 302.
-              
+
               * SEE_OTHER which corresponds to 303.
-              
+
               * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
               will be retained.
-              
+
               * PERMANENT_REDIRECT, which corresponds to 308. In this case,
               the request method will be retained.
             skip_docs_values: true

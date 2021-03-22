@@ -1,5 +1,3 @@
-// <% autogen_exception -%>
-
 package google
 
 import (
@@ -9,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -20,7 +19,6 @@ import (
 	"github.com/mitchellh/hashstructure"
 	computeBeta "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/compute/v1"
-	"google.golang.org/api/googleapi"
 )
 
 var (
@@ -46,9 +44,7 @@ var (
 		"scheduling.0.automatic_restart",
 		"scheduling.0.preemptible",
 		"scheduling.0.node_affinities",
-<% unless version == 'ga' -%>
 		"scheduling.0.min_node_cpus",
-<% end -%>
 	}
 
 	shieldedInstanceConfigKeys = []string{
@@ -297,15 +293,13 @@ func resourceComputeInstance() *schema.Resource {
 							Computed:    true,
 							Description: `The name of the interface`,
 						},
-<% unless version == 'ga' -%>
 						"nic_type": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:         schema.TypeString,
+							Optional:     true,
 							ForceNew:     true,
 							ValidateFunc: validation.StringInSlice([]string{"GVNIC", "VIRTIO_NET"}, false),
 							Description:  `The type of vNIC to be used on this interface. Possible values:GVNIC, VIRTIO_NET`,
 						},
-<% end -%>
 						"access_config": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -554,13 +548,11 @@ func resourceComputeInstance() *schema.Resource {
 							DiffSuppressFunc: emptyOrDefaultStringSuppress(""),
 							Description:      `Specifies node affinities or anti-affinities to determine which sole-tenant nodes your instances and managed instance groups will use as host systems.`,
 						},
-<% unless version == 'ga' -%>
 						"min_node_cpus": {
-							Type:             schema.TypeInt,
-							Optional:         true,
-							AtLeastOneOf:     schedulingKeys,
+							Type:         schema.TypeInt,
+							Optional:     true,
+							AtLeastOneOf: schedulingKeys,
 						},
-<% end -%>
 					},
 				},
 			},
@@ -650,18 +642,18 @@ func resourceComputeInstance() *schema.Resource {
 				},
 			},
 			"confidential_instance_config": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
 				Description: `The Confidential VM config being used by the instance.  on_host_maintenance has to be set to TERMINATE or this will fail to create.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enable_confidential_compute": {
-							Type:         schema.TypeBool,
-							Required:     true,
-							Description:  `Defines whether the instance should have confidential compute enabled.`,
+							Type:        schema.TypeBool,
+							Required:    true,
+							Description: `Defines whether the instance should have confidential compute enabled.`,
 						},
 					},
 				},
@@ -865,26 +857,26 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *Confi
 
 	// Create the instance information
 	return &computeBeta.Instance{
-		CanIpForward:       d.Get("can_ip_forward").(bool),
-		Description:        d.Get("description").(string),
-		Disks:              disks,
-		MachineType:        machineTypeUrl,
-		Metadata:           metadata,
-		Name:               d.Get("name").(string),
-		NetworkInterfaces:  networkInterfaces,
-		Tags:               resourceInstanceTags(d),
-		Labels:             expandLabels(d),
-		ServiceAccounts:    expandServiceAccounts(d.Get("service_account").([]interface{})),
-		GuestAccelerators:  accels,
-		MinCpuPlatform:     d.Get("min_cpu_platform").(string),
-		Scheduling:         scheduling,
-		DeletionProtection: d.Get("deletion_protection").(bool),
-		Hostname:           d.Get("hostname").(string),
-		ForceSendFields:    []string{"CanIpForward", "DeletionProtection"},
-		ConfidentialInstanceConfig:  expandConfidentialInstanceConfig(d),
-		ShieldedInstanceConfig:   expandShieldedVmConfigs(d),
-		DisplayDevice:      expandDisplayDevice(d),
-		ResourcePolicies:   convertStringArr(d.Get("resource_policies").([]interface{})),
+		CanIpForward:               d.Get("can_ip_forward").(bool),
+		Description:                d.Get("description").(string),
+		Disks:                      disks,
+		MachineType:                machineTypeUrl,
+		Metadata:                   metadata,
+		Name:                       d.Get("name").(string),
+		NetworkInterfaces:          networkInterfaces,
+		Tags:                       resourceInstanceTags(d),
+		Labels:                     expandLabels(d),
+		ServiceAccounts:            expandServiceAccounts(d.Get("service_account").([]interface{})),
+		GuestAccelerators:          accels,
+		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
+		Scheduling:                 scheduling,
+		DeletionProtection:         d.Get("deletion_protection").(bool),
+		Hostname:                   d.Get("hostname").(string),
+		ForceSendFields:            []string{"CanIpForward", "DeletionProtection"},
+		ConfidentialInstanceConfig: expandConfidentialInstanceConfig(d),
+		ShieldedInstanceConfig:     expandShieldedVmConfigs(d),
+		DisplayDevice:              expandDisplayDevice(d),
+		ResourcePolicies:           convertStringArr(d.Get("resource_policies").([]interface{})),
 	}, nil
 }
 
@@ -1382,7 +1374,6 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Instance had unexpected number of network interfaces: %d", len(instance.NetworkInterfaces))
 	}
 
-
 	var updatesToNIWhileStopped []func(inst *computeBeta.Instance) error
 	for i := 0; i < len(networkInterfaces); i++ {
 		prefix := fmt.Sprintf("network_interface.%d", i)
@@ -1477,7 +1468,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 			networkInterfacePatchObj := &computeBeta.NetworkInterface{
 				AliasIpRanges: networkInterface.AliasIpRanges,
-				Fingerprint: instNetworkInterface.Fingerprint,
+				Fingerprint:   instNetworkInterface.Fingerprint,
 			}
 			updateCall := config.NewComputeBetaClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
 			op, err := updateCall()
