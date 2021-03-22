@@ -7348,7 +7348,7 @@ objects:
         name: 'description'
         description: |
           An optional description of this resource.
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Integer
         name: 'mtu'
         description: |
           Maximum Transmission Unit (MTU), in bytes, of packets passing through
