@@ -166,6 +166,11 @@ objects:
           true, all Data Fusion nodes will have private IP addresses and will not be
           able to access the public internet.
         input: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'dataprocServiceAccount'
+        description: |
+          User-managed service account to set on Dataproc when Cloud Data Fusion creates Dataproc to run data processing pipelines.
+        input: true
       - !ruby/object:Api::Type::NestedObject
         name: 'networkConfig'
         description: |
