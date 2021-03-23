@@ -23,8 +23,16 @@ func MergeOrganizationIamBinding(existing, incoming Asset) Asset {
 	return mergeIamAssets(existing, incoming, mergeAuthoritativeBindings)
 }
 
+func MergeOrganizationIamBindingDelete(existing, incoming Asset) Asset {
+	return mergeDeleteIamAssets(existing, incoming, mergeDeleteAuthoritativeBindings)
+}
+
 func MergeOrganizationIamMember(existing, incoming Asset) Asset {
 	return mergeIamAssets(existing, incoming, mergeAdditiveBindings)
+}
+
+func MergeOrganizationIamMemberDelete(existing, incoming Asset) Asset {
+	return mergeDeleteIamAssets(existing, incoming, mergeDeleteAdditiveBindings)
 }
 
 func newOrganizationIamAsset(
@@ -49,4 +57,14 @@ func newOrganizationIamAsset(
 			Bindings: bindings,
 		},
 	}}, nil
+}
+
+func FetchOrganizationIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+	return fetchIamPolicy(
+		NewOrganizationIamUpdater,
+		d,
+		config,
+		"//cloudresourcemanager.googleapis.com/organizations/{{org_id}}",
+		"cloudresourcemanager.googleapis.com/Organization",
+	)
 }
