@@ -23,6 +23,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: "basic"
           cluster_name: "basiccluster"
+      - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
+        name: "gkehub_membership_issuer"
+        primary_resource_id: "issuer_membership"
+        vars:
+          name: "basic"
+          cluster_name: "basiccluster"
         test_env_vars:
           project: :PROJECT_NAME
     # Skip sweeper gen since this is a child resource.
