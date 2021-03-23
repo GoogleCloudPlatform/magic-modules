@@ -23,8 +23,16 @@ func MergeBucketIamBinding(existing, incoming Asset) Asset {
 	return mergeIamAssets(existing, incoming, mergeAuthoritativeBindings)
 }
 
+func MergeBucketIamBindingDelete(existing, incoming Asset) Asset {
+	return mergeDeleteIamAssets(existing, incoming, mergeDeleteAuthoritativeBindings)
+}
+
 func MergeBucketIamMember(existing, incoming Asset) Asset {
 	return mergeIamAssets(existing, incoming, mergeAdditiveBindings)
+}
+
+func MergeBucketIamMemberDelete(existing, incoming Asset) Asset {
+	return mergeDeleteIamAssets(existing, incoming, mergeDeleteAdditiveBindings)
 }
 
 func newBucketIamAsset(
@@ -49,4 +57,14 @@ func newBucketIamAsset(
 			Bindings: bindings,
 		},
 	}}, nil
+}
+
+func FetchBucketIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+	return fetchIamPolicy(
+		StorageBucketIamUpdaterProducer,
+		d,
+		config,
+		"//storage.googleapis.com/{{name}}",
+		"storage.googleapis.com/Bucket",
+	)
 }

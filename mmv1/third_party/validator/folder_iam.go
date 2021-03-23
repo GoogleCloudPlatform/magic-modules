@@ -61,7 +61,6 @@ func newFolderIamAsset(
 }
 
 func FetchFolderIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
-	// We use project_id in the asset name template to be consistent with newProjectIamAsset.
 	return fetchIamPolicy(
 		NewProjectIamUpdater,
 		d,
