@@ -62,7 +62,7 @@ resource "google_apigee_environment" "apigee_env" {
   org_id       = google_apigee_organization.apigee_org.id
   name         = "tf-test%{random_suffix}"
   description  = "Apigee Environment"
-display_name   = "tf-test%{random_suffix}"
+  display_name   = "tf-test%{random_suffix}"
 }
 
 resource "google_apigee_instance_attachment" "<%= ctx[:primary_resource_id] %>" {
