@@ -23,6 +23,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: "basic"
           cluster_name: "basiccluster"
+        test_env_vars:
+          project: :PROJECT_NAME
     # Skip sweeper gen since this is a child resource.
     skip_sweeper: true
     id_format: "{{name}}"
