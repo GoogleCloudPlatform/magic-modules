@@ -59,15 +59,15 @@ resource "google_apigee_instance" "apigee_instance" {
 }
 
 resource "google_apigee_environment" "apigee_env" {
-  org_id   = google_apigee_organization.apigee_org.id
+  org_id       = google_apigee_organization.apigee_org.id
   name         = "tf-test%{random_suffix}"
   description  = "Apigee Environment"
-  display_name = "environment-1"
+display_name   = "tf-test%{random_suffix}"
 }
 
 resource "google_apigee_instance_attachment" "<%= ctx[:primary_resource_id] %>" {
   instance_id  = google_apigee_instance.apigee_instance.id
-  environment  = "tf0-test%{random_suffix}"
+  environment  = "tf-test%{random_suffix}"
   depends_on   = [
     google_apigee_instance.apigee_instance,
     google_apigee_environment.apigee_env,
