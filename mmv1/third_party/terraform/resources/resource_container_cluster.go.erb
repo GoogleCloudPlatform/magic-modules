@@ -1368,10 +1368,6 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			Enabled:         d.Get("enable_legacy_abac").(bool),
 			ForceSendFields: []string{"Enabled"},
 		},
-		ShieldedNodes: &containerBeta.ShieldedNodes{
-			Enabled:         d.Get("enable_shielded_nodes").(bool),
-			ForceSendFields: []string{"Enabled"},
-		},
 		LoggingService:          d.Get("logging_service").(string),
 		MonitoringService:       d.Get("monitoring_service").(string),
 		NetworkPolicy:           expandNetworkPolicy(d.Get("network_policy")),
@@ -1382,6 +1378,10 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		Autoscaling:             expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
 		BinaryAuthorization: &containerBeta.BinaryAuthorization{
 			Enabled:         d.Get("enable_binary_authorization").(bool),
+			ForceSendFields: []string{"Enabled"},
+		},
+		ShieldedNodes: &containerBeta.ShieldedNodes{
+			Enabled:         d.Get("enable_shielded_nodes").(bool),
 			ForceSendFields: []string{"Enabled"},
 		},
 		ReleaseChannel:          expandReleaseChannel(d.Get("release_channel")),
@@ -1414,10 +1414,8 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			ForceSendFields: []string{"Enabled"},
 		}
 		if v.(bool) == true {
-			cluster.ShieldedNodes = &containerBeta.ShieldedNodes{
-				Enabled:         true,
-				ForceSendFields: []string{"Enabled"},
-			}
+			// Set preconfigured AutoGKE defaults
+			cluster.ShieldedNodes.Enabled = true
 			cluster.NetworkConfig.EnableIntraNodeVisibility = true
 		}
 	}
