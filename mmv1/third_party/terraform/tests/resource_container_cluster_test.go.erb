@@ -1684,11 +1684,12 @@ func TestAccContainerCluster_withAutopilot(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:             testAccContainerCluster_withAutopilot(containerNetName, clusterName, true),
-				ExpectNonEmptyPlan: true,
 			},
 			{
 				ResourceName: "google_container_cluster.with_autopilot",
 				ImportState:  true,
+				ImportStateVerify:	 true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 		},
 	})

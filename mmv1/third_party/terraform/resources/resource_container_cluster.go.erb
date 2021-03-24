@@ -128,6 +128,7 @@ func resourceContainerCluster() *schema.Resource {
 			<% unless version == 'ga' -%>
 			customdiff.ForceNewIfChange("enable_l4_ilb_subsetting", isBeenEnabled),
 			<% end -%>
+			containerClusterAutopilotCustomizeDiff,
 		),
 
 		Timeouts: &schema.ResourceTimeout{
@@ -507,8 +508,8 @@ func resourceContainerCluster() *schema.Resource {
 			"enable_shielded_nodes": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
-				Description: `Enable Shielded Nodes features on all nodes in this cluster. Defaults to false.`,
+				Computed: true,
+				Description: `Enable Shielded Nodes features on all nodes in this cluster.`,
 				ConflictsWith: []string{"enable_autopilot"},
 			},
 
@@ -516,7 +517,8 @@ func resourceContainerCluster() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				ForceNew:    true,
-				Description: `Enable Autopilot for this cluster. Defaults to false.`,
+				Description: `Enable Autopilot for this cluster.`,
+				// ConflictsWith: many fields, see https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison. The conflict is only set one-way, on other fields w/ this field. 
 			},
 
 			"authenticator_groups_config": {
@@ -921,6 +923,7 @@ func resourceContainerCluster() *schema.Resource {
 				Type:          schema.TypeList,
 				MaxItems:      1,
 				ForceNew:      true,
+				Computed:      true,
 				Optional:      true,
 				ConflictsWith: []string{"cluster_ipv4_cidr"},
 				Description:   `Configuration of cluster IP allocation for VPC-native clusters. Adding this block enables IP aliasing, making the cluster VPC-native instead of routes-based.`,
@@ -1093,6 +1096,7 @@ func resourceContainerCluster() *schema.Resource {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
+				Computed: true,
 				Description: `Configuration for the use of Kubernetes Service Accounts in GCP IAM policies.`,
 				ConflictsWith: []string{"enable_autopilot"},
 				Elem: &schema.Resource{
@@ -1206,11 +1210,9 @@ func resourceContainerCluster() *schema.Resource {
 			"enable_intranode_visibility": {
 			   Type: schema.TypeBool,
 			   Optional: true,
+			   Computed: true,
 			   Description: `Whether Intra-node visibility is enabled for this cluster. This makes same node pod to pod traffic visible for VPC network.`,
 			   ConflictsWith: []string{"enable_autopilot"},
-<% unless version == 'ga' -%>
-			   Default: false,
-<% end -%>
 			},
 <% unless version == 'ga' -%>
 			"enable_l4_ilb_subsetting": {
@@ -1380,10 +1382,6 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			Enabled:         d.Get("enable_binary_authorization").(bool),
 			ForceSendFields: []string{"Enabled"},
 		},
-		ShieldedNodes: &containerBeta.ShieldedNodes{
-			Enabled:         d.Get("enable_shielded_nodes").(bool),
-			ForceSendFields: []string{"Enabled"},
-		},
 		ReleaseChannel:          expandReleaseChannel(d.Get("release_channel")),
 <% unless version == 'ga' -%>
 		ClusterTelemetry: expandClusterTelemetry(d.Get("cluster_telemetry")),
@@ -1413,15 +1411,17 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			Enabled:         v.(bool),
 			ForceSendFields: []string{"Enabled"},
 		}
-		if v.(bool) == true {
-			// Set preconfigured AutoGKE defaults
-			cluster.ShieldedNodes.Enabled = true
-			cluster.NetworkConfig.EnableIntraNodeVisibility = true
-		}
 	}
 
 	if v, ok := d.GetOk("default_max_pods_per_node"); ok {
 		cluster.DefaultMaxPodsConstraint = expandDefaultMaxPodsConstraint(v)
+	}
+
+	if v, ok := d.GetOk("enable_shielded_nodes"); ok {
+		cluster.ShieldedNodes = &containerBeta.ShieldedNodes{
+			Enabled:         v.(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
 	}
 
 	// Only allow setting node_version on create if it's set to the equivalent master version,
@@ -4082,6 +4082,14 @@ func containerClusterPrivateClusterConfigCustomDiff(_ context.Context, d *schema
 		if block != nil && block != "" {
 			return fmt.Errorf("master_ipv4_cidr_block can only be set if enable_private_nodes is true")
 		}
+	}
+	return nil
+}
+
+// The GKE API requires intranode visibility enabled for autopilot clusters
+func containerClusterAutopilotCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	if d.Get("enable_autopilot").(bool) {
+		d.SetNew("enable_intranode_visibility", true)
 	}
 	return nil
 }
