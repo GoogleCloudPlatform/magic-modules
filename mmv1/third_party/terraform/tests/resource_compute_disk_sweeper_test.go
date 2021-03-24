@@ -17,7 +17,7 @@ func init() {
 
 // At the time of writing, the CI only passes us-central1 as the region
 func testSweepDisk(region string) error {
-	resourceName := "Disk"
+	resourceName := "ComputeDisk"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
 	config, err := sharedConfigForRegion(region)
