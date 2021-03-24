@@ -45,7 +45,7 @@ func newBucketIamAsset(
 		return []Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
-	name, err := assetName(d, config, "//storage.googleapis.com/{{name}}")
+	name, err := assetName(d, config, "//storage.googleapis.com/{{bucket}}")
 	if err != nil {
 		return []Asset{}, err
 	}
@@ -64,7 +64,7 @@ func FetchBucketIamPolicy(d TerraformResourceData, config *Config) (Asset, error
 		StorageBucketIamUpdaterProducer,
 		d,
 		config,
-		"//storage.googleapis.com/{{name}}",
+		"//storage.googleapis.com/{{bucket}}",
 		"storage.googleapis.com/Bucket",
 	)
 }
