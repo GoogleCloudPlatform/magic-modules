@@ -1,0 +1,298 @@
+# Copyright 2021 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: GKEHub
+display_name: GKEHub
+versions:
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://gkehub.googleapis.com/v1alpha1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: GKEHub API
+    url: https://console.cloud.google.com/apis/library/gkehub.googleapis.com
+objects:
+  - !ruby/object:Api::Resource
+    min_version: beta
+    name: 'Feature'
+    base_url: "projects/{{project}}/locations/global/features"
+    create_url: "projects/{{project}}/locations/global/features?featureId={{feature_id}}"
+    update_url: "projects/{{project}}/locations/global/features/{{feature_id}}"
+    self_link: "projects/{{project}}/locations/global/features/{{feature_id}}"
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Feature represents the settings and status of any feature.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/gkehub/docs/'
+      api: 'https://cloud.google.com/gkehub/docs/reference/rest/v1beta1/projects.locations.memberships'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'gkehub#operation'
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: 'true'
+        allowed:
+          - 'true'
+          - 'false'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'featureId'
+        description: |
+          The name of the feature to enable.
+        required: true
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        output: true
+        description: |
+          The unique identifier of the feature.
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          The name of this entity type to be displayed on the console.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          Labels to apply to this feature.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'multiclusteringressFeatureSpec'
+        input: true
+        description: |
+          Fully-qualified member name which hosts the MultiClusterIngress CRD.
+          Example member name: `projects/foo-proj/locations/global/memberships/bar`
+        conflicts:
+          - 'configmanagement_feature_spec'
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'configMembership'
+            input: true
+            description: |
+              If this Membership is a Kubernetes API server hosted on GKE, this is a self link to its GCP resource.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'configmanagementFeatureSpec'
+        description: |
+          The specification for Anthos Config Management.
+        conflicts:
+          - 'multiclusteringress_feature_spec'
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'membershipConfigs'
+            input: true
+            description: |
+              Set of membership configs.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+              - !ruby/object:Api::Type::String
+                name: 'membershipId'
+                description: /
+                  Identifier of the membership
+                required: true
+              - !ruby/object:Api::Type::String
+                name: 'version'
+                description: /
+                  Version of ACM installed.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'configSync'
+                description: /
+                  Config Sync configuration for the cluster.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'sourceFormat'
+                    description: /
+                      Specifies whether the Config Sync Repo is in “hierarchical” or “unstructured” mode.
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'git'
+                    description: /
+                      Git repo configuration for a single cluster.
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: 'syncRepo'
+                        description: /
+                          Config Sync configuration for the cluster.
+                      - !ruby/object:Api::Type::String
+                        name: 'syncBranch'
+                        description: /
+                          The branch of the repository to sync from.
+                      - !ruby/object:Api::Type::String
+                        name: 'policyDir'
+                        description: /
+                          The path within the Git repository that represents the top level of the repo to sync.
+                      - !ruby/object:Api::Type::Integer
+                        name: 'syncWaitSecs'
+                        description: /
+                          Period in seconds between consecutive syncs.
+                      - !ruby/object:Api::Type::String
+                        name: 'syncRev'
+                        description: /
+                          Git revision (tag or hash) to check out.
+                      - !ruby/object:Api::Type::String
+                        name: 'secretType'
+                        description: /
+                          Type of secret configured for access to the Git repo.
+                      - !ruby/object:Api::Type::String
+                        name: 'httpsProxy'
+                        description: /
+                          URL for the HTTPS proxy to be used when communicating with the Git repo.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'policyController'
+                description: /
+                  Configuration for a single cluster. Intended to parallel the ConfigManagement CR.
+                properties:
+                  - !ruby/object:Api::Type::Integer
+                    name: 'auditIntervalSeconds'
+                    description: /
+                      Sets the interval for Policy Controller Audit Scans (in seconds). When set to 0,
+                      this disables audit functionality altogether.
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'logDeniesEnabled'
+                    description: /
+                      Logs all denies and dry run failures.
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'templateLibraryInstalled'
+                    description: /
+                      Installs the default template library along with Policy Controller.
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'referentialRulesEnabled'
+                    description: /
+                      Enables the ability to use Constraint Templates that reference to objects other than
+                      the object currently being evaluated
+                  - !ruby/object:Api::Type::Array
+                    name: 'exemptableNamespaces'
+                    description: |
+                      The set of namespaces that are excluded from Policy Controller checks.
+                      Namespaces do not need to currently exist on the cluster.
+                    item_type: Api::Type::String
+              - !ruby/object:Api::Type::NestedObject
+                name: 'hierarchyController'
+                description: /
+                  Hierarchy Controller configuration for the cluster.
+                properties:
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'enablePodTreeLabels'
+                    description: /
+                      Whether pod tree labels are enabled in this cluster.
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'enableHierarchicalResourceQuota'
+                    description: /
+                      Whether hierarchical resource quota is enabled in this cluster.
+  - !ruby/object:Api::Resource
+    min_version: beta
+    name: 'Membership'
+    base_url: "projects/{{project}}/locations/global/memberships"
+    create_url: "projects/{{project}}/locations/global/memberships?membershipId={{membership_id}}"
+    update_url: "projects/{{project}}/locations/global/memberships/{{membership_id}}"
+    self_link: "{{name}}"
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Membership contains information about a member cluster.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/gkehub/docs/'
+      api: 'https://cloud.google.com/gkehub/docs/reference/rest/v1beta1/projects.locations.memberships'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'gkehub#operation'
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: 'true'
+        allowed:
+          - 'true'
+          - 'false'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'membershipId'
+        description: |
+          The client-provided identifier of the membership.
+        required: true
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        output: true
+        description: |
+          The unique identifier of the membership.
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          The name of this entity type to be displayed on the console.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          Labels to apply to this membership.
+      - !ruby/object:Api::Type::String
+        name: 'externalId'
+        description: |
+          An externally-generated and managed ID for this Membership.
+          This ID may still be modified after creation but it is not recommended to do so.
+          The ID must match the regex: `[a-zA-Z0-9][a-zA-Z0-9_\-\.]*` If this Membership
+          represents a Kubernetes cluster, this value should be set to the UUID of the
+          kube-system namespace object.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'uniqueId'
+        description: |
+          Output only. Google-generated UUID for this resource.
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'endpoint'
+        input: true
+        description: |
+          If this Membership is a Kubernetes API server hosted on GKE, this is a self link to its GCP resource.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'gkeCluster'
+            input: true
+            description: |
+              If this Membership is a Kubernetes API server hosted on GKE, this is a self link to its GCP resource.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'resourceLink'
+                description: |
+                  Self-link of the GCP resource for the GKE cluster.
+                  For example: `//container.googleapis.com/projects/my-project/zones/us-west1-a/clusters/my-cluster`.
+                  It can be at the most 1000 characters in length.  If the cluster is provisioned with Terraform,
+                  this is `"//container.googleapis.com/${google_container_cluster.my-cluster.id}"`.
+                input: true

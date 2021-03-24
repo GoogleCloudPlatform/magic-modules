@@ -1,3 +1,7 @@
+data "google_project" "project" {
+  provider = google-beta
+}
+
 resource "google_container_cluster" "primary" {
   name               = "<%= ctx[:vars]['cluster_name'] %>"
   location           = "us-central1-a"
@@ -17,11 +21,18 @@ resource "google_gke_hub_membership" "membership" {
 }
 
 resource "google_gke_hub_feature" "feature" {
-  feature_id = "multiclusteringress"
-  spec {
-    multiclusteringress {
-    	config_membership = google_gke_hub_membership.membership.id
-	 }
+  feature_id = "configmanagement"
+  membership_specs {
+    membership_id = "projects/${data.google_project.project.number}/locations/global/memberships/${google_gke_hub_membership.membership.membership_id}"
+    configmanagement {
+      version = "1.6.2"
+      config_sync {
+        source_format = "hierarchy"
+        git {
+          sync_repo = "https://github.com/GoogleCloudPlatform/magic-modules"
+        }
+      }
+    }
   }
   provider = google-beta
 }
