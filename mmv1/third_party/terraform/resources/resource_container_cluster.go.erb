@@ -515,7 +515,6 @@ func resourceContainerCluster() *schema.Resource {
 			"enable_autopilot": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				ForceNew:    true,
 				Description: `Enable Autopilot for this cluster. Defaults to false.`,
 			},
@@ -1369,6 +1368,10 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			Enabled:         d.Get("enable_legacy_abac").(bool),
 			ForceSendFields: []string{"Enabled"},
 		},
+		ShieldedNodes: &containerBeta.ShieldedNodes{
+			Enabled:         d.Get("enable_shielded_nodes").(bool),
+			ForceSendFields: []string{"Enabled"},
+		},
 		LoggingService:          d.Get("logging_service").(string),
 		MonitoringService:       d.Get("monitoring_service").(string),
 		NetworkPolicy:           expandNetworkPolicy(d.Get("network_policy")),
@@ -1416,13 +1419,6 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 				ForceSendFields: []string{"Enabled"},
 			}
 			cluster.NetworkConfig.EnableIntraNodeVisibility = true
-		}
-	}
-
-	if v, ok := d.GetOk("enable_shielded_nodes"); ok {
-		cluster.ShieldedNodes = &containerBeta.ShieldedNodes{
-			Enabled:         v.(bool),
-			ForceSendFields: []string{"Enabled"},
 		}
 	}
 
