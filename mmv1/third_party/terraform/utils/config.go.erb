@@ -161,6 +161,12 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// 1. OAUTH2 TRANSPORT/CLIENT - sets up proper auth headers
 	client := oauth2.NewClient(cleanCtx, tokenSource)
 
+	// Userinfo is fetched before request logging is enabled to reduce additional noise.
+	err = c.logGoogleIdentities()
+	if err != nil {
+		return err
+	}
+
 	// 2. Logging Transport - ensure we log HTTP requests to GCP APIs.
 	loggingTransport := logging.NewTransport("Google", client.Transport)
 
@@ -193,41 +199,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	c.dclConfig = dcl.NewConfig(dcl.WithHTTPClient(client), dcl.WithUserAgent(c.userAgent), dcl.WithLogger(dclLogger{}))
 	c.clientEventarcDCL = eventarcDcl.NewClient(c.dclConfig)
 <% end -%>
-
-	// Print Identities executing terraform API Calls.
-
-	if c.ImpersonateServiceAccount != "" {
-		// Drop Impersonated ClientOption from OAuth2 TokenSource to infer original identity
-
-		tokenSource, err = c.getTokenSource(c.Scopes, true)
-		if err != nil {
-			return err
-		}
-		client = oauth2.NewClient(cleanCtx, tokenSource)
-
-		email, err := GetCurrentUserEmail(c, c.userAgent)
-		if err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] Terraform is configured with service account impersonation, original identity: %s, impersonated identity: %s", email, c.ImpersonateServiceAccount)
-
-		// Add the Impersonated ClientOption back in to the OAuth2 TokenSource
-
-		tokenSource, err = c.getTokenSource(c.Scopes, false)
-		if err != nil {
-			return err
-		}
-		client = oauth2.NewClient(cleanCtx, tokenSource)
-
-	} else {
-		email, err := GetCurrentUserEmail(c, c.userAgent)
-		if err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] Terraform will be using this identity: %s", email)
-	}
 
 	return nil
 }
@@ -269,8 +240,47 @@ func (c *Config) synchronousTimeout() time.Duration {
 	return c.RequestTimeout
 }
 
-func (c *Config) getTokenSource(clientScopes []string, nullClientOptions bool) (oauth2.TokenSource, error) {
-	creds, err := c.GetCredentials(clientScopes, nullClientOptions)
+// Print Identities executing terraform API Calls.
+func (c *Config) logGoogleIdentities() error {
+	if c.ImpersonateServiceAccount != "" {
+		// Drop Impersonated ClientOption from OAuth2 TokenSource to infer original identity
+
+		tokenSource, err := c.getTokenSource(c.Scopes, true)
+		if err != nil {
+			return err
+		}
+		c.client = oauth2.NewClient(c.context, tokenSource)
+
+		email, err := GetCurrentUserEmail(c, c.userAgent)
+		if err != nil {
+			log.Printf("[INFO] error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope? error: %s", err)
+		}
+
+		log.Printf("[INFO] Terraform is configured with service account impersonation, original identity: %s, impersonated identity: %s", email, c.ImpersonateServiceAccount)
+
+		// Add the Impersonated ClientOption back in to the OAuth2 TokenSource
+
+		tokenSource, err = c.getTokenSource(c.Scopes, false)
+		if err != nil {
+			return err
+		}
+		c.client = oauth2.NewClient(c.context, tokenSource)
+
+	} else {
+		email, err := GetCurrentUserEmail(c, c.userAgent)
+		if err != nil {
+			log.Printf("[INFO] error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope? error: %s", err)
+		}
+
+		log.Printf("[INFO] Terraform will be using this identity: %s", email)
+	}
+	return nil
+}
+
+// Get a TokenSource based on the Google Credentials configured.
+// If initialCredentialsOnly is true, don't follow the impersonation settings and return the initial set of creds.
+func (c *Config) getTokenSource(clientScopes []string, initialCredentialsOnly bool) (oauth2.TokenSource, error) {
+	creds, err := c.GetCredentials(clientScopes, initialCredentialsOnly)
 	if err != nil {
 		return nil, fmt.Errorf("%s", err)
 	}
@@ -783,7 +793,10 @@ type staticTokenSource struct {
       oauth2.TokenSource
 }
 
-func (c *Config) GetCredentials(clientScopes []string, nullClientOptions bool) (googleoauth.Credentials, error) {
+// Get a set of credentials with a given scope (clientScopes) based on the Config object.
+// If initialCredentialsOnly is true, don't follow the impersonation settings and return the initial set of creds
+// instead.
+func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bool) (googleoauth.Credentials, error) {
 
 	if c.AccessToken != "" {
 		contents, _, err := pathOrContents(c.AccessToken)
@@ -792,7 +805,7 @@ func (c *Config) GetCredentials(clientScopes []string, nullClientOptions bool) (
 		}
 		token := &oauth2.Token{AccessToken: contents}
 
-		if c.ImpersonateServiceAccount != "" && !nullClientOptions {
+		if c.ImpersonateServiceAccount != "" && !initialCredentialsOnly {
 			opts := []option.ClientOption{option.WithTokenSource(oauth2.StaticTokenSource(token)), option.ImpersonateCredentials(c.ImpersonateServiceAccount, c.ImpersonateServiceAccountDelegates...), option.WithScopes(clientScopes...)}
 			creds, err := transport.Creds(context.TODO(), opts...)
 			if err != nil {
@@ -814,7 +827,7 @@ func (c *Config) GetCredentials(clientScopes []string, nullClientOptions bool) (
 		if err != nil {
 			return googleoauth.Credentials{}, fmt.Errorf("error loading credentials: %s", err)
 		}
-		if c.ImpersonateServiceAccount != "" && !nullClientOptions {
+		if c.ImpersonateServiceAccount != "" && !initialCredentialsOnly {
 			opts := []option.ClientOption{option.WithCredentialsJSON([]byte(contents)), option.ImpersonateCredentials(c.ImpersonateServiceAccount, c.ImpersonateServiceAccountDelegates...), option.WithScopes(clientScopes...)}
 			creds, err := transport.Creds(context.TODO(), opts...)
 			if err != nil {
@@ -832,7 +845,7 @@ func (c *Config) GetCredentials(clientScopes []string, nullClientOptions bool) (
 		return *creds, nil
 	}
 
-	if c.ImpersonateServiceAccount != "" && !nullClientOptions {
+	if c.ImpersonateServiceAccount != "" && !initialCredentialsOnly {
 		opts := option.ImpersonateCredentials(c.ImpersonateServiceAccount, c.ImpersonateServiceAccountDelegates...)
 		creds, err := transport.Creds(context.TODO(), opts, option.WithScopes(clientScopes...))
 		if err != nil {
