@@ -26,7 +26,8 @@ func cloudrunAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) 
 
 func cloudrunTemplateAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// Suppress diffs for the annotations provided by API
-	if old == "gvisor" && new == "" {
+	if k == "template.0.metadata.0.annotations.run.googleapis.com/sandbox" &&
+		old == "gvisor" && new == "" {
 		return true
 	}
 
