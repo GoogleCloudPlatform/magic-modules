@@ -159,8 +159,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 30
       delete_minutes: 30
-    #custom_code: !ruby/object:Provider::Terraform::CustomCode
-     # custom_import: templates/terraform/custom_import/apigee_instance_attachment.go.erb
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/apigee_instance_attachment.go.erb
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
