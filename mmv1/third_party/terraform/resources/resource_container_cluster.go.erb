@@ -4089,7 +4089,9 @@ func containerClusterPrivateClusterConfigCustomDiff(_ context.Context, d *schema
 // The GKE API requires intranode visibility enabled for autopilot clusters
 func containerClusterAutopilotCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	if d.Get("enable_autopilot").(bool) {
-		d.SetNew("enable_intranode_visibility", true)
+		if err := d.SetNew("enable_intranode_visibility", true); err != nil {
+			return err
+		}
 	}
 	return nil
 }
