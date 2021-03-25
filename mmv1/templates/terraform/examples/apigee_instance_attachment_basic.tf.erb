@@ -67,7 +67,7 @@ resource "google_apigee_environment" "apigee_env" {
 
 resource "google_apigee_instance_attachment" "<%= ctx[:primary_resource_id] %>" {
   instance_id  = google_apigee_instance.apigee_instance.id
-  environment  = "tf-test%{random_suffix}"
+  environment  = google_apigee_environment.apigee_env.name
   depends_on   = [
     google_apigee_instance.apigee_instance,
     google_apigee_environment.apigee_env,
