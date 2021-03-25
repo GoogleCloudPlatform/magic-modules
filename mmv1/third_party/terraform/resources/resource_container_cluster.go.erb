@@ -1382,6 +1382,10 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			Enabled:         d.Get("enable_binary_authorization").(bool),
 			ForceSendFields: []string{"Enabled"},
 		},
+		Autopilot: &containerBeta.Autopilot{
+			Enabled:         d.Get("enable_autopilot").(bool),
+			ForceSendFields: []string{"Enabled"},
+		},
 		ReleaseChannel:          expandReleaseChannel(d.Get("release_channel")),
 <% unless version == 'ga' -%>
 		ClusterTelemetry: expandClusterTelemetry(d.Get("cluster_telemetry")),
@@ -1406,8 +1410,8 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		ResourceLabels: expandStringMap(d, "resource_labels"),
 	}
 
-	if v, ok := d.GetOk("enable_autopilot"); ok {
-		cluster.Autopilot = &containerBeta.Autopilot{
+	if v, ok := d.GetOk("enable_shielded_nodes"); ok {
+		cluster.ShieldedNodes = &containerBeta.ShieldedNodes{
 			Enabled:         v.(bool),
 			ForceSendFields: []string{"Enabled"},
 		}
@@ -1415,13 +1419,6 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 
 	if v, ok := d.GetOk("default_max_pods_per_node"); ok {
 		cluster.DefaultMaxPodsConstraint = expandDefaultMaxPodsConstraint(v)
-	}
-
-	if v, ok := d.GetOk("enable_shielded_nodes"); ok {
-		cluster.ShieldedNodes = &containerBeta.ShieldedNodes{
-			Enabled:         v.(bool),
-			ForceSendFields: []string{"Enabled"},
-		}
 	}
 
 	// Only allow setting node_version on create if it's set to the equivalent master version,
@@ -4086,10 +4083,14 @@ func containerClusterPrivateClusterConfigCustomDiff(_ context.Context, d *schema
 	return nil
 }
 
-// The GKE API requires intranode visibility enabled for autopilot clusters
+// Autopilot clusters have preconfigured defaults: https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison.
+// This function modifies the diff so users can see what these will be during plan time.
 func containerClusterAutopilotCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	if d.Get("enable_autopilot").(bool) {
+	if d.HasChange("enable_autopilot") && d.Get("enable_autopilot").(bool) {
 		if err := d.SetNew("enable_intranode_visibility", true); err != nil {
+			return err
+		}
+		if err := d.SetNew("enable_shielded_nodes", true); err != nil {
 			return err
 		}
 	}
