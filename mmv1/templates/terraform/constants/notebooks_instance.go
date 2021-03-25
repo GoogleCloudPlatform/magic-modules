@@ -1,8 +1,8 @@
-const NotebooksInstanceGoogleProvidedLabel = "goog-caip-notebook"
+const notebooksInstanceGoogleProvidedLabel = "goog-caip-notebook"
 
 func NotebooksInstanceLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// Suppress diffs for the label provided by Google
-	if strings.Contains(k, domainMappingGoogleProvidedLabel) && new == "" {
+	if strings.Contains(k, notebooksInstanceGoogleProvidedLabel) && new == "" {
 		return true
 	}
 
