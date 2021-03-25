@@ -7,26 +7,6 @@ func revisionNameCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v i
 	return nil
 }
 
-func templateMetadataAnnotationsCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
-	if diff.HasChange("template.0.metadata.0.annotations") {
-		old, new := diff.GetChange("template.0.metadata.0.annotations")
-
-		omap := old.(map[string]interface{})
-		nmap := new.(map[string]interface{})
-
-		for k, v := range omap {
-			if _, ok := nmap[k]; !ok {
-				if k == "run.googleapis.com/sandbox" {
-					// add new annotations to the state
-					nmap[k] = v
-				}
-			}
-		}
-		diff.SetNew("template.0.metadata.0.annotations", nmap)
-		diff.Clear("template.0.metadata.0.annotations")
-	}
-	return nil
-}
 var cloudRunGoogleProvidedAnnotations = regexp.MustCompile(`serving\.knative\.dev/(?:(?:creator)|(?:lastModifier))$|run\.googleapis\.com/(?:(?:ingress-status))$|cloud\.googleapis\.com/(?:(?:location))`)
 
 func cloudrunAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
@@ -37,6 +17,16 @@ func cloudrunAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) 
 
 	// Let diff be determined by annotations (above)
 	if strings.Contains(k, "annotations.%") {
+		return true
+	}
+
+	// For other keys, don't suppress diff.
+	return false
+}
+
+func cloudrunTemplateAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Suppress diffs for the annotations provided by API
+	if old == "gvisor" && new == "" {
 		return true
 	}
 
