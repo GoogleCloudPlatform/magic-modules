@@ -4,6 +4,10 @@ func revisionNameCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v i
 		return fmt.Errorf("google_cloud_run_service: `template.metadata.name` cannot be set while `autogenerate_revision_name` is true. Please remove the field or set `autogenerate_revision_name` to false.")
 	}
 
+	return nil
+}
+
+func templateMetadataAnnotationsCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
 	if diff.HasChange("template.0.metadata.0.annotations") {
 		old, new := diff.GetChange("template.0.metadata.0.annotations")
 
@@ -13,6 +17,7 @@ func revisionNameCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v i
 		for k, v := range omap {
 			if _, ok := nmap[k]; !ok {
 				if k == "run.googleapis.com/sandbox" {
+					// add new annotations to the state
 					nmap[k] = v
 				}
 			}
@@ -20,10 +25,8 @@ func revisionNameCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v i
 		diff.SetNew("template.0.metadata.0.annotations", nmap)
 		diff.Clear("template.0.metadata.0.annotations")
 	}
-
 	return nil
 }
-
 var cloudRunGoogleProvidedAnnotations = regexp.MustCompile(`serving\.knative\.dev/(?:(?:creator)|(?:lastModifier))$|run\.googleapis\.com/(?:(?:ingress-status))$|cloud\.googleapis\.com/(?:(?:location))`)
 
 func cloudrunAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {

@@ -13,4 +13,7 @@
 	# limitations under the License.
 -%>
 SchemaVersion: 1,
-CustomizeDiff: revisionNameCustomizeDiff,
+CustomizeDiff: customdiff.All(
+	revisionNameCustomizeDiff,
+	templateMetadataAnnotationsCustomizeDiff,
+),
