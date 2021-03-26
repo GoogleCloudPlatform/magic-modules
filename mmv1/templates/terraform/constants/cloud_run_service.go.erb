@@ -28,7 +28,7 @@ var cloudRunGoogleProvidedTemplateAnnotations = regexp.MustCompile(`template\.0\
 
 func cloudrunTemplateAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// Suppress diffs for the annotations provided by API
-	if cloudrunTemplateAnnotationDiffSuppress.MatchString(k) &&
+	if cloudRunGoogleProvidedTemplateAnnotations.MatchString(k) &&
 		old == "gvisor" && new == "" {
 		return true
 	}
