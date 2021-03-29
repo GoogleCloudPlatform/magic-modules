@@ -151,6 +151,7 @@ components:
                   readOnly: true
                   type: string
                   x-dcl-go-name: Subscription
+                  x-kubernetes-immutable: true
                 topic:
                   description: 'Optional. The name of the Pub/Sub topic created and
                     managed by Eventarc system as a transport for the event delivery.
@@ -160,12 +161,15 @@ components:
                     at trigger deletion.'
                   type: string
                   x-dcl-go-name: Topic
+                  x-kubernetes-immutable: true
               type: object
               x-dcl-go-name: Pubsub
               x-dcl-go-type: TriggerTransportPubsub
+              x-kubernetes-immutable: true
           type: object
           x-dcl-go-name: Transport
           x-dcl-go-type: TriggerTransport
+          x-kubernetes-immutable: true
         updateTime:
           description: Output only. The last-modified time.
           format: date-time
