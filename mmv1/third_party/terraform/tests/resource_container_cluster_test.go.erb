@@ -265,7 +265,7 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 <% end -%>
 
 <% unless version == 'ga' -%>
-func TestAccContainerCluster_withILBSubSetting(t *testing.T) {
+func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
