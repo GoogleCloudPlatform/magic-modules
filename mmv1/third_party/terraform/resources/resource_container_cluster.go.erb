@@ -825,6 +825,9 @@ func resourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				MaxItems:    1,
 				Description: `Configuration for the PodSecurityPolicy feature.`,
+<% if version == "ga" -%>
+				Deprecated:   `This is beta only attribute`,
+<% end -%>
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
