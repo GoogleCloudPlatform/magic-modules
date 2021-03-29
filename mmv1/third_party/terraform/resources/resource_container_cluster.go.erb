@@ -125,7 +125,9 @@ func resourceContainerCluster() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			resourceNodeConfigEmptyGuestAccelerator,
 			containerClusterPrivateClusterConfigCustomDiff,
+			<% unless version == 'ga' -%>
 			customdiff.ForceNewIfChange("enable_l4_ilb_subsetting", isBeenEnabled),
+			<% end -%>
 		),
 
 		Timeouts: &schema.ResourceTimeout{
