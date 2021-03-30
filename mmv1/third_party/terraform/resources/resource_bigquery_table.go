@@ -242,7 +242,6 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error)
 			switch key {
 			case "name":
 				if valOld != valNew {
-					fmt.Printf("old %s new %s", valOld, valNew)
 					return false, nil
 				}
 			case "type":
