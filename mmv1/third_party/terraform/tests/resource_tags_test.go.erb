@@ -334,6 +334,8 @@ func testAccTagsTagBinding_tagBindingBasic(t *testing.T) {
 func testAccTagsTagBinding_tagBindingBasicExample(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_project" "project" {
+	provider = google-beta
+
 	project_id = "%{project_id}"
 	name       = "%{project_id}"
 	org_id     = "%{org_id}"
