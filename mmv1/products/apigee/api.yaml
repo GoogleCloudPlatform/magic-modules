@@ -1,0 +1,316 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: Apigee
+display_name: Apigee
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://apigee.googleapis.com/v1/
+  # Apigee has no beta API, but running the full Terraform
+  # acceptance tests depends on a beta-only resource and a bug in MM
+  # will generate beta tests against the GA provider in this case, so
+  # we fake a beta API with the same endpoint as the GA API.
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://apigee.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Apigee API
+    url: https://console.cloud.google.com/apis/library/apigee.googleapis.com/
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Organization'
+    base_url: 'organizations'
+    create_url: 'organizations?parent=projects/{{project_id}}'
+    self_link: 'organizations/{{name}}'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    description: |
+      An `Organization` is the top-level container in Apigee.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'projectId'
+        description: |
+          The project ID associated with the Apigee organization.
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Output only. Name of the Apigee organization.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: |
+          The display name of the Apigee organization.
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          Description of the Apigee organization.
+      - !ruby/object:Api::Type::String
+        name: 'analyticsRegion'
+        description: |
+          Primary GCP region for analytics data storage. For valid values, see [Create an Apigee organization](https://cloud.google.com/apigee/docs/api-platform/get-started/create-org).
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'authorizedNetwork'
+        description: |
+          Compute Engine network used for Service Networking to be peered with Apigee runtime instances.
+          See [Getting started with the Service Networking API](https://cloud.google.com/service-infrastructure/docs/service-networking/getting-started).
+          Valid only when `RuntimeType` is set to CLOUD. The value can be updated only when there are no runtime instances. For example: "default".
+      - !ruby/object:Api::Type::Enum
+        name: 'runtimeType'
+        description: |
+          Runtime type of the Apigee organization based on the Apigee subscription purchased.
+        values:
+          - "CLOUD"
+          - "HYBRID"
+        default_value: :CLOUD
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'subscriptionType'
+        description: |
+          Output only. Subscription type of the Apigee organization.
+          Valid values include trial (free, limited, and for evaluation purposes only) or paid (full subscription has been purchased).
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'caCertificate'
+        description: |
+          Output only. Base64-encoded public certificate for the root CA of the Apigee organization.
+          Valid only when `RuntimeType` is CLOUD. A base64-encoded string.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'runtimeDatabaseEncryptionKeyName'
+        description: |
+          Cloud KMS key name used for encrypting the data that is stored and replicated across runtime instances.
+          Update is not allowed after the organization is created.
+          If not specified, a Google-Managed encryption key will be used.
+          Valid only when `RuntimeType` is CLOUD. For example: `projects/foo/locations/us/keyRings/bar/cryptoKeys/baz`.
+        input: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating an API organization':
+          'https://cloud.google.com/apigee/docs/api-platform/get-started/create-org'
+      api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations'
+  - !ruby/object:Api::Resource
+    name: 'Instance'
+    base_url: 'instances'
+    create_url: '{{org_id}}/instances'
+    self_link: '{{org_id}}/instances/{{name}}'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    input: true
+    description: |
+      An `Instance` is the runtime dataplane in Apigee.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'orgId'
+        description: |
+          The Apigee Organization associated with the Apigee instance,
+          in the format `organizations/{{org_name}}`.
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Resource ID of the instance.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        description: |
+          Compute Engine location where the instance resides. For trial organization
+          subscriptions, the location must be a Compute Engine zone. For paid organization
+          subscriptions, it should correspond to a Compute Engine region.
+        required: true
+      - !ruby/object:Api::Type::Enum
+        name: 'peeringCidrRange'
+        description: |
+          The size of the CIDR block range that will be reserved by the instance.
+        values:
+          - "SLASH_16"
+          - "SLASH_20"
+        default_value: :SLASH_16
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          Description of the instance.
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: |
+          Display name of the instance.
+      - !ruby/object:Api::Type::String
+        name: 'diskEncryptionKeyName'
+        description: |
+          Customer Managed Encryption Key (CMEK) used for disk and volume encryption. Required for Apigee paid subscriptions only.
+          Use the following format: `projects/([^/]+)/locations/([^/]+)/keyRings/([^/]+)/cryptoKeys/([^/]+)`
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'host'
+        description: |
+          Output only. Hostname or IP address of the exposed Apigee endpoint used by clients to connect to the service.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'port'
+        description: |
+          Output only. Port number of the exposed Apigee endpoint.
+        output: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating a runtime instance':
+          'https://cloud.google.com/apigee/docs/api-platform/get-started/create-instance'
+      api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances/create'
+  - !ruby/object:Api::Resource
+    name: 'Environment'
+    base_url: 'environments'
+    create_url: '{{org_id}}/environments'
+    self_link: '{{org_id}}/environments/{{name}}'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    description: |
+      An `Environment` in Apigee.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'orgId'
+        description: |
+          The Apigee Organization associated with the Apigee environment,
+          in the format `organizations/{{org_name}}`.
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource ID of the environment.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: |
+          Display name of the environment.
+        required: false
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          Description of the environment.
+        required: false
+        input: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating an environment':
+          'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
+      api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments/create'
+  - !ruby/object:Api::Resource
+    name: 'Envgroup'
+    base_url: 'envgroups'
+    create_url: '{{org_id}}/envgroups'
+    self_link: '{{org_id}}/envgroups/{{name}}'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    description: |
+      An `Environment group` in Apigee.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'orgId'
+        description: |
+          The Apigee Organization associated with the Apigee environment group,
+          in the format `organizations/{{org_name}}`.
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource ID of the environment group.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::Array
+        name: 'hostnames'
+        description: |
+          Hostnames of the environment group.
+        required: false
+        item_type: Api::Type::String
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating an environment':
+          'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
+      api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups/create'

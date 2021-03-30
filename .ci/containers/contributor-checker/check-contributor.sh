@@ -13,13 +13,13 @@ set -x
 
 ASSIGNEE=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/requested_reviewers" | jq .users[0].login)
-  
-if [[ "$ASSIGNEE" == "null" || -z "$ASSIGNEE" ]] ; then 
+
+if [[ "$ASSIGNEE" == "null" || -z "$ASSIGNEE" ]] ; then
   ASSIGNEE=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
     "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/reviews" | jq .[0].user.login)
 fi
 
-if [[ "$ASSIGNEE" == "null"  || -z "$ASSIGNEE" ]] ; then 
+if [[ "$ASSIGNEE" == "null"  || -z "$ASSIGNEE" ]] ; then
   echo "Issue is not assigned."
 else
   echo "Issue is assigned, not assigning."
@@ -31,14 +31,14 @@ USER=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
 
 # This is where you add users who do not need to have an assignee chosen for
 # them.
-if $(echo $USER | fgrep -wq -e ndmckinley -e danawillow -e megan07 -e paddycarver -e rambleraptor -e SirGitsalot -e slevenick -e c2thorn -e rileykarson -e melinath -e scottsuarez); then
+if $(echo $USER | fgrep -wq -e ndmckinley -e danawillow -e megan07 -e paddycarver -e rambleraptor -e SirGitsalot -e slevenick -e c2thorn -e rileykarson -e melinath -e ScottSuarez); then
   echo "User is on the list, not assigning."
   exit 0
 fi
 
 # This is where you add people to the random-assignee rotation.  This list
 # might not equal the list above.
-ASSIGNEE=$(shuf -n 1 <(printf "rileykarson\nslevenick\nc2thorn\nndmckinley\nscottsuarez\melinath"))
+ASSIGNEE=$(shuf -n 1 <(printf "rileykarson\nslevenick\nc2thorn\nscottsuarez\nmelinath"))
 
 comment=$(cat << EOF
 Hello!  I am a robot who works on Magic Modules PRs.
