@@ -11,5 +11,5 @@ resource "google_tags_tag_value" "<%= ctx[:primary_resource_id] %>" {
 
 	parent = "tagKeys/${google_tags_tag_key.key.name}"
 	short_name = "<%= ctx[:vars]['short_name'] %>"
-	description = "For <%= ctx[:vars]['short_name'] %> resources.""
+	description = "For <%= ctx[:vars]['short_name'] %> resources."
 }
