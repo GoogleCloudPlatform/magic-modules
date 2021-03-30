@@ -12,4 +12,9 @@ resource "google_notebooks_instance" "<%= ctx[:primary_resource_id] %>" {
     project      = "deeplearning-platform-release"
     image_family = "tf-latest-gpu"
   }
+
+  labels = {
+    k = "val"
+    goog-caip-notebook = ""
+  }
 }
