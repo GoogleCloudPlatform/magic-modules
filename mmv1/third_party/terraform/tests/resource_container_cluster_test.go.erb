@@ -264,6 +264,47 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 }
 <% end -%>
 
+<% unless version == 'ga' -%>
+func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_disableILBSubSetting(clusterName, npName),
+			},
+			{
+				ResourceName:      "google_container_cluster.confidential_nodes",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerCluster_withILBSubSetting(clusterName, npName),
+			},
+			{
+				ResourceName:      "google_container_cluster.confidential_nodes",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerCluster_disableILBSubSetting(clusterName, npName),
+			},
+			{
+				ResourceName:      "google_container_cluster.confidential_nodes",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+<% end -%>
+
 func TestAccContainerCluster_withMasterAuthConfig(t *testing.T) {
 	t.Parallel()
 
@@ -2516,6 +2557,54 @@ resource "google_container_cluster" "confidential_nodes" {
 }
 <% end -%>
 
+<% unless version == 'ga' -%>
+func testAccContainerCluster_withILBSubSetting(clusterName string, npName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "confidential_nodes" {
+  name               = "%s"
+  location           = "us-central1-a"
+  enable_shielded_nodes = true
+  release_channel {
+    channel = "RAPID"
+  }
+
+  node_pool {
+    name = "%s"
+    initial_node_count = 1
+    node_config {
+      machine_type = "n2d-standard-2"
+    }
+  }
+
+  enable_l4_ilb_subsetting = true
+}
+`, clusterName, npName)
+}
+
+func testAccContainerCluster_disableILBSubSetting(clusterName string, npName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "confidential_nodes" {
+  name               = "%s"
+  location           = "us-central1-a"
+  enable_shielded_nodes = true
+  release_channel {
+    channel = "RAPID"
+  }
+
+  node_pool {
+    name = "%s"
+    initial_node_count = 1
+    node_config {
+      machine_type = "n2d-standard-2"
+    }
+  }
+
+  enable_l4_ilb_subsetting = false
+}
+`, clusterName, npName)
+}
+<% end -%>
+
 func testAccContainerCluster_withMasterAuth(clusterName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_master_auth" {
@@ -2896,7 +2985,7 @@ resource "google_container_cluster" "with_intranode_visibility" {
   name                        = "%s"
   location                    = "us-central1-a"
   initial_node_count          = 1
-  enable_intranode_visibility = true
+  enable_intranode_visibility = true 
 }
 `, clusterName)
 }
@@ -2908,6 +2997,7 @@ resource "google_container_cluster" "with_intranode_visibility" {
   location                    = "us-central1-a"
   initial_node_count          = 1
   enable_intranode_visibility = false
+  private_ipv6_google_access  = "PRIVATE_IPV6_GOOGLE_ACCESS_BIDIRECTIONAL"
 }
 `, clusterName)
 }
