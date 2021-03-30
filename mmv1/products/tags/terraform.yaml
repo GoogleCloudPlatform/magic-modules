@@ -21,13 +21,42 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      shortName: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(1, 63)'
+      description: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(0, 256)'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "tag_key_basic"
         min_version: 'beta'
-        skip_vcr: true
         skip_test: true
         primary_resource_id: "key"
+        vars:
+          short_name: "foo"
+        test_env_vars:
+          org_id: :ORG_ID
+  TagValue: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    mutex: tagValue/{{parent}}
+    id_format: "tagValues/{{name}}"
+    import_format: ["tagValues/{{name}}", "{{name}}"]
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      shortName: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(1, 63)'
+      description: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(0, 256)'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "tag_value_basic"
+        min_version: 'beta'
+        skip_test: true
+        primary_resource_id: "value"
         vars:
           short_name: "foo"
         test_env_vars:
