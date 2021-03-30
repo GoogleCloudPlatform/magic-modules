@@ -301,6 +301,12 @@ subnetwork in which the cluster's instances are launched.
 * `enable_intranode_visibility` - (Optional)
     Whether Intra-node visibility is enabled for this cluster. This makes same node pod to pod traffic visible for VPC network.
 
+* `enable_l4_ilb_subsetting` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+    Whether L4ILB Subsetting is enabled for this cluster.
+
+* `private_ipv6_google_access` - (Optional)
+    The desired state of IPv6 connectivity to Google Services. By default, no private IPv6 access to or from Google Services (all access will be via IPv4).
+
 * `datapath_provider` - (Optional)
     The desired datapath provider for this cluster. By default, uses the IPTables-based kube-proxy implementation.
 
@@ -350,7 +356,7 @@ The `addons_config` block supports:
 * `gce_persistent_disk_csi_driver_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Defaults to disabled; set `enabled = true` to enable.
 
-* `kalm_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/ provider_versions.html)).
+* `kalm_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     Configuration for the KALM addon, which manages the lifecycle of k8s. It is disabled by default; Set `enabled = true` to enable.
 
 *  `config_connector_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).

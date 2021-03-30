@@ -66,6 +66,6 @@ resource "google_apigee_environment" "apigee_env" {
 }
 
 resource "google_apigee_instance_attachment" "<%= ctx[:primary_resource_id] %>" {
-  instance_id  = google_apigee_instance.apigee_ins.id
-  environment  = google_apigee_environment.apigee_env.id
+  instance_id  = google_apigee_instance.apigee_instance.id
+  environment  = google_apigee_environment.apigee_env.name
 }

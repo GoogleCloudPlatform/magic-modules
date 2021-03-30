@@ -9,9 +9,15 @@ import (
 )
 
 func GetProjectCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
-	// NOTE: asset.name should use the project number, but we use project_id b/c
-	// the number is computed server-side.
-	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project_id_or_project}}")
+	// use project number if it's available; otherwise, fill in project id so that we
+	// keep the CAI assets apart for different uncreated projects.
+	var linkTmpl string
+	if _, ok := d.GetOk("number"); ok {
+		linkTmpl = "//cloudresourcemanager.googleapis.com/projects/{{number}}"
+	} else {
+		linkTmpl = "//cloudresourcemanager.googleapis.com/projects/{{project_id_or_project}}"
+	}
+	name, err := assetName(d, config, linkTmpl)
 	if err != nil {
 		return []Asset{}, err
 	}
@@ -76,7 +82,15 @@ func getParentResourceId(d TerraformResourceData, p *cloudresourcemanager.Projec
 }
 
 func GetProjectBillingInfoCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//cloudbilling.googleapis.com/projects/{{project_id_or_project}}/billingInfo")
+	// use project number if it's available; otherwise, fill in project id so that we
+	// keep the CAI assets apart for different uncreated projects.
+	var linkTmpl string
+	if _, ok := d.GetOk("number"); ok {
+		linkTmpl = "//cloudbilling.googleapis.com/projects/{{number}}/billingInfo"
+	} else {
+		linkTmpl = "//cloudbilling.googleapis.com/projects/{{project_id_or_project}}/billingInfo"
+	}
+	name, err := assetName(d, config, linkTmpl)
 	if err != nil {
 		return []Asset{}, err
 	}
@@ -103,9 +117,16 @@ func GetProjectBillingInfoApiObject(d TerraformResourceData, config *Config) (ma
 		return nil, ErrNoConversion
 	}
 
+	var name string
+	if number, ok := d.GetOk("number"); ok {
+		name = fmt.Sprintf("projects/%s/billingInfo", number)
+	} else {
+		name = fmt.Sprintf("projects/%s/billingInfo", d.Get("project_id"))
+	}
+
 	ba := &cloudbilling.ProjectBillingInfo{
 		BillingAccountName: fmt.Sprintf("billingAccounts/%s", d.Get("billing_account")),
-		Name:               fmt.Sprintf("projects/%s/billingInfo", d.Get("project_id")),
+		Name:               name,
 		ProjectId:          d.Get("project_id").(string),
 	}
 
