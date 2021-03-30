@@ -15,7 +15,7 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   TagKey: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
-    mutex: tags/{{parent}}
+    mutex: tagKeys/{{parent}}
     id_format: "tagKeys/{{name}}"
     import_format: ["tagKeys/{{name}}", "{{name}}"]
     properties:
@@ -39,7 +39,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
   TagValue: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
-    mutex: tags/{{parent}}
+    mutex: tagValues/{{parent}}
     id_format: "tagValues/{{name}}"
     import_format: ["tagValues/{{name}}", "{{name}}"]
     properties:
@@ -63,7 +63,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
   TagBinding: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
-    mutex: tags/{{parent}}
+    mutex: tagBindings/{{parent}}
     id_format: "tagBindings/{{name}}"
     import_format: ["tagBindings/{{name}}", "{{name}}"]
     properties:
