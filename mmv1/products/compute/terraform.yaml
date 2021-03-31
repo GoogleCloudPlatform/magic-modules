@@ -1137,6 +1137,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       edgeAvailabilityDomain: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       mtu: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/float64_to_int_to_string.go.erb
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/interconnect_attachment.go.erb
