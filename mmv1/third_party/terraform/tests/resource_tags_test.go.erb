@@ -345,7 +345,7 @@ resource "google_tags_tag_key" "key" {
 	provider = google-beta
 
 	parent = "organizations/%{org_id}"
-	short_name = "keyname"
+	short_name = "keyname%{random_suffix}"
 	description = "For a certain set of resources."
 }
 
