@@ -1,0 +1,58 @@
+<%# The license inside this block applies to this file
+	# Copyright 2021 Google Inc.
+	# Licensed under the Apache License, Version 2.0 (the "License");
+	# you may not use this file except in compliance with the License.
+	# You may obtain a copy of the License at
+	#
+	#     http://www.apache.org/licenses/LICENSE-2.0
+	#
+	# Unless required by applicable law or agreed to in writing, software
+	# distributed under the License is distributed on an "AS IS" BASIS,
+	# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	# See the License for the specific language governing permissions and
+	# limitations under the License.
+-%>
+func deleteSpannerBackups(d *schema.ResourceData, config *Config, res map[string]interface{}, userAgent string, billingProject string) error {
+	var v interface{}
+	var ok bool
+
+	v, ok = res["backups"]
+	if !ok || v == nil {
+		return nil
+	}
+
+	switch v.(type) {
+	case []interface{}:
+		break
+	case map[string]interface{}:
+		// Construct list out of single nested resource
+		v = []interface{}{v}
+	default:
+		return fmt.Errorf("expected list or map for value backups. Actual value: %v", v)
+	}
+
+	// Iterate over the list and delete each backup.
+	for _, itemRaw := range v.([]interface{}) {
+		if itemRaw == nil {
+			continue
+		}
+		item := itemRaw.(map[string]interface{})
+
+		backupName := item["name"].(string)
+
+		log.Printf("[DEBUG] Found backups for resource %q: %#v)", d.Id(), item)
+
+		path := "{{SpannerBasePath}}" + backupName
+
+		url, err := replaceVars(d, config, path)
+		if err != nil {
+			return err
+		}
+
+		res, err = sendRequest(config, "DELETE", billingProject, url, userAgent, nil)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
