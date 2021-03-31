@@ -111,7 +111,7 @@ func schemaNodeConfig() *schema.Schema {
 					Optional: true,
 					MaxItems: 1,
 					Description: `Parameters for the ephemeral storage filesystem.`,
-                    ForceNew: true,
+					ForceNew: true,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"local_ssd_count": {
