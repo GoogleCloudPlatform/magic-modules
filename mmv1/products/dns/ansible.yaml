@@ -87,7 +87,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Project: !ruby/object:Overrides::Ansible::ResourceOverride
     # TODO(alexstephen): Re-evaluate merging Project into Ansible
     exclude: true
-  ResourceDnsRecordSet: !ruby/object:Overrides::Inspec::ResourceOverride
+  ResourceDnsRecordSet: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true  
 files: !ruby/object:Provider::Config::Files
   resource:
