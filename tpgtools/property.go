@@ -166,14 +166,31 @@ func (p Property) PackageJSONName() string {
 // PackagePath is the title-cased path of a type (relative to the resource) for
 // use in naming functions. For example, "MachineType" or "NodeConfigPreemptible".
 func (p Property) PackagePath() string {
+	if p.ref != "" {
+		glog.Errorf("Returning ref : %v", p.ref)
+		return p.ref
+	}
 	if p.parent != nil {
 		return p.parent.PackagePath() + p.PackageName
 	}
-	if p.ref != "" {
-		return p.ref
-	}
 
 	return p.PackageName
+}
+
+func (p Property) ObjectType() string {
+	parent := p
+	// Look up chain to see if we are within a reference
+	// types within a reference should not use the parent resource's type
+	for {
+		if parent.ref != "" {
+			return p.PackagePath()
+		}
+		if parent.parent == nil {
+			break
+		}
+		parent = *parent.parent
+	}
+	return fmt.Sprintf("%s%s", p.resource.Type(), p.PackagePath())
 }
 
 func (p Property) IsArray() bool {
@@ -432,7 +449,9 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 	if parent == nil {
 		identityFields = idParts(resource.ID)
 	}
+
 	for k, v := range schema.Properties {
+		glog.Errorf("Creating : %v", k)
 		ref := ""
 		packageName := ""
 
@@ -447,7 +466,11 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				return nil, err
 			}
 			ref = typeFetcher.PackagePathForReference(ref, v.Extension["x-dcl-go-type"].(string))
+			glog.Errorf("Resolved is : %v", v)
+			glog.Errorf("Resolved props are : %v", v.Properties)
 		}
+		glog.Errorf("Ref is : %v", v.Ref)
+
 		// Sub-properties are referenced by name, and the explicit title value
 		// won't be set initially.
 		v.Title = k
