@@ -68,6 +68,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       ~> **Note:** Due to limitations of the Notebooks Instance API, many fields
       in this resource do not properly detect drift. These fields will also not
       appear in state once imported.
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/notebooks_instance.go
     properties:
       bootDiskSizeGb: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
@@ -87,6 +89,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'emptyOrDefaultStringSuppress("DISK_ENCRYPTION_UNSPECIFIED")'
       instanceOwners: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+      labels: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        diff_suppress_func: NotebooksInstanceLabelDiffSuppress
       machineType: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb

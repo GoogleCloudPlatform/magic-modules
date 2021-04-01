@@ -11,12 +11,18 @@ if $(echo $USER | fgrep -wq -e ndmckinley -e danawillow -e emilymye -e megan07 -
 	echo "User is on the list, not skipping."
 else
 	echo "Checking GCP org membership"
-	GCP_MEMBER=$(curl -sw '%{http_code}' -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/orgs/GoogleCloudPlatform/members/$USER -o /dev/null)
+	GCP_MEMBER=$(curl -Lsw '%{http_code}' -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/orgs/GoogleCloudPlatform/members/$USER -o /dev/null)
 	if [ "$GCP_MEMBER" != "404" ]; then
 		echo "User is a GCP org member, continuing"
 	else
-		echo "User is not a GCP org member"
-		exit 0
+		echo "Checking googlers org membership"
+		GOOGLERS_MEMBER=$(curl -Lsw '%{http_code}' -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/orgs/googlers/members/$USER -o /dev/null)
+		if [ "$GOOGLERS_MEMBER" != "404" ]; then
+			echo "User is a googlers org member, continuing"
+		else
+			echo "User is not a GCP org member or a googlers org member"
+			exit 0
+		fi
 	fi
 fi
 

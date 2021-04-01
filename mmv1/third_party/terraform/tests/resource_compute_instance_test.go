@@ -1,5 +1,3 @@
-// <% autogen_exception -%>
-
 package google
 
 import (
@@ -1518,6 +1516,7 @@ func TestAccComputeInstance_updateRunning_desiredStatusRunning_allowStoppingForU
 }
 
 const errorAllowStoppingMsg = "Changing the machine_type, min_cpu_platform, service_account, enable_display, shielded_instance_config, or network_interface.\\[#d\\].\\(network/subnetwork/subnetwork_project\\) on a started instance requires stopping it. To acknowledge this, please set allow_stopping_for_update = true in your config. You can also stop it by setting desired_status = \"TERMINATED\", but the instance will not be restarted after the update."
+
 func TestAccComputeInstance_updateRunning_desiredStatusNotSet_notAllowStoppingForUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -4586,9 +4585,7 @@ resource "google_compute_instance" "foobar" {
       values   = [google_compute_node_group.nodes.name]
     }
 
-<% unless version == 'ga' -%>
     min_node_cpus = 4
-<% end -%>
   }
 }
 
@@ -4602,9 +4599,7 @@ resource "google_compute_node_template" "nodetmpl" {
 
   node_type = "n1-node-96-624"
 
-<% unless version == 'ga' -%>
   cpu_overcommit_type = "ENABLED"
-<% end -%>
 }
 
 resource "google_compute_node_group" "nodes" {
@@ -4658,9 +4653,7 @@ resource "google_compute_instance" "foobar" {
       values   = [google_compute_node_group.nodes.name]
     }
 
-<% unless version == 'ga' -%>
     min_node_cpus = 6
-<% end -%>
   }
 }
 
@@ -4674,9 +4667,7 @@ resource "google_compute_node_template" "nodetmpl" {
 
   node_type = "n1-node-96-624"
 
-<% unless version == 'ga' -%>
   cpu_overcommit_type = "ENABLED"
-<% end -%>
 }
 
 resource "google_compute_node_group" "nodes" {
@@ -4693,7 +4684,7 @@ func testAccComputeInstance_shieldedVmConfig(instance string, enableSecureBoot b
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "centos-7"
-  project = "gce-uefi-images"
+  project = "centos-cloud"
 }
 
 resource "google_compute_instance" "foobar" {
@@ -4760,7 +4751,7 @@ func testAccComputeInstance_enableDisplay(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "centos-7"
-  project = "gce-uefi-images"
+  project = "centos-cloud"
 }
 
 resource "google_compute_instance" "foobar" {
@@ -4789,7 +4780,7 @@ func testAccComputeInstance_enableDisplayUpdated(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "centos-7"
-  project = "gce-uefi-images"
+  project = "centos-cloud"
 }
 
 resource "google_compute_instance" "foobar" {

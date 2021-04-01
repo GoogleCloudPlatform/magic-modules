@@ -199,6 +199,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       serviceLevelIndicator.basicSli.availability.enabled: !ruby/object:Overrides::Terraform::PropertyOverride  
         validation: !ruby/object:Provider::Terraform::Validation
           function: validateAvailabilitySli
+      serviceLevelIndicator.windowsBasedSli.goodTotalRatioThreshold.basicSliPerformance.availability: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/monitoring_slo_availability_sli.go.erb'
+      serviceLevelIndicator.windowsBasedSli.goodTotalRatioThreshold.basicSliPerformance.availability.enabled: !ruby/object:Overrides::Terraform::PropertyOverride  
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: validateAvailabilitySli    
       serviceLevelIndicator.requestBasedSli: !ruby/object:Overrides::Terraform::PropertyOverride
         # Force update all nested fields to allow for unsetting values.
         update_mask_fields:

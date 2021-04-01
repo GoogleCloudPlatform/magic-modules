@@ -496,7 +496,6 @@ objects:
   - !ruby/object:Api::Resource
     name: 'ResourceDnsRecordSet'
     kind: 'dns#resourceRecordSet'
-    min_version: beta
     description: |
       A single DNS record that exists on a domain name (i.e. in a managed zone).
       This record defines the information about the domain and where the

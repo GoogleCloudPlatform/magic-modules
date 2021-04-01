@@ -547,9 +547,8 @@ objects:
     self_link: "{{dataset}}/consentStores/{{name}}"
     update_verb: :PATCH
     update_mask: true
-    min_version: beta
     description: |
-      The Consent Management API is a tool for tracking user consents and the documentation associated with the consents. 
+      The Consent Management API is a tool for tracking user consents and the documentation associated with the consents.
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       method_name_separator: ':'
       fetch_iam_policy_verb: :GET
@@ -588,7 +587,7 @@ objects:
         name: 'enableConsentCreateOnUpdate'
         required: false
         description: |
-          If true, [consents.patch] [google.cloud.healthcare.v1beta1.consent.UpdateConsent] creates the consent if it does not already exist.
+          If true, [consents.patch] [google.cloud.healthcare.v1.consent.UpdateConsent] creates the consent if it does not already exist.
       - !ruby/object:Api::Type::KeyValuePairs
         name: labels
         required: false
@@ -610,4 +609,4 @@ objects:
       guides:
         'Creating a Consent store':
           'https://cloud.google.com/healthcare/docs/how-tos/consent'
-      api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1beta1/projects.locations.datasets.consentStores'
+      api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.consentStores'

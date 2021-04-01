@@ -303,6 +303,17 @@ The optional `settings.backup_configuration` subblock supports:
 
 * `location` - (Optional) The region where the backup will be stored
 
+* `transaction_log_retention_days` - (Optional) The number of days of transaction logs we retain for point in time restore, from 1-7.
+
+* `backup_retention_settings` - (Optional) Backup retention settings. The configuration is detailed below.
+
+The optional `settings.backup_configuration.backup_retention_settings` subblock supports:
+
+* `retained_backups` - (Optional) Depending on the value of retention_unit, this is used to determine if a backup needs to be deleted. If retention_unit
+  is 'COUNT', we will retain this many backups.
+
+* `retention_unit` - (Optional) The unit that 'retained_backups' represents. Defaults to `COUNT`.
+
 The optional `settings.ip_configuration` subblock supports:
 
 * `ipv4_enabled` - (Optional) Whether this Cloud SQL instance should be assigned
@@ -346,6 +357,16 @@ when an Instance can automatically restart to apply updates. The maintenance win
 
 * `update_track` - (Optional) Receive updates earlier (`canary`) or later
 (`stable`)
+
+The optional `settings.insights_config` subblock for instances declares [Query Insights](https://cloud.google.com/sql/docs/postgres/insights-overview) configuration. It contains:
+
+* `query_insights_enabled` - True if Query Insights feature is enabled.
+
+* `query_string_length` - Maximum query length stored in bytes. Between 256 and 4500. Default to 1024.
+
+* `record_application_tags` - True if Query Insights will record application tags from query when enabled.
+
+* `record_client_address` - True if Query Insights will record client address when enabled.
 
 The optional `replica_configuration` block must have `master_instance_name` set
 to work, cannot be updated, and supports:
@@ -459,9 +480,9 @@ performing filtering in a Terraform config.
 `google_sql_database_instance` provides the following
 [Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
 
-- `create` - Default is 20 minutes.
-- `update` - Default is 20 minutes.
-- `delete` - Default is 20 minutes.
+- `create` - Default is 30 minutes.
+- `update` - Default is 30 minutes.
+- `delete` - Default is 30 minutes.
 
 ## Import
 

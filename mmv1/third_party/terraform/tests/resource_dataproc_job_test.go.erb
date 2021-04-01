@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -13,8 +14,12 @@ import (
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"google.golang.org/api/dataproc/v1"
 	"google.golang.org/api/googleapi"
+<% if version == "ga" -%>
+	"google.golang.org/api/dataproc/v1"
+<% else -%>
+	"google.golang.org/api/dataproc/v1beta2"
+<% end -%>
 )
 
 type jobTestField struct {
@@ -505,7 +510,7 @@ resource "google_dataproc_cluster" "basic" {
       num_instances = 1
       machine_type  = "e2-standard-2"
       disk_config {
-        boot_disk_size_gb = 15
+        boot_disk_size_gb = 30
       }
     }
   }

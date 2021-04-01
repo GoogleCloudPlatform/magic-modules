@@ -2,15 +2,15 @@ package google
 
 import "fmt"
 
-func GetBucketIamPolicyCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+func GetBucketIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return newBucketIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetBucketIamBindingCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+func GetBucketIamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return newBucketIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetBucketIamMemberCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+func GetBucketIamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return newBucketIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -23,30 +23,48 @@ func MergeBucketIamBinding(existing, incoming Asset) Asset {
 	return mergeIamAssets(existing, incoming, mergeAuthoritativeBindings)
 }
 
+func MergeBucketIamBindingDelete(existing, incoming Asset) Asset {
+	return mergeDeleteIamAssets(existing, incoming, mergeDeleteAuthoritativeBindings)
+}
+
 func MergeBucketIamMember(existing, incoming Asset) Asset {
 	return mergeIamAssets(existing, incoming, mergeAdditiveBindings)
+}
+
+func MergeBucketIamMemberDelete(existing, incoming Asset) Asset {
+	return mergeDeleteIamAssets(existing, incoming, mergeDeleteAdditiveBindings)
 }
 
 func newBucketIamAsset(
 	d TerraformResourceData,
 	config *Config,
 	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
-) (Asset, error) {
+) ([]Asset, error) {
 	bindings, err := expandBindings(d)
 	if err != nil {
-		return Asset{}, fmt.Errorf("expanding bindings: %v", err)
+		return []Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
-	name, err := assetName(d, config, "//storage.googleapis.com/{{name}}")
+	name, err := assetName(d, config, "//storage.googleapis.com/{{bucket}}")
 	if err != nil {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 
-	return Asset{
+	return []Asset{{
 		Name: name,
 		Type: "storage.googleapis.com/Bucket",
 		IAMPolicy: &IAMPolicy{
 			Bindings: bindings,
 		},
-	}, nil
+	}}, nil
+}
+
+func FetchBucketIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+	return fetchIamPolicy(
+		StorageBucketIamUpdaterProducer,
+		d,
+		config,
+		"//storage.googleapis.com/{{bucket}}",
+		"storage.googleapis.com/Bucket",
+	)
 }

@@ -9,10 +9,12 @@ description: |-
 
 # google\_cloudfunctions\_function
 
-Creates a new Cloud Function. For more information see
-[the official documentation](https://cloud.google.com/functions/docs/)
-and
-[API](https://cloud.google.com/functions/docs/apis).
+Creates a new Cloud Function. For more information see:
+
+* [API documentation](https://cloud.google.com/functions/docs/reference/rest/v1/projects.locations.functions)
+* How-to Guides
+    * [Official Documentation](https://cloud.google.com/functions/docs)
+
 
 ~> **Warning:** As of November 1, 2019, newly created Functions are
 private-by-default and will require [appropriate IAM permissions](https://cloud.google.com/functions/docs/reference/iam/roles)
@@ -36,7 +38,7 @@ resource "google_storage_bucket_object" "archive" {
 resource "google_cloudfunctions_function" "function" {
   name        = "function-test"
   description = "My function"
-  runtime     = "nodejs10"
+  runtime     = "nodejs12"
 
   available_memory_mb   = 128
   source_archive_bucket = google_storage_bucket.bucket.name
@@ -72,7 +74,7 @@ resource "google_storage_bucket_object" "archive" {
 resource "google_cloudfunctions_function" "function" {
   name        = "function-test"
   description = "My function"
-  runtime     = "nodejs10"
+  runtime     = "nodejs12"
 
   available_memory_mb   = 128
   source_archive_bucket = google_storage_bucket.bucket.name
@@ -107,7 +109,7 @@ The following arguments are supported:
 * `name` - (Required) A user-defined name of the function. Function names must be unique globally.
 
 * `runtime` - (Required) The runtime in which the function is going to run.
-Eg. `"nodejs8"`, `"nodejs10"`, `"python37"`, `"go111"`, `"go113"`.
+Eg. `"nodejs8"`, `"nodejs10"`, `"nodejs12"`, `"python37"`, `"python38"`,`"go111"`, `"go113"`.
 
 - - -
 

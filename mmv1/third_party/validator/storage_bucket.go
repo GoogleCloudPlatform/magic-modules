@@ -16,13 +16,13 @@ import (
 	"google.golang.org/api/storage/v1"
 )
 
-func GetStorageBucketCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+func GetStorageBucketCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//storage.googleapis.com/{{name}}")
 	if err != nil {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 	if obj, err := GetStorageBucketApiObject(d, config); err == nil {
-		return Asset{
+		return []Asset{{
 			Name: name,
 			Type: "storage.googleapis.com/Bucket",
 			Resource: &AssetResource{
@@ -31,9 +31,9 @@ func GetStorageBucketCaiObject(d TerraformResourceData, config *Config) (Asset, 
 				DiscoveryName:        "Bucket",
 				Data:                 obj,
 			},
-		}, nil
+		}}, nil
 	} else {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 }
 
@@ -107,6 +107,9 @@ func GetStorageBucketApiObject(d TerraformResourceData, config *Config) (map[str
 }
 
 func expandCors(configured []interface{}) []*storage.BucketCors {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
 	corsRules := make([]*storage.BucketCors, 0, len(configured))
 	for _, raw := range configured {
 		data := raw.(map[string]interface{})
@@ -156,7 +159,7 @@ func expandBucketLogging(configured interface{}) *storage.BucketLogging {
 
 func expandBucketVersioning(configured interface{}) *storage.BucketVersioning {
 	versionings := configured.([]interface{})
-	if len(versionings) == 0 {
+	if len(versionings) == 0 || versionings[0] == nil  {
 		return nil
 	}
 

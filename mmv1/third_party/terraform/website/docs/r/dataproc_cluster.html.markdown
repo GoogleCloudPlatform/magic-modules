@@ -9,8 +9,11 @@ description: |-
 
 # google\_dataproc\_cluster
 
-Manages a Cloud Dataproc cluster resource within GCP. For more information see
-[the official dataproc documentation](https://cloud.google.com/dataproc/).
+Manages a Cloud Dataproc cluster resource within GCP.
+
+* [API documentation](https://cloud.google.com/dataproc/docs/reference/rest/v1/projects.regions.clusters)
+* How-to Guides
+    * [Official Documentation](https://cloud.google.com/dataproc/docs)
 
 
 !> **Warning:** Due to limitations of the API, all arguments except
@@ -50,7 +53,7 @@ resource "google_dataproc_cluster" "mycluster" {
       machine_type  = "e2-medium"
       disk_config {
         boot_disk_type    = "pd-ssd"
-        boot_disk_size_gb = 15
+        boot_disk_size_gb = 30
       }
     }
 
@@ -59,7 +62,7 @@ resource "google_dataproc_cluster" "mycluster" {
       machine_type     = "e2-medium"
       min_cpu_platform = "Intel Skylake"
       disk_config {
-        boot_disk_size_gb = 15
+        boot_disk_size_gb = 30
         num_local_ssds    = 1
       }
     }
@@ -275,7 +278,7 @@ cluster_config {
 
     disk_config {
       boot_disk_type    = "pd-ssd"
-      boot_disk_size_gb = 15
+      boot_disk_size_gb = 30
       num_local_ssds    = 1
     }
   }
@@ -334,7 +337,7 @@ cluster_config {
 
     disk_config {
       boot_disk_type    = "pd-standard"
-      boot_disk_size_gb = 15
+      boot_disk_size_gb = 30
       num_local_ssds    = 1
     }
   }
@@ -395,7 +398,7 @@ cluster_config {
 
     disk_config {
       boot_disk_type    = "pd-standard"
-      boot_disk_size_gb = 15
+      boot_disk_size_gb = 30
       num_local_ssds    = 1
     }
   }
