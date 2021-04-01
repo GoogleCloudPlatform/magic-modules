@@ -169,6 +169,7 @@ components:
           type: object
           x-dcl-go-name: Transport
           x-dcl-go-type: TriggerTransport
+          x-dcl-server-default: true
           x-kubernetes-immutable: true
         updateTime:
           description: Output only. The last-modified time.
