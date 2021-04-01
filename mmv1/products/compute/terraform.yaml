@@ -1109,10 +1109,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "interconnect_attachment_basic"
         primary_resource_id: "on_prem"
-        skip_test: true
         vars:
           interconnect_attachment_name: "on-prem-attachment"
           router_name: "router"
+          network_name: "network"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
