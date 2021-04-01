@@ -75,7 +75,19 @@ func TestAccDNSRecordSet_Update(t *testing.T) {
 				Config: testAccDnsRecordSet_basic(zoneName, "127.0.0.10", 300),
 			},
 			{
+				ResourceName:      "google_dns_record_set.foobar",
+				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: testAccDnsRecordSet_basic(zoneName, "127.0.0.11", 300),
+			},
+			{
+				ResourceName:      "google_dns_record_set.foobar",
+				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccDnsRecordSet_basic(zoneName, "127.0.0.11", 600),
@@ -101,6 +113,12 @@ func TestAccDNSRecordSet_changeType(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDnsRecordSet_basic(zoneName, "127.0.0.10", 300),
+			},
+			{
+				ResourceName:      "google_dns_record_set.foobar",
+				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccDnsRecordSet_bigChange(zoneName, 600),
