@@ -197,7 +197,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       constants: 'templates/terraform/constants/resource_dns_resource_record_set.go.erb'
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        min_version: beta
         skip_test: true
         name: "dns_record_set_basic"
         primary_resource_id: "resource-recordset"
