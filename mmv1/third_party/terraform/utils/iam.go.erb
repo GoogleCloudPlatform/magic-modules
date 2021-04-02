@@ -247,7 +247,8 @@ func iamMemberIsCaseSensitive(member string) bool {
 }
 
 // normalizeIamMemberCasing returns the case adjusted value of an iamMember
-// this is important as iam will ignore casing in most circumstances
+// this is important as iam will ignore casing unless it is one of the following
+// member types: principalSet, principal, principalHierarchy
 // members are in <type>:<value> format
 // <type> is case sensitive
 // <value> isn't in most cases
