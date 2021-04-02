@@ -112,14 +112,12 @@ func TestAccServiceAccountIamMember(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config:             testAccServiceAccountIamMember_basic(account, strings.ToUpper(email)),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: false,
+				Config:   testAccServiceAccountIamMember_basic(account, strings.ToUpper(email)),
+				PlanOnly: true,
 			},
 			{
-				Config:             testAccServiceAccountIamMember_basic(account, strings.Title(email)),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: false,
+				Config:   testAccServiceAccountIamMember_basic(account, strings.Title(email)),
+				PlanOnly: true,
 			},
 		},
 	})
