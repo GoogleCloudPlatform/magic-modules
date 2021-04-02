@@ -16,6 +16,6 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
     if v == nil {
         return v
     }
-	parts := strings.SplitN(v.(string), "/", 2)
-	return parts[1]
+	parts := strings.Split(v.(string), "/")
+	return strings.Join(parts[len(parts)-3:], "/")
 }

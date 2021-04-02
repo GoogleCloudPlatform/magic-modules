@@ -76,7 +76,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/tags_tag_binding_name.erb'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/tags_tag_binding.go.erb
-      decoder: templates/terraform/decoders/tags_tag_binding.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "tag_binding_basic"
