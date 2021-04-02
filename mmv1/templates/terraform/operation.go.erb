@@ -29,13 +29,6 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
 }
 
 func create<%= product_name %>Waiter(config *Config, op map[string]interface{}, <% if has_project -%> project, <% end -%> activity, userAgent string) (*<%=product_name%>OperationWaiter, error) {
-  if val, ok := op["name"]; !ok || val == "" {
-    // An operation could also be indicated with a "metadata" field.
-    if _, ok := op["metadata"]; !ok {
-      // This was a synchronous call - there is no operation to wait for.
-      return nil, nil
-    }
-  }
   w := &<%= product_name -%>OperationWaiter{
     Config:    config,
     UserAgent: userAgent,
@@ -57,8 +50,7 @@ func create<%= product_name %>Waiter(config *Config, op map[string]interface{}, 
 // nolint: deadcode,unused
 func <%= product_name.camelize(:lower) -%>OperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{},<% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
   w, err := create<%= product_name %>Waiter(config, op, <% if has_project -%> project, <%end-%> activity, userAgent)
-  if err != nil || w == nil {
-      // If w is nil, the op was synchronous.
+  if err != nil {
       return err
   }
   if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
@@ -69,8 +61,12 @@ func <%= product_name.camelize(:lower) -%>OperationWaitTimeWithResponse(config *
 <% end -%>
 
 func <%= product_name.camelize(:lower) -%>OperationWaitTime(config *Config, op map[string]interface{}, <% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
+  if val, ok := op["name"]; !ok || val == "" {
+    // This was a synchronous call - there is no operation to wait for.
+    return nil
+  }
   w, err := create<%= product_name %>Waiter(config, op, <% if has_project -%> project, <%end-%> activity, userAgent)
-  if err != nil || w == nil {
+  if err != nil {
       // If w is nil, the op was synchronous.
       return err
   }
