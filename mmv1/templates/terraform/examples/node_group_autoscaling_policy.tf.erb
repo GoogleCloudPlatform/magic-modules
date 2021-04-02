@@ -6,7 +6,7 @@ resource "google_compute_node_template" "soletenant-tmpl" {
 
 resource "google_compute_node_group" "<%= ctx[:primary_resource_id] %>" {
   name        = "<%= ctx[:vars]['group_name'] %>"
-  zone        = "us-central1-a"
+  zone        = "us-central1-f"
   description = "example google_compute_node_group for Terraform Google Provider"
   maintenance_policy = "RESTART_IN_PLACE"
   maintenance_window {
