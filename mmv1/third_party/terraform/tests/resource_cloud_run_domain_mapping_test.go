@@ -78,3 +78,35 @@ resource "google_cloud_run_domain_mapping" "default" {
 }
 `, context)
 }
+
+func testAccCloudRunDomainMapping_cloudRunDomainMappingUpdated2(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_cloud_run_service" "default" {
+  name     = "tf-test-cloudrun-srv%{random_suffix}"
+  location = "us-central1"
+  metadata {
+    namespace = "%{namespace}"
+  }
+  template {
+    spec {
+      containers {
+        image = "us-docker.pkg.dev/cloudrun/container/hello"
+      }
+    }
+  }
+}
+resource "google_cloud_run_domain_mapping" "default" {
+  location = "us-central1"
+  name     = "tf-test-domain%{random_suffix}.gcp.tfacc.hashicorptest.com"
+  metadata {
+    namespace = "%{namespace}"
+    labels = {
+      "my-label" = "my-value"
+    }
+  }
+  spec {
+    route_name = google_cloud_run_service.default.name
+  }
+}
+`, context)
+}
