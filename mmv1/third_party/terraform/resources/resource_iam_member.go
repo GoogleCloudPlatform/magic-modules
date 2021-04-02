@@ -1,10 +1,10 @@
-<% autogen_exception -%>
 package google
 
 import (
 	"errors"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -101,7 +101,7 @@ func iamMemberImport(newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser 
 
 		// Set the ID again so that the ID matches the ID it would have if it had been created via TF.
 		// Use the current ID in case it changed in the resourceIdParserFunc.
-		d.SetId(d.Id() + "/" + role + "/" + strings.ToLower(member))
+		d.SetId(d.Id() + "/" + role + "/" + normalizeIamMemberCasing(member))
 
 		// Read the upstream policy so we can set the full condition.
 		updater, err := newUpdaterFunc(d, config)
@@ -114,7 +114,7 @@ func iamMemberImport(newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser 
 		}
 		var binding *cloudresourcemanager.Binding
 		for _, b := range p.Bindings {
-			if (b.Role == role && conditionKeyFromCondition(b.Condition).Title == conditionTitle) {
+			if b.Role == role && conditionKeyFromCondition(b.Condition).Title == conditionTitle {
 				containsMember := false
 				for _, m := range b.Members {
 					if strings.ToLower(m) == strings.ToLower(member) {
@@ -165,8 +165,8 @@ func ResourceIamMemberWithBatching(parentSpecificSchema map[string]*schema.Schem
 
 func getResourceIamMember(d *schema.ResourceData) *cloudresourcemanager.Binding {
 	b := &cloudresourcemanager.Binding{
-		Members:   []string{d.Get("member").(string)},
-		Role:      d.Get("role").(string),
+		Members: []string{d.Get("member").(string)},
+		Role:    d.Get("role").(string),
 	}
 	if c := expandIamCondition(d.Get("condition")); c != nil {
 		b.Condition = c
@@ -199,7 +199,7 @@ func resourceIamMemberCreate(newUpdaterFunc newResourceIamUpdaterFunc, enableBat
 		if err != nil {
 			return err
 		}
-		d.SetId(updater.GetResourceId() + "/" + memberBind.Role + "/" + strings.ToLower(memberBind.Members[0]))
+		d.SetId(updater.GetResourceId() + "/" + memberBind.Role + "/" + normalizeIamMemberCasing(memberBind.Members[0]))
 		if k := conditionKeyFromCondition(memberBind.Condition); !k.Empty() {
 			d.SetId(d.Id() + "/" + k.String())
 		}
@@ -227,7 +227,7 @@ func resourceIamMemberRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.Read
 
 		var binding *cloudresourcemanager.Binding
 		for _, b := range p.Bindings {
-			if (b.Role == eMember.Role && conditionKeyFromCondition(b.Condition) == eCondition) {
+			if b.Role == eMember.Role && conditionKeyFromCondition(b.Condition) == eCondition {
 				binding = b
 				break
 			}
