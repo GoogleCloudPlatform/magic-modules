@@ -250,7 +250,7 @@ func TestAccServiceAccountIamMember_federatedIdentity(t *testing.T) {
 	})
 }
 
-func TestAccServiceAccountIamBinding_federeatedIdentity(t *testing.T) {
+func TestAccServiceAccountIamBinding_federatedIdentity(t *testing.T) {
 	t.Parallel()
 
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
@@ -269,6 +269,29 @@ func TestAccServiceAccountIamBinding_federeatedIdentity(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateId:     fmt.Sprintf("%s %s", serviceAccountCanonicalId(account), "roles/iam.serviceAccountUser"),
+			},
+		},
+	})
+}
+
+func TestAccServiceAccountIamPolicy_federatedIdentity(t *testing.T) {
+	t.Parallel()
+
+	account := fmt.Sprintf("tf-test-%d", randInt(t))
+	pool := fmt.Sprintf("tf-test-%d", randInt(t))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccServiceAccountIamPolicy_federatedIdentity(account, pool),
+			},
+			{
+				ResourceName:      "google_service_account_iam_policy.foo",
+				ImportStateId:     serviceAccountCanonicalId(account),
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -515,6 +538,32 @@ resource "google_service_account_iam_binding" "foo" {
   service_account_id = google_service_account.test_account.name
   role               = "roles/iam.serviceAccountUser"
   members            = ["principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.my_pool.name}/attribute.aws_role/arn:aws:sts::999999999999:assumed-role/stack-eu-central-1-lambdaRole"]
+}
+
+resource "google_iam_workload_identity_pool" "my_pool" {
+	workload_identity_pool_id = "%s"
+}
+`, account, poolId)
+}
+
+func testAccServiceAccountIamPolicy_federatedIdentity(account, poolId string) string {
+	return fmt.Sprintf(`
+resource "google_service_account" "test_account" {
+  account_id   = "%s"
+  display_name = "Service Account Iam Testing Account"
+}
+
+data "google_iam_policy" "foo" {
+  binding {
+    role = "roles/iam.serviceAccountUser"
+
+    members = ["principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.my_pool.name}/attribute.aws_role/arn:aws:sts::999999999999:assumed-role/stack-eu-central-1-lambdaRole"]
+  }
+}
+
+resource "google_service_account_iam_policy" "foo" {
+  service_account_id = google_service_account.test_account.name
+  policy_data        = data.google_iam_policy.foo.policy_data
 }
 
 resource "google_iam_workload_identity_pool" "my_pool" {
