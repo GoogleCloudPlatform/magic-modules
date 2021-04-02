@@ -90,7 +90,7 @@ func iamMemberImport(newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser 
 		if err := d.Set("role", role); err != nil {
 			return nil, fmt.Errorf("Error setting role: %s", err)
 		}
-		if err := d.Set("member", member); err != nil {
+		if err := d.Set("member", normalizeIamMemberCasing(member)); err != nil {
 			return nil, fmt.Errorf("Error setting member: %s", err)
 		}
 
