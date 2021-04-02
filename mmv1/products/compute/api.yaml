@@ -7321,7 +7321,6 @@ objects:
       - !ruby/object:Api::Type::Boolean
         name: 'adminEnabled'
         send_empty_value: true
-        default_value: true
         description: |
           Whether the VLAN attachment is enabled or disabled.  When using
           PARTNER type this will Pre-Activate the interconnect attachment
@@ -7374,7 +7373,7 @@ objects:
           - :BPS_10G
           - :BPS_20G
           - :BPS_50G
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Enum
         name: 'edgeAvailabilityDomain'
         input: true
         description: |
@@ -7384,13 +7383,34 @@ objects:
           selected availability domain will be provided to the Partner via the
           pairing key so that the provisioned circuit will lie in the specified
           domain. If not specified, the value will default to AVAILABILITY_DOMAIN_ANY.
+        values:
+          - :AVAILABILITY_DOMAIN_1
+          - :AVAILABILITY_DOMAIN_2
+          - :AVAILABILITY_DOMAIN_ANY
+      - !ruby/object:Api::Type::NestedObject
+        name: 'partnerMetadata'
+        description: |
+          Informational metadata about Partner attachments from Partners to display
+          to customers. Output only for for PARTNER type, mutable for PARTNER_PROVIDER,
+          not available for DEDICATED.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: partnerName
+            description: |
+              Plain text name of the Partner providing this attachment. This value may be validated to match approved Partner values.
+          - !ruby/object:Api::Type::String
+            name: interconnectName
+            description: |
+              Plain text name of the Interconnect this attachment is connected to, as displayed in the Partner's portal. For instance "Chicago 1". This value may be validated to match approved Partner values.
+          - !ruby/object:Api::Type::String
+            name: portalUrl
+            description: |
+              URL of the Partner's portal for this Attachment. Partners may customise this to be a deep link to the specific resource on the Partner portal. This value may be validated to match approved Partner values.
       - !ruby/object:Api::Type::String
         name: 'pairingKey'
+        input: true
         description: |
-          [Output only for type PARTNER. Not present for DEDICATED]. The opaque
-          identifier of an PARTNER attachment used to initiate provisioning with
-          a selected partner. Of the form "XXXXX/region/domain"
-        output: true
+          [Output only for type PARTNER. Input only for PARTNER_PROVIDER. Not present for DEDICATED]. The opaque identifier of an PARTNER attachment used to initiate provisioning with a selected partner. Of the form "XXXXX/region/domain"
       - !ruby/object:Api::Type::String
         name: 'partnerAsn'
         description: |
@@ -7455,7 +7475,6 @@ objects:
           the same region as this InterconnectAttachment. The InterconnectAttachment will
           automatically connect the Interconnect to the network & region within which the
           Cloud Router is configured.
-        required: true
         input: true
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
