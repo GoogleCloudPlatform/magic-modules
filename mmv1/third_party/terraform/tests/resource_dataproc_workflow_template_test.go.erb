@@ -54,18 +54,19 @@ resource "google_dataproc_workflow_template" "template" {
           num_instances = 1
           machine_type = "n1-standard-1"
           disk_config {
-            disk_boot_type = "pd-ssd"
-            disk_boot_size_gb = 15
+            boot_disk_type = "pd-ssd"
+            boot_disk_size_gb = 15
           }
         }
         worker_config {
           num_instances = 3
           machine_type = "n1-standard-2"
+          disk_config {
+            boot_disk_size_gb = 10
+            num_local_ssds = 2
+          }
         }
-        disk_config {
-          boot_disk_size_gb = 10
-          num_local_ssds = 2
-        }
+
         secondary_worker_config {
           num_instances = 2
         }
@@ -77,14 +78,14 @@ resource "google_dataproc_workflow_template" "template" {
   }
   jobs {
     step_id = "someJob"
-    spark_job = {
+    spark_job {
       main_class = "SomeClass"
     }
   }
   jobs {
     step_id = "otherJob"
-    prerequisite_job_steps = ["someJob"]
-    presto_job = {
+    prerequisite_step_ids = ["someJob"]
+    presto_job {
       query_file_uri = "someuri"
     }
   }

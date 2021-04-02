@@ -167,7 +167,6 @@ func (p Property) PackageJSONName() string {
 // use in naming functions. For example, "MachineType" or "NodeConfigPreemptible".
 func (p Property) PackagePath() string {
 	if p.ref != "" {
-		glog.Errorf("Returning ref : %v", p.ref)
 		return p.ref
 	}
 	if p.parent != nil {
@@ -228,7 +227,7 @@ func buildGetter(p Property, rawGetter string) string {
 		return fmt.Sprintf("dcl.Bool(%s.(bool))", rawGetter)
 	case SchemaTypeString:
 		if p.Type.IsEnum() {
-			return fmt.Sprintf("%s.%s%sEnumRef(%s.(string))", p.resource.Package, p.resource.Type(), p.PackagePath(), rawGetter)
+			return fmt.Sprintf("%s.%sEnumRef(%s.(string))", p.resource.Package, p.ObjectType(), rawGetter)
 		}
 		if p.sendEmpty {
 			return fmt.Sprintf("dcl.String(%s.(string))", rawGetter)
@@ -451,7 +450,6 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 	}
 
 	for k, v := range schema.Properties {
-		glog.Errorf("Creating : %v", k)
 		ref := ""
 		packageName := ""
 
@@ -466,10 +464,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				return nil, err
 			}
 			ref = typeFetcher.PackagePathForReference(ref, v.Extension["x-dcl-go-type"].(string))
-			glog.Errorf("Resolved is : %v", v)
-			glog.Errorf("Resolved props are : %v", v.Properties)
 		}
-		glog.Errorf("Ref is : %v", v.Ref)
 
 		// Sub-properties are referenced by name, and the explicit title value
 		// won't be set initially.

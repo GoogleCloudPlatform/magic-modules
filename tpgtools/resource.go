@@ -20,7 +20,6 @@ import (
 	"strings"
 
 	"bitbucket.org/creachadair/stringset"
-	"github.com/golang/glog"
 	"github.com/nasa9084/go-openapi"
 )
 
@@ -382,7 +381,6 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 	if err != nil {
 		return nil, err
 	}
-	glog.Errorf("Props are : %#v", props)
 
 	res.Properties = props
 

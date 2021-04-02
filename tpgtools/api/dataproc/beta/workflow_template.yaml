@@ -485,15 +485,6 @@ components:
               type: string
               x-dcl-go-name: ImageVersion
               x-kubernetes-immutable: true
-            optionalComponents:
-              description: Optional. The set of components to activate on the cluster.
-              items:
-                type: string
-                x-dcl-go-type: ClusterClusterConfigSoftwareConfigOptionalComponentsEnum
-              type: array
-              x-dcl-go-name: OptionalComponents
-              x-dcl-list-type: list
-              x-kubernetes-immutable: true
             properties:
               additionalProperties:
                 type: string
