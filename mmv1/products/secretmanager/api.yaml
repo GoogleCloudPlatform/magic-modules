@@ -163,4 +163,5 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: data
+            required: true
             description: The secret data. Must be no larger than 64KiB.

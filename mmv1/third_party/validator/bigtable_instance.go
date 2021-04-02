@@ -5,7 +5,7 @@ import (
 )
 
 func GetBigtableInstanceCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//bigtable.googleapis.com/projects/{{.Provider.project}}/instances/{{name}}")
+	name, err := assetName(d, config, "//bigtable.googleapis.com/projects/{{project}}/instances/{{name}}")
 
 	if err != nil {
 		return []Asset{}, err

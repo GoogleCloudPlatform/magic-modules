@@ -19,7 +19,7 @@ scopes:
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://artifactregistry.googleapis.com/v1beta1/
+    base_url: https://artifactregistry.googleapis.com/v1beta2/
 apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Artifact Registry API
@@ -56,7 +56,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/artifact-registry/docs/overview'
-      api: 'https://cloud.google.com/artifact-registry/docs/reference/rest/'
+      api: 'https://cloud.google.com/artifact-registry/docs/reference/rest/v1beta2/projects.locations.repositories'
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
       method_name_separator: ':'
@@ -87,12 +87,10 @@ objects:
       required: true
       input: true
       url_param_only: true
-    - !ruby/object:Api::Type::Enum
+    - !ruby/object:Api::Type::String
       name: format
       description: |-
         The format of packages that are stored in the repository.
-      values:
-        - :DOCKER
       required: true
       input: true
     - !ruby/object:Api::Type::String
