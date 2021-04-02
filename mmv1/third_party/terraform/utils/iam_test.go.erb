@@ -683,11 +683,16 @@ func TestIamCreateIamBindingsMap(t *testing.T) {
 					Role:    "role-3",
 					Members: []string{"user-3"},
 				},
+				{
+					Role:    "role-4",
+					Members: []string{"deleted:principal:useR-1"},
+				},
 			},
 			expect: map[iamBindingKey]map[string]struct{}{
 				iamBindingKey{"role-1", conditionKey{}}: {"deleted:serviceAccount:user-1": {}, "user-2": {}, "serviceAccount:user-3": {}},
 				iamBindingKey{"role-2", conditionKey{}}: {"deleted:user:user-1": {}, "user-2": {}},
 				iamBindingKey{"role-3", conditionKey{}}: {"user-3": {}},
+				iamBindingKey{"role-4", conditionKey{}}: {"deleted:principal:useR-1": {}},
 			},
 		},
 		{
