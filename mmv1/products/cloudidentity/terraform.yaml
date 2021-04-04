@@ -51,7 +51,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         in the provider configuration. Otherwise the Cloud Identity API will return a 403 error. 
         Your account must have the `serviceusage.services.use` permission on the 
         `billing_project` you defined.
-    import_format: ["{{name}}"]
+    import_format: ["{{%name}}"]
     # These will be sweeped with the parent groups
     skip_sweeper: true
     examples:
@@ -79,7 +79,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/set_computed_name.erb
-      custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.erb
+      post_import: templates/terraform/post_import/cloud_identity_group_membership.go.erb
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
