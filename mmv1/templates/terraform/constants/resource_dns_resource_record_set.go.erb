@@ -1,0 +1,19 @@
+func rrdatasDnsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if d.Get("type") == "AAAA" {
+		return ipv6AddressforDnsDiffSuppress(k, old, new, d)
+	}
+	if d.Get("type") == "MX" {
+		return (strings.ToLower(old) == strings.ToLower(new))
+	}
+	if d.Get("type") == "TXT" {
+		return strings.ToLower(strings.Trim(old, `"`)) == strings.ToLower(strings.Trim(new, `"`))
+	}
+	return false
+}
+
+func ipv6AddressforDnsDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	oldIp := net.ParseIP(old)
+	newIp := net.ParseIP(new)
+
+	return oldIp.Equal(newIp)
+}
