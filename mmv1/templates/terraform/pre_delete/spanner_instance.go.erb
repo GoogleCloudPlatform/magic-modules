@@ -1,24 +1,17 @@
 
 if d.Get("force_destroy").(bool) {
-	// Override GET url to get backups
-	url, err = replaceVars(d, config, "{{SpannerBasePath}}projects/{{project}}/instances/{{name}}/backups")
+	backupsUrl, err := replaceVars(d, config, "{{SpannerBasePath}}projects/{{project}}/instances/{{name}}/backups")
 	if err != nil {
 		return err
 	}
 
-	resp, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	resp, err := sendRequest(config, "GET", billingProject, backupsUrl, userAgent, nil)
 	if err != nil {
-		// API returns 200 if no backups exist but the instance still exists. This error is gua
+		// API returns 200 if no backups exist but the instance still exists, hence the error check.
 		return handleNotFoundError(err, d, fmt.Sprintf("SpannerInstance %q", d.Id()))
 	}
 
 	err = deleteSpannerBackups(d, config, resp, billingProject, userAgent)
-	if err != nil {
-		return err
-	}
-
-	// Undo URL override
-	url, err = replaceVars(d, config, "{{SpannerBasePath}}projects/{{project}}/instances/{{name}}")
 	if err != nil {
 		return err
 	}
