@@ -16,11 +16,17 @@ import (
 
 func TestAccTags(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"tagKeyBasic":  testAccTagsTagKey_tagKeyBasic,
-		"tagKeyUpdate": testAccTagsTagKey_tagKeyUpdate,
-		"tagValueBasic":  testAccTagsTagValue_tagValueBasic,
-		"tagValueUpdate": testAccTagsTagValue_tagValueUpdate,
-		"tagBindingBasic": testAccTagsTagBinding_tagBindingBasic,
+		"tagKeyBasic":        testAccTagsTagKey_tagKeyBasic,
+		"tagKeyUpdate":       testAccTagsTagKey_tagKeyUpdate,
+		"tagKeyIamBinding":   testAccTagsTagKeyIamBinding,
+		"tagKeyIamMember":    testAccTagsTagKeyIamMember,
+		"tagKeyIamPolicy":    testAccTagsTagKeyIamPolicy,
+		"tagValueBasic":      testAccTagsTagValue_tagValueBasic,
+		"tagValueUpdate":     testAccTagsTagValue_tagValueUpdate,
+		"tagBindingBasic":    testAccTagsTagBinding_tagBindingBasic,
+		"tagValueIamBinding": testAccTagsTagValueIamBinding,
+		"tagValueIamMember":  testAccTagsTagValueIamMember,
+		"tagValueIamPolicy":  testAccTagsTagValueIamPolicy,
 	}
 
 	for name, tc := range testCases {
@@ -399,4 +405,404 @@ func testAccCheckTagsTagBindingDestroyProducer(t *testing.T) func(s *terraform.S
 	}
 }
 
+func testAccTagsTagKeyIamBinding(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+		"role":          "roles/viewer",
+		"org_id":        getTestOrgFromEnv(t),
+
+		"short_name": "tf-test-key-" + randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProvidersOiCS,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsTagKeyIamBinding_basicGenerated(context),
+			},
+			{
+				// Test Iam Binding update
+				Config: testAccTagsTagKeyIamBinding_updateGenerated(context),
+			},
+		},
+	})
+}
+
+func testAccTagsTagKeyIamMember(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+		"role":          "roles/viewer",
+		"org_id":        getTestOrgFromEnv(t),
+
+		"short_name": "tf-test-key-" + randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProvidersOiCS,
+		Steps: []resource.TestStep{
+			{
+				// Test Iam Member creation (no update for member, no need to test)
+				Config: testAccTagsTagKeyIamMember_basicGenerated(context),
+			},
+		},
+	})
+}
+
+func testAccTagsTagKeyIamPolicy(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+		"role":          "roles/viewer",
+		"org_id":        getTestOrgFromEnv(t),
+
+		"short_name": "tf-test-key-" + randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProvidersOiCS,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsTagKeyIamPolicy_basicGenerated(context),
+			},
+			{
+				Config: testAccTagsTagKeyIamPolicy_emptyBinding(context),
+			},
+		},
+	})
+}
+
+func testAccTagsTagKeyIamMember_basicGenerated(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_tags_tag_key" "key" {
+  provider = google-beta
+
+  parent = "organizations/%{org_id}"
+  short_name = "%{short_name}"
+  description = "For %{short_name} resources."
+}
+
+resource "google_tags_tag_key_iam_member" "foo" {
+  provider = google-beta
+  tag_key = google_tags_tag_key.key.name
+  role = "%{role}"
+  member = "user:admin@hashicorptest.com"
+}
+`, context)
+}
+
+func testAccTagsTagKeyIamPolicy_basicGenerated(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_tags_tag_key" "key" {
+  provider = google-beta
+
+  parent = "organizations/%{org_id}"
+  short_name = "%{short_name}"
+  description = "For %{short_name} resources."
+}
+
+data "google_iam_policy" "foo" {
+  provider = google-beta
+  binding {
+    role = "%{role}"
+    members = ["user:admin@hashicorptest.com"]
+  }
+}
+
+resource "google_tags_tag_key_iam_policy" "foo" {
+  provider = google-beta
+  tag_key = google_tags_tag_key.key.name
+  policy_data = data.google_iam_policy.foo.policy_data
+}
+`, context)
+}
+
+func testAccTagsTagKeyIamPolicy_emptyBinding(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_tags_tag_key" "key" {
+  provider = google-beta
+
+  parent = "organizations/%{org_id}"
+  short_name = "%{short_name}"
+  description = "For %{short_name} resources."
+}
+
+data "google_iam_policy" "foo" {
+  provider = google-beta
+}
+
+resource "google_tags_tag_key_iam_policy" "foo" {
+  provider = google-beta
+  tag_key = google_tags_tag_key.key.name
+  policy_data = data.google_iam_policy.foo.policy_data
+}
+`, context)
+}
+
+func testAccTagsTagKeyIamBinding_basicGenerated(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_tags_tag_key" "key" {
+  provider = google-beta
+
+  parent = "organizations/%{org_id}"
+  short_name = "%{short_name}"
+  description = "For %{short_name} resources."
+}
+
+resource "google_tags_tag_key_iam_binding" "foo" {
+  provider = google-beta
+  tag_key = google_tags_tag_key.key.name
+  role = "%{role}"
+  members = ["user:admin@hashicorptest.com"]
+}
+`, context)
+}
+
+func testAccTagsTagKeyIamBinding_updateGenerated(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_tags_tag_key" "key" {
+  provider = google-beta
+
+  parent = "organizations/%{org_id}"
+  short_name = "%{short_name}"
+  description = "For %{short_name} resources."
+}
+
+resource "google_tags_tag_key_iam_binding" "foo" {
+  provider = google-beta
+  tag_key = google_tags_tag_key.key.name
+  role = "%{role}"
+  members = ["user:admin@hashicorptest.com", "user:paddy@hashicorp.com"]
+}
+`, context)
+}
+
+func testAccTagsTagValueIamBinding(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+		"role":          "roles/viewer",
+		"org_id":        getTestOrgFromEnv(t),
+
+		"key_short_name":   "tf-test-key-" + randString(t, 10),
+		"value_short_name": "tf-test-value-" + randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProvidersOiCS,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsTagValueIamBinding_basicGenerated(context),
+			},
+			{
+				// Test Iam Binding update
+				Config: testAccTagsTagValueIamBinding_updateGenerated(context),
+			},
+		},
+	})
+}
+
+func testAccTagsTagValueIamMember(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+		"role":          "roles/viewer",
+		"org_id":        getTestOrgFromEnv(t),
+
+		"key_short_name":   "tf-test-key-" + randString(t, 10),
+		"value_short_name": "tf-test-value-" + randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProvidersOiCS,
+		Steps: []resource.TestStep{
+			{
+				// Test Iam Member creation (no update for member, no need to test)
+				Config: testAccTagsTagValueIamMember_basicGenerated(context),
+			},
+		},
+	})
+}
+
+func testAccTagsTagValueIamPolicy(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+		"role":          "roles/viewer",
+		"org_id":        getTestOrgFromEnv(t),
+
+		"key_short_name":   "tf-test-key-" + randString(t, 10),
+		"value_short_name": "tf-test-value-" + randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProvidersOiCS,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsTagValueIamPolicy_basicGenerated(context),
+			},
+			{
+				Config: testAccTagsTagValueIamPolicy_emptyBinding(context),
+			},
+		},
+	})
+}
+
+func testAccTagsTagValueIamMember_basicGenerated(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_tags_tag_key" "key" {
+	provider = google-beta
+
+	parent = "organizations/%{org_id}"
+	short_name = "%{key_short_name}"
+	description = "For %{key_short_name} resources."
+}
+
+resource "google_tags_tag_value" "value" {
+	provider = google-beta
+
+	parent = "tagKeys/${google_tags_tag_key.key.name}"
+	short_name = "%{value_short_name}"
+	description = "For %{value_short_name} resources."
+}
+
+resource "google_tags_tag_value_iam_member" "foo" {
+  provider = google-beta
+  tag_value = google_tags_tag_value.value.name
+  role = "%{role}"
+  member = "user:admin@hashicorptest.com"
+}
+`, context)
+}
+
+func testAccTagsTagValueIamPolicy_basicGenerated(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_tags_tag_key" "key" {
+	provider = google-beta
+
+	parent = "organizations/%{org_id}"
+	short_name = "%{key_short_name}"
+	description = "For %{key_short_name} resources."
+}
+
+resource "google_tags_tag_value" "value" {
+	provider = google-beta
+
+	parent = "tagKeys/${google_tags_tag_key.key.name}"
+	short_name = "%{value_short_name}"
+	description = "For %{value_short_name} resources."
+}
+
+data "google_iam_policy" "foo" {
+  provider = google-beta
+  binding {
+    role = "%{role}"
+    members = ["user:admin@hashicorptest.com"]
+  }
+}
+
+resource "google_tags_tag_value_iam_policy" "foo" {
+  provider = google-beta
+  tag_value = google_tags_tag_value.value.name
+  policy_data = data.google_iam_policy.foo.policy_data
+}
+`, context)
+}
+
+func testAccTagsTagValueIamPolicy_emptyBinding(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_tags_tag_key" "key" {
+	provider = google-beta
+
+	parent = "organizations/%{org_id}"
+	short_name = "%{key_short_name}"
+	description = "For %{key_short_name} resources."
+}
+
+resource "google_tags_tag_value" "value" {
+	provider = google-beta
+
+	parent = "tagKeys/${google_tags_tag_key.key.name}"
+	short_name = "%{value_short_name}"
+	description = "For %{value_short_name} resources."
+}
+
+data "google_iam_policy" "foo" {
+  provider = google-beta
+}
+
+resource "google_tags_tag_value_iam_policy" "foo" {
+  provider = google-beta
+  tag_value = google_tags_tag_value.value.name
+  policy_data = data.google_iam_policy.foo.policy_data
+}
+`, context)
+}
+
+func testAccTagsTagValueIamBinding_basicGenerated(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_tags_tag_key" "key" {
+	provider = google-beta
+
+	parent = "organizations/%{org_id}"
+	short_name = "%{key_short_name}"
+	description = "For %{key_short_name} resources."
+}
+
+resource "google_tags_tag_value" "value" {
+	provider = google-beta
+
+	parent = "tagKeys/${google_tags_tag_key.key.name}"
+	short_name = "%{value_short_name}"
+	description = "For %{value_short_name} resources."
+}
+
+resource "google_tags_tag_value_iam_binding" "foo" {
+  provider = google-beta
+  tag_value = google_tags_tag_value.value.name
+  role = "%{role}"
+  members = ["user:admin@hashicorptest.com"]
+}
+`, context)
+}
+
+func testAccTagsTagValueIamBinding_updateGenerated(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_tags_tag_key" "key" {
+	provider = google-beta
+
+	parent = "organizations/%{org_id}"
+	short_name = "%{key_short_name}"
+	description = "For %{key_short_name} resources."
+}
+
+resource "google_tags_tag_value" "value" {
+	provider = google-beta
+
+	parent = "tagKeys/${google_tags_tag_key.key.name}"
+	short_name = "%{value_short_name}"
+	description = "For %{value_short_name} resources."
+}
+
+resource "google_tags_tag_value_iam_binding" "foo" {
+  provider = google-beta
+  tag_value = google_tags_tag_value.value.name
+  role = "%{role}"
+  members = ["user:admin@hashicorptest.com", "user:paddy@hashicorp.com"]
+}
+`, context)
+}
 <% end %>
