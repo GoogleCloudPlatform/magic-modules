@@ -8433,6 +8433,16 @@ objects:
           Specifies how to handle instances when a node in the group undergoes maintenance. Set to one of: DEFAULT, RESTART_IN_PLACE, or MIGRATE_WITHIN_NODE_GROUP. The default value is DEFAULT.
         default_value: DEFAULT
       - !ruby/object:Api::Type::NestedObject
+        name: 'maintenanceWindow'
+        description: |
+          contains properties for the timeframe of maintenance
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'startTime'
+            required: true
+            description: |
+              instances.start time of the window. This must be in UTC format that resolves to one of 00:00, 04:00, 08:00, 12:00, 16:00, or 20:00. For example, both 13:00-5 and 08:00 are valid.
+      - !ruby/object:Api::Type::NestedObject
         name: 'autoscalingPolicy'
         description: |
           If you use sole-tenant nodes for your workloads, you can use the node
