@@ -50,6 +50,9 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
       api: 'https://cloud.google.com/resource-manager/reference/rest/v3/tagKeys'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      parent_resource_attribute: 'tag_key'
     properties:
       - !ruby/object:Api::Type::String
         name: name
@@ -106,6 +109,9 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
       api: 'https://cloud.google.com/resource-manager/reference/rest/v3/tagValues'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      parent_resource_attribute: 'tag_value'
     properties:
       - !ruby/object:Api::Type::String
         name: name
