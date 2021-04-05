@@ -2,14 +2,14 @@ resource "google_tags_tag_key" "key" {
 	provider = google-beta
 
 	parent = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
-	short_name = "keyname"
-	description = "For a certain set of resources."
+	short_name = "<%= ctx[:vars]['key_short_name'] %>"
+	description = "For <%= ctx[:vars]['key_short_name'] %> resources."
 }
 
 resource "google_tags_tag_value" "<%= ctx[:primary_resource_id] %>" {
 	provider = google-beta
 
 	parent = "tagKeys/${google_tags_tag_key.key.name}"
-	short_name = "<%= ctx[:vars]['short_name'] %>"
-	description = "For <%= ctx[:vars]['short_name'] %> resources.""
+	short_name = "<%= ctx[:vars]['value_short_name'] %>"
+	description = "For <%= ctx[:vars]['value_short_name'] %> resources."
 }
