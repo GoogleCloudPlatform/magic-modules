@@ -24,7 +24,7 @@ func TestAccKmsSecretAsymmetricBasic(t *testing.T) {
 	projectOrg := getTestOrgFromEnv(t)
 	projectBillingAccount := getTestBillingAccountFromEnv(t)
 
-	projectID := "terraform-" + randString(t, 10)
+	projectID := "tf-test-" + randString(t, 10)
 	keyRingName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 

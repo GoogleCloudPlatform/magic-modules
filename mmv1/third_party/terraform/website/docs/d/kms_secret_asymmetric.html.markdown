@@ -40,7 +40,7 @@ resource "google_kms_crypto_key" "my_crypto_key" {
   }
 }
 
-data "google_kms_crypto_key" "my_crypto_key" {
+data "google_kms_crypto_key_version" "my_crypto_key" {
   crypto_key = google_kms_crypto_key.my_crypto_key.id
 }
 ```
@@ -50,7 +50,7 @@ some sensitive information:
 
 ```bash
 ## get the public key to encrypt the secret with
-$ gcloud kms keys versions get-public-key  \
+$ gcloud kms keys versions get-public-key 1 \
   --project my-project \
   --location us-central1 \
   --keyring my-key-ring \
@@ -82,7 +82,7 @@ IP+47Veb10aFn61F1CJwpmOOiGNXKdDT1vK8CMnnwhm825K0q/q9Zqpzc1+1ae1z
 mSqol1zCoa88CuSN6nTLQlVnN/dzfrGbc0boJPaM0iGhHtSzHk4SWg84LhiJB1q9
 A9XFJmOVdkvRY9nnz/iVLAdd0Q3vFtLqCdUYsNN2yh4=
 
-## optionally calculate the CRC32 of the ciphertext  
+## optionally calculate the CRC32 of the ciphertext
 $ go get github.com/binxio/crc32 
 $ $GOPATH/bin/crc32 -polynomial castagnoli < my-secret-password.enc
 12c59e54
@@ -92,9 +92,9 @@ Finally, reference the encrypted ciphertext in your resource definitions:
 
 ```hcl
 data "google_kms_secret_asymmetric" "sql_user_password" {
-  crypto_key = data.google_kms_crypto_key_version.my_crypto_key.id
-  crc32      = "12c59e54"
-  ciphertext = <<EOT
+  crypto_key_version = data.google_kms_crypto_key_version.my_crypto_key.id
+  crc32              = "12c59e54"
+  ciphertext         = <<EOT
     M7nUoba9EGVTu2LjNjBKGdGVBYjyS/i/AY+4yQMQF0Qf/RfUfX31Jw6+VO9OuThq
     ylu/7ihX9XD4bM7yYdXnMv9p1OHQUlorSBSbb/J6n1W9UJhcp6um8Tw8/Isx4f75
     4PskYS6f8Y2ItliGt1/A9iR5BTgGtJBwOxMlgoX2Ggq+Nh4E5SbdoaE5o6CO1nBx

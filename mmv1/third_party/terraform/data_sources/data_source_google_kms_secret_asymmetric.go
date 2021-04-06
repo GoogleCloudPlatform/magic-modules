@@ -6,8 +6,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
-	"google.golang.org/protobuf/types/known/wrapperspb"
+	"google.golang.org/api/cloudkms/v1"
 	"hash/crc32"
 	"regexp"
 	"strconv"
@@ -95,23 +94,31 @@ func dataSourceGoogleKmsSecretAsymmetricRead(ctx context.Context, d *schema.Reso
 		}
 	}
 
-	req := &kmspb.AsymmetricDecryptRequest{
-		Name:             cryptoKeyVersion,
-		Ciphertext:       ciphertext,
-		CiphertextCrc32C: wrapperspb.Int64(int64(ciphertextCRC32C)),
+	req := cloudkms.AsymmetricDecryptRequest{
+		Ciphertext:       base64CipherText,
+		CiphertextCrc32c: int64(ciphertextCRC32C)}
+
+	client := config.NewKmsClientWithCtx(ctx, userAgent)
+	if client == nil {
+		return fmt.Errorf("failed to get a KMS client")
 	}
 
-	client := config.NewKeyManagementClient(ctx, userAgent)
-	result, err := client.AsymmetricDecrypt(ctx, req)
+	result, err := client.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.AsymmetricDecrypt(cryptoKeyVersion, &req).Do()
 	if err != nil {
 		return fmt.Errorf("failed to decrypt ciphertext: %v", err)
 	}
-
-	if !result.VerifiedCiphertextCrc32C || int64(crc32c(result.Plaintext)) != result.PlaintextCrc32C.Value {
-		return fmt.Errorf("asymmetricDecrypt request corrupted in-transit")
+	plaintext, err := base64.StdEncoding.DecodeString(result.Plaintext)
+	if err != nil {
+		return fmt.Errorf("failed to base64 decode plaintext: %v", err)
 	}
 
-	if err := d.Set("plaintext", string(result.Plaintext)); err != nil {
+	plaintextCrc32c := int64(crc32c(plaintext))
+	if !result.VerifiedCiphertextCrc32c || plaintextCrc32c != result.PlaintextCrc32c {
+		return fmt.Errorf("asymmetricDecrypt response corrupted in-transit, got %x, expected %x",
+			plaintextCrc32c, result.PlaintextCrc32c)
+	}
+
+	if err := d.Set("plaintext", string(plaintext)); err != nil {
 		return fmt.Errorf("error setting plaintext: %s", err)
 	}
 
