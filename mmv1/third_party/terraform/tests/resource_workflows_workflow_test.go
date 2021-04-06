@@ -2,35 +2,35 @@ package google
 
 import (
   "context"
-	"fmt"
-	"testing"
+  "fmt"
+  "testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccWorkflowsWorkflow_basic(t *testing.T) {
-	// Custom test written to test diffs
-	t.Parallel()
+  // Custom test written to test diffs
+  t.Parallel()
 
-	bucketName := fmt.Sprintf("tf-test-acc-bucket-%d", randInt(t))
+  bucketName := fmt.Sprintf("tf-test-acc-bucket-%d", randInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckWorkflowsWorkflowDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccWorkflowsWorkflow_basic(bucketName),
-			},
-			{
-				Config: testAccWorkflowsWorkflow_newBucket(bucketName),
-			},
-		},
-	})
+  vcrTest(t, resource.TestCase{
+    PreCheck:     func() { testAccPreCheck(t) },
+    Providers:    testAccProviders,
+    CheckDestroy: testAccCheckWorkflowsWorkflowDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccWorkflowsWorkflow_basic(bucketName),
+      },
+      {
+        Config: testAccWorkflowsWorkflow_newBucket(bucketName),
+      },
+    },
+  })
 }
 
 func testAccWorkflowsWorkflow_basic(name string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_workflows_workflow" "example" {
   name          = "%s"
   region        = "us-central1"
@@ -67,7 +67,7 @@ EOF
 }
 
 func testAccWorkflowsWorkflow_newBucket(name string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name = "%s"
 }
