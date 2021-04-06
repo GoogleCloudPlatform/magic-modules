@@ -6634,7 +6634,7 @@ objects:
             update_url: projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig
       - !ruby/object:Api::Type::NestedObject
         name: 'confidentialInstanceConfig'
-        description: 'Enable confidential instance (requires setting the machine type to any of the n2d-* types).'
+        description: 'Configuration for confidential computing (requires setting the machine type to any of the n2d-* types and a boot disk of type pd-ssd).'
         properties:
           - !ruby/object:Api::Type::Boolean
             name: 'enableConfidentialCompute'
