@@ -80,11 +80,6 @@ module Overrides
           # level resources such as firebase project
           :skip_delete,
 
-          # Set for false by default. Set to true if you need to pull external provider for your
-          # testcase. Think before adding as there is latency and adds an external dependency to
-          # your test so avoid if you can.
-          :pull_external,
-
           # This enables resources that get their project via a reference to a different resource
           # instead of a project field to use User Project Overrides
           :supports_indirect_user_project_override,
@@ -125,7 +120,6 @@ module Overrides
         check :schema_version, type: Integer
         check :skip_sweeper, type: :boolean, default: false
         check :skip_delete, type: :boolean, default: false
-        check :pull_external, type: :boolean, default: false
         check :supports_indirect_user_project_override, type: :boolean, default: false
         check :read_error_transform, type: String
       end
