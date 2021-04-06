@@ -17,11 +17,8 @@ func TestAccCloudRunDomainMapping_foregroundDeletion(t *testing.T) {
 	}
 
 	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-		},
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudRunDomainMappingDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -52,11 +49,11 @@ func testAccCloudRunDomainMapping_cloudRunDomainMappingUpdated1(context map[stri
 resource "google_cloud_run_service" "default" {
     name     = "tf-test-cloudrun-srv%{random_suffix}"
     location = "us-central1"
-  
+
     metadata {
       namespace = "%{namespace}"
     }
-  
+
     template {
       spec {
         containers {
