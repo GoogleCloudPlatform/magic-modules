@@ -394,7 +394,7 @@ objects:
         name: 'envgroupId'
         description: |
           The Apigee environment group associated with the Apigee environment,
-          in the format `organisations/{{org_name}}/envgroups/{{envgroup_name}}`.
+          in the format `organizations/{{org_name}}/envgroups/{{envgroup_name}}`.
         required: true
         url_param_only: true
     properties:

@@ -165,6 +165,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     import_format: ["{{envgroup_id}}/attachments/{{name}}", "{{envgroup_id}}/{{name}}"]
     delete_url: '{{envgroup_id}}/attachments/{{name}}'
+    skip_sweeper: true
     examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "apigee_environment_group_attachment_basic"
