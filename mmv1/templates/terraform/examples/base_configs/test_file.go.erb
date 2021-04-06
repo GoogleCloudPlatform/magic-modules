@@ -61,9 +61,11 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 		<% else -%>
 		Providers: testAccProvidersOiCS,
 		<% end -%>
+		<% unless example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 		},
+		<% end -%>
 		<% unless object.skip_delete -%>
 		CheckDestroy: testAccCheck<%= "#{resource_name}" -%>DestroyProducer(t),
 		<% end -%>
