@@ -88,6 +88,7 @@ components:
               type: boolean
               x-dcl-go-name: InternalIPOnly
               x-kubernetes-immutable: true
+              x-dcl-server-default: true
             metadata:
               additionalProperties:
                 type: string
@@ -593,6 +594,7 @@ components:
               type: integer
               x-dcl-go-name: NumLocalSsds
               x-kubernetes-immutable: true
+              x-dcl-server-default: true
           type: object
           x-dcl-go-name: DiskConfig
           x-dcl-go-type: ClusterInstanceGroupConfigDiskConfig
@@ -1674,6 +1676,7 @@ components:
           type: integer
           x-dcl-go-name: Version
           x-kubernetes-immutable: true
+          x-dcl-server-default: true
       required:
       - name
       - placement

@@ -20,7 +20,7 @@ func TestAccDataprocWorkflowTemplate_basic(t *testing.T) {
   vcrTest(t, resource.TestCase{
     PreCheck:          func() { testAccPreCheck(t) },
     Providers:         testAccProviders,
-    CheckDestroy:      funcAccTestEventarcTriggerCheckDestroy(t),
+    CheckDestroy:      funcAccTestDataprocWorkflowTemplateCheckDestroy(t),
     ExternalProviders: map[string]resource.ExternalProvider{
       "random": {},
     },
