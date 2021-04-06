@@ -15,6 +15,9 @@
 name: Tags
 versions:
   - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://cloudresourcemanager.googleapis.com/v3/
+  - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://cloudresourcemanager.googleapis.com/v3/
 scopes:
@@ -39,7 +42,6 @@ async: !ruby/object:Api::OpAsync
 objects:
   - !ruby/object:Api::Resource
     name: 'TagKey'
-    min_version: beta
     base_url: tagKeys
     self_link: "tagKeys/{{name}}"
     update_verb: :PATCH
@@ -99,7 +101,6 @@ objects:
         output: true
   - !ruby/object:Api::Resource
     name: 'TagValue'
-    min_version: beta
     base_url: tagValues
     self_link: "tagValues/{{name}}"
     update_verb: :PATCH
@@ -159,7 +160,6 @@ objects:
         output: true
   - !ruby/object:Api::Resource
     name: 'TagBinding'
-    min_version: beta
     base_url: tagBindings
     self_link: "tagBindings/?parent={{parent}}&pageSize=300"
     delete_url: "tagBindings/{{name}}"
