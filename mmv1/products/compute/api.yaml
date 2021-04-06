@@ -6632,6 +6632,13 @@ objects:
             description: Defines whether the instance has integrity monitoring enabled.
             update_verb: :PATCH
             update_url: projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig
+      - !ruby/object:Api::Type::NestedObject
+        name: 'confidentialInstanceConfig'
+        description: 'Enable confidential instance (requires setting the machine type to any of the n2d-* types).'
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enableConfidentialCompute'
+            description: Enables confidential computing
       - !ruby/object:Api::Type::Enum
         name: 'status'
         description: |
