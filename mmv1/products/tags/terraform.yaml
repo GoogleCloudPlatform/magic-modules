@@ -30,7 +30,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "tag_key_basic"
-        min_version: 'beta'
         skip_test: true
         primary_resource_id: "key"
         vars:
@@ -56,7 +55,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "tag_value_basic"
-        min_version: 'beta'
         skip_test: true
         primary_resource_id: "value"
         vars:
@@ -79,7 +77,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "tag_binding_basic"
-        min_version: 'beta'
         skip_test: true
         primary_resource_id: "binding"
         vars:
