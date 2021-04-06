@@ -48,9 +48,6 @@ func testAccTagsTagKey_tagKeyBasic(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-		},
 		CheckDestroy: testAccCheckTagsTagKeyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -80,9 +77,6 @@ func testAccTagsTagKey_tagKeyUpdate(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-		},
 		CheckDestroy: testAccCheckTagsTagKeyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -169,9 +163,6 @@ func testAccTagsTagValue_tagValueBasic(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-		},
 		CheckDestroy: testAccCheckTagsTagValueDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -208,9 +199,6 @@ func testAccTagsTagValue_tagValueUpdate(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-		},
 		CheckDestroy: testAccCheckTagsTagValueDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
