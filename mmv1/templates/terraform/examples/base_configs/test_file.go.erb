@@ -61,7 +61,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 		<% else -%>
 		Providers: testAccProvidersOiCS,
 		<% end -%>
-		<% unless example.pull_external -%>
+		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 		},
