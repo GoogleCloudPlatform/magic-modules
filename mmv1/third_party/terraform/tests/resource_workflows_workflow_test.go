@@ -47,20 +47,20 @@ resource "google_workflows_workflow" "example" {
 	# FYI, In terraform you need to escape the $$ or it will cause errors.
 
 	- getCurrentTime:
-			call: http.get
-			args:
-					url: https://us-central1-workflowsample.cloudfunctions.net/datetime
-			result: CurrentDateTime
+		call: http.get
+		args:
+				url: https://us-central1-workflowsample.cloudfunctions.net/datetime
+		result: CurrentDateTime
 	- readWikipedia:
-			call: http.get
-			args:
-					url: https://en.wikipedia.org/w/api.php
-					query:
-							action: opensearch
-							search: $${CurrentDateTime.body.dayOfTheWeek}
-			result: WikiResult
+		call: http.get
+		args:
+			url: https://en.wikipedia.org/w/api.php
+			query:
+				action: opensearch
+				search: $${CurrentDateTime.body.dayOfTheWeek}
+		result: WikiResult
 	- returnOutput:
-			return: $${WikiResult.body[1]}
+		return: $${WikiResult.body[1]}
 EOF
 }
 `, name)
