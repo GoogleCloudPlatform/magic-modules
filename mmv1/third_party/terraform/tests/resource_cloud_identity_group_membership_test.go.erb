@@ -29,10 +29,25 @@ func TestAccCloudIdentityGroupMembership_update(t *testing.T) {
 				Config: testAccCloudIdentityGroupMembership_update1(context),
 			},
 			{
+				ResourceName:      "google_cloud_identity_group_membership.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: testAccCloudIdentityGroupMembership_update2(context),
 			},
 			{
+				ResourceName:      "google_cloud_identity_group_membership.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: testAccCloudIdentityGroupMembership_update1(context),
+			},
+			{
+				ResourceName:      "google_cloud_identity_group_membership.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -190,10 +205,9 @@ func TestAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipWithMemberK
 				Config: testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipWithMemberKey(context),
 			},
 			{
-				ResourceName:            "google_cloud_identity_group_membership.cloud_identity_group_membership_basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"group"},
+				ResourceName:      "google_cloud_identity_group_membership.cloud_identity_group_membership_basic",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -265,10 +279,9 @@ func TestAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipUserWithMem
 				Config: testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipUserWithMemberKey(context),
 			},
 			{
-				ResourceName:            "google_cloud_identity_group_membership.cloud_identity_group_membership_basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"group"},
+				ResourceName:      "google_cloud_identity_group_membership.cloud_identity_group_membership_basic",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
