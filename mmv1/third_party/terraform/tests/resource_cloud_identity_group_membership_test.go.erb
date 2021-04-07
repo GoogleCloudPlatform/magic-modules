@@ -137,13 +137,9 @@ func TestAccCloudIdentityGroupMembership_import(t *testing.T) {
 				Config: testAccCloudIdentityGroupMembership_import(context),
 			},
 			{
-				ResourceName:            "google_cloud_identity_group_membership.basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-			},
-			{
-				Config:   testAccCloudIdentityGroupMembership_import(context),
-				PlanOnly: true,
+				ResourceName:      "google_cloud_identity_group_membership.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
