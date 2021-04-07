@@ -142,10 +142,10 @@ func TestWorkflowsWorkflowStateUpgradeV0(t *testing.T) {
 				t.Error(err)
 			}
 
-			for k, v := range tc.Expected {
-				if actual[k] != v {
-					t.Errorf("expected: %#v -> %#v\n got: %#v -> %#v\n in: %#v",
-						k, v, k, actual[k], actual)
+			for _, expectedName := range tc.Expected {
+				if actual["name"] != expectedName {
+					t.Errorf("expected: name -> %#v\n got: name -> %#v\n in: %#v",
+						expectedName, actual["name"], actual)
 				}
 			}
 		})
