@@ -844,13 +844,17 @@ func TestAccComputeInstance_soleTenantNodeAffinities(t *testing.T) {
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
+				Config: testAccComputeInstance_withoutNodeAffinities(instanceName, templateName, groupName),
+			},
+			computeInstanceImportStep("us-central1-c", instanceName, []string{"allow_stopping_for_update"}),
+			{
 				Config: testAccComputeInstance_soleTenantNodeAffinities(instanceName, templateName, groupName),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-central1-c", instanceName, []string{"allow_stopping_for_update"}),
 			{
 				Config: testAccComputeInstance_soleTenantNodeAffinitiesUpdated(instanceName, templateName, groupName),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-central1-c", instanceName, []string{"allow_stopping_for_update"}),
 		},
 	})
 }
@@ -4544,7 +4548,7 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
-func testAccComputeInstance_soleTenantNodeAffinities(instance, nodeTemplate, nodeGroup string) string {
+func testAccComputeInstance_withoutNodeAffinities(instance, nodeTemplate, nodeGroup string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-9"
@@ -4554,7 +4558,7 @@ data "google_compute_image" "my_image" {
 resource "google_compute_instance" "foobar" {
   name         = "%s"
   machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
-  zone         = "us-central1-a"
+  zone         = "us-central1-c"
   allow_stopping_for_update = true
 
   boot_disk {
@@ -4583,7 +4587,76 @@ resource "google_compute_node_template" "nodetmpl" {
 
 resource "google_compute_node_group" "nodes" {
   name = "%s"
-  zone = "us-central1-a"
+  zone = "us-central1-c"
+
+  size          = 1
+  node_template = google_compute_node_template.nodetmpl.self_link
+}
+`, instance, nodeTemplate, nodeGroup)
+}
+
+func testAccComputeInstance_soleTenantNodeAffinities(instance, nodeTemplate, nodeGroup string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
+  zone         = "us-central1-c"
+  allow_stopping_for_update = true
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    node_affinities {
+      key      = "tfacc"
+      operator = "IN"
+      values   = ["test"]
+    }
+
+    node_affinities {
+      key      = "tfacc"
+      operator = "NOT_IN"
+      values   = ["not_here"]
+    }
+
+    node_affinities {
+      key      = "compute.googleapis.com/node-group-name"
+      operator = "IN"
+      values   = [google_compute_node_group.nodes.name]
+    }
+
+    min_node_cpus = 4
+  }
+}
+
+resource "google_compute_node_template" "nodetmpl" {
+  name   = "%s"
+  region = "us-central1"
+
+  node_affinity_labels = {
+    tfacc = "test"
+  }
+
+  node_type = "n1-node-96-624"
+
+  cpu_overcommit_type = "ENABLED"
+}
+
+resource "google_compute_node_group" "nodes" {
+  name = "%s"
+  zone = "us-central1-c"
 
   size          = 1
   node_template = google_compute_node_template.nodetmpl.self_link
@@ -4601,7 +4674,7 @@ data "google_compute_image" "my_image" {
 resource "google_compute_instance" "foobar" {
   name         = "%s"
   machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
-  zone         = "us-central1-a"
+  zone         = "us-central1-c"
   allow_stopping_for_update = true
 
   boot_disk {
@@ -4652,7 +4725,7 @@ resource "google_compute_node_template" "nodetmpl" {
 
 resource "google_compute_node_group" "nodes" {
   name = "%s"
-  zone = "us-central1-a"
+  zone = "us-central1-c"
 
   size          = 1
   node_template = google_compute_node_template.nodetmpl.self_link
