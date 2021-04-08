@@ -812,18 +812,29 @@ func TestAccComputeInstance_serviceAccount_updated(t *testing.T) {
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_serviceAccount_update1(instanceName),
+				Config: testAccComputeInstance_serviceAccount_update0(instanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceScopes(&instance, 0),
 				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
 			{
-				Config: testAccComputeInstance_serviceAccount_update2(instanceName),
+				Config: testAccComputeInstance_serviceAccount_update01(instanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceScopes(&instance, 0),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			{
+				Config: testAccComputeInstance_serviceAccount_update3(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceScopes(&instance, 3),
 				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
@@ -2517,6 +2528,30 @@ func testAccCheckComputeInstanceServiceAccount(instance *compute.Instance, scope
 	}
 }
 
+func testAccCheckComputeInstanceScopes(instance *compute.Instance, scopeCount int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+
+		if count := len(instance.ServiceAccounts); count == 0 {
+			if scopeCount == 0 {
+				return nil
+			} else {
+				return fmt.Errorf("Scope count expected: %s, but got %s", fmt.Sprint(scopeCount), fmt.Sprint(count))
+			}
+		} else {
+			if count := len(instance.ServiceAccounts); count != 1 {
+				return fmt.Errorf("Wrong number of ServiceAccounts: expected 1, got %d", count)
+			}
+
+			if scount := len(instance.ServiceAccounts[0].Scopes); scount == scopeCount {
+				return nil
+			} else {
+				return fmt.Errorf("Scope count expected: %s, but got %s", fmt.Sprint(scopeCount), fmt.Sprint(scount))
+			}
+		}
+		return fmt.Errorf("Scope count not found: %s", fmt.Sprint(scopeCount))
+	}
+}
+
 func testAccCheckComputeInstanceHasSubnet(instance *compute.Instance) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, i := range instance.NetworkInterfaces {
@@ -3830,7 +3865,67 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
-func testAccComputeInstance_serviceAccount_update2(instance string) string {
+func testAccComputeInstance_serviceAccount_update0(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+  allow_stopping_for_update = true
+}
+`, instance)
+}
+
+func testAccComputeInstance_serviceAccount_update01(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    email = data.google_compute_default_service_account.default.email
+    scopes = []
+  }
+  allow_stopping_for_update = true
+}
+
+data "google_compute_default_service_account" "default" {
+}
+`, instance)
+}
+
+func testAccComputeInstance_serviceAccount_update3(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-9"
@@ -3861,39 +3956,6 @@ resource "google_compute_instance" "foobar" {
   }
 
   allow_stopping_for_update = true
-}
-`, instance)
-}
-
-func testAccComputeInstance_serviceAccount_update1(instance string) string {
-	return fmt.Sprintf(`
-data "google_compute_image" "my_image" {
-  family  = "debian-9"
-  project = "debian-cloud"
-}
-
-resource "google_compute_instance" "foobar" {
-  name         = "%s"
-  machine_type = "e2-medium"
-  zone         = "us-central1-a"
-
-  boot_disk {
-    initialize_params {
-      image = data.google_compute_image.my_image.self_link
-    }
-  }
-
-  network_interface {
-    network = "default"
-  }
-
-  service_account {
-    email = data.google_compute_default_service_account.default.email
-  }
-  allow_stopping_for_update = true
-}
-
-data "google_compute_default_service_account" "default" {
 }
 `, instance)
 }
