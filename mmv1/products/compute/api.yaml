@@ -120,22 +120,16 @@ objects:
           following characters must be a dash, lowercase letter, or digit,
           except the last character, which cannot be a dash.
         required: true
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: purpose
         description: |
-          The purpose of this resource, which can be one of the following values:
+          The purpose of this resource. Possible values include:
 
           * GCE_ENDPOINT for addresses that are used by VM instances, alias IP ranges, internal load balancers, and similar resources.
 
           * SHARED_LOADBALANCER_VIP for an address that can be used by multiple internal load balancers.
 
           * VPC_PEERING for addresses that are reserved for VPC peer networks.
-
-          This should only be set when using an Internal address.
-        values:
-          - :GCE_ENDPOINT
-          - :VPC_PEERING
-          - :SHARED_LOADBALANCER_VIP
       - !ruby/object:Api::Type::Enum
         name: 'networkTier'
         description: |
@@ -3992,18 +3986,14 @@ objects:
         - :EXTERNAL
         - :INTERNAL
         default_value: :EXTERNAL
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'purpose'
         description: |
-          The purpose of the resource. For global internal addresses it can be
+          The purpose of the resource. Possible values include:
 
           * VPC_PEERING - for peer networks
-          * PRIVATE_SERVICE_CONNECT - for ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) only) Private Service Connect networks
 
-          This should only be set when using an Internal address.
-        values:
-        - :VPC_PEERING
-        - :PRIVATE_SERVICE_CONNECT
+          * PRIVATE_SERVICE_CONNECT - for ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) only) Private Service Connect networks
       - !ruby/object:Api::Type::ResourceRef
         name: 'network'
         resource: 'Network'
