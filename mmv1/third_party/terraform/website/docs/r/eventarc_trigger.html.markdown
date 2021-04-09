@@ -89,7 +89,7 @@ The following arguments are supported:
   
 * `matching_criteria` -
   (Required)
-  Required. null The criteria by which events are filtered. Only events that match with this criteria will be sent to the destination.
+  Required. The criteria by which events are filtered. Only events that match with this criteria will be sent to the destination.
   
 * `name` -
   (Required)
