@@ -1,0 +1,8 @@
+- type: CUSTOM_NAME
+  field: destination.cloud_run
+  details:
+    name: cloud_run_service
+- type: CUSTOM_NAME
+  field: event_filters
+  details:
+    name: matching_criteria

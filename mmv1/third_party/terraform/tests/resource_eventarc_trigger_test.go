@@ -86,7 +86,7 @@ func testAccEventarcTrigger_basic(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_eventarc_trigger" "trigger" {
 	name = "trigger%{random_suffix}"
-	location = "us-central1"
+	location = "europe-west1"
 	matching_criteria {
 		attribute = "type"
 		value = "google.cloud.pubsub.topic.v1.messagePublished"
@@ -94,7 +94,7 @@ resource "google_eventarc_trigger" "trigger" {
 	destination {
 		cloud_run_service {
 			service = google_cloud_run_service.default.name
-			region = "us-central1"
+			region = "europe-west1"
 		}
 	}
 	labels = {
@@ -108,7 +108,7 @@ resource "google_pubsub_topic" "foo" {
 
 resource "google_cloud_run_service" "default" {
 	name     = "service-eventarc%{random_suffix}"
-	location = "us-central1"
+	location = "europe-west1"
 
 	metadata {
 		namespace = "%{project}"
@@ -136,7 +136,7 @@ func testAccEventarcTrigger_transport(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_eventarc_trigger" "trigger" {
 	name = "trigger%{random_suffix}"
-	location = "us-central1"
+	location = "europe-west1"
 	matching_criteria {
 		attribute = "type"
 		value = "google.cloud.pubsub.topic.v1.messagePublished"
@@ -144,7 +144,7 @@ resource "google_eventarc_trigger" "trigger" {
 	destination {
 		cloud_run_service {
 			service = google_cloud_run_service.default.name
-			region = "us-central1"
+			region = "europe-west1"
 		}
 	}
 	transport {
@@ -160,7 +160,7 @@ resource "google_pubsub_topic" "foo" {
 
 resource "google_cloud_run_service" "default" {
 	name     = "service-eventarc%{random_suffix}"
-	location = "us-central1"
+	location = "europe-west1"
 
 	metadata {
 		namespace = "%{project}"
@@ -188,7 +188,7 @@ func testAccEventarcTrigger_transportUpdate(context map[string]interface{}) stri
 	return Nprintf(`
 resource "google_eventarc_trigger" "trigger" {
 	name = "trigger%{random_suffix}"
-	location = "us-central1"
+	location = "europe-west1"
 	matching_criteria {
 		attribute = "type"
 		value = "google.cloud.pubsub.topic.v1.messagePublished"
@@ -196,7 +196,7 @@ resource "google_eventarc_trigger" "trigger" {
 	destination {
 		cloud_run_service {
 			service = google_cloud_run_service.default.name
-			region = "us-central2"
+			region = "europe-west1"
 		}
 	}
 	transport {
@@ -221,7 +221,7 @@ resource "google_pubsub_topic" "foo" {
 
 resource "google_cloud_run_service" "default" {
 	name     = "service-eventarc%{random_suffix}"
-	location = "us-central1"
+	location = "europe-west1"
 
 	metadata {
 		namespace = "%{project}"
