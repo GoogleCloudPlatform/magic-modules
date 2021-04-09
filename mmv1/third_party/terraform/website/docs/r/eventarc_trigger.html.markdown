@@ -101,7 +101,8 @@ The `destination` block supports:
 * `cloud_run_service` -
   (Optional)
   Cloud Run fully-managed service that receives the events. The service should be running in the same project as the trigger.
-    The `matching_criteria` block supports:
+
+The `matching_criteria` block supports:
     
 * `attribute` -
   (Required)
@@ -143,7 +144,8 @@ The `cloud_run_service` block supports:
 * `region` -
   (Optional)
   Required. The region the Cloud Run service is deployed in.
-    The `transport` block supports:
+    
+The `transport` block supports:
     
 * `pubsub` -
   (Optional)
