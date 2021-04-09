@@ -181,6 +181,30 @@ resource "google_cloud_run_service" "default" {
 		latest_revision = true
 	}
 }
+
+resource "google_cloud_run_service" "default2" {
+	name     = "service-eventarc2%{random_suffix}"
+	location = "europe-north1"
+
+	metadata {
+		namespace = "%{project}"
+	}
+
+	template {
+		spec {
+			containers {
+				image = "gcr.io/cloudrun/hello"
+				args  = ["arrgs"]
+			}
+		container_concurrency = 50
+		}
+	}
+
+	traffic {
+		percent         = 100
+		latest_revision = true
+	}
+}
 `, context)
 }
 
@@ -195,8 +219,8 @@ resource "google_eventarc_trigger" "trigger" {
 	}
 	destination {
 		cloud_run_service {
-			service = google_cloud_run_service.default.name
-			region = "europe-west1"
+			service = google_cloud_run_service.default2.name
+			region = "europe-north1"
 		}
 	}
 	transport {
@@ -222,6 +246,30 @@ resource "google_pubsub_topic" "foo" {
 resource "google_cloud_run_service" "default" {
 	name     = "service-eventarc%{random_suffix}"
 	location = "europe-west1"
+
+	metadata {
+		namespace = "%{project}"
+	}
+
+	template {
+		spec {
+			containers {
+				image = "gcr.io/cloudrun/hello"
+				args  = ["arrgs"]
+			}
+		container_concurrency = 50
+		}
+	}
+
+	traffic {
+		percent         = 100
+		latest_revision = true
+	}
+}
+
+resource "google_cloud_run_service" "default2" {
+	name     = "service-eventarc2%{random_suffix}"
+	location = "europe-north1"
 
 	metadata {
 		namespace = "%{project}"
