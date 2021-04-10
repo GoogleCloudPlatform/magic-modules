@@ -108,17 +108,6 @@ func jsonCompareWithMapKeyOverride(a, b interface{}, compareMapKeyVal func(key s
 	}
 }
 
-// checks if the value is within the array, only works for generics
-// because objects and arrays will take the reference comparison
-func valueIsInArray(value interface{}, array []interface{}) bool {
-	for _, item := range array {
-		if item == value {
-			return true
-		}
-	}
-	return false
-}
-
 func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interface{}) bool {
 	// we rely on the fallback to nil if the object does not have the key
 	valA := objectA[key]

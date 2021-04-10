@@ -184,6 +184,47 @@ func expandStringMap(d TerraformResourceData, key string) map[string]string {
 	return convertStringMap(v.(map[string]interface{}))
 }
 
+// expands the fields from the resource model and formats it for ForceSendFields input for the given target
+func expandForceSendFieldsFromResourceModel(target string, ignoreValues []string, resource *schema.Resource) []string {
+	targets := strings.Split(target, ".")
+	out, err := expandForceSendFieldsFromSchemaRecursive(targets, ignoreValues, resource.Schema)
+	if err != nil {
+		log.Fatal(fmt.Errorf("unable to find target from schema - %w", err))
+	}
+	return out
+}
+
+func expandForceSendFieldsFromSchemaRecursive(targets []string, ignoreValues []string, parentSchema map[string]*schema.Schema) ([]string, error) {
+	if parentSchema == nil {
+		return nil, errors.New("error itterating schema, found nil value")
+	}
+	// if we haven't found the target schema
+	if len(targets) > 0 {
+		target, additionalTargets := targets[0], targets[1:]
+		for k, s := range parentSchema {
+			if k == target {
+				castedElement, ok := s.Elem.(*schema.Resource)
+				if !ok {
+					return nil, fmt.Errorf("error itterating schema, can't index into element type of target %s", target)
+				}
+				return expandForceSendFieldsFromSchemaRecursive(additionalTargets, ignoreValues, castedElement.Schema)
+			}
+		}
+		return nil, fmt.Errorf("error itterating schema, unable to find target %s", target)
+	}
+
+	// found the target
+	var out []string
+	for k, s := range parentSchema {
+		// enumerated the target's field names
+		if !stringIsInArray(SnakeToPascalCase(k), ignoreValues) && !s.Required {
+			out = append(out, SnakeToPascalCase(k))
+		}
+	}
+
+	return out, nil
+}
+
 func convertStringMap(v map[string]interface{}) map[string]string {
 	m := make(map[string]string)
 	for k, val := range v {
@@ -485,4 +526,26 @@ func SnakeToPascalCase(s string) (string) {
 		split[i] = strings.Title(split[i])
 	}
 	return strings.Join(split, "")
+}
+
+// checks if the value is within the array, only works for generics
+// because objects and arrays will take the reference comparison
+func valueIsInArray(value interface{}, array []interface{}) bool {
+	for _, item := range array {
+		if item == value {
+			return true
+		}
+	}
+	return false
+}
+
+// checks if the value is within the array, only works for generics
+// because objects and arrays will take the reference comparison
+func stringIsInArray(value string, array []string) bool {
+	for _, item := range array {
+		if item == value {
+			return true
+		}
+	}
+	return false
 }
