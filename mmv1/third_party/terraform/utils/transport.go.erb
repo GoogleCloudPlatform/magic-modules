@@ -137,7 +137,6 @@ func replaceVars(d TerraformResourceData, config *Config, linkTmpl string) (stri
 	return replaceVarsRecursive(d, config, linkTmpl, false, 0)
 }
 
-<% unless version == 'ga' -%>
 // relaceVarsForId shortens variables by running them through GetResourceNameFromSelfLink
 // this allows us to use long forms of variables from configs without needing
 // custom id formats. For instance:
@@ -149,7 +148,6 @@ func replaceVars(d TerraformResourceData, config *Config, linkTmpl string) (stri
 func replaceVarsForId(d TerraformResourceData, config *Config, linkTmpl string) (string, error) {
 	return replaceVarsRecursive(d, config, linkTmpl, true, 0)
 }
-<% end -%>
 
 // replaceVars must be done recursively because there are baseUrls that can contain references to regions
 // (eg cloudrun service) there aren't any cases known for 2+ recursion but we will track a run away
