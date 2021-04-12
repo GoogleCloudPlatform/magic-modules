@@ -365,9 +365,7 @@ end     # products.each do
 				"google_dataproc_cluster":                      resourceDataprocCluster(),
 				"google_dataproc_job":                          resourceDataprocJob(),
 				"google_endpoints_service":                     resourceEndpointsService(),
-				<% unless version == 'ga' -%>
 				"google_eventarc_trigger":                      resourceEventarcTrigger(),
-				<% end -%>
 				"google_folder":                                resourceGoogleFolder(),
 				"google_folder_organization_policy":            resourceGoogleFolderOrganizationPolicy(),
 				"google_logging_billing_account_sink":          resourceLoggingBillingAccountSink(),
