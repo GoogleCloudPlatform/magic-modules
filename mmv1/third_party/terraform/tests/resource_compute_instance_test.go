@@ -846,15 +846,15 @@ func TestAccComputeInstance_soleTenantNodeAffinities(t *testing.T) {
 			{
 				Config: testAccComputeInstance_withoutNodeAffinities(instanceName, templateName, groupName),
 			},
-			computeInstanceImportStep("us-central1-c", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
 			{
 				Config: testAccComputeInstance_soleTenantNodeAffinities(instanceName, templateName, groupName),
 			},
-			computeInstanceImportStep("us-central1-c", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
 			{
 				Config: testAccComputeInstance_soleTenantNodeAffinitiesUpdated(instanceName, templateName, groupName),
 			},
-			computeInstanceImportStep("us-central1-c", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
 		},
 	})
 }
@@ -4558,7 +4558,7 @@ data "google_compute_image" "my_image" {
 resource "google_compute_instance" "foobar" {
   name         = "%s"
   machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
-  zone         = "us-central1-c"
+  zone         = "us-central1-a"
   allow_stopping_for_update = true
 
   boot_disk {
@@ -4587,7 +4587,7 @@ resource "google_compute_node_template" "nodetmpl" {
 
 resource "google_compute_node_group" "nodes" {
   name = "%s"
-  zone = "us-central1-c"
+  zone = "us-central1-a"
 
   size          = 1
   node_template = google_compute_node_template.nodetmpl.self_link
@@ -4605,7 +4605,7 @@ data "google_compute_image" "my_image" {
 resource "google_compute_instance" "foobar" {
   name         = "%s"
   machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
-  zone         = "us-central1-c"
+  zone         = "us-central1-a"
   allow_stopping_for_update = true
 
   boot_disk {
@@ -4656,7 +4656,7 @@ resource "google_compute_node_template" "nodetmpl" {
 
 resource "google_compute_node_group" "nodes" {
   name = "%s"
-  zone = "us-central1-c"
+  zone = "us-central1-a"
 
   size          = 1
   node_template = google_compute_node_template.nodetmpl.self_link
@@ -4674,7 +4674,7 @@ data "google_compute_image" "my_image" {
 resource "google_compute_instance" "foobar" {
   name         = "%s"
   machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
-  zone         = "us-central1-c"
+  zone         = "us-central1-a"
   allow_stopping_for_update = true
 
   boot_disk {
@@ -4725,7 +4725,7 @@ resource "google_compute_node_template" "nodetmpl" {
 
 resource "google_compute_node_group" "nodes" {
   name = "%s"
-  zone = "us-central1-c"
+  zone = "us-central1-a"
 
   size          = 1
   node_template = google_compute_node_template.nodetmpl.self_link
