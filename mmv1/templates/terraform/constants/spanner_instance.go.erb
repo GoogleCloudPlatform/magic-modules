@@ -21,16 +21,6 @@ func deleteSpannerBackups(d *schema.ResourceData, config *Config, res map[string
 		return nil
 	}
 
-	switch v.(type) {
-	case []interface{}:
-		break
-	case map[string]interface{}:
-		// Construct list out of single nested resource
-		v = []interface{}{v}
-	default:
-		return fmt.Errorf("expected list or map for value backups. Actual value: %v", v)
-	}
-
 	// Iterate over the list and delete each backup.
 	for _, itemRaw := range v.([]interface{}) {
 		if itemRaw == nil {
