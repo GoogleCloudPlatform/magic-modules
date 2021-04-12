@@ -30,6 +30,7 @@ The following arguments are supported:
 
 * `project_id` - (Optional) The project ID. If it is not provided, the provider project is used.
 
+* `number` - The numeric identifier of the project.
 
 ## Attributes Reference
 
