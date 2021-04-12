@@ -21,9 +21,6 @@ func TestAccEventarcTrigger_basic(t *testing.T) {
     PreCheck:          func() { testAccPreCheck(t) },
     Providers:         testAccProvidersOiCS,
     CheckDestroy:      funcAccTestEventarcTriggerCheckDestroy(t),
-    ExternalProviders: map[string]resource.ExternalProvider{
-      "random": {},
-    },
     Steps: []resource.TestStep{
       {
         Config: testAccEventarcTrigger_basic(context),

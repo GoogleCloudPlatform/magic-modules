@@ -21,6 +21,15 @@ func bigQueryTableSortArrayByName(array []interface{}) {
 	})
 }
 
+func bigQueryArrayToMapIndexedByName(array []interface{}) map[string]interface{} {
+	out := map[string]interface{}{}
+	for _, v := range array {
+		name := v.(map[string]interface{})["name"].(string)
+		out[name] = v
+	}
+	return out
+}
+
 func bigQueryTablecheckNameExists(jsonList []interface{}) error {
 	for _, m := range jsonList {
 		if _, ok := m.(map[string]interface{})["name"]; !ok {
@@ -197,14 +206,18 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error)
 		if err := bigQueryTablecheckNameExists(arrayOld); err != nil {
 			return false, err
 		}
-		bigQueryTableSortArrayByName(arrayOld)
+		mapOld := bigQueryArrayToMapIndexedByName(arrayOld)
 		if err := bigQueryTablecheckNameExists(arrayNew); err != nil {
 			return false, err
 		}
-		bigQueryTableSortArrayByName(arrayNew)
-		for i := range arrayOld {
+		mapNew := bigQueryArrayToMapIndexedByName(arrayNew)
+		for key := range mapOld {
+			// all old keys should be represented in the new config
+			if _, ok := mapNew[key]; !ok {
+				return false, nil
+			}
 			if isChangable, err :=
-				resourceBigQueryTableSchemaIsChangeable(arrayOld[i], arrayNew[i]); err != nil || !isChangable {
+				resourceBigQueryTableSchemaIsChangeable(mapOld[key], mapNew[key]); err != nil || !isChangable {
 				return false, err
 			}
 		}
@@ -216,7 +229,6 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error)
 			// if both aren't objects
 			return false, nil
 		}
-
 		var unionOfKeys map[string]bool = make(map[string]bool)
 		for key := range objectOld {
 			unionOfKeys[key] = true
@@ -224,7 +236,6 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error)
 		for key := range objectNew {
 			unionOfKeys[key] = true
 		}
-
 		for key := range unionOfKeys {
 			valOld := objectOld[key]
 			valNew := objectNew[key]
@@ -521,6 +532,14 @@ func resourceBigQueryTable() *schema.Resource {
 										Type:        schema.TypeString,
 										Optional:    true,
 										Description: `When set, what mode of hive partitioning to use when reading data.`,
+									},
+									// RequirePartitionFilter: [Optional] If set to true, queries over this table
+									// require a partition filter that can be used for partition elimination to be
+									// specified.
+									"require_partition_filter": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Description: `If set to true, queries over this table require a partition filter that can be used for partition elimination to be specified.`,
 									},
 									// SourceUriPrefix: [Optional] [Experimental] When hive partition detection is requested, a common for all source uris must be required.
 									// The prefix must end immediately before the partition key encoding begins.
@@ -1399,6 +1418,10 @@ func expandHivePartitioningOptions(configured interface{}) *bigquery.HivePartiti
 		opts.Mode = v.(string)
 	}
 
+	if v, ok := raw["require_partition_filter"]; ok {
+		opts.RequirePartitionFilter = v.(bool)
+	}
+
 	if v, ok := raw["source_uri_prefix"]; ok {
 		opts.SourceUriPrefix = v.(string)
 	}
@@ -1411,6 +1434,10 @@ func flattenHivePartitioningOptions(opts *bigquery.HivePartitioningOptions) []ma
 
 	if opts.Mode != "" {
 		result["mode"] = opts.Mode
+	}
+
+	if opts.RequirePartitionFilter {
+		result["require_partition_filter"] = opts.RequirePartitionFilter
 	}
 
 	if opts.SourceUriPrefix != "" {

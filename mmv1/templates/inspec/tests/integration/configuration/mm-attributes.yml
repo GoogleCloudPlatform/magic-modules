@@ -249,11 +249,11 @@ dataproc_cluster:
       num_instances: 1
       machine_type: n1-standard-1
       boot_disk_type: pd-ssd
-      boot_disk_size_gb: 15
+      boot_disk_size_gb: 30
     worker_config:
       num_instances: 2
       machine_type: n1-standard-1
-      boot_disk_size_gb: 20
+      boot_disk_size_gb: 40
       num_local_ssds: 1
     preemptible_worker_config:
       num_instances: 0
