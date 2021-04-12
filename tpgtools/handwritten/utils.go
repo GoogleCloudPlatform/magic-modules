@@ -488,3 +488,12 @@ func checkStringMap(v interface{}) map[string]string {
 	}
 	return convertStringMap(v.(map[string]interface{}))
 }
+
+func multiEnvSearch(ks []string) string {
+	for _, k := range ks {
+		if v := os.Getenv(k); v != "" {
+			return v
+		}
+	}
+	return ""
+}
