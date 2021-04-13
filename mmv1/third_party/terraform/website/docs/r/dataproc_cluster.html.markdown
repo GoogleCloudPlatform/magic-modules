@@ -286,7 +286,7 @@ cluster_config{
 
 * `enable_secure_boot` - (Optional) Defines whether instances have Secure Boot enabled.
 
-* `enable_vtpm` - (Optional) Defines whether instances have the vTPM enabled.
+* `enable_vtpm` - (Optional) Defines whether instances have the [vTPM](https://cloud.google.com/security/shielded-cloud/shielded-vm#vtpm) enabled.
 
 * `enable_integrity_monitoring` - (Optional) Defines whether instances have integrity monitoring enabled.
 
