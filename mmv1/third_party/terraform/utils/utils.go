@@ -1,10 +1,14 @@
+// Contains functions that don't really belong anywhere else.
+
 package google
 
 import (
 	"fmt"
 	"log"
+	"os"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -20,12 +24,17 @@ type TerraformResourceData interface {
 	Set(string, interface{}) error
 	SetId(string)
 	Id() string
+	GetProviderMeta(interface{}) error
+	Timeout(key string) time.Duration
 }
 
 type TerraformResourceDiff interface {
+	HasChange(string) bool
 	GetChange(string) (interface{}, interface{})
 	Get(string) interface{}
+	GetOk(string) (interface{}, bool)
 	Clear(string) error
+	ForceNew(string) error
 }
 
 // getRegionFromZone returns the region from a zone for Google cloud.
@@ -51,6 +60,12 @@ func getRegion(d TerraformResourceData, config *Config) (string, error) {
 // given, an error is returned.
 func getProject(d TerraformResourceData, config *Config) (string, error) {
 	return getProjectFromSchema("project", d, config)
+}
+
+// getBillingProject reads the "billing_project" field from the given resource data and falls
+// back to the provider's value if not given. If no value is found, an error is returned.
+func getBillingProject(d TerraformResourceData, config *Config) (string, error) {
+	return getBillingProjectFromSchema("billing_project", d, config)
 }
 
 // getProjectFromDiff reads the "project" field from the given diff and falls
@@ -128,11 +143,11 @@ func isFailedPreconditionError(err error) bool {
 }
 
 func isConflictError(err error) bool {
-	if e, ok := err.(*googleapi.Error); ok && e.Code == 409 {
+	if e, ok := err.(*googleapi.Error); ok && (e.Code == 409 || e.Code == 412) {
 		return true
 	} else if !ok && errwrap.ContainsType(err, &googleapi.Error{}) {
 		e := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error)
-		if e.Code == 409 {
+		if e.Code == 409 || e.Code == 412 {
 			return true
 		}
 	}
@@ -147,6 +162,11 @@ func expandLabels(d TerraformResourceData) map[string]string {
 // expandEnvironmentVariables pulls the value of "environment_variables" out of a schema.ResourceData as a map[string]string.
 func expandEnvironmentVariables(d *schema.ResourceData) map[string]string {
 	return expandStringMap(d, "environment_variables")
+}
+
+// expandBuildEnvironmentVariables pulls the value of "build_environment_variables" out of a schema.ResourceData as a map[string]string.
+func expandBuildEnvironmentVariables(d *schema.ResourceData) map[string]string {
+	return expandStringMap(d, "build_environment_variables")
 }
 
 // expandStringMap pulls the value of key out of a TerraformResourceData as a map[string]string.
@@ -166,15 +186,6 @@ func convertStringMap(v map[string]interface{}) map[string]string {
 		m[k] = val.(string)
 	}
 	return m
-}
-
-// handles cases of map[string]string and map[string]interface{}
-func checkStringMap(v interface{}) map[string]string {
-	m, ok := v.(map[string]string)
-	if ok {
-		return m
-	}
-	return convertStringMap(v.(map[string]interface{}))
 }
 
 func convertStringArr(ifaceArr []interface{}) []string {
@@ -347,8 +358,8 @@ func serviceAccountFQN(serviceAccount string, d TerraformResourceData, config *C
 	return fmt.Sprintf("projects/-/serviceAccounts/%s@%s.iam.gserviceaccount.com", serviceAccount, project), nil
 }
 
-func paginatedListRequest(project, baseUrl string, config *Config, flattener func(map[string]interface{}) []interface{}) ([]interface{}, error) {
-	res, err := sendRequest(config, "GET", project, baseUrl, nil)
+func paginatedListRequest(project, baseUrl, userAgent string, config *Config, flattener func(map[string]interface{}) []interface{}) ([]interface{}, error) {
+	res, err := sendRequest(config, "GET", project, baseUrl, userAgent, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -360,7 +371,7 @@ func paginatedListRequest(project, baseUrl string, config *Config, flattener fun
 			break
 		}
 		url := fmt.Sprintf("%s?pageToken=%s", baseUrl, pageToken.(string))
-		res, err = sendRequest(config, "GET", project, url, nil)
+		res, err = sendRequest(config, "GET", project, url, userAgent, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -371,9 +382,9 @@ func paginatedListRequest(project, baseUrl string, config *Config, flattener fun
 	return ls, nil
 }
 
-func getInterconnectAttachmentLink(config *Config, project, region, ic string) (string, error) {
+func getInterconnectAttachmentLink(config *Config, project, region, ic, userAgent string) (string, error) {
 	if !strings.Contains(ic, "/") {
-		icData, err := config.clientCompute.InterconnectAttachments.Get(
+		icData, err := config.NewComputeClient(userAgent).InterconnectAttachments.Get(
 			project, region, ic).Do()
 		if err != nil {
 			return "", fmt.Errorf("Error reading interconnect attachment: %s", err)
@@ -448,8 +459,42 @@ func changeFieldSchemaToForceNew(sch *schema.Schema) {
 	}
 }
 
-// Helper function to return only the old value from a d.GetChange
-// Used to construct a StateHint
-func oldOnly(old, new interface{}) interface{} {
-	return old
+func generateUserAgentString(d TerraformResourceData, currentUserAgent string) (string, error) {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return currentUserAgent, err
+	}
+
+	if m.ModuleName != "" {
+		return strings.Join([]string{currentUserAgent, m.ModuleName}, " "), nil
+	}
+
+	return currentUserAgent, nil
+}
+
+func SnakeToPascalCase(s string) string {
+	split := strings.Split(s, "_")
+	for i := range split {
+		split[i] = strings.Title(split[i])
+	}
+	return strings.Join(split, "")
+}
+
+func checkStringMap(v interface{}) map[string]string {
+	m, ok := v.(map[string]string)
+	if ok {
+		return m
+	}
+	return convertStringMap(v.(map[string]interface{}))
+}
+
+func multiEnvSearch(ks []string) string {
+	for _, k := range ks {
+		if v := os.Getenv(k); v != "" {
+			return v
+		}
+	}
+	return ""
 }

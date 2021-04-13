@@ -155,6 +155,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       spec.template.metadata.annotations: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        diff_suppress_func: 'cloudrunTemplateAnnotationDiffSuppress'
       spec.template.metadata.namespace: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         custom_expand: "templates/terraform/custom_expand/default_to_project.go.erb"

@@ -23,8 +23,16 @@ func MergeFolderIamBinding(existing, incoming Asset) Asset {
 	return mergeIamAssets(existing, incoming, mergeAuthoritativeBindings)
 }
 
+func MergeFolderIamBindingDelete(existing, incoming Asset) Asset {
+	return mergeDeleteIamAssets(existing, incoming, mergeDeleteAuthoritativeBindings)
+}
+
 func MergeFolderIamMember(existing, incoming Asset) Asset {
 	return mergeIamAssets(existing, incoming, mergeAdditiveBindings)
+}
+
+func MergeFolderIamMemberDelete(existing, incoming Asset) Asset {
+	return mergeDeleteIamAssets(existing, incoming, mergeDeleteAdditiveBindings)
 }
 
 func newFolderIamAsset(
@@ -50,4 +58,14 @@ func newFolderIamAsset(
 			Bindings: bindings,
 		},
 	}}, nil
+}
+
+func FetchFolderIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+	return fetchIamPolicy(
+		NewProjectIamUpdater,
+		d,
+		config,
+		"//cloudresourcemanager.googleapis.com/{{folder}}",
+		"cloudresourcemanager.googleapis.com/Folder",
+	)
 }

@@ -132,6 +132,7 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/identity/docs/how-to/memberships-google-groups'
       api: 'https://cloud.google.com/identity/docs/reference/rest/v1/groups.memberships'
+    input: true
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'group'
@@ -246,6 +247,8 @@ objects:
                 - :OWNER
                 - :MANAGER
                 - :MEMBER
+        update_verb: :POST
+        update_url: '{{name}}:modifyMembershipRoles'
       - !ruby/object:Api::Type::String
         name: 'type'
         output: true

@@ -61,8 +61,6 @@ module Provider
                            'third_party/terraform/utils/config.go.erb'],
                           ['google/iam.go',
                            'third_party/terraform/utils/iam.go.erb'],
-                          ['google/utils.go',
-                           'third_party/terraform/utils/utils.go.erb'],
                           ['google/compute_instance_helpers.go',
                            'third_party/terraform/utils/compute_instance_helpers.go.erb'],
                           ['google/provider_handwritten_endpoint.go',
@@ -177,7 +175,11 @@ module Provider
                        ['google/iam_folder.go',
                         'third_party/terraform/utils/iam_folder.go'],
                        ['google/iam_project.go',
-                        'third_party/terraform/utils/iam_project.go']
+                        'third_party/terraform/utils/iam_project.go'],
+                       ['google/dcl_logger.go',
+                        '../tpgtools/handwritten/dcl_logger.go'],
+                       ['google/utils.go',
+                        'third_party/terraform/utils/utils.go']
                      ])
     end
 

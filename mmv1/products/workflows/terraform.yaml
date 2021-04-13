@@ -23,8 +23,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       update_minutes: 6
       delete_minutes: 6
     autogen_async: true
-    id_format: '{{name}}'
+    id_format: 'projects/{{project}}/locations/{{region}}/workflows/{{name}}'
     exclude_import: true
+    schema_version: 1
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "workflow_basic"
@@ -36,7 +37,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       serviceAccount: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         diff_suppress_func: 'compareSelfLinkOrResourceName'
