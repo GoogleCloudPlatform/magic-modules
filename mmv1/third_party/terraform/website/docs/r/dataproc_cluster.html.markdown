@@ -284,7 +284,7 @@ cluster_config{
 }
 ```
 
-* `enable_secure_boot` - (Optional) efines whether instances have Secure Boot enabled.
+* `enable_secure_boot` - (Optional) Defines whether instances have Secure Boot enabled.
 
 * `enable_vtpm` - (Optional) Defines whether instances have the vTPM enabled.
 
