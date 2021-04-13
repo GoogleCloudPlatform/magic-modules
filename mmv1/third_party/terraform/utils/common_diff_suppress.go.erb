@@ -165,3 +165,32 @@ func timestampDiffSuppress(format string) schema.SchemaDiffSuppressFunc {
 func internalIpDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	return (net.ParseIP(old) != nil) && (net.ParseIP(new) == nil)
 }
+
+// suppress the diff between { } and {[]}
+func emptyOrEmptySetDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	o, n := d.GetChange(strings.TrimSuffix(k, ".#"))
+	var l []interface{}
+	if old == "0" && new == "1" {
+		l = n.([]interface{})
+	} else if new == "0" && old == "1" {
+		l = o.([]interface{})
+	} else {
+		// we don't have one set and one unset, so don't suppress the diff
+		return false
+	}
+
+	if l[0] != nil {
+		contents := l[0].(map[string]interface{})
+		for _, v := range contents {
+			if reflect.TypeOf(v).String() == "*schema.Set" {
+				a := v.(*schema.Set).List()
+				if len(a) > 0 {
+					return false
+				}
+			} else if !isEmptyValue(reflect.ValueOf(v)) {
+				return false
+			}
+		}
+	}
+	return true
+}

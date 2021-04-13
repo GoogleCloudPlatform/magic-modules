@@ -574,10 +574,11 @@ func resourceComputeInstance() *schema.Resource {
 			},
 
 			"service_account": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				Description: `The service account to attach to the instance.`,
+				Type:             schema.TypeList,
+				MaxItems:         1,
+				Optional:         true,
+				DiffSuppressFunc: emptyOrEmptySetDiffSuppress,
+				Description:      `The service account to attach to the instance.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"email": {
