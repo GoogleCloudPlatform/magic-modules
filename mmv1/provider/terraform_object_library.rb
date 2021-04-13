@@ -176,6 +176,8 @@ module Provider
                         'third_party/terraform/utils/iam_folder.go'],
                        ['google/iam_project.go',
                         'third_party/terraform/utils/iam_project.go'],
+                       ['google/dcl_logger.go',
+                        '../tpgtools/handwritten/dcl_logger.go'],
                        ['google/utils.go',
                         'third_party/terraform/utils/utils.go']
                      ])
