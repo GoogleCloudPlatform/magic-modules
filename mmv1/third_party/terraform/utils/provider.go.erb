@@ -25,20 +25,12 @@ func Provider() *schema.Provider {
 			"credentials": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_CREDENTIALS",
-					"GOOGLE_CLOUD_KEYFILE_JSON",
-					"GCLOUD_KEYFILE_JSON",
-				}, nil),
 				ValidateFunc: validateCredentials,
 			},
 
 			"access_token": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_OAUTH_ACCESS_TOKEN",
-				}, nil),
 				ConflictsWith: []string{"credentials"},
 			},
 			"impersonate_service_account": {
@@ -373,9 +365,7 @@ end     # products.each do
 				"google_dataproc_cluster":                      resourceDataprocCluster(),
 				"google_dataproc_job":                          resourceDataprocJob(),
 				"google_endpoints_service":                     resourceEndpointsService(),
-				<% unless version == 'ga' -%>
 				"google_eventarc_trigger":                      resourceEventarcTrigger(),
-				<% end -%>
 				"google_folder":                                resourceGoogleFolder(),
 				"google_folder_organization_policy":            resourceGoogleFolderOrganizationPolicy(),
 				"google_logging_billing_account_sink":          resourceLoggingBillingAccountSink(),
@@ -510,6 +500,18 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 			return nil, diag.FromErr(err)
 		}
 	}
+
+	// Search for default credentials
+	config.Credentials = multiEnvSearch([]string{
+		"GOOGLE_CREDENTIALS",
+		"GOOGLE_CLOUD_KEYFILE_JSON",
+		"GCLOUD_KEYFILE_JSON",
+	})
+
+	config.AccessToken = multiEnvSearch([]string{
+		"GOOGLE_OAUTH_ACCESS_TOKEN",
+	})
+
 	// Add credential source
 	if v, ok := d.GetOk("access_token"); ok {
 		config.AccessToken = v.(string)

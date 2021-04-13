@@ -57,6 +57,9 @@ func main() {
 	} else {
 		resourcesForVersion = resources[allVersions()[0]]
 	}
+	if *version == GA_VERSION {
+		terraformResourceDirectory = "google"
+	}
 
 	if mode != nil && *mode == "serialization" {
 		generateSerializationLogic(resourcesForVersion)
