@@ -39,7 +39,7 @@ func deleteSpannerBackups(d *schema.ResourceData, config *Config, res map[string
 			return err
 		}
 
-		res, err = sendRequest(config, "DELETE", billingProject, url, userAgent, nil)
+		_, err = sendRequest(config, "DELETE", billingProject, url, userAgent, nil)
 		if err != nil {
 			return err
 		}
