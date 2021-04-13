@@ -81,9 +81,6 @@ func TestAccRedisInstance_redisInstanceAuthEnabled(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-		},
 		CheckDestroy: testAccCheckRedisInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -145,7 +142,7 @@ resource "google_redis_instance" "test" {
     maxmemory-policy       = "noeviction"
     notify-keyspace-events = ""
   }
-  <% unless version == 'ga' -%>  
+  <% unless version == 'ga' -%>
   transit_encryption_mode = "SERVER_AUTHENTICATION"
   <% end -%>
 }

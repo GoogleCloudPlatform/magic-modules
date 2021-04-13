@@ -25,20 +25,12 @@ func Provider() *schema.Provider {
 			"credentials": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_CREDENTIALS",
-					"GOOGLE_CLOUD_KEYFILE_JSON",
-					"GCLOUD_KEYFILE_JSON",
-				}, nil),
 				ValidateFunc: validateCredentials,
 			},
 
 			"access_token": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_OAUTH_ACCESS_TOKEN",
-				}, nil),
 				ConflictsWith: []string{"credentials"},
 			},
 			"impersonate_service_account": {
@@ -234,6 +226,7 @@ func Provider() *schema.Provider {
 			"google_kms_secret":                                dataSourceGoogleKmsSecret(),
 			"google_kms_secret_ciphertext":                     dataSourceGoogleKmsSecretCiphertext(),
 			<% unless version == 'ga' -%>
+			"google_kms_secret_asymmetric":                     dataSourceGoogleKmsSecretAsymmetric(),
 			"google_firebase_web_app":                          dataSourceGoogleFirebaseWebApp(),
 			"google_firebase_web_app_config":                   dataSourceGoogleFirebaseWebappConfig(),
 			<% end -%>
@@ -241,6 +234,7 @@ func Provider() *schema.Provider {
 			"google_folder_organization_policy":                dataSourceGoogleFolderOrganizationPolicy(),
 			"google_monitoring_notification_channel":           dataSourceMonitoringNotificationChannel(),
 			"google_monitoring_cluster_istio_service":          dataSourceMonitoringServiceClusterIstio(),
+			"google_monitoring_istio_canonical_service":        dataSourceMonitoringIstioCanonicalService(),
 			"google_monitoring_mesh_istio_service":             dataSourceMonitoringServiceMeshIstio(),
 			"google_monitoring_app_engine_service":             dataSourceMonitoringServiceAppEngine(),
 			"google_monitoring_uptime_check_ips":               dataSourceGoogleMonitoringUptimeCheckIps(),
@@ -370,11 +364,8 @@ end     # products.each do
 				<% end -%>
 				"google_dataproc_cluster":                      resourceDataprocCluster(),
 				"google_dataproc_job":                          resourceDataprocJob(),
-				"google_dns_record_set":                        resourceDnsRecordSet(),
 				"google_endpoints_service":                     resourceEndpointsService(),
-				<% unless version == 'ga' -%>
 				"google_eventarc_trigger":                      resourceEventarcTrigger(),
-				<% end -%>
 				"google_folder":                                resourceGoogleFolder(),
 				"google_folder_organization_policy":            resourceGoogleFolderOrganizationPolicy(),
 				"google_logging_billing_account_sink":          resourceLoggingBillingAccountSink(),
@@ -509,6 +500,18 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 			return nil, diag.FromErr(err)
 		}
 	}
+
+	// Search for default credentials
+	config.Credentials = multiEnvSearch([]string{
+		"GOOGLE_CREDENTIALS",
+		"GOOGLE_CLOUD_KEYFILE_JSON",
+		"GCLOUD_KEYFILE_JSON",
+	})
+
+	config.AccessToken = multiEnvSearch([]string{
+		"GOOGLE_OAUTH_ACCESS_TOKEN",
+	})
+
 	// Add credential source
 	if v, ok := d.GetOk("access_token"); ok {
 		config.AccessToken = v.(string)

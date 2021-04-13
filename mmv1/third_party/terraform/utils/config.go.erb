@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"google.golang.org/api/option"
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+	"google.golang.org/api/option"
 
 	"golang.org/x/oauth2"
 	googleoauth "golang.org/x/oauth2/google"
@@ -63,10 +63,8 @@ import (
 	"google.golang.org/api/storage/v1"
 	"google.golang.org/api/storagetransfer/v1"
 	"google.golang.org/api/transport"
-<% unless version == 'ga' -%>
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
-	eventarcDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc/beta"
-<% end -%>
+	eventarcDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc<% unless version == 'ga' -%>/beta<% end -%>"
 )
 
 type providerMeta struct {
@@ -122,10 +120,8 @@ type Config struct {
 	requestBatcherIam          *RequestBatcher
 
 	// start DCL clients
-<% unless version == 'ga' -%>
 	dclConfig *dcl.Config
 	clientEventarcDCL *eventarcDcl.Client
-<% end -%>
 }
 
 // Generated product base paths
@@ -188,11 +184,9 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	c.PollInterval = 10 * time.Second
 
 	// Start DCL client instantiation
-<% unless version == 'ga' -%>
 	// TODO(slevenick): handle user agents
 	c.dclConfig = dcl.NewConfig(dcl.WithHTTPClient(client), dcl.WithUserAgent(c.userAgent), dcl.WithLogger(dclLogger{}))
 	c.clientEventarcDCL = eventarcDcl.NewClient(c.dclConfig)
-<% end -%>
 
 	return nil
 }
@@ -319,10 +313,10 @@ func (c *Config) NewDnsClient(userAgent string) *dns.Service {
 	return clientDns
 }
 
-func (c *Config) NewKmsClient(userAgent string) *cloudkms.Service {
+func (c *Config) NewKmsClientWithCtx(ctx context.Context, userAgent string) *cloudkms.Service {
 	kmsClientBasePath := removeBasePathVersion(c.KMSBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud KMS client for path %s", kmsClientBasePath)
-	clientKms, err := cloudkms.NewService(c.context, option.WithHTTPClient(c.client))
+	clientKms, err := cloudkms.NewService(ctx, option.WithHTTPClient(c.client))
 	if err != nil {
 		log.Printf("[WARN] Error creating client kms: %s", err)
 		return nil
@@ -331,6 +325,10 @@ func (c *Config) NewKmsClient(userAgent string) *cloudkms.Service {
 	clientKms.BasePath = kmsClientBasePath
 
 	return clientKms
+}
+
+func (c *Config) NewKmsClient(userAgent string) *cloudkms.Service {
+	return c.NewKmsClientWithCtx(c.context, userAgent)
 }
 
 func (c *Config) NewLoggingClient(userAgent string) *cloudlogging.Service {
