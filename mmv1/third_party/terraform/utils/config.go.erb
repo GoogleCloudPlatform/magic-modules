@@ -123,7 +123,6 @@ type Config struct {
 	// start DCL clients
 	dclConfig *dcl.Config
 	clientDataprocDCL *dataprocDcl.Client
-<% unless version == 'ga' -%>
 	clientEventarcDCL *eventarcDcl.Client
 }
 
@@ -190,7 +189,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// TODO(slevenick): handle user agents
 	c.dclConfig = dcl.NewConfig(dcl.WithHTTPClient(client), dcl.WithUserAgent(c.userAgent), dcl.WithLogger(dclLogger{}))
 	c.clientDataprocDCL = dataprocDcl.NewClient(c.dclConfig)
-<% unless version == 'ga' -%>
 	c.clientEventarcDCL = eventarcDcl.NewClient(c.dclConfig)
 
 	return nil
