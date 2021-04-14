@@ -376,40 +376,48 @@ func flattenEnableDisplay(displayDevice *computeBeta.DisplayDevice) interface{} 
 	return displayDevice.EnableDisplay
 }
 
+// Node affinity updates require a reboot
+func schedulingHasChangeRequiringReboot(d *schema.ResourceData) bool {
+	o, n := d.GetChange("scheduling")
+	oScheduling := o.([]interface{})[0].(map[string]interface{})
+	newScheduling := n.([]interface{})[0].(map[string]interface{})
+
+	return hasNodeAffinitiesChanged(oScheduling, newScheduling)
+}
+
 // Terraform doesn't correctly calculate changes on schema.Set, so we do it manually
 // https://github.com/hashicorp/terraform-plugin-sdk/issues/98
-// 1st bool is a change that requires a reboot and the second bool is a change that doesn't
-func schedulingHasChange(d *schema.ResourceData) (bool, bool) {
+func schedulingHasChangeWithoutReboot(d *schema.ResourceData) bool {
 	if !d.HasChange("scheduling") {
 		// This doesn't work correctly, which is why this method exists
 		// But it is here for posterity
-		return false, false
+		return false
 	}
 	o, n := d.GetChange("scheduling")
 	oScheduling := o.([]interface{})[0].(map[string]interface{})
 	newScheduling := n.([]interface{})[0].(map[string]interface{})
 
-	if hasNodeAffinitiesChanged(oScheduling, newScheduling) {
-		return true, false
+	if schedulingHasChangeRequiringReboot(d) {
+		return false
 	}
 
 	if oScheduling["automatic_restart"] != newScheduling["automatic_restart"] {
-		return false, true
+		return true
 	}
 
 	if oScheduling["preemptible"] != newScheduling["preemptible"] {
-		return false, true
+		return true
 	}
 
 	if oScheduling["on_host_maintenance"] != newScheduling["on_host_maintenance"] {
-		return false, true
+		return true
 	}
 
 	if oScheduling["min_node_cpus"] != newScheduling["min_node_cpus"] {
-		return false, true
+		return true
 	}
 
-	return false, false
+	return false
 }
 
 func hasNodeAffinitiesChanged(oScheduling, newScheduling map[string]interface{}) bool {

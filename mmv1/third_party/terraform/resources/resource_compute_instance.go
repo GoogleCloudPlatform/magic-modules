@@ -512,7 +512,7 @@ func resourceComputeInstance() *schema.Resource {
 					// !!! IMPORTANT !!!
 					// We have a custom diff function for the scheduling block due to issues with Terraform's
 					// diff on schema.Set. If changes are made to this block, they must be reflected in that
-					// method. See schedulingHasChange in compute_instance_helpers.go
+					// method. See schedulingHasChangeWithoutReboot in compute_instance_helpers.go
 					Schema: map[string]*schema.Schema{
 						"on_host_maintenance": {
 							Type:         schema.TypeString,
@@ -1344,7 +1344,8 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
-	bootRequiredSchedulingChange, bootNotRequiredSchedulingChange := schedulingHasChange(d)
+	bootRequiredSchedulingChange := schedulingHasChangeRequiringReboot(d)
+	bootNotRequiredSchedulingChange := schedulingHasChangeWithoutReboot(d)
 	if bootNotRequiredSchedulingChange {
 		scheduling, err := expandScheduling(d.Get("scheduling"))
 		if err != nil {
@@ -1664,7 +1665,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		desiredStatus := d.Get("desired_status").(string)
 
 		if statusBeforeUpdate == "RUNNING" && desiredStatus != "TERMINATED" && !d.Get("allow_stopping_for_update").(bool) {
-			return fmt.Errorf("Changing the machine_type, min_cpu_platform, service_account, enable_display, shielded_instance_config, scheduling.0.node_affinities " +
+			return fmt.Errorf("Changing the machine_type, min_cpu_platform, service_account, enable_display, shielded_instance_config, scheduling.node_affinities " +
 				"or network_interface.[#d].(network/subnetwork/subnetwork_project) on a started instance requires stopping it. " +
 				"To acknowledge this, please set allow_stopping_for_update = true in your config. " +
 				"You can also stop it by setting desired_status = \"TERMINATED\", but the instance will not be restarted after the update.")
