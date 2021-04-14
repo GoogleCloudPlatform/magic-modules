@@ -14,6 +14,9 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Database: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      # CMEK support sometimes makes a DB take a while to create
+      insert_minutes: 3
     autogen_async: true
     # This resource is a child resource
     skip_sweeper: true
@@ -39,6 +42,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_vcr: true
         vars:
           database_name: "my-database"
+        ignore_read_extra:
+          - "deletion_protection"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "spanner_database_cmek"
+        primary_resource_id: "database"
+        # Randomness due to spanner instance
+        skip_vcr: true
+        vars:
+          database_name: "another"
+          key_name: "key"
+          keyring_name: "keyring"
         ignore_read_extra:
           - "deletion_protection"
     virtual_fields:
