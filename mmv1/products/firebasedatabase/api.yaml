@@ -24,9 +24,9 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Instance'
     min_version: beta
-    base_url:  projects/{{project}}/locations/{{location_id}}/instances
-    self_link: projects/{{project}}/locations/{{location_id}}/instances/{{database_id}}
-    create_url:  projects/{{project}}/locations/{{location_id}}/instances?databaseId={{database_id}}
+    base_url:  projects/{{project_id}}/locations/{{location_id}}/instances
+    self_link: projects/{{project_id}}/locations/{{location_id}}/instances/{{database_id}}
+    create_url:  projects/{{project_id}}/locations/{{location_id}}/instances?databaseId={{database_id}}
     input: true
     description: |
       A Firebase Realtime Database Instance
@@ -43,15 +43,24 @@ objects:
         output: true
         pattern: projects/{{project}}/locations/{{location_id}}/instances/{{database_id}}
       - !ruby/object:Api::Type::String
+        name: 'projectId'
+        input: true
+        required: true
+        url_param_only: true
+        description: |
+          The ID of the project that this database belongs to.
+      - !ruby/object:Api::Type::String
         name: 'databaseId'
         input: true
         required: true
+        url_param_only: true
         description: |
           The globally unique ID of the database.
       - !ruby/object:Api::Type::String
         name: 'locationId'
         input: true
         required: true
+        url_param_only: true
         description: |
           The globally unique ID of the database.
       - !ruby/object:Api::Type::String
@@ -61,7 +70,6 @@ objects:
           The globally unique hostname of the database.
       - !ruby/object:Api::Type::Enum
         name: 'type'
-        required: true
         input: true
         description: |
           The database instance type.
