@@ -312,6 +312,7 @@ objects:
           The id of the tag template to create.
       - !ruby/object:Api::Type::Boolean
         name: forceDelete
+        default_value: false
         url_param_only: true
         description: |
           This confirms the deletion of any possible tags using this template. Must be set to true in order to delete the tag template.
