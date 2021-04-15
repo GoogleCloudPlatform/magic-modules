@@ -429,7 +429,7 @@ func TestAccBigQueryDataTable_bigtable(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": randString(t, 8),
 		"project":       getTestProjectFromEnv(),
 	}
 
@@ -442,9 +442,10 @@ func TestAccBigQueryDataTable_bigtable(t *testing.T) {
 				Config: testAccBigQueryTableFromBigtable(context),
 			},
 			{
-				ResourceName:      "google_bigquery_table.table",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_bigquery_table.table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -1436,7 +1437,7 @@ func testAccBigQueryTableFromBigtable(context map[string]interface{}) string {
 	resource "google_bigtable_instance" "instance" {
 		name = "tf-test-bigtable-inst-%{random_suffix}"
 		cluster {
-			cluster_id = "%{random_suffix}"
+			cluster_id = "tf-test-bigtable-%{random_suffix}"
 			zone       = "us-central1-b"
 		}
 		instance_type = "DEVELOPMENT"
@@ -1453,6 +1454,7 @@ func testAccBigQueryTableFromBigtable(context map[string]interface{}) string {
 		}
 	}
 	resource "google_bigquery_table" "table" {
+		deletion_protection = false
 		dataset_id = google_bigquery_dataset.dataset.dataset_id
 		table_id   = "tf_test_bigtable_%{random_suffix}"
 		external_data_configuration {
