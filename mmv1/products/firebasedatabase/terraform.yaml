@@ -25,8 +25,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "firebase_database_basic"
         min_version: 'beta'
         primary_resource_id: "basic"
-        vars:
-          instance_name: "memory-cache"
+        test_env_vars:
+          org_id: :ORG_ID
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
 # This is for copying files over
