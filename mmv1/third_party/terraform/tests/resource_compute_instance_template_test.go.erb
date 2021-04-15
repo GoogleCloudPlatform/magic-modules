@@ -2130,9 +2130,7 @@ resource "google_compute_instance_template" "foobar" {
       values   = ["testinstancetemplate"]
     }
 
-<% unless version == 'ga' -%>
     min_node_cpus = 2
-<% end -%>
   }
 
   service_account {
