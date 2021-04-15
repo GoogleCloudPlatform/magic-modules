@@ -435,7 +435,9 @@ func hasNodeAffinitiesChanged(oScheduling, newScheduling map[string]interface{})
 		if oldNodeAffinity["operator"] != newNodeAffinity["operator"] {
 			return true
 		}
-		if !reflect.DeepEqual(oldNodeAffinity["values"].(*schema.Set).List(), newNodeAffinity["values"].(*schema.Set).List()) {
+
+		// convertStringSet will sort the set into a slice, allowing DeepEqual
+		if !reflect.DeepEqual(convertStringSet(oldNodeAffinity["values"].(*schema.Set)), convertStringSet(newNodeAffinity["values"].(*schema.Set))) {
 			return true
 		}
 	}
