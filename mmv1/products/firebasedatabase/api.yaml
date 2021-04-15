@@ -55,14 +55,14 @@ objects:
         required: true
         url_param_only: true
         description: |
-          The globally unique ID of the database.
+          The globally unique identifier of the database instance.
       - !ruby/object:Api::Type::String
         name: 'locationId'
         input: true
         required: true
         url_param_only: true
         description: |
-          The globally unique ID of the database.
+          The ID of the GCP resource location for the database.
       - !ruby/object:Api::Type::String
         name: 'databaseUrl'
         output: true
