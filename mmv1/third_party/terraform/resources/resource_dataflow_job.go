@@ -583,8 +583,6 @@ func resourceDataflowJobIterateMapHasChange(mapKey string, d *schema.ResourceDat
 func resourceDataflowJobIsVirtualUpdate(d *schema.ResourceData, resourceSchema map[string]*schema.Schema) bool {
 	// on_delete is the only virtual field
 	if d.HasChange("on_delete") {
-		// Check if other fields have changes, which would require an actual update request
-		resourceSchema := resourceDataflowJob().Schema
 		for field := range resourceSchema {
 			if field == "on_delete" {
 				continue
