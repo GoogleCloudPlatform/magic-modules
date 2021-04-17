@@ -2565,7 +2565,6 @@ func testAccCheckComputeInstanceScopes(instance *compute.Instance, scopeCount in
 				return fmt.Errorf("Scope count expected: %s, but got %s", fmt.Sprint(scopeCount), fmt.Sprint(scount))
 			}
 		}
-		return fmt.Errorf("Scope count not found: %s", fmt.Sprint(scopeCount))
 	}
 }
 
