@@ -35,13 +35,7 @@ objects:
         'Official Documentation':
           'https://firebase.google.com/'
       api: 'https://firebase.google.com/docs/reference/rest/database/database-management/rest'
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        description: |
-          The resource name of the Database Instance.
-        output: true
-        pattern: projects/{{project}}/locations/{{location_id}}/instances/{{database_id}}
+    parameters:
       - !ruby/object:Api::Type::String
         name: 'projectId'
         input: true
@@ -63,6 +57,13 @@ objects:
         url_param_only: true
         description: |
           The ID of the GCP resource location for the database.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource name of the Database Instance.
+        output: true
+        pattern: projects/{{project}}/locations/{{location_id}}/instances/{{database_id}}
       - !ruby/object:Api::Type::String
         name: 'databaseUrl'
         output: true
@@ -77,3 +78,9 @@ objects:
           - "USER_DATABASE"
           - "DEFAULT_DATABASE"
         default_value: :USER_DATABASE
+      - !ruby/object:Api::Type::String
+        name: 'project'
+        description: |
+          The resource name of the owning project.
+        output: true
+        pattern: projects/{{project_number}}
