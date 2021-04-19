@@ -1,7 +1,5 @@
-<% autogen_exception -%>
 package google
 
-<% unless version == 'ga' %>
 import (
 	"fmt"
 	"testing"
@@ -124,4 +122,3 @@ data "google_compute_network" "memcache_network" {
 }
 `, prefix, name, network)
 }
-<% end -%>
