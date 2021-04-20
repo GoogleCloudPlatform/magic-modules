@@ -79,6 +79,27 @@ objects:
               and is not a valid configuration.
             item_type: Api::Type::String
             required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'schemaSettings'
+        description: |
+          Settings for validating messages published against a schema.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'schema'
+            description: |
+              The name of the schema that messages published should be
+              validated against. Format is projects/{project}/schemas/{schema}.
+              The value of this field will be _deleted-schema_
+              if the schema has been deleted.
+            required: true
+          - !ruby/object:Api::Type::Enum
+            name: 'encoding'
+            description: The encoding of messages validated against schema.
+            default_value: :ENCODING_UNSPECIFIED
+            values:
+              - :ENCODING_UNSPECIFIED
+              - :JSON
+              - :BINARY
   - !ruby/object:Api::Resource
     name: 'Subscription'
     description: |
