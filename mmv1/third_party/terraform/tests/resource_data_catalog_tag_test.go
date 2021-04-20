@@ -1,7 +1,6 @@
 package google
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -38,36 +37,6 @@ func TestAccDataCatalogTag_update(t *testing.T) {
 			},
 			{
 				Config: testAccDataCatalogTag_dataCatalogEntryTagBasicExample(context),
-			},
-			{
-				ResourceName:      "google_data_catalog_tag.basic_tag",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func TestAccDataCatalogTag_parent_update(t *testing.T) {
-	t.Parallel()
-
-	randStr := randString(t, 10)
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataCatalogEntryDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataCatalogTag_parent_update(randStr, "entry"),
-			},
-			{
-				ResourceName:      "google_data_catalog_tag.basic_tag",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccDataCatalogTag_parent_update(randStr, "entry2"),
 			},
 			{
 				ResourceName:      "google_data_catalog_tag.basic_tag",
@@ -150,81 +119,4 @@ resource "google_data_catalog_tag" "basic_tag" {
   }
 }
 `, context)
-}
-
-func testAccDataCatalogTag_parent_update(randStr, entryid string) string {
-	return fmt.Sprintf(`
-resource "google_data_catalog_entry" "entry" {
-  entry_group = google_data_catalog_entry_group.entry_group.id
-  entry_id = "tf_test_my_entry1%s"
-
-  user_specified_type = "my_custom_type"
-  user_specified_system = "SomethingExternal"
-}
-
-resource "google_data_catalog_entry" "entry2" {
-  entry_group = google_data_catalog_entry_group.entry_group.id
-  entry_id = "tf_test_my_entry2%s"
-
-  user_specified_type = "my_custom_type"
-  user_specified_system = "SomethingExternal"
-}
-
-resource "google_data_catalog_entry_group" "entry_group" {
-  entry_group_id = "tf_test_my_entry_group2%s"
-}
-
-resource "google_data_catalog_tag_template" "tag_template" {
-  tag_template_id = "tf_test_template%s"
-  region = "us-central1"
-  display_name = "Demo Tag Template"
-
-  fields {
-    field_id = "source"
-    display_name = "Source of data asset"
-    type {
-      primitive_type = "STRING"
-    }
-    is_required = true
-  }
-
-  fields {
-    field_id = "num_rows"
-    display_name = "Number of rows in the data asset"
-    type {
-      primitive_type = "DOUBLE"
-    }
-  }
-
-  fields {
-    field_id = "pii_type"
-    display_name = "PII type"
-    type {
-      enum_type {
-        allowed_values {
-          display_name = "EMAIL"
-        }
-        allowed_values {
-          display_name = "SOCIAL SECURITY NUMBER"
-        }
-        allowed_values {
-          display_name = "NONE"
-        }
-      }
-    }
-  }
-
-  force_delete = "true"
-}
-
-resource "google_data_catalog_tag" "basic_tag" {
-  parent   = google_data_catalog_entry.%s.id
-  template = google_data_catalog_tag_template.tag_template.id
-
-  fields {
-    field_name   = "source"
-    string_value = "my-string"
-  }
-}
-`, randStr, randStr, randStr, randStr, entryid)
 }
