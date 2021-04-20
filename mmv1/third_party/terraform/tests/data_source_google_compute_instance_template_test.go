@@ -202,6 +202,7 @@ resource "google_compute_instance_template" "b" {
 
   depends_on = [
     google_compute_instance_template.a,
+    google_compute_instance_template.c,
   ]
 }
 resource "google_compute_instance_template" "c" {
@@ -224,13 +225,12 @@ resource "google_compute_instance_template" "c" {
 
   depends_on = [
     google_compute_instance_template.a,
-    google_compute_instance_template.b,
   ]
 }
 
 data "google_compute_instance_template" "default" {
   // Hack to prevent depends_on bug triggering datasource recreate due to https://github.com/hashicorp/terraform/issues/11806
-  project = "%{project}${replace(google_compute_instance_template.c.id, "/.*/", "")}"
+  project = "%{project}${replace(google_compute_instance_template.b.id, "/.*/", "")}"
   filter      = "name eq tf-test-template-.*"
   most_recent = true
 }
