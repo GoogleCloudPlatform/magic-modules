@@ -1,13 +1,11 @@
-provider "google" {
-  request_timeout = "180s"
-}
-
 resource "google_spanner_instance" "main" {
+  provider     = google-beta
   config       = "regional-europe-west1"
   display_name = "main-instance1"
 }
 
 resource "google_spanner_database" "database" {
+  provider = google-beta
   instance = google_spanner_instance.main.name
   name     = "<%= ctx[:vars]['database_name'] %>"
   ddl = [
@@ -25,17 +23,20 @@ resource "google_spanner_database" "database" {
 }
 
 resource "google_kms_key_ring" "keyring" {
+  provider = google-beta
   name     = "<%= ctx[:vars]['keyring_name'] %>"
   location = "europe-west1"
 }
 
 resource "google_kms_crypto_key" "example-key" {
+  provider        = google-beta
   name            = "<%= ctx[:vars]['key_name'] %>"
   key_ring        = google_kms_key_ring.keyring.id
   rotation_period = "100000s"
 }
 
 resource "google_kms_crypto_key_iam_binding" "crypto-key-binding" {
+  provider      = google-beta
   crypto_key_id = google_kms_crypto_key.example-key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
@@ -44,9 +45,12 @@ resource "google_kms_crypto_key_iam_binding" "crypto-key-binding" {
   ]
 }
 
-data "google_project" "project" {}
+data "google_project" "project" {
+  provider = google-beta
+}
 
 resource "google_project_service_identity" "ck_sa" {
-  project = data.google_project.project.project_id
-  service = "spanner.googleapis.com"
+  provider = google-beta
+  project  = data.google_project.project.project_id
+  service  = "spanner.googleapis.com"
 }
