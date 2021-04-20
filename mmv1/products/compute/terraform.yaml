@@ -167,6 +167,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       cdnPolicy.negativeCaching: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      cdnPolicy.serveWhileStale: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.clientTtl: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.defaultTtl: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.maxTtl: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_import: true
     exclude_validator: true
@@ -174,6 +182,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_bucket_signed_url_key"
+        pull_external: true
         primary_resource_id: "backend_key"
         vars:
           key_name: "test-key"
@@ -399,6 +408,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_signed_url_key"
+        pull_external: true
         primary_resource_id: "backend_key"
         vars:
           key_name: "test-key"
@@ -707,33 +717,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       IPAddress: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-        validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateIpAddress'
-        description: |
-          The IP address that this forwarding rule is serving on behalf of.
-
-          Addresses are restricted based on the forwarding rule's load balancing
-          scheme (EXTERNAL or INTERNAL) and scope (global or regional).
-
-          When the load balancing scheme is EXTERNAL, for global forwarding
-          rules, the address must be a global IP, and for regional forwarding
-          rules, the address must live in the same region as the forwarding
-          rule. If this field is empty, an ephemeral IPv4 address from the same
-          scope (global or regional) will be assigned. A regional forwarding
-          rule supports IPv4 only. A global forwarding rule supports either IPv4
-          or IPv6.
-
-          When the load balancing scheme is INTERNAL, this can only be an RFC
-          1918 IP address belonging to the network/subnet configured for the
-          forwarding rule. By default, if this field is empty, an ephemeral
-          internal IP address will be automatically allocated from the IP range
-          of the subnet or network configured for this forwarding rule.
-
-          An address must be specified by a literal IP address. ~> **NOTE:** While
-          the API allows you to specify various resource paths for an address resource
-          instead, Terraform requires this to specifically be an IP address to
-          avoid needing to fetching the IP address from resource paths on refresh
-          or unnecessary diffs.
+        diff_suppress_func: 'internalIpDiffSuppress'
       IPProtocol: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'caseDiffSuppress'
         default_from_api: true
@@ -823,31 +807,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       IPAddress: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         diff_suppress_func: 'internalIpDiffSuppress'
-        description: |
-          The IP address that this forwarding rule is serving on behalf of.
-
-          Addresses are restricted based on the forwarding rule's load balancing
-          scheme (EXTERNAL or INTERNAL) and scope (global or regional).
-
-          When the load balancing scheme is EXTERNAL, for global forwarding
-          rules, the address must be a global IP, and for regional forwarding
-          rules, the address must live in the same region as the forwarding
-          rule. If this field is empty, an ephemeral IPv4 address from the same
-          scope (global or regional) will be assigned. A regional forwarding
-          rule supports IPv4 only. A global forwarding rule supports either IPv4
-          or IPv6.
-
-          When the load balancing scheme is INTERNAL, this can only be an RFC
-          1918 IP address belonging to the network/subnet configured for the
-          forwarding rule. By default, if this field is empty, an ephemeral
-          internal IP address will be automatically allocated from the IP range
-          of the subnet or network configured for this forwarding rule.
-
-          An address must be specified by a literal IP address. ~> **NOTE**: While
-          the API allows you to specify various resource paths for an address resource
-          instead, Terraform requires this to specifically be an IP address to
-          avoid needing to fetching the IP address from resource paths on refresh
-          or unnecessary diffs.
       IPProtocol: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'caseDiffSuppress'
         default_from_api: true
@@ -1109,10 +1068,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "interconnect_attachment_basic"
         primary_resource_id: "on_prem"
-        skip_test: true
         vars:
           interconnect_attachment_name: "on-prem-attachment"
           router_name: "router"
+          network_name: "network"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1137,7 +1096,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       edgeAvailabilityDomain: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       mtu: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true 
+        custom_flatten: templates/terraform/custom_flatten/float64_to_int_to_string.go.erb
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/interconnect_attachment.go.erb
       post_create: templates/terraform/post_create/interconnect_attachment.go.erb
@@ -1408,7 +1368,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           template_name: "soletenant-tmpl"
       - !ruby/object:Provider::Terraform::Examples
         name: "node_template_server_binding"
-        min_version: beta
         primary_resource_id: "template"
         vars:
           template_name: "soletenant-with-licenses"
@@ -2247,6 +2206,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "managed_ssl_certificate_recreation"
         primary_resource_id: "cert"
+        pull_external: true
         # Random provider
         skip_vcr: true
     description: |
@@ -2279,6 +2239,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "name_prefix"
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_random_provider"
+        pull_external: true
         primary_resource_id: "default"
         # Uses resource.UniqueId
         skip_vcr: true
@@ -2330,6 +2291,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "name_prefix"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_ssl_certificate_random_provider"
+        pull_external: true
         primary_resource_id: "default"
         # Uses resource.UniqueId
         skip_vcr: true
@@ -2517,6 +2479,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
+      proxyBind: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   TargetHttpsProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -2534,6 +2498,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       quicOverride: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: :NONE
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+      proxyBind: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   RegionTargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -2654,6 +2620,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: backendService
       proxyHeader: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: :NONE
+      proxyBind: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   TargetVpnGateway: !ruby/object:Overrides::Terraform::ResourceOverride
     name: 'VpnGateway'
     docs: !ruby/object:Provider::Terraform::Docs

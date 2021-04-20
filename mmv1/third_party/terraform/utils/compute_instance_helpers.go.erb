@@ -18,18 +18,15 @@ func instanceSchedulingNodeAffinitiesElemSchema() *schema.Resource {
 			"key": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"operator": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"IN", "NOT_IN"}, false),
 			},
 			"values": {
 				Type:     schema.TypeSet,
 				Required: true,
-				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
@@ -118,11 +115,9 @@ func expandScheduling(v interface{}) (*computeBeta.Scheduling, error) {
 		}
 	}
 
-<% unless version == 'ga' -%>
 	if v, ok := original["min_node_cpus"]; ok {
 		scheduling.MinNodeCpus = int64(v.(int))
 	}
-<% end -%>
 
 	return scheduling, nil
 }
@@ -131,9 +126,7 @@ func flattenScheduling(resp *computeBeta.Scheduling) []map[string]interface{} {
 	schedulingMap := map[string]interface{}{
 		"on_host_maintenance": resp.OnHostMaintenance,
 		"preemptible":         resp.Preemptible,
-<% unless version == 'ga' -%>
 		"min_node_cpus":       resp.MinNodeCpus,
-<% end -%>
 	}
 
 	if resp.AutomaticRestart != nil {
@@ -255,17 +248,10 @@ func expandNetworkInterfaces(d TerraformResourceData, config *Config) ([]*comput
 			Subnetwork:    sf.RelativeLink(),
 			AccessConfigs: expandAccessConfigs(data["access_config"].([]interface{})),
 			AliasIpRanges: expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
-			NicType:       expandNicType(data["nic_type"].(interface{})),
+			NicType:       data["nic_type"].(string),
 		}
 	}
 	return ifaces, nil
-}
-
-func expandNicType(d interface{}) string {
-	if d == nil {
-		return ""
-	}
-	return d.(string)
 }
 
 func flattenServiceAccounts(serviceAccounts []*computeBeta.ServiceAccount) []map[string]interface{} {
@@ -345,8 +331,8 @@ func expandConfidentialInstanceConfig(d TerraformResourceData) *computeBeta.Conf
 
 	prefix := "confidential_instance_config.0"
 	return &computeBeta.ConfidentialInstanceConfig{
-		EnableConfidentialCompute:     d.Get(prefix + ".enable_confidential_compute").(bool),
-		ForceSendFields:              []string{"EnableSecureBoot"},
+		EnableConfidentialCompute: d.Get(prefix + ".enable_confidential_compute").(bool),
+		ForceSendFields:           []string{"EnableSecureBoot"},
 	}
 }
 
@@ -356,7 +342,7 @@ func flattenConfidentialInstanceConfig(ConfidentialInstanceConfig *computeBeta.C
 	}
 
 	return []map[string]bool{{
-		"enable_confidential_compute":          ConfidentialInstanceConfig.EnableConfidentialCompute,
+		"enable_confidential_compute": ConfidentialInstanceConfig.EnableConfidentialCompute,
 	}}
 }
 
@@ -390,9 +376,18 @@ func flattenEnableDisplay(displayDevice *computeBeta.DisplayDevice) interface{} 
 	return displayDevice.EnableDisplay
 }
 
+// Node affinity updates require a reboot
+func schedulingHasChangeRequiringReboot(d *schema.ResourceData) bool {
+	o, n := d.GetChange("scheduling")
+	oScheduling := o.([]interface{})[0].(map[string]interface{})
+	newScheduling := n.([]interface{})[0].(map[string]interface{})
+
+	return hasNodeAffinitiesChanged(oScheduling, newScheduling)
+}
+
 // Terraform doesn't correctly calculate changes on schema.Set, so we do it manually
 // https://github.com/hashicorp/terraform-plugin-sdk/issues/98
-func schedulingHasChange(d *schema.ResourceData) bool {
+func schedulingHasChangeWithoutReboot(d *schema.ResourceData) bool {
 	if !d.HasChange("scheduling") {
 		// This doesn't work correctly, which is why this method exists
 		// But it is here for posterity
@@ -401,8 +396,11 @@ func schedulingHasChange(d *schema.ResourceData) bool {
 	o, n := d.GetChange("scheduling")
 	oScheduling := o.([]interface{})[0].(map[string]interface{})
 	newScheduling := n.([]interface{})[0].(map[string]interface{})
-	originalNa := oScheduling["node_affinities"].(*schema.Set)
-	newNa := newScheduling["node_affinities"].(*schema.Set)
+
+	if schedulingHasChangeRequiringReboot(d) {
+		return false
+	}
+
 	if oScheduling["automatic_restart"] != newScheduling["automatic_restart"] {
 		return true
 	}
@@ -415,11 +413,34 @@ func schedulingHasChange(d *schema.ResourceData) bool {
 		return true
 	}
 
-<% unless version == 'ga' -%>
 	if oScheduling["min_node_cpus"] != newScheduling["min_node_cpus"] {
 		return true
 	}
-<% end -%>
 
-	return reflect.DeepEqual(newNa, originalNa)
+	return false
+}
+
+func hasNodeAffinitiesChanged(oScheduling, newScheduling map[string]interface{}) bool {
+	oldNAs := oScheduling["node_affinities"].(*schema.Set).List()
+	newNAs := newScheduling["node_affinities"].(*schema.Set).List()
+	if len(oldNAs) != len(newNAs) {
+		return true
+	}
+	for i := range oldNAs {
+		oldNodeAffinity := oldNAs[i].(map[string]interface{})
+		newNodeAffinity := newNAs[i].(map[string]interface{})
+		if oldNodeAffinity["key"] != newNodeAffinity["key"] {
+			return true
+		}
+		if oldNodeAffinity["operator"] != newNodeAffinity["operator"] {
+			return true
+		}
+
+		// convertStringSet will sort the set into a slice, allowing DeepEqual
+		if !reflect.DeepEqual(convertStringSet(oldNodeAffinity["values"].(*schema.Set)), convertStringSet(newNodeAffinity["values"].(*schema.Set))) {
+			return true
+		}
+	}
+
+	return false
 }

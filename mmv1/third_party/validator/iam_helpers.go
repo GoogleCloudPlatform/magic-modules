@@ -188,3 +188,42 @@ func mergeDeleteAuthoritativeBindings(existing, incoming []IAMBinding) []IAMBind
 
 	return newExisting
 }
+
+func fetchIamPolicy(
+	newUpdaterFunc newResourceIamUpdaterFunc,
+	d TerraformResourceData,
+	config *Config,
+	assetNameTmpl string,
+	assetType string,
+) (Asset, error) {
+	updater, err := newUpdaterFunc(d, config)
+	if err != nil {
+		return Asset{}, err
+	}
+
+	iamPolicy, err := updater.GetResourceIamPolicy()
+	if err != nil {
+		return Asset{}, err
+	}
+
+	var bindings []IAMBinding
+	for _, b := range iamPolicy.Bindings {
+		bindings = append(
+			bindings,
+			IAMBinding{
+				Role:    b.Role,
+				Members: b.Members,
+			},
+		)
+	}
+
+	name, err := assetName(d, config, assetNameTmpl)
+
+	return Asset{
+		Name: name,
+		Type: assetType,
+		IAMPolicy: &IAMPolicy{
+			Bindings: bindings,
+		},
+	}, nil
+}

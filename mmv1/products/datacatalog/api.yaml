@@ -290,6 +290,12 @@ objects:
       guides:
         'Official Documentation': https://cloud.google.com/data-catalog/docs
       api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.tagTemplates
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
+      parent_resource_attribute: 'tag_template'
+      import_format: ["projects/{{project}}/locations/{{region}}/tagTemplates/{{tag_template}}", "{{tag_template}}"]
+      base_url: projects/{{project}}/locations/{{region}}/tagTemplates/{{tag_template}}
     parameters:
       - !ruby/object:Api::Type::String
         name: region
@@ -306,6 +312,7 @@ objects:
           The id of the tag template to create.
       - !ruby/object:Api::Type::Boolean
         name: forceDelete
+        default_value: false
         url_param_only: true
         description: |
           This confirms the deletion of any possible tags using this template. Must be set to true in order to delete the tag template.
@@ -338,6 +345,10 @@ objects:
               name: displayName
               description: |
                The display name for this field.
+            - !ruby/object:Api::Type::String
+              name: description
+              description: |
+               A description for this field.
             - !ruby/object:Api::Type::NestedObject
               name: type
               description: |

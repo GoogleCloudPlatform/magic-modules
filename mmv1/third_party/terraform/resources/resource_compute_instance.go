@@ -1,5 +1,3 @@
-// <% autogen_exception -%>
-
 package google
 
 import (
@@ -9,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -20,7 +19,6 @@ import (
 	"github.com/mitchellh/hashstructure"
 	computeBeta "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/compute/v1"
-	"google.golang.org/api/googleapi"
 )
 
 var (
@@ -46,9 +44,7 @@ var (
 		"scheduling.0.automatic_restart",
 		"scheduling.0.preemptible",
 		"scheduling.0.node_affinities",
-<% unless version == 'ga' -%>
 		"scheduling.0.min_node_cpus",
-<% end -%>
 	}
 
 	shieldedInstanceConfigKeys = []string{
@@ -298,8 +294,8 @@ func resourceComputeInstance() *schema.Resource {
 							Description: `The name of the interface`,
 						},
 						"nic_type": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:         schema.TypeString,
+							Optional:     true,
 							ForceNew:     true,
 							ValidateFunc: validation.StringInSlice([]string{"GVNIC", "VIRTIO_NET"}, false),
 							Description:  `The type of vNIC to be used on this interface. Possible values:GVNIC, VIRTIO_NET`,
@@ -516,7 +512,7 @@ func resourceComputeInstance() *schema.Resource {
 					// !!! IMPORTANT !!!
 					// We have a custom diff function for the scheduling block due to issues with Terraform's
 					// diff on schema.Set. If changes are made to this block, they must be reflected in that
-					// method. See schedulingHasChange in compute_instance_helpers.go
+					// method. See schedulingHasChangeWithoutReboot in compute_instance_helpers.go
 					Schema: map[string]*schema.Schema{
 						"on_host_maintenance": {
 							Type:         schema.TypeString,
@@ -547,18 +543,15 @@ func resourceComputeInstance() *schema.Resource {
 							Type:             schema.TypeSet,
 							Optional:         true,
 							AtLeastOneOf:     schedulingKeys,
-							ForceNew:         true,
 							Elem:             instanceSchedulingNodeAffinitiesElemSchema(),
 							DiffSuppressFunc: emptyOrDefaultStringSuppress(""),
 							Description:      `Specifies node affinities or anti-affinities to determine which sole-tenant nodes your instances and managed instance groups will use as host systems.`,
 						},
-<% unless version == 'ga' -%>
 						"min_node_cpus": {
-							Type:             schema.TypeInt,
-							Optional:         true,
-							AtLeastOneOf:     schedulingKeys,
+							Type:         schema.TypeInt,
+							Optional:     true,
+							AtLeastOneOf: schedulingKeys,
 						},
-<% end -%>
 					},
 				},
 			},
@@ -581,10 +574,11 @@ func resourceComputeInstance() *schema.Resource {
 			},
 
 			"service_account": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				Description: `The service account to attach to the instance.`,
+				Type:             schema.TypeList,
+				MaxItems:         1,
+				Optional:         true,
+				DiffSuppressFunc: serviceAccountDiffSuppress,
+				Description:      `The service account to attach to the instance.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"email": {
@@ -648,18 +642,18 @@ func resourceComputeInstance() *schema.Resource {
 				},
 			},
 			"confidential_instance_config": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
 				Description: `The Confidential VM config being used by the instance.  on_host_maintenance has to be set to TERMINATE or this will fail to create.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enable_confidential_compute": {
-							Type:         schema.TypeBool,
-							Required:     true,
-							Description:  `Defines whether the instance should have confidential compute enabled.`,
+							Type:        schema.TypeBool,
+							Required:    true,
+							Description: `Defines whether the instance should have confidential compute enabled.`,
 						},
 					},
 				},
@@ -863,26 +857,26 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *Confi
 
 	// Create the instance information
 	return &computeBeta.Instance{
-		CanIpForward:       d.Get("can_ip_forward").(bool),
-		Description:        d.Get("description").(string),
-		Disks:              disks,
-		MachineType:        machineTypeUrl,
-		Metadata:           metadata,
-		Name:               d.Get("name").(string),
-		NetworkInterfaces:  networkInterfaces,
-		Tags:               resourceInstanceTags(d),
-		Labels:             expandLabels(d),
-		ServiceAccounts:    expandServiceAccounts(d.Get("service_account").([]interface{})),
-		GuestAccelerators:  accels,
-		MinCpuPlatform:     d.Get("min_cpu_platform").(string),
-		Scheduling:         scheduling,
-		DeletionProtection: d.Get("deletion_protection").(bool),
-		Hostname:           d.Get("hostname").(string),
-		ForceSendFields:    []string{"CanIpForward", "DeletionProtection"},
-		ConfidentialInstanceConfig:  expandConfidentialInstanceConfig(d),
-		ShieldedInstanceConfig:   expandShieldedVmConfigs(d),
-		DisplayDevice:      expandDisplayDevice(d),
-		ResourcePolicies:   convertStringArr(d.Get("resource_policies").([]interface{})),
+		CanIpForward:               d.Get("can_ip_forward").(bool),
+		Description:                d.Get("description").(string),
+		Disks:                      disks,
+		MachineType:                machineTypeUrl,
+		Metadata:                   metadata,
+		Name:                       d.Get("name").(string),
+		NetworkInterfaces:          networkInterfaces,
+		Tags:                       resourceInstanceTags(d),
+		Labels:                     expandLabels(d),
+		ServiceAccounts:            expandServiceAccounts(d.Get("service_account").([]interface{})),
+		GuestAccelerators:          accels,
+		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
+		Scheduling:                 scheduling,
+		DeletionProtection:         d.Get("deletion_protection").(bool),
+		Hostname:                   d.Get("hostname").(string),
+		ForceSendFields:            []string{"CanIpForward", "DeletionProtection"},
+		ConfidentialInstanceConfig: expandConfidentialInstanceConfig(d),
+		ShieldedInstanceConfig:     expandShieldedVmConfigs(d),
+		DisplayDevice:              expandDisplayDevice(d),
+		ResourcePolicies:           convertStringArr(d.Get("resource_policies").([]interface{})),
 	}, nil
 }
 
@@ -1350,7 +1344,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
-	if schedulingHasChange(d) {
+	bootRequiredSchedulingChange := schedulingHasChangeRequiringReboot(d)
+	bootNotRequiredSchedulingChange := schedulingHasChangeWithoutReboot(d)
+	if bootNotRequiredSchedulingChange {
 		scheduling, err := expandScheduling(d.Get("scheduling"))
 		if err != nil {
 			return fmt.Errorf("Error creating request data to update scheduling: %s", err)
@@ -1379,7 +1375,6 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if len(networkInterfaces) != len(instance.NetworkInterfaces) {
 		return fmt.Errorf("Instance had unexpected number of network interfaces: %d", len(instance.NetworkInterfaces))
 	}
-
 
 	var updatesToNIWhileStopped []func(inst *computeBeta.Instance) error
 	for i := 0; i < len(networkInterfaces); i++ {
@@ -1475,7 +1470,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 			networkInterfacePatchObj := &computeBeta.NetworkInterface{
 				AliasIpRanges: networkInterface.AliasIpRanges,
-				Fingerprint: instNetworkInterface.Fingerprint,
+				Fingerprint:   instNetworkInterface.Fingerprint,
 			}
 			updateCall := config.NewComputeBetaClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
 			op, err := updateCall()
@@ -1636,7 +1631,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
-	needToStopInstanceBeforeUpdating := scopesChange || d.HasChange("service_account.0.email") || d.HasChange("machine_type") || d.HasChange("min_cpu_platform") || d.HasChange("enable_display") || d.HasChange("shielded_instance_config") || len(updatesToNIWhileStopped) > 0
+	needToStopInstanceBeforeUpdating := scopesChange || d.HasChange("service_account.0.email") || d.HasChange("machine_type") || d.HasChange("min_cpu_platform") || d.HasChange("enable_display") || d.HasChange("shielded_instance_config") || len(updatesToNIWhileStopped) > 0 || bootRequiredSchedulingChange
 
 	if d.HasChange("desired_status") && !needToStopInstanceBeforeUpdating {
 		desiredStatus := d.Get("desired_status").(string)
@@ -1670,7 +1665,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		desiredStatus := d.Get("desired_status").(string)
 
 		if statusBeforeUpdate == "RUNNING" && desiredStatus != "TERMINATED" && !d.Get("allow_stopping_for_update").(bool) {
-			return fmt.Errorf("Changing the machine_type, min_cpu_platform, service_account, enable_display, shielded_instance_config, " +
+			return fmt.Errorf("Changing the machine_type, min_cpu_platform, service_account, enable_display, shielded_instance_config, scheduling.node_affinities " +
 				"or network_interface.[#d].(network/subnetwork/subnetwork_project) on a started instance requires stopping it. " +
 				"To acknowledge this, please set allow_stopping_for_update = true in your config. " +
 				"You can also stop it by setting desired_status = \"TERMINATED\", but the instance will not be restarted after the update.")
@@ -1770,6 +1765,26 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 			opErr := computeOperationWaitTime(config, op, project,
 				"shielded vm config update", userAgent, d.Timeout(schema.TimeoutUpdate))
+			if opErr != nil {
+				return opErr
+			}
+		}
+
+		if bootRequiredSchedulingChange {
+			scheduling, err := expandScheduling(d.Get("scheduling"))
+			if err != nil {
+				return fmt.Errorf("Error creating request data to update scheduling: %s", err)
+			}
+
+			op, err := config.NewComputeBetaClient(userAgent).Instances.SetScheduling(
+				project, zone, instance.Name, scheduling).Do()
+			if err != nil {
+				return fmt.Errorf("Error updating scheduling policy: %s", err)
+			}
+
+			opErr := computeOperationWaitTime(
+				config, op, project, "scheduling policy update", userAgent,
+				d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
 				return opErr
 			}
@@ -2224,4 +2239,29 @@ func hash256(raw string) (string, error) {
 	}
 	h := sha256.Sum256(decoded)
 	return base64.StdEncoding.EncodeToString(h[:]), nil
+}
+
+func serviceAccountDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	o, n := d.GetChange(strings.TrimSuffix(k, ".#"))
+	var l []interface{}
+	if old == "0" && new == "1" {
+		l = n.([]interface{})
+	} else if new == "0" && old == "1" {
+		l = o.([]interface{})
+	} else {
+		// we don't have one set and one unset, so don't suppress the diff
+		return false
+	}
+
+	// suppress changes between { } and {scopes:[]}
+	if l[0] != nil {
+		contents := l[0].(map[string]interface{})
+		if scopes, ok := contents["scopes"]; ok {
+			a := scopes.(*schema.Set).List()
+			if a != nil && len(a) > 0 {
+				return false
+			}
+		}
+	}
+	return true
 }
