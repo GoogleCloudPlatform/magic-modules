@@ -1,0 +1,255 @@
+# Copyright 2021 Google LLC. All Rights Reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+components:
+  schemas:
+    FeatureMembership:
+      properties:
+        configmanagement:
+          description: Config Management-specific spec.
+          properties:
+            binauthz:
+              description: Binauthz conifguration for the cluster.
+              properties:
+                enabled:
+                  description: Whether binauthz is enabled in this cluster.
+                  type: boolean
+                  x-dcl-go-name: Enabled
+              type: object
+              x-dcl-go-name: Binauthz
+              x-dcl-go-type: FeatureMembershipConfigmanagementBinauthz
+            configSync:
+              description: Config Sync configuration for the cluster.
+              properties:
+                git:
+                  properties:
+                    gcpServiceAccountEmail:
+                      description: The GCP Service Account Email used for auth when
+                        secretType is gcpServiceAccount.
+                      type: string
+                      x-dcl-go-name: GcpServiceAccountEmail
+                      x-dcl-references:
+                      - field: email
+                        resource: Iam/ServiceAccount
+                    httpsProxy:
+                      description: URL for the HTTPS proxy to be used when communicating
+                        with the Git repo.
+                      type: string
+                      x-dcl-go-name: HttpsProxy
+                    policyDir:
+                      description: 'The path within the Git repository that represents
+                        the top level of the repo to sync. Default: the root directory
+                        of the repository.'
+                      type: string
+                      x-dcl-go-name: PolicyDir
+                    secretType:
+                      description: Type of secret configured for access to the Git
+                        repo.
+                      type: string
+                      x-dcl-go-name: SecretType
+                    syncBranch:
+                      description: 'The branch of the repository to sync from. Default:
+                        master.'
+                      type: string
+                      x-dcl-go-name: SyncBranch
+                    syncRepo:
+                      description: The URL of the Git repository to use as the source
+                        of truth.
+                      type: string
+                      x-dcl-go-name: SyncRepo
+                    syncRev:
+                      description: Git revision (tag or hash) to check out. Default
+                        HEAD.
+                      type: string
+                      x-dcl-go-name: SyncRev
+                    syncWaitSecs:
+                      description: 'Period in seconds between consecutive syncs. Default:
+                        15.'
+                      type: string
+                      x-dcl-go-name: SyncWaitSecs
+                  type: object
+                  x-dcl-go-name: Git
+                  x-dcl-go-type: FeatureMembershipConfigmanagementConfigSyncGit
+                sourceFormat:
+                  description: Specifies whether the Config Sync Repo is in "hierarchical"
+                    or "unstructured" mode.
+                  type: string
+                  x-dcl-go-name: SourceFormat
+              type: object
+              x-dcl-go-name: ConfigSync
+              x-dcl-go-type: FeatureMembershipConfigmanagementConfigSync
+            hierarchyController:
+              description: Hierarchy Controller configuration for the cluster.
+              properties:
+                enableHierarchicalResourceQuota:
+                  description: Whether hierarchical resource quota is enabled in this
+                    cluster.
+                  type: boolean
+                  x-dcl-go-name: EnableHierarchicalResourceQuota
+                enablePodTreeLabels:
+                  description: Whether pod tree labels are enabled in this cluster.
+                  type: boolean
+                  x-dcl-go-name: EnablePodTreeLabels
+                enabled:
+                  description: Whether Hierarchy Controller is enabled in this cluster.
+                  type: boolean
+                  x-dcl-go-name: Enabled
+              type: object
+              x-dcl-go-name: HierarchyController
+              x-dcl-go-type: FeatureMembershipConfigmanagementHierarchyController
+            policyController:
+              description: Policy Controller configuration for the cluster.
+              properties:
+                auditIntervalSeconds:
+                  description: Sets the interval for Policy Controller Audit Scans
+                    (in seconds). When set to 0, this disables audit functionality
+                    altogether.
+                  type: string
+                  x-dcl-go-name: AuditIntervalSeconds
+                enabled:
+                  description: Enables the installation of Policy Controller. If false,
+                    the rest of PolicyController fields take no effect.
+                  type: boolean
+                  x-dcl-go-name: Enabled
+                exemptableNamespaces:
+                  description: The set of namespaces that are excluded from Policy
+                    Controller checks. Namespaces do not need to currently exist on
+                    the cluster.
+                  items:
+                    type: string
+                    x-dcl-go-type: string
+                  type: array
+                  x-dcl-go-name: ExemptableNamespaces
+                  x-dcl-list-type: list
+                logDeniesEnabled:
+                  description: Logs all denies and dry run failures.
+                  type: boolean
+                  x-dcl-go-name: LogDeniesEnabled
+                referentialRulesEnabled:
+                  description: Enables the ability to use Constraint Templates that
+                    reference to objects other than the object currently being evaluated.
+                  type: boolean
+                  x-dcl-go-name: ReferentialRulesEnabled
+                templateLibraryInstalled:
+                  description: Installs the default template library along with Policy
+                    Controller.
+                  type: boolean
+                  x-dcl-go-name: TemplateLibraryInstalled
+              type: object
+              x-dcl-go-name: PolicyController
+              x-dcl-go-type: FeatureMembershipConfigmanagementPolicyController
+            version:
+              description: Version of ACM installed.
+              type: string
+              x-dcl-go-name: Version
+          type: object
+          x-dcl-go-name: Configmanagement
+          x-dcl-go-type: FeatureMembershipConfigmanagement
+        feature:
+          description: The name of the feature
+          type: string
+          x-dcl-go-name: Feature
+          x-dcl-references:
+          - field: name
+            parent: true
+            resource: Gkehub/Feature
+          x-kubernetes-immutable: true
+        location:
+          description: The location of the feature
+          type: string
+          x-dcl-go-name: Location
+          x-kubernetes-immutable: true
+        membership:
+          description: The name of the membership
+          type: string
+          x-dcl-go-name: Membership
+          x-dcl-references:
+          - field: name
+            resource: Gkehub/Membership
+          x-kubernetes-immutable: true
+        project:
+          description: The project of the feature
+          type: string
+          x-dcl-go-name: Project
+          x-dcl-references:
+          - field: name
+            parent: true
+            resource: Cloudresourcemanager/Project
+          x-kubernetes-immutable: true
+        projectNumber:
+          description: The project number of the feature
+          type: string
+          x-dcl-go-name: ProjectNumber
+          x-dcl-references:
+          - field: projectNumber
+            resource: Cloudresourcemanager/Project
+          x-kubernetes-immutable: true
+      title: FeatureMembership
+      type: object
+      x-dcl-id: projects/{{project}}/locations/{{location}}/features/{{feature}}
+      x-dcl-locations: []
+      x-dcl-parent-container: project
+      x-dcl-uses-state-hint: false
+info:
+  description: DCL Specification for the Gkehub FeatureMembership resource
+  title: Gkehub/FeatureMembership
+  x-dcl-has-iam: false
+paths:
+  apply:
+    description: The function used to apply information about a FeatureMembership
+    parameters:
+    - description: A full instance of a FeatureMembership
+      name: FeatureMembership
+      required: true
+  delete:
+    description: The function used to delete a FeatureMembership
+    parameters:
+    - description: A full instance of a FeatureMembership
+      name: FeatureMembership
+      required: true
+  deleteAll:
+    description: The function used to delete all FeatureMembership
+    parameters:
+    - name: project
+      required: true
+      schema:
+        type: string
+    - name: location
+      required: true
+      schema:
+        type: string
+    - name: feature
+      required: true
+      schema:
+        type: string
+  get:
+    description: The function used to get information about a FeatureMembership
+    parameters:
+    - description: A full instance of a FeatureMembership
+      name: FeatureMembership
+      required: true
+  list:
+    description: The function used to list information about many FeatureMembership
+    parameters:
+    - name: project
+      required: true
+      schema:
+        type: string
+    - name: location
+      required: true
+      schema:
+        type: string
+    - name: feature
+      required: true
+      schema:
+        type: string

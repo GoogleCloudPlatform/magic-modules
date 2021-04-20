@@ -66,6 +66,9 @@ import (
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	dataprocDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc<% unless version == 'ga' -%>/beta<% end -%>"
 	eventarcDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc<% unless version == 'ga' -%>/beta<% end -%>"
+<% unless version == 'ga' -%>
+	gkehubDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub/beta"
+<% end -%>
 )
 
 type providerMeta struct {
