@@ -41,19 +41,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           database_name: "my-database"
         ignore_read_extra:
           - "deletion_protection"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "spanner_database_cmek"
-        primary_resource_id: "database"
-        # Randomness due to spanner instance
-        skip_vcr: true
-        # Fields are not beta, but dependencies are
-        min_version: beta
-        vars:
-          database_name: "another"
-          key_name: "key"
-          keyring_name: "keyring"
-        ignore_read_extra:
-          - "deletion_protection"
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'deletion_protection'
