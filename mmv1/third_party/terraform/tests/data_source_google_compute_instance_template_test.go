@@ -157,7 +157,7 @@ resource "google_compute_instance_template" "c" {
 data "google_compute_instance_template" "default" {
   // Hack to prevent depends_on bug triggering datasource recreate due to https://github.com/hashicorp/terraform/issues/11806
   project = "%{project}${replace(google_compute_instance_template.a.id, "/.*/", "")}${replace(google_compute_instance_template.b.id, "/.*/", "")}${replace(google_compute_instance_template.c.id, "/.*/", "")}"
-  filter  = "name eq tf-test-template-c-.*"
+  filter  = "name = tf-test-template-c-%{suffix}"
 }
 `, map[string]interface{}{"project": project, "suffix": suffix})
 }
@@ -231,7 +231,7 @@ resource "google_compute_instance_template" "c" {
 data "google_compute_instance_template" "default" {
   // Hack to prevent depends_on bug triggering datasource recreate due to https://github.com/hashicorp/terraform/issues/11806
   project = "%{project}${replace(google_compute_instance_template.b.id, "/.*/", "")}"
-  filter      = "name eq tf-test-template-.*"
+  filter      = "name != tf-test-template-%{suffix}-b"
   most_recent = true
 }
 `, map[string]interface{}{"project": project, "suffix": suffix})
