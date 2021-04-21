@@ -122,6 +122,7 @@ objects:
         name: 'datasetReference'
         description: 'A reference that identifies the dataset.'
         required: true
+        input: true
         properties:
           - !ruby/object:Api::Type::String
             name: 'datasetId'
@@ -134,6 +135,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'projectId'
             description: The ID of the project containing this dataset.
+            input: true
       - !ruby/object:Api::Type::Integer
         name: 'defaultTableExpirationMs'
         description: |
