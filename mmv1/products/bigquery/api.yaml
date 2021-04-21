@@ -130,6 +130,7 @@ objects:
               must contain only letters (a-z, A-Z), numbers (0-9), or
               underscores (_). The maximum length is 1,024 characters.
             required: true
+            input: true
           - !ruby/object:Api::Type::String
             name: 'projectId'
             description: The ID of the project containing this dataset.
