@@ -57,6 +57,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "example"
         vars:
           topic_name: "example-topic"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "pubsub_topic_schema_settings"
+        primary_resource_id: "example"
+        vars:
+          topic_name: "example-topic"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
