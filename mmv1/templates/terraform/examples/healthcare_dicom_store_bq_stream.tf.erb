@@ -12,8 +12,8 @@ resource "google_healthcare_dicom_store" "default" {
     label1 = "labelvalue1"
   }
 
-  stream_configs = {
-    bigquery_destination = {
+  stream_configs {
+    bigquery_destination {
       table_uri = "bq://${google_bigquery_dataset.bq_dataset.project}.${google_bigquery_dataset.bq_dataset.dataset_id}.${google_bigquery_table.bq_table.table_id}"
     }
   }  
