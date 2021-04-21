@@ -2,12 +2,12 @@ package google
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-// This will sweep GCE Disk resources
 func init() {
 	resource.AddTestSweepers("StorageBucket", &resource.Sweeper{
 		Name: "StorageBucket",
@@ -69,7 +69,7 @@ func testSweepStorageBucket(region string) error {
 			continue
 		}
 
-		deleteUrl := servicesUrl + "/" + id
+		deleteUrl := fmt.Sprintf("https://storage.googleapis.com/storage/v1/b/%s", id)
 		_, err = sendRequest(config, "DELETE", config.Project, deleteUrl, config.userAgent, nil)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", deleteUrl, err)
