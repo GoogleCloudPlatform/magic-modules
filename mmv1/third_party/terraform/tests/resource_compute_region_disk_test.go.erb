@@ -190,7 +190,7 @@ func TestAccComputeRegionDisk_interface(t *testing.T) {
 				Config: testAccComputeRegionDisk_interface(diskName),
 			},
 			{
-				ResourceName:      "google_compute_disk.foobar",
+				ResourceName:      "google_compute_region_disk.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -201,18 +201,12 @@ func TestAccComputeRegionDisk_interface(t *testing.T) {
 
 func testAccComputeRegionDisk_interface(diskName string) string {
 	return fmt.Sprintf(`
-data "google_compute_image" "my_image" {
-  family  = "debian-9"
-  project = "debian-cloud"
-}
-
-resource "google_compute_disk" "foobar" {
-  name      = "%s"
-  image     = data.google_compute_image.my_image.self_link
-  size      = 50
-  type      = "pd-ssd"
-  region   = "us-central1"
-  interface = "NVME"
+resource "google_compute_region_disk" "foobar" {
+  name          = "%s"
+  size          = 50
+  type          = "pd-ssd"
+  interface     = "NVME"
+  replica_zones = ["us-central1-a", "us-central1-f"]
 }
 `, diskName)
 }
@@ -339,8 +333,6 @@ resource "google_compute_region_disk" "regiondisk" {
   name     = "%s"
   snapshot = google_compute_snapshot.snapdisk.%s
   type     = "pd-ssd"
-  region   = "us-central1"
-
   replica_zones = ["us-central1-a", "us-central1-f"]
 }
 `, diskName, diskName, diskName, refSelector)
@@ -400,7 +392,6 @@ resource "google_compute_region_disk" "regiondisk" {
   name     = "%s"
   snapshot = google_compute_snapshot.snapdisk.self_link
   type     = "pd-ssd"
-  region   = "us-central1"
 
   replica_zones = ["us-central1-a", "us-central1-f"]
 
@@ -431,7 +422,6 @@ resource "google_compute_region_disk" "regiondisk" {
   name     = "%s"
   snapshot = google_compute_snapshot.snapdisk.self_link
   type     = "pd-ssd"
-  region   = "us-central1"
 
   replica_zones = ["us-central1-a", "us-central1-f"]
 }
