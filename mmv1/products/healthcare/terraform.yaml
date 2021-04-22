@@ -90,6 +90,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           dataset_name: "example-dataset"
           dicom_store_name: "example-dicom-store"
           pubsub_topic: "dicom-notifications"
+          bq_dataset_name: "dicom_bq_ds"
+          bq_table_name: "dicom_bq_tb"
     properties:
       creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
