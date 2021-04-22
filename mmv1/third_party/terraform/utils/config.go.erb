@@ -64,6 +64,7 @@ import (
 	"google.golang.org/api/storagetransfer/v1"
 	"google.golang.org/api/transport"
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
+	dataprocDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc<% unless version == 'ga' -%>/beta<% end -%>"
 	eventarcDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc<% unless version == 'ga' -%>/beta<% end -%>"
 )
 
@@ -121,6 +122,7 @@ type Config struct {
 
 	// start DCL clients
 	dclConfig *dcl.Config
+	clientDataprocDCL *dataprocDcl.Client
 	clientEventarcDCL *eventarcDcl.Client
 }
 
@@ -186,6 +188,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// Start DCL client instantiation
 	// TODO(slevenick): handle user agents
 	c.dclConfig = dcl.NewConfig(dcl.WithHTTPClient(client), dcl.WithUserAgent(c.userAgent), dcl.WithLogger(dclLogger{}))
+	c.clientDataprocDCL = dataprocDcl.NewClient(c.dclConfig)
 	c.clientEventarcDCL = eventarcDcl.NewClient(c.dclConfig)
 
 	return nil
@@ -223,7 +226,7 @@ func expandProviderBatchingConfig(v interface{}) (*batchingConfig, error) {
 
 func (c *Config) synchronousTimeout() time.Duration {
 	if c.RequestTimeout == 0 {
-		return 30 * time.Second
+		return 120 * time.Second
 	}
 	return c.RequestTimeout
 }
