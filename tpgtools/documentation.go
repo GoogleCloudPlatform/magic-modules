@@ -1,11 +1,11 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,12 +22,13 @@ import (
 	"sort"
 	"text/template"
 
+	"github.com/GoogleCloudPlatform/magic-modules/tpgtools/types"
 	"github.com/golang/glog"
 )
 
 // Merges beta and GA resources for doc generation for a particular resource.
-func mergeResource(res *Resource, resources map[Version][]*Resource, version *Version) *Resource {
-	resourceAcrossVersions := make(map[Version]*Resource)
+func mergeResource(res *types.Resource, resources map[Version][]*types.Resource, version *Version) *types.Resource {
+	resourceAcrossVersions := make(map[Version]*types.Resource)
 	for v, resList := range resources {
 		for _, r := range resList {
 			// Name is not unique, TerraformName must be
@@ -48,28 +49,28 @@ func mergeResource(res *Resource, resources map[Version][]*Resource, version *Ve
 	return beta
 }
 
-func mergeResources(ga, beta *Resource) *Resource {
+func mergeResources(ga, beta *types.Resource) *types.Resource {
 	beta.Properties = mergeProperties(ga.Properties, beta.Properties)
 
 	return beta
 }
 
 // Marks any sub properties as beta only
-func mergeProperties(ga, beta []Property) []Property {
-	gaProps := make(map[string]Property)
+func mergeProperties(ga, beta []types.Property) []types.Property {
+	gaProps := make(map[string]types.Property)
 	for _, p := range ga {
-		gaProps[p.title] = p
+		gaProps[p.Name()] = p
 	}
-	betaProps := make(map[string]Property)
+	betaProps := make(map[string]types.Property)
 	for _, p := range beta {
-		betaProps[p.title] = p
+		betaProps[p.Name()] = p
 	}
 	inOrder := make([]string, 0)
 	for k, _ := range betaProps {
 		inOrder = append(inOrder, k)
 	}
 	sort.Strings(inOrder)
-	modifiedProps := make([]Property, 0)
+	modifiedProps := make([]types.Property, 0)
 	for _, name := range inOrder {
 		v := betaProps[name]
 		if gaProp, ok := gaProps[name]; !ok {
@@ -85,11 +86,11 @@ func mergeProperties(ga, beta []Property) []Property {
 	return modifiedProps
 }
 
-func generateResourceWebsiteFile(res *Resource, resources map[Version][]*Resource, version *Version) {
-	
+func generateResourceWebsiteFile(res *types.Resource, resources map[Version][]*types.Resource, version *Version) {
+
 	res = mergeResource(res, resources, version)
 	// Generate resource website file
-	tmplInput := ResourceInput{
+	tmplInput := types.ResourceInput{
 		Resource: *res,
 	}
 

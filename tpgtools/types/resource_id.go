@@ -1,48 +1,28 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package types
 
 import (
 	"fmt"
-	"regexp"
 	"sort"
 	"strings"
 
 	"bitbucket.org/creachadair/stringset"
+	"github.com/GoogleCloudPlatform/magic-modules/tpgtools/utils"
 	"github.com/nasa9084/go-openapi"
 )
-
-const PatternPart = "{{(\\w+)}}"
-
-func idParts(id string) (parts []string) {
-	r := regexp.MustCompile(PatternPart)
-
-	// returns [["{{field}}", "field"] ...]
-	idTmplAndParts := r.FindAllStringSubmatch(id, -1)
-	for _, v := range idTmplAndParts {
-		parts = append(parts, v[1])
-	}
-
-	return parts
-}
-
-// PatternToRegex formats a pattern string into a Python-compatible regex.
-func PatternToRegex(s string) string {
-	re := regexp.MustCompile(PatternPart)
-	return re.ReplaceAllString(s, "(?P<$1>[^/]+)")
-}
 
 // Finds the correct resource id based on the schema and any overrides
 func findResourceId(schema *openapi.Schema, overrides Overrides, location string) (string, error) {
@@ -79,7 +59,7 @@ func defaultImportFormats(id string) (formats []string) {
 
 	uniqueFormats.Add(id)
 
-	parts := idParts(id)
+	parts := utils.IdParts(id)
 	for i, v := range parts {
 		parts[i] = fmt.Sprintf("{{%s}}", v)
 	}
@@ -114,6 +94,6 @@ func defaultImportFormats(id string) (formats []string) {
 	}
 
 	// formats must be ordered most to least specific
-	sort.SliceStable(formats, formatComparator(formats))
+	sort.SliceStable(formats, utils.FormatComparator(formats))
 	return formats
 }

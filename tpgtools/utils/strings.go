@@ -1,18 +1,18 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package utils
 
 import (
 	"regexp"
@@ -33,13 +33,13 @@ var initialisms = map[string]string{
 }
 
 // snakeToTitleCase converts a snake_case string to TitleCase / Go struct case.
-func snakeToTitleCase(s string) string {
-	return strings.Join(snakeToTitleParts(s), "")
+func SnakeToTitleCase(s string) string {
+	return strings.Join(SnakeToTitleParts(s), "")
 }
 
 // snakeToTitleParts returns the parts of a snake_case string titlecased as an
 // array, taking into account common initialisms.
-func snakeToTitleParts(s string) []string {
+func SnakeToTitleParts(s string) []string {
 	parts := []string{}
 	segments := strings.Split(s, "_")
 	for _, seg := range segments {
@@ -54,7 +54,7 @@ func snakeToTitleParts(s string) []string {
 }
 
 // jsonToSnakeCase converts a jsonCase string to snake_case.
-func jsonToSnakeCase(s string) string {
+func JsonToSnakeCase(s string) string {
 	for _, v := range initialisms {
 		s = strings.ReplaceAll(s, v, v[0:1]+strings.ToLower(v[1:]))
 	}

@@ -1,11 +1,11 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,8 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/GoogleCloudPlatform/magic-modules/tpgtools/types"
+	"github.com/GoogleCloudPlatform/magic-modules/tpgtools/utils"
 	"github.com/golang/glog"
 
 	"github.com/nasa9084/go-openapi"
@@ -46,7 +48,7 @@ var terraformResourceDirectory = "google-beta"
 
 func main() {
 	resources := loadAndModelResources()
-	var resourcesForVersion []*Resource
+	var resourcesForVersion []*types.Resource
 	var version *Version
 	if vFilter != nil && *vFilter != "" {
 		version = fromString(*vFilter)
@@ -63,37 +65,39 @@ func main() {
 
 	if mode != nil && *mode == "serialization" {
 		generateSerializationLogic(resourcesForVersion)
-	} else {
-		for _, resource := range resourcesForVersion {
-			resJSON, err := json.MarshalIndent(resource, "", "  ")
-			if err != nil {
-				glog.Errorf("Failed to marshal resource struct")
-			} else {
-				glog.Infof("Generating from resource %s", string(resJSON))
-			}
-			generateResourceFile(resource)
-			generateSweeperFile(resource)
-			// Disabled to allow handwriting files until samples exist
-			// generateResourceWebsiteFile(resource, resources, version)
-		}
-
-		if oPath == nil || *oPath == "" {
-			glog.Info("Skipping copying handwritten files, no output specified")
-			return
-		}
-
-		if cPath == nil || *cPath == "" {
-			glog.Info("No handwritten path specified")
-			return
-		}
-
-		copyHandwrittenFiles(*cPath, *oPath)
+		return
 	}
+
+	for _, resource := range resourcesForVersion {
+		resJSON, err := json.MarshalIndent(resource, "", "  ")
+		if err != nil {
+			glog.Errorf("Failed to marshal resource struct")
+		} else {
+			glog.Infof("Generating from resource %s", string(resJSON))
+		}
+		generateResourceFile(resource)
+		generateSweeperFile(resource)
+		// Disabled to allow handwriting files until samples exist
+		// generateResourceWebsiteFile(resource, resources, version)
+	}
+
+	if oPath == nil || *oPath == "" {
+		glog.Info("Skipping copying handwritten files, no output specified")
+		return
+	}
+
+	if cPath == nil || *cPath == "" {
+		glog.Info("No handwritten path specified")
+		return
+	}
+
+	copyHandwrittenFiles(*cPath, *oPath)
+
 }
 
 // TODO(rileykarson): Change interface to an error, handle exceptional stuff in
 // main func.
-func loadAndModelResources() map[Version][]*Resource {
+func loadAndModelResources() map[Version][]*types.Resource {
 	flag.Parse()
 	if fPath == nil || *fPath == "" {
 		glog.Exit("No path specified")
@@ -103,9 +107,9 @@ func loadAndModelResources() map[Version][]*Resource {
 	if err != nil {
 		glog.Fatal(err)
 	}
-	resources := make(map[Version][]*Resource)
+	resources := make(map[Version][]*types.Resource)
 	for _, version := range allVersions() {
-		resources[version] = make([]*Resource, 0)
+		resources[version] = make([]*types.Resource, 0)
 		for _, v := range dirs {
 			// skip flat files- we're looking for service directory
 			if !v.IsDir() {
@@ -149,7 +153,7 @@ func loadAndModelResources() map[Version][]*Resource {
 					glog.Exit(err)
 				}
 
-				overrides := Overrides{}
+				overrides := types.Overrides{}
 				if !(tPath == nil) && !(*tPath == "") {
 					b, err := ioutil.ReadFile(path.Join(*tPath, packagePath, f.Name()))
 					if err != nil {
@@ -185,7 +189,7 @@ func loadAndModelResources() map[Version][]*Resource {
 
 				lRaw := schema.Extension["x-dcl-locations"].([]interface{})
 
-				typeFetcher := NewTypeFetcher(document)
+				typeFetcher := types.NewTypeFetcher(document)
 				var locations []string
 				// If the schema cannot be split into two or mor locations, we specify this
 				// by passing a single empty location string.
@@ -199,7 +203,7 @@ func loadAndModelResources() map[Version][]*Resource {
 				}
 
 				for _, l := range locations {
-					res, err := createResource(schema, typeFetcher, overrides, packagePath, l)
+					res, err := types.NewResource(schema, typeFetcher, overrides, packagePath, l)
 					if err != nil {
 						glog.Exit(err)
 					}
@@ -213,7 +217,7 @@ func loadAndModelResources() map[Version][]*Resource {
 	return resources
 }
 
-func generateSerializationLogic(specs []*Resource) {
+func generateSerializationLogic(specs []*types.Resource) {
 	buf := bytes.Buffer{}
 	tmpl, err := template.New("serialization.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
 		"templates/serialization.go.tmpl",
@@ -242,9 +246,9 @@ func generateSerializationLogic(specs []*Resource) {
 
 }
 
-func generateResourceFile(res *Resource) {
+func generateResourceFile(res *types.Resource) {
 	// Generate resource file
-	tmplInput := ResourceInput{
+	tmplInput := types.ResourceInput{
 		Resource: *res,
 	}
 
@@ -280,13 +284,13 @@ func generateResourceFile(res *Resource) {
 	}
 }
 
-func generateSweeperFile(res *Resource) {
+func generateSweeperFile(res *types.Resource) {
 	if !res.HasSweeper {
 		return
 	}
 
 	// Generate resource file
-	tmplInput := ResourceInput{
+	tmplInput := types.ResourceInput{
 		Resource: *res,
 	}
 
@@ -324,37 +328,6 @@ func generateSweeperFile(res *Resource) {
 
 var TemplateFunctions = template.FuncMap{
 	"title":          strings.Title,
-	"patternToRegex": PatternToRegex,
+	"patternToRegex": utils.PatternToRegex,
 	"replace":        strings.Replace,
-}
-
-// TypeFetcher fetches reused types, as marked by the $ref field being marked on an OpenAPI schema.
-type TypeFetcher struct {
-	doc *openapi.Document
-
-	// Tracks if a property has already been generated.
-	generates map[string]string
-}
-
-// NewTypeFetcher returns a TypeFetcher for a OpenAPI document.
-func NewTypeFetcher(doc *openapi.Document) *TypeFetcher {
-	return &TypeFetcher{
-		doc:       doc,
-		generates: make(map[string]string),
-	}
-}
-
-// ResolveSchema resolves a #/components/schemas reference from a reused type.
-func (r *TypeFetcher) ResolveSchema(ref string) (*openapi.Schema, error) {
-	return openapi.ResolveSchema(r.doc, ref)
-}
-
-// PackagePathForReference returns either the packageName or the shared package name.
-func (r *TypeFetcher) PackagePathForReference(ref, packageName string) string {
-	if v, ok := r.generates[ref]; ok {
-		return v
-	} else {
-		r.generates[ref] = packageName
-		return packageName
-	}
 }

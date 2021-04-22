@@ -1,18 +1,18 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package types
 
 import (
 	"fmt"
@@ -20,6 +20,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/GoogleCloudPlatform/magic-modules/tpgtools/utils"
 	"github.com/golang/glog"
 	"github.com/nasa9084/go-openapi"
 )
@@ -430,7 +431,7 @@ func (c ConflictsWith) String() string {
 func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides Overrides, resource *Resource, parent *Property, location string) (props []Property, err error) {
 	identityFields := []string{} // always empty if parent != nil
 	if parent == nil {
-		identityFields = idParts(resource.ID)
+		identityFields = utils.IdParts(resource.ID)
 	}
 	for k, v := range schema.Properties {
 		ref := ""
@@ -453,7 +454,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		v.Title = k
 
 		p := Property{
-			title:       jsonToSnakeCase(v.Title),
+			title:       utils.JsonToSnakeCase(v.Title),
 			Type:        Type{typ: v},
 			PackageName: packageName,
 			Description: v.Description,
@@ -511,12 +512,11 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		if v.ReadOnly || isSGP || (parent != nil && parent.Computed) {
 			p.Computed = true
 
-			if stringInSlice(p.Name(), identityFields) {
+			if utils.StringInSlice(p.Name(), identityFields) {
 				sg := p.DefaultStateGetter()
 				p.StateGetter = &sg
 			}
 		}
-
 
 		// Handle object properties
 		if len(v.Properties) > 0 {
@@ -563,7 +563,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 		if !p.Computed {
 			glog.Infof("Looking for %q in %v.", v.Title, schema.Required)
-			if stringInSlice(v.Title, schema.Required) {
+			if utils.StringInSlice(v.Title, schema.Required) {
 				p.Required = true
 			} else {
 				p.Optional = true
@@ -588,7 +588,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 			// special handling for project/region/zone/other fields with
 			// provider defaults
-			if stringInSlice(p.title, []string{"project", "region", "zone"}) {
+			if utils.StringInSlice(p.title, []string{"project", "region", "zone"}) {
 				p.Optional = true
 				p.Required = false
 				p.Computed = true
@@ -613,7 +613,6 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				p.StateGetter = &sg
 			}
 		}
-
 
 		ss := p.DefaultStateSetter()
 		p.StateSetter = &ss
