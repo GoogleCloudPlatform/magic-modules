@@ -45,7 +45,7 @@ var {{$pkg.ProductType}}Entry = &schema.Schema{
 
 //Add new values to config.go.erb config object delcaration
 {{- range $index, $pkg := . }}
-// client{{$pkg.ProductType}} *{{$pkg.PackageName}}Dcl.Client
+// client{{$pkg.ProductType}}DCL *{{$pkg.PackageName}}Dcl.Client
 {{- end}}
 
 //Add new values to config.go.erb object initialization
