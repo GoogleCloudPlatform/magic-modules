@@ -32,8 +32,8 @@ import (
 )
 
 {{range $index, $pkg := .}}
-var {{$pkg.ProductType}}EntryKey = "eventarc_custom_endpoint"
-var {{$pkg.ProductType}}Entry = &schema.Schema{
+var {{$pkg.ProductType}}EndpointEntryKey = "eventarc_custom_endpoint"
+var {{$pkg.ProductType}}EndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
 	Optional:     true,
 	ValidateFunc: validateCustomEndpoint,
@@ -60,6 +60,6 @@ var {{$pkg.ProductType}}Entry = &schema.Schema{
 
 //Add new values to provider.go.erb - provider block read
 {{- range $index, $pkg := . }}
-// config.client{{$pkg.ProductType}}DCL.Config.BasePath = d.Get({{$pkg.ProductType}}EntryKey).(string)
+// config.client{{$pkg.ProductType}}DCL.Config.BasePath = d.Get({{$pkg.ProductType}}EndpointEntryKey).(string)
 {{- end}}
 
