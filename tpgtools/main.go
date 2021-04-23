@@ -92,7 +92,6 @@ func main() {
 	}
 
 	copyHandwrittenFiles(*cPath, *oPath)
-
 }
 
 // TODO(rileykarson): Change interface to an error, handle exceptional stuff in
