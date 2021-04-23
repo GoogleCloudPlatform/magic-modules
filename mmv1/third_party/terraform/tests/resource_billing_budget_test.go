@@ -1,6 +1,7 @@
 package google
 
 import (
+	"context"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -162,4 +163,49 @@ resource "google_billing_budget" "budget" {
   }
 }
 `, context)
+}
+
+func TestBillingBudgetStateUpgradeV0(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		Attributes map[string]interface{}
+		Expected   map[string]string
+		Meta       interface{}
+	}{
+		"shorten long name": {
+			Attributes: map[string]interface{}{
+				"name": "billingAccounts/000000-111111-222222/budgets/9188612e-e4c0-4e69-9d14-9befebbcb87d",
+			},
+			Expected: map[string]string{
+				"name": "9188612e-e4c0-4e69-9d14-9befebbcb87d",
+			},
+			Meta: &Config{},
+		},
+		"short name stays": {
+			Attributes: map[string]interface{}{
+				"name": "9188612e-e4c0-4e69-9d14-9befebbcb87d",
+			},
+			Expected: map[string]string{
+				"name": "9188612e-e4c0-4e69-9d14-9befebbcb87d",
+			},
+			Meta: &Config{},
+		},
+	}
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			actual, err := resourceBillingBudgetUpgradeV0(context.Background(), tc.Attributes, tc.Meta)
+
+			if err != nil {
+				t.Error(err)
+			}
+
+			for _, expectedName := range tc.Expected {
+				if actual["name"] != expectedName {
+					t.Errorf("expected: name -> %#v\n got: name -> %#v\n in: %#v",
+						expectedName, actual["name"], actual)
+				}
+			}
+		})
+	}
 }

@@ -23,6 +23,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         `billing_project` you defined.
     id_format: 'billingAccounts/{{billing_account}}/budgets/{{name}}'
     import_format: ["billingAccounts/{{billing_account}}/budgets/{{name}}", "{{name}}"]
+    schema_version: 1
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: 'billing_budget_basic'
