@@ -527,18 +527,21 @@ objects:
                     - !ruby/object:Api::Type::NestedObject
                       name: secretKeyRef
                       required: true
+                      min_version: beta
                       description: |-
                         Selects a key (version) of a secret in Secret Manager.
                       properties:
                         - !ruby/object:Api::Type::String
                           name: key
                           required: true
+                          min_version: beta
                           description: |-
                             A Cloud Secret Manager secret version. Must be 'latest' for the latest
                             version or an integer for a specific version.
                         - !ruby/object:Api::Type::String
                           name: name
                           required: true
+                          min_version: beta
                           description: |-
                             The name of the secret in Cloud Secret Manager. By default, the secret
                             is assumed to be in the same project.
