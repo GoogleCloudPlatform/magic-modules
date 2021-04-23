@@ -1,11 +1,11 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -64,6 +64,7 @@ func main() {
 	if mode != nil && *mode == "serialization" {
 		generateSerializationLogic(resourcesForVersion)
 	} else {
+		products := make(map[string]*ProductMetadata)
 		for _, resource := range resourcesForVersion {
 			resJSON, err := json.MarshalIndent(resource, "", "  ")
 			if err != nil {
@@ -71,11 +72,16 @@ func main() {
 			} else {
 				glog.Infof("Generating from resource %s", string(resJSON))
 			}
+			if _, ok := products[resource.ProductType()]; !ok {
+				products[resource.ProductType()] = resource.productMetadata
+			}
 			generateResourceFile(resource)
 			generateSweeperFile(resource)
 			// Disabled to allow handwriting files until samples exist
 			// generateResourceWebsiteFile(resource, resources, version)
 		}
+
+		generateEndpointsFile(products)
 
 		if oPath == nil || *oPath == "" {
 			glog.Info("Skipping copying handwritten files, no output specified")
@@ -167,11 +173,13 @@ func loadAndModelResources() map[Version][]*Resource {
 
 				titleParts := strings.Split(document.Info.Title, "/")
 
+				var productMetadata *ProductMetadata
 				var schema *openapi.Schema
 				for k, v := range document.Components.Schemas {
 					if k == titleParts[len(titleParts)-1] {
 						schema = v
 						schema.Title = k
+						productMetadata = NewProductMetadata(packagePath, jsonToSnakeCase(titleParts[0]))
 					}
 				}
 
@@ -199,7 +207,7 @@ func loadAndModelResources() map[Version][]*Resource {
 				}
 
 				for _, l := range locations {
-					res, err := createResource(schema, typeFetcher, overrides, packagePath, l)
+					res, err := createResource(schema, typeFetcher, overrides, productMetadata, l)
 					if err != nil {
 						glog.Exit(err)
 					}
@@ -266,13 +274,13 @@ func generateResourceFile(res *Resource) {
 
 	formatted, err := formatSource(&contents)
 	if err != nil {
-		glog.Error(fmt.Errorf("error formatting %v: %v", res.Package+res.Name(), err))
+		glog.Error(fmt.Errorf("error formatting %v: %v - resource \n ", res.Package()+res.Name(), err))
 	}
 
 	if oPath == nil || *oPath == "" {
 		fmt.Printf("%v", string(formatted))
 	} else {
-		outname := fmt.Sprintf("resource_%s_%s.go", res.Package, res.Name())
+		outname := fmt.Sprintf("resource_%s_%s.go", res.Package(), res.Name())
 		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
 		if err != nil {
 			glog.Exit(err)
@@ -308,13 +316,50 @@ func generateSweeperFile(res *Resource) {
 
 	formatted, err := formatSource(&contents)
 	if err != nil {
-		glog.Error(fmt.Errorf("error formatting %v: %v", res.Package+res.Name(), err))
+		glog.Error(fmt.Errorf("error formatting %v: %v - sweeper", res.Package()+res.Name(), err))
 	}
 
 	if oPath == nil || *oPath == "" {
 		fmt.Printf("%v", string(formatted))
 	} else {
-		outname := fmt.Sprintf("resource_%s_%s_sweeper_test.go", res.Package, res.Name())
+		outname := fmt.Sprintf("resource_%s_%s_sweeper_test.go", res.Package(), res.Name())
+		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
+		if err != nil {
+			glog.Exit(err)
+		}
+	}
+}
+
+func generateEndpointsFile(products map[string]*ProductMetadata) {
+	if len(products) <= 0 {
+		return
+	}
+	// Generate endpoints file
+	tmpl, err := template.New("provider_dcl_endpoints.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
+		"templates/provider_dcl_endpoints.go.tmpl",
+	)
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	contents := bytes.Buffer{}
+	if err = tmpl.ExecuteTemplate(&contents, "provider_dcl_endpoints.go.tmpl", products); err != nil {
+		glog.Exit(err)
+	}
+
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	formatted, err := formatSource(&contents)
+	if err != nil {
+		glog.Error(fmt.Errorf("error formatting package endpoints file"))
+	}
+
+	if oPath == nil || *oPath == "" {
+		fmt.Printf("%v", string(formatted))
+	} else {
+		outname := fmt.Sprintf("provider_dcl_endpoints.go")
 		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
 		if err != nil {
 			glog.Exit(err)

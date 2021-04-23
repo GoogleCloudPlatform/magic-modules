@@ -1,11 +1,11 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -227,7 +227,7 @@ func buildGetter(p Property, rawGetter string) string {
 		return fmt.Sprintf("dcl.Bool(%s.(bool))", rawGetter)
 	case SchemaTypeString:
 		if p.Type.IsEnum() {
-			return fmt.Sprintf("%s.%sEnumRef(%s.(string))", p.resource.Package, p.ObjectType(), rawGetter)
+			return fmt.Sprintf("%s.%sEnumRef(%s.(string))", p.resource.Package(), p.ObjectType(), rawGetter)
 		}
 		if p.sendEmpty {
 			return fmt.Sprintf("dcl.String(%s.(string))", rawGetter)
@@ -535,7 +535,6 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			}
 		}
 
-
 		// Handle object properties
 		if len(v.Properties) > 0 {
 			props, err := createPropertiesFromSchema(v, typeFetcher, overrides, resource, &p, location)
@@ -631,7 +630,6 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				p.StateGetter = &sg
 			}
 		}
-
 
 		ss := p.DefaultStateSetter()
 		p.StateSetter = &ss
