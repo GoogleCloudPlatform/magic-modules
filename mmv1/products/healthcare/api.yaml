@@ -152,6 +152,28 @@ objects:
         description: |
           The fully qualified name of this dataset
         output: true
+      - !ruby/object:Api::Type::Array
+        name: streamConfigs
+        required: false
+        min_version: beta
+        update_url: '{{dataset}}/dicomStores/{{name}}'
+        description: |
+          To enable streaming to BigQuery, configure the streamConfigs object in your DICOM store.
+          streamConfigs is an array, so you can specify multiple BigQuery destinations. You can stream metadata from a single DICOM store to up to five BigQuery tables in a BigQuery dataset.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: bigqueryDestination
+              required: true
+              description: |
+                BigQueryDestination to include a fully qualified BigQuery table URI where DICOM instance metadata will be streamed.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: tableUri
+                  required: true
+                  description: |
+                    a fully qualified BigQuery table URI where DICOM instance metadata will be streamed.
+
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Creating a DICOM store':
