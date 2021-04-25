@@ -1,18 +1,18 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package types
 
 import (
 	"fmt"
@@ -20,10 +20,9 @@ import (
 	"strings"
 
 	"bitbucket.org/creachadair/stringset"
+	"github.com/GoogleCloudPlatform/magic-modules/tpgtools/utils"
 	"github.com/nasa9084/go-openapi"
 )
-
-const GoPkgTerraformSdkValidation = "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 // Resource is tpgtools' model of what a information is necessary to generate a
 // resource in TPG.
@@ -146,19 +145,19 @@ func (r Resource) TerraformName() string {
 // Type is the title-cased name of a resource, for printing information about
 // the type". For example, "Instance".
 func (r Resource) Type() string {
-	return snakeToTitleCase(r.DCLName())
+	return utils.SnakeToTitleCase(r.DCLName())
 }
 
 // PackageType is the title-cased package name of a resource. For example,
 // "Redis.
 func (r Resource) PackageType() string {
-	return snakeToTitleCase(r.Package)
+	return utils.SnakeToTitleCase(r.Package)
 }
 
 // PathType is the title-cased name of a resource preceded by it's package, for
 // often used to namespace functions. For example, "RedisInstance".
 func (r Resource) PathType() string {
-	return snakeToTitleCase(r.Path())
+	return utils.SnakeToTitleCase(r.Path())
 }
 
 // DCLPackage is the package name of the DCL client library to use for this
@@ -247,9 +246,9 @@ func (r Resource) AdditionalFileImports() []string {
 // If this resource has a server generated field that is used to read the
 // resource. This must be set during create
 func (r Resource) HasServerGeneratedName() bool {
-	identityFields := idParts(r.ID)
+	identityFields := utils.IdParts(r.ID)
 	for _, p := range r.Properties {
-		if stringInSlice(p.Name(), identityFields) {
+		if utils.StringInSlice(p.Name(), identityFields) {
 			if !p.Settable {
 				return true
 			}
@@ -306,7 +305,7 @@ func (r Resource) RegisterReusedType(p Property) []Property {
 	return r.ReusedTypes
 }
 
-func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides Overrides, packagePath string, location string) (*Resource, error) {
+func NewResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides Overrides, packagePath string, location string) (*Resource, error) {
 	pkg := strings.Split(packagePath, "/")[0]
 	resourceTitle := schema.Title
 
@@ -319,8 +318,8 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 		resourceTitle = location + resourceTitle
 	}
 	res := Resource{
-		title:                jsonToSnakeCase(resourceTitle),
-		dclname:              jsonToSnakeCase(schema.Title),
+		title:                utils.JsonToSnakeCase(resourceTitle),
+		dclname:              utils.JsonToSnakeCase(schema.Title),
 		Package:              pkg,
 		DCLPackagePath:       packagePath,
 		Description:          schema.Description,
@@ -336,7 +335,7 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 	}
 
 	if crnameOk {
-		res.title = jsonToSnakeCase(crname.Title)
+		res.title = utils.JsonToSnakeCase(crname.Title)
 	}
 
 	id, err := findResourceId(schema, overrides, location)
