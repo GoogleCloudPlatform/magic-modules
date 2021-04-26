@@ -330,7 +330,7 @@ func resourceComposerEnvironment() *schema.Resource {
 										Default:  true,
 										AtLeastOneOf: []string{
 											"config.0.private_environment_config.0.enable_private_endpoint",
-											"config.0.private_environment_config.0.//_ipv4_cidr_block",
+											"config.0.private_environment_config.0._ipv4_cidr_block",
 											"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
 											"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
 										},
