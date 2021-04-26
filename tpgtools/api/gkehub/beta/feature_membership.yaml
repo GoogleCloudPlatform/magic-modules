@@ -186,14 +186,6 @@ components:
             parent: true
             resource: Cloudresourcemanager/Project
           x-kubernetes-immutable: true
-        projectNumber:
-          description: The project number of the feature
-          type: string
-          x-dcl-go-name: ProjectNumber
-          x-dcl-references:
-          - field: projectNumber
-            resource: Cloudresourcemanager/Project
-          x-kubernetes-immutable: true
       title: FeatureMembership
       type: object
       x-dcl-id: projects/{{project}}/locations/{{location}}/features/{{feature}}

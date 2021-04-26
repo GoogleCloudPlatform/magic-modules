@@ -1,0 +1,548 @@
+<% autogen_exception -%>
+package google
+<% unless version == 'ga' -%>
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+)
+
+func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
+  t.Parallel()
+
+  context := map[string]interface{}{
+    "random_suffix": randString(t, 10),
+  }
+
+  vcrTest(t, resource.TestCase{
+    PreCheck:  func() { testAccPreCheck(t) },
+    Providers: testAccProvidersOiCS,
+    ExternalProviders: map[string]resource.ExternalProvider{
+      "random": {},
+    },
+    CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccGKEHubFeature_gkehubFeatureMciUpdateStart(context),
+      },
+      {
+        ResourceName:      "google_gkehub_feature.feature",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccGKEHubFeature_gkehubFeatureMciUpdateEnd(context),
+      },
+      {
+        ResourceName:      "google_gkehub_feature.feature",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
+}
+
+func testAccGKEHubFeature_gkehubFeatureMciUpdateStart(context map[string]interface{}) string {
+  return Nprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "basiccluster%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  provider = google-beta
+}
+
+resource "google_container_cluster" "secondary" {
+  name               = "basiccluster2%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  provider = google-beta
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "basic%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
+    }
+  }
+  description = "test resource."
+  provider = google-beta
+}
+
+resource "google_gke_hub_membership" "membership_second" {
+  membership_id = "basic2%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.secondary.id}"
+    }
+  }
+  description = "test resource."
+  provider = google-beta
+}
+
+resource "google_gkehub_feature" "feature" {
+  name = "multiclusteringress"
+  location = "global"
+  spec {
+    multiclusteringress {
+      config_membership = google_gke_hub_membership.membership.id
+   }
+  }
+  provider = google-beta
+}
+`, context)
+}
+
+func testAccGKEHubFeature_gkehubFeatureMciUpdateEnd(context map[string]interface{}) string {
+  return Nprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "basiccluster%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  provider = google-beta
+}
+
+resource "google_container_cluster" "secondary" {
+  name               = "basiccluster2%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  provider = google-beta
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "basic%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
+    }
+  }
+  description = "test resource."
+  provider = google-beta
+}
+
+resource "google_gke_hub_membership" "membership_second" {
+  membership_id = "basic2%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.secondary.id}"
+    }
+  }
+  description = "test resource."
+  provider = google-beta
+}
+
+resource "google_gkehub_feature" "feature" {
+  name = "multiclusteringress"
+  location = "global"
+  spec {
+    multiclusteringress {
+      config_membership = google_gke_hub_membership.membership_second.id
+    }
+  }
+  labels = {
+    foo = "bar"
+  }
+  provider = google-beta
+}
+`, context)
+}
+
+func TestAccGKEHubFeature_gkehubFeatureAcmUpdate(t *testing.T) {
+  t.Parallel()
+
+  context := map[string]interface{}{
+    "random_suffix": randString(t, 10),
+  }
+
+  vcrTest(t, resource.TestCase{
+    PreCheck:  func() { testAccPreCheck(t) },
+    Providers: testAccProvidersOiCS,
+    ExternalProviders: map[string]resource.ExternalProvider{
+      "random": {},
+    },
+    CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateStart(context),
+      },
+      {
+        ResourceName:      "google_gkehub_feature_membership.feature_member_1",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateMiddle(context),
+      },
+      {
+        ResourceName:      "google_gkehub_feature_membership.feature_member_2",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateEnd(context),
+      },
+      {
+        ResourceName:      "google_gkehub_feature_membership.feature_member_2",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
+}
+
+func testAccGKEHubFeature_gkehubFeatureAcmUpdateStart(context map[string]interface{}) string {
+  return Nprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "basiccluster%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  provider = google-beta
+}
+
+resource "google_container_cluster" "secondary" {
+  name               = "basiccluster2%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  provider = google-beta
+}
+
+resource "google_container_cluster" "tertiary" {
+  name               = "basiccluster3%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  provider = google-beta
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "basic%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
+    }
+  }
+  description = "test resource."
+  provider = google-beta
+}
+
+resource "google_gke_hub_membership" "membership_second" {
+  membership_id = "basic2%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.secondary.id}"
+    }
+  }
+  description = "test resource."
+  provider = google-beta
+}
+
+resource "google_gke_hub_membership" "membership_third" {
+  membership_id = "basic3%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.tertiary.id}"
+    }
+  }
+  description = "test resource."
+  provider = google-beta
+}
+
+resource "google_gkehub_feature" "feature" {
+  name = "configmanagement"
+  location = "global"
+
+  labels = {
+    foo = "bar"
+  }
+  provider = google-beta
+}
+
+resource "google_gkehub_feature_membership" "feature_member_1" {
+  location = "global"
+  feature = google_gkehub_feature.feature.name
+  membership = google_gke_hub_membership.membership.membership_id
+  configmanagement {
+    version = "1.6.2"
+    config_sync {
+      source_format = "hierarchy"
+      git {
+        sync_repo = "https://github.com/GoogleCloudPlatform/magic-modules"
+      }
+    }
+  }
+  provider = google-beta
+}
+
+resource "google_gkehub_feature_membership" "feature_member_2" {
+  location = "global"
+  feature = google_gkehub_feature.feature.name
+  membership = google_gke_hub_membership.membership_second.membership_id
+  configmanagement {
+    version = "1.6.1"
+    config_sync {
+      source_format = "hierarchy"
+      git {
+        sync_repo = "https://github.com/terraform-providers/terraform-provider-google"
+      }
+    }
+  }
+  provider = google-beta
+}
+`, context)
+}
+
+func testAccGKEHubFeature_gkehubFeatureAcmUpdateMiddle(context map[string]interface{}) string {
+  return Nprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "basiccluster%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  provider = google-beta
+}
+
+resource "google_container_cluster" "secondary" {
+  name               = "basiccluster2%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  provider = google-beta
+}
+
+resource "google_container_cluster" "tertiary" {
+  name               = "basiccluster3%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  provider = google-beta
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "basic%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
+    }
+  }
+  description = "test resource."
+  provider = google-beta
+}
+
+resource "google_gke_hub_membership" "membership_second" {
+  membership_id = "basic2%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.secondary.id}"
+    }
+  }
+  description = "test resource."
+  provider = google-beta
+}
+
+resource "google_gke_hub_membership" "membership_third" {
+  membership_id = "basic3%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.tertiary.id}"
+    }
+  }
+  description = "test resource."
+  provider = google-beta
+}
+
+resource "google_gkehub_feature" "feature" {
+  name = "configmanagement"
+  location = "global"
+
+  labels = {
+    foo = "changed"
+  }
+  provider = google-beta
+}
+
+resource "google_gkehub_feature_membership" "feature_member_1" {
+  location = "global"
+  feature = google_gkehub_feature.feature.name
+  membership = google_gke_hub_membership.membership.membership_id
+  configmanagement {
+    version = "1.6.2"
+    config_sync {
+      source_format = "hierarchy"
+      git {
+        sync_repo = "https://github.com/GoogleCloudPlatform/magic-modules"
+      }
+    }
+  }
+  provider = google-beta
+}
+
+resource "google_gkehub_feature_membership" "feature_member_2" {
+  location = "global"
+  feature = google_gkehub_feature.feature.name
+  membership = google_gke_hub_membership.membership_second.membership_id
+  configmanagement {
+    version = "1.6.1"
+    config_sync {
+      source_format = "hierarchy"
+      git {
+        sync_repo = "https://github.com/terraform-providers/terraform-provider-google-beta"
+      }
+    }
+    policy_controller {
+      enabled = true
+      audit_interval_seconds = "10"
+      exemptable_namespaces = ["asdf", "1234"]
+      template_library_installed = true
+    }
+  }
+  provider = google-beta
+}
+`, context)
+}
+
+func testAccGKEHubFeature_gkehubFeatureAcmUpdateEnd(context map[string]interface{}) string {
+  return Nprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "basiccluster%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  provider = google-beta
+}
+
+resource "google_container_cluster" "secondary" {
+  name               = "basiccluster2%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  provider = google-beta
+}
+
+resource "google_container_cluster" "tertiary" {
+  name               = "basiccluster3%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  provider = google-beta
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "basic%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
+    }
+  }
+  description = "test resource."
+  provider = google-beta
+}
+
+resource "google_gke_hub_membership" "membership_second" {
+  membership_id = "basic2%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.secondary.id}"
+    }
+  }
+  description = "test resource."
+  provider = google-beta
+}
+
+resource "google_gke_hub_membership" "membership_third" {
+  membership_id = "basic3%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.tertiary.id}"
+    }
+  }
+  description = "test resource."
+  provider = google-beta
+}
+
+resource "google_gkehub_feature" "feature" {
+  name = "configmanagement"
+  location = "global"
+
+  labels = {
+    foo = "changed"
+  }
+  provider = google-beta
+}
+
+resource "google_gkehub_feature_membership" "feature_member_1" {
+  location = "global"
+  feature = google_gkehub_feature.feature.name
+  membership = google_gke_hub_membership.membership_third.membership_id
+  configmanagement {
+    version = "1.6.2"
+    config_sync {
+      source_format = "hierarchy"
+      git {
+        sync_repo = "https://github.com/hashicorp/terraform"
+      }
+    }
+    policy_controller {
+      enabled = false
+      audit_interval_seconds = "100"
+      exemptable_namespaces = ["onetwothree", "fourfive"]
+      template_library_installed = true
+    }
+  }
+  provider = google-beta
+}
+
+resource "google_gkehub_feature_membership" "feature_member_2" {
+  location = "global"
+  feature = google_gkehub_feature.feature.name
+  membership = google_gke_hub_membership.membership_second.membership_id
+  configmanagement {
+    version = "1.6.1"
+    config_sync {
+      source_format = "unstructured"
+      git {
+        sync_repo = "https://github.com/terraform-providers/terraform-provider-google-beta"
+      }
+    }
+    hierarchy_controller {
+      enable_hierarchical_resource_quota = true
+      enabled = true
+    }
+    policy_controller {
+      enabled = true
+      audit_interval_seconds = "9"
+      exemptable_namespaces = ["different", "1234"]
+      template_library_installed = false
+    }
+  }
+  provider = google-beta
+}
+`, context)
+}
+
+func testAccCheckGKEHubFeatureDestroyProducer(t *testing.T) func(s *terraform.State) error {
+  return func(s *terraform.State) error {
+    for name, rs := range s.RootModule().Resources {
+      if rs.Type != "google_gkehub_feature" {
+        continue
+      }
+      if strings.HasPrefix(name, "data.") {
+        continue
+      }
+
+      config := googleProviderConfig(t)
+
+      url, err := replaceVarsForTest(config, rs, "{{GKEHubBasePath}}projects/{{project}}/locations/{{location}}/features/{{name}}")
+      if err != nil {
+        return err
+      }
+
+      billingProject := ""
+
+      if config.BillingProject != "" {
+        billingProject = config.BillingProject
+      }
+
+      _, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+      if err == nil {
+        return fmt.Errorf("GKEHubFeature still exists at %s", url)
+      }
+    }
+
+    return nil
+  }
+}
+<% end -%>
