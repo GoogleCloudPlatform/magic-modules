@@ -107,6 +107,7 @@ objects:
               for the HTTP response code, response_code, so you can look at latencies for successful responses
               or just for responses that failed.
             required: false
+            input: true
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
