@@ -149,8 +149,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/no_send_name.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/pubsub_subscription_path.erb
       update_encoder: templates/terraform/update_encoder/pubsub_subscription.erb
-
-
+  Schema: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "pubsub_schema_basic"
+        primary_resource_id: "example"
+        vars:
+          schema_name: "example-schema"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
