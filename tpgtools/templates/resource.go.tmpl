@@ -239,7 +239,7 @@ func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) erro
 {{- else }}
   createDirective := CreateDirective
 {{- end }}
-	res, err := config.client{{$.PackageType}}DCL.Apply{{$.Type}}(context.Background(), obj, createDirective...)
+	res, err := config.client{{$.ProductType}}DCL.Apply{{$.Type}}(context.Background(), obj, createDirective...)
 	if err != nil {
 		// The resource didn't actually create
 		d.SetId("")
@@ -293,7 +293,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 {{ end }}
 	}
 
-	res, err := config.client{{$.PackageType}}DCL.Get{{$.Type}}(context.Background(), obj)
+	res, err := config.client{{$.ProductType}}DCL.Get{{$.Type}}(context.Background(), obj)
 	if err != nil {
 		// Resource not found
 		d.SetId("")
@@ -356,7 +356,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	{{- if $.StateHint }}
 	directive = append(UpdateDirective, dcl.WithStateHint(old))
 	{{- end }}
-	res, err := config.client{{$.PackageType}}DCL.Apply{{$.Type}}(context.Background(), obj, directive...)
+	res, err := config.client{{$.ProductType}}DCL.Apply{{$.Type}}(context.Background(), obj, directive...)
 	if err != nil {
 		return fmt.Errorf("Error updating {{$.Type}}: %s", err)
 	}
@@ -413,7 +413,7 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 {{- end}}
 
 	log.Printf("[DEBUG] Deleting {{$.Type}} %q", d.Id())
-	if err := config.client{{$.PackageType}}DCL.Delete{{$.Type}}(context.Background(), obj); err != nil {
+	if err := config.client{{$.ProductType}}DCL.Delete{{$.Type}}(context.Background(), obj); err != nil {
 		return fmt.Errorf("Error deleting {{$.Type}}: %s", err)
 	}
 
