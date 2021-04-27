@@ -43,7 +43,7 @@ var {{$pkg.ProductType}}EndpointEntry = &schema.Schema{
 }
 {{end}}
 
-//Add new values to config.go.erb config object delcaration
+//Add new values to config.go.erb config object declaration
 {{- range $index, $pkg := . }}
 // client{{$pkg.ProductType}}DCL *{{$pkg.PackageName}}Dcl.Client
 {{- end}}
