@@ -800,6 +800,57 @@ func TestAccComputeInstance_serviceAccount(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstance_serviceAccount_updated(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_serviceAccount_update0(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceScopes(&instance, 0),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			{
+				Config: testAccComputeInstance_serviceAccount_update01(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceScopes(&instance, 0),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			{
+				Config: testAccComputeInstance_serviceAccount_update02(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceScopes(&instance, 0),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			{
+				Config: testAccComputeInstance_serviceAccount_update3(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceScopes(&instance, 3),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+		},
+	})
+}
+
 func TestAccComputeInstance_scheduling(t *testing.T) {
 	t.Parallel()
 
@@ -844,13 +895,21 @@ func TestAccComputeInstance_soleTenantNodeAffinities(t *testing.T) {
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
+				Config: testAccComputeInstance_withoutNodeAffinities(instanceName, templateName, groupName),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			{
 				Config: testAccComputeInstance_soleTenantNodeAffinities(instanceName, templateName, groupName),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
 			{
 				Config: testAccComputeInstance_soleTenantNodeAffinitiesUpdated(instanceName, templateName, groupName),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			{
+				Config: testAccComputeInstance_soleTenantNodeAffinitiesReduced(instanceName, templateName, groupName),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
 		},
 	})
 }
@@ -1515,7 +1574,7 @@ func TestAccComputeInstance_updateRunning_desiredStatusRunning_allowStoppingForU
 	})
 }
 
-const errorAllowStoppingMsg = "Changing the machine_type, min_cpu_platform, service_account, enable_display, shielded_instance_config, or network_interface.\\[#d\\].\\(network/subnetwork/subnetwork_project\\) on a started instance requires stopping it. To acknowledge this, please set allow_stopping_for_update = true in your config. You can also stop it by setting desired_status = \"TERMINATED\", but the instance will not be restarted after the update."
+const errorAllowStoppingMsg = "Changing the machine_type, min_cpu_platform, service_account, enable_display, shielded_instance_config, scheduling.node_affinities or network_interface.\\[#d\\].\\(network/subnetwork/subnetwork_project\\) on a started instance requires stopping it. To acknowledge this, please set allow_stopping_for_update = true in your config. You can also stop it by setting desired_status = \"TERMINATED\", but the instance will not be restarted after the update."
 
 func TestAccComputeInstance_updateRunning_desiredStatusNotSet_notAllowStoppingForUpdate(t *testing.T) {
 	t.Parallel()
@@ -2483,6 +2542,29 @@ func testAccCheckComputeInstanceServiceAccount(instance *compute.Instance, scope
 		}
 
 		return fmt.Errorf("Scope not found: %s", scope)
+	}
+}
+
+func testAccCheckComputeInstanceScopes(instance *compute.Instance, scopeCount int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+
+		if count := len(instance.ServiceAccounts); count == 0 {
+			if scopeCount == 0 {
+				return nil
+			} else {
+				return fmt.Errorf("Scope count expected: %s, but got %s", fmt.Sprint(scopeCount), fmt.Sprint(count))
+			}
+		} else {
+			if count := len(instance.ServiceAccounts); count != 1 {
+				return fmt.Errorf("Wrong number of ServiceAccounts: expected 1, got %d", count)
+			}
+
+			if scount := len(instance.ServiceAccounts[0].Scopes); scount == scopeCount {
+				return nil
+			} else {
+				return fmt.Errorf("Scope count expected: %s, but got %s", fmt.Sprint(scopeCount), fmt.Sprint(scount))
+			}
+		}
 	}
 }
 
@@ -3799,6 +3881,134 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
+func testAccComputeInstance_serviceAccount_update0(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+  allow_stopping_for_update = true
+}
+`, instance)
+}
+
+func testAccComputeInstance_serviceAccount_update01(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    scopes = []
+  }
+  allow_stopping_for_update = true
+}
+
+data "google_compute_default_service_account" "default" {
+}
+`, instance)
+}
+
+func testAccComputeInstance_serviceAccount_update02(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    email = data.google_compute_default_service_account.default.email
+    scopes = []
+  }
+  allow_stopping_for_update = true
+}
+
+data "google_compute_default_service_account" "default" {
+}
+`, instance)
+}
+
+func testAccComputeInstance_serviceAccount_update3(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    scopes = [
+      "userinfo-email",
+      "compute-ro",
+      "storage-ro",
+    ]
+  }
+
+  allow_stopping_for_update = true
+}
+`, instance)
+}
+
 func testAccComputeInstance_scheduling(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -4544,6 +4754,53 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
+func testAccComputeInstance_withoutNodeAffinities(instance, nodeTemplate, nodeGroup string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
+  zone         = "us-central1-a"
+  allow_stopping_for_update = true
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+
+resource "google_compute_node_template" "nodetmpl" {
+  name   = "%s"
+  region = "us-central1"
+
+  node_affinity_labels = {
+    tfacc = "test"
+  }
+
+  node_type = "n1-node-96-624"
+
+  cpu_overcommit_type = "ENABLED"
+}
+
+resource "google_compute_node_group" "nodes" {
+  name = "%s"
+  zone = "us-central1-a"
+
+  size          = 1
+  node_template = google_compute_node_template.nodetmpl.self_link
+}
+`, instance, nodeTemplate, nodeGroup)
+}
+
 func testAccComputeInstance_soleTenantNodeAffinities(instance, nodeTemplate, nodeGroup string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -4555,6 +4812,7 @@ resource "google_compute_instance" "foobar" {
   name         = "%s"
   machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
   zone         = "us-central1-a"
+  allow_stopping_for_update = true
 
   boot_disk {
     initialize_params {
@@ -4623,6 +4881,7 @@ resource "google_compute_instance" "foobar" {
   name         = "%s"
   machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
   zone         = "us-central1-a"
+  allow_stopping_for_update = true
 
   boot_disk {
     initialize_params {
@@ -4645,6 +4904,69 @@ resource "google_compute_instance" "foobar" {
       key      = "tfacc"
       operator = "NOT_IN"
       values   = ["not_here"]
+    }
+
+    node_affinities {
+      key      = "compute.googleapis.com/node-group-name"
+      operator = "IN"
+      values   = [google_compute_node_group.nodes.name]
+    }
+
+    min_node_cpus = 6
+  }
+}
+
+resource "google_compute_node_template" "nodetmpl" {
+  name   = "%s"
+  region = "us-central1"
+
+  node_affinity_labels = {
+    tfacc = "test"
+  }
+
+  node_type = "n1-node-96-624"
+
+  cpu_overcommit_type = "ENABLED"
+}
+
+resource "google_compute_node_group" "nodes" {
+  name = "%s"
+  zone = "us-central1-a"
+
+  size          = 1
+  node_template = google_compute_node_template.nodetmpl.self_link
+}
+`, instance, nodeTemplate, nodeGroup)
+}
+
+func testAccComputeInstance_soleTenantNodeAffinitiesReduced(instance, nodeTemplate, nodeGroup string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
+  zone         = "us-central1-a"
+  allow_stopping_for_update = true
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    node_affinities {
+      key      = "tfacc"
+      operator = "IN"
+      values   = ["test", "updatedlabel"]
     }
 
     node_affinities {

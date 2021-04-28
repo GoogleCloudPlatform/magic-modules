@@ -1,7 +1,5 @@
-<% autogen_exception -%>
 package google
 
-<% unless version == 'ga' %>
 import (
 	"fmt"
 	"testing"
@@ -11,12 +9,12 @@ import (
 
 func TestAccMemcacheInstance_update(t *testing.T) {
 	t.Parallel()
-  // Temporary as CI has used up servicenetworking quota
-  skipIfVcr(t)
+	// Temporary as CI has used up servicenetworking quota
+	skipIfVcr(t)
 
 	prefix := fmt.Sprintf("%d", randInt(t))
 	name := fmt.Sprintf("tf-test-%s", prefix)
-  network := BootstrapSharedTestNetwork(t, "memcache-update")
+	network := BootstrapSharedTestNetwork(t, "memcache-update")
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -124,4 +122,3 @@ data "google_compute_network" "memcache_network" {
 }
 `, prefix, name, network)
 }
-<% end -%>
