@@ -41,12 +41,12 @@ func TestIpv6AddressDiffSuppress(t *testing.T) {
 		},
 	}
 
-	parsefunc := func(x string) string {
+	parseFunc := func(x string) string {
 		return net.ParseIP(x).String()
 	}
 
 	for tn, tc := range cases {
-		shouldSuppress := rrdatasforDnsDiffSuppress(tc.Old, tc.New, parsefunc, nil)
+		shouldSuppress := rrdatasListDiffSuppress(tc.Old, tc.New, parseFunc, nil)
 		if shouldSuppress != tc.ShouldSuppress {
 			t.Errorf("%s: expected %t", tn, tc.ShouldSuppress)
 		}
