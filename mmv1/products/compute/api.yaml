@@ -510,6 +510,7 @@ objects:
                   description: |
                     Minimum number of VM instances that autoscaler will recommend in time intervals starting according to schedule.
                   required: true
+                  send_empty_value: true
                 - !ruby/object:Api::Type::String
                   name: 'schedule'
                   description: |
@@ -9782,6 +9783,7 @@ objects:
                   description: |
                     Minimum number of VM instances that autoscaler will recommend in time intervals starting according to schedule.
                   required: true
+                  send_empty_value: true
                 - !ruby/object:Api::Type::String
                   name: 'schedule'
                   description: |
