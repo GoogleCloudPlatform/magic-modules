@@ -44,12 +44,13 @@ var {{$pkg.ProductType}}EndpointEntry = &schema.Schema{
 
 //Add new values to config.go.erb config object declaration
 {{- range $index, $pkg := . }}
+//{{$pkg.ProductType}}BasePath string
 // client{{$pkg.ProductType}}DCL *{{$pkg.PackageName}}Dcl.Client
 {{- end}}
 
 //Add new values to config.go.erb object initialization
 {{- range $index, $pkg := . }}
-// c.client{{$pkg.ProductType}}DCL = {{$pkg.PackageName}}Dcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions,dclLoggerOptions))
+// c.client{{$pkg.ProductType}}DCL = {{$pkg.PackageName}}Dcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions,dclLoggerOptions, dcl.WithBasePath(c.{{$pkg.ProductType}}BasePath)))
 {{- end}}
 
 //Add new values to provider.go.erb schema initialization
@@ -59,6 +60,6 @@ var {{$pkg.ProductType}}EndpointEntry = &schema.Schema{
 
 //Add new values to provider.go.erb - provider block read
 {{- range $index, $pkg := . }}
-// config.client{{$pkg.ProductType}}DCL.Config.BasePath = d.Get({{$pkg.ProductType}}EndpointEntryKey).(string)
+// config.{{$pkg.ProductType}}BasePath = d.Get({{$pkg.ProductType}}EndpointEntryKey).(string)
 {{- end}}
 
