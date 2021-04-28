@@ -18,13 +18,30 @@ import (
 // behavior however induces flakiness in our acceptance tests, hence the need for running them
 // serially.
 // Policies are *not tested*, because testing them will ruin changes made to the test org.
-func TestAccOrganizationIam(t *testing.T) {
+func TestAccOrganizationIamMembersAndBindings(t *testing.T) {
 	if os.Getenv("TF_RUN_ORG_IAM") != "true" {
 		t.Skip("Environment variable TF_RUN_ORG_IAM is not set, skipping.")
 	}
-
 	t.Parallel()
 
+	testCases := map[string]func(t *testing.T){
+		"bindingBasic": testAccOrganizationIamBinding_basic,
+		"memberBasic":  testAccOrganizationIamMember_basic,
+	}
+
+	for name, tc := range testCases {
+		// shadow the tc variable into scope so that when
+		// the loop continues, if t.Run hasn't executed tc(t)
+		// yet, we don't have a race condition
+		// see https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			tc(t)
+		})
+	}
+}
+
+func testAccOrganizationIamBinding_basic(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
 	roleId := "tfIamTest" + randString(t, 10)
@@ -34,7 +51,7 @@ func TestAccOrganizationIam(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Binding creation
-				Config: testAccOrganizationIamBinding_basic(account, roleId, org),
+				Config: testAccOrganizationIamBinding_basicConfig(account, roleId, org),
 				Check: testAccCheckGoogleOrganizationIamBindingExists(t, "foo", "test-role", []string{
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, getTestProjectFromEnv()),
 				}),
@@ -59,9 +76,20 @@ func TestAccOrganizationIam(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+		},
+	})
+}
+
+func testAccOrganizationIamMember_basic(t *testing.T) {
+	org := getTestOrgFromEnv(t)
+	account := fmt.Sprintf("tf-test-%d", randInt(t))
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
-				Config: testAccOrganizationIamMember_basic(account, org),
+				Config: testAccOrganizationIamMember_basicConfig(account, org),
 				Check: testAccCheckGoogleOrganizationIamMemberExists(t, "foo", "roles/browser",
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, getTestProjectFromEnv()),
 				),
@@ -142,7 +170,7 @@ func testAccCheckGoogleOrganizationIamMemberExists(t *testing.T, n, role, member
 
 // We are using a custom role since iam_binding is authoritative on the member list and
 // we want to avoid removing members from an existing role to prevent unwanted side effects.
-func testAccOrganizationIamBinding_basic(account, role, org string) string {
+func testAccOrganizationIamBinding_basicConfig(account, role, org string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
@@ -194,7 +222,7 @@ resource "google_organization_iam_binding" "foo" {
 `, account, role, org, account, org)
 }
 
-func testAccOrganizationIamMember_basic(account, org string) string {
+func testAccOrganizationIamMember_basicConfig(account, org string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
