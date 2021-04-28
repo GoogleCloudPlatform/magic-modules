@@ -32,12 +32,12 @@ import (
 )
 
 {{range $index, $pkg := .}}
-var {{$pkg.ProductType}}EndpointEntryKey = "eventarc_custom_endpoint"
+var {{$pkg.ProductType}}EndpointEntryKey = "{{$pkg.ProductName}}_custom_endpoint"
 var {{$pkg.ProductType}}EndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
 	Optional:     true,
 	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_EVENTARC_CUSTOM_ENDPOINT",
+		"GOOGLE_{{$pkg.ProductNameUpper}}_CUSTOM_ENDPOINT",
 	}, ""),
 }
 {{end}}

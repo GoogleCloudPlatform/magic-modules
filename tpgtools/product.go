@@ -34,3 +34,9 @@ func NewProductMetadata(packagePath, productName string) *ProductMetadata {
 func (pm *ProductMetadata) ProductType() string {
 	return snakeToTitleCase(pm.ProductName)
 }
+
+// ProductType is the all caps snakecase product name of a resource. For example,
+// "NetworkServices".
+func (pm *ProductMetadata) ProductNameUpper() string {
+	return strings.ToUpper(pm.ProductName)
+}
