@@ -24,4 +24,11 @@
 		obj["nextRotationTime"] = nextRotation
 	}
 
+	// set to false if it is not true explicitly
+	if !(d.Get("skip_initial_version_creation").(bool)) {
+		if err := d.Set("skip_initial_version_creation", false); err != nil {
+			return nil, fmt.Errorf("Error setting skip_initial_version_creation: %s", err)
+		}
+	}
+
 	return obj, nil

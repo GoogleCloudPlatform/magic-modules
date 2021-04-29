@@ -285,7 +285,7 @@ resource "google_compute_region_autoscaler" "foobar" {
     scaling_schedules {
       name = "every-weekday-morning"
       description = "Increase to 2 every weekday at 7AM for 6 hours."
-      min_required_replicas = 2
+      min_required_replicas = 0
       schedule = "0 7 * * MON-FRI"
       time_zone = "America/New_York"
       duration_sec = 21600
