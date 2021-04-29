@@ -100,7 +100,7 @@ func resourceStorageTransferJob() *schema.Resource {
 							MaxItems:     1,
 							Elem:         httpDataSchema(),
 							ExactlyOneOf: transferSpecDataSourceKeys,
-							Description:  `An HTTP URL data source.`,
+							Description:  `A HTTP URL data source.`,
 						},
 						"azure_blob_storage_data_source": {
 							Type:         schema.TypeList,
@@ -108,7 +108,7 @@ func resourceStorageTransferJob() *schema.Resource {
 							MaxItems:     1,
 							Elem:         azureBlobStorageDataSchema(),
 							ExactlyOneOf: transferSpecDataSourceKeys,
-							Description:  `An HTTP URL data source.`,
+							Description:  `An Azure Blob Storage data source.`,
 						},
 					},
 				},

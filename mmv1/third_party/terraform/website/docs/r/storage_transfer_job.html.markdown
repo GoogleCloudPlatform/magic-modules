@@ -118,9 +118,9 @@ The `transfer_spec` block supports:
 
 * `aws_s3_data_source` - (Optional) An AWS S3 data source. Structure documented below.
 
-* `http_data_source` - (Optional) An HTTP URL data source. Structure documented below.
+* `http_data_source` - (Optional) A HTTP URL data source. Structure documented below.
 
-* `azure_blob_storage_data_source` - (Optional) An HTTP URL data source. Structure documented below.
+* `azure_blob_storage_data_source` - (Optional) An Azure Blob Storage data source. Structure documented below.
 
 The `schedule` block supports:
 
