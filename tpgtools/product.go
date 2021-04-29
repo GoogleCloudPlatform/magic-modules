@@ -32,16 +32,12 @@ func NewProductMetadata(packagePath, productName string) *ProductMetadata {
 }
 
 func (pm *ProductMetadata) WriteBasePath() bool {
-	return !pm.SkipBasePath()
-}
-
-func (pm *ProductMetadata) SkipBasePath() bool {
 	po, ok := productOverrides[pm.PackageName]
 	if !ok {
-		return false
+		return true
 	}
-
-	return po.ResourceOverride(ProductSkipBasePath, "")
+	skipBasePath := po.ResourceOverride(ProductSkipBasePath, "")
+	return !skipBasePath
 }
 
 // ProductType is the title-cased product name of a resource. For example,
@@ -50,8 +46,8 @@ func (pm *ProductMetadata) ProductType() string {
 	return snakeToTitleCase(pm.ProductName)
 }
 
-// ProductType is the all caps snakecase product name of a resource. For example,
-// "NetworkServices".
+// ProductNameUpper is the all caps snakecase product name of a resource.
+// For example, "Network_Services".
 func (pm *ProductMetadata) ProductNameUpper() string {
 	return strings.ToUpper(pm.ProductName)
 }
