@@ -138,7 +138,7 @@ func TestAccCloudRunService_secretVolume(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "status.0.conditions"},
 			},
 			{
-				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretVolume(name, project, "secret-"+randString(t, 10), "secret-"+randString(t, 11), "google_secret_manager_secret.secret1.secret_id"),
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretVolume(name, project, "secret-"+randString(t, 10), "secret-"+randString(t, 11), "google_secret_manager_secret.secret2.secret_id"),
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
@@ -155,17 +155,11 @@ func testAccCloudRunService_cloudRunServiceUpdateWithSecretVolume(name, project,
 data "google_project" "project" {
 }
 
-resource "google_project_service" "secret-manager" {
-  service = "secretmanager.googleapis.com"
-}
-
 resource "google_secret_manager_secret" "secret1" {
   secret_id = "%s"
   replication {
     automatic = true
   }
-
-  depends_on = [google_project_service.secret-manager]
 }
 
 resource "google_secret_manager_secret" "secret2" {
@@ -173,8 +167,6 @@ resource "google_secret_manager_secret" "secret2" {
   replication {
     automatic = true
   }
-
-  depends_on = [google_project_service.secret-manager]
 }
 
 resource "google_secret_manager_secret_version" "secret1-version-data" {
@@ -246,7 +238,7 @@ resource "google_cloud_run_service" "default" {
     ]
   }
 
-  depends_on = [google_secret_manager_secret_version.secret-version-data]
+  depends_on = [google_secret_manager_secret_version.secret1-version-data, google_secret_manager_secret_version.secret2-version-data]
 }
 `, secretName1, secretName2, name, secretRef, project)
 }
@@ -288,17 +280,11 @@ func testAccCloudRunService_cloudRunServiceUpdateWithSecretEnvVar(name, project,
 data "google_project" "project" {
 }
 
-resource "google_project_service" "secret-manager" {
-  service = "secretmanager.googleapis.com"
-}
-
 resource "google_secret_manager_secret" "secret1" {
   secret_id = "%s"
   replication {
     automatic = true
   }
-
-  depends_on = [google_project_service.secret-manager]
 }
 
 resource "google_secret_manager_secret" "secret2" {
@@ -306,8 +292,6 @@ resource "google_secret_manager_secret" "secret2" {
   replication {
     automatic = true
   }
-
-  depends_on = [google_project_service.secret-manager]
 }
 
 resource "google_secret_manager_secret_version" "secret1-version-data" {
@@ -374,7 +358,7 @@ resource "google_cloud_run_service" "default" {
     ]
   }
 
-  depends_on = [google_secret_manager_secret_version.secret-version-data]
+  depends_on = [google_secret_manager_secret_version.secret1-version-data, google_secret_manager_secret_version.secret2-version-data]
 }
 `, secretName1, secretName2, name, secretRef, project)
 }

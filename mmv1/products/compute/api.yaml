@@ -510,6 +510,7 @@ objects:
                   description: |
                     Minimum number of VM instances that autoscaler will recommend in time intervals starting according to schedule.
                   required: true
+                  send_empty_value: true
                 - !ruby/object:Api::Type::String
                   name: 'schedule'
                   description: |
@@ -9782,6 +9783,7 @@ objects:
                   description: |
                     Minimum number of VM instances that autoscaler will recommend in time intervals starting according to schedule.
                   required: true
+                  send_empty_value: true
                 - !ruby/object:Api::Type::String
                   name: 'schedule'
                   description: |
@@ -10140,6 +10142,15 @@ objects:
         description: |
           URL of the disk type resource describing which disk type to use to
           create the disk. Provide this when creating the disk.
+      - !ruby/object:Api::Type::Enum
+        name: 'interface'
+        min_version: 'beta'
+        description: |
+          Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
+        default_value: :SCSI
+        values:
+          - :SCSI
+          - :NVME
   - !ruby/object:Api::Resource
     name: 'RegionUrlMap'
     kind: 'compute#urlMap'

@@ -29,11 +29,9 @@ objects:
   - !ruby/object:Api::Resource
     name: Budget
     base_url: billingAccounts/{{billing_account}}/budgets
-    self_link: '{{name}}'
+    self_link: 'billingAccounts/{{billing_account}}/budgets/{{name}}'
     update_verb: :PATCH
-    # TODO: investigate why updates are not being handled by the API when this
-    # is enabled.
-    # update_mask: true
+    update_mask: true
     description: |
       Budget configuration for a billing account.
     references: !ruby/object:Api::Resource::ReferenceLinks

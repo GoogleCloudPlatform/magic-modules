@@ -607,11 +607,6 @@ objects:
                     required: true
                     description: |-
                       This must match the Name of a Volume.
-                  - !ruby/object:Api::Type::Boolean
-                    name: readOnly
-                    description: |-
-                      Only true is accepted.
-                      Defaults to true.
 
         - !ruby/object:Api::Type::Integer
           name: containerConcurrency

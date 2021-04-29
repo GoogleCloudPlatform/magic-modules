@@ -58,7 +58,7 @@ func testSweep{{$.SweeperName}}(region string) error {
 		"billing_account":billingId,
 	}
 
-	err = config.client{{$.PackageType}}DCL.DeleteAll{{$.Type}}(context.Background(), {{$.SweeperFunctionArgs}} isDeletable{{$.SweeperName}})
+	err = config.client{{$.ProductType}}DCL.DeleteAll{{$.Type}}(context.Background(), {{$.SweeperFunctionArgs}} isDeletable{{$.SweeperName}})
 	if err != nil {
 		return err
 	}
@@ -66,5 +66,5 @@ func testSweep{{$.SweeperName}}(region string) error {
 }
 
 func isDeletable{{$.SweeperName}}(r *{{$.Package}}.{{$.Type}}) bool {
-	return isSweepableTestResource(*r.Name)	
+	return isSweepableTestResource(*r.Name)
 }
