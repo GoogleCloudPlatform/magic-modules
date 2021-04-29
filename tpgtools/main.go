@@ -155,22 +155,6 @@ func loadAndModelResources() map[Version][]*Resource {
 					glog.Exit(err)
 				}
 
-				overrides := Overrides{}
-				if !(tPath == nil) && !(*tPath == "") {
-					b, err := ioutil.ReadFile(path.Join(*tPath, packagePath, f.Name()))
-					if err != nil {
-						// ignore the error if the file just doesn't exist
-						if !os.IsNotExist(err) {
-							glog.Exit(err)
-						}
-					} else {
-						err = yaml.UnmarshalStrict(b, &overrides)
-						if err != nil {
-							glog.Exit(err)
-						}
-					}
-				}
-
 				titleParts := strings.Split(document.Info.Title, "/")
 
 				var productMetadata *ProductMetadata
@@ -181,6 +165,11 @@ func loadAndModelResources() map[Version][]*Resource {
 						schema.Title = k
 						productMetadata = NewProductMetadata(packagePath, jsonToSnakeCase(titleParts[0]))
 					}
+				}
+
+				overrides := loadOverrides(packagePath, f.Name())
+				if _, ok := productOverrides[productMetadata.PackageName]; !ok {
+					productOverrides[productMetadata.PackageName] = loadOverrides(packagePath, "tpgtools_product.yaml")
 				}
 
 				if schema == nil {
@@ -247,7 +236,25 @@ func generateSerializationLogic(specs []*Resource) {
 			glog.Exit(err)
 		}
 	}
+}
 
+func loadOverrides(packagePath, fileName string) Overrides {
+	overrides := Overrides{}
+	if !(tPath == nil) && !(*tPath == "") {
+		b, err := ioutil.ReadFile(path.Join(*tPath, packagePath, fileName))
+		if err != nil {
+			// ignore the error if the file just doesn't exist
+			if !os.IsNotExist(err) {
+				glog.Exit(err)
+			}
+		} else {
+			err = yaml.UnmarshalStrict(b, &overrides)
+			if err != nil {
+				glog.Exit(err)
+			}
+		}
+	}
+	return overrides
 }
 
 func generateResourceFile(res *Resource) {

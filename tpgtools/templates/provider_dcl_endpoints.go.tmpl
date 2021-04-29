@@ -32,6 +32,7 @@ import (
 )
 
 {{range $index, $pkg := .}}
+{{- if $pkg.WriteBasePath }}
 var {{$pkg.ProductType}}EndpointEntryKey = "{{$pkg.ProductName}}_custom_endpoint"
 var {{$pkg.ProductType}}EndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
@@ -40,11 +41,14 @@ var {{$pkg.ProductType}}EndpointEntry = &schema.Schema{
 		"GOOGLE_{{$pkg.ProductNameUpper}}_CUSTOM_ENDPOINT",
 	}, ""),
 }
+{{- end}}
 {{end}}
 
 //Add new values to config.go.erb config object declaration
 {{- range $index, $pkg := . }}
+{{- if $pkg.WriteBasePath }}
 //{{$pkg.ProductType}}BasePath string
+{{- end}}
 // client{{$pkg.ProductType}}DCL *{{$pkg.PackageName}}Dcl.Client
 {{- end}}
 
@@ -55,11 +59,15 @@ var {{$pkg.ProductType}}EndpointEntry = &schema.Schema{
 
 //Add new values to provider.go.erb schema initialization
 {{- range $index, $pkg := . }}
+{{- if $pkg.WriteBasePath }}
 // {{$pkg.ProductType}}EndpointEntryKey:               {{$pkg.ProductType}}EndpointEntry,
+{{- end}}
 {{- end}}
 
 //Add new values to provider.go.erb - provider block read
 {{- range $index, $pkg := . }}
+{{- if $pkg.WriteBasePath }}
 // config.{{$pkg.ProductType}}BasePath = d.Get({{$pkg.ProductType}}EndpointEntryKey).(string)
+{{- end}}
 {{- end}}
 

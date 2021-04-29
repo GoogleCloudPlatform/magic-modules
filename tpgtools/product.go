@@ -17,6 +17,8 @@ type ProductMetadata struct {
 	ProductName string
 }
 
+var productOverrides map[string]Overrides = make(map[string]Overrides, 0)
+
 func NewProductMetadata(packagePath, productName string) *ProductMetadata {
 	if regexp.MustCompile("[A-Z]+").Match([]byte(productName)) {
 		log.Fatalln("error - expected product name to be snakecase")
@@ -27,6 +29,19 @@ func NewProductMetadata(packagePath, productName string) *ProductMetadata {
 		PackageName: packageName,
 		ProductName: productName,
 	}
+}
+
+func (pm *ProductMetadata) WriteBasePath() bool {
+	return !pm.SkipBasePath()
+}
+
+func (pm *ProductMetadata) SkipBasePath() bool {
+	po, ok := productOverrides[pm.PackageName]
+	if !ok {
+		return false
+	}
+
+	return po.ResourceOverride(ProductSkipBasePath, "")
 }
 
 // ProductType is the title-cased product name of a resource. For example,
