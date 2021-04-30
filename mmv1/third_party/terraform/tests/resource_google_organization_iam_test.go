@@ -86,20 +86,21 @@ func testAccOrganizationIamBinding_condition(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
 	roleId := "tfIamTest" + randString(t, 10)
+	conditionTitle := "expires_after_2019_12_31"
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Binding creation
-				Config: testAccOrganizationIamBinding_conditionConfig(account, roleId, org),
+				Config: testAccOrganizationIamBinding_conditionConfig(account, roleId, org, conditionTitle),
 				Check: testAccCheckGoogleOrganizationIamBindingExists(t, "foo", "test-role", []string{
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, getTestProjectFromEnv()),
 				}),
 			},
 			{
 				ResourceName:      "google_organization_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("%s organizations/%s/roles/%s", org, org, roleId),
+				ImportStateId:     fmt.Sprintf("%s organizations/%s/roles/%s %s", org, org, roleId, conditionTitle),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -134,20 +135,27 @@ func testAccOrganizationIamMember_basic(t *testing.T) {
 func testAccOrganizationIamMember_condition(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
+	conditionTitle := "expires_after_2019_12_31"
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
-				Config: testAccOrganizationIamMember_conditionConfig(account, org),
+				Config: testAccOrganizationIamMember_conditionConfig(account, org, conditionTitle),
 				Check: testAccCheckGoogleOrganizationIamMemberExists(t, "foo", "roles/browser",
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, getTestProjectFromEnv()),
 				),
 			},
 			{
-				ResourceName:      "google_organization_iam_member.foo",
-				ImportStateId:     fmt.Sprintf("%s roles/browser serviceAccount:%s@%s.iam.gserviceaccount.com", org, account, getTestProjectFromEnv()),
+				ResourceName: "google_organization_iam_member.foo",
+				ImportStateId: fmt.Sprintf(
+					"%s roles/browser serviceAccount:%s@%s.iam.gserviceaccount.com %s",
+					org,
+					account,
+					getTestProjectFromEnv(),
+					conditionTitle,
+				),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -168,7 +176,14 @@ func testAccCheckGoogleOrganizationIamBindingExists(t *testing.T, bindingResourc
 		}
 
 		config := googleProviderConfig(t)
-		p, err := config.NewResourceManagerClient(config.userAgent).Organizations.GetIamPolicy("organizations/"+bindingRs.Primary.Attributes["org_id"], &cloudresourcemanager.GetIamPolicyRequest{}).Do()
+		p, err := config.NewResourceManagerClient(config.userAgent).Organizations.GetIamPolicy(
+			"organizations/"+bindingRs.Primary.Attributes["org_id"],
+			&cloudresourcemanager.GetIamPolicyRequest{
+				Options: &cloudresourcemanager.GetPolicyOptions{
+					RequestedPolicyVersion: iamPolicyVersion,
+				},
+			},
+		).Do()
 		if err != nil {
 			return err
 		}
@@ -198,7 +213,14 @@ func testAccCheckGoogleOrganizationIamMemberExists(t *testing.T, n, role, member
 		}
 
 		config := googleProviderConfig(t)
-		p, err := config.NewResourceManagerClient(config.userAgent).Organizations.GetIamPolicy("organizations/"+rs.Primary.Attributes["org_id"], &cloudresourcemanager.GetIamPolicyRequest{}).Do()
+		p, err := config.NewResourceManagerClient(config.userAgent).Organizations.GetIamPolicy(
+			"organizations/"+rs.Primary.Attributes["org_id"],
+			&cloudresourcemanager.GetIamPolicyRequest{
+				Options: &cloudresourcemanager.GetPolicyOptions{
+					RequestedPolicyVersion: iamPolicyVersion,
+				},
+			},
+		).Do()
 		if err != nil {
 			return err
 		}
@@ -273,7 +295,7 @@ resource "google_organization_iam_binding" "foo" {
 `, account, role, org, account, org)
 }
 
-func testAccOrganizationIamBinding_conditionConfig(account, role, org string) string {
+func testAccOrganizationIamBinding_conditionConfig(account, role, org, conditionTitle string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
@@ -292,12 +314,12 @@ resource "google_organization_iam_binding" "foo" {
   role    = google_organization_iam_custom_role.test-role.id
   members = ["serviceAccount:${google_service_account.test-account.email}"]
   condition {
-    title       = "expires_after_2019_12_31"
+    title       = "%s"
     description = "Expiring at midnight of 2019-12-31"
     expression  = "request.time < timestamp(\"2020-01-01T00:00:00Z\")"
   }
 }
-`, account, role, org, org)
+`, account, role, org, org, conditionTitle)
 }
 
 func testAccOrganizationIamMember_basicConfig(account, org string) string {
@@ -315,7 +337,7 @@ resource "google_organization_iam_member" "foo" {
 `, account, org)
 }
 
-func testAccOrganizationIamMember_conditionConfig(account, org string) string {
+func testAccOrganizationIamMember_conditionConfig(account, org, conditionTitle string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
@@ -327,10 +349,10 @@ resource "google_organization_iam_member" "foo" {
   role   = "roles/browser"
   member = "serviceAccount:${google_service_account.test-account.email}"
   condition {
-    title       = "expires_after_2019_12_31"
+    title       = "%s"
     description = "Expiring at midnight of 2019-12-31"
     expression  = "request.time < timestamp(\"2020-01-01T00:00:00Z\")"
   }
 }
-`, account, org)
+`, account, org, conditionTitle)
 }
