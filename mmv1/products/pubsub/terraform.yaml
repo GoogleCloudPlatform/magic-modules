@@ -132,8 +132,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'comparePubsubSubscriptionExpirationPolicy'
       retryPolicy.minimumBackoff: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        diff_suppress_func: 'durationDiffSuppress'
       retryPolicy.maximumBackoff: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        diff_suppress_func: 'durationDiffSuppress'
       pushConfig.attributes: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'ignoreMissingKeyInMap("x-goog-version")'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
