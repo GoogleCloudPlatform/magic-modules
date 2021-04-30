@@ -180,7 +180,28 @@ func TestAccGKEHubFeature_gkehubFeatureAcmUpdate(t *testing.T) {
         ImportStateVerify: true,
       },
       {
+        Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateMiddle2(context),
+      },
+      {
+        ResourceName:      "google_gkehub_feature_membership.feature_member_2",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
         Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateEnd(context),
+      },
+      {
+        ResourceName:      "google_gkehub_feature_membership.feature_member_1",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateMiddle2(context),
+      },
+      {
+        ResourceName:      "google_gkehub_feature_membership.feature_member_1",
+        ImportState:       true,
+        ImportStateVerify: true,
       },
       {
         ResourceName:      "google_gkehub_feature_membership.feature_member_2",
@@ -397,7 +418,7 @@ resource "google_gkehub_feature_membership" "feature_member_2" {
 `, context)
 }
 
-func testAccGKEHubFeature_gkehubFeatureAcmUpdateEnd(context map[string]interface{}) string {
+func testAccGKEHubFeature_gkehubFeatureAcmUpdateMiddle2(context map[string]interface{}) string {
   return Nprintf(`
 resource "google_container_cluster" "primary" {
   name               = "basiccluster%{random_suffix}"
@@ -498,7 +519,6 @@ resource "google_gkehub_feature_membership" "feature_member_2" {
       }
     }
     hierarchy_controller {
-      enable_hierarchical_resource_quota = true
       enabled = true
     }
     policy_controller {
@@ -506,6 +526,96 @@ resource "google_gkehub_feature_membership" "feature_member_2" {
       audit_interval_seconds = "9"
       exemptable_namespaces = ["different", "1234"]
       template_library_installed = false
+    }
+  }
+  provider = google-beta
+}
+`, context)
+}
+
+func testAccGKEHubFeature_gkehubFeatureAcmUpdateEnd(context map[string]interface{}) string {
+  return Nprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "basiccluster%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  provider = google-beta
+}
+
+resource "google_container_cluster" "secondary" {
+  name               = "basiccluster2%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  provider = google-beta
+}
+
+resource "google_container_cluster" "tertiary" {
+  name               = "basiccluster3%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  provider = google-beta
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "basic%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
+    }
+  }
+  description = "test resource."
+  provider = google-beta
+}
+
+resource "google_gke_hub_membership" "membership_second" {
+  membership_id = "basic2%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.secondary.id}"
+    }
+  }
+  description = "test resource."
+  provider = google-beta
+}
+
+resource "google_gke_hub_membership" "membership_third" {
+  membership_id = "basic3%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.tertiary.id}"
+    }
+  }
+  description = "test resource."
+  provider = google-beta
+}
+
+resource "google_gkehub_feature" "feature" {
+  name = "configmanagement"
+  location = "global"
+
+  labels = {
+    foo = "changed"
+  }
+  provider = google-beta
+}
+
+resource "google_gkehub_feature_membership" "feature_member_1" {
+  location = "global"
+  feature = google_gkehub_feature.feature.name
+  membership = google_gke_hub_membership.membership_third.membership_id
+  configmanagement {
+    version = "1.6.2"
+    config_sync {
+      source_format = "hierarchy"
+      git {
+        sync_repo = "https://github.com/hashicorp/terraform"
+      }
+    }
+    policy_controller {
+      enabled = false
+      audit_interval_seconds = "100"
+      exemptable_namespaces = ["onetwothree", "fourfive"]
+      template_library_installed = true
     }
   }
   provider = google-beta
