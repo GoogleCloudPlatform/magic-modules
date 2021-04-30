@@ -205,7 +205,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	c.clientDataprocDCL = dataprocDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions, dclLoggerOptions))
 	c.clientEventarcDCL = eventarcDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions, dclLoggerOptions))
 <% unless version == 'ga' -%>
-	c.clientGkehubDCL = gkehubDcl.NewClient(c.dclConfig)
+	c.clientGkehubDCL = gkehubDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions, dclLoggerOptions))
 <% end -%>
 >>>>>>> 2e63951b3 (Adding dcl for gkehub feature)
 
