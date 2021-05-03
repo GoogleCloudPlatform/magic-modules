@@ -35,6 +35,9 @@ func NewProductMetadata(packagePath, productName string) *ProductMetadata {
 	if regexp.MustCompile("[A-Z]+").Match([]byte(productName)) {
 		log.Fatalln("error - expected product name to be snakecase")
 	}
+	if _, ok := productOverrides[packagePath]; !ok {
+		productOverrides[packagePath] = loadOverrides(packagePath, "tpgtools_product.yaml")
+	}
 	packageName := strings.Split(packagePath, "/")[0]
 	return &ProductMetadata{
 		PackagePath: packagePath,
@@ -44,7 +47,7 @@ func NewProductMetadata(packagePath, productName string) *ProductMetadata {
 }
 
 func (pm *ProductMetadata) WriteBasePath() bool {
-	po, ok := productOverrides[pm.PackageName]
+	po, ok := productOverrides[pm.PackagePath]
 	if !ok {
 		return true
 	}

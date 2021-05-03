@@ -159,9 +159,6 @@ func getProductInformation(packagePath string, specs []fs.FileInfo) *ProductMeta
 		document := loadDocument(packagePath, &f)
 		productMetadata := GetProductMetadataFromDocument(document, packagePath)
 
-		if _, ok := productOverrides[productMetadata.PackageName]; !ok {
-			productOverrides[productMetadata.PackageName] = loadOverrides(packagePath, "tpgtools_product.yaml")
-		}
 		return productMetadata
 	}
 	glog.Exit(fmt.Sprintf("Could not find product information for %s", packagePath))
