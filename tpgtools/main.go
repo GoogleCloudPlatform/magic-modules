@@ -189,6 +189,8 @@ func getResources(packagePath string, specs []fs.FileInfo) []*Resource {
 			}
 		}
 
+		overrides := loadOverrides(packagePath, f.Name())
+
 		if schema == nil {
 			glog.Exit(fmt.Sprintf("Could not find document schema for %s", document.Info.Title))
 		}
