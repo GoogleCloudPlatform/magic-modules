@@ -48,7 +48,7 @@ objects:
     # This is a convenience field handled by terraform encoder/decoders
     exclude: true
     description: |-
-      Name should be a verified domain
+      Name should be a [verified](https://support.google.com/webmasters/answer/9008080) domain
   - !ruby/object:Api::Type::String
     name: kind
     description: This is always set to DomainMapping
