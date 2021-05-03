@@ -4,6 +4,9 @@ import (
 	"log"
 	"regexp"
 	"strings"
+
+	"github.com/golang/glog"
+	"github.com/nasa9084/go-openapi"
 )
 
 type ProductMetadata struct {
@@ -18,6 +21,15 @@ type ProductMetadata struct {
 }
 
 var productOverrides map[string]Overrides = make(map[string]Overrides, 0)
+
+func GetProductMetadataFromDocument(document *openapi.Document, packagePath string) *ProductMetadata {
+	titleParts := strings.Split(document.Info.Title, "/")
+	if len(titleParts) < 0 {
+		glog.Exitf("could not find product information for %s", packagePath)
+	}
+	productMetadata := NewProductMetadata(packagePath, jsonToSnakeCase(titleParts[0]))
+	return productMetadata
+}
 
 func NewProductMetadata(packagePath, productName string) *ProductMetadata {
 	if regexp.MustCompile("[A-Z]+").Match([]byte(productName)) {
@@ -47,7 +59,7 @@ func (pm *ProductMetadata) ProductType() string {
 }
 
 // ProductNameUpper is the all caps snakecase product name of a resource.
-// For example, "Network_Services".
+// For example, "NETWORK_SERVICES".
 func (pm *ProductMetadata) ProductNameUpper() string {
 	return strings.ToUpper(pm.ProductName)
 }

@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"path"
@@ -45,8 +46,9 @@ var mode = flag.String("mode", "", "mode for the generator. If unset, creates th
 var terraformResourceDirectory = "google-beta"
 
 func main() {
-	resources := loadAndModelResources()
+	resources, products := loadAndModelResources()
 	var resourcesForVersion []*Resource
+	var productsForVersion []*ProductMetadata
 	var version *Version
 	if vFilter != nil && *vFilter != "" {
 		version = fromString(*vFilter)
@@ -54,8 +56,10 @@ func main() {
 			glog.Exitf("Failed finding version for input: %s", *vFilter)
 		}
 		resourcesForVersion = resources[*version]
+		productsForVersion = products[*version]
 	} else {
 		resourcesForVersion = resources[allVersions()[0]]
+		productsForVersion = products[allVersions()[0]]
 	}
 	if *version == GA_VERSION {
 		terraformResourceDirectory = "google"
@@ -63,43 +67,42 @@ func main() {
 
 	if mode != nil && *mode == "serialization" {
 		generateSerializationLogic(resourcesForVersion)
-	} else {
-		products := make(map[string]*ProductMetadata)
-		for _, resource := range resourcesForVersion {
-			resJSON, err := json.MarshalIndent(resource, "", "  ")
-			if err != nil {
-				glog.Errorf("Failed to marshal resource struct")
-			} else {
-				glog.Infof("Generating from resource %s", string(resJSON))
-			}
-			if _, ok := products[resource.ProductType()]; !ok {
-				products[resource.ProductType()] = resource.productMetadata
-			}
-			generateResourceFile(resource)
-			generateSweeperFile(resource)
-			// Disabled to allow handwriting files until samples exist
-			// generateResourceWebsiteFile(resource, resources, version)
-		}
-
-		generateEndpointsFile(products)
-
-		if oPath == nil || *oPath == "" {
-			glog.Info("Skipping copying handwritten files, no output specified")
-			return
-		}
-
-		if cPath == nil || *cPath == "" {
-			glog.Info("No handwritten path specified")
-			return
-		}
-
-		copyHandwrittenFiles(*cPath, *oPath)
+		return
 	}
+
+	for _, resource := range resourcesForVersion {
+		resJSON, err := json.MarshalIndent(resource, "", "  ")
+		if err != nil {
+			glog.Errorf("Failed to marshal resource struct")
+		} else {
+			glog.Infof("Generating from resource %s", string(resJSON))
+		}
+
+		generateResourceFile(resource)
+		generateSweeperFile(resource)
+		// Disabled to allow handwriting files until samples exist
+		// generateResourceWebsiteFile(resource, resources, version)
+	}
+
+	// product specific generation
+	generateEndpointsFile(productsForVersion)
+
+	if oPath == nil || *oPath == "" {
+		glog.Info("Skipping copying handwritten files, no output specified")
+		return
+	}
+
+	if cPath == nil || *cPath == "" {
+		glog.Info("No handwritten path specified")
+		return
+	}
+
+	copyHandwrittenFiles(*cPath, *oPath)
 }
 
 // TODO(rileykarson): Change interface to an error, handle exceptional stuff in
 // main func.
-func loadAndModelResources() map[Version][]*Resource {
+func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMetadata) {
 	flag.Parse()
 	if fPath == nil || *fPath == "" {
 		glog.Exit("No path specified")
@@ -110,16 +113,13 @@ func loadAndModelResources() map[Version][]*Resource {
 		glog.Fatal(err)
 	}
 	resources := make(map[Version][]*Resource)
+	products := make(map[Version][]*ProductMetadata)
+
 	for _, version := range allVersions() {
 		resources[version] = make([]*Resource, 0)
 		for _, v := range dirs {
 			// skip flat files- we're looking for service directory
 			if !v.IsDir() {
-				continue
-			}
-
-			// if a filter is specified, skip filtered services
-			if sFilter != nil && *sFilter != "" && *sFilter != v.Name() {
 				continue
 			}
 
@@ -131,83 +131,122 @@ func loadAndModelResources() map[Version][]*Resource {
 			} else {
 				packagePath = path.Join(v.Name(), version.V)
 			}
+
 			specs, err = ioutil.ReadDir(path.Join(*fPath, packagePath))
-			for _, f := range specs {
-				if f.IsDir() {
-					continue
-				}
-				// if a filter is specified, skip filtered resources
-				resName := stripExt(f.Name())
-				if rFilter != nil && *rFilter != "" && strings.ToLower(*rFilter) != strings.ToLower(resName) {
-					continue
-				}
+			newProduct := getProductInformation(packagePath, specs)
+			products[version] = append(products[version], newProduct)
 
-				// TODO: use yaml.UnmarshalStrict once apply / list paths are changed to
-				// specification extensions and we're using a datatype that supports them.
-				document := &openapi.Document{}
-				p := path.Join(*fPath, packagePath, f.Name())
-				b, err := ioutil.ReadFile(p)
-				if err != nil {
-					glog.Exit(err)
-				}
-				err = yaml.Unmarshal(b, document)
-				if err != nil {
-					glog.Exit(err)
-				}
-
-				titleParts := strings.Split(document.Info.Title, "/")
-
-				var productMetadata *ProductMetadata
-				var schema *openapi.Schema
-				for k, v := range document.Components.Schemas {
-					if k == titleParts[len(titleParts)-1] {
-						schema = v
-						schema.Title = k
-						productMetadata = NewProductMetadata(packagePath, jsonToSnakeCase(titleParts[0]))
-					}
-				}
-
-				overrides := loadOverrides(packagePath, f.Name())
-				if _, ok := productOverrides[productMetadata.PackageName]; !ok {
-					productOverrides[productMetadata.PackageName] = loadOverrides(packagePath, "tpgtools_product.yaml")
-				}
-
-				if schema == nil {
-					glog.Exit(fmt.Sprintf("Could not find document schema for %s", document.Info.Title))
-				}
-
-				if err := schema.Validate(); err != nil {
-					glog.Exit(err)
-				}
-
-				lRaw := schema.Extension["x-dcl-locations"].([]interface{})
-
-				typeFetcher := NewTypeFetcher(document)
-				var locations []string
-				// If the schema cannot be split into two or mor locations, we specify this
-				// by passing a single empty location string.
-				if len(lRaw) < 2 {
-					locations = make([]string, 1)
-				} else {
-					locations = make([]string, 0, len(lRaw))
-					for _, l := range lRaw {
-						locations = append(locations, l.(string))
-					}
-				}
-
-				for _, l := range locations {
-					res, err := createResource(schema, typeFetcher, overrides, productMetadata, l)
-					if err != nil {
-						glog.Exit(err)
-					}
-
-					resources[version] = append(resources[version], res)
-				}
+			// if a filter is specified, skip filtered services
+			if sFilter != nil && *sFilter != "" && *sFilter != v.Name() {
+				continue
 			}
+
+			newResources := getResources(packagePath, specs)
+			resources[version] = append(resources[version], newResources...)
+
+		}
+	}
+
+	return resources, products
+}
+
+func getProductInformation(packagePath string, specs []fs.FileInfo) *ProductMetadata {
+	for _, f := range specs {
+		if f.IsDir() {
+			continue
+		}
+
+		document := loadDocument(packagePath, &f)
+		productMetadata := GetProductMetadataFromDocument(document, packagePath)
+
+		if _, ok := productOverrides[productMetadata.PackageName]; !ok {
+			productOverrides[productMetadata.PackageName] = loadOverrides(packagePath, "tpgtools_product.yaml")
+		}
+		return productMetadata
+	}
+	glog.Exit(fmt.Sprintf("Could not find product information for %s", packagePath))
+	return nil
+}
+
+func getResources(packagePath string, specs []fs.FileInfo) []*Resource {
+	var resources []*Resource
+	for _, f := range specs {
+		if f.IsDir() {
+			continue
+		}
+		// if a filter is specified, skip filtered resources
+		resName := stripExt(f.Name())
+		if rFilter != nil && *rFilter != "" && strings.ToLower(*rFilter) != strings.ToLower(resName) {
+			continue
+		}
+
+		document := loadDocument(packagePath, &f)
+		productMetadata := GetProductMetadataFromDocument(document, packagePath)
+		titleParts := strings.Split(document.Info.Title, "/")
+
+		var schema *openapi.Schema
+		for k, v := range document.Components.Schemas {
+			if k == titleParts[len(titleParts)-1] {
+				schema = v
+				schema.Title = k
+			}
+		}
+
+		overrides := loadOverrides(packagePath, f.Name())
+		if _, ok := productOverrides[productMetadata.PackageName]; !ok {
+			productOverrides[productMetadata.PackageName] = loadOverrides(packagePath, "tpgtools_product.yaml")
+		}
+
+		if schema == nil {
+			glog.Exit(fmt.Sprintf("Could not find document schema for %s", document.Info.Title))
+		}
+
+		if err := schema.Validate(); err != nil {
+			glog.Exit(err)
+		}
+
+		lRaw := schema.Extension["x-dcl-locations"].([]interface{})
+
+		typeFetcher := NewTypeFetcher(document)
+		var locations []string
+		// If the schema cannot be split into two or mor locations, we specify this
+		// by passing a single empty location string.
+		if len(lRaw) < 2 {
+			locations = make([]string, 1)
+		} else {
+			locations = make([]string, 0, len(lRaw))
+			for _, l := range lRaw {
+				locations = append(locations, l.(string))
+			}
+		}
+
+		for _, l := range locations {
+			res, err := createResource(schema, typeFetcher, overrides, productMetadata, l)
+			if err != nil {
+				glog.Exit(err)
+			}
+
+			resources = append(resources, res)
 		}
 	}
 
 	return resources
+}
+
+func loadDocument(packagePath string, f *fs.FileInfo) *openapi.Document {
+	// TODO: use yaml.UnmarshalStrict once apply / list paths are changed to
+	// specification extensions and we're using a datatype that supports them.
+	document := &openapi.Document{}
+	p := path.Join(*fPath, packagePath, (*f).Name())
+	b, err := ioutil.ReadFile(p)
+	if err != nil {
+		glog.Exit(err)
+	}
+	err = yaml.Unmarshal(b, document)
+	if err != nil {
+		glog.Exit(err)
+	}
+	return document
 }
 
 func generateSerializationLogic(specs []*Resource) {
@@ -337,7 +376,7 @@ func generateSweeperFile(res *Resource) {
 	}
 }
 
-func generateEndpointsFile(products map[string]*ProductMetadata) {
+func generateEndpointsFile(products []*ProductMetadata) {
 	if len(products) <= 0 {
 		return
 	}
