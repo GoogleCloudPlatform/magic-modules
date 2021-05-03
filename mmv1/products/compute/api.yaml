@@ -8333,7 +8333,7 @@ objects:
     name: 'NodeGroup'
     kind: 'compute#NodeGroup'
     base_url: projects/{{project}}/zones/{{zone}}/nodeGroups
-    create_url: projects/{{project}}/zones/{{zone}}/nodeGroups?initialNodeCount=PRE_CREATE_REPLACE_ME
+    create_url: projects/{{project}}/zones/{{zone}}/nodeGroups?initialNodeCount={{size}}
     has_self_link: true
     description: |
       Represents a NodeGroup resource to manage a group of sole-tenant nodes.
