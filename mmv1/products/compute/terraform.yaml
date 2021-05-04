@@ -1354,6 +1354,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       size: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        description: |
+         The total number of nodes in the node group. One of `initial_size` or `size` must be specified.
       autoscalingPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       autoscalingPolicy.mode: !ruby/object:Overrides::Terraform::PropertyOverride

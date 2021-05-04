@@ -8395,7 +8395,7 @@ objects:
       - !ruby/object:Api::Type::Integer
         name: 'size'
         description: |
-          The total number of nodes in the node group. One of `initial_size` or `size` must be specified.
+          The total number of nodes in the node group.
         input: true
         exactly_one_of:
           - size
