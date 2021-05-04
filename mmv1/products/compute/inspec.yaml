@@ -116,7 +116,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   NetworkPeeringRoutesConfig: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  NodeGroup: !ruby/object:Overrides::Terraform::ResourceOverride
+  NodeGroup: !ruby/object:Overrides::Inspec::ResourceOverride
     properties:
       initialSize: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true
@@ -226,4 +226,3 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   TargetGrpcProxy: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-
