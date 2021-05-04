@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+  gkehub "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub/beta"
 )
 
 func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
@@ -165,6 +166,10 @@ func TestAccGKEHubFeature_gkehubFeatureAcmUpdate(t *testing.T) {
     Steps: []resource.TestStep{
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateStart(context),
+        Check:  resource.ComposeTestCheckFunc(
+          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("basic%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("basic2%s", context["random_suffix"])),
+        ),
       },
       {
         ResourceName:      "google_gkehub_feature_membership.feature_member_1",
@@ -173,6 +178,10 @@ func TestAccGKEHubFeature_gkehubFeatureAcmUpdate(t *testing.T) {
       },
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateMiddle(context),
+        Check:  resource.ComposeTestCheckFunc(
+          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("basic%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("basic2%s", context["random_suffix"])),
+        ),
       },
       {
         ResourceName:      "google_gkehub_feature_membership.feature_member_2",
@@ -181,25 +190,40 @@ func TestAccGKEHubFeature_gkehubFeatureAcmUpdate(t *testing.T) {
       },
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateMiddle2(context),
+        Check:  resource.ComposeTestCheckFunc(
+          testAccCheckGkeHubFeatureMembershipNotPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("basic%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("basic2%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("basic3%s", context["random_suffix"])),
+        ),
       },
       {
-        ResourceName:      "google_gkehub_feature_membership.feature_member_2",
+        ResourceName:      "google_gkehub_feature_membership.feature_member_3",
         ImportState:       true,
         ImportStateVerify: true,
       },
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateEnd(context),
+        Check:  resource.ComposeTestCheckFunc(
+          testAccCheckGkeHubFeatureMembershipNotPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("basic2%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipNotPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("basic1%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("basic3%s", context["random_suffix"])),
+        ),
       },
       {
-        ResourceName:      "google_gkehub_feature_membership.feature_member_1",
+        ResourceName:      "google_gkehub_feature_membership.feature_member_3",
         ImportState:       true,
         ImportStateVerify: true,
       },
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateMiddle2(context),
+        Check:  resource.ComposeTestCheckFunc(
+          testAccCheckGkeHubFeatureMembershipNotPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("basic%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("basic2%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("basic3%s", context["random_suffix"])),
+        ),
       },
       {
-        ResourceName:      "google_gkehub_feature_membership.feature_member_1",
+        ResourceName:      "google_gkehub_feature_membership.feature_member_3",
         ImportState:       true,
         ImportStateVerify: true,
       },
@@ -289,6 +313,10 @@ resource "google_gkehub_feature_membership" "feature_member_1" {
       git {
         sync_repo = "https://github.com/GoogleCloudPlatform/magic-modules"
       }
+    }
+    hierarchy_controller {
+      enable_hierarchical_resource_quota = true
+      enabled = true
     }
   }
   provider = google-beta
@@ -484,28 +512,6 @@ resource "google_gkehub_feature" "feature" {
   provider = google-beta
 }
 
-resource "google_gkehub_feature_membership" "feature_member_1" {
-  location = "global"
-  feature = google_gkehub_feature.feature.name
-  membership = google_gke_hub_membership.membership_third.membership_id
-  configmanagement {
-    version = "1.6.2"
-    config_sync {
-      source_format = "hierarchy"
-      git {
-        sync_repo = "https://github.com/hashicorp/terraform"
-      }
-    }
-    policy_controller {
-      enabled = false
-      audit_interval_seconds = "100"
-      exemptable_namespaces = ["onetwothree", "fourfive"]
-      template_library_installed = true
-    }
-  }
-  provider = google-beta
-}
-
 resource "google_gkehub_feature_membership" "feature_member_2" {
   location = "global"
   feature = google_gkehub_feature.feature.name
@@ -526,6 +532,28 @@ resource "google_gkehub_feature_membership" "feature_member_2" {
       audit_interval_seconds = "9"
       exemptable_namespaces = ["different", "1234"]
       template_library_installed = false
+    }
+  }
+  provider = google-beta
+}
+
+resource "google_gkehub_feature_membership" "feature_member_3" {
+  location = "global"
+  feature = google_gkehub_feature.feature.name
+  membership = google_gke_hub_membership.membership_third.membership_id
+  configmanagement {
+    version = "1.6.2"
+    config_sync {
+      source_format = "hierarchy"
+      git {
+        sync_repo = "https://github.com/hashicorp/terraform"
+      }
+    }
+    policy_controller {
+      enabled = false
+      audit_interval_seconds = "100"
+      exemptable_namespaces = ["onetwothree", "fourfive"]
+      template_library_installed = true
     }
   }
   provider = google-beta
@@ -599,7 +627,7 @@ resource "google_gkehub_feature" "feature" {
   provider = google-beta
 }
 
-resource "google_gkehub_feature_membership" "feature_member_1" {
+resource "google_gkehub_feature_membership" "feature_member_3" {
   location = "global"
   feature = google_gkehub_feature.feature.name
   membership = google_gke_hub_membership.membership_third.membership_id
@@ -653,6 +681,45 @@ func testAccCheckGKEHubFeatureDestroyProducer(t *testing.T) func(s *terraform.St
     }
 
     return nil
+  }
+}
+
+func testAccCheckGkeHubFeatureMembershipPresent(t *testing.T, project, location, feature, membership string) resource.TestCheckFunc {
+  return func(s *terraform.State) error {
+    config := googleProviderConfig(t)
+    obj := &gkehub.FeatureMembership{
+      Feature:          dcl.StringOrNil(feature),
+      Location:         dcl.StringOrNil(location),
+      Membership:       dcl.StringOrNil(membership),
+      Project:          dcl.String(project),
+    }
+
+    _, err := config.clientGkehubDCL.GetFeatureMembership(context.Background(), obj)
+    if err != nil {
+      return err
+    }
+    return nil
+  }
+}
+
+func testAccCheckGkeHubFeatureMembershipNotPresent(t *testing.T, project, location, feature, membership string) resource.TestCheckFunc {
+  return func(s *terraform.State) error {
+    config := googleProviderConfig(t)
+    obj := &gkehub.FeatureMembership{
+      Feature:          dcl.StringOrNil(feature),
+      Location:         dcl.StringOrNil(location),
+      Membership:       dcl.StringOrNil(membership),
+      Project:          dcl.String(project),
+    }
+
+    _, err := config.clientGkehubDCL.GetFeatureMembership(context.Background(), obj)
+    if err == nil {
+      return fmt.Errorf("Did not expect to find GKE Feature Membership for projects/%s/locations/%s/features/%s/membershipId/%s", project, location, feature, membership)
+    }
+    if dcl.IsNotFound(err) {
+      return nil
+    }
+    return err
   }
 }
 <% end -%>
