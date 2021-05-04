@@ -86,6 +86,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "example"
         # Randomness
         skip_vcr: true
+    virtual_fields:
+      - !ruby/object:Api::Type::Boolean
+        name: 'force_destroy'
+        default_value: false
+        description: |
+          When deleting a spanner instance, this boolean option will delete all backups of this instance.
+          This must be set to true if you created a backup manually in the console.
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
@@ -110,6 +117,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       update_encoder: templates/terraform/encoders/spanner_instance_update.go.erb
       decoder: templates/terraform/decoders/spanner_instance.go.erb
       post_create: templates/terraform/post_create/sleep.go.erb
+      pre_delete: 'templates/terraform/pre_delete/spanner_instance.go.erb'
+      constants: 'templates/terraform/constants/spanner_instance.go.erb'
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
