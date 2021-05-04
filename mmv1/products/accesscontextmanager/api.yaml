@@ -285,6 +285,8 @@ objects:
                           - :DESKTOP_WINDOWS
                           - :DESKTOP_LINUX
                           - :DESKTOP_CHROME_OS
+                          - :ANDROID
+                          - :IOS
                   - !ruby/object:Api::Type::Boolean
                     name: 'requireAdminApproval'
                     description: |
@@ -530,6 +532,8 @@ objects:
                                 - :DESKTOP_WINDOWS
                                 - :DESKTOP_LINUX
                                 - :DESKTOP_CHROME_OS
+                                - :ANDROID
+                                - :IOS
                         - !ruby/object:Api::Type::Boolean
                           name: 'requireAdminApproval'
                           description: |
@@ -732,6 +736,8 @@ objects:
                   - :DESKTOP_WINDOWS
                   - :DESKTOP_LINUX
                   - :DESKTOP_CHROME_OS
+                  - :ANDROID
+                  - :IOS
           - !ruby/object:Api::Type::Boolean
             name: 'requireAdminApproval'
             description: |
