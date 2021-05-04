@@ -29,6 +29,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
           "\"{{resource_name}}\" in \"{{ results['resources'] | map(attribute='name') | list }}\""
         does_not_exist: |
           "\"{{resource_name}}\" not in \"{{ results['resources'] | map(attribute='name') | list }}\""
+  Schema: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
 files: !ruby/object:Provider::Config::Files
   resource:
