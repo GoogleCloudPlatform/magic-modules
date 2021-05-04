@@ -990,7 +990,7 @@ func resourceContainerCluster() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: `If true, deletes the default node pool upon cluster creation. If you're using google_container_node_pool resources with no default node pool, this should be set to true, alongside setting initial_node_count to at least 1.`,
-				ConflictsWith: []string{"enable_autopilot"},
+				ConflictsWith: []string{"enable_autopilot", "node_version"},
 			},
 
 			"private_cluster_config": {
