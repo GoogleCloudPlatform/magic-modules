@@ -1356,6 +1356,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         description: |
          The total number of nodes in the node group. One of `initial_size` or `size` must be specified.
+        exactly_one_of:
+          - size
+          - initial_size
       autoscalingPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       autoscalingPolicy.mode: !ruby/object:Overrides::Terraform::PropertyOverride
