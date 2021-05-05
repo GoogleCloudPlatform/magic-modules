@@ -504,7 +504,7 @@ func expand{{$.PathType}}{{$v.PackagePath}}(o interface{}) *{{$.Package}}.{{$v.O
 	{{ if $v.IsObject -}}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 {
-		return nil
+		return {{$.Package}}.Empty{{$v.ObjectType}}
 	}
 	obj := objArr[0].(map[string]interface{})
 	{{- else }}
