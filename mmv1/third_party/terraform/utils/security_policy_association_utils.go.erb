@@ -1,3 +1,5 @@
+<% autogen_exception -%>
+<% unless version == 'ga' -%>
 package google
 
 import (
@@ -24,3 +26,4 @@ func transformSecurityPolicyAssociationReadError(err error) error {
 
 	return err
 }
+<% end -%>
