@@ -118,6 +118,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   NodeGroup: !ruby/object:Overrides::Inspec::ResourceOverride
     properties:
+      size: !ruby/object:Overrides::Inspec::PropertyOverride
+        required: true
       initialSize: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true
   OrganizationSecurityPolicy: !ruby/object:Overrides::Inspec::ResourceOverride
