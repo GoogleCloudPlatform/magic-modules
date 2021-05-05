@@ -100,7 +100,6 @@ func main() {
 		return
 	}
 
-	fmt.Println("copying handwritten files")
 	copyHandwrittenFiles(*cPath, *oPath)
 }
 
