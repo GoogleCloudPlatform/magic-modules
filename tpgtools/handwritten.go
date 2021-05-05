@@ -1,11 +1,11 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,6 +16,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -29,6 +30,8 @@ func copyHandwrittenFiles(inPath string, outPath string) {
 		glog.Info("Skipping copying handwritten files, empty path specified")
 		return
 	}
+
+	glog.Info("copying handwritten files")
 
 	_, err := os.Stat(outPath)
 	if os.IsNotExist(err) {
@@ -48,6 +51,7 @@ func copyHandwrittenFiles(inPath string, outPath string) {
 			return
 		}
 
+		fmt.Printf("copying file %s\n", f.Name())
 		// Ignore empty go.mod
 		if f.Name() == "go.mod" {
 			continue
@@ -71,6 +75,7 @@ func copyHandwrittenFiles(inPath string, outPath string) {
 			}
 		}
 
+		fmt.Printf("writing file %s to %s\n", f.Name(), path.Join(outPath, terraformResourceDirectory, f.Name()))
 		// Write copied file.
 		err = ioutil.WriteFile(path.Join(outPath, terraformResourceDirectory, f.Name()), b, 0644)
 		if err != nil {

@@ -69,8 +69,12 @@ func main() {
 		generateSerializationLogic(resourcesForVersion)
 		return
 	}
+	fmt.Println(len(resources))
 
 	for _, resource := range resourcesForVersion {
+		if skipResource(resource) {
+			continue
+		}
 		resJSON, err := json.MarshalIndent(resource, "", "  ")
 		if err != nil {
 			glog.Errorf("Failed to marshal resource struct")
@@ -78,6 +82,7 @@ func main() {
 			glog.Infof("Generating from resource %s", string(resJSON))
 		}
 
+		fmt.Printf("generating resource %s, %s\n", resource.ProductType(), resource.title)
 		generateResourceFile(resource)
 		generateSweeperFile(resource)
 		// Disabled to allow handwriting files until samples exist
@@ -97,7 +102,20 @@ func main() {
 		return
 	}
 
+	fmt.Println("copying handwritten files")
 	copyHandwrittenFiles(*cPath, *oPath)
+}
+
+func skipResource(r *Resource) bool {
+	// if a filter is specified, skip filtered services
+	if sFilter != nil && *sFilter != "" && *sFilter != r.ProductMetadata().PackageName {
+		return true
+	}
+
+	if rFilter != nil && *rFilter != "" && strings.ToLower(*rFilter) != strings.ToLower(r.title) {
+		return true
+	}
+	return false
 }
 
 // TODO(rileykarson): Change interface to an error, handle exceptional stuff in
@@ -136,11 +154,6 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 			newProduct := getProductInformation(packagePath, specs)
 			products[version] = append(products[version], newProduct)
 
-			// if a filter is specified, skip filtered services
-			if sFilter != nil && *sFilter != "" && *sFilter != v.Name() {
-				continue
-			}
-
 			newResources := getResources(packagePath, specs)
 			resources[version] = append(resources[version], newResources...)
 
@@ -169,11 +182,6 @@ func getResources(packagePath string, specs []fs.FileInfo) []*Resource {
 	var resources []*Resource
 	for _, f := range specs {
 		if f.IsDir() {
-			continue
-		}
-		// if a filter is specified, skip filtered resources
-		resName := stripExt(f.Name())
-		if rFilter != nil && *rFilter != "" && strings.ToLower(*rFilter) != strings.ToLower(resName) {
 			continue
 		}
 
