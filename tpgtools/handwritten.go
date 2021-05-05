@@ -16,7 +16,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -51,7 +50,6 @@ func copyHandwrittenFiles(inPath string, outPath string) {
 			return
 		}
 
-		fmt.Printf("copying file %s\n", f.Name())
 		// Ignore empty go.mod
 		if f.Name() == "go.mod" {
 			continue
@@ -75,7 +73,6 @@ func copyHandwrittenFiles(inPath string, outPath string) {
 			}
 		}
 
-		fmt.Printf("writing file %s to %s\n", f.Name(), path.Join(outPath, terraformResourceDirectory, f.Name()))
 		// Write copied file.
 		err = ioutil.WriteFile(path.Join(outPath, terraformResourceDirectory, f.Name()), b, 0644)
 		if err != nil {

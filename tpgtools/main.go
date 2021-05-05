@@ -69,7 +69,6 @@ func main() {
 		generateSerializationLogic(resourcesForVersion)
 		return
 	}
-	fmt.Println(len(resources))
 
 	for _, resource := range resourcesForVersion {
 		if skipResource(resource) {
@@ -82,7 +81,6 @@ func main() {
 			glog.Infof("Generating from resource %s", string(resJSON))
 		}
 
-		fmt.Printf("generating resource %s, %s\n", resource.ProductType(), resource.title)
 		generateResourceFile(resource)
 		generateSweeperFile(resource)
 		// Disabled to allow handwriting files until samples exist
