@@ -111,8 +111,8 @@ func skipResource(r *Resource) bool {
 	if sFilter != nil && *sFilter != "" && *sFilter != r.ProductMetadata().PackageName {
 		return true
 	}
-
-	if rFilter != nil && *rFilter != "" && strings.ToLower(*rFilter) != strings.ToLower(r.title) {
+	// skip filtered resources
+	if rFilter != nil && *rFilter != "" && strings.ToLower(*rFilter) != snakeToLowercase(r.DCLName()) {
 		return true
 	}
 	return false
