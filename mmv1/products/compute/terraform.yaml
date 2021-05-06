@@ -1438,6 +1438,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     self_link: '{{policy_id}}/getAssociation?name={{name}}'
     create_url: '{{policy_id}}/addAssociation'
     delete_url: '{{policy_id}}/removeAssociation?name={{name}}'
+    read_error_transform: "transformSecurityPolicyAssociationReadError"
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "organization_security_policy_association_basic"
