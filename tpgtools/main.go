@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/fs"
 	"io/ioutil"
 	"os"
 	"path"
@@ -160,7 +159,7 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 	return resources, products
 }
 
-func getProductInformation(packagePath string, specs []fs.FileInfo) *ProductMetadata {
+func getProductInformation(packagePath string, specs []os.FileInfo) *ProductMetadata {
 	for _, f := range specs {
 		if f.IsDir() {
 			continue
@@ -175,7 +174,7 @@ func getProductInformation(packagePath string, specs []fs.FileInfo) *ProductMeta
 	return nil
 }
 
-func getResources(packagePath string, specs []fs.FileInfo) []*Resource {
+func getResources(packagePath string, specs []os.FileInfo) []*Resource {
 	var resources []*Resource
 	for _, f := range specs {
 		if f.IsDir() {
@@ -232,7 +231,7 @@ func getResources(packagePath string, specs []fs.FileInfo) []*Resource {
 	return resources
 }
 
-func loadDocument(packagePath string, f *fs.FileInfo) *openapi.Document {
+func loadDocument(packagePath string, f *os.FileInfo) *openapi.Document {
 	// TODO: use yaml.UnmarshalStrict once apply / list paths are changed to
 	// specification extensions and we're using a datatype that supports them.
 	document := &openapi.Document{}
