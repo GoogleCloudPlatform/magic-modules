@@ -1121,6 +1121,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   License: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   MachineImage: !ruby/object:Overrides::Terraform::ResourceOverride
+    properties:
+      machineImageEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: compareCryptoKeyVersions
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/compute.admin'
       parent_resource_attribute: 'machine_image'
@@ -1132,6 +1135,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           vm_name: "vm"
           image_name: "image"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "compute_machine_image_kms"
+        primary_resource_id: "image"
+        vars:
+          vm_name: "vm"
+          image_name: "image"
+          key_name: "key"
+          keyring_name: "keyring"
 
   MachineType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
