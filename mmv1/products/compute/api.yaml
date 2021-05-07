@@ -7553,7 +7553,6 @@ objects:
             output: true
           - !ruby/object:Api::Type::String
             name: 'kmsKeyName'
-            output: true
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
           - !ruby/object:Api::Type::String
