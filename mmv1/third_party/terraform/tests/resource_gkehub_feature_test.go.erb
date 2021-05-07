@@ -651,6 +651,176 @@ resource "google_gkehub_feature_membership" "feature_member_3" {
 `, context)
 }
 
+func TestAccGKEHubFeature_gkehubFeatureAcmAllFields(t *testing.T) {
+  t.Parallel()
+
+  context := map[string]interface{}{
+    "random_suffix": randString(t, 10),
+  }
+
+  vcrTest(t, resource.TestCase{
+    PreCheck:  func() { testAccPreCheck(t) },
+    Providers: testAccProvidersOiCS,
+    ExternalProviders: map[string]resource.ExternalProvider{
+      "random": {},
+    },
+    CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccGKEHubFeature_gkehubFeatureAcmFewFields(context),
+        Check:  resource.ComposeTestCheckFunc(
+          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("basic%s", context["random_suffix"])),
+        ),
+      },
+      {
+        ResourceName:      "google_gkehub_feature_membership.feature_member",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccGKEHubFeature_gkehubFeatureAcmAllFields(context),
+        Check:  resource.ComposeTestCheckFunc(
+          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("basic%s", context["random_suffix"])),
+        ),
+      },
+      {
+        ResourceName:      "google_gkehub_feature_membership.feature_member",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccGKEHubFeature_gkehubFeatureAcmFewFields(context),
+        Check:  resource.ComposeTestCheckFunc(
+          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("basic%s", context["random_suffix"])),
+        ),
+      },
+      {
+        ResourceName:      "google_gkehub_feature_membership.feature_member",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
+}
+
+func testAccGKEHubFeature_gkehubFeatureAcmAllFields(context map[string]interface{}) string {
+  return Nprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "basiccluster%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  provider = google-beta
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "basic%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
+    }
+  }
+  description = "test resource."
+  provider = google-beta
+}
+
+resource "google_gkehub_feature" "feature" {
+  name = "configmanagement"
+  location = "global"
+
+  labels = {
+    foo = "bar"
+  }
+  provider = google-beta
+}
+
+resource "google_service_account" "feature_sa" {
+  account_id = "feature-sa"
+  provider = google-beta
+}
+
+resource "google_gkehub_feature_membership" "feature_member" {
+  location = "global"
+  feature = google_gkehub_feature.feature.name
+  membership = google_gke_hub_membership.membership.membership_id
+  configmanagement {
+    version = "1.6.2"
+    config_sync {
+      git {
+        sync_repo = "https://github.com/hashicorp/terraform"
+        gcp_service_account_email = google_service_account.feature_sa.email
+        https_proxy = "https://example.com"
+        policy_dir = "google/"
+        sync_branch = "some-branch"
+        sync_rev = "v3.60.0"
+        sync_wait_secs = "30"
+      }
+    }
+    policy_controller {
+      enabled = true
+      audit_interval_seconds = "100"
+      exemptable_namespaces = ["onetwothree", "fourfive"]
+      template_library_installed = true
+      referential_rules_enabled = true
+      log_denies_enabled = true
+    }
+  }
+  provider = google-beta
+}
+`, context)
+}
+
+func testAccGKEHubFeature_gkehubFeatureAcmFewFields(context map[string]interface{}) string {
+  return Nprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "basiccluster%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  provider = google-beta
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "basic%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
+    }
+  }
+  description = "test resource."
+  provider = google-beta
+}
+
+resource "google_gkehub_feature" "feature" {
+  name = "configmanagement"
+  location = "global"
+
+  labels = {
+    foo = "bar"
+  }
+  provider = google-beta
+}
+
+resource "google_service_account" "feature_sa" {
+  account_id = "feature-sa"
+  provider = google-beta
+}
+
+resource "google_gkehub_feature_membership" "feature_member" {
+  location = "global"
+  feature = google_gkehub_feature.feature.name
+  membership = google_gke_hub_membership.membership.membership_id
+  configmanagement {
+    version = "1.6.2"
+    config_sync {
+      git {
+        sync_repo = "https://github.com/hashicorp/terraform"
+      }
+    }
+  }
+  provider = google-beta
+}
+`, context)
+}
+
 func testAccCheckGKEHubFeatureDestroyProducer(t *testing.T) func(s *terraform.State) error {
   return func(s *terraform.State) error {
     for name, rs := range s.RootModule().Resources {
