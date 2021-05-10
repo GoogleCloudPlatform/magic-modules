@@ -510,7 +510,7 @@ func resourceContainerCluster() *schema.Resource {
 			"enable_shielded_nodes": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Computed: true,
+				Default:     true,
 				Description: `Enable Shielded Nodes features on all nodes in this cluster.`,
 				ConflictsWith: []string{"enable_autopilot"},
 			},
@@ -520,7 +520,7 @@ func resourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				ForceNew:    true,
 				Description: `Enable Autopilot for this cluster.`,
-				// ConflictsWith: many fields, see https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison. The conflict is only set one-way, on other fields w/ this field. 
+				// ConflictsWith: many fields, see https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison. The conflict is only set one-way, on other fields w/ this field.
 			},
 
 			"authenticator_groups_config": {
