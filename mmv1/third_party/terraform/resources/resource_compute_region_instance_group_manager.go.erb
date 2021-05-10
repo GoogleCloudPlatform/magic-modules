@@ -325,6 +325,63 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
+			"status": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: `The status of this managed instance group.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"is_stable": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: `A bit indicating whether the managed instance group is in a stable state. A stable state means that: none of the instances in the managed instance group is currently undergoing any type of change (for example, creation, restart, or deletion); no future changes are scheduled for instances in the managed instance group; and the managed instance group itself is not being modified.`,
+						},
+
+						"version_target": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: `A status of consistency of Instances' versions with their target version specified by version field on Instance Group Manager.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"is_reached": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: `A bit indicating whether version target has been reached in this managed instance group, i.e. all instances are in their target version. Instances' target version are specified by version field on Instance Group Manager.`,
+									},
+								},
+							},
+						},
+						"stateful": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: `Stateful status of the given Instance Group Manager.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"has_stateful_config": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: `A bit indicating whether the managed instance group has stateful configuration, that is, if you have configured any items in a stateful policy or in per-instance configs. The group might report that it has no stateful config even when there is still some preserved state on a managed instance, for example, if you have deleted all PICs but not yet applied those deletions.`,
+									},
+									"per_instance_configs": {
+										Type:        schema.TypeList,
+										Computed:    true,
+										Description: `Status of per-instance configs on the instance.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"all_effective": {
+													Type:        schema.TypeBool,
+													Computed:    true,
+													Description: `A bit indicating if all of the group's per-instance configs (listed in the output of a listPerInstanceConfigs API call) have status EFFECTIVE or there are no per-instance-configs.`,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -496,6 +553,9 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	}
 	if err = d.Set("stateful_disk", flattenStatefulPolicy(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_disk in state: %s", err.Error())
+	}
+	if err = d.Set("status", flattenStatus(manager.Status)); err != nil {
+		return fmt.Errorf("Error setting status in state: %s", err.Error())
 	}
 
 	if d.Get("wait_for_instances").(bool) {
