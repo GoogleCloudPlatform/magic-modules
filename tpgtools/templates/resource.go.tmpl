@@ -500,18 +500,18 @@ func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.
 func expand{{$.PathType}}{{$v.PackagePath}}(o interface{}) *{{$.Package}}.{{$v.ObjectType}} {
 	if o == nil {
 	{{- if $v.Computed }}
-		return {{$.Package}}.Empty{{$v.ObjectType}}
-	{{- else }}
 		return nil
+	{{- else }}
+		return {{$.Package}}.Empty{{$v.ObjectType}}
 	{{- end }}
 	}
 	{{ if $v.IsObject -}}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 {
 	{{- if $v.Computed }}
-		return {{$.Package}}.Empty{{$v.ObjectType}}
-	{{- else }}
 		return nil
+	{{- else }}
+		return {{$.Package}}.Empty{{$v.ObjectType}}
 	{{- end }}
 	}
 	obj := objArr[0].(map[string]interface{})
