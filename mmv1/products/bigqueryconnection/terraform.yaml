@@ -32,6 +32,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         min_version: beta
         name: "bigquery_connection_basic"
+        pull_external: true
         primary_resource_id: "connection"
         # Random provider
         skip_vcr: true
@@ -46,6 +47,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         min_version: beta
         name: "bigquery_connection_full"
+        pull_external: true
         primary_resource_id: "connection"
         # Random provider
         skip_vcr: true

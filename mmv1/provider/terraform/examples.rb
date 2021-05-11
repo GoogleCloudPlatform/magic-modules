@@ -138,6 +138,11 @@ module Provider
       # Or a config with two fine grained resources that have a race condition during create
       attr_reader :skip_vcr
 
+      # Set for false by default. Set to true if you need to pull external provider for your
+      # testcase. Think before adding as there is latency and adds an external dependency to
+      # your test so avoid if you can.
+      attr_reader :pull_external
+
       def config_documentation(pwd)
         docs_defaults = {
           PROJECT_NAME: 'my-project-name',
@@ -286,6 +291,7 @@ module Provider
         check :skip_docs, type: TrueClass
         check :config_path, type: String, default: "templates/terraform/examples/#{name}.tf.erb"
         check :skip_vcr, type: TrueClass
+        check :pull_external, type: :boolean, default: false
       end
     end
   end

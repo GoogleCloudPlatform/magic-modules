@@ -344,6 +344,10 @@ objects:
               name: displayName
               description: |
                The display name for this field.
+            - !ruby/object:Api::Type::String
+              name: description
+              description: |
+               A description for this field.
             - !ruby/object:Api::Type::NestedObject
               name: type
               description: |

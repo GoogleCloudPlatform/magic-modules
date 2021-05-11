@@ -56,7 +56,7 @@ objects:
       api: 'https://cloud.google.com/workflows/docs/reference/rest/v1/projects.locations.workflows'
     base_url: projects/{{project}}/locations/{{region}}/workflows
     create_url: projects/{{project}}/locations/{{region}}/workflows?workflowId={{name}}
-    self_link: '{{name}}'
+    self_link: 'projects/{{project}}/locations/{{region}}/workflows/{{name}}'
     update_verb: :PATCH
     update_mask: true
     parameters:

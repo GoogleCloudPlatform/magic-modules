@@ -217,7 +217,7 @@ includes an up-to-date reference of supported versions.
     is not provided, the provider project is used.
 
 * `replica_configuration` - (Optional) The configuration for replication. The
-    configuration is detailed below.
+    configuration is detailed below. Valid only for MySQL instances.
     
 * `root_password` - (Optional) Initial root password. Required for MS SQL Server, ignored by MySQL and PostgreSQL.
 
@@ -317,13 +317,13 @@ The optional `settings.backup_configuration.backup_retention_settings` subblock 
 The optional `settings.ip_configuration` subblock supports:
 
 * `ipv4_enabled` - (Optional) Whether this Cloud SQL instance should be assigned
-a public IPV4 address. Either `ipv4_enabled` must be enabled or a
+a public IPV4 address. At least `ipv4_enabled` must be enabled or a
 `private_network` must be configured.
 
 * `private_network` - (Optional) The VPC network from which the Cloud SQL
 instance is accessible for private IP. For example, projects/myProject/global/networks/default.
 Specifying a network enables private IP.
-Either `ipv4_enabled` must be enabled or a `private_network` must be configured.
+At least `ipv4_enabled` must be enabled or a `private_network` must be configured.
 This setting can be updated, but it cannot be removed after it is set.
 
 * `require_ssl` - (Optional) Whether SSL connections over IP are enforced or not.
@@ -357,6 +357,16 @@ when an Instance can automatically restart to apply updates. The maintenance win
 
 * `update_track` - (Optional) Receive updates earlier (`canary`) or later
 (`stable`)
+
+The optional `settings.insights_config` subblock for instances declares [Query Insights](https://cloud.google.com/sql/docs/postgres/insights-overview) configuration. It contains:
+
+* `query_insights_enabled` - True if Query Insights feature is enabled.
+
+* `query_string_length` - Maximum query length stored in bytes. Between 256 and 4500. Default to 1024.
+
+* `record_application_tags` - True if Query Insights will record application tags from query when enabled.
+
+* `record_client_address` - True if Query Insights will record client address when enabled.
 
 The optional `replica_configuration` block must have `master_instance_name` set
 to work, cannot be updated, and supports:
@@ -470,9 +480,9 @@ performing filtering in a Terraform config.
 `google_sql_database_instance` provides the following
 [Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
 
-- `create` - Default is 20 minutes.
-- `update` - Default is 20 minutes.
-- `delete` - Default is 20 minutes.
+- `create` - Default is 30 minutes.
+- `update` - Default is 30 minutes.
+- `delete` - Default is 30 minutes.
 
 ## Import
 
