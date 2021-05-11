@@ -769,7 +769,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/backend-service'
-      api: 'https://cloud.google.com/compute/docs/reference/v1/backendServices'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/backendServices'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -2711,6 +2711,19 @@ objects:
         description: |
           The URL of the network to which this backend service belongs.
           This field can only be specified when the load balancing scheme is set to INTERNAL.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'subsetting'
+        min_version: beta
+        description: |
+          Subsetting configuration for this BackendService. Currently this is applicable only for Internal TCP/UDP load balancing and Internal HTTP(S) load balancing.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'policy'
+            values:
+                - :NONE
+                - :CONSISTENT_HASH_SUBSETTING
+            description: |
+              "Valid values are currently CONSISTENT_HASH_SUBSETTING and NONE."
   - !ruby/object:Api::Resource
     name: 'BackendServiceSignedUrlKey'
     kind: 'compute#BackendServiceSignedUrlKey'
