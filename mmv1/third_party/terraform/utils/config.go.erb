@@ -236,38 +236,42 @@ func (c *Config) synchronousTimeout() time.Duration {
 
 // Print Identities executing terraform API Calls.
 func (c *Config) logGoogleIdentities() error {
-	if c.ImpersonateServiceAccount != "" {
-		// Drop Impersonated ClientOption from OAuth2 TokenSource to infer original identity
-
-		tokenSource, err := c.getTokenSource(c.Scopes, true)
-		if err != nil {
-			return err
-		}
-		c.client = oauth2.NewClient(c.context, tokenSource)
+	if c.ImpersonateServiceAccount == "" {
 
 		email, err := GetCurrentUserEmail(c, c.userAgent)
 		if err != nil {
 			log.Printf("[INFO] error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope? error: %s", err)
 		}
 
-		log.Printf("[INFO] Terraform is configured with service account impersonation, original identity: %s, impersonated identity: %s", email, c.ImpersonateServiceAccount)
+		log.Printf("[INFO] Terraform is using this identity: %s", email)
 
-		// Add the Impersonated ClientOption back in to the OAuth2 TokenSource
+		return nil
 
-		tokenSource, err = c.getTokenSource(c.Scopes, false)
-		if err != nil {
-			return err
-		}
-		c.client = oauth2.NewClient(c.context, tokenSource)
-
-	} else {
-		email, err := GetCurrentUserEmail(c, c.userAgent)
-		if err != nil {
-			log.Printf("[INFO] error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope? error: %s", err)
-		}
-
-		log.Printf("[INFO] Terraform will be using this identity: %s", email)
 	}
+
+	// Drop Impersonated ClientOption from OAuth2 TokenSource to infer original identity
+
+	tokenSource, err := c.getTokenSource(c.Scopes, true)
+	if err != nil {
+		return err
+	}
+	c.client = oauth2.NewClient(c.context, tokenSource)
+
+	email, err := GetCurrentUserEmail(c, c.userAgent)
+	if err != nil {
+		log.Printf("[INFO] error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope? error: %s", err)
+	}
+
+	log.Printf("[INFO] Terraform is configured with service account impersonation, original identity: %s, impersonated identity: %s", email, c.ImpersonateServiceAccount)
+
+	// Add the Impersonated ClientOption back in to the OAuth2 TokenSource
+
+	tokenSource, err = c.getTokenSource(c.Scopes, false)
+	if err != nil {
+		return err
+	}
+	c.client = oauth2.NewClient(c.context, tokenSource)
+
 	return nil
 }
 
