@@ -12406,6 +12406,10 @@ objects:
           first character must be a lowercase letter, and all following characters
           must be a dash, lowercase letter, or digit, except the last character,
           which cannot be a dash.
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of this resource. Provide this property when you create the resource.
       - !ruby/object:Api::Type::NestedObject
         name: 'snapshotSchedulePolicy'
         conflicts:
