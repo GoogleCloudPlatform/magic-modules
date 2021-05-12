@@ -2669,8 +2669,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           ha_vpn_gateway1_name: "ha-vpn-1"
           network1_name: "network1"
+          router1_name: "ha-vpn-router1"
           ha_vpn_gateway2_name: "ha-vpn-2"
           network2_name: "network2"
+          router2_name: "ha-vpn-router1"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
