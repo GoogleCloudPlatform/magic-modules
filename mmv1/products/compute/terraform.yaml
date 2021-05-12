@@ -2700,6 +2700,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           network_name: "network"
           external_gateway_name: "external-gateway"
           global_address_name: "global-address"
+          router_name: "ha-vpn-router1"
   UrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
