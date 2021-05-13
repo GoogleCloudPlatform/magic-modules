@@ -210,6 +210,40 @@ var schemaNodePool = map[string]*schema.Schema{
 		Computed:    true,
 		Description: `The Kubernetes version for the nodes in this pool. Note that if this field and auto_upgrade are both specified, they will fight each other for what the node version should be, so setting both is highly discouraged. While a fuzzy version can be specified, it's recommended that you specify explicit versions as Terraform will see spurious diffs when fuzzy versions are used. See the google_container_engine_versions data source's version_prefix field to approximate fuzzy versions in a Terraform-compatible way.`,
 	},
+
+	"network_config": {
+		Type:        schema.TypeList,
+		Optional:    true,
+		Computed:    true,
+		MaxItems:    1,
+		Description: `Networking configuration for this NodePool. If specified, it overrides the cluster-level defaults.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"create_pod_range": {
+					Type:         schema.TypeBool,
+					Optional:     true,
+					ForceNew:     true,
+					Description:  `The number of additional nodes that can be added to the node pool during an upgrade. Increasing max_surge raises the number of nodes that can be upgraded simultaneously. Can be set to 0 or greater.`,
+				},
+
+				"pod_range": {
+					Type:         schema.TypeString,
+					Required:     true,
+					ForceNew:     true,
+					Description:  `The ID of the secondary range for pod IPs. If create_pod_range is true, this ID is used for the new range. If createPodRange is false, uses an existing secondary range with this ID.`,
+				},
+				"pod_ipv4_cidr_block": {
+					Type:         schema.TypeString,
+					Optional:     true,
+					ForceNew:     true,
+					Computed:     true,
+					ValidateFunc: validateIpCidrRange,
+					Description:  `The number of nodes that can be simultaneously unavailable during an upgrade. Increasing max_unavailable raises the number of nodes that can be upgraded in parallel. Can be set to 0 or greater.`,
+				},
+			},
+		},
+	},
+
 }
 
 type NodePoolInformation struct {
