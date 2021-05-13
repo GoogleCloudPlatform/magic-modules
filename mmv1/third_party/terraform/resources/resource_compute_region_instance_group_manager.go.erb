@@ -176,6 +176,13 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 				Default:     false,
 				Description: `Whether to wait for all instances to be created/updated before returning. Note that if this is set to true and the operation does not succeed, Terraform will continue trying until it times out.`,
 			},
+			"wait_for_instances_status": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "STABLE",
+				ValidateFunc: validation.StringInSlice([]string{"STABLE", "UPDATED"}, false),
+				Description: `When used with wait_for_instances specifies the status to wait for. When STABLE is specified this resource will wait until the instances are stable before returning. When UPDATED is set, it will wait for the version target to be reached and any per instance configs to be effective as well as all instances to be stable before returning.`,
+			},
 
 			"auto_healing_policies": {
 				Type:        schema.TypeList,
@@ -469,7 +476,7 @@ func getRegionalManager(d *schema.ResourceData, meta interface{}) (*computeBeta.
 	return manager, nil
 }
 
-func waitForInstancesRefreshFunc(f getInstanceManagerFunc, d *schema.ResourceData, meta interface{}) resource.StateRefreshFunc {
+func waitForInstancesRefreshFunc(f getInstanceManagerFunc, waitForUpdates bool, d *schema.ResourceData, meta interface{}) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		m, err := f(d, meta)
 		if err != nil {
@@ -477,6 +484,17 @@ func waitForInstancesRefreshFunc(f getInstanceManagerFunc, d *schema.ResourceDat
 			return nil, "error", err
 		}
 		if m.Status.IsStable {
+			if waitForUpdates {
+				// waitForUpdates waits for versions to be reached and per instance configs to be updated (if present)
+				if m.Status.HasStatefulConfig {
+					if !m.Status.PerInstanceConfigs.AllEffective {
+						return false, "updating per instance configs"
+					}
+				}
+				if !m.Status.VersionTarget.IsReached {
+					return false, "reaching version target"
+				}
+			}
 			return true, "created", nil
 		} else {
 			return false, "creating", nil
@@ -559,10 +577,11 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	}
 
 	if d.Get("wait_for_instances").(bool) {
+		waitForUpdates := d.Get("wait_for_instances_status").(string) == "UPDATED"
 		conf := resource.StateChangeConf{
-			Pending: []string{"creating", "error"},
+			Pending: []string{"creating", "error", "updating per instance configs", "reaching version target"},
 			Target:  []string{"created"},
-			Refresh: waitForInstancesRefreshFunc(getRegionalManager, d, meta),
+			Refresh: waitForInstancesRefreshFunc(getRegionalManager, waitForUpdates, d, meta),
 			Timeout: d.Timeout(schema.TimeoutCreate),
 		}
 		_, err := conf.WaitForState()
@@ -833,6 +852,9 @@ func hashZoneFromSelfLinkOrResourceName(value interface{}) int {
 func resourceRegionInstanceGroupManagerStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	if err := d.Set("wait_for_instances", false); err != nil {
 		return nil, fmt.Errorf("Error setting wait_for_instances: %s", err)
+	}
+	if err := d.Set("wait_for_instances_status", "STABLE"); err != nil {
+		return nil, fmt.Errorf("Error setting wait_for_instances_status: %s", err)
 	}
 	config := meta.(*Config)
 	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/instanceGroupManagers/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)", "(?P<region>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {

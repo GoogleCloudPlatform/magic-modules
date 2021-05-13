@@ -131,6 +131,11 @@ The following arguments are supported:
     returning. Note that if this is set to true and the operation does not succeed, Terraform will
     continue trying until it times out.
 
+* `wait_for_instances_status` - (Optional) When used with `wait_for_instances` it specifies the status to wait for.
+    When `STABLE` is specified this resource will wait until the instances are stable before returning. When `UPDATED` is
+    set, it will wait for the version target to be reached and any per instance configs to be effective as well as all
+    instances to be stable before returning. The possible values are `STABLE` and `UPDATED`
+
 ---
 
 * `auto_healing_policies` - (Optional) The autohealing policies for this managed instance

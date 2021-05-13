@@ -273,6 +273,13 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				Default:     false,
 				Description: `Whether to wait for all instances to be created/updated before returning. Note that if this is set to true and the operation does not succeed, Terraform will continue trying until it times out.`,
 			},
+			"wait_for_instances_status": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "STABLE",
+				ValidateFunc: validation.StringInSlice([]string{"STABLE", "UPDATED"}, false),
+				Description: `When used with wait_for_instances specifies the status to wait for. When STABLE is specified this resource will wait until the instances are stable before returning. When UPDATED is set, it will wait for the version target to be reached and any per instance configs to be effective as well as all instances to be stable before returning.`,
+			},
 			"stateful_disk": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -620,10 +627,11 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	}
 
 	if d.Get("wait_for_instances").(bool) {
+		waitForUpdates := d.Get("wait_for_instances_status").(string) == "UPDATED"
 		conf := resource.StateChangeConf{
-			Pending: []string{"creating", "error"},
+			Pending: []string{"creating", "error", "updating per instance configs", "reaching version target"},
 			Target:  []string{"created"},
-			Refresh: waitForInstancesRefreshFunc(getManager, d, meta),
+			Refresh: waitForInstancesRefreshFunc(getManager, waitForUpdates, d, meta),
 			Timeout: d.Timeout(schema.TimeoutCreate),
 		}
 		_, err := conf.WaitForState()
@@ -1011,6 +1019,9 @@ func flattenStatusVersionTarget(versionTarget *computeBeta.InstanceGroupManagerS
 func resourceInstanceGroupManagerStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	if err := d.Set("wait_for_instances", false); err != nil {
 		return nil, fmt.Errorf("Error setting wait_for_instances: %s", err)
+	}
+	if err := d.Set("wait_for_instances_status", "STABLE"); err != nil {
+		return nil, fmt.Errorf("Error setting wait_for_instances_status: %s", err)
 	}
 	config := meta.(*Config)
 	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/zones/(?P<zone>[^/]+)/instanceGroupManagers/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<zone>[^/]+)/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
