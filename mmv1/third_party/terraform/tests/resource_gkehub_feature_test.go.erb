@@ -733,11 +733,6 @@ resource "google_gkehub_feature" "feature" {
   provider = google-beta
 }
 
-resource "google_service_account" "feature_sa" {
-  account_id = "feature-sa"
-  provider = google-beta
-}
-
 resource "google_gkehub_feature_membership" "feature_member" {
   location = "global"
   feature = google_gkehub_feature.feature.name
@@ -747,7 +742,6 @@ resource "google_gkehub_feature_membership" "feature_member" {
     config_sync {
       git {
         sync_repo = "https://github.com/hashicorp/terraform"
-        gcp_service_account_email = google_service_account.feature_sa.email
         https_proxy = "https://example.com"
         policy_dir = "google/"
         sync_branch = "some-branch"

@@ -33,14 +33,6 @@ components:
               properties:
                 git:
                   properties:
-                    gcpServiceAccountEmail:
-                      description: The GCP Service Account Email used for auth when
-                        secretType is gcpServiceAccount.
-                      type: string
-                      x-dcl-go-name: GcpServiceAccountEmail
-                      x-dcl-references:
-                      - field: email
-                        resource: Iam/ServiceAccount
                     httpsProxy:
                       description: URL for the HTTPS proxy to be used when communicating
                         with the Git repo.
