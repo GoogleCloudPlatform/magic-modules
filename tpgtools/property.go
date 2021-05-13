@@ -1,11 +1,11 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -166,14 +166,30 @@ func (p Property) PackageJSONName() string {
 // PackagePath is the title-cased path of a type (relative to the resource) for
 // use in naming functions. For example, "MachineType" or "NodeConfigPreemptible".
 func (p Property) PackagePath() string {
-	if p.parent != nil {
-		return p.parent.PackagePath() + p.PackageName
-	}
 	if p.ref != "" {
 		return p.ref
 	}
+	if p.parent != nil {
+		return p.parent.PackagePath() + p.PackageName
+	}
 
 	return p.PackageName
+}
+
+func (p Property) ObjectType() string {
+	parent := p
+	// Look up chain to see if we are within a reference
+	// types within a reference should not use the parent resource's type
+	for {
+		if parent.ref != "" {
+			return p.PackagePath()
+		}
+		if parent.parent == nil {
+			break
+		}
+		parent = *parent.parent
+	}
+	return fmt.Sprintf("%s%s", p.resource.Type(), p.PackagePath())
 }
 
 func (p Property) IsArray() bool {
@@ -211,7 +227,7 @@ func buildGetter(p Property, rawGetter string) string {
 		return fmt.Sprintf("dcl.Bool(%s.(bool))", rawGetter)
 	case SchemaTypeString:
 		if p.Type.IsEnum() {
-			return fmt.Sprintf("%s.%s%sEnumRef(%s.(string))", p.resource.Package, p.resource.Type(), p.PackagePath(), rawGetter)
+			return fmt.Sprintf("%s.%sEnumRef(%s.(string))", p.resource.Package(), p.ObjectType(), rawGetter)
 		}
 		if p.sendEmpty {
 			return fmt.Sprintf("dcl.String(%s.(string))", rawGetter)
@@ -432,6 +448,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 	if parent == nil {
 		identityFields = idParts(resource.ID)
 	}
+
 	for k, v := range schema.Properties {
 		ref := ""
 		packageName := ""
@@ -448,6 +465,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			}
 			ref = typeFetcher.PackagePathForReference(ref, v.Extension["x-dcl-go-type"].(string))
 		}
+
 		// Sub-properties are referenced by name, and the explicit title value
 		// won't be set initially.
 		v.Title = k
@@ -516,7 +534,6 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				p.StateGetter = &sg
 			}
 		}
-
 
 		// Handle object properties
 		if len(v.Properties) > 0 {
@@ -613,7 +630,6 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				p.StateGetter = &sg
 			}
 		}
-
 
 		ss := p.DefaultStateSetter()
 		p.StateSetter = &ss

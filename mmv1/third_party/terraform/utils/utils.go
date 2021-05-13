@@ -482,14 +482,6 @@ func SnakeToPascalCase(s string) string {
 	return strings.Join(split, "")
 }
 
-func checkStringMap(v interface{}) map[string]string {
-	m, ok := v.(map[string]string)
-	if ok {
-		return m
-	}
-	return convertStringMap(v.(map[string]interface{}))
-}
-
 func multiEnvSearch(ks []string) string {
 	for _, k := range ks {
 		if v := os.Getenv(k); v != "" {
@@ -507,4 +499,12 @@ func GetCurrentUserEmail(config *Config, userAgent string) (string, error) {
 		return "", fmt.Errorf("error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope? error: %s", err)
 	}
 	return res["email"].(string), nil
+}
+
+func checkStringMap(v interface{}) map[string]string {
+	m, ok := v.(map[string]string)
+	if ok {
+		return m
+	}
+	return convertStringMap(v.(map[string]interface{}))
 }

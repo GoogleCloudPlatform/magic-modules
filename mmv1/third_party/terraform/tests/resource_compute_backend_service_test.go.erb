@@ -573,6 +573,8 @@ func TestAccComputeBackendService_withCustomHeaders(t *testing.T) {
 <% end -%>
 
 func TestAccComputeBackendService_internalLoadBalancing(t *testing.T) {
+	// Instance template uses UniqueId in some cases
+	skipIfVcr(t)
 	t.Parallel()
 
 	fr := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
@@ -1598,7 +1600,7 @@ resource "google_compute_instance_group_manager" "foobar" {
 }
 
 resource "google_compute_instance_template" "foobar" {
-  name         = "instance-template-internal"
+  name_prefix  = "tf-test-"
   machine_type = "e2-medium"
 
   network_interface {

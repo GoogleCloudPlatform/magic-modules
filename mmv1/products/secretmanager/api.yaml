@@ -115,6 +115,16 @@ objects:
                       required: true
                       description: |
                         The canonical IDs of the location to replicate data. For example: "us-east1".
+                    - !ruby/object:Api::Type::NestedObject
+                      name: customerManagedEncryption
+                      description: |
+                        Customer Managed Encryption for the secret.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: kmsKeyName
+                          required: true
+                          description: |
+                            Describes the Cloud KMS encryption key that will be used to protect destination secret.  
   - !ruby/object:Api::Resource
     name: SecretVersion
     base_url: '{{name}}'

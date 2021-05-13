@@ -510,6 +510,7 @@ objects:
                   description: |
                     Minimum number of VM instances that autoscaler will recommend in time intervals starting according to schedule.
                   required: true
+                  send_empty_value: true
                 - !ruby/object:Api::Type::String
                   name: 'schedule'
                   description: |
@@ -6595,6 +6596,13 @@ objects:
             description: Defines whether the instance has integrity monitoring enabled.
             update_verb: :PATCH
             update_url: projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig
+      - !ruby/object:Api::Type::NestedObject
+        name: 'confidentialInstanceConfig'
+        description: 'Configuration for confidential computing (requires setting the machine type to any of the n2d-* types and a boot disk of type pd-ssd).'
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enableConfidentialCompute'
+            description: Enables confidential computing
       - !ruby/object:Api::Type::Enum
         name: 'status'
         description: |
@@ -7545,7 +7553,6 @@ objects:
             output: true
           - !ruby/object:Api::Type::String
             name: 'kmsKeyName'
-            output: true
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
           - !ruby/object:Api::Type::String
@@ -8388,8 +8395,16 @@ objects:
         name: 'size'
         description: |
           The total number of nodes in the node group.
-        required: true
+        input: true
         send_empty_value: true
+      - !ruby/object:Api::Type::Integer
+        name: 'initialSize'
+        description: |
+          The initial number of nodes in the node group. One of `initial_size` or `size` must be specified.
+        url_param_only: true
+        exactly_one_of:
+          - size
+          - initial_size
       - !ruby/object:Api::Type::String
         name: 'maintenancePolicy'
         description: |
@@ -9775,6 +9790,7 @@ objects:
                   description: |
                     Minimum number of VM instances that autoscaler will recommend in time intervals starting according to schedule.
                   required: true
+                  send_empty_value: true
                 - !ruby/object:Api::Type::String
                   name: 'schedule'
                   description: |
@@ -10133,6 +10149,15 @@ objects:
         description: |
           URL of the disk type resource describing which disk type to use to
           create the disk. Provide this when creating the disk.
+      - !ruby/object:Api::Type::Enum
+        name: 'interface'
+        min_version: 'beta'
+        description: |
+          Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
+        default_value: :SCSI
+        values:
+          - :SCSI
+          - :NVME
   - !ruby/object:Api::Resource
     name: 'RegionUrlMap'
     kind: 'compute#urlMap'

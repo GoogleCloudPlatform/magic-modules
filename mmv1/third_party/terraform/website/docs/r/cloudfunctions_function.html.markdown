@@ -38,7 +38,7 @@ resource "google_storage_bucket_object" "archive" {
 resource "google_cloudfunctions_function" "function" {
   name        = "function-test"
   description = "My function"
-  runtime     = "nodejs12"
+  runtime     = "nodejs14"
 
   available_memory_mb   = 128
   source_archive_bucket = google_storage_bucket.bucket.name
@@ -74,7 +74,7 @@ resource "google_storage_bucket_object" "archive" {
 resource "google_cloudfunctions_function" "function" {
   name        = "function-test"
   description = "My function"
-  runtime     = "nodejs12"
+  runtime     = "nodejs14"
 
   available_memory_mb   = 128
   source_archive_bucket = google_storage_bucket.bucket.name
@@ -109,13 +109,13 @@ The following arguments are supported:
 * `name` - (Required) A user-defined name of the function. Function names must be unique globally.
 
 * `runtime` - (Required) The runtime in which the function is going to run.
-Eg. `"nodejs8"`, `"nodejs10"`, `"nodejs12"`, `"python37"`, `"python38"`,`"go111"`, `"go113"`.
+Eg. `"nodejs10"`, `"nodejs12"`, `"nodejs14"`, `"python37"`, `"python38"`, `"python39"`, `"dotnet3"`, `"go113"`, `"java11"`, `"ruby27"`, etc. Check the [official doc](https://cloud.google.com/functions/docs/concepts/exec#runtimes) for the up-to-date list.
 
 - - -
 
 * `description` - (Optional) Description of the function.
 
-* `available_memory_mb` - (Optional) Memory (in MB), available to the function. Default value is 256MB. Allowed values are: 128MB, 256MB, 512MB, 1024MB, 2048MB and 4096MB.
+* `available_memory_mb` - (Optional) Memory (in MB), available to the function. Default value is `256`. Possible values include `128`, `256`, `512`, `1024`, etc.
 
 * `timeout` - (Optional) Timeout (in seconds) for the function. Default value is 60 seconds. Cannot be more than 540 seconds.
 

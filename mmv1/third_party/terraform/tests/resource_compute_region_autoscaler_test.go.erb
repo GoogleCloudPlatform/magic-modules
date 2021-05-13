@@ -15,7 +15,7 @@ func TestAccComputeRegionAutoscaler_update(t *testing.T) {
 	var itName = fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var tpName = fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var igmName = fmt.Sprintf("tf-test-%s", randString(t, 10))
-	var autoscalerName = fmt.Sprintf("region-autoscaler-test-%s", randString(t, 10))
+	var autoscalerName = fmt.Sprintf("tf-test-region-autoscaler-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -49,7 +49,7 @@ func TestAccComputeRegionAutoscaler_scaleDownControl(t *testing.T) {
 	var itName = fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var tpName = fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var igmName = fmt.Sprintf("tf-test-%s", randString(t, 10))
-	var autoscalerName = fmt.Sprintf("region-autoscaler-test-%s", randString(t, 10))
+	var autoscalerName = fmt.Sprintf("tf-test-region-autoscaler-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -76,7 +76,7 @@ func TestAccComputeRegionAutoscaler_scalingSchedule(t *testing.T) {
 	var itName = fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var tpName = fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var igmName = fmt.Sprintf("tf-test-%s", randString(t, 10))
-	var autoscalerName = fmt.Sprintf("region-autoscaler-test-%s", randString(t, 10))
+	var autoscalerName = fmt.Sprintf("tf-test-region-autoscaler-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -102,7 +102,7 @@ func TestAccComputeRegionAutoscaler_scaleInControl(t *testing.T) {
 	var itName = fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var tpName = fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var igmName = fmt.Sprintf("tf-test-%s", randString(t, 10))
-	var autoscalerName = fmt.Sprintf("region-autoscaler-test-%s", randString(t, 10))
+	var autoscalerName = fmt.Sprintf("tf-test-region-autoscaler-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -285,7 +285,7 @@ resource "google_compute_region_autoscaler" "foobar" {
     scaling_schedules {
       name = "every-weekday-morning"
       description = "Increase to 2 every weekday at 7AM for 6 hours."
-      min_required_replicas = 2
+      min_required_replicas = 0
       schedule = "0 7 * * MON-FRI"
       time_zone = "America/New_York"
       duration_sec = 21600
