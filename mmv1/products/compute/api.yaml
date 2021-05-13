@@ -7538,6 +7538,7 @@ objects:
           option.
 
           Not currently available publicly.
+        input: true
         values:
           - :NONE
           - :IPSEC
@@ -12981,6 +12982,7 @@ objects:
                     send_empty_value: true
       - !ruby/object:Api::Type::Boolean
         name: encryptedInterconnectRouter
+        input: true
         description: |
           Field to indicate if a router is dedicated to use with encrypted
           Interconnect Attachment (IPsec-encrypted Cloud Interconnect feature).
