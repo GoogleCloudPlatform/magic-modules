@@ -245,6 +245,12 @@ func (c *Config) synchronousTimeout() time.Duration {
 func (c *Config) logGoogleIdentities() error {
 	if c.ImpersonateServiceAccount == "" {
 
+		tokenSource, err := c.getTokenSource(c.Scopes, true)
+		if err != nil {
+			return err
+		}
+		c.client = oauth2.NewClient(c.context, tokenSource) // c.client isn't initialised fully when this code is called.
+
 		email, err := GetCurrentUserEmail(c, c.userAgent)
 		if err != nil {
 			log.Printf("[INFO] error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope? error: %s", err)
@@ -262,7 +268,7 @@ func (c *Config) logGoogleIdentities() error {
 	if err != nil {
 		return err
 	}
-	c.client = oauth2.NewClient(c.context, tokenSource)
+	c.client = oauth2.NewClient(c.context, tokenSource) // c.client isn't initialised fully when this code is called.
 
 	email, err := GetCurrentUserEmail(c, c.userAgent)
 	if err != nil {
@@ -277,7 +283,7 @@ func (c *Config) logGoogleIdentities() error {
 	if err != nil {
 		return err
 	}
-	c.client = oauth2.NewClient(c.context, tokenSource)
+	c.client = oauth2.NewClient(c.context, tokenSource) // c.client isn't initialised fully when this code is called.
 
 	return nil
 }
