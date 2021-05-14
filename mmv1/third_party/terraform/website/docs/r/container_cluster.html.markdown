@@ -235,6 +235,13 @@ region are guaranteed to support the same version.
     manages the default node pool, which isn't recommended to be used with
     Terraform. Structure is documented below.
 
+* `network_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for
+   [Adding Pod IP address ranges](https://cloud.google.com/kubernetes-engine/docs/how-to/multi-pod-cidr))  used in creating the default node pool.
+    Generally, this field should not be used at the same time as a
+    `google_container_node_pool` or a `node_pool` block; this configuration
+    manages the default node pool, which isn't recommended to be used with
+    Terraform. Structure is documented below.
+
 * `node_pool` - (Optional) List of node pools associated with this cluster.
     See [google_container_node_pool](container_node_pool.html) for schema.
     **Warning:** node pools defined inside a cluster can't be changed (or added/removed) after
@@ -691,6 +698,14 @@ linux_node_config {
   }
 }
 ```
+
+The `network_config` block supports:
+
+* `create_pod_range` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Size of the disk attached to each node, specified
+    in GB. The smallest allowed disk size is 10GB. Defaults to 100GB.
+
+* `disk_type` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Type of the disk attached to each node
+    (e.g. 'pd-standard', 'pd-balanced' or 'pd-ssd'). If unspecified, the default disk type is 'pd-standard'
 
 The `ephemeral_storage_config` block supports:
 

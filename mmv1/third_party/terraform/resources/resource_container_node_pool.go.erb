@@ -211,6 +211,7 @@ var schemaNodePool = map[string]*schema.Schema{
 		Description: `The Kubernetes version for the nodes in this pool. Note that if this field and auto_upgrade are both specified, they will fight each other for what the node version should be, so setting both is highly discouraged. While a fuzzy version can be specified, it's recommended that you specify explicit versions as Terraform will see spurious diffs when fuzzy versions are used. See the google_container_engine_versions data source's version_prefix field to approximate fuzzy versions in a Terraform-compatible way.`,
 	},
 
+<% unless version == 'ga' -%>
 	"network_config": {
 		Type:        schema.TypeList,
 		Optional:    true,
@@ -243,6 +244,7 @@ var schemaNodePool = map[string]*schema.Schema{
 			},
 		},
 	},
+<% end -%>
 
 }
 
@@ -683,6 +685,9 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*containerBeta.NodeP
 		Config:           expandNodeConfig(d.Get(prefix + "node_config")),
 		Locations:        locations,
 		Version:          d.Get(prefix + "version").(string),
+<% unless version == 'ga' -%>
+		NetworkConfig:    expandNodeNetworkConfig(prefix + "network_config"),
+<% end -%>
 	}
 
 	if v, ok := d.GetOk(prefix + "autoscaling"); ok {
@@ -771,6 +776,9 @@ func flattenNodePool(d *schema.ResourceData, config *Config, np *containerBeta.N
 		"node_config":         flattenNodeConfig(np.Config),
 		"instance_group_urls": igmUrls,
 		"version":             np.Version,
+<% unless version == 'ga' -%>
+		"network_config":      flattenNodeNetworkConfig(np.NetworkConfig, d, prefix),
+<% end -%>
 	}
 
 	if np.Autoscaling != nil {
@@ -810,6 +818,48 @@ func flattenNodePool(d *schema.ResourceData, config *Config, np *containerBeta.N
 
 	return nodePool, nil
 }
+
+<% unless version == 'ga' -%>
+func flattenNodeNetworkConfig(c *containerBeta.NodeNetworkConfig, d *schema.ResourceData, prefix string) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"create_pod_range":    d.Get(prefix + "network_config.0.create_pod_range"), // API doesn't return this value so we set the old one. Field is ForceNew + Required
+			"pod_ipv4_cidr_block": c.PodIpv4CidrBlock,
+			"pod_range":           c.PodRange,
+		})
+	}
+	return result
+}
+
+func expandNodeNetworkConfig(v interface{}) *containerBeta.NodeNetworkConfig {
+	networkNodeConfigs := v.([]interface{})
+
+	nnc := &containerBeta.NodeNetworkConfig{}
+
+	if len(networkNodeConfigs) == 0 {
+		return nnc
+	}
+
+	networkNodeConfig := networkNodeConfigs[0].(map[string]interface{})
+
+	if v, ok := networkNodeConfig["create_pod_range"]; ok {
+		nnc.CreatePodRange = v.(bool)
+	}
+
+	if v, ok := networkNodeConfig["pod_range"]; ok {
+		nnc.PodRange = v.(string)
+	}
+
+	if v, ok := networkNodeConfig["pod_ipv4_cidr_block"]; ok {
+		nnc.PodIpv4CidrBlock = v.(string)
+	}
+
+	return nnc
+}
+
+
+<% end -%>
 
 func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *NodePoolInformation, prefix string, timeout time.Duration) error {
 	config := meta.(*Config)
