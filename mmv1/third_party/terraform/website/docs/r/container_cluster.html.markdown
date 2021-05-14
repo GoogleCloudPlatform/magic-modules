@@ -719,9 +719,9 @@ The `notification_config` block supports:
 
 The `pubsub` block supports:
 
-* `enabled` (Required) - Enable the Upgrade notifications for this cluster.
+* `enabled` (Required) - Whether or not the notification config is enabled
 
-* `topic` (Optional) - The pubsub topic to push upgrade notifications to. Must be in the same project as the cluster.
+* `topic` (Optional) - The pubsub topic to push upgrade notifications to. Must be in the same project as the cluster. Must be in the format: `projects/{project}/topics/{topic}`.
 
 ```hcl
 notification_config {
