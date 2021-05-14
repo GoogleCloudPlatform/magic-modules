@@ -45,7 +45,6 @@ objects:
     parameters:
       - !ruby/object:Api::Type::Enum
         name: 'initialGroupConfig'
-        input: true
         description: |
           The initial configuration options for creating a Group.
 
