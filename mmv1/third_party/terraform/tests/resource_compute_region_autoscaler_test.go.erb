@@ -69,7 +69,6 @@ func TestAccComputeRegionAutoscaler_scaleDownControl(t *testing.T) {
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func TestAccComputeRegionAutoscaler_scalingSchedule(t *testing.T) {
 	t.Parallel()
 
@@ -94,7 +93,6 @@ func TestAccComputeRegionAutoscaler_scalingSchedule(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccComputeRegionAutoscaler_scaleInControl(t *testing.T) {
 	t.Parallel()
@@ -261,7 +259,6 @@ resource "google_compute_region_autoscaler" "foobar" {
 `, autoscalerName)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeRegionAutoscaler_scalingSchedule(itName, tpName, igmName, autoscalerName string) string {
 	return testAccComputeRegionAutoscaler_scaffolding(itName, tpName, igmName) + fmt.Sprintf(`
 resource "google_compute_region_autoscaler" "foobar" {
@@ -276,12 +273,14 @@ resource "google_compute_region_autoscaler" "foobar" {
     cpu_utilization {
       target = 0.5
     }
+<% unless version == 'ga' -%>
     scale_down_control {
       max_scaled_down_replicas {
         percent = 80
       }
       time_window_sec = 300
     }
+<% end -%>
     scaling_schedules {
       name = "every-weekday-morning"
       description = "Increase to 2 every weekday at 7AM for 6 hours."
@@ -302,4 +301,3 @@ resource "google_compute_region_autoscaler" "foobar" {
 }
 `, autoscalerName)
 }
-<% end -%>
