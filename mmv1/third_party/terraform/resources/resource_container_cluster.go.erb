@@ -674,7 +674,7 @@ func resourceContainerCluster() *schema.Resource {
 									"topic": {
 										Type:        schema.TypeString,
 										Optional:    true,
-										Description: `The Cloud Pub/Sub topic to send the notification to, must be in the format: projects/{project}/topics/{topic}`,
+										Description: `The pubsub topic to push upgrade notifications to. Must be in the same project as the cluster. Must be in the format: projects/{project}/topics/{topic}.`,
 									},
 								},
 							},
