@@ -486,13 +486,13 @@ func waitForInstancesRefreshFunc(f getInstanceManagerFunc, waitForUpdates bool, 
 		if m.Status.IsStable {
 			if waitForUpdates {
 				// waitForUpdates waits for versions to be reached and per instance configs to be updated (if present)
-				if m.Status.HasStatefulConfig {
-					if !m.Status.PerInstanceConfigs.AllEffective {
-						return false, "updating per instance configs"
+				if m.Status.Stateful.HasStatefulConfig {
+					if !m.Status.Stateful.PerInstanceConfigs.AllEffective {
+						return false, "updating per instance configs", nil
 					}
 				}
 				if !m.Status.VersionTarget.IsReached {
-					return false, "reaching version target"
+					return false, "reaching version target", nil
 				}
 			}
 			return true, "created", nil
