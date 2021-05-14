@@ -384,7 +384,6 @@ objects:
                 utilization.
             - !ruby/object:Api::Type::String
               name: 'predictiveMethod'
-              min_version: beta
               default_value: NONE
               description: |
                 Indicates whether predictive autoscaling based on CPU metric is enabled. Valid values are:
@@ -9664,7 +9663,6 @@ objects:
                 utilization.
             - !ruby/object:Api::Type::String
               name: 'predictiveMethod'
-              min_version: beta
               default_value: NONE
               description: |
                 Indicates whether predictive autoscaling based on CPU metric is enabled. Valid values are:
