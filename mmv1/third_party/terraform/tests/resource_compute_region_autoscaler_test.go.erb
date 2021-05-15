@@ -42,7 +42,6 @@ func TestAccComputeRegionAutoscaler_update(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeRegionAutoscaler_scaleDownControl(t *testing.T) {
 	t.Parallel()
 
@@ -67,7 +66,6 @@ func TestAccComputeRegionAutoscaler_scaleDownControl(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func TestAccComputeRegionAutoscaler_scalingSchedule(t *testing.T) {
@@ -208,7 +206,6 @@ resource "google_compute_region_autoscaler" "foobar" {
 `, autoscalerName)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeRegionAutoscaler_scaleDownControl(itName, tpName, igmName, autoscalerName string) string {
 	return testAccComputeRegionAutoscaler_scaffolding(itName, tpName, igmName) + fmt.Sprintf(`
 resource "google_compute_region_autoscaler" "foobar" {
@@ -224,17 +221,18 @@ resource "google_compute_region_autoscaler" "foobar" {
       target = 0.5
       predictive_method = "OPTIMIZE_AVAILABILITY"
     }
+<% unless version == 'ga' -%>
     scale_down_control {
       max_scaled_down_replicas {
         percent = 80
       }
       time_window_sec = 300
     }
+<% end -%>
   }
 }
 `, autoscalerName)
 }
-<% end -%>
 
 func testAccComputeRegionAutoscaler_scaleInControl(itName, tpName, igmName, autoscalerName string) string {
 	return testAccComputeRegionAutoscaler_scaffolding(itName, tpName, igmName) + fmt.Sprintf(`
