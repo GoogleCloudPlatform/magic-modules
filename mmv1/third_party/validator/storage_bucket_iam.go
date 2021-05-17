@@ -60,6 +60,11 @@ func newBucketIamAsset(
 }
 
 func FetchBucketIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+	// Check if the identity field returns a value
+	if d.GetOk("{{bucket}}"); !ok {
+		return nil, fmt.Errorf("Did not return a value for {{bucket}}")
+	}
+
 	return fetchIamPolicy(
 		StorageBucketIamUpdaterProducer,
 		d,
