@@ -198,16 +198,11 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	dclLoggerOptions := dcl.WithLogger(dclLogger{})
 	// each product needs it own client currently since basepath can only be specified at
 	// the config level.
-<<<<<<< HEAD
 	c.clientDataprocDCL = dataprocDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions,dclLoggerOptions, dcl.WithBasePath(c.DataprocBasePath)))
 	c.clientEventarcDCL = eventarcDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions,dclLoggerOptions, dcl.WithBasePath(c.EventarcBasePath)))
-=======
-	c.clientDataprocDCL = dataprocDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions, dclLoggerOptions))
-	c.clientEventarcDCL = eventarcDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions, dclLoggerOptions))
 <% unless version == 'ga' -%>
 	c.clientGkehubDCL = gkehubDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions, dclLoggerOptions))
 <% end -%>
->>>>>>> 2e63951b3 (Adding dcl for gkehub feature)
 
 	return nil
 }
