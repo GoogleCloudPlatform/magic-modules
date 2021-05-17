@@ -70,6 +70,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         aliases: ['maxReplicas']
       autoscalingPolicy.coolDownPeriodSec: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases: ['cooldownPeriod']
+      autoscalingPolicy.scalingSchedules: !ruby/object:Overrides::Ansible::PropertyOverride
+        exclude: true
       autoscalingPolicy.cpuUtilization.utilizationTarget: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases: ['target']
       autoscalingPolicy.customMetricUtilizations: !ruby/object:Overrides::Ansible::PropertyOverride
@@ -289,6 +291,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       size: !ruby/object:Overrides::Ansible::PropertyOverride
         required: true
       initialSize: !ruby/object:Overrides::Ansible::PropertyOverride
+        exclude: true
+  RegionAutoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
+    properties:
+      autoscalingPolicy.scalingSchedules: !ruby/object:Overrides::Ansible::PropertyOverride
         exclude: true
   RegionDisk: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:

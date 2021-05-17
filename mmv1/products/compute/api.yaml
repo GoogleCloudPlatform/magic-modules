@@ -517,7 +517,6 @@ objects:
                 be a positive float value. If not defined, the default is 0.8.
           - !ruby/object:Api::Type::Map
             name: 'scalingSchedules'
-            min_version: beta
             description: |
               Scaling schedules defined for an autoscaler. Multiple schedules can be set on an autoscaler and they can overlap.
             key_name: name
@@ -9850,7 +9849,6 @@ objects:
                 be a positive float value. If not defined, the default is 0.8.
           - !ruby/object:Api::Type::Map
             name: 'scalingSchedules'
-            min_version: beta
             description: |
               Scaling schedules defined for an autoscaler. Multiple schedules can be set on an autoscaler and they can overlap.
             key_name: name
