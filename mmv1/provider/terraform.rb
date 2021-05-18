@@ -308,11 +308,11 @@ module Provider
     end
 
     def full_resource_name(data)
-      name = data.object.filename_override || data.object.name.underscore
-      product_name = data.product.name.underscore
       if data.object.legacy_name
         "#{data.object.legacy_name.sub(/^google_/, '')}"
       else
+        name = data.object.filename_override || data.object.name.underscore
+        product_name = data.product.name.underscore
         "#{product_name}_#{name}"
       end
     end
