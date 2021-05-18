@@ -230,8 +230,7 @@ module Provider
       FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
       data.generate(pwd,
                     'templates/terraform/sweeper_file.go.erb',
-                    file_name
-                    ,
+                    file_name,
                     self)
     end
 
