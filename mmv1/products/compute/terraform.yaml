@@ -1968,6 +1968,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "baz"
         vars:
           name: "policy"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "resource_policy_instance_schedule_policy"
+        primary_resource_id: "hourly"
+        vars:
+          name: "policy"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
