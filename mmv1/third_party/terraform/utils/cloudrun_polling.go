@@ -31,23 +31,23 @@ type KnativeStatus struct {
 	}
 }
 
-func getGeneration(res map[string]interface{}) int {
+func getGeneration(res map[string]interface{}) (int, error) {
 	metadata, ok := res["metadata"]
 	if !ok {
-		return 0
+		return 0, fmt.Errorf("Unable to find knative metadata")
 	}
 	m, ok := metadata.(map[string]interface{})
 	if !ok {
-		return 0
+		return 0, fmt.Errorf("Unable to find generation in knative metadata")
 	}
 	gen, ok := m["generation"]
 	if !ok {
-		return 0
+		return 0, fmt.Errorf("Unable to find generation in knative metadata")
 	}
-	return int(gen.(float64))
+	return int(gen.(float64)), nil
 }
 
-func PollCheckKnativeStatusFunc(generation int) func(resp map[string]interface{}, respErr error) PollResult {
+func PollCheckKnativeStatusFunc(res map[string]interface{}) func(resp map[string]interface{}, respErr error) PollResult {
 	return func(resp map[string]interface{}, respErr error) PollResult {
 		if respErr != nil {
 			return ErrorPollResult(respErr)
@@ -57,7 +57,11 @@ func PollCheckKnativeStatusFunc(generation int) func(resp map[string]interface{}
 			return ErrorPollResult(errwrap.Wrapf("unable to get KnativeStatus: {{err}}", err))
 		}
 
-		if int(s.Status.ObservedGeneration) != generation {
+		gen, err := getGeneration(res)
+		if err != nil {
+			return ErrorPollResult(errwrap.Wrapf("unable to find Knative generation: {{err}}", err))
+		}
+		if int(s.Status.ObservedGeneration) != gen {
 			return PendingStatusPollResult("waiting for observed generation to match")
 		}
 		for _, condition := range s.Status.Conditions {

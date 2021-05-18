@@ -18,7 +18,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}"]
     error_retry_predicates: ["isCloudRunCreationConflict"]
     async: !ruby/object:Provider::Terraform::PollAsync
-      check_response_func_existence: PollCheckKnativeStatusFunc(getGeneration(res))
+      check_response_func_existence: PollCheckKnativeStatusFunc(res)
       actions: ['create', 'update']
       operation: !ruby/object:Api::Async::Operation
         timeouts: !ruby/object:Api::Timeouts
@@ -70,7 +70,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["locations/{{location}}/namespaces/{{project}}/services/{{name}}"]
     error_retry_predicates: ["isCloudRunCreationConflict"]
     async: !ruby/object:Provider::Terraform::PollAsync
-      check_response_func_existence: PollCheckKnativeStatusFunc(getGeneration(res))
+      check_response_func_existence: PollCheckKnativeStatusFunc(res)
       actions: ['create', 'update']
       operation: !ruby/object:Api::Async::Operation
         timeouts: !ruby/object:Api::Timeouts
