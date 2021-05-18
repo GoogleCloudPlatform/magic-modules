@@ -208,9 +208,6 @@ module Provider
       File.join(target_folder, "#{data.object.legacy_name.sub(/^google_/, '')}.html.markdown") :
       File.join(target_folder, "#{product_name}_#{name}.html.markdown")
 
-    Google::LOGGER.info \
-      "\n #{filepath}"
-
       data.generate(pwd, 'templates/terraform/resource.html.markdown.erb', filepath, self)
     end
 
