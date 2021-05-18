@@ -225,10 +225,13 @@ module Provider
                 data.object.custom_code.post_delete ||
                 data.object.skip_delete
 
+      file_name =
+        "#{folder_name(data.version)}/resource_#{full_resource_name(data)}_sweeper_test.go"
       FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
       data.generate(pwd,
                     'templates/terraform/sweeper_file.go.erb',
-                    "#{folder_name(data.version)}/resource_#{full_resource_name(data)}_sweeper_test.go",
+                    file_name
+                    ,
                     self)
     end
 
@@ -303,14 +306,15 @@ module Provider
     def id_format(object)
       object.id_format || object.self_link_uri
     end
+
     def full_resource_name(data)
       name = data.object.filename_override || data.object.name.underscore
       product_name = data.product.name.underscore
-      resource_name =
-        data.object.legacy_name ?
-        "#{data.object.legacy_name.sub(/^google_/, '')}.html.markdown" :
-        "#{product_name}_#{name}.html.markdown"
-      return resource_name
+      if data.object.legacy_name
+        "#{data.object.legacy_name.sub(/^google_/, '')}"
+      else
+        "#{product_name}_#{name}"
+      end
     end
   end
 end
