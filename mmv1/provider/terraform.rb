@@ -200,12 +200,17 @@ module Provider
       target_folder = File.join(target_folder, 'website', 'docs', 'r')
       FileUtils.mkpath target_folder
       name = data.object.filename_override || data.object.name.underscore
-      product_name = data.product.name.underscore
+      product_name = @config.legacy_name || data.product.name.underscore
 
-      filepath =
-        @config.legacy_name ?
-        File.join(target_folder, "#{@config.legacy_name}.html.markdown"):
-        File.join(target_folder, "#{product_name}_#{name}.html.markdown")
+
+    filepath =
+      data.object.legacy_name ?
+      File.join(target_folder, "#{data.object.legacy_name.sub(/^google_/, '')}.html.markdown") :
+      File.join(target_folder, "#{product_name}_#{name}.html.markdown")
+
+    Google::LOGGER.info \
+      "\n #{filepath}"
+
       data.generate(pwd, 'templates/terraform/resource.html.markdown.erb', filepath, self)
     end
 
@@ -303,7 +308,10 @@ module Provider
       product_name = @config.legacy_name || data.product.name.underscore
 
       filepath =
+        data.object.legacy_name ?
+        File.join(target_folder, "#{data.object.legacy_name.sub(/^google_/, '')}_iam.html.markdown") :
         File.join(target_folder, "#{product_name}_#{name}_iam.html.markdown")
+
       data.generate(pwd, 'templates/terraform/resource_iam.html.markdown.erb', filepath, self)
     end
 
