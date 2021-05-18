@@ -200,9 +200,11 @@ module Provider
       target_folder = File.join(target_folder, 'website', 'docs', 'r')
       FileUtils.mkpath target_folder
       name = data.object.filename_override || data.object.name.underscore
-      product_name = @config.legacy_name || data.product.name.underscore
+      product_name = data.product.name.underscore
 
       filepath =
+        @config.legacy_name ?
+        File.join(target_folder, "#{@config.legacy_name}.html.markdown")
         File.join(target_folder, "#{product_name}_#{name}.html.markdown")
       data.generate(pwd, 'templates/terraform/resource.html.markdown.erb', filepath, self)
     end
