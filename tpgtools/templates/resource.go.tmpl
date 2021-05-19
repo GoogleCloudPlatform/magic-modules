@@ -546,7 +546,7 @@ func flatten{{$.PathType}}{{$v.PackagePath}}Array(objs []{{$.Package}}.{{$v.Obje
 	{{- end }}
 
 func flatten{{$.PathType}}{{$v.PackagePath}}(obj *{{$.Package}}.{{$v.ObjectType}}) interface{} {
-	if obj == nil {
+	if obj == nil || obj.Empty(){
 		return nil
 	}
 	transformed := map[string]interface{}{

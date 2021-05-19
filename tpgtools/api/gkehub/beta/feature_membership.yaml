@@ -80,25 +80,6 @@ components:
               type: object
               x-dcl-go-name: ConfigSync
               x-dcl-go-type: FeatureMembershipConfigmanagementConfigSync
-            hierarchyController:
-              description: Hierarchy Controller configuration for the cluster.
-              properties:
-                enableHierarchicalResourceQuota:
-                  description: Whether hierarchical resource quota is enabled in this
-                    cluster.
-                  type: boolean
-                  x-dcl-go-name: EnableHierarchicalResourceQuota
-                enablePodTreeLabels:
-                  description: Whether pod tree labels are enabled in this cluster.
-                  type: boolean
-                  x-dcl-go-name: EnablePodTreeLabels
-                enabled:
-                  description: Whether Hierarchy Controller is enabled in this cluster.
-                  type: boolean
-                  x-dcl-go-name: Enabled
-              type: object
-              x-dcl-go-name: HierarchyController
-              x-dcl-go-type: FeatureMembershipConfigmanagementHierarchyController
             policyController:
               description: Policy Controller configuration for the cluster.
               properties:
