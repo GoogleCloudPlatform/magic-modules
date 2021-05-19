@@ -97,7 +97,7 @@ func resource{{$.PathType}}() *schema.Resource {
 	{{- if $p.DiffSuppressFunc }}
 				DiffSuppressFunc: {{$p.DiffSuppressFunc}},
 	{{- end }}
-				Description: `{{/* TODO fix formatting for $p.Description */}}`,
+				Description: `{{/* TODO fix formatting for $p.Description - see https://github.com/hashicorp/terraform-provider-google/issues/9197 */}}`,
 	{{- if $p.MaxItems }}
 				MaxItems: {{$p.MaxItems}},
 	{{- end }}
