@@ -1764,7 +1764,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       diskEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
       interface: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       encoder: templates/terraform/encoders/disk.erb
