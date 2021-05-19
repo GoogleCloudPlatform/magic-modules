@@ -3344,6 +3344,10 @@ objects:
         description: |
           Indicates whether or not the disk can be read/write attached to more than one instance.
         min_version: beta
+      - !ruby/object:Api::Type::Integer
+        name: 'provisionedIops'
+        description: |
+          Indicates how many IOPS must be provisioned for the disk.
   - !ruby/object:Api::Resource
     name: 'Firewall'
     kind: 'compute#firewall'
