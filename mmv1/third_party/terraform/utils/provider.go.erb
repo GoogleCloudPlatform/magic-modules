@@ -156,6 +156,7 @@ func Provider() *schema.Provider {
 			BigtableAdminCustomEndpointEntryKey:          BigtableAdminCustomEndpointEntry,
 
 			// dcl
+			BigqueryReservationEndpointEntryKey:          BigqueryReservationEndpointEntry,
 			EventarcEndpointEntryKey:               EventarcEndpointEntry,
 },
 
@@ -333,6 +334,7 @@ end     # products.each do
 			map[string]*schema.Resource{
 				"google_app_engine_application":                resourceAppEngineApplication(),
 				"google_bigquery_table":                        resourceBigQueryTable(),
+				"google_bigquery_reservation":                  resourceBigqueryreservationReservation(),
 				"google_bigtable_gc_policy":                    resourceBigtableGCPolicy(),
 				"google_bigtable_instance":                     resourceBigtableInstance(),
 				"google_bigtable_table":                        resourceBigtableTable(),
@@ -572,6 +574,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.BigtableAdminBasePath = d.Get(BigtableAdminCustomEndpointEntryKey).(string)
 
 	// dcl
+	config.BigqueryReservationBasePath = d.Get(BigqueryReservationEndpointEntryKey).(string)
 	config.EventarcBasePath = d.Get(EventarcEndpointEntryKey).(string)
 
 	stopCtx, ok := schema.StopContext(ctx)

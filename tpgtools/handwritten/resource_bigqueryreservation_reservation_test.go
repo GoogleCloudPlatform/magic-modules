@@ -1,14 +1,9 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccBigqueryReservationReservation_bigqueryReservation(t *testing.T) {
@@ -49,6 +44,3 @@ resource "google_bigquery_reservation" "reservation" {
 }
 `, context)
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
