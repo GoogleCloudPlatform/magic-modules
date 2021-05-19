@@ -10230,7 +10230,6 @@ objects:
         min_version: 'beta'
         description: |
           Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
-        default_value: :SCSI
         values:
           - :SCSI
           - :NVME
