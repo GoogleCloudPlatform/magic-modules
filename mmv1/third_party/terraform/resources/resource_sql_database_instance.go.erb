@@ -990,7 +990,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, secondGen bool)
 	if secondGen {
 		resize := _settings["disk_autoresize"].(bool)
 		settings.StorageAutoResize = &resize
-		settings.StorageAutoResizeLimitGb = int64(_settings["disk_autoresize_limit"].(int))
+		settings.StorageAutoResizeLimit = int64(_settings["disk_autoresize_limit"].(int))
 	}
 
 	return settings
@@ -1410,7 +1410,7 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 	}
 
 	data["disk_autoresize"] = settings.StorageAutoResize
-	data["disk_autoresize_limit"] = settings.StorageAutoResizeLimitGb
+	data["disk_autoresize_limit"] = settings.StorageAutoResizeLimit
 
 	if settings.UserLabels != nil {
 		data["user_labels"] = settings.UserLabels
