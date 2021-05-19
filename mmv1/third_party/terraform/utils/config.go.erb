@@ -66,9 +66,6 @@ import (
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	dataprocDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc<% unless version == 'ga' -%>/beta<% end -%>"
 	eventarcDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc<% unless version == 'ga' -%>/beta<% end -%>"
-<% unless version == 'ga' -%>
-	gkehubDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub/beta"
-<% end -%>
 )
 
 type providerMeta struct {
@@ -127,9 +124,6 @@ type Config struct {
 	clientDataprocDCL      *dataprocDcl.Client
 	EventarcBasePath string
 	clientEventarcDCL      *eventarcDcl.Client
-<% unless version == 'ga' -%>
-	clientGkehubDCL *gkehubDcl.Client
-<% end -%>
 }
 
 // Generated product base paths
@@ -200,9 +194,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// the config level.
 	c.clientDataprocDCL = dataprocDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions,dclLoggerOptions, dcl.WithBasePath(c.DataprocBasePath)))
 	c.clientEventarcDCL = eventarcDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions,dclLoggerOptions, dcl.WithBasePath(c.EventarcBasePath)))
-<% unless version == 'ga' -%>
-	c.clientGkehubDCL = gkehubDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions, dclLoggerOptions))
-<% end -%>
 
 	return nil
 }
