@@ -391,9 +391,8 @@ resource "google_compute_snapshot" "snapdisk" {
 resource "google_compute_region_disk" "regiondisk" {
   name     = "%s"
   snapshot = google_compute_snapshot.snapdisk.self_link
-  type     = "pd-extreme"
-  region   = "us-central1"
-  provisioned_iops = 10000
+  type     = "pd-ssd"
+
   replica_zones = ["us-central1-a", "us-central1-f"]
 
   disk_encryption_key {

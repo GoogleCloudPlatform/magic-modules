@@ -3348,7 +3348,6 @@ objects:
         name: 'provisionedIops'
         description: |
           Indicates how many IOPS must be provisioned for the disk.
-        min_version: beta
   - !ruby/object:Api::Resource
     name: 'Firewall'
     kind: 'compute#firewall'
@@ -10235,11 +10234,6 @@ objects:
         values:
           - :SCSI
           - :NVME
-      - !ruby/object:Api::Type::Integer
-        name: 'provisionedIops'
-        description: |
-          Indicates how many IOPS must be provisioned for the disk.
-        min_version: beta
   - !ruby/object:Api::Resource
     name: 'RegionUrlMap'
     kind: 'compute#urlMap'
