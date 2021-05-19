@@ -314,10 +314,6 @@ resource "google_gkehub_feature_membership" "feature_member_1" {
         sync_repo = "https://github.com/GoogleCloudPlatform/magic-modules"
       }
     }
-    hierarchy_controller {
-      enable_hierarchical_resource_quota = true
-      enabled = true
-    }
   }
   provider = google-beta
 }
@@ -523,9 +519,6 @@ resource "google_gkehub_feature_membership" "feature_member_2" {
       git {
         sync_repo = "https://github.com/terraform-providers/terraform-provider-google-beta"
       }
-    }
-    hierarchy_controller {
-      enabled = true
     }
     policy_controller {
       enabled = true
