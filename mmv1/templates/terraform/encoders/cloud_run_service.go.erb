@@ -22,4 +22,20 @@ metadata["name"] = name
 // The only acceptable version/kind right now
 obj["apiVersion"] = "serving.knative.dev/v1"
 obj["kind"] = "Service"
+
+// Insert client-name and version https://github.com/hashicorp/terraform-provider-google/issues/5385
+if metadata["annotations"] == nil {
+	metadata["annotations"] = make(map[string]interface{})
+}
+
+<% if version.nil? || version == 'ga' -%>
+providerVersionString := "google/" + version.ProviderVersion
+<% else -%>
+providerVersionString := "google-<%= version -%>/"  + version.ProviderVersion
+<% end -%>
+
+annotations := metadata["annotations"].(map[string]interface{})
+annotations["run.googleapis.com/client-name"] = "hashicorp-terraform"
+annotations["run.googleapis.com/client-version"] = providerVersionString
+
 return obj, nil
