@@ -148,6 +148,10 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 
 			specs, err = ioutil.ReadDir(path.Join(*fPath, packagePath))
 			newProduct := getProductInformation(packagePath, specs)
+			if newProduct == nil {
+				// No resource at this version for this product
+				continue
+			}
 			products[version] = append(products[version], newProduct)
 
 			newResources := getResources(packagePath, specs)
@@ -170,7 +174,6 @@ func getProductInformation(packagePath string, specs []os.FileInfo) *ProductMeta
 
 		return productMetadata
 	}
-	glog.Exit(fmt.Sprintf("Could not find product information for %s", packagePath))
 	return nil
 }
 

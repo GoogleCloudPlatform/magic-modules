@@ -114,11 +114,6 @@ type Property struct {
 	// If this property allows forward slashes in its value (only important for
 	// properties sent in the URL)
 	forwardSlashAllowed bool
-
-	// Indicates this property should send empty values to the DCL instead of
-	// removing the empty value from the request.
-	// This includes values like 0, or "".
-	sendEmpty bool
 }
 
 // An IdentityGetter is a function to retrieve the value of an "identity" field
@@ -229,20 +224,20 @@ func buildGetter(p Property, rawGetter string) string {
 		if p.Type.IsEnum() {
 			return fmt.Sprintf("%s.%sEnumRef(%s.(string))", p.resource.Package(), p.ObjectType(), rawGetter)
 		}
-		if p.sendEmpty {
-			return fmt.Sprintf("dcl.String(%s.(string))", rawGetter)
+		if p.Computed {
+			return fmt.Sprintf("dcl.StringOrNil(%s.(string))", rawGetter)
 		}
-		return fmt.Sprintf("dcl.StringOrNil(%s.(string))", rawGetter)
+		return fmt.Sprintf("dcl.String(%s.(string))", rawGetter)
 	case SchemaTypeFloat:
-		if p.sendEmpty {
-			return fmt.Sprintf("dcl.Float64(%s.(float64))", rawGetter)
+		if p.Computed {
+			return fmt.Sprintf("dcl.Float64OrNil(%s.(float64))", rawGetter)
 		}
-		return fmt.Sprintf("dcl.Float64OrNil(%s.(float64))", rawGetter)
+		return fmt.Sprintf("dcl.Float64(%s.(float64))", rawGetter)
 	case SchemaTypeInt:
-		if p.sendEmpty {
-			return fmt.Sprintf("dcl.Int64(int64(%s.(int)))", rawGetter)
+		if p.Computed {
+			return fmt.Sprintf("dcl.Int64OrNil(int64(%s.(int)))", rawGetter)
 		}
-		return fmt.Sprintf("dcl.Int64OrNil(int64(%s.(int)))", rawGetter)
+		return fmt.Sprintf("dcl.Int64(int64(%s.(int)))", rawGetter)
 	case SchemaTypeMap:
 		return fmt.Sprintf("checkStringMap(%s)", rawGetter)
 	case SchemaTypeList, SchemaTypeSet:
@@ -509,10 +504,6 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 		if sens, ok := v.Extension["x-dcl-sensitive"].(bool); ok {
 			p.Sensitive = sens
-		}
-
-		if sendEmpty, ok := v.Extension["x-dcl-send-empty"].(bool); ok {
-			p.sendEmpty = sendEmpty
 		}
 
 		if v, ok := v.Extension["x-dcl-conflicts"].([]interface{}); ok {
