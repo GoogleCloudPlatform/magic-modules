@@ -1,0 +1,242 @@
+# Copyright 2021 Google LLC. All Rights Reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+components:
+  schemas:
+    Key:
+      properties:
+        createTime:
+          description: Output only. The creation time.
+          format: date-time
+          readOnly: true
+          type: string
+          x-dcl-go-name: CreateTime
+          x-kubernetes-immutable: true
+        restrictions:
+          description: Required. Key restrictions.
+          properties:
+            browserKeyRestrictions:
+              description: The HTTP referrers (websites) that are allowed to use the key.
+              properties:
+                allowedReferrers:
+                  description: A list of regular expressions
+                    for the referrer URLs that are allowed to make API calls with this key.
+                  items:
+                    type: string
+                    x-dcl-go-type: string
+                  type: array
+                  x-dcl-go-name: AllowedReferrers
+                  x-dcl-list-type: list
+                  x-kubernetes-immutable: true
+              required:
+              - allowedReferrers
+              type: object
+              x-dcl-go-name: BrowserKeyRestrictions
+              x-dcl-go-type: KeyRestrictionsBrowserKeyRestrictions
+            serverKeyRestrictions:
+              description: The IP addresses of callers that are allowed to use the key.
+              properties:
+                allowedIps:
+                  description: A list of the caller IP addresses that are allowed to make API calls with this key.
+                  items:
+                    type: string
+                    x-dcl-go-type: string
+                  type: array
+                  x-dcl-go-name: AllowedIps
+                  x-dcl-list-type: list
+                  x-kubernetes-immutable: true
+              required:
+              - allowedIps
+              type: object
+              x-dcl-go-name: ServerKeyRestrictions
+              x-dcl-go-type: KeyRestrictionsBrowserKeyRestrictions
+            androidKeyRestrictions:
+              description: The Android apps that are allowed to use the key.
+              properties:
+                allowedApplications:
+                  description: A list of regular expressions
+                    for the referrer URLs that are allowed to make API calls with this key.
+                  items:
+                    properties:
+                      sha1Fingerprint:
+                        description: Required. The name of a CloudEvents attribute. Currently,
+                          only a subset of attributes are supported for filtering. All triggers
+                          MUST provide a filter for the 'type' attribute.
+                        type: string
+                        x-dcl-go-name: Sha1Fingerprint
+                      packageName:
+                        description: Required. The value for the packageName.
+                        type: string
+                        x-dcl-go-name: PackageName
+                    required:
+                    - attribute
+                    - value
+                    type: object
+                    x-dcl-go-type: KeyRestrictionsAndroidKeyRestrictionsAllowedApplications
+                  type: array
+                  x-dcl-go-name: AllowedApplications
+                  x-dcl-list-type: list
+                  x-kubernetes-immutable: true
+              required:
+              - allowedApplications
+              type: object
+              x-dcl-go-name: AndroidKeyRestrictions
+              x-dcl-go-type: KeyRestrictionsBrowserKeyRestrictions
+            iosKeyRestrictions:
+              description: iosKeyRestrictions
+              properties:
+                allowedBundleIds:
+                  description: A list of regular expressions
+                    for the referrer URLs that are allowed to make API calls with this key.
+                  items:
+                    type: string
+                    x-dcl-go-type: string
+                  type: array
+                  x-dcl-go-name: AllowedBundleIds
+                  x-dcl-list-type: list
+                  x-kubernetes-immutable: true
+              required:
+              - allowedBundleIds
+              type: object
+              x-dcl-go-name: IosKeyRestrictions
+              x-dcl-go-type: KeyRestrictionsIosKeyRestrictions
+            apiTargets:
+              description: A restriction for a specific service and optionally one or more specific methods.
+                Requests are allowed if they match any of these restrictions. If no restrictions are specified, all targets are allowed.
+              items:
+                properties:
+                  service:
+                    description: 'Required. The service for this restriction. 
+                      It should be the canonical service name, for example: translate.googleapis.com. You can use gcloud services list to get a list of services that are enabled in the project.'
+                    type: string
+                    x-dcl-go-name: Service
+                    # x-kubernetes-immutable: true
+                  methods:
+                    description: '
+                      Optional. List of one or more methods that can be called. 
+                      If empty, all methods for the service are allowed. A wildcard (*) can be used as the last symbol. Valid examples: google.cloud.translate.v2.TranslateService.GetSupportedLanguage TranslateText Get* translate.googleapis.com.Get*'
+                    items:
+                      type: string
+                      x-dcl-go-type: string
+                    type: array
+                    x-dcl-go-name: Methods
+                    x-dcl-list-type: list
+                    # x-kubernetes-immutable: true
+                required:
+                - attribute
+                - value
+                type: object
+                x-dcl-go-type: KeyRestrictionsAndroidKeyRestrictionsAllowedApplications
+              type: array
+              x-dcl-go-name: ApiTargets
+              x-dcl-list-type: list
+              x-kubernetes-immutable: true
+          type: object
+          x-dcl-go-name: Restrictions
+          x-dcl-go-type: KeyRestrictions
+        etag:
+          description: Output only. This checksum is computed by the server based
+            on the value of other fields, and may be sent only on create requests
+            to ensure the client has an up-to-date value before proceeding.
+          readOnly: true
+          type: string
+          x-dcl-go-name: Etag
+          x-kubernetes-immutable: true
+        name:
+          description: 'Output only. The resource name of the key.
+            The name has the form: projects/<PROJECT_NUMBER>/locations/global/keys/<KEY_ID>. For example: projects/123456867718/locations/global/keys/b7ff1f9f-8275-410a-94dd-3855ee9b5dd2'
+          type: string
+          x-dcl-go-name: Name
+          x-kubernetes-immutable: true
+          readOnly: true
+        displayName:
+          description: Human-readable display name of this key that you can modify.
+            The maximum length is 63 characters.
+          type: string
+          x-dcl-go-name: DisplayName
+        project:
+          description: The project for the resource
+          type: string
+          x-dcl-go-name: Project
+          x-dcl-references:
+          - field: name
+            parent: true
+            resource: Cloudresourcemanager/Project
+          x-kubernetes-immutable: true
+        uid:
+          description: Output only. Server assigned unique identifier for the Key.
+            The value is a UUID4 string and guaranteed to remain unchanged until the
+            resource is deleted.
+          readOnly: true
+          type: string
+          x-dcl-go-name: Uid
+          x-kubernetes-immutable: true
+        updateTime:
+          description: Output only. The last-modified time.
+          format: date-time
+          readOnly: true
+          type: string
+          x-dcl-go-name: UpdateTime
+          x-kubernetes-immutable: true
+        keyString:
+          description: Output only. An encrypted and signed value held by this key.
+          readOnly: true
+          type: string
+          x-dcl-go-name: KeyString
+          x-kubernetes-immutable: true
+      required:
+      - displayName
+      title: Key
+      type: object
+      x-dcl-id: '{{name}}'
+      x-dcl-labels: labels
+      x-dcl-locations: []
+      x-dcl-parent-container: project
+      x-dcl-uses-state-hint: false
+info:
+  description: DCL Specification for the Apikeys Key resource
+  title: Apikeys/Key
+  x-dcl-has-iam: false
+paths:
+  apply:
+    description: The function used to apply information about a Key
+    parameters:
+    - description: A full instance of a Key
+      name: Key
+      required: true
+  delete:
+    description: The function used to delete a Key
+    parameters:
+    - description: A full instance of a Key
+      name: Key
+      required: true
+  deleteAll:
+    description: The function used to delete all Keys
+    parameters:
+    - name: project
+      required: true
+      schema:
+        type: string
+  get:
+    description: The function used to get information about a Key
+    parameters:
+    - description: A full instance of a Key
+      name: Key
+      required: true
+  list:
+    description: The function used to list information about many Keys
+    parameters:
+    - name: project
+      required: true
+      schema:
+        type: string
