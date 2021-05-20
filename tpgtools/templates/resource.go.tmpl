@@ -499,12 +499,20 @@ func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.
 
 func expand{{$.PathType}}{{$v.PackagePath}}(o interface{}) *{{$.Package}}.{{$v.ObjectType}} {
 	if o == nil {
+	{{- if $v.Computed }}
 		return nil
+	{{- else }}
+		return {{$.Package}}.Empty{{$v.ObjectType}}
+	{{- end }}
 	}
 	{{ if $v.IsObject -}}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 {
+	{{- if $v.Computed }}
 		return nil
+	{{- else }}
+		return {{$.Package}}.Empty{{$v.ObjectType}}
+	{{- end }}
 	}
 	obj := objArr[0].(map[string]interface{})
 	{{- else }}
@@ -538,7 +546,7 @@ func flatten{{$.PathType}}{{$v.PackagePath}}Array(objs []{{$.Package}}.{{$v.Obje
 	{{- end }}
 
 func flatten{{$.PathType}}{{$v.PackagePath}}(obj *{{$.Package}}.{{$v.ObjectType}}) interface{} {
-	if obj == nil {
+	if obj == nil || obj.Empty(){
 		return nil
 	}
 	transformed := map[string]interface{}{
