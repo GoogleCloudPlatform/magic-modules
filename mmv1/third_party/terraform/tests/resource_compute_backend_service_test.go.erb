@@ -1181,6 +1181,8 @@ resource "google_compute_backend_service" "foobar" {
   health_checks = [google_compute_http_health_check.zero.self_link]
 
   cdn_policy {
+    negative_caching = false
+    serve_while_stale = 0
     cache_key_policy {
       include_protocol       = true
       include_host           = true
