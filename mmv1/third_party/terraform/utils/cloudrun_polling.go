@@ -47,7 +47,7 @@ func getGeneration(res map[string]interface{}) (int, error) {
 	return int(gen.(float64)), nil
 }
 
-func PollCheckKnativeStatusFunc(res map[string]interface{}) func(resp map[string]interface{}, respErr error) PollResult {
+func PollCheckKnativeStatusFunc(knativeRestResponse map[string]interface{}) func(resp map[string]interface{}, respErr error) PollResult {
 	return func(resp map[string]interface{}, respErr error) PollResult {
 		if respErr != nil {
 			return ErrorPollResult(respErr)
@@ -57,7 +57,7 @@ func PollCheckKnativeStatusFunc(res map[string]interface{}) func(resp map[string
 			return ErrorPollResult(errwrap.Wrapf("unable to get KnativeStatus: {{err}}", err))
 		}
 
-		gen, err := getGeneration(res)
+		gen, err := getGeneration(knativeRestResponse)
 		if err != nil {
 			return ErrorPollResult(errwrap.Wrapf("unable to find Knative generation: {{err}}", err))
 		}
