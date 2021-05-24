@@ -1510,6 +1510,7 @@ objects:
             name: 'ingressTrafficAllowed'
             description: |
               The ingress settings for version or service.
+            default_value: :INGRESS_TRAFFIC_ALLOWED_UNSPECIFIED
             values:
               - :INGRESS_TRAFFIC_ALLOWED_UNSPECIFIED
               - :INGRESS_TRAFFIC_ALLOWED_ALL
