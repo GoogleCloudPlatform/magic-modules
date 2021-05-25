@@ -20,6 +20,7 @@ var mutexKV = NewMutexKV()
 
 // Provider returns a *schema.Provider.
 func Provider() *schema.Provider {
+	// mutate basepaths to mtls =>
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"credentials": &schema.Schema{
@@ -134,7 +135,7 @@ func Provider() *schema.Provider {
 				ValidateFunc: validateCustomEndpoint,
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 					"GOOGLE_<%= product[:definitions].name.underscore.upcase -%>_CUSTOM_ENDPOINT",
-				}, <%= product[:definitions].name -%>DefaultBasePath),
+				}, DefaultBasePaths["<%= product[:definitions].name -%>"]),
 			},
 			<% end -%>
 
