@@ -241,6 +241,10 @@ The following arguments are supported:
     this template. This can be specified multiple times for multiple networks.
     Structure is documented below.
 
+* `network_performance_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)
+    Configures network performance settings for this template. Structure is
+    documented below.
+
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
@@ -270,6 +274,15 @@ The following arguments are supported:
 **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true in order to update this field.
 
 * `confidential_instance_config` (Optional) - Enable [Confidential Mode](https://cloud.google.com/compute/confidential-vm/docs/about-cvm) on this VM.
+
+* `network_performance_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Configures [network performance settings](https://cloud.google.com/compute/docs/networking/configure-vm-with-high-bandwidth-configuration)
+  for the instance. Structure is documented below. **Note**: [`machine_type`](#machine_type)
+  must be a [supported type](https://cloud.google.com/compute/docs/networking/configure-vm-with-high-bandwidth-configuration#bandwidth_tiers),
+  the [`image`](#image) used must include [`GVNIC`](https://cloud.google.com/compute/docs/networking/using-gvnic#create-instance-gvnic-image)
+  in `guest-os-features`, and `network_interface.0.nic-type` must be `GVNIC`
+  in order for this setting to take effect.
+
+---
 
 The `disk` block supports:
 
@@ -334,6 +347,11 @@ The `disk` block supports:
 The `disk_encryption_key` block supports:
 
 * `kms_key_self_link` - (Required) The self link of the encryption key that is stored in Google Cloud KMS
+
+The `network_performance_config` block supports:
+
+* `total_egress_bandwidth_tier` - (Optional) The egress bandwidth tier to enable.
+    Possible values: TIER_1
 
 The `network_interface` block supports:
 
@@ -444,6 +462,11 @@ The `shielded_instance_config` block supports:
 The `confidential_instance_config` block supports:
 
 * `enable_confidential_compute` (Optional) Defines whether the instance should have confidential compute enabled. [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
+
+The `network_performance_config` block supports:
+
+* `total_egress_bandwidth_tier` - (Optional) The egress bandwidth tier to enable.
+    Possible values: TIER_1, DEFAULT
 
 ## Attributes Reference
 
