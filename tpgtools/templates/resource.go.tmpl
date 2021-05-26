@@ -240,6 +240,9 @@ func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) erro
   createDirective := CreateDirective
 {{- end }}
 	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	client := Create{{$.ProductType}}Client(config, userAgent, "")
 	res, err := client.Apply{{$.Type}}(context.Background(), obj, createDirective...)
 	if err != nil {
@@ -296,6 +299,9 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	client := Create{{$.ProductType}}Client(config, userAgent, "")
 	res, err := client.Get{{$.Type}}(context.Background(), obj)
 	if err != nil {
@@ -361,6 +367,9 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	directive = append(UpdateDirective, dcl.WithStateHint(old))
 	{{- end }}
 	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	client := Create{{$.ProductType}}Client(config, userAgent, "")
 	res, err := client.Apply{{$.Type}}(context.Background(), obj, directive...)
 	if err != nil {
@@ -420,6 +429,9 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 
 	log.Printf("[DEBUG] Deleting {{$.Type}} %q", d.Id())
 	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	client := Create{{$.ProductType}}Client(config, userAgent, "")
 	if err := client.Delete{{$.Type}}(context.Background(), obj); err != nil {
 		return fmt.Errorf("Error deleting {{$.Type}}: %s", err)
