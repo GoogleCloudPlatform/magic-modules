@@ -197,12 +197,10 @@ objects:
           The URL of the network in which to reserve the address. This field
           can only be used with INTERNAL type with the VPC_PEERING and
           IPSEC_INTERCONNECT purposes.
-        min_version: beta
       - !ruby/object:Api::Type::Integer
         name: prefixLength
         description: |
           The prefix length if the resource represents an IP range.
-        min_version: beta
   - !ruby/object:Api::Resource
     name: 'Autoscaler'
     kind: 'compute#autoscaler'
@@ -7521,7 +7519,6 @@ objects:
           this interconnect attachment, the HA VPN gateway's IP address will be
           allocated from regional external IP address pool.
         input: true
-        min_version: beta
         item_type: !ruby/object:Api::Type::ResourceRef
           name: 'ipsecInternalAddress'
           resource: 'Address'
@@ -7551,7 +7548,6 @@ objects:
           - :NONE
           - :IPSEC
         default_value: :NONE
-        min_version: beta
   - !ruby/object:Api::Resource
     name: 'MachineImage'
     kind: 'compute#machineImage'
@@ -15499,7 +15495,6 @@ objects:
 
                   Not currently available publicly.
               input: true
-              min_version: beta
   - !ruby/object:Api::Resource
     name: 'ExternalVpnGateway'
     kind: 'compute#externalVpnGateway'
