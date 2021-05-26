@@ -11,7 +11,7 @@ func dataSourceSecretManagerSecret() *schema.Resource {
 	addOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
-		Read:   dataSourceSecretManagerSecretRead(),
+		Read:   dataSourceSecretManagerSecretRead,
 		Schema: dsSchema,
 	}
 }
