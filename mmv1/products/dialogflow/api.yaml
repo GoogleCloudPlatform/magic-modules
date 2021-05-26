@@ -361,12 +361,11 @@ objects:
           properties:
           - !ruby/object:Api::Type::Enum
             name: 'type'
+            required: true
             description: |
               The type of the feature that enabled for fulfillment.
-              * TYPE_UNSPECIFIED: Feature type not specified.
               * SMALLTALK: Fulfillment is enabled for SmallTalk.
             values:
-              - :TYPE_UNSPECIFIED
               - :SMALLTALK
       - !ruby/object:Api::Type::NestedObject
         name: 'genericWebService'
@@ -375,6 +374,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'uri'
+            required: true
             description: |
               The fulfillment URI for receiving POST requests. It must use https protocol.
           - !ruby/object:Api::Type::String
