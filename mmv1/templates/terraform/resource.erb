@@ -870,7 +870,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%    end -%>
 <%  end -%>
 <%  if object.supports_indirect_user_project_override -%>
-    
+
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
         billingProject = parts[1]
     }

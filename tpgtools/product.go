@@ -66,3 +66,10 @@ func (pm *ProductMetadata) ProductType() string {
 func (pm *ProductMetadata) ProductNameUpper() string {
 	return strings.ToUpper(pm.ProductName)
 }
+
+// DCLPackage is the package name of the DCL client library to use for this
+// resource. For example, the Package "access_context_manager" would have a
+// DCLPackage of "accesscontextmanager"
+func (pm *ProductMetadata) DCLPackage() string {
+	return strings.Replace(pm.PackagePath, "_", "", -1)
+}
