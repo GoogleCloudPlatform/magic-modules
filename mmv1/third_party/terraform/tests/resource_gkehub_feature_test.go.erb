@@ -59,16 +59,19 @@ resource "google_project" "project" {
 resource "google_project_service" "mci" {
   project = google_project.project.project_id
   service = "multiclusteringress.googleapis.com"
+  provider = google-beta
 }
 
 resource "google_project_service" "compute" {
   project = google_project.project.project_id
   service = "compute.googleapis.com"
+  provider = google-beta
 }
 
 resource "google_project_service" "container" {
   project = google_project.project.project_id
   service = "container.googleapis.com"
+  provider = google-beta
 }
 
 resource "google_container_cluster" "primary" {
@@ -138,16 +141,19 @@ resource "google_project" "acceptance" {
 resource "google_project_service" "mci" {
   project = google_project.project.project_id
   service = "multiclusteringress.googleapis.com"
+  provider = google-beta
 }
 
 resource "google_project_service" "compute" {
   project = google_project.project.project_id
   service = "compute.googleapis.com"
+  provider = google-beta
 }
 
 resource "google_project_service" "container" {
   project = google_project.project.project_id
   service = "container.googleapis.com"
+  provider = google-beta
 }
 
 resource "google_container_cluster" "primary" {
