@@ -95,7 +95,7 @@ resource "google_container_cluster" "primary" {
   initial_node_count = 1
   project = google_project.project.project_id
   provider = google-beta
-  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container]
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_container_cluster" "secondary" {
@@ -104,7 +104,7 @@ resource "google_container_cluster" "secondary" {
   initial_node_count = 1
   project = google_project.project.project_id
   provider = google-beta
-  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container]
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_gke_hub_membership" "membership" {
@@ -194,7 +194,7 @@ resource "google_container_cluster" "primary" {
   initial_node_count = 1
   project = google_project.project.project_id
   provider = google-beta
-  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container]
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_container_cluster" "secondary" {
@@ -203,7 +203,7 @@ resource "google_container_cluster" "secondary" {
   initial_node_count = 1
   project = google_project.project.project_id
   provider = google-beta
-  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container]
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_gke_hub_membership" "membership" {
