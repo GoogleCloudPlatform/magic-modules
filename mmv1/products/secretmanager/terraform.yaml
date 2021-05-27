@@ -27,6 +27,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: templates/terraform/custom_expand/bool_to_object.go.erb
       expireTime: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      ttl: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true # API doesn't return this value
 
   SecretVersion: !ruby/object:Overrides::Terraform::ResourceOverride
     # Versions will be sweeped by the Secret sweeper
