@@ -62,6 +62,12 @@ resource "google_project_service" "mci" {
   provider = google-beta
 }
 
+resource "google_project_service" "mcsd" {
+  project = google_project.project.project_id
+  service = "multiclusterservicediscovery.googleapis.com"
+  provider = google-beta
+}
+
 resource "google_project_service" "compute" {
   project = google_project.project.project_id
   service = "compute.googleapis.com"
@@ -151,6 +157,12 @@ resource "google_project" "acceptance" {
 resource "google_project_service" "mci" {
   project = google_project.project.project_id
   service = "multiclusteringress.googleapis.com"
+  provider = google-beta
+}
+
+resource "google_project_service" "mcsd" {
+  project = google_project.project.project_id
+  service = "multiclusterservicediscovery.googleapis.com"
   provider = google-beta
 }
 
