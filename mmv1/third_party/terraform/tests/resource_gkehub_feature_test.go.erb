@@ -65,14 +65,20 @@ resource "google_project_service" "mci" {
 resource "google_project_service" "compute" {
   project = google_project.project.project_id
   service = "compute.googleapis.com"
-  disable_dependent_services = true
+  disable_on_destroy = false
   provider = google-beta
 }
 
 resource "google_project_service" "container" {
   project = google_project.project.project_id
   service = "container.googleapis.com"
-  disable_dependent_services = true
+  disable_on_destroy = false
+  provider = google-beta
+}
+
+resource "google_project_service" "gkehub" {
+  project = google_project.project.project_id
+  service = "gkehub.googleapis.com"
   provider = google-beta
 }
 
@@ -151,14 +157,20 @@ resource "google_project_service" "mci" {
 resource "google_project_service" "compute" {
   project = google_project.project.project_id
   service = "compute.googleapis.com"
-  disable_dependent_services = true
+  disable_on_destroy = false
   provider = google-beta
 }
 
 resource "google_project_service" "container" {
   project = google_project.project.project_id
   service = "container.googleapis.com"
-  disable_dependent_services = true
+  disable_on_destroy = false
+  provider = google-beta
+}
+
+resource "google_project_service" "gkehub" {
+  project = google_project.project.project_id
+  service = "gkehub.googleapis.com"
   provider = google-beta
 }
 
