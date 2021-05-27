@@ -85,7 +85,7 @@ resource "google_project_service" "container" {
 resource "google_project_service" "gkehub" {
   project = google_project.project.project_id
   service = "gkehub.googleapis.com"
-  disable_dependent_services = true
+  disable_on_destroy = false
   provider = google-beta
 }
 
@@ -184,7 +184,7 @@ resource "google_project_service" "container" {
 resource "google_project_service" "gkehub" {
   project = google_project.project.project_id
   service = "gkehub.googleapis.com"
-  disable_dependent_services = true
+  disable_on_destroy = false
   provider = google-beta
 }
 
