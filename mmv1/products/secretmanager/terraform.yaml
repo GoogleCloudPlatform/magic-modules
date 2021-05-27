@@ -25,6 +25,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       replication.automatic: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/object_to_bool.go.erb
         custom_expand: templates/terraform/custom_expand/bool_to_object.go.erb
+      expireTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
 
   SecretVersion: !ruby/object:Overrides::Terraform::ResourceOverride
     # Versions will be sweeped by the Secret sweeper
