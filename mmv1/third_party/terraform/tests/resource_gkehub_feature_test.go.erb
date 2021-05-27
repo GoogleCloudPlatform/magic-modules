@@ -47,47 +47,7 @@ func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
 }
 
 func testAccGKEHubFeature_gkehubFeatureMciUpdateStart(context map[string]interface{}) string {
-  return Nprintf(`
-resource "google_project" "project" {
-  name            = "tf-test-gkehub%{random_suffix}"
-  project_id      = "tf-test-gkehub%{random_suffix}"
-  org_id          = "%{org_id}"
-  billing_account = "%{billing_account}"
-  provider        = google-beta
-}
-
-resource "google_project_service" "mci" {
-  project = google_project.project.project_id
-  service = "multiclusteringress.googleapis.com"
-  provider = google-beta
-}
-
-resource "google_project_service" "mcsd" {
-  project = google_project.project.project_id
-  service = "multiclusterservicediscovery.googleapis.com"
-  provider = google-beta
-}
-
-resource "google_project_service" "compute" {
-  project = google_project.project.project_id
-  service = "compute.googleapis.com"
-  disable_on_destroy = false
-  provider = google-beta
-}
-
-resource "google_project_service" "container" {
-  project = google_project.project.project_id
-  service = "container.googleapis.com"
-  disable_on_destroy = false
-  provider = google-beta
-}
-
-resource "google_project_service" "gkehub" {
-  project = google_project.project.project_id
-  service = "gkehub.googleapis.com"
-  disable_on_destroy = false
-  provider = google-beta
-}
+  return projectSetup(context) + Nprintf(`
 
 resource "google_container_cluster" "primary" {
   name               = "tf-test%{random_suffix}"
@@ -146,7 +106,7 @@ resource "google_gkehub_feature" "feature" {
 }
 
 func testAccGKEHubFeature_gkehubFeatureMciUpdateEnd(context map[string]interface{}) string {
-  return Nprintf(`
+  return projectSetup(context) + Nprintf(`
 resource "google_project" "project" {
   name            = "tf-test-gkehub%{random_suffix}"
   project_id      = "tf-test-gkehub%{random_suffix}"
@@ -611,7 +571,7 @@ resource "google_gkehub_feature_membership" "feature_member_2" {
   feature = google_gkehub_feature.feature.name
   membership = google_gke_hub_membership.membership_second.membership_id
   configmanagement {
-    version = "1.6.1"
+    version = "1.6.2"
     config_sync {
       source_format = "unstructured"
       git {
@@ -623,6 +583,11 @@ resource "google_gkehub_feature_membership" "feature_member_2" {
       audit_interval_seconds = "9"
       exemptable_namespaces = ["different", "1234"]
       template_library_installed = false
+    }
+    hierarchy_controller {
+      enable_hierarchical_resource_quota = true
+      enable_pod_tree_labels = false
+      enabled = true
     }
   }
   provider = google-beta
@@ -645,6 +610,11 @@ resource "google_gkehub_feature_membership" "feature_member_3" {
       audit_interval_seconds = "100"
       exemptable_namespaces = ["onetwothree", "fourfive"]
       template_library_installed = true
+    }
+    hierarchy_controller {
+      enable_hierarchical_resource_quota = false
+      enable_pod_tree_labels = true
+      enabled = false
     }
   }
   provider = google-beta
@@ -906,6 +876,51 @@ resource "google_gkehub_feature_membership" "feature_member" {
 `, context)
 }
 
+func projectSetup(context map[string]interface{}) string {
+  return Nprintf(`
+resource "google_project" "project" {
+  name            = "tf-test-gkehub%{random_suffix}"
+  project_id      = "tf-test-gkehub%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  provider        = google-beta
+}
+
+resource "google_project_service" "mci" {
+  project = google_project.project.project_id
+  service = "multiclusteringress.googleapis.com"
+  provider = google-beta
+}
+
+resource "google_project_service" "mcsd" {
+  project = google_project.project.project_id
+  service = "multiclusterservicediscovery.googleapis.com"
+  provider = google-beta
+}
+
+resource "google_project_service" "compute" {
+  project = google_project.project.project_id
+  service = "compute.googleapis.com"
+  disable_on_destroy = false
+  provider = google-beta
+}
+
+resource "google_project_service" "container" {
+  project = google_project.project.project_id
+  service = "container.googleapis.com"
+  disable_on_destroy = false
+  provider = google-beta
+}
+
+resource "google_project_service" "gkehub" {
+  project = google_project.project.project_id
+  service = "gkehub.googleapis.com"
+  disable_on_destroy = false
+  provider = google-beta
+}
+`, context)
+}
+
 func testAccCheckGKEHubFeatureDestroyProducer(t *testing.T) func(s *terraform.State) error {
   return func(s *terraform.State) error {
     for name, rs := range s.RootModule().Resources {
@@ -949,7 +964,7 @@ func testAccCheckGkeHubFeatureMembershipPresent(t *testing.T, project, location,
       Project:          dcl.String(project),
     }
 
-    _, err := config.clientGkehubDCL.GetFeatureMembership(context.Background(), obj)
+    _, err := config.clientGkeHubDCL.GetFeatureMembership(context.Background(), obj)
     if err != nil {
       return err
     }
@@ -967,7 +982,7 @@ func testAccCheckGkeHubFeatureMembershipNotPresent(t *testing.T, project, locati
       Project:          dcl.String(project),
     }
 
-    _, err := config.clientGkehubDCL.GetFeatureMembership(context.Background(), obj)
+    _, err := config.clientGkeHubDCL.GetFeatureMembership(context.Background(), obj)
     if err == nil {
       return fmt.Errorf("Did not expect to find GKE Feature Membership for projects/%s/locations/%s/features/%s/membershipId/%s", project, location, feature, membership)
     }

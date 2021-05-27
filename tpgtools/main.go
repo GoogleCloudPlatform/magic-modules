@@ -207,7 +207,13 @@ func getResources(packagePath string, specs []os.FileInfo) []*Resource {
 			glog.Exit(err)
 		}
 
-		lRaw := schema.Extension["x-dcl-locations"].([]interface{})
+		l := schema.Extension["x-dcl-locations"]
+		var lRaw []interface{}
+		if l == nil {
+			lRaw = make([]interface{}, 0)
+		} else {
+			lRaw = l.([]interface{})
+		}
 
 		typeFetcher := NewTypeFetcher(document)
 		var locations []string

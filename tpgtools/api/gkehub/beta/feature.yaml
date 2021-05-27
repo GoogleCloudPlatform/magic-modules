@@ -11,111 +11,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-components:
-  schemas:
-    Feature:
-      properties:
-        createTime:
-          description: Output only. When the Feature resource was created.
-          format: date-time
-          readOnly: true
-          type: string
-          x-dcl-go-name: CreateTime
-          x-kubernetes-immutable: true
-        deleteTime:
-          description: Output only. When the Feature resource was deleted.
-          format: date-time
-          readOnly: true
-          type: string
-          x-dcl-go-name: DeleteTime
-          x-kubernetes-immutable: true
-        labels:
-          additionalProperties:
-            type: string
-          description: GCP labels for this Feature.
-          type: object
-          x-dcl-go-name: Labels
-        location:
-          description: The location for the resource
-          type: string
-          x-dcl-go-name: Location
-          x-kubernetes-immutable: true
-        name:
-          description: The full, unique name of this Feature resource
-          type: string
-          x-dcl-go-name: Name
-          x-kubernetes-immutable: true
-        project:
-          description: The project for the resource
-          type: string
-          x-dcl-go-name: Project
-          x-dcl-references:
-          - field: name
-            parent: true
-            resource: Cloudresourcemanager/Project
-          x-kubernetes-immutable: true
-        spec:
-          description: Optional. Hub-wide Feature configuration. If this Feature does
-            not support any Hub-wide configuration, this field may be unused.
-          properties:
-            multiclusteringress:
-              description: Multicluster Ingress-specific spec.
-              properties:
-                billing:
-                  description: 'Customer''s billing structure Possible values: BILLING_UNSPECIFIED,
-                    PAY_AS_YOU_GO, ANTHOS_LICENSE'
-                  enum:
-                  - BILLING_UNSPECIFIED
-                  - PAY_AS_YOU_GO
-                  - ANTHOS_LICENSE
-                  type: string
-                  x-dcl-go-name: Billing
-                  x-dcl-go-type: FeatureSpecMulticlusteringressBillingEnum
-                configMembership:
-                  description: 'Fully-qualified Membership name which hosts the MultiClusterIngress
-                    CRD. Example: `projects/foo-proj/locations/global/memberships/bar`'
-                  type: string
-                  x-dcl-go-name: ConfigMembership
-              type: object
-              x-dcl-go-name: Multiclusteringress
-              x-dcl-go-type: FeatureSpecMulticlusteringress
-          type: object
-          x-dcl-go-name: Spec
-          x-dcl-go-type: FeatureSpec
-        updateTime:
-          description: Output only. When the Feature resource was last updated.
-          format: date-time
-          readOnly: true
-          type: string
-          x-dcl-go-name: UpdateTime
-          x-kubernetes-immutable: true
-      required:
-      - project
-      - location
-      title: Feature
-      type: object
-      x-dcl-id: projects/{{project}}/locations/{{location}}/features/{{name}}
-      x-dcl-labels: labels
-      x-dcl-locations: []
-      x-dcl-parent-container: project
-      x-dcl-uses-state-hint: false
 info:
-  description: DCL Specification for the Gkehub Feature resource
-  title: Gkehub/Feature
+  title: GkeHub/Feature
+  description: DCL Specification for the GkeHub Feature resource
   x-dcl-has-iam: false
 paths:
+  get:
+    description: The function used to get information about a Feature
+    parameters:
+    - name: Feature
+      required: true
+      description: A full instance of a Feature
   apply:
     description: The function used to apply information about a Feature
     parameters:
-    - description: A full instance of a Feature
-      name: Feature
+    - name: Feature
       required: true
+      description: A full instance of a Feature
   delete:
     description: The function used to delete a Feature
     parameters:
-    - description: A full instance of a Feature
-      name: Feature
+    - name: Feature
       required: true
+      description: A full instance of a Feature
   deleteAll:
     description: The function used to delete all Feature
     parameters:
@@ -127,12 +45,6 @@ paths:
       required: true
       schema:
         type: string
-  get:
-    description: The function used to get information about a Feature
-    parameters:
-    - description: A full instance of a Feature
-      name: Feature
-      required: true
   list:
     description: The function used to list information about many Feature
     parameters:
@@ -144,3 +56,82 @@ paths:
       required: true
       schema:
         type: string
+components:
+  schemas:
+    Feature:
+      title: Feature
+      x-dcl-id: projects/{{project}}/locations/{{location}}/features/{{name}}
+      x-dcl-parent-container: project
+      x-dcl-labels: labels
+      type: object
+      required:
+      - project
+      - location
+      properties:
+        createTime:
+          type: string
+          format: date-time
+          x-dcl-go-name: CreateTime
+          readOnly: true
+          description: Output only. When the Feature resource was created.
+          x-kubernetes-immutable: true
+        deleteTime:
+          type: string
+          format: date-time
+          x-dcl-go-name: DeleteTime
+          readOnly: true
+          description: Output only. When the Feature resource was deleted.
+          x-kubernetes-immutable: true
+        labels:
+          type: object
+          additionalProperties:
+            type: string
+          x-dcl-go-name: Labels
+          description: GCP labels for this Feature.
+        location:
+          type: string
+          x-dcl-go-name: Location
+          description: The location for the resource
+          x-kubernetes-immutable: true
+        name:
+          type: string
+          x-dcl-go-name: Name
+          description: The full, unique name of this Feature resource
+          x-kubernetes-immutable: true
+        project:
+          type: string
+          x-dcl-go-name: Project
+          description: The project for the resource
+          x-kubernetes-immutable: true
+          x-dcl-references:
+          - resource: Cloudresourcemanager/Project
+            field: name
+            parent: true
+        spec:
+          type: object
+          x-dcl-go-name: Spec
+          x-dcl-go-type: FeatureSpec
+          description: Optional. Hub-wide Feature configuration. If this Feature does
+            not support any Hub-wide configuration, this field may be unused.
+          properties:
+            multiclusteringress:
+              type: object
+              x-dcl-go-name: Multiclusteringress
+              x-dcl-go-type: FeatureSpecMulticlusteringress
+              description: Multicluster Ingress-specific spec.
+              properties:
+                configMembership:
+                  type: string
+                  x-dcl-go-name: ConfigMembership
+                  description: 'Fully-qualified Membership name which hosts the MultiClusterIngress
+                    CRD. Example: `projects/foo-proj/locations/global/memberships/bar`'
+                  x-dcl-references:
+                  - resource: Gkehub/Membership
+                    field: name
+        updateTime:
+          type: string
+          format: date-time
+          x-dcl-go-name: UpdateTime
+          readOnly: true
+          description: Output only. When the Feature resource was last updated.
+          x-kubernetes-immutable: true
