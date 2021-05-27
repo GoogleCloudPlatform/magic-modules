@@ -146,7 +146,7 @@ resource "google_gkehub_feature" "feature" {
 
 func testAccGKEHubFeature_gkehubFeatureMciUpdateEnd(context map[string]interface{}) string {
   return Nprintf(`
-resource "google_project" "acceptance" {
+resource "google_project" "project" {
   name            = "tf-test-gkehub%{random_suffix}"
   project_id      = "tf-test-gkehub%{random_suffix}"
   org_id          = "%{org_id}"
