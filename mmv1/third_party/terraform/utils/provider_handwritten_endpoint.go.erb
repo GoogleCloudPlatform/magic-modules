@@ -187,6 +187,17 @@ var EventarcCustomEndpointEntry = &schema.Schema{
 	}, EventarcDefaultBasePath),
 }
 
+var ApikeysDefaultBasePath = "https://apikeys.googleapis.com/v2/"
+var ApikeysCustomEndpointEntryKey = "eventarc_custom_endpoint"
+var ApikeysCustomEndpointEntry = &schema.Schema{
+	Type:         schema.TypeString,
+	Optional:     true,
+	ValidateFunc: validateCustomEndpoint,
+	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+		"GOOGLE_APIKEYS_CUSTOM_ENDPOINT",
+	}, ApikeysDefaultBasePath),
+}
+
 func validateCustomEndpoint(v interface{}, k string) (ws []string, errors []error) {
 	re := `.*/[^/]+/$`
 	return validateRegexp(re)(v, k)
