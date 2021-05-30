@@ -63,6 +63,7 @@ import (
 	"google.golang.org/api/storage/v1"
 	"google.golang.org/api/storagetransfer/v1"
 	"google.golang.org/api/transport"
+	bigqueryreservationDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc"
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	dataprocDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc<% unless version == 'ga' -%>/beta<% end -%>"
 	eventarcDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc<% unless version == 'ga' -%>/beta<% end -%>"
@@ -120,6 +121,7 @@ type Config struct {
 	requestBatcherIam          *RequestBatcher
 
 	// start DCL clients
+	clientBigqueryReservationDCL *bigqueryreservationDcl.Client
 	// dataprocBasePath is implemented in mm
 	clientDataprocDCL      *dataprocDcl.Client
 	EventarcBasePath string
@@ -198,6 +200,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	dclLoggerOptions := dcl.WithLogger(dclLogger{})
 	// each product needs it own client currently since basepath can only be specified at
 	// the config level.
+	c.clientBigqueryReservationDCL = bigqueryreservationDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions,dclLoggerOptions, dcl.WithBasePath(c.BigqueryReservationBasePath)))
 	c.clientDataprocDCL = dataprocDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions,dclLoggerOptions, dcl.WithBasePath(c.DataprocBasePath)))
 	c.clientEventarcDCL = eventarcDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions,dclLoggerOptions, dcl.WithBasePath(c.EventarcBasePath)))
 
