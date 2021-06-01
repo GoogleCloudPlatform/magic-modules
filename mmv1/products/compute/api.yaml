@@ -637,6 +637,7 @@ objects:
         - !ruby/object:Api::Type::Boolean
           name: 'negativeCaching'
           min_version: beta
+          send_empty_value: true
           description: |
             Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects.
         - !ruby/object:Api::Type::Array
@@ -672,6 +673,7 @@ objects:
         - !ruby/object:Api::Type::Integer
           name: 'serveWhileStale'
           min_version: beta
+          send_empty_value: true
           description: |
             Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
 
@@ -1239,6 +1241,7 @@ objects:
           - !ruby/object:Api::Type::Boolean
             name: 'negativeCaching'
             min_version: beta
+            send_empty_value: true
             description: |
               Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects.
           - !ruby/object:Api::Type::Array
@@ -1274,6 +1277,7 @@ objects:
           - !ruby/object:Api::Type::Integer
             name: 'serveWhileStale'
             min_version: beta
+            send_empty_value: true
             description: |
               Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
       - !ruby/object:Api::Type::NestedObject
@@ -2219,6 +2223,7 @@ objects:
           - !ruby/object:Api::Type::Boolean
             name: 'negativeCaching'
             min_version: beta
+            send_empty_value: true
             description: |
               Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects.
           - !ruby/object:Api::Type::Array
@@ -2254,6 +2259,7 @@ objects:
           - !ruby/object:Api::Type::Integer
             name: 'serveWhileStale'
             min_version: beta
+            send_empty_value: true
             description: |
               Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
 
@@ -3344,6 +3350,10 @@ objects:
         description: |
           Indicates whether or not the disk can be read/write attached to more than one instance.
         min_version: beta
+      - !ruby/object:Api::Type::Integer
+        name: 'provisionedIops'
+        description: |
+          Indicates how many IOPS must be provisioned for the disk.
   - !ruby/object:Api::Resource
     name: 'Firewall'
     kind: 'compute#firewall'
