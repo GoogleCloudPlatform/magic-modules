@@ -58,7 +58,7 @@ func testAccDialogflowCXAgent_basic(context map[string]interface{}) string {
 
 	resource "google_dialogflow_cx_agent" "foobar" {
 		display_name = "tf-test-%{random_suffix}"
-		location = "us-central1"
+		location = "global"
 		default_language_code = "en"
 		supported_language_codes = ["fr","de","es"]
 		time_zone = "America/New_York"
@@ -87,7 +87,7 @@ func testAccDialogflowCXAgent_full(context map[string]interface{}) string {
 
 	resource "google_dialogflow_cx_agent" "foobar" {
 		display_name = "tf-test-%{random_suffix}update"
-		location = "us-central1"
+		location = "global"
 		default_language_code = "en"
 		supported_language_codes = ["no"]
 		time_zone = "Europe/London"
