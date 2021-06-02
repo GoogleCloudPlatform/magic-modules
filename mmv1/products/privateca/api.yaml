@@ -16,8 +16,8 @@ name: Privateca
 display_name: Certificate Authority Service
 versions:
   - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://privateca.googleapis.com/v1beta1/
+    name: ga
+    base_url: https://privateca.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -31,15 +31,13 @@ objects:
     description: |
         A CertificateAuthority represents an individual Certificate Authority. A
         CertificateAuthority can be used to create Certificates.
-    base_url: projects/{{project}}/locations/{{location}}/certificateAuthorities
-    create_url: projects/{{project}}/locations/{{location}}/certificateAuthorities?certificateAuthorityId={{certificate_authority_id}}
-    self_link: projects/{{project}}/locations/{{location}}/certificateAuthorities/{{certificate_authority_id}}
-    min_version: beta
+    base_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities
+    create_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities?certificateAuthorityId={{certificate_authority_id}}
+    self_link: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}
+    create_url: '{{name}}?ignoreActiveCertificates={{ignore_active_certificates}}'
     create_verb: :POST
     update_verb: :PATCH
     update_mask: true
-    delete_url: '{{name}}:scheduleDelete'
-    delete_verb: :POST
     async: !ruby/object:Api::OpAsync
         operation: !ruby/object:Api::OpAsync::Operation
           base_url: '{{op_id}}'
@@ -67,13 +65,19 @@ objects:
         name: location
         description:  |
           Location of the CertificateAuthority. A full list of valid locations can be found by
-          running `gcloud beta privateca locations list`.
+          running `gcloud privateca locations list`.
         required: true
         input: true
         url_param_only: true
       - !ruby/object:Api::Type::String
         name: certificateAuthorityId
         description: The user provided Resource ID for this Certificate Authority.
+        required: true
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: pool
+        description: The name of the CaPool this Certificate Authority belongs to.
         required: true
         input: true
         url_param_only: true
@@ -347,7 +351,6 @@ objects:
     base_url: 'projects/{{project}}/locations/{{location}}/certificateAuthorities/{{certificate_authority}}/certificates'
     create_url: 'projects/{{project}}/locations/{{location}}/certificateAuthorities/{{certificate_authority}}/certificates?certificateId={{name}}'
     self_link: 'projects/{{project}}/locations/{{location}}/certificateAuthorities/{{certificate_authority}}/certificates/{{name}}'
-    min_version: beta
     delete_url: 'projects/{{project}}/locations/{{location}}/certificateAuthorities/{{certificate_authority}}/certificates/{{name}}:revoke'
     delete_verb: :POST    
     input: true
@@ -358,7 +361,7 @@ objects:
         name: location
         description:  |
           Location of the CertificateAuthority. A full list of valid locations can be found by
-          running `gcloud beta privateca locations list`.
+          running `gcloud privateca locations list`.
         required: true
         input: true
         url_param_only: true
@@ -853,3 +856,80 @@ objects:
               - "KEY_TYPE_UNSPECIFIED"
               - "PEM_RSA_KEY"
               - "PEM_EC_KEY"
+  - !ruby/object:Api::Resource
+    name: 'CaPool'
+    base_url: 'projects/{{project}}/locations/{{location}}/caPools'
+    create_url: 'projects/{{project}}/locations/{{location}}/caPools?caPoolId={{name}}'
+    self_link: 'projects/{{project}}/locations/{{location}}/caPools/{{name}}'
+    input: true
+    description: |
+      A CaPool represents a group of CertificateAuthorities that form a trust anchor. A CaPool can be used to manage
+      issuance policies for one or more CertificateAuthority resources and to rotate CA certificates in and out of the
+      trust anchor.
+    parameters:    
+      - !ruby/object:Api::Type::String
+        name: location
+        description:  |
+          Location of the CaPool. A full list of valid locations can be found by
+          running `gcloud privateca locations list`.
+        required: true
+        input: true
+        url_param_only: true        
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The name for this CaPool.
+        required: true
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::Enum
+        name: 'tier'
+        description: |
+          The Tier of this CaPool.
+        values:
+          - "ENTERPRISE"
+          - "DEVOPS"
+        input: true
+        required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'issuancePolicy'
+        description: |
+          The IssuancePolicy to control how Certificates will be issued from this CaPool.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'maximumLifetime'
+            description: |
+              The maximum lifetime allowed for issued Certificates. Note that if the issuing CertificateAuthority
+              expires before a Certificate's requested maximumLifetime, the effective lifetime will be explicitly truncated to match it.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'publishingOptions'
+        description: |
+          The PublishingOptions to follow when issuing Certificates from any CertificateAuthority in this CaPool.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'publishCaCert'
+            required: true
+            description: |
+              When true, publishes each CertificateAuthority's CA certificate and includes its URL in the "Authority Information Access"
+              X.509 extension in all issued Certificates. If this is false, the CA certificate will not be published and the corresponding
+              X.509 extension will not be written in issued certificates.
+          - !ruby/object:Api::Type::Boolean
+            name: 'publishCrl'
+            required: true
+            description: |
+              When true, publishes each CertificateAuthority's CRL and includes its URL in the "CRL Distribution Points" X.509 extension
+              in all issued Certificates. If this is false, CRLs will not be published and the corresponding X.509 extension will not
+              be written in issued certificates. CRLs will expire 7 days from their creation. However, we will rebuild daily. CRLs are
+              also rebuilt shortly after a certificate is revoked.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: labels
+        description: |
+          Labels with user-defined metadata.
+
+          An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass":
+          "1.3kg", "count": "3" }.
+
+
+
+
