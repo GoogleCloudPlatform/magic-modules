@@ -1208,7 +1208,7 @@ resource "google_dataproc_cluster" "with_config_overrides" {
       machine_type  = "n1-standard-2"  // can't be e2 because of min_cpu_platform
       disk_config {
         boot_disk_type    = "pd-standard"
-        boot_disk_size_gb = 32
+        boot_disk_size_gb = 35
         num_local_ssds    = 1
       }
 
@@ -1219,7 +1219,7 @@ resource "google_dataproc_cluster" "with_config_overrides" {
       num_instances = 1
       disk_config {
         boot_disk_type    = "pd-ssd"
-        boot_disk_size_gb = 34
+        boot_disk_size_gb = 35
         num_local_ssds    = 1
       }
     }
@@ -1304,7 +1304,7 @@ resource "google_dataproc_cluster" "updatable" {
     preemptible_worker_config {
       num_instances = "%d"
       disk_config {
-        boot_disk_size_gb = 30
+        boot_disk_size_gb = 35
       }
     }
   }
