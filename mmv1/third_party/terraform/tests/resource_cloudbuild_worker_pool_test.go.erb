@@ -34,6 +34,22 @@ func TestAccCloudbuildWorkerPool_basic(t *testing.T) {
 				ImportStateVerify: true,
 				ResourceName:      "google_cloudbuild_worker_pool.pool",
 			},
+			{
+				Config: testAccCloudbuildWorkerPool_updated(context),
+			},
+			{
+				ImportState:       true,
+				ImportStateVerify: true,
+				ResourceName:      "google_cloudbuild_worker_pool.pool",
+			},
+			{
+				Config: testAccCloudbuildWorkerPool_updated2(context),
+			},
+			{
+				ImportState:       true,
+				ImportStateVerify: true,
+				ResourceName:      "google_cloudbuild_worker_pool.pool",
+			},
 		},
 	})
 }
@@ -48,6 +64,47 @@ resource "google_cloudbuild_worker_pool" "pool" {
 		machine_type = "n1-standard-2"
 		no_external_ip = true
 	}
+}
+
+resource "google_compute_network" "network" {
+  name                    = "tf-test-network%{random_suffix}"
+  auto_create_subnetworks = false
+}
+`, context)
+}
+
+func testAccCloudbuildWorkerPool_updated(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_compute_network" "network" {
+  name                    = "tf-test-network%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_cloudbuild_worker_pool" "pool" {
+	name = "pool%{random_suffix}"
+	location = "europe-west1"
+	worker_config {
+		disk_size_gb = 101
+		machine_type = "n2-standard-4"
+		no_external_ip = false
+	}
+	network_config {
+		peered_network = google_compute_network.network.id
+	}
+}
+`, context)
+}
+
+func testAccCloudbuildWorkerPool_updated2(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_compute_network" "network" {
+  name                    = "tf-test-network%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_cloudbuild_worker_pool" "pool" {
+	name = "pool%{random_suffix}"
+	location = "europe-west1"
 }
 `, context)
 }
