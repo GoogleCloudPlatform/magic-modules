@@ -1198,7 +1198,7 @@ resource "google_dataproc_cluster" "with_config_overrides" {
       machine_type  = "n1-standard-2"  // can't be e2 because of min_cpu_platform
       disk_config {
         boot_disk_type    = "pd-ssd"
-        boot_disk_size_gb = 30
+        boot_disk_size_gb = 35
       }
       min_cpu_platform = "Intel Skylake"
     }
@@ -1261,7 +1261,7 @@ resource "google_dataproc_cluster" "with_init_action" {
     master_config {
       machine_type = "e2-medium"
       disk_config {
-        boot_disk_size_gb = 30
+        boot_disk_size_gb = 35
       }
     }
 
@@ -1289,7 +1289,7 @@ resource "google_dataproc_cluster" "updatable" {
       num_instances = "1"
       machine_type  = "e2-medium"
       disk_config {
-        boot_disk_size_gb = 30
+        boot_disk_size_gb = 35
       }
     }
 
@@ -1297,7 +1297,7 @@ resource "google_dataproc_cluster" "updatable" {
       num_instances = "%d"
       machine_type  = "e2-medium"
       disk_config {
-        boot_disk_size_gb = 30
+        boot_disk_size_gb = 35
       }
     }
 
@@ -1351,7 +1351,7 @@ resource "google_dataproc_cluster" "with_bucket" {
     master_config {
       machine_type = "e2-medium"
       disk_config {
-        boot_disk_size_gb = 30
+        boot_disk_size_gb = 35
       }
     }
   }
@@ -1380,7 +1380,7 @@ resource "google_dataproc_cluster" "with_bucket" {
     master_config {
       machine_type = "e2-medium"
       disk_config {
-        boot_disk_size_gb = 30
+        boot_disk_size_gb = 35
       }
     }
   }
@@ -1512,7 +1512,7 @@ resource "google_dataproc_cluster" "with_service_account" {
     master_config {
       machine_type = "e2-medium"
       disk_config {
-        boot_disk_size_gb = 30
+        boot_disk_size_gb = 35
       }
     }
 
@@ -1589,7 +1589,7 @@ resource "google_dataproc_cluster" "with_net_ref_by_name" {
     master_config {
       machine_type = "e2-medium"
       disk_config {
-        boot_disk_size_gb = 30
+        boot_disk_size_gb = 35
       }
     }
 
@@ -1615,7 +1615,7 @@ resource "google_dataproc_cluster" "with_net_ref_by_url" {
     master_config {
       machine_type = "e2-medium"
       disk_config {
-        boot_disk_size_gb = 30
+        boot_disk_size_gb = 35
       }
     }
 
