@@ -57,12 +57,22 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "example"
         vars:
           topic_name: "example-topic"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "pubsub_topic_schema_settings"
+        primary_resource_id: "example"
+        vars:
+          topic_name: "example-topic"
+          schema_name: "example"
+        test_env_vars:
+          project_name: :PROJECT_NAME
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       messageStoragePolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      schemaSettings: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/no_send_name.go.erb
@@ -132,8 +142,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'comparePubsubSubscriptionExpirationPolicy'
       retryPolicy.minimumBackoff: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        diff_suppress_func: 'durationDiffSuppress'
       retryPolicy.maximumBackoff: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        diff_suppress_func: 'durationDiffSuppress'
       pushConfig.attributes: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'ignoreMissingKeyInMap("x-goog-version")'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -142,8 +154,21 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/no_send_name.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/pubsub_subscription_path.erb
       update_encoder: templates/terraform/update_encoder/pubsub_subscription.erb
-
-
+  Schema: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "pubsub_schema_basic"
+        primary_resource_id: "example"
+        vars:
+          schema_name: "example"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      # This can be changed once update is supported for schema definition
+      definition: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

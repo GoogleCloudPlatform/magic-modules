@@ -53,7 +53,7 @@ The `settings` block contains:
 * `tier` - The machine type to use.
     
 * `activation_policy` - This specifies when the instance should be
-    active. Can be either `ALWAYS`, `NEVER` or `ON_DEMAND`.
+    active. Can be either `ALWAYS` or `NEVER`.
 
 * `authorized_gae_applications` - (Deprecated) This property is only applicable to First Generation instances.
     First Generation instances are now deprecated, see [here](https://cloud.google.com/sql/docs/mysql/upgrade-2nd-gen)
@@ -67,6 +67,8 @@ instance, high availability (`REGIONAL`) or single zone (`ZONAL`).
     First Generation instances are now deprecated, see [here](https://cloud.google.com/sql/docs/mysql/upgrade-2nd-gen)
 
 * `disk_autoresize` - Configuration to increase storage size automatically.
+
+* `disk_autoresize_limit` - The maximum size, in GB, to which storage capacity can be automatically increased.
 
 * `disk_size` - The size of data disk, in GB.
 

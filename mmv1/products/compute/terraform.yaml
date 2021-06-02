@@ -45,6 +45,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
          address_name: "ipv4-address"
          instance_name: "vm-instance"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "compute_address_ipsec_interconnect"
+        primary_resource_id: "ipsec-interconnect-address"
+        min_version: beta
+        vars:
+          address_name: "test-address"
+          network_name: "test-network"
     properties:
       address: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -264,6 +271,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       cdnPolicy.negativeCaching: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      cdnPolicy.serveWhileStale: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.clientTtl: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.defaultTtl: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.maxTtl: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       connectionDraining: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
       connectionDraining.drainingTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -362,6 +377,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       cdnPolicy.cacheMode: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       cdnPolicy.negativeCaching: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.serveWhileStale: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.clientTtl: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.defaultTtl: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.maxTtl: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -566,6 +589,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           one at a time. Use
           [`google_compute_disk_resource_policy_attachment`](https://www.terraform.io/docs/providers/google/r/compute_disk_resource_policy_attachment.html)
           to allow for updating the resource policy attached to the disk.
+      interface: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       constants: templates/terraform/constants/disk.erb
@@ -1072,6 +1097,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           interconnect_attachment_name: "on-prem-attachment"
           router_name: "router"
           network_name: "network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "compute_interconnect_attachment_ipsec_encryption"
+        primary_resource_id: "ipsec-encrypted-interconnect-attachment"
+        min_version: beta
+        vars:
+          interconnect_attachment_name: "test-interconnect-attachment"
+          address_name: "test-address"
+          router_name: "test-router"
+          network_name: "test-network"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1105,6 +1139,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   License: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   MachineImage: !ruby/object:Overrides::Terraform::ResourceOverride
+    properties:
+      machineImageEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: compareCryptoKeyVersions
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/compute.admin'
       parent_resource_attribute: 'machine_image'
@@ -1116,6 +1153,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           vm_name: "vm"
           image_name: "image"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "compute_machine_image_kms"
+        primary_resource_id: "image"
+        vars:
+          vm_name: "vm"
+          image_name: "image"
+          key_name: "key"
+          keyring_name: "keyring"
 
   MachineType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
@@ -1327,6 +1372,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: 'templates/terraform/encoders/network_peering_routes_config.go.erb'
   NodeGroup: !ruby/object:Overrides::Terraform::ResourceOverride
+    create_url: projects/{{project}}/zones/{{zone}}/nodeGroups?initialNodeCount=PRE_CREATE_REPLACE_ME
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         Due to limitations of the API, Terraform cannot update the
@@ -1351,6 +1397,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      size: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        description: |
+         The total number of nodes in the node group. One of `initial_size` or `size` must be specified.
+        exactly_one_of:
+          - size
+          - initial_size
       autoscalingPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       autoscalingPolicy.mode: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -1359,6 +1412,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       autoscalingPolicy.maxNodes: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_create: templates/terraform/pre_create/compute_node_group_url_replace.go.erb
   NodeTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1412,6 +1467,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     self_link: '{{policy_id}}/getAssociation?name={{name}}'
     create_url: '{{policy_id}}/addAssociation'
     delete_url: '{{policy_id}}/removeAssociation?name={{name}}'
+    read_error_transform: "transformSecurityPolicyAssociationReadError"
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "organization_security_policy_association_basic"
@@ -1709,6 +1765,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       diskEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
+      interface: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       encoder: templates/terraform/encoders/disk.erb
@@ -1914,6 +1972,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "baz"
         vars:
           name: "policy"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "resource_policy_instance_schedule_policy"
+        primary_resource_id: "hourly"
+        vars:
+          name: "policy"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
@@ -2018,6 +2081,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           router_name: "my-router"
           network_name: "my-network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "compute_router_encrypted_interconnect"
+        primary_resource_id: "encrypted-interconnect-router"
+        min_version: beta
+        vars:
+          router_name: "test-router"
+          network_name: "test-network"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/router.go.erb
       resource_definition: templates/terraform/resource_definition/router.go.erb
@@ -2669,8 +2739,22 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           ha_vpn_gateway1_name: "ha-vpn-1"
           network1_name: "network1"
+          router1_name: "ha-vpn-router1"
           ha_vpn_gateway2_name: "ha-vpn-2"
           network2_name: "network2"
+          router2_name: "ha-vpn-router2"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "compute_ha_vpn_gateway_encrypted_interconnect"
+        primary_resource_id: "vpn-gateway"
+        min_version: beta
+        vars:
+          ha_vpn_gateway_name: "test-ha-vpngw"
+          interconnect_attachment1_name: "test-interconnect-attachment1"
+          interconnect_attachment2_name: "test-interconnect-attachment2"
+          address1_name: "test-address1"
+          address2_name: "test-address2"
+          router_name: "test-router"
+          network_name: "test-network"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
@@ -2683,6 +2767,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false # the provider-default value will be used if not specified
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      vpnInterfaces: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   ExternalVpnGateway: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
       interfaces: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -2698,6 +2784,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           network_name: "network"
           external_gateway_name: "external-gateway"
           global_address_name: "global-address"
+          router_name: "ha-vpn-router1"
   UrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples

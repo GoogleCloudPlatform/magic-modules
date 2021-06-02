@@ -180,13 +180,10 @@ module Provider
     # GCP Resource on Terraform.
     def generate_resource(pwd, data, generate_code, generate_docs)
       if generate_code
-        name = data.object.filename_override || data.object.name.underscore
-        product_name = data.product.name.underscore
-
         FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
         data.generate(pwd,
                       '/templates/terraform/resource.erb',
-                      "#{folder_name(data.version)}/resource_#{product_name}_#{name}.go",
+                      "#{folder_name(data.version)}/resource_#{full_resource_name(data)}.go",
                       self)
       end
 
@@ -199,11 +196,7 @@ module Provider
       target_folder = data.output_folder
       target_folder = File.join(target_folder, 'website', 'docs', 'r')
       FileUtils.mkpath target_folder
-      name = data.object.filename_override || data.object.name.underscore
-      product_name = @config.legacy_name || data.product.name.underscore
-
-      filepath =
-        File.join(target_folder, "#{product_name}_#{name}.html.markdown")
+      filepath = File.join(target_folder, "#{full_resource_name(data)}.html.markdown")
       data.generate(pwd, 'templates/terraform/resource.html.markdown.erb', filepath, self)
     end
 
@@ -216,16 +209,11 @@ module Provider
                 end
                     .empty?
 
-      name = data.object.filename_override || data.object.name.underscore
-      product_name = data.product.name.underscore
-
-      data.product = data.product.name
-      data.resource_name = data.object.name.camelize(:upper)
       FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
       data.generate(
         pwd,
         'templates/terraform/examples/base_configs/test_file.go.erb',
-        "#{folder_name(data.version)}/resource_#{product_name}_#{name}_generated_test.go",
+        "#{folder_name(data.version)}/resource_#{full_resource_name(data)}_generated_test.go",
         self
       )
     end
@@ -237,15 +225,12 @@ module Provider
                 data.object.custom_code.post_delete ||
                 data.object.skip_delete
 
-      name = data.object.filename_override || data.object.name.underscore
-      product_name = data.product.name.underscore
-
-      data.product = data.product.name
-      data.resource_name = data.object.name.camelize(:upper)
+      file_name =
+        "#{folder_name(data.version)}/resource_#{full_resource_name(data)}_sweeper_test.go"
       FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
       data.generate(pwd,
                     'templates/terraform/sweeper_file.go.erb',
-                    "#{folder_name(data.version)}/resource_#{product_name}_#{name}_sweeper_test.go",
+                    file_name,
                     self)
     end
 
@@ -268,13 +253,10 @@ module Provider
     # IAM policies separately from the resource itself
     def generate_iam_policy(pwd, data, generate_code, generate_docs)
       if generate_code
-        name = data.object.filename_override || data.object.name.underscore
-        product_name = data.product.name.underscore
-
         FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
         data.generate(pwd,
                       'templates/terraform/iam_policy.go.erb',
-                      "#{folder_name(data.version)}/iam_#{product_name}_#{name}.go",
+                      "#{folder_name(data.version)}/iam_#{full_resource_name(data)}.go",
                       self)
 
         # Only generate test if testable examples exist.
@@ -282,7 +264,7 @@ module Provider
           data.generate(
             pwd,
             'templates/terraform/examples/base_configs/iam_test_file.go.erb',
-            "#{folder_name(data.version)}/iam_#{product_name}_#{name}_generated_test.go",
+            "#{folder_name(data.version)}/iam_#{full_resource_name(data)}_generated_test.go",
             self
           )
         end
@@ -297,11 +279,9 @@ module Provider
       target_folder = data.output_folder
       target_folder = File.join(target_folder, 'website', 'docs', 'r')
       FileUtils.mkpath target_folder
-      name = data.object.filename_override || data.object.name.underscore
-      product_name = @config.legacy_name || data.product.name.underscore
-
       filepath =
-        File.join(target_folder, "#{product_name}_#{name}_iam.html.markdown")
+        File.join(target_folder, "#{full_resource_name(data)}_iam.html.markdown")
+
       data.generate(pwd, 'templates/terraform/resource_iam.html.markdown.erb', filepath, self)
     end
 
@@ -324,6 +304,16 @@ module Provider
     # resources in a standard way, and most APIs accept short name, long name or self_link
     def id_format(object)
       object.id_format || object.self_link_uri
+    end
+
+    def full_resource_name(data)
+      if data.object.legacy_name
+        data.object.legacy_name.sub(/^google_/, '')
+      else
+        name = data.object.filename_override || data.object.name.underscore
+        product_name = @config.legacy_name || data.product.name.underscore
+        "#{product_name}_#{name}"
+      end
     end
   end
 end

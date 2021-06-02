@@ -97,7 +97,7 @@ func resource{{$.PathType}}() *schema.Resource {
 	{{- if $p.DiffSuppressFunc }}
 				DiffSuppressFunc: {{$p.DiffSuppressFunc}},
 	{{- end }}
-				Description: `{{/* TODO fix formatting for $p.Description */}}`,
+				Description: `{{/* TODO fix formatting for $p.Description - see https://github.com/hashicorp/terraform-provider-google/issues/9197 */}}`,
 	{{- if $p.MaxItems }}
 				MaxItems: {{$p.MaxItems}},
 	{{- end }}
@@ -239,7 +239,12 @@ func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) erro
 {{- else }}
   createDirective := CreateDirective
 {{- end }}
-	res, err := config.client{{$.ProductType}}DCL.Apply{{$.Type}}(context.Background(), obj, createDirective...)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+	client := Create{{$.ProductType}}Client(config, userAgent, "")
+	res, err := client.Apply{{$.Type}}(context.Background(), obj, createDirective...)
 	if err != nil {
 		// The resource didn't actually create
 		d.SetId("")
@@ -293,7 +298,12 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 {{ end }}
 	}
 
-	res, err := config.client{{$.ProductType}}DCL.Get{{$.Type}}(context.Background(), obj)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+	client := Create{{$.ProductType}}Client(config, userAgent, "")
+	res, err := client.Get{{$.Type}}(context.Background(), obj)
 	if err != nil {
 		// Resource not found
 		d.SetId("")
@@ -356,7 +366,12 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	{{- if $.StateHint }}
 	directive = append(UpdateDirective, dcl.WithStateHint(old))
 	{{- end }}
-	res, err := config.client{{$.ProductType}}DCL.Apply{{$.Type}}(context.Background(), obj, directive...)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+	client := Create{{$.ProductType}}Client(config, userAgent, "")
+	res, err := client.Apply{{$.Type}}(context.Background(), obj, directive...)
 	if err != nil {
 		return fmt.Errorf("Error updating {{$.Type}}: %s", err)
 	}
@@ -413,7 +428,12 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 {{- end}}
 
 	log.Printf("[DEBUG] Deleting {{$.Type}} %q", d.Id())
-	if err := config.client{{$.ProductType}}DCL.Delete{{$.Type}}(context.Background(), obj); err != nil {
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+	client := Create{{$.ProductType}}Client(config, userAgent, "")
+	if err := client.Delete{{$.Type}}(context.Background(), obj); err != nil {
 		return fmt.Errorf("Error deleting {{$.Type}}: %s", err)
 	}
 
@@ -499,12 +519,20 @@ func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.
 
 func expand{{$.PathType}}{{$v.PackagePath}}(o interface{}) *{{$.Package}}.{{$v.ObjectType}} {
 	if o == nil {
+	{{- if $v.Computed }}
 		return nil
+	{{- else }}
+		return {{$.Package}}.Empty{{$v.ObjectType}}
+	{{- end }}
 	}
 	{{ if $v.IsObject -}}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 {
+	{{- if $v.Computed }}
 		return nil
+	{{- else }}
+		return {{$.Package}}.Empty{{$v.ObjectType}}
+	{{- end }}
 	}
 	obj := objArr[0].(map[string]interface{})
 	{{- else }}
@@ -538,7 +566,7 @@ func flatten{{$.PathType}}{{$v.PackagePath}}Array(objs []{{$.Package}}.{{$v.Obje
 	{{- end }}
 
 func flatten{{$.PathType}}{{$v.PackagePath}}(obj *{{$.Package}}.{{$v.ObjectType}}) interface{} {
-	if obj == nil {
+	if obj == nil || obj.Empty(){
 		return nil
 	}
 	transformed := map[string]interface{}{
