@@ -11,6 +11,60 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"empty schema": {
+			Old:                "null",
+			New:                "[]",
+			ExpectDiffSuppress: true,
+		},
+		"empty schema -> non-empty": {
+			Old: "null",
+			New: `[
+				{
+					"name": "PageNo",
+					"type": "INTEGER"
+				}
+			]`,
+			ExpectDiffSuppress: false,
+		},
+		"mode NULLABLE -> default mode (also NULLABLE)": {
+			Old: `[
+				{
+					"mode": "NULLABLE",
+					"name": "PageNo",
+					"type": "INTEGER"
+				},
+				{
+					"mode": "NULLABLE",
+					"name": "IngestTime",
+					"type": "TIMESTAMP"
+				}
+			]`,
+			New: `[
+				{
+					"name": "PageNo",
+					"type": "INTEGER"
+				},
+				{
+					"name": "IngestTime",
+					"type": "TIMESTAMP"
+				}
+			]`,
+			ExpectDiffSuppress: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		if bigQueryTableSchemaDiffSuppress("schema", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Errorf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
+
 func TestAccBigQueryTable_Basic(t *testing.T) {
 	t.Parallel()
 
