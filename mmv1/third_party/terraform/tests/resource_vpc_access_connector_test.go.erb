@@ -2,8 +2,6 @@
 package google
 <% unless version == 'ga' -%>
 
-package google
-
 import (
 	"testing"
 
@@ -64,6 +62,4 @@ resource "google_compute_network" "custom_test" {
 `, context)
 }
 
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
 <% end -%>
