@@ -12,6 +12,8 @@ import (
 )
 
 func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
+	t.Parallel()
+
 	cases := map[string]struct {
 		Old, New           string
 		ExpectDiffSuppress bool
@@ -31,30 +33,76 @@ func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
 			]`,
 			ExpectDiffSuppress: false,
 		},
+		"no change": {
+			Old: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"finalKey\" : {} }]",
+			New: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"finalKey\" : {} }]",
+			ExpectDiffSuppress: true,
+		},
+		"remove key": {
+			Old: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"finalKey\" : {} }]",
+			New: "[{\"name\": \"someValue\", \"finalKey\" : {} }]",
+			ExpectDiffSuppress: false,
+		},
+		"empty description -> default description (empty)": {
+			Old: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"description\": \"\"  }]",
+			New: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
+			ExpectDiffSuppress: true,
+		},
+		"empty description -> other description": {
+			Old: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"description\": \"\"  }]",
+			New: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"description\": \"somethingRandom\"  }]",
+			ExpectDiffSuppress: false,
+		},
+		"mode NULLABLE -> other mode": {
+			Old: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"mode\": \"NULLABLE\"  }]",
+			New: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"mode\": \"somethingRandom\"  }]",
+			ExpectDiffSuppress: false,
+		},
 		"mode NULLABLE -> default mode (also NULLABLE)": {
 			Old: `[
 				{
 					"mode": "NULLABLE",
 					"name": "PageNo",
 					"type": "INTEGER"
-				},
-				{
-					"mode": "NULLABLE",
-					"name": "IngestTime",
-					"type": "TIMESTAMP"
 				}
 			]`,
 			New: `[
 				{
 					"name": "PageNo",
 					"type": "INTEGER"
-				},
-				{
-					"name": "IngestTime",
-					"type": "TIMESTAMP"
 				}
 			]`,
 			ExpectDiffSuppress: true,
+		},
+		"type INTEGER -> INT64": {
+			Old: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"INTEGER\"  }]",
+			New: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"INT64\"  }]",
+			ExpectDiffSuppress: true,
+		},
+		"type INTEGER -> other": {
+			Old: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"INTEGER\"  }]",
+			New: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"somethingRandom\"  }]",
+			ExpectDiffSuppress: false,
+		},
+		"type FLOAT -> FLOAT64": {
+			Old: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"FLOAT\"  }]",
+			New: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"FLOAT64\"  }]",
+			ExpectDiffSuppress: true,
+		},
+		"type FLOAT -> default": {
+			Old: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"FLOAT\"  }]",
+			New: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
+			ExpectDiffSuppress: false,
+		},
+		"type BOOLEAN -> BOOL": {
+			Old: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"BOOLEAN\"  }]",
+			New: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"BOOL\"  }]",
+			ExpectDiffSuppress: true,
+		},
+		"type BOOLEAN -> default": {
+			Old: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"BOOLEAN\"  }]",
+			New: "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
+			ExpectDiffSuppress: false,
 		},
 		"reordering fields": {
 			Old: `[
@@ -78,6 +126,31 @@ func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
 				}
 			]`,
 			ExpectDiffSuppress: true,
+		},
+		"reordering fields with value change": {
+			Old: `[
+				{
+					"name": "PageNo",
+					"type": "INTEGER",
+					"description": "someVal"
+				},
+				{
+					"name": "IngestTime",
+					"type": "TIMESTAMP"
+				}
+			]`,
+			New: `[
+				{
+					"name": "IngestTime",
+					"type": "TIMESTAMP"
+				},
+				{
+					"name": "PageNo",
+					"type": "INTEGER",
+					"description": "otherVal"
+				}
+			]`,
+			ExpectDiffSuppress: false,
 		},
 		"nested field ordering changes": {
 			Old: `[
@@ -149,9 +222,21 @@ func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if bigQueryTableSchemaDiffSuppress("schema", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-			t.Errorf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-		}
+		tc := tc
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+
+			var a, b interface{}
+			if err := json.Unmarshal([]byte(tc.Old), &a); err != nil {
+				t.Fatalf(fmt.Sprintf("unable to unmarshal old json - %v", err))
+			}
+			if err := json.Unmarshal([]byte(tc.New), &b); err != nil {
+				t.Fatalf(fmt.Sprintf("unable to unmarshal new json - %v", err))
+			}
+			if bigQueryTableSchemaDiffSuppress("schema", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+				t.Fatalf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+			}
+		})
 	}
 }
 
@@ -712,27 +797,6 @@ func TestAccBigQueryDataTable_expandArray(t *testing.T) {
 	})
 }
 
-func TestUnitBigQueryDataTable_jsonEquivalency(t *testing.T) {
-	t.Parallel()
-
-	for i, testcase := range testUnitBigQueryDataTableJSONEquivalencyTestCases {
-		var a, b interface{}
-		if err := json.Unmarshal([]byte(testcase.jsonA), &a); err != nil {
-			panic(fmt.Sprintf("unable to unmarshal json - %v", err))
-		}
-		if err := json.Unmarshal([]byte(testcase.jsonB), &b); err != nil {
-			panic(fmt.Sprintf("unable to unmarshal json - %v", err))
-		}
-		eq, err := jsonCompareWithMapKeyOverride("schema", a, b, bigQueryTableMapKeyOverride)
-		if err != nil {
-			t.Errorf("ahhhh an error I did not expect this! especially not on testscase %v - %s", i, err)
-		}
-		if eq != testcase.equivalent {
-			t.Errorf("expected equivalency result of %v but got %v for testcase number %v", testcase.equivalent, eq, i)
-		}
-	}
-}
-
 func TestUnitBigQueryDataTable_schemaIsChangable(t *testing.T) {
 	t.Parallel()
 	for _, testcase := range testUnitBigQueryDataTableIsChangableTestCases {
@@ -777,12 +841,6 @@ func TestAccBigQueryTable_allowDestroy(t *testing.T) {
 			},
 		},
 	})
-}
-
-type testUnitBigQueryDataTableJSONEquivalencyTestCase struct {
-	jsonA      string
-	jsonB      string
-	equivalent bool
 }
 
 type testUnitBigQueryDataTableJSONChangeableTestCase struct {
@@ -903,81 +961,6 @@ var testUnitBigQueryDataTableIsChangableTestCases = []testUnitBigQueryDataTableJ
 		jsonOld:    "[{\"name\": \"value1\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }, {\"name\": \"value2\", \"type\" : \"BOOLEAN\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
 		jsonNew:    "[{\"name\": \"value3\", \"type\" : \"BOOLEAN\", \"mode\" : \"NULLABLE\", \"description\" : \"newVal\" },  {\"name\": \"value1\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
 		changeable: false,
-	},
-}
-
-var testUnitBigQueryDataTableJSONEquivalencyTestCases = []testUnitBigQueryDataTableJSONEquivalencyTestCase{
-	{
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"finalKey\" : {} }]",
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"finalKey\" : {} }]",
-		true,
-	},
-	{
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"finalKey\" : {} }]",
-		"[{\"name\": \"someValue\", \"finalKey\" : {} }]",
-		false,
-	},
-	{
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"mode\": \"NULLABLE\"  }]",
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
-		true,
-	},
-	{
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"mode\": \"NULLABLE\"  }]",
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"mode\": \"somethingRandom\"  }]",
-		false,
-	},
-	{
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"description\": \"\"  }]",
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
-		true,
-	},
-	{
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"description\": \"\"  }]",
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"description\": \"somethingRandom\"  }]",
-		false,
-	},
-	{
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"INTEGER\"  }]",
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"INT64\"  }]",
-		true,
-	},
-	{
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"INTEGER\"  }]",
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"somethingRandom\"  }]",
-		false,
-	},
-	{
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"FLOAT\"  }]",
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"FLOAT64\"  }]",
-		true,
-	},
-	{
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"FLOAT\"  }]",
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
-		false,
-	},
-	{
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"BOOLEAN\"  }]",
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"BOOL\"  }]",
-		true,
-	},
-	{
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"BOOLEAN\"  }]",
-		"[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
-		false,
-	},
-	{
-		// order changes, name same
-		"[{\"name\": \"value1\", \"1\" : \"1\"},{\"name\": \"value2\", \"2\" : \"2\" }]",
-		"[{\"name\": \"value2\", \"2\" : \"2\" },{\"name\": \"value1\", \"1\" : \"1\" }]",
-		true,
-	},
-	{
-		// order changes, value different
-		"[{\"name\": \"value1\", \"1\" : \"1\"},{\"name\": \"value2\", \"2\" : \"2\" }]",
-		"[{\"name\": \"value2\", \"2\" : \"random\" },{\"name\": \"value1\", \"1\" : \"1\" }]",
-		false,
 	},
 }
 
