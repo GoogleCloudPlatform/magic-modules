@@ -168,7 +168,6 @@ objects:
           - REDIS_5_0 for Redis 5.0 compatibility
           - REDIS_4_0 for Redis 4.0 compatibility
           - REDIS_3_2 for Redis 3.2 compatibility
-        input: true
       - !ruby/object:Api::Type::String
         name: reservedIpRange
         description: |
@@ -192,7 +191,6 @@ objects:
         input: true
       - !ruby/object:Api::Type::Enum
         name: transitEncryptionMode
-        min_version: beta
         input: true
         description: |
           The TLS mode of the Redis instance, If not provided, TLS is disabled for the instance.
@@ -204,7 +202,6 @@ objects:
         default_value: :DISABLED
       - !ruby/object:Api::Type::Array
         name: 'serverCaCerts'
-        min_version: beta
         description: |
           List of server CA certificates for the instance.
         output: true

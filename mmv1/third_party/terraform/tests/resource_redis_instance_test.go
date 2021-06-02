@@ -1,5 +1,3 @@
-<% autogen_exception -%>
-
 package google
 
 import (
@@ -79,8 +77,8 @@ func TestAccRedisInstance_redisInstanceAuthEnabled(t *testing.T) {
 	}
 
 	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckRedisInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -122,6 +120,7 @@ resource "google_redis_instance" "test" {
     maxmemory-policy       = "allkeys-lru"
     notify-keyspace-events = "KEA"
   }
+  redis_version = "REDIS_4_0"
 }
 `, name)
 }
@@ -142,9 +141,8 @@ resource "google_redis_instance" "test" {
     maxmemory-policy       = "noeviction"
     notify-keyspace-events = ""
   }
-  <% unless version == 'ga' -%>
   transit_encryption_mode = "SERVER_AUTHENTICATION"
-  <% end -%>
+  redis_version = "REDIS_5_0"
 }
 `, name)
 }
