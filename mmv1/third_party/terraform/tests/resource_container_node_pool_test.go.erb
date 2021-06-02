@@ -685,12 +685,6 @@ func TestAccContainerNodePool_resize(t *testing.T) {
 
 func TestAccContainerNodePool_version(t *testing.T) {
 	t.Parallel()
-
-	// Re-enable this test when there is more than one acceptable node pool version
-	// for the current master version
-	if v := os.Getenv("TF_ACC"); v == "" {
-		t.Skip()
-	}
 	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 	np := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
 
