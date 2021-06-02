@@ -112,7 +112,13 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, secondGen bool)
 	if secondGen {
 		diskAutoresize := _settings["disk_autoresize"].(bool)
 		settings.StorageAutoResize = &diskAutoresize
-		settings.StorageAutoResizeLimit = int64(_settings["disk_autoresize_limit"].(int))
+		var resizeLimit int
+		if _settings["disk_autoresize_limit"] == nil {
+			resizeLimit = 0
+		} else {
+			resizeLimit = _settings["disk_autoresize_limit"].(int)
+		}
+		settings.StorageAutoResizeLimit = int64(resizeLimit)
 	}
 
 	return settings
