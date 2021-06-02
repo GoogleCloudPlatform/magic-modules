@@ -38,7 +38,6 @@ func TestAccBinaryAuthorizationPolicy_basic(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccBinaryAuthorizationPolicy_full(t *testing.T) {
 	t.Parallel()
 
@@ -156,16 +155,11 @@ func TestAccBinaryAuthorizationPolicy_update(t *testing.T) {
 		},
 	})
 }
-<% else -%>
 
-// Because Container Analysis is still in beta, we can't run any of the tests that call that
-// resource without vendoring in the full beta provider.
-
-<% end -%>
 func testAccCheckBinaryAuthorizationPolicyDefault(t *testing.T, pid string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := googleProviderConfig(t)
-		url := fmt.Sprintf("https://binaryauthorization.googleapis.com/v1beta1/projects/%s/policy", pid)
+		url := fmt.Sprintf("https://binaryauthorization.googleapis.com/v1/projects/%s/policy", pid)
 		pol, err := sendRequest(config, "GET", "", url, config.userAgent, nil)
 		if err != nil {
 			return err
@@ -229,7 +223,6 @@ resource "google_binary_authorization_policy" "policy" {
 `, pid, pname, org, billing)
 }
 
-<% unless version == 'ga' -%>
 func testAccBinaryAuthorizationPolicyFull(pid, pname, org, billing, note, attestor, gpmode string) string {
 	return fmt.Sprintf(`
 // Use a separate project since each project can only have one policy
@@ -356,5 +349,3 @@ resource "google_binary_authorization_policy" "policy" {
 }
 `, pid, pname, org, billing, note, attestor)
 }
-
-<% end -%>

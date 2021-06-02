@@ -32,33 +32,36 @@ import (
 )
 
 {{range $index, $pkg := .}}
-var {{$pkg.ProductType}}EndpointEntryKey = "eventarc_custom_endpoint"
+{{- if $pkg.WriteBasePath }}
+var {{$pkg.ProductType}}EndpointEntryKey = "{{$pkg.ProductName}}_custom_endpoint"
 var {{$pkg.ProductType}}EndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
 	Optional:     true,
 	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_EVENTARC_CUSTOM_ENDPOINT",
+		"GOOGLE_{{$pkg.ProductNameUpper}}_CUSTOM_ENDPOINT",
 	}, ""),
 }
+{{- end}}
 {{end}}
 
 //Add new values to config.go.erb config object declaration
 {{- range $index, $pkg := . }}
-// client{{$pkg.ProductType}}DCL *{{$pkg.PackageName}}Dcl.Client
+{{- if $pkg.WriteBasePath }}
+//{{$pkg.ProductType}}BasePath string
 {{- end}}
-
-//Add new values to config.go.erb object initialization
-{{- range $index, $pkg := . }}
-// c.client{{$pkg.ProductType}}DCL = {{$pkg.PackageName}}Dcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions,dclLoggerOptions))
 {{- end}}
 
 //Add new values to provider.go.erb schema initialization
 {{- range $index, $pkg := . }}
+{{- if $pkg.WriteBasePath }}
 // {{$pkg.ProductType}}EndpointEntryKey:               {{$pkg.ProductType}}EndpointEntry,
+{{- end}}
 {{- end}}
 
 //Add new values to provider.go.erb - provider block read
 {{- range $index, $pkg := . }}
-// config.client{{$pkg.ProductType}}DCL.Config.BasePath = d.Get({{$pkg.ProductType}}EndpointEntryKey).(string)
+{{- if $pkg.WriteBasePath }}
+// config.{{$pkg.ProductType}}BasePath = d.Get({{$pkg.ProductType}}EndpointEntryKey).(string)
+{{- end}}
 {{- end}}
 
