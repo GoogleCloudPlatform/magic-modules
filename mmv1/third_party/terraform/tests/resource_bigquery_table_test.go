@@ -56,6 +56,53 @@ func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
 			]`,
 			ExpectDiffSuppress: true,
 		},
+		"reordering fields": {
+			Old: `[
+				{
+					"name": "PageNo",
+					"type": "INTEGER"
+				},
+				{
+					"name": "IngestTime",
+					"type": "TIMESTAMP"
+				}
+			]`,
+			New: `[
+				{
+					"name": "IngestTime",
+					"type": "TIMESTAMP"
+				},
+				{
+					"name": "PageNo",
+					"type": "INTEGER"
+				}
+			]`,
+			ExpectDiffSuppress: true,
+		},
+		"nested lists": {
+			Old: `[
+				{
+					"mode": "NULLABLE",
+					"name": "providerphone",
+					"policyTags": {
+						"names": [
+							"projects/my-project/locations/us/taxonomies/12345678/policyTags/12345678"
+						]
+					},
+					"type":"STRING"
+				}
+			]`,
+			New: `[
+			  {
+			    "name": "providerphone",
+			    "type": "STRING",
+			    "policyTags": {
+			          "names": ["projects/my-project/locations/us/taxonomies/12345678/policyTags/12345678"]
+			        }
+			  }
+			]`,
+			ExpectDiffSuppress: true,
+		},
 	}
 
 	for tn, tc := range cases {

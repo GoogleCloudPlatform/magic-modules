@@ -53,14 +53,6 @@ func jsonCompareWithMapKeyOverride(a, b interface{}, compareMapKeyVal func(key s
 		} else if len(arrayA) != len(arrayB) {
 			return false, nil
 		}
-		if err := bigQueryTablecheckNameExists(arrayA); err != nil {
-			return false, err
-		}
-		bigQueryTableSortArrayByName(arrayA)
-		if err := bigQueryTablecheckNameExists(arrayB); err != nil {
-			return false, err
-		}
-		bigQueryTableSortArrayByName(arrayB)
 		for i := range arrayA {
 			eq, err := jsonCompareWithMapKeyOverride(arrayA[i], arrayB[i], compareMapKeyVal)
 			if err != nil {
@@ -147,13 +139,34 @@ func bigQueryTableSchemaDiffSuppress(_, old, new string, _ *schema.ResourceData)
 	}
 	var a, b interface{}
 	if err := json.Unmarshal([]byte(old), &a); err != nil {
-		log.Printf("[DEBUG] unable to unmarshal json - %v", err)
+		log.Printf("[DEBUG] unable to unmarshal old json - %v", err)
 	}
 	if err := json.Unmarshal([]byte(new), &b); err != nil {
-		log.Printf("[DEBUG] unable to unmarshal json - %v", err)
+		log.Printf("[DEBUG] unable to unmarshal new json - %v", err)
 	}
 
-	eq, err := jsonCompareWithMapKeyOverride(a, b, bigQueryTableMapKeyOverride)
+	arrayA := a.([]interface{})
+	arrayB, ok := b.([]interface{})
+	if !ok {
+		return false
+	} else if len(arrayA) != len(arrayB) {
+		return false
+	}
+
+	// Sort the first level of the schema by name so reordering the
+	// fields doesn't cause a diff.
+	if err := bigQueryTablecheckNameExists(arrayA); err != nil {
+		log.Printf("[DEBUG] unable to sort old schema by field name - %v", err)
+		return false
+	}
+	bigQueryTableSortArrayByName(arrayA)
+	if err := bigQueryTablecheckNameExists(arrayB); err != nil {
+		log.Printf("[DEBUG] unable to sort new schema by field name - %v", err)
+		return false
+	}
+	bigQueryTableSortArrayByName(arrayB)
+
+	eq, err := jsonCompareWithMapKeyOverride(arrayA, arrayB, bigQueryTableMapKeyOverride)
 	if err != nil {
 		log.Printf("[DEBUG] %v", err)
 		log.Printf("[DEBUG] Error comparing JSON: %v, %v", old, new)
