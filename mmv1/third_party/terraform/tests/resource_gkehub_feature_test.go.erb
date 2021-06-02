@@ -13,9 +13,9 @@ func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
   t.Parallel()
 
   context := map[string]interface{}{
-    "random_suffix"   : randString(t, 10),
-    "org_id"          : getTestOrgFromEnv(t),
-    "billing_account" : getTestBillingAccountFromEnv(t),
+    "random_suffix":   randString(t, 10),
+    "org_id":          getTestOrgFromEnv(t),
+    "billing_account": getTestBillingAccountFromEnv(t),
   }
 
   vcrTest(t, resource.TestCase{
@@ -107,47 +107,6 @@ resource "google_gkehub_feature" "feature" {
 
 func testAccGKEHubFeature_gkehubFeatureMciUpdateEnd(context map[string]interface{}) string {
   return projectSetup(context) + Nprintf(`
-resource "google_project" "project" {
-  name            = "tf-test-gkehub%{random_suffix}"
-  project_id      = "tf-test-gkehub%{random_suffix}"
-  org_id          = "%{org_id}"
-  billing_account = "%{billing_account}"
-  provider        = google-beta
-}
-
-resource "google_project_service" "mci" {
-  project = google_project.project.project_id
-  service = "multiclusteringress.googleapis.com"
-  provider = google-beta
-}
-
-resource "google_project_service" "mcsd" {
-  project = google_project.project.project_id
-  service = "multiclusterservicediscovery.googleapis.com"
-  provider = google-beta
-}
-
-resource "google_project_service" "compute" {
-  project = google_project.project.project_id
-  service = "compute.googleapis.com"
-  disable_on_destroy = false
-  provider = google-beta
-}
-
-resource "google_project_service" "container" {
-  project = google_project.project.project_id
-  service = "container.googleapis.com"
-  disable_on_destroy = false
-  provider = google-beta
-}
-
-resource "google_project_service" "gkehub" {
-  project = google_project.project.project_id
-  service = "gkehub.googleapis.com"
-  disable_on_destroy = false
-  provider = google-beta
-}
-
 resource "google_container_cluster" "primary" {
   name               = "tf-test%{random_suffix}"
   location           = "us-central1-a"
@@ -208,10 +167,14 @@ resource "google_gkehub_feature" "feature" {
 }
 
 func TestAccGKEHubFeature_gkehubFeatureAcmUpdate(t *testing.T) {
+  // Multiple fine-grained resources cause VCR to fail
+  skipIfVcr(t)
   t.Parallel()
 
   context := map[string]interface{}{
-    "random_suffix": randString(t, 10),
+    "random_suffix":   randString(t, 10),
+    "org_id":          getTestOrgFromEnv(t),
+    "billing_account": getTestBillingAccountFromEnv(t),
   }
 
   vcrTest(t, resource.TestCase{
@@ -224,7 +187,7 @@ func TestAccGKEHubFeature_gkehubFeatureAcmUpdate(t *testing.T) {
     Steps: []resource.TestStep{
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateStart(context),
-        Check:  resource.ComposeTestCheckFunc(
+        Check: resource.ComposeTestCheckFunc(
           testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
           testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test2%s", context["random_suffix"])),
         ),
@@ -236,7 +199,7 @@ func TestAccGKEHubFeature_gkehubFeatureAcmUpdate(t *testing.T) {
       },
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateMiddle(context),
-        Check:  resource.ComposeTestCheckFunc(
+        Check: resource.ComposeTestCheckFunc(
           testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
           testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test2%s", context["random_suffix"])),
         ),
@@ -248,7 +211,7 @@ func TestAccGKEHubFeature_gkehubFeatureAcmUpdate(t *testing.T) {
       },
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateMiddle2(context),
-        Check:  resource.ComposeTestCheckFunc(
+        Check: resource.ComposeTestCheckFunc(
           testAccCheckGkeHubFeatureMembershipNotPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
           testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test2%s", context["random_suffix"])),
           testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test3%s", context["random_suffix"])),
@@ -261,7 +224,7 @@ func TestAccGKEHubFeature_gkehubFeatureAcmUpdate(t *testing.T) {
       },
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateEnd(context),
-        Check:  resource.ComposeTestCheckFunc(
+        Check: resource.ComposeTestCheckFunc(
           testAccCheckGkeHubFeatureMembershipNotPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test2%s", context["random_suffix"])),
           testAccCheckGkeHubFeatureMembershipNotPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("basic1%s", context["random_suffix"])),
           testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test3%s", context["random_suffix"])),
@@ -274,7 +237,7 @@ func TestAccGKEHubFeature_gkehubFeatureAcmUpdate(t *testing.T) {
       },
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateMiddle2(context),
-        Check:  resource.ComposeTestCheckFunc(
+        Check: resource.ComposeTestCheckFunc(
           testAccCheckGkeHubFeatureMembershipNotPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
           testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test2%s", context["random_suffix"])),
           testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test3%s", context["random_suffix"])),
@@ -295,29 +258,36 @@ func TestAccGKEHubFeature_gkehubFeatureAcmUpdate(t *testing.T) {
 }
 
 func testAccGKEHubFeature_gkehubFeatureAcmUpdateStart(context map[string]interface{}) string {
-  return Nprintf(`
+  return projectSetup(context) + Nprintf(`
 resource "google_container_cluster" "primary" {
   name               = "basiccluster%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
+  project = google_project.project.project_id
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_container_cluster" "secondary" {
   name               = "basiccluster2%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
+  project = google_project.project.project_id
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_container_cluster" "tertiary" {
   name               = "basiccluster3%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
+  project = google_project.project.project_id
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_gke_hub_membership" "membership" {
+  project = google_project.project.project_id
   membership_id = "tf-test1%{random_suffix}"
   endpoint {
     gke_cluster {
@@ -329,6 +299,7 @@ resource "google_gke_hub_membership" "membership" {
 }
 
 resource "google_gke_hub_membership" "membership_second" {
+  project = google_project.project.project_id
   membership_id = "tf-test2%{random_suffix}"
   endpoint {
     gke_cluster {
@@ -340,6 +311,7 @@ resource "google_gke_hub_membership" "membership_second" {
 }
 
 resource "google_gke_hub_membership" "membership_third" {
+  project = google_project.project.project_id
   membership_id = "tf-test3%{random_suffix}"
   endpoint {
     gke_cluster {
@@ -351,16 +323,20 @@ resource "google_gke_hub_membership" "membership_third" {
 }
 
 resource "google_gkehub_feature" "feature" {
+  project = google_project.project.project_id
   name = "configmanagement"
   location = "global"
 
   labels = {
     foo = "bar"
   }
+  project = google_project.project.project_id
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_gkehub_feature_membership" "feature_member_1" {
+  project = google_project.project.project_id
   location = "global"
   feature = google_gkehub_feature.feature.name
   membership = google_gke_hub_membership.membership.membership_id
@@ -377,6 +353,7 @@ resource "google_gkehub_feature_membership" "feature_member_1" {
 }
 
 resource "google_gkehub_feature_membership" "feature_member_2" {
+  project = google_project.project.project_id
   location = "global"
   feature = google_gkehub_feature.feature.name
   membership = google_gke_hub_membership.membership_second.membership_id
@@ -395,29 +372,36 @@ resource "google_gkehub_feature_membership" "feature_member_2" {
 }
 
 func testAccGKEHubFeature_gkehubFeatureAcmUpdateMiddle(context map[string]interface{}) string {
-  return Nprintf(`
+  return projectSetup(context) + Nprintf(`
 resource "google_container_cluster" "primary" {
+  project = google_project.project.project_id
   name               = "basiccluster%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_container_cluster" "secondary" {
+  project = google_project.project.project_id
   name               = "basiccluster2%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_container_cluster" "tertiary" {
+  project = google_project.project.project_id
   name               = "basiccluster3%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_gke_hub_membership" "membership" {
+  project = google_project.project.project_id
   membership_id = "tf-test1%{random_suffix}"
   endpoint {
     gke_cluster {
@@ -429,6 +413,7 @@ resource "google_gke_hub_membership" "membership" {
 }
 
 resource "google_gke_hub_membership" "membership_second" {
+  project = google_project.project.project_id
   membership_id = "tf-test2%{random_suffix}"
   endpoint {
     gke_cluster {
@@ -440,6 +425,7 @@ resource "google_gke_hub_membership" "membership_second" {
 }
 
 resource "google_gke_hub_membership" "membership_third" {
+  project = google_project.project.project_id
   membership_id = "tf-test3%{random_suffix}"
   endpoint {
     gke_cluster {
@@ -451,6 +437,7 @@ resource "google_gke_hub_membership" "membership_third" {
 }
 
 resource "google_gkehub_feature" "feature" {
+  project = google_project.project.project_id
   name = "configmanagement"
   location = "global"
 
@@ -458,9 +445,11 @@ resource "google_gkehub_feature" "feature" {
     foo = "changed"
   }
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_gkehub_feature_membership" "feature_member_1" {
+  project = google_project.project.project_id
   location = "global"
   feature = google_gkehub_feature.feature.name
   membership = google_gke_hub_membership.membership.membership_id
@@ -477,6 +466,7 @@ resource "google_gkehub_feature_membership" "feature_member_1" {
 }
 
 resource "google_gkehub_feature_membership" "feature_member_2" {
+  project = google_project.project.project_id
   location = "global"
   feature = google_gkehub_feature.feature.name
   membership = google_gke_hub_membership.membership_second.membership_id
@@ -501,29 +491,36 @@ resource "google_gkehub_feature_membership" "feature_member_2" {
 }
 
 func testAccGKEHubFeature_gkehubFeatureAcmUpdateMiddle2(context map[string]interface{}) string {
-  return Nprintf(`
+  return projectSetup(context) + Nprintf(`
 resource "google_container_cluster" "primary" {
+  project = google_project.project.project_id
   name               = "basiccluster%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_container_cluster" "secondary" {
+  project = google_project.project.project_id
   name               = "basiccluster2%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_container_cluster" "tertiary" {
+  project = google_project.project.project_id
   name               = "basiccluster3%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_gke_hub_membership" "membership" {
+  project = google_project.project.project_id
   membership_id = "tf-test1%{random_suffix}"
   endpoint {
     gke_cluster {
@@ -535,6 +532,7 @@ resource "google_gke_hub_membership" "membership" {
 }
 
 resource "google_gke_hub_membership" "membership_second" {
+  project = google_project.project.project_id
   membership_id = "tf-test2%{random_suffix}"
   endpoint {
     gke_cluster {
@@ -546,6 +544,7 @@ resource "google_gke_hub_membership" "membership_second" {
 }
 
 resource "google_gke_hub_membership" "membership_third" {
+  project = google_project.project.project_id
   membership_id = "tf-test3%{random_suffix}"
   endpoint {
     gke_cluster {
@@ -557,6 +556,7 @@ resource "google_gke_hub_membership" "membership_third" {
 }
 
 resource "google_gkehub_feature" "feature" {
+  project = google_project.project.project_id
   name = "configmanagement"
   location = "global"
 
@@ -564,9 +564,11 @@ resource "google_gkehub_feature" "feature" {
     foo = "changed"
   }
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_gkehub_feature_membership" "feature_member_2" {
+  project = google_project.project.project_id
   location = "global"
   feature = google_gkehub_feature.feature.name
   membership = google_gke_hub_membership.membership_second.membership_id
@@ -594,6 +596,7 @@ resource "google_gkehub_feature_membership" "feature_member_2" {
 }
 
 resource "google_gkehub_feature_membership" "feature_member_3" {
+  project = google_project.project.project_id
   location = "global"
   feature = google_gkehub_feature.feature.name
   membership = google_gke_hub_membership.membership_third.membership_id
@@ -623,29 +626,36 @@ resource "google_gkehub_feature_membership" "feature_member_3" {
 }
 
 func testAccGKEHubFeature_gkehubFeatureAcmUpdateEnd(context map[string]interface{}) string {
-  return Nprintf(`
+  return projectSetup(context) + Nprintf(`
 resource "google_container_cluster" "primary" {
+  project = google_project.project.project_id
   name               = "basiccluster%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_container_cluster" "secondary" {
+  project = google_project.project.project_id
   name               = "basiccluster2%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_container_cluster" "tertiary" {
+  project = google_project.project.project_id
   name               = "basiccluster3%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_gke_hub_membership" "membership" {
+  project = google_project.project.project_id
   membership_id = "tf-test1%{random_suffix}"
   endpoint {
     gke_cluster {
@@ -657,6 +667,7 @@ resource "google_gke_hub_membership" "membership" {
 }
 
 resource "google_gke_hub_membership" "membership_second" {
+  project = google_project.project.project_id
   membership_id = "tf-test2%{random_suffix}"
   endpoint {
     gke_cluster {
@@ -668,6 +679,7 @@ resource "google_gke_hub_membership" "membership_second" {
 }
 
 resource "google_gke_hub_membership" "membership_third" {
+  project = google_project.project.project_id
   membership_id = "tf-test3%{random_suffix}"
   endpoint {
     gke_cluster {
@@ -679,6 +691,7 @@ resource "google_gke_hub_membership" "membership_third" {
 }
 
 resource "google_gkehub_feature" "feature" {
+  project = google_project.project.project_id
   name = "configmanagement"
   location = "global"
 
@@ -686,9 +699,11 @@ resource "google_gkehub_feature" "feature" {
     foo = "changed"
   }
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_gkehub_feature_membership" "feature_member_3" {
+  project = google_project.project.project_id
   location = "global"
   feature = google_gkehub_feature.feature.name
   membership = google_gke_hub_membership.membership_third.membership_id
@@ -716,7 +731,9 @@ func TestAccGKEHubFeature_gkehubFeatureAcmAllFields(t *testing.T) {
   t.Parallel()
 
   context := map[string]interface{}{
-    "random_suffix": randString(t, 10),
+    "random_suffix":   randString(t, 10),
+    "org_id":          getTestOrgFromEnv(t),
+    "billing_account": getTestBillingAccountFromEnv(t),
   }
 
   vcrTest(t, resource.TestCase{
@@ -729,7 +746,7 @@ func TestAccGKEHubFeature_gkehubFeatureAcmAllFields(t *testing.T) {
     Steps: []resource.TestStep{
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmFewFields(context),
-        Check:  resource.ComposeTestCheckFunc(
+        Check: resource.ComposeTestCheckFunc(
           testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
         ),
       },
@@ -740,7 +757,7 @@ func TestAccGKEHubFeature_gkehubFeatureAcmAllFields(t *testing.T) {
       },
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmAllFields(context),
-        Check:  resource.ComposeTestCheckFunc(
+        Check: resource.ComposeTestCheckFunc(
           testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
         ),
       },
@@ -751,7 +768,7 @@ func TestAccGKEHubFeature_gkehubFeatureAcmAllFields(t *testing.T) {
       },
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmFewFields(context),
-        Check:  resource.ComposeTestCheckFunc(
+        Check: resource.ComposeTestCheckFunc(
           testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
         ),
       },
@@ -765,15 +782,18 @@ func TestAccGKEHubFeature_gkehubFeatureAcmAllFields(t *testing.T) {
 }
 
 func testAccGKEHubFeature_gkehubFeatureAcmAllFields(context map[string]interface{}) string {
-  return Nprintf(`
+  return projectSetup(context) + Nprintf(`
 resource "google_container_cluster" "primary" {
+  project = google_project.project.project_id
   name               = "basiccluster%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_gke_hub_membership" "membership" {
+  project = google_project.project.project_id
   membership_id = "tf-test1%{random_suffix}"
   endpoint {
     gke_cluster {
@@ -785,6 +805,7 @@ resource "google_gke_hub_membership" "membership" {
 }
 
 resource "google_gkehub_feature" "feature" {
+  project = google_project.project.project_id
   name = "configmanagement"
   location = "global"
 
@@ -792,9 +813,11 @@ resource "google_gkehub_feature" "feature" {
     foo = "bar"
   }
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_gkehub_feature_membership" "feature_member" {
+  project = google_project.project.project_id
   location = "global"
   feature = google_gkehub_feature.feature.name
   membership = google_gke_hub_membership.membership.membership_id
@@ -825,15 +848,18 @@ resource "google_gkehub_feature_membership" "feature_member" {
 }
 
 func testAccGKEHubFeature_gkehubFeatureAcmFewFields(context map[string]interface{}) string {
-  return Nprintf(`
+  return projectSetup(context) + Nprintf(`
 resource "google_container_cluster" "primary" {
+  project = google_project.project.project_id
   name               = "basiccluster%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_gke_hub_membership" "membership" {
+  project = google_project.project.project_id
   membership_id = "tf-test1%{random_suffix}"
   endpoint {
     gke_cluster {
@@ -845,6 +871,7 @@ resource "google_gke_hub_membership" "membership" {
 }
 
 resource "google_gkehub_feature" "feature" {
+  project = google_project.project.project_id
   name = "configmanagement"
   location = "global"
 
@@ -852,14 +879,17 @@ resource "google_gkehub_feature" "feature" {
     foo = "bar"
   }
   provider = google-beta
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_service_account" "feature_sa" {
+  project = google_project.project.project_id
   account_id = "feature-sa"
   provider = google-beta
 }
 
 resource "google_gkehub_feature_membership" "feature_member" {
+  project = google_project.project.project_id
   location = "global"
   feature = google_gkehub_feature.feature.name
   membership = google_gke_hub_membership.membership.membership_id
@@ -877,7 +907,7 @@ resource "google_gkehub_feature_membership" "feature_member" {
 }
 
 func projectSetup(context map[string]interface{}) string {
-  return Nprintf(`
+  return projectSetup(context) + Nprintf(`
 resource "google_project" "project" {
   name            = "tf-test-gkehub%{random_suffix}"
   project_id      = "tf-test-gkehub%{random_suffix}"
@@ -958,13 +988,13 @@ func testAccCheckGkeHubFeatureMembershipPresent(t *testing.T, project, location,
   return func(s *terraform.State) error {
     config := googleProviderConfig(t)
     obj := &gkehub.FeatureMembership{
-      Feature:          dcl.StringOrNil(feature),
-      Location:         dcl.StringOrNil(location),
-      Membership:       dcl.StringOrNil(membership),
-      Project:          dcl.String(project),
+      Feature:    dcl.StringOrNil(feature),
+      Location:   dcl.StringOrNil(location),
+      Membership: dcl.StringOrNil(membership),
+      Project:    dcl.String(project),
     }
 
-    _, err := config.clientGkeHubDCL.GetFeatureMembership(context.Background(), obj)
+    _, err := CreateGkeHubClient(config, "", "").GetFeatureMembership(context.Background(), obj)
     if err != nil {
       return err
     }
@@ -976,13 +1006,13 @@ func testAccCheckGkeHubFeatureMembershipNotPresent(t *testing.T, project, locati
   return func(s *terraform.State) error {
     config := googleProviderConfig(t)
     obj := &gkehub.FeatureMembership{
-      Feature:          dcl.StringOrNil(feature),
-      Location:         dcl.StringOrNil(location),
-      Membership:       dcl.StringOrNil(membership),
-      Project:          dcl.String(project),
+      Feature:    dcl.StringOrNil(feature),
+      Location:   dcl.StringOrNil(location),
+      Membership: dcl.StringOrNil(membership),
+      Project:    dcl.String(project),
     }
 
-    _, err := config.clientGkeHubDCL.GetFeatureMembership(context.Background(), obj)
+    _, err := CreateGkeHubClient(config, "", "").GetFeatureMembership(context.Background(), obj)
     if err == nil {
       return fmt.Errorf("Did not expect to find GKE Feature Membership for projects/%s/locations/%s/features/%s/membershipId/%s", project, location, feature, membership)
     }
