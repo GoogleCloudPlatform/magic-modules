@@ -79,7 +79,50 @@ func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
 			]`,
 			ExpectDiffSuppress: true,
 		},
-		"nested lists": {
+		"nested field ordering changes": {
+			Old: `[
+				{
+					"name": "someValue",
+					"type": "INTEGER",
+					"fields": [
+						{
+							"name": "value1",
+							"type": "INTEGER",
+							"mode": "NULLABLE",
+							"description": "someVal"
+						},
+						{
+							"name": "value2",
+							"type": "BOOLEAN",
+							"mode": "NULLABLE",
+							"description": "someVal"
+						}
+					]
+				}
+			]`,
+			New: `[
+				{
+					"name": "someValue",
+					"type": "INTEGER",
+					"fields": [
+						{
+							"name": "value2",
+							"type": "BOOLEAN",
+							"mode": "NULLABLE",
+							"description": "someVal"
+						},
+						{
+							"name": "value1",
+							"type": "INTEGER",
+							"mode": "NULLABLE",
+							"description": "someVal"
+						}
+					]
+				}
+			]`,
+			ExpectDiffSuppress: true,
+		},
+		"policyTags": {
 			Old: `[
 				{
 					"mode": "NULLABLE",
@@ -680,7 +723,7 @@ func TestUnitBigQueryDataTable_jsonEquivalency(t *testing.T) {
 		if err := json.Unmarshal([]byte(testcase.jsonB), &b); err != nil {
 			panic(fmt.Sprintf("unable to unmarshal json - %v", err))
 		}
-		eq, err := jsonCompareWithMapKeyOverride(a, b, bigQueryTableMapKeyOverride)
+		eq, err := jsonCompareWithMapKeyOverride("schema", a, b, bigQueryTableMapKeyOverride)
 		if err != nil {
 			t.Errorf("ahhhh an error I did not expect this! especially not on testscase %v - %s", i, err)
 		}

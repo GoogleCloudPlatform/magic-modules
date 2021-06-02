@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"sort"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -43,7 +44,7 @@ func bigQueryTablecheckNameExists(jsonList []interface{}) error {
 // Compares two json's while optionally taking in a compareMapKeyVal function.
 // This function will override any comparison of a given map[string]interface{}
 // on a specific key value allowing for a separate equality in specific scenarios
-func jsonCompareWithMapKeyOverride(a, b interface{}, compareMapKeyVal func(key string, val1, val2 map[string]interface{}) bool) (bool, error) {
+func jsonCompareWithMapKeyOverride(key string, a, b interface{}, compareMapKeyVal func(key string, val1, val2 map[string]interface{}) bool) (bool, error) {
 	switch a.(type) {
 	case []interface{}:
 		arrayA := a.([]interface{})
@@ -53,8 +54,20 @@ func jsonCompareWithMapKeyOverride(a, b interface{}, compareMapKeyVal func(key s
 		} else if len(arrayA) != len(arrayB) {
 			return false, nil
 		}
+
+		// Sort fields by name so reordering them doesn't cause a diff.
+		if (key == "schema" || key == "fields") {
+			if err := bigQueryTablecheckNameExists(arrayA); err != nil {
+				return false, err
+			}
+			bigQueryTableSortArrayByName(arrayA)
+			if err := bigQueryTablecheckNameExists(arrayB); err != nil {
+				return false, err
+			}
+			bigQueryTableSortArrayByName(arrayB)
+		}
 		for i := range arrayA {
-			eq, err := jsonCompareWithMapKeyOverride(arrayA[i], arrayB[i], compareMapKeyVal)
+			eq, err := jsonCompareWithMapKeyOverride(strconv.Itoa(i), arrayA[i], arrayB[i], compareMapKeyVal)
 			if err != nil {
 				return false, err
 			} else if !eq {
@@ -70,22 +83,22 @@ func jsonCompareWithMapKeyOverride(a, b interface{}, compareMapKeyVal func(key s
 		}
 
 		var unionOfKeys map[string]bool = make(map[string]bool)
-		for key := range objectA {
-			unionOfKeys[key] = true
+		for subKey := range objectA {
+			unionOfKeys[subKey] = true
 		}
-		for key := range objectB {
-			unionOfKeys[key] = true
+		for subKey := range objectB {
+			unionOfKeys[subKey] = true
 		}
 
-		for key := range unionOfKeys {
-			eq := compareMapKeyVal(key, objectA, objectB)
+		for subKey := range unionOfKeys {
+			eq := compareMapKeyVal(subKey, objectA, objectB)
 			if !eq {
-				valA, ok1 := objectA[key]
-				valB, ok2 := objectB[key]
+				valA, ok1 := objectA[subKey]
+				valB, ok2 := objectB[subKey]
 				if !ok1 || !ok2 {
 					return false, nil
 				}
-				eq, err := jsonCompareWithMapKeyOverride(valA, valB, compareMapKeyVal)
+				eq, err := jsonCompareWithMapKeyOverride(subKey, valA, valB, compareMapKeyVal)
 				if err != nil || !eq {
 					return false, err
 				}
@@ -132,7 +145,7 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 }
 
 // Compare the JSON strings are equal
-func bigQueryTableSchemaDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+func bigQueryTableSchemaDiffSuppress(name, old, new string, _ *schema.ResourceData) bool {
 	// The API can return an empty schema which gets encoded to "null" during read.
 	if old == "null" {
 		old = "[]"
@@ -145,28 +158,7 @@ func bigQueryTableSchemaDiffSuppress(_, old, new string, _ *schema.ResourceData)
 		log.Printf("[DEBUG] unable to unmarshal new json - %v", err)
 	}
 
-	arrayA := a.([]interface{})
-	arrayB, ok := b.([]interface{})
-	if !ok {
-		return false
-	} else if len(arrayA) != len(arrayB) {
-		return false
-	}
-
-	// Sort the first level of the schema by name so reordering the
-	// fields doesn't cause a diff.
-	if err := bigQueryTablecheckNameExists(arrayA); err != nil {
-		log.Printf("[DEBUG] unable to sort old schema by field name - %v", err)
-		return false
-	}
-	bigQueryTableSortArrayByName(arrayA)
-	if err := bigQueryTablecheckNameExists(arrayB); err != nil {
-		log.Printf("[DEBUG] unable to sort new schema by field name - %v", err)
-		return false
-	}
-	bigQueryTableSortArrayByName(arrayB)
-
-	eq, err := jsonCompareWithMapKeyOverride(arrayA, arrayB, bigQueryTableMapKeyOverride)
+	eq, err := jsonCompareWithMapKeyOverride(name, a, b, bigQueryTableMapKeyOverride)
 	if err != nil {
 		log.Printf("[DEBUG] %v", err)
 		log.Printf("[DEBUG] Error comparing JSON: %v, %v", old, new)
