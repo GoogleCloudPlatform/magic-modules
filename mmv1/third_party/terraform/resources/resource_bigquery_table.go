@@ -56,7 +56,7 @@ func jsonCompareWithMapKeyOverride(key string, a, b interface{}, compareMapKeyVa
 		}
 
 		// Sort fields by name so reordering them doesn't cause a diff.
-		if (key == "schema" || key == "fields") {
+		if key == "schema" || key == "fields" {
 			if err := bigQueryTablecheckNameExists(arrayA); err != nil {
 				return false, err
 			}
