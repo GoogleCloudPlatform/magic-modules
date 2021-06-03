@@ -48,7 +48,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "compute_address_ipsec_interconnect"
         primary_resource_id: "ipsec-interconnect-address"
-        min_version: beta
         vars:
           address_name: "test-address"
           network_name: "test-network"
@@ -1100,7 +1099,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "compute_interconnect_attachment_ipsec_encryption"
         primary_resource_id: "ipsec-encrypted-interconnect-attachment"
-        min_version: beta
         vars:
           interconnect_attachment_name: "test-interconnect-attachment"
           address_name: "test-address"
@@ -2084,7 +2082,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "compute_router_encrypted_interconnect"
         primary_resource_id: "encrypted-interconnect-router"
-        min_version: beta
         vars:
           router_name: "test-router"
           network_name: "test-network"
@@ -2746,7 +2743,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "compute_ha_vpn_gateway_encrypted_interconnect"
         primary_resource_id: "vpn-gateway"
-        min_version: beta
         vars:
           ha_vpn_gateway_name: "test-ha-vpngw"
           interconnect_attachment1_name: "test-interconnect-attachment1"

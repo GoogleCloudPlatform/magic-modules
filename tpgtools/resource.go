@@ -170,7 +170,7 @@ func (r Resource) ProductMetadata() *ProductMetadata {
 // resource. For example, the Package "access_context_manager" would have a
 // DCLPackage of "accesscontextmanager"
 func (r Resource) DCLPackage() string {
-	return strings.Replace(r.productMetadata.PackagePath, "_", "", -1)
+	return r.productMetadata.DCLPackage()
 }
 
 // SidebarCurrent is the website sidebar identifier, for example

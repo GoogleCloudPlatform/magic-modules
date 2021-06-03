@@ -122,11 +122,9 @@ type Config struct {
 	requestBatcherServiceUsage *RequestBatcher
 	requestBatcherIam          *RequestBatcher
 
-	// start DCL clients
+	// start DCLBasePaths
 	// dataprocBasePath is implemented in mm
-	clientDataprocDCL      *dataprocDcl.Client
 	EventarcBasePath string
-	clientEventarcDCL      *eventarcDcl.Client
 }
 
 // Generated product base paths
