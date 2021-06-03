@@ -907,7 +907,7 @@ resource "google_gkehub_feature_membership" "feature_member" {
 }
 
 func projectSetup(context map[string]interface{}) string {
-  return projectSetup(context) + Nprintf(`
+  return Nprintf(`
 resource "google_project" "project" {
   name            = "tf-test-gkehub%{random_suffix}"
   project_id      = "tf-test-gkehub%{random_suffix}"
