@@ -24,7 +24,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           agent_name: "dialogflowcx-agent"
     id_format: "{{name}}"
-    import_format: ["projects/{{project}}/locations/{{location}}/agents/{{name}}"]
+    import_format: ["{{name}}"]
     # Skip sweeper gen due to non-standard urls.
     skip_sweeper: true
     properties:
