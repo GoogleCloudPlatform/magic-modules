@@ -63,6 +63,7 @@ components:
       x-dcl-id: projects/{{project}}/locations/{{location}}/triggers/{{name}}
       x-dcl-parent-container: project
       x-dcl-labels: labels
+      x-dcl-locations: []
       type: object
       required:
       - name
