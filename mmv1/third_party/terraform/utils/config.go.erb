@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+	"github.com/hashicorp/terraform-provider-google/version"
 	"google.golang.org/api/option"
 
 	"golang.org/x/oauth2"
@@ -71,6 +72,8 @@ import (
 type providerMeta struct {
 	ModuleName string `cty:"module_name"`
 }
+
+var providerVersion string
 
 // Config is the configuration structure used to instantiate the Google
 // provider.
@@ -200,6 +203,12 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// the config level.
 	c.clientDataprocDCL = dataprocDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions,dclLoggerOptions, dcl.WithBasePath(c.DataprocBasePath)))
 	c.clientEventarcDCL = eventarcDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions,dclLoggerOptions, dcl.WithBasePath(c.EventarcBasePath)))
+
+<% if version.nil? || version == 'ga' -%>
+	providerVersion = "google/" + version.ProviderVersion
+<% else -%>
+	providerVersion = "google-<%= version -%>/"  + version.ProviderVersion
+<% end -%>
 
 	return nil
 }

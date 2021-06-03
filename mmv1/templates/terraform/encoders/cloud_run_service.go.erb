@@ -28,14 +28,8 @@ if metadata["annotations"] == nil {
 	metadata["annotations"] = make(map[string]interface{})
 }
 
-<% if version.nil? || version == 'ga' -%>
-providerVersionString := "google/" + version.ProviderVersion
-<% else -%>
-providerVersionString := "google-<%= version -%>/"  + version.ProviderVersion
-<% end -%>
-
 annotations := metadata["annotations"].(map[string]interface{})
 annotations["run.googleapis.com/client-name"] = "hashicorp-terraform"
-annotations["run.googleapis.com/client-version"] = providerVersionString
+annotations["run.googleapis.com/client-version"] = providerVersion
 
 return obj, nil
