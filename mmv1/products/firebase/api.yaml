@@ -152,3 +152,71 @@ objects:
           Immutable. The globally unique, Firebase-assigned identifier of the App.
 
           This identifier should be treated as an opaque token, as the data format is not specified.
+  - !ruby/object:Api::Resource
+    name: 'IosApp'
+    description: |
+      A Google Cloud Firebase iOS application instance
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://firebase.google.com/'
+      api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.iosApps'
+    base_url: projects/{{project}}/iosApps
+    min_version: beta
+    update_mask: true
+    self_link: '{{name}}'
+    update_verb: :PATCH
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      actions: ["create"]
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: true
+        allowed:
+          - true
+          - false
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The fully qualified resource name of the App, for example:
+
+          `projects/PROJECT_IDENTIFIER/iosApps/APP_ID`
+
+          - `PROJECT_IDENTIFIER`: the parent Project's `ProjectNumber` (recommended) or its `ProjectId`. Note that the value for `PROJECT_IDENTIFIER` in any response body will be the `ProjectId`.
+          - `APP_ID`: the globally unique, Firebase-assigned identifier for the App (see [appId](https://firebase.google.com/docs/projects/api/reference/rest/projects.iosApps#IosApp.FIELDS.app_id)).
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'appId'
+        description: |
+          Immutable. The globally unique, Firebase-assigned identifier of the App.
+
+          This identifier should be treated as an opaque token, as the data format is not specified.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        required: true
+        description: |
+          The user-assigned display name of the App.
+      - !ruby/object:Api::Type::String
+        name: 'projectId'
+        description: |
+          Immutable. A user-assigned unique identifier of the parent FirebaseProject for the IosApp.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'bundleId'
+        description: |
+          Immutable. The canonical bundle ID of the iOS app as it would appear in the iOS AppStore.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'appStoreId'
+        description: |
+          The automatically generated Apple ID assigned to the iOS app by Apple in the iOS App Store.
