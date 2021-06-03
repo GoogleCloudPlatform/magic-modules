@@ -219,6 +219,125 @@ func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
 			]`,
 			ExpectDiffSuppress: true,
 		},
+		"multiple levels of reordering with policyTags set": {
+			Old: `[
+				{
+					"mode": "NULLABLE",
+					"name": "providerphone",
+					"type":"STRING",
+					"policyTags": {
+						"names": [
+							"projects/my-project/locations/us/taxonomies/12345678/policyTags/12345678"
+						]
+					},
+					"fields": [
+						{
+							"name": "value1",
+							"type": "INTEGER",
+							"mode": "NULLABLE",
+							"description": "someVal",
+							"policyTags": {
+								"names": [
+									"projects/my-project/locations/us/taxonomies/12345678/policyTags/12345678"
+								]
+							}
+						},
+						{
+							"name": "value2",
+							"type": "BOOLEAN",
+							"mode": "NULLABLE",
+							"description": "someVal"
+						}
+					]
+				},
+				{
+					"name": "PageNo",
+					"type": "INTEGER"
+				},
+				{
+					"name": "IngestTime",
+					"type": "TIMESTAMP",
+					"fields": [
+						{
+							"name": "value3",
+							"type": "INTEGER",
+							"mode": "NULLABLE",
+							"description": "someVal",
+							"policyTags": {
+								"names": [
+									"projects/my-project/locations/us/taxonomies/12345678/policyTags/12345678"
+								]
+							}
+						},
+						{
+							"name": "value4",
+							"type": "BOOLEAN",
+							"mode": "NULLABLE",
+							"description": "someVal"
+						}
+					]
+				}
+			]`,
+			New: `[
+				{
+					"name": "IngestTime",
+					"type": "TIMESTAMP",
+					"fields": [
+						{
+							"name": "value4",
+							"type": "BOOLEAN",
+							"mode": "NULLABLE",
+							"description": "someVal"
+						},
+						{
+							"name": "value3",
+							"type": "INTEGER",
+							"mode": "NULLABLE",
+							"description": "someVal",
+							"policyTags": {
+								"names": [
+									"projects/my-project/locations/us/taxonomies/12345678/policyTags/12345678"
+								]
+							}
+						}
+					]
+				},
+				{
+					"mode": "NULLABLE",
+					"name": "providerphone",
+					"type":"STRING",
+					"policyTags": {
+						"names": [
+							"projects/my-project/locations/us/taxonomies/12345678/policyTags/12345678"
+						]
+					},
+					"fields": [
+						{
+							"name": "value1",
+							"type": "INTEGER",
+							"mode": "NULLABLE",
+							"description": "someVal",
+							"policyTags": {
+								"names": [
+									"projects/my-project/locations/us/taxonomies/12345678/policyTags/12345678"
+								]
+							}
+						},
+						{
+							"name": "value2",
+							"type": "BOOLEAN",
+							"mode": "NULLABLE",
+							"description": "someVal"
+						}
+					]
+				},
+				{
+					"name": "PageNo",
+					"type": "INTEGER"
+				}
+			]`,
+			ExpectDiffSuppress: true,
+		},
 	}
 
 	for tn, tc := range cases {
