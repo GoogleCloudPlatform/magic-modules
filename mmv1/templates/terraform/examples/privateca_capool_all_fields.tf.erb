@@ -34,5 +34,44 @@ resource "google_privateca_ca_pool" "<%= ctx[:primary_resource_id] %>" {
         title = "My title"
       }
     }
+    baseline_values {
+      aia_ocsp_servers = ["example.com"]
+      additional_extensions {
+        critical = true
+        value = "asdf"
+        object_id {
+          object_id_path = [123, 899]
+        }
+      }
+      policy_ids {
+        object_id_path = [123, 888]
+      }
+      policy_ids {
+        object_id_path = [456, 120]
+      }
+      ca_options {
+        is_ca = true
+        max_issuer_path_length = 10
+      }
+      key_usage {
+        base_key_usage {
+          digital_signature = true
+          content_commitment = true
+          key_encipherment = false
+          data_encipherment = true
+          key_agreement = true
+          cert_sign = false
+          crl_sign = true
+          decipher_only = true
+        }
+        extended_key_usage {
+          server_auth = true
+          client_auth = false
+          email_protection = true
+          code_signing = true
+          time_stamping = true
+        }
+      }
+    }
   }
 }

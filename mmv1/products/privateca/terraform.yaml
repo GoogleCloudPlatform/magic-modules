@@ -15,12 +15,6 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   CertificateAuthority: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
-    iam_policy: !ruby/object:Api::Resource::IamPolicy
-      parent_resource_attribute: certificate_authority
-      allowed_iam_role: 'roles/privateca.certificateManager'
-      method_name_separator: ':'
-      example_config_body: 'templates/terraform/iam/example_config_body/privateca_certificate_authority.tf.erb'
-      base_url: '{{name}}'
     import_format: ["projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -88,17 +82,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate.go.erb
   CaPool: !ruby/object:Overrides::Terraform::ResourceOverride
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      allowed_iam_role: 'roles/privateca.certificateManager'
+      method_name_separator: ':'
+      parent_resource_attribute: ca_pool
+      example_config_body: 'templates/terraform/iam/example_config_body/privateca_ca_pool.tf.erb'
     autogen_async: true
     import_format: ["projects/{{project}}/locations/{{location}}/caPools/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_capool_basic"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-capool%s\", context[\"random_suffix\"])"
         primary_resource_id: "default"
         vars:
-          name: "capool"
+          name: "my-capool"
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_capool_all_fields"
         primary_resource_id: "default"
         vars:
-          name: "capool"
+          name: "my-capool"
 
