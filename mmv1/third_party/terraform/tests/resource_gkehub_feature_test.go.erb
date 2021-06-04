@@ -854,7 +854,7 @@ resource "google_container_cluster" "primary" {
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
-  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
+  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub, google_project_service.acm]
 }
 
 resource "google_gke_hub_membership" "membership" {
@@ -924,6 +924,12 @@ resource "google_project_service" "mci" {
 resource "google_project_service" "mcsd" {
   project = google_project.project.project_id
   service = "multiclusterservicediscovery.googleapis.com"
+  provider = google-beta
+}
+
+resource "google_project_service" "acm" {
+  project = google_project.project.project_id
+  service = "anthosconfigmanagement.googleapis.com"
   provider = google-beta
 }
 
