@@ -897,11 +897,96 @@ objects:
         description: |
           The IssuancePolicy to control how Certificates will be issued from this CaPool.
         properties:
+          - !ruby/object:Api::Type::Array
+            name: 'allowedKeyTypes'
+            description: |
+               If any AllowedKeyType is specified, then the certificate request's public key must match one of the key types listed here.
+               Otherwise, any key may be used.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'rsa'
+                  description: |
+                    Describes an RSA key that may be used in a Certificate issued from a CaPool.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'minModulusSize'
+                      description: |
+                         The minimum allowed RSA modulus size, in bits. If this is not set, or if set to zero, the
+                         service-level min RSA modulus size will continue to apply.
+                    - !ruby/object:Api::Type::String
+                      name: 'maxModulusSize'
+                      description: |
+                         The maximum allowed RSA modulus size, in bits. If this is not set, or if set to zero, the
+                         service will not enforce an explicit upper bound on RSA modulus sizes.
+                - !ruby/object:Api::Type::Enum
+                  name: 'ellipticCurve'
+                  description: |
+                    Represents an allowed Elliptic Curve key type.
+                  values:
+                    - ECDSA_P256
+                    - ECDSA_P384
+                    - EDDSA_25519
           - !ruby/object:Api::Type::String
             name: 'maximumLifetime'
             description: |
               The maximum lifetime allowed for issued Certificates. Note that if the issuing CertificateAuthority
               expires before a Certificate's requested maximumLifetime, the effective lifetime will be explicitly truncated to match it.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'allowedIssuanceModes'
+            description: |
+              IssuanceModes specifies the allowed ways in which Certificates may be requested from this CaPool.
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'allowCsrBasedIssuance'
+                required: true
+                description: |
+                   When true, allows callers to create Certificates by specifying a CSR.
+              - !ruby/object:Api::Type::Boolean
+                name: 'allowConfigBasedIssuance'
+                required: true
+                description: |
+                   When true, allows callers to create Certificates by specifying a CertificateConfig.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'identityConstraints'
+            description: |
+              Describes constraints on identities that may appear in Certificates issued through this CaPool.
+              If this is omitted, then this CaPool will not add restrictions on a certificate's identity.
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'allowSubjectPassthrough'
+                description: |
+                   If this is set, the Subject field may be copied from a certificate request into the signed certificate.
+                   Otherwise, the requested Subject will be discarded.
+              - !ruby/object:Api::Type::Boolean
+                name: 'allowSubjectAltNamesPassthrough'
+                description: |
+                   If this is set, the SubjectAltNames extension may be copied from a certificate request into the signed certificate.
+                   Otherwise, the requested SubjectAltNames will be discarded.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'celExpression'
+                description: |
+                  A CEL expression that may be used to validate the resolved X.509 Subject and/or Subject Alternative Name before a
+                  certificate is signed. To see the full allowed syntax and some examples,
+                  see https://cloud.google.com/certificate-authority-service/docs/cel-guide
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'expression'
+                    required: true
+                    description: |
+                       Textual representation of an expression in Common Expression Language syntax.
+                  - !ruby/object:Api::Type::String
+                    name: 'title'
+                    description: |
+                       Title for the expression, i.e. a short string describing its purpose. This can be used e.g. in UIs which allow to enter the expression.
+                  - !ruby/object:Api::Type::String
+                    name: 'description'
+                    description: |
+                       Description of the expression. This is a longer text which describes the expression, e.g. when hovered over it in a UI.
+                  - !ruby/object:Api::Type::String
+                    name: 'location'
+                    description: |
+                       String indicating the location of the expression for error reporting, e.g. a file name and a position in the file.
       - !ruby/object:Api::Type::NestedObject
         name: 'publishingOptions'
         description: |
