@@ -330,7 +330,6 @@ resource "google_gkehub_feature" "feature" {
   labels = {
     foo = "bar"
   }
-  project = google_project.project.project_id
   provider = google-beta
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
