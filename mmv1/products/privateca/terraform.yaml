@@ -96,4 +96,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           name: "capool"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "privateca_capool_all_fields"
+        primary_resource_id: "default"
+        vars:
+          name: "capool"
 

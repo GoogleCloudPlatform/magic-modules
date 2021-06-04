@@ -1,0 +1,38 @@
+resource "google_privateca_ca_pool" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]["name"] %>"
+  location = "us-central1"
+  tier = "ENTERPRISE"
+  publishing_options {
+    publish_ca_cert = false
+    publish_crl = true
+  }
+  labels = {
+    foo = "bar"
+  }
+  issuance_policy {
+    allowed_key_types {
+      elliptic_curve {
+        signature_algorithm = "ECDSA_P256"
+      }
+    }
+    allowed_key_types {
+      rsa {
+        min_modulus_size = 5
+        max_modulus_size = 10
+      }
+    }
+    maximum_lifetime = "50000s"
+    allowed_issuance_modes {
+      allow_csr_based_issuance = true
+      allow_config_based_issuance = true
+    }
+    identity_constraints {
+      allow_subject_passthrough = true
+      allow_subject_alt_names_passthrough = true
+      cel_expression {
+        expression = "subject_alt_names.all(san, san.type == DNS || san.type == EMAIL )"
+        title = "My title"
+      }
+    }
+  }
+}

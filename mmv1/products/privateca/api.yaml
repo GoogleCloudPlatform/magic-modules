@@ -862,6 +862,23 @@ objects:
     create_url: 'projects/{{project}}/locations/{{location}}/caPools?caPoolId={{name}}'
     self_link: 'projects/{{project}}/locations/{{location}}/caPools/{{name}}'
     input: true
+    async: !ruby/object:Api::OpAsync
+        operation: !ruby/object:Api::OpAsync::Operation
+          base_url: '{{op_id}}'
+          path: 'name'
+          wait_ms: 1000
+        result: !ruby/object:Api::OpAsync::Result
+          path: 'response'
+          resource_inside_response: true
+        status: !ruby/object:Api::OpAsync::Status
+          path: 'done'
+          complete: True
+          allowed:
+            - True
+            - False
+        error: !ruby/object:Api::OpAsync::Error
+          path: 'error'
+          message: 'message'
     description: |
       A CaPool represents a group of CertificateAuthorities that form a trust anchor. A CaPool can be used to manage
       issuance policies for one or more CertificateAuthority resources and to rotate CA certificates in and out of the
@@ -919,14 +936,20 @@ objects:
                       description: |
                          The maximum allowed RSA modulus size, in bits. If this is not set, or if set to zero, the
                          service will not enforce an explicit upper bound on RSA modulus sizes.
-                - !ruby/object:Api::Type::Enum
+                - !ruby/object:Api::Type::NestedObject
                   name: 'ellipticCurve'
                   description: |
                     Represents an allowed Elliptic Curve key type.
-                  values:
-                    - ECDSA_P256
-                    - ECDSA_P384
-                    - EDDSA_25519
+                  properties:
+                    - !ruby/object:Api::Type::Enum
+                      name: 'signatureAlgorithm'
+                      description: |
+                         The algorithm used.
+                      required: true
+                      values:
+                        - ECDSA_P256
+                        - ECDSA_P384
+                        - EDDSA_25519
           - !ruby/object:Api::Type::String
             name: 'maximumLifetime'
             description: |
