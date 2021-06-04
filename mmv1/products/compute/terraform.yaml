@@ -1104,6 +1104,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           address_name: "test-address"
           router_name: "test-router"
           network_name: "test-network"
+        min_version: beta
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -2087,6 +2088,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           router_name: "test-router"
           network_name: "test-network"
+        min_version: beta
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/router.go.erb
       resource_definition: templates/terraform/resource_definition/router.go.erb
@@ -2753,6 +2755,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           address2_name: "test-address2"
           router_name: "test-router"
           network_name: "test-network"
+        min_version: beta
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
