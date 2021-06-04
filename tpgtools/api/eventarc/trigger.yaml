@@ -208,6 +208,7 @@ components:
             to that transport intermediary. This information can be used for debugging
             purposes.
           x-kubernetes-immutable: true
+          x-dcl-server-default: true
           properties:
             pubsub:
               type: object
