@@ -4,6 +4,7 @@ package google
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -62,6 +63,37 @@ func TestAccDataflowFlexTemplateJob_streamUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobHasOption(t, "google_dataflow_flex_template_job.job", "topic", "projects/myproject/topics/mytopic2"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccDataflowFlexTemplateJob_streamUpdateFail(t *testing.T) {
+	// This resource uses custom retry logic that cannot be sped up without
+	// modifying the actual resource
+	skipIfVcr(t)
+	t.Parallel()
+
+	randStr := randString(t, 10)
+	job := "tf-test-dataflow-job-" + randStr
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataflowFlexTemplateJob_basic(job, "mytopic"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
+				),
+			},
+			{
+				Config: testAccDataflowFlexTemplateJob_basic(job, ""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowJobHasOption(t, "google_dataflow_flex_template_job.job", "topic", "projects/myproject/topics/mytopic"),
+				),
+				ExpectError: regexp.MustCompile(`Error waiting for Job with job ID "[^"]+" to be updated: the job with ID "[^"]+" has terminated with state "JOB_STATE_FAILED" instead of expected state "JOB_STATE_RUNNING"`),
 			},
 		},
 	})
@@ -155,6 +187,10 @@ func testAccDataflowFlexTemplateJobGetGeneratedInstance(t *testing.T, s *terrafo
 
 // note: this config creates a job that doesn't actually do anything, but still runs
 func testAccDataflowFlexTemplateJob_basic(job, topicName string) string {
+	topicField := ""
+	if topicName != "" {
+		topicField = fmt.Sprintf("topic = \"projects/myproject/topics/%s\"", topicName)
+	}
 	return fmt.Sprintf(`
 data "google_storage_bucket_object" "flex_template" {
   name   = "latest/flex/Streaming_Data_Generator"
@@ -167,10 +203,10 @@ resource "google_dataflow_flex_template_job" "job" {
   parameters = {
     schemaLocation = "gs://mybucket/schema.json"
     qps = "1"
-    topic = "projects/myproject/topics/%s"
+    %s
   }
 }
-`, job, topicName)
+`, job, topicField)
 }
 
 // note: this config creates a job that doesn't actually do anything, but still runs
