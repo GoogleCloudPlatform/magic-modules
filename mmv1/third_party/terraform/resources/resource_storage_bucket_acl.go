@@ -56,34 +56,47 @@ func resourceStorageBucketAcl() *schema.Resource {
 }
 
 func resourceStorageRoleEntityCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
-	keys := diff.GetChangedKeysPrefix("role_entity")
-	if len(keys) < 1 {
+
+	old, new := diff.GetChange("role_entity")
+	if old == nil || new == nil {
 		return nil
 	}
-	count := diff.Get("role_entity.#").(int)
-	if count < 1 {
-		return nil
+
+	oldList := convertStringArr(old.([]interface{}))
+	newList := convertStringArr(new.([]interface{}))
+
+	num := len(oldList)
+	if len(newList) > num {
+		num = len(newList)
 	}
-	state := map[string]struct{}{}
-	conf := map[string]struct{}{}
-	for i := 0; i < count; i++ {
-		old, new := diff.GetChange(fmt.Sprintf("role_entity.%d", i))
-		state[old.(string)] = struct{}{}
-		conf[new.(string)] = struct{}{}
+
+	// compare two lists of unordered entity
+	// api adds up to 3 role-entity OWNER:project-owners-, OWNER:project-editors-, READER:project-viewers-
+	// that need to be excluded in the comaprison
+	comp := make(map[string]bool, num)
+
+	for _, oldEntity := range oldList {
+		if !strings.Contains(oldEntity, ":project-") {
+			comp[oldEntity] = true
+		}
 	}
-	if len(state) != len(conf) {
-		return nil
-	}
-	for k := range state {
-		if _, ok := conf[k]; !ok {
-			// project-owners- is explicitly stripped from the roles that this
-			// resource will delete
-			if strings.Contains(k, "OWNER:project-owners-") {
-				continue
+	for _, newEntity := range newList {
+		if !strings.Contains(newEntity, ":project-") {
+			if comp[newEntity] {
+				comp[newEntity] = false
+			} else {
+				// new entity is found
+				return nil
 			}
+		}
+	}
+	// can't suppress if unmatched entities are found
+	for _, entity := range comp {
+		if entity {
 			return nil
 		}
 	}
+
 	return diff.Clear("role_entity")
 }
 
