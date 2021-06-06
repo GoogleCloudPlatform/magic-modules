@@ -72,7 +72,7 @@ func resourceStorageRoleEntityCustomizeDiff(_ context.Context, diff *schema.Reso
 
 	// compare two lists of unordered entity
 	// api adds up to 3 role-entity OWNER:project-owners-, OWNER:project-editors-, READER:project-viewers-
-	// that need to be excluded in the comaprison
+	// that need to be excluded in the comparison
 	comp := make(map[string]bool, num)
 
 	for _, oldEntity := range oldList {
