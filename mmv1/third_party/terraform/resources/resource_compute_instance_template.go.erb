@@ -556,6 +556,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 						"enable_confidential_compute": {
 							Type:        schema.TypeBool,
 							Required:    true,
+							ForceNew:    true,
 							Description: `Defines whether the instance should have confidential compute enabled.`,
 						},
 					},
@@ -566,6 +567,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 				MaxItems:    1,
 				Optional:    true,
 				Computed:    true,
+				ForceNew:    true,
 				Description: `Controls for advanced machine-related behavior features.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -573,12 +575,14 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Default:     false,
+							ForceNew:    true,
 							Description: `Whether to enable nested virtualization or not.`,
 						},
 						"threads_per_core": {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Computed:    false,
+							ForceNew:    true,
 							Description: `The number of threads per physical core. To disable simultaneous multithreading (SMT) set this to 1. If unset, the maximum number of threads supported per core by the underlying processor is assumed.`,
 						},
 					},
