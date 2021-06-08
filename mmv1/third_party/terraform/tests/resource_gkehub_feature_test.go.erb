@@ -21,9 +21,6 @@ func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
   vcrTest(t, resource.TestCase{
     PreCheck:  func() { testAccPreCheck(t) },
     Providers: testAccProvidersOiCS,
-    ExternalProviders: map[string]resource.ExternalProvider{
-      "random": {},
-    },
     CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -180,16 +177,13 @@ func TestAccGKEHubFeature_gkehubFeatureAcmUpdate(t *testing.T) {
   vcrTest(t, resource.TestCase{
     PreCheck:  func() { testAccPreCheck(t) },
     Providers: testAccProvidersOiCS,
-    ExternalProviders: map[string]resource.ExternalProvider{
-      "random": {},
-    },
     CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateStart(context),
         Check: resource.ComposeTestCheckFunc(
-          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
-          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test2%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("tf-test2%s", context["random_suffix"])),
         ),
       },
       {
@@ -200,8 +194,8 @@ func TestAccGKEHubFeature_gkehubFeatureAcmUpdate(t *testing.T) {
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateMiddle(context),
         Check: resource.ComposeTestCheckFunc(
-          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
-          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test2%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("tf-test2%s", context["random_suffix"])),
         ),
       },
       {
@@ -212,9 +206,9 @@ func TestAccGKEHubFeature_gkehubFeatureAcmUpdate(t *testing.T) {
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateMiddle2(context),
         Check: resource.ComposeTestCheckFunc(
-          testAccCheckGkeHubFeatureMembershipNotPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
-          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test2%s", context["random_suffix"])),
-          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test3%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipNotPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("tf-test2%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("tf-test3%s", context["random_suffix"])),
         ),
       },
       {
@@ -225,9 +219,9 @@ func TestAccGKEHubFeature_gkehubFeatureAcmUpdate(t *testing.T) {
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateEnd(context),
         Check: resource.ComposeTestCheckFunc(
-          testAccCheckGkeHubFeatureMembershipNotPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test2%s", context["random_suffix"])),
-          testAccCheckGkeHubFeatureMembershipNotPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("basic1%s", context["random_suffix"])),
-          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test3%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipNotPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("tf-test2%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipNotPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("basic1%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("tf-test3%s", context["random_suffix"])),
         ),
       },
       {
@@ -238,9 +232,9 @@ func TestAccGKEHubFeature_gkehubFeatureAcmUpdate(t *testing.T) {
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmUpdateMiddle2(context),
         Check: resource.ComposeTestCheckFunc(
-          testAccCheckGkeHubFeatureMembershipNotPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
-          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test2%s", context["random_suffix"])),
-          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test3%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipNotPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("tf-test2%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("tf-test3%s", context["random_suffix"])),
         ),
       },
       {
@@ -260,7 +254,7 @@ func TestAccGKEHubFeature_gkehubFeatureAcmUpdate(t *testing.T) {
 func testAccGKEHubFeature_gkehubFeatureAcmUpdateStart(context map[string]interface{}) string {
   return projectSetup(context) + Nprintf(`
 resource "google_container_cluster" "primary" {
-  name               = "basiccluster%{random_suffix}"
+  name               = "tf-test-cl%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   project = google_project.project.project_id
@@ -269,7 +263,7 @@ resource "google_container_cluster" "primary" {
 }
 
 resource "google_container_cluster" "secondary" {
-  name               = "basiccluster2%{random_suffix}"
+  name               = "tf-test-cl2%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   project = google_project.project.project_id
@@ -278,7 +272,7 @@ resource "google_container_cluster" "secondary" {
 }
 
 resource "google_container_cluster" "tertiary" {
-  name               = "basiccluster3%{random_suffix}"
+  name               = "tf-test-cl3%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   project = google_project.project.project_id
@@ -374,7 +368,7 @@ func testAccGKEHubFeature_gkehubFeatureAcmUpdateMiddle(context map[string]interf
   return projectSetup(context) + Nprintf(`
 resource "google_container_cluster" "primary" {
   project = google_project.project.project_id
-  name               = "basiccluster%{random_suffix}"
+  name               = "tf-test-cl%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
@@ -383,7 +377,7 @@ resource "google_container_cluster" "primary" {
 
 resource "google_container_cluster" "secondary" {
   project = google_project.project.project_id
-  name               = "basiccluster2%{random_suffix}"
+  name               = "tf-test-cl2%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
@@ -392,7 +386,7 @@ resource "google_container_cluster" "secondary" {
 
 resource "google_container_cluster" "tertiary" {
   project = google_project.project.project_id
-  name               = "basiccluster3%{random_suffix}"
+  name               = "tf-test-cl3%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
@@ -493,7 +487,7 @@ func testAccGKEHubFeature_gkehubFeatureAcmUpdateMiddle2(context map[string]inter
   return projectSetup(context) + Nprintf(`
 resource "google_container_cluster" "primary" {
   project = google_project.project.project_id
-  name               = "basiccluster%{random_suffix}"
+  name               = "tf-test-cl%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
@@ -502,7 +496,7 @@ resource "google_container_cluster" "primary" {
 
 resource "google_container_cluster" "secondary" {
   project = google_project.project.project_id
-  name               = "basiccluster2%{random_suffix}"
+  name               = "tf-test-cl2%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
@@ -511,7 +505,7 @@ resource "google_container_cluster" "secondary" {
 
 resource "google_container_cluster" "tertiary" {
   project = google_project.project.project_id
-  name               = "basiccluster3%{random_suffix}"
+  name               = "tf-test-cl3%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
@@ -628,7 +622,7 @@ func testAccGKEHubFeature_gkehubFeatureAcmUpdateEnd(context map[string]interface
   return projectSetup(context) + Nprintf(`
 resource "google_container_cluster" "primary" {
   project = google_project.project.project_id
-  name               = "basiccluster%{random_suffix}"
+  name               = "tf-test-cl%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
@@ -637,7 +631,7 @@ resource "google_container_cluster" "primary" {
 
 resource "google_container_cluster" "secondary" {
   project = google_project.project.project_id
-  name               = "basiccluster2%{random_suffix}"
+  name               = "tf-test-cl2%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
@@ -646,7 +640,7 @@ resource "google_container_cluster" "secondary" {
 
 resource "google_container_cluster" "tertiary" {
   project = google_project.project.project_id
-  name               = "basiccluster3%{random_suffix}"
+  name               = "tf-test-cl3%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
@@ -738,15 +732,12 @@ func TestAccGKEHubFeature_gkehubFeatureAcmAllFields(t *testing.T) {
   vcrTest(t, resource.TestCase{
     PreCheck:  func() { testAccPreCheck(t) },
     Providers: testAccProvidersOiCS,
-    ExternalProviders: map[string]resource.ExternalProvider{
-      "random": {},
-    },
     CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmFewFields(context),
         Check: resource.ComposeTestCheckFunc(
-          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
         ),
       },
       {
@@ -757,7 +748,7 @@ func TestAccGKEHubFeature_gkehubFeatureAcmAllFields(t *testing.T) {
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmAllFields(context),
         Check: resource.ComposeTestCheckFunc(
-          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
         ),
       },
       {
@@ -768,7 +759,7 @@ func TestAccGKEHubFeature_gkehubFeatureAcmAllFields(t *testing.T) {
       {
         Config: testAccGKEHubFeature_gkehubFeatureAcmFewFields(context),
         Check: resource.ComposeTestCheckFunc(
-          testAccCheckGkeHubFeatureMembershipPresent(t, getTestProjectFromEnv(), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
+          testAccCheckGkeHubFeatureMembershipPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
         ),
       },
       {
@@ -784,7 +775,7 @@ func testAccGKEHubFeature_gkehubFeatureAcmAllFields(context map[string]interface
   return projectSetup(context) + Nprintf(`
 resource "google_container_cluster" "primary" {
   project = google_project.project.project_id
-  name               = "basiccluster%{random_suffix}"
+  name               = "tf-test-cl%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
@@ -850,7 +841,7 @@ func testAccGKEHubFeature_gkehubFeatureAcmFewFields(context map[string]interface
   return projectSetup(context) + Nprintf(`
 resource "google_container_cluster" "primary" {
   project = google_project.project.project_id
-  name               = "basiccluster%{random_suffix}"
+  name               = "tf-test-cl%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
   provider = google-beta
