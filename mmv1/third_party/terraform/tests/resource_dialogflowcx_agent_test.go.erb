@@ -42,11 +42,6 @@ func TestAccDialogflowCXAgent_update(t *testing.T) {
 
 func testAccDialogflowCXAgent_basic(context map[string]interface{}) string {
 	return Nprintf(`
-	resource "google_project_service" "agent_project" {
-		service = "dialogflow.googleapis.com"
-		disable_dependent_services = false
-	}
-
 	resource "google_service_account" "dialogflowcx_service_account" {
 		account_id = "tf-test-dialogflow-%{random_suffix}"
 	}
@@ -71,12 +66,7 @@ func testAccDialogflowCXAgent_basic(context map[string]interface{}) string {
 
 func testAccDialogflowCXAgent_full(context map[string]interface{}) string {
 	return Nprintf(`
-    resource "google_project_service" "agent_project" {
-		service = "dialogflow.googleapis.com"
-		disable_dependent_services = false
-	}
-
-	resource "google_service_account" "dialogflowcx_service_account" {
+    resource "google_service_account" "dialogflowcx_service_account" {
 		account_id = "tf-test-dialogflow-%{random_suffix}"
 	}
 	  
