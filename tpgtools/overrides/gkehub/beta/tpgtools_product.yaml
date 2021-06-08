@@ -1,0 +1,4 @@
+## product level overrides
+
+## SKIP_BASEPATH generation... needs to not share a name with GKEHub Membership
+- type: SKIP_BASEPATH
