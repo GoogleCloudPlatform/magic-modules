@@ -28,7 +28,6 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Agent'
     base_url: "projects/{{project}}/locations/{{location}}/agents"
-    self_link: "{{name}}"
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -43,8 +42,7 @@ objects:
         name: 'name'
         output: true
         description: |
-          The unique identifier of the agent. Required for the Agents.UpdateAgent method. 
-          Agents.CreateAgent populates the name automatically. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
+          The unique identifier of the agent.
       - !ruby/object:Api::Type::String
         name: 'location'
         description: |
