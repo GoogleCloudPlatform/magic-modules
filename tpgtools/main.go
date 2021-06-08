@@ -87,7 +87,8 @@ func main() {
 	}
 
 	// product specific generation
-	generateEndpointsFile(productsForVersion)
+	generateProductsFile("provider_dcl_endpoints", productsForVersion)
+	generateProductsFile("provider_dcl_client_creation", productsForVersion)
 
 	if oPath == nil || *oPath == "" {
 		glog.Info("Skipping copying handwritten files, no output specified")
@@ -377,20 +378,21 @@ func generateSweeperFile(res *Resource) {
 	}
 }
 
-func generateEndpointsFile(products []*ProductMetadata) {
+func generateProductsFile(fileName string, products []*ProductMetadata) {
 	if len(products) <= 0 {
 		return
 	}
+	templateFileName := fileName + ".go.tmpl"
 	// Generate endpoints file
-	tmpl, err := template.New("provider_dcl_endpoints.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
-		"templates/provider_dcl_endpoints.go.tmpl",
+	tmpl, err := template.New(templateFileName).Funcs(TemplateFunctions).ParseFiles(
+		"templates/" + templateFileName,
 	)
 	if err != nil {
 		glog.Exit(err)
 	}
 
 	contents := bytes.Buffer{}
-	if err = tmpl.ExecuteTemplate(&contents, "provider_dcl_endpoints.go.tmpl", products); err != nil {
+	if err = tmpl.ExecuteTemplate(&contents, templateFileName, products); err != nil {
 		glog.Exit(err)
 	}
 
@@ -400,13 +402,13 @@ func generateEndpointsFile(products []*ProductMetadata) {
 
 	formatted, err := formatSource(&contents)
 	if err != nil {
-		glog.Error(fmt.Errorf("error formatting package endpoints file"))
+		glog.Error(fmt.Errorf("error formatting package %s file: \n%w", fileName, err))
 	}
 
 	if oPath == nil || *oPath == "" {
 		fmt.Printf("%v", string(formatted))
 	} else {
-		outname := fmt.Sprintf("provider_dcl_endpoints.go")
+		outname := fmt.Sprintf(fileName + ".go")
 		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
 		if err != nil {
 			glog.Exit(err)

@@ -93,6 +93,9 @@ type Resource struct {
 	// ListFields is the list of fields required for a list call.
 	ListFields []string
 
+	// HasProject tells us if the resource has a project field
+	HasProject bool
+
 	// HasSweeper says if this resource has a generated sweeper.
 	HasSweeper bool
 
@@ -170,7 +173,7 @@ func (r Resource) ProductMetadata() *ProductMetadata {
 // resource. For example, the Package "access_context_manager" would have a
 // DCLPackage of "accesscontextmanager"
 func (r Resource) DCLPackage() string {
-	return strings.Replace(r.productMetadata.PackagePath, "_", "", -1)
+	return r.productMetadata.DCLPackage()
 }
 
 // SidebarCurrent is the website sidebar identifier, for example
@@ -386,6 +389,7 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 	}
 
 	res.Properties = props
+	_, res.HasProject = schema.Properties["project"]
 
 	// Resource Override: Virtual field
 	for _, vfd := range overrides.ResourceOverridesWithDetails(VirtualField, location) {

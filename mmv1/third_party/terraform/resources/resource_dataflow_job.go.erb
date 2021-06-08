@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -17,6 +18,13 @@ import (
 )
 
 const resourceDataflowJobGoogleProvidedLabelPrefix = "labels.goog-dataflow-provided"
+
+<% unless version == "ga" -%>
+var dataflowTerminatingStatesMap = map[string]struct{}{
+	"JOB_STATE_CANCELLING": {},
+	"JOB_STATE_DRAINING":   {},
+}
+<% end -%>
 
 var dataflowTerminalStatesMap = map[string]struct{}{
 	"JOB_STATE_DONE":      {},
