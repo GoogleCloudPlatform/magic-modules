@@ -33,8 +33,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       description: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.StringLenBetween(0, 500)'
-      avatarUri: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
