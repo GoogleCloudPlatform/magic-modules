@@ -1693,9 +1693,6 @@ objects:
       # TODO: make a ResourceRef to Security Policy
       - !ruby/object:Api::Type::String
         name: 'securityPolicy'
-        update_verb: :POST
-        update_url:
-          'projects/{{project}}/global/backendServices/{{name}}/setSecurityPolicy'
         description: |
           The security policy associated with this backend service.
       - !ruby/object:Api::Type::Enum
@@ -9208,8 +9205,6 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'preservedState'
         description: 'The preserved state for this instance.'
-        update_verb: :POST
-        update_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/updatePerInstanceConfigs'
         properties:
           - !ruby/object:Api::Type::KeyValuePairs
             name: 'metadata'
@@ -9329,7 +9324,6 @@ objects:
         name: 'preservedState'
         description: 'The preserved state for this instance.'
         update_verb: :POST
-        update_url: 'projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}/updatePerInstanceConfigs'
         properties:
           - !ruby/object:Api::Type::KeyValuePairs
             name: 'metadata'
@@ -18277,8 +18271,6 @@ objects:
           the BackendService. The protocol field in the BackendService
           must be set to GRPC.
         input: true
-        update_verb: :PATCH
-        update_url: projects/{{project}}/global/targetGrpcProxies
         update_id: 'urlMap'
         fingerprint_name: 'fingerprint'
       - !ruby/object:Api::Type::Boolean
