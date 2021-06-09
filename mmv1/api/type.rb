@@ -124,7 +124,7 @@ module Api
       raise 'Property cannot be output and required at the same time.' \
         if @output && @required
 
-      check :update_verb, type: Symbol, allowed: %i[POST PUT PATCH UPGRADE NONE],
+      check :update_verb, type: Symbol, allowed: %i[POST PUT PATCH NONE],
                           default: @__resource&.update_verb
 
       check :update_url, type: ::String
