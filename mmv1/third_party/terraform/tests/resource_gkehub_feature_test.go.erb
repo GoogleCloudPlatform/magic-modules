@@ -10,6 +10,8 @@ import (
 )
 
 func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
+  // VCR fails to handle batched project services
+  skipIfVcr(t)
   t.Parallel()
 
   context := map[string]interface{}{
@@ -721,6 +723,8 @@ resource "google_gkehub_feature_membership" "feature_member_3" {
 }
 
 func TestAccGKEHubFeature_gkehubFeatureAcmAllFields(t *testing.T) {
+  // VCR fails to handle batched project services
+  skipIfVcr(t)
   t.Parallel()
 
   context := map[string]interface{}{
@@ -897,6 +901,8 @@ resource "google_gkehub_feature_membership" "feature_member" {
 }
 
 func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
+  // VCR fails to handle batched project services
+  skipIfVcr(t)
   t.Parallel()
 
   context := map[string]interface{}{
