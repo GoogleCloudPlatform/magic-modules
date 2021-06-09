@@ -14130,7 +14130,7 @@ objects:
       Represents a ServiceAttachment resource.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
-        'TODO': 'https://cloud.google.com/'
+        'Configuring Private Service Connect to access services': 'https://cloud.google.com/vpc/docs/configure-private-service-connect-services'
       api: 'https://cloud.google.com/compute/docs/reference/beta/serviceAttachments'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
