@@ -67,6 +67,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           regex: '^[a-z][a-z0-9-]{0,39}[a-z0-9]$'
       redisVersion: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        update_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}'
+        update_verb: :UPGRADE
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
         required: false
