@@ -10,9 +10,9 @@ resource "google_compute_service_attachment" "<%= ctx[:primary_resource_id] %>" 
   nat_subnets              = [google_compute_subnetwork.psc_ilb_nat.id]
   target_service           = google_compute_forwarding_rule.psc_ilb_target_service.id
 
-  consumer_reject_list = ["673497134629", "482878270665"]
+  consumer_reject_lists = ["673497134629", "482878270665"]
 
-  consumer_accept_list {
+  consumer_accept_lists {
     project_id_or_num = "658859330310"
     connection_limit  = 4
   }

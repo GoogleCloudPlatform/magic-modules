@@ -14225,13 +14225,13 @@ objects:
           address data in TCP connections that traverse proxies on their way to
           destination servers.
       - !ruby/object:Api::Type::Array
-        name: 'consumerRejectList'
+        name: 'consumerRejectLists'
         item_type: Api::Type::String
         description: |
           An array of projects that are not allowed to connect to this service
           attachment.
       - !ruby/object:Api::Type::Array
-        name: 'consumerAcceptList'
+        name: 'consumerAcceptLists'
         description: |
           An array of projects that are allowed to connect to this service
           attachment.
