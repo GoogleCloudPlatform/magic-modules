@@ -896,6 +896,71 @@ resource "google_gkehub_feature_membership" "feature_member" {
 `, context)
 }
 
+func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
+  t.Parallel()
+
+  context := map[string]interface{}{
+    "random_suffix":   randString(t, 10),
+    "org_id":          getTestOrgFromEnv(t),
+    "billing_account": getTestBillingAccountFromEnv(t),
+  }
+
+  vcrTest(t, resource.TestCase{
+    PreCheck:  func() { testAccPreCheck(t) },
+    Providers: testAccProvidersOiCS,
+    CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccGKEHubFeature_gkehubFeatureMcsd(context),
+      },
+      {
+        ResourceName:      "google_gkehub_feature.feature",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccGKEHubFeature_gkehubFeatureMcsdUpdate(context),
+      },
+      {
+        ResourceName:      "google_gkehub_feature.feature",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
+}
+
+func testAccGKEHubFeature_gkehubFeatureMcsd(context map[string]interface{}) string {
+  return projectSetup(context) + Nprintf(`
+resource "google_gkehub_feature" "feature" {
+  name = "multiclusterservicediscovery"
+  location = "global"
+  project = google_project.project.project_id
+  labels = {
+    foo = "bar"
+  }
+  provider = google-beta
+  depends_on = [google_project_service.mcsd]
+}
+`, context)
+}
+
+func testAccGKEHubFeature_gkehubFeatureMcsdUpdate(context map[string]interface{}) string {
+  return projectSetup(context) + Nprintf(`
+resource "google_gkehub_feature" "feature" {
+  name = "multiclusterservicediscovery"
+  location = "global"
+  project = google_project.project.project_id
+  labels = {
+    foo = "quux"
+    baz = "qux"
+  }
+  provider = google-beta
+  depends_on = [google_project_service.mcsd]
+}
+`, context)
+}
+
 func projectSetup(context map[string]interface{}) string {
   return Nprintf(`
 resource "google_project" "project" {

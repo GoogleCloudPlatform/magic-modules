@@ -14,3 +14,5 @@
 - type: MUTEX
   details:
     mutex: '{{project}}/{{location}}/{{feature}}'
+# Feature is a singleton, so we create it in sub-projects anyways
+- type: NO_SWEEPER
