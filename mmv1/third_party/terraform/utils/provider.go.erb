@@ -157,6 +157,7 @@ func Provider() *schema.Provider {
 
 			// dcl
 			EventarcEndpointEntryKey:               EventarcEndpointEntry,
+			GkeHubFeatureCustomEndpointEntryKey:               GkeHubFeatureCustomEndpointEntry,
 },
 
 		ProviderMetaSchema: map[string]*schema.Schema{
@@ -372,6 +373,10 @@ end     # products.each do
 				"google_eventarc_trigger":                      resourceEventarcTrigger(),
 				"google_folder":                                resourceGoogleFolder(),
 				"google_folder_organization_policy":            resourceGoogleFolderOrganizationPolicy(),
+				<% unless version == 'ga' -%>
+				"google_gke_hub_feature":                        resourceGkeHubFeature(),
+				"google_gke_hub_feature_membership":             resourceGkeHubFeatureMembership(),
+				<% end -%>
 				"google_logging_billing_account_sink":          resourceLoggingBillingAccountSink(),
 				"google_logging_billing_account_exclusion":     ResourceLoggingExclusion(BillingAccountLoggingExclusionSchema, NewBillingAccountLoggingExclusionUpdater, billingAccountLoggingExclusionIdParseFunc),
 				"google_logging_billing_account_bucket_config": ResourceLoggingBillingAccountBucketConfig(),
@@ -573,6 +578,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 
 	// dcl
 	config.EventarcBasePath = d.Get(EventarcEndpointEntryKey).(string)
+	config.GkeHubBasePath = d.Get(GkeHubFeatureCustomEndpointEntryKey).(string)
 
 	stopCtx, ok := schema.StopContext(ctx)
 	if !ok {
