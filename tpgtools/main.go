@@ -207,17 +207,23 @@ func getResources(packagePath string, specs []os.FileInfo) []*Resource {
 			glog.Exit(err)
 		}
 
-		lRaw := schema.Extension["x-dcl-locations"].([]interface{})
+		lRaw := schema.Extension["x-dcl-locations"]
+		var schemaLocations []interface{}
+		if lRaw == nil {
+			schemaLocations = make([]interface{}, 0)
+		} else {
+			schemaLocations = lRaw.([]interface{})
+		}
 
 		typeFetcher := NewTypeFetcher(document)
 		var locations []string
-		// If the schema cannot be split into two or mor locations, we specify this
+		// If the schema cannot be split into two or more locations, we specify this
 		// by passing a single empty location string.
-		if len(lRaw) < 2 {
+		if len(schemaLocations) < 2 {
 			locations = make([]string, 1)
 		} else {
-			locations = make([]string, 0, len(lRaw))
-			for _, l := range lRaw {
+			locations = make([]string, 0, len(schemaLocations))
+			for _, l := range schemaLocations {
 				locations = append(locations, l.(string))
 			}
 		}
