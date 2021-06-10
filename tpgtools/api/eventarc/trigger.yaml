@@ -11,219 +11,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-components:
-  schemas:
-    Trigger:
-      properties:
-        createTime:
-          description: Output only. The creation time.
-          format: date-time
-          readOnly: true
-          type: string
-          x-dcl-go-name: CreateTime
-          x-kubernetes-immutable: true
-        destination:
-          description: Required. Destination specifies where the events should be
-            sent to.
-          properties:
-            cloudFunction:
-              description: 'The Cloud Function resource name. Only Cloud Functions
-                V2 is supported. Format: projects/{project}/locations/{location}/functions/{function}'
-              type: string
-              x-dcl-go-name: CloudFunction
-              x-dcl-references:
-              - field: selfLink
-                resource: Cloudfunctions/CloudFunction
-            cloudRun:
-              description: Cloud Run fully-managed service that receives the events.
-                The service should be running in the same project of the trigger.
-              properties:
-                path:
-                  description: 'Optional. The relative path on the Cloud Run service
-                    the events should be sent to. The value must conform to the definition
-                    of URI path segment (section 3.3 of RFC2396). Examples: "/route",
-                    "route", "route/subroute".'
-                  type: string
-                  x-dcl-go-name: Path
-                region:
-                  description: Required. The region the Cloud Run service is deployed
-                    in.
-                  type: string
-                  x-dcl-go-name: Region
-                service:
-                  description: Required. The name of the Cloud Run service being addressed.
-                    See https://cloud.google.com/run/docs/reference/rest/v1/namespaces.services.
-                    Only services located in the same project of the trigger object
-                    can be addressed.
-                  type: string
-                  x-dcl-go-name: Service
-                  x-dcl-references:
-                  - field: selfLink
-                    resource: Run/Service
-              required:
-              - service
-              - region
-              type: object
-              x-dcl-go-name: CloudRun
-              x-dcl-go-type: TriggerDestinationCloudRun
-          type: object
-          x-dcl-go-name: Destination
-          x-dcl-go-type: TriggerDestination
-        etag:
-          description: Output only. This checksum is computed by the server based
-            on the value of other fields, and may be sent only on create requests
-            to ensure the client has an up-to-date value before proceeding.
-          readOnly: true
-          type: string
-          x-dcl-go-name: Etag
-          x-kubernetes-immutable: true
-        eventFilters:
-          description: Required. null The list of filters that applies to event attributes.
-            Only events that match all the provided filters will be sent to the destination.
-          items:
-            properties:
-              attribute:
-                description: Required. The name of a CloudEvents attribute. Currently,
-                  only a subset of attributes are supported for filtering. All triggers
-                  MUST provide a filter for the 'type' attribute.
-                type: string
-                x-dcl-go-name: Attribute
-              value:
-                description: Required. The value for the attribute.
-                type: string
-                x-dcl-go-name: Value
-            required:
-            - attribute
-            - value
-            type: object
-            x-dcl-go-type: TriggerEventFilters
-          type: array
-          x-dcl-go-name: EventFilters
-          x-dcl-list-type: set
-        labels:
-          additionalProperties:
-            type: string
-          description: Optional. User labels attached to the triggers that can be
-            used to group resources.
-          type: object
-          x-dcl-go-name: Labels
-        location:
-          description: The location for the resource
-          type: string
-          x-dcl-go-name: Location
-          x-kubernetes-immutable: true
-        name:
-          description: Required. The resource name of the trigger. Must be unique
-            within the location on the project and must be in \\\`projects/{project}/locations/{location}/triggers/{trigger}\\\`
-            format.
-          type: string
-          x-dcl-go-name: Name
-        project:
-          description: The project for the resource
-          type: string
-          x-dcl-go-name: Project
-          x-dcl-references:
-          - field: name
-            parent: true
-            resource: Cloudresourcemanager/Project
-          x-kubernetes-immutable: true
-        serviceAccount:
-          description: Optional. The IAM service account email associated with the
-            trigger. The service account represents the identity of the trigger. The
-            principal who calls this API must have \\\`iam.serviceAccounts.actAs\\\`
-            permission in the service account. See https://cloud.google.com/iam/docs/understanding-service-accounts?hl=en#sa\\\_common
-            for more information. For Cloud Run destinations, this service account
-            is used to generate identity tokens when invoking the service. See https://cloud.google.com/run/docs/triggering/pubsub-push#create-service-account
-            for information on how to invoke authenticated Cloud Run services. In
-            order to create Audit Log triggers, the service account should also have
-            \\\`roles/eventarc.eventReceiver\\\` IAM role.
-          type: string
-          x-dcl-go-name: ServiceAccount
-          x-dcl-references:
-          - field: email
-            resource: Iam/ServiceAccount
-        transport:
-          description: Optional. In order to deliver messages, Eventarc may use other
-            GCP products as transport intermediary. This field contains a reference
-            to that transport intermediary. This information can be used for debugging
-            purposes.
-          properties:
-            pubsub:
-              description: The Pub/Sub topic and subscription used by Eventarc as
-                delivery intermediary.
-              properties:
-                subscription:
-                  description: 'Output only. The name of the Pub/Sub subscription
-                    created and managed by Eventarc system as a transport for the
-                    event delivery. Format: \\\\\\\\\\`projects/{PROJECT\\\\\\\\\\_ID}/subscriptions/{SUBSCRIPTION\\\\\\\\\\_NAME}\\\\\\\\\\`.'
-                  readOnly: true
-                  type: string
-                  x-dcl-go-name: Subscription
-                  x-kubernetes-immutable: true
-                topic:
-                  description: 'Optional. The name of the Pub/Sub topic created and
-                    managed by Eventarc system as a transport for the event delivery.
-                    Format: \\\\\\\\\\`projects/{PROJECT\\\\\\\\\\_ID}/topics/{TOPIC\\\\\\\\\\_NAME}\\\\\\\\\\`.
-                    You may set an existing topic for triggers of the type \\\\\\\\\\`google.cloud.pubsub.topic.v1.messagePublished\\\\\\\\\\`
-                    only. The topic you provide here will not be deleted by Eventarc
-                    at trigger deletion.'
-                  type: string
-                  x-dcl-go-name: Topic
-                  x-kubernetes-immutable: true
-              type: object
-              x-dcl-go-name: Pubsub
-              x-dcl-go-type: TriggerTransportPubsub
-              x-kubernetes-immutable: true
-          type: object
-          x-dcl-go-name: Transport
-          x-dcl-go-type: TriggerTransport
-          x-dcl-server-default: true
-          x-kubernetes-immutable: true
-        uid:
-          description: Output only. Server assigned unique identifier for the trigger.
-            The value is a UUID4 string and guaranteed to remain unchanged until the
-            resource is deleted.
-          readOnly: true
-          type: string
-          x-dcl-go-name: Uid
-          x-kubernetes-immutable: true
-        updateTime:
-          description: Output only. The last-modified time.
-          format: date-time
-          readOnly: true
-          type: string
-          x-dcl-go-name: UpdateTime
-          x-kubernetes-immutable: true
-      required:
-      - name
-      - eventFilters
-      - destination
-      - project
-      - location
-      title: Trigger
-      type: object
-      x-dcl-id: projects/{{project}}/locations/{{location}}/triggers/{{name}}
-      x-dcl-labels: labels
-      x-dcl-locations: []
-      x-dcl-parent-container: project
-      x-dcl-uses-state-hint: false
 info:
-  description: DCL Specification for the Eventarc Trigger resource
   title: Eventarc/Trigger
+  description: DCL Specification for the Eventarc Trigger resource
   x-dcl-has-iam: false
 paths:
+  get:
+    description: The function used to get information about a Trigger
+    parameters:
+    - name: Trigger
+      required: true
+      description: A full instance of a Trigger
   apply:
     description: The function used to apply information about a Trigger
     parameters:
-    - description: A full instance of a Trigger
-      name: Trigger
+    - name: Trigger
       required: true
+      description: A full instance of a Trigger
   delete:
     description: The function used to delete a Trigger
     parameters:
-    - description: A full instance of a Trigger
-      name: Trigger
+    - name: Trigger
       required: true
+      description: A full instance of a Trigger
   deleteAll:
     description: The function used to delete all Trigger
     parameters:
@@ -235,12 +45,6 @@ paths:
       required: true
       schema:
         type: string
-  get:
-    description: The function used to get information about a Trigger
-    parameters:
-    - description: A full instance of a Trigger
-      name: Trigger
-      required: true
   list:
     description: The function used to list information about many Trigger
     parameters:
@@ -252,3 +56,198 @@ paths:
       required: true
       schema:
         type: string
+components:
+  schemas:
+    Trigger:
+      title: Trigger
+      x-dcl-id: projects/{{project}}/locations/{{location}}/triggers/{{name}}
+      x-dcl-parent-container: project
+      x-dcl-labels: labels
+      x-dcl-locations: []
+      type: object
+      required:
+      - name
+      - matchingCriteria
+      - destination
+      - project
+      - location
+      properties:
+        createTime:
+          type: string
+          format: date-time
+          x-dcl-go-name: CreateTime
+          readOnly: true
+          description: Output only. The creation time.
+          x-kubernetes-immutable: true
+        destination:
+          type: object
+          x-dcl-go-name: Destination
+          x-dcl-go-type: TriggerDestination
+          description: Required. Destination specifies where the events should be
+            sent to.
+          properties:
+            cloudFunction:
+              type: string
+              x-dcl-go-name: CloudFunction
+              description: 'The Cloud Function resource name. Only Cloud Functions
+                V2 is supported. Format: projects/{project}/locations/{location}/functions/{function}'
+              x-dcl-references:
+              - resource: Cloudfunctions/CloudFunction
+                field: selfLink
+            cloudRunService:
+              type: object
+              x-dcl-go-name: CloudRunService
+              x-dcl-go-type: TriggerDestinationCloudRunService
+              description: Cloud Run fully-managed service that receives the events.
+                The service should be running in the same project of the trigger.
+              required:
+              - service
+              - region
+              properties:
+                path:
+                  type: string
+                  x-dcl-go-name: Path
+                  description: 'Optional. The relative path on the Cloud Run service
+                    the events should be sent to. The value must conform to the definition
+                    of URI path segment (section 3.3 of RFC2396). Examples: "/route",
+                    "route", "route/subroute".'
+                region:
+                  type: string
+                  x-dcl-go-name: Region
+                  description: Required. The region the Cloud Run service is deployed
+                    in.
+                service:
+                  type: string
+                  x-dcl-go-name: Service
+                  description: Required. The name of the Cloud Run service being addressed.
+                    See https://cloud.google.com/run/docs/reference/rest/v1/namespaces.services.
+                    Only services located in the same project of the trigger object
+                    can be addressed.
+                  x-dcl-references:
+                  - resource: Run/Service
+                    field: selfLink
+        etag:
+          type: string
+          x-dcl-go-name: Etag
+          readOnly: true
+          description: Output only. This checksum is computed by the server based
+            on the value of other fields, and may be sent only on create requests
+            to ensure the client has an up-to-date value before proceeding.
+          x-kubernetes-immutable: true
+        labels:
+          type: object
+          additionalProperties:
+            type: string
+          x-dcl-go-name: Labels
+          description: Optional. User labels attached to the triggers that can be
+            used to group resources.
+        location:
+          type: string
+          x-dcl-go-name: Location
+          description: The location for the resource
+          x-kubernetes-immutable: true
+        matchingCriteria:
+          type: array
+          x-dcl-go-name: MatchingCriteria
+          description: Required. null The list of filters that applies to event attributes.
+            Only events that match all the provided filters will be sent to the destination.
+          x-dcl-list-type: set
+          items:
+            type: object
+            x-dcl-go-type: TriggerMatchingCriteria
+            required:
+            - attribute
+            - value
+            properties:
+              attribute:
+                type: string
+                x-dcl-go-name: Attribute
+                description: Required. The name of a CloudEvents attribute. Currently,
+                  only a subset of attributes are supported for filtering. All triggers
+                  MUST provide a filter for the 'type' attribute.
+              value:
+                type: string
+                x-dcl-go-name: Value
+                description: Required. The value for the attribute.
+        name:
+          type: string
+          x-dcl-go-name: Name
+          description: Required. The resource name of the trigger. Must be unique
+            within the location on the project and must be in \\\`projects/{project}/locations/{location}/triggers/{trigger}\\\`
+            format.
+        project:
+          type: string
+          x-dcl-go-name: Project
+          description: The project for the resource
+          x-kubernetes-immutable: true
+          x-dcl-references:
+          - resource: Cloudresourcemanager/Project
+            field: name
+            parent: true
+        serviceAccount:
+          type: string
+          x-dcl-go-name: ServiceAccount
+          description: Optional. The IAM service account email associated with the
+            trigger. The service account represents the identity of the trigger. The
+            principal who calls this API must have \\\`iam.serviceAccounts.actAs\\\`
+            permission in the service account. See https://cloud.google.com/iam/docs/understanding-service-accounts?hl=en#sa\\\_common
+            for more information. For Cloud Run destinations, this service account
+            is used to generate identity tokens when invoking the service. See https://cloud.google.com/run/docs/triggering/pubsub-push#create-service-account
+            for information on how to invoke authenticated Cloud Run services. In
+            order to create Audit Log triggers, the service account should also have
+            \\\`roles/eventarc.eventReceiver\\\` IAM role.
+          x-dcl-references:
+          - resource: Iam/ServiceAccount
+            field: email
+        transport:
+          type: object
+          x-dcl-go-name: Transport
+          x-dcl-go-type: TriggerTransport
+          description: Optional. In order to deliver messages, Eventarc may use other
+            GCP products as transport intermediary. This field contains a reference
+            to that transport intermediary. This information can be used for debugging
+            purposes.
+          x-kubernetes-immutable: true
+          x-dcl-server-default: true
+          properties:
+            pubsub:
+              type: object
+              x-dcl-go-name: Pubsub
+              x-dcl-go-type: TriggerTransportPubsub
+              description: The Pub/Sub topic and subscription used by Eventarc as
+                delivery intermediary.
+              x-kubernetes-immutable: true
+              properties:
+                subscription:
+                  type: string
+                  x-dcl-go-name: Subscription
+                  readOnly: true
+                  description: 'Output only. The name of the Pub/Sub subscription
+                    created and managed by Eventarc system as a transport for the
+                    event delivery. Format: \\\\\\\\\\`projects/{PROJECT\\\\\\\\\\_ID}/subscriptions/{SUBSCRIPTION\\\\\\\\\\_NAME}\\\\\\\\\\`.'
+                  x-kubernetes-immutable: true
+                topic:
+                  type: string
+                  x-dcl-go-name: Topic
+                  description: 'Optional. The name of the Pub/Sub topic created and
+                    managed by Eventarc system as a transport for the event delivery.
+                    Format: \\\\\\\\\\`projects/{PROJECT\\\\\\\\\\_ID}/topics/{TOPIC\\\\\\\\\\_NAME}\\\\\\\\\\`.
+                    You may set an existing topic for triggers of the type \\\\\\\\\\`google.cloud.pubsub.topic.v1.messagePublished\\\\\\\\\\`
+                    only. The topic you provide here will not be deleted by Eventarc
+                    at trigger deletion.'
+                  x-kubernetes-immutable: true
+        uid:
+          type: string
+          x-dcl-go-name: Uid
+          readOnly: true
+          description: Output only. Server assigned unique identifier for the trigger.
+            The value is a UUID4 string and guaranteed to remain unchanged until the
+            resource is deleted.
+          x-kubernetes-immutable: true
+        updateTime:
+          type: string
+          format: date-time
+          x-dcl-go-name: UpdateTime
+          readOnly: true
+          description: Output only. The last-modified time.
+          x-kubernetes-immutable: true

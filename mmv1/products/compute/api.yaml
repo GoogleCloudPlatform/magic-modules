@@ -133,7 +133,7 @@ objects:
 
           * VPC_PEERING for addresses that are reserved for VPC peer networks.
 
-          * IPSEC_INTERCONNECT (Beta only) for addresses created from a private IP range
+          * IPSEC_INTERCONNECT for addresses created from a private IP range
             that are reserved for a VLAN attachment in an IPsec-encrypted Cloud
             Interconnect configuration. These addresses are regional resources.
 
@@ -197,12 +197,10 @@ objects:
           The URL of the network in which to reserve the address. This field
           can only be used with INTERNAL type with the VPC_PEERING and
           IPSEC_INTERCONNECT purposes.
-        min_version: beta
       - !ruby/object:Api::Type::Integer
         name: prefixLength
         description: |
           The prefix length if the resource represents an IP range.
-        min_version: beta
   - !ruby/object:Api::Resource
     name: 'Autoscaler'
     kind: 'compute#autoscaler'
@@ -5238,7 +5236,6 @@ objects:
         name: 'logConfig'
         description: |
           Configure logging on this health check.
-        min_version: beta
         properties:
             - !ruby/object:Api::Type::Boolean
               name: 'enable'
@@ -7521,7 +7518,6 @@ objects:
           this interconnect attachment, the HA VPN gateway's IP address will be
           allocated from regional external IP address pool.
         input: true
-        min_version: beta
         item_type: !ruby/object:Api::Type::ResourceRef
           name: 'ipsecInternalAddress'
           resource: 'Address'
@@ -7551,7 +7547,6 @@ objects:
           - :NONE
           - :IPSEC
         default_value: :NONE
-        min_version: beta
   - !ruby/object:Api::Resource
     name: 'MachineImage'
     kind: 'compute#machineImage'
@@ -12434,13 +12429,13 @@ objects:
         name: 'logConfig'
         description: |
           Configure logging on this health check.
-        min_version: beta
         properties:
             - !ruby/object:Api::Type::Boolean
               name: 'enable'
               description: |
                 Indicates whether or not to export logs. This is false by default,
                 which means no health check logging will be done.
+              default_value: false
   - !ruby/object:Api::Resource
     name: 'ResourcePolicy'
     kind: 'compute#resourcePolicy'
@@ -14125,6 +14120,135 @@ objects:
                       description: |
                        The size of the disk in base-2 GB.
   - !ruby/object:Api::Resource
+    name: 'ServiceAttachment'
+    kind: 'compute#ServiceAttachment'
+    base_url: projects/{{project}}/regions/{{region}}/serviceAttachments
+    has_self_link: true
+    input: true
+    min_version: beta
+    description: |
+      Represents a ServiceAttachment resource.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Configuring Private Service Connect to access services': 'https://cloud.google.com/vpc/docs/configure-private-service-connect-services'
+      api: 'https://cloud.google.com/compute/docs/reference/beta/serviceAttachments'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'name'
+        description: |
+          URL of the region where the resource resides.
+        required: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        description: |
+          Name of the resource. The name must be 1-63 characters long, and
+          comply with RFC1035. Specifically, the name must be 1-63 characters
+          long and match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?`
+          which means the first character must be a lowercase letter, and all
+          following characters must be a dash, lowercase letter, or digit,
+          except the last character, which cannot be a dash.
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of this resource.
+      - !ruby/object:Api::Type::String
+        name: 'connectionPreference'
+        required: true
+        description: |
+          The connection preference to use for this service attachment. Valid
+          values include "ACCEPT_AUTOMATIC", "ACCEPT_MANUAL".
+      - !ruby/object:Api::Type::Array
+        name: 'connectedEndpoints'
+        output: true
+        description: |
+          An array of the consumer forwarding rules connected to this service
+          attachment.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+          - !ruby/object:Api::Type::String
+            name: 'endpoint'
+            output: true
+            description: |
+              The URL of the consumer forwarding rule.
+          - !ruby/object:Api::Type::String
+            name: 'status'
+            output: true
+            description: |
+              The status of the connection from the consumer forwarding rule to
+              this service attachment.
+      - !ruby/object:Api::Type::ResourceRef
+        name: targetService
+        required: true
+        resource: 'ForwardingRule'
+        imports: 'selfLink'
+        description: |
+          The URL of a forwarding rule that represents the service identified by
+          this service attachment.
+      - !ruby/object:Api::Type::Array
+        name: 'natSubnets'
+        required: true
+        description: |
+          An array of subnets that is provided for NAT in this service attachment.
+        item_type: !ruby/object:Api::Type::ResourceRef
+          name: 'subnet'
+          resource: 'Subnetwork'
+          imports: 'selfLink'
+          description: |
+            A subnet that is provided for NAT in this service attachment.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableProxyProtocol'
+        required: true
+        description: |
+          If true, enable the proxy protocol which is for supplying client TCP/IP
+          address data in TCP connections that traverse proxies on their way to
+          destination servers.
+      - !ruby/object:Api::Type::Array
+        name: 'consumerRejectLists'
+        item_type: Api::Type::String
+        description: |
+          An array of projects that are not allowed to connect to this service
+          attachment.
+      - !ruby/object:Api::Type::Array
+        name: 'consumerAcceptLists'
+        description: |
+          An array of projects that are allowed to connect to this service
+          attachment.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+          - !ruby/object:Api::Type::String
+            name: 'projectIdOrNum'
+            required: true
+            description: |
+              A project that is allowed to connect to this service attachment.
+          - !ruby/object:Api::Type::Integer
+            name: 'connectionLimit'
+            required: true
+            description: |
+              The number of consumer forwarding rules the consumer project can
+              create.
+  - !ruby/object:Api::Resource
     name: 'SslPolicy'
     kind: 'compute#sslPolicy'
     base_url: projects/{{project}}/global/sslPolicies
@@ -15499,7 +15623,6 @@ objects:
 
                   Not currently available publicly.
               input: true
-              min_version: beta
   - !ruby/object:Api::Resource
     name: 'ExternalVpnGateway'
     kind: 'compute#externalVpnGateway'

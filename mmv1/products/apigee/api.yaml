@@ -177,6 +177,7 @@ objects:
         values:
           - "SLASH_16"
           - "SLASH_20"
+          - "SLASH_23"
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
