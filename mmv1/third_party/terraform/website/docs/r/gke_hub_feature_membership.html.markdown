@@ -3,7 +3,7 @@
 
 subcategory: "GKEHub"
 layout: "google"
-page_title: "Google: google_gkehub_feature_membership"
+page_title: "Google: google_gke_hub_feature_membership"
 sidebar_current: "docs-google-gkehub-feature-membership"
 description: |-
   Contains information about a GKEHub Feature Memberships.
@@ -37,7 +37,7 @@ resource "google_gke_hub_membership" "membership" {
   provider = google-beta
 }
 
-resource "google_gkehub_feature" "feature" {
+resource "google_gke_hub_feature" "feature" {
   name = "configmanagement"
   location = "global"
 
@@ -47,9 +47,9 @@ resource "google_gkehub_feature" "feature" {
   provider = google-beta
 }
 
-resource "google_gkehub_feature_membership" "feature_member" {
+resource "google_gke_hub_feature_membership" "feature_member" {
   location = "global"
-  feature = google_gkehub_feature.feature.name
+  feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership.membership_id
   configmanagement {
     version = "1.6.2"
@@ -66,7 +66,7 @@ resource "google_gkehub_feature_membership" "feature_member" {
 ## Example Usage - Multi Cluster Service Discovery
 
 ```hcl
-resource "google_gkehub_feature" "feature" {
+resource "google_gke_hub_feature" "feature" {
   name = "multiclusterservicediscovery"
   location = "global"
   labels = {
@@ -232,7 +232,7 @@ This resource provides the following
 FeatureMembership can be imported using any of these accepted formats:
 
 ```
-$ terraform import google_gkehub_feature_membership.default projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}
-$ terraform import google_gkehub_feature_membership.default {{project}}/{{location}}/{{feature}}/{{membership}}
-$ terraform import google_gkehub_feature_membership.default {{location}}/{{feature}}/{{membership}}
+$ terraform import google_gke_hub_feature_membership.default projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}
+$ terraform import google_gke_hub_feature_membership.default {{project}}/{{location}}/{{feature}}/{{membership}}
+$ terraform import google_gke_hub_feature_membership.default {{location}}/{{feature}}/{{membership}}
 ```

@@ -3,7 +3,7 @@
 
 subcategory: "GKEHub"
 layout: "google"
-page_title: "Google: google_gkehub_feature"
+page_title: "Google: google_gke_hub_feature"
 sidebar_current: "docs-google-gkehub-feature"
 description: |-
   Contains information about a GKEHub Feature.
@@ -40,7 +40,7 @@ resource "google_gke_hub_membership" "membership" {
   provider = google-beta
 }
 
-resource "google_gkehub_feature" "feature" {
+resource "google_gke_hub_feature" "feature" {
   name = "multiclusteringress"
   location = "global"
   spec {
@@ -55,7 +55,7 @@ resource "google_gkehub_feature" "feature" {
 ## Example Usage - Multi Cluster Service Discovery
 
 ```hcl
-resource "google_gkehub_feature" "feature" {
+resource "google_gke_hub_feature" "feature" {
   name = "multiclusterservicediscovery"
   location = "global"
   labels = {
@@ -132,9 +132,9 @@ This resource provides the following
 Feature can be imported using any of these accepted formats:
 
 ```
-$ terraform import google_gkehub_feature.default projects/{{project}}/locations/{{location}}/features/{{name}}
-$ terraform import google_gkehub_feature.default {{project}}/{{location}}/{{name}}
-$ terraform import google_gkehub_feature.default {{location}}/{{name}}
+$ terraform import google_gke_hub_feature.default projects/{{project}}/locations/{{location}}/features/{{name}}
+$ terraform import google_gke_hub_feature.default {{project}}/{{location}}/{{name}}
+$ terraform import google_gke_hub_feature.default {{location}}/{{name}}
 ```
 
 
