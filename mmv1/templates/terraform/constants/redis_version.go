@@ -1,5 +1,11 @@
+
 // Is the new redis version less than the old one?
 func isRedisVersionDecreasing(_ context.Context, old, new, _ interface{}) bool {
+	return isRedisVersionDecreasingFunc(old, new)
+}
+
+// seperate function for unit testing
+func isRedisVersionDecreasingFunc(old, new interface{}) bool {
 	if old == nil || new == nil {
 		return false
 	}
@@ -8,8 +14,7 @@ func isRedisVersionDecreasing(_ context.Context, old, new, _ interface{}) bool {
 	newParsed := re.FindSubmatch([]byte(new.(string)))
 
 	if oldParsed == nil || newParsed == nil {
-		// create new if you don't recognize the expression
-		return true
+		return false
 	}
 
 	oldVersion, err := strconv.ParseFloat(fmt.Sprintf("%s.%s", oldParsed[1], oldParsed[2]), 32)

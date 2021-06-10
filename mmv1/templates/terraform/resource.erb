@@ -645,6 +645,10 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
       billingProject = bp
     }
 
+<% if object.update_mask -%>
+// if updateMask is empty we are not updating anything so skip the post
+if len(updateMask) > 0 {
+<% end -%>
     res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 
     if err != nil {
@@ -673,6 +677,9 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     }
 <%    end -%>
 <%  end -%>
+<% if object.update_mask -%>
+  }
+<% end -%>
 <%  end # if !object.input -%>
 <%    if properties_by_custom_update(object.root_properties).length() > 0 -%>
     d.Partial(true)
