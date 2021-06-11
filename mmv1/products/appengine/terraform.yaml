@@ -220,16 +220,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     skip_delete: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
-    properties:
-      networkSettings: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_service_network_settings"
         primary_resource_id: 'liveapp'
         vars:
           service_id: "default"
-          network_settings.ingress_traffic_allowed: "INGRESS_TRAFFIC_ALLOWED_INTERNAL_ONLY"
           bucket_name: "appengine-static-content"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
