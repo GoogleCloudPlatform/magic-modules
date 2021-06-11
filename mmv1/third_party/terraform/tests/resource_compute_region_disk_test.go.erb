@@ -1,3 +1,5 @@
+<% autogen_exception -%>
+
 package google
 
 import (
@@ -174,6 +176,42 @@ func TestAccComputeRegionDisk_deleteDetach(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
+func TestAccComputeRegionDisk_interface(t *testing.T) {
+	t.Parallel()
+
+	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionDisk_interface(diskName),
+			},
+			{
+				ResourceName:      "google_compute_region_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+
+func testAccComputeRegionDisk_interface(diskName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_disk" "foobar" {
+  name          = "%s"
+  size          = 50
+  type          = "pd-ssd"
+  interface     = "NVME"
+  replica_zones = ["us-central1-a", "us-central1-f"]
+}
+`, diskName)
+}
+<% end -%>
+
 func testAccCheckComputeRegionDiskExists(t *testing.T, n string, disk *computeBeta.Disk) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		p := getTestProjectFromEnv()
@@ -295,8 +333,6 @@ resource "google_compute_region_disk" "regiondisk" {
   name     = "%s"
   snapshot = google_compute_snapshot.snapdisk.%s
   type     = "pd-ssd"
-  region   = "us-central1"
-
   replica_zones = ["us-central1-a", "us-central1-f"]
 }
 `, diskName, diskName, diskName, refSelector)
@@ -356,7 +392,6 @@ resource "google_compute_region_disk" "regiondisk" {
   name     = "%s"
   snapshot = google_compute_snapshot.snapdisk.self_link
   type     = "pd-ssd"
-  region   = "us-central1"
 
   replica_zones = ["us-central1-a", "us-central1-f"]
 
@@ -387,7 +422,6 @@ resource "google_compute_region_disk" "regiondisk" {
   name     = "%s"
   snapshot = google_compute_snapshot.snapdisk.self_link
   type     = "pd-ssd"
-  region   = "us-central1"
 
   replica_zones = ["us-central1-a", "us-central1-f"]
 }

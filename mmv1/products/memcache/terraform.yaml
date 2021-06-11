@@ -21,7 +21,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        min_version: beta
         # Temporary as CI has used up servicenetworking quota
         skip_vcr: true
         name: "memcache_instance_basic"

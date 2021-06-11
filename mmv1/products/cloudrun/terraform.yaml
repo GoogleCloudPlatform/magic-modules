@@ -18,7 +18,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}"]
     error_retry_predicates: ["isCloudRunCreationConflict"]
     async: !ruby/object:Provider::Terraform::PollAsync
-      check_response_func_existence: PollCheckKnativeStatus
+      check_response_func_existence: PollCheckKnativeStatusFunc(res)
       actions: ['create', 'update']
       operation: !ruby/object:Api::Async::Operation
         timeouts: !ruby/object:Api::Timeouts
@@ -61,11 +61,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       spec.forceOverride: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/cloudrun_ignore_force_override.go.erb
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        `google_cloudrun_service` creates a Managed Google Cloud Run Service. If you need to create
+        a Cloud Run Service on Anthos(GKE/VMWare) then you will need to create it using the kubernetes alpha provider.
+        Have a look at the Cloud Run Anthos example below.
     id_format: "locations/{{location}}/namespaces/{{project}}/services/{{name}}"
     import_format: ["locations/{{location}}/namespaces/{{project}}/services/{{name}}"]
     error_retry_predicates: ["isCloudRunCreationConflict"]
     async: !ruby/object:Provider::Terraform::PollAsync
-      check_response_func_existence: PollCheckKnativeStatus
+      check_response_func_existence: PollCheckKnativeStatusFunc(res)
       actions: ['create', 'update']
       operation: !ruby/object:Api::Async::Operation
         timeouts: !ruby/object:Api::Timeouts
@@ -103,6 +108,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_anthos"
+        skip_test: true
+      - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_multiple_environment_variables"
         primary_resource_id: "default"
         primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
@@ -121,6 +129,30 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           cloud_run_service_name: "cloudrun-srv"
         test_env_vars:
           project: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_secret_environment_variables"
+        min_version: beta
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
+        vars:
+          cloud_run_service_name: "cloudrun-srv"
+          secret_id: "secret"
+        test_env_vars:
+          project: :PROJECT_NAME
+        ignore_read_extra:
+          - "autogenerate_revision_name"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_secret_volumes"
+        min_version: beta
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
+        vars:
+          cloud_run_service_name: "cloudrun-srv"
+          secret_id: "secret"
+        test_env_vars:
+          project: :PROJECT_NAME
+        ignore_read_extra:
+          - "autogenerate_revision_name"
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'autogenerate_revision_name'

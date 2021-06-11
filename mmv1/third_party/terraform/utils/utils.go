@@ -5,6 +5,7 @@ package google
 import (
 	"fmt"
 	"log"
+	"os"
 	"sort"
 	"strings"
 	"time"
@@ -481,14 +482,6 @@ func SnakeToPascalCase(s string) string {
 	return strings.Join(split, "")
 }
 
-func checkStringMap(v interface{}) map[string]string {
-	m, ok := v.(map[string]string)
-	if ok {
-		return m
-	}
-	return convertStringMap(v.(map[string]interface{}))
-}
-
 func multiEnvSearch(ks []string) string {
 	for _, k := range ks {
 		if v := os.Getenv(k); v != "" {
@@ -496,4 +489,22 @@ func multiEnvSearch(ks []string) string {
 		}
 	}
 	return ""
+}
+
+func GetCurrentUserEmail(config *Config, userAgent string) (string, error) {
+	// See https://github.com/golang/oauth2/issues/306 for a recommendation to do this from a Go maintainer
+	// URL retrieved from https://accounts.google.com/.well-known/openid-configuration
+	res, err := sendRequest(config, "GET", "", "https://openidconnect.googleapis.com/v1/userinfo", userAgent, nil)
+	if err != nil {
+		return "", fmt.Errorf("error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope? error: %s", err)
+	}
+	return res["email"].(string), nil
+}
+
+func checkStringMap(v interface{}) map[string]string {
+	m, ok := v.(map[string]string)
+	if ok {
+		return m
+	}
+	return convertStringMap(v.(map[string]interface{}))
 }

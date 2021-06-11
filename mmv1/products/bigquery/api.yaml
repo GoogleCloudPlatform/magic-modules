@@ -122,6 +122,7 @@ objects:
         name: 'datasetReference'
         description: 'A reference that identifies the dataset.'
         required: true
+        input: true
         properties:
           - !ruby/object:Api::Type::String
             name: 'datasetId'
@@ -130,9 +131,11 @@ objects:
               must contain only letters (a-z, A-Z), numbers (0-9), or
               underscores (_). The maximum length is 1,024 characters.
             required: true
+            input: true
           - !ruby/object:Api::Type::String
             name: 'projectId'
             description: The ID of the project containing this dataset.
+            input: true
       - !ruby/object:Api::Type::Integer
         name: 'defaultTableExpirationMs'
         description: |
@@ -725,7 +728,8 @@ objects:
                 description: |
                   The format of the data files. For CSV files, specify "CSV". For datastore backups, specify "DATASTORE_BACKUP".
                   For newline-delimited JSON, specify "NEWLINE_DELIMITED_JSON". For Avro, specify "AVRO". For parquet, specify "PARQUET".
-                  For orc, specify "ORC". The default value is CSV.
+                  For orc, specify "ORC". [Beta] For Bigtable, specify "BIGTABLE".
+                  The default value is CSV.
                 default_value: 'CSV'
               - !ruby/object:Api::Type::Boolean
                 name: 'allowJaggedRows'

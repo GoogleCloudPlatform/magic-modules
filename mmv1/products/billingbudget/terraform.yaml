@@ -21,8 +21,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         in the provider configuration. Otherwise the Billing Budgets API will return a 403 error.
         Your account must have the `serviceusage.services.use` permission on the
         `billing_project` you defined.
-    id_format: '{{name}}'
-    exclude_import: true
+    id_format: 'billingAccounts/{{billing_account}}/budgets/{{name}}'
+    import_format: ["billingAccounts/{{billing_account}}/budgets/{{name}}", "{{name}}"]
+    schema_version: 1
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: 'billing_budget_basic'
@@ -31,7 +32,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           display_name: 'Example Billing Budget'
         test_env_vars:
           billing_acct: :BILLING_ACCT
-        skip_import_test: true
       - !ruby/object:Provider::Terraform::Examples
         name: 'billing_budget_lastperiod'
         primary_resource_id: 'budget'
@@ -39,7 +39,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           display_name: 'Example Billing Budget'
         test_env_vars:
           billing_acct: :BILLING_ACCT
-        skip_import_test: true
       - !ruby/object:Provider::Terraform::Examples
         name: 'billing_budget_filter'
         primary_resource_id: 'budget'
@@ -47,7 +46,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           display_name: 'Example Billing Budget'
         test_env_vars:
           billing_acct: :BILLING_ACCT
-        skip_import_test: true
       - !ruby/object:Provider::Terraform::Examples
         name: 'billing_budget_notify'
         primary_resource_id: 'budget'
@@ -56,17 +54,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           channel_name: 'Example Notification Channel'
         test_env_vars:
           billing_acct: :BILLING_ACCT
-        skip_import_test: true
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/self_link_as_name.erb
-      post_create: templates/terraform/post_create/set_computed_name.erb
     properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       allUpdatesRule.schemaVersion: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
       budgetFilter.creditTypes: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       budgetFilter: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        update_mask_fields:
+          - "budgetFilter.projects"
       budgetFilter.services: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       budgetFilter.subaccounts: !ruby/object:Overrides::Terraform::PropertyOverride

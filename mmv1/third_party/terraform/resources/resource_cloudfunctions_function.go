@@ -15,15 +15,6 @@ import (
 	"time"
 )
 
-var functionAllowedMemory = map[int]bool{
-	128:  true,
-	256:  true,
-	512:  true,
-	1024: true,
-	2048: true,
-	4096: true,
-}
-
 var allowedIngressSettings = []string{
 	"ALLOW_ALL",
 	"ALLOW_INTERNAL_AND_GCLB",
@@ -79,14 +70,6 @@ func parseCloudFunctionId(d *schema.ResourceData, config *Config) (*cloudFunctio
 		Region:  d.Get("region").(string),
 		Name:    d.Get("name").(string),
 	}, nil
-}
-
-func joinMapKeys(mapToJoin *map[int]bool) string {
-	var keys []string
-	for key := range *mapToJoin {
-		keys = append(keys, strconv.Itoa(key))
-	}
-	return strings.Join(keys, ",")
 }
 
 // Differs from validateGcpName because Cloud Functions allow capital letters
@@ -173,16 +156,7 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Default:     256,
-				Description: `Memory (in MB), available to the function. Default value is 256MB. Allowed values are: 128MB, 256MB, 512MB, 1024MB, and 2048MB.`,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					availableMemoryMB := v.(int)
-
-					if !functionAllowedMemory[availableMemoryMB] {
-						errors = append(errors, fmt.Errorf("Allowed values for memory (in MB) are: %s . Got %d",
-							joinMapKeys(&functionAllowedMemory), availableMemoryMB))
-					}
-					return
-				},
+				Description: `Memory (in MB), available to the function. Default value is 256. Possible values include 128, 256, 512, 1024, etc.`,
 			},
 
 			"timeout": {

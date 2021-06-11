@@ -15,7 +15,7 @@ func TestAccComputeRegionAutoscaler_update(t *testing.T) {
 	var itName = fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var tpName = fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var igmName = fmt.Sprintf("tf-test-%s", randString(t, 10))
-	var autoscalerName = fmt.Sprintf("region-autoscaler-test-%s", randString(t, 10))
+	var autoscalerName = fmt.Sprintf("tf-test-region-autoscaler-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -42,14 +42,13 @@ func TestAccComputeRegionAutoscaler_update(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeRegionAutoscaler_scaleDownControl(t *testing.T) {
 	t.Parallel()
 
 	var itName = fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var tpName = fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var igmName = fmt.Sprintf("tf-test-%s", randString(t, 10))
-	var autoscalerName = fmt.Sprintf("region-autoscaler-test-%s", randString(t, 10))
+	var autoscalerName = fmt.Sprintf("tf-test-region-autoscaler-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -67,16 +66,14 @@ func TestAccComputeRegionAutoscaler_scaleDownControl(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
-<% unless version == 'ga' -%>
 func TestAccComputeRegionAutoscaler_scalingSchedule(t *testing.T) {
 	t.Parallel()
 
 	var itName = fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var tpName = fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var igmName = fmt.Sprintf("tf-test-%s", randString(t, 10))
-	var autoscalerName = fmt.Sprintf("region-autoscaler-test-%s", randString(t, 10))
+	var autoscalerName = fmt.Sprintf("tf-test-region-autoscaler-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -94,7 +91,6 @@ func TestAccComputeRegionAutoscaler_scalingSchedule(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccComputeRegionAutoscaler_scaleInControl(t *testing.T) {
 	t.Parallel()
@@ -102,7 +98,7 @@ func TestAccComputeRegionAutoscaler_scaleInControl(t *testing.T) {
 	var itName = fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var tpName = fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var igmName = fmt.Sprintf("tf-test-%s", randString(t, 10))
-	var autoscalerName = fmt.Sprintf("region-autoscaler-test-%s", randString(t, 10))
+	var autoscalerName = fmt.Sprintf("tf-test-region-autoscaler-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -208,7 +204,6 @@ resource "google_compute_region_autoscaler" "foobar" {
 `, autoscalerName)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeRegionAutoscaler_scaleDownControl(itName, tpName, igmName, autoscalerName string) string {
 	return testAccComputeRegionAutoscaler_scaffolding(itName, tpName, igmName) + fmt.Sprintf(`
 resource "google_compute_region_autoscaler" "foobar" {
@@ -224,17 +219,18 @@ resource "google_compute_region_autoscaler" "foobar" {
       target = 0.5
       predictive_method = "OPTIMIZE_AVAILABILITY"
     }
+<% unless version == 'ga' -%>
     scale_down_control {
       max_scaled_down_replicas {
         percent = 80
       }
       time_window_sec = 300
     }
+<% end -%>
   }
 }
 `, autoscalerName)
 }
-<% end -%>
 
 func testAccComputeRegionAutoscaler_scaleInControl(itName, tpName, igmName, autoscalerName string) string {
 	return testAccComputeRegionAutoscaler_scaffolding(itName, tpName, igmName) + fmt.Sprintf(`
@@ -261,7 +257,6 @@ resource "google_compute_region_autoscaler" "foobar" {
 `, autoscalerName)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeRegionAutoscaler_scalingSchedule(itName, tpName, igmName, autoscalerName string) string {
 	return testAccComputeRegionAutoscaler_scaffolding(itName, tpName, igmName) + fmt.Sprintf(`
 resource "google_compute_region_autoscaler" "foobar" {
@@ -276,16 +271,18 @@ resource "google_compute_region_autoscaler" "foobar" {
     cpu_utilization {
       target = 0.5
     }
+<% unless version == 'ga' -%>
     scale_down_control {
       max_scaled_down_replicas {
         percent = 80
       }
       time_window_sec = 300
     }
+<% end -%>
     scaling_schedules {
       name = "every-weekday-morning"
       description = "Increase to 2 every weekday at 7AM for 6 hours."
-      min_required_replicas = 2
+      min_required_replicas = 0
       schedule = "0 7 * * MON-FRI"
       time_zone = "America/New_York"
       duration_sec = 21600
@@ -302,4 +299,3 @@ resource "google_compute_region_autoscaler" "foobar" {
 }
 `, autoscalerName)
 }
-<% end -%>

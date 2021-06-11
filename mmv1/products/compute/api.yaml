@@ -123,13 +123,21 @@ objects:
       - !ruby/object:Api::Type::String
         name: purpose
         description: |
-          The purpose of this resource. Possible values include:
+          The purpose of this resource, which can be one of the following values:
 
-          * GCE_ENDPOINT for addresses that are used by VM instances, alias IP ranges, internal load balancers, and similar resources.
+          * GCE_ENDPOINT for addresses that are used by VM instances, alias IP
+            ranges, internal load balancers, and similar resources.
 
-          * SHARED_LOADBALANCER_VIP for an address that can be used by multiple internal load balancers.
+          * SHARED_LOADBALANCER_VIP for an address that can be used by multiple
+            internal load balancers.
 
           * VPC_PEERING for addresses that are reserved for VPC peer networks.
+
+          * IPSEC_INTERCONNECT (Beta only) for addresses created from a private IP range
+            that are reserved for a VLAN attachment in an IPsec-encrypted Cloud
+            Interconnect configuration. These addresses are regional resources.
+
+          This should only be set when using an Internal address.
       - !ruby/object:Api::Type::Enum
         name: 'networkTier'
         description: |
@@ -181,6 +189,20 @@ objects:
           - :RESERVING
           - :RESERVED
           - :IN_USE
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'network'
+        resource: 'Network'
+        imports: 'selfLink'
+        description: |
+          The URL of the network in which to reserve the address. This field
+          can only be used with INTERNAL type with the VPC_PEERING and
+          IPSEC_INTERCONNECT purposes.
+        min_version: beta
+      - !ruby/object:Api::Type::Integer
+        name: prefixLength
+        description: |
+          The prefix length if the resource represents an IP range.
+        min_version: beta
   - !ruby/object:Api::Resource
     name: 'Autoscaler'
     kind: 'compute#autoscaler'
@@ -384,7 +406,6 @@ objects:
                 utilization.
             - !ruby/object:Api::Type::String
               name: 'predictiveMethod'
-              min_version: beta
               default_value: NONE
               description: |
                 Indicates whether predictive autoscaling based on CPU metric is enabled. Valid values are:
@@ -496,7 +517,6 @@ objects:
                 be a positive float value. If not defined, the default is 0.8.
           - !ruby/object:Api::Type::Map
             name: 'scalingSchedules'
-            min_version: beta
             description: |
               Scaling schedules defined for an autoscaler. Multiple schedules can be set on an autoscaler and they can overlap.
             key_name: name
@@ -510,6 +530,7 @@ objects:
                   description: |
                     Minimum number of VM instances that autoscaler will recommend in time intervals starting according to schedule.
                   required: true
+                  send_empty_value: true
                 - !ruby/object:Api::Type::String
                   name: 'schedule'
                   description: |
@@ -616,6 +637,7 @@ objects:
         - !ruby/object:Api::Type::Boolean
           name: 'negativeCaching'
           min_version: beta
+          send_empty_value: true
           description: |
             Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects.
         - !ruby/object:Api::Type::Array
@@ -651,6 +673,7 @@ objects:
         - !ruby/object:Api::Type::Integer
           name: 'serveWhileStale'
           min_version: beta
+          send_empty_value: true
           description: |
             Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
 
@@ -1218,6 +1241,7 @@ objects:
           - !ruby/object:Api::Type::Boolean
             name: 'negativeCaching'
             min_version: beta
+            send_empty_value: true
             description: |
               Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects.
           - !ruby/object:Api::Type::Array
@@ -1253,6 +1277,7 @@ objects:
           - !ruby/object:Api::Type::Integer
             name: 'serveWhileStale'
             min_version: beta
+            send_empty_value: true
             description: |
               Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
       - !ruby/object:Api::Type::NestedObject
@@ -2198,6 +2223,7 @@ objects:
           - !ruby/object:Api::Type::Boolean
             name: 'negativeCaching'
             min_version: beta
+            send_empty_value: true
             description: |
               Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects.
           - !ruby/object:Api::Type::Array
@@ -2233,6 +2259,7 @@ objects:
           - !ruby/object:Api::Type::Integer
             name: 'serveWhileStale'
             min_version: beta
+            send_empty_value: true
             description: |
               Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
 
@@ -3323,6 +3350,10 @@ objects:
         description: |
           Indicates whether or not the disk can be read/write attached to more than one instance.
         min_version: beta
+      - !ruby/object:Api::Type::Integer
+        name: 'provisionedIops'
+        description: |
+          Indicates how many IOPS must be provisioned for the disk.
   - !ruby/object:Api::Resource
     name: 'Firewall'
     kind: 'compute#firewall'
@@ -6595,6 +6626,13 @@ objects:
             description: Defines whether the instance has integrity monitoring enabled.
             update_verb: :PATCH
             update_url: projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig
+      - !ruby/object:Api::Type::NestedObject
+        name: 'confidentialInstanceConfig'
+        description: 'Configuration for confidential computing (requires setting the machine type to any of the n2d-* types and a boot disk of type pd-ssd).'
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enableConfidentialCompute'
+            description: Enables confidential computing
       - !ruby/object:Api::Type::Enum
         name: 'status'
         description: |
@@ -7460,6 +7498,60 @@ objects:
         description: |
           The IEEE 802.1Q VLAN tag for this attachment, in the range 2-4094. When
           using PARTNER type this will be managed upstream.
+      - !ruby/object:Api::Type::Array
+        name: 'ipsecInternalAddresses'
+        description: |
+          URL of addresses that have been reserved for the interconnect
+          attachment, Used only for interconnect attachment that has the
+          encryption option as IPSEC.
+
+          The addresses must be RFC 1918 IP address ranges. When creating HA
+          VPN gateway over the interconnect attachment, if the attachment is
+          configured to use an RFC 1918 IP address, then the VPN gateway's IP
+          address will be allocated from the IP address range specified
+          here.
+
+          For example, if the HA VPN gateway's interface 0 is paired to this
+          interconnect attachment, then an RFC 1918 IP address for the VPN
+          gateway interface 0 will be allocated from the IP address specified
+          for this interconnect attachment.
+
+          If this field is not specified for interconnect attachment that has
+          encryption option as IPSEC, later on when creating HA VPN gateway on
+          this interconnect attachment, the HA VPN gateway's IP address will be
+          allocated from regional external IP address pool.
+        input: true
+        min_version: beta
+        item_type: !ruby/object:Api::Type::ResourceRef
+          name: 'ipsecInternalAddress'
+          resource: 'Address'
+          imports: 'selfLink'
+          description: |
+            URL of an address that has been reserved for the interconnect
+            attachment.
+      - !ruby/object:Api::Type::Enum
+        name: 'encryption'
+        description: |
+          Indicates the user-supplied encryption option of this interconnect
+          attachment:
+
+          NONE is the default value, which means that the attachment carries
+          unencrypted traffic. VMs can send traffic to, or receive traffic
+          from, this type of attachment.
+
+          IPSEC indicates that the attachment carries only traffic encrypted by
+          an IPsec device such as an HA VPN gateway. VMs cannot directly send
+          traffic to, or receive traffic from, such an attachment. To use
+          IPsec-encrypted Cloud Interconnect create the attachment using this
+          option.
+
+          Not currently available publicly.
+        input: true
+        values:
+          - :NONE
+          - :IPSEC
+        default_value: :NONE
+        min_version: beta
   - !ruby/object:Api::Resource
     name: 'MachineImage'
     kind: 'compute#machineImage'
@@ -7545,7 +7637,6 @@ objects:
             output: true
           - !ruby/object:Api::Type::String
             name: 'kmsKeyName'
-            output: true
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
           - !ruby/object:Api::Type::String
@@ -8388,8 +8479,16 @@ objects:
         name: 'size'
         description: |
           The total number of nodes in the node group.
-        required: true
+        input: true
         send_empty_value: true
+      - !ruby/object:Api::Type::Integer
+        name: 'initialSize'
+        description: |
+          The initial number of nodes in the node group. One of `initial_size` or `size` must be specified.
+        url_param_only: true
+        exactly_one_of:
+          - size
+          - initial_size
       - !ruby/object:Api::Type::String
         name: 'maintenancePolicy'
         description: |
@@ -9649,7 +9748,6 @@ objects:
                 utilization.
             - !ruby/object:Api::Type::String
               name: 'predictiveMethod'
-              min_version: beta
               default_value: NONE
               description: |
                 Indicates whether predictive autoscaling based on CPU metric is enabled. Valid values are:
@@ -9761,7 +9859,6 @@ objects:
                 be a positive float value. If not defined, the default is 0.8.
           - !ruby/object:Api::Type::Map
             name: 'scalingSchedules'
-            min_version: beta
             description: |
               Scaling schedules defined for an autoscaler. Multiple schedules can be set on an autoscaler and they can overlap.
             key_name: name
@@ -9775,6 +9872,7 @@ objects:
                   description: |
                     Minimum number of VM instances that autoscaler will recommend in time intervals starting according to schedule.
                   required: true
+                  send_empty_value: true
                 - !ruby/object:Api::Type::String
                   name: 'schedule'
                   description: |
@@ -10133,6 +10231,15 @@ objects:
         description: |
           URL of the disk type resource describing which disk type to use to
           create the disk. Provide this when creating the disk.
+      - !ruby/object:Api::Type::Enum
+        name: 'interface'
+        min_version: 'beta'
+        description: |
+          Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
+        default_value: :SCSI
+        values:
+          - :SCSI
+          - :NVME
   - !ruby/object:Api::Resource
     name: 'RegionUrlMap'
     kind: 'compute#urlMap'
@@ -12381,10 +12488,15 @@ objects:
           first character must be a lowercase letter, and all following characters
           must be a dash, lowercase letter, or digit, except the last character,
           which cannot be a dash.
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of this resource. Provide this property when you create the resource.
       - !ruby/object:Api::Type::NestedObject
         name: 'snapshotSchedulePolicy'
         conflicts:
           - 'group_placement_policy'
+          - 'instance_schedule_policy'
         description: |
           Policy for creating snapshots of persistent disks.
         properties:
@@ -12529,6 +12641,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'groupPlacementPolicy'
         conflicts:
+          - 'instance_schedule_policy'
           - 'snapshot_schedule_policy'
         description: |
           Resource policy for instances used for placement configuration.
@@ -12557,6 +12670,54 @@ objects:
               attached.
             values:
               - :COLLOCATED
+      - !ruby/object:Api::Type::NestedObject
+        name: 'instanceSchedulePolicy'
+        conflicts:
+          - 'snapshot_schedule_policy'
+          - 'group_placement_policy'
+        description: |
+          Resource policy for scheduling instance operations.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'vmStartSchedule'
+            at_least_one_of:
+              - instance_schedule_policy.0.vm_start_schedule
+              - instance_schedule_policy.0.vm_stop_schedule
+            description: |
+              Specifies the schedule for starting instances.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'schedule'
+                description: |
+                  Specifies the frequency for the operation, using the unix-cron format.
+                required: true
+          - !ruby/object:Api::Type::NestedObject
+            name: 'vmStopSchedule'
+            at_least_one_of:
+              - instance_schedule_policy.0.vm_start_schedule
+              - instance_schedule_policy.0.vm_stop_schedule
+            description: |
+              Specifies the schedule for stopping instances.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'schedule'
+                description: |
+                  Specifies the frequency for the operation, using the unix-cron format.
+                required: true
+          - !ruby/object:Api::Type::String
+            name: 'timeZone'
+            description: |
+              Specifies the time zone to be used in interpreting the schedule. The value of this field must be a time zone name
+              from the tz database: http://en.wikipedia.org/wiki/Tz_database.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'startTime'
+            description: |
+              The start time of the schedule. The timestamp is an RFC3339 string.
+          - !ruby/object:Api::Type::String
+            name: 'expirationTime'
+            description: |
+              The expiration time of the schedule. The timestamp is an RFC3339 string.
   - !ruby/object:Api::Resource
     name: 'Route'
     kind: 'compute#route'
@@ -12879,6 +13040,15 @@ objects:
                     description: |
                       User-specified description for the IP range.
                     send_empty_value: true
+      - !ruby/object:Api::Type::Boolean
+        name: encryptedInterconnectRouter
+        input: true
+        description: |
+          Field to indicate if a router is dedicated to use with encrypted
+          Interconnect Attachment (IPsec-encrypted Cloud Interconnect feature).
+
+          Not currently available publicly.
+        min_version: beta
   - !ruby/object:Api::Resource
     name: 'RouterNat'
     base_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
@@ -15307,7 +15477,6 @@ objects:
         name: 'vpnInterfaces'
         description: |
           A list of interfaces on this VPN gateway.
-        output: true
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::Integer
@@ -15316,6 +15485,21 @@ objects:
             - !ruby/object:Api::Type::String
               name: 'ipAddress'
               description: 'The external IP address for this VPN gateway interface.'
+              output: true
+            - !ruby/object:Api::Type::ResourceRef
+              name: 'interconnectAttachment'
+              resource: 'InterconnectAttachment'
+              imports: 'selfLink'
+              description: |
+                  URL of the interconnect attachment resource. When the value
+                  of this field is present, the VPN Gateway will be used for
+                  IPsec-encrypted Cloud Interconnect; all Egress or Ingress
+                  traffic for this VPN Gateway interface will go through the
+                  specified interconnect attachment resource.
+
+                  Not currently available publicly.
+              input: true
+              min_version: beta
   - !ruby/object:Api::Resource
     name: 'ExternalVpnGateway'
     kind: 'compute#externalVpnGateway'

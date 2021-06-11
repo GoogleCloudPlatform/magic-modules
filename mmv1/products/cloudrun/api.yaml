@@ -18,6 +18,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://{{location}}-run.googleapis.com/
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://{{location}}-run.googleapis.com/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 objects:
@@ -48,7 +51,7 @@ objects:
     # This is a convenience field handled by terraform encoder/decoders
     exclude: true
     description: |-
-      Name should be a verified domain
+      Name should be a [verified](https://support.google.com/webmasters/answer/9008080) domain
   - !ruby/object:Api::Type::String
     name: kind
     description: This is always set to DomainMapping
@@ -515,6 +518,37 @@ objects:
                     references will never be expanded, regardless of whether the variable
                     exists or not.
                     Defaults to "".
+                - !ruby/object:Api::Type::NestedObject
+                  name: valueFrom
+                  min_version: beta
+                  description: |-
+                    Source for the environment variable's value. Only supports secret_key_ref.
+                  properties:
+                    - !ruby/object:Api::Type::NestedObject
+                      name: secretKeyRef
+                      required: true
+                      description: |-
+                        Selects a key (version) of a secret in Secret Manager.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: key
+                          required: true
+                          description: |-
+                            A Cloud Secret Manager secret version. Must be 'latest' for the latest
+                            version or an integer for a specific version.
+                        - !ruby/object:Api::Type::String
+                          name: name
+                          required: true
+                          description: |-
+                            The name of the secret in Cloud Secret Manager. By default, the secret
+                            is assumed to be in the same project.
+                            If the secret is in another project, you must define an alias.
+                            An alias definition has the form:
+                            <alias>:projects/<project-id|project-number>/secrets/<secret-name>.
+                            If multiple alias definitions are needed, they must be separated by
+                            commas.
+                            The alias definitions must be set on the run.googleapis.com/secrets
+                            annotation.
             - !ruby/object:Api::Type::Array
               name: ports
               description: |-
@@ -554,6 +588,25 @@ objects:
                   explicitly specified, otherwise to an implementation-defined value.
                   The values of the map is string form of the 'quantity' k8s type:
                   https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+            - !ruby/object:Api::Type::Array
+              name: volumeMounts
+              min_version: beta
+              description: |-
+                Volume to mount into the container's filesystem.
+                Only supports SecretVolumeSources.
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: mountPath
+                    required: true
+                    description: |-
+                      Path within the container at which the volume should be mounted.  Must
+                      not contain ':'.
+                  - !ruby/object:Api::Type::String
+                    name: name
+                    required: true
+                    description: |-
+                      This must match the Name of a Volume.
 
         - !ruby/object:Api::Type::Integer
           name: containerConcurrency
@@ -575,6 +628,63 @@ objects:
             service. The service account represents the identity of the running revision,
             and determines what permissions the revision has. If not provided, the revision
             will use the project's default service account.
+        - !ruby/object:Api::Type::Array
+          name: volumes
+          min_version: beta
+          description: |-
+            Volume represents a named volume in a container.
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::String
+                name: name
+                required: true
+                description: |-
+                  Volume's name.
+              - !ruby/object:Api::Type::NestedObject
+                name: secret
+                required: true
+                description: |-
+                  The secret's value will be presented as the content of a file whose
+                  name is defined in the item path. If no items are defined, the name of
+                  the file is the secret_name.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: secretName
+                    required: true
+                    description: |-
+                      The name of the secret in Cloud Secret Manager. By default, the secret
+                      is assumed to be in the same project.
+                      If the secret is in another project, you must define an alias.
+                      An alias definition has the form:
+                      <alias>:projects/<project-id|project-number>/secrets/<secret-name>.
+                      If multiple alias definitions are needed, they must be separated by
+                      commas.
+                      The alias definitions must be set on the run.googleapis.com/secrets
+                      annotation.
+                  - !ruby/object:Api::Type::Array
+                    name: items
+                    description: |-
+                      If unspecified, the volume will expose a file whose name is the
+                      secret_name.
+                      If specified, the key will be used as the version to fetch from Cloud
+                      Secret Manager and the path will be the name of the file exposed in the
+                      volume. When items are defined, they must specify a key and a path.
+                    item_type: !ruby/object:Api::Type::NestedObject
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: key
+                          required: true
+                          description: |-
+                            The Cloud Secret Manager secret version.
+                            Can be 'latest' for the latest value or an integer for a specific version.
+                        - !ruby/object:Api::Type::String
+                          name: path
+                          required: true
+                          description: |-
+                            The relative path of the file to map the key to.
+                            May not be an absolute path.
+                            May not contain the path element '..'.
+                            May not start with the string '..'.
         - !ruby/object:Api::Type::Enum
           name: servingState
           deprecation_message: "Not supported by Cloud Run fully managed"

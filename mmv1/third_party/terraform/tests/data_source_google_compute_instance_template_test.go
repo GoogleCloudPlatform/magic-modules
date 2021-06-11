@@ -72,7 +72,7 @@ func TestAccInstanceTemplateDatasource_filter_mostRecent(t *testing.T) {
 func testAccInstanceTemplate_name(project, suffix string) string {
 	return Nprintf(`
 resource "google_compute_instance_template" "default" {
-  name        = "test-template-%{suffix}"
+  name        = "tf-test-template-%{suffix}"
   description = "Example template."
 
   machine_type = "e2-small"
@@ -100,7 +100,7 @@ data "google_compute_instance_template" "default" {
 func testAccInstanceTemplate_filter(project, suffix string) string {
 	return Nprintf(`
 resource "google_compute_instance_template" "a" {
-  name        = "test-template-a-%{suffix}"
+  name        = "tf-test-template-a-%{suffix}"
   description = "Example template."
 
   machine_type = "e2-small"
@@ -118,7 +118,7 @@ resource "google_compute_instance_template" "a" {
   }
 }
 resource "google_compute_instance_template" "b" {
-  name        = "test-template-b-%{suffix}"
+  name        = "tf-test-template-b-%{suffix}"
   description = "Example template."
 
   machine_type = "e2-small"
@@ -136,7 +136,7 @@ resource "google_compute_instance_template" "b" {
   }
 }
 resource "google_compute_instance_template" "c" {
-  name        = "test-template-c-%{suffix}"
+  name        = "tf-test-template-c-%{suffix}"
   description = "Example template."
 
   machine_type = "e2-small"
@@ -157,7 +157,7 @@ resource "google_compute_instance_template" "c" {
 data "google_compute_instance_template" "default" {
   // Hack to prevent depends_on bug triggering datasource recreate due to https://github.com/hashicorp/terraform/issues/11806
   project = "%{project}${replace(google_compute_instance_template.a.id, "/.*/", "")}${replace(google_compute_instance_template.b.id, "/.*/", "")}${replace(google_compute_instance_template.c.id, "/.*/", "")}"
-  filter  = "name eq test-template-c-.*"
+  filter  = "name = tf-test-template-c-%{suffix}"
 }
 `, map[string]interface{}{"project": project, "suffix": suffix})
 }
@@ -165,7 +165,7 @@ data "google_compute_instance_template" "default" {
 func testAccInstanceTemplate_filter_mostRecent(project, suffix string) string {
 	return Nprintf(`
 resource "google_compute_instance_template" "a" {
-  name        = "test-template-%{suffix}-a"
+  name        = "tf-test-template-%{suffix}-a"
   description = "Example template."
 
   machine_type = "e2-small"
@@ -183,7 +183,7 @@ resource "google_compute_instance_template" "a" {
   }
 }
 resource "google_compute_instance_template" "b" {
-  name        = "test-template-%{suffix}-b"
+  name        = "tf-test-template-%{suffix}-b"
   description = "Example template."
 
   machine_type = "e2-small"
@@ -202,10 +202,11 @@ resource "google_compute_instance_template" "b" {
 
   depends_on = [
     google_compute_instance_template.a,
+    google_compute_instance_template.c,
   ]
 }
 resource "google_compute_instance_template" "c" {
-  name        = "test-template-%{suffix}-c"
+  name        = "tf-test-template-%{suffix}-c"
   description = "Example template."
 
   machine_type = "e2-small"
@@ -224,14 +225,13 @@ resource "google_compute_instance_template" "c" {
 
   depends_on = [
     google_compute_instance_template.a,
-    google_compute_instance_template.b,
   ]
 }
 
 data "google_compute_instance_template" "default" {
   // Hack to prevent depends_on bug triggering datasource recreate due to https://github.com/hashicorp/terraform/issues/11806
-  project = "%{project}${replace(google_compute_instance_template.c.id, "/.*/", "")}"
-  filter      = "name eq test-template-.*"
+  project = "%{project}${replace(google_compute_instance_template.b.id, "/.*/", "")}"
+  filter      = "name != tf-test-template-%{suffix}-b"
   most_recent = true
 }
 `, map[string]interface{}{"project": project, "suffix": suffix})

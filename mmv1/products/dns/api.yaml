@@ -470,6 +470,9 @@ objects:
           - :AAAA
           - :CAA
           - :CNAME
+          - :DNSKEY
+          - :DS
+          - :IPSECVPNKEY
           - :MX
           - :NAPTR
           - :NS
@@ -477,6 +480,7 @@ objects:
           - :SOA
           - :SPF
           - :SRV
+          - :SSHFP
           - :TLSA
           - :TXT
         description: One of valid DNS resource types.
@@ -528,6 +532,9 @@ objects:
           - :AAAA
           - :CAA
           - :CNAME
+          - :DNSKEY
+          - :DS
+          - :IPSECVPNKEY
           - :MX
           - :NAPTR
           - :NS
@@ -535,6 +542,7 @@ objects:
           - :SOA
           - :SPF
           - :SRV
+          - :SSHFP
           - :TLSA
           - :TXT
         description: One of valid DNS resource types.

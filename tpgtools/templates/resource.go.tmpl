@@ -97,7 +97,7 @@ func resource{{$.PathType}}() *schema.Resource {
 	{{- if $p.DiffSuppressFunc }}
 				DiffSuppressFunc: {{$p.DiffSuppressFunc}},
 	{{- end }}
-				Description: `{{/* TODO fix formatting for $p.Description */}}`,
+				Description: `{{/* TODO fix formatting for $p.Description - see https://github.com/hashicorp/terraform-provider-google/issues/9197 */}}`,
 	{{- if $p.MaxItems }}
 				MaxItems: {{$p.MaxItems}},
 	{{- end }}
@@ -239,7 +239,7 @@ func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) erro
 {{- else }}
   createDirective := CreateDirective
 {{- end }}
-	res, err := config.client{{$.PackageType}}DCL.Apply{{$.Type}}(context.Background(), obj, createDirective...)
+	res, err := config.client{{$.ProductType}}DCL.Apply{{$.Type}}(context.Background(), obj, createDirective...)
 	if err != nil {
 		// The resource didn't actually create
 		d.SetId("")
@@ -293,7 +293,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 {{ end }}
 	}
 
-	res, err := config.client{{$.PackageType}}DCL.Get{{$.Type}}(context.Background(), obj)
+	res, err := config.client{{$.ProductType}}DCL.Get{{$.Type}}(context.Background(), obj)
 	if err != nil {
 		// Resource not found
 		d.SetId("")
@@ -356,7 +356,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	{{- if $.StateHint }}
 	directive = append(UpdateDirective, dcl.WithStateHint(old))
 	{{- end }}
-	res, err := config.client{{$.PackageType}}DCL.Apply{{$.Type}}(context.Background(), obj, directive...)
+	res, err := config.client{{$.ProductType}}DCL.Apply{{$.Type}}(context.Background(), obj, directive...)
 	if err != nil {
 		return fmt.Errorf("Error updating {{$.Type}}: %s", err)
 	}
@@ -413,7 +413,7 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 {{- end}}
 
 	log.Printf("[DEBUG] Deleting {{$.Type}} %q", d.Id())
-	if err := config.client{{$.PackageType}}DCL.Delete{{$.Type}}(context.Background(), obj); err != nil {
+	if err := config.client{{$.ProductType}}DCL.Delete{{$.Type}}(context.Background(), obj); err != nil {
 		return fmt.Errorf("Error deleting {{$.Type}}: %s", err)
 	}
 
@@ -456,8 +456,8 @@ func resource{{$.PathType}}Import(d *schema.ResourceData, meta interface{}) ([]*
 {{ range $v := .Objects -}}
 	{{ if $v.Settable -}}
 		{{ if $v.Collapsed -}}
-func expand{{$.PathType}}{{$v.PackagePath}}Collapsed(d *schema.ResourceData) *{{$.Package}}.{{$.Type}}{{$v.PackagePath}} {
-	collapsed := {{$.Package}}.{{$.Type}}{{$v.PackagePath}}{
+func expand{{$.PathType}}{{$v.PackagePath}}Collapsed(d *schema.ResourceData) *{{$.Package}}.{{$v.ObjectType}} {
+	collapsed := {{$.Package}}.{{$v.ObjectType}}{
 			{{- range $p := $v.Properties }}
 				{{- if and ($p.Settable) ($p.StateGetter) }}
 		{{$p.PackageName}}: {{$p.StateGetter}},
@@ -465,7 +465,7 @@ func expand{{$.PathType}}{{$v.PackagePath}}Collapsed(d *schema.ResourceData) *{{
 			{{ end }}
 	}
 	// Return nil if empty
-	if ({{$.Package}}.{{$.Type}}{{$v.PackagePath}}{}) == collapsed {
+	if ({{$.Package}}.{{$v.ObjectType}}{}) == collapsed {
 		return nil
 	}
 	return &collapsed
@@ -473,7 +473,7 @@ func expand{{$.PathType}}{{$v.PackagePath}}Collapsed(d *schema.ResourceData) *{{
 		{{ else -}}
 
 		{{ if $v.IsArray -}}
-func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.{{$.Type}}{{$v.PackagePath}} {
+func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.{{$v.ObjectType}} {
 	if o == nil {
 		return nil
 	}
@@ -487,7 +487,7 @@ func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.
 		return nil
 	}
 
-	items := make([]{{$.Package}}.{{$.Type}}{{$v.PackagePath}}, 0, len(objs))
+	items := make([]{{$.Package}}.{{$v.ObjectType}}, 0, len(objs))
 	for _, item := range objs {
 		i := expand{{$.PathType}}{{$v.PackagePath}}(item)
 		items = append(items, *i)
@@ -497,20 +497,28 @@ func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.
 }
 		{{- end }}
 
-func expand{{$.PathType}}{{$v.PackagePath}}(o interface{}) *{{$.Package}}.{{$.Type}}{{$v.PackagePath}} {
+func expand{{$.PathType}}{{$v.PackagePath}}(o interface{}) *{{$.Package}}.{{$v.ObjectType}} {
 	if o == nil {
+	{{- if $v.Computed }}
 		return nil
+	{{- else }}
+		return {{$.Package}}.Empty{{$v.ObjectType}}
+	{{- end }}
 	}
 	{{ if $v.IsObject -}}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 {
+	{{- if $v.Computed }}
 		return nil
+	{{- else }}
+		return {{$.Package}}.Empty{{$v.ObjectType}}
+	{{- end }}
 	}
 	obj := objArr[0].(map[string]interface{})
 	{{- else }}
 	obj := o.(map[string]interface{})
 	{{- end }}
-	return &{{$.Package}}.{{$.Type}}{{$v.PackagePath}}{
+	return &{{$.Package}}.{{$v.ObjectType}}{
 	{{- range $p := $v.Properties }}
 		{{- if and ($p.Settable) ($p.ExpandGetter) }}
 		{{$p.PackageName}}: {{$p.ExpandGetter}},
@@ -522,7 +530,7 @@ func expand{{$.PathType}}{{$v.PackagePath}}(o interface{}) *{{$.Package}}.{{$.Ty
 {{- end }}
 
 	{{ if $v.IsArray -}}
-func flatten{{$.PathType}}{{$v.PackagePath}}Array(objs []{{$.Package}}.{{$.Type}}{{$v.PackagePath}}) []interface{} {
+func flatten{{$.PathType}}{{$v.PackagePath}}Array(objs []{{$.Package}}.{{$v.ObjectType}}) []interface{} {
 	if objs == nil {
 		return nil
 	}
@@ -537,8 +545,8 @@ func flatten{{$.PathType}}{{$v.PackagePath}}Array(objs []{{$.Package}}.{{$.Type}
 }
 	{{- end }}
 
-func flatten{{$.PathType}}{{$v.PackagePath}}(obj *{{$.Package}}.{{$.Type}}{{$v.PackagePath}}) interface{} {
-	if obj == nil {
+func flatten{{$.PathType}}{{$v.PackagePath}}(obj *{{$.Package}}.{{$v.ObjectType}}) interface{} {
+	if obj == nil || obj.Empty(){
 		return nil
 	}
 	transformed := map[string]interface{}{
@@ -557,7 +565,7 @@ func flatten{{$.PathType}}{{$v.PackagePath}}(obj *{{$.Package}}.{{$.Type}}{{$v.P
 {{ end -}}
 
 {{ range $v := .EnumArrays -}}
-func flatten{{$.PathType}}{{$v.PackagePath}}Array(obj []{{$.Package}}.{{$.Type}}{{$v.PackagePath}}Enum) interface{} {
+func flatten{{$.PathType}}{{$v.PackagePath}}Array(obj []{{$.Package}}.{{$v.ObjectType}}Enum) interface{} {
 	if obj == nil {
 		return nil
 	}
@@ -568,11 +576,11 @@ func flatten{{$.PathType}}{{$v.PackagePath}}Array(obj []{{$.Package}}.{{$.Type}}
 	return items
 }
 
-func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.{{$.Type}}{{$v.PackagePath}}Enum {
+func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.{{$v.ObjectType}}Enum {
 	objs := o.([]interface{})
-	items := make([]{{$.Package}}.{{$.Type}}{{$v.PackagePath}}Enum, 0, len(objs))
+	items := make([]{{$.Package}}.{{$v.ObjectType}}Enum, 0, len(objs))
 	for _, item := range objs {
-		i := {{$.Package}}.{{$.Type}}{{$v.PackagePath}}EnumRef(item.(string))
+		i := {{$.Package}}.{{$v.ObjectType}}EnumRef(item.(string))
 		items = append(items, *i)
 	}
   return items

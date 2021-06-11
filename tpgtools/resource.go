@@ -1,11 +1,11 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,13 +28,7 @@ const GoPkgTerraformSdkValidation = "github.com/hashicorp/terraform-plugin-sdk/v
 // Resource is tpgtools' model of what a information is necessary to generate a
 // resource in TPG.
 type Resource struct {
-	// Package is the namespace of the resource in snake_case. For example,
-	// "redis", "cloud_run".
-	Package string
-
-	// DCLPackagePath is the path of the package within the DCL. Differs from Package
-	// for cases like version subfolders. For example, "sqladmin/beta"
-	DCLPackagePath string
+	productMetadata *ProductMetadata
 
 	// ID is the Terraform resource id format as a pattern string. Additionally,
 	// import formats can be derived from it.
@@ -134,7 +128,7 @@ func (r Resource) DCLName() string {
 // Path is the provider name of a resource, product_name. For example,
 // "cloud_run_service".
 func (r Resource) Path() string {
-	return r.Package + "_" + r.Name()
+	return r.Package() + "_" + r.Name()
 }
 
 // TerraformName is the Terraform resource type used in HCL configuration.
@@ -149,23 +143,34 @@ func (r Resource) Type() string {
 	return snakeToTitleCase(r.DCLName())
 }
 
-// PackageType is the title-cased package name of a resource. For example,
-// "Redis.
-func (r Resource) PackageType() string {
-	return snakeToTitleCase(r.Package)
-}
-
 // PathType is the title-cased name of a resource preceded by it's package, for
 // often used to namespace functions. For example, "RedisInstance".
 func (r Resource) PathType() string {
 	return snakeToTitleCase(r.Path())
 }
 
+// Package is the namespace of the package within the dcl
+// the Package is normally a lowercase variant of ProductName
+func (r Resource) Package() string {
+	return r.productMetadata.PackageName
+}
+
+// ProductType is the title-cased product name of a resource. For example,
+// "NetworkServices".
+func (r Resource) ProductType() string {
+	return r.productMetadata.ProductType()
+}
+
+func (r Resource) ProductMetadata() *ProductMetadata {
+	copy := *r.productMetadata
+	return &copy
+}
+
 // DCLPackage is the package name of the DCL client library to use for this
 // resource. For example, the Package "access_context_manager" would have a
 // DCLPackage of "accesscontextmanager"
 func (r Resource) DCLPackage() string {
-	return strings.Replace(r.DCLPackagePath, "_", "", -1)
+	return strings.Replace(r.productMetadata.PackagePath, "_", "", -1)
 }
 
 // SidebarCurrent is the website sidebar identifier, for example
@@ -260,7 +265,7 @@ func (r Resource) HasServerGeneratedName() bool {
 
 // SweeperName returns the name of the Sweeper for this resource.
 func (r Resource) SweeperName() string {
-	return strings.Title(r.Package) + strings.Title(r.Name())
+	return r.ProductType() + strings.Title(r.Name())
 }
 
 // SweeperFunctionArgs returns a list of arguments for calling a sweeper function.
@@ -306,8 +311,7 @@ func (r Resource) RegisterReusedType(p Property) []Property {
 	return r.ReusedTypes
 }
 
-func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides Overrides, packagePath string, location string) (*Resource, error) {
-	pkg := strings.Split(packagePath, "/")[0]
+func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides Overrides, product *ProductMetadata, location string) (*Resource, error) {
 	resourceTitle := schema.Title
 
 	// Attempt to construct the resource name using location. Other than
@@ -321,8 +325,7 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 	res := Resource{
 		title:                jsonToSnakeCase(resourceTitle),
 		dclname:              jsonToSnakeCase(schema.Title),
-		Package:              pkg,
-		DCLPackagePath:       packagePath,
+		productMetadata:      product,
 		Description:          schema.Description,
 		InsertTimeoutMinutes: 10,
 		UpdateTimeoutMinutes: 10,

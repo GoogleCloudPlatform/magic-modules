@@ -116,6 +116,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   NetworkPeeringRoutesConfig: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  NodeGroup: !ruby/object:Overrides::Inspec::ResourceOverride
+    properties:
+      size: !ruby/object:Overrides::Inspec::PropertyOverride
+        required: true
+      initialSize: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: true
   OrganizationSecurityPolicy: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   OrganizationSecurityPolicyAssociation: !ruby/object:Overrides::Inspec::ResourceOverride

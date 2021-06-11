@@ -24,7 +24,7 @@ data "google_compute_instance_template" "generic" {
 
 # using a filter
 data "google_compute_instance_template" "generic-regex" {
-  filter      = "name eq generic-tpl-.*"
+  filter      = "name != generic-tpl-20200107"
   most_recent = true
 }
 ```
@@ -156,6 +156,9 @@ The `disk` block supports:
 * `disk_size_gb` - The size of the image in gigabytes. If not
     specified, it will inherit the size of its base image. For SCRATCH disks,
     the size must be exactly 375GB.
+
+* `labels` - (Optional) A set of ket/value label pairs to assign to disk created from
+    this template
 
 * `type` - The type of GCE disk, can be either `"SCRATCH"` or
     `"PERSISTENT"`.

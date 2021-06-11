@@ -186,3 +186,15 @@ objects:
         values:
           - :READY
           - :CREATING
+      - !ruby/object:Api::Type::NestedObject
+        name: 'encryptionConfig'
+        description: |
+          Encryption configuration for the database
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyName'
+            required: true
+            description: |
+              Fully qualified name of the KMS key to use to encrypt this database. This key must exist
+              in the same location as the Spanner Database.
+

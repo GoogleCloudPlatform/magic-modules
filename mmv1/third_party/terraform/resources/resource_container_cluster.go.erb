@@ -82,6 +82,8 @@ func clusterSchemaNodeConfig() *schema.Schema {
 			changeFieldSchemaToForceNew(sch)
 		}
 	}
+	// Autopilot is only applicable for container cluster
+	nodeConfigSch.ConflictsWith = []string{"enable_autopilot"}
 	return nodeConfigSch
 }
 
@@ -129,6 +131,7 @@ func resourceContainerCluster() *schema.Resource {
 			customdiff.ForceNewIfChange("enable_l4_ilb_subsetting", isBeenEnabled),
 			<% end -%>
 			containerClusterAutopilotCustomizeDiff,
+			containerClusterNodeVersionRemoveDefaultCustomizeDiff,
 		),
 
 		Timeouts: &schema.ResourceTimeout{
@@ -508,7 +511,7 @@ func resourceContainerCluster() *schema.Resource {
 			"enable_shielded_nodes": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Computed: true,
+				Computed:     true,
 				Description: `Enable Shielded Nodes features on all nodes in this cluster.`,
 				ConflictsWith: []string{"enable_autopilot"},
 			},
@@ -518,7 +521,7 @@ func resourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				ForceNew:    true,
 				Description: `Enable Autopilot for this cluster.`,
-				// ConflictsWith: many fields, see https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison. The conflict is only set one-way, on other fields w/ this field. 
+				// ConflictsWith: many fields, see https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison. The conflict is only set one-way, on other fields w/ this field.
 			},
 
 			"authenticator_groups_config": {
@@ -671,7 +674,7 @@ func resourceContainerCluster() *schema.Resource {
 									"topic": {
 										Type:        schema.TypeString,
 										Optional:    true,
-										Description: `The Cloud Pub/Sub topic to send the notification to, must be in the format: projects/{project}/topics/{topic}`,
+										Description: `The pubsub topic to push upgrade notifications to. Must be in the same project as the cluster. Must be in the format: projects/{project}/topics/{topic}.`,
 									},
 								},
 							},
@@ -860,6 +863,9 @@ func resourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				MaxItems:    1,
 				Description: `Configuration for the PodSecurityPolicy feature.`,
+<% if version == "ga" -%>
+				Deprecated:   `This attribute is currently in beta and will be removed from the google provider. Please use the google-beta provider to continue using this attribute.`,
+<% end -%>
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
@@ -1401,11 +1407,14 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		ResourceLabels: expandStringMap(d, "resource_labels"),
 	}
 
-	if v, ok := d.GetOk("enable_shielded_nodes"); ok {
-		cluster.ShieldedNodes = &containerBeta.ShieldedNodes{
-			Enabled:         v.(bool),
-			ForceSendFields: []string{"Enabled"},
-		}
+	// shielded nodes is computed and optional yet serverside
+	// default is true. Forcing true here esentially serves
+	// as a default false but is unavoidable due to how
+	// computed and GetOk work together.
+	v:= d.Get("enable_shielded_nodes")
+	cluster.ShieldedNodes = &containerBeta.ShieldedNodes{
+		Enabled:         v.(bool),
+		ForceSendFields: []string{"Enabled"},
 	}
 
 	if v, ok := d.GetOk("default_max_pods_per_node"); ok {
@@ -4068,6 +4077,19 @@ func containerClusterAutopilotCustomizeDiff(_ context.Context, d *schema.Resourc
 		if err := d.SetNew("enable_shielded_nodes", true); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// node_version only applies to the default node pool, so it should conflict with remove_default_node_pool = true
+func containerClusterNodeVersionRemoveDefaultCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	// node_version is computed, so we can only check this on initial creation
+	o, _ := d.GetChange("name")
+	if o != "" {
+		return nil
+	}
+	if d.Get("node_version").(string) != "" && d.Get("remove_default_node_pool").(bool) {
+		return fmt.Errorf("node_version can only be specified if remove_default_node_pool is not true")
 	}
 	return nil
 }

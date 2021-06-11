@@ -1,11 +1,11 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,8 +45,9 @@ var mode = flag.String("mode", "", "mode for the generator. If unset, creates th
 var terraformResourceDirectory = "google-beta"
 
 func main() {
-	resources := loadAndModelResources()
+	resources, products := loadAndModelResources()
 	var resourcesForVersion []*Resource
+	var productsForVersion []*ProductMetadata
 	var version *Version
 	if vFilter != nil && *vFilter != "" {
 		version = fromString(*vFilter)
@@ -54,8 +55,10 @@ func main() {
 			glog.Exitf("Failed finding version for input: %s", *vFilter)
 		}
 		resourcesForVersion = resources[*version]
+		productsForVersion = products[*version]
 	} else {
 		resourcesForVersion = resources[allVersions()[0]]
+		productsForVersion = products[allVersions()[0]]
 	}
 	if *version == GA_VERSION {
 		terraformResourceDirectory = "google"
@@ -63,37 +66,57 @@ func main() {
 
 	if mode != nil && *mode == "serialization" {
 		generateSerializationLogic(resourcesForVersion)
-	} else {
-		for _, resource := range resourcesForVersion {
-			resJSON, err := json.MarshalIndent(resource, "", "  ")
-			if err != nil {
-				glog.Errorf("Failed to marshal resource struct")
-			} else {
-				glog.Infof("Generating from resource %s", string(resJSON))
-			}
-			generateResourceFile(resource)
-			generateSweeperFile(resource)
-			// Disabled to allow handwriting files until samples exist
-			// generateResourceWebsiteFile(resource, resources, version)
-		}
-
-		if oPath == nil || *oPath == "" {
-			glog.Info("Skipping copying handwritten files, no output specified")
-			return
-		}
-
-		if cPath == nil || *cPath == "" {
-			glog.Info("No handwritten path specified")
-			return
-		}
-
-		copyHandwrittenFiles(*cPath, *oPath)
+		return
 	}
+
+	for _, resource := range resourcesForVersion {
+		if skipResource(resource) {
+			continue
+		}
+		resJSON, err := json.MarshalIndent(resource, "", "  ")
+		if err != nil {
+			glog.Errorf("Failed to marshal resource struct")
+		} else {
+			glog.Infof("Generating from resource %s", string(resJSON))
+		}
+
+		generateResourceFile(resource)
+		generateSweeperFile(resource)
+		// Disabled to allow handwriting files until samples exist
+		// generateResourceWebsiteFile(resource, resources, version)
+	}
+
+	// product specific generation
+	generateEndpointsFile(productsForVersion)
+
+	if oPath == nil || *oPath == "" {
+		glog.Info("Skipping copying handwritten files, no output specified")
+		return
+	}
+
+	if cPath == nil || *cPath == "" {
+		glog.Info("No handwritten path specified")
+		return
+	}
+
+	copyHandwrittenFiles(*cPath, *oPath)
+}
+
+func skipResource(r *Resource) bool {
+	// if a filter is specified, skip filtered services
+	if sFilter != nil && *sFilter != "" && *sFilter != r.ProductMetadata().PackageName {
+		return true
+	}
+	// skip filtered resources
+	if rFilter != nil && *rFilter != "" && strings.ToLower(*rFilter) != snakeToLowercase(r.DCLName()) {
+		return true
+	}
+	return false
 }
 
 // TODO(rileykarson): Change interface to an error, handle exceptional stuff in
 // main func.
-func loadAndModelResources() map[Version][]*Resource {
+func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMetadata) {
 	flag.Parse()
 	if fPath == nil || *fPath == "" {
 		glog.Exit("No path specified")
@@ -104,16 +127,13 @@ func loadAndModelResources() map[Version][]*Resource {
 		glog.Fatal(err)
 	}
 	resources := make(map[Version][]*Resource)
+	products := make(map[Version][]*ProductMetadata)
+
 	for _, version := range allVersions() {
 		resources[version] = make([]*Resource, 0)
 		for _, v := range dirs {
 			// skip flat files- we're looking for service directory
 			if !v.IsDir() {
-				continue
-			}
-
-			// if a filter is specified, skip filtered services
-			if sFilter != nil && *sFilter != "" && *sFilter != v.Name() {
 				continue
 			}
 
@@ -125,92 +145,109 @@ func loadAndModelResources() map[Version][]*Resource {
 			} else {
 				packagePath = path.Join(v.Name(), version.V)
 			}
+
 			specs, err = ioutil.ReadDir(path.Join(*fPath, packagePath))
-			for _, f := range specs {
-				if f.IsDir() {
-					continue
-				}
-				// if a filter is specified, skip filtered resources
-				resName := stripExt(f.Name())
-				if rFilter != nil && *rFilter != "" && strings.ToLower(*rFilter) != strings.ToLower(resName) {
-					continue
-				}
-
-				// TODO: use yaml.UnmarshalStrict once apply / list paths are changed to
-				// specification extensions and we're using a datatype that supports them.
-				document := &openapi.Document{}
-				p := path.Join(*fPath, packagePath, f.Name())
-				b, err := ioutil.ReadFile(p)
-				if err != nil {
-					glog.Exit(err)
-				}
-				err = yaml.Unmarshal(b, document)
-				if err != nil {
-					glog.Exit(err)
-				}
-
-				overrides := Overrides{}
-				if !(tPath == nil) && !(*tPath == "") {
-					b, err := ioutil.ReadFile(path.Join(*tPath, packagePath, f.Name()))
-					if err != nil {
-						// ignore the error if the file just doesn't exist
-						if !os.IsNotExist(err) {
-							glog.Exit(err)
-						}
-					} else {
-						err = yaml.UnmarshalStrict(b, &overrides)
-						if err != nil {
-							glog.Exit(err)
-						}
-					}
-				}
-
-				titleParts := strings.Split(document.Info.Title, "/")
-
-				var schema *openapi.Schema
-				for k, v := range document.Components.Schemas {
-					if k == titleParts[len(titleParts)-1] {
-						schema = v
-						schema.Title = k
-					}
-				}
-
-				if schema == nil {
-					glog.Exit(fmt.Sprintf("Could not find document schema for %s", document.Info.Title))
-				}
-
-				if err := schema.Validate(); err != nil {
-					glog.Exit(err)
-				}
-
-				lRaw := schema.Extension["x-dcl-locations"].([]interface{})
-
-				typeFetcher := NewTypeFetcher(document)
-				var locations []string
-				// If the schema cannot be split into two or mor locations, we specify this
-				// by passing a single empty location string.
-				if len(lRaw) < 2 {
-					locations = make([]string, 1)
-				} else {
-					locations = make([]string, 0, len(lRaw))
-					for _, l := range lRaw {
-						locations = append(locations, l.(string))
-					}
-				}
-
-				for _, l := range locations {
-					res, err := createResource(schema, typeFetcher, overrides, packagePath, l)
-					if err != nil {
-						glog.Exit(err)
-					}
-
-					resources[version] = append(resources[version], res)
-				}
+			newProduct := getProductInformation(packagePath, specs)
+			if newProduct == nil {
+				// No resource at this version for this product
+				continue
 			}
+			products[version] = append(products[version], newProduct)
+
+			newResources := getResources(packagePath, specs)
+			resources[version] = append(resources[version], newResources...)
+
+		}
+	}
+
+	return resources, products
+}
+
+func getProductInformation(packagePath string, specs []os.FileInfo) *ProductMetadata {
+	for _, f := range specs {
+		if f.IsDir() {
+			continue
+		}
+
+		document := loadDocument(packagePath, &f)
+		productMetadata := GetProductMetadataFromDocument(document, packagePath)
+
+		return productMetadata
+	}
+	return nil
+}
+
+func getResources(packagePath string, specs []os.FileInfo) []*Resource {
+	var resources []*Resource
+	for _, f := range specs {
+		if f.IsDir() {
+			continue
+		}
+
+		document := loadDocument(packagePath, &f)
+		productMetadata := GetProductMetadataFromDocument(document, packagePath)
+		titleParts := strings.Split(document.Info.Title, "/")
+
+		var schema *openapi.Schema
+		for k, v := range document.Components.Schemas {
+			if k == titleParts[len(titleParts)-1] {
+				schema = v
+				schema.Title = k
+			}
+		}
+
+		overrides := loadOverrides(packagePath, f.Name())
+
+		if schema == nil {
+			glog.Exit(fmt.Sprintf("Could not find document schema for %s", document.Info.Title))
+		}
+
+		if err := schema.Validate(); err != nil {
+			glog.Exit(err)
+		}
+
+		lRaw := schema.Extension["x-dcl-locations"].([]interface{})
+
+		typeFetcher := NewTypeFetcher(document)
+		var locations []string
+		// If the schema cannot be split into two or mor locations, we specify this
+		// by passing a single empty location string.
+		if len(lRaw) < 2 {
+			locations = make([]string, 1)
+		} else {
+			locations = make([]string, 0, len(lRaw))
+			for _, l := range lRaw {
+				locations = append(locations, l.(string))
+			}
+		}
+
+		for _, l := range locations {
+			res, err := createResource(schema, typeFetcher, overrides, productMetadata, l)
+			if err != nil {
+				glog.Exit(err)
+			}
+
+			resources = append(resources, res)
 		}
 	}
 
 	return resources
+}
+
+func loadDocument(packagePath string, f *os.FileInfo) *openapi.Document {
+	// TODO: use yaml.UnmarshalStrict once apply / list paths are changed to
+	// specification extensions and we're using a datatype that supports them.
+	document := &openapi.Document{}
+	p := path.Join(*fPath, packagePath, (*f).Name())
+	b, err := ioutil.ReadFile(p)
+	if err != nil {
+		glog.Exit(err)
+	}
+	err = yaml.Unmarshal(b, document)
+	if err != nil {
+		glog.Exit(err)
+	}
+	return document
 }
 
 func generateSerializationLogic(specs []*Resource) {
@@ -239,7 +276,25 @@ func generateSerializationLogic(specs []*Resource) {
 			glog.Exit(err)
 		}
 	}
+}
 
+func loadOverrides(packagePath, fileName string) Overrides {
+	overrides := Overrides{}
+	if !(tPath == nil) && !(*tPath == "") {
+		b, err := ioutil.ReadFile(path.Join(*tPath, packagePath, fileName))
+		if err != nil {
+			// ignore the error if the file just doesn't exist
+			if !os.IsNotExist(err) {
+				glog.Exit(err)
+			}
+		} else {
+			err = yaml.UnmarshalStrict(b, &overrides)
+			if err != nil {
+				glog.Exit(err)
+			}
+		}
+	}
+	return overrides
 }
 
 func generateResourceFile(res *Resource) {
@@ -266,13 +321,13 @@ func generateResourceFile(res *Resource) {
 
 	formatted, err := formatSource(&contents)
 	if err != nil {
-		glog.Error(fmt.Errorf("error formatting %v: %v", res.Package+res.Name(), err))
+		glog.Error(fmt.Errorf("error formatting %v: %v - resource \n ", res.Package()+res.Name(), err))
 	}
 
 	if oPath == nil || *oPath == "" {
 		fmt.Printf("%v", string(formatted))
 	} else {
-		outname := fmt.Sprintf("resource_%s_%s.go", res.Package, res.Name())
+		outname := fmt.Sprintf("resource_%s_%s.go", res.Package(), res.Name())
 		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
 		if err != nil {
 			glog.Exit(err)
@@ -308,13 +363,50 @@ func generateSweeperFile(res *Resource) {
 
 	formatted, err := formatSource(&contents)
 	if err != nil {
-		glog.Error(fmt.Errorf("error formatting %v: %v", res.Package+res.Name(), err))
+		glog.Error(fmt.Errorf("error formatting %v: %v - sweeper", res.Package()+res.Name(), err))
 	}
 
 	if oPath == nil || *oPath == "" {
 		fmt.Printf("%v", string(formatted))
 	} else {
-		outname := fmt.Sprintf("resource_%s_%s_sweeper_test.go", res.Package, res.Name())
+		outname := fmt.Sprintf("resource_%s_%s_sweeper_test.go", res.Package(), res.Name())
+		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
+		if err != nil {
+			glog.Exit(err)
+		}
+	}
+}
+
+func generateEndpointsFile(products []*ProductMetadata) {
+	if len(products) <= 0 {
+		return
+	}
+	// Generate endpoints file
+	tmpl, err := template.New("provider_dcl_endpoints.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
+		"templates/provider_dcl_endpoints.go.tmpl",
+	)
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	contents := bytes.Buffer{}
+	if err = tmpl.ExecuteTemplate(&contents, "provider_dcl_endpoints.go.tmpl", products); err != nil {
+		glog.Exit(err)
+	}
+
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	formatted, err := formatSource(&contents)
+	if err != nil {
+		glog.Error(fmt.Errorf("error formatting package endpoints file"))
+	}
+
+	if oPath == nil || *oPath == "" {
+		fmt.Printf("%v", string(formatted))
+	} else {
+		outname := fmt.Sprintf("provider_dcl_endpoints.go")
 		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
 		if err != nil {
 			glog.Exit(err)

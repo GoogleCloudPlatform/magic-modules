@@ -79,6 +79,27 @@ objects:
               and is not a valid configuration.
             item_type: Api::Type::String
             required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'schemaSettings'
+        description: |
+          Settings for validating messages published against a schema.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'schema'
+            description: |
+              The name of the schema that messages published should be
+              validated against. Format is projects/{project}/schemas/{schema}.
+              The value of this field will be _deleted-schema_
+              if the schema has been deleted.
+            required: true
+          - !ruby/object:Api::Type::Enum
+            name: 'encoding'
+            description: The encoding of messages validated against schema.
+            default_value: :ENCODING_UNSPECIFIED
+            values:
+              - :ENCODING_UNSPECIFIED
+              - :JSON
+              - :BINARY
   - !ruby/object:Api::Resource
     name: 'Subscription'
     description: |
@@ -319,3 +340,36 @@ objects:
           If `true`, messages published with the same orderingKey in PubsubMessage will be delivered to
           the subscribers in the order in which they are received by the Pub/Sub system. Otherwise, they
           may be delivered in any order.
+  - !ruby/object:Api::Resource
+    name: 'Schema'
+    description: |
+      A schema is a format that messages must follow,
+      creating a contract between publisher and subscriber that Pub/Sub will enforce.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating and managing schemas':
+          'https://cloud.google.com/pubsub/docs/schemas'
+      api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.schemas'
+    base_url: projects/{{project}}/schemas
+    create_url: projects/{{project}}/schemas?schemaId={{name}}
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The ID to use for the schema, which will become the final component of the schema's resource name.
+        required: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'type'
+        description: The type of the schema definition
+        default_value: :TYPE_UNSPECIFIED
+        values:
+          - :TYPE_UNSPECIFIED
+          - :PROTOCOL_BUFFER
+          - :AVRO
+      - !ruby/object:Api::Type::String
+        name: 'definition'
+        description: |
+          The definition of the schema.
+          This should contain a string representing the full definition of the schema
+          that is a valid schema definition of the type specified in type.

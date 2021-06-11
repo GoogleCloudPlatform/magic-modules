@@ -637,7 +637,7 @@ objects:
         resource: 'Service'
         imports: 'name'
         description: |
-          AppEngine service resource
+          AppEngine service resource. Can contain numbers, letters, and hyphens.
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'

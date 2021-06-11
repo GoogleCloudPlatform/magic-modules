@@ -1,11 +1,11 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,21 +32,30 @@ var initialisms = map[string]string{
 	"vpc":    "VPC",
 }
 
-// snakeToTitleCase converts a snake_case string to TitleCase / Go struct case.
-func snakeToTitleCase(s string) string {
-	return strings.Join(snakeToTitleParts(s), "")
+// snakeToTitleCase converts a snake_case string to a conjoined string
+func snakeToLowercase(s string) string {
+	return strings.Join(snakeToParts(s, false), "")
 }
 
-// snakeToTitleParts returns the parts of a snake_case string titlecased as an
-// array, taking into account common initialisms.
-func snakeToTitleParts(s string) []string {
+// snakeToTitleCase converts a snake_case string to TitleCase / Go struct case.
+func snakeToTitleCase(s string) string {
+	return strings.Join(snakeToParts(s, true), "")
+}
+
+// snakeToTitleParts returns the parts of a snake_case string absent of '_'
+// if titleCase is true these segents will have their first letter capitalized
+func snakeToParts(s string, titleCase bool) []string {
 	parts := []string{}
 	segments := strings.Split(s, "_")
 	for _, seg := range segments {
 		if v, ok := initialisms[seg]; ok {
 			parts = append(parts, v)
 		} else {
-			parts = append(parts, strings.ToUpper(seg[0:1])+seg[1:])
+			var newPart string = seg
+			if titleCase {
+				newPart = strings.ToUpper(newPart[0:1]) + newPart[1:]
+			}
+			parts = append(parts, newPart)
 		}
 	}
 
