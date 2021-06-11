@@ -5,11 +5,9 @@ resource "google_compute_router" "<%= ctx[:primary_resource_id] %>" {
   bgp {
     asn = 64514
   }
-  provider = google-beta
 }
 
 resource "google_compute_network" "network" {
   name                    = "<%= ctx[:vars]['network_name'] %>"
   auto_create_subnetworks = false
-  provider = google-beta
 }

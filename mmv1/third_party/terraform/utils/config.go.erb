@@ -66,6 +66,9 @@ import (
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	dataprocDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc<% unless version == 'ga' -%>/beta<% end -%>"
 	eventarcDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc<% unless version == 'ga' -%>/beta<% end -%>"
+<% unless version == 'ga' -%>
+	gkehubDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub/beta"
+<% end -%>
 )
 
 type providerMeta struct {
@@ -119,11 +122,10 @@ type Config struct {
 	requestBatcherServiceUsage *RequestBatcher
 	requestBatcherIam          *RequestBatcher
 
-	// start DCL clients
+	// start DCLBasePaths
 	// dataprocBasePath is implemented in mm
-	clientDataprocDCL      *dataprocDcl.Client
 	EventarcBasePath string
-	clientEventarcDCL      *eventarcDcl.Client
+	GkeHubBasePath string
 }
 
 // Generated product base paths
@@ -190,16 +192,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	c.requestBatcherServiceUsage = NewRequestBatcher("Service Usage", ctx, c.BatchingConfig)
 	c.requestBatcherIam = NewRequestBatcher("IAM", ctx, c.BatchingConfig)
 	c.PollInterval = 10 * time.Second
-
-	// Start DCL client instantiation
-	// TODO(slevenick): handle user agents
-	dclClientOptions := dcl.WithHTTPClient(client)
-	dclUserAgentOptions:=dcl.WithUserAgent(c.userAgent)
-	dclLoggerOptions := dcl.WithLogger(dclLogger{})
-	// each product needs it own client currently since basepath can only be specified at
-	// the config level.
-	c.clientDataprocDCL = dataprocDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions,dclLoggerOptions, dcl.WithBasePath(c.DataprocBasePath)))
-	c.clientEventarcDCL = eventarcDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions,dclLoggerOptions, dcl.WithBasePath(c.EventarcBasePath)))
 
 	return nil
 }
