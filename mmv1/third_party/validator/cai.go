@@ -7,11 +7,6 @@ import (
 )
 
 // Asset is the CAI representation of a resource.
-type Asset struct {
-	// The name, in a peculiar format: `\\<api>.googleapis.com/<self_link>`
-	Name string `json:"name"`
-	// The type name in `google.<api>.<resourcename>` format.
-	Type      string         `json:"asset_type"`
 	Resource  *AssetResource `json:"resource,omitempty"`
 	IAMPolicy *IAMPolicy     `json:"iam_policy,omitempty"`
 	OrgPolicy []*OrgPolicy   `json:"org_policy,omitempty"`
