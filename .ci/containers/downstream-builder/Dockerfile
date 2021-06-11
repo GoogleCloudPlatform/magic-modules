@@ -67,5 +67,4 @@ ADD generate_downstream.sh /generate_downstream.sh
 ADD test_tpgc.sh /test_tpgc.sh
 ADD test_terraform.sh /test_terraform.sh
 
-
 ENTRYPOINT ["/generate_downstream.sh"]

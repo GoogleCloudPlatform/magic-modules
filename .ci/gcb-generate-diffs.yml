@@ -179,6 +179,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       id: tpgb-test
+      entrypoint: "test_terraform.sh"
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["diff"]
       args:
