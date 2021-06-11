@@ -22,6 +22,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           certificate_authority_id: "my-certificate-authority"
+        test_vars_overrides:
+          pool: 'my-static-ca-pool'
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_authority_full"
         primary_resource_id: "default"
