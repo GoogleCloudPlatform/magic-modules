@@ -169,14 +169,15 @@ steps:
       args:
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/terraform-google-conversion-tester'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
       id: tgc-test
+      entrypoint: "test_tpgc.sh"
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["diff"]
       args:
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/terraform-tester'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
       id: tpgb-test
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["diff"]
@@ -184,8 +185,9 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/terraform-tester'
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
       id: tpg-test
+      entrypoint: "test_terraform.sh"
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["diff"]
       args:
