@@ -4,7 +4,7 @@ func isRedisVersionDecreasing(_ context.Context, old, new, _ interface{}) bool {
 	return isRedisVersionDecreasingFunc(old, new)
 }
 
-// seperate function for unit testing
+// separate function for unit testing
 func isRedisVersionDecreasingFunc(old, new interface{}) bool {
 	if old == nil || new == nil {
 		return false

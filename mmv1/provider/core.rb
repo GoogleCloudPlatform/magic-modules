@@ -301,6 +301,12 @@ module Provider
       }
     end
 
+    # used to determine and separate objects that have update methods
+    # that target individual fields
+    def has_field_specific_update_methods(properties)
+      properties_by_custom_update(properties).length() > 0
+    end
+
     # Filter the properties to keep only the ones requiring custom update
     # method and group them by update url & verb.
     def properties_by_custom_update(properties, behavior = :new)
