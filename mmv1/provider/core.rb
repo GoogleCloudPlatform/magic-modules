@@ -303,8 +303,8 @@ module Provider
 
     # used to determine and separate objects that have update methods
     # that target individual fields
-    def has_field_specific_update_methods(properties)
-      properties_by_custom_update(properties).length() > 0
+    def field_specific_update_methods(properties)
+      properties_by_custom_update(properties).length.positive?
     end
 
     # Filter the properties to keep only the ones requiring custom update
