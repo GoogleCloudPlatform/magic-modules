@@ -1,0 +1,33 @@
+    
+	config := meta.(*Config)
+	
+	// current import_formats cannot import fields with forward slashes in their value
+	if err := parseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
+		return nil, err
+	}
+
+	stringParts := strings.Split(d.Get("name").(string), "/")
+	if stringParts[2] != "locations" {
+		return nil, fmt.Errorf(
+			"Saw %s when the name is expected to have shape %s",
+			d.Get("name"),
+			"projects/{{project}}/locations/{{location}}/agents/{{agent}}/flows/{{flow}}/versions/{{name}}",
+		)
+	}
+
+	if err := d.Set("location", stringParts[3]); err != nil {
+		return nil, fmt.Errorf("Error setting location: %s", err)
+	}
+
+	if err := d.Set("parent", fmt.Sprintf("projects/%s/locations/%s/agents/%s/flows/%s", stringParts[1], stringParts[3], stringParts[5], stringParts[7])); err != nil {
+		return nil, fmt.Errorf("Error setting parent, %s", err)
+	}
+
+	// Replace import id for the resource id
+	id, err := replaceVars(d, config, "{{name}}")
+	if err != nil {
+		return nil, fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+
+	return []*schema.ResourceData{d}, nil

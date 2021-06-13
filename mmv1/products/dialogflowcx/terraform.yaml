@@ -33,6 +33,29 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       description: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.StringLenBetween(0, 500)'
+  Version: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 40
+      update_minutes: 40
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name_set_location.go.erb   
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dialogflowcx_version_full"
+        primary_resource_id: "version_1"
+        vars:
+          agent_name: "dialogflowcx-agent"
+    skip_sweeper: true
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
+    autogen_async: true
+    properties:
+      description: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(0, 500)'
+      displayName: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(0, 64)'
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
