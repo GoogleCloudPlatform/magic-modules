@@ -4521,7 +4521,6 @@ data "google_compute_image" "my_image" {
   family  = "debian-9"
   project = "debian-cloud"
 }
-<% end -%>
 
 resource "google_compute_disk" "foobar" {
   name  = "%s"
@@ -4564,6 +4563,7 @@ resource "google_compute_instance" "foobar" {
 }
 `, disk, image, instance)
 }
+<% end -%>
 
 func testAccComputeInstance_multiNic(instance, network, subnetwork string) string {
 	return fmt.Sprintf(`

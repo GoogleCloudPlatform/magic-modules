@@ -360,13 +360,12 @@ func resourceComputeInstance() *schema.Resource {
 				MaxItems:    1,
 				Optional:    true,
 				ForceNew:    true,
-				Computed:    true,
 				Description: `Configures network performance settings for the instance. If not specified, the instance will be created with its default network performance configuration.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"total_egress_bandwidth_tier": {
 							Type:         schema.TypeString,
-							Optional:     false,
+							Required:     true,
 							ForceNew:     true,
 							ValidateFunc: validation.StringInSlice([]string{"TIER_1", "DEFAULT"}, false),
 							Description:  `The egress bandwidth tier to enable. Possible values:TIER_1, DEFAULT`,
