@@ -38,8 +38,5 @@ func getMtlsEndpoint(baseEndpoint string) string {
 	} else {
 		u.Host = fmt.Sprintf("%s.mtls", domainParts[0])
 	}
-	if len(portParts) > 1 {
-		u.Host = fmt.Sprintf("%s:%s", u.Host, portParts[1])
-	}
 	return u.String()
 }
