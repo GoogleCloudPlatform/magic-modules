@@ -9,9 +9,9 @@
 	stringParts := strings.Split(d.Get("name").(string), "/")
 	if stringParts[2] != "locations" {
 		return nil, fmt.Errorf(
-			"Saw %s when the name is expected to have shape %s",
+			"Saw %s when the name is expected to contains location %s",
 			d.Get("name"),
-			"projects/{{project}}/locations/{{location}}/agents/{{agent}}/flows/{{flow}}/versions/{{name}}",
+			"projects/{{project}}/locations/{{location}}/...",
 		)
 	}
 
@@ -19,7 +19,9 @@
 		return nil, fmt.Errorf("Error setting location: %s", err)
 	}
 
-	if err := d.Set("parent", fmt.Sprintf("projects/%s/locations/%s/agents/%s/flows/%s", stringParts[1], stringParts[3], stringParts[5], stringParts[7])); err != nil {
+	// Removing last 2 elements from name to set parent
+	parent := strings.Join(stringParts[:len(stringParts)-2],"/")
+	if err := d.Set("parent", parent); err != nil {
 		return nil, fmt.Errorf("Error setting parent, %s", err)
 	}
 
