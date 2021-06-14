@@ -32,11 +32,7 @@ func getMtlsEndpoint(baseEndpoint string) string {
 		}
 		return baseEndpoint
 	}
-	portParts := strings.Split(u.Host, ":")
-	if len(portParts) == 0 || portParts[0] == "" {
-		return baseEndpoint
-	}
-	domainParts := strings.Split(portParts[0], ".")
+	domainParts := strings.Split(u.Host, ".")
 	if len(domainParts) > 1 {
 		u.Host = fmt.Sprintf("%s.mtls.%s", domainParts[0], strings.Join(domainParts[1:], "."))
 	} else {
