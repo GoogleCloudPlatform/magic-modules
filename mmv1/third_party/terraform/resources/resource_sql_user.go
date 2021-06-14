@@ -135,7 +135,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	// for which user.Host is an empty string.  That's okay.
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
 
-	err = sqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutCreate))
+	err = sqlAdminOperationWaitTime(d, config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutCreate))
 
 	if err != nil {
 		return fmt.Errorf("Error, failure waiting for insertion of %s "+
@@ -247,7 +247,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 				"user %s into user %s: %s", name, instance, err)
 		}
 
-		err = sqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = sqlAdminOperationWaitTime(d, config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutUpdate))
 
 		if err != nil {
 			return fmt.Errorf("Error, failure waiting for update of %s "+
@@ -293,7 +293,7 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 
-		if err := sqlAdminOperationWaitTime(config, op, project, "Delete User", userAgent, d.Timeout(schema.TimeoutDelete)); err != nil {
+		if err := sqlAdminOperationWaitTime(d, config, op, project, "Delete User", userAgent, d.Timeout(schema.TimeoutDelete)); err != nil {
 			return err
 		}
 		return nil

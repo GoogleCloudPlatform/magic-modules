@@ -32,7 +32,7 @@ if err != nil {
 }
 
 err = computeOperationWaitTime(
-	config, res, project, "Applying update to PerInstanceConfig", userAgent,
+	d, config, res, project, "Applying update to PerInstanceConfig", userAgent,
 	d.Timeout(schema.TimeoutUpdate))
 
 if err != nil {

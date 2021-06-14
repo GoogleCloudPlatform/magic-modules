@@ -68,7 +68,7 @@ func resourceComputeProjectDefaultNetworkTierCreateOrUpdate(d *schema.ResourceDa
 	}
 
 	log.Printf("[DEBUG] SetDefaultNetworkTier: %d (%s)", op.Id, op.SelfLink)
-	err = computeOperationWaitTime(config, op, projectID, "SetDefaultNetworkTier", userAgent, d.Timeout(schema.TimeoutCreate))
+	err = computeOperationWaitTime(d, config, op, projectID, "SetDefaultNetworkTier", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("SetDefaultNetworkTier failed: %s", err)
 	}

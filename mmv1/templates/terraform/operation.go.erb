@@ -16,6 +16,7 @@ type <%= product_name -%>OperationWaiter struct {
   Project string
 <% end -%>
   CommonOperationWaiter
+	d *schema.ResourceData
 }
 
 func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
@@ -25,16 +26,23 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
   // Returns the proper get.
   url := fmt.Sprintf("<%= [object.__product.base_url, async.operation.base_url].flatten.join.gsub('{{op_id}}', '%s') -%>", w.CommonOperationWaiter.Op.Name)
 
-  return sendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, w.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+  // This is for regional API endpoints like Vertex AI that need to infer the subdomain prefix in *.googleapis.com from d such as https://{{region}}-aiplatform.googleapis.com/v1/
+	parsedUrl, err := replaceVars(w.d, w.Config, url)
+	if err != nil {
+		return nil, err
+	}
+
+  return sendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, parsedUrl, w.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 }
 
-func create<%= product_name %>Waiter(config *Config, op map[string]interface{}, <% if has_project -%> project, <% end -%> activity, userAgent string) (*<%=product_name%>OperationWaiter, error) {
+func create<%= product_name %>Waiter(d *schema.ResourceData, config *Config, op map[string]interface{}, <% if has_project -%> project, <% end -%> activity, userAgent string) (*<%=product_name%>OperationWaiter, error) {
   w := &<%= product_name -%>OperationWaiter{
     Config:    config,
     UserAgent: userAgent,
 <% if has_project -%>
-    Project: project,
+    Project:   project,
 <% end -%>
+    d:         d,
   }
   if err := w.CommonOperationWaiter.SetOp(op); err != nil {
     return nil, err
@@ -48,8 +56,8 @@ func create<%= product_name %>Waiter(config *Config, op map[string]interface{}, 
     Might as well just nolint it so we can pass the linter checks.
 -%>
 // nolint: deadcode,unused
-func <%= product_name.camelize(:lower) -%>OperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{},<% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
-  w, err := create<%= product_name %>Waiter(config, op, <% if has_project -%> project, <%end-%> activity, userAgent)
+func <%= product_name.camelize(:lower) -%>OperationWaitTimeWithResponse(d *schema.ResourceData, config *Config, op map[string]interface{}, response *map[string]interface{},<% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
+  w, err := create<%= product_name %>Waiter(d, config, op, <% if has_project -%> project, <%end-%> activity, userAgent)
   if err != nil {
       return err
   }
@@ -60,12 +68,12 @@ func <%= product_name.camelize(:lower) -%>OperationWaitTimeWithResponse(config *
 }
 <% end -%>
 
-func <%= product_name.camelize(:lower) -%>OperationWaitTime(config *Config, op map[string]interface{}, <% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
+func <%= product_name.camelize(:lower) -%>OperationWaitTime(d *schema.ResourceData, config *Config, op map[string]interface{}, <% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
   if val, ok := op["name"]; !ok || val == "" {
     // This was a synchronous call - there is no operation to wait for.
     return nil
   }
-  w, err := create<%= product_name %>Waiter(config, op, <% if has_project -%> project, <%end-%> activity, userAgent)
+  w, err := create<%= product_name %>Waiter(d, config, op, <% if has_project -%> project, <%end-%> activity, userAgent)
   if err != nil {
       // If w is nil, the op was synchronous.
       return err

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	computeBeta "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/compute/v1"
@@ -2165,7 +2166,8 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 		if err != nil {
 			return fmt.Errorf("Could not stop instance: %s", err)
 		}
-		err = computeOperationWaitTime(config, op, config.Project, "Waiting on stop", config.userAgent, 20*time.Minute)
+		d := &schema.ResourceData{}
+		err = computeOperationWaitTime(d, config, op, config.Project, "Waiting on stop", config.userAgent, 20*time.Minute)
 		if err != nil {
 			return fmt.Errorf("Could not stop instance: %s", err)
 		}
@@ -2179,7 +2181,7 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 		if err != nil {
 			return fmt.Errorf("Could not change machine type: %s", err)
 		}
-		err = computeOperationWaitTime(config, op, config.Project, "Waiting machine type change", config.userAgent, 20*time.Minute)
+		err = computeOperationWaitTime(d, config, op, config.Project, "Waiting machine type change", config.userAgent, 20*time.Minute)
 		if err != nil {
 			return fmt.Errorf("Could not change machine type: %s", err)
 		}

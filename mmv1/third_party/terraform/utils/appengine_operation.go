@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/appengine/v1"
 )
 
@@ -17,6 +18,7 @@ type AppEngineOperationWaiter struct {
 	Service *appengine.APIService
 	AppId   string
 	CommonOperationWaiter
+	d *schema.ResourceData
 }
 
 func (w *AppEngineOperationWaiter) QueryOp() (interface{}, error) {
@@ -30,7 +32,7 @@ func (w *AppEngineOperationWaiter) QueryOp() (interface{}, error) {
 	return w.Service.Apps.Operations.Get(w.AppId, matches[1]).Do()
 }
 
-func appEngineOperationWaitTimeWithResponse(config *Config, res interface{}, response *map[string]interface{}, appId, activity, userAgent string, timeout time.Duration) error {
+func appEngineOperationWaitTimeWithResponse(d *schema.ResourceData, config *Config, res interface{}, response *map[string]interface{}, appId, activity, userAgent string, timeout time.Duration) error {
 	op := &appengine.Operation{}
 	err := Convert(res, op)
 	if err != nil {
@@ -40,6 +42,7 @@ func appEngineOperationWaitTimeWithResponse(config *Config, res interface{}, res
 	w := &AppEngineOperationWaiter{
 		Service: config.NewAppEngineClient(userAgent),
 		AppId:   appId,
+		d:       d,
 	}
 
 	if err := w.SetOp(op); err != nil {
@@ -51,7 +54,7 @@ func appEngineOperationWaitTimeWithResponse(config *Config, res interface{}, res
 	return json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), response)
 }
 
-func appEngineOperationWaitTime(config *Config, res interface{}, appId, activity, userAgent string, timeout time.Duration) error {
+func appEngineOperationWaitTime(d *schema.ResourceData, config *Config, res interface{}, appId, activity, userAgent string, timeout time.Duration) error {
 	op := &appengine.Operation{}
 	err := Convert(res, op)
 	if err != nil {
@@ -61,6 +64,7 @@ func appEngineOperationWaitTime(config *Config, res interface{}, appId, activity
 	w := &AppEngineOperationWaiter{
 		Service: config.NewAppEngineClient(userAgent),
 		AppId:   appId,
+		d:       d,
 	}
 
 	if err := w.SetOp(op); err != nil {

@@ -1,7 +1,7 @@
 parent := d.Get("parent").(string)
 var opRes map[string]interface{}
 err = computeOrgOperationWaitTimeWithResponse(
-	config, res, &opRes, parent, "Creating OrganizationSecurityPolicy", userAgent,
+	d, config, res, &opRes, parent, "Creating OrganizationSecurityPolicy", userAgent,
  	d.Timeout(schema.TimeoutCreate))
 
 if err != nil {

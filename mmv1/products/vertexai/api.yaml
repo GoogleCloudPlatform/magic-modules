@@ -17,10 +17,10 @@ display_name: Vertex AI
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://{{location}}-aiplatform.googleapis.com/v1/
+    base_url: https://{{region}}-aiplatform.googleapis.com/v1/
   # - !ruby/object:Api::Product::Version
   #   name: beta
-  #   base_url: https://{{location}}-aiplatform.googleapis.com/v1beta1/
+  #   base_url: https://{{region}}-aiplatform.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 objects:
@@ -57,10 +57,10 @@ objects:
       A collection of DataItems and Annotations on them.
     parameters:
       - !ruby/object:Api::Type::String
-        name: location
-        description: The location of the dataset. eg us-central1
+        name: region
+        description: The region of the dataset. eg us-central1
         url_param_only: true
-        required: true
+        input: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'

@@ -132,7 +132,7 @@ func resourceComputeNetworkPeeringCreate(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("Error adding network peering: %s", err)
 	}
 
-	err = computeOperationWaitTime(config, addOp, networkFieldValue.Project, "Adding Network Peering", userAgent, d.Timeout(schema.TimeoutCreate))
+	err = computeOperationWaitTime(d, config, addOp, networkFieldValue.Project, "Adding Network Peering", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return err
 	}
@@ -227,7 +227,7 @@ func resourceComputeNetworkPeeringUpdate(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("Error updating network peering: %s", err)
 	}
 
-	err = computeOperationWaitTime(config, updateOp, networkFieldValue.Project, "Updating Network Peering", userAgent, d.Timeout(schema.TimeoutUpdate))
+	err = computeOperationWaitTime(d, config, updateOp, networkFieldValue.Project, "Updating Network Peering", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
 	}
@@ -273,7 +273,7 @@ func resourceComputeNetworkPeeringDelete(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error removing peering `%s` from network `%s`: %s", name, networkFieldValue.Name, err)
 		}
 	} else {
-		err = computeOperationWaitTime(config, removeOp, networkFieldValue.Project, "Removing Network Peering", userAgent, d.Timeout(schema.TimeoutDelete))
+		err = computeOperationWaitTime(d, config, removeOp, networkFieldValue.Project, "Removing Network Peering", userAgent, d.Timeout(schema.TimeoutDelete))
 		if err != nil {
 			return err
 		}

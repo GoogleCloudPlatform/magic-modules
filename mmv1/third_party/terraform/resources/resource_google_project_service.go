@@ -282,7 +282,7 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 			return err
 		}
 		// Wait for the operation to complete
-		waitErr := serviceUsageOperationWait(config, sop, project, "api to disable", userAgent, d.Timeout(schema.TimeoutDelete))
+		waitErr := serviceUsageOperationWait(d, config, sop, project, "api to disable", userAgent, d.Timeout(schema.TimeoutDelete))
 		if waitErr != nil {
 			return waitErr
 		}

@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudkms/v1"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/iam/v1"
@@ -246,7 +247,7 @@ func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
 		}
 
 		log.Printf("[DEBUG] Waiting for network creation to finish")
-		err = computeOperationWaitTime(config, res, project, "Error bootstrapping shared test network", config.userAgent, 4*time.Minute)
+		err = computeOperationWaitTime(&schema.ResourceData{}, config, res, project, "Error bootstrapping shared test network", config.userAgent, 4*time.Minute)
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared test network %q: %s", networkName, err)
 		}
@@ -302,7 +303,7 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 			t.Fatalf("Error bootstrapping shared test project: %s", err)
 		}
 
-		err = resourceManagerOperationWaitTime(config, opAsMap, "creating project", config.userAgent, 4)
+		err = resourceManagerOperationWaitTime(&schema.ResourceData{}, config, opAsMap, "creating project", config.userAgent, 4)
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared test project: %s", err)
 		}
@@ -395,7 +396,7 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 		if err != nil {
 			t.Fatalf("Error, failed to create instance %s: %s", bootstrapInstance.Name, err)
 		}
-		err = sqlAdminOperationWaitTime(config, op, project, "Create Instance", config.userAgent, time.Duration(20)*time.Minute)
+		err = sqlAdminOperationWaitTime(&schema.ResourceData{}, config, op, project, "Create Instance", config.userAgent, time.Duration(20)*time.Minute)
 		if err != nil {
 			t.Fatalf("Error, failed to create instance %s: %s", bootstrapInstance.Name, err)
 		}
@@ -421,7 +422,7 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 		if err != nil {
 			t.Fatalf("Error, failed to create instance backup: %s", err)
 		}
-		err = sqlAdminOperationWaitTime(config, op, project, "Backup Instance", config.userAgent, time.Duration(20)*time.Minute)
+		err = sqlAdminOperationWaitTime(&schema.ResourceData{}, config, op, project, "Backup Instance", config.userAgent, time.Duration(20)*time.Minute)
 		if err != nil {
 			t.Fatalf("Error, failed to create instance backup: %s", err)
 		}

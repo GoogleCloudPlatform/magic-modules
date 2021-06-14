@@ -27,7 +27,7 @@
 	}
 
 	err = computeOperationWaitTime(
-		config, res, project, "Deleting PerInstanceConfig", userAgent,
+		d, config, res, project, "Deleting PerInstanceConfig", userAgent,
 		d.Timeout(schema.TimeoutDelete))
 
 	if err != nil {
@@ -59,7 +59,7 @@
 		}
 
 		err = computeOperationWaitTime(
-			config, res, project, "Applying update to PerInstanceConfig", userAgent,
+			d, config, res, project, "Applying update to PerInstanceConfig", userAgent,
 			d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return fmt.Errorf("Error deleting PerInstanceConfig %q: %s", d.Id(), err)
