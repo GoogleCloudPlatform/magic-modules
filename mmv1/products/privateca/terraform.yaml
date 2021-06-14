@@ -16,6 +16,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   CertificateAuthority: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     import_format: ["projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}"]
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate_authority.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_authority_basic"
@@ -23,12 +25,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           certificate_authority_id: "my-certificate-authority"
         test_vars_overrides:
-          pool: 'my-static-ca-pool'
+          pool: "\"static-ca-pool\""
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_authority_full"
         primary_resource_id: "default"
         vars:
           certificate_authority_id: "my-certificate-authority"
+        test_vars_overrides:
+          pool: "\"static-ca-pool\""
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_authority_cmek"
         primary_resource_id: "default"
@@ -38,13 +42,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           kms_key_name: "projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key"
         test_vars_overrides:
           kms_key_name: 'BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN", "us-central1").CryptoKey.Name'
-    virtual_fields:
-      - !ruby/object:Api::Type::Boolean
-        name: 'ignore_active_certificates'
-        default_value: false
-        description: |
-          This field allows the CA to be deleted even if the CA has active certs. Active certs include both unrevoked and unexpired certs.
-          Use with care. Defaults to `false`.
+          pool: "\"static-ca-pool\""
     properties:
       type: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
@@ -63,7 +61,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
 
       ~> **Note:** The Certificate Authority that is referenced by this resource **must** be 
       `tier = "ENTERPRISE"`
-    import_format: ["projects/{{project}}/locations/{{location}}/certificateAuthorities/{{certificate_authority}}/certificates/{{name}}"]
+    import_format: ["projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificates/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_config"
@@ -73,6 +71,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           certificate_name: "my-certificate"
         test_env_vars:
           project: :PROJECT_NAME
+        test_vars_overrides:
+          pool: "\"static-ca-pool\""
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_csr"
         primary_resource_id: "default"
@@ -81,6 +81,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           certificate_authority_id: "my-certificate-authority"
         test_env_vars:
           project: :PROJECT_NAME
+        test_vars_overrides:
+          pool: "\"static-ca-pool\""
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate.go.erb
   CaPool: !ruby/object:Overrides::Terraform::ResourceOverride
