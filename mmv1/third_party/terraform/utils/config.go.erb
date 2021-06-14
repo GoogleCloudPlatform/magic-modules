@@ -128,29 +128,47 @@ type Config struct {
 	GkeHubBasePath string
 }
 
+<% products.each do |product| -%>
+const <%= product[:definitions].name -%>BasePathKey = "<%= product[:definitions].name -%>"
+<% end -%>
+const CloudBillingBasePathKey = "CloudBilling"
+const ComposerBasePathKey = "Composer"
+const ComputeBetaBasePathKey = "ComputeBeta"
+const ContainerBasePathKey = "Container"
+const DataprocBetaBasePathKey = "DataprocBeta"
+const ContainerBetaBasePathKey = "ContainerBeta"
+const DataflowBasePathKey = "Dataflow"
+const IAMBasePathKey = "IAM"
+const IamCredentialsBasePathKey = "IamCredentials"
+const ResourceManagerV2BasePathKey = "ResourceManagerV2"
+const ServiceNetworkingBasePathKey = "ServiceNetworking"
+const StorageTransferBasePathKey = "StorageTransfer"
+const BigtableAdminBasePathKey = "BigtableAdmin"
+const EventarcBasePathKey = "Eventarc"
+
 // Generated product base paths
 var DefaultBasePaths = map[string]string{
 <% products.each do |product| -%>
-	"<%= product[:definitions].name -%>" : "<%= product[:definitions].base_url -%>",
+	<%= product[:definitions].name -%>BasePathKey : "<%= product[:definitions].base_url -%>",
 <% end -%>
-	"CloudBilling" : "https://cloudbilling.googleapis.com/v1/",
-	<% if version == "ga" -%>
-	"Composer" : "https://composer.googleapis.com/v1/",
-	<% else -%>
-	"Composer" : "https://composer.googleapis.com/v1beta1/",
-	<% end -%>
-	"ComputeBeta" : "https://www.googleapis.com/compute/beta/",
-	"Container" : "https://container.googleapis.com/v1/",
-	"ContainerBeta" : "https://container.googleapis.com/v1beta1/",
-	"DataprocBeta" : "https://dataproc.googleapis.com/v1beta2/",
-	"Dataflow" : "https://dataflow.googleapis.com/v1b3/",
-	"IAM" : "https://iam.googleapis.com/v1/",
-	"IamCredentials" : "https://iamcredentials.googleapis.com/v1/",
-	"ResourceManagerV2" : "https://cloudresourcemanager.googleapis.com/v2/",
-	"ServiceNetworking" : "https://servicenetworking.googleapis.com/v1/",
-	"StorageTransfer" : "https://storagetransfer.googleapis.com/v1/",
-	"BigtableAdmin" : "https://bigtableadmin.googleapis.com/v2/",
-	"Eventarc" : "https://eventarc.googleapis.com/v1beta1/",
+	CloudBillingBasePathKey : "https://cloudbilling.googleapis.com/v1/",
+<% if version == "ga" -%>
+	ComposerBasePathKey : "https://composer.googleapis.com/v1/",
+<% else -%>
+	ComposerBasePathKey : "https://composer.googleapis.com/v1beta1/",
+<% end -%>
+	ComputeBetaBasePathKey : "https://www.googleapis.com/compute/beta/",
+	ContainerBasePathKey : "https://container.googleapis.com/v1/",
+	ContainerBetaBasePathKey : "https://container.googleapis.com/v1beta1/",
+	DataprocBetaBasePathKey : "https://dataproc.googleapis.com/v1beta2/",
+	DataflowBasePathKey : "https://dataflow.googleapis.com/v1b3/",
+	IAMBasePathKey : "https://iam.googleapis.com/v1/",
+	IamCredentialsBasePathKey : "https://iamcredentials.googleapis.com/v1/",
+	ResourceManagerV2BasePathKey : "https://cloudresourcemanager.googleapis.com/v2/",
+	ServiceNetworkingBasePathKey : "https://servicenetworking.googleapis.com/v1/",
+	StorageTransferBasePathKey : "https://storagetransfer.googleapis.com/v1/",
+	BigtableAdminBasePathKey : "https://bigtableadmin.googleapis.com/v2/",
+	EventarcBasePathKey : "https://eventarc.googleapis.com/v1beta1/",
 }
 
 var DefaultClientScopes = []string{
@@ -908,22 +926,22 @@ func removeBasePathVersion(url string) string {
 func ConfigureBasePaths(c *Config) {
 	// Generated Products
 	<% products.map.each do |product| -%>
-	c.<%= product[:definitions].name -%>BasePath = DefaultBasePaths["<%= product[:definitions].name -%>"]
+	c.<%= product[:definitions].name -%>BasePath = DefaultBasePaths[<%= product[:definitions].name -%>BasePathKey]
 	<% end -%>
 
 	// Handwritten Products / Versioned / Atypical Entries
-	c.CloudBillingBasePath = DefaultBasePaths["CloudBilling"]
-	c.ComposerBasePath = DefaultBasePaths["Composer"]
-	c.ComputeBetaBasePath = DefaultBasePaths["ComputeBeta"]
-	c.ContainerBasePath = DefaultBasePaths["Container"]
-	c.ContainerBetaBasePath = DefaultBasePaths["ContainerBeta"]
-	c.DataprocBasePath = DefaultBasePaths["Dataproc"]
-	c.DataflowBasePath = DefaultBasePaths["Dataflow"]
-	c.IamCredentialsBasePath = DefaultBasePaths["IamCredentials"]
-	c.ResourceManagerV2BasePath = DefaultBasePaths["ResourceManagerV2"]
-	c.IAMBasePath = DefaultBasePaths["IAM"]
-	c.ServiceNetworkingBasePath = DefaultBasePaths["ServiceNetworking"]
-	c.BigQueryBasePath = DefaultBasePaths["BigQuery"]
-	c.StorageTransferBasePath = DefaultBasePaths["StorageTransfer"]
-	c.BigtableAdminBasePath = DefaultBasePaths["BigtableAdmin"]
+	c.CloudBillingBasePath = DefaultBasePaths[CloudBillingBasePathKey]
+	c.ComposerBasePath = DefaultBasePaths[ComposerBasePathKey]
+	c.ComputeBetaBasePath = DefaultBasePaths[ComputeBetaBasePathKey]
+	c.ContainerBasePath = DefaultBasePaths[ContainerBasePathKey]
+	c.ContainerBetaBasePath = DefaultBasePaths[ContainerBetaBasePathKey]
+	c.DataprocBasePath = DefaultBasePaths[DataprocBasePathKey]
+	c.DataflowBasePath = DefaultBasePaths[DataflowBasePathKey]
+	c.IamCredentialsBasePath = DefaultBasePaths[IamCredentialsBasePathKey]
+	c.ResourceManagerV2BasePath = DefaultBasePaths[ResourceManagerV2BasePathKey]
+	c.IAMBasePath = DefaultBasePaths[IAMBasePathKey]
+	c.ServiceNetworkingBasePath = DefaultBasePaths[ServiceNetworkingBasePathKey]
+	c.BigQueryBasePath = DefaultBasePaths[BigQueryBasePathKey]
+	c.StorageTransferBasePath = DefaultBasePaths[StorageTransferBasePathKey]
+	c.BigtableAdminBasePath = DefaultBasePaths[BigtableAdminBasePathKey]
 }
