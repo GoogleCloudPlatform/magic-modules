@@ -242,8 +242,12 @@ The following arguments are supported:
     Structure is documented below.
 
 * `network_performance_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)
-    Configures network performance settings for this template. Structure is
-    documented below.
+    Configures network performance settings for the instance created from the
+    template. Structure is documented below. **Note**: [`machine_type`](#machine_type)
+    must be a [supported type](https://cloud.google.com/compute/docs/networking/configure-vm-with-high-bandwidth-configuration),
+    the [`image`](#image) used must include the [`GVNIC`](https://cloud.google.com/compute/docs/networking/using-gvnic#create-instance-gvnic-image)
+    in `guest-os-features`, and `network_interface.0.nic-type` must be `GVNIC`
+    in order for this setting to take effect.
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.

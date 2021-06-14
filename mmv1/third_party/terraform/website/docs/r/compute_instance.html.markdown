@@ -174,8 +174,8 @@ The following arguments are supported:
 * `confidential_instance_config` (Optional) - Enable [Confidential Mode](https://cloud.google.com/compute/confidential-vm/docs/about-cvm) on this VM.
 
 * `network_performance_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)
-    Configures network performance settings for the instance. Structure is documented below. **Note**: [`machine_type`](#machine_type)
-    must be a [supported type](https://cloud.google.com/compute/docs/networking/configure-vm-with-high-bandwidth-configuration),
+    Configures network performance settings for the instance. Structure is
+    documented below. **Note**: [`machine_type`](#machine_type) must be a [supported type](https://cloud.google.com/compute/docs/networking/configure-vm-with-high-bandwidth-configuration),
     the [`image`](#image) used must include the [`GVNIC`](https://cloud.google.com/compute/docs/networking/using-gvnic#create-instance-gvnic-image)
     in `guest-os-features`, and `network_interface.0.nic-type` must be `GVNIC`
     in order for this setting to take effect.

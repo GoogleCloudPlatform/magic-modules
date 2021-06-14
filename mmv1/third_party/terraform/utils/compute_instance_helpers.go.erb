@@ -496,6 +496,7 @@ func flattenReservationAffinity(affinity *computeBeta.ReservationAffinity) []map
 	return []map[string]interface{}{flattened}
 }
 
+<% unless version == "ga" -%>
 func expandNetworkPerformanceConfig(d TerraformResourceData, config *Config) (*computeBeta.NetworkPerformanceConfig, error) {
 	configs, ok := d.GetOk("network_performance_config")
 	if !ok {
@@ -526,3 +527,4 @@ func flattenNetworkPerformanceConfig(c *computeBeta.NetworkPerformanceConfig) []
 		},
 	}
 }
+<% end -%>
