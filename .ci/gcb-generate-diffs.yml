@@ -175,6 +175,9 @@ steps:
       waitFor: ["diff"]
       args:
           - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpgb-test
