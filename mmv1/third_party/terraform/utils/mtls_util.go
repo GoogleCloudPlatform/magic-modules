@@ -27,6 +27,9 @@ func isMtls() bool {
 func getMtlsEndpoint(baseEndpoint string) string {
 	u, err := url.Parse(baseEndpoint)
 	if err != nil {
+		if strings.Contains(baseEndpoint, ".googleapis") {
+			return strings.Replace(baseEndpoint, ".googleapis", ".mtls.googleapis", 1)
+		}
 		return baseEndpoint
 	}
 	portParts := strings.Split(u.Host, ":")

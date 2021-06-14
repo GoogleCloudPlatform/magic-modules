@@ -178,8 +178,8 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 
 	cleanCtx := context.WithValue(ctx, oauth2.HTTPClient, cleanhttp.DefaultClient())
 
-	// 1. OAUTH2 TRANSPORT/CLIENT - sets up proper auth headers
-	client := oauth2.NewClient(cleanCtx, tokenSource)
+	// 1. MTLS TRANSPORT/CLIENT - sets up proper auth headers
+	client, _, err := transport.NewHTTPClient(cleanCtx, option.WithTokenSource(tokenSource))
 
 	// Userinfo is fetched before request logging is enabled to reduce additional noise.
 	err = c.logGoogleIdentities()

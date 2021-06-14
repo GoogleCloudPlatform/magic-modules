@@ -20,7 +20,13 @@ var mutexKV = NewMutexKV()
 
 // Provider returns a *schema.Provider.
 func Provider() *schema.Provider {
-	// mutate basepaths to mtls =>
+	if isMtls() {
+		// if mtls is enabled switch all
+		// default endpoints to use the mtls endpoint
+		for key, bp := range DefaultBasePaths {
+			DefaultBasePaths[key] = getMtlsEndpoint(bp)
+		}
+	}
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"credentials": &schema.Schema{
