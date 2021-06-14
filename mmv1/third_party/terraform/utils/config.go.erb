@@ -180,7 +180,9 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 
 	// 1. MTLS TRANSPORT/CLIENT - sets up proper auth headers
 	client, _, err := transport.NewHTTPClient(cleanCtx, option.WithTokenSource(tokenSource))
-
+	if err != nil {
+		return err
+	}
 	// Userinfo is fetched before request logging is enabled to reduce additional noise.
 	err = c.logGoogleIdentities()
 	if err != nil {
