@@ -20,13 +20,18 @@ var mutexKV = NewMutexKV()
 
 // Provider returns a *schema.Provider.
 func Provider() *schema.Provider {
+
+	// The mtls service client gives the type of endpoint (mtls/regular)
+	// at client creation. Since we use a shared client for requests we must
+	// rewrite the endpoints to be mtls endpoints for the scenario where
+	// mtls is enabled.
 	if isMtls() {
-		// if mtls is enabled switch all
-		// default endpoints to use the mtls endpoint
+		// if mtls is enabled switch all default endpoints to use the mtls endpoint
 		for key, bp := range DefaultBasePaths {
 			DefaultBasePaths[key] = getMtlsEndpoint(bp)
 		}
 	}
+
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"credentials": &schema.Schema{
