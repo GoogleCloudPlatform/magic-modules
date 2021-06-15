@@ -382,6 +382,17 @@ class GcpRequest(object):
             if not found_item:
                 difference.append(req_item)
 
+        # We need to check list in both direction, to get changes from both sides.
+        # Or additional fields in new_resp_list get ignored
+        for resp_item in new_resp_list:
+            found_item = False
+            for req_item in new_req_list:
+                # Looking for a None value here.
+                if not self._compare_value(req_item, resp_item):
+                    found_item = True
+            if not found_item:
+                difference.append(req_item)
+
         difference2 = []
         for value in difference:
             if value:
