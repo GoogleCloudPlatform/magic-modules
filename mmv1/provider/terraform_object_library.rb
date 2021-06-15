@@ -55,18 +55,12 @@ module Provider
 
     def compile_tf_files(output_folder, instance, _common_compile_file)
       Google::LOGGER.info 'Compiling TF files.'
-      #print $instanceInfo
-      # print build_env
-      # build_env.store("resources", $instanceInfo)
-      # print build_env
       file_template = ProviderFileTemplate.new(
         output_folder,
         @target_version_name,
         build_env,
         instance
       )
-      
-      #print(instanceInfo)
       compile_file_list(output_folder, [
                            ['google/mappers.go',
                            'templates/terraform/mappers/mappers.go.erb'],
@@ -82,7 +76,6 @@ module Provider
         build_env,
         products
       )
-      #print(instanceInfo)
       compile_file_list(output_folder, [
                           ['google/compute_operation.go',
                            'third_party/terraform/utils/compute_operation.go.erb'],
@@ -228,16 +221,10 @@ module Provider
       product_name = data.product.name.underscore
 
       FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
-      # print product_name + " " + name + "\n"
-      # # Naming convention for IAM functions
-      # print product_name.camelize(:upper) +name.camelize(:upper) + "\n"
-      # print product_name+name.gsub(" ", "_")  + "\n"
-      #print product_ns + object.name + "\n"
       $instanceInfo["IAM"].append({
         "tfResource" => product_name+"_"+name.gsub(" ", "_"),
         "CAIName" => product_name.camelize(:upper) +name.camelize(:upper),
       })
-      #$instanceInfo["IAM"].append(product_ns + object.name)
       data.generate(pwd,
                     'templates/terraform/iam/iam_consumer.go.erb',
                     "#{target_folder}/#{product_name}_#{name}_iam.go",
