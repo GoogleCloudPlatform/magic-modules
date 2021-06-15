@@ -48,7 +48,7 @@ type mapper struct {
 // 1:1 = [mapper{convert: convertAbc}]                  (len=1)
 // 1:N = [mapper{convert: convertAbc}, ...]             (len=N)
 // N:1 = [mapper{convert: convertAbc, merge: mergeAbc}] (len=1)
-func mappers() map[string][]mapper {
+func Mappers() map[string][]mapper {
 	return map[string][]mapper{
         <% $instanceInfo["resources"].each do |resource| -%>
             "google_<%= resource["tfResource"] -%>": {
@@ -160,7 +160,7 @@ func mappers() map[string][]mapper {
 
 // SupportedResources returns a sorted list of terraform resource names.
 func SupportedTerraformResources() []string {
-	fns := mappers()
+	fns := Mappers()
 	list := make([]string, 0, len(fns))
 	for k := range fns {
 		list = append(list, k)
