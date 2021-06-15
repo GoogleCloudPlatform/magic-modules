@@ -12,7 +12,7 @@ import (
 
 // The transport libaray does not natively expose logic to determine whether
 // the user is within mtls mode or not. They do return the mtls endpoint if
-// it is enabled durring client creation so we will use this logic to determine
+// it is enabled during client creation so we will use this logic to determine
 // the mode the user is in and throw away the client they give us back.
 func isMtls() bool {
 	regularEndpoint := "https://mockservice.googleapis.com/v1/"
