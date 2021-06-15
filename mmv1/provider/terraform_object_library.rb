@@ -141,7 +141,7 @@ module Provider
                       #  ['google/organization_iam.go',
                       #   'third_party/validator/organization_iam.go'],
                       #  ['google/project_iam.go',
-                      #   'third_party/validator/project_iam.go'],
+                        # 'third_party/validator/project_iam.go'],
                        ['google/project_organization_policy.go',
                         'third_party/validator/project_organization_policy.go'],
                       #  ['google/folder_iam.go',
