@@ -51,7 +51,11 @@ type mapper struct {
 func mappers() map[string][]mapper {
 	return map[string][]mapper{
         <% $instanceInfo["resources"].each do |resource| -%>
-            "google_<%= resource["tfResource"] -%>":               {{convert: converter.Get<%= resource["CAIName"] -%>CaiObject}},
+            "google_<%= resource["tfResource"] -%>": {
+                {
+                    convert: converter.Get<%= resource["CAIName"] -%>CaiObject
+                }
+            },
         <%end -%>
 
 
@@ -79,7 +83,78 @@ func mappers() map[string][]mapper {
                 },
             },
         <% end -%>
-            
+		"google_organization_iam_policy": {
+			{
+				convert:           converter.GetOrganizationIamPolicyCaiObject,
+				mergeCreateUpdate: converter.MergeOrganizationIamPolicy,
+			},
+		},
+		"google_project_organization_policy": {
+			{
+				convert:           converter.GetProjectOrgPolicyCaiObject,
+				mergeCreateUpdate: converter.MergeProjectOrgPolicy,
+			},
+		},
+		"google_organization_iam_binding": {
+			{
+				convert:           converter.GetOrganizationIamBindingCaiObject,
+				mergeCreateUpdate: converter.MergeOrganizationIamBinding,
+				mergeDelete:       converter.MergeOrganizationIamBindingDelete,
+				fetch:             converter.FetchOrganizationIamPolicy,
+			},
+		},
+		"google_organization_iam_member": {
+			{
+				convert:           converter.GetOrganizationIamMemberCaiObject,
+				mergeCreateUpdate: converter.MergeOrganizationIamMember,
+				mergeDelete:       converter.MergeOrganizationIamMemberDelete,
+				fetch:             converter.FetchOrganizationIamPolicy,
+			},
+		},
+		"google_folder_iam_policy": {
+			{
+				convert:           converter.GetFolderIamPolicyCaiObject,
+				mergeCreateUpdate: converter.MergeFolderIamPolicy,
+			},
+		},
+		"google_folder_iam_binding": {
+			{
+				convert:           converter.GetFolderIamBindingCaiObject,
+				mergeCreateUpdate: converter.MergeFolderIamBinding,
+				mergeDelete:       converter.MergeFolderIamBindingDelete,
+				fetch:             converter.FetchFolderIamPolicy,
+			},
+		},
+		"google_folder_iam_member": {
+			{
+				convert:           converter.GetFolderIamMemberCaiObject,
+				mergeCreateUpdate: converter.MergeFolderIamMember,
+				mergeDelete:       converter.MergeFolderIamMemberDelete,
+				fetch:             converter.FetchFolderIamPolicy,
+			},
+		},
+		"google_project_iam_policy": {
+			{
+				convert:           converter.GetProjectIamPolicyCaiObject,
+				mergeCreateUpdate: converter.MergeProjectIamPolicy,
+			},
+		},
+		"google_project_iam_binding": {
+			{
+				convert:           converter.GetProjectIamBindingCaiObject,
+				mergeCreateUpdate: converter.MergeProjectIamBinding,
+				mergeDelete:       converter.MergeProjectIamBindingDelete,
+				fetch:             converter.FetchProjectIamPolicy,
+			},
+		},
+		"google_project_iam_member": {
+			{
+				convert:           converter.GetProjectIamMemberCaiObject,
+				mergeCreateUpdate: converter.MergeProjectIamMember,
+				mergeDelete:       converter.MergeProjectIamMemberDelete,
+				fetch:             converter.FetchProjectIamPolicy,
+			},
+		},
 	}
 }
 
