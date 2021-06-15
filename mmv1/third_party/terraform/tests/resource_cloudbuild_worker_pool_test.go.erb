@@ -12,8 +12,6 @@ import (
 )
 
 func TestAccCloudbuildWorkerPool_basic(t *testing.T) {
-	// DCL currently fails due to transport modification
-	skipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -43,7 +41,7 @@ func TestAccCloudbuildWorkerPool_basic(t *testing.T) {
 				ResourceName:      "google_cloudbuild_worker_pool.pool",
 			},
 			{
-				Config: testAccCloudbuildWorkerPool_updated2(context),
+				Config: testAccCloudbuildWorkerPool_noWorkerConfig(context),
 			},
 			{
 				ImportState:       true,
@@ -61,23 +59,87 @@ resource "google_cloudbuild_worker_pool" "pool" {
 	location = "europe-west1"
 	worker_config {
 		disk_size_gb = 100
-		machine_type = "n1-standard-2"
+		machine_type = "e2-standard-8"
 		no_external_ip = true
 	}
-}
-
-resource "google_compute_network" "network" {
-  name                    = "tf-test-network%{random_suffix}"
-  auto_create_subnetworks = false
 }
 `, context)
 }
 
 func testAccCloudbuildWorkerPool_updated(context map[string]interface{}) string {
 	return Nprintf(`
+resource "google_cloudbuild_worker_pool" "pool" {
+	name = "pool%{random_suffix}"
+	location = "europe-west1"
+	worker_config {
+		disk_size_gb = 101
+		machine_type = "e2-standard-4"
+		no_external_ip = false
+	}
+}
+`, context)
+}
+
+func testAccCloudbuildWorkerPool_noWorkerConfig(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_cloudbuild_worker_pool" "pool" {
+	name = "pool%{random_suffix}"
+	location = "europe-west1"
+}
+`, context)
+}
+
+func TestAccCloudbuildWorkerPool_withNetwork(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+		"project":       getTestProjectFromEnv(),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: funcAccTestEventarcTriggerCheckDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudbuildWorkerPool_withNetwork(context),
+			},
+			{
+				ImportState:       true,
+				ImportStateVerify: true,
+				ResourceName:      "google_cloudbuild_worker_pool.pool",
+			},
+		},
+	})
+}
+
+func testAccCloudbuildWorkerPool_withNetwork(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_project_service" "servicenetworking" {
+  service = "servicenetworking.googleapis.com"
+  disable_on_destroy = false
+}
+
 resource "google_compute_network" "network" {
   name                    = "tf-test-network%{random_suffix}"
   auto_create_subnetworks = false
+  depends_on = [google_project_service.servicenetworking]
+}
+
+resource "google_compute_global_address" "worker_range" {
+  name          = "worker-pool-range"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = google_compute_network.network.id
+}
+
+resource "google_service_networking_connection" "worker_pool_conn" {
+  network                 = google_compute_network.network.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.worker_range.name]
+  depends_on              = [google_project_service.servicenetworking]
 }
 
 resource "google_cloudbuild_worker_pool" "pool" {
@@ -91,20 +153,7 @@ resource "google_cloudbuild_worker_pool" "pool" {
 	network_config {
 		peered_network = google_compute_network.network.id
 	}
-}
-`, context)
-}
-
-func testAccCloudbuildWorkerPool_updated2(context map[string]interface{}) string {
-	return Nprintf(`
-resource "google_compute_network" "network" {
-  name                    = "tf-test-network%{random_suffix}"
-  auto_create_subnetworks = false
-}
-
-resource "google_cloudbuild_worker_pool" "pool" {
-	name = "pool%{random_suffix}"
-	location = "europe-west1"
+	depends_on = [google_service_networking_connection.worker_pool_conn]
 }
 `, context)
 }

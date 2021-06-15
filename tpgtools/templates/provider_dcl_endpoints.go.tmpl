@@ -34,35 +34,35 @@ import (
 // empty string is passed for dcl default since dcl
 // [hardcodes the values](https://github.com/GoogleCloudPlatform/declarative-resource-client-library/blob/main/services/google/eventarc/beta/trigger_internal.go#L96-L103)
 {{range $index, $pkg := .}}
-{{- if $pkg.WriteBasePath }}
+{{- if $pkg.WriteProductBasePath }}
 var {{$pkg.ProductType}}EndpointEntryKey = "{{$pkg.ProductName}}_custom_endpoint"
 var {{$pkg.ProductType}}EndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
 	Optional:     true,
 	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 		"GOOGLE_{{$pkg.ProductNameUpper}}_CUSTOM_ENDPOINT",
-	}, ""),
+	}, "{{ $pkg.ProductBasePathUrl }}"),
 }
 {{- end}}
 {{end}}
 
 //Add new values to config.go.erb config object declaration
 {{- range $index, $pkg := . }}
-{{- if $pkg.WriteBasePath }}
+{{- if $pkg.WriteProductBasePath }}
 //{{$pkg.ProductType}}BasePath string
 {{- end}}
 {{- end}}
 
 //Add new values to provider.go.erb schema initialization
 {{- range $index, $pkg := . }}
-{{- if $pkg.WriteBasePath }}
+{{- if $pkg.WriteProductBasePath }}
 // {{$pkg.ProductType}}EndpointEntryKey:               {{$pkg.ProductType}}EndpointEntry,
 {{- end}}
 {{- end}}
 
 //Add new values to provider.go.erb - provider block read
 {{- range $index, $pkg := . }}
-{{- if $pkg.WriteBasePath }}
+{{- if $pkg.WriteProductBasePath }}
 // config.{{$pkg.ProductType}}BasePath = d.Get({{$pkg.ProductType}}EndpointEntryKey).(string)
 {{- end}}
 {{- end}}

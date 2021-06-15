@@ -161,3 +161,11 @@ type SkipDeleteFunctionDetails struct {
 	// The name of the function that determines if we should skip delete.
 	Function string
 }
+
+type ProductBasePathDetails struct {
+	// Url is the base path of the product
+	Url string
+	// If set to true, generating the product base path should be skipped
+	// This is the case when mmv1 already generates base path support
+	Skip bool
+}

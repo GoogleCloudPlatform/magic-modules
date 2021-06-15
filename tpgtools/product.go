@@ -46,13 +46,39 @@ func NewProductMetadata(packagePath, productName string) *ProductMetadata {
 	}
 }
 
-func (pm *ProductMetadata) WriteBasePath() bool {
-	po, ok := productOverrides[pm.PackagePath]
-	if !ok {
-		return true
+func (pm *ProductMetadata) WriteProductBasePath() bool {
+	bp := pm.ProductBasePathDetails()
+	if bp == nil {
+		return false
 	}
-	skipBasePath := po.ResourceOverride(ProductSkipBasePath, "")
-	return !skipBasePath
+	return !bp.Skip
+}
+
+func (pm *ProductMetadata) ProductBasePathUrl() string {
+	bp := pm.ProductBasePathDetails()
+	if bp == nil {
+		return ""
+	}
+	return bp.Url
+}
+
+func (pm *ProductMetadata) ProductBasePathDetails() *ProductBasePathDetails {
+	overrides, ok := productOverrides[pm.PackagePath]
+	if !ok {
+		// TODO maybe crash here?
+		return nil
+	}
+	bp := ProductBasePathDetails{}
+	bpOk, err := overrides.ProductOverrideWithDetails(ProductBasePath, &bp)
+	if err != nil {
+		log.Fatalln("error - failed to decode base path details")
+	}
+
+	if !bpOk {
+		return nil
+	}
+
+	return &bp
 }
 
 // ProductType is the title-cased product name of a resource. For example,

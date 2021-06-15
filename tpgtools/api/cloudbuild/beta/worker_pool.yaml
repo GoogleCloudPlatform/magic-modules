@@ -63,7 +63,6 @@ components:
       x-dcl-id: projects/{{project}}/locations/{{location}}/workerPools/{{name}}
       x-dcl-parent-container: project
       type: object
-      x-dcl-locations: []
       required:
       - name
       - project
@@ -113,6 +112,7 @@ components:
                 Must be in the format `projects/{project}/global/networks/{network}`,
                 where `{project}` is a project number, such as `12345`, and `{network}`
                 is the name of a VPC network in the project. See (https://cloud.google.com/cloud-build/docs/custom-workers/set-up-custom-worker-pool-environment#understanding_the_network_configuration_options)
+              x-kubernetes-immutable: true
               x-dcl-references:
               - resource: Compute/Network
                 field: selfLink
