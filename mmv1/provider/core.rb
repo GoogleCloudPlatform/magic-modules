@@ -205,6 +205,7 @@ module Provider
 
     def generate_objects(output_folder, types, generate_code, generate_docs)
       (@api.objects || []).each do |object|
+        #print object
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info "Excluding #{object.name} per user request"
         elsif types.empty? && object.exclude

@@ -36,6 +36,7 @@ module Provider
     end
 
     def generate_resource(pwd, data, _generate_code, _generate_docs)
+      #print data
       target_folder = data.output_folder
       product_ns = data.object.__product.name
 
@@ -92,8 +93,8 @@ module Provider
                         'third_party/validator/sql_database_instance.go'],
                        ['google/storage_bucket.go',
                         'third_party/validator/storage_bucket.go'],
-                       ['google/storage_bucket_iam.go',
-                        'third_party/validator/storage_bucket_iam.go'],
+                      #  ['google/storage_bucket_iam.go',
+                      #   'third_party/validator/storage_bucket_iam.go'],
                        ['google/cloudfunctions_function.go',
                         'third_party/validator/cloudfunctions_function.go'],
                        ['google/bigquery_table.go',
@@ -106,14 +107,14 @@ module Provider
                         'third_party/validator/iam_helpers.go'],
                        ['google/iam_helpers_test.go',
                         'third_party/validator/iam_helpers_test.go'],
-                       ['google/organization_iam.go',
-                        'third_party/validator/organization_iam.go'],
-                       ['google/project_iam.go',
-                        'third_party/validator/project_iam.go'],
+                      #  ['google/organization_iam.go',
+                      #   'third_party/validator/organization_iam.go'],
+                      #  ['google/project_iam.go',
+                      #   'third_party/validator/project_iam.go'],
                        ['google/project_organization_policy.go',
                         'third_party/validator/project_organization_policy.go'],
-                       ['google/folder_iam.go',
-                        'third_party/validator/folder_iam.go'],
+                      #  ['google/folder_iam.go',
+                      #   'third_party/validator/folder_iam.go'],
                        ['google/container.go',
                         'third_party/validator/container.go'],
                        ['google/project_service.go',
@@ -196,6 +197,12 @@ module Provider
       product_name = data.product.name.underscore
 
       FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
+
+      data.generate(pwd,
+                    'templates/terraform/iam/iam_consumer.go.erb',
+                    "#{target_folder}/#{product_name}_#{name}_iam.go",
+                    self)
+
       data.generate(pwd,
                     'templates/terraform/iam_policy.go.erb',
                     "#{target_folder}/iam_#{product_name}_#{name}.go",
