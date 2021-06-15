@@ -53,7 +53,7 @@ func Mappers() map[string][]mapper {
         <% $instanceInfo["resources"].each do |resource| -%>
             "google_<%= resource["tfResource"] -%>": {
                 {
-                    convert: converter.Get<%= resource["CAIName"] -%>CaiObject
+                    convert: Get<%= resource["CAIName"] -%>CaiObject
                 }
             },
         <%end -%>
@@ -62,97 +62,97 @@ func Mappers() map[string][]mapper {
         <% $instanceInfo["IAM"].each do |product| -%>
             "google_<%= product["tfResource"] -%>_iam_policy": {
                 {
-                    convert:           converter.Get<%= product["CAIName"] -%>IamPolicyCaiObject,
-                    mergeCreateUpdate: converter.Merge<%= product["CAIName"] -%>IamPolicy,
+                    convert:           Get<%= product["CAIName"] -%>IamPolicyCaiObject,
+                    mergeCreateUpdate: Merge<%= product["CAIName"] -%>IamPolicy,
                 },
             },
             "google_<%= product["tfResource"] -%>_iam_binding": {
                 {
-                    convert:           converter.Get<%= product["CAIName"] -%>IamBindingCaiObject,
-                    mergeCreateUpdate: converter.Merge<%= product["CAIName"] -%>IamBinding,
-                    mergeDelete:       converter.Merge<%= product["CAIName"] -%>IamBindingDelete,
-                    fetch:             converter.Fetch<%= product["CAIName"] -%>IamPolicy,
+                    convert:           Get<%= product["CAIName"] -%>IamBindingCaiObject,
+                    mergeCreateUpdate: Merge<%= product["CAIName"] -%>IamBinding,
+                    mergeDelete:       Merge<%= product["CAIName"] -%>IamBindingDelete,
+                    fetch:             Fetch<%= product["CAIName"] -%>IamPolicy,
                 },
             },
             "google_<%= product["tfResource"] -%>_iam_member": {
                 {
-                    convert:           converter.Get<%= product["CAIName"] -%>IamMemberCaiObject,
-                    mergeCreateUpdate: converter.Merge<%= product["CAIName"] -%>IamMember,
-                    mergeDelete:       converter.Merge<%= product["CAIName"] -%>IamMemberDelete,
-                    fetch:             converter.Fetch<%= product["CAIName"] -%>IamPolicy,
+                    convert:           Get<%= product["CAIName"] -%>IamMemberCaiObject,
+                    mergeCreateUpdate: Merge<%= product["CAIName"] -%>IamMember,
+                    mergeDelete:       Merge<%= product["CAIName"] -%>IamMemberDelete,
+                    fetch:             Fetch<%= product["CAIName"] -%>IamPolicy,
                 },
             },
         <% end -%>
 		"google_organization_iam_policy": {
 			{
-				convert:           converter.GetOrganizationIamPolicyCaiObject,
-				mergeCreateUpdate: converter.MergeOrganizationIamPolicy,
+				convert:           GetOrganizationIamPolicyCaiObject,
+				mergeCreateUpdate: MergeOrganizationIamPolicy,
 			},
 		},
 		"google_project_organization_policy": {
 			{
-				convert:           converter.GetProjectOrgPolicyCaiObject,
-				mergeCreateUpdate: converter.MergeProjectOrgPolicy,
+				convert:           GetProjectOrgPolicyCaiObject,
+				mergeCreateUpdate: MergeProjectOrgPolicy,
 			},
 		},
 		"google_organization_iam_binding": {
 			{
-				convert:           converter.GetOrganizationIamBindingCaiObject,
-				mergeCreateUpdate: converter.MergeOrganizationIamBinding,
-				mergeDelete:       converter.MergeOrganizationIamBindingDelete,
-				fetch:             converter.FetchOrganizationIamPolicy,
+				convert:           GetOrganizationIamBindingCaiObject,
+				mergeCreateUpdate: MergeOrganizationIamBinding,
+				mergeDelete:       MergeOrganizationIamBindingDelete,
+				fetch:             FetchOrganizationIamPolicy,
 			},
 		},
 		"google_organization_iam_member": {
 			{
-				convert:           converter.GetOrganizationIamMemberCaiObject,
-				mergeCreateUpdate: converter.MergeOrganizationIamMember,
-				mergeDelete:       converter.MergeOrganizationIamMemberDelete,
-				fetch:             converter.FetchOrganizationIamPolicy,
+				convert:           GetOrganizationIamMemberCaiObject,
+				mergeCreateUpdate: MergeOrganizationIamMember,
+				mergeDelete:       MergeOrganizationIamMemberDelete,
+				fetch:             FetchOrganizationIamPolicy,
 			},
 		},
 		"google_folder_iam_policy": {
 			{
-				convert:           converter.GetFolderIamPolicyCaiObject,
-				mergeCreateUpdate: converter.MergeFolderIamPolicy,
+				convert:           GetFolderIamPolicyCaiObject,
+				mergeCreateUpdate: MergeFolderIamPolicy,
 			},
 		},
 		"google_folder_iam_binding": {
 			{
-				convert:           converter.GetFolderIamBindingCaiObject,
-				mergeCreateUpdate: converter.MergeFolderIamBinding,
-				mergeDelete:       converter.MergeFolderIamBindingDelete,
-				fetch:             converter.FetchFolderIamPolicy,
+				convert:           GetFolderIamBindingCaiObject,
+				mergeCreateUpdate: MergeFolderIamBinding,
+				mergeDelete:       MergeFolderIamBindingDelete,
+				fetch:             FetchFolderIamPolicy,
 			},
 		},
 		"google_folder_iam_member": {
 			{
-				convert:           converter.GetFolderIamMemberCaiObject,
-				mergeCreateUpdate: converter.MergeFolderIamMember,
-				mergeDelete:       converter.MergeFolderIamMemberDelete,
-				fetch:             converter.FetchFolderIamPolicy,
+				convert:           GetFolderIamMemberCaiObject,
+				mergeCreateUpdate: MergeFolderIamMember,
+				mergeDelete:       MergeFolderIamMemberDelete,
+				fetch:             FetchFolderIamPolicy,
 			},
 		},
 		"google_project_iam_policy": {
 			{
-				convert:           converter.GetProjectIamPolicyCaiObject,
-				mergeCreateUpdate: converter.MergeProjectIamPolicy,
+				convert:           GetProjectIamPolicyCaiObject,
+				mergeCreateUpdate: MergeProjectIamPolicy,
 			},
 		},
 		"google_project_iam_binding": {
 			{
-				convert:           converter.GetProjectIamBindingCaiObject,
-				mergeCreateUpdate: converter.MergeProjectIamBinding,
-				mergeDelete:       converter.MergeProjectIamBindingDelete,
-				fetch:             converter.FetchProjectIamPolicy,
+				convert:           GetProjectIamBindingCaiObject,
+				mergeCreateUpdate: MergeProjectIamBinding,
+				mergeDelete:       MergeProjectIamBindingDelete,
+				fetch:             FetchProjectIamPolicy,
 			},
 		},
 		"google_project_iam_member": {
 			{
-				convert:           converter.GetProjectIamMemberCaiObject,
-				mergeCreateUpdate: converter.MergeProjectIamMember,
-				mergeDelete:       converter.MergeProjectIamMemberDelete,
-				fetch:             converter.FetchProjectIamPolicy,
+				convert:           GetProjectIamMemberCaiObject,
+				mergeCreateUpdate: MergeProjectIamMember,
+				mergeDelete:       MergeProjectIamMemberDelete,
+				fetch:             FetchProjectIamPolicy,
 			},
 		},
 	}
