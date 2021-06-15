@@ -160,7 +160,6 @@ var BigtableAdminCustomEndpointEntry = &schema.Schema{
 }
 
 // GkeHubFeature uses a different base path "v1beta" than GkeHubMembership "v1beta1"
-var GkeHubFeatureDefaultBasePath = "https://gkehub.googleapis.com/v1beta/"
 var GkeHubFeatureCustomEndpointEntryKey = "gkehub_feature_custom_endpoint"
 var GkeHubFeatureCustomEndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
@@ -168,7 +167,7 @@ var GkeHubFeatureCustomEndpointEntry = &schema.Schema{
 	ValidateFunc: validateCustomEndpoint,
 	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 		"GOOGLE_GKEHUB_FEATURE_CUSTOM_ENDPOINT",
-	}, GkeHubFeatureDefaultBasePath),
+	}, DefaultBasePaths[GkeHubFeatureBasePathKey]),
 }
 
 func validateCustomEndpoint(v interface{}, k string) (ws []string, errors []error) {
