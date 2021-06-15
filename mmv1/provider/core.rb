@@ -27,6 +27,10 @@ module Provider
 
     def initialize(config, api, version_name, start_time)
       @config = config
+      # $instanceInfo = {
+      #   "IAM" => [],
+      #   "resources" => [],
+      # }
       @api = api
 
       # @target_version_name is the version specified by MM for this generation
@@ -169,6 +173,31 @@ module Provider
       compile_file_list(output_folder, @config.files.compile, file_template)
     end
 
+    def compile_mappers(
+      file_template,
+      output_folder,
+      common_compile_file,
+      override_path = nil
+    )
+      # return unless File.exist?(common_compile_file)
+
+      # files = YAML.safe_load(compile(common_compile_file))
+      # return unless files
+      pwd = Dir.pwd
+      Dir.chdir output_folder
+      # file_template = ProviderFileTemplate.new(
+      #   output_folder,
+      #   @target_version_name,
+      #   build_env,
+      #   $instanceInfo,
+      #   override_path
+      # )
+      #compile_file_list(output_folder, files, file_template)
+      # ['google/mappers.go',
+      # 'templates/terraform/mappers/mappers.go.erb'],
+      file_template.generate(output_folder, pwd+'templates/terraform/mappers/mappers.go.erb', 'google/mappers.go', self)
+      Dir.chdir pwd
+    end
     # Compiles files that are shared at the provider level
     def compile_common_files(
       output_folder,
@@ -205,7 +234,6 @@ module Provider
 
     def generate_objects(output_folder, types, generate_code, generate_docs)
       (@api.objects || []).each do |object|
-        #print object
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info "Excluding #{object.name} per user request"
         elsif types.empty? && object.exclude

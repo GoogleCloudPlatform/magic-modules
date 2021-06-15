@@ -49,6 +49,11 @@ types_to_generate = []
 version = 'ga'
 override_dir = nil
 
+$instanceInfo = {
+  "IAM" => [],
+  "resources" => [],
+}
+
 ARGV << '-h' if ARGV.empty?
 Google::LOGGER.level = Logger::INFO
 
@@ -242,11 +247,23 @@ provider&.copy_common_files(output_path, generate_code, generate_docs)
 Google::LOGGER.info "Compiling common files for #{provider_name}"
 common_compile_file = "provider/#{provider_name}/common~compile.yaml"
 if generate_code
+  # provider&.compile_mappers(
+  #   output_path,
+  #   common_compile_file  
+  # )
+  if force_provider == "validator"
+    provider&.compile_tf_files(
+      output_path,
+      $instanceInfo,
+      common_compile_file 
+    )
+  end
   provider&.compile_common_files(
     output_path,
     products_for_version.sort_by { |p| p[:definitions].name.downcase },
     common_compile_file
   )
+
   if override_dir
     Google::LOGGER.info "Compiling override common files for #{provider_name}"
     common_compile_file = "#{override_dir}/common~compile.yaml"
