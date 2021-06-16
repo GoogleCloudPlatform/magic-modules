@@ -49,7 +49,7 @@ func NewProductMetadata(packagePath, productName string) *ProductMetadata {
 func (pm *ProductMetadata) WriteProductBasePath() bool {
 	bp := pm.ProductBasePathDetails()
 	if bp == nil {
-		return false
+		return true
 	}
 	return !bp.Skip
 }
@@ -60,6 +60,14 @@ func (pm *ProductMetadata) BasePathNameSnakeUpper() string {
 		return strings.ToUpper(bp.BasePathName)
 	}
 	return pm.ProductNameUpper()
+}
+
+func (pm *ProductMetadata) BasePathNameSnake() string {
+	bp := pm.ProductBasePathDetails()
+	if bp != nil && bp.BasePathName != ""{
+		return bp.BasePathName
+	}
+	return pm.ProductName
 }
 
 func (pm *ProductMetadata) BasePathName() string {

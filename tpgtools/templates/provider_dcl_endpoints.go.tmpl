@@ -35,7 +35,7 @@ import (
 // [hardcodes the values](https://github.com/GoogleCloudPlatform/declarative-resource-client-library/blob/main/services/google/eventarc/beta/trigger_internal.go#L96-L103)
 {{range $index, $pkg := .}}
 {{- if $pkg.WriteProductBasePath }}
-var {{$pkg.BasePathName}}EndpointEntryKey = "{{$pkg.ProductName}}_custom_endpoint"
+var {{$pkg.BasePathName}}EndpointEntryKey = "{{$pkg.BasePathNameSnake}}_custom_endpoint"
 var {{$pkg.BasePathName}}EndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
 	Optional:     true,
