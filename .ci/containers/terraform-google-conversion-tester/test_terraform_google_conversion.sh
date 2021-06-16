@@ -37,7 +37,7 @@ exit_code=$?
 
 set -e
 
-if [ $exitCode -ne 0 ]; then
+if [ $exit_code -ne 0 ]; then
 	state="failure"
 else
 	state="success"
