@@ -54,12 +54,20 @@ func (pm *ProductMetadata) WriteProductBasePath() bool {
 	return !bp.Skip
 }
 
-func (pm *ProductMetadata) ProductBasePathUrl() string {
+func (pm *ProductMetadata) BasePathNameSnakeUpper() string {
 	bp := pm.ProductBasePathDetails()
-	if bp == nil {
-		return ""
+	if bp != nil && bp.BasePathName != ""{
+		return strings.ToUpper(bp.BasePathName)
 	}
-	return bp.Url
+	return pm.ProductNameUpper()
+}
+
+func (pm *ProductMetadata) BasePathName() string {
+	bp := pm.ProductBasePathDetails()
+	if bp != nil && bp.BasePathName != ""{
+		return snakeToTitleCase(bp.BasePathName)
+	}
+	return pm.ProductType()
 }
 
 func (pm *ProductMetadata) ProductBasePathDetails() *ProductBasePathDetails {

@@ -46,7 +46,7 @@ func NewDCL{{$pkg.ProductType}}Client(config *Config, userAgent, billingProject 
 			dclClientOptions,
 			dclUserAgentOptions,
 			dclLoggerOptions,
-			dcl.WithBasePath(config.{{$pkg.ProductType}}BasePath),
+			dcl.WithBasePath(config.{{$pkg.BasePathName}}BasePath),
 			dclBillingProjectHeader,
 		)
 	} else{
@@ -54,7 +54,7 @@ func NewDCL{{$pkg.ProductType}}Client(config *Config, userAgent, billingProject 
 			dclClientOptions,
 			dclUserAgentOptions,
 			dclLoggerOptions,
-			dcl.WithBasePath(config.{{$pkg.ProductType}}BasePath),
+			dcl.WithBasePath(config.{{$pkg.BasePathName}}BasePath),
 		)
 	}
 
