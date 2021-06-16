@@ -170,7 +170,9 @@ func Provider() *schema.Provider {
 			// dcl
 			EventarcEndpointEntryKey:               EventarcEndpointEntry,
 			GkeHubFeatureCustomEndpointEntryKey:               GkeHubFeatureCustomEndpointEntry,
+			<% unless version == "ga" -%>
 			CloudBuildWorkerPoolEndpointEntryKey:               CloudBuildWorkerPoolEndpointEntry,
+			<% end -%>
 },
 
 		ProviderMetaSchema: map[string]*schema.Schema{
@@ -595,7 +597,9 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	// dcl
 	config.EventarcBasePath = d.Get(EventarcEndpointEntryKey).(string)
 	config.GkeHubBasePath = d.Get(GkeHubFeatureCustomEndpointEntryKey).(string)
+	<% unless version == "ga" -%>
 	config.CloudBuildWorkerPoolBasePath = d.Get(CloudBuildWorkerPoolEndpointEntryKey).(string)
+	<% end -%>
 
 	stopCtx, ok := schema.StopContext(ctx)
 	if !ok {
