@@ -13,11 +13,11 @@ build_step="21"
 scratch_path=https://$github_username:$GITHUB_TOKEN@github.com/$github_username/$gh_repo
 local_path=$GOPATH/src/github.com/GoogleCloudPlatform/$gh_repo
 
-post_body="{"
-post_body+='"context":"terraform-google-conversion-test",'
-post_body+='"target_url":"https://console.cloud.google.com/cloud-build/builds;region=global/'"$build_id"';step='"$build_step"'?project='"$project_id"'",'
-post_body+='"state":"success"'
-post_body+="}"
+post_body=$( jq -n \
+	--arg context "terraform-google-conversion-test" \
+	--arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
+	--arg state "pending" \
+	'{context: $context, target_url: $target_url, state: $state}')
 
 curl \
   -X POST \
@@ -37,17 +37,17 @@ exit_code=$?
 
 set -e
 
-if [ $exitCode -ne 0 ]; then
+if [ $exit_code -ne 0 ]; then
 	state="failure"
 else
 	state="success"
 fi
 
-post_body="{"
-post_body+='"context":"terraform-google-conversion-test",'
-post_body+='"target_url":"https://console.cloud.google.com/cloud-build/builds;region=global/'"$build_id"';step='"$build_step"'?project='"$project_id"'",'
-post_body+='"state":"'"$state"'"'
-post_body+="}"
+post_body=$( jq -n \
+	--arg context "terraform-google-conversion-test" \
+	--arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
+	--arg state "${state}" \
+	'{context: $context, target_url: $target_url, state: $state}')
 
 curl \
   -X POST \
