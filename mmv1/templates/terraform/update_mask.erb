@@ -20,5 +20,5 @@ if d.HasChange("<%= prop_name %>") {
 // won't set it
 url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 if err != nil {
-	return err
+  return err
 }
