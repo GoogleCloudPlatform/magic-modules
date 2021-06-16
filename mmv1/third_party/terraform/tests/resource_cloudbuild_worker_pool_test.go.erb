@@ -22,7 +22,7 @@ func TestAccCloudbuildWorkerPool_basic(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: funcAccTestEventarcTriggerCheckDestroy(t),
+		CheckDestroy: funcAccTestCloudbuildWorkerPoolCheckDestroy(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudbuildWorkerPool_basic(context),
@@ -100,7 +100,7 @@ func TestAccCloudbuildWorkerPool_withNetwork(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: funcAccTestEventarcTriggerCheckDestroy(t),
+		CheckDestroy: funcAccTestCloudbuildWorkerPoolCheckDestroy(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudbuildWorkerPool_withNetwork(context),
