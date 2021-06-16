@@ -164,6 +164,12 @@ func (r Resource) ProductType() string {
 	return r.productMetadata.ProductType()
 }
 
+// ProductType is the snakecase product name of a resource. For example,
+// "network_services".
+func (r Resource) ProductName() string {
+	return r.productMetadata.ProductName
+}
+
 func (r Resource) ProductMetadata() *ProductMetadata {
 	copy := *r.productMetadata
 	return &copy
