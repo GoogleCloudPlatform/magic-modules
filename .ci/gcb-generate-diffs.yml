@@ -128,6 +128,7 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      id: tgc-head
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       args:
@@ -137,6 +138,7 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      id: tgc-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       args:
@@ -172,7 +174,7 @@ steps:
     - name: 'gcr.io/graphite-docker-images/terraform-google-conversion-tester'
       id: tgc-test
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["diff"]
+      waitFor: ["tgc-head", "tgc-base"]
       args:
           - $_PR_NUMBER
           - $COMMIT_SHA
