@@ -203,7 +203,7 @@ func resourceComposerEnvironment() *schema.Resource {
 <% unless version == "ga" -%>	
 									"max_pods_per_node": {
 										Type:             schema.TypeInt,
-										Computed:         false,
+										Computed:         true,
 										Optional:         true,
 										ForceNew:         true,
 										Description:      `The maximum pods per node in the GKE cluster allocated during environment creation. Lowering this value reduces IP address consumption by the Cloud Composer Kubernetes cluster. This value can only be set during environment creation, and only if the environment is VPC-Native. The range of possible values is 8-110, and the default is 32.`,
