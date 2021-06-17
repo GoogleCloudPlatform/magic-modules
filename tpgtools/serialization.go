@@ -10,6 +10,7 @@ import (
 	dataprocBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc/beta"
 	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc"
 	eventarcBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc/beta"
+	gkehubBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub/beta"
 	run "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/run"
 	fmtcmd "github.com/hashicorp/hcl/hcl/fmtcmd"
 )
@@ -23,6 +24,10 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 			return "google_dataproc_workflow_template", nil
 		case "EventarcTrigger":
 			return "google_eventarc_trigger", nil
+		case "GkehubFeature":
+			return "google_gke_hub_feature", nil
+		case "GkehubFeatureMembership":
+			return "google_gke_hub_feature_membership", nil
 		}
 	}
 	// If not found in sample version, fallthrough to GA
@@ -55,6 +60,18 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 				return "", err
 			}
 			return EventarcTriggerBetaAsHCL(*r)
+		case "GkehubFeature":
+			r := &gkehubBeta.Feature{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return GkehubFeatureBetaAsHCL(*r)
+		case "GkehubFeatureMembership":
+			r := &gkehubBeta.FeatureMembership{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return GkehubFeatureMembershipBetaAsHCL(*r)
 		}
 	}
 	// If not found in sample version, fallthrough to GA
@@ -1160,6 +1177,201 @@ func convertEventarcTriggerBetaTransportPubsubToHCL(r *eventarcBeta.TriggerTrans
 	return outputConfig + "}"
 }
 
+// GkehubFeatureBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func GkehubFeatureBetaAsHCL(r gkehubBeta.Feature) (string, error) {
+	outputConfig := "resource \"google_gke_hub_feature\" \"output\" {\n"
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if v := convertGkehubFeatureBetaSpecToHCL(r.Spec); v != "" {
+		outputConfig += fmt.Sprintf("\tspec %s\n", v)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+func convertGkehubFeatureBetaSpecToHCL(r *gkehubBeta.FeatureSpec) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertGkehubFeatureBetaSpecMulticlusteringressToHCL(r.Multiclusteringress); v != "" {
+		outputConfig += fmt.Sprintf("\tmulticlusteringress %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertGkehubFeatureBetaSpecMulticlusteringressToHCL(r *gkehubBeta.FeatureSpecMulticlusteringress) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ConfigMembership != nil {
+		outputConfig += fmt.Sprintf("\tconfig_membership = %#v\n", *r.ConfigMembership)
+	}
+	return outputConfig + "}"
+}
+
+// GkehubFeatureMembershipBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func GkehubFeatureMembershipBetaAsHCL(r gkehubBeta.FeatureMembership) (string, error) {
+	outputConfig := "resource \"google_gke_hub_feature_membership\" \"output\" {\n"
+	if v := convertGkehubFeatureMembershipBetaConfigmanagementToHCL(r.Configmanagement); v != "" {
+		outputConfig += fmt.Sprintf("\tconfigmanagement %s\n", v)
+	}
+	if r.Feature != nil {
+		outputConfig += fmt.Sprintf("\tfeature = %#v\n", *r.Feature)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Membership != nil {
+		outputConfig += fmt.Sprintf("\tmembership = %#v\n", *r.Membership)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+func convertGkehubFeatureMembershipBetaConfigmanagementToHCL(r *gkehubBeta.FeatureMembershipConfigmanagement) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertGkehubFeatureMembershipBetaConfigmanagementBinauthzToHCL(r.Binauthz); v != "" {
+		outputConfig += fmt.Sprintf("\tbinauthz %s\n", v)
+	}
+	if v := convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncToHCL(r.ConfigSync); v != "" {
+		outputConfig += fmt.Sprintf("\tconfig_sync %s\n", v)
+	}
+	if v := convertGkehubFeatureMembershipBetaConfigmanagementHierarchyControllerToHCL(r.HierarchyController); v != "" {
+		outputConfig += fmt.Sprintf("\thierarchy_controller %s\n", v)
+	}
+	if v := convertGkehubFeatureMembershipBetaConfigmanagementPolicyControllerToHCL(r.PolicyController); v != "" {
+		outputConfig += fmt.Sprintf("\tpolicy_controller %s\n", v)
+	}
+	if r.Version != nil {
+		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
+	}
+	return outputConfig + "}"
+}
+
+func convertGkehubFeatureMembershipBetaConfigmanagementBinauthzToHCL(r *gkehubBeta.FeatureMembershipConfigmanagementBinauthz) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Enabled != nil {
+		outputConfig += fmt.Sprintf("\tenabled = %#v\n", *r.Enabled)
+	}
+	return outputConfig + "}"
+}
+
+func convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncToHCL(r *gkehubBeta.FeatureMembershipConfigmanagementConfigSync) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncGitToHCL(r.Git); v != "" {
+		outputConfig += fmt.Sprintf("\tgit %s\n", v)
+	}
+	if r.SourceFormat != nil {
+		outputConfig += fmt.Sprintf("\tsource_format = %#v\n", *r.SourceFormat)
+	}
+	return outputConfig + "}"
+}
+
+func convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncGitToHCL(r *gkehubBeta.FeatureMembershipConfigmanagementConfigSyncGit) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.HttpsProxy != nil {
+		outputConfig += fmt.Sprintf("\thttps_proxy = %#v\n", *r.HttpsProxy)
+	}
+	if r.PolicyDir != nil {
+		outputConfig += fmt.Sprintf("\tpolicy_dir = %#v\n", *r.PolicyDir)
+	}
+	if r.SecretType != nil {
+		outputConfig += fmt.Sprintf("\tsecret_type = %#v\n", *r.SecretType)
+	}
+	if r.SyncBranch != nil {
+		outputConfig += fmt.Sprintf("\tsync_branch = %#v\n", *r.SyncBranch)
+	}
+	if r.SyncRepo != nil {
+		outputConfig += fmt.Sprintf("\tsync_repo = %#v\n", *r.SyncRepo)
+	}
+	if r.SyncRev != nil {
+		outputConfig += fmt.Sprintf("\tsync_rev = %#v\n", *r.SyncRev)
+	}
+	if r.SyncWaitSecs != nil {
+		outputConfig += fmt.Sprintf("\tsync_wait_secs = %#v\n", *r.SyncWaitSecs)
+	}
+	return outputConfig + "}"
+}
+
+func convertGkehubFeatureMembershipBetaConfigmanagementHierarchyControllerToHCL(r *gkehubBeta.FeatureMembershipConfigmanagementHierarchyController) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.EnableHierarchicalResourceQuota != nil {
+		outputConfig += fmt.Sprintf("\tenable_hierarchical_resource_quota = %#v\n", *r.EnableHierarchicalResourceQuota)
+	}
+	if r.EnablePodTreeLabels != nil {
+		outputConfig += fmt.Sprintf("\tenable_pod_tree_labels = %#v\n", *r.EnablePodTreeLabels)
+	}
+	if r.Enabled != nil {
+		outputConfig += fmt.Sprintf("\tenabled = %#v\n", *r.Enabled)
+	}
+	return outputConfig + "}"
+}
+
+func convertGkehubFeatureMembershipBetaConfigmanagementPolicyControllerToHCL(r *gkehubBeta.FeatureMembershipConfigmanagementPolicyController) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AuditIntervalSeconds != nil {
+		outputConfig += fmt.Sprintf("\taudit_interval_seconds = %#v\n", *r.AuditIntervalSeconds)
+	}
+	if r.Enabled != nil {
+		outputConfig += fmt.Sprintf("\tenabled = %#v\n", *r.Enabled)
+	}
+	if r.ExemptableNamespaces != nil {
+		outputConfig += "\texemptable_namespaces = ["
+		for _, v := range r.ExemptableNamespaces {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.LogDeniesEnabled != nil {
+		outputConfig += fmt.Sprintf("\tlog_denies_enabled = %#v\n", *r.LogDeniesEnabled)
+	}
+	if r.ReferentialRulesEnabled != nil {
+		outputConfig += fmt.Sprintf("\treferential_rules_enabled = %#v\n", *r.ReferentialRulesEnabled)
+	}
+	if r.TemplateLibraryInstalled != nil {
+		outputConfig += fmt.Sprintf("\ttemplate_library_installed = %#v\n", *r.TemplateLibraryInstalled)
+	}
+	return outputConfig + "}"
+}
+
 // DataprocWorkflowTemplateAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -2107,9 +2319,9 @@ func EventarcTriggerAsHCL(r eventarc.Trigger) (string, error) {
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
 	}
-	if r.EventFilters != nil {
-		for _, v := range r.EventFilters {
-			outputConfig += fmt.Sprintf("\tmatching_criteria %s\n", convertEventarcTriggerEventFiltersToHCL(&v))
+	if r.MatchingCriteria != nil {
+		for _, v := range r.MatchingCriteria {
+			outputConfig += fmt.Sprintf("\tmatching_criteria %s\n", convertEventarcTriggerMatchingCriteriaToHCL(&v))
 		}
 	}
 	if r.Name != nil {
@@ -2135,13 +2347,13 @@ func convertEventarcTriggerDestinationToHCL(r *eventarc.TriggerDestination) stri
 	if r.CloudFunction != nil {
 		outputConfig += fmt.Sprintf("\tcloud_function = %#v\n", *r.CloudFunction)
 	}
-	if v := convertEventarcTriggerDestinationCloudRunToHCL(r.CloudRun); v != "" {
+	if v := convertEventarcTriggerDestinationCloudRunServiceToHCL(r.CloudRunService); v != "" {
 		outputConfig += fmt.Sprintf("\tcloud_run_service %s\n", v)
 	}
 	return outputConfig + "}"
 }
 
-func convertEventarcTriggerDestinationCloudRunToHCL(r *eventarc.TriggerDestinationCloudRun) string {
+func convertEventarcTriggerDestinationCloudRunServiceToHCL(r *eventarc.TriggerDestinationCloudRunService) string {
 	if r == nil {
 		return ""
 	}
@@ -2158,7 +2370,7 @@ func convertEventarcTriggerDestinationCloudRunToHCL(r *eventarc.TriggerDestinati
 	return outputConfig + "}"
 }
 
-func convertEventarcTriggerEventFiltersToHCL(r *eventarc.TriggerEventFilters) string {
+func convertEventarcTriggerMatchingCriteriaToHCL(r *eventarc.TriggerMatchingCriteria) string {
 	if r == nil {
 		return ""
 	}
@@ -2234,15 +2446,6 @@ func convertRunServiceMetadataToHCL(r *run.ServiceMetadata) string {
 	if r.ClusterName != nil {
 		outputConfig += fmt.Sprintf("\tcluster_name = %#v\n", *r.ClusterName)
 	}
-	if v := convertRunServiceMetadataCreateTimeToHCL(r.CreateTime); v != "" {
-		outputConfig += fmt.Sprintf("\tcreate_time %s\n", v)
-	}
-	if v := convertRunServiceMetadataDeleteTimeToHCL(r.DeleteTime); v != "" {
-		outputConfig += fmt.Sprintf("\tdelete_time %s\n", v)
-	}
-	if r.DeletionGracePeriodSeconds != nil {
-		outputConfig += fmt.Sprintf("\tdeletion_grace_period_seconds = %#v\n", *r.DeletionGracePeriodSeconds)
-	}
 	if r.Finalizers != nil {
 		outputConfig += "\tfinalizers = ["
 		for _, v := range r.Finalizers {
@@ -2253,12 +2456,6 @@ func convertRunServiceMetadataToHCL(r *run.ServiceMetadata) string {
 	if r.GenerateName != nil {
 		outputConfig += fmt.Sprintf("\tgenerate_name = %#v\n", *r.GenerateName)
 	}
-	if r.Generation != nil {
-		outputConfig += fmt.Sprintf("\tgeneration = %#v\n", *r.Generation)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
 	if r.Namespace != nil {
 		outputConfig += fmt.Sprintf("\tnamespace = %#v\n", *r.Namespace)
 	}
@@ -2266,43 +2463,6 @@ func convertRunServiceMetadataToHCL(r *run.ServiceMetadata) string {
 		for _, v := range r.OwnerReferences {
 			outputConfig += fmt.Sprintf("\towner_references %s\n", convertRunServiceMetadataOwnerReferencesToHCL(&v))
 		}
-	}
-	if r.ResourceVersion != nil {
-		outputConfig += fmt.Sprintf("\tresource_version = %#v\n", *r.ResourceVersion)
-	}
-	if r.SelfLink != nil {
-		outputConfig += fmt.Sprintf("\tself_link = %#v\n", *r.SelfLink)
-	}
-	if r.Uid != nil {
-		outputConfig += fmt.Sprintf("\tuid = %#v\n", *r.Uid)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceMetadataCreateTimeToHCL(r *run.ServiceMetadataCreateTime) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Nanos != nil {
-		outputConfig += fmt.Sprintf("\tnanos = %#v\n", *r.Nanos)
-	}
-	if r.Seconds != nil {
-		outputConfig += fmt.Sprintf("\tseconds = %#v\n", *r.Seconds)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceMetadataDeleteTimeToHCL(r *run.ServiceMetadataDeleteTime) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Nanos != nil {
-		outputConfig += fmt.Sprintf("\tnanos = %#v\n", *r.Nanos)
-	}
-	if r.Seconds != nil {
-		outputConfig += fmt.Sprintf("\tseconds = %#v\n", *r.Seconds)
 	}
 	return outputConfig + "}"
 }
@@ -2330,6 +2490,22 @@ func convertRunServiceMetadataOwnerReferencesToHCL(r *run.ServiceMetadataOwnerRe
 	if r.Uid != nil {
 		outputConfig += fmt.Sprintf("\tuid = %#v\n", *r.Uid)
 	}
+	return outputConfig + "}"
+}
+
+func convertRunServiceMetadataCreateTimeToHCL(r *run.ServiceMetadataCreateTime) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertRunServiceMetadataDeleteTimeToHCL(r *run.ServiceMetadataDeleteTime) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
 	return outputConfig + "}"
 }
 
@@ -2371,15 +2547,6 @@ func convertRunServiceSpecTemplateMetadataToHCL(r *run.ServiceSpecTemplateMetada
 	if r.ClusterName != nil {
 		outputConfig += fmt.Sprintf("\tcluster_name = %#v\n", *r.ClusterName)
 	}
-	if v := convertRunServiceSpecTemplateMetadataCreateTimeToHCL(r.CreateTime); v != "" {
-		outputConfig += fmt.Sprintf("\tcreate_time %s\n", v)
-	}
-	if v := convertRunServiceSpecTemplateMetadataDeleteTimeToHCL(r.DeleteTime); v != "" {
-		outputConfig += fmt.Sprintf("\tdelete_time %s\n", v)
-	}
-	if r.DeletionGracePeriodSeconds != nil {
-		outputConfig += fmt.Sprintf("\tdeletion_grace_period_seconds = %#v\n", *r.DeletionGracePeriodSeconds)
-	}
 	if r.Finalizers != nil {
 		outputConfig += "\tfinalizers = ["
 		for _, v := range r.Finalizers {
@@ -2389,9 +2556,6 @@ func convertRunServiceSpecTemplateMetadataToHCL(r *run.ServiceSpecTemplateMetada
 	}
 	if r.GenerateName != nil {
 		outputConfig += fmt.Sprintf("\tgenerate_name = %#v\n", *r.GenerateName)
-	}
-	if r.Generation != nil {
-		outputConfig += fmt.Sprintf("\tgeneration = %#v\n", *r.Generation)
 	}
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
@@ -2403,43 +2567,6 @@ func convertRunServiceSpecTemplateMetadataToHCL(r *run.ServiceSpecTemplateMetada
 		for _, v := range r.OwnerReferences {
 			outputConfig += fmt.Sprintf("\towner_references %s\n", convertRunServiceSpecTemplateMetadataOwnerReferencesToHCL(&v))
 		}
-	}
-	if r.ResourceVersion != nil {
-		outputConfig += fmt.Sprintf("\tresource_version = %#v\n", *r.ResourceVersion)
-	}
-	if r.SelfLink != nil {
-		outputConfig += fmt.Sprintf("\tself_link = %#v\n", *r.SelfLink)
-	}
-	if r.Uid != nil {
-		outputConfig += fmt.Sprintf("\tuid = %#v\n", *r.Uid)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateMetadataCreateTimeToHCL(r *run.ServiceSpecTemplateMetadataCreateTime) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Nanos != nil {
-		outputConfig += fmt.Sprintf("\tnanos = %#v\n", *r.Nanos)
-	}
-	if r.Seconds != nil {
-		outputConfig += fmt.Sprintf("\tseconds = %#v\n", *r.Seconds)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateMetadataDeleteTimeToHCL(r *run.ServiceSpecTemplateMetadataDeleteTime) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Nanos != nil {
-		outputConfig += fmt.Sprintf("\tnanos = %#v\n", *r.Nanos)
-	}
-	if r.Seconds != nil {
-		outputConfig += fmt.Sprintf("\tseconds = %#v\n", *r.Seconds)
 	}
 	return outputConfig + "}"
 }
@@ -2467,6 +2594,22 @@ func convertRunServiceSpecTemplateMetadataOwnerReferencesToHCL(r *run.ServiceSpe
 	if r.Uid != nil {
 		outputConfig += fmt.Sprintf("\tuid = %#v\n", *r.Uid)
 	}
+	return outputConfig + "}"
+}
+
+func convertRunServiceSpecTemplateMetadataCreateTimeToHCL(r *run.ServiceSpecTemplateMetadataCreateTime) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertRunServiceSpecTemplateMetadataDeleteTimeToHCL(r *run.ServiceSpecTemplateMetadataDeleteTime) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
 	return outputConfig + "}"
 }
 
@@ -4359,6 +4502,192 @@ func convertEventarcTriggerBetaTransportPubsubList(i interface{}) (out []map[str
 	return out
 }
 
+func convertGkehubFeatureBetaSpec(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"multiclusteringress": convertGkehubFeatureBetaSpecMulticlusteringress(in["multiclusteringress"]),
+	}
+}
+
+func convertGkehubFeatureBetaSpecList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertGkehubFeatureBetaSpec(v))
+	}
+	return out
+}
+
+func convertGkehubFeatureBetaSpecMulticlusteringress(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"configMembership": in["config_membership"],
+	}
+}
+
+func convertGkehubFeatureBetaSpecMulticlusteringressList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertGkehubFeatureBetaSpecMulticlusteringress(v))
+	}
+	return out
+}
+
+func convertGkehubFeatureMembershipBetaConfigmanagement(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"binauthz":            convertGkehubFeatureMembershipBetaConfigmanagementBinauthz(in["binauthz"]),
+		"configSync":          convertGkehubFeatureMembershipBetaConfigmanagementConfigSync(in["config_sync"]),
+		"hierarchyController": convertGkehubFeatureMembershipBetaConfigmanagementHierarchyController(in["hierarchy_controller"]),
+		"policyController":    convertGkehubFeatureMembershipBetaConfigmanagementPolicyController(in["policy_controller"]),
+		"version":             in["version"],
+	}
+}
+
+func convertGkehubFeatureMembershipBetaConfigmanagementList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertGkehubFeatureMembershipBetaConfigmanagement(v))
+	}
+	return out
+}
+
+func convertGkehubFeatureMembershipBetaConfigmanagementBinauthz(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"enabled": in["enabled"],
+	}
+}
+
+func convertGkehubFeatureMembershipBetaConfigmanagementBinauthzList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertGkehubFeatureMembershipBetaConfigmanagementBinauthz(v))
+	}
+	return out
+}
+
+func convertGkehubFeatureMembershipBetaConfigmanagementConfigSync(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"git":          convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncGit(in["git"]),
+		"sourceFormat": in["source_format"],
+	}
+}
+
+func convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertGkehubFeatureMembershipBetaConfigmanagementConfigSync(v))
+	}
+	return out
+}
+
+func convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncGit(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"httpsProxy":   in["https_proxy"],
+		"policyDir":    in["policy_dir"],
+		"secretType":   in["secret_type"],
+		"syncBranch":   in["sync_branch"],
+		"syncRepo":     in["sync_repo"],
+		"syncRev":      in["sync_rev"],
+		"syncWaitSecs": in["sync_wait_secs"],
+	}
+}
+
+func convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncGitList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncGit(v))
+	}
+	return out
+}
+
+func convertGkehubFeatureMembershipBetaConfigmanagementHierarchyController(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"enableHierarchicalResourceQuota": in["enable_hierarchical_resource_quota"],
+		"enablePodTreeLabels":             in["enable_pod_tree_labels"],
+		"enabled":                         in["enabled"],
+	}
+}
+
+func convertGkehubFeatureMembershipBetaConfigmanagementHierarchyControllerList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertGkehubFeatureMembershipBetaConfigmanagementHierarchyController(v))
+	}
+	return out
+}
+
+func convertGkehubFeatureMembershipBetaConfigmanagementPolicyController(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"auditIntervalSeconds":     in["audit_interval_seconds"],
+		"enabled":                  in["enabled"],
+		"exemptableNamespaces":     in["exemptable_namespaces"],
+		"logDeniesEnabled":         in["log_denies_enabled"],
+		"referentialRulesEnabled":  in["referential_rules_enabled"],
+		"templateLibraryInstalled": in["template_library_installed"],
+	}
+}
+
+func convertGkehubFeatureMembershipBetaConfigmanagementPolicyControllerList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertGkehubFeatureMembershipBetaConfigmanagementPolicyController(v))
+	}
+	return out
+}
+
 func convertDataprocWorkflowTemplateJobs(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -5414,8 +5743,8 @@ func convertEventarcTriggerDestination(i interface{}) map[string]interface{} {
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"cloudFunction": in["cloud_function"],
-		"cloudRun":      convertEventarcTriggerDestinationCloudRun(in["cloud_run_service"]),
+		"cloudFunction":   in["cloud_function"],
+		"cloudRunService": convertEventarcTriggerDestinationCloudRunService(in["cloud_run_service"]),
 	}
 }
 
@@ -5430,7 +5759,7 @@ func convertEventarcTriggerDestinationList(i interface{}) (out []map[string]inte
 	return out
 }
 
-func convertEventarcTriggerDestinationCloudRun(i interface{}) map[string]interface{} {
+func convertEventarcTriggerDestinationCloudRunService(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -5442,18 +5771,18 @@ func convertEventarcTriggerDestinationCloudRun(i interface{}) map[string]interfa
 	}
 }
 
-func convertEventarcTriggerDestinationCloudRunList(i interface{}) (out []map[string]interface{}) {
+func convertEventarcTriggerDestinationCloudRunServiceList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertEventarcTriggerDestinationCloudRun(v))
+		out = append(out, convertEventarcTriggerDestinationCloudRunService(v))
 	}
 	return out
 }
 
-func convertEventarcTriggerEventFilters(i interface{}) map[string]interface{} {
+func convertEventarcTriggerMatchingCriteria(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -5464,13 +5793,13 @@ func convertEventarcTriggerEventFilters(i interface{}) map[string]interface{} {
 	}
 }
 
-func convertEventarcTriggerEventFiltersList(i interface{}) (out []map[string]interface{}) {
+func convertEventarcTriggerMatchingCriteriaList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertEventarcTriggerEventFilters(v))
+		out = append(out, convertEventarcTriggerMatchingCriteria(v))
 	}
 	return out
 }
@@ -5526,16 +5855,15 @@ func convertRunServiceMetadata(i interface{}) map[string]interface{} {
 	return map[string]interface{}{
 		"annotations":                in["annotations"],
 		"clusterName":                in["cluster_name"],
+		"finalizers":                 in["finalizers"],
+		"generateName":               in["generate_name"],
+		"labels":                     in["labels"],
+		"namespace":                  in["namespace"],
+		"ownerReferences":            in["owner_references"],
 		"createTime":                 convertRunServiceMetadataCreateTime(in["create_time"]),
 		"deleteTime":                 convertRunServiceMetadataDeleteTime(in["delete_time"]),
 		"deletionGracePeriodSeconds": in["deletion_grace_period_seconds"],
-		"finalizers":                 in["finalizers"],
-		"generateName":               in["generate_name"],
 		"generation":                 in["generation"],
-		"labels":                     in["labels"],
-		"name":                       in["name"],
-		"namespace":                  in["namespace"],
-		"ownerReferences":            in["owner_references"],
 		"resourceVersion":            in["resource_version"],
 		"selfLink":                   in["self_link"],
 		"uid":                        in["uid"],
@@ -5549,6 +5877,32 @@ func convertRunServiceMetadataList(i interface{}) (out []map[string]interface{})
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertRunServiceMetadata(v))
+	}
+	return out
+}
+
+func convertRunServiceMetadataOwnerReferences(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"apiVersion":         in["api_version"],
+		"blockOwnerDeletion": in["block_owner_deletion"],
+		"controller":         in["controller"],
+		"kind":               in["kind"],
+		"name":               in["name"],
+		"uid":                in["uid"],
+	}
+}
+
+func convertRunServiceMetadataOwnerReferencesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertRunServiceMetadataOwnerReferences(v))
 	}
 	return out
 }
@@ -5593,32 +5947,6 @@ func convertRunServiceMetadataDeleteTimeList(i interface{}) (out []map[string]in
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertRunServiceMetadataDeleteTime(v))
-	}
-	return out
-}
-
-func convertRunServiceMetadataOwnerReferences(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"apiVersion":         in["api_version"],
-		"blockOwnerDeletion": in["block_owner_deletion"],
-		"controller":         in["controller"],
-		"kind":               in["kind"],
-		"name":               in["name"],
-		"uid":                in["uid"],
-	}
-}
-
-func convertRunServiceMetadataOwnerReferencesList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceMetadataOwnerReferences(v))
 	}
 	return out
 }
@@ -5675,16 +6003,16 @@ func convertRunServiceSpecTemplateMetadata(i interface{}) map[string]interface{}
 	return map[string]interface{}{
 		"annotations":                in["annotations"],
 		"clusterName":                in["cluster_name"],
-		"createTime":                 convertRunServiceSpecTemplateMetadataCreateTime(in["create_time"]),
-		"deleteTime":                 convertRunServiceSpecTemplateMetadataDeleteTime(in["delete_time"]),
-		"deletionGracePeriodSeconds": in["deletion_grace_period_seconds"],
 		"finalizers":                 in["finalizers"],
 		"generateName":               in["generate_name"],
-		"generation":                 in["generation"],
 		"labels":                     in["labels"],
 		"name":                       in["name"],
 		"namespace":                  in["namespace"],
 		"ownerReferences":            in["owner_references"],
+		"createTime":                 convertRunServiceSpecTemplateMetadataCreateTime(in["create_time"]),
+		"deleteTime":                 convertRunServiceSpecTemplateMetadataDeleteTime(in["delete_time"]),
+		"deletionGracePeriodSeconds": in["deletion_grace_period_seconds"],
+		"generation":                 in["generation"],
 		"resourceVersion":            in["resource_version"],
 		"selfLink":                   in["self_link"],
 		"uid":                        in["uid"],
@@ -5698,6 +6026,32 @@ func convertRunServiceSpecTemplateMetadataList(i interface{}) (out []map[string]
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertRunServiceSpecTemplateMetadata(v))
+	}
+	return out
+}
+
+func convertRunServiceSpecTemplateMetadataOwnerReferences(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"apiVersion":         in["api_version"],
+		"blockOwnerDeletion": in["block_owner_deletion"],
+		"controller":         in["controller"],
+		"kind":               in["kind"],
+		"name":               in["name"],
+		"uid":                in["uid"],
+	}
+}
+
+func convertRunServiceSpecTemplateMetadataOwnerReferencesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertRunServiceSpecTemplateMetadataOwnerReferences(v))
 	}
 	return out
 }
@@ -5742,32 +6096,6 @@ func convertRunServiceSpecTemplateMetadataDeleteTimeList(i interface{}) (out []m
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertRunServiceSpecTemplateMetadataDeleteTime(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateMetadataOwnerReferences(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"apiVersion":         in["api_version"],
-		"blockOwnerDeletion": in["block_owner_deletion"],
-		"controller":         in["controller"],
-		"kind":               in["kind"],
-		"name":               in["name"],
-		"uid":                in["uid"],
-	}
-}
-
-func convertRunServiceSpecTemplateMetadataOwnerReferencesList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateMetadataOwnerReferences(v))
 	}
 	return out
 }

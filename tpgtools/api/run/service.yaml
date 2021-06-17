@@ -65,21 +65,19 @@ components:
       x-dcl-labels: metadata.labels
       type: object
       required:
+      - name
       - project
       - location
-      - name
       properties:
         apiVersion:
           type: string
           x-dcl-go-name: ApiVersion
           description: The API version for this call such as "serving.knative.dev/v1".
-          x-kubernetes-immutable: true
           default: serving.knative.dev/v1
         kind:
           type: string
           x-dcl-go-name: Kind
-          description: The kind of this request. Should not be user set
-          x-kubernetes-immutable: true
+          description: The kind of resource, in this case "Service".
           default: Service
         location:
           type: string
@@ -93,7 +91,6 @@ components:
           description: |-
             Metadata associated with this Service, including name, namespace, labels,
             and annotations.
-          x-kubernetes-immutable: true
           properties:
             annotations:
               type: object
@@ -107,7 +104,6 @@ components:
                 may be set by external tools to store and retrieve arbitrary metadata. They
                 are not queryable and should be preserved when modifying objects. More
                 info: http://kubernetes.io/docs/user-guide/annotations
-              x-kubernetes-immutable: true
             clusterName:
               type: string
               x-dcl-go-name: ClusterName
@@ -122,11 +118,14 @@ components:
                 This is used to distinguish resources with same name and namespace in
                 different clusters. This field is not set anywhere right now and apiserver
                 is going to ignore it if set in create or update request.
-              x-kubernetes-immutable: true
+              x-dcl-references:
+              - resource: Container/Cluster
+                field: name
             createTime:
               type: object
               x-dcl-go-name: CreateTime
               x-dcl-go-type: ServiceMetadataCreateTime
+              readOnly: true
               description: |-
                 (Optional)
 
@@ -140,31 +139,31 @@ components:
                 Null for lists.
                 More info:
                 https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
-              x-kubernetes-immutable: true
               properties:
                 nanos:
                   type: integer
                   format: int64
                   x-dcl-go-name: Nanos
+                  readOnly: true
                   description: |-
                     Non-negative fractions of a second at nanosecond resolution. Negative
                     second values with fractions must still have non-negative nanos values
                     that count forward in time. Must be from 0 to 999,999,999
                     inclusive.
-                  x-kubernetes-immutable: true
                 seconds:
                   type: integer
                   format: int64
                   x-dcl-go-name: Seconds
+                  readOnly: true
                   description: |-
                     Represents seconds of UTC time since Unix epoch
                     1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
                     9999-12-31T23:59:59Z inclusive.
-                  x-kubernetes-immutable: true
             deleteTime:
               type: object
               x-dcl-go-name: DeleteTime
               x-dcl-go-type: ServiceMetadataDeleteTime
+              readOnly: true
               description: |-
                 (Optional)
 
@@ -194,31 +193,31 @@ components:
                 Read-only.
                 More info:
                 https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
-              x-kubernetes-immutable: true
               properties:
                 nanos:
                   type: integer
                   format: int64
                   x-dcl-go-name: Nanos
+                  readOnly: true
                   description: |-
                     Non-negative fractions of a second at nanosecond resolution. Negative
                     second values with fractions must still have non-negative nanos values
                     that count forward in time. Must be from 0 to 999,999,999
                     inclusive.
-                  x-kubernetes-immutable: true
                 seconds:
                   type: integer
                   format: int64
                   x-dcl-go-name: Seconds
+                  readOnly: true
                   description: |-
                     Represents seconds of UTC time since Unix epoch
                     1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
                     9999-12-31T23:59:59Z inclusive.
-                  x-kubernetes-immutable: true
             deletionGracePeriodSeconds:
               type: integer
               format: int64
               x-dcl-go-name: DeletionGracePeriodSeconds
+              readOnly: true
               description: |
                 (Optional)
 
@@ -229,7 +228,6 @@ components:
                 Number of seconds allowed for this object to gracefully terminate before
                 it will be removed from the system. Only set when deletionTimestamp is also
                 set. May only be shortened. Read-only.
-              x-kubernetes-immutable: true
             finalizers:
               type: array
               x-dcl-go-name: Finalizers
@@ -245,7 +243,6 @@ components:
                 from the list. If the deletionTimestamp of the object is non-nil, entries
                 in this list can only be removed.
                 +patchStrategy=merge
-              x-kubernetes-immutable: true
               x-dcl-list-type: list
               items:
                 type: string
@@ -278,17 +275,16 @@ components:
                 More info:
                 https://git.k8s.io/community/contributors/devel/api-conventions.md#idempotency
                  string generateName = 2;
-              x-kubernetes-immutable: true
             generation:
               type: integer
               format: int64
               x-dcl-go-name: Generation
+              readOnly: true
               description: |-
                 (Optional)
 
                 A sequence number representing a specific generation of the desired state.
                 Populated by the system. Read-only.
-              x-kubernetes-immutable: true
             labels:
               type: object
               additionalProperties:
@@ -301,19 +297,6 @@ components:
                 (scope and select) objects. May match selectors of replication controllers
                 and routes.
                 More info: http://kubernetes.io/docs/user-guide/labels
-              x-kubernetes-immutable: true
-            name:
-              type: string
-              x-dcl-go-name: Name
-              description: |-
-                Name must be unique within a namespace, within a Cloud Run region.
-                Is required when creating
-                resources, although some resources may allow a client to request the
-                generation of an appropriate name automatically. Name is primarily intended
-                for creation idempotence and configuration definition. Cannot be updated.
-                More info: http://kubernetes.io/docs/user-guide/identifiers#names
-                +optional
-              x-kubernetes-immutable: true
             namespace:
               type: string
               x-dcl-go-name: Namespace
@@ -321,7 +304,6 @@ components:
                 Namespace defines the space within each name must be unique, within a
                 Cloud Run region. In Cloud Run the namespace must be equal to either the
                 project ID or project number.
-              x-kubernetes-immutable: true
             ownerReferences:
               type: array
               x-dcl-go-name: OwnerReferences
@@ -334,7 +316,6 @@ components:
 
                 List of objects that own this object. If ALL objects in the list have
                 been deleted, this object will be garbage collected.
-              x-kubernetes-immutable: true
               x-dcl-list-type: list
               items:
                 type: object
@@ -344,7 +325,6 @@ components:
                     type: string
                     x-dcl-go-name: ApiVersion
                     description: API version of the referent.
-                    x-kubernetes-immutable: true
                   blockOwnerDeletion:
                     type: boolean
                     x-dcl-go-name: BlockOwnerDeletion
@@ -356,14 +336,12 @@ components:
                       To set this field, a user needs "delete" permission of the owner,
                       otherwise 422 (Unprocessable Entity) will be returned.
                       +optional
-                    x-kubernetes-immutable: true
                   controller:
                     type: boolean
                     x-dcl-go-name: Controller
                     description: |-
                       If true, this reference points to the managing controller.
                       +optional
-                    x-kubernetes-immutable: true
                   kind:
                     type: string
                     x-dcl-go-name: Kind
@@ -371,24 +349,22 @@ components:
                       Kind of the referent.
                       More info:
                       https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds
-                    x-kubernetes-immutable: true
                   name:
                     type: string
                     x-dcl-go-name: Name
                     description: |-
                       Name of the referent.
                       More info: http://kubernetes.io/docs/user-guide/identifiers#names
-                    x-kubernetes-immutable: true
                   uid:
                     type: string
                     x-dcl-go-name: Uid
                     description: |-
                       UID of the referent.
                       More info: http://kubernetes.io/docs/user-guide/identifiers#uids
-                    x-kubernetes-immutable: true
             resourceVersion:
               type: string
               x-dcl-go-name: ResourceVersion
+              readOnly: true
               description: |-
                 (Optional)
 
@@ -404,10 +380,10 @@ components:
                 Value must be treated as opaque by clients and .
                 More info:
                 https://git.k8s.io/community/contributors/devel/api-conventions.md#concurrency-control-and-consistency
-              x-kubernetes-immutable: true
             selfLink:
               type: string
               x-dcl-go-name: SelfLink
+              readOnly: true
               description: |-
                 (Optional)
 
@@ -415,10 +391,10 @@ components:
                 Populated by the system.
                 Read-only.
                  string selfLink = 4;
-              x-kubernetes-immutable: true
             uid:
               type: string
               x-dcl-go-name: Uid
+              readOnly: true
               description: |-
                 (Optional)
 
@@ -429,12 +405,10 @@ components:
                 Populated by the system.
                 Read-only.
                 More info: http://kubernetes.io/docs/user-guide/identifiers#uids
-              x-kubernetes-immutable: true
         name:
           type: string
           x-dcl-go-name: Name
           description: The name for the resource
-          x-kubernetes-immutable: true
         project:
           type: string
           x-dcl-go-name: Project
@@ -449,7 +423,6 @@ components:
           x-dcl-go-name: Spec
           x-dcl-go-type: ServiceSpec
           description: Spec holds the desired state of the Service (from the client).
-          x-kubernetes-immutable: true
           properties:
             template:
               type: object
@@ -458,7 +431,6 @@ components:
               description: |-
                 Template holds the latest specification for the Revision to
                 be stamped out.
-              x-kubernetes-immutable: true
               properties:
                 metadata:
                   type: object
@@ -473,7 +445,6 @@ components:
                     "autoscaling.knative.dev/maxScale" annotation key.
                     To set Cloud SQL connections for the revision, use the
                     "run.googleapis.com/cloudsql-instances" annotation key.
-                  x-kubernetes-immutable: true
                   properties:
                     annotations:
                       type: object
@@ -487,7 +458,6 @@ components:
                         may be set by external tools to store and retrieve arbitrary metadata. They
                         are not queryable and should be preserved when modifying objects. More
                         info: http://kubernetes.io/docs/user-guide/annotations
-                      x-kubernetes-immutable: true
                     clusterName:
                       type: string
                       x-dcl-go-name: ClusterName
@@ -502,11 +472,14 @@ components:
                         This is used to distinguish resources with same name and namespace in
                         different clusters. This field is not set anywhere right now and apiserver
                         is going to ignore it if set in create or update request.
-                      x-kubernetes-immutable: true
+                      x-dcl-references:
+                      - resource: Container/Cluster
+                        field: name
                     createTime:
                       type: object
                       x-dcl-go-name: CreateTime
                       x-dcl-go-type: ServiceSpecTemplateMetadataCreateTime
+                      readOnly: true
                       description: |-
                         (Optional)
 
@@ -520,31 +493,31 @@ components:
                         Null for lists.
                         More info:
                         https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
-                      x-kubernetes-immutable: true
                       properties:
                         nanos:
                           type: integer
                           format: int64
                           x-dcl-go-name: Nanos
+                          readOnly: true
                           description: |-
                             Non-negative fractions of a second at nanosecond resolution. Negative
                             second values with fractions must still have non-negative nanos values
                             that count forward in time. Must be from 0 to 999,999,999
                             inclusive.
-                          x-kubernetes-immutable: true
                         seconds:
                           type: integer
                           format: int64
                           x-dcl-go-name: Seconds
+                          readOnly: true
                           description: |-
                             Represents seconds of UTC time since Unix epoch
                             1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
                             9999-12-31T23:59:59Z inclusive.
-                          x-kubernetes-immutable: true
                     deleteTime:
                       type: object
                       x-dcl-go-name: DeleteTime
                       x-dcl-go-type: ServiceSpecTemplateMetadataDeleteTime
+                      readOnly: true
                       description: |-
                         (Optional)
 
@@ -574,31 +547,31 @@ components:
                         Read-only.
                         More info:
                         https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
-                      x-kubernetes-immutable: true
                       properties:
                         nanos:
                           type: integer
                           format: int64
                           x-dcl-go-name: Nanos
+                          readOnly: true
                           description: |-
                             Non-negative fractions of a second at nanosecond resolution. Negative
                             second values with fractions must still have non-negative nanos values
                             that count forward in time. Must be from 0 to 999,999,999
                             inclusive.
-                          x-kubernetes-immutable: true
                         seconds:
                           type: integer
                           format: int64
                           x-dcl-go-name: Seconds
+                          readOnly: true
                           description: |-
                             Represents seconds of UTC time since Unix epoch
                             1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
                             9999-12-31T23:59:59Z inclusive.
-                          x-kubernetes-immutable: true
                     deletionGracePeriodSeconds:
                       type: integer
                       format: int64
                       x-dcl-go-name: DeletionGracePeriodSeconds
+                      readOnly: true
                       description: |-
                         (Optional)
 
@@ -609,7 +582,6 @@ components:
                         Number of seconds allowed for this object to gracefully terminate before
                         it will be removed from the system. Only set when deletionTimestamp is also
                         set. May only be shortened. Read-only.
-                      x-kubernetes-immutable: true
                     finalizers:
                       type: array
                       x-dcl-go-name: Finalizers
@@ -625,7 +597,6 @@ components:
                         from the list. If the deletionTimestamp of the object is non-nil, entries
                         in this list can only be removed.
                         +patchStrategy=merge
-                      x-kubernetes-immutable: true
                       x-dcl-list-type: list
                       items:
                         type: string
@@ -658,17 +629,16 @@ components:
                         More info:
                         https://git.k8s.io/community/contributors/devel/api-conventions.md#idempotency
                          string generateName = 2;
-                      x-kubernetes-immutable: true
                     generation:
                       type: integer
                       format: int64
                       x-dcl-go-name: Generation
+                      readOnly: true
                       description: |-
                         (Optional)
 
                         A sequence number representing a specific generation of the desired state.
                         Populated by the system. Read-only.
-                      x-kubernetes-immutable: true
                     labels:
                       type: object
                       additionalProperties:
@@ -681,7 +651,6 @@ components:
                         (scope and select) objects. May match selectors of replication controllers
                         and routes.
                         More info: http://kubernetes.io/docs/user-guide/labels
-                      x-kubernetes-immutable: true
                     name:
                       type: string
                       x-dcl-go-name: Name
@@ -693,7 +662,6 @@ components:
                         for creation idempotence and configuration definition. Cannot be updated.
                         More info: http://kubernetes.io/docs/user-guide/identifiers#names
                         +optional
-                      x-kubernetes-immutable: true
                     namespace:
                       type: string
                       x-dcl-go-name: Namespace
@@ -701,7 +669,6 @@ components:
                         Namespace defines the space within each name must be unique, within a
                         Cloud Run region. In Cloud Run the namespace must be equal to either the
                         project ID or project number.
-                      x-kubernetes-immutable: true
                     ownerReferences:
                       type: array
                       x-dcl-go-name: OwnerReferences
@@ -714,7 +681,6 @@ components:
 
                         List of objects that own this object. If ALL objects in the list have
                         been deleted, this object will be garbage collected.
-                      x-kubernetes-immutable: true
                       x-dcl-list-type: list
                       items:
                         type: object
@@ -724,7 +690,6 @@ components:
                             type: string
                             x-dcl-go-name: ApiVersion
                             description: API version of the referent.
-                            x-kubernetes-immutable: true
                           blockOwnerDeletion:
                             type: boolean
                             x-dcl-go-name: BlockOwnerDeletion
@@ -736,14 +701,12 @@ components:
                               To set this field, a user needs "delete" permission of the owner,
                               otherwise 422 (Unprocessable Entity) will be returned.
                               +optional
-                            x-kubernetes-immutable: true
                           controller:
                             type: boolean
                             x-dcl-go-name: Controller
                             description: |-
                               If true, this reference points to the managing controller.
                               +optional
-                            x-kubernetes-immutable: true
                           kind:
                             type: string
                             x-dcl-go-name: Kind
@@ -751,24 +714,22 @@ components:
                               Kind of the referent.
                               More info:
                               https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds
-                            x-kubernetes-immutable: true
                           name:
                             type: string
                             x-dcl-go-name: Name
                             description: |-
                               Name of the referent.
                               More info: http://kubernetes.io/docs/user-guide/identifiers#names
-                            x-kubernetes-immutable: true
                           uid:
                             type: string
                             x-dcl-go-name: Uid
                             description: |-
                               UID of the referent.
                               More info: http://kubernetes.io/docs/user-guide/identifiers#uids
-                            x-kubernetes-immutable: true
                     resourceVersion:
                       type: string
                       x-dcl-go-name: ResourceVersion
+                      readOnly: true
                       description: |-
                         (Optional)
 
@@ -784,10 +745,10 @@ components:
                         Value must be treated as opaque by clients and .
                         More info:
                         https://git.k8s.io/community/contributors/devel/api-conventions.md#concurrency-control-and-consistency
-                      x-kubernetes-immutable: true
                     selfLink:
                       type: string
                       x-dcl-go-name: SelfLink
+                      readOnly: true
                       description: |-
                         (Optional)
 
@@ -795,10 +756,10 @@ components:
                         Populated by the system.
                         Read-only.
                          string selfLink = 4;
-                      x-kubernetes-immutable: true
                     uid:
                       type: string
                       x-dcl-go-name: Uid
+                      readOnly: true
                       description: |-
                         (Optional)
 
@@ -809,14 +770,12 @@ components:
                         Populated by the system.
                         Read-only.
                         More info: http://kubernetes.io/docs/user-guide/identifiers#uids
-                      x-kubernetes-immutable: true
                 spec:
                   type: object
                   x-dcl-go-name: Spec
                   x-dcl-go-type: ServiceSpecTemplateSpec
                   description: RevisionSpec holds the desired state of the Revision
                     (from the client).
-                  x-kubernetes-immutable: true
                   properties:
                     containerConcurrency:
                       type: integer
@@ -833,7 +792,6 @@ components:
                         Cloud Run for Anthos: supported, defaults to 0, which means concurrency
                         to the application is not limited, and the system decides the
                         target concurrency for the autoscaler.
-                      x-kubernetes-immutable: true
                     containers:
                       type: array
                       x-dcl-go-name: Containers
@@ -844,7 +802,6 @@ components:
                         In Cloud Run, only a single container may be provided.
                         The runtime contract is documented here:
                         https://github.com/knative/serving/blob/master/docs/runtime-contract.md
-                      x-kubernetes-immutable: true
                       x-dcl-list-type: list
                       items:
                         type: object
@@ -869,7 +826,6 @@ components:
                               regardless of whether the variable exists or not.
                               More info:
                               https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
-                            x-kubernetes-immutable: true
                             x-dcl-list-type: list
                             items:
                               type: string
@@ -877,7 +833,6 @@ components:
                           command:
                             type: array
                             x-dcl-go-name: Command
-                            x-kubernetes-immutable: true
                             x-dcl-list-type: list
                             items:
                               type: string
@@ -893,7 +848,6 @@ components:
                               Cloud Run for Anthos: supported
 
                               List of environment variables to set in the container.
-                            x-kubernetes-immutable: true
                             x-dcl-list-type: list
                             items:
                               type: object
@@ -904,7 +858,6 @@ components:
                                   x-dcl-go-name: Name
                                   description: Name of the environment variable. Must
                                     be a C_IDENTIFIER.
-                                  x-kubernetes-immutable: true
                                 value:
                                   type: string
                                   x-dcl-go-name: Value
@@ -919,7 +872,6 @@ components:
                                     references will never be expanded, regardless of whether the variable
                                     exists or not.
                                     Defaults to "".
-                                  x-kubernetes-immutable: true
                                 valueFrom:
                                   type: object
                                   x-dcl-go-name: ValueFrom
@@ -933,7 +885,6 @@ components:
 
                                     Source for the environment variable's value. Cannot be used if value is not
                                     empty.
-                                  x-kubernetes-immutable: true
                                   properties:
                                     configMapKeyRef:
                                       type: object
@@ -947,7 +898,6 @@ components:
                                         Cloud Run for Anthos: supported
 
                                         Selects a key of a ConfigMap.
-                                      x-kubernetes-immutable: true
                                       properties:
                                         key:
                                           type: string
@@ -958,7 +908,6 @@ components:
                                             Cloud Run for Anthos: supported
 
                                             The key to select.
-                                          x-kubernetes-immutable: true
                                         localObjectReference:
                                           type: object
                                           x-dcl-go-name: LocalObjectReference
@@ -966,7 +915,6 @@ components:
                                           description: |-
                                             This field should not be used directly as it is meant to be inlined
                                             directly into the message. Use the "name" field instead.
-                                          x-kubernetes-immutable: true
                                           properties:
                                             name:
                                               type: string
@@ -982,7 +930,6 @@ components:
                                                 More info:
                                                 https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
                                                 TODO: Add other useful fields. apiVersion, kind, uid?
-                                              x-kubernetes-immutable: true
                                         name:
                                           type: string
                                           x-dcl-go-name: Name
@@ -992,7 +939,6 @@ components:
                                             Cloud Run for Anthos: supported
 
                                             The ConfigMap to select from.
-                                          x-kubernetes-immutable: true
                                         optional:
                                           type: boolean
                                           x-dcl-go-name: Optional
@@ -1004,7 +950,6 @@ components:
                                             Cloud Run for Anthos: supported
 
                                             Specify whether the ConfigMap or its key must be defined
-                                          x-kubernetes-immutable: true
                                     secretKeyRef:
                                       type: object
                                       x-dcl-go-name: SecretKeyRef
@@ -1017,7 +962,6 @@ components:
                                         Cloud Run for Anthos: supported
 
                                         Selects a key of a secret in the pod's namespace
-                                      x-kubernetes-immutable: true
                                       properties:
                                         key:
                                           type: string
@@ -1028,7 +972,6 @@ components:
                                             Cloud Run for Anthos: supported
 
                                             The key of the secret to select from.  Must be a valid secret key.
-                                          x-kubernetes-immutable: true
                                         localObjectReference:
                                           type: object
                                           x-dcl-go-name: LocalObjectReference
@@ -1036,7 +979,6 @@ components:
                                           description: |-
                                             This field should not be used directly as it is meant to be inlined
                                             directly into the message. Use the "name" field instead.
-                                          x-kubernetes-immutable: true
                                           properties:
                                             name:
                                               type: string
@@ -1052,7 +994,6 @@ components:
                                                 More info:
                                                 https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
                                                 TODO: Add other useful fields. apiVersion, kind, uid?
-                                              x-kubernetes-immutable: true
                                         name:
                                           type: string
                                           x-dcl-go-name: Name
@@ -1062,7 +1003,6 @@ components:
                                             Cloud Run for Anthos: supported
 
                                             The name of the secret in the pod's namespace to select from.
-                                          x-kubernetes-immutable: true
                                         optional:
                                           type: boolean
                                           x-dcl-go-name: Optional
@@ -1074,7 +1014,6 @@ components:
                                             Cloud Run for Anthos: supported
 
                                             Specify whether the Secret or its key must be defined
-                                          x-kubernetes-immutable: true
                           envFrom:
                             type: array
                             x-dcl-go-name: EnvFrom
@@ -1091,7 +1030,6 @@ components:
                               exists in multiple sources, the value associated with the last source will
                               take precedence. Values defined by an Env with a duplicate key will take
                               precedence. Cannot be updated.
-                            x-kubernetes-immutable: true
                             x-dcl-list-type: list
                             items:
                               type: object
@@ -1109,7 +1047,6 @@ components:
                                     Cloud Run for Anthos: supported
 
                                     The ConfigMap to select from
-                                  x-kubernetes-immutable: true
                                   properties:
                                     localObjectReference:
                                       type: object
@@ -1118,7 +1055,6 @@ components:
                                       description: |-
                                         This field should not be used directly as it is meant to be inlined
                                         directly into the message. Use the "name" field instead.
-                                      x-kubernetes-immutable: true
                                       properties:
                                         name:
                                           type: string
@@ -1134,7 +1070,6 @@ components:
                                             More info:
                                             https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
                                             TODO: Add other useful fields. apiVersion, kind, uid?
-                                          x-kubernetes-immutable: true
                                     name:
                                       type: string
                                       x-dcl-go-name: Name
@@ -1144,7 +1079,6 @@ components:
                                         Cloud Run for Anthos: supported
 
                                         The ConfigMap to select from.
-                                      x-kubernetes-immutable: true
                                     optional:
                                       type: boolean
                                       x-dcl-go-name: Optional
@@ -1156,7 +1090,6 @@ components:
                                         Cloud Run for Anthos: supported
 
                                         Specify whether the ConfigMap must be defined
-                                      x-kubernetes-immutable: true
                                 prefix:
                                   type: string
                                   x-dcl-go-name: Prefix
@@ -1169,7 +1102,6 @@ components:
 
                                     An optional identifier to prepend to each key in the ConfigMap. Must be a
                                     C_IDENTIFIER.
-                                  x-kubernetes-immutable: true
                                 secretRef:
                                   type: object
                                   x-dcl-go-name: SecretRef
@@ -1182,7 +1114,6 @@ components:
                                     Cloud Run for Anthos: supported
 
                                     The Secret to select from
-                                  x-kubernetes-immutable: true
                                   properties:
                                     localObjectReference:
                                       type: object
@@ -1191,7 +1122,6 @@ components:
                                       description: |-
                                         This field should not be used directly as it is meant to be inlined
                                         directly into the message. Use the "name" field instead.
-                                      x-kubernetes-immutable: true
                                       properties:
                                         name:
                                           type: string
@@ -1207,7 +1137,6 @@ components:
                                             More info:
                                             https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
                                             TODO: Add other useful fields. apiVersion, kind, uid?
-                                          x-kubernetes-immutable: true
                                     name:
                                       type: string
                                       x-dcl-go-name: Name
@@ -1217,7 +1146,6 @@ components:
                                         Cloud Run for Anthos: supported
 
                                         The Secret to select from.
-                                      x-kubernetes-immutable: true
                                     optional:
                                       type: boolean
                                       x-dcl-go-name: Optional
@@ -1229,7 +1157,6 @@ components:
                                         Cloud Run for Anthos: supported
 
                                         Specify whether the Secret must be defined
-                                      x-kubernetes-immutable: true
                           image:
                             type: string
                             x-dcl-go-name: Image
@@ -1241,7 +1168,6 @@ components:
 
                               URL of the Container image.
                               More info: https://kubernetes.io/docs/concepts/containers/images
-                            x-kubernetes-immutable: true
                           imagePullPolicy:
                             type: string
                             x-dcl-go-name: ImagePullPolicy
@@ -1257,7 +1183,6 @@ components:
                               Defaults to Always if :latest tag is specified, or IfNotPresent otherwise.
                               More info:
                               https://kubernetes.io/docs/concepts/containers/images#updating-images
-                            x-kubernetes-immutable: true
                           livenessProbe:
                             type: object
                             x-dcl-go-name: LivenessProbe
@@ -1273,7 +1198,6 @@ components:
                               Container will be restarted if the probe fails.
                               More info:
                               https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-                            x-kubernetes-immutable: true
                             properties:
                               exec:
                                 type: object
@@ -1290,7 +1214,6 @@ components:
                                   Exec specifies the action to take.
 
                                   A field inlined from the Handler message.
-                                x-kubernetes-immutable: true
                                 properties:
                                   command:
                                     type: string
@@ -1308,7 +1231,6 @@ components:
                                       shell instructions ('|', etc) won't work. To use a shell, you need to
                                       explicitly call out to that shell. Exit status of 0 is treated as
                                       live/healthy and non-zero is unhealthy.
-                                    x-kubernetes-immutable: true
                               failureThreshold:
                                 type: integer
                                 format: int64
@@ -1322,7 +1244,6 @@ components:
 
                                   Minimum consecutive failures for the probe to be considered failed after
                                   having succeeded. Defaults to 3. Minimum value is 1.
-                                x-kubernetes-immutable: true
                               httpGet:
                                 type: object
                                 x-dcl-go-name: HttpGet
@@ -1337,7 +1258,6 @@ components:
                                   HTTPGet specifies the http request to perform.
 
                                   A field inlined from the Handler message.
-                                x-kubernetes-immutable: true
                                 properties:
                                   host:
                                     type: string
@@ -1351,7 +1271,6 @@ components:
 
                                       Host name to connect to, defaults to the pod IP. You probably want to set
                                       "Host" in httpHeaders instead.
-                                    x-kubernetes-immutable: true
                                   httpHeaders:
                                     type: array
                                     x-dcl-go-name: HttpHeaders
@@ -1363,7 +1282,6 @@ components:
                                       Cloud Run for Anthos: supported
 
                                       Custom headers to set in the request. HTTP allows repeated headers.
-                                    x-kubernetes-immutable: true
                                     x-dcl-list-type: list
                                     items:
                                       type: object
@@ -1378,7 +1296,6 @@ components:
                                             Cloud Run for Anthos: supported
 
                                             The header field name
-                                          x-kubernetes-immutable: true
                                         value:
                                           type: string
                                           x-dcl-go-name: Value
@@ -1388,7 +1305,6 @@ components:
                                             Cloud Run for Anthos: supported
 
                                             The header field value
-                                          x-kubernetes-immutable: true
                                   path:
                                     type: string
                                     x-dcl-go-name: Path
@@ -1400,7 +1316,6 @@ components:
                                       Cloud Run for Anthos: supported
 
                                       Path to access on the HTTP server.
-                                    x-kubernetes-immutable: true
                                   scheme:
                                     type: string
                                     x-dcl-go-name: Scheme
@@ -1413,7 +1328,6 @@ components:
 
                                       Scheme to use for connecting to the host.
                                       Defaults to HTTP.
-                                    x-kubernetes-immutable: true
                               initialDelaySeconds:
                                 type: integer
                                 format: int64
@@ -1428,7 +1342,6 @@ components:
                                   Number of seconds after the container has started before liveness probes
                                   are initiated. More info:
                                   https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-                                x-kubernetes-immutable: true
                               periodSeconds:
                                 type: integer
                                 format: int64
@@ -1442,7 +1355,6 @@ components:
 
                                   How often (in seconds) to perform the probe.
                                   Default to 10 seconds. Minimum value is 1.
-                                x-kubernetes-immutable: true
                               successThreshold:
                                 type: integer
                                 format: int64
@@ -1457,7 +1369,6 @@ components:
                                   Minimum consecutive successes for the probe to be considered successful
                                   after having failed. Defaults to 1. Must be 1 for liveness. Minimum value
                                   is 1.
-                                x-kubernetes-immutable: true
                               tcpSocket:
                                 type: object
                                 x-dcl-go-name: TcpSocket
@@ -1473,7 +1384,6 @@ components:
                                   TCP hooks not yet supported
 
                                   A field inlined from the Handler message.
-                                x-kubernetes-immutable: true
                                 properties:
                                   host:
                                     type: string
@@ -1486,7 +1396,6 @@ components:
                                       Cloud Run for Anthos: supported
 
                                       Optional: Host name to connect to, defaults to the pod IP.
-                                    x-kubernetes-immutable: true
                                   port:
                                     type: integer
                                     format: int64
@@ -1503,7 +1412,6 @@ components:
 
                                       This field is currently limited to integer types only because of proto's
                                       inability to properly support the IntOrString golang type.
-                                    x-kubernetes-immutable: true
                               timeoutSeconds:
                                 type: integer
                                 format: int64
@@ -1519,7 +1427,6 @@ components:
                                   Defaults to 1 second. Minimum value is 1.
                                   More info:
                                   https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-                                x-kubernetes-immutable: true
                           name:
                             type: string
                             x-dcl-go-name: Name
@@ -1527,7 +1434,6 @@ components:
                               (Optional)
 
                               Name of the container specified as a DNS_LABEL.
-                            x-kubernetes-immutable: true
                           ports:
                             type: array
                             x-dcl-go-name: Ports
@@ -1540,7 +1446,6 @@ components:
 
                               If omitted, a port number will be chosen and passed to the container
                               through the PORT environment variable for the container to listen on.
-                            x-kubernetes-immutable: true
                             x-dcl-list-type: list
                             items:
                               type: object
@@ -1555,7 +1460,6 @@ components:
 
                                     Port number the container listens on.
                                     This must be a valid port number, 0 < x < 65536.
-                                  x-kubernetes-immutable: true
                                 name:
                                   type: string
                                   x-dcl-go-name: Name
@@ -1568,7 +1472,6 @@ components:
 
                                     If specified, used to specify which protocol to use.
                                     Allowed values are "http1" and "h2c".
-                                  x-kubernetes-immutable: true
                                 protocol:
                                   type: string
                                   x-dcl-go-name: Protocol
@@ -1581,7 +1484,6 @@ components:
 
                                     Protocol for port. Must be "TCP".
                                     Defaults to "TCP".
-                                  x-kubernetes-immutable: true
                           readinessProbe:
                             type: object
                             x-dcl-go-name: ReadinessProbe
@@ -1597,7 +1499,6 @@ components:
                               Container will be removed from service endpoints if the probe fails.
                               More info:
                               https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-                            x-kubernetes-immutable: true
                             properties:
                               exec:
                                 type: object
@@ -1614,7 +1515,6 @@ components:
                                   Exec specifies the action to take.
 
                                   A field inlined from the Handler message.
-                                x-kubernetes-immutable: true
                                 properties:
                                   command:
                                     type: string
@@ -1632,7 +1532,6 @@ components:
                                       shell instructions ('|', etc) won't work. To use a shell, you need to
                                       explicitly call out to that shell. Exit status of 0 is treated as
                                       live/healthy and non-zero is unhealthy.
-                                    x-kubernetes-immutable: true
                               failureThreshold:
                                 type: integer
                                 format: int64
@@ -1646,7 +1545,6 @@ components:
 
                                   Minimum consecutive failures for the probe to be considered failed after
                                   having succeeded. Defaults to 3. Minimum value is 1.
-                                x-kubernetes-immutable: true
                               httpGet:
                                 type: object
                                 x-dcl-go-name: HttpGet
@@ -1661,7 +1559,6 @@ components:
                                   HTTPGet specifies the http request to perform.
 
                                   A field inlined from the Handler message.
-                                x-kubernetes-immutable: true
                                 properties:
                                   host:
                                     type: string
@@ -1675,7 +1572,6 @@ components:
 
                                       Host name to connect to, defaults to the pod IP. You probably want to set
                                       "Host" in httpHeaders instead.
-                                    x-kubernetes-immutable: true
                                   httpHeaders:
                                     type: array
                                     x-dcl-go-name: HttpHeaders
@@ -1687,7 +1583,6 @@ components:
                                       Cloud Run for Anthos: supported
 
                                       Custom headers to set in the request. HTTP allows repeated headers.
-                                    x-kubernetes-immutable: true
                                     x-dcl-list-type: list
                                     items:
                                       type: object
@@ -1702,7 +1597,6 @@ components:
                                             Cloud Run for Anthos: supported
 
                                             The header field name
-                                          x-kubernetes-immutable: true
                                         value:
                                           type: string
                                           x-dcl-go-name: Value
@@ -1712,7 +1606,6 @@ components:
                                             Cloud Run for Anthos: supported
 
                                             The header field value
-                                          x-kubernetes-immutable: true
                                   path:
                                     type: string
                                     x-dcl-go-name: Path
@@ -1724,7 +1617,6 @@ components:
                                       Cloud Run for Anthos: supported
 
                                       Path to access on the HTTP server.
-                                    x-kubernetes-immutable: true
                                   scheme:
                                     type: string
                                     x-dcl-go-name: Scheme
@@ -1737,7 +1629,6 @@ components:
 
                                       Scheme to use for connecting to the host.
                                       Defaults to HTTP.
-                                    x-kubernetes-immutable: true
                               initialDelaySeconds:
                                 type: integer
                                 format: int64
@@ -1752,7 +1643,6 @@ components:
                                   Number of seconds after the container has started before liveness probes
                                   are initiated. More info:
                                   https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-                                x-kubernetes-immutable: true
                               periodSeconds:
                                 type: integer
                                 format: int64
@@ -1766,7 +1656,6 @@ components:
 
                                   How often (in seconds) to perform the probe.
                                   Default to 10 seconds. Minimum value is 1.
-                                x-kubernetes-immutable: true
                               successThreshold:
                                 type: integer
                                 format: int64
@@ -1781,7 +1670,6 @@ components:
                                   Minimum consecutive successes for the probe to be considered successful
                                   after having failed. Defaults to 1. Must be 1 for liveness. Minimum value
                                   is 1.
-                                x-kubernetes-immutable: true
                               tcpSocket:
                                 type: object
                                 x-dcl-go-name: TcpSocket
@@ -1797,7 +1685,6 @@ components:
                                   TCP hooks not yet supported
 
                                   A field inlined from the Handler message.
-                                x-kubernetes-immutable: true
                                 properties:
                                   host:
                                     type: string
@@ -1810,7 +1697,6 @@ components:
                                       Cloud Run for Anthos: supported
 
                                       Optional: Host name to connect to, defaults to the pod IP.
-                                    x-kubernetes-immutable: true
                                   port:
                                     type: integer
                                     format: int64
@@ -1826,7 +1712,6 @@ components:
 
                                       This field is currently limited to integer types only because of proto's
                                       inability to properly support the IntOrString golang type.
-                                    x-kubernetes-immutable: true
                               timeoutSeconds:
                                 type: integer
                                 format: int64
@@ -1842,7 +1727,6 @@ components:
                                   Defaults to 1 second. Minimum value is 1.
                                   More info:
                                   https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-                                x-kubernetes-immutable: true
                           resources:
                             type: object
                             x-dcl-go-name: Resources
@@ -1857,7 +1741,6 @@ components:
                               Compute Resources required by this container.
                               More info:
                               https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources
-                            x-kubernetes-immutable: true
                             properties:
                               limits:
                                 type: object
@@ -1875,7 +1758,6 @@ components:
                                   Limits describes the maximum amount of compute resources allowed.
                                   The values of the map is string form of the 'quantity' k8s type:
                                   https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
-                                x-kubernetes-immutable: true
                               requests:
                                 type: object
                                 additionalProperties:
@@ -1894,7 +1776,6 @@ components:
                                   explicitly specified, otherwise to an implementation-defined value.
                                   The values of the map is string form of the 'quantity' k8s type:
                                   https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
-                                x-kubernetes-immutable: true
                           securityContext:
                             type: object
                             x-dcl-go-name: SecurityContext
@@ -1910,7 +1791,6 @@ components:
                               More info: https://kubernetes.io/docs/concepts/policy/security-context/
                               More info:
                               https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-                            x-kubernetes-immutable: true
                             properties:
                               runAsUser:
                                 type: integer
@@ -1928,7 +1808,6 @@ components:
                                   May also be set in PodSecurityContext.  If set in both SecurityContext and
                                   PodSecurityContext, the value specified in SecurityContext takes
                                   precedence.
-                                x-kubernetes-immutable: true
                           terminationMessagePath:
                             type: string
                             x-dcl-go-name: TerminationMessagePath
@@ -1945,7 +1824,6 @@ components:
                               message. Will be truncated by the node if greater than 4096 bytes. The
                               total message length across all containers will be limited to 12kb.
                               Defaults to /dev/termination-log.
-                            x-kubernetes-immutable: true
                           terminationMessagePolicy:
                             type: string
                             x-dcl-go-name: TerminationMessagePolicy
@@ -1962,7 +1840,6 @@ components:
                               of container log output if the termination message file is empty and the
                               container exited with an error. The log output is limited to 2048 bytes or
                               80 lines, whichever is smaller. Defaults to File. Cannot be updated.
-                            x-kubernetes-immutable: true
                           volumeMounts:
                             type: array
                             x-dcl-go-name: VolumeMounts
@@ -1974,7 +1851,6 @@ components:
                               Cloud Run for Anthos: supported
 
                               Pod volumes to mount into the container's filesystem.
-                            x-kubernetes-immutable: true
                             x-dcl-list-type: list
                             items:
                               type: object
@@ -1990,7 +1866,6 @@ components:
 
                                     Path within the container at which the volume should be mounted.  Must
                                     not contain ':'.
-                                  x-kubernetes-immutable: true
                                 name:
                                   type: string
                                   x-dcl-go-name: Name
@@ -2000,7 +1875,6 @@ components:
                                     Cloud Run for Anthos: supported
 
                                     This must match the Name of a Volume.
-                                  x-kubernetes-immutable: true
                                 readOnly:
                                   type: boolean
                                   x-dcl-go-name: ReadOnly
@@ -2013,7 +1887,6 @@ components:
 
                                     Only true is accepted.
                                     Defaults to true.
-                                  x-kubernetes-immutable: true
                                 subPath:
                                   type: string
                                   x-dcl-go-name: SubPath
@@ -2026,7 +1899,6 @@ components:
 
                                     Path within the volume from which the container's volume should be mounted.
                                     Defaults to "" (volume's root).
-                                  x-kubernetes-immutable: true
                           workingDir:
                             type: string
                             x-dcl-go-name: WorkingDir
@@ -2040,7 +1912,6 @@ components:
                               Container's working directory.
                               If not specified, the container runtime's default will be used, which
                               might be configured in the container image.
-                            x-kubernetes-immutable: true
                     serviceAccountName:
                       type: string
                       x-dcl-go-name: ServiceAccountName
@@ -2049,7 +1920,6 @@ components:
                         of the service. The service account represents the identity of the
                         running revision, and determines what permissions the revision has. If
                         not provided, the revision will use the project's default service account.
-                      x-kubernetes-immutable: true
                     timeoutSeconds:
                       type: integer
                       format: int64
@@ -2063,11 +1933,9 @@ components:
 
                         Cloud Run for Anthos: defaults to 300 seconds (5 minutes). Maximum allowed
                         value is configurable by the cluster operator.
-                      x-kubernetes-immutable: true
                     volumes:
                       type: array
                       x-dcl-go-name: Volumes
-                      x-kubernetes-immutable: true
                       x-dcl-list-type: list
                       items:
                         type: object
@@ -2081,7 +1949,6 @@ components:
                               Cloud Run fully managed: not supported
 
                               Cloud Run for Anthos: supported
-                            x-kubernetes-immutable: true
                             properties:
                               defaultMode:
                                 type: integer
@@ -2098,7 +1965,6 @@ components:
                                   0777. Defaults to 0644. Directories within the path are not affected by
                                   this setting. This might be in conflict with other options that affect the
                                   file mode, like fsGroup, and the result can be other mode bits set.
-                                x-kubernetes-immutable: true
                               items:
                                 type: array
                                 x-dcl-go-name: Items
@@ -2115,7 +1981,6 @@ components:
                                   projected into the specified paths, and unlisted keys will not be
                                   present. If a key is specified which is not present in the Secret,
                                   the volume setup will error unless it is marked optional.
-                                x-kubernetes-immutable: true
                                 x-dcl-list-type: list
                                 items:
                                   type: object
@@ -2130,7 +1995,6 @@ components:
                                         Cloud Run for Anthos: supported
 
                                         The key to project.
-                                      x-kubernetes-immutable: true
                                     mode:
                                       type: integer
                                       format: int64
@@ -2146,7 +2010,6 @@ components:
                                         specified, the volume defaultMode will be used. This might be in conflict
                                         with other options that affect the file mode, like fsGroup, and the result
                                         can be other mode bits set.
-                                      x-kubernetes-immutable: true
                                     path:
                                       type: string
                                       x-dcl-go-name: Path
@@ -2159,7 +2022,6 @@ components:
                                         May not be an absolute path.
                                         May not contain the path element '..'.
                                         May not start with the string '..'.
-                                      x-kubernetes-immutable: true
                               name:
                                 type: string
                                 x-dcl-go-name: Name
@@ -2169,7 +2031,6 @@ components:
                                   Cloud Run for Anthos: supported
 
                                   Name of the config.
-                                x-kubernetes-immutable: true
                               optional:
                                 type: boolean
                                 x-dcl-go-name: Optional
@@ -2181,7 +2042,6 @@ components:
                                   Cloud Run for Anthos: supported
 
                                   Specify whether the Secret or its keys must be defined.
-                                x-kubernetes-immutable: true
                           name:
                             type: string
                             x-dcl-go-name: Name
@@ -2191,7 +2051,6 @@ components:
                               Cloud Run for Anthos: supported
 
                               Volume's name.
-                            x-kubernetes-immutable: true
                           secret:
                             type: object
                             x-dcl-go-name: Secret
@@ -2200,7 +2059,6 @@ components:
                               Cloud Run fully managed: not supported
 
                               Cloud Run for Anthos: supported
-                            x-kubernetes-immutable: true
                             properties:
                               defaultMode:
                                 type: integer
@@ -2217,7 +2075,6 @@ components:
                                   0777. Defaults to 0644. Directories within the path are not affected by
                                   this setting. This might be in conflict with other options that affect the
                                   file mode, like fsGroup, and the result can be other mode bits set.
-                                x-kubernetes-immutable: true
                               items:
                                 type: array
                                 x-dcl-go-name: Items
@@ -2234,7 +2091,6 @@ components:
                                   projected into the specified paths, and unlisted keys will not be
                                   present. If a key is specified which is not present in the Secret,
                                   the volume setup will error unless it is marked optional.
-                                x-kubernetes-immutable: true
                                 x-dcl-list-type: list
                                 items:
                                   type: object
@@ -2249,7 +2105,6 @@ components:
                                         Cloud Run for Anthos: supported
 
                                         The key to project.
-                                      x-kubernetes-immutable: true
                                     mode:
                                       type: integer
                                       format: int64
@@ -2265,7 +2120,6 @@ components:
                                         specified, the volume defaultMode will be used. This might be in conflict
                                         with other options that affect the file mode, like fsGroup, and the result
                                         can be other mode bits set.
-                                      x-kubernetes-immutable: true
                                     path:
                                       type: string
                                       x-dcl-go-name: Path
@@ -2278,7 +2132,6 @@ components:
                                         May not be an absolute path.
                                         May not contain the path element '..'.
                                         May not start with the string '..'.
-                                      x-kubernetes-immutable: true
                               optional:
                                 type: boolean
                                 x-dcl-go-name: Optional
@@ -2290,7 +2143,6 @@ components:
                                   Cloud Run for Anthos: supported
 
                                   Specify whether the Secret or its keys must be defined.
-                                x-kubernetes-immutable: true
                               secretName:
                                 type: string
                                 x-dcl-go-name: SecretName
@@ -2300,14 +2152,12 @@ components:
                                   Cloud Run for Anthos: supported
 
                                   Name of the secret in the container's namespace to use.
-                                x-kubernetes-immutable: true
             traffic:
               type: array
               x-dcl-go-name: Traffic
               description: |-
                 Traffic specifies how to distribute traffic over a collection of Knative
                 Revisions and Configurations.
-              x-kubernetes-immutable: true
               x-dcl-list-type: list
               items:
                 type: object
@@ -2325,7 +2175,6 @@ components:
                       with RevisionName.
 
                       Cloud Run currently supports a single ConfigurationName.
-                    x-kubernetes-immutable: true
                   latestRevision:
                     type: boolean
                     x-dcl-go-name: LatestRevision
@@ -2336,7 +2185,6 @@ components:
                       empty; it must be false when RevisionName is non-empty.
 
                       +optional
-                    x-kubernetes-immutable: true
                   percent:
                     type: integer
                     format: int64
@@ -2347,7 +2195,6 @@ components:
 
                       Cloud Run currently requires 100 percent for a single ConfigurationName
                       TrafficTarget entry.
-                    x-kubernetes-immutable: true
                   revisionName:
                     type: string
                     x-dcl-go-name: RevisionName
@@ -2356,7 +2203,6 @@ components:
                       traffic. This is mutually exclusive with ConfigurationName.
 
                       Providing RevisionName in spec is not currently supported by Cloud Run.
-                    x-kubernetes-immutable: true
                   tag:
                     type: string
                     x-dcl-go-name: Tag
@@ -2366,7 +2212,6 @@ components:
 
                       Not currently supported in Cloud Run.
                       +optional
-                    x-kubernetes-immutable: true
                   url:
                     type: string
                     x-dcl-go-name: Url
@@ -2378,7 +2223,6 @@ components:
                       (e.g. basic auth, url path, etc.
 
                       Not currently supported in Cloud Run.
-                    x-kubernetes-immutable: true
         status:
           type: object
           x-dcl-go-name: Status
@@ -2387,7 +2231,6 @@ components:
           description: |-
             Status communicates the observed state of the Service (from the
             controller).
-          x-kubernetes-immutable: true
           properties:
             address:
               type: object
@@ -2396,12 +2239,10 @@ components:
               description: |-
                 From RouteStatus.
                 Similar to url, information on where the service is available on HTTP.
-              x-kubernetes-immutable: true
               properties:
                 url:
                   type: string
                   x-dcl-go-name: Url
-                  x-kubernetes-immutable: true
             conditions:
               type: array
               x-dcl-go-name: Conditions
@@ -2414,7 +2255,6 @@ components:
                 * "RoutesReady": true when the underlying Route is ready.
                 * "Ready": true when both the underlying Route and Configuration are
                 ready.
-              x-kubernetes-immutable: true
               x-dcl-list-type: list
               items:
                 type: object
@@ -2426,7 +2266,6 @@ components:
                     x-dcl-go-type: ServiceStatusConditionsLastTransitionTime
                     description: Optional. Last time the condition transitioned from
                       one status to another.
-                    x-kubernetes-immutable: true
                     properties:
                       nanos:
                         type: integer
@@ -2437,7 +2276,6 @@ components:
                           second values with fractions must still have non-negative nanos values
                           that count forward in time. Must be from 0 to 999,999,999
                           inclusive.
-                        x-kubernetes-immutable: true
                       seconds:
                         type: integer
                         format: int64
@@ -2446,30 +2284,25 @@ components:
                           Represents seconds of UTC time since Unix epoch
                           1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
                           9999-12-31T23:59:59Z inclusive.
-                        x-kubernetes-immutable: true
                   message:
                     type: string
                     x-dcl-go-name: Message
                     description: Optional. Human readable message indicating details
                       about the current status.
-                    x-kubernetes-immutable: true
                   reason:
                     type: string
                     x-dcl-go-name: Reason
                     description: Optional. One-word CamelCase reason for the condition's
                       last transition.
-                    x-kubernetes-immutable: true
                   severity:
                     type: string
                     x-dcl-go-name: Severity
                     description: Optional. How to interpret failures of this condition,
                       one of Error, Warning, Info
-                    x-kubernetes-immutable: true
                   status:
                     type: string
                     x-dcl-go-name: Status
                     description: Status of the condition, one of True, False, Unknown.
-                    x-kubernetes-immutable: true
                   type:
                     type: string
                     x-dcl-go-name: Type
@@ -2479,7 +2312,6 @@ components:
                       https://github.com/knative/serving/blob/master/docs/spec/errors.md#error-conditions-and-reporting
                       Types common to all resources include:
                       * "Ready": True when the Resource is ready.
-                    x-kubernetes-immutable: true
             latestCreatedRevisionName:
               type: string
               x-dcl-go-name: LatestCreatedRevisionName
@@ -2488,7 +2320,6 @@ components:
                 LatestCreatedRevisionName is the last revision that was created from this
                 Service's Configuration. It might not be ready yet, for that use
                 LatestReadyRevisionName.
-              x-kubernetes-immutable: true
             latestReadyRevisionName:
               type: string
               x-dcl-go-name: LatestReadyRevisionName
@@ -2497,7 +2328,6 @@ components:
                 LatestReadyRevisionName holds the name of the latest Revision stamped out
                 from this Service's Configuration that has had its "Ready" condition become
                 "True".
-              x-kubernetes-immutable: true
             observedGeneration:
               type: integer
               format: int64
@@ -2509,7 +2339,6 @@ components:
                 Clients polling for completed reconciliation should poll until
                 observedGeneration = metadata.generation and the Ready condition's status
                 is True or False.
-              x-kubernetes-immutable: true
             traffic:
               type: array
               x-dcl-go-name: Traffic
@@ -2519,7 +2348,6 @@ components:
                 These entries will always contain RevisionName references.
                 When ConfigurationName appears in the spec, this will hold the
                 LatestReadyRevisionName that we last observed.
-              x-kubernetes-immutable: true
               x-dcl-list-type: list
               items:
                 type: object
@@ -2537,7 +2365,6 @@ components:
                       with RevisionName.
 
                       Cloud Run currently supports a single ConfigurationName.
-                    x-kubernetes-immutable: true
                   latestRevision:
                     type: boolean
                     x-dcl-go-name: LatestRevision
@@ -2548,7 +2375,6 @@ components:
                       empty; it must be false when RevisionName is non-empty.
 
                       +optional
-                    x-kubernetes-immutable: true
                   percent:
                     type: integer
                     format: int64
@@ -2559,7 +2385,6 @@ components:
 
                       Cloud Run currently requires 100 percent for a single ConfigurationName
                       TrafficTarget entry.
-                    x-kubernetes-immutable: true
                   revisionName:
                     type: string
                     x-dcl-go-name: RevisionName
@@ -2568,7 +2393,6 @@ components:
                       traffic. This is mutually exclusive with ConfigurationName.
 
                       Providing RevisionName in spec is not currently supported by Cloud Run.
-                    x-kubernetes-immutable: true
                   tag:
                     type: string
                     x-dcl-go-name: Tag
@@ -2578,7 +2402,6 @@ components:
 
                       Not currently supported in Cloud Run.
                       +optional
-                    x-kubernetes-immutable: true
                   url:
                     type: string
                     x-dcl-go-name: Url
@@ -2590,7 +2413,6 @@ components:
                       (e.g. basic auth, url path, etc.
 
                       Not currently supported in Cloud Run.
-                    x-kubernetes-immutable: true
             url:
               type: string
               x-dcl-go-name: Url
@@ -2599,4 +2421,3 @@ components:
                 URL holds the url that will distribute traffic over the provided traffic
                 targets. It generally has the form
                 https://{route-hash}-{project-hash}-{cluster-level-suffix}.a.run.app
-              x-kubernetes-immutable: true

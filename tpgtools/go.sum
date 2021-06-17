@@ -42,6 +42,8 @@ github.com/GoogleCloudPlatform/declarative-resource-client-library v0.0.0-202104
 github.com/GoogleCloudPlatform/declarative-resource-client-library v0.0.0-20210420173332-684f70639c1a/go.mod h1:oEeBHikdF/NrnUy0ornVaY1OT+jGvTqm+LQS0+ZDKzU=
 github.com/GoogleCloudPlatform/declarative-resource-client-library v0.0.0-20210519165700-76bc5cc4eeee h1:WZLlNdsfnB6FHmuyYtMaCEBVoKgUDW4YtXLGac5uB54=
 github.com/GoogleCloudPlatform/declarative-resource-client-library v0.0.0-20210519165700-76bc5cc4eeee/go.mod h1:oEeBHikdF/NrnUy0ornVaY1OT+jGvTqm+LQS0+ZDKzU=
+github.com/GoogleCloudPlatform/declarative-resource-client-library v0.0.0-20210617164845-328d5ab3c794 h1:/VysE4BmOZ/tAV9Da+kO3L4gMkqtwX8lccBPAlzvO5w=
+github.com/GoogleCloudPlatform/declarative-resource-client-library v0.0.0-20210617164845-328d5ab3c794/go.mod h1:oEeBHikdF/NrnUy0ornVaY1OT+jGvTqm+LQS0+ZDKzU=
 github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/agext/levenshtein v1.2.2 h1:0S/Yg6LYmFJ5stwQeRp6EeOcCbj7xiqQSdNelsXvaqE=
 github.com/agext/levenshtein v1.2.2/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
