@@ -46,7 +46,7 @@ func Merge<%= resource_name -%>IamBindingDelete(existing, incoming Asset) Asset 
 	return mergeDeleteIamAssets(existing, incoming, mergeDeleteAuthoritativeBindings)
 }
 
-func Merge<%= object.name -%>IamMember(existing, incoming Asset) Asset {
+func Merge<%= resource_name -%>IamMember(existing, incoming Asset) Asset {
 	return mergeIamAssets(existing, incoming, mergeAdditiveBindings)
 }
 
