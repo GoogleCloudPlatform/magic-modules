@@ -172,7 +172,7 @@ func GetRegionFromRegionSelfLink(selfLink string) string {
 
 // This function supports selflinks that have regions and locations in their paths
 func GetRegionFromRegionalSelfLink(selfLink string) string {
-	re := regexp.MustCompile("projects/[a-zA-Z0-9-]*/[locations/regions]+/([a-zA-Z0-9-]*)")
+	re := regexp.MustCompile("projects/[a-zA-Z0-9-]*/(?:locations|regions)/([a-zA-Z0-9-]*)")
 	switch {
 	case re.MatchString(selfLink):
 		if res := re.FindStringSubmatch(selfLink); len(res) == 2 && res[1] != "" {
