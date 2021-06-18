@@ -1,5 +1,14 @@
 ---
 steps:
+    - name: 'gcr.io/graphite-docker-images/changelog-checker'
+      secretEnv: ["GITHUB_TOKEN"]
+      args:
+          - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - 0  # Build step
+
     - name: 'gcr.io/graphite-docker-images/contributor-checker'
       secretEnv: ["GITHUB_TOKEN"]
       args:
@@ -182,7 +191,7 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
-          - "21"  # Build step
+          - "22"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpgb-test
@@ -194,7 +203,7 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
-          - "22"  # Build step
+          - "23"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpg-test
@@ -206,19 +215,13 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
-          - "23"  # Build step
+          - "24"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-vcr-tester'
       id: tpg-vcr-test
       secretEnv: ["TEAMCITY_TOKEN", "GITHUB_TOKEN"]
       waitFor: ["diff"]
       timeout: 12000s
-      args:
-          - $_PR_NUMBER
-
-    - name: 'gcr.io/graphite-docker-images/changelog-checker'
-      secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tpg-test", "tpgb-test"]
       args:
           - $_PR_NUMBER
 
