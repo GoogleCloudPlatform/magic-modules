@@ -7,13 +7,12 @@ pr_number=$2
 mm_commit_sha=$3
 build_id=$4
 project_id=$5
+build_step=$6
 github_username=modular-magician
 if [ "$version" == "ga" ]; then
     gh_repo=terraform-provider-google
-    build_step="24"
 elif [ "$version" == "beta" ]; then
     gh_repo=terraform-provider-google-beta
-    build_step="23"
 else
     echo "no repo, dying."
     exit 1

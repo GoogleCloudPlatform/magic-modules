@@ -6,9 +6,9 @@ pr_number=$1
 mm_commit_sha=$2
 build_id=$3
 project_id=$4
+build_step=$5
 github_username=modular-magician
 gh_repo=terraform-google-conversion
-build_step="21"
 
 scratch_path=https://$github_username:$GITHUB_TOKEN@github.com/$github_username/$gh_repo
 local_path=$GOPATH/src/github.com/GoogleCloudPlatform/$gh_repo
