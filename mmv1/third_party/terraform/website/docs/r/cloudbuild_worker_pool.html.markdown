@@ -17,6 +17,21 @@ Definition of custom Cloud Build WorkerPools for running jobs with custom networ
 ~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
 See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 
+
+## Example Usage
+
+```hcl
+resource "google_cloudbuild_worker_pool" "pool" {
+  name = "my-pool"
+  location = "europe-west1"
+  worker_config {
+    disk_size_gb = 100
+    machine_type = "e2-standard-4"
+    no_external_ip = false
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
