@@ -26,7 +26,6 @@ type ComputeOperationWaiter struct {
 <% unless version == 'ga' -%>
 	Parent  string
 <% end -%>
-	d        *schema.ResourceData
 }
 
 func (w *ComputeOperationWaiter) State() string {
@@ -111,7 +110,7 @@ func (w *ComputeOperationWaiter) TargetStates() []string {
 	return []string{"DONE"}
 }
 
-func computeOperationWaitTime(d *schema.ResourceData, config *Config, res interface{}, project, activity, userAgent string, timeout time.Duration) error {
+func computeOperationWaitTime(config *Config, res interface{}, project, activity, userAgent string, timeout time.Duration) error {
 <% if version == 'ga' -%>
 	op := &compute.Operation{}
 <% else -%>
@@ -131,7 +130,6 @@ func computeOperationWaitTime(d *schema.ResourceData, config *Config, res interf
 		Context: config.context,
 		Op:      op,
 		Project: project,
-		d:       d,
 	}
 
 	if err := w.SetOp(op); err != nil {
@@ -141,7 +139,7 @@ func computeOperationWaitTime(d *schema.ResourceData, config *Config, res interf
 }
 
 <% unless version == 'ga' -%>
-func computeOrgOperationWaitTimeWithResponse(d *schema.ResourceData, config *Config, res interface{}, response *map[string]interface{}, parent, activity, userAgent string, timeout time.Duration) error {
+func computeOrgOperationWaitTimeWithResponse(config *Config, res interface{}, response *map[string]interface{}, parent, activity, userAgent string, timeout time.Duration) error {
 	op := &computeBeta.Operation{}
 	err := Convert(res, op)
 	if err != nil {
@@ -152,7 +150,6 @@ func computeOrgOperationWaitTimeWithResponse(d *schema.ResourceData, config *Con
 		Service: config.NewComputeBetaClient(userAgent),
 		Op:      op,
 		Parent:  parent,
-		d:       d,
 	}
 
 	if err := w.SetOp(op); err != nil {

@@ -972,7 +972,7 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, z, instance.Name))
 
 	// Wait for the operation to complete
-	waitErr := computeOperationWaitTime(d, config, op, project, "instance to create", userAgent, d.Timeout(schema.TimeoutCreate))
+	waitErr := computeOperationWaitTime(config, op, project, "instance to create", userAgent, d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		// The resource didn't actually create
 		d.SetId("")
@@ -1296,7 +1296,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					return fmt.Errorf("Error updating metadata: %s", err)
 				}
 
-				opErr := computeOperationWaitTime(d, config, op, project, "metadata to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+				opErr := computeOperationWaitTime(config, op, project, "metadata to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 				if opErr != nil {
 					return opErr
 				}
@@ -1322,7 +1322,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			return fmt.Errorf("Error updating tags: %s", err)
 		}
 
-		opErr := computeOperationWaitTime(d, config, op, project, "tags to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+		opErr := computeOperationWaitTime(config, op, project, "tags to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if opErr != nil {
 			return opErr
 		}
@@ -1338,7 +1338,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			return fmt.Errorf("Error updating labels: %s", err)
 		}
 
-		opErr := computeOperationWaitTime(d, config, op, project, "labels to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+		opErr := computeOperationWaitTime(config, op, project, "labels to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if opErr != nil {
 			return opErr
 		}
@@ -1359,7 +1359,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 
 		opErr := computeOperationWaitTime(
-			d, config, op, project, "scheduling policy update", userAgent,
+			config, op, project, "scheduling policy update", userAgent,
 			d.Timeout(schema.TimeoutUpdate))
 		if opErr != nil {
 			return opErr
@@ -1456,7 +1456,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				if err != nil {
 					return errwrap.Wrapf("Error removing alias_ip_range: {{err}}", err)
 				}
-				opErr := computeOperationWaitTime(d, config, op, project, "updating alias ip ranges", userAgent, d.Timeout(schema.TimeoutUpdate))
+				opErr := computeOperationWaitTime(config, op, project, "updating alias ip ranges", userAgent, d.Timeout(schema.TimeoutUpdate))
 				if opErr != nil {
 					return opErr
 				}
@@ -1477,7 +1477,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return errwrap.Wrapf("Error updating network interface: {{err}}", err)
 			}
-			opErr := computeOperationWaitTime(d, config, op, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+			opErr := computeOperationWaitTime(config, op, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
 				return opErr
 			}
@@ -1578,7 +1578,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					return errwrap.Wrapf("Error detaching disk: %s", err)
 				}
 
-				opErr := computeOperationWaitTime(d, config, op, project, "detaching disk", userAgent, d.Timeout(schema.TimeoutUpdate))
+				opErr := computeOperationWaitTime(config, op, project, "detaching disk", userAgent, d.Timeout(schema.TimeoutUpdate))
 				if opErr != nil {
 					return opErr
 				}
@@ -1593,7 +1593,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				return errwrap.Wrapf("Error attaching disk : {{err}}", err)
 			}
 
-			opErr := computeOperationWaitTime(d, config, op, project, "attaching disk", userAgent, d.Timeout(schema.TimeoutUpdate))
+			opErr := computeOperationWaitTime(config, op, project, "attaching disk", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
 				return opErr
 			}
@@ -1625,7 +1625,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			return fmt.Errorf("Error updating deletion protection flag: %s", err)
 		}
 
-		opErr := computeOperationWaitTime(d, config, op, project, "deletion protection to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+		opErr := computeOperationWaitTime(config, op, project, "deletion protection to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if opErr != nil {
 			return opErr
 		}
@@ -1651,7 +1651,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				}
 			}
 			opErr := computeOperationWaitTime(
-				d, config, op, project, "updating status", userAgent,
+				config, op, project, "updating status", userAgent,
 				d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
 				return opErr
@@ -1677,7 +1677,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				return errwrap.Wrapf("Error stopping instance: {{err}}", err)
 			}
 
-			opErr := computeOperationWaitTime(d, config, op, project, "stopping instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+			opErr := computeOperationWaitTime(config, op, project, "stopping instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
 				return opErr
 			}
@@ -1695,7 +1695,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return err
 			}
-			opErr := computeOperationWaitTime(d, config, op, project, "updating machinetype", userAgent, d.Timeout(schema.TimeoutUpdate))
+			opErr := computeOperationWaitTime(config, op, project, "updating machinetype", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
 				return opErr
 			}
@@ -1716,7 +1716,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return err
 			}
-			opErr := computeOperationWaitTime(d, config, op, project, "updating min cpu platform", userAgent, d.Timeout(schema.TimeoutUpdate))
+			opErr := computeOperationWaitTime(config, op, project, "updating min cpu platform", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
 				return opErr
 			}
@@ -1734,7 +1734,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return err
 			}
-			opErr := computeOperationWaitTime(d, config, op, project, "updating service account", userAgent, d.Timeout(schema.TimeoutUpdate))
+			opErr := computeOperationWaitTime(config, op, project, "updating service account", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
 				return opErr
 			}
@@ -1749,7 +1749,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if err != nil {
 				return fmt.Errorf("Error updating display device: %s", err)
 			}
-			opErr := computeOperationWaitTime(d, config, op, project, "updating display device", userAgent, d.Timeout(schema.TimeoutUpdate))
+			opErr := computeOperationWaitTime(config, op, project, "updating display device", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
 				return opErr
 			}
@@ -1763,7 +1763,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				return fmt.Errorf("Error updating shielded vm config: %s", err)
 			}
 
-			opErr := computeOperationWaitTime(d, config, op, project,
+			opErr := computeOperationWaitTime(config, op, project,
 				"shielded vm config update", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
 				return opErr
@@ -1783,7 +1783,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			}
 
 			opErr := computeOperationWaitTime(
-				d, config, op, project, "scheduling policy update", userAgent,
+				config, op, project, "scheduling policy update", userAgent,
 				d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
 				return opErr
@@ -1812,7 +1812,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				return errwrap.Wrapf("Error starting instance: {{err}}", err)
 			}
 
-			opErr := computeOperationWaitTime(d, config, op, project,
+			opErr := computeOperationWaitTime(config, op, project,
 				"starting instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
 				return opErr
@@ -2045,7 +2045,7 @@ func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) err
 		}
 
 		// Wait for the operation to complete
-		opErr := computeOperationWaitTime(d, config, op, project, "instance to delete", userAgent, d.Timeout(schema.TimeoutDelete))
+		opErr := computeOperationWaitTime(config, op, project, "instance to delete", userAgent, d.Timeout(schema.TimeoutDelete))
 		if opErr != nil {
 			// Refresh operation to check status
 			op, _ = config.NewComputeClient(userAgent).ZoneOperations.Get(project, zone, strconv.FormatUint(op.Id, 10)).Do()

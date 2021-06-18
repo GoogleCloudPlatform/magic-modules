@@ -62,7 +62,7 @@ func resourceComputeProjectMetadataCreateOrUpdate(d *schema.ResourceData, meta i
 		Items: expandComputeMetadata(d.Get("metadata").(map[string]interface{})),
 	}
 
-	err = resourceComputeProjectMetadataSet(projectID, userAgent, d, config, md, d.Timeout(schema.TimeoutCreate))
+	err = resourceComputeProjectMetadataSet(projectID, userAgent, config, md, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("SetCommonInstanceMetadata failed: %s", err)
 	}
@@ -120,7 +120,7 @@ func resourceComputeProjectMetadataDelete(d *schema.ResourceData, meta interface
 	}
 
 	md := &compute.Metadata{}
-	err = resourceComputeProjectMetadataSet(projectID, userAgent, d, config, md, d.Timeout(schema.TimeoutDelete))
+	err = resourceComputeProjectMetadataSet(projectID, userAgent, config, md, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return fmt.Errorf("SetCommonInstanceMetadata failed: %s", err)
 	}
@@ -128,7 +128,7 @@ func resourceComputeProjectMetadataDelete(d *schema.ResourceData, meta interface
 	return resourceComputeProjectMetadataRead(d, meta)
 }
 
-func resourceComputeProjectMetadataSet(projectID, userAgent string, d *schema.ResourceData, config *Config, md *compute.Metadata, timeout time.Duration) error {
+func resourceComputeProjectMetadataSet(projectID, userAgent string, config *Config, md *compute.Metadata, timeout time.Duration) error {
 	createMD := func() error {
 		log.Printf("[DEBUG] Loading project service: %s", projectID)
 		project, err := config.NewComputeClient(userAgent).Projects.Get(projectID).Do()
@@ -143,7 +143,7 @@ func resourceComputeProjectMetadataSet(projectID, userAgent string, d *schema.Re
 		}
 
 		log.Printf("[DEBUG] SetCommonMetadata: %d (%s)", op.Id, op.SelfLink)
-		return computeOperationWaitTime(d, config, op, project.Name, "SetCommonMetadata", userAgent, timeout)
+		return computeOperationWaitTime(config, op, project.Name, "SetCommonMetadata", userAgent, timeout)
 	}
 
 	err := MetadataRetryWrapper(createMD)

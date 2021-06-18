@@ -11,7 +11,7 @@ if d.Get("disable_on_delete").(bool) && d.Get("state").(string) == "ENABLED" {
 		return err
 	}
 
-	err = privatecaOperationWaitTime(d, config, disableRes, project, "Disabling CertificateAuthority", userAgent, d.Timeout(schema.TimeoutDelete))
+	err = privatecaOperationWaitTime(config, disableRes, project, "Disabling CertificateAuthority", userAgent, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return err
 	}

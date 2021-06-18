@@ -61,7 +61,7 @@
     }
 
     err = activeDirectoryOperationWaitTime(
-        d, config, res, project, "Deleting DomainTrust", userAgent,
+        config, res, project, "Deleting DomainTrust", userAgent,
         d.Timeout(schema.TimeoutDelete))
 
     if err != nil {

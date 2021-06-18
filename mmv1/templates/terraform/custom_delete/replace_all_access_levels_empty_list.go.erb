@@ -16,7 +16,7 @@ if err != nil {
 }
 
 err = accessContextManagerOperationWaitTime(
-	d, config, res, "Updating AccessLevels", userAgent,
+	config, res, "Updating AccessLevels", userAgent,
 	d.Timeout(schema.TimeoutUpdate))
 
 if err != nil {

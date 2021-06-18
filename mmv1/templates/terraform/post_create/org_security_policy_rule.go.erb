@@ -14,7 +14,7 @@ if err != nil {
 parent := flattenComputeOrganizationSecurityPolicyParent(policyRes["parent"], d, config)
 var opRes map[string]interface{}
 err = computeOrgOperationWaitTimeWithResponse(
-	d, config, res, &opRes, parent.(string), "Creating OrganizationSecurityPolicyRule", userAgent,
+	config, res, &opRes, parent.(string), "Creating OrganizationSecurityPolicyRule", userAgent,
 	d.Timeout(schema.TimeoutCreate))
 
 if err != nil {

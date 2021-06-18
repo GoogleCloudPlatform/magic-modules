@@ -6,7 +6,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
@@ -14,7 +13,6 @@ type SqlAdminOperationWaiter struct {
 	Service *sqladmin.Service
 	Op      *sqladmin.Operation
 	Project string
-	d       *schema.ResourceData
 }
 
 func (w *SqlAdminOperationWaiter) State() string {
@@ -102,7 +100,7 @@ func (w *SqlAdminOperationWaiter) TargetStates() []string {
 	return []string{"DONE"}
 }
 
-func sqlAdminOperationWaitTime(d *schema.ResourceData, config *Config, res interface{}, project, activity, userAgent string, timeout time.Duration) error {
+func sqlAdminOperationWaitTime(config *Config, res interface{}, project, activity, userAgent string, timeout time.Duration) error {
 	op := &sqladmin.Operation{}
 	err := Convert(res, op)
 	if err != nil {
@@ -113,7 +111,6 @@ func sqlAdminOperationWaitTime(d *schema.ResourceData, config *Config, res inter
 		Service: config.NewSqlAdminClient(userAgent),
 		Op:      op,
 		Project: project,
-		d:       d,
 	}
 	if err := w.SetOp(op); err != nil {
 		return err

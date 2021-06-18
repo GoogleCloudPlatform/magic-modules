@@ -27,7 +27,7 @@
 	}
 
 	err = computeOperationWaitTime(
-		d, config, res, project, "Deleting RegionPerInstanceConfig", userAgent,
+		config, res, project, "Deleting RegionPerInstanceConfig", userAgent,
 		d.Timeout(schema.TimeoutDelete))
 
 	if err != nil {
@@ -59,7 +59,7 @@
 		}
 
 		err = computeOperationWaitTime(
-			d, config, res, project, "Applying update to PerInstanceConfig", userAgent,
+			config, res, project, "Applying update to PerInstanceConfig", userAgent,
 			d.Timeout(schema.TimeoutUpdate))
 
 		if err != nil {

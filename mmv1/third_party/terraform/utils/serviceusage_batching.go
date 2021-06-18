@@ -31,7 +31,7 @@ func BatchRequestEnableService(service string, project string, d *schema.Resourc
 		ResourceName: project,
 		Body:         []string{service},
 		CombineF:     combineServiceUsageServicesBatches,
-		SendF:        sendBatchFuncEnableServices(d, config, userAgent, d.Timeout(schema.TimeoutCreate)),
+		SendF:        sendBatchFuncEnableServices(config, userAgent, d.Timeout(schema.TimeoutCreate)),
 		DebugId:      fmt.Sprintf("Enable Project Service %q for project %q", service, project),
 	}
 
@@ -52,10 +52,10 @@ func tryEnableRenamedService(service, altName string, project string, d *schema.
 	// use a short timeout- failures are likely
 
 	log.Printf("[DEBUG] attempting enabling service with user-specified name %s", service)
-	err = enableServiceUsageProjectServices([]string{service}, project, userAgent, d, config, 1*time.Minute)
+	err = enableServiceUsageProjectServices([]string{service}, project, userAgent, config, 1*time.Minute)
 	if err != nil {
 		log.Printf("[DEBUG] saw error %s. attempting alternate name %v", err, altName)
-		err2 := enableServiceUsageProjectServices([]string{altName}, project, userAgent, d, config, 1*time.Minute)
+		err2 := enableServiceUsageProjectServices([]string{altName}, project, userAgent, config, 1*time.Minute)
 		if err2 != nil {
 			return fmt.Errorf("Saw 2 subsequent errors attempting to enable a renamed service: %s / %s", err, err2)
 		}
@@ -97,13 +97,13 @@ func combineServiceUsageServicesBatches(srvsRaw interface{}, toAddRaw interface{
 	return append(srvs, toAdd...), nil
 }
 
-func sendBatchFuncEnableServices(d *schema.ResourceData, config *Config, userAgent string, timeout time.Duration) BatcherSendFunc {
+func sendBatchFuncEnableServices(config *Config, userAgent string, timeout time.Duration) BatcherSendFunc {
 	return func(project string, toEnableRaw interface{}) (interface{}, error) {
 		toEnable, ok := toEnableRaw.([]string)
 		if !ok {
 			return nil, fmt.Errorf("Expected batch body type to be []string, got %v. This is a provider error.", toEnableRaw)
 		}
-		return nil, enableServiceUsageProjectServices(toEnable, project, userAgent, d, config, timeout)
+		return nil, enableServiceUsageProjectServices(toEnable, project, userAgent, config, timeout)
 	}
 }
 

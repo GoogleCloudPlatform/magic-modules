@@ -11,7 +11,6 @@ import (
 
 	"google.golang.org/api/compute/v1"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
@@ -108,8 +107,7 @@ func TestAccComputeInstanceMigrateState(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	d := &schema.ResourceData{}
-	waitErr := computeOperationWaitTime(d, config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
+	waitErr := computeOperationWaitTime(config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
 	if waitErr != nil {
 		t.Fatal(waitErr)
 	}
@@ -182,8 +180,7 @@ func TestAccComputeInstanceMigrateState_bootDisk(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	d := &schema.ResourceData{}
-	waitErr := computeOperationWaitTime(d, config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
+	waitErr := computeOperationWaitTime(config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
 	if waitErr != nil {
 		t.Fatal(waitErr)
 	}
@@ -251,8 +248,7 @@ func TestAccComputeInstanceMigrateState_v4FixBootDisk(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	d := &schema.ResourceData{}
-	waitErr := computeOperationWaitTime(d, config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
+	waitErr := computeOperationWaitTime(config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
 	if waitErr != nil {
 		t.Fatal(waitErr)
 	}
@@ -305,8 +301,7 @@ func TestAccComputeInstanceMigrateState_attachedDiskFromSource(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error creating disk: %s", err)
 	}
-	d := &schema.ResourceData{}
-	waitErr := computeOperationWaitTime(d, config, op, config.Project, "disk to create", config.userAgent, 4*time.Minute)
+	waitErr := computeOperationWaitTime(config, op, config.Project, "disk to create", config.userAgent, 4*time.Minute)
 	if waitErr != nil {
 		t.Fatal(waitErr)
 	}
@@ -338,7 +333,7 @@ func TestAccComputeInstanceMigrateState_attachedDiskFromSource(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	waitErr = computeOperationWaitTime(d, config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
+	waitErr = computeOperationWaitTime(config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
 	if waitErr != nil {
 		t.Fatal(waitErr)
 	}
@@ -387,8 +382,7 @@ func TestAccComputeInstanceMigrateState_v4FixAttachedDiskFromSource(t *testing.T
 	if err != nil {
 		t.Fatalf("Error creating disk: %s", err)
 	}
-	d := &schema.ResourceData{}
-	waitErr := computeOperationWaitTime(d, config, op, config.Project, "disk to create", config.userAgent, 4*time.Minute)
+	waitErr := computeOperationWaitTime(config, op, config.Project, "disk to create", config.userAgent, 4*time.Minute)
 	if waitErr != nil {
 		t.Fatal(waitErr)
 	}
@@ -420,7 +414,7 @@ func TestAccComputeInstanceMigrateState_v4FixAttachedDiskFromSource(t *testing.T
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	waitErr = computeOperationWaitTime(d, config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
+	waitErr = computeOperationWaitTime(config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
 	if waitErr != nil {
 		t.Fatal(waitErr)
 	}
@@ -489,8 +483,7 @@ func TestAccComputeInstanceMigrateState_attachedDiskFromEncryptionKey(t *testing
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	d := &schema.ResourceData{}
-	waitErr := computeOperationWaitTime(d, config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
+	waitErr := computeOperationWaitTime(config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
 	if waitErr != nil {
 		t.Fatal(waitErr)
 	}
@@ -559,8 +552,7 @@ func TestAccComputeInstanceMigrateState_v4FixAttachedDiskFromEncryptionKey(t *te
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	d := &schema.ResourceData{}
-	waitErr := computeOperationWaitTime(d, config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
+	waitErr := computeOperationWaitTime(config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
 	if waitErr != nil {
 		t.Fatal(waitErr)
 	}
@@ -631,8 +623,7 @@ func TestAccComputeInstanceMigrateState_attachedDiskFromAutoDeleteAndImage(t *te
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	d := &schema.ResourceData{}
-	waitErr := computeOperationWaitTime(d, config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
+	waitErr := computeOperationWaitTime(config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
 	if waitErr != nil {
 		t.Fatal(waitErr)
 	}
@@ -705,8 +696,7 @@ func TestAccComputeInstanceMigrateState_v4FixAttachedDiskFromAutoDeleteAndImage(
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	d := &schema.ResourceData{}
-	waitErr := computeOperationWaitTime(d, config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
+	waitErr := computeOperationWaitTime(config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
 	if waitErr != nil {
 		t.Fatal(waitErr)
 	}
@@ -775,8 +765,7 @@ func TestAccComputeInstanceMigrateState_scratchDisk(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	d := &schema.ResourceData{}
-	waitErr := computeOperationWaitTime(d, config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
+	waitErr := computeOperationWaitTime(config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
 	if waitErr != nil {
 		t.Fatal(waitErr)
 	}
@@ -841,8 +830,7 @@ func TestAccComputeInstanceMigrateState_v4FixScratchDisk(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error creating instance: %s", err)
 	}
-	d := &schema.ResourceData{}
-	waitErr := computeOperationWaitTime(d, config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
+	waitErr := computeOperationWaitTime(config, op, config.Project, "instance to create", config.userAgent, 4*time.Minute)
 	if waitErr != nil {
 		t.Fatal(waitErr)
 	}
@@ -921,8 +909,7 @@ func cleanUpInstance(config *Config, instanceName, zone string) {
 	}
 
 	// Wait for the operation to complete
-	d := &schema.ResourceData{}
-	opErr := computeOperationWaitTime(d, config, op, config.Project, "instance to delete", config.userAgent, 4*time.Minute)
+	opErr := computeOperationWaitTime(config, op, config.Project, "instance to delete", config.userAgent, 4*time.Minute)
 	if opErr != nil {
 		log.Printf("[WARNING] Error deleting instance %q, dangling resources may exist: %s", instanceName, opErr)
 	}
@@ -936,8 +923,7 @@ func cleanUpDisk(config *Config, diskName, zone string) {
 	}
 
 	// Wait for the operation to complete
-	d := &schema.ResourceData{}
-	opErr := computeOperationWaitTime(d, config, op, config.Project, "disk to delete", config.userAgent, 4*time.Minute)
+	opErr := computeOperationWaitTime(config, op, config.Project, "disk to delete", config.userAgent, 4*time.Minute)
 	if opErr != nil {
 		log.Printf("[WARNING] Error deleting disk %q, dangling resources may exist: %s", diskName, opErr)
 	}

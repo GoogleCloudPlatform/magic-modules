@@ -11,7 +11,6 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/composer/v1beta1"
 	"google.golang.org/api/storage/v1"
@@ -1191,7 +1190,7 @@ func testAccCheckClearComposerEnvironmentFirewalls(t *testing.T, networkName str
 				continue
 			}
 
-			waitErr := computeOperationWaitTime(&schema.ResourceData{}, config, op, config.Project,
+			waitErr := computeOperationWaitTime(config, op, config.Project,
 				"Sweeping test composer environment firewalls", config.userAgent, 10)
 			if waitErr != nil {
 				allErrors = multierror.Append(allErrors,

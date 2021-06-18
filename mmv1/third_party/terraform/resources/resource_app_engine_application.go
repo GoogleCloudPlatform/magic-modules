@@ -230,7 +230,7 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 	d.SetId(project)
 
 	// Wait for the operation to complete
-	waitErr := appEngineOperationWaitTime(d, config, op, project, "App Engine app to create", userAgent, d.Timeout(schema.TimeoutCreate))
+	waitErr := appEngineOperationWaitTime(config, op, project, "App Engine app to create", userAgent, d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		d.SetId("")
 		return waitErr
@@ -338,7 +338,7 @@ func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}
 	}
 
 	// Wait for the operation to complete
-	waitErr := appEngineOperationWaitTime(d, config, op, pid, "App Engine app to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+	waitErr := appEngineOperationWaitTime(config, op, pid, "App Engine app to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if waitErr != nil {
 		return waitErr
 	}

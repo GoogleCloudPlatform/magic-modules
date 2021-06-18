@@ -16,7 +16,6 @@ type DeploymentManagerOperationWaiter struct {
 	Project      string
 	OperationUrl string
 	ComputeOperationWaiter
-	d            *schema.ResourceData
 }
 
 func (w *DeploymentManagerOperationWaiter) IsRetryable(error) bool {
@@ -44,7 +43,7 @@ func (w *DeploymentManagerOperationWaiter) QueryOp() (interface{}, error) {
 }
 
 
-func deploymentManagerOperationWaitTime(d *schema.ResourceData, config *Config, resp interface{}, project, activity, userAgent string, timeout time.Duration) error {
+func deploymentManagerOperationWaitTime(config *Config, resp interface{}, project, activity, userAgent string, timeout time.Duration) error {
 <% if version == 'ga' -%>
 	op := &compute.Operation{}
 <% else -%>
@@ -62,7 +61,6 @@ func deploymentManagerOperationWaitTime(d *schema.ResourceData, config *Config, 
 		ComputeOperationWaiter: ComputeOperationWaiter{
 			Project: project,
 		},
-		d:            d,
 	}
 	if err := w.SetOp(op); err != nil {
 		return err

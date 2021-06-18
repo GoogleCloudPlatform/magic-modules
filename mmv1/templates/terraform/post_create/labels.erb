@@ -26,7 +26,7 @@ if v, ok := d.GetOkExists("labels"); !isEmptyValue(reflect.ValueOf(v)) && (ok ||
     }
 
     err = computeOperationWaitTime(
-        d, config, res, project, "Updating <%= resource_name -%> Labels", userAgent,
+        config, res, project, "Updating <%= resource_name -%> Labels", userAgent,
         d.Timeout(schema.TimeoutUpdate))
 
     if err != nil {
