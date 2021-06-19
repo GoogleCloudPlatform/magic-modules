@@ -34,13 +34,13 @@ import (
 // empty string is passed for dcl default since dcl
 // [hardcodes the values](https://github.com/GoogleCloudPlatform/declarative-resource-client-library/blob/main/services/google/eventarc/beta/trigger_internal.go#L96-L103)
 {{range $index, $pkg := .}}
-{{- if $pkg.WriteProductBasePath }}
-var {{$pkg.BasePathName}}EndpointEntryKey = "{{$pkg.BasePathNameSnake}}_custom_endpoint"
-var {{$pkg.BasePathName}}EndpointEntry = &schema.Schema{
+{{- if $pkg.ShouldWriteProductBasePath }}
+var {{$pkg.BasePathIdentifier}}EndpointEntryKey = "{{$pkg.BasePathIdentifierSnake}}_custom_endpoint"
+var {{$pkg.BasePathIdentifier}}EndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
 	Optional:     true,
 	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_{{$pkg.BasePathNameSnakeUpper}}_CUSTOM_ENDPOINT",
+		"GOOGLE_{{$pkg.BasePathIdentifierSnakeUpper}}_CUSTOM_ENDPOINT",
 	}, ""),
 }
 {{- end}}
@@ -48,22 +48,22 @@ var {{$pkg.BasePathName}}EndpointEntry = &schema.Schema{
 
 //Add new values to config.go.erb config object declaration
 {{- range $index, $pkg := . }}
-{{- if $pkg.WriteProductBasePath }}
-//{{$pkg.BasePathName}}BasePath string
+{{- if $pkg.ShouldWriteProductBasePath }}
+//{{$pkg.BasePathIdentifier}}BasePath string
 {{- end}}
 {{- end}}
 
 //Add new values to provider.go.erb schema initialization
 {{- range $index, $pkg := . }}
-{{- if $pkg.WriteProductBasePath }}
-// {{$pkg.BasePathName}}EndpointEntryKey:               {{$pkg.BasePathName}}EndpointEntry,
+{{- if $pkg.ShouldWriteProductBasePath }}
+// {{$pkg.BasePathIdentifier}}EndpointEntryKey:               {{$pkg.BasePathIdentifier}}EndpointEntry,
 {{- end}}
 {{- end}}
 
 //Add new values to provider.go.erb - provider block read
 {{- range $index, $pkg := . }}
-{{- if $pkg.WriteProductBasePath }}
-// config.{{$pkg.BasePathName}}BasePath = d.Get({{$pkg.BasePathName}}EndpointEntryKey).(string)
+{{- if $pkg.ShouldWriteProductBasePath }}
+// config.{{$pkg.BasePathIdentifier}}BasePath = d.Get({{$pkg.BasePathIdentifier}}EndpointEntryKey).(string)
 {{- end}}
 {{- end}}
 

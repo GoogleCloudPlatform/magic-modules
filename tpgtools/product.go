@@ -46,7 +46,7 @@ func NewProductMetadata(packagePath, productName string) *ProductMetadata {
 	}
 }
 
-func (pm *ProductMetadata) WriteProductBasePath() bool {
+func (pm *ProductMetadata) ShouldWriteProductBasePath() bool {
 	bp := pm.ProductBasePathDetails()
 	if bp == nil {
 		return true
@@ -54,26 +54,22 @@ func (pm *ProductMetadata) WriteProductBasePath() bool {
 	return !bp.Skip
 }
 
-func (pm *ProductMetadata) BasePathNameSnakeUpper() string {
-	bp := pm.ProductBasePathDetails()
-	if bp != nil && bp.BasePathName != ""{
-		return strings.ToUpper(bp.BasePathName)
-	}
-	return pm.ProductNameUpper()
+func (pm *ProductMetadata) BasePathIdentifierSnakeUpper() string {
+	return strings.ToUpper(pm.BasePathIdentifierSnake())
 }
 
-func (pm *ProductMetadata) BasePathNameSnake() string {
+func (pm *ProductMetadata) BasePathIdentifierSnake() string {
 	bp := pm.ProductBasePathDetails()
-	if bp != nil && bp.BasePathName != ""{
-		return bp.BasePathName
+	if bp != nil && bp.BasePathIdentifier != ""{
+		return bp.BasePathIdentifier
 	}
 	return pm.ProductName
 }
 
-func (pm *ProductMetadata) BasePathName() string {
+func (pm *ProductMetadata) BasePathIdentifier() string {
 	bp := pm.ProductBasePathDetails()
-	if bp != nil && bp.BasePathName != ""{
-		return snakeToTitleCase(bp.BasePathName)
+	if bp != nil && bp.BasePathIdentifier != ""{
+		return snakeToTitleCase(bp.BasePathIdentifier)
 	}
 	return pm.ProductType()
 }

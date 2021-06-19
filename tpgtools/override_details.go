@@ -168,5 +168,5 @@ type ProductBasePathDetails struct {
 	Skip bool
 	// Alternative product base path name to allow for DCL-based resources to use
 	// different default base paths than mmv1 generated resources
-	BasePathName string
+	BasePathIdentifier string
 }
