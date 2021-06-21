@@ -55,8 +55,8 @@ func Mappers() map[string][]mapper {
                 <% if object.min_version.name == "ga" -%>
                     <% if !object.exclude && !object.exclude_validator && !object.exclude_resource -%>
                         <% name = object.filename_override || object.name.underscore -%>
-                        <% tf_resource = object.__product.name.underscore+ "_"+name.gsub(" ", "_") -%>
-                        <% cai_name =  object.__product.name + name.camelize(:upper) -%>
+                        <% tf_resource = object.__product.name.underscore+ "_" + name.gsub(" ", "_") -%>
+                        <% cai_name =  object.__product.name + object.name -%>
                         "google_<%= tf_resource -%>": {{ convert: Get<%= cai_name -%>CaiObject }},
                         <% if (!object.iam_policy.nil?) && (!object.iam_policy.exclude) -%>
                             "google_<%= tf_resource -%>_iam_policy": {
