@@ -53,7 +53,7 @@ func Mappers() map[string][]mapper {
         <% products.each do |product| -%>
             <% (product[:definitions].objects || []).each do |object| -%>
                 <% if object.min_version.name == "ga" -%>
-                    <% if !object.exclude && !object.exclude_validator -%>
+                    <% if !object.exclude && !object.exclude_validator && !object.exclude_resource -%>
                         <% name = object.filename_override || object.name.underscore -%>
                         <% tf_resource = object.__product.name.underscore+ "_"+name.gsub(" ", "_") -%>
                         <% cai_name =  object.__product.name + name.camelize(:upper) -%>
