@@ -53,35 +53,37 @@ func Mappers() map[string][]mapper {
         <% products.each do |product| -%>
             <% (product[:definitions].objects || []).each do |object| -%>
                 <% if object.min_version.name == "ga" -%>
-                    <% if !object.exclude && !object.exclude_validator && !object.exclude_resource -%>
+                    <% if !object.exclude && !object.exclude_validator -%>
                         <% name = object.filename_override || object.name.underscore -%>
                         <% tf_resource = object.__product.name.underscore+ "_" + name.gsub(" ", "_") -%>
                         <% cai_name =  object.__product.name + object.name -%>
+						<% if !object.exclude_resource -%>
                         "google_<%= tf_resource -%>": {{ convert: Get<%= cai_name -%>CaiObject }},
-                        <% if (!object.iam_policy.nil?) && (!object.iam_policy.exclude) -%>
-                            "google_<%= tf_resource -%>_iam_policy": {
-                                {
-                                    convert:           Get<%= cai_name -%>IamPolicyCaiObject,
-                                    mergeCreateUpdate: Merge<%= cai_name -%>IamPolicy,
-                                },
-                            },
-                            "google_<%= tf_resource -%>_iam_binding": {
-                                {
-                                    convert:           Get<%= cai_name -%>IamBindingCaiObject,
-                                    mergeCreateUpdate: Merge<%= cai_name -%>IamBinding,
-                                    mergeDelete:       Merge<%= cai_name -%>IamBindingDelete,
-                                    fetch:             Fetch<%= cai_name -%>IamPolicy,
-                                },
-                            },
-                            "google_<%= tf_resource -%>_iam_member": {
-                                {
-                                    convert:           Get<%= cai_name -%>IamMemberCaiObject,
-                                    mergeCreateUpdate: Merge<%= cai_name -%>IamMember,
-                                    mergeDelete:       Merge<%= cai_name -%>IamMemberDelete,
-                                    fetch:             Fetch<%= cai_name -%>IamPolicy,
-                                },
-                            },
                         <% end -%>
+						<% if (!object.iam_policy.nil?) && (!object.iam_policy.exclude) -%>
+							"google_<%= tf_resource -%>_iam_policy": {
+								{
+									convert:           Get<%= cai_name -%>IamPolicyCaiObject,
+									mergeCreateUpdate: Merge<%= cai_name -%>IamPolicy,
+								},
+							},
+							"google_<%= tf_resource -%>_iam_binding": {
+								{
+									convert:           Get<%= cai_name -%>IamBindingCaiObject,
+									mergeCreateUpdate: Merge<%= cai_name -%>IamBinding,
+									mergeDelete:       Merge<%= cai_name -%>IamBindingDelete,
+									fetch:             Fetch<%= cai_name -%>IamPolicy,
+								},
+							},
+							"google_<%= tf_resource -%>_iam_member": {
+								{
+									convert:           Get<%= cai_name -%>IamMemberCaiObject,
+									mergeCreateUpdate: Merge<%= cai_name -%>IamMember,
+									mergeDelete:       Merge<%= cai_name -%>IamMemberDelete,
+									fetch:             Fetch<%= cai_name -%>IamPolicy,
+								},
+							},
+						<% end -%>
                     <% end -%>
                 <% end -%>
             <% end -%>
