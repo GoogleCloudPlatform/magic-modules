@@ -78,6 +78,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       workloadIdentityPoolProviderId: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateWorkloadIdentityPoolProviderId'
+      oidc: !ruby/object:Overrides::Terraform::PropertyOverride
+        update_mask_fields:
+          - "oidc.allowed_audiences"
+          - "oidc.issuer_uri"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

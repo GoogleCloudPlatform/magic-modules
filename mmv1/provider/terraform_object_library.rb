@@ -80,8 +80,6 @@ module Provider
                            'third_party/terraform/utils/compute_operation.go.erb'],
                           ['google/config.go',
                            'third_party/terraform/utils/config.go.erb'],
-                          #  ['google/mappers.go',
-                          #  'templates/terraform/mappers/mappers.go.erb'],
                           ['google/iam.go',
                            'third_party/terraform/utils/iam.go.erb'],
                           ['google/compute_instance_helpers.go',
@@ -220,10 +218,6 @@ module Provider
       product_name = data.product.name.underscore
 
       FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
-      $instanceInfo["IAM"].append({
-        "tfResource" => product_name+"_"+name.gsub(" ", "_"),
-        "CAIName" => product_name.camelize(:upper) +name.camelize(:upper),
-      })
       data.generate(pwd,
                     'templates/validator/iam/iam_consumer.go.erb',
                     "#{target_folder}/#{product_name}_#{name}_iam.go",
