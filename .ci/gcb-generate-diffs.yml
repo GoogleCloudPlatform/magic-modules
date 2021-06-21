@@ -216,12 +216,6 @@ steps:
       args:
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/changelog-checker'
-      secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tpg-test", "tpgb-test"]
-      args:
-          - $_PR_NUMBER
-
 # Long timeout to enable waiting on VCR test
 timeout: 20000s
 options:
