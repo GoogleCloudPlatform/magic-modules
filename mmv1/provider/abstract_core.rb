@@ -24,6 +24,5 @@ module Provider
     # Generates IAM policy support for the resource
     def generate_iam_policy(data) end
     # rubocop:enable Layout/EmptyLineBetweenDefs
-    def generate_mappers(data) end
   end
 end
