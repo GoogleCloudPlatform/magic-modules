@@ -40,11 +40,6 @@ module Provider
       product_ns = data.object.__product.name
       name = data.object.filename_override || data.object.name.underscore
       product_name = data.product.name.underscore
-      #print product_name+"_" + name.gsub(" ", "_") + " " + product_name.camelize(:upper) +name.camelize(:upper) + "\n"
-      $instanceInfo["resources"].append({
-        "tfResource" => product_name+"_"+name.gsub(" ", "_"),
-        "CAIName" => product_name.camelize(:upper) +name.camelize(:upper),
-      })
       data.generate(pwd,
                     'templates/terraform/objectlib/base.go.erb',
                     File.join(target_folder,
@@ -89,7 +84,7 @@ module Provider
                           ['google/transport.go',
                            'third_party/terraform/utils/transport.go.erb'],
                           ['google/mappers.go',
-                            'templates/validator/mappers/mappers.go.erb']
+                           'templates/validator/mappers/mappers.go.erb']
                         ],
                         file_template)
     end
