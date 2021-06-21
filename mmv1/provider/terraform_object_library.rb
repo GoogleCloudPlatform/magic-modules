@@ -47,20 +47,6 @@ module Provider
                     self)
     end
 
-    def compile_tf_files(output_folder, instance, _common_compile_file)
-      Google::LOGGER.info 'Compiling TF files.'
-      file_template = ProviderFileTemplate.new(
-        output_folder,
-        @target_version_name,
-        build_env,
-        instance
-      )
-      compile_file_list(output_folder, [
-                           ['google/mappers.go',
-                           'templates/terraform/mappers/mappers.go.erb'],
-                        ],
-                        file_template)
-    end
 
     def compile_common_files(output_folder, products, _common_compile_file)
       Google::LOGGER.info 'Compiling common files.'
