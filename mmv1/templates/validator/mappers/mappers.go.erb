@@ -53,15 +53,11 @@ func Mappers() map[string][]mapper {
         <% products.each do |product| -%>
             <% (product[:definitions].objects || []).each do |object| -%>
                 <% if object.min_version.name == "ga" -%>
-                    <% if !object.exclude -%>
+                    <% if !object.exclude && !object.exclude_validator -%>
                         <% name = object.filename_override || object.name.underscore -%>
                         <% tf_resource = object.__product.name.underscore+ "_"+name.gsub(" ", "_") -%>
                         <% cai_name =  object.__product.name + name.camelize(:upper) -%>
-                        "google_<%= tf_resource -%>": {
-                            {
-                                convert: Get<%= cai_name -%>CaiObject
-                            }
-                        },
+                        "google_<%= tf_resource -%>": {{ convert: Get<%= cai_name -%>CaiObject }},
                         <% if (!object.iam_policy.nil?) && (!object.iam_policy.exclude) -%>
                             "google_<%= tf_resource -%>_iam_policy": {
                                 {
@@ -90,6 +86,21 @@ func Mappers() map[string][]mapper {
                 <% end -%>
             <% end -%>
         <% end -%>
+		"google_project": {
+			{
+				convert:           GetProjectCaiObject,
+				mergeCreateUpdate: MergeProject,
+			},
+			{convert: GetProjectBillingInfoCaiObject},
+		},
+		"google_bigtable_instance": {
+			{
+				convert: GetBigtableInstanceCaiObject,
+			},
+			{
+				convert: GetBigtableClusterCaiObject,
+			},
+		},
 		"google_organization_iam_policy": {
 			{
 				convert:           GetOrganizationIamPolicyCaiObject,
@@ -163,6 +174,11 @@ func Mappers() map[string][]mapper {
 			},
 		},
 	}
+}
+
+func MergeProject(existing, incoming Asset) Asset {
+	existing.Resource = incoming.Resource
+	return existing
 }
 
 // SupportedResources returns a sorted list of terraform resource names.
