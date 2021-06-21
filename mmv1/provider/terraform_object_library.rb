@@ -201,10 +201,6 @@ module Provider
       product_name = data.product.name.underscore
 
       FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
-      $instanceInfo["IAM"].append({
-        "tfResource" => product_name+"_"+name.gsub(" ", "_"),
-        "CAIName" => product_name.camelize(:upper) +name.camelize(:upper),
-      })
       data.generate(pwd,
                     'templates/validator/iam/iam_consumer.go.erb',
                     "#{target_folder}/#{product_name}_#{name}_iam.go",
