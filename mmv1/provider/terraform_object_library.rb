@@ -141,7 +141,7 @@ module Provider
                        ['google/common_operation.go',
                         'third_party/terraform/utils/common_operation.go'],
                        ['google/convert.go',
-                        'third_party/terraform/utils/convert.go']s,
+                        'third_party/terraform/utils/convert.go'],
                        ['google/metadata.go',
                         'third_party/terraform/utils/metadata.go'],
                        ['google/service_scope.go',
