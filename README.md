@@ -111,7 +111,7 @@ For Ansible and Inspec, wherever you have cloned those repositories.
 For example, to generate Terraform:
 
 ```bash
-bundle exec compiler -a -v "ga" -e terraform -o "$GOPATH/src/github.com/hashicorp/terraform-provider-google"
+bundle exec compiler -e terraform -o "$GOPATH/src/github.com/hashicorp/terraform-provider-google" -v "ga" -a 
 ```
 
 It's worth noting that Magic Modules will only generate new files when ran
