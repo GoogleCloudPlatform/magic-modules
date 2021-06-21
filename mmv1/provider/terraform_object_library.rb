@@ -38,12 +38,33 @@ module Provider
     def generate_resource(pwd, data, _generate_code, _generate_docs)
       target_folder = data.output_folder
       product_ns = data.object.__product.name
-
+      name = data.object.filename_override || data.object.name.underscore
+      product_name = data.product.name.underscore
+      #print product_name+"_" + name.gsub(" ", "_") + " " + product_name.camelize(:upper) +name.camelize(:upper) + "\n"
+      $instanceInfo["resources"].append({
+        "tfResource" => product_name+"_"+name.gsub(" ", "_"),
+        "CAIName" => product_name.camelize(:upper) +name.camelize(:upper),
+      })
       data.generate(pwd,
                     'templates/terraform/objectlib/base.go.erb',
                     File.join(target_folder,
                               "google/#{product_ns.downcase}_#{data.object.name.underscore}.go"),
                     self)
+    end
+
+    def compile_tf_files(output_folder, instance, _common_compile_file)
+      Google::LOGGER.info 'Compiling TF files.'
+      file_template = ProviderFileTemplate.new(
+        output_folder,
+        @target_version_name,
+        build_env,
+        instance
+      )
+      compile_file_list(output_folder, [
+                           ['google/mappers.go',
+                           'templates/terraform/mappers/mappers.go.erb'],
+                        ],
+                        file_template)
     end
 
     def compile_common_files(output_folder, products, _common_compile_file)
@@ -59,6 +80,8 @@ module Provider
                            'third_party/terraform/utils/compute_operation.go.erb'],
                           ['google/config.go',
                            'third_party/terraform/utils/config.go.erb'],
+                          #  ['google/mappers.go',
+                          #  'templates/terraform/mappers/mappers.go.erb'],
                           ['google/iam.go',
                            'third_party/terraform/utils/iam.go.erb'],
                           ['google/compute_instance_helpers.go',
@@ -72,6 +95,7 @@ module Provider
                         ],
                         file_template)
     end
+
 
     def copy_common_files(output_folder, generate_code, _generate_docs)
       Google::LOGGER.info 'Copying common files.'
@@ -196,7 +220,10 @@ module Provider
       product_name = data.product.name.underscore
 
       FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
-
+      $instanceInfo["IAM"].append({
+        "tfResource" => product_name+"_"+name.gsub(" ", "_"),
+        "CAIName" => product_name.camelize(:upper) +name.camelize(:upper),
+      })
       data.generate(pwd,
                     'templates/validator/iam/iam_consumer.go.erb',
                     "#{target_folder}/#{product_name}_#{name}_iam.go",

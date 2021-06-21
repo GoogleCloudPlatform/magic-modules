@@ -76,5 +76,6 @@ module Provider
     def copy_common_files(output_folder, generate_code, generate_docs) end
 
     def generate_iam_policy(pwd, data, generate_code, generate_docs) end
+    def generate_mappers(pwd, data, _generate_code, _generate_docs) end
   end
 end
