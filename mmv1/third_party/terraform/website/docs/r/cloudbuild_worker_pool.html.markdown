@@ -1,4 +1,3 @@
-
 ---
 subcategory: "Cloud Build"
 layout: "google"
@@ -10,7 +9,7 @@ description: |-
 
 # google\_cloudbuild\_worker\_pool
 
-Definition of custom Cloud Build WorkerPools for running jobs with custom networking.
+Definition of custom Cloud Build WorkerPools for running jobs with custom configuration and custom networking.
 
 -> This resource is not currently public, and requires allow-listing of projects prior to use.
 
@@ -29,6 +28,50 @@ resource "google_cloudbuild_worker_pool" "pool" {
     machine_type = "e2-standard-4"
     no_external_ip = false
   }
+}
+```
+
+## Example Usage - Network Config
+
+```hcl
+resource "google_project_service" "servicenetworking" {
+  service = "servicenetworking.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_compute_network" "network" {
+  name                    = "my-network"
+  auto_create_subnetworks = false
+  depends_on = [google_project_service.servicenetworking]
+}
+
+resource "google_compute_global_address" "worker_range" {
+  name          = "worker-pool-range"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = google_compute_network.network.id
+}
+
+resource "google_service_networking_connection" "worker_pool_conn" {
+  network                 = google_compute_network.network.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.worker_range.name]
+  depends_on              = [google_project_service.servicenetworking]
+}
+
+resource "google_cloudbuild_worker_pool" "pool" {
+  name = "my-pool"
+  location = "europe-west1"
+  worker_config {
+    disk_size_gb = 100
+    machine_type = "e2-standard-4"
+    no_external_ip = false
+  }
+  network_config {
+    peered_network = google_compute_network.network.id
+  }
+  depends_on = [google_service_networking_connection.worker_pool_conn]
 }
 ```
 
@@ -65,7 +108,7 @@ The `network_config` block supports:
     
 * `peered_network` -
   (Required)
-  Required. Immutable. The network definition that the workers are peered to. If this section is left empty, the workers will be peered to `WorkerPool.project_id` on the service producer network. Must be in the format `projects/{project}/global/networks/{network}`, where `{project}` is a project number, such as `12345`, and `{network}` is the name of a VPC network in the project. See (https://cloud.google.com/cloud-build/docs/custom-workers/set-up-custom-worker-pool-environment#understanding_the_network_configuration_options)
+  Immutable. The network definition that the workers are peered to. If this section is left empty, the workers will be peered to `WorkerPool.project_id` on the service producer network. Must be in the format `projects/{project}/global/networks/{network}`, where `{project}` is a project number, such as `12345`, and `{network}` is the name of a VPC network in the project. See (https://cloud.google.com/cloud-build/docs/custom-workers/set-up-custom-worker-pool-environment#understanding_the_network_configuration_options)
     
 The `worker_config` block supports:
     
