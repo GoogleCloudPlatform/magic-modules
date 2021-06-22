@@ -89,7 +89,7 @@ module Provider
 
       generate_properties(pwd, data.clone, data.object.all_user_properties)
     end
-    
+
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
     def generate_iam_policy(pwd, data, generate_code, generate_docs)

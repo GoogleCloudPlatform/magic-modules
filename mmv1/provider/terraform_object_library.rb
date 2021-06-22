@@ -38,15 +38,12 @@ module Provider
     def generate_resource(pwd, data, _generate_code, _generate_docs)
       target_folder = data.output_folder
       product_ns = data.object.__product.name
-      name = data.object.filename_override || data.object.name.underscore
-      product_name = data.product.name.underscore
       data.generate(pwd,
                     'templates/terraform/objectlib/base.go.erb',
                     File.join(target_folder,
                               "google/#{product_ns.downcase}_#{data.object.name.underscore}.go"),
                     self)
     end
-
 
     def compile_common_files(output_folder, products, _common_compile_file)
       Google::LOGGER.info 'Compiling common files.'
@@ -74,7 +71,6 @@ module Provider
                         ],
                         file_template)
     end
-
 
     def copy_common_files(output_folder, generate_code, _generate_docs)
       Google::LOGGER.info 'Copying common files.'
