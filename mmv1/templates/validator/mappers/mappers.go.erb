@@ -73,17 +73,17 @@ func Mappers() map[string][]mapper {
             <% (product[:definitions].objects || []).each do |object| -%>
                 <% if object.min_version.name == "ga" -%>
                     <% if !object.exclude && !object.exclude_validator -%>
-                        <% name = object.filename_override || object.name.underscore -%>
-                        <% tf_resource = object.__product.name.underscore+ "_" + name.gsub(" ", "_") -%>
+						<% tf_product = (product[:overrides].legacy_name || object.__product.name).underscore -%>
+						<% terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}" -%>
                         <% cai_name =  object.__product.name + object.name -%>
                         <% if (!object.iam_policy.nil?) && (!object.iam_policy.exclude) -%>
-                            "google_<%= tf_resource -%>_iam_policy": {
+                            "<%= terraform_name -%>_iam_policy": {
                                 {
                                     convert:           Get<%= cai_name -%>IamPolicyCaiObject,
                                     mergeCreateUpdate: Merge<%= cai_name -%>IamPolicy,
                                 },
                             },
-                            "google_<%= tf_resource -%>_iam_binding": {
+                            "<%= terraform_name -%>_iam_binding": {
                                 {
                                     convert:           Get<%= cai_name -%>IamBindingCaiObject,
                                     mergeCreateUpdate: Merge<%= cai_name -%>IamBinding,
@@ -91,7 +91,7 @@ func Mappers() map[string][]mapper {
                                     fetch:             Fetch<%= cai_name -%>IamPolicy,
                                 },
                             },
-                            "google_<%= tf_resource -%>_iam_member": {
+                            "<%= terraform_name -%>_iam_member": {
                                 {
                                     convert:           Get<%= cai_name -%>IamMemberCaiObject,
                                     mergeCreateUpdate: Merge<%= cai_name -%>IamMember,
