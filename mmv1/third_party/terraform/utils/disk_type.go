@@ -9,3 +9,5 @@ func readDiskType(c *Config, d TerraformResourceData, name string) (*ZonalFieldV
 func readRegionDiskType(c *Config, d TerraformResourceData, name string) (*RegionalFieldValue, error) {
 	return parseRegionalFieldValue("diskTypes", name, "project", "region", "zone", d, c, false)
 }
+
+// whatever
