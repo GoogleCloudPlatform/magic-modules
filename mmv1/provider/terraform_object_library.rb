@@ -38,7 +38,6 @@ module Provider
     def generate_resource(pwd, data, _generate_code, _generate_docs)
       target_folder = data.output_folder
       product_ns = data.object.__product.name
-
       data.generate(pwd,
                     'templates/terraform/objectlib/base.go.erb',
                     File.join(target_folder,
@@ -196,7 +195,6 @@ module Provider
       product_name = data.product.name.underscore
 
       FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
-
       data.generate(pwd,
                     'templates/validator/iam/iam_consumer.go.erb',
                     "#{target_folder}/#{product_name}_#{name}_iam.go",
