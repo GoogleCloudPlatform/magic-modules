@@ -302,9 +302,9 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 	timeout := d.Timeout(schema.TimeoutCreate)
 	startTime := time.Now()
 
+	// we attempt to prefetch the node pool to make sure it doesn't exist before creation
 	var id = fmt.Sprintf("projects/%s/locations/%s/clusters/%s/nodePools/%s", nodePoolInfo.project, nodePoolInfo.location, nodePoolInfo.cluster, nodePool.Name)
 	name := getNodePoolName(id)
-
 	clusterNodePoolsGetCall := config.NewContainerBetaClient(userAgent).Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name))
 	if config.UserProjectOverride {
 		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
