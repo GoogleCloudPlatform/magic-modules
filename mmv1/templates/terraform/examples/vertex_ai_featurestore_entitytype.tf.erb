@@ -16,7 +16,7 @@ resource "google_vertex_ai_featurestore_entitytype" "featurestore" {
   labels = {
     foo = "bar"
   }
-  featurestore = "terraformxl34nkqltq"
+  featurestore = google_vertex_ai_featurestore.featurestore.name
   monitoring_config {
     snapshot_analysis {
       disabled = false
