@@ -316,8 +316,7 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 		// refreshed on the next call to apply.
 		d.SetId(fmt.Sprintf(id))
 	} else if err == nil {
-		return fmt.Errorf("Resource - %s - already exists: %s", id, err)
-
+		return fmt.Errorf("resource - %s - already exists", id)
 	}
 
 	var operation *containerBeta.Operation
