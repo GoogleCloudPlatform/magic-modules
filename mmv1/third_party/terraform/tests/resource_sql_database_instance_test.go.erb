@@ -1165,6 +1165,9 @@ resource "google_sql_database_instance" "replica1" {
 
   settings {
     tier = "db-n1-standard-1"
+		backup_configuration {
+      binary_log_enabled = true
+		}
   }
 
   master_instance_name = google_sql_database_instance.instance_master.name
