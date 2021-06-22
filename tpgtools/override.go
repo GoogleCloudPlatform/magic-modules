@@ -45,6 +45,8 @@ const (
 	CustomImport                       = "CUSTOM_IMPORT_FUNCTION"
 	CustomCreateDirective              = "CUSTOM_CREATE_DIRECTIVE_FUNCTION"
 	SkipDelete                         = "SKIP_DELETE_FUNCTION"
+	SerializationOnly                  = "SERIALIZATION_ONLY"
+	TerraformProductName               = "CUSTOM_TERRAFORM_PRODUCT_NAME"
 )
 
 // Field-level Overrides

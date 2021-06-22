@@ -11,175 +11,204 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */}}
-package serialization
+
+package main
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"strings"
-	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
-	tfjson "github.com/hashicorp/terraform-json"
+
 	fmtcmd "github.com/hashicorp/hcl/hcl/fmtcmd"
-{{- range $res := . }}
-	{{$res.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$res.Package}}"
+{{- range $name, $path := $.Packages   }}
+	{{$name}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$path}}"
 {{- end }}
 )
 
-// TFJSONToDCL takes a tfjson plan and returns a list of DCL resources which are in that plan.
-// These resources may be more verbose than the config in the HCL - this is a representation
-// of what Terraform actually intends to do, rather than a simple reproduction of the
-// given HCL.  This provides a better match to the Terraform user experience than the alternative.
-func TFJSONToDCL(p tfjson.Plan) ([]dcl.Resource, error) {
-	var resources []dcl.Resource
-	for _, r := range p.PlannedValues.RootModule.Resources {
-	{{- range $res := . }}
-		if r.Type == "google_{{$res.Path}}" {
-			m := map[string]interface{}{
-			{{- range $prop := $res.Properties }}
-
-				{{- if and (eq $prop.Type.String "TypeList" "TypeSet") (not $prop.ElemIsBasicType) }}
-				"{{$prop.PackageJSONName}}": convert{{$res.PathType}}{{$prop.PackagePath}}List(r.AttributeValues["{{$prop.Name}}"]),
-				{{- else if $prop.IsObject }}
-				"{{$prop.PackageJSONName}}": convert{{$res.PathType}}{{$prop.PackagePath}}(r.AttributeValues["{{$prop.Name}}"]),
-				{{- else }}
-				"{{$prop.PackageJSONName}}": r.AttributeValues["{{$prop.Name}}"],
-				{{- end }}
+// DCLToTerraformReferencce converts a DCL resource name to the final tpgtools name
+// after overrides are applied
+func DCLToTerraformReference(resourceType, version string) (string, error) {
+	{{- range $version, $resList := $.Resources   }}
+		{{- if not (eq $version.V "ga") }}
+	if version == "{{$version.V}}" {
+		switch resourceType {
+			{{- range $res := $resList   }}
+		case "{{$res.PathType}}":
+			return "{{$res.TerraformName}}", nil
 			{{- end }}
-			}
-			b, err := json.Marshal(m)
-			if err != nil {
-				return nil, err
-			}
-			r := &{{$res.Package}}.{{$res.Type}}{}
-			if err := json.Unmarshal(b, r); err != nil {
-				return nil, err
-			}
-			resources = append(resources, r)
-		}
-	{{- end }}
+		}	
 	}
-	return resources, nil
+		{{- else }}
+	// If not found in sample version, fallthrough to GA
+	switch resourceType {
+	{{- range $res := $resList   }}
+	case "{{$res.PathType}}":
+		return "{{$res.TerraformName}}", nil
+	{{- end }}
+	default:
+		return "", fmt.Errorf("Error retrieving Terraform name from DCL resource type: %s not found", resourceType)
+	}
+		{{ end }}
+	{{- end }}
 }
 
-{{- range $res := . }}
-// {{ $res.PathType }}AsHCL returns a string representation of the specified resource in HCL.
+// ConvertSampleJSONToDCLResource unmarshals json to a DCL resource specified by the resource type
+func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (string, error) {
+	{{- range $version, $resList := $.Resources   }}
+		{{- if not (eq $version.V "ga") }}
+	if version == "{{$version.V}}" {
+		switch resourceType {
+			{{- range $res := $resList   }}
+		case "{{$res.PathType}}":
+			r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.Type}}{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return {{$res.PathType}}{{$version.SerializationSuffix}}AsHCL(*r)
+			{{- end }}
+		}	
+	}
+		{{- else }}
+	// If not found in sample version, fallthrough to GA
+	switch resourceType {
+	{{- range $res := $resList   }}
+	case "{{$res.PathType}}":
+		r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.Type}}{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return {{$res.PathType}}{{$version.SerializationSuffix}}AsHCL(*r)
+	{{- end }}
+	default:
+		//return fmt.Sprintf("%s resource not supported in tpgtools", resourceType), nil
+		return "", fmt.Errorf("Error converting sample JSON to HCL: %s not found", resourceType)
+	}
+		{{ end }}
+	{{- end }}
+}
+
+
+{{- range $version, $resList := $.Resources   }}
+	{{- range $res  := $resList   }}
+// {{ $res.PathType }}{{$version.SerializationSuffix}}AsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func {{ $res.PathType}}AsHCL(r {{$res.Package}}.{{$res.Type}}) (string, error) {
-	outputConfig := "resource \"google_{{$res.Path}}\" \"output\" {\n"
-	{{- range $field := $res.Properties}}
-		{{- if $field.Settable }}
-		{{- if eq $field.Type.String "TypeString" "TypeInt" "TypeBool" "TypeFloat" }}
-			{{- if $field.Type.IsDateTime }}
+func {{ $res.PathType}}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{{$version.SerializationSuffix}}.{{$res.Type}}) (string, error) {
+	outputConfig := "resource \"{{$res.TerraformName}}\" \"output\" {\n"
+		{{- range $field := $res.Properties}}
+			{{- if $field.Settable }}
+				{{- if eq $field.Type.String "TypeString" "TypeInt" "TypeBool" "TypeFloat" }}
+					{{- if $field.Type.IsDateTime }}
 	if !r.{{$field.PackageName}}.IsZero() {
 		outputConfig += fmt.Sprintf("\t{{$field.Name}} = %v\n", r.{{$field.PackageName}})
 	}
-			{{- else }}
+					{{- else }}
 	if r.{{$field.PackageName}} != nil {
 		outputConfig += fmt.Sprintf("\t{{$field.Name}} = %#v\n", *r.{{$field.PackageName}})
 	}
-			{{- end}}
-		{{- else if $field.Type.IsObject }}
-	if v := convert{{$res.PathType}}{{$field.PackagePath}}ToHCL(r.{{$field.PackageName}}); v != "" {
-		outputConfig += fmt.Sprintf("\t{{$field.Name}} = %s\n", v)
+					{{- end}}
+				{{- else if $field.Type.IsObject }}
+	if v := convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(r.{{$field.PackageName}}); v != "" {
+						{{- if $field.Collapsed }}
+		outputConfig += v
+						{{- else }}
+		outputConfig += fmt.Sprintf("\t{{$field.Name}} %s\n", v)
+						{{- end }}
 	}
-		{{- else if eq $field.Type.String "TypeList" "TypeSet" }}
+				{{- else if eq $field.Type.String "TypeList" "TypeSet" }}
 	if r.{{$field.PackageName}} != nil {
-			{{- if $field.ElemIsBasicType }}
+					{{- if $field.ElemIsBasicType }}
 		outputConfig += "\t{{$field.Name}} = ["
 		for _, v := range r.{{$field.PackageName}} {
 			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
 		outputConfig += "]\n"
-			{{- else }}
+					{{- else }}
 		for _, v := range r.{{$field.PackageName}} {
-			outputConfig += fmt.Sprintf("\t{{$field.Name}} %s\n", convert{{$res.PathType}}{{$field.PackagePath}}ToHCL(&v))
+			outputConfig += fmt.Sprintf("\t{{$field.Name}} %s\n", convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(&v))
 		}
-			{{- end }}
+					{{- end }}
 	}
+				{{- end}}
+			{{- end}}
 		{{- end}}
-		{{- end}}
-	{{- end}}
 	return formatHCL(outputConfig + "}")
 }
 
-{{- range $v := $res.Objects}}
-func convert{{$res.PathType}}{{$v.PackagePath}}ToHCL(r *{{$res.Package}}.{{$res.Type}}{{$v.PackagePath}}) string {
+		{{ range $v := $res.Objects}}
+func convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$v.PackagePath}}ToHCL(r *{{$res.Package}}{{$version.SerializationSuffix}}.{{$v.ObjectType}}) string {
 	if r == nil {
 		return ""
 	}
-	outputConfig := "{\n"
-	{{- range $field := $v.Properties}}
-		{{- if $field.Settable }}
-		{{- if eq $field.Type.String "TypeString" "TypeInt" "TypeBool" "TypeFloat" }}
-			{{- if $field.Type.IsDateTime }}
-	if !r.{{$field.PackageName}}.IsZero() {
-		outputConfig += fmt.Sprintf("\t{{$field.Name}} = %v\n", r.{{$field.PackageName}})
-	}
-			{{- else }}
+	outputConfig := "{{ if not $v.Collapsed }}{\n{{end}}"
+			{{- range $field := $v.Properties}}
+				{{- if $field.Settable }}
+					{{- if eq $field.Type.String "TypeString" "TypeInt" "TypeBool" "TypeFloat" }}
 	if r.{{$field.PackageName}} != nil {
-		outputConfig += fmt.Sprintf("\t{{$field.Name}} = %#v\n", *r.{{$field.PackageName}})
+		outputConfig += fmt.Sprintf("{{ if not $v.Collapsed }}\t{{end}}{{$field.Name}} = %#v\n", *r.{{$field.PackageName}})
 	}
-			{{- end}}
-		{{- else if $field.Type.IsObject }}
-	if v := convert{{$res.PathType}}{{$field.PackagePath}}ToHCL(r.{{$field.PackageName}}); v != "" {
-		outputConfig += fmt.Sprintf("\t{{$field.Name}} = %s\n", v)
+					{{- else if $field.Type.IsObject }}
+	if v := convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(r.{{$field.PackageName}}); v != "" {
+		outputConfig += fmt.Sprintf("{{ if not $v.Collapsed }}\t{{end}}{{$field.Name}} %s\n", v)
 	}
-		{{- else if eq $field.Type.String "TypeList" "TypeSet" }}
+					{{- else if eq $field.Type.String "TypeList" "TypeSet" }}
 	if r.{{$field.PackageName}} != nil {
-			{{- if $field.ElemIsBasicType }}
-		outputConfig += "\t{{$field.Name}} = ["
+						{{- if $field.ElemIsBasicType }}
+		outputConfig += "{{ if not $v.Collapsed }}\t{{end}}{{$field.Name}} = ["
 		for _, v := range r.{{$field.PackageName}} {
 			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
 		outputConfig += "]\n"
-			{{- else }}
+						{{- else }}
 		for _, v := range r.{{$field.PackageName}} {
-			outputConfig += fmt.Sprintf("\t{{$field.Name}} %s\n", convert{{$res.PathType}}{{$field.PackagePath}}ToHCL(&v))
+			outputConfig += fmt.Sprintf("{{ if not $v.Collapsed }}\t{{end}}{{$field.Name}} %s\n", convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(&v))
 		}
-			{{- end }}
+						{{- end }}
 	}
-		{{- end}}
-		{{- end}}
-	{{- end}}
-	return outputConfig + "}"
+					{{- end}}
+				{{- end}}
+			{{- end}}
+	return outputConfig{{ if not $v.Collapsed }} + "}"{{end}}
 }
-{{- end }}
-{{- end }}
 
-{{- range $res := . }}
-	{{- range $v := $res.Objects }}
-func convert{{$res.PathType}}{{$v.PackagePath}}(i interface{}) (map[string]interface{}) {
+		{{ end }}
+	{{- end }}
+{{- end }}
+{{- range $version, $resList := $.Resources   }}
+	{{- range $res := $resList  }}
+		{{- range $v := $res.Objects }}
+func convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$v.PackagePath}}(i interface{}) (map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-	{{- range $prop := $v.Properties }}
-		{{- if $prop.IsObject }}
-		"{{$prop.PackageJSONName}}": convert{{$res.PathType}}{{$prop.PackagePath}}(in["{{$prop.Name}}"]),
-		{{- else }}
+			{{- range $prop := $v.Properties }}
+				{{- if $prop.IsObject }}
+		"{{$prop.PackageJSONName}}": convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$prop.PackagePath}}(in["{{$prop.Name}}"]),
+				{{- else }}
 		"{{$prop.PackageJSONName}}": in["{{$prop.Name}}"],
-		{{- end }}
-	{{- end }}
+				{{- end }}
+			{{- end }}
 	}
 }
 
 
-func convert{{$res.PathType}}{{$v.PackagePath}}List(i interface{}) (out []map[string]interface{}) {
+func convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$v.PackagePath}}List(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convert{{$res.PathType}}{{$v.PackagePath}}(v))
+		out = append(out, convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$v.PackagePath}}(v))
 	}
 	return out
 }
+		{{ end }}
 	{{- end }}
 {{- end }}
 

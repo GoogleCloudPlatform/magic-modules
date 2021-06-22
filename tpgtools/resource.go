@@ -114,6 +114,15 @@ type Resource struct {
 	// object and config and returns a boolean for if Terraform should make
 	// the delete call for the resource
 	SkipDeleteFunction *string
+
+	// SerializationOnly defines if this resource should not generate provider files
+	// and only be used for serialization
+	SerializationOnly bool
+
+	// TerraformProductName is the Product name overriden from the DCL
+	TerraformProductName *string
+
+	Samples []Sample
 }
 
 // Name is the shortname of a resource. For example, "instance".
@@ -137,6 +146,9 @@ func (r Resource) Path() string {
 // TerraformName is the Terraform resource type used in HCL configuration.
 // For example, "google_compute_instance"
 func (r Resource) TerraformName() string {
+	if r.TerraformProductName != nil {
+		return fmt.Sprintf("google_%s_%s", *r.TerraformProductName, r.Name())
+	}
 	return "google_" + r.Path()
 }
 
@@ -314,7 +326,7 @@ func (r Resource) RegisterReusedType(p Property) []Property {
 	return r.ReusedTypes
 }
 
-func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides Overrides, product *ProductMetadata, location string) (*Resource, error) {
+func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides Overrides, product *ProductMetadata, samples []Sample, location string) (*Resource, error) {
 	resourceTitle := schema.Title
 
 	// Attempt to construct the resource name using location. Other than
@@ -333,6 +345,7 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 		InsertTimeoutMinutes: 10,
 		UpdateTimeoutMinutes: 10,
 		DeleteTimeoutMinutes: 10,
+		Samples:              samples,
 	}
 
 	crname := CustomResourceNameDetails{}
@@ -478,6 +491,19 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 	}
 	if skipDeleteFuncOk {
 		res.SkipDeleteFunction = &skipDeleteFunc.Function
+	}
+
+	// Resource Override: SerializationOnly
+	res.SerializationOnly = overrides.ResourceOverride(SerializationOnly, location)
+
+	// Resource Override: TerraformProductName
+	terraformProductName := TerraformProductNameDetails{}
+	terraformProductNameOk, err := overrides.ResourceOverrideWithDetails(TerraformProductName, &terraformProductName, location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode terraform product name function details: %v", err)
+	}
+	if terraformProductNameOk {
+		res.TerraformProductName = &terraformProductName.Product
 	}
 
 	return &res, nil

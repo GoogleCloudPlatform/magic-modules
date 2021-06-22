@@ -1,0 +1,28 @@
+{
+  "name": "{{name}}",
+  "location": "{{region}}",
+  "metadata": {
+    "namespace": "{{project}}"
+  },
+  "spec": {
+    "template": {
+      "spec": {
+        "containers": [
+          {
+            "image": "gcr.io/cloudrun/hello",
+            "args": [
+              "arrgs"
+            ]
+          }
+        ],
+        "containerCurrency": 50
+      }
+    },
+    "traffic": [
+      {
+        "percent": 100,
+        "latestRevision": true
+      }
+    ]
+  }
+}

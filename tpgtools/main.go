@@ -46,6 +46,15 @@ var terraformResourceDirectory = "google-beta"
 
 func main() {
 	resources, products := loadAndModelResources()
+
+	if mode != nil && *mode == "serialization" {
+		if vFilter != nil {
+			glog.Warning("[WARNING] serialization mode uses all resource versions. version flag is ignored")
+		}
+		generateSerializationLogic(resources)
+		return
+	}
+
 	var resourcesForVersion []*Resource
 	var productsForVersion []*ProductMetadata
 	var version *Version
@@ -64,11 +73,6 @@ func main() {
 		terraformResourceDirectory = "google"
 	}
 
-	if mode != nil && *mode == "serialization" {
-		generateSerializationLogic(resourcesForVersion)
-		return
-	}
-
 	for _, resource := range resourcesForVersion {
 		if skipResource(resource) {
 			continue
@@ -82,8 +86,7 @@ func main() {
 
 		generateResourceFile(resource)
 		generateSweeperFile(resource)
-		// Disabled to allow handwriting files until samples exist
-		// generateResourceWebsiteFile(resource, resources, version)
+		generateResourceWebsiteFile(resource, resources, version)
 	}
 
 	// product specific generation
@@ -112,7 +115,9 @@ func skipResource(r *Resource) bool {
 	if rFilter != nil && *rFilter != "" && strings.ToLower(*rFilter) != snakeToLowercase(r.DCLName()) {
 		return true
 	}
-	return false
+
+	// skip if set to SerializationOnly
+	return r.SerializationOnly
 }
 
 // TODO(rileykarson): Change interface to an error, handle exceptional stuff in
@@ -155,7 +160,7 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 			}
 			products[version] = append(products[version], newProduct)
 
-			newResources := getResources(packagePath, specs)
+			newResources := getResources(packagePath, specs, version)
 			resources[version] = append(resources[version], newResources...)
 
 		}
@@ -178,7 +183,7 @@ func getProductInformation(packagePath string, specs []os.FileInfo) *ProductMeta
 	return nil
 }
 
-func getResources(packagePath string, specs []os.FileInfo) []*Resource {
+func getResources(packagePath string, specs []os.FileInfo, version Version) []*Resource {
 	var resources []*Resource
 	for _, f := range specs {
 		if f.IsDir() {
@@ -198,6 +203,8 @@ func getResources(packagePath string, specs []os.FileInfo) []*Resource {
 		}
 
 		overrides := loadOverrides(packagePath, f.Name())
+
+		samples := loadSamples(packagePath, f.Name(), version)
 
 		if schema == nil {
 			glog.Exit(fmt.Sprintf("Could not find document schema for %s", document.Info.Title))
@@ -229,7 +236,7 @@ func getResources(packagePath string, specs []os.FileInfo) []*Resource {
 		}
 
 		for _, l := range locations {
-			res, err := createResource(schema, typeFetcher, overrides, productMetadata, l)
+			res, err := createResource(schema, typeFetcher, overrides, productMetadata, samples, l)
 			if err != nil {
 				glog.Exit(err)
 			}
@@ -257,7 +264,13 @@ func loadDocument(packagePath string, f *os.FileInfo) *openapi.Document {
 	return document
 }
 
-func generateSerializationLogic(specs []*Resource) {
+// SerializationInput contains an array of resources along with additional generation metadata.
+type SerializationInput struct {
+	Resources map[Version][]*Resource
+	Packages  map[string]string
+}
+
+func generateSerializationLogic(specs map[Version][]*Resource) {
 	buf := bytes.Buffer{}
 	tmpl, err := template.New("serialization.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
 		"templates/serialization.go.tmpl",
@@ -266,7 +279,29 @@ func generateSerializationLogic(specs []*Resource) {
 		glog.Exit(err)
 	}
 
-	if err = tmpl.ExecuteTemplate(&buf, "serialization.go.tmpl", specs); err != nil {
+	packageMap := make(map[string]string)
+	for v, resList := range specs {
+		for _, res := range resList {
+			var pkgName, pkgPath string
+			pkgName = res.Package() + v.SerializationSuffix
+			if v == BETA_VERSION {
+				pkgPath = path.Join(res.Package(), v.V)
+			} else {
+				pkgPath = res.Package()
+			}
+
+			if _, ok := packageMap[pkgPath]; !ok {
+				packageMap[pkgName] = pkgPath
+			}
+		}
+	}
+
+	tmplInput := SerializationInput{
+		Resources: specs,
+		Packages:  packageMap,
+	}
+
+	if err = tmpl.ExecuteTemplate(&buf, "serialization.go.tmpl", tmplInput); err != nil {
 		glog.Exit(err)
 	}
 
@@ -302,6 +337,74 @@ func loadOverrides(packagePath, fileName string) Overrides {
 		}
 	}
 	return overrides
+}
+
+func loadSamples(packagePath, fileName string, version Version) Samples {
+	samples := Samples{}
+
+	if mode != nil && *mode == "serialization" {
+		return samples
+	}
+
+	// Samples appear in the root product folder
+	packagePath = strings.Split(packagePath, "beta")[0]
+	samplesPath := path.Join(*fPath, packagePath, "samples")
+	files, err := ioutil.ReadDir(samplesPath)
+	if err != nil {
+		// ignore the error if the file just doesn't exist
+		if !os.IsNotExist(err) {
+			glog.Exit(err)
+		}
+	}
+	for _, file := range files {
+		if !strings.HasSuffix(file.Name(), ".yaml") {
+			continue
+		}
+		sample := Sample{}
+		tc, err := ioutil.ReadFile(path.Join(samplesPath, file.Name()))
+		if err != nil {
+			glog.Exit(err)
+		}
+
+		err = yaml.UnmarshalStrict(tc, &sample)
+		if err != nil {
+			glog.Exit(err)
+		}
+
+		versionMatch := false
+		for _, v := range sample.Versions {
+			if v == version.V {
+				versionMatch = true
+			}
+		}
+		if !versionMatch {
+			continue
+		}
+
+		var dependencies []Dependency
+		mainResource := loadSampleDependency(samplesPath, *sample.PrimaryResource, version)
+		dependencies = append(dependencies, mainResource)
+		for _, dFileName := range sample.DependencyFileNames {
+			dependency := loadSampleDependency(samplesPath, dFileName, version)
+			dependencies = append(dependencies, dependency)
+		}
+		sample.DependencyList = dependencies
+		sample.TestSlug = sampleNameToTitleCase(*sample.Name)
+		samples = append(samples, sample)
+	}
+
+	return samples
+}
+
+func loadSampleDependency(samplesPath, fileName string, version Version) Dependency {
+	dFileNameParts := strings.Split(fileName, "samples/")
+	fileName = dFileNameParts[len(dFileNameParts)-1]
+	dependencyBytes, err := ioutil.ReadFile(path.Join(samplesPath, fileName))
+	d, err := BuildDependency(fileName, version, dependencyBytes)
+	if err != nil {
+		glog.Exit(err)
+	}
+	return *d
 }
 
 func generateResourceFile(res *Resource) {

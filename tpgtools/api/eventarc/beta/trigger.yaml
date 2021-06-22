@@ -82,7 +82,7 @@ components:
           x-dcl-go-name: Location
           x-kubernetes-immutable: true
         matchingCriteria:
-          description: Required. null The criteria by which events are filtered. Only
+          description: Required. The criteria by which events are filtered. Only
             events that match with this criteria will be sent to the destination.
           items:
             properties:
@@ -106,7 +106,7 @@ components:
           x-dcl-list-type: set
         name:
           description: Required. The resource name of the trigger. Must be unique
-            within the location on the project and must be in \\\`projects/{project}/locations/{location}/triggers/{trigger}\\\`
+            within the location on the project and must be in `projects/{project}/locations/{location}/triggers/{trigger}`
             format.
           type: string
           x-dcl-go-name: Name
@@ -122,13 +122,13 @@ components:
         serviceAccount:
           description: Optional. The IAM service account email associated with the
             trigger. The service account represents the identity of the trigger. The
-            principal who calls this API must have \\\`iam.serviceAccounts.actAs\\\`
-            permission in the service account. See https://cloud.google.com/iam/docs/understanding-service-accounts?hl=en#sa\\\_common
+            principal who calls this API must have `iam.serviceAccounts.actAs`
+            permission in the service account. See https://cloud.google.com/iam/docs/understanding-service-accounts?hl=en#sa_common
             for more information. For Cloud Run destinations, this service account
             is used to generate identity tokens when invoking the service. See https://cloud.google.com/run/docs/triggering/pubsub-push#create-service-account
             for information on how to invoke authenticated Cloud Run services. In
             order to create Audit Log triggers, the service account should also have
-            \\\`roles/eventarc.eventReceiver\\\` IAM role.
+            `roles/eventarc.eventReceiver` IAM role.
           type: string
           x-dcl-go-name: ServiceAccount
           x-dcl-references:
@@ -147,7 +147,7 @@ components:
                 subscription:
                   description: 'Output only. The name of the Pub/Sub subscription
                     created and managed by Eventarc system as a transport for the
-                    event delivery. Format: \\\\\\\\\\`projects/{PROJECT\\\\\\\\\\_ID}/subscriptions/{SUBSCRIPTION\\\\\\\\\\_NAME}\\\\\\\\\\`.'
+                    event delivery. Format: `projects/{PROJECT_ID}/subscriptions/{SUBSCRIPTION_NAME}`.'
                   readOnly: true
                   type: string
                   x-dcl-go-name: Subscription
@@ -155,8 +155,8 @@ components:
                 topic:
                   description: 'Optional. The name of the Pub/Sub topic created and
                     managed by Eventarc system as a transport for the event delivery.
-                    Format: \\\\\\\\\\`projects/{PROJECT\\\\\\\\\\_ID}/topics/{TOPIC\\\\\\\\\\_NAME}\\\\\\\\\\`.
-                    You may set an existing topic for triggers of the type \\\\\\\\\\`google.cloud.pubsub.topic.v1.messagePublished\\\\\\\\\\`
+                    Format: `projects/{PROJECT_ID}/topics/{TOPIC_NAME}`.
+                    You may set an existing topic for triggers of the type `google.cloud.pubsub.topic.v1.messagePublished`
                     only. The topic you provide here will not be deleted by Eventarc
                     at trigger deletion.'
                   type: string

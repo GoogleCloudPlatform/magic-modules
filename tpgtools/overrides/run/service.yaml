@@ -11,8 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-- type: MUTEX
+
+- type: SERIALIZATION_ONLY
+- type: COLLAPSED_OBJECT
+  field: spec
+- type: CUSTOM_TERRAFORM_PRODUCT_NAME
   details:
-    mutex: '{{project}}/{{location}}/{{feature}}'
-# Feature is a singleton, so we create it in sub-projects anyways
-- type: NO_SWEEPER
+    product: cloud_run
