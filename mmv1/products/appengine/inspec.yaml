@@ -47,4 +47,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true  
   ServiceSplitTraffic: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true  
-  
+  ServiceNetworkSettings: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true  
