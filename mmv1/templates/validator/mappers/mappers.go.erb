@@ -21,23 +21,23 @@ import (
 
 )
 
-type convertFunc func(d TerraformResourceData, config *Config) ([]Asset, error)
+type ConvertFunc func(d TerraformResourceData, config *Config) ([]Asset, error)
 
 // fetchFunc allows initial data for a resource to be fetched from the API and merged
 // with the planned changes. This is useful for resources that are only partially managed
 // by Terraform, like IAM policies managed with member/binding resources.
-type fetchFunc func(d TerraformResourceData, config *Config) (Asset, error)
+type FetchFunc func(d TerraformResourceData, config *Config) (Asset, error)
 
 // mergeFunc combines multiple terraform resources into a single CAI asset.
 // The incoming asset will either be an asset that was created/updated or deleted.
-type mergeFunc func(existing, incoming Asset) Asset
+type MergeFunc func(existing, incoming Asset) Asset
 
 // mapper pairs related conversion/merging functions.
 type Mapper struct {
-	convert           convertFunc // required
-	fetch             fetchFunc   // optional
-	mergeCreateUpdate mergeFunc   // optional
-	mergeDelete       mergeFunc   // optional
+	Convert           ConvertFunc // required
+	Fetch             FetchFunc   // optional
+	MergeCreateUpdate MergeFunc   // optional
+	MergeDelete       MergeFunc   // optional
 }
 
 // mappers maps terraform resource types (i.e. `google_project`) into
@@ -45,30 +45,30 @@ type Mapper struct {
 //
 // Modelling of relationships:
 // terraform resources to CAI assets as []mapperFuncs:
-// 1:1 = [mapper{convert: convertAbc}]                  (len=1)
-// 1:N = [mapper{convert: convertAbc}, ...]             (len=N)
-// N:1 = [mapper{convert: convertAbc, merge: mergeAbc}] (len=1)
+// 1:1 = [mapper{Convert: convertAbc}]                  (len=1)
+// 1:N = [mapper{Convert: convertAbc}, ...]             (len=N)
+// N:1 = [mapper{Convert: convertAbc, merge: mergeAbc}] (len=1)
 func Mappers() map[string][]Mapper {
 	return map[string][]Mapper{
-		"google_compute_firewall":               {{convert: GetComputeFirewallCaiObject}},
-		"google_compute_disk":                   {{convert: GetComputeDiskCaiObject}},
-		"google_compute_forwarding_rule":        {{convert: GetComputeForwardingRuleCaiObject}},
-		"google_compute_global_forwarding_rule": {{convert: GetComputeGlobalForwardingRuleCaiObject}},
-		"google_compute_instance":               {{convert: GetComputeInstanceCaiObject}},
-		"google_compute_network":                {{convert: GetComputeNetworkCaiObject}},
-		"google_compute_subnetwork":             {{convert: GetComputeSubnetworkCaiObject}},
-		"google_storage_bucket":                 {{convert: GetStorageBucketCaiObject}},
-		"google_sql_database_instance":          {{convert: GetSQLDatabaseInstanceCaiObject}},
-		"google_container_cluster":              {{convert: GetContainerClusterCaiObject}},
-		"google_container_node_pool":            {{convert: GetContainerNodePoolCaiObject}},
-		"google_bigquery_dataset":               {{convert: GetBigQueryDatasetCaiObject}},
-		"google_spanner_instance":               {{convert: GetSpannerInstanceCaiObject}},
-		"google_project_service":                {{convert: GetServiceUsageCaiObject}},
-		"google_pubsub_subscription":            {{convert: GetPubsubSubscriptionCaiObject}},
-		"google_pubsub_topic":                   {{convert: GetPubsubTopicCaiObject}},
-		"google_kms_crypto_key":                 {{convert: GetKMSCryptoKeyCaiObject}},
-		"google_kms_key_ring":                   {{convert: GetKMSKeyRingCaiObject}},
-		"google_filestore_instance":             {{convert: GetFilestoreInstanceCaiObject}},
+		"google_compute_firewall":               {{Convert: GetComputeFirewallCaiObject}},
+		"google_compute_disk":                   {{Convert: GetComputeDiskCaiObject}},
+		"google_compute_forwarding_rule":        {{Convert: GetComputeForwardingRuleCaiObject}},
+		"google_compute_global_forwarding_rule": {{Convert: GetComputeGlobalForwardingRuleCaiObject}},
+		"google_compute_instance":               {{Convert: GetComputeInstanceCaiObject}},
+		"google_compute_network":                {{Convert: GetComputeNetworkCaiObject}},
+		"google_compute_subnetwork":             {{Convert: GetComputeSubnetworkCaiObject}},
+		"google_storage_bucket":                 {{Convert: GetStorageBucketCaiObject}},
+		"google_sql_database_instance":          {{Convert: GetSQLDatabaseInstanceCaiObject}},
+		"google_container_cluster":              {{Convert: GetContainerClusterCaiObject}},
+		"google_container_node_pool":            {{Convert: GetContainerNodePoolCaiObject}},
+		"google_bigquery_dataset":               {{Convert: GetBigQueryDatasetCaiObject}},
+		"google_spanner_instance":               {{Convert: GetSpannerInstanceCaiObject}},
+		"google_project_service":                {{Convert: GetServiceUsageCaiObject}},
+		"google_pubsub_subscription":            {{Convert: GetPubsubSubscriptionCaiObject}},
+		"google_pubsub_topic":                   {{Convert: GetPubsubTopicCaiObject}},
+		"google_kms_crypto_key":                 {{Convert: GetKMSCryptoKeyCaiObject}},
+		"google_kms_key_ring":                   {{Convert: GetKMSKeyRingCaiObject}},
+		"google_filestore_instance":             {{Convert: GetFilestoreInstanceCaiObject}},
         <% products.each do |product| -%>
             <% (product[:definitions].objects || []).each do |object| -%>
                 <% if object.min_version.name == "ga" -%>
@@ -79,24 +79,24 @@ func Mappers() map[string][]Mapper {
                         <% if (!object.iam_policy.nil?) && (!object.iam_policy.exclude) -%>
                             "<%= terraform_name -%>_iam_policy": {
                                 {
-                                    convert:           Get<%= cai_name -%>IamPolicyCaiObject,
-                                    mergeCreateUpdate: Merge<%= cai_name -%>IamPolicy,
+                                    Convert:           Get<%= cai_name -%>IamPolicyCaiObject,
+                                    MergeCreateUpdate: Merge<%= cai_name -%>IamPolicy,
                                 },
                             },
                             "<%= terraform_name -%>_iam_binding": {
                                 {
-                                    convert:           Get<%= cai_name -%>IamBindingCaiObject,
-                                    mergeCreateUpdate: Merge<%= cai_name -%>IamBinding,
-                                    mergeDelete:       Merge<%= cai_name -%>IamBindingDelete,
-                                    fetch:             Fetch<%= cai_name -%>IamPolicy,
+                                    Convert:           Get<%= cai_name -%>IamBindingCaiObject,
+                                    MergeCreateUpdate: Merge<%= cai_name -%>IamBinding,
+                                    MergeDelete:       Merge<%= cai_name -%>IamBindingDelete,
+                                    Fetch:             Fetch<%= cai_name -%>IamPolicy,
                                 },
                             },
                             "<%= terraform_name -%>_iam_member": {
                                 {
-                                    convert:           Get<%= cai_name -%>IamMemberCaiObject,
-                                    mergeCreateUpdate: Merge<%= cai_name -%>IamMember,
-                                    mergeDelete:       Merge<%= cai_name -%>IamMemberDelete,
-                                    fetch:             Fetch<%= cai_name -%>IamPolicy,
+                                    Convert:           Get<%= cai_name -%>IamMemberCaiObject,
+                                    MergeCreateUpdate: Merge<%= cai_name -%>IamMember,
+                                    MergeDelete:       Merge<%= cai_name -%>IamMemberDelete,
+                                    Fetch:             Fetch<%= cai_name -%>IamPolicy,
                                 },
                             },
                         <% end -%>
@@ -106,89 +106,89 @@ func Mappers() map[string][]Mapper {
         <% end -%>
 		"google_project": {
 			{
-				convert:           GetProjectCaiObject,
-				mergeCreateUpdate: MergeProject,
+				Convert:           GetProjectCaiObject,
+				MergeCreateUpdate: MergeProject,
 			},
-			{convert: GetProjectBillingInfoCaiObject},
+			{Convert: GetProjectBillingInfoCaiObject},
 		},
 		"google_bigtable_instance": {
 			{
-				convert: GetBigtableInstanceCaiObject,
+				Convert: GetBigtableInstanceCaiObject,
 			},
 			{
-				convert: GetBigtableClusterCaiObject,
+				Convert: GetBigtableClusterCaiObject,
 			},
 		},
 		"google_organization_iam_policy": {
 			{
-				convert:           GetOrganizationIamPolicyCaiObject,
-				mergeCreateUpdate: MergeOrganizationIamPolicy,
+				Convert:           GetOrganizationIamPolicyCaiObject,
+				MergeCreateUpdate: MergeOrganizationIamPolicy,
 			},
 		},
 		"google_project_organization_policy": {
 			{
-				convert:           GetProjectOrgPolicyCaiObject,
-				mergeCreateUpdate: MergeProjectOrgPolicy,
+				Convert:           GetProjectOrgPolicyCaiObject,
+				MergeCreateUpdate: MergeProjectOrgPolicy,
 			},
 		},
 		"google_organization_iam_binding": {
 			{
-				convert:           GetOrganizationIamBindingCaiObject,
-				mergeCreateUpdate: MergeOrganizationIamBinding,
-				mergeDelete:       MergeOrganizationIamBindingDelete,
-				fetch:             FetchOrganizationIamPolicy,
+				Convert:           GetOrganizationIamBindingCaiObject,
+				MergeCreateUpdate: MergeOrganizationIamBinding,
+				MergeDelete:       MergeOrganizationIamBindingDelete,
+				Fetch:             FetchOrganizationIamPolicy,
 			},
 		},
 		"google_organization_iam_member": {
 			{
-				convert:           GetOrganizationIamMemberCaiObject,
-				mergeCreateUpdate: MergeOrganizationIamMember,
-				mergeDelete:       MergeOrganizationIamMemberDelete,
-				fetch:             FetchOrganizationIamPolicy,
+				Convert:           GetOrganizationIamMemberCaiObject,
+				MergeCreateUpdate: MergeOrganizationIamMember,
+				MergeDelete:       MergeOrganizationIamMemberDelete,
+				Fetch:             FetchOrganizationIamPolicy,
 			},
 		},
 		"google_folder_iam_policy": {
 			{
-				convert:           GetFolderIamPolicyCaiObject,
-				mergeCreateUpdate: MergeFolderIamPolicy,
+				Convert:           GetFolderIamPolicyCaiObject,
+				MergeCreateUpdate: MergeFolderIamPolicy,
 			},
 		},
 		"google_folder_iam_binding": {
 			{
-				convert:           GetFolderIamBindingCaiObject,
-				mergeCreateUpdate: MergeFolderIamBinding,
-				mergeDelete:       MergeFolderIamBindingDelete,
-				fetch:             FetchFolderIamPolicy,
+				Convert:           GetFolderIamBindingCaiObject,
+				MergeCreateUpdate: MergeFolderIamBinding,
+				MergeDelete:       MergeFolderIamBindingDelete,
+				Fetch:             FetchFolderIamPolicy,
 			},
 		},
 		"google_folder_iam_member": {
 			{
-				convert:           GetFolderIamMemberCaiObject,
-				mergeCreateUpdate: MergeFolderIamMember,
-				mergeDelete:       MergeFolderIamMemberDelete,
-				fetch:             FetchFolderIamPolicy,
+				Convert:           GetFolderIamMemberCaiObject,
+				MergeCreateUpdate: MergeFolderIamMember,
+				MergeDelete:       MergeFolderIamMemberDelete,
+				Fetch:             FetchFolderIamPolicy,
 			},
 		},
 		"google_project_iam_policy": {
 			{
-				convert:           GetProjectIamPolicyCaiObject,
-				mergeCreateUpdate: MergeProjectIamPolicy,
+				Convert:           GetProjectIamPolicyCaiObject,
+				MergeCreateUpdate: MergeProjectIamPolicy,
 			},
 		},
 		"google_project_iam_binding": {
 			{
-				convert:           GetProjectIamBindingCaiObject,
-				mergeCreateUpdate: MergeProjectIamBinding,
-				mergeDelete:       MergeProjectIamBindingDelete,
-				fetch:             FetchProjectIamPolicy,
+				Convert:           GetProjectIamBindingCaiObject,
+				MergeCreateUpdate: MergeProjectIamBinding,
+				MergeDelete:       MergeProjectIamBindingDelete,
+				Fetch:             FetchProjectIamPolicy,
 			},
 		},
 		"google_project_iam_member": {
 			{
-				convert:           GetProjectIamMemberCaiObject,
-				mergeCreateUpdate: MergeProjectIamMember,
-				mergeDelete:       MergeProjectIamMemberDelete,
-				fetch:             FetchProjectIamPolicy,
+				Convert:           GetProjectIamMemberCaiObject,
+				MergeCreateUpdate: MergeProjectIamMember,
+				MergeDelete:       MergeProjectIamMemberDelete,
+				Fetch:             FetchProjectIamPolicy,
 			},
 		},
 	}
