@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 )
-
+// totally a change
 const defaultBatchSendIntervalSec = 3
 
 // RequestBatcher keeps track of batched requests globally.
