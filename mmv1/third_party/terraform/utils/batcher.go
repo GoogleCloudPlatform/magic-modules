@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 )
+
 // totally a change
 const defaultBatchSendIntervalSec = 3
 
