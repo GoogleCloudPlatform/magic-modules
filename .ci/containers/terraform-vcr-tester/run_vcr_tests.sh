@@ -26,7 +26,7 @@ function update_status {
 	  -d "$post_body"
 }
 
-build_url=$(cat build.json | jq .webUrl)
+build_url=$(cat build.json | jq -r .webUrl)
 update_status "${build_url}" "pending"
 
 ID=$(cat build.json | jq .id -r)
@@ -73,7 +73,7 @@ set -e
 sed -i 's/{{PR_NUMBER}}/'"$pr_number"'/g' /teamcityparamsrecording.xml
 sed -i 's/{{FAILED_TESTS}}/'"$FAILED_TESTS"'/g' /teamcityparamsrecording.xml
 curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" https://ci-oss.hashicorp.engineering/app/rest/buildQueue --request POST --header "Content-Type:application/xml" --data-binary @/teamcityparamsrecording.xml --output record.json
-build_url=$(cat record.json | jq .webUrl)
+build_url=$(cat record.json | jq -r .webUrl)
 comment="I have triggered VCR tests in RECORDING mode for the following tests that failed during VCR: $FAILED_TESTS You can view the result here: $build_url"
 
 curl -H "Authorization: token ${GITHUB_TOKEN}" \
