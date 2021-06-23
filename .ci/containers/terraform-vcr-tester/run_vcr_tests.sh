@@ -5,7 +5,7 @@ pr_number=$1
 mm_commit_sha=$2
 github_username=modular-magician
 
-sed -i 's/{{pr_number}}/'"$pr_number"'/g' /teamcityparams.xml
+sed -i 's/{{PR_NUMBER}}/'"$pr_number"'/g' /teamcityparams.xml
 curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" https://ci-oss.hashicorp.engineering/app/rest/buildQueue --request POST --header "Content-Type:application/xml" --data-binary @/teamcityparams.xml -o build.json
 
 function update_status {
@@ -66,7 +66,7 @@ if [ $ret -ne 0 ]; then
 fi
 set -e
 
-sed -i 's/{{pr_number}}/'"$pr_number"'/g' /teamcityparamsrecording.xml
+sed -i 's/{{PR_NUMBER}}/'"$pr_number"'/g' /teamcityparamsrecording.xml
 sed -i 's/{{FAILED_TESTS}}/'"$FAILED_TESTS"'/g' /teamcityparamsrecording.xml
 curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" https://ci-oss.hashicorp.engineering/app/rest/buildQueue --request POST --header "Content-Type:application/xml" --data-binary @/teamcityparamsrecording.xml --output record.json
 build_url=$(cat record.json | jq .webUrl)
