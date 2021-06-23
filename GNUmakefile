@@ -13,7 +13,7 @@ ifneq ($(RESOURCE),)
   mmv1_compile += -t $(RESOURCE)
   tpgtools_compile += --resource $(RESOURCE)
 endif
-build:
+terraform build:
 	make mmv1
 	make tpgtools
 
@@ -25,5 +25,10 @@ mmv1:
 tpgtools:
 	cd tpgtools;\
 		go run . --path "api" --overrides "overrides" --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
+
+validator:
+	cd mmv1;\
+		bundle; \
+		bundle exec compiler -e terraform -f validator -o $(OUTPUT_PATH) $(mmv1_compile);
 
 .PHONY: mmv1 tpgtools
