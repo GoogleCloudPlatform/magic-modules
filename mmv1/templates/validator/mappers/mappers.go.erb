@@ -33,7 +33,7 @@ type fetchFunc func(d TerraformResourceData, config *Config) (Asset, error)
 type mergeFunc func(existing, incoming Asset) Asset
 
 // mapper pairs related conversion/merging functions.
-type mapper struct {
+type Mapper struct {
 	convert           convertFunc // required
 	fetch             fetchFunc   // optional
 	mergeCreateUpdate mergeFunc   // optional
@@ -48,8 +48,8 @@ type mapper struct {
 // 1:1 = [mapper{convert: convertAbc}]                  (len=1)
 // 1:N = [mapper{convert: convertAbc}, ...]             (len=N)
 // N:1 = [mapper{convert: convertAbc, merge: mergeAbc}] (len=1)
-func Mappers() map[string][]mapper {
-	return map[string][]mapper{
+func Mappers() map[string][]Mapper {
+	return map[string][]Mapper{
 		"google_compute_firewall":               {{convert: GetComputeFirewallCaiObject}},
 		"google_compute_disk":                   {{convert: GetComputeDiskCaiObject}},
 		"google_compute_forwarding_rule":        {{convert: GetComputeForwardingRuleCaiObject}},
