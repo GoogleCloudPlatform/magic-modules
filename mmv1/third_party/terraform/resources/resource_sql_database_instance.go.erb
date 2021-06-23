@@ -857,16 +857,14 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
     }
     <% end -%>
 
-	patchCalls := []func(opts ...googleapi.CallOption) (*sqladmin.Operation, error){}
+	var patchData *sqladmin.DatabaseInstance
 
 	// BinaryLogging can be enabled on replica instances but only after creation.
 	if instance.MasterInstanceName != "" && instance.Settings != nil && instance.Settings.BackupConfiguration != nil {
 		bc := instance.Settings.BackupConfiguration
 		instance.Settings.BackupConfiguration = nil
 		if bc.BinaryLogEnabled {
-			bcPatchData := &sqladmin.DatabaseInstance{Settings: &sqladmin.Settings{BackupConfiguration: bc}}
-			bcPatch := config.NewSqlAdminClient(userAgent).Instances.Patch(project, instance.Name, bcPatchData).Do
-			patchCalls = append(patchCalls, bcPatch)
+			patchData = &sqladmin.DatabaseInstance{Settings: &sqladmin.Settings{BackupConfiguration: bc}}
 		}
 	}
 
@@ -898,9 +896,9 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	// patch any fields that need to be sent postcreation
-	for _, call := range patchCalls {
+	if patchData != nil {
 		err = retryTimeDuration(func() (rerr error) {
-			op, rerr = call()
+			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, instance.Name, patchData).Do()
 			return rerr
 		}, d.Timeout(schema.TimeoutUpdate), isSqlOperationInProgressError)
 		if err != nil {
