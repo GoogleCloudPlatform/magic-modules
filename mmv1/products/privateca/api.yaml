@@ -402,24 +402,6 @@ objects:
           exactly_one_of:
           - key_spec.0.cloud_kms_key_version
           - key_spec.0.algorithm
-      - !ruby/object:Api::Type::NestedObject
-        name: 'issuingOptions'
-        description: |
-          Options that affect all certificates issued by a CertificateAuthority.
-        properties:
-        - !ruby/object:Api::Type::Boolean
-          name: 'includeCaCertUrl'
-          description: |
-            When true, includes a URL to the issuing CA certificate in the "authority
-            information access" X.509 extension.
-          default_value: true
-        - !ruby/object:Api::Type::Boolean
-          name: 'includeCrlAccessUrl'
-          description: |
-            When true, includes a URL to the CRL corresponding to certificates issued from a
-            CertificateAuthority. CRLs will expire 7 days from their creation. However, we will
-            rebuild daily. CRLs are also rebuilt shortly after a certificate is revoked.
-          default_value: false
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: The State for this CertificateAuthority.

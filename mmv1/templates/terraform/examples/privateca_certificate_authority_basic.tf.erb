@@ -40,6 +40,7 @@ resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id]
       }
     }
   }
+  lifetime = "86400s"
   key_spec {
     algorithm = "RSA_PKCS1_4096_SHA256"
   }
