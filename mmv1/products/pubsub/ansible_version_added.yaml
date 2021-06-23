@@ -17,6 +17,12 @@
       :version_added: '2.9'
       :allowedPersistenceRegions:
         :version_added: '2.9'
+    :schemaSettings:
+      :version_added: '2.10'
+      :schema:
+        :version_added: '2.10'
+      :encoding:
+        :version_added: '2.10'
   :Subscription:
     :version_added: '2.6'
     :name:
@@ -47,3 +53,19 @@
       :version_added: '2.9'
       :ttl:
         :version_added: '2.9'
+    :filter:
+      :version_added: '2.10'
+    :deadLetterPolicy:
+      :version_added: '2.10'
+      :deadLetterTopic:
+        :version_added: '2.10'
+      :maxDeliveryAttempts:
+        :version_added: '2.10'
+    :retryPolicy:
+      :version_added: '2.10'
+      :minimumBackoff:
+        :version_added: '2.10'
+      :maximumBackoff:
+        :version_added: '2.10'
+    :enableMessageOrdering:
+      :version_added: '2.10'

@@ -67,11 +67,11 @@ module Provider
                           ['google/transport.go',
                            'third_party/terraform/utils/transport.go.erb'],
                           ['google/mappers.go',
-                           'templates/validator/mappers/mappers.go.erb'],
+                           'templates/validator/mappers/mappers.go.erb']
                           ['google/iam_kms_key_ring.go',
                            'third_party/terraform/utils/iam_kms_key_ring.go.erb'],
                           ['google/iam_kms_crypto_key.go',
-                           'third_party/terraform/utils/iam_kms_crypto_key.go.erb']
+                           'third_party/terraform/utils/iam_kms_crypto_key.go.erb'] 
                         ],
                         file_template)
     end
@@ -177,6 +177,10 @@ module Provider
                         'third_party/terraform/utils/iam_folder.go'],
                        ['google/iam_project.go',
                         'third_party/terraform/utils/iam_project.go'],
+                       ['google/kms_key_ring_iam.go',
+                        'third_party/validator/kms_key_ring_iam.go'],
+                       ['google/kms_crypto_key_iam.go',
+                        'third_party/validator/kms_crypto_key_iam.go'],
                        ['google/dcl_logger.go',
                         '../tpgtools/handwritten/dcl_logger.go'],
                        ['google/utils.go',

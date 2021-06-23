@@ -33,6 +33,10 @@
         :version_added: '2.9'
       :maxDoublings:
         :version_added: '2.9'
+    :stackdriverLoggingConfig:
+      :version_added: '2.10'
+      :samplingRatio:
+        :version_added: '2.10'
     :status:
       :version_added: '2.9'
     :location:

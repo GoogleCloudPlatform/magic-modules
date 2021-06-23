@@ -90,8 +90,6 @@
     :version_added: '2.7'
   :TargetVpnGateway:
     :version_added: '2.7'
-  :ExternalVpnGateway:
-    :version_added: '2.10'
   :UrlMap:
     :version_added: '2.7'
   :VpnTunnel:
@@ -113,6 +111,10 @@
       :version_added: '2.8'
     :subnetwork:
       :version_added: '2.7'
+    :network:
+      :version_added: '2.10'
+    :prefixLength:
+      :version_added: '2.10'
     :region:
       :version_added: '2.6'
   :Autoscaler:
@@ -129,10 +131,34 @@
         :version_added: '2.9'
       :coolDownPeriodSec:
         :version_added: '2.9'
+      :mode:
+        :version_added: '2.10'
+      :scaleDownControl:
+        :version_added: '2.10'
+        :maxScaledDownReplicas:
+          :version_added: '2.10'
+          :fixed:
+            :version_added: '2.10'
+          :percent:
+            :version_added: '2.10'
+        :timeWindowSec:
+          :version_added: '2.10'
+      :scaleInControl:
+        :version_added: '2.10'
+        :maxScaledInReplicas:
+          :version_added: '2.10'
+          :fixed:
+            :version_added: '2.10'
+          :percent:
+            :version_added: '2.10'
+        :timeWindowSec:
+          :version_added: '2.10'
       :cpuUtilization:
         :version_added: '2.9'
         :utilizationTarget:
           :version_added: '2.9'
+        :predictiveMethod:
+          :version_added: '2.10'
       :customMetricUtilizations:
         :version_added: '2.9'
         :metric:
@@ -161,6 +187,26 @@
       :version_added: '2.8'
       :signedUrlCacheMaxAgeSec:
         :version_added: '2.8'
+      :defaultTtl:
+        :version_added: '2.10'
+      :maxTtl:
+        :version_added: '2.10'
+      :clientTtl:
+        :version_added: '2.10'
+      :negativeCaching:
+        :version_added: '2.10'
+      :negativeCachingPolicy:
+        :version_added: '2.10'
+        :code:
+          :version_added: '2.10'
+        :ttl:
+          :version_added: '2.10'
+      :cacheMode:
+        :version_added: '2.10'
+      :serveWhileStale:
+        :version_added: '2.10'
+    :customResponseHeaders:
+      :version_added: '2.10'
     :description:
       :version_added: '2.6'
     :enableCdn:
@@ -195,6 +241,42 @@
         :version_added: '2.9'
       :maxUtilization:
         :version_added: '2.6'
+    :circuitBreakers:
+      :version_added: '2.10'
+      :connectTimeout:
+        :version_added: '2.10'
+        :seconds:
+          :version_added: '2.10'
+        :nanos:
+          :version_added: '2.10'
+      :maxRequestsPerConnection:
+        :version_added: '2.10'
+      :maxConnections:
+        :version_added: '2.10'
+      :maxPendingRequests:
+        :version_added: '2.10'
+      :maxRequests:
+        :version_added: '2.10'
+      :maxRetries:
+        :version_added: '2.10'
+    :consistentHash:
+      :version_added: '2.10'
+      :httpCookie:
+        :version_added: '2.10'
+        :ttl:
+          :version_added: '2.10'
+          :seconds:
+            :version_added: '2.10'
+          :nanos:
+            :version_added: '2.10'
+        :name:
+          :version_added: '2.10'
+        :path:
+          :version_added: '2.10'
+      :httpHeaderName:
+        :version_added: '2.10'
+      :minimumRingSize:
+        :version_added: '2.10'
     :cdnPolicy:
       :version_added: '2.6'
       :cacheKeyPolicy:
@@ -211,10 +293,32 @@
           :version_added: '2.6'
       :signedUrlCacheMaxAgeSec:
         :version_added: '2.8'
+      :defaultTtl:
+        :version_added: '2.10'
+      :maxTtl:
+        :version_added: '2.10'
+      :clientTtl:
+        :version_added: '2.10'
+      :negativeCaching:
+        :version_added: '2.10'
+      :negativeCachingPolicy:
+        :version_added: '2.10'
+        :code:
+          :version_added: '2.10'
+        :ttl:
+          :version_added: '2.10'
+      :cacheMode:
+        :version_added: '2.10'
+      :serveWhileStale:
+        :version_added: '2.10'
     :connectionDraining:
       :version_added: '2.6'
       :drainingTimeoutSec:
         :version_added: '2.6'
+    :customRequestHeaders:
+      :version_added: '2.10'
+    :customResponseHeaders:
+      :version_added: '2.10'
     :description:
       :version_added: '2.6'
     :enableCDN:
@@ -231,8 +335,42 @@
         :version_added: '2.7'
     :loadBalancingScheme:
       :version_added: '2.7'
+    :localityLbPolicy:
+      :version_added: '2.10'
     :name:
       :version_added: '2.6'
+    :outlierDetection:
+      :version_added: '2.10'
+      :baseEjectionTime:
+        :version_added: '2.10'
+        :seconds:
+          :version_added: '2.10'
+        :nanos:
+          :version_added: '2.10'
+      :consecutiveErrors:
+        :version_added: '2.10'
+      :consecutiveGatewayFailure:
+        :version_added: '2.10'
+      :enforcingConsecutiveErrors:
+        :version_added: '2.10'
+      :enforcingConsecutiveGatewayFailure:
+        :version_added: '2.10'
+      :enforcingSuccessRate:
+        :version_added: '2.10'
+      :interval:
+        :version_added: '2.10'
+        :seconds:
+          :version_added: '2.10'
+        :nanos:
+          :version_added: '2.10'
+      :maxEjectionPercent:
+        :version_added: '2.10'
+      :successRateMinimumHosts:
+        :version_added: '2.10'
+      :successRateRequestVolume:
+        :version_added: '2.10'
+      :successRateStdevFactor:
+        :version_added: '2.10'
     :portName:
       :version_added: '2.6'
     :protocol:
@@ -243,8 +381,16 @@
       :version_added: '2.6'
     :timeoutSec:
       :version_added: '2.6'
+    :logConfig:
+      :version_added: '2.10'
+      :enable:
+        :version_added: '2.10'
+      :sampleRate:
+        :version_added: '2.10'
   :RegionBackendService:
     :version_added: '2.10'
+    :affinityCookieTtlSec:
+      :version_added: '2.10'
     :backends:
       :version_added: '2.10'
       :balancingMode:
@@ -271,23 +417,147 @@
         :version_added: '2.10'
       :maxUtilization:
         :version_added: '2.10'
+    :circuitBreakers:
+      :version_added: '2.10'
+      :connectTimeout:
+        :version_added: '2.10'
+        :seconds:
+          :version_added: '2.10'
+        :nanos:
+          :version_added: '2.10'
+      :maxRequestsPerConnection:
+        :version_added: '2.10'
+      :maxConnections:
+        :version_added: '2.10'
+      :maxPendingRequests:
+        :version_added: '2.10'
+      :maxRequests:
+        :version_added: '2.10'
+      :maxRetries:
+        :version_added: '2.10'
+    :consistentHash:
+      :version_added: '2.10'
+      :httpCookie:
+        :version_added: '2.10'
+        :ttl:
+          :version_added: '2.10'
+          :seconds:
+            :version_added: '2.10'
+          :nanos:
+            :version_added: '2.10'
+        :name:
+          :version_added: '2.10'
+        :path:
+          :version_added: '2.10'
+      :httpHeaderName:
+        :version_added: '2.10'
+      :minimumRingSize:
+        :version_added: '2.10'
+    :cdnPolicy:
+      :version_added: '2.10'
+      :cacheKeyPolicy:
+        :version_added: '2.10'
+        :includeHost:
+          :version_added: '2.10'
+        :includeProtocol:
+          :version_added: '2.10'
+        :includeQueryString:
+          :version_added: '2.10'
+        :queryStringBlacklist:
+          :version_added: '2.10'
+        :queryStringWhitelist:
+          :version_added: '2.10'
+      :signedUrlCacheMaxAgeSec:
+        :version_added: '2.10'
+      :defaultTtl:
+        :version_added: '2.10'
+      :maxTtl:
+        :version_added: '2.10'
+      :clientTtl:
+        :version_added: '2.10'
+      :negativeCaching:
+        :version_added: '2.10'
+      :negativeCachingPolicy:
+        :version_added: '2.10'
+        :code:
+          :version_added: '2.10'
+        :ttl:
+          :version_added: '2.10'
+      :cacheMode:
+        :version_added: '2.10'
+      :serveWhileStale:
+        :version_added: '2.10'
     :connectionDraining:
       :version_added: '2.10'
       :drainingTimeoutSec:
         :version_added: '2.10'
     :description:
       :version_added: '2.10'
+    :failoverPolicy:
+      :version_added: '2.10'
+      :disableConnectionDrainOnFailover:
+        :version_added: '2.10'
+      :dropTrafficIfUnhealthy:
+        :version_added: '2.10'
+      :failoverRatio:
+        :version_added: '2.10'
+    :enableCDN:
+      :version_added: '2.10'
     :healthChecks:
       :version_added: '2.10'
     :loadBalancingScheme:
       :version_added: '2.10'
+    :localityLbPolicy:
+      :version_added: '2.10'
     :name:
+      :version_added: '2.10'
+    :outlierDetection:
+      :version_added: '2.10'
+      :baseEjectionTime:
+        :version_added: '2.10'
+        :seconds:
+          :version_added: '2.10'
+        :nanos:
+          :version_added: '2.10'
+      :consecutiveErrors:
+        :version_added: '2.10'
+      :consecutiveGatewayFailure:
+        :version_added: '2.10'
+      :enforcingConsecutiveErrors:
+        :version_added: '2.10'
+      :enforcingConsecutiveGatewayFailure:
+        :version_added: '2.10'
+      :enforcingSuccessRate:
+        :version_added: '2.10'
+      :interval:
+        :version_added: '2.10'
+        :seconds:
+          :version_added: '2.10'
+        :nanos:
+          :version_added: '2.10'
+      :maxEjectionPercent:
+        :version_added: '2.10'
+      :successRateMinimumHosts:
+        :version_added: '2.10'
+      :successRateRequestVolume:
+        :version_added: '2.10'
+      :successRateStdevFactor:
+        :version_added: '2.10'
+    :portName:
       :version_added: '2.10'
     :protocol:
       :version_added: '2.10'
     :sessionAffinity:
       :version_added: '2.10'
     :timeoutSec:
+      :version_added: '2.10'
+    :logConfig:
+      :version_added: '2.10'
+      :enable:
+        :version_added: '2.10'
+      :sampleRate:
+        :version_added: '2.10'
+    :network:
       :version_added: '2.10'
     :region:
       :version_added: '2.10'
@@ -309,6 +579,8 @@
       :version_added: '2.7'
     :sourceImage:
       :version_added: '2.6'
+    :provisionedIops:
+      :version_added: '2.10'
     :zone:
       :version_added: '2.6'
     :sourceImageEncryptionKey:
@@ -317,12 +589,16 @@
         :version_added: '2.6'
       :kmsKeyName:
         :version_added: '2.6'
+      :kmsKeyServiceAccount:
+        :version_added: '2.10'
     :diskEncryptionKey:
       :version_added: '2.6'
       :rawKey:
         :version_added: '2.6'
       :kmsKeyName:
         :version_added: '2.6'
+      :kmsKeyServiceAccount:
+        :version_added: '2.10'
     :sourceSnapshot:
       :version_added: '2.6'
     :sourceSnapshotEncryptionKey:
@@ -331,6 +607,8 @@
         :version_added: '2.6'
       :kmsKeyName:
         :version_added: '2.6'
+      :kmsKeyServiceAccount:
+        :version_added: '2.10'
   :Firewall:
     :version_added: '2.6'
     :allowed:
@@ -355,7 +633,9 @@
       :version_added: '2.8'
     :logConfig:
       :version_added: '2.10'
-      :enableLogging:
+      :enable:
+        :version_added: '2.10'
+      :metadata:
         :version_added: '2.10'
     :name:
       :version_added: '2.6'
@@ -375,6 +655,8 @@
       :version_added: '2.6'
   :ForwardingRule:
     :version_added: '2.6'
+    :isMirroringCollector:
+      :version_added: '2.10'
     :description:
       :version_added: '2.6'
     :IPAddress:
@@ -587,6 +869,20 @@
         :version_added: '2.10'
       :portSpecification:
         :version_added: '2.10'
+    :grpcHealthCheck:
+      :version_added: '2.10'
+      :port:
+        :version_added: '2.10'
+      :portName:
+        :version_added: '2.10'
+      :portSpecification:
+        :version_added: '2.10'
+      :grpcServiceName:
+        :version_added: '2.10'
+    :logConfig:
+      :version_added: '2.10'
+      :enable:
+        :version_added: '2.10'
   :InstanceTemplate:
     :version_added: '2.6'
     :description:
@@ -741,6 +1037,10 @@
         :version_added: '2.6'
     :sourceDiskId:
       :version_added: '2.6'
+    :sourceImage:
+      :version_added: '2.10'
+    :sourceSnapshot:
+      :version_added: '2.10'
     :sourceType:
       :version_added: '2.6'
   :Instance:
@@ -855,6 +1155,10 @@
         :version_added: '2.9'
       :enableIntegrityMonitoring:
         :version_added: '2.9'
+    :confidentialInstanceConfig:
+      :version_added: '2.10'
+      :enableConfidentialCompute:
+        :version_added: '2.10'
     :status:
       :version_added: '2.8'
     :tags:
@@ -945,6 +1249,8 @@
       :version_added: '2.8'
     :description:
       :version_added: '2.8'
+    :mtu:
+      :version_added: '2.10'
     :bandwidth:
       :version_added: '2.9'
     :edgeAvailabilityDomain:
@@ -959,6 +1265,10 @@
       :version_added: '2.8'
     :vlanTag8021q:
       :version_added: '2.8'
+    :ipsecInternalAddresses:
+      :version_added: '2.10'
+    :encryption:
+      :version_added: '2.10'
     :region:
       :version_added: '2.8'
   :Network:
@@ -973,6 +1283,8 @@
       :version_added: '2.8'
       :routingMode:
         :version_added: '2.8'
+    :mtu:
+      :version_added: '2.10'
   :NetworkEndpointGroup:
     :version_added: '2.10'
     :name:
@@ -999,6 +1311,20 @@
       :version_added: '2.10'
     :size:
       :version_added: '2.10'
+    :maintenancePolicy:
+      :version_added: '2.10'
+    :maintenanceWindow:
+      :version_added: '2.10'
+      :startTime:
+        :version_added: '2.10'
+    :autoscalingPolicy:
+      :version_added: '2.10'
+      :mode:
+        :version_added: '2.10'
+      :minNodes:
+        :version_added: '2.10'
+      :maxNodes:
+        :version_added: '2.10'
     :zone:
       :version_added: '2.10'
   :NodeTemplate:
@@ -1017,6 +1343,12 @@
         :version_added: '2.10'
       :memory:
         :version_added: '2.10'
+    :serverBinding:
+      :version_added: '2.10'
+      :type:
+        :version_added: '2.10'
+    :cpuOvercommitType:
+      :version_added: '2.10'
     :region:
       :version_added: '2.10'
   :RegionAutoscaler:
@@ -1033,9 +1365,33 @@
         :version_added: '2.10'
       :coolDownPeriodSec:
         :version_added: '2.10'
+      :mode:
+        :version_added: '2.10'
+      :scaleDownControl:
+        :version_added: '2.10'
+        :maxScaledDownReplicas:
+          :version_added: '2.10'
+          :fixed:
+            :version_added: '2.10'
+          :percent:
+            :version_added: '2.10'
+        :timeWindowSec:
+          :version_added: '2.10'
+      :scaleInControl:
+        :version_added: '2.10'
+        :maxScaledInReplicas:
+          :version_added: '2.10'
+          :fixed:
+            :version_added: '2.10'
+          :percent:
+            :version_added: '2.10'
+        :timeWindowSec:
+          :version_added: '2.10'
       :cpuUtilization:
         :version_added: '2.10'
         :utilizationTarget:
+          :version_added: '2.10'
+        :predictiveMethod:
           :version_added: '2.10'
       :customMetricUtilizations:
         :version_added: '2.10'
@@ -1417,6 +1773,20 @@
             :version_added: '2.10'
           :stripQuery:
             :version_added: '2.10'
+      :defaultUrlRedirect:
+        :version_added: '2.10'
+        :hostRedirect:
+          :version_added: '2.10'
+        :httpsRedirect:
+          :version_added: '2.10'
+        :pathRedirect:
+          :version_added: '2.10'
+        :prefixRedirect:
+          :version_added: '2.10'
+        :redirectResponseCode:
+          :version_added: '2.10'
+        :stripQuery:
+          :version_added: '2.10'
     :tests:
       :version_added: '2.10'
       :description:
@@ -1426,6 +1796,20 @@
       :path:
         :version_added: '2.10'
       :service:
+        :version_added: '2.10'
+    :defaultUrlRedirect:
+      :version_added: '2.10'
+      :hostRedirect:
+        :version_added: '2.10'
+      :httpsRedirect:
+        :version_added: '2.10'
+      :pathRedirect:
+        :version_added: '2.10'
+      :prefixRedirect:
+        :version_added: '2.10'
+      :redirectResponseCode:
+        :version_added: '2.10'
+      :stripQuery:
         :version_added: '2.10'
     :region:
       :version_added: '2.10'
@@ -1521,11 +1905,27 @@
         :version_added: '2.10'
       :portSpecification:
         :version_added: '2.10'
+    :grpcHealthCheck:
+      :version_added: '2.10'
+      :port:
+        :version_added: '2.10'
+      :portName:
+        :version_added: '2.10'
+      :portSpecification:
+        :version_added: '2.10'
+      :grpcServiceName:
+        :version_added: '2.10'
+    :logConfig:
+      :version_added: '2.10'
+      :enable:
+        :version_added: '2.10'
     :region:
       :version_added: '2.10'
   :ResourcePolicy:
     :version_added: '2.10'
     :name:
+      :version_added: '2.10'
+    :description:
       :version_added: '2.10'
     :snapshotSchedulePolicy:
       :version_added: '2.10'
@@ -1565,6 +1965,30 @@
           :version_added: '2.10'
         :guestFlush:
           :version_added: '2.10'
+    :groupPlacementPolicy:
+      :version_added: '2.10'
+      :vmCount:
+        :version_added: '2.10'
+      :availabilityDomainCount:
+        :version_added: '2.10'
+      :collocation:
+        :version_added: '2.10'
+    :instanceSchedulePolicy:
+      :version_added: '2.10'
+      :vmStartSchedule:
+        :version_added: '2.10'
+        :schedule:
+          :version_added: '2.10'
+      :vmStopSchedule:
+        :version_added: '2.10'
+        :schedule:
+          :version_added: '2.10'
+      :timeZone:
+        :version_added: '2.10'
+      :startTime:
+        :version_added: '2.10'
+      :expirationTime:
+        :version_added: '2.10'
     :region:
       :version_added: '2.10'
   :Route:
@@ -1621,6 +2045,8 @@
       :version_added: '2.9'
     :description:
       :version_added: '2.9'
+    :storageLocations:
+      :version_added: '2.10'
     :labels:
       :version_added: '2.9'
     :sourceDisk:
@@ -1633,12 +2059,16 @@
         :version_added: '2.9'
       :kmsKeyName:
         :version_added: '2.9'
+      :kmsKeyServiceAccount:
+        :version_added: '2.10'
     :sourceDiskEncryptionKey:
       :version_added: '2.9'
       :rawKey:
         :version_added: '2.9'
       :kmsKeyName:
         :version_added: '2.9'
+      :kmsKeyServiceAccount:
+        :version_added: '2.10'
   :SslCertificate:
     :version_added: '2.6'
     :certificate:
@@ -1711,6 +2141,8 @@
         :version_added: '2.8'
     :privateIpGoogleAccess:
       :version_added: '2.6'
+    :privateIpv6GoogleAccess:
+      :version_added: '2.10'
     :region:
       :version_added: '2.6'
   :TargetHttpProxy:
@@ -1721,6 +2153,8 @@
       :version_added: '2.6'
     :urlMap:
       :version_added: '2.6'
+    :proxyBind:
+      :version_added: '2.10'
   :TargetHttpsProxy:
     :version_added: '2.6'
     :description:
@@ -1735,6 +2169,8 @@
       :version_added: '2.8'
     :urlMap:
       :version_added: '2.6'
+    :proxyBind:
+      :version_added: '2.10'
   :RegionTargetHttpProxy:
     :version_added: '2.10'
     :description:
@@ -1811,6 +2247,8 @@
       :version_added: '2.6'
     :service:
       :version_added: '2.6'
+    :proxyBind:
+      :version_added: '2.10'
   :TargetVpnGateway:
     :version_added: '2.7'
     :description:
@@ -1821,20 +2259,6 @@
       :version_added: '2.7'
     :region:
       :version_added: '2.7'
-  :ExternalVpnGateway:
-    :version_added: '2.10'
-    :description:
-      :version_added: '2.10'
-    :name:
-      :version_added: '2.10'
-    :redundancyType:
-      :version_added: '2.10'
-    :interfaces:
-      :version_added: '2.10'
-      :id:
-        :version_added: '2.10'
-      :ipAddress:
-        :version_added: '2.10'
   :UrlMap:
     :version_added: '2.6'
     :defaultService:
@@ -2205,6 +2629,114 @@
             :version_added: '2.10'
           :stripQuery:
             :version_added: '2.10'
+      :defaultUrlRedirect:
+        :version_added: '2.10'
+        :hostRedirect:
+          :version_added: '2.10'
+        :httpsRedirect:
+          :version_added: '2.10'
+        :pathRedirect:
+          :version_added: '2.10'
+        :prefixRedirect:
+          :version_added: '2.10'
+        :redirectResponseCode:
+          :version_added: '2.10'
+        :stripQuery:
+          :version_added: '2.10'
+      :defaultRouteAction:
+        :version_added: '2.10'
+        :weightedBackendServices:
+          :version_added: '2.10'
+          :backendService:
+            :version_added: '2.10'
+          :weight:
+            :version_added: '2.10'
+          :headerAction:
+            :version_added: '2.10'
+            :requestHeadersToRemove:
+              :version_added: '2.10'
+            :requestHeadersToAdd:
+              :version_added: '2.10'
+              :headerName:
+                :version_added: '2.10'
+              :headerValue:
+                :version_added: '2.10'
+              :replace:
+                :version_added: '2.10'
+            :responseHeadersToRemove:
+              :version_added: '2.10'
+            :responseHeadersToAdd:
+              :version_added: '2.10'
+              :headerName:
+                :version_added: '2.10'
+              :headerValue:
+                :version_added: '2.10'
+              :replace:
+                :version_added: '2.10'
+        :urlRewrite:
+          :version_added: '2.10'
+          :pathPrefixRewrite:
+            :version_added: '2.10'
+          :hostRewrite:
+            :version_added: '2.10'
+        :timeout:
+          :version_added: '2.10'
+          :seconds:
+            :version_added: '2.10'
+          :nanos:
+            :version_added: '2.10'
+        :retryPolicy:
+          :version_added: '2.10'
+          :retryConditions:
+            :version_added: '2.10'
+          :numRetries:
+            :version_added: '2.10'
+          :perTryTimeout:
+            :version_added: '2.10'
+            :seconds:
+              :version_added: '2.10'
+            :nanos:
+              :version_added: '2.10'
+        :requestMirrorPolicy:
+          :version_added: '2.10'
+          :backendService:
+            :version_added: '2.10'
+        :corsPolicy:
+          :version_added: '2.10'
+          :allowOrigins:
+            :version_added: '2.10'
+          :allowOriginRegexes:
+            :version_added: '2.10'
+          :allowMethods:
+            :version_added: '2.10'
+          :allowHeaders:
+            :version_added: '2.10'
+          :exposeHeaders:
+            :version_added: '2.10'
+          :maxAge:
+            :version_added: '2.10'
+          :allowCredentials:
+            :version_added: '2.10'
+          :disabled:
+            :version_added: '2.10'
+        :faultInjectionPolicy:
+          :version_added: '2.10'
+          :delay:
+            :version_added: '2.10'
+            :fixedDelay:
+              :version_added: '2.10'
+              :seconds:
+                :version_added: '2.10'
+              :nanos:
+                :version_added: '2.10'
+            :percentage:
+              :version_added: '2.10'
+          :abort:
+            :version_added: '2.10'
+            :httpStatus:
+              :version_added: '2.10'
+            :percentage:
+              :version_added: '2.10'
     :tests:
       :version_added: '2.6'
       :description:
@@ -2215,6 +2747,114 @@
         :version_added: '2.6'
       :service:
         :version_added: '2.6'
+    :defaultUrlRedirect:
+      :version_added: '2.10'
+      :hostRedirect:
+        :version_added: '2.10'
+      :httpsRedirect:
+        :version_added: '2.10'
+      :pathRedirect:
+        :version_added: '2.10'
+      :prefixRedirect:
+        :version_added: '2.10'
+      :redirectResponseCode:
+        :version_added: '2.10'
+      :stripQuery:
+        :version_added: '2.10'
+    :defaultRouteAction:
+      :version_added: '2.10'
+      :weightedBackendServices:
+        :version_added: '2.10'
+        :backendService:
+          :version_added: '2.10'
+        :weight:
+          :version_added: '2.10'
+        :headerAction:
+          :version_added: '2.10'
+          :requestHeadersToRemove:
+            :version_added: '2.10'
+          :requestHeadersToAdd:
+            :version_added: '2.10'
+            :headerName:
+              :version_added: '2.10'
+            :headerValue:
+              :version_added: '2.10'
+            :replace:
+              :version_added: '2.10'
+          :responseHeadersToRemove:
+            :version_added: '2.10'
+          :responseHeadersToAdd:
+            :version_added: '2.10'
+            :headerName:
+              :version_added: '2.10'
+            :headerValue:
+              :version_added: '2.10'
+            :replace:
+              :version_added: '2.10'
+      :urlRewrite:
+        :version_added: '2.10'
+        :pathPrefixRewrite:
+          :version_added: '2.10'
+        :hostRewrite:
+          :version_added: '2.10'
+      :timeout:
+        :version_added: '2.10'
+        :seconds:
+          :version_added: '2.10'
+        :nanos:
+          :version_added: '2.10'
+      :retryPolicy:
+        :version_added: '2.10'
+        :retryConditions:
+          :version_added: '2.10'
+        :numRetries:
+          :version_added: '2.10'
+        :perTryTimeout:
+          :version_added: '2.10'
+          :seconds:
+            :version_added: '2.10'
+          :nanos:
+            :version_added: '2.10'
+      :requestMirrorPolicy:
+        :version_added: '2.10'
+        :backendService:
+          :version_added: '2.10'
+      :corsPolicy:
+        :version_added: '2.10'
+        :allowOrigins:
+          :version_added: '2.10'
+        :allowOriginRegexes:
+          :version_added: '2.10'
+        :allowMethods:
+          :version_added: '2.10'
+        :allowHeaders:
+          :version_added: '2.10'
+        :exposeHeaders:
+          :version_added: '2.10'
+        :maxAge:
+          :version_added: '2.10'
+        :allowCredentials:
+          :version_added: '2.10'
+        :disabled:
+          :version_added: '2.10'
+      :faultInjectionPolicy:
+        :version_added: '2.10'
+        :delay:
+          :version_added: '2.10'
+          :fixedDelay:
+            :version_added: '2.10'
+            :seconds:
+              :version_added: '2.10'
+            :nanos:
+              :version_added: '2.10'
+          :percentage:
+            :version_added: '2.10'
+        :abort:
+          :version_added: '2.10'
+          :httpStatus:
+            :version_added: '2.10'
+          :percentage:
+            :version_added: '2.10'
   :VpnTunnel:
     :version_added: '2.7'
     :name:
@@ -2223,6 +2863,16 @@
       :version_added: '2.7'
     :targetVpnGateway:
       :version_added: '2.7'
+    :vpnGateway:
+      :version_added: '2.10'
+    :vpnGatewayInterface:
+      :version_added: '2.10'
+    :peerExternalGateway:
+      :version_added: '2.10'
+    :peerExternalGatewayInterface:
+      :version_added: '2.10'
+    :peerGcpGateway:
+      :version_added: '2.10'
     :router:
       :version_added: '2.7'
     :peerIp:

@@ -7,8 +7,12 @@
     :version_added: '2.8'
     :alternativeLocationId:
       :version_added: '2.8'
+    :authEnabled:
+      :version_added: '2.10'
     :authorizedNetwork:
       :version_added: '2.8'
+    :connectMode:
+      :version_added: '2.10'
     :displayName:
       :version_added: '2.8'
     :labels:
@@ -27,5 +31,7 @@
       :version_added: '2.8'
     :tier:
       :version_added: '2.8'
+    :transitEncryptionMode:
+      :version_added: '2.10'
     :region:
       :version_added: '2.8'

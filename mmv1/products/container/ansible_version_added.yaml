@@ -75,6 +75,12 @@
       :version_added: '2.6'
     :network:
       :version_added: '2.6'
+    :databaseEncryption:
+      :version_added: '2.10'
+      :state:
+        :version_added: '2.10'
+      :keyName:
+        :version_added: '2.10'
     :privateClusterConfig:
       :version_added: '2.8'
       :enablePrivateNodes:
@@ -141,8 +147,6 @@
         :version_added: '2.9'
       :tpuIpv4CidrBlock:
         :version_added: '2.9'
-      :tpuIpv4CidrBlock:
-        :version_added: '2.9'
     :initialClusterVersion:
       :version_added: '2.10'
     :masterAuthorizedNetworksConfig:
@@ -159,10 +163,22 @@
       :version_added: '2.10'
       :enabled:
         :version_added: '2.10'
+    :releaseChannel:
+      :version_added: '2.10'
+      :channel:
+        :version_added: '2.10'
     :shieldedNodes:
       :version_added: '2.10'
       :enabled:
         :version_added: '2.10'
+    :networkConfig:
+      :version_added: '2.10'
+      :enableIntraNodeVisibility:
+        :version_added: '2.10'
+      :defaultSnatStatus:
+        :version_added: '2.10'
+    :enableKubernetesAlpha:
+      :version_added: '2.10'
     :location:
       :version_added: '2.8'
     :kubectlPath:
@@ -218,6 +234,10 @@
         :enableSecureBoot:
           :version_added: '2.10'
         :enableIntegrityMonitoring:
+          :version_added: '2.10'
+      :workloadMetaConfig:
+        :version_added: '2.10'
+        :mode:
           :version_added: '2.10'
     :initialNodeCount:
       :version_added: '2.6'

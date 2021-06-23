@@ -19,6 +19,18 @@
         :version_added: '2.9'
       :capacityGb:
         :version_added: '2.9'
+      :nfsExportOptions:
+        :version_added: '2.10'
+        :ipRanges:
+          :version_added: '2.10'
+        :accessMode:
+          :version_added: '2.10'
+        :squashMode:
+          :version_added: '2.10'
+        :anonUid:
+          :version_added: '2.10'
+        :anonGid:
+          :version_added: '2.10'
     :networks:
       :version_added: '2.9'
       :network:

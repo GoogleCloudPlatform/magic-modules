@@ -11,6 +11,8 @@
       :version_added: '2.10'
     :description:
       :version_added: '2.8'
+    :tags:
+      :version_added: '2.10'
     :disabled:
       :version_added: '2.8'
     :substitutions:
@@ -29,20 +31,84 @@
         :version_added: '2.8'
       :dir:
         :version_added: '2.8'
+      :invertRegex:
+        :version_added: '2.10'
       :branchName:
         :version_added: '2.8'
       :tagName:
         :version_added: '2.8'
       :commitSha:
         :version_added: '2.8'
+    :github:
+      :version_added: '2.10'
+      :owner:
+        :version_added: '2.10'
+      :name:
+        :version_added: '2.10'
+      :pullRequest:
+        :version_added: '2.10'
+        :branch:
+          :version_added: '2.10'
+        :commentControl:
+          :version_added: '2.10'
+        :invertRegex:
+          :version_added: '2.10'
+      :push:
+        :version_added: '2.10'
+        :invertRegex:
+          :version_added: '2.10'
+        :branch:
+          :version_added: '2.10'
+        :tag:
+          :version_added: '2.10'
     :build:
       :version_added: '2.8'
+      :source:
+        :version_added: '2.10'
+        :storageSource:
+          :version_added: '2.10'
+          :bucket:
+            :version_added: '2.10'
+          :object:
+            :version_added: '2.10'
+          :generation:
+            :version_added: '2.10'
+        :repoSource:
+          :version_added: '2.10'
+          :projectId:
+            :version_added: '2.10'
+          :repoName:
+            :version_added: '2.10'
+          :dir:
+            :version_added: '2.10'
+          :invertRegex:
+            :version_added: '2.10'
+          :substitutions:
+            :version_added: '2.10'
+          :branchName:
+            :version_added: '2.10'
+          :tagName:
+            :version_added: '2.10'
+          :commitSha:
+            :version_added: '2.10'
       :tags:
         :version_added: '2.8'
       :images:
         :version_added: '2.8'
+      :substitutions:
+        :version_added: '2.10'
+      :queueTtl:
+        :version_added: '2.10'
+      :logsBucket:
+        :version_added: '2.10'
       :timeout:
         :version_added: '2.10'
+      :secrets:
+        :version_added: '2.10'
+        :kmsKeyName:
+          :version_added: '2.10'
+        :secretEnv:
+          :version_added: '2.10'
       :steps:
         :version_added: '2.8'
         :name:
@@ -71,3 +137,43 @@
             :version_added: '2.8'
         :waitFor:
           :version_added: '2.8'
+      :artifacts:
+        :version_added: '2.10'
+        :images:
+          :version_added: '2.10'
+        :objects:
+          :version_added: '2.10'
+          :location:
+            :version_added: '2.10'
+          :paths:
+            :version_added: '2.10'
+      :options:
+        :version_added: '2.10'
+        :sourceProvenanceHash:
+          :version_added: '2.10'
+        :requestedVerifyOption:
+          :version_added: '2.10'
+        :machineType:
+          :version_added: '2.10'
+        :diskSizeGb:
+          :version_added: '2.10'
+        :substitutionOption:
+          :version_added: '2.10'
+        :dynamicSubstitutions:
+          :version_added: '2.10'
+        :logStreamingOption:
+          :version_added: '2.10'
+        :workerPool:
+          :version_added: '2.10'
+        :logging:
+          :version_added: '2.10'
+        :env:
+          :version_added: '2.10'
+        :secretEnv:
+          :version_added: '2.10'
+        :volumes:
+          :version_added: '2.10'
+          :name:
+            :version_added: '2.10'
+          :path:
+            :version_added: '2.10'
