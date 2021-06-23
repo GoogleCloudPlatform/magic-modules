@@ -3,6 +3,8 @@
 set -e
 pr_number=$1
 mm_commit_sha=$2
+echo "PR number: ${pr_number}"
+echo "Commit SHA: ${mm_commit_sha}"
 github_username=modular-magician
 
 sed -i 's/{{PR_NUMBER}}/'"$pr_number"'/g' /teamcityparams.xml
