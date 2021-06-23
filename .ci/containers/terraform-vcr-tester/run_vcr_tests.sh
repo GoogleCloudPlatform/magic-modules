@@ -3,22 +3,26 @@
 set -e
 pr_number=$1
 mm_commit_sha=$2
+echo "PR number: ${pr_number}"
+echo "Commit SHA: ${mm_commit_sha}"
 github_username=modular-magician
 
 sed -i 's/{{PR_NUMBER}}/'"$pr_number"'/g' /teamcityparams.xml
 curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" https://ci-oss.hashicorp.engineering/app/rest/buildQueue --request POST --header "Content-Type:application/xml" --data-binary @/teamcityparams.xml -o build.json
 
 function update_status {
+	local context="beta-provider-vcr-test"
 	local post_body=$( jq -n \
-		--arg context "beta-provider-vcr-test" \
+		--arg context "${context}" \
 		--arg target_url "${1}" \
 		--arg state "${2}" \
 		'{context: $context, target_url: $target_url, state: $state}')
+	echo "Updating status ${context} to ${2} with target_url ${1} for sha ${mm_commit_sha}"
 	curl \
 	  -X POST \
 	  -u "$github_username:$GITHUB_TOKEN" \
 	  -H "Accept: application/vnd.github.v3+json" \
-	  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
+	  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/${mm_commit_sha}" \
 	  -d "$post_body"
 }
 
