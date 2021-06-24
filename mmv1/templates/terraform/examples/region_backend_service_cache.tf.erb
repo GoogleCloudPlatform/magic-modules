@@ -1,5 +1,4 @@
 resource "google_compute_region_backend_service" "<%= ctx[:primary_resource_id] %>" {
-  provider                        = google-beta
   name                            = "<%= ctx[:vars]['region_backend_service_name'] %>"
   region                          = "us-central1"
   health_checks                   = [google_compute_region_health_check.default.id]
@@ -19,7 +18,6 @@ resource "google_compute_region_backend_service" "<%= ctx[:primary_resource_id] 
 }
 
 resource "google_compute_region_health_check" "default" {
-  provider           = google-beta
   name               = "<%= ctx[:vars]['health_check_name'] %>"
   region             = "us-central1"
 
