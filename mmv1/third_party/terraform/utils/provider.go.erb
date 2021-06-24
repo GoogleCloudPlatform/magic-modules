@@ -171,6 +171,9 @@ func Provider() *schema.Provider {
 			AssuredWorkloadsEndpointEntryKey:               AssuredWorkloadsEndpointEntry,
 			EventarcEndpointEntryKey:               EventarcEndpointEntry,
 			GkeHubFeatureCustomEndpointEntryKey:               GkeHubFeatureCustomEndpointEntry,
+			<% unless version == "ga" -%>
+			CloudBuildWorkerPoolEndpointEntryKey:               CloudBuildWorkerPoolEndpointEntry,
+			<% end -%>
 },
 
 		ProviderMetaSchema: map[string]*schema.Schema{
@@ -352,6 +355,9 @@ end     # products.each do
 				"google_bigtable_instance":                     resourceBigtableInstance(),
 				"google_bigtable_table":                        resourceBigtableTable(),
 				"google_billing_subaccount":                    resourceBillingSubaccount(),
+				<% unless version == 'ga' -%>
+				"google_cloudbuild_worker_pool":                resourceCloudbuildWorkerPool(),
+				<% end -%>
 				"google_cloudfunctions_function":               resourceCloudFunctionsFunction(),
 				"google_composer_environment":                  resourceComposerEnvironment(),
 				"google_compute_attached_disk":                 resourceComputeAttachedDisk(),
@@ -594,6 +600,9 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
   config.AssuredWorkloadsBasePath = d.Get(AssuredWorkloadsEndpointEntryKey).(string)
 	config.EventarcBasePath = d.Get(EventarcEndpointEntryKey).(string)
 	config.GkeHubBasePath = d.Get(GkeHubFeatureCustomEndpointEntryKey).(string)
+	<% unless version == "ga" -%>
+	config.CloudBuildWorkerPoolBasePath = d.Get(CloudBuildWorkerPoolEndpointEntryKey).(string)
+	<% end -%>
 
 	stopCtx, ok := schema.StopContext(ctx)
 	if !ok {

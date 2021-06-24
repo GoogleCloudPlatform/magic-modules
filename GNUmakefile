@@ -13,7 +13,7 @@ ifneq ($(RESOURCE),)
   mmv1_compile += -t $(RESOURCE)
   tpgtools_compile += --resource $(RESOURCE)
 endif
-build:
+terraform build:
 	make mmv1
 	make tpgtools
 
@@ -34,5 +34,10 @@ tpgtools:
 tpgwithmmv1basic:
 	make mmv1basic
 	make tpgtools
+
+validator:
+	cd mmv1;\
+		bundle; \
+		bundle exec compiler -e terraform -f validator -o $(OUTPUT_PATH) $(mmv1_compile);
 
 .PHONY: mmv1 tpgtools

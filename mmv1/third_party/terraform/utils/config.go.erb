@@ -64,6 +64,9 @@ import (
 	"google.golang.org/api/storagetransfer/v1"
 	"google.golang.org/api/transport"
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
+<% unless version == 'ga' -%>
+	cloudbuildDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudbuild/beta"
+<% end -%>
 	dataprocDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc<% unless version == 'ga' -%>/beta<% end -%>"
 	eventarcDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc<% unless version == 'ga' -%>/beta<% end -%>"
 <% unless version == 'ga' -%>
@@ -127,6 +130,10 @@ type Config struct {
 	AssuredWorkloadsBasePath string
 	EventarcBasePath string
 	GkeHubBasePath string
+	<% unless version == 'ga' -%>
+	// CloudBuild WorkerPool uses a different endpoint (v1beta1) than any other CloudBuild resources
+	CloudBuildWorkerPoolBasePath string
+	<% end -%>
 }
 
 <% products.each do |product| -%>
