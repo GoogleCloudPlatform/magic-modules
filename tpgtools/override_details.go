@@ -166,3 +166,12 @@ type TerraformProductNameDetails struct {
 	// The name of the product in terraform.
 	Product string
 }
+
+type ProductBasePathDetails struct {
+	// If set to true, generating the product base path should be skipped
+	// This is the case when mmv1 already generates base path support
+	Skip bool
+	// Alternative product base path name to allow for DCL-based resources to use
+	// different default base paths than mmv1 generated resources
+	BasePathIdentifier string
+}

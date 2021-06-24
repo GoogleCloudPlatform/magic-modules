@@ -1,10 +1,11 @@
 #!/bin/bash
 
 set -e
-PR_NUMBER=$1
+pr_number=$1
+mm_commit_sha=$2
 
 USER=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
-  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}" | jq -r .user.login)
+  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${pr_number}" | jq -r .user.login)
 
 # Only run tests for safe users
 if $(echo $USER | fgrep -wq -e ndmckinley -e danawillow -e emilymye -e megan07 -e paddycarver -e rambleraptor -e SirGitsalot -e slevenick -e c2thorn -e rileykarson -e melinath -e scottsuarez); then
@@ -26,5 +27,5 @@ else
 	fi
 fi
 
-# Pass PR number to runner, which expects it
-sh /run_vcr_tests.sh $PR_NUMBER
+# Pass args through to runner
+sh /run_vcr_tests.sh $pr_number $mm_commit_sha

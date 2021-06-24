@@ -38,7 +38,6 @@ module Provider
     def generate_resource(pwd, data, _generate_code, _generate_docs)
       target_folder = data.output_folder
       product_ns = data.object.__product.name
-
       data.generate(pwd,
                     'templates/terraform/objectlib/base.go.erb',
                     File.join(target_folder,
@@ -66,7 +65,9 @@ module Provider
                           ['google/provider_handwritten_endpoint.go',
                            'third_party/terraform/utils/provider_handwritten_endpoint.go.erb'],
                           ['google/transport.go',
-                           'third_party/terraform/utils/transport.go.erb']
+                           'third_party/terraform/utils/transport.go.erb'],
+                          ['google/mappers.go',
+                           'templates/validator/mappers/mappers.go.erb']
                         ],
                         file_template)
     end
@@ -92,8 +93,6 @@ module Provider
                         'third_party/validator/sql_database_instance.go'],
                        ['google/storage_bucket.go',
                         'third_party/validator/storage_bucket.go'],
-                       ['google/storage_bucket_iam.go',
-                        'third_party/validator/storage_bucket_iam.go'],
                        ['google/cloudfunctions_function.go',
                         'third_party/validator/cloudfunctions_function.go'],
                        ['google/bigquery_table.go',
@@ -196,6 +195,11 @@ module Provider
       product_name = data.product.name.underscore
 
       FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
+      data.generate(pwd,
+                    'templates/validator/iam/iam_consumer.go.erb',
+                    "#{target_folder}/#{product_name}_#{name}_iam.go",
+                    self)
+
       data.generate(pwd,
                     'templates/terraform/iam_policy.go.erb',
                     "#{target_folder}/iam_#{product_name}_#{name}.go",
