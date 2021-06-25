@@ -1134,7 +1134,8 @@ objects:
     base_url: 'projects/{{project}}/locations/{{location}}/caPools'
     create_url: 'projects/{{project}}/locations/{{location}}/caPools?caPoolId={{name}}'
     self_link: 'projects/{{project}}/locations/{{location}}/caPools/{{name}}'
-    input: true
+    update_verb: :PATCH
+    update_mask: true
     async: !ruby/object:Api::OpAsync
         operation: !ruby/object:Api::OpAsync::Operation
           base_url: '{{op_id}}'
