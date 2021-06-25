@@ -477,10 +477,10 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Certificate'
     base_url: 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}//certificates'
-    create_url: 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificates?certificateId={{name}}&issuingCertificateAuthorityId={{certificate_authority}}'
+    create_url: 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificates?certificateId={{name}}'
     self_link: 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificates/{{name}}'
     delete_url: 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificates/{{name}}:revoke'
-    delete_verb: :POST    
+    delete_verb: :POST
     input: true
     description: |
       A Certificate corresponds to a signed X.509 certificate issued by a CertificateAuthority.

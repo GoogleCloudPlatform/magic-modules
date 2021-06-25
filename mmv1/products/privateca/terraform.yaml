@@ -82,6 +82,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_vars_overrides:
           pool: "\"static-ca-pool\""
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_create: templates/terraform/pre_create/privateca_certificate.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate.go.erb
   CaPool: !ruby/object:Overrides::Terraform::ResourceOverride
     iam_policy: !ruby/object:Api::Resource::IamPolicy
@@ -97,10 +98,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_name: "fmt.Sprintf(\"tf-test-my-capool%s\", context[\"random_suffix\"])"
         primary_resource_id: "default"
         vars:
-          name: "my-capool"
+          name: "tf-test-pool"
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_capool_all_fields"
         primary_resource_id: "default"
         vars:
-          name: "my-capool"
+          name: "tf-test-pool"
 
