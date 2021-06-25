@@ -1047,7 +1047,7 @@ objects:
                                     - :SATURDAY
                                     - :SUNDAY
                         - !ruby/object:Api::Type::Boolean
-                          name: 'replaceWithInfoType'
+                          name: 'replaceWithInfoTypeConfig'
                           description: |
                             Replace each matching finding with the name of the info type.
                         - !ruby/object:Api::Type::NestedObject
