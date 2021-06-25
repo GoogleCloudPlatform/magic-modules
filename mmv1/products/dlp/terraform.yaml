@@ -18,6 +18,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      deidentifyConfig.infoTypeTransformations.transformations.primitiveTransformation.replaceWithInfoTypeConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/object_to_bool.go.erb
+        custom_expand: templates/terraform/custom_expand/bool_to_object.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dlp_deidentify_template_basic"
