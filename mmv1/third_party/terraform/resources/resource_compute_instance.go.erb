@@ -665,20 +665,17 @@ func resourceComputeInstance() *schema.Resource {
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Optional:    true,
-				Computed:    true,
 				Description: `Controls for advanced machine-related behavior features.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enable_nested_virtualization": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Default:     false,
 							Description: `Whether to enable nested virtualization or not.`,
 						},
 						"threads_per_core": {
 							Type:        schema.TypeInt,
 							Optional:    true,
-							Computed:    false,
 							Description: `The number of threads per physical core. To disable simultaneous multithreading (SMT) set this to 1. If unset, the maximum number of threads supported per core by the underlying processor is assumed.`,
 						},
 					},
