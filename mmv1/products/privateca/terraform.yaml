@@ -64,6 +64,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_config"
         primary_resource_id: "default"
+        ignore_read_extra:
+          - "certificate_description"
         vars:
           certificate_authority_id: "my-certificate-authority" 
           certificate_name: "my-certificate"
@@ -77,6 +79,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           certificate_name: "my-certificate"
           certificate_authority_id: "my-certificate-authority"
+        test_env_vars:
+          project: :PROJECT_NAME
+        test_vars_overrides:
+          pool: "\"static-ca-pool\""
+      - !ruby/object:Provider::Terraform::Examples
+        name: "privateca_certificate_no_authority"
+        primary_resource_id: "default"
+        ignore_read_extra:
+          - "certificate_description"
+        vars:
+          certificate_name: "my-certificate"
         test_env_vars:
           project: :PROJECT_NAME
         test_vars_overrides:

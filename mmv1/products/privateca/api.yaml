@@ -34,6 +34,7 @@ objects:
     base_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities
     create_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities?certificateAuthorityId={{certificate_authority_id}}
     self_link: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}
+    delete_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}?ignoreActiveCertificates={{ignore_active_certificates}}
     input: true
     async: !ruby/object:Api::OpAsync
         operation: !ruby/object:Api::OpAsync::Operation
@@ -119,6 +120,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'x509Config'
+            required: true
             description: |
                Describes how some of the technical X.509 fields in a certificate should be populated.
             properties:
@@ -170,11 +172,13 @@ objects:
                   "Authority Information Access" extension in the certificate.
               - !ruby/object:Api::Type::NestedObject
                 name: 'caOptions'
+                required: true
                 description: |
                   Describes values that are relevant in a CA certificate.
                 properties:
                   - !ruby/object:Api::Type::Boolean
                     name: 'isCa'
+                    required: true
                     description: |
                       Refers to the "CA" X.509 extension, which is a boolean value. When this value is missing,
                       the extension will be omitted from the CA certificate.
@@ -483,12 +487,12 @@ objects:
     delete_verb: :POST
     input: true
     description: |
-      A Certificate corresponds to a signed X.509 certificate issued by a CertificateAuthority.
+      A Certificate corresponds to a signed X.509 certificate issued by a Certificate.
     parameters:    
       - !ruby/object:Api::Type::String
         name: location
         description:  |
-          Location of the CertificateAuthority. A full list of valid locations can be found by
+          Location of the Certificate. A full list of valid locations can be found by
           running `gcloud privateca locations list`.
         required: true
         input: true
@@ -502,14 +506,14 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: pool
-        description: The name of the CaPool this Certificate Authority belongs to.
+        description: The name of the CaPool this Certificate belongs to.
         required: true
         input: true
         url_param_only: true
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
-          The name for this Certificate .
+          The name for this Certificate.
         required: true
         input: true
         url_param_only: true
@@ -555,7 +559,7 @@ objects:
         name: 'certificateDescription'
         description: |
           Output only. Details regarding the revocation of this Certificate. This Certificate is considered revoked if and only if this field is present.
-        output: true          
+        output: true
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'subjectDescription'
@@ -968,6 +972,7 @@ objects:
                         The key may be used in a key agreement protocol.
                     - !ruby/object:Api::Type::Boolean
                       name: 'certSign'
+                      send_empty_value: true
                       description: |
                         The key may be used to sign certificates.
                     - !ruby/object:Api::Type::Boolean

@@ -1,0 +1,34 @@
+resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
+  pool = "<%= ctx[:vars]["pool"] %>"
+  location = "us-central1"
+  lifetime = "860s"
+  name = "<%= ctx[:vars]["certificate_name"] %>"
+  config {
+    subject_config  {
+      subject {
+        common_name = "san1.example.com"
+        country_code = "us"
+        organization = "google"
+        organizational_unit = "enterprise"
+        locality = "mountain view"
+        province = "california"
+        street_address = "1600 amphitheatre parkway"
+        postal_code = "94109"
+      }
+    }
+    x509_config {
+      ca_options {
+        is_ca = false
+      }
+      key_usage {
+        base_key_usage {
+          crl_sign = true
+        }
+      }
+    }
+    public_key {
+      format = "PEM"
+      key = filebase64("test-fixtures/rsa_public.pem")
+    }
+  }
+}
