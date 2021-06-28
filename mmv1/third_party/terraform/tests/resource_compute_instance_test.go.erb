@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -987,6 +988,45 @@ func TestAccComputeInstance_soleTenantNodeAffinities(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstance_reservationAffinities(t *testing.T) {
+	t.Parallel()
+
+	var instance computeBeta.Instance
+	var instanceName = fmt.Sprintf("tf-test-resaffinity-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_reservationAffinity_nonSpecificReservationConfig(instanceName, "NO_RESERVATION"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceHasReservationAffinity(&instance, "NO_RESERVATION"),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+			{
+				Config: testAccComputeInstance_reservationAffinity_nonSpecificReservationConfig(instanceName, "ANY_RESERVATION"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceHasReservationAffinity(&instance, "ANY_RESERVATION"),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+			{
+				Config: testAccComputeInstance_reservationAffinity_specificReservationConfig(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceHasReservationAffinity(&instance, "SPECIFIC_RESERVATION", instanceName),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+		},
+	})
+}
+
 func TestAccComputeInstance_subnet_auto(t *testing.T) {
 	t.Parallel()
 
@@ -1133,7 +1173,32 @@ func TestAccComputeInstance_private_image_family(t *testing.T) {
 		},
 	})
 }
+<% unless version == 'ga' -%>
+func TestAccComputeInstance_networkPerformanceConfig(t *testing.T) {
+	t.Parallel()
 
+	var instance computeBeta.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", randString(t, 10))
+	var diskName = fmt.Sprintf("tf-testd-%s", randString(t, 10))
+	var imageName = fmt.Sprintf("tf-testf-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_networkPerformanceConfig(imageName, diskName, instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceHasNetworkPerformanceConfig(&instance, "DEFAULT"),
+				),
+			},
+		},
+	})
+}
+<% end -%>
 func TestAccComputeInstance_forceChangeMachineTypeManually(t *testing.T) {
 	t.Parallel()
 
@@ -2677,6 +2742,21 @@ func testAccCheckComputeInstanceHasNetworkIP(instance *compute.Instance, network
 	}
 }
 
+<% unless version == "ga" -%>
+func testAccCheckComputeInstanceHasNetworkPerformanceConfig(instance *computeBeta.Instance, bandwidthTier string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if instance.NetworkPerformanceConfig == nil {
+			return fmt.Errorf("Expected instance to have network performance config, but it was nil")
+		}
+		if instance.NetworkPerformanceConfig.TotalEgressBandwidthTier != bandwidthTier {
+			return fmt.Errorf("Incorrect network_performance_config.total_egress_bandwidth_tier found: expected %v, got %v", bandwidthTier, instance.NetworkPerformanceConfig.TotalEgressBandwidthTier)
+		}
+
+		return nil
+	}
+}
+<% end -%>
+
 func testAccCheckComputeInstanceHasMultiNic(instance *compute.Instance) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if len(instance.NetworkInterfaces) < 2 {
@@ -2767,6 +2847,34 @@ func testAccCheckComputeInstanceHasConfiguredDeletionProtection(instance *comput
 	return func(s *terraform.State) error {
 		if instance.DeletionProtection != configuredDeletionProtection {
 			return fmt.Errorf("Wrong deletion protection flag: expected %t, got %t", configuredDeletionProtection, instance.DeletionProtection)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckComputeInstanceHasReservationAffinity(instance *computeBeta.Instance, reservationType string, specificReservationNames ...string) resource.TestCheckFunc {
+	if len(specificReservationNames) > 1 {
+		panic("too many specificReservationNames provided in test")
+	}
+
+	return func(*terraform.State) error {
+		if instance.ReservationAffinity == nil {
+			return fmt.Errorf("expected instance to have reservation affinity, but it was nil")
+		}
+
+		if instance.ReservationAffinity.ConsumeReservationType != reservationType {
+			return fmt.Errorf("Wrong reservationAffinity consumeReservationType: expected %s, got, %s", reservationType, instance.ReservationAffinity.ConsumeReservationType)
+		}
+
+		if len(specificReservationNames) > 0 {
+			const reservationNameKey = "compute.googleapis.com/reservation-name"
+			if instance.ReservationAffinity.Key != reservationNameKey {
+				return fmt.Errorf("Wrong reservationAffinity key: expected %s, got, %s", reservationNameKey, instance.ReservationAffinity.Key)
+			}
+			if len(instance.ReservationAffinity.Values) != 1 || instance.ReservationAffinity.Values[0] != specificReservationNames[0] {
+				return fmt.Errorf("Wrong reservationAffinity values: expected %s, got, %s", specificReservationNames, instance.ReservationAffinity.Values)
+			}
 		}
 
 		return nil
@@ -4499,6 +4607,57 @@ resource "google_compute_instance" "foobar" {
 `, disk, family, family, instance)
 }
 
+<% unless version == "ga" -%>
+func testAccComputeInstance_networkPerformanceConfig(disk string, image string, instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "foobar" {
+  name  = "%s"
+  zone  = "us-central1-a"
+  image = data.google_compute_image.my_image.self_link
+}
+
+resource "google_compute_image" "foobar" {
+  name              = "%s"
+  source_disk       = google_compute_disk.foobar.self_link
+  guest_os_features {
+    type = "GVNIC"
+  }
+  guest_os_features {
+    type = "VIRTIO_SCSI_MULTIQUEUE"
+  }
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "n2-standard-2"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = google_compute_image.foobar.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+    access_config {
+      // Ephemeral IP
+    }
+  }
+
+  network_performance_config {
+    total_egress_bandwidth_tier = "DEFAULT"
+  }
+}
+`, disk, image, instance)
+}
+<% end -%>
+
 func testAccComputeInstance_multiNic(instance, network, subnetwork string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -5163,6 +5322,81 @@ resource "google_compute_node_group" "nodes" {
   node_template = google_compute_node_template.nodetmpl.self_link
 }
 `, instance, nodeTemplate, nodeGroup)
+}
+
+func testAccComputeInstance_reservationAffinity_nonSpecificReservationConfig(instanceName, reservationType string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "n1-standard-1"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  reservation_affinity {
+    type = "%s"
+  }
+}`, instanceName, reservationType)
+}
+
+func testAccComputeInstance_reservationAffinity_specificReservationConfig(instanceName string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_reservation" "reservation" {
+  name = "%s"
+  zone = "us-central1-a"
+
+  specific_reservation {
+    count = 1
+    instance_properties {
+      machine_type = "n1-standard-1"
+    }
+  }
+
+  specific_reservation_required = true
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%[1]s"
+  machine_type = "n1-standard-1"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  reservation_affinity {
+    type = "SPECIFIC_RESERVATION"
+
+	specific_reservation {
+		key    = "compute.googleapis.com/reservation-name"
+		values = ["%[1]s"]
+	}
+  }
+}`, instanceName)
 }
 
 func testAccComputeInstance_shieldedVmConfig(instance string, enableSecureBoot bool, enableVtpm bool, enableIntegrityMonitoring bool) string {
