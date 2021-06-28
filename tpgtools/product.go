@@ -46,13 +46,51 @@ func NewProductMetadata(packagePath, productName string) *ProductMetadata {
 	}
 }
 
-func (pm *ProductMetadata) WriteBasePath() bool {
-	po, ok := productOverrides[pm.PackagePath]
-	if !ok {
+func (pm *ProductMetadata) ShouldWriteProductBasePath() bool {
+	bp := pm.ProductBasePathDetails()
+	if bp == nil {
 		return true
 	}
-	skipBasePath := po.ResourceOverride(ProductSkipBasePath, "")
-	return !skipBasePath
+	return !bp.Skip
+}
+
+func (pm *ProductMetadata) BasePathIdentifierSnakeUpper() string {
+	return strings.ToUpper(pm.BasePathIdentifierSnake())
+}
+
+func (pm *ProductMetadata) BasePathIdentifierSnake() string {
+	bp := pm.ProductBasePathDetails()
+	if bp != nil && bp.BasePathIdentifier != ""{
+		return bp.BasePathIdentifier
+	}
+	return pm.ProductName
+}
+
+func (pm *ProductMetadata) BasePathIdentifier() string {
+	bp := pm.ProductBasePathDetails()
+	if bp != nil && bp.BasePathIdentifier != ""{
+		return snakeToTitleCase(bp.BasePathIdentifier)
+	}
+	return pm.ProductType()
+}
+
+func (pm *ProductMetadata) ProductBasePathDetails() *ProductBasePathDetails {
+	overrides, ok := productOverrides[pm.PackagePath]
+	if !ok {
+		// TODO maybe crash here?
+		return nil
+	}
+	bp := ProductBasePathDetails{}
+	bpOk, err := overrides.ProductOverrideWithDetails(ProductBasePath, &bp)
+	if err != nil {
+		log.Fatalln("error - failed to decode base path details")
+	}
+
+	if !bpOk {
+		return nil
+	}
+
+	return &bp
 }
 
 // ProductType is the title-cased product name of a resource. For example,

@@ -1,10 +1,11 @@
 #!/bin/bash
 
 set -e
-PR_NUMBER=$1
+pr_number=$1
+mm_commit_sha=$2
 
 USER=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
-  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}" | jq -r .user.login)
+  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${pr_number}" | jq -r .user.login)
 
 # This image runs tests for community PRs. This script reverses check_membership.sh to exit without running tests
 # for users for who tests are automatically run.
@@ -29,5 +30,5 @@ else
 	fi
 fi
 
-# Pass PR number to runner, which expects it
-sh /run_vcr_tests.sh $PR_NUMBER
+# Pass args through to runner
+sh /run_vcr_tests.sh $pr_number $mm_commit_sha

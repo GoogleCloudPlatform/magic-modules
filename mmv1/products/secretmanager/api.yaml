@@ -125,6 +125,51 @@ objects:
                           required: true
                           description: |
                             Describes the Cloud KMS encryption key that will be used to protect destination secret.  
+      - !ruby/object:Api::Type::Array
+        name: topics
+        required_with:
+          - rotation
+        description: |
+          A list of up to 10 Pub/Sub topics to which messages are published when control plane operations are called on the secret or its versions.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: name
+              required: true
+              description: |
+                The resource name of the Pub/Sub topic that will be published to, in the following format: projects/*/topics/*.
+                For publication to succeed, the Secret Manager Service Agent service account must have pubsub.publisher permissions on the topic.
+      - !ruby/object:Api::Type::String
+        name: expireTime
+        description: |
+          Timestamp in UTC when the Secret is scheduled to expire. This is always provided on output, regardless of what was sent on input.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+      - !ruby/object:Api::Type::String
+        name: ttl
+        input: true
+        description: |
+          The TTL for the Secret.
+          A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+      - !ruby/object:Api::Type::NestedObject
+        name: rotation
+        required_with:
+          - topics
+        description: |
+          The rotation time and period for a Secret. At `next_rotation_time`, Secret Manager will send a Pub/Sub notification to the topics configured on the Secret. `topics` must be set to configure rotation.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: nextRotationTime
+            description: |
+              Timestamp in UTC at which the Secret is scheduled to rotate.
+              A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+            required_with:
+              - rotation.0.rotation_period
+          - !ruby/object:Api::Type::String
+            name: rotationPeriod
+            input: true
+            description: |
+              The Duration between rotation notifications. Must be in seconds and at least 3600s (1h) and at most 3153600000s (100 years).
+              If rotationPeriod is set, `next_rotation_time` must be set. `next_rotation_time` will be advanced by this period when the service automatically sends rotation notifications.
   - !ruby/object:Api::Resource
     name: SecretVersion
     base_url: '{{name}}'

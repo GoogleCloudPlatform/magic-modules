@@ -618,29 +618,24 @@ objects:
             header. The actual headers served in responses will not be altered.
         - !ruby/object:Api::Type::Integer
           name: 'defaultTtl'
-          min_version: beta
           description: |
             Specifies the default TTL for cached content served by this origin for responses
             that do not have an existing valid TTL (max-age or s-max-age).
         - !ruby/object:Api::Type::Integer
           name: 'maxTtl'
-          min_version: beta
           description: |
             Specifies the maximum allowed TTL for cached content served by this origin.
         - !ruby/object:Api::Type::Integer
           name: 'clientTtl'
-          min_version: beta
           description: |
             Specifies the maximum allowed TTL for cached content served by this origin.
         - !ruby/object:Api::Type::Boolean
           name: 'negativeCaching'
-          min_version: beta
           send_empty_value: true
           description: |
             Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects.
         - !ruby/object:Api::Type::Array
           name: 'negativeCachingPolicy'
-          min_version: beta
           description: |
             Sets a cache TTL for the specified HTTP status code. negativeCaching must be enabled to configure negativeCachingPolicy.
             Omitting the policy and leaving negativeCaching enabled will use Cloud CDN's default cache TTLs.
@@ -648,19 +643,16 @@ objects:
             properties:
               - !ruby/object:Api::Type::Integer
                 name: 'code'
-                min_version: beta
                 description: |
                   The HTTP status code to define a TTL against. Only HTTP status codes 300, 301, 308, 404, 405, 410, 421, 451 and 501
                   can be specified as values, and you cannot specify a status code more than once.
               - !ruby/object:Api::Type::Integer
                 name: 'ttl'
-                min_version: beta
                 description: |
                   The TTL (in seconds) for which to cache responses with the corresponding status code. The maximum allowed value is 1800s
                   (30 minutes), noting that infrequently accessed objects may be evicted from the cache before the defined TTL.
         - !ruby/object:Api::Type::Enum
           name: 'cacheMode'
-          min_version: beta
           description: |
             Specifies the cache setting for all responses from this backend.
             The possible values are: USE_ORIGIN_HEADERS, FORCE_CACHE_ALL and CACHE_ALL_STATIC
@@ -670,14 +662,12 @@ objects:
             - :CACHE_ALL_STATIC
         - !ruby/object:Api::Type::Integer
           name: 'serveWhileStale'
-          min_version: beta
           send_empty_value: true
           description: |
             Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
 
       - !ruby/object:Api::Type::Array
         name: 'customResponseHeaders'
-        min_version: beta
         description: |
           Headers that the HTTP/S load balancer should add to proxied responses.
         item_type: Api::Type::String
@@ -1222,29 +1212,24 @@ objects:
               responses will not be altered.
           - !ruby/object:Api::Type::Integer
             name: 'defaultTtl'
-            min_version: beta
             description: |
               Specifies the default TTL for cached content served by this origin for responses
               that do not have an existing valid TTL (max-age or s-max-age).
           - !ruby/object:Api::Type::Integer
             name: 'maxTtl'
-            min_version: beta
             description: |
               Specifies the maximum allowed TTL for cached content served by this origin.
           - !ruby/object:Api::Type::Integer
             name: 'clientTtl'
-            min_version: beta
             description: |
               Specifies the maximum allowed TTL for cached content served by this origin.
           - !ruby/object:Api::Type::Boolean
             name: 'negativeCaching'
-            min_version: beta
             send_empty_value: true
             description: |
               Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects.
           - !ruby/object:Api::Type::Array
             name: 'negativeCachingPolicy'
-            min_version: beta
             description: |
               Sets a cache TTL for the specified HTTP status code. negativeCaching must be enabled to configure negativeCachingPolicy.
               Omitting the policy and leaving negativeCaching enabled will use Cloud CDN's default cache TTLs.
@@ -1252,19 +1237,16 @@ objects:
               properties:
                 - !ruby/object:Api::Type::Integer
                   name: 'code'
-                  min_version: beta
                   description: |
                     The HTTP status code to define a TTL against. Only HTTP status codes 300, 301, 308, 404, 405, 410, 421, 451 and 501
                     can be specified as values, and you cannot specify a status code more than once.
                 - !ruby/object:Api::Type::Integer
                   name: 'ttl'
-                  min_version: beta
                   description: |
                     The TTL (in seconds) for which to cache responses with the corresponding status code. The maximum allowed value is 1800s
                     (30 minutes), noting that infrequently accessed objects may be evicted from the cache before the defined TTL.
           - !ruby/object:Api::Type::Enum
             name: 'cacheMode'
-            min_version: beta
             description: |
               Specifies the cache setting for all responses from this backend.
               The possible values are: USE_ORIGIN_HEADERS, FORCE_CACHE_ALL and CACHE_ALL_STATIC
@@ -1274,7 +1256,6 @@ objects:
               - :CACHE_ALL_STATIC
           - !ruby/object:Api::Type::Integer
             name: 'serveWhileStale'
-            min_version: beta
             send_empty_value: true
             description: |
               Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
@@ -1302,7 +1283,6 @@ objects:
           requests.
       - !ruby/object:Api::Type::Array
         name: 'customResponseHeaders'
-        min_version: beta
         item_type: Api::Type::String
         description: |
           Headers that the HTTP/S load balancer should add to proxied
@@ -1693,9 +1673,6 @@ objects:
       # TODO: make a ResourceRef to Security Policy
       - !ruby/object:Api::Type::String
         name: 'securityPolicy'
-        update_verb: :POST
-        update_url:
-          'projects/{{project}}/global/backendServices/{{name}}/setSecurityPolicy'
         description: |
           The security policy associated with this backend service.
       - !ruby/object:Api::Type::Enum
@@ -2204,29 +2181,24 @@ objects:
               responses will not be altered.
           - !ruby/object:Api::Type::Integer
             name: 'defaultTtl'
-            min_version: beta
             description: |
               Specifies the default TTL for cached content served by this origin for responses
               that do not have an existing valid TTL (max-age or s-max-age).
           - !ruby/object:Api::Type::Integer
             name: 'maxTtl'
-            min_version: beta
             description: |
               Specifies the maximum allowed TTL for cached content served by this origin.
           - !ruby/object:Api::Type::Integer
             name: 'clientTtl'
-            min_version: beta
             description: |
               Specifies the maximum allowed TTL for cached content served by this origin.
           - !ruby/object:Api::Type::Boolean
             name: 'negativeCaching'
-            min_version: beta
             send_empty_value: true
             description: |
               Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects.
           - !ruby/object:Api::Type::Array
             name: 'negativeCachingPolicy'
-            min_version: beta
             description: |
               Sets a cache TTL for the specified HTTP status code. negativeCaching must be enabled to configure negativeCachingPolicy.
               Omitting the policy and leaving negativeCaching enabled will use Cloud CDN's default cache TTLs.
@@ -2234,7 +2206,6 @@ objects:
               properties:
                 - !ruby/object:Api::Type::Integer
                   name: 'code'
-                  min_version: beta
                   description: |
                     The HTTP status code to define a TTL against. Only HTTP status codes 300, 301, 308, 404, 405, 410, 421, 451 and 501
                     can be specified as values, and you cannot specify a status code more than once.
@@ -2246,7 +2217,6 @@ objects:
                     (30 minutes), noting that infrequently accessed objects may be evicted from the cache before the defined TTL.
           - !ruby/object:Api::Type::Enum
             name: 'cacheMode'
-            min_version: beta
             description: |
               Specifies the cache setting for all responses from this backend.
               The possible values are: USE_ORIGIN_HEADERS, FORCE_CACHE_ALL and CACHE_ALL_STATIC
@@ -2256,7 +2226,6 @@ objects:
               - :CACHE_ALL_STATIC
           - !ruby/object:Api::Type::Integer
             name: 'serveWhileStale'
-            min_version: beta
             send_empty_value: true
             description: |
               Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
@@ -4452,7 +4421,7 @@ objects:
         name: 'port'
         description: |
           The TCP port number for the HTTPS health check request.
-          The default value is 80.
+          The default value is 443.
       - !ruby/object:Api::Type::String
         name: 'requestPath'
         description: |
@@ -9208,8 +9177,6 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'preservedState'
         description: 'The preserved state for this instance.'
-        update_verb: :POST
-        update_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/updatePerInstanceConfigs'
         properties:
           - !ruby/object:Api::Type::KeyValuePairs
             name: 'metadata'
@@ -9329,7 +9296,6 @@ objects:
         name: 'preservedState'
         description: 'The preserved state for this instance.'
         update_verb: :POST
-        update_url: 'projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}/updatePerInstanceConfigs'
         properties:
           - !ruby/object:Api::Type::KeyValuePairs
             name: 'metadata'
@@ -18406,8 +18372,6 @@ objects:
           the BackendService. The protocol field in the BackendService
           must be set to GRPC.
         input: true
-        update_verb: :PATCH
-        update_url: projects/{{project}}/global/targetGrpcProxies
         update_id: 'urlMap'
         fingerprint_name: 'fingerprint'
       - !ruby/object:Api::Type::Boolean

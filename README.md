@@ -94,46 +94,36 @@ Now, you can verify you're ready with:
 ./tools/doctor
 ```
 
-### Generating downstream tools
+### Generating the Terraform Providers
 
-Before making any changes, you can compile the "downstream" tool you're working
+Before making any changes, you can compile the Terraform provider you're working
 on by running the following command. If Magic Modules has been installed
-correctly, you'll get no errors when you run a command:
-
-```bash
-bundle exec compiler -a -v "ga" -e {{tool}} -o "{{output_folder}}"
-```
+correctly, you'll get no errors.
 
 Generally, you'll want to generate into the same output.  For terraform, that
 will be `$GOPATH/src/github.com/hashicorp/terraform-provider-google` (optionally `-beta`).
-For Ansible and Inspec, wherever you have cloned those repositories.
 
-For example, to generate Terraform:
 
 ```bash
-bundle exec compiler -a -v "ga" -e terraform -o "$GOPATH/src/github.com/hashicorp/terraform-provider-google"
+make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google"
+make terraform VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
+
+# Only generate a specific product (plus all common files)
+make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=dataproc
 ```
 
-It's worth noting that Magic Modules will only generate new files when ran
+It's worth noting that Magic Modules will only generate new files when run
 locally. The "Magician"- the Magic Modules CI system- handles deletion of old
 files when creating PRs.
 
-#### Compiler options
+#### Generating terraform-google-conversion
 
-`-e`, `-v`, and `-f` let you select which project should be generated.
+You can compile terraform-google-conversion by running the following command.
+If Magic Modules has been installed correctly, you'll get no errors.
 
-Target                      | compiler options
-----------------------------|-----------------
-ansible                     | `-e ansible`
-inspec                      | `-e inspec -v "beta"`
-terraform                   | `-e terraform -v "ga"`
-terraform (beta)            | `-e terraform -v "beta"`
-terraform-google-conversion | `-e terraform -f validator`
-
-Other important options are:
-
-- `-a` Generate for all products
-- `-p products/<folder_name>` Generate for a specific project, i.e. `-p products/appengine`
+```bash
+make validator OUTPUT_PATH="/path/to/your/terraform-google-conversion"
+```
 
 ### Making changes to resources
 
