@@ -16,7 +16,6 @@ resource "google_dialogflow_cx_agent" "agent" {
 
 resource "google_dialogflow_cx_version" "<%= ctx[:primary_resource_id] %>" {
   parent       = google_dialogflow_cx_agent.agent.start_flow
-  location     = google_dialogflow_cx_agent.agent.location
   display_name = "1.0.0"
   description  = "version 1.0.0"
 }
