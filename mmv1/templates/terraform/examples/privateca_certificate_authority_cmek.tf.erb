@@ -38,13 +38,18 @@ resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id]
     }
     x509_config {
       ca_options {
+        # is_ca *MUST* be true for certificate authorities
         is_ca = true
         max_issuer_path_length = 10
       }
       key_usage {
         base_key_usage {
+          # cert_sign and crl_sign *MUST* be true for certificate authorities
           cert_sign = true
           crl_sign = true
+        }
+        extended_key_usage {
+          server_auth = false
         }
       }
     }

@@ -24,6 +24,9 @@ resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
         base_key_usage {
           crl_sign = true
         }
+        extended_key_usage {
+          server_auth = true
+        }
       }
     }
     public_key {

@@ -203,3 +203,67 @@ resource "google_privateca_ca_pool" "default" {
 }
 `, context)
 }
+
+func TestAccPrivatecaCaPool_privatecaCapoolEmptyBaseline(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPrivatecaCaPoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPrivatecaCaPool_privatecaCapoolEmptyBaseline(context),
+			},
+			{
+				ResourceName:            "google_privateca_ca_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location"},
+			},
+		},
+	})
+}
+
+func testAccPrivatecaCaPool_privatecaCapoolEmptyBaseline(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_privateca_ca_pool" "default" {
+  name = "tf-test-my-capool%{random_suffix}"
+  location = "us-central1"
+  tier = "ENTERPRISE"
+  publishing_options {
+    publish_ca_cert = false
+    publish_crl = true
+  }
+  labels = {
+    foo = "bar"
+  }
+  issuance_policy {
+    baseline_values {
+      additional_extensions {
+        critical = false
+        value = "asdf"
+        object_id {
+          object_id_path = [123, 899]
+        }
+      }
+      ca_options {
+        is_ca = false
+      }
+      key_usage {
+        base_key_usage {
+          digital_signature = false
+        }
+        extended_key_usage {
+          server_auth = false
+        }
+      }
+    }
+  }
+}
+`, context)
+}

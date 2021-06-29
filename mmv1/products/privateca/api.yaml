@@ -143,6 +143,7 @@ objects:
                         The value of this X.509 extension. A base64-encoded string.
                     - !ruby/object:Api::Type::NestedObject
                       name: 'objectId'
+                      required: true
                       description: |
                         Describes values that are relevant in a CA certificate.
                       properties:
@@ -190,11 +191,13 @@ objects:
                       value is missing, the max path length will be omitted from the CA certificate.
               - !ruby/object:Api::Type::NestedObject
                 name: 'keyUsage'
+                required: true
                 description: |
-                  Optional. Indicates the intended use for keys that correspond to a certificate.
+                  Indicates the intended use for keys that correspond to a certificate.
                 properties:
                   - !ruby/object:Api::Type::NestedObject
                     name: 'baseKeyUsage'
+                    required: true
                     description: |
                       Describes high-level ways in which a key may be used.
                     properties:
@@ -236,6 +239,7 @@ objects:
                           The key may be used to decipher only.
                   - !ruby/object:Api::Type::NestedObject
                     name: 'extendedKeyUsage'
+                    required: true
                     description: |
                       Describes high-level ways in which a key may be used.
                     properties:
@@ -875,6 +879,7 @@ objects:
         - !ruby/object:Api::Type::NestedObject
           name: 'x509Config'
           required: true
+          send_empty_value: true
           description: |
              Describes how some of the technical X.509 fields in a certificate should be populated.
           properties:
@@ -897,6 +902,7 @@ objects:
                       The value of this X.509 extension. A base64-encoded string.
                   - !ruby/object:Api::Type::NestedObject
                     name: 'objectId'
+                    required: true
                     description: |
                       Describes values that are relevant in a CA certificate.
                     properties:
@@ -926,11 +932,13 @@ objects:
                 "Authority Information Access" extension in the certificate.
             - !ruby/object:Api::Type::NestedObject
               name: 'caOptions'
+              send_empty_value: true
               description: |
                 Describes values that are relevant in a CA certificate.
               properties:
                 - !ruby/object:Api::Type::Boolean
                   name: 'isCa'
+                  default_value: false
                   description: |
                     Refers to the "CA" X.509 extension, which is a boolean value. When this value is missing,
                     the extension will be omitted from the CA certificate.
@@ -942,11 +950,13 @@ objects:
                     value is missing, the max path length will be omitted from the CA certificate.
             - !ruby/object:Api::Type::NestedObject
               name: 'keyUsage'
+              required: true
               description: |
-                Optional. Indicates the intended use for keys that correspond to a certificate.
+                Indicates the intended use for keys that correspond to a certificate.
               properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: 'baseKeyUsage'
+                  required: true
                   description: |
                     Describes high-level ways in which a key may be used.
                   properties:
@@ -972,7 +982,6 @@ objects:
                         The key may be used in a key agreement protocol.
                     - !ruby/object:Api::Type::Boolean
                       name: 'certSign'
-                      send_empty_value: true
                       description: |
                         The key may be used to sign certificates.
                     - !ruby/object:Api::Type::Boolean
@@ -989,6 +998,7 @@ objects:
                         The key may be used to decipher only.
                 - !ruby/object:Api::Type::NestedObject
                   name: 'extendedKeyUsage'
+                  required: true
                   description: |
                     Describes high-level ways in which a key may be used.
                   properties:
@@ -1316,6 +1326,7 @@ objects:
                         The value of this X.509 extension. A base64-encoded string.
                     - !ruby/object:Api::Type::NestedObject
                       name: 'objectId'
+                      required: true
                       description: |
                         Describes values that are relevant in a CA certificate.
                       properties:
@@ -1345,6 +1356,7 @@ objects:
                   "Authority Information Access" extension in the certificate.
               - !ruby/object:Api::Type::NestedObject
                 name: 'caOptions'
+                required: true
                 description: |
                   Describes values that are relevant in a CA certificate.
                 properties:
@@ -1361,11 +1373,13 @@ objects:
                       value is missing, the max path length will be omitted from the CA certificate.
               - !ruby/object:Api::Type::NestedObject
                 name: 'keyUsage'
+                required: true
                 description: |
-                  Optional. Indicates the intended use for keys that correspond to a certificate.
+                  Indicates the intended use for keys that correspond to a certificate.
                 properties:
                   - !ruby/object:Api::Type::NestedObject
                     name: 'baseKeyUsage'
+                    required: true
                     description: |
                       Describes high-level ways in which a key may be used.
                     properties:
@@ -1407,6 +1421,7 @@ objects:
                           The key may be used to decipher only.
                   - !ruby/object:Api::Type::NestedObject
                     name: 'extendedKeyUsage'
+                    required: true
                     description: |
                       Describes high-level ways in which a key may be used.
                     properties:

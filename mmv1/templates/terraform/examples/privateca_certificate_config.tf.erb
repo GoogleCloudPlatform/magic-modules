@@ -23,6 +23,9 @@ resource "google_privateca_certificate_authority" "test-ca" {
           cert_sign = true
           crl_sign = true
         }
+        extended_key_usage {
+          server_auth = true
+        }
       }
     }
   }
@@ -60,8 +63,11 @@ resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
       }
       key_usage {
         base_key_usage {
-          crl_sign = true
-          decipher_only = true
+          crl_sign = false
+          decipher_only = false
+        }
+        extended_key_usage {
+          server_auth = false
         }
       }
     }
