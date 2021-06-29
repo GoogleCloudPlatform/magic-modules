@@ -61,7 +61,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
 
       ~> **Note:** The Certificate Authority that is referenced by this resource **must** be 
       `tier = "ENTERPRISE"`
-    import_format: ["projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificates/{{name}}"]
     properties:
       config.x509Config: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.erb'
@@ -69,8 +68,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_config"
         primary_resource_id: "default"
-        ignore_read_extra:
-          - "certificate_description"
         vars:
           certificate_authority_id: "my-certificate-authority" 
           certificate_name: "my-certificate"
@@ -91,8 +88,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_no_authority"
         primary_resource_id: "default"
-        ignore_read_extra:
-          - "certificate_description"
         vars:
           certificate_name: "my-certificate"
         test_env_vars:

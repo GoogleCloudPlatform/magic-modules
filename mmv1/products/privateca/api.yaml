@@ -484,9 +484,8 @@ objects:
   # Certificate
   - !ruby/object:Api::Resource
     name: 'Certificate'
-    base_url: 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}//certificates'
+    base_url: 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificates'
     create_url: 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificates?certificateId={{name}}'
-    self_link: 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificates/{{name}}'
     delete_url: 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificates/{{name}}:revoke'
     delete_verb: :POST
     input: true
@@ -938,7 +937,6 @@ objects:
               properties:
                 - !ruby/object:Api::Type::Boolean
                   name: 'isCa'
-                  default_value: false
                   description: |
                     Refers to the "CA" X.509 extension, which is a boolean value. When this value is missing,
                     the extension will be omitted from the CA certificate.

@@ -36,6 +36,15 @@ func TestAccPrivatecaCaPool_privatecaCapoolUpdate(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "location"},
 			},
+			{
+				Config: testAccPrivatecaCaPool_privatecaCapoolStart(context),
+			},
+			{
+				ResourceName:            "google_privateca_ca_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location"},
+			},
 		},
 	})
 }
@@ -166,14 +175,14 @@ resource "google_privateca_ca_pool" "default" {
         critical = true
         value = "asdf"
         object_id {
-          object_id_path = [123, 899]
+          object_id_path = [899, 123]
         }
       }
       policy_ids {
-        object_id_path = [123, 888]
+        object_id_path = [123, 999]
       }
       policy_ids {
-        object_id_path = [456, 120]
+        object_id_path = [456, 120, 789]
       }
       ca_options {
         is_ca = true
