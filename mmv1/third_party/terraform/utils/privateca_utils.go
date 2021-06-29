@@ -6,6 +6,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// This file contains shared flatteners between PrivateCA Certificate, CaPool and CertificateAuthority.
+// These resources share the x509Config (Certificate, CertificateAuthorty)/baselineValues (CaPool) object.
+// The API does not return this object if it only contains booleans with the default (false) value. This
+// causes problems if a user specifies only default values, as Terraform detects that the object has been
+// deleted on the API-side. This flattener creates default objects for sub-objects that match this pattern
+// to fix perma-diffs on default-only objects. For this to work all objects that are flattened from nil to
+// their default object *MUST* be set in the user's config, so they are all marked as Required in the schema.
+
 func flattenPrivatecaCertificateConfigX509ConfigAdditionalExtensions(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	if v == nil {
 		return v
@@ -78,6 +86,8 @@ func flattenPrivatecaCertificateConfigX509ConfigAiaOcspServers(v interface{}, d 
 }
 
 func flattenPrivatecaCertificateConfigX509ConfigCaOptions(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+	// Special case here as the CaPool API returns an empty object rather than nil unlike the Certificate
+	// and CertificateAuthority APIs.
 	if v == nil || len(v.(map[string]interface{})) == 0 {
 		v = make(map[string]interface{})
 		original := v.(map[string]interface{})

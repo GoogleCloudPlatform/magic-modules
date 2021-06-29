@@ -537,6 +537,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::Enum
             name: 'revocationState'
+            output: true
             description: |
               Indicates why a Certificate was revoked.
             values:
@@ -551,6 +552,7 @@ objects:
               - "ATTRIBUTE_AUTHORITY_COMPROMISE"
           - !ruby/object:Api::Type::String
             name: 'revocationTime'
+            output: true
             description: |
                 The time at which this Certificate was revoked.
       - !ruby/object:Api::Type::String
@@ -566,236 +568,273 @@ objects:
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'subjectDescription'
+            output: true
             description: |
               Describes some of the values in a certificate that are related to the subject and lifetime.
             properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'subject'
+              output: true
               description: |
-                Required. Contains distinguished name fields such as the location and organization.
+                Contains distinguished name fields such as the location and organization.
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'countryCode'
+                  output: true
                   description: |
                     The country code of the subject.
                 - !ruby/object:Api::Type::String
                   name: 'organization'
+                  output: true
                   description: |
                     The organization of the subject.
                 - !ruby/object:Api::Type::String
                   name: 'organizationalUnit'
+                  output: true
                   description: |
                     The organizationalUnit of the subject.
                 - !ruby/object:Api::Type::String
                   name: 'locality'
+                  output: true
                   description: |
                     The locality or city of the subject.
                 - !ruby/object:Api::Type::String
                   name: 'province'
+                  output: true
                   description: |
                     The province of the subject.
                 - !ruby/object:Api::Type::String
                   name: 'streetAddress'
+                  output: true
                   description: |
                     The streetAddress or city of the subject.
                 - !ruby/object:Api::Type::String
                   name: 'postalCode'
+                  output: true
                   description: |
                     The postalCode or city of the subject.
                 - !ruby/object:Api::Type::String
                   name: 'commonName'
+                  output: true
                   description: |
                     The "common name" of the distinguished name.
             - !ruby/object:Api::Type::NestedObject
               name: 'subjectAltName'
+              output: true
               description: |
-                Optional. The subject alternative name fields.
+                The subject alternative name fields.
               properties:
                 - !ruby/object:Api::Type::Array
                   name: 'dnsNames'
+                  output: true
                   description: |
                     Contains only valid, fully-qualified host names.
-                  required: false
                   item_type: Api::Type::String
                 - !ruby/object:Api::Type::Array
+                  output: true
                   name: 'uris'
                   description: |
                     Contains only valid RFC 3986 URIs.
                   item_type: Api::Type::String
-                  required: false
                 - !ruby/object:Api::Type::Array
                   name: 'emailAddresses'
+                  output: true
                   item_type: Api::Type::String
                   description: |
                     Contains only valid RFC 2822 E-mail addresses.
-                  required: false
                 - !ruby/object:Api::Type::Array
                   name: 'ipAddresses'
+                  output: true
                   item_type: Api::Type::String
                   description: |
                     Contains only valid 32-bit IPv4 addresses or RFC 4291 IPv6 addresses.
-                  required: false
                 - !ruby/object:Api::Type::Array
                   name: 'customSans'
-                  required: true
+                  output: true
                   description: |
                     Contains additional subject alternative name values.
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                     - !ruby/object:Api::Type::NestedObject
                       name: 'obectId'
-                      required: true
+                      output: true
                       description: |
-                        Required. Describes how some of the technical fields in a certificate should be populated.
+                        Describes how some of the technical fields in a certificate should be populated.
                       properties:
                       - !ruby/object:Api::Type::Array
                         name: 'objectIdPath'
-                        required: true
+                        output: true
                         item_type: Api::Type::Integer
                         description: |
                           An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
                     - !ruby/object:Api::Type::Boolean
                       name: 'critical'
-                      required: true
+                      output: true
                       description: |
                         Required. Indicates whether or not this extension is critical (i.e., if the client does not know how to handle this extension, the client should consider this to be an error).
                     - !ruby/object:Api::Type::String
                       name: 'value'
+                      output: true
                       description: |
-                        Required. The value of this X.509 extension.
+                        The value of this X.509 extension.
             - !ruby/object:Api::Type::String
               name: 'hexSerialNumber'
+              output: true
               description: |
                 The serial number encoded in lowercase hexadecimal.
             - !ruby/object:Api::Type::String
               name: 'lifetime'
+              output: true
               description: |
                 For convenience, the actual lifetime of an issued certificate. Corresponds to 'notAfterTime' - 'notBeforeTime'.
             - !ruby/object:Api::Type::String
               name: 'notBeforeTime'
+              output: true
               description: |
                 The time at which the certificate becomes valid.
             - !ruby/object:Api::Type::String
               name: 'notAfterTime'
+              output: true
               description: |
                 The time at which the certificate expires.
           - !ruby/object:Api::Type::NestedObject
             name: 'configValues'
+            output: true
             description: |
               Describes some of the technical fields in a certificate.
             properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'keyUsage'
+              output: true
               description: |
-                Optional. Indicates the intended use for keys that correspond to a certificate.
+                Indicates the intended use for keys that correspond to a certificate.
               properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: 'baseKeyUsage'
+                  output: true
                   description: |
                     Describes high-level ways in which a key may be used.
                   properties:
                   - !ruby/object:Api::Type::NestedObject
                     name: 'keyUsageOptions'
+                    output: true
                     description: |
                       Describes high-level ways in which a key may be used.
                     properties:
                     - !ruby/object:Api::Type::Boolean
                       name: 'digitalSignature'
+                      output: true
                       description: |
                         The key may be used for digital signatures.
                     - !ruby/object:Api::Type::Boolean
                       name: 'contentCommitment'
+                      output: true
                       description: |
                         The key may be used for cryptographic commitments. Note that this may also be referred to as "non-repudiation".
                     - !ruby/object:Api::Type::Boolean
                       name: 'keyEncipherment'
+                      output: true
                       description: |
                         The key may be used to encipher other keys.
                     - !ruby/object:Api::Type::Boolean
                       name: 'dataEncipherment'
+                      output: true
                       description: |
                         The key may be used to encipher data.
                     - !ruby/object:Api::Type::Boolean
                       name: 'keyAgreement'
+                      output: true
                       description: |
                         The key may be used in a key agreement protocol.
                     - !ruby/object:Api::Type::Boolean
                       name: 'certSign'
+                      output: true
                       description: |
                         The key may be used to sign certificates.
                     - !ruby/object:Api::Type::Boolean
                       name: 'crlSign'
+                      output: true
                       description: |
                         The key may be used sign certificate revocation lists.
                     - !ruby/object:Api::Type::Boolean
                       name: 'encipherOnly'
+                      output: true
                       description: |
                         The key may be used to encipher only.
                     - !ruby/object:Api::Type::Boolean
                       name: 'decipherOnly'
+                      output: true
                       description: |
                         The key may be used to decipher only.
                 - !ruby/object:Api::Type::NestedObject
                   name: 'extendedKeyUsage'
+                  output: true
                   description: |
                     Describes high-level ways in which a key may be used.
                   properties:
                   - !ruby/object:Api::Type::Boolean
                     name: 'serverAuth'
+                    output: true
                     description: |
                       Corresponds to OID 1.3.6.1.5.5.7.3.1. Officially described as "TLS WWW server authentication", though regularly used for non-WWW TLS.
                   - !ruby/object:Api::Type::Boolean
                     name: 'clientAuth'
+                    output: true
                     description: |
                       Corresponds to OID 1.3.6.1.5.5.7.3.2. Officially described as "TLS WWW client authentication", though regularly used for non-WWW TLS.
                   - !ruby/object:Api::Type::Boolean
                     name: 'codeSigning'
+                    output: true
                     description: |
                       Corresponds to OID 1.3.6.1.5.5.7.3.3. Officially described as "Signing of downloadable executable code client authentication".
                   - !ruby/object:Api::Type::Boolean
                     name: 'emailProtection'
+                    output: true
                     description: |
                       Corresponds to OID 1.3.6.1.5.5.7.3.4. Officially described as "Email protection".
                   - !ruby/object:Api::Type::Boolean
                     name: 'timeStamping'
+                    output: true
                     description: |
                       Corresponds to OID 1.3.6.1.5.5.7.3.8. Officially described as "Binding the hash of an object to a time".
                   - !ruby/object:Api::Type::Boolean
                     name: 'ocspSigning'
+                    output: true
                     description: |
                       Corresponds to OID 1.3.6.1.5.5.7.3.9. Officially described as "Signing OCSP responses".
                 - !ruby/object:Api::Type::Array
                   name: 'unknownExtendedKeyUsages'
-                  required: true
+                  output: true
                   description: |
                     An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                     - !ruby/object:Api::Type::NestedObject
-                      name: 'obectId'
-                      required: true
+                      name: 'obectId' 
+                      output: true
                       description: |
                         Required. Describes how some of the technical fields in a certificate should be populated.
                       properties:
                       - !ruby/object:Api::Type::Array
                         name: 'objectIdPath'
-                        required: true
+                        output: true
                         item_type: Api::Type::Integer
                         description: |
                           An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
           - !ruby/object:Api::Type::NestedObject
             name: 'publicKey'
-            required: true
+            output: true
             description: |
               A PublicKey describes a public key.
             properties:
             - !ruby/object:Api::Type::String
               name: 'key'
+              output: true
               description: |
                 Required. A public key. When this is specified in a request, the padding and encoding can be any of the options described by the respective 'KeyType' value. When this is generated by the service, it will always be an RFC 5280 SubjectPublicKeyInfo structure containing an algorithm identifier and a key. A base64-encoded string.
             - !ruby/object:Api::Type::Enum
               name: 'format'
-              required: true
+              output: true
               description: |
                 Types of public keys that are supported. At a minimum, we support RSA, for the key sizes or curves listed: https://cloud.google.com/kms/docs/algorithms#asymmetric_signing_algorithms
               values:
@@ -803,39 +842,47 @@ objects:
                 - "PEM"
           - !ruby/object:Api::Type::NestedObject
             name: 'subjectKeyId'
+            output: true
             description: |
               Provides a means of identifiying certificates that contain a particular public key, per https://tools.ietf.org/html/rfc5280#section-4.2.1.2.
             properties:
             - !ruby/object:Api::Type::String
               name: 'keyId'
+              output: true
               description: |
                 Optional. The value of this KeyId encoded in lowercase hexadecimal. This is most likely the 160 bit SHA-1 hash of the public key.
           - !ruby/object:Api::Type::NestedObject
             name: 'authorityKeyId'
+            output: true
             description: |
               Identifies the subjectKeyId of the parent certificate, per https://tools.ietf.org/html/rfc5280#section-4.2.1.1
             properties:
             - !ruby/object:Api::Type::String
               name: 'keyId'
+              output: true
               description: |
                 Optional. The value of this KeyId encoded in lowercase hexadecimal. This is most likely the 160 bit SHA-1 hash of the public key.
           - !ruby/object:Api::Type::Array
             name: 'crlDistributionPoints'
+            output: true
             description: |
               Describes a list of locations to obtain CRL information, i.e. the DistributionPoint.fullName described by https://tools.ietf.org/html/rfc5280#section-4.2.1.13
             item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
             name: 'aiaIssuingCertificateUrls'
+            output: true
             description: |
               Describes lists of issuer CA certificate URLs that appear in the "Authority Information Access" extension in the certificate.
             item_type: Api::Type::String
           - !ruby/object:Api::Type::NestedObject
             name: 'certFingerprint'
+            output: true
             description: |
               The hash of the x.509 certificate.
             properties:
             - !ruby/object:Api::Type::String
               name: 'sha256Hash'
+              output: true
               description: |
                 The SHA 256 hash, encoded in hexadecimal, of the DER x509 certificate.
       - !ruby/object:Api::Type::Array
