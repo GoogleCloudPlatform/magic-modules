@@ -21,6 +21,8 @@ resource "google_privateca_certificate_authority" "authority" {
       key_usage {
         base_key_usage {
           digital_signature = true
+          cert_sign = true
+          crl_sign = true
         }
         extended_key_usage {
           server_auth = true

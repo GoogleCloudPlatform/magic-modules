@@ -90,6 +90,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           certificate_name: "my-certificate"
+          certificate_authority_id: "my-authority"
         test_env_vars:
           project: :PROJECT_NAME
         test_vars_overrides:
