@@ -83,7 +83,7 @@ func main() {
 		generateResourceFile(resource)
 		generateSweeperFile(resource)
 		// Disabled to allow handwriting files until samples exist
-		// generateResourceWebsiteFile(resource, resources, version)
+		generateResourceWebsiteFile(resource, resources, version)
 	}
 
 	// product specific generation
