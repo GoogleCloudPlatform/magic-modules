@@ -199,10 +199,8 @@ module Provider
         @test_env_vars ||= {}
         @cloud_docs_vars_overrides ||= {}
 
-        unless cloud_docs_vars_overrides.empty?
-          vars.merge!(cloud_docs_vars_overrides)
-        end
-        
+        vars.merge!(cloud_docs_vars_overrides) unless cloud_docs_vars_overrides.empty?
+
         body = lines(compile_file(
                        {
                          vars: vars,
