@@ -22,6 +22,8 @@ TFC_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magic
 TFC_LOCAL_PATH=$PWD/../tfc
 TFOICS_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/docs-examples
 TFOICS_LOCAL_PATH=$PWD/../tfoics
+TFCD_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/terraform-docs-samples
+TFCD_LOCAL_PATH=$PWD/../tfcd
 ANSIBLE_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/google.cloud
 ANSIBLE_LOCAL_PATH=$PWD/../ansible
 INSPEC_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/inspec-gcp
@@ -82,6 +84,17 @@ git fetch origin $OLD_BRANCH
 if ! git diff --exit-code --quiet origin/$OLD_BRANCH origin/$NEW_BRANCH; then
     SUMMARY="$(git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat)"
     DIFFS="${DIFFS}${NEWLINE}TF OiCS: [Diff](https://github.com/modular-magician/docs-examples/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
+fi
+popd
+
+# TF Cloud Docs
+mkdir -p $TFCD_LOCAL_PATH
+git clone -b $NEW_BRANCH $TFCD_SCRATCH_PATH $TFCD_LOCAL_PATH
+pushd $TFCD_LOCAL_PATH
+git fetch origin $OLD_BRANCH
+if ! git diff --exit-code --quiet origin/$OLD_BRANCH origin/$NEW_BRANCH; then
+    SUMMARY="$(git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat)"
+    DIFFS="${DIFFS}${NEWLINE}TF Cloud Doc Samples: [Diff](https://github.com/modular-magician/terraform-docs-samples/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
 fi
 popd
 
