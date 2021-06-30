@@ -57,8 +57,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      allUpdatesRule: !ruby/object:Overrides::Terraform::PropertyOverride
+        update_mask_fields:
+          - "notificationsRule.pubsubTopic"
+          - "notificationsRule.schemaVersion"
+          - "notificationsRule.monitoringNotificationChannels"
+          - "notificationsRule.disableDefaultIamRecipients"
       allUpdatesRule.schemaVersion: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
+      amount: !ruby/object:Overrides::Terraform::PropertyOverride
+        update_mask_fields:
+          - "amount.specifiedAmount.currencyCode"
+          - "amount.specifiedAmount.units"
+          - "amount.specifiedAmount.nanos"
+      amount.lastPeriodAmount: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/bool_to_object.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/object_to_bool.go.erb'
+      amount.specifiedAmount.currencyCode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       budgetFilter.creditTypes: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       budgetFilter: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -70,11 +86,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       budgetFilter.subaccounts: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       budgetFilter.labels: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      amount.lastPeriodAmount: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/bool_to_object.go.erb'
-        custom_flatten: 'templates/terraform/custom_flatten/object_to_bool.go.erb'
-      amount.specifiedAmount.currencyCode: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
 
 # This is for copying files over

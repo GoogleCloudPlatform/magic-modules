@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2021 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,9 +14,8 @@
 require 'provider/terraform'
 
 module Provider
-  # Code generator for runnable Terraform examples that can be run via an
-  # Open in Cloud Shell link.
-  class TerraformOiCS < Provider::Terraform
+  # Code generator for Terraform samples meant to be displayed in cloud.google.com
+  class TerraformCloudDocs < Provider::Terraform
     # We don't want *any* static generation, so we override generate to only
     # generate objects.
     def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
@@ -33,9 +32,7 @@ module Provider
       return unless generate_docs
 
       examples = data.object.examples
-                     .reject(&:skip_test)
-                     .reject { |e| !e.test_env_vars.nil? && e.test_env_vars.any? }
-                     .reject { |e| @version < @api.version_obj_or_closest(e.min_version) }
+                     .reject { |e| e.cloud_docs_region_tag.nil? || e.cloud_docs_region_tag.empty? }
 
       examples.each do |example|
         target_folder = data.output_folder
@@ -45,23 +42,8 @@ module Provider
         data.example = example
 
         data.generate(pwd,
-                      'templates/terraform/examples/base_configs/oics_example_file.tf.erb',
+                      'templates/terraform/examples/base_configs/cloud_docs_example_file.tf.erb',
                       File.join(target_folder, 'main.tf'),
-                      self)
-
-        data.generate(pwd,
-                      'templates/terraform/examples/base_configs/tutorial.md.erb',
-                      File.join(target_folder, 'tutorial.md'),
-                      self)
-
-        data.generate(pwd,
-                      'templates/terraform/examples/base_configs/example_backing_file.tf.erb',
-                      File.join(target_folder, 'backing_file.tf'),
-                      self)
-
-        data.generate(pwd,
-                      'templates/terraform/examples/static/motd',
-                      File.join(target_folder, 'motd'),
                       self)
       end
     end
