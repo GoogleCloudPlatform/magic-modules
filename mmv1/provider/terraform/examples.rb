@@ -87,6 +87,14 @@ module Provider
       # See test_vars_overrides for more details
       attr_reader :oics_vars_overrides
 
+      # Hash to provider custom override values for generating tf_cloud_docs
+      # configs. See test_vars_overrides for more details
+      attr_reader :cloud_docs_vars_overrides
+
+      # The region tag that wraps the primary resource as a snippet in a
+      # cloud docs sample.
+      attr_reader :cloud_docs_region_tag
+
       # The version name of of the example's version if it's different than the
       # resource version, eg. `beta`
       #
@@ -221,20 +229,33 @@ module Provider
         substitute_test_paths body
       end
 
-      def config_example(pwd)
-        @vars ||= []
+      def oics_example(pwd)
         @oics_vars_overrides ||= {}
+        config_example(pwd, oics_vars_overrides)
+      end
+
+      def cloud_docs_example(pwd)
+        @cloud_docs_vars_overrides ||= {}
+        config_example(pwd, cloud_docs_vars_overrides)
+      end
+
+      def config_example(pwd, vars_overrides)
+        @vars ||= []
 
         rand_vars = vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h
 
         # Examples with test_env_vars are skipped elsewhere
         body = lines(compile_file(
                        {
-                         vars: rand_vars.merge(oics_vars_overrides),
+                         vars: rand_vars.merge(vars_overrides),
                          primary_resource_id: primary_resource_id
                        },
                        pwd + '/' + config_path
                      ))
+
+        unless @cloud_docs_region_tag.nil? || @cloud_docs_region_tag.empty?
+          body = insert_region_tag(body, primary_resource_id, @cloud_docs_region_tag)
+        end
 
         substitute_example_paths body
       end
@@ -253,6 +274,14 @@ module Provider
           path: '/cloudshell/open',
           query: URI.encode_www_form(hash)
         )
+      end
+
+      def insert_region_tag(config, primary_resource_id, tag)
+        index_before = config.index(/resource [a-z_\" ]+#{primary_resource_id}/)
+        index_after = config.index(/\n}\n/, index_before)
+
+        config.insert(index_after + 3, "# [END #{tag}]\n")
+        config.insert(index_before, "# [START #{tag}]\n")
       end
 
       # rubocop:disable Metrics/LineLength
@@ -287,6 +316,8 @@ module Provider
         check :ignore_read_extra, type: Array, item_type: String, default: []
         check :primary_resource_name, type: String
         check :skip_test, type: TrueClass
+        check :cloud_docs_vars_overrides, type: Hash
+        check :cloud_docs_region_tag, type: String
         check :skip_import_test, type: TrueClass
         check :skip_docs, type: TrueClass
         check :config_path, type: String, default: "templates/terraform/examples/#{name}.tf.erb"
