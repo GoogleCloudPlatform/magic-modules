@@ -148,8 +148,8 @@ func (s Sample) generateHCLTemplate() (string, error) {
 	return hcl, nil
 }
 
-// GenerateDocsHCL generates sample HCL using docs substitution metadata
-func (s Sample) GenerateDocsHCL() string {
+// GenerateHCL generates sample HCL using docs substitution metadata
+func (s Sample) GenerateHCL() string {
 	hcl, err := s.generateHCLTemplate()
 	if err != nil {
 		glog.Exit(err)

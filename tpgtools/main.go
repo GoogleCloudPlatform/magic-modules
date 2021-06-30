@@ -87,6 +87,7 @@ func main() {
 		generateResourceFile(resource)
 		generateSweeperFile(resource)
 		generateResourceWebsiteFile(resource, resources, version)
+		generateResourceTestFile(resource, resources, version)
 	}
 
 	// product specific generation
