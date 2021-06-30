@@ -124,6 +124,24 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 				},
+
+				"gcfs_config": {
+					Type:     schema.TypeList,
+					Optional: true,
+					MaxItems: 1,
+					Description: `GCFS configuration for this node.`,
+					ForceNew: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"enabled": {
+								Type:        schema.TypeBool,
+								Required:    true,
+								ForceNew:    true,
+								Description: `Whether or not GCFS is enabled`,
+							},
+						},
+					},
+				},
 	<% end -%>
 
 				"machine_type": {
@@ -402,6 +420,13 @@ func expandNodeConfig(v interface{}) *containerBeta.NodeConfig {
 			LocalSsdCount: int64(conf["local_ssd_count"].(int)),
 		}
 	}
+
+	if v, ok := nodeConfig["gcfs_config"]; ok && len(v.([]interface{})) > 0 {
+		conf := v.([]interface{})[0].(map[string]interface{})
+		nc.GcfsConfig = &containerBeta.GcfsConfig{
+			Enabled: conf["enabled"].(bool),
+		}
+	}
 <% end -%>
 
 	if scopes, ok := nodeConfig["oauth_scopes"]; ok {
@@ -588,6 +613,7 @@ func flattenNodeConfig(c *containerBeta.NodeConfig) []map[string]interface{} {
 		"local_ssd_count":          c.LocalSsdCount,
 <% unless version == 'ga' -%>
 		"ephemeral_storage_config": flattenEphemeralStorageConfig(c.EphemeralStorageConfig),
+		"gcfs_config":              flattenGcfsConfig(c.GcfsConfig),
 <% end -%>
 		"service_account":          c.ServiceAccount,
 		"metadata":                 c.Metadata,
@@ -644,6 +670,16 @@ func flattenEphemeralStorageConfig(c *containerBeta.EphemeralStorageConfig) []ma
 	if c != nil {
 		result = append(result, map[string]interface{}{
 			"local_ssd_count": c.LocalSsdCount,
+		})
+	}
+	return result
+}
+
+func flattenGcfsConfig(c *containerBeta.GcfsConfig) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"enabled": c.Enabled,
 		})
 	}
 	return result
