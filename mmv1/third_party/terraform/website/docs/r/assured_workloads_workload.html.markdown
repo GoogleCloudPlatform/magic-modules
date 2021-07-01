@@ -1,11 +1,9 @@
 ---
-
 subcategory: ""
 layout: "google"
 page_title: "Google: google_assured_workloads_workload"
 sidebar_current: "docs-google-assured_workloads_workload"
 description: |-
-
 ---
 
 # google\_assured\_workloads\_workload
@@ -145,6 +143,5 @@ Workload can be imported using any of these accepted formats:
 $ terraform import google_assuredworkloads_workload.default organizations/{{organization}}/locations/{{location}}/workloads/{{name}}
 $ terraform import google_assuredworkloads_workload.default {{organization}}/{{location}}/{{name}}
 ```
-
 
 
