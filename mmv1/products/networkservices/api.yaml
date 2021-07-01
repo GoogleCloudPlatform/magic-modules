@@ -487,7 +487,15 @@ objects:
                             - !ruby/object:Api::Type::String
                               name: pathTemplateMatch
                               description: |
-                                For satisfying the matchRule condition, the path of the request must exactly match the value specified in fullPathMatch after removing any query parameters and anchor that may be part of the original URL.
+                                For satisfying the matchRule condition, the path of the request
+                                must match the wildcard pattern specified in pathTemplateMatch
+                                after removing any query parameters and anchor that may be part
+                                of the original URL.
+
+                                pathTemplateMatch must be between 1 and 255 characters
+                                (inclusive).  The pattern specified by pathTemplateMatch may
+                                have at most 5 wildcard operators and at most 5 variable
+                                captures in total.
                             - !ruby/object:Api::Type::String
                               name: fullPathMatch
                               description: |
@@ -653,7 +661,13 @@ objects:
                                   - !ruby/object:Api::Type::Boolean
                                     name: excludeQueryString
                                     description: |
-                                      If false, include query string parameters in the cache key according to includeQueryParameters and excludeQueryParameters.
+                                      If true, exclude query string parameters from the cache key
+
+                                      If false (the default), include the query string parameters in
+                                      the cache key according to includeQueryParameters and
+                                      excludeQueryParameters. If neither includeQueryParameters nor
+                                      excludeQueryParameters is set, the entire query string will be
+                                      included.
                                   - !ruby/object:Api::Type::Boolean
                                     name: excludeHost # default from api
                                     description: |
@@ -737,6 +751,23 @@ objects:
                                 name: 'hostRewrite'
                                 description: |
                                   Prior to forwarding the request to the selected origin, the request's host header is replaced with contents of hostRewrite.
+                              - !ruby/object:Api::Type::String
+                                name: 'pathTemplateRewrite'
+                                description: |
+                                  Prior to forwarding the request to the selected origin, if the
+                                  request matched a pathTemplateMatch, the matching portion of the
+                                  request's path is replaced re-written using the pattern specified
+                                  by pathTemplateRewrite.
+
+                                  pathTemplateRewrite must be between 1 and 255 characters
+                                  (inclusive), must start with a '/', and must only use variables
+                                  captured by the route's pathTemplate matchers.
+
+                                  pathTemplateRewrite may only be used when all of a route's
+                                  MatchRules specify pathTemplate.
+
+                                  Only one of pathPrefixRewrite and pathTemplateRewrite may be
+                                  specified.
                           - !ruby/object:Api::Type::NestedObject
                             name: corsPolicy
                             description: |
