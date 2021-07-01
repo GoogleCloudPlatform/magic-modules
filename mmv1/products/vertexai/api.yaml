@@ -177,7 +177,7 @@ objects:
             required: true
             description: |
               The number of nodes for each cluster. The number of nodes will not scale automatically but can be scaled manually by providing different values when updating.
-# Vertex AI Featurestores
+# Vertex AI Featurestore Entity Type
   - !ruby/object:Api::Resource
     name: FeaturestoreEntitytype
     base_url: '{{featurestore}}/entityTypes'
@@ -214,7 +214,7 @@ objects:
     parameters:
       - !ruby/object:Api::Type::String
         name: featurestore
-        description: The name of the Featurestore to use.
+        description: The name of the Featurestore to use, in the format projects/{project}/locations/{location}/featurestores/{featurestore}.
         url_param_only: true
         input: true
         required: true
