@@ -252,8 +252,10 @@ objects:
             name: 'subscription'
             description: |
               Output only. Name of the subscription.
+            output: true
           - !ruby/object:Api::Type::String
             name: 'topic'
+            required: true
             description: |
               The name of the topic from which this subscription is receiving messages.
           - !ruby/object:Api::Type::String
@@ -262,6 +264,7 @@ objects:
               Service account that will make the push request.
           - !ruby/object:Api::Type::String
             name: 'state'
+            output: true
             description: |
               Potential issues with the underlying Pub/Sub subscription configuration.
               Only populated on get requests.
@@ -278,10 +281,12 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'secret'
+            required: true
             description: |
               Resource name for the secret required as a URL parameter.
           - !ruby/object:Api::Type::String
             name: 'state'
+            output: true
             description: |
               Potential issues with the underlying Pub/Sub subscription configuration.
               Only populated on get requests.
