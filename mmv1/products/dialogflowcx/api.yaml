@@ -17,7 +17,7 @@ display_name: Dialogflow CX
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://{{location}}-dialogflow.googleapis.com/v3/
+    base_url: https://dialogflow.googleapis.com/v3/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -113,8 +113,7 @@ objects:
          Indicates if automatic spell correction is enabled in detect intent requests.
   - !ruby/object:Api::Resource
     name: 'EntityType'
-    base_url: "{{parent}}/entityTypes/"
-    self_link: "{{name}}"
+    base_url: "{{parent}}/entityTypes"
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -133,13 +132,6 @@ objects:
         description: |
           The agent to create a entity type for. 
           Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
-      - !ruby/object:Api::Type::String
-        name: 'location'
-        description: |
-          The name of the location this entity type is located in.
-        required: true
-        input: true
-        url_param_only: true
       - !ruby/object:Api::Type::String
         name: 'languageCode'
         description: |

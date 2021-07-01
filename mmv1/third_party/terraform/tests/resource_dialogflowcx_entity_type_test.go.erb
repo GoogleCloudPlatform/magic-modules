@@ -64,7 +64,6 @@ func testAccDialogflowCXEntityType_basic(context map[string]interface{}) string 
     
 	resource "google_dialogflow_cx_entity_type" "my_entity" {
         parent       = google_dialogflow_cx_agent.agent_entity.id
-        location     = google_dialogflow_cx_agent.agent_entity.location
         display_name  = "MyEntity"
         kind         = "KIND_MAP"
         entities {
@@ -109,7 +108,6 @@ func testAccDialogflowCXEntityType_full(context map[string]interface{}) string {
     
 	resource "google_dialogflow_cx_entity_type" "my_entity" {
         parent       = google_dialogflow_cx_agent.agent_entity.id
-        location     = google_dialogflow_cx_agent.agent_entity.location
         display_name  = "MyEntity"
         kind         = "KIND_MAP"
         entities {

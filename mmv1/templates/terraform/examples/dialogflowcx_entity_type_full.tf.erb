@@ -16,8 +16,7 @@ resource "google_dialogflow_cx_agent" "agent" {
 
 resource "google_dialogflow_cx_entity_type" "<%= ctx[:primary_resource_id] %>" {
   parent       = google_dialogflow_cx_agent.agent.id
-  location     = google_dialogflow_cx_agent.agent.location
-  displayName  = "My Entity"
+  display_name = "MyEntity"
   kind         = "KIND_MAP"
   entities {
     value = "value1"
