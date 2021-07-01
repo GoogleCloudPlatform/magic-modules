@@ -15,51 +15,28 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   CertificateAuthority: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
-    iam_policy: !ruby/object:Api::Resource::IamPolicy
-      parent_resource_attribute: certificate_authority
-      allowed_iam_role: 'roles/privateca.certificateManager'
-      method_name_separator: ':'
-      example_config_body: 'templates/terraform/iam/example_config_body/privateca_certificate_authority.tf.erb'
-      base_url: '{{name}}'
-    description: |
-      {{description}}
-      
-      ~> **Warning:** Please remember that all resources created during preview (via the terraform-provider-google-beta)
-      will be deleted when CA service transitions to General Availability (GA). Relying on these
-      certificate authorities for production traffic is discouraged.
-    import_format: ["projects/{{project}}/locations/{{location}}/certificateAuthorities/{{certificate_authority_id}}"]
+    import_format: ["projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}"]
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate_authority.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_authority_basic"
-        min_version: "beta"
         primary_resource_id: "default"
         vars:
           certificate_authority_id: "my-certificate-authority"
+        test_vars_overrides:
+          pool: "\"static-ca-pool\""
       - !ruby/object:Provider::Terraform::Examples
-        name: "privateca_certificate_authority_full"
-        min_version: "beta"
-        primary_resource_id: "default"
-        vars:
-          certificate_authority_id: "my-certificate-authority"
-      - !ruby/object:Provider::Terraform::Examples
-        min_version: beta
         name: "privateca_certificate_authority_cmek"
-        min_version: "beta"
         primary_resource_id: "default"
         # Multiple IAM bindings on the same key cause non-determinism
         skip_vcr: true
         vars:
           kms_key_name: "projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key"
+          certificate_authority_id: "my-certificate-authority"
         test_vars_overrides:
           kms_key_name: 'BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN", "us-central1").CryptoKey.Name'
-    virtual_fields:
-      - !ruby/object:Api::Type::Boolean
-        name: 'disable_on_delete'
-        default_value: false
-        description: |
-          If set to `true`, the Certificate Authority will be disabled
-          on delete. If the Certitificate Authorities is not disabled,
-          it cannot be deleted. Use with care. Defaults to `false`.
+          pool: "\"static-ca-pool\""
     properties:
       type: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
@@ -68,17 +45,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           ~> **Note:** For `SUBORDINATE` Certificate Authorities, they need to
           be manually activated (via Cloud Console of `gcloud`) before they can
           issue certificates.
-      config.reusableConfig.reusableConfig: !ruby/object:Overrides::Terraform::PropertyOverride
-        description: |
-          {{description}}. Alternatively, one of the short names
-          found by running `gcloud beta privateca reusable-configs list`.
-        diff_suppress_func: 'certificateAuthorityReusableConfigDiffSuppress'
+      config.x509Config: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.erb'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      constants: templates/terraform/constants/certificate_authority.go.erb
-      encoder: templates/terraform/encoders/certificate_authority.go.erb
-      pre_delete: templates/terraform/pre_delete/privateca_certificate_authority.go.erb
+      decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
+      post_create: templates/terraform/post_create/privateca_authority_enable.go.erb
+      pre_delete: templates/terraform/pre_delete/privateca_authority_disable.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate_authority.go.erb
-
   Certificate: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     # This resource is a child resource
@@ -88,30 +61,64 @@ overrides: !ruby/object:Overrides::ResourceOverrides
 
       ~> **Note:** The Certificate Authority that is referenced by this resource **must** be 
       `tier = "ENTERPRISE"`
-
-      ~> **Warning:** Please remember that all resources created during preview (via the terraform-provider-google-beta)
-      will be deleted when CA service transitions to General Availability (GA). Relying on these
-      certificate authorities for production traffic is discouraged.
-    import_format: ["projects/{{project}}/locations/{{location}}/certificateAuthorities/{{certificate_authority}}/certificates/{{name}}"]
+    properties:
+      config.x509Config: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.erb'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_config"
-        min_version: "beta"
         primary_resource_id: "default"
         vars:
           certificate_authority_id: "my-certificate-authority" 
           certificate_name: "my-certificate"
         test_env_vars:
           project: :PROJECT_NAME
+        test_vars_overrides:
+          pool: "\"static-ca-pool\""
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_csr"
-        min_version: "beta"
         primary_resource_id: "default"
         vars:
           certificate_name: "my-certificate"
           certificate_authority_id: "my-certificate-authority"
         test_env_vars:
           project: :PROJECT_NAME
+        test_vars_overrides:
+          pool: "\"static-ca-pool\""
+      - !ruby/object:Provider::Terraform::Examples
+        name: "privateca_certificate_no_authority"
+        primary_resource_id: "default"
+        vars:
+          certificate_name: "my-certificate"
+          certificate_authority_id: "my-authority"
+        test_env_vars:
+          project: :PROJECT_NAME
+        test_vars_overrides:
+          pool: "\"static-ca-pool\""
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_create: templates/terraform/pre_create/privateca_certificate.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate.go.erb
+  CaPool: !ruby/object:Overrides::Terraform::ResourceOverride
+    properties:
+      issuancePolicy.baselineValues: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.erb'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      allowed_iam_role: 'roles/privateca.certificateManager'
+      method_name_separator: ':'
+      parent_resource_attribute: ca_pool
+      example_config_body: 'templates/terraform/iam/example_config_body/privateca_ca_pool.tf.erb'
+    autogen_async: true
+    import_format: ["projects/{{project}}/locations/{{location}}/caPools/{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "privateca_capool_basic"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-pool%s\", context[\"random_suffix\"])"
+        primary_resource_id: "default"
+        vars:
+          name: "my-pool"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "privateca_capool_all_fields"
+        primary_resource_id: "default"
+        vars:
+          name: "my-pool"
 
