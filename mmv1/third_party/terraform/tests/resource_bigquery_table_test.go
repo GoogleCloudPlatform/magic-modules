@@ -121,6 +121,20 @@ func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
 			New:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"somethingRandom\" }]",
 			ExpectDiffSuppress: false,
 		},
+		// this is invalid but we need to make sure we don't cause a panic
+		// if users provide an invalid schema
+		"invalid - missing type for old": {
+			Old:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
+			New:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"BOOLEAN\" }]",
+			ExpectDiffSuppress: false,
+		},
+		// this is invalid but we need to make sure we don't cause a panic
+		// if users provide an invalid schema
+		"invalid - missing type for new": {
+			Old:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"BOOLEAN\" }]",
+			New:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
+			ExpectDiffSuppress: false,
+		},
 		"reordering fields": {
 			Old: `[
 				{
@@ -358,6 +372,7 @@ func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
+		tn := tn
 		tc := tc
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
@@ -1054,6 +1069,22 @@ var testUnitBigQueryDataTableIsChangableTestCases = []testUnitBigQueryDataTableJ
 		jsonNew:    "[{\"name\": \"someValue\", \"type\" : \"DATETIME\", \"mode\" : \"NULLABLE\", \"description\" : \"some new value\" }]",
 		changeable: false,
 	},
+	// this is invalid but we need to make sure we don't cause a panic
+	// if users provide an invalid schema
+	{
+		name:       "typeChangeIgnoreNewMissingType",
+		jsonOld:    "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
+		jsonNew:    "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"BOOLEAN\" }]",
+		changeable: true,
+	},
+	// this is invalid but we need to make sure we don't cause a panic
+	// if users provide an invalid schema
+	{
+		name:       "typeChangeIgnoreOldMissingType",
+		jsonOld:    "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
+		jsonNew:    "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"BOOLEAN\" }]",
+		changeable: true,
+	},
 	{
 		name:       "typeModeReqToNull",
 		jsonOld:    "[{\"name\": \"someValue\", \"type\" : \"BOOLEAN\", \"mode\" : \"REQUIRED\", \"description\" : \"someVal\" }]",
@@ -1067,10 +1098,10 @@ var testUnitBigQueryDataTableIsChangableTestCases = []testUnitBigQueryDataTableJ
 		changeable: false,
 	},
 	{
-		name:       "typeModeOmission",
+		name:       "modeToDefaultNullable",
 		jsonOld:    "[{\"name\": \"someValue\", \"type\" : \"BOOLEAN\", \"mode\" : \"REQUIRED\", \"description\" : \"someVal\" }]",
 		jsonNew:    "[{\"name\": \"someValue\", \"type\" : \"BOOLEAN\", \"description\" : \"some new value\" }]",
-		changeable: false,
+		changeable: true,
 	},
 	{
 		name:       "orderOfArrayChangesAndDescriptionChanges",

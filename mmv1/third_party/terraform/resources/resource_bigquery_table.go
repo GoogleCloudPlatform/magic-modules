@@ -138,6 +138,9 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 		eq := valueIsInArray(valA, equivalentSet) && valueIsInArray(valB, equivalentSet)
 		return eq
 	case "type":
+		if valA == nil || valB == nil {
+			return false
+		}
 		return bigQueryTableTypeEq(valA.(string), valB.(string))
 	}
 
@@ -255,6 +258,10 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error)
 					return false, nil
 				}
 			case "type":
+				if valOld == nil || valNew == nil {
+					// This is invalid, so it shouldn't require a ForceNew
+					return true, nil
+				}
 				if !bigQueryTableTypeEq(valOld.(string), valNew.(string)) {
 					return false, nil
 				}
