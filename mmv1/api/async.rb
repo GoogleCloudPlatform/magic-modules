@@ -66,7 +66,7 @@ module Api
     attr_reader :result
     attr_reader :status
     attr_reader :error
-    # If true, include project as an argument to OperationWaitTime. 
+    # If true, include project as an argument to OperationWaitTime.
     # It is intended for resources that calculate project/region from a selflink field
     attr_reader :include_project
 
