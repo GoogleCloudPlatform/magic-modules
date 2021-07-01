@@ -181,6 +181,38 @@ module Provider
               ))
       end
 
+      def config_cloud_docs(pwd)
+        docs_defaults = {
+          PROJECT_NAME: 'my-project-name',
+          FIRESTORE_PROJECT_NAME: 'my-project-name',
+          CREDENTIALS: 'my/credentials/filename.json',
+          REGION: 'us-west1',
+          ORG_ID: '123456789',
+          ORG_DOMAIN: 'example.com',
+          ORG_TARGET: '123456789',
+          BILLING_ACCT: '000000-0000000-0000000-000000',
+          SERVICE_ACCT: 'emailAddress:my@service-account.com',
+          CUST_ID: 'A01b123xz',
+          IDENTITY_USER: 'cloud_identity_user'
+        }
+        @vars ||= {}
+        @test_env_vars ||= {}
+        @cloud_docs_vars_overrides ||= {}
+
+        vars.merge!(cloud_docs_vars_overrides) unless cloud_docs_vars_overrides.empty?
+
+        body = lines(compile_file(
+                       {
+                         vars: vars,
+                         test_env_vars: test_env_vars.map { |k, v| [k, docs_defaults[v]] }.to_h,
+                         primary_resource_id: primary_resource_id
+                       },
+                       pwd + '/' + config_path
+                     ))
+
+        insert_region_tag(body, primary_resource_id, @cloud_docs_region_tag)
+      end
+
       def config_test(pwd)
         body = config_test_body(pwd)
         lines(compile_file(
@@ -229,33 +261,20 @@ module Provider
         substitute_test_paths body
       end
 
-      def oics_example(pwd)
-        @oics_vars_overrides ||= {}
-        config_example(pwd, oics_vars_overrides)
-      end
-
-      def cloud_docs_example(pwd)
-        @cloud_docs_vars_overrides ||= {}
-        config_example(pwd, cloud_docs_vars_overrides)
-      end
-
-      def config_example(pwd, vars_overrides)
+      def config_oics(pwd)
         @vars ||= []
+        @oics_vars_overrides ||= {}
 
         rand_vars = vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h
 
         # Examples with test_env_vars are skipped elsewhere
         body = lines(compile_file(
                        {
-                         vars: rand_vars.merge(vars_overrides),
+                         vars: rand_vars.merge(oics_vars_overrides),
                          primary_resource_id: primary_resource_id
                        },
                        pwd + '/' + config_path
                      ))
-
-        unless @cloud_docs_region_tag.nil? || @cloud_docs_region_tag.empty?
-          body = insert_region_tag(body, primary_resource_id, @cloud_docs_region_tag)
-        end
 
         substitute_example_paths body
       end
