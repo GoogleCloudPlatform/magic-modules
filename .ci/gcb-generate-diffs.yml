@@ -167,6 +167,24 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["merged"]
+      args:
+          - 'head'
+          - 'tf-cloud-docs'
+          - 'beta'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["merged"]
+      args:
+          - 'base'
+          - 'tf-cloud-docs'
+          - 'beta'
+          - $_PR_NUMBER
+
     - name: 'gcr.io/graphite-docker-images/github-differ'
       id: diff
       secretEnv: ["GITHUB_TOKEN"]
@@ -215,6 +233,7 @@ steps:
       timeout: 12000s
       args:
           - $_PR_NUMBER
+          - $COMMIT_SHA
 
 # Long timeout to enable waiting on VCR test
 timeout: 20000s
