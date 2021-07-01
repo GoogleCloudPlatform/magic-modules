@@ -90,20 +90,27 @@ func (pm *ProductMetadata) ProductBasePathDetails() *ProductBasePathDetails {
 	return &bp
 }
 
+// getProductTitle is used internally to get the product title
+// or case sensitve product name from the product definition
+// we will also check if there is an override for the product title
+// and utilize that if avalible and set.
 func getProductTitle(documentTitle, packagePath string) string {
 	overrides, ok := productOverrides[packagePath]
 	if !ok {
 		glog.Fatalf("product overrides should be loaded already for packagePath %s", packagePath)
 	}
 
-	bt := ProductTitleDetails{}
-	btOk, err := overrides.ProductOverrideWithDetails(ProductTitle, &bt)
+	pt := ProductTitleDetails{}
+	ptOk, err := overrides.ProductOverrideWithDetails(ProductTitle, &pt)
 	if err != nil {
-		log.Fatalln("error - failed to decode base path details")
+		glog.Fatalln("error - failed to decode base path details")
 	}
 
-	if btOk && bt.Title != "" {
-		title := bt.Title
+	if ptOk {
+		if pt.Title == "" {
+			glog.Fatalf("error - product title override defined but got empty value for %", packagePath)
+		}
+		title := pt.Title
 		return title
 	}
 
