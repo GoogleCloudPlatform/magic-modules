@@ -34,28 +34,28 @@ func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
 			ExpectDiffSuppress: false,
 		},
 		"no change": {
-			Old:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"finalKey\" : {} }]",
-			New:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"finalKey\" : {} }]",
+			Old:                "[{\"name\": \"someValue\", \"type\": \"INT64\", \"anotherKey\" : \"anotherValue\", \"finalKey\" : {} }]",
+			New:                "[{\"name\": \"someValue\", \"type\": \"INT64\", \"anotherKey\" : \"anotherValue\", \"finalKey\" : {} }]",
 			ExpectDiffSuppress: true,
 		},
 		"remove key": {
-			Old:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"finalKey\" : {} }]",
-			New:                "[{\"name\": \"someValue\", \"finalKey\" : {} }]",
+			Old:                "[{\"name\": \"someValue\", \"type\": \"INT64\", \"anotherKey\" : \"anotherValue\", \"finalKey\" : {} }]",
+			New:                "[{\"name\": \"someValue\", \"type\": \"INT64\", \"finalKey\" : {} }]",
 			ExpectDiffSuppress: false,
 		},
 		"empty description -> default description (empty)": {
-			Old:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"description\": \"\"  }]",
-			New:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
+			Old:                "[{\"name\": \"someValue\", \"type\": \"INT64\", \"anotherKey\" : \"anotherValue\", \"description\": \"\"  }]",
+			New:                "[{\"name\": \"someValue\", \"type\": \"INT64\", \"anotherKey\" : \"anotherValue\" }]",
 			ExpectDiffSuppress: true,
 		},
 		"empty description -> other description": {
-			Old:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"description\": \"\"  }]",
-			New:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"description\": \"somethingRandom\"  }]",
+			Old:                "[{\"name\": \"someValue\", \"type\": \"INT64\", \"anotherKey\" : \"anotherValue\", \"description\": \"\"  }]",
+			New:                "[{\"name\": \"someValue\", \"type\": \"INT64\", \"anotherKey\" : \"anotherValue\", \"description\": \"somethingRandom\"  }]",
 			ExpectDiffSuppress: false,
 		},
 		"mode NULLABLE -> other mode": {
-			Old:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"mode\": \"NULLABLE\"  }]",
-			New:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"mode\": \"somethingRandom\"  }]",
+			Old:                "[{\"name\": \"someValue\", \"type\": \"INT64\", \"anotherKey\" : \"anotherValue\", \"mode\": \"NULLABLE\"  }]",
+			New:                "[{\"name\": \"someValue\", \"type\": \"INT64\", \"anotherKey\" : \"anotherValue\", \"mode\": \"somethingRandom\"  }]",
 			ExpectDiffSuppress: false,
 		},
 		"mode NULLABLE -> default mode (also NULLABLE)": {
@@ -70,6 +70,23 @@ func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
 				{
 					"name": "PageNo",
 					"type": "INTEGER"
+				}
+			]`,
+			ExpectDiffSuppress: true,
+		},
+		"mode & type uppercase -> lowercase": {
+			Old: `[
+				{
+					"mode": "NULLABLE",
+					"name": "PageNo",
+					"type": "INTEGER"
+				}
+			]`,
+			New: `[
+				{
+					"mode": "nullable",
+					"name": "PageNo",
+					"type": "integer"
 				}
 			]`,
 			ExpectDiffSuppress: true,
@@ -89,9 +106,9 @@ func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
 			New:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"FLOAT64\"  }]",
 			ExpectDiffSuppress: true,
 		},
-		"type FLOAT -> default": {
+		"type FLOAT -> other": {
 			Old:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"FLOAT\"  }]",
-			New:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
+			New:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"somethingRandom\" }]",
 			ExpectDiffSuppress: false,
 		},
 		"type BOOLEAN -> BOOL": {
@@ -99,9 +116,9 @@ func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
 			New:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"BOOL\"  }]",
 			ExpectDiffSuppress: true,
 		},
-		"type BOOLEAN -> default": {
+		"type BOOLEAN -> other": {
 			Old:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"BOOLEAN\"  }]",
-			New:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
+			New:                "[{\"name\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"somethingRandom\" }]",
 			ExpectDiffSuppress: false,
 		},
 		"reordering fields": {
@@ -1822,8 +1839,8 @@ resource "google_bigquery_table" "test" {
       {
         description = "Time snapshot was taken, in Epoch milliseconds. Same across all rows and all tables in the snapshot, and uniquely defines a particular snapshot."
         name        = "snapshot_timestamp"
-        mode        = "NULLABLE"
-        type        = "INTEGER"
+        mode        = "nullable"
+        type        = "integer"
       },
       {
         description = "Timestamp of dataset creation"
