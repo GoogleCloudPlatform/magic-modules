@@ -2,8 +2,7 @@ resource "google_privateca_certificate_authority" "test-ca" {
   certificate_authority_id = "<%= ctx[:vars]["certificate_authority_id"] %>"
   location = "us-central1"
   pool = "<%= ctx[:vars]["pool"] %>"
-  tier = "ENTERPRISE"
-  ignore_active_certificates = true
+  ignore_active_certificates_on_deletion = true
   config {
     subject_config {
       subject {
