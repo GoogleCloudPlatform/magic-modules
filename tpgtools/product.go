@@ -23,20 +23,18 @@ type ProductMetadata struct {
 var productOverrides map[string]Overrides = make(map[string]Overrides, 0)
 
 func GetProductMetadataFromDocument(document *openapi.Document, packagePath string) *ProductMetadata {
-	titleParts := strings.Split(document.Info.Title, "/")
-	if len(titleParts) < 0 {
-		glog.Exitf("could not find product information for %s", packagePath)
+	// load overrides for product
+	if _, ok := productOverrides[packagePath]; !ok {
+		productOverrides[packagePath] = loadOverrides(packagePath, "tpgtools_product.yaml")
 	}
-	productMetadata := NewProductMetadata(packagePath, jsonToSnakeCase(titleParts[0]))
+	title := getProductTitle(document.Info.Title, packagePath)
+	productMetadata := NewProductMetadata(packagePath, jsonToSnakeCase(title))
 	return productMetadata
 }
 
 func NewProductMetadata(packagePath, productName string) *ProductMetadata {
 	if regexp.MustCompile("[A-Z]+").Match([]byte(productName)) {
 		log.Fatalln("error - expected product name to be snakecase")
-	}
-	if _, ok := productOverrides[packagePath]; !ok {
-		productOverrides[packagePath] = loadOverrides(packagePath, "tpgtools_product.yaml")
 	}
 	packageName := strings.Split(packagePath, "/")[0]
 	return &ProductMetadata{
@@ -60,7 +58,7 @@ func (pm *ProductMetadata) BasePathIdentifierSnakeUpper() string {
 
 func (pm *ProductMetadata) BasePathIdentifierSnake() string {
 	bp := pm.ProductBasePathDetails()
-	if bp != nil && bp.BasePathIdentifier != ""{
+	if bp != nil && bp.BasePathIdentifier != "" {
 		return bp.BasePathIdentifier
 	}
 	return pm.ProductName
@@ -68,7 +66,7 @@ func (pm *ProductMetadata) BasePathIdentifierSnake() string {
 
 func (pm *ProductMetadata) BasePathIdentifier() string {
 	bp := pm.ProductBasePathDetails()
-	if bp != nil && bp.BasePathIdentifier != ""{
+	if bp != nil && bp.BasePathIdentifier != "" {
 		return snakeToTitleCase(bp.BasePathIdentifier)
 	}
 	return pm.ProductType()
@@ -77,8 +75,7 @@ func (pm *ProductMetadata) BasePathIdentifier() string {
 func (pm *ProductMetadata) ProductBasePathDetails() *ProductBasePathDetails {
 	overrides, ok := productOverrides[pm.PackagePath]
 	if !ok {
-		// TODO maybe crash here?
-		return nil
+		glog.Fatalf("product overrides should be loaded already for packagePath %s", pm.PackagePath)
 	}
 	bp := ProductBasePathDetails{}
 	bpOk, err := overrides.ProductOverrideWithDetails(ProductBasePath, &bp)
@@ -91,6 +88,31 @@ func (pm *ProductMetadata) ProductBasePathDetails() *ProductBasePathDetails {
 	}
 
 	return &bp
+}
+
+func getProductTitle(documentTitle, packagePath string) string {
+	overrides, ok := productOverrides[packagePath]
+	if !ok {
+		glog.Fatalf("product overrides should be loaded already for packagePath %s", packagePath)
+	}
+
+	bt := ProductTitleDetails{}
+	btOk, err := overrides.ProductOverrideWithDetails(ProductTitle, &bt)
+	if err != nil {
+		log.Fatalln("error - failed to decode base path details")
+	}
+
+	if btOk && bt.Title != "" {
+		title := bt.Title
+		return title
+	}
+
+	titleParts := strings.Split(documentTitle, "/")
+	if len(titleParts) < 0 {
+		glog.Exitf("could not find product information for %s", packagePath)
+	}
+	title := titleParts[0]
+	return title
 }
 
 // ProductType is the title-cased product name of a resource. For example,
