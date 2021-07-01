@@ -166,7 +166,7 @@ objects:
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
-          A set of key/value label pairs to assign to this Workflow.
+          A set of key/value label pairs to assign to this Featurestore.
       - !ruby/object:Api::Type::NestedObject
         name: 'onlineServingConfig'
         description: |
@@ -180,9 +180,9 @@ objects:
 # Vertex AI Featurestores
   - !ruby/object:Api::Resource
     name: FeaturestoreEntitytype
-    base_url: 'projects/{{project}}/locations/{{region}}/featurestores/{{featurestore}}/entityTypes/{{name}}'
-    create_url: 'projects/{{project}}/locations/{{region}}/featurestores/{{featurestore}}/entityTypes?entityTypeId={{name}}'
-    self_link: 'projects/{{project}}/locations/{{region}}/featurestores/{{featurestore}}/entityTypes/{{name}}'
+    base_url: '{{featurestore}}/entityTypes'
+    create_url: '{{featurestore}}/entityTypes?entityTypeId={{name}}'
+    self_link: '{{featurestore}}/entityTypes/{{name}}'
     min_version: beta
     update_verb: :PATCH
     update_mask: true
@@ -208,6 +208,7 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: 'error'
         message: 'message'
+      include_project: true
     description: |-
       An entity type is a type of object in a system that needs to be modeled and have stored information about. For example, driver is an entity type, and driver0 is an instance of an entity type driver.
     parameters:
@@ -217,18 +218,13 @@ objects:
         url_param_only: true
         input: true
         required: true
-      - !ruby/object:Api::Type::String
-        name: region
-        description: The region of the dataset. eg us-central1
-        url_param_only: true
-        input: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: The name of the EntityType. This value may be up to 60 characters, and valid characters are [a-z0-9_]. The first character cannot be a number.
         input: true
         url_param_only: true
-        pattern: 'projects/{{project}}/locations/{{region}}/featurestores/{{featurestore}}/entityTypes/{{name}}'
+        pattern: '{featurestore}}/entityTypes/{{name}}'
       - !ruby/object:Api::Type::String
         name: 'etag'
         description: Used to perform consistent read-modify-write updates. 
@@ -246,7 +242,7 @@ objects:
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
-          A set of key/value label pairs to assign to this Workflow.
+          A set of key/value label pairs to assign to this EntityType.
       - !ruby/object:Api::Type::NestedObject
         name: 'monitoringConfig'
         description: |
