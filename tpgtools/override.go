@@ -28,6 +28,7 @@ type OverrideType string // enum
 // Product-level Overrides
 const (
 	ProductBasePath OverrideType = "PRODUCT_BASE_PATH"
+	ProductTitle    OverrideType = "PRODUCT_TITLE"
 )
 
 // Resource-level Overrides

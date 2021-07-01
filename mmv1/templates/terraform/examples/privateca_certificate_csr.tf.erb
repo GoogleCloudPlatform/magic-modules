@@ -1,5 +1,5 @@
 resource "google_privateca_certificate_authority" "test-ca" {
-  provider = google-beta
+  pool = "<%= ctx[:vars]["pool"] %>"
   certificate_authority_id = "<%= ctx[:vars]["certificate_authority_id"] %>"
   location = "us-central1"
   tier = "ENTERPRISE"
@@ -7,28 +7,37 @@ resource "google_privateca_certificate_authority" "test-ca" {
     subject_config {
       subject {
         organization = "HashiCorp"
+        common_name = "my-certificate-authority"
       }
-      common_name = "my-certificate-authority"
       subject_alt_name {
         dns_names = ["hashicorp.com"]
       }
     }
-    reusable_config {
-      reusable_config = "projects/568668481468/locations/us-central1/reusableConfigs/root-unconstrained"
+    x509_config {
+      ca_options {
+        # is_ca *MUST* be true for certificate authorities
+        is_ca = true
+      }
+      key_usage {
+        base_key_usage {
+          # cert_sign and crl_sign *MUST* be true for certificate authorities
+          cert_sign = true
+          crl_sign = true
+        }
+        extended_key_usage {
+          server_auth = false
+        }
+      }
     }
   }
   key_spec {
     algorithm = "RSA_PKCS1_4096_SHA256"
   }
-  disable_on_delete = true
 }
 
 
-
-
 resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
-  project = "<%= ctx[:test_env_vars]['project'] %>"
+  pool = "<%= ctx[:vars]["pool"] %>"
   location = "us-central1"
   certificate_authority = google_privateca_certificate_authority.test-ca.certificate_authority_id
   lifetime = "860s"
