@@ -17,7 +17,7 @@ display_name: Dialogflow CX
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://{{location}}-dialogflow.googleapis.com/v3/
+    base_url: https://dialogflow.googleapis.com/v3/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -113,8 +113,7 @@ objects:
          Indicates if automatic spell correction is enabled in detect intent requests.
   - !ruby/object:Api::Resource
     name: 'Version'
-    base_url: "{{parent}}/versions/"
-    self_link: "{{name}}"
+    base_url: "{{parent}}/versions"
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -128,7 +127,7 @@ objects:
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
-        full_url: 'https://dialogflow.googleapis.com/v3/{{op_id}}'
+        base_url: '{{op_id}}'
         wait_ms: 1000
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 60
@@ -154,13 +153,6 @@ objects:
         description: |
           The Flow to create an Version for. 
           Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
-      - !ruby/object:Api::Type::String
-        name: 'location'
-        description: |
-          The name of the location this version is located in.
-        required: true
-        input: true
-        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'

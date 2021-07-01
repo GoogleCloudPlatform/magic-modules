@@ -247,6 +247,7 @@ if generate_code
     products_for_version.sort_by { |p| p[:definitions].name.downcase },
     common_compile_file
   )
+
   if override_dir
     Google::LOGGER.info "Compiling override common files for #{provider_name}"
     common_compile_file = "#{override_dir}/common~compile.yaml"

@@ -64,6 +64,7 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      id: tpg-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       args:
@@ -83,6 +84,7 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      id: tpgb-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       args:
@@ -128,6 +130,7 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      id: tgc-head
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       args:
@@ -137,6 +140,7 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      id: tgc-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       args:
@@ -172,25 +176,37 @@ steps:
     - name: 'gcr.io/graphite-docker-images/terraform-google-conversion-tester'
       id: tgc-test
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["diff"]
+      waitFor: ["tgc-head", "tgc-base"]
       args:
           - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - "21"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpgb-test
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["diff"]
+      waitFor: ["tpgb-head", "tpgb-base"]
       args:
           - 'beta'
           - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - "22"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpg-test
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["diff"]
+      waitFor: ["tpg-head", "tpg-base"]
       args:
           - 'ga'
           - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - "23"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-vcr-tester'
       id: tpg-vcr-test
@@ -199,12 +215,7 @@ steps:
       timeout: 12000s
       args:
           - $_PR_NUMBER
-
-    - name: 'gcr.io/graphite-docker-images/changelog-checker'
-      secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tpg-test", "tpgb-test"]
-      args:
-          - $_PR_NUMBER
+          - $COMMIT_SHA
 
 # Long timeout to enable waiting on VCR test
 timeout: 20000s

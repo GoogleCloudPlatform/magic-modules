@@ -64,7 +64,6 @@ func testAccDialogflowCXVersion_basic(context map[string]interface{}) string {
     
 	resource "google_dialogflow_cx_version" "version1" {
 		parent       = google_dialogflow_cx_agent.agent_version.start_flow
-		location     = google_dialogflow_cx_agent.agent_version.location
 		display_name = "1.0.0"
 		description  = "version 1.0.0"
 	}
@@ -99,7 +98,6 @@ func testAccDialogflowCXVersion_full(context map[string]interface{}) string {
 	}
 	resource "google_dialogflow_cx_version" "version1" {
 		parent       = google_dialogflow_cx_agent.agent_version.start_flow
-		location     = google_dialogflow_cx_agent.agent_version.location
 		display_name = "1.0.0"
 		description  = "version 1.0.0"
 	}
