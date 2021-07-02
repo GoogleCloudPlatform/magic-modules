@@ -16,7 +16,6 @@ resource "google_dialogflow_cx_agent" "agent" {
 
 resource "google_dialogflow_cx_intent" "<%= ctx[:primary_resource_id] %>" {
   parent       = google_dialogflow_cx_agent.agent.id
-  location     = google_dialogflow_cx_agent.agent.location
   display_name = "Example"
   priority     = 1
   description  = "Intent example"
@@ -32,11 +31,13 @@ resource "google_dialogflow_cx_intent" "<%= ctx[:primary_resource_id] %>" {
      parts {
          text = "example"
      }
+
+     repeat_count = 1
   }
 
   parameters {
-    id          = 1
-    entity_type = "${google_dialogflow_cx_agent.agent.id}/entityTypes/sys.date"
+    id          = "param1"
+    entity_type = "projects/-/locations/-/agents/-/entityTypes/sys.date"
   }
 
   labels  = {
