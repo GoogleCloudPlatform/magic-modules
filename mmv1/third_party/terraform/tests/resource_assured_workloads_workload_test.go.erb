@@ -83,8 +83,10 @@ func TestAccAssuredWorkloadsWorkload_full(t *testing.T) {
 func testAccAssuredWorkloadsWorkload_basic(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_assured_workloads_workload" "meep" {
-	provider = google-beta
 	display_name = "workloadExample"
+	labels = {
+		a = "a"
+	}
 	billing_account = "billingAccounts/%{billing_account}"
 	compliance_regime = "FEDRAMP_MODERATE"
 	organization = "%{org_id}"
@@ -96,8 +98,10 @@ resource "google_assured_workloads_workload" "meep" {
 func testAccAssuredWorkloadsWorkload_basicUpdate(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_assured_workloads_workload" "meep" {
-	provider = google-beta
 	display_name = "updatedExample"
+	labels = {
+		a = "b"
+	}
 	billing_account = "billingAccounts/%{billing_account}"
 	compliance_regime = "FEDRAMP_MODERATE"
 	organization = "%{org_id}"
@@ -109,7 +113,6 @@ resource "google_assured_workloads_workload" "meep" {
 func testAccAssuredWorkloadsWorkload_full(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_assured_workloads_workload" "meep" {
-	provider = google-beta
 	display_name = "workloadExample"
 	billing_account = "billingAccounts/%{billing_account}"
 	compliance_regime = "FEDRAMP_MODERATE"
