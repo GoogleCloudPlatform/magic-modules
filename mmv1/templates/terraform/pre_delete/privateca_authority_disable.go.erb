@@ -5,7 +5,14 @@
 
 	log.Printf("[DEBUG] Disabling CertificateAuthority: %#v", obj)
 
-	_, err = sendRequest(config, "POST", billingProject, disableUrl, userAgent, nil)
+	res, err = sendRequest(config, "POST", billingProject, disableUrl, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("Error disabling CertificateAuthority: %s", err)
+	}
+
+	err = privatecaOperationWaitTimeWithResponse(
+		config, res, &opRes, project, "Disabling CertificateAuthority", userAgent,
+		d.Timeout(schema.TimeoutDelete))
+	if err != nil {
+		return fmt.Errorf("Error waiting to disable CertificateAuthority: %s", err)
 	}

@@ -824,7 +824,7 @@ objects:
               name: 'format'
               output: true
               description: |
-                Types of public keys that are supported. The key formats that are supported are RSA, for the key sizes or curves listed: https://cloud.google.com/kms/docs/algorithms#asymmetric_signing_algorithms
+                The format of the public key. Currently, only PEM format is supported.
               values:
                 - "KEY_TYPE_UNSPECIFIED"
                 - "PEM"
@@ -1173,7 +1173,7 @@ objects:
             name: 'format'
             required: true
             description: |
-              Types of public keys that are supported. The key formats that are supported are RSA, for the key sizes or curves listed: https://cloud.google.com/kms/docs/algorithms#asymmetric_signing_algorithms
+              The format of the public key. Currently, only PEM format is supported.
             values:
               - "KEY_TYPE_UNSPECIFIED"
               - "PEM"
