@@ -1,9 +1,5 @@
 ---
-<<<<<<< HEAD
 subcategory: "Assured Workloads"
-=======
-subcategory: ""
->>>>>>> 9d9c16f86f21dfa4b763e36ddf4ef67a48c20582
 layout: "google"
 page_title: "Google: google_assured_workloads_workload"
 sidebar_current: "docs-google-assured_workloads_workload"
