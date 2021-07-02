@@ -16,7 +16,10 @@ name: CertificateManager
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://certificatemanager.googleapis.com/v1alpha2/
+    base_url: https://certificatemanager.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://certificatemanager.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-identity
 apis_required:
@@ -26,7 +29,6 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'DnsAuthorization'
-    min_version: beta
     base_url: 'projects/{{project}}/locations/global/dnsAuthorizations'
     create_url: 'projects/{{project}}/locations/global/dnsAuthorizations?dnsAuthorizationId={{name}}'
     self_link: 'projects/{{project}}/locations/global/dnsAuthorizations/{{name}}'
@@ -101,7 +103,6 @@ objects:
               Data of the DNS Resource Record.
   - !ruby/object:Api::Resource
     name: 'Certificate'
-    min_version: beta
     base_url: 'projects/{{project}}/locations/global/certificates'
     create_url: 'projects/{{project}}/locations/global/certificates?certificateId={{name}}'
     self_link: 'projects/{{project}}/locations/global/certificates/{{name}}'

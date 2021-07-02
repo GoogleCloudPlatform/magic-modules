@@ -22,7 +22,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "certificate_manager_dns_authorization_basic"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           dns_auth_name: "dns-auth"
@@ -35,7 +34,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "certificate_manager_certificate_basic"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           dns_auth_name: "dns-auth"
