@@ -110,7 +110,7 @@ func generateResourceWebsiteFile(res *Resource, resources map[Version][]*Resourc
 	if oPath == nil || *oPath == "" {
 		fmt.Printf("%v\n", string(source))
 	} else {
-		outname := fmt.Sprintf("%s_%s.html.markdown", res.Package(), res.Name())
+		outname := fmt.Sprintf("%s_%s.html.markdown", res.ProductName(), res.Name())
 		err := ioutil.WriteFile(path.Join(*oPath, "website/docs/r", outname), source, 0644)
 		if err != nil {
 			glog.Exit(err)
