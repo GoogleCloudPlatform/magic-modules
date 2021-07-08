@@ -155,7 +155,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           bucket_name: "image-store-bucket"
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_bucket_full"
-        min_version: beta
         primary_resource_id: "image_backend_full"
         skip_docs: true
         vars:
@@ -220,7 +219,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           http_health_check_name: "health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_cache"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           backend_service_name: "backend-service"
@@ -1516,7 +1514,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           mirroring_name: "my-mirroring"
           ilb_rule_name: "my-ilb"
           network_name: "my-network"
-
+        cloud_docs_region_tag: compute_vm_packet_mirror
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation

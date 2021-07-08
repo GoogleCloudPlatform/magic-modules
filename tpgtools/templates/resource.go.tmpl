@@ -382,7 +382,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 {{ end }}
 	directive := UpdateDirective
 	{{- if $.StateHint }}
-	directive = append(UpdateDirective, dcl.WithStateHint(old))
+	directive = append(directive, dcl.WithStateHint(old))
 	{{- end }}
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {

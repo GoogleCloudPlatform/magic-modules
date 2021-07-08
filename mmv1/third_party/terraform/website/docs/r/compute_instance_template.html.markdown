@@ -227,7 +227,7 @@ The following arguments are supported:
     created from this template.
 
 * `labels` - (Optional) A set of key/value label pairs to assign to instances
-    created from this template,
+    created from this template.
 
 * `metadata` - (Optional) Metadata key/value pairs to make available from
     within instances created from this template.
@@ -259,6 +259,9 @@ The following arguments are supported:
     resource is tied to a specific region. Defaults to the region of the
     Provider if no value is given.
 
+* `reservation_affinity` - (Optional) Specifies the reservations that this instance can consume from.
+    Structure is documented below.
+
 * `scheduling` - (Optional) The scheduling strategy to use. More details about
     this configuration option are detailed below.
 
@@ -279,7 +282,7 @@ The following arguments are supported:
 
 * `confidential_instance_config` (Optional) - Enable [Confidential Mode](https://cloud.google.com/compute/confidential-vm/docs/about-cvm) on this VM.
 
-* `advanced_machine_features` (Optional) - Configure Nested Virtualisation and Simultaneous Hyper Threading  on this VM.
+* `advanced_machine_features` (Optional) - Configure Nested Virtualisation and Simultaneous Hyper Threading on this VM.
 
 The `disk` block supports:
 
@@ -443,6 +446,19 @@ The `node_affinities` block supports:
 
 * `value` (Required) - The values for the node affinity label.
 
+The `reservation_affinity` block supports:
+
+* `type` - (Required) The type of reservation from which this instance can consume resources.
+
+* `specific_reservation` - (Optional) Specifies the label selector for the reservation to use..
+    Structure is documented below.
+
+The `specific_reservation` block supports:
+
+* `key` - (Required) Corresponds to the label key of a reservation resource. To target a SPECIFIC_RESERVATION by name, specify compute.googleapis.com/reservation-name as the key and specify the name of your reservation as the only value.
+
+* `values` - (Required) Corresponds to the label values of a reservation resource.
+
 The `shielded_instance_config` block supports:
 
 * `enable_secure_boot` (Optional) -- Verify the digital signature of all boot components, and halt the boot process if signature verification fails. Defaults to false.
@@ -461,7 +477,7 @@ The `network_performance_config` block supports:
 
 The `advanced_machine_features` block supports:
 
-* `enable_nested_virtualization` (Optional) Defines whether the instance should have [nested virtualization](#on_host_maintenance)  enabled. Defaults to false.
+* `enable_nested_virtualization` (Optional) Defines whether the instance should have [nested virtualization](#on_host_maintenance) enabled. Defaults to false.
 
 * `threads_per_core` (Optional) he number of threads per physical core. To disable [simultaneous multithreading (SMT)](https://cloud.google.com/compute/docs/instances/disabling-smt) set this to 1.
 
