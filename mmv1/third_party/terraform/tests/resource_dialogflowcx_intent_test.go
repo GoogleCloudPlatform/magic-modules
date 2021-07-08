@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -24,17 +23,17 @@ func TestAccDialogflowCXIntent_update(t *testing.T) {
 				Config: testAccDialogflowCXIntent_basic(context),
 			},
 			{
-				ResourceName:            "google_dialogflow_cx_intent.my_intent",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_dialogflow_cx_intent.my_intent",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccDialogflowCXIntent_full(context),
 			},
 			{
-				ResourceName:            "google_dialogflow_cx_intent.my_intent",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_dialogflow_cx_intent.my_intent",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

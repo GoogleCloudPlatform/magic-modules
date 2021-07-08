@@ -37,6 +37,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 40
       update_minutes: 40  
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/dialogflowcx_intent.go.erb   
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dialogflowcx_intent_full"

@@ -138,7 +138,6 @@ objects:
           Intent.training_phrases.parts.text
           If not specified, the agent's default language is used. Many languages are supported. Note: languages must be enabled in the agent before they can be used.
         input: true
-        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
