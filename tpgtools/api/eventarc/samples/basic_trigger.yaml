@@ -1,11 +1,11 @@
 # Copyright 2021 Google LLC. All Rights Reserved.
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,18 +20,17 @@ versions:
 - beta
 extra_substitutions:
   - substitution: "project"
-    test_value: "TODO"
+    test_value: "tf-test-%{random_suffix}"
     docs_value: "my-project"
   - substitution: "region"
     test_value: "us-central1"
     docs_value: "us-central1"
   - substitution: "name"
-    test_value: "TODO"
+    test_value: "tf-test-%{random_suffix}"
     docs_value: "trigger"
   - substitution: "topic"
-    test_value: "TODO"
+    test_value: "topic-%{random_suffix}"
     docs_value: "topic"
   - substitution: "service_account"
     test_value: "TODO"
     docs_value: "my-service-account@example.com"
-    

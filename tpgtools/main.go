@@ -373,9 +373,13 @@ func loadSamples(packagePath, fileName string, version Version) Samples {
 		}
 
 		versionMatch := false
+		hasGA := false
 		for _, v := range sample.Versions {
 			if v == version.V {
 				versionMatch = true
+			}
+			if v == "ga" {
+				hasGA = true
 			}
 		}
 		if !versionMatch {
@@ -391,6 +395,7 @@ func loadSamples(packagePath, fileName string, version Version) Samples {
 		}
 		sample.DependencyList = dependencies
 		sample.TestSlug = sampleNameToTitleCase(*sample.Name)
+		sample.HasGAEquivalent = hasGA
 		samples = append(samples, sample)
 	}
 

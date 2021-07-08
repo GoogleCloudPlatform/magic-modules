@@ -36,6 +36,10 @@ type Sample struct {
 	Versions []string
 
 	Updates []map[string]string
+
+	// HasGAEquivalent tells us if we should have `provider = google-beta`
+	// in the testcase. (if the test doesn't have a ga version of the test)
+	HasGAEquivalent bool
 }
 
 // Substitution contains metadata that varies for the sample context
@@ -48,9 +52,6 @@ type Substitution struct {
 
 	// TestValue is the value of the substituted text for docs
 	DocsValue *string `yaml:"docs_value"`
-
-	// BetaOnly tells us if the testcase should only run against the beta provider
-	BetaOnly bool
 }
 
 // Dependency contains data that describes a single resource in a sample
@@ -152,7 +153,7 @@ func (s Sample) generateHCLTemplate() (string, error) {
 }
 
 // GenerateHCL generates sample HCL using docs substitution metadata
-func (s Sample) GenerateHCL() string {
+func (s Sample) GenerateHCLDocs() string {
 	hcl, err := s.generateHCLTemplate()
 	if err != nil {
 		glog.Exit(err)
@@ -160,6 +161,20 @@ func (s Sample) GenerateHCL() string {
 
 	for _, sub := range s.Substitutions {
 		re := regexp.MustCompile(fmt.Sprintf(`{{%s}}`, *sub.Substitution))
+		hcl = re.ReplaceAllString(hcl, *sub.TestValue)
+	}
+	return hcl
+}
+
+// GenerateHCL generates sample HCL using docs substitution metadata
+func (s Sample) GenerateHCL() string {
+	hcl, err := s.generateHCLTemplate()
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	for _, sub := range s.Substitutions {
+		re := regexp.MustCompile(fmt.Sprintf(`tf-test-{{%s}}-%s`, *sub.Substitution))
 		hcl = re.ReplaceAllString(hcl, *sub.DocsValue)
 	}
 	return hcl

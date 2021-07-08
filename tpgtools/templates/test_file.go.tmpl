@@ -38,40 +38,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
-<%
-resource_name = product_ns + object.name
-tf_product = (@config.legacy_name || product_ns).underscore
-tf_resource = object.name.underscore
-terraform_name = object.legacy_name || "google_#{tf_product}_#{tf_resource}"
--%>
-<%
-# @api.version_obj_or_closest(version) is slightly wrong; we want the _object_ version or the generation version.
-# Ultimately this won't matter though, since the API default should always be less than the object default.
 
 {{- range $s := $.Samples}}
+{{ $testSlug = $.PathType + "_" + $s.TestSlug }}
 
-object.examples
-  .reject(&:skip_test)
-  .reject { |e| @api.version_obj_or_closest(version) < @api.version_obj_or_closest(e.min_version) }
-  .each do |example|
-
-	# {Compute}{Address}_{addressBasic}
-    {{testSlug = $.PathType + "_" + example.name.camelize(:lower)}Example"}}
-
-    ignore_read = object.all_user_properties
-      .select{|p| p.url_param_only || p.ignore_read || p.is_a?(Api::Type::ResourceRef) }
-      .map { |p| p.name.underscore }
-      .concat(example.ignore_read_extra)
-
-    # Use explicit version for the example if given.
-    # Otherwise, use object version.
-    example_version = example.min_version || object.min_version.name
--%>
-
-func TestAcc<%= test_slug -%>(t *testing.T) {
-<% if example.skip_vcr -%>
-	skipIfVcr(t)
-<% end -%>
+func TestAcc{{ $testSlug }}(t *testing.T) {
   t.Parallel()
 
 	context := map[string]interface{} {
