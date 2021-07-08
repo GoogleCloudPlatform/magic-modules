@@ -48,6 +48,9 @@ type Substitution struct {
 
 	// TestValue is the value of the substituted text for docs
 	DocsValue *string `yaml:"docs_value"`
+
+	// BetaOnly tells us if the testcase should only run against the beta provider
+	BetaOnly bool
 }
 
 // Dependency contains data that describes a single resource in a sample
