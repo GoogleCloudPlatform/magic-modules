@@ -19,17 +19,19 @@ func TestAccNetworkServicesEdgeCacheOrigin_updateAndImport(t *testing.T) {
 				Config: testAccNetworkServicesEdgeCacheOrigin_update_0(name),
 			},
 			{
-				ResourceName:      "google_network_services_edge_cache_origin.instance",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_network_services_edge_cache_origin.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "timeout"},
 			},
 			{
 				Config: testAccNetworkServicesEdgeCacheOrigin_update_1(name),
 			},
 			{
-				ResourceName:      "google_network_services_edge_cache_origin.instance",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_network_services_edge_cache_origin.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "timeout"},
 			},
 		},
 	})

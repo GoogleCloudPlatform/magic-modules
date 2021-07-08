@@ -1,12 +1,10 @@
 resource "google_storage_bucket" "dest" {
-  provider = google-beta
   name = "<%= ctx[:vars]['bucket_name'] %>"
 
   force_destroy = true
 }
 
 resource "google_network_services_edge_cache_origin" "instance" {
-  provider             = google-beta
   name                 = "<%= ctx[:vars]['origin_name'] %>"
   origin_address       = google_storage_bucket.dest.url
   description          = "The default bucket for media edge test"
@@ -17,7 +15,6 @@ resource "google_network_services_edge_cache_origin" "instance" {
 }
 
 resource "google_network_services_edge_cache_service" "<%= ctx[:primary_resource_id] %>" {
-  provider             = google-beta
   name                 = "<%= ctx[:vars]['service_name'] %>"
   description          = "some description"
   routing {

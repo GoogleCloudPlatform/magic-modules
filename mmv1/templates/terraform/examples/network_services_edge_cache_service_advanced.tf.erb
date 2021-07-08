@@ -1,11 +1,9 @@
 resource "google_storage_bucket" "dest" {
-  provider      = google-beta
   name          = "<%= ctx[:vars]['bucket_name'] %>"
   force_destroy = true
 }
 
 resource "google_network_services_edge_cache_origin" "google" {
-  provider             = google-beta
   name                 = "<%= ctx[:vars]['origin_google'] %>"
   origin_address       = "google.com"
   description          = "The default bucket for media edge test"
@@ -16,7 +14,6 @@ resource "google_network_services_edge_cache_origin" "google" {
 }
 
 resource "google_network_services_edge_cache_origin" "instance" {
-  provider             = google-beta
   name                 = "<%= ctx[:vars]['origin_name'] %>"
   origin_address       = google_storage_bucket.dest.url
   description          = "The default bucket for media edge test"
@@ -27,7 +24,6 @@ resource "google_network_services_edge_cache_origin" "instance" {
 }
 
 resource "google_network_services_edge_cache_service" "<%= ctx[:primary_resource_id] %>" {
-  provider             = google-beta
   name                 = "<%= ctx[:vars]['service_name'] %>"
   description          = "some description"
   disable_quic         = true
@@ -84,24 +80,7 @@ resource "google_network_services_edge_cache_service" "<%= ctx[:primary_resource
         description = "an advanced route rule to match against"
         priority = 1
         match_rule {
-          ignore_case = true
           prefix_match = "/potato/"
-          header_match {
-            header_name = "banana"
-            prefix_match = "ya"
-            suffix_match = "s"
-          }
-          header_match {
-            header_name = "not-banana"
-            prefix_match = "ya"
-            suffix_match = "s"
-            invert_match =  true
-          }
-          header_match {
-            header_name = "exact"
-            exact_match = "exactly"
-            invert_match =  true
-          }
           query_parameter_match {
             name = "debug"
             present_match = true
@@ -112,12 +91,7 @@ resource "google_network_services_edge_cache_service" "<%= ctx[:primary_resource
           }
         }
         match_rule {
-          ignore_case = true
           full_path_match = "/apple"
-          header_match {
-            header_name = "seed"
-            present_match = true
-          }
         }
         header_action {
           request_header_to_add {
@@ -151,7 +125,6 @@ resource "google_network_services_edge_cache_service" "<%= ctx[:primary_resource
               max_ttl = "9000s"
               cache_key_policy {
                 include_protocol = true
-                include_query_string = true
                 exclude_host = true
                 included_query_parameters = ["apple", "dev", "santa", "claus"]
                 included_header_names = ["banana"]
@@ -169,7 +142,7 @@ resource "google_network_services_edge_cache_service" "<%= ctx[:primary_resource
           cors_policy {
             max_age = "2500s"
             allow_credentials = true
-            allow_origins = [google_network_services_edge_cache_origin.google.name]
+            allow_origins = ["*"]
             allow_methods = ["GET"]
             allow_headers = ["dev"]
             expose_headers = ["prod"]
@@ -180,12 +153,7 @@ resource "google_network_services_edge_cache_service" "<%= ctx[:primary_resource
         description = "a second route rule to match against"
         priority = 2
         match_rule {
-          ignore_case = true
           full_path_match = "/yay"
-          header_match {
-            header_name = "yay"
-            present_match = true
-          }
         }
         origin = google_network_services_edge_cache_origin.instance.name
         route_action {

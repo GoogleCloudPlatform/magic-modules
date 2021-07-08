@@ -1,5 +1,4 @@
 resource "google_certificate_manager_dns_authorization" "<%= ctx[:primary_resource_id] %>" {
-  provider    = google-beta
   name        = "<%= ctx[:vars]['dns_auth_name'] %>"
   description = "The default dnss"
   domain      = "%{random_suffix}.hashicorptest.com"

@@ -25,6 +25,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           dns_auth_name: "dns-auth"
+          zone_name: "my-zone"
   Certificate: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
@@ -41,6 +42,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           dns_auth_name2: "dns-auth2"
           dns_auth_subdomain2: "subdomain2"
           cert_name: "dns-cert"
+        ignore_read_extra:
+          - "managed.0.dns_authorizations"
     properties:
       managed.dnsAuthorizations: !ruby/object:Overrides::Terraform::PropertyOverride
         # We don't support ignore_read on nested fields
