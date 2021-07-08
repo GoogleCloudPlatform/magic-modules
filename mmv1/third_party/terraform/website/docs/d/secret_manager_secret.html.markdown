@@ -7,7 +7,7 @@ description: |-
   Get information about a Secret Manager Secret
 ---
 
-# google\_sql\_database\_instance
+# google\_secret\_manager\_secret
 
 Use this data source to get information about a Secret Manager Secret
 
