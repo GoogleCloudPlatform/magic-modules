@@ -2,13 +2,24 @@
 
 default: build
 
-ifneq ($(PRODUCT),)
+# mm setup
+ifeq ($(ENGINE),tpgtools)
+  mmv1_compile=-p blahblah
+else ifne ($(PRODUCT),)
   mmv1_compile=-p products/$(PRODUCT)
-  tpgtools_compile = --service $(PRODUCT)
 else
   mmv1_compile=-a
+endif
+
+# tpgtools setup
+ifeq ($(ENGINE),mmv1)
+	tpgtools_compile = --service blahblah
+else ifneq ($(PRODUCT),)
+  tpgtools_compile = --service $(PRODUCT)
+else
   tpgtools_compile =
 endif
+
 ifneq ($(RESOURCE),)
   mmv1_compile += -t $(RESOURCE)
   tpgtools_compile += --resource $(RESOURCE)
@@ -22,18 +33,9 @@ mmv1:
 		bundle; \
 		bundle exec compiler -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile);
 
-mmv1basic:
-	cd mmv1;\
-		bundle; \
-		bundle exec compiler -e terraform -o $(OUTPUT_PATH) -v $(VERSION) -p=blahblah
-
 tpgtools:
 	cd tpgtools;\
 		go run . --path "api" --overrides "overrides" --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
-
-tpgwithmmv1basic:
-	make mmv1basic
-	make tpgtools
 
 validator:
 	cd mmv1;\
