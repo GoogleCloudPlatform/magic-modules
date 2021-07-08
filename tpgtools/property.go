@@ -212,7 +212,7 @@ func (p Property) DefaultStateGetter() string {
 }
 
 func (p Property) ChangeStateGetter() string {
-	return buildGetter(p, fmt.Sprintf("oldOnly(d.GetChange(%q))", p.Name()))
+	return buildGetter(p, fmt.Sprintf("oldValue(d.GetChange(%q))", p.Name()))
 }
 
 // Builds a Getter for a property with given raw value

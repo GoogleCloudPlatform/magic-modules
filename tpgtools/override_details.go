@@ -175,3 +175,8 @@ type ProductBasePathDetails struct {
 	// different default base paths than mmv1 generated resources
 	BasePathIdentifier string
 }
+
+type ProductTitleDetails struct {
+	// alternative name to be used for the product resources
+	Title string
+}

@@ -140,7 +140,7 @@ func (r Resource) DCLName() string {
 // Path is the provider name of a resource, product_name. For example,
 // "cloud_run_service".
 func (r Resource) Path() string {
-	return r.Package() + "_" + r.Name()
+	return r.ProductName() + "_" + r.Name()
 }
 
 // TerraformName is the Terraform resource type used in HCL configuration.
@@ -174,6 +174,12 @@ func (r Resource) Package() string {
 // "NetworkServices".
 func (r Resource) ProductType() string {
 	return r.productMetadata.ProductType()
+}
+
+// ProductType is the snakecase product name of a resource. For example,
+// "network_services".
+func (r Resource) ProductName() string {
+	return r.productMetadata.ProductName
 }
 
 func (r Resource) ProductMetadata() *ProductMetadata {

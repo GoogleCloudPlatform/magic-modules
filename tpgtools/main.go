@@ -432,13 +432,13 @@ func generateResourceFile(res *Resource) {
 
 	formatted, err := formatSource(&contents)
 	if err != nil {
-		glog.Error(fmt.Errorf("error formatting %v: %v - resource \n ", res.Package()+res.Name(), err))
+		glog.Error(fmt.Errorf("error formatting %v: %v - resource \n ", res.ProductName()+res.Name(), err))
 	}
 
 	if oPath == nil || *oPath == "" {
 		fmt.Printf("%v", string(formatted))
 	} else {
-		outname := fmt.Sprintf("resource_%s_%s.go", res.Package(), res.Name())
+		outname := fmt.Sprintf("resource_%s_%s.go", res.ProductName(), res.Name())
 		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
 		if err != nil {
 			glog.Exit(err)
@@ -474,13 +474,13 @@ func generateSweeperFile(res *Resource) {
 
 	formatted, err := formatSource(&contents)
 	if err != nil {
-		glog.Error(fmt.Errorf("error formatting %v: %v - sweeper", res.Package()+res.Name(), err))
+		glog.Error(fmt.Errorf("error formatting %v: %v - sweeper", res.ProductName()+res.Name(), err))
 	}
 
 	if oPath == nil || *oPath == "" {
 		fmt.Printf("%v", string(formatted))
 	} else {
-		outname := fmt.Sprintf("resource_%s_%s_sweeper_test.go", res.Package(), res.Name())
+		outname := fmt.Sprintf("resource_%s_%s_sweeper_test.go", res.ProductName(), res.Name())
 		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
 		if err != nil {
 			glog.Exit(err)

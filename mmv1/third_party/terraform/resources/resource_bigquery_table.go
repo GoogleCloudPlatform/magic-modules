@@ -6,8 +6,10 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -130,14 +132,17 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 	valB := objectB[key]
 	switch key {
 	case "mode":
-		eq := bigQueryTableModeEq(valA, valB)
+		eq := bigQueryTableNormalizeMode(valA) == bigQueryTableNormalizeMode(valB)
 		return eq
 	case "description":
 		equivalentSet := []interface{}{nil, ""}
 		eq := valueIsInArray(valA, equivalentSet) && valueIsInArray(valB, equivalentSet)
 		return eq
 	case "type":
-		return bigQueryTableTypeEq(valA, valB)
+		if valA == nil || valB == nil {
+			return false
+		}
+		return bigQueryTableTypeEq(valA.(string), valB.(string))
 	}
 
 	// otherwise rely on default behavior
@@ -167,28 +172,32 @@ func bigQueryTableSchemaDiffSuppress(name, old, new string, _ *schema.ResourceDa
 	return eq
 }
 
-func bigQueryTableTypeEq(old, new interface{}) bool {
+func bigQueryTableTypeEq(old, new string) bool {
+	// Do case-insensitive comparison. https://github.com/hashicorp/terraform-provider-google/issues/9472
+	oldUpper := strings.ToUpper(old)
+	newUpper := strings.ToUpper(new)
+
 	equivalentSet1 := []interface{}{"INTEGER", "INT64"}
 	equivalentSet2 := []interface{}{"FLOAT", "FLOAT64"}
 	equivalentSet3 := []interface{}{"BOOLEAN", "BOOL"}
-	eq0 := old == new
-	eq1 := valueIsInArray(old, equivalentSet1) && valueIsInArray(new, equivalentSet1)
-	eq2 := valueIsInArray(old, equivalentSet2) && valueIsInArray(new, equivalentSet2)
-	eq3 := valueIsInArray(old, equivalentSet3) && valueIsInArray(new, equivalentSet3)
+	eq0 := oldUpper == newUpper
+	eq1 := valueIsInArray(oldUpper, equivalentSet1) && valueIsInArray(newUpper, equivalentSet1)
+	eq2 := valueIsInArray(oldUpper, equivalentSet2) && valueIsInArray(newUpper, equivalentSet2)
+	eq3 := valueIsInArray(oldUpper, equivalentSet3) && valueIsInArray(newUpper, equivalentSet3)
 	eq := eq0 || eq1 || eq2 || eq3
 	return eq
 }
 
-func bigQueryTableModeEq(old, new interface{}) bool {
-	equivalentSet := []interface{}{nil, "NULLABLE"}
-	eq0 := old == new
-	eq1 := valueIsInArray(old, equivalentSet) && valueIsInArray(new, equivalentSet)
-	eq := eq0 || eq1
-	return eq
+func bigQueryTableNormalizeMode(mode interface{}) string {
+	if mode == nil {
+		return "NULLABLE"
+	}
+	// Upper-case to get case-insensitive comparisons. https://github.com/hashicorp/terraform-provider-google/issues/9472
+	return strings.ToUpper(mode.(string))
 }
 
-func bigQueryTableModeIsForceNew(old, new interface{}) bool {
-	eq := bigQueryTableModeEq(old, new)
+func bigQueryTableModeIsForceNew(old, new string) bool {
+	eq := old == new
 	reqToNull := old == "REQUIRED" && new == "NULLABLE"
 	return !eq && !reqToNull
 }
@@ -250,11 +259,18 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error)
 					return false, nil
 				}
 			case "type":
-				if !bigQueryTableTypeEq(valOld, valNew) {
+				if valOld == nil || valNew == nil {
+					// This is invalid, so it shouldn't require a ForceNew
+					return true, nil
+				}
+				if !bigQueryTableTypeEq(valOld.(string), valNew.(string)) {
 					return false, nil
 				}
 			case "mode":
-				if bigQueryTableModeIsForceNew(valOld, valNew) {
+				if bigQueryTableModeIsForceNew(
+					bigQueryTableNormalizeMode(valOld),
+					bigQueryTableNormalizeMode(valNew),
+				) {
 					return false, nil
 				}
 			case "fields":
@@ -804,6 +820,11 @@ func resourceBigQueryTable() *schema.Resource {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: `The self link or full name of a key which should be used to encrypt this table. Note that the default bigquery service account will need to have encrypt/decrypt permissions on this key - you may want to see the google_bigquery_default_service_account datasource and the google_kms_crypto_key_iam_binding resource.`,
+						},
+						"kms_key_version": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `The self link or full name of the kms key version used to encrypt this table.`,
 						},
 					},
 				},
@@ -1528,7 +1549,20 @@ func expandRangePartitioning(configured interface{}) (*bigquery.RangePartitionin
 }
 
 func flattenEncryptionConfiguration(ec *bigquery.EncryptionConfiguration) []map[string]interface{} {
-	return []map[string]interface{}{{"kms_key_name": ec.KmsKeyName}}
+	re := regexp.MustCompile(`(projects/.*/locations/.*/keyRings/.*/cryptoKeys/.*)/cryptoKeyVersions/.*`)
+	paths := re.FindStringSubmatch(ec.KmsKeyName)
+
+	if len(paths) > 0 {
+		return []map[string]interface{}{
+			{
+				"kms_key_name":    paths[0],
+				"kms_key_version": ec.KmsKeyName,
+			},
+		}
+	}
+
+	//	The key name was returned, no need to set the version
+	return []map[string]interface{}{{"kms_key_name": ec.KmsKeyName, "kms_key_version": ""}}
 }
 
 func flattenTimePartitioning(tp *bigquery.TimePartitioning) []map[string]interface{} {
