@@ -91,9 +91,9 @@ resource "google_privateca_ca_pool" "default" {
       aia_ocsp_servers = ["example.com"]
       additional_extensions {
         critical = true
-        value = "asdf"
+        value = "AwIBgg=="
         object_id {
-          object_id_path = [123, 899]
+          object_id_path = [2, 5, 29, 15]
         }
       }
       policy_ids {
@@ -175,7 +175,7 @@ resource "google_privateca_ca_pool" "default" {
         critical = true
         value = "asdf"
         object_id {
-          object_id_path = [899, 123]
+          object_id_path = [2, 5, 29, 25]
         }
       }
       policy_ids {
@@ -255,9 +255,9 @@ resource "google_privateca_ca_pool" "default" {
     baseline_values {
       additional_extensions {
         critical = false
-        value = "asdf"
+        value = "AwIBgg=="
         object_id {
-          object_id_path = [123, 899]
+          object_id_path = [2, 5, 29, 15]
         }
       }
       ca_options {
