@@ -34,7 +34,7 @@ objects:
     base_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities
     create_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities?certificateAuthorityId={{certificate_authority_id}}
     self_link: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}
-    delete_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}?ignoreActiveCertificates={{ignore_active_certificates}}
+    delete_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}?ignoreActiveCertificates={{ignore_active_certificates_on_deletion}}
     input: true
     async: !ruby/object:Api::OpAsync
         operation: !ruby/object:Api::OpAsync::Operation
@@ -60,9 +60,8 @@ objects:
       api: 'https://cloud.google.com/certificate-authority-service/docs/reference/rest'
     properties:
       - !ruby/object:Api::Type::Boolean
-        name: 'ignore_active_certificates'
+        name: 'ignore_active_certificates_on_deletion'
         default_value: false
-        input: true
         url_param_only: true
         description: |
           This field allows the CA to be deleted even if the CA has active certs. Active certs include both unrevoked and unexpired certs.
@@ -101,17 +100,6 @@ objects:
           - :SELF_SIGNED
           - :SUBORDINATE
         default_value: :SELF_SIGNED
-      - !ruby/object:Api::Type::Enum
-        name: 'tier'
-        description: |
-          The Tier of this CertificateAuthority. `ENTERPRISE` Certificate Authorities track
-          server side certificates issued, and support certificate revocation. For more details,
-          please check the [associated documentation](https://cloud.google.com/certificate-authority-service/docs/tiers).
-        input: true
-        values:
-          - :ENTERPRISE
-          - :DEVOPS
-        default_value: :ENTERPRISE
       - !ruby/object:Api::Type::NestedObject
         name: 'config'
         description: The config used to create a self-signed X.509 certificate or CSR.
@@ -836,7 +824,7 @@ objects:
               name: 'format'
               output: true
               description: |
-                Types of public keys that are supported. At a minimum, we support RSA, for the key sizes or curves listed: https://cloud.google.com/kms/docs/algorithms#asymmetric_signing_algorithms
+                The format of the public key. Currently, only PEM format is supported.
               values:
                 - "KEY_TYPE_UNSPECIFIED"
                 - "PEM"
@@ -1185,7 +1173,7 @@ objects:
             name: 'format'
             required: true
             description: |
-              Types of public keys that are supported. At a minimum, we support RSA, for the key sizes or curves listed: https://cloud.google.com/kms/docs/algorithms#asymmetric_signing_algorithms
+              The format of the public key. Currently, only PEM format is supported.
             values:
               - "KEY_TYPE_UNSPECIFIED"
               - "PEM"
@@ -1312,11 +1300,15 @@ objects:
             properties:
               - !ruby/object:Api::Type::Boolean
                 name: 'allowSubjectPassthrough'
+                required: true
+                send_empty_value: true
                 description: |
                    If this is set, the Subject field may be copied from a certificate request into the signed certificate.
                    Otherwise, the requested Subject will be discarded.
               - !ruby/object:Api::Type::Boolean
                 name: 'allowSubjectAltNamesPassthrough'
+                required: true
+                send_empty_value: true
                 description: |
                    If this is set, the SubjectAltNames extension may be copied from a certificate request into the signed certificate.
                    Otherwise, the requested SubjectAltNames will be discarded.
