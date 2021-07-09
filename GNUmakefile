@@ -4,7 +4,9 @@ default: build
 
 # mm setup
 ifeq ($(ENGINE),tpgtools)
-  mmv1_compile=-p blahblah
+  # we specify the product to one that doesn't
+  # exist so exclusively build base tpgtools implementation
+  mmv1_compile=-p does-not-exist
 else ifne ($(PRODUCT),)
   mmv1_compile=-p products/$(PRODUCT)
 else
@@ -13,7 +15,9 @@ endif
 
 # tpgtools setup
 ifeq ($(ENGINE),mmv1)
-	tpgtools_compile = --service blahblah
+  # we specify the product to one that doesn't
+  # exist so exclusively build base mmv1 implementation
+	tpgtools_compile = --service does-not-exist
 else ifneq ($(PRODUCT),)
   tpgtools_compile = --service $(PRODUCT)
 else
