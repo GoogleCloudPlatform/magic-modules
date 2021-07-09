@@ -41,8 +41,7 @@ import (
 
 {{- range $s := $.Samples}}
 {{ $testSlug = $.PathType + "_" + $s.TestSlug }}
-
-func TestAcc{{ $testSlug }}(t *testing.T) {
+func TestAcc{{$testSlug}}(t *testing.T) {
   t.Parallel()
 
 	context := map[string]interface{} {
@@ -55,19 +54,19 @@ func TestAcc{{ $testSlug }}(t *testing.T) {
 			"random_suffix": randString(t, 10),
 	}
 
-<% versioned_provider = !example_version.nil? && example_version != 'ga' -%>
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		<% unless versioned_provider -%>
+		{{ if $.HasGAEquivalent -}}
 		Providers: testAccProviders,
-		<% else -%>
+		{{- else }}
 		Providers: testAccProvidersOiCS,
-		<% end -%>
-		<% if example.pull_external -%>
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-		},
-		<% end -%>
+		{{- end }}
+		// placeholder code if we need to grab external providers
+		// {{ pull external }}
+		// ExternalProviders: map[string]resource.ExternalProvider{
+		// 	"random": {},
+		// },
+		// {{- end }}
 		<% unless object.skip_delete -%>
 		CheckDestroy: testAccCheck<%= "#{resource_name}" -%>DestroyProducer(t),
 		<% end -%>

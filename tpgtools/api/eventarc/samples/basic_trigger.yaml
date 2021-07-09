@@ -20,7 +20,7 @@ versions:
 - beta
 extra_substitutions:
   - substitution: "project"
-    test_value: "tf-test-%{random_suffix}"
+    test_value: ""
     docs_value: "my-project"
   - substitution: "region"
     test_value: "us-central1"
@@ -31,6 +31,3 @@ extra_substitutions:
   - substitution: "topic"
     test_value: "topic-%{random_suffix}"
     docs_value: "topic"
-  - substitution: "service_account"
-    test_value: "TODO"
-    docs_value: "my-service-account@example.com"
