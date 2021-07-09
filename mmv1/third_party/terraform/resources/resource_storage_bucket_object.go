@@ -2,11 +2,13 @@ package google
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -14,8 +16,7 @@ import (
 	"encoding/base64"
 	"io/ioutil"
 
-	"google.golang.org/api/googleapi"
-	"google.golang.org/api/storage/v1"
+	"cloud.google.com/go/storage"
 )
 
 func resourceStorageBucketObject() *schema.Resource {
@@ -152,7 +153,6 @@ func resourceStorageBucketObject() *schema.Resource {
 				Computed:    true,
 				Description: `The StorageClass of the new bucket object. Supported values include: MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE, ARCHIVE. If not provided, this defaults to the bucket's default storage class or to a standard class.`,
 			},
-
 			"kms_key_name": {
 				Type:             schema.TypeString,
 				Optional:         true,
@@ -202,8 +202,8 @@ func resourceStorageBucketObject() *schema.Resource {
 	}
 }
 
-func objectGetID(object *storage.Object) string {
-	return object.Bucket + "-" + object.Name
+func objectGetID(attrs *storage.ObjectAttrs) string {
+	return attrs.Bucket + "-" + attrs.Name
 }
 
 func compareCryptoKeyVersions(_, old, new string, _ *schema.ResourceData) bool {
@@ -219,14 +219,10 @@ func compareCryptoKeyVersions(_, old, new string, _ *schema.ResourceData) bool {
 }
 
 func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
-	if err != nil {
-		return err
-	}
 
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
+
 	var media io.Reader
 
 	if v, ok := d.GetOk("source"); ok {
@@ -241,195 +237,199 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error, either \"content\" or \"source\" must be specified")
 	}
 
-	objectsService := storage.NewObjectsService(config.NewStorageClient(userAgent))
-	object := &storage.Object{Bucket: bucket}
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+
+	wc := client.Bucket(bucket).Object(name).NewWriter(ctx)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	if v, ok := d.GetOk("cache_control"); ok {
-		object.CacheControl = v.(string)
+		wc.CacheControl = v.(string)
 	}
 
 	if v, ok := d.GetOk("content_disposition"); ok {
-		object.ContentDisposition = v.(string)
+		wc.ContentDisposition = v.(string)
 	}
 
 	if v, ok := d.GetOk("content_encoding"); ok {
-		object.ContentEncoding = v.(string)
+		wc.ContentEncoding = v.(string)
 	}
 
 	if v, ok := d.GetOk("content_language"); ok {
-		object.ContentLanguage = v.(string)
+		wc.ContentLanguage = v.(string)
 	}
 
 	if v, ok := d.GetOk("content_type"); ok {
-		object.ContentType = v.(string)
+		wc.ContentType = v.(string)
 	}
 
 	if v, ok := d.GetOk("metadata"); ok {
-		object.Metadata = convertStringMap(v.(map[string]interface{}))
+		wc.Metadata = convertStringMap(v.(map[string]interface{}))
 	}
 
 	if v, ok := d.GetOk("storage_class"); ok {
-		object.StorageClass = v.(string)
+		wc.StorageClass = v.(string)
 	}
 
 	if v, ok := d.GetOk("kms_key_name"); ok {
-		object.KmsKeyName = v.(string)
+		wc.KMSKeyName = v.(string)
 	}
 
 	if v, ok := d.GetOk("event_based_hold"); ok {
-		object.EventBasedHold = v.(bool)
+		wc.EventBasedHold = v.(bool)
 	}
 
 	if v, ok := d.GetOk("temporary_hold"); ok {
-		object.TemporaryHold = v.(bool)
+		wc.TemporaryHold = v.(bool)
 	}
 
-	insertCall := objectsService.Insert(bucket, object)
-	insertCall.Name(name)
-	insertCall.Media(media)
-
-	_, err = insertCall.Do()
-
-	if err != nil {
-		return fmt.Errorf("Error uploading object %s: %s", name, err)
+	if _, err = io.Copy(wc, media); err != nil {
+		return fmt.Errorf("io.Copy: %v", err)
 	}
-
+	if err := wc.Close(); err != nil {
+		return fmt.Errorf("Writer.Close: %v", err)
+	}
 	return resourceStorageBucketObjectRead(d, meta)
 }
 
 func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
 
-	objectsService := storage.NewObjectsService(config.NewStorageClient(userAgent))
-	getCall := objectsService.Get(bucket, name)
-
-	res, err := getCall.Do()
+	object := client.Bucket(bucket).Object(name)
+	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{}
 
 	if d.HasChange("event_based_hold") {
 		v := d.Get("event_based_hold")
-		res.EventBasedHold = v.(bool)
+		objectAttrsToUpdate.EventBasedHold = v.(bool)
 	}
 
 	if d.HasChange("temporary_hold") {
 		v := d.Get("temporary_hold")
-		res.TemporaryHold = v.(bool)
+		objectAttrsToUpdate.TemporaryHold = v.(bool)
 	}
 
-	updateCall := objectsService.Update(bucket, name, res)
-	_, err = updateCall.Do()
-
-	if err != nil {
-		return fmt.Errorf("Error updating object %s: %s", name, err)
+	if _, err := object.Update(ctx, objectAttrsToUpdate); err != nil {
+		return fmt.Errorf("Object(%q).Update: %v", name, err)
 	}
 
 	return nil
 }
 
 func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
-	if err != nil {
-		return err
-	}
 
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
 
-	objectsService := storage.NewObjectsService(config.NewStorageClient(userAgent))
-	getCall := objectsService.Get(bucket, name)
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
 
-	res, err := getCall.Do()
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+
+	object := client.Bucket(bucket).Object(name)
+	attrs, err := object.Attrs(ctx)
+	if err != nil {
+		return fmt.Errorf("Object(%q).Attrs: %v", name, err)
+	}
 
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Storage Bucket Object %q", d.Get("name").(string)))
 	}
 
-	if err := d.Set("md5hash", res.Md5Hash); err != nil {
+	if err := d.Set("md5hash", base64.StdEncoding.EncodeToString(attrs.MD5)); err != nil {
 		return fmt.Errorf("Error setting md5hash: %s", err)
 	}
-	if err := d.Set("detect_md5hash", res.Md5Hash); err != nil {
+	if err := d.Set("detect_md5hash", base64.StdEncoding.EncodeToString(attrs.MD5)); err != nil {
 		return fmt.Errorf("Error setting detect_md5hash: %s", err)
 	}
-	if err := d.Set("crc32c", res.Crc32c); err != nil {
+	if err := d.Set("crc32c", fmt.Sprint(attrs.CRC32C)); err != nil {
 		return fmt.Errorf("Error setting crc32c: %s", err)
 	}
-	if err := d.Set("cache_control", res.CacheControl); err != nil {
+	if err := d.Set("cache_control", attrs.CacheControl); err != nil {
 		return fmt.Errorf("Error setting cache_control: %s", err)
 	}
-	if err := d.Set("content_disposition", res.ContentDisposition); err != nil {
+	if err := d.Set("content_disposition", attrs.ContentDisposition); err != nil {
 		return fmt.Errorf("Error setting content_disposition: %s", err)
 	}
-	if err := d.Set("content_encoding", res.ContentEncoding); err != nil {
+	if err := d.Set("content_encoding", attrs.ContentEncoding); err != nil {
 		return fmt.Errorf("Error setting content_encoding: %s", err)
 	}
-	if err := d.Set("content_language", res.ContentLanguage); err != nil {
+	if err := d.Set("content_language", attrs.ContentLanguage); err != nil {
 		return fmt.Errorf("Error setting content_language: %s", err)
 	}
-	if err := d.Set("content_type", res.ContentType); err != nil {
+	if err := d.Set("content_type", attrs.ContentType); err != nil {
 		return fmt.Errorf("Error setting content_type: %s", err)
 	}
-	if err := d.Set("storage_class", res.StorageClass); err != nil {
+	if err := d.Set("storage_class", attrs.StorageClass); err != nil {
 		return fmt.Errorf("Error setting storage_class: %s", err)
 	}
-	if err := d.Set("kms_key_name", res.KmsKeyName); err != nil {
+	if err := d.Set("kms_key_name", attrs.KMSKeyName); err != nil {
 		return fmt.Errorf("Error setting kms_key_name: %s", err)
 	}
-	if err := d.Set("self_link", res.SelfLink); err != nil {
-		return fmt.Errorf("Error setting self_link: %s", err)
-	}
-	if err := d.Set("output_name", res.Name); err != nil {
+	if err := d.Set("output_name", attrs.Name); err != nil {
 		return fmt.Errorf("Error setting output_name: %s", err)
 	}
-	if err := d.Set("metadata", res.Metadata); err != nil {
+	if err := d.Set("metadata", attrs.Metadata); err != nil {
 		return fmt.Errorf("Error setting metadata: %s", err)
 	}
-	if err := d.Set("media_link", res.MediaLink); err != nil {
+	if err := d.Set("media_link", attrs.MediaLink); err != nil {
 		return fmt.Errorf("Error setting media_link: %s", err)
 	}
-	if err := d.Set("event_based_hold", res.EventBasedHold); err != nil {
+	if err := d.Set("event_based_hold", attrs.EventBasedHold); err != nil {
 		return fmt.Errorf("Error setting event_based_hold: %s", err)
 	}
-	if err := d.Set("temporary_hold", res.TemporaryHold); err != nil {
+	if err := d.Set("temporary_hold", attrs.TemporaryHold); err != nil {
 		return fmt.Errorf("Error setting temporary_hold: %s", err)
 	}
 
-	d.SetId(objectGetID(res))
+	d.SetId(objectGetID(attrs))
 
 	return nil
 }
 
 func resourceStorageBucketObjectDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
-	if err != nil {
-		return err
-	}
 
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
 
-	objectsService := storage.NewObjectsService(config.NewStorageClient(userAgent))
-
-	DeleteCall := objectsService.Delete(bucket, name)
-	err = DeleteCall.Do()
-
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
 	if err != nil {
-		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
-			log.Printf("[WARN] Removing Bucket Object %q because it's gone", name)
-			// The resource doesn't exist anymore
-			d.SetId("")
+		return fmt.Errorf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
 
-			return nil
-		}
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 
-		return fmt.Errorf("Error deleting contents of object %s: %s", name, err)
+	object := client.Bucket(bucket).Object(name)
+	if err := object.Delete(ctx); err != nil {
+		return fmt.Errorf("Object(%q).Delete: %v", name, err)
 	}
 
 	return nil
