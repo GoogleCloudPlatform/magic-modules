@@ -27,7 +27,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_vars_overrides:
           pool: "\"static-ca-pool\""
       - !ruby/object:Provider::Terraform::Examples
-        name: "privateca_certificate_authority_cmek"
+        name: "privateca_certificate_authority_byo_key"
         primary_resource_id: "default"
         # Multiple IAM bindings on the same key cause non-determinism
         skip_vcr: true
