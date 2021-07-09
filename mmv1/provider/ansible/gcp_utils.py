@@ -5,6 +5,10 @@ from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
 
+import ast
+import os
+import json
+
 try:
     import requests
     HAS_REQUESTS = True
@@ -23,9 +27,6 @@ except ImportError:
 from ansible.module_utils.basic import AnsibleModule, env_fallback
 from ansible.module_utils.six import string_types
 from ansible.module_utils._text import to_text, to_native
-import ast
-import os
-import json
 
 
 def navigate_hash(source, path, default=None):
@@ -39,8 +40,7 @@ def navigate_hash(source, path, default=None):
     result = source[key]
     if path:
         return navigate_hash(result, path, default)
-    else:
-        return result
+    return result
 
 
 class GcpRequestException(Exception):
@@ -67,11 +67,9 @@ def replace_resource_dict(item, value):
         for i in item:
             items.append(replace_resource_dict(i, value))
         return items
-    else:
-        if not item:
-            return item
-        else:
-            return item.get(value)
+    if not item:
+        return item
+    return item.get(value)
 
 
 # Handles all authentication and HTTP sessions for GCP API calls.
@@ -191,8 +189,7 @@ class GcpSession(object):
     def _set_headers(self, headers):
         if headers:
             return self._merge_dictionaries(headers, self._headers())
-        else:
-            return self._headers()
+        return self._headers()
 
     def session(self):
         return AuthorizedSession(
@@ -221,10 +218,14 @@ class GcpSession(object):
         if cred_type == 'application':
             credentials, project_id = google.auth.default(scopes=self.module.params['scopes'])
             return credentials
-        elif cred_type == 'serviceaccount' and self.module.params.get('service_account_file'):
+        if cred_type == 'serviceaccount' and self.module.params.get('service_account_file'):
             path = os.path.realpath(os.path.expanduser(self.module.params['service_account_file']))
+            if not os.path.exists(path):
+                self.module.fail_json(
+                    msg="Unable to find service_account_file at '%s'" % path
+                )
             return service_account.Credentials.from_service_account_file(path).with_scopes(self.module.params['scopes'])
-        elif cred_type == 'serviceaccount' and self.module.params.get('service_account_contents'):
+        if cred_type == 'serviceaccount' and self.module.params.get('service_account_contents'):
             try:
                 cred = json.loads(self.module.params.get('service_account_contents'))
             except json.decoder.JSONDecodeError as e:
@@ -232,21 +233,18 @@ class GcpSession(object):
                     msg="Unable to decode service_account_contents as JSON"
                 )
             return service_account.Credentials.from_service_account_info(cred).with_scopes(self.module.params['scopes'])
-        elif cred_type == 'machineaccount':
+        if cred_type == 'machineaccount':
             return google.auth.compute_engine.Credentials(
                 self.module.params['service_account_email'])
-        else:
-            self.module.fail_json(msg="Credential type '%s' not implemented" % cred_type)
+        self.module.fail_json(msg="Credential type '%s' not implemented" % cred_type)
 
     def _headers(self):
+        user_agent = "Google-Ansible-MM-{0}".format(self.product)
         if self.module.params.get('env_type'):
-            return {
-                'User-Agent': "Google-Ansible-MM-{0}-{1}".format(self.product, self.module.params.get('env_type'))
-            }
-        else:
-            return {
-                'User-Agent': "Google-Ansible-MM-{0}".format(self.product)
-            }
+            user_agent = "{0}-{1}".format(user_agent, self.module.params.get('env_type'))
+        return {
+            'User-Agent': user_agent
+        }
 
     def _merge_dictionaries(self, a, b):
         new = a.copy()
@@ -256,9 +254,7 @@ class GcpSession(object):
 
 class GcpModule(AnsibleModule):
     def __init__(self, *args, **kwargs):
-        arg_spec = {}
-        if 'argument_spec' in kwargs:
-            arg_spec = kwargs['argument_spec']
+        arg_spec = kwargs.get('argument_spec', {})
 
         kwargs['argument_spec'] = self._merge_dictionaries(
             arg_spec,
@@ -297,9 +293,7 @@ class GcpModule(AnsibleModule):
             )
         )
 
-        mutual = []
-        if 'mutually_exclusive' in kwargs:
-            mutual = kwargs['mutually_exclusive']
+        mutual = kwargs.get('mutually_exclusive', [])
 
         kwargs['mutually_exclusive'] = mutual.append(
             ['service_account_email', 'service_account_file', 'service_account_contents']
@@ -422,16 +416,15 @@ class GcpRequest(object):
             if req_value and isinstance(resp_value, bool) and resp_value:
                 return None
             # Value1 True, resp_value 'true'
-            elif req_value and to_text(resp_value) == 'true':
+            if req_value and to_text(resp_value) == 'true':
                 return None
             # Both False
-            elif not req_value and isinstance(resp_value, bool) and not resp_value:
+            if not req_value and isinstance(resp_value, bool) and not resp_value:
                 return None
             # Value1 False, resp_value 'false'
-            elif not req_value and to_text(resp_value) == 'false':
+            if not req_value and to_text(resp_value) == 'false':
                 return None
-            else:
-                return resp_value
+            return resp_value
 
         # to_text may throw UnicodeErrors.
         # These errors shouldn't crash Ansible and should be hidden.
@@ -448,10 +441,9 @@ class GcpRequest(object):
             for item in value:
                 new_list.append(self._convert_value(item))
             return new_list
-        elif isinstance(value, dict):
+        if isinstance(value, dict):
             new_dict = {}
             for key in value:
                 new_dict[key] = self._convert_value(value[key])
             return new_dict
-        else:
-            return to_text(value)
+        return to_text(value)

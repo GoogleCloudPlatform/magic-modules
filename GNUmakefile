@@ -22,9 +22,18 @@ mmv1:
 		bundle; \
 		bundle exec compiler -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile);
 
+mmv1basic:
+	cd mmv1;\
+		bundle; \
+		bundle exec compiler -e terraform -o $(OUTPUT_PATH) -v $(VERSION) -p=blahblah
+
 tpgtools:
 	cd tpgtools;\
 		go run . --path "api" --overrides "overrides" --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
+
+tpgwithmmv1basic:
+	make mmv1basic
+	make tpgtools
 
 validator:
 	cd mmv1;\
