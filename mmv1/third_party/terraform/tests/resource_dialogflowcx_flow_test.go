@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -24,17 +23,17 @@ func TestAccDialogflowCXFlow_update(t *testing.T) {
 				Config: testAccDialogflowCXFlow_basic(context),
 			},
 			{
-				ResourceName:            "google_dialogflow_cx_flow.my_flow",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_dialogflow_cx_flow.my_flow",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccDialogflowCXFlow_full(context),
 			},
 			{
-				ResourceName:            "google_dialogflow_cx_flow.my_flow",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_dialogflow_cx_flow.my_flow",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
