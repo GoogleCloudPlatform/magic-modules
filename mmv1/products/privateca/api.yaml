@@ -115,7 +115,12 @@ objects:
               - !ruby/object:Api::Type::Array
                 name: 'additionalExtensions'
                 description: |
-                  Specifies an X.509 extension, which may be used in different parts of X.509 objects like certificates, CSRs, and CRLs.
+                  Specifies an X.509 extension, which may be used in different
+                  parts of X.509 objects like certificates, CSRs, and CRLs.
+                  Specifying extensions using Terraform is not recommended, as
+                  there may be undesirable behaviour(s) if the fields are
+                  promoted in the API. If extensions are in use, carefully
+                  review your plan.
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::Boolean
@@ -920,7 +925,11 @@ objects:
             - !ruby/object:Api::Type::Array
               name: 'additionalExtensions'
               description: |
-                Specifies an X.509 extension, which may be used in different parts of X.509 objects like certificates, CSRs, and CRLs.
+                Specifies an X.509 extension, which may be used in different
+                parts of X.509 objects like certificates, CSRs, and CRLs.
+                Specifying extensions using Terraform is not recommended, as
+                there may be undesirable behaviour(s) if the fields are promoted
+                in the API. If extensions are in use, carefully review your plan.
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                   - !ruby/object:Api::Type::Boolean
@@ -1347,7 +1356,12 @@ objects:
               - !ruby/object:Api::Type::Array
                 name: 'additionalExtensions'
                 description: |
-                  Specifies an X.509 extension, which may be used in different parts of X.509 objects like certificates, CSRs, and CRLs.
+                  Specifies an X.509 extension, which may be used in different
+                  parts of X.509 objects like certificates, CSRs, and CRLs.
+                  Specifying extensions using Terraform is not recommended, as
+                  there may be undesirable behaviour(s) if the fields are
+                  promoted in the API. If extensions are in use, carefully
+                  review your plan.
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::Boolean
