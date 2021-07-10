@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+	"github.com/hashicorp/terraform-provider-google/version"
 	"google.golang.org/api/option"
 
 	"golang.org/x/oauth2"
@@ -77,6 +78,8 @@ import (
 type providerMeta struct {
 	ModuleName string `cty:"module_name"`
 }
+
+var providerVersion string
 
 // Config is the configuration structure used to instantiate the Google
 // provider.
@@ -240,6 +243,22 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	c.requestBatcherServiceUsage = NewRequestBatcher("Service Usage", ctx, c.BatchingConfig)
 	c.requestBatcherIam = NewRequestBatcher("IAM", ctx, c.BatchingConfig)
 	c.PollInterval = 10 * time.Second
+
+	// Start DCL client instantiation
+	// TODO(slevenick): handle user agents
+	dclClientOptions := dcl.WithHTTPClient(client)
+	dclUserAgentOptions:=dcl.WithUserAgent(c.userAgent)
+	dclLoggerOptions := dcl.WithLogger(dclLogger{})
+	// each product needs it own client currently since basepath can only be specified at
+	// the config level.
+	c.clientDataprocDCL = dataprocDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions,dclLoggerOptions, dcl.WithBasePath(c.DataprocBasePath)))
+	c.clientEventarcDCL = eventarcDcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions,dclLoggerOptions, dcl.WithBasePath(c.EventarcBasePath)))
+
+<% if version.nil? || version == 'ga' -%>
+	providerVersion = "google/" + version.ProviderVersion
+<% else -%>
+	providerVersion = "google-<%= version -%>/"  + version.ProviderVersion
+<% end -%>
 
 	return nil
 }
