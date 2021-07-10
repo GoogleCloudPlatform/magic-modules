@@ -67,6 +67,7 @@ resource "google_container_cluster" "kubes" {
   name               = "tf-test-cluster-%s"
   location           = "us-central1-a"
   initial_node_count = 1
+  min_master_version = "1.18"
 
   master_auth {
     username = "mr.yoda"
