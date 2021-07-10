@@ -139,8 +139,6 @@ module Provider
                         'third_party/terraform/utils/bigtable_client_factory.go'],
                        ['google/common_operation.go',
                         'third_party/terraform/utils/common_operation.go'],
-                       ['google/compute_shared_operation.go',
-                        'third_party/terraform/utils/compute_shared_operation.go'],
                        ['google/convert.go',
                         'third_party/terraform/utils/convert.go'],
                        ['google/metadata.go',
