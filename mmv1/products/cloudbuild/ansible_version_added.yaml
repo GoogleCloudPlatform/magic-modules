@@ -61,6 +61,16 @@
           :version_added: '2.10'
         :tag:
           :version_added: '2.10'
+    :pubsubConfig:
+      :version_added: '2.10'
+      :topic:
+        :version_added: '2.10'
+      :service_account_email:
+        :version_added: '2.10'
+    :webhookConfig:
+      :version_added: '2.10'
+      :secret:
+        :version_added: '2.10'
     :build:
       :version_added: '2.8'
       :source:
