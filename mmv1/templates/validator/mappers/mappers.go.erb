@@ -235,6 +235,28 @@ func Mappers() map[string][]Mapper {
 				Fetch:             FetchKmsCryptoKeyIamPolicy,
 			},
 		},
+		"google_bigquery_dataset_iam_policy": {
+			{
+				Convert:           GetBigqueryDatasetIamPolicyCaiObject,
+				MergeCreateUpdate: MergeBigqueryDatasetIamPolicy,
+			},
+		},
+		"google_bigquery_dataset_iam_binding": {
+			{
+				Convert:           GetBigqueryDatasetIamBindingCaiObject,
+				MergeCreateUpdate: MergeBigqueryDatasetIamBinding,
+				MergeDelete:       MergeBigqueryDatasetIamBindingDelete,
+				Fetch:             FetchBigqueryDatasetIamPolicy,
+			},
+		},
+		"google_bigquery_dataset_iam_member": {
+			{
+				Convert:           GetBigqueryDatasetIamMemberCaiObject,
+				MergeCreateUpdate: MergeBigqueryDatasetIamMember,
+				MergeDelete:       MergeBigqueryDatasetIamMemberDelete,
+				Fetch:             FetchBigqueryDatasetIamPolicy,
+			},
+		},
 	}
 }
 
