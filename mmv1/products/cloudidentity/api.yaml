@@ -30,7 +30,7 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'Group'
-    base_url: groups?initialGroupConfig=EMPTY
+    base_url: 'groups?initialGroupConfig={{initial_group_config}}'
     update_url: '{{name}}'
     self_link: '{{name}}'
     update_verb: :PATCH
@@ -42,6 +42,21 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/identity/docs/how-to/setup'
       api: 'https://cloud.google.com/identity/docs/reference/rest/v1beta1/groups'
+    parameters:
+      - !ruby/object:Api::Type::Enum
+        name: 'initialGroupConfig'
+        description: |
+          The initial configuration options for creating a Group.
+
+          See the
+          [API reference](https://cloud.google.com/identity/docs/reference/rest/v1beta1/groups/create#initialgroupconfig)
+          for possible values.
+        values:
+          - "INITIAL_GROUP_CONFIG_UNSPECIFIED"
+          - "WITH_INITIAL_OWNER"
+          - "EMPTY"
+        default_value: :EMPTY
+        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'

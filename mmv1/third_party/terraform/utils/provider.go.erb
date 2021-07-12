@@ -2,13 +2,13 @@
 package google
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	googleoauth "golang.org/x/oauth2/google"
 )
@@ -20,6 +20,18 @@ var mutexKV = NewMutexKV()
 
 // Provider returns a *schema.Provider.
 func Provider() *schema.Provider {
+
+	// The mtls service client gives the type of endpoint (mtls/regular)
+	// at client creation. Since we use a shared client for requests we must
+	// rewrite the endpoints to be mtls endpoints for the scenario where
+	// mtls is enabled.
+	if isMtls() {
+		// if mtls is enabled switch all default endpoints to use the mtls endpoint
+		for key, bp := range DefaultBasePaths {
+			DefaultBasePaths[key] = getMtlsEndpoint(bp)
+		}
+	}
+
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"credentials": &schema.Schema{
@@ -134,7 +146,7 @@ func Provider() *schema.Provider {
 				ValidateFunc: validateCustomEndpoint,
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 					"GOOGLE_<%= product[:definitions].name.underscore.upcase -%>_CUSTOM_ENDPOINT",
-				}, <%= product[:definitions].name -%>DefaultBasePath),
+				}, DefaultBasePaths[<%= product[:definitions].name -%>BasePathKey]),
 			},
 			<% end -%>
 
@@ -154,8 +166,11 @@ func Provider() *schema.Provider {
 			ServiceUsageCustomEndpointEntryKey:           ServiceUsageCustomEndpointEntry,
 			StorageTransferCustomEndpointEntryKey:        StorageTransferCustomEndpointEntry,
 			BigtableAdminCustomEndpointEntryKey:          BigtableAdminCustomEndpointEntry,
-			EventarcCustomEndpointEntryKey:               EventarcCustomEndpointEntry,
-		},
+
+			// dcl
+			EventarcEndpointEntryKey:               EventarcEndpointEntry,
+			GkeHubFeatureCustomEndpointEntryKey:               GkeHubFeatureCustomEndpointEntry,
+},
 
 		ProviderMetaSchema: map[string]*schema.Schema{
 			"module_name": {
@@ -185,6 +200,7 @@ func Provider() *schema.Provider {
 			"google_compute_forwarding_rule":                   dataSourceGoogleComputeForwardingRule(),
 			"google_compute_global_address":                    dataSourceGoogleComputeGlobalAddress(),
 			"google_compute_global_forwarding_rule":            dataSourceGoogleComputeGlobalForwardingRule(),
+			"google_compute_ha_vpn_gateway":                    dataSourceGoogleComputeHaVpnGateway(),
 			"google_compute_health_check":                      dataSourceGoogleComputeHealthCheck(),
 			"google_compute_image":                             dataSourceGoogleComputeImage(),
 			"google_compute_instance":                          dataSourceGoogleComputeInstance(),
@@ -364,10 +380,15 @@ end     # products.each do
 				<% end -%>
 				"google_dataproc_cluster":                      resourceDataprocCluster(),
 				"google_dataproc_job":                          resourceDataprocJob(),
+				"google_dataproc_workflow_template":            resourceDataprocWorkflowTemplate(),
 				"google_endpoints_service":                     resourceEndpointsService(),
 				"google_eventarc_trigger":                      resourceEventarcTrigger(),
 				"google_folder":                                resourceGoogleFolder(),
 				"google_folder_organization_policy":            resourceGoogleFolderOrganizationPolicy(),
+				<% unless version == 'ga' -%>
+				"google_gke_hub_feature":                        resourceGkeHubFeature(),
+				"google_gke_hub_feature_membership":             resourceGkeHubFeatureMembership(),
+				<% end -%>
 				"google_logging_billing_account_sink":          resourceLoggingBillingAccountSink(),
 				"google_logging_billing_account_exclusion":     ResourceLoggingExclusion(BillingAccountLoggingExclusionSchema, NewBillingAccountLoggingExclusionUpdater, billingAccountLoggingExclusionIdParseFunc),
 				"google_logging_billing_account_bucket_config": ResourceLoggingBillingAccountBucketConfig(),
@@ -566,7 +587,10 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.ServiceUsageBasePath = d.Get(ServiceUsageCustomEndpointEntryKey).(string)
 	config.StorageTransferBasePath = d.Get(StorageTransferCustomEndpointEntryKey).(string)
 	config.BigtableAdminBasePath = d.Get(BigtableAdminCustomEndpointEntryKey).(string)
-	config.EventarcBasePath = d.Get(EventarcCustomEndpointEntryKey).(string)
+
+	// dcl
+	config.EventarcBasePath = d.Get(EventarcEndpointEntryKey).(string)
+	config.GkeHubBasePath = d.Get(GkeHubFeatureCustomEndpointEntryKey).(string)
 
 	stopCtx, ok := schema.StopContext(ctx)
 	if !ok {

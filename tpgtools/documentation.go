@@ -1,11 +1,11 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -86,7 +86,7 @@ func mergeProperties(ga, beta []Property) []Property {
 }
 
 func generateResourceWebsiteFile(res *Resource, resources map[Version][]*Resource, version *Version) {
-	
+
 	res = mergeResource(res, resources, version)
 	// Generate resource website file
 	tmplInput := ResourceInput{
@@ -110,7 +110,7 @@ func generateResourceWebsiteFile(res *Resource, resources map[Version][]*Resourc
 	if oPath == nil || *oPath == "" {
 		fmt.Printf("%v\n", string(source))
 	} else {
-		outname := fmt.Sprintf("%s_%s.html.markdown", res.Package, res.Name())
+		outname := fmt.Sprintf("%s_%s.html.markdown", res.Package(), res.Name())
 		err := ioutil.WriteFile(path.Join(*oPath, "website/docs/r", outname), source, 0644)
 		if err != nil {
 			glog.Exit(err)

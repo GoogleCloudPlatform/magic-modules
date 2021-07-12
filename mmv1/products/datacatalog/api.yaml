@@ -312,6 +312,7 @@ objects:
           The id of the tag template to create.
       - !ruby/object:Api::Type::Boolean
         name: forceDelete
+        default_value: false
         url_param_only: true
         description: |
           This confirms the deletion of any possible tags using this template. Must be set to true in order to delete the tag template.
@@ -418,6 +419,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: parent
         url_param_only: true
+        input: true
         description: |
           The name of the parent this tag is attached to. This can be the name of an entry or an entry group. If an entry group, the tag will be attached to
           all entries in that group.

@@ -289,6 +289,26 @@ objects:
                         instance, "2013-01-15"). This condition is satisfied
                         when an object is created before midnight of the
                         specified date in UTC.
+                    - !ruby/object:Api::Type::Time
+                      name: 'customTimeBefore'
+                      description: |
+                        A date in the RFC 3339 format YYYY-MM-DD. This condition
+                        is satisfied when the customTime metadata for the object
+                        is set to an earlier date than the date used in
+                        this lifecycle condition.
+                    - !ruby/object:Api::Type::Integer
+                      name: 'daysSinceCustomTime'
+                      description: |
+                        Days since the date set in the customTime metadata for the
+                        object. This condition is satisfied when the current date
+                        and time is at least the specified number of days after
+                        the customTime.
+                    - !ruby/object:Api::Type::Integer
+                      name: 'daysSinceNoncurrentTime'
+                      description: |
+                        Relevant only for versioned objects. This condition is
+                        satisfied when an object has been noncurrent for more than
+                        the specified number of days.
                     - !ruby/object:Api::Type::Boolean
                       name: 'isLive'
                       description: |
@@ -303,6 +323,13 @@ objects:
                         MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE, ARCHIVE,
                         STANDARD, and DURABLE_REDUCED_AVAILABILITY.
                       item_type: Api::Type::String
+                    - !ruby/object:Api::Type::Time
+                      name: 'noncurrentTimeBefore'
+                      description: |
+                        Relevant only for versioned objects. A date in the
+                        RFC 3339 format YYYY-MM-DD. This condition is satisfied
+                        for objects that became noncurrent on a date prior to the
+                        one specified in this condition.
                     - !ruby/object:Api::Type::Integer
                       name: 'numNewerVersions'
                       description: |

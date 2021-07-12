@@ -63,10 +63,18 @@
             :version_added: '2.6'
           :createdBefore:
             :version_added: '2.6'
+          :customTimeBefore:
+            :version_added: '2.10'
+          :daysSinceCustomTime:
+            :version_added: '2.10'
+          :daysSinceNoncurrentTime:
+            :version_added: '2.10'
           :isLive:
             :version_added: '2.6'
           :matchesStorageClass:
             :version_added: '2.6'
+          :noncurrentTimeBefore:
+            :version_added: '2.10'
           :numNewerVersions:
             :version_added: '2.6'
     :location:
@@ -97,6 +105,8 @@
         :version_added: '2.6'
       :notFoundPage:
         :version_added: '2.6'
+    :labels:
+      :version_added: '2.10'
     :project:
       :version_added: '2.6'
     :predefinedDefaultObjectAcl:

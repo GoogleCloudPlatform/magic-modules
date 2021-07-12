@@ -18,18 +18,15 @@ func instanceSchedulingNodeAffinitiesElemSchema() *schema.Resource {
 			"key": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"operator": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"IN", "NOT_IN"}, false),
 			},
 			"values": {
 				Type:     schema.TypeSet,
 				Required: true,
-				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
@@ -349,6 +346,29 @@ func flattenConfidentialInstanceConfig(ConfidentialInstanceConfig *computeBeta.C
 	}}
 }
 
+func expandAdvancedMachineFeatures(d TerraformResourceData) *computeBeta.AdvancedMachineFeatures {
+	if _, ok := d.GetOk("advanced_machine_features"); !ok {
+		return nil
+	}
+
+	prefix := "advanced_machine_features.0"
+	return &computeBeta.AdvancedMachineFeatures{
+		EnableNestedVirtualization: d.Get(prefix + ".enable_nested_virtualization").(bool),
+		ThreadsPerCore:             int64(d.Get(prefix + ".threads_per_core").(int)),
+		//	ForceSendFields:           []string{"EnableSecureBoot"},
+	}
+}
+
+func flattenAdvancedMachineFeatures(AdvancedMachineFeatures *computeBeta.AdvancedMachineFeatures) []map[string]interface{} {
+	if AdvancedMachineFeatures == nil {
+		return nil
+	}
+	return []map[string]interface{}{{
+		"enable_nested_virtualization": AdvancedMachineFeatures.EnableNestedVirtualization,
+		"threads_per_core":             AdvancedMachineFeatures.ThreadsPerCore,
+	}}
+}
+
 func flattenShieldedVmConfig(shieldedVmConfig *computeBeta.ShieldedInstanceConfig) []map[string]bool {
 	if shieldedVmConfig == nil {
 		return nil
@@ -379,9 +399,18 @@ func flattenEnableDisplay(displayDevice *computeBeta.DisplayDevice) interface{} 
 	return displayDevice.EnableDisplay
 }
 
+// Node affinity updates require a reboot
+func schedulingHasChangeRequiringReboot(d *schema.ResourceData) bool {
+	o, n := d.GetChange("scheduling")
+	oScheduling := o.([]interface{})[0].(map[string]interface{})
+	newScheduling := n.([]interface{})[0].(map[string]interface{})
+
+	return hasNodeAffinitiesChanged(oScheduling, newScheduling)
+}
+
 // Terraform doesn't correctly calculate changes on schema.Set, so we do it manually
 // https://github.com/hashicorp/terraform-plugin-sdk/issues/98
-func schedulingHasChange(d *schema.ResourceData) bool {
+func schedulingHasChangeWithoutReboot(d *schema.ResourceData) bool {
 	if !d.HasChange("scheduling") {
 		// This doesn't work correctly, which is why this method exists
 		// But it is here for posterity
@@ -390,8 +419,11 @@ func schedulingHasChange(d *schema.ResourceData) bool {
 	o, n := d.GetChange("scheduling")
 	oScheduling := o.([]interface{})[0].(map[string]interface{})
 	newScheduling := n.([]interface{})[0].(map[string]interface{})
-	originalNa := oScheduling["node_affinities"].(*schema.Set)
-	newNa := newScheduling["node_affinities"].(*schema.Set)
+
+	if schedulingHasChangeRequiringReboot(d) {
+		return false
+	}
+
 	if oScheduling["automatic_restart"] != newScheduling["automatic_restart"] {
 		return true
 	}
@@ -408,5 +440,114 @@ func schedulingHasChange(d *schema.ResourceData) bool {
 		return true
 	}
 
-	return reflect.DeepEqual(newNa, originalNa)
+	return false
 }
+
+func hasNodeAffinitiesChanged(oScheduling, newScheduling map[string]interface{}) bool {
+	oldNAs := oScheduling["node_affinities"].(*schema.Set).List()
+	newNAs := newScheduling["node_affinities"].(*schema.Set).List()
+	if len(oldNAs) != len(newNAs) {
+		return true
+	}
+	for i := range oldNAs {
+		oldNodeAffinity := oldNAs[i].(map[string]interface{})
+		newNodeAffinity := newNAs[i].(map[string]interface{})
+		if oldNodeAffinity["key"] != newNodeAffinity["key"] {
+			return true
+		}
+		if oldNodeAffinity["operator"] != newNodeAffinity["operator"] {
+			return true
+		}
+
+		// convertStringSet will sort the set into a slice, allowing DeepEqual
+		if !reflect.DeepEqual(convertStringSet(oldNodeAffinity["values"].(*schema.Set)), convertStringSet(newNodeAffinity["values"].(*schema.Set))) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func expandReservationAffinity(d *schema.ResourceData) (*computeBeta.ReservationAffinity, error) {
+	_, ok := d.GetOk("reservation_affinity")
+	if !ok {
+		return nil, nil
+	}
+
+	prefix := "reservation_affinity.0"
+	reservationAffinityType := d.Get(prefix + ".type").(string)
+
+	affinity := computeBeta.ReservationAffinity{
+		ConsumeReservationType: reservationAffinityType,
+		ForceSendFields:        []string{"ConsumeReservationType"},
+	}
+
+	_, hasSpecificReservation := d.GetOk(prefix + ".specific_reservation")
+	if (reservationAffinityType == "SPECIFIC_RESERVATION") != hasSpecificReservation {
+		return nil, fmt.Errorf("specific_reservation must be set when reservation_affinity is SPECIFIC_RESERVATION, and not set otherwise")
+	}
+
+	prefix = prefix + ".specific_reservation.0"
+	if hasSpecificReservation {
+		affinity.Key = d.Get(prefix + ".key").(string)
+		affinity.ForceSendFields = append(affinity.ForceSendFields, "Key", "Values")
+
+		for _, v := range d.Get(prefix + ".values").([]interface{}) {
+			affinity.Values = append(affinity.Values, v.(string))
+		}
+	}
+
+	return &affinity, nil
+}
+
+func flattenReservationAffinity(affinity *computeBeta.ReservationAffinity) []map[string]interface{} {
+	if affinity == nil {
+		return nil
+	}
+
+	flattened := map[string]interface{}{
+		"type": affinity.ConsumeReservationType,
+	}
+
+	if affinity.ConsumeReservationType == "SPECIFIC_RESERVATION" {
+		flattened["specific_reservation"] = []map[string]interface{}{{
+			"key":    affinity.Key,
+			"values": affinity.Values,
+		}}
+	}
+
+	return []map[string]interface{}{flattened}
+}
+
+<% unless version == "ga" -%>
+func expandNetworkPerformanceConfig(d TerraformResourceData, config *Config) (*computeBeta.NetworkPerformanceConfig, error) {
+	configs, ok := d.GetOk("network_performance_config")
+	if !ok {
+		return nil, nil
+	}
+
+	npcSlice := configs.([]interface{})
+	if len(npcSlice) > 1 {
+		return nil, fmt.Errorf("cannot specify multiple network_performance_configs")
+	}
+
+	if len(npcSlice) == 0 || npcSlice[0] == nil {
+		return nil, nil
+	}
+	npc := npcSlice[0].(map[string]interface{})
+	return &computeBeta.NetworkPerformanceConfig{
+		TotalEgressBandwidthTier: npc["total_egress_bandwidth_tier"].(string),
+	}, nil
+}
+
+func flattenNetworkPerformanceConfig(c *computeBeta.NetworkPerformanceConfig) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"total_egress_bandwidth_tier": c.TotalEgressBandwidthTier,
+		},
+	}
+}
+<% end -%>

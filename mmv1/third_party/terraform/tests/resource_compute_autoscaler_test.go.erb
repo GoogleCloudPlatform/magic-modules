@@ -70,7 +70,6 @@ func TestAccComputeAutoscaler_multicondition(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeAutoscaler_scaleDownControl(t *testing.T) {
 	t.Parallel()
 
@@ -95,9 +94,7 @@ func TestAccComputeAutoscaler_scaleDownControl(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
-<% unless version == 'ga' -%>
 func TestAccComputeAutoscaler_scalingSchedule(t *testing.T) {
 	t.Parallel()
 
@@ -122,7 +119,6 @@ func TestAccComputeAutoscaler_scalingSchedule(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccComputeAutoscaler_scaleInControl(t *testing.T) {
 	t.Parallel()
@@ -293,7 +289,6 @@ resource "google_compute_autoscaler" "foobar" {
 `, autoscalerName)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeAutoscaler_scaleDownControl(itName, tpName, igmName, autoscalerName string) string {
 	return testAccComputeAutoscaler_scaffolding(itName, tpName, igmName) + fmt.Sprintf(`
 resource "google_compute_autoscaler" "foobar" {
@@ -309,17 +304,18 @@ resource "google_compute_autoscaler" "foobar" {
       target = 0.5
       predictive_method = "OPTIMIZE_AVAILABILITY"
     }
+<% unless version == 'ga' -%>
     scale_down_control {
       max_scaled_down_replicas {
         percent = 80
       }
       time_window_sec = 300
     }
+<% end -%>
   }
 }
 `, autoscalerName)
 }
-<% end -%>
 
 func testAccComputeAutoscaler_scaleInControl(itName, tpName, igmName, autoscalerName string) string {
 	return testAccComputeAutoscaler_scaffolding(itName, tpName, igmName) + fmt.Sprintf(`
@@ -371,7 +367,6 @@ resource "google_compute_autoscaler" "foobar" {
 `, autoscalerName)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeAutoscaler_scalingSchedule(itName, tpName, igmName, autoscalerName string) string {
 	return testAccComputeAutoscaler_scaffolding(itName, tpName, igmName) + fmt.Sprintf(`
 resource "google_compute_autoscaler" "foobar" {
@@ -386,16 +381,18 @@ resource "google_compute_autoscaler" "foobar" {
     cpu_utilization {
       target = 0.5
     }
+<% unless version == 'ga' -%>
     scale_down_control {
       max_scaled_down_replicas {
         percent = 80
       }
       time_window_sec = 300
     }
+<% end -%>
     scaling_schedules {
       name = "every-weekday-morning"
       description = "Increase to 2 every weekday at 7AM for 6 hours."
-      min_required_replicas = 2
+      min_required_replicas = 0
       schedule = "0 7 * * MON-FRI"
       time_zone = "America/New_York"
       duration_sec = 21600
@@ -412,4 +409,3 @@ resource "google_compute_autoscaler" "foobar" {
 }
 `, autoscalerName)
 }
-<% end -%>

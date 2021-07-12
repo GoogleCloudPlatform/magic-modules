@@ -35,8 +35,8 @@ import (
 <%
     resource_name = product_ns + object.name
     properties = object.all_user_properties
-    update_body_properties = object.settable_properties
-    update_body_properties = object.settable_properties.reject(&:input) if object.update_verb == :PATCH
+    update_body_properties = properties_without_custom_update(object.settable_properties)
+    update_body_properties = update_body_properties.reject(&:input) if object.update_verb == :PATCH
     # Handwritten TF Operation objects will be shaped like accessContextManager while the Google Go Client will have a name like accesscontextmanager
     client_name = @config.client_name || product_ns
     client_name_camel = client_name.camelize(:lower)
@@ -577,7 +577,111 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     billingProject = project
 <%  end -%>
 
-<%  if object.input -%>
+
+<%  if !object.input -%>
+    obj := make(map[string]interface{})
+<%  update_body_properties.each do |prop| -%>
+    <%# flattened objects won't have something stored in state so instead nil is passed to the next expander. -%>
+    <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
+    <%= prop.api_name -%>Prop, err := expand<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
+    if err != nil {
+        return err
+<%      if prop.send_empty_value -%>
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
+<%      elsif prop.flatten_object -%>
+    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
+<%      else -%>
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+<%      end -%>
+        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
+    }
+<%  end -%>
+
+<%# We need to decide what encoder to use here - if there's an update encoder, use that! -%>
+<%  if object.custom_code.update_encoder -%>
+    obj, err = resource<%= resource_name -%>UpdateEncoder(d, meta, obj)
+    if err != nil {
+        return err
+    }
+<%  elsif object.custom_code.encoder -%>
+    obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
+    if err != nil {
+        return err
+    }
+<%  end -%>
+
+<%  if object.mutex -%>
+    lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
+    if err != nil {
+        return err
+    }
+    mutexKV.Lock(lockName)
+    defer mutexKV.Unlock(lockName)
+<%  end -%>
+
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, object.update_url)}" -%>")
+    if err != nil {
+        return err
+    }
+
+    log.Printf("[DEBUG] Updating <%= object.name -%> %q: %#v", d.Id(), obj)
+<%= lines(compile(pwd + '/templates/terraform/update_mask.erb')) if object.update_mask -%>
+<%= lines(compile(pwd + '/' + object.custom_code.pre_update)) if object.custom_code.pre_update -%>
+<%  if object.nested_query&.modify_by_patch -%>
+<%# Keep this after mutex - patch request data relies on current resource state %>
+    obj, err = resource<%= resource_name -%>PatchUpdateEncoder(d, meta, obj)
+    if err != nil {
+        return err
+    }
+<%  end -%>
+<%  if object.supports_indirect_user_project_override -%>
+     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+        billingProject = parts[1]
+    }
+<%  end -%>
+
+    // err == nil indicates that the billing_project value was found
+    if bp, err := getBillingProject(d, config); err == nil {
+      billingProject = bp
+    }
+
+<% if object.update_mask && field_specific_update_methods(object.root_properties) -%>
+// if updateMask is empty we are not updating anything so skip the post
+if len(updateMask) > 0 {
+<% end -%>
+    res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+
+    if err != nil {
+        return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
+    } else {
+	log.Printf("[DEBUG] Finished updating <%= object.name -%> %q: %#v", d.Id(), res)
+    }
+
+<%  if object.async&.allow?('update') -%>
+<%    if object.async.is_a? Api::OpAsync -%>
+    err = <%= client_name_camel -%>OperationWaitTime(
+        config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>", userAgent,
+        d.Timeout(schema.TimeoutUpdate))
+
+    if err != nil {
+        return err
+    }
+<%    elsif object.async.is_a? Provider::Terraform::PollAsync -%>
+    err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Updating <%= object.name -%>", d.Timeout(schema.TimeoutUpdate), <%= object.async.target_occurrences -%>)
+    if err != nil {
+<%      if object.async.suppress_error-%>
+        log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
+<%      else -%>
+        return err
+<%      end -%>
+    }
+<%    end -%>
+<%  end -%>
+<% if object.update_mask && field_specific_update_methods(object.root_properties) -%>
+  }
+<% end -%>
+<%  end # if !object.input -%>
+<%    if field_specific_update_methods(object.root_properties) -%>
     d.Partial(true)
 
 <% properties_by_custom_update(object.root_properties)
@@ -707,103 +811,8 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
     }
 <%  end -%>
 
-    d.Partial(false)
-<%  else # if object.input -%>
-    obj := make(map[string]interface{})
-<%  update_body_properties.each do |prop| -%>
-    <%# flattened objects won't have something stored in state so instead nil is passed to the next expander. -%>
-    <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
-    <%= prop.api_name -%>Prop, err := expand<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
-    if err != nil {
-        return err
-<%      if prop.send_empty_value -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
-<%      elsif prop.flatten_object -%>
-    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
-<%      else -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
-<%      end -%>
-        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-    }
-<%  end -%>
-
-<%# We need to decide what encoder to use here - if there's an update encoder, use that! -%>
-<%  if object.custom_code.update_encoder -%>
-    obj, err = resource<%= resource_name -%>UpdateEncoder(d, meta, obj)
-    if err != nil {
-        return err
-    }
-<%  elsif object.custom_code.encoder -%>
-    obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
-    if err != nil {
-        return err
-    }
-<%  end -%>
-
-<%  if object.mutex -%>
-    lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
-    if err != nil {
-        return err
-    }
-    mutexKV.Lock(lockName)
-    defer mutexKV.Unlock(lockName)
-<%  end -%>
-
-    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, object.update_url)}" -%>")
-    if err != nil {
-        return err
-    }
-
-    log.Printf("[DEBUG] Updating <%= object.name -%> %q: %#v", d.Id(), obj)
-<%= lines(compile(pwd + '/templates/terraform/update_mask.erb')) if object.update_mask -%>
-<%= lines(compile(pwd + '/' + object.custom_code.pre_update)) if object.custom_code.pre_update -%>
-<%  if object.nested_query&.modify_by_patch -%>
-<%# Keep this after mutex - patch request data relies on current resource state %>
-    obj, err = resource<%= resource_name -%>PatchUpdateEncoder(d, meta, obj)
-    if err != nil {
-        return err
-    }
-<%  end -%>
-<%  if object.supports_indirect_user_project_override -%>
-     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
-        billingProject = parts[1]
-    }
-<%  end -%>
-
-    // err == nil indicates that the billing_project value was found
-    if bp, err := getBillingProject(d, config); err == nil {
-      billingProject = bp
-    }
-
-    res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
-
-    if err != nil {
-        return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
-    } else {
-	log.Printf("[DEBUG] Finished updating <%= object.name -%> %q: %#v", d.Id(), res)
-    }
-
-<%  if object.async&.allow?('update') -%>
-<%    if object.async.is_a? Api::OpAsync -%>
-    err = <%= client_name_camel -%>OperationWaitTime(
-        config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>", userAgent,
-        d.Timeout(schema.TimeoutUpdate))
-
-    if err != nil {
-        return err
-    }
-<%    elsif object.async.is_a? Provider::Terraform::PollAsync -%>
-    err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Updating <%= object.name -%>", d.Timeout(schema.TimeoutUpdate), <%= object.async.target_occurrences -%>)
-    if err != nil {
-<%      if object.async.suppress_error-%>
-        log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
-<%      else -%>
-        return err
-<%      end -%>
-    }
-<%    end -%>
-<%  end -%>
-<%  end # if object.input -%>
+  d.Partial(false)
+<% end -%>
 
 <%= lines(compile(pwd + '/' + object.custom_code.post_update)) if object.custom_code.post_update -%>
     return resource<%= resource_name -%>Read(d, meta)
@@ -870,7 +879,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%    end -%>
 <%  end -%>
 <%  if object.supports_indirect_user_project_override -%>
-    
+
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
         billingProject = parts[1]
     }

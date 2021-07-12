@@ -64,7 +64,11 @@ import (
 	"google.golang.org/api/storagetransfer/v1"
 	"google.golang.org/api/transport"
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
+	dataprocDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc<% unless version == 'ga' -%>/beta<% end -%>"
 	eventarcDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc<% unless version == 'ga' -%>/beta<% end -%>"
+<% unless version == 'ga' -%>
+	gkehubDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub/beta"
+<% end -%>
 )
 
 type providerMeta struct {
@@ -114,20 +118,58 @@ type Config struct {
 	ServiceNetworkingBasePath string
 	StorageTransferBasePath string
 	BigtableAdminBasePath string
-	EventarcBasePath string
 
 	requestBatcherServiceUsage *RequestBatcher
 	requestBatcherIam          *RequestBatcher
 
-	// start DCL clients
-	dclConfig *dcl.Config
-	clientEventarcDCL *eventarcDcl.Client
+	// start DCLBasePaths
+	// dataprocBasePath is implemented in mm
+	EventarcBasePath string
+	GkeHubBasePath string
 }
 
-// Generated product base paths
 <% products.each do |product| -%>
-var <%= product[:definitions].name -%>DefaultBasePath = "<%= product[:definitions].base_url -%>"
+const <%= product[:definitions].name -%>BasePathKey = "<%= product[:definitions].name -%>"
 <% end -%>
+const CloudBillingBasePathKey = "CloudBilling"
+const ComposerBasePathKey = "Composer"
+const ComputeBetaBasePathKey = "ComputeBeta"
+const ContainerBasePathKey = "Container"
+const DataprocBetaBasePathKey = "DataprocBeta"
+const ContainerBetaBasePathKey = "ContainerBeta"
+const DataflowBasePathKey = "Dataflow"
+const IAMBasePathKey = "IAM"
+const IamCredentialsBasePathKey = "IamCredentials"
+const ResourceManagerV2BasePathKey = "ResourceManagerV2"
+const ServiceNetworkingBasePathKey = "ServiceNetworking"
+const StorageTransferBasePathKey = "StorageTransfer"
+const BigtableAdminBasePathKey = "BigtableAdmin"
+const GkeHubFeatureBasePathKey = "GkeHubFeatureBasePathKey"
+
+// Generated product base paths
+var DefaultBasePaths = map[string]string{
+<% products.each do |product| -%>
+	<%= product[:definitions].name -%>BasePathKey : "<%= product[:definitions].base_url -%>",
+<% end -%>
+	CloudBillingBasePathKey : "https://cloudbilling.googleapis.com/v1/",
+<% if version == "ga" -%>
+	ComposerBasePathKey : "https://composer.googleapis.com/v1/",
+<% else -%>
+	ComposerBasePathKey : "https://composer.googleapis.com/v1beta1/",
+<% end -%>
+	ComputeBetaBasePathKey : "https://www.googleapis.com/compute/beta/",
+	ContainerBasePathKey : "https://container.googleapis.com/v1/",
+	ContainerBetaBasePathKey : "https://container.googleapis.com/v1beta1/",
+	DataprocBetaBasePathKey : "https://dataproc.googleapis.com/v1beta2/",
+	DataflowBasePathKey : "https://dataflow.googleapis.com/v1b3/",
+	IAMBasePathKey : "https://iam.googleapis.com/v1/",
+	IamCredentialsBasePathKey : "https://iamcredentials.googleapis.com/v1/",
+	ResourceManagerV2BasePathKey : "https://cloudresourcemanager.googleapis.com/v2/",
+	ServiceNetworkingBasePathKey : "https://servicenetworking.googleapis.com/v1/",
+	StorageTransferBasePathKey : "https://storagetransfer.googleapis.com/v1/",
+	BigtableAdminBasePathKey : "https://bigtableadmin.googleapis.com/v2/",
+	GkeHubFeatureBasePathKey: "https://gkehub.googleapis.com/v1beta/",
+}
 
 var DefaultClientScopes = []string{
 	"https://www.googleapis.com/auth/compute",
@@ -145,7 +187,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 
 	c.context = ctx
 
-	tokenSource, err := c.getTokenSource(c.Scopes)
+	tokenSource, err := c.getTokenSource(c.Scopes, false)
 	if err != nil {
 		return err
 	}
@@ -154,8 +196,16 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 
 	cleanCtx := context.WithValue(ctx, oauth2.HTTPClient, cleanhttp.DefaultClient())
 
-	// 1. OAUTH2 TRANSPORT/CLIENT - sets up proper auth headers
-	client := oauth2.NewClient(cleanCtx, tokenSource)
+	// 1. MTLS TRANSPORT/CLIENT - sets up proper auth headers
+	client, _, err := transport.NewHTTPClient(cleanCtx, option.WithTokenSource(tokenSource))
+	if err != nil {
+		return err
+	}
+	// Userinfo is fetched before request logging is enabled to reduce additional noise.
+	err = c.logGoogleIdentities()
+	if err != nil {
+		return err
+	}
 
 	// 2. Logging Transport - ensure we log HTTP requests to GCP APIs.
 	loggingTransport := logging.NewTransport("Google", client.Transport)
@@ -182,11 +232,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	c.requestBatcherServiceUsage = NewRequestBatcher("Service Usage", ctx, c.BatchingConfig)
 	c.requestBatcherIam = NewRequestBatcher("IAM", ctx, c.BatchingConfig)
 	c.PollInterval = 10 * time.Second
-
-	// Start DCL client instantiation
-	// TODO(slevenick): handle user agents
-	c.dclConfig = dcl.NewConfig(dcl.WithHTTPClient(client), dcl.WithUserAgent(c.userAgent), dcl.WithLogger(dclLogger{}))
-	c.clientEventarcDCL = eventarcDcl.NewClient(c.dclConfig)
 
 	return nil
 }
@@ -223,13 +268,62 @@ func expandProviderBatchingConfig(v interface{}) (*batchingConfig, error) {
 
 func (c *Config) synchronousTimeout() time.Duration {
 	if c.RequestTimeout == 0 {
-		return 30 * time.Second
+		return 120 * time.Second
 	}
 	return c.RequestTimeout
 }
 
-func (c *Config) getTokenSource(clientScopes []string) (oauth2.TokenSource, error) {
-	creds, err := c.GetCredentials(clientScopes)
+// Print Identities executing terraform API Calls.
+func (c *Config) logGoogleIdentities() error {
+	if c.ImpersonateServiceAccount == "" {
+
+		tokenSource, err := c.getTokenSource(c.Scopes, true)
+		if err != nil {
+			return err
+		}
+		c.client = oauth2.NewClient(c.context, tokenSource) // c.client isn't initialised fully when this code is called.
+
+		email, err := GetCurrentUserEmail(c, c.userAgent)
+		if err != nil {
+			log.Printf("[INFO] error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope? error: %s", err)
+		}
+
+		log.Printf("[INFO] Terraform is using this identity: %s", email)
+
+		return nil
+
+	}
+
+	// Drop Impersonated ClientOption from OAuth2 TokenSource to infer original identity
+
+	tokenSource, err := c.getTokenSource(c.Scopes, true)
+	if err != nil {
+		return err
+	}
+	c.client = oauth2.NewClient(c.context, tokenSource) // c.client isn't initialised fully when this code is called.
+
+	email, err := GetCurrentUserEmail(c, c.userAgent)
+	if err != nil {
+		log.Printf("[INFO] error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope? error: %s", err)
+	}
+
+	log.Printf("[INFO] Terraform is configured with service account impersonation, original identity: %s, impersonated identity: %s", email, c.ImpersonateServiceAccount)
+
+	// Add the Impersonated ClientOption back in to the OAuth2 TokenSource
+
+	tokenSource, err = c.getTokenSource(c.Scopes, false)
+	if err != nil {
+		return err
+	}
+	c.client = oauth2.NewClient(c.context, tokenSource) // c.client isn't initialised fully when this code is called.
+
+	return nil
+}
+
+// Get a TokenSource based on the Google Credentials configured.
+// If initialCredentialsOnly is true, don't follow the impersonation settings and return the initial set of creds.
+func (c *Config) getTokenSource(clientScopes []string, initialCredentialsOnly bool) (oauth2.TokenSource, error) {
+	creds, err := c.GetCredentials(clientScopes, initialCredentialsOnly)
 	if err != nil {
 		return nil, fmt.Errorf("%s", err)
 	}
@@ -746,7 +840,10 @@ type staticTokenSource struct {
       oauth2.TokenSource
 }
 
-func (c *Config) GetCredentials(clientScopes []string) (googleoauth.Credentials, error) {
+// Get a set of credentials with a given scope (clientScopes) based on the Config object.
+// If initialCredentialsOnly is true, don't follow the impersonation settings and return the initial set of creds
+// instead.
+func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bool) (googleoauth.Credentials, error) {
 
 	if c.AccessToken != "" {
 		contents, _, err := pathOrContents(c.AccessToken)
@@ -755,7 +852,7 @@ func (c *Config) GetCredentials(clientScopes []string) (googleoauth.Credentials,
 		}
 		token := &oauth2.Token{AccessToken: contents}
 
-		if c.ImpersonateServiceAccount != "" {
+		if c.ImpersonateServiceAccount != "" && !initialCredentialsOnly {
 			opts := []option.ClientOption{option.WithTokenSource(oauth2.StaticTokenSource(token)), option.ImpersonateCredentials(c.ImpersonateServiceAccount, c.ImpersonateServiceAccountDelegates...), option.WithScopes(clientScopes...)}
 			creds, err := transport.Creds(context.TODO(), opts...)
 			if err != nil {
@@ -777,7 +874,7 @@ func (c *Config) GetCredentials(clientScopes []string) (googleoauth.Credentials,
 		if err != nil {
 			return googleoauth.Credentials{}, fmt.Errorf("error loading credentials: %s", err)
 		}
-		if c.ImpersonateServiceAccount != "" {
+		if c.ImpersonateServiceAccount != "" && !initialCredentialsOnly {
 			opts := []option.ClientOption{option.WithCredentialsJSON([]byte(contents)), option.ImpersonateCredentials(c.ImpersonateServiceAccount, c.ImpersonateServiceAccountDelegates...), option.WithScopes(clientScopes...)}
 			creds, err := transport.Creds(context.TODO(), opts...)
 			if err != nil {
@@ -795,7 +892,7 @@ func (c *Config) GetCredentials(clientScopes []string) (googleoauth.Credentials,
 		return *creds, nil
 	}
 
-	if c.ImpersonateServiceAccount != "" {
+	if c.ImpersonateServiceAccount != "" && !initialCredentialsOnly {
 		opts := option.ImpersonateCredentials(c.ImpersonateServiceAccount, c.ImpersonateServiceAccountDelegates...)
 		creds, err := transport.Creds(context.TODO(), opts, option.WithScopes(clientScopes...))
 		if err != nil {
@@ -829,22 +926,22 @@ func removeBasePathVersion(url string) string {
 func ConfigureBasePaths(c *Config) {
 	// Generated Products
 	<% products.map.each do |product| -%>
-	c.<%= product[:definitions].name -%>BasePath = <%= product[:definitions].name -%>DefaultBasePath
+	c.<%= product[:definitions].name -%>BasePath = DefaultBasePaths[<%= product[:definitions].name -%>BasePathKey]
 	<% end -%>
 
 	// Handwritten Products / Versioned / Atypical Entries
-	c.CloudBillingBasePath = CloudBillingDefaultBasePath
-	c.ComposerBasePath = ComposerDefaultBasePath
-	c.ComputeBetaBasePath = ComputeBetaDefaultBasePath
-	c.ContainerBasePath = ContainerDefaultBasePath
-	c.ContainerBetaBasePath = ContainerBetaDefaultBasePath
-	c.DataprocBasePath = DataprocDefaultBasePath
-	c.DataflowBasePath = DataflowDefaultBasePath
-	c.IamCredentialsBasePath = IamCredentialsDefaultBasePath
-	c.ResourceManagerV2BasePath = ResourceManagerV2DefaultBasePath
-	c.IAMBasePath = IAMDefaultBasePath
-	c.ServiceNetworkingBasePath = ServiceNetworkingDefaultBasePath
-	c.BigQueryBasePath = BigQueryDefaultBasePath
-	c.StorageTransferBasePath = StorageTransferDefaultBasePath
-	c.BigtableAdminBasePath = BigtableAdminDefaultBasePath
+	c.CloudBillingBasePath = DefaultBasePaths[CloudBillingBasePathKey]
+	c.ComposerBasePath = DefaultBasePaths[ComposerBasePathKey]
+	c.ComputeBetaBasePath = DefaultBasePaths[ComputeBetaBasePathKey]
+	c.ContainerBasePath = DefaultBasePaths[ContainerBasePathKey]
+	c.ContainerBetaBasePath = DefaultBasePaths[ContainerBetaBasePathKey]
+	c.DataprocBasePath = DefaultBasePaths[DataprocBasePathKey]
+	c.DataflowBasePath = DefaultBasePaths[DataflowBasePathKey]
+	c.IamCredentialsBasePath = DefaultBasePaths[IamCredentialsBasePathKey]
+	c.ResourceManagerV2BasePath = DefaultBasePaths[ResourceManagerV2BasePathKey]
+	c.IAMBasePath = DefaultBasePaths[IAMBasePathKey]
+	c.ServiceNetworkingBasePath = DefaultBasePaths[ServiceNetworkingBasePathKey]
+	c.BigQueryBasePath = DefaultBasePaths[BigQueryBasePathKey]
+	c.StorageTransferBasePath = DefaultBasePaths[StorageTransferBasePathKey]
+	c.BigtableAdminBasePath = DefaultBasePaths[BigtableAdminBasePathKey]
 }
