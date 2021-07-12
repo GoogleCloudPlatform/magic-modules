@@ -42,6 +42,41 @@ func TestAccStorageBucketAcl_basic(t *testing.T) {
 	})
 }
 
+func TestAccStorageBucketAcl_basic_add(t *testing.T) {
+	t.Parallel()
+
+	bucketName := testBucketName(t)
+	skipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccStorageBucketAclDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleStorageBucketsAclBasic1(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleStorageBucketAcl(t, bucketName, roleEntityBasic1),
+					testAccCheckGoogleStorageBucketAcl(t, bucketName, roleEntityBasic2),
+				),
+			},
+			{
+				Config: testGoogleStorageBucketsAclBasic1Update(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleStorageBucketAcl(t, bucketName, roleEntityBasic1),
+					testAccCheckGoogleStorageBucketAclDelete(t, bucketName, roleEntityBasic2),
+				),
+			},
+			{
+				Config: testGoogleStorageBucketsAclBasic1(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleStorageBucketAcl(t, bucketName, roleEntityBasic1),
+					testAccCheckGoogleStorageBucketAcl(t, bucketName, roleEntityBasic2),
+				),
+			},
+		},
+	})
+}
+
 func TestAccStorageBucketAcl_upgrade(t *testing.T) {
 	t.Parallel()
 
@@ -287,6 +322,19 @@ resource "google_storage_bucket_acl" "acl" {
   role_entity = ["%s", "%s", "%s", "%s", "%s"]
 }
 `, bucketName, roleEntityOwners, roleEntityEditors, roleEntityViewers, roleEntityBasic1, roleEntityBasic2)
+}
+
+func testGoogleStorageBucketsAclBasic1Update(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name = "%s"
+}
+
+resource "google_storage_bucket_acl" "acl" {
+  bucket      = google_storage_bucket.bucket.name
+  role_entity = ["%s", "%s", "%s", "%s"]
+}
+`, bucketName, roleEntityOwners, roleEntityEditors, roleEntityViewers, roleEntityBasic1)
 }
 
 func testGoogleStorageBucketsAclBasic2(bucketName string) string {
