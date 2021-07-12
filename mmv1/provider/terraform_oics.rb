@@ -45,7 +45,7 @@ module Provider
         data.example = example
 
         data.generate(pwd,
-                      'templates/terraform/examples/base_configs/example_file.tf.erb',
+                      'templates/terraform/examples/base_configs/oics_example_file.tf.erb',
                       File.join(target_folder, 'main.tf'),
                       self)
 

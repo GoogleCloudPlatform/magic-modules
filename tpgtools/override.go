@@ -27,7 +27,8 @@ type OverrideType string // enum
 
 // Product-level Overrides
 const (
-	ProductSkipBasePath OverrideType = "SKIP_BASEPATH"
+	ProductBasePath OverrideType = "PRODUCT_BASE_PATH"
+	ProductTitle    OverrideType = "PRODUCT_TITLE"
 )
 
 // Resource-level Overrides
@@ -158,6 +159,26 @@ func (o Overrides) PropertyOverrideWithDetails(typ OverrideType, p Property, i i
 	found := false
 	for _, v := range o {
 		if v.Field != nil && *v.Field == p.overridePath() && v.Type == typ && compareLocation(v.Location, location) {
+			if found {
+				return false, fmt.Errorf("found duplicate override of type %v", typ)
+			}
+
+			found = true
+			if err := convert(v.Details, i); err != nil {
+				return false, fmt.Errorf("error converting type: %v", err)
+			}
+		}
+	}
+
+	return found, nil
+}
+
+// ProductWithDetails returns whether a single OverrideType is present
+// on the resource, and includes the override's Details in the i interface if so.
+func (o Overrides) ProductOverrideWithDetails(typ OverrideType, i interface{}) (bool, error) {
+	found := false
+	for _, v := range o {
+		if v.Field == nil && v.Type == typ {
 			if found {
 				return false, fmt.Errorf("found duplicate override of type %v", typ)
 			}

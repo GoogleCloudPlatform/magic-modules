@@ -1679,7 +1679,7 @@ resource "google_compute_backend_service" "backend" {
   name                            = "tf-test-backend%s"
   enable_cdn                      = true
   connection_draining_timeout_sec = 10
- 
+
   backend {
     group = google_compute_region_network_endpoint_group.cloudrun_neg.id
   }

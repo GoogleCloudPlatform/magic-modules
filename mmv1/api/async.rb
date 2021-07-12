@@ -66,6 +66,9 @@ module Api
     attr_reader :result
     attr_reader :status
     attr_reader :error
+    # If true, include project as an argument to OperationWaitTime.
+    # It is intended for resources that calculate project/region from a selflink field
+    attr_reader :include_project
 
     # The list of methods where operations are used.
     attr_reader :actions
@@ -78,6 +81,7 @@ module Api
       check :status, type: Status, required: true
       check :error, type: Error, required: true
       check :actions, default: %w[create delete update], type: ::Array, item_type: ::String
+      check :include_project, type: :boolean, default: false
     end
 
     # The main implementation of Operation,
