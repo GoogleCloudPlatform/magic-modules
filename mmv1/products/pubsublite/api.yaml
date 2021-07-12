@@ -38,7 +38,7 @@ objects:
     create_url: projects/{{project}}/locations/{{zone}}/topics?topicId={{name}}
     update_verb: :PATCH
     update_mask: true
-    update_url: projects/{{project}}/locations/{{zone}}/topics/{name}}
+    update_url: projects/{{project}}/locations/{{zone}}/topics/{{name}}
     parameters:
       - !ruby/object:Api::Type::String
         name: region
@@ -111,7 +111,7 @@ objects:
     create_url: projects/{{project}}/locations/{{zone}}/subscriptions?subscriptionId={{name}}
     update_verb: :PATCH
     update_mask: true
-    update_url: projects/{{project}}/locations/{{zone}}/subscriptions/{name}}
+    update_url: projects/{{project}}/locations/{{zone}}/subscriptions/{{name}}
     parameters:
       - !ruby/object:Api::Type::String
         name: region
@@ -136,7 +136,7 @@ objects:
           A reference to a Topic resource.
         required: true
         input: true
-        pattern: 'projects/{{project}}/locations/{{zone}}/topics/{name}}'
+        pattern: 'projects/{{project}}/locations/{{zone}}/topics/{{name}}'
       - !ruby/object:Api::Type::NestedObject
         name: 'deliveryConfig'
         description: |
