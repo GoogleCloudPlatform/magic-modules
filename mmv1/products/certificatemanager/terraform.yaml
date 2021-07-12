@@ -1,0 +1,55 @@
+# Copyright 2021 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  DnsAuthorization: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        These resources require allow-listing to use, and are not openly available to all Cloud customers. Engage with your Cloud account team to discuss how to onboard.
+    autogen_async: true
+    import_format: ["projects/{{project}}/locations/global/dnsAuthorizations/{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "certificate_manager_dns_authorization_basic"
+        primary_resource_id: "default"
+        vars:
+          dns_auth_name: "dns-auth"
+          zone_name: "my-zone"
+  Certificate: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        These resources require allow-listing to use, and are not openly available to all Cloud customers. Engage with your Cloud account team to discuss how to onboard.
+    autogen_async: true
+    import_format: ["projects/{{project}}/locations/global/certificates/{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "certificate_manager_certificate_basic"
+        primary_resource_id: "default"
+        vars:
+          dns_auth_name: "dns-auth"
+          dns_auth_subdomain: "subdomain"
+          dns_auth_name2: "dns-auth2"
+          dns_auth_subdomain2: "subdomain2"
+          cert_name: "dns-cert"
+        ignore_read_extra:
+          - "managed.0.dns_authorizations"
+    properties:
+      managed.dnsAuthorizations: !ruby/object:Overrides::Terraform::PropertyOverride
+        # We don't support ignore_read on nested fields
+        ignore_read: true
+        custom_flatten: "templates/terraform/custom_flatten/certificate_manager_certificate_managed_dns_auth.go.erb"
+      selfManaged.certificatePem: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+      selfManaged.privateKeyPem: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
