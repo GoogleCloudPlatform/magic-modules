@@ -360,9 +360,6 @@ resource "google_compute_region_backend_service" "foobar" {
   outlier_detection {
     consecutive_errors = 2
   }
-  subsetting {
-	  policy = "CONSISTENT_HASH_SUBSETTING"
-  }
 }
 
 resource "google_compute_health_check" "health_check" {
