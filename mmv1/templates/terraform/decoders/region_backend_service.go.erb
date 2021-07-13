@@ -25,4 +25,11 @@ if v, ok :=  res["localityLbPolicy"]; ok {
 	}
 }
 
+b, a := d.GetChange("subsetting.0.policy")
+
+// This is for situations where TF users remove the block but the API requires policy to be set to NONE to disable it.
+if b.(string) == "CONSISTENT_HASH_SUBSETTING" && a.(string) == "" {
+	delete(res, "subsetting")
+}
+
 return res, nil
