@@ -57,6 +57,7 @@ func Mappers() map[string][]Mapper {
 		"google_compute_instance":               {{Convert: GetComputeInstanceCaiObject}},
 		"google_compute_network":                {{Convert: GetComputeNetworkCaiObject}},
 		"google_compute_subnetwork":             {{Convert: GetComputeSubnetworkCaiObject}},
+		"google_dns_managed_zone":               {{Convert: GetDNSManagedZoneCaiObject}},
 		"google_storage_bucket":                 {{Convert: GetStorageBucketCaiObject}},
 		"google_sql_database_instance":          {{Convert: GetSQLDatabaseInstanceCaiObject}},
 		"google_container_cluster":              {{Convert: GetContainerClusterCaiObject}},
