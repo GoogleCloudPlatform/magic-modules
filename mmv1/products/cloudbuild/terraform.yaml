@@ -45,11 +45,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       triggerTemplate: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           {{description}}
-          One of `trigger_template` or `github` must be provided.
+          One of `trigger_template`, `github`, `pubsub_config` or `webhook_config` must be provided.
       github: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           {{description}}
-          One of `trigger_template` or `github` must be provided.
+          One of `trigger_template`, `github`, `pubsub_config` or `webhook_config` must be provided.
+      pubsubConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          {{description}}
+          One of `trigger_template`, `github`, `pubsub_config` or `webhook_config` must be provided.
+      webhookConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          {{description}}
+          One of `trigger_template`, `github`, `pubsub_config` or `webhook_config` must be provided.
       triggerTemplate.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode

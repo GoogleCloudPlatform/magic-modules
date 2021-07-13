@@ -17,9 +17,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         If you are using User ADCs (Application Default Credentials) with this resource,
-        you must specify a `billing_project` and set `user_project_override` to true 
-        in the provider configuration. Otherwise the ACM API will return a 403 error. 
-        Your account must have the `serviceusage.services.use` permission on the 
+        you must specify a `billing_project` and set `user_project_override` to true
+        in the provider configuration. Otherwise the ACM API will return a 403 error.
+        Your account must have the `serviceusage.services.use` permission on the
         `billing_project` you defined.
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
@@ -46,9 +46,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         If you are using User ADCs (Application Default Credentials) with this resource,
-        you must specify a `billing_project` and set `user_project_override` to true 
-        in the provider configuration. Otherwise the ACM API will return a 403 error. 
-        Your account must have the `serviceusage.services.use` permission on the 
+        you must specify a `billing_project` and set `user_project_override` to true
+        in the provider configuration. Otherwise the ACM API will return a 403 error.
+        Your account must have the `serviceusage.services.use` permission on the
         `billing_project` you defined.
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
@@ -106,9 +106,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         If you are using User ADCs (Application Default Credentials) with this resource,
-        you must specify a `billing_project` and set `user_project_override` to true 
-        in the provider configuration. Otherwise the ACM API will return a 403 error. 
-        Your account must have the `serviceusage.services.use` permission on the 
+        you must specify a `billing_project` and set `user_project_override` to true
+        in the provider configuration. Otherwise the ACM API will return a 403 error.
+        Your account must have the `serviceusage.services.use` permission on the
         `billing_project` you defined.
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckForExistence
@@ -219,9 +219,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         If you are using User ADCs (Application Default Credentials) with this resource,
-        you must specify a `billing_project` and set `user_project_override` to true 
-        in the provider configuration. Otherwise the ACM API will return a 403 error. 
-        Your account must have the `serviceusage.services.use` permission on the 
+        you must specify a `billing_project` and set `user_project_override` to true
+        in the provider configuration. Otherwise the ACM API will return a 403 error.
+        Your account must have the `serviceusage.services.use` permission on the
         `billing_project` you defined.
     autogen_async: true
     exclude_validator: true
