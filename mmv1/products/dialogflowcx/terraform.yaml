@@ -110,7 +110,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       insert_minutes: 40
       update_minutes: 40
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/self_link_as_name_set_location.go.erb   
+      custom_import: templates/terraform/custom_import/dialogflowcx_environment.go.erb   
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dialogflowcx_environment_full"
@@ -118,8 +118,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           agent_name: "dialogflowcx-agent"
     skip_sweeper: true
-    id_format: "{{name}}"
-    import_format: ["{{name}}"]
+    id_format: "{{parent}}/environments/{{name}}"
+    import_format: ["{{parent}}/environments/{{name}}"]
     autogen_async: true
     properties:
       description: !ruby/object:Overrides::Terraform::PropertyOverride

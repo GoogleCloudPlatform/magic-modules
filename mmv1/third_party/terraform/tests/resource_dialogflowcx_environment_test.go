@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -24,17 +23,17 @@ func TestAccDialogflowCXEnvironment_update(t *testing.T) {
 				Config: testAccDialogflowCXEnvironment_basic(context),
 			},
 			{
-				ResourceName:            "google_dialogflow_cx_environment.development",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_dialogflow_cx_environment.development",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccDialogflowCXEnvironment_full(context),
 			},
 			{
-				ResourceName:            "google_dialogflow_cx_environment.development",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_dialogflow_cx_environment.development",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -64,16 +63,13 @@ func testAccDialogflowCXEnvironment_basic(context map[string]interface{}) string
     
 	resource "google_dialogflow_cx_version" "version1" {
 		parent       = google_dialogflow_cx_agent.agent_version.start_flow
-		location     = google_dialogflow_cx_agent.agent_version.location
 		display_name = "1.0.0"
 		description  = "version 1.0.0"
 	}
 
 	resource "google_dialogflow_cx_environment" "development" {
         parent       = google_dialogflow_cx_agent.agent_version.id
-        location     = google_dialogflow_cx_agent.agent_version.location
         display_name = "Development"
-        description  = "Development Environment"
         version_configs {
             version = google_dialogflow_cx_version.version1.id
         }
@@ -110,14 +106,12 @@ func testAccDialogflowCXEnvironment_full(context map[string]interface{}) string 
 
 	resource "google_dialogflow_cx_version" "version1" {
 		parent       = google_dialogflow_cx_agent.agent_version.start_flow
-		location     = google_dialogflow_cx_agent.agent_version.location
 		display_name = "1.0.0"
 		description  = "version 1.0.0"
 	}
 
 	resource "google_dialogflow_cx_environment" "development" {
         parent       = google_dialogflow_cx_agent.agent_version.id
-        location     = google_dialogflow_cx_agent.agent_version.location
         display_name = "Development"
         version_configs {
             version = google_dialogflow_cx_version.version1.id

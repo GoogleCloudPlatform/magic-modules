@@ -603,13 +603,6 @@ objects:
         description: |
           The Agent to create an Environment for. 
           Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
-      - !ruby/object:Api::Type::String
-        name: 'location'
-        description: |
-          The name of the location this environment is located in.
-        required: true
-        input: true
-        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
