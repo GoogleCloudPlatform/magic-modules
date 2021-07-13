@@ -16,21 +16,13 @@ if d.Get("load_balancing_scheme").(string) == "INTERNAL_MANAGED" {
 	return obj, nil
 }
 
-log.Printf("DUMPING PRE PATCH ENCODER: %#v", obj)
-
 b, a := d.GetChange("subsetting.0.policy")
-
-log.Printf("before pol value: %s", b.(string))
-
-log.Printf("after pol value: %s", a.(string))
 
 // This is for situations where TF users remove the block but the API requires policy to be set to NONE to disable it.
 if b.(string) == "CONSISTENT_HASH_SUBSETTING" && a.(string) == "" {
 	disableSubsetting := map[string]string{"policy": "NONE"}
 	obj["subsetting"] = disableSubsetting
 }
-
-log.Printf("DUMPING POST PATCH ENCODER: %#v", obj)
 
 backendServiceOnlyManagedApiFieldNames := []string{
 	"capacityScaler",
