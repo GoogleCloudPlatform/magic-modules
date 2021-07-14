@@ -181,6 +181,8 @@ module Provider
                         'third_party/terraform/utils/iam_bigquery_dataset.go'],
                        ['google/iam_project.go',
                         'third_party/terraform/utils/iam_project.go'],
+                       ['google/kms_crypto_key.go',
+                        'third_party/validator/kms_crypto_key.go'],
                        ['google/kms_key_ring_iam.go',
                         'third_party/validator/kms_key_ring_iam.go'],
                        ['google/kms_crypto_key_iam.go',
