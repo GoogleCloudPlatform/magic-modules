@@ -1,15 +1,15 @@
 resource "google_compute_router" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
   name                          = "<%= ctx[:vars]['router_name'] %>"
   network                       = google_compute_network.network.name
   encrypted_interconnect_router = true
   bgp {
     asn = 64514
   }
-  provider = google-beta
 }
 
 resource "google_compute_network" "network" {
+  provider = google-beta
   name                    = "<%= ctx[:vars]['network_name'] %>"
   auto_create_subnetworks = false
-  provider = google-beta
 }

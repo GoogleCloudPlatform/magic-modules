@@ -54,7 +54,6 @@ objects:
         input: true
       - !ruby/object:Api::Type::String
         name: "timeZone"
-        update_url: 'projects/{{project}}/locations/{{location}}/datasets/{{name}}'
         description: |
           The default timezone used by this dataset. Must be a either a valid IANA time zone name such as
           "America/New_York" or empty, which defaults to UTC. This is used for parsing times in resources
@@ -110,7 +109,6 @@ objects:
       - !ruby/object:Api::Type::KeyValuePairs
         name: labels
         required: false
-        update_url: '{{dataset}}/dicomStores/{{name}}'
         description: |
           User-supplied key-value pairs used to organize DICOM stores.
 
@@ -128,7 +126,6 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: notificationConfig
         required: false
-        update_url: '{{dataset}}/dicomStores/{{name}}'
         properties:
           - !ruby/object:Api::Type::String
             name: pubsubTopic
@@ -156,7 +153,6 @@ objects:
         name: streamConfigs
         required: false
         min_version: beta
-        update_url: '{{dataset}}/dicomStores/{{name}}'
         description: |
           To enable streaming to BigQuery, configure the streamConfigs object in your DICOM store.
           streamConfigs is an array, so you can specify multiple BigQuery destinations. You can stream metadata from a single DICOM store to up to five BigQuery tables in a BigQuery dataset.
@@ -243,7 +239,6 @@ objects:
           identifiers, those IDs will be part of the FHIR resource path recorded in Cloud audit logs and Cloud Pub/Sub
           notifications.
         required: false
-        update_url: '{{dataset}}/fhirStores/{{name}}'
       - !ruby/object:Api::Type::Boolean
         name: 'disableReferentialIntegrity'
         description: |
@@ -284,7 +279,6 @@ objects:
       - !ruby/object:Api::Type::KeyValuePairs
         name: labels
         required: false
-        update_url: '{{dataset}}/fhirStores/{{name}}'
         description: |
           User-supplied key-value pairs used to organize FHIR stores.
 
@@ -302,7 +296,6 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: notificationConfig
         required: false
-        update_url: '{{dataset}}/fhirStores/{{name}}'
         properties:
           - !ruby/object:Api::Type::String
             name: pubsubTopic
@@ -420,7 +413,6 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: parserConfig
         required: false
-        update_url: '{{dataset}}/hl7V2Stores/{{name}}'
         properties:
           - !ruby/object:Api::Type::Boolean
             name: allowNullHeader
@@ -463,7 +455,6 @@ objects:
       - !ruby/object:Api::Type::KeyValuePairs
         name: labels
         required: false
-        update_url: '{{dataset}}/hl7V2Stores/{{name}}'
         description: |
           User-supplied key-value pairs used to organize HL7v2 stores.
 
@@ -516,7 +507,6 @@ objects:
         removed_message: This field has been replaced by notificationConfigs
         exact_version: ga
         required: false
-        update_url: '{{dataset}}/hl7V2Stores/{{name}}'
         properties:
           - !ruby/object:Api::Type::String
             name: pubsubTopic
@@ -534,7 +524,6 @@ objects:
         deprecation_message: This field has been replaced by notificationConfigs
         exact_version: beta
         required: false
-        update_url: '{{dataset}}/hl7V2Stores/{{name}}'
         properties:
           - !ruby/object:Api::Type::String
             name: pubsubTopic

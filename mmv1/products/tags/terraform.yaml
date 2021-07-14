@@ -15,6 +15,7 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   TagKey: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
+    exclude_validator: true
     mutex: tagKeys/{{parent}}
     id_format: "tagKeys/{{name}}"
     import_format: ["tagKeys/{{name}}", "{{name}}"]
@@ -40,6 +41,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
   TagValue: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
+    exclude_validator: true
     mutex: tagValues/{{parent}}
     id_format: "tagValues/{{name}}"
     import_format: ["tagValues/{{name}}", "{{name}}"]

@@ -6,6 +6,7 @@ steps:
       timeout: 8000s
       args:
           - $_PR_NUMBER
+          - $COMMIT_SHA
 
 # Long timeout to enable waiting on VCR test
 timeout: 20000s

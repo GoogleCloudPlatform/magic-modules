@@ -34,6 +34,7 @@ require 'provider/ansible_devel'
 require 'provider/inspec'
 require 'provider/terraform'
 require 'provider/terraform_oics'
+require 'provider/terraform_cloud_docs'
 require 'provider/terraform_object_library'
 require 'pp' if ENV['COMPILER_DEBUG']
 
@@ -201,6 +202,7 @@ all_product_files.each do |product_name|
   else
     override_providers = {
       'oics' => Provider::TerraformOiCS,
+      'cloud_docs' => Provider::TerraformCloudDocs,
       'validator' => Provider::TerraformObjectLibrary,
       'ansible_devel' => Provider::Ansible::Devel
     }
@@ -247,6 +249,7 @@ if generate_code
     products_for_version.sort_by { |p| p[:definitions].name.downcase },
     common_compile_file
   )
+
   if override_dir
     Google::LOGGER.info "Compiling override common files for #{provider_name}"
     common_compile_file = "#{override_dir}/common~compile.yaml"

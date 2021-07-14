@@ -5,23 +5,13 @@ steps:
       args:
           - $_PR_NUMBER
 
-    # The GCB / GH integration doesn't satisfy our use case perfectly.
-    # It doesn't check out the merge commit, and it doesn't check out the repo
-    # itself - it only gives us the actual code, not the repo. So we need
-    # to handle that access ourselves - which means deleting the code
-    # and cloning the repo to the present directory.  We need to use
-    # 'sh' to evaluate the '*' arguments, which otherwise would be
-    # passed literally to 'rm'.
-    - name: 'alpine'
-      args:
-          - sh
-          - -c
-          - rm -rf ./* ./.* || true
+    # The GCB / GH integration uses a shallow clone of the repo. We need to convert
+    # that to a full clone in order to work with it properly.
+    # https://cloud.google.com/source-repositories/docs/integrating-with-cloud-build#unshallowing_clones
     - name: 'gcr.io/cloud-builders/git'
       args:
-          - clone
-          - https://github.com/GoogleCloudPlatform/magic-modules
-          - .
+          - fetch
+          - --unshallow
     # We need to configure git since creating the merge commit is
     # technically a commit.
     - name: 'gcr.io/cloud-builders/git'
@@ -74,6 +64,7 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      id: tpg-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       args:
@@ -93,6 +84,7 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      id: tpgb-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       args:
@@ -138,6 +130,7 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      id: tgc-head
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       args:
@@ -147,6 +140,7 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      id: tgc-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       args:
@@ -170,6 +164,24 @@ steps:
       args:
           - 'base'
           - 'tf-oics'
+          - 'beta'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["merged"]
+      args:
+          - 'head'
+          - 'tf-cloud-docs'
+          - 'beta'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["merged"]
+      args:
+          - 'base'
+          - 'tf-cloud-docs'
           - 'beta'
           - $_PR_NUMBER
 
@@ -182,25 +194,37 @@ steps:
     - name: 'gcr.io/graphite-docker-images/terraform-google-conversion-tester'
       id: tgc-test
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["diff"]
+      waitFor: ["tgc-head", "tgc-base"]
       args:
           - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - "21"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpgb-test
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["diff"]
+      waitFor: ["tpgb-head", "tpgb-base"]
       args:
           - 'beta'
           - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - "22"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpg-test
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["diff"]
+      waitFor: ["tpg-head", "tpg-base"]
       args:
           - 'ga'
           - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - "23"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-vcr-tester'
       id: tpg-vcr-test
@@ -209,12 +233,7 @@ steps:
       timeout: 12000s
       args:
           - $_PR_NUMBER
-
-    - name: 'gcr.io/graphite-docker-images/changelog-checker'
-      secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tpg-test", "tpgb-test"]
-      args:
-          - $_PR_NUMBER
+          - $COMMIT_SHA
 
 # Long timeout to enable waiting on VCR test
 timeout: 20000s

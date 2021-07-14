@@ -31,14 +31,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// empty string is passed for dcl default since dcl
+// [hardcodes the values](https://github.com/GoogleCloudPlatform/declarative-resource-client-library/blob/main/services/google/eventarc/beta/trigger_internal.go#L96-L103)
 {{range $index, $pkg := .}}
-{{- if $pkg.WriteBasePath }}
-var {{$pkg.ProductType}}EndpointEntryKey = "{{$pkg.ProductName}}_custom_endpoint"
-var {{$pkg.ProductType}}EndpointEntry = &schema.Schema{
+{{- if $pkg.ShouldWriteProductBasePath }}
+var {{$pkg.BasePathIdentifier}}EndpointEntryKey = "{{$pkg.BasePathIdentifierSnake}}_custom_endpoint"
+var {{$pkg.BasePathIdentifier}}EndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
 	Optional:     true,
 	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_{{$pkg.ProductNameUpper}}_CUSTOM_ENDPOINT",
+		"GOOGLE_{{$pkg.BasePathIdentifierSnakeUpper}}_CUSTOM_ENDPOINT",
 	}, ""),
 }
 {{- end}}
@@ -46,28 +48,22 @@ var {{$pkg.ProductType}}EndpointEntry = &schema.Schema{
 
 //Add new values to config.go.erb config object declaration
 {{- range $index, $pkg := . }}
-{{- if $pkg.WriteBasePath }}
-//{{$pkg.ProductType}}BasePath string
+{{- if $pkg.ShouldWriteProductBasePath }}
+//{{$pkg.BasePathIdentifier}}BasePath string
 {{- end}}
-// client{{$pkg.ProductType}}DCL *{{$pkg.PackageName}}Dcl.Client
-{{- end}}
-
-//Add new values to config.go.erb object initialization
-{{- range $index, $pkg := . }}
-// c.client{{$pkg.ProductType}}DCL = {{$pkg.PackageName}}Dcl.NewClient(dcl.NewConfig(dclClientOptions, dclUserAgentOptions,dclLoggerOptions, dcl.WithBasePath(c.{{$pkg.ProductType}}BasePath)))
 {{- end}}
 
 //Add new values to provider.go.erb schema initialization
 {{- range $index, $pkg := . }}
-{{- if $pkg.WriteBasePath }}
-// {{$pkg.ProductType}}EndpointEntryKey:               {{$pkg.ProductType}}EndpointEntry,
+{{- if $pkg.ShouldWriteProductBasePath }}
+// {{$pkg.BasePathIdentifier}}EndpointEntryKey:               {{$pkg.BasePathIdentifier}}EndpointEntry,
 {{- end}}
 {{- end}}
 
 //Add new values to provider.go.erb - provider block read
 {{- range $index, $pkg := . }}
-{{- if $pkg.WriteBasePath }}
-// config.{{$pkg.ProductType}}BasePath = d.Get({{$pkg.ProductType}}EndpointEntryKey).(string)
+{{- if $pkg.ShouldWriteProductBasePath }}
+// config.{{$pkg.BasePathIdentifier}}BasePath = d.Get({{$pkg.BasePathIdentifier}}EndpointEntryKey).(string)
 {{- end}}
 {{- end}}
 

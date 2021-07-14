@@ -1,8 +1,7 @@
-resource "google_compute_backend_bucket" "image_backend" {
-  provider    = google-beta
+resource "google_compute_backend_bucket" "<%= ctx[:primary_resource_id] %>" {
   name        = "<%= ctx[:vars]['backend_bucket_name'] %>"
   description = "Contains beautiful beta mages"
-  bucket_name = google_storage_bucket.image_bucket.name
+  bucket_name = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
   enable_cdn  = true
   cdn_policy {
     cache_mode = "CACHE_ALL_STATIC"
@@ -17,8 +16,7 @@ resource "google_compute_backend_bucket" "image_backend" {
   ]
 }
 
-resource "google_storage_bucket" "image_bucket" {
-  provider = google-beta
+resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['bucket_name'] %>"
   location = "EU"
 }

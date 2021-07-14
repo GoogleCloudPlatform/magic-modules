@@ -25,6 +25,10 @@ function clone_repo() {
         UPSTREAM_OWNER=terraform-google-modules
         GH_REPO=docs-examples
         LOCAL_PATH=$GOPATH/src/github.com/terraform-google-modules/docs-examples
+    elif [ "$REPO" == "tf-cloud-docs" ]; then
+        UPSTREAM_OWNER=terraform-google-modules
+        GH_REPO=terraform-docs-samples
+        LOCAL_PATH=$GOPATH/src/github.com/terraform-google-modules/terraform-docs-samples
     elif [ "$REPO" == "ansible" ]; then
         UPSTREAM_OWNER=ansible-collections
         GH_REPO=google.cloud
@@ -88,7 +92,7 @@ fi
 
 if [ "$REPO" == "terraform" ]; then
     pushd $LOCAL_PATH
-    find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf" -not -name ".go-version" -not -name ".hashibot.hcl" -not -name "tools.go"  -exec git rm {} \;
+    find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name "go.mod" -not -name "go.sum" -not -name ".go-version" -not -name ".hashibot.hcl" -not -name "tools.go"  -exec git rm {} \;
     go mod download
     popd
 fi
@@ -99,6 +103,9 @@ if [ "$REPO" == "tf-conversion" ]; then
 elif [ "$REPO" == "tf-oics" ]; then
     # use terraform generator with oics override
     bundle exec compiler -a -e terraform -f oics -o $LOCAL_PATH -v $VERSION
+elif [ "$REPO" == "tf-cloud-docs" ]; then
+    # use terraform generator with cloud docs override
+    bundle exec compiler -a -e terraform -f cloud_docs -o $LOCAL_PATH -v $VERSION
 else
     if [ "$REPO" == "terraform" ] && [ "$VERSION" == "ga" ]; then
         bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION --no-docs
