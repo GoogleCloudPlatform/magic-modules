@@ -12,7 +12,11 @@ import (
 
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+<% unless version == 'ga' -%>
+	"github.com/hashicorp/terraform-provider-google-beta/version"
+<% else -%>
 	"github.com/hashicorp/terraform-provider-google/version"
+<% end -%>	
 	"google.golang.org/api/option"
 
 	"golang.org/x/oauth2"
