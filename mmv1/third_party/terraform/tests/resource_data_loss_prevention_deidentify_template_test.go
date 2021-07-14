@@ -42,66 +42,66 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateUpdate(t *
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateStart(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
-	parent = "organizations/%{organization}"
-	description = "Description"
-	display_name = "Displayname"
+  parent = "organizations/%{organization}"
+  description = "Description"
+  display_name = "Displayname"
 
-	deidentify_config {
-		info_type_transformations {
-			transformations {
-				info_types {
-					name = "PHONE_NUMBER"
-				}
-				info_types {
-					name = "CREDIT_CARD_NUMBER"
-				}
+  deidentify_config {
+    info_type_transformations {
+      transformations {
+        info_types {
+          name = "PHONE_NUMBER"
+        }
+        info_types {
+          name = "CREDIT_CARD_NUMBER"
+        }
 
-				primitive_transformation {
-					replace_config {
-						new_value {
-							integer_value = 9
-						}
-					}
-				}
-			}
+        primitive_transformation {
+          replace_config {
+            new_value {
+              integer_value = 9
+            }
+          }
+        }
+      }
 
-			transformations {
-				info_types {
-					name = "EMAIL_ADDRESS"
-				}
-				info_types {
-					name = "LAST_NAME"
-				}
+      transformations {
+        info_types {
+          name = "EMAIL_ADDRESS"
+        }
+        info_types {
+          name = "LAST_NAME"
+        }
 
-				primitive_transformation {
-					character_mask_config {
-						masking_character = "X"
-						number_to_mask = 4
-						reverse_order = true
-						characters_to_ignore {
-							common_characters_to_ignore = "PUNCTUATION"
-						}
-					}
-				}
-			}
+        primitive_transformation {
+          character_mask_config {
+            masking_character = "X"
+            number_to_mask = 4
+            reverse_order = true
+            characters_to_ignore {
+              common_characters_to_ignore = "PUNCTUATION"
+            }
+          }
+        }
+      }
 
-			transformations {
-				info_types {
-					name = "DATE_OF_BIRTH"
-				}
+      transformations {
+        info_types {
+          name = "DATE_OF_BIRTH"
+        }
 
-				primitive_transformation {
-					replace_config {
-						new_value {
-							date_value {
-								year  = 2020
-								month = 1
-								day   = 1
-							}
-						}
-					}
-				}
-			}
+        primitive_transformation {
+          replace_config {
+            new_value {
+              date_value {
+                year  = 2020
+                month = 1
+                day   = 1
+              }
+            }
+          }
+        }
+      }
 
       transformations {
         info_types {
@@ -125,6 +125,29 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           }
         }
       }
+
+      transformations {
+        info_types {
+          name = "CREDIT_CARD_NUMBER23224"
+        }
+
+        primitive_transformation {
+          crypto_deterministic_config {
+            context {
+              name = "sometweak"
+            }
+            crypto_key {
+              unwrapped {
+                key     = "VVdWVWFGZHRXbkUwZERkM0lYb2xRdz09"
+              }
+            }
+            surrogate_info_type {
+              name = "abc"
+            }
+          }
+        }
+      }
+
       transformations {
         info_types {
           name = "CUSTOM_INFO_TYPE"
@@ -187,8 +210,27 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           }
         }
       }
-		}
-	}
+
+      transformations {
+        info_types {
+          name = "SSN33"
+        }
+        primitive_transformation {
+          crypto_replace_ffx_fpe_config {
+            common_alphabet = "UPPER_CASE_ALPHA_NUMERIC"
+            crypto_key {
+              unwrapped {
+                key = "VVdWVWFGZHRXbkUwZERkM0lYb2xRdz09"
+              }
+            }
+            surrogate_info_type {
+              name = "CUSTOM_INFO_TYPE"
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 resource "google_kms_crypto_key" "my_key" {
@@ -206,61 +248,61 @@ resource "google_kms_key_ring" "key_ring" {
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateUpdate(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
-	parent = "organizations/%{organization}"
-	description = "Description"
-	display_name = "Displayname"
+  parent = "organizations/%{organization}"
+  description = "Description"
+  display_name = "Displayname"
 
-	deidentify_config {
-		info_type_transformations {
-			transformations {
-				info_types {
-					name = "CREDIT_CARD_NUMBER"
-				}
+  deidentify_config {
+    info_type_transformations {
+      transformations {
+        info_types {
+          name = "CREDIT_CARD_NUMBER"
+        }
 
-				primitive_transformation {
-					replace_config {
-						new_value {
-							integer_value = 9
-						}
-					}
-				}
-			}
+        primitive_transformation {
+          replace_config {
+            new_value {
+              integer_value = 9
+            }
+          }
+        }
+      }
 
-			transformations {
-				info_types {
-					name = "EMAIL_ADDRESS"
-				}
-				info_types {
-					name = "LAST_NAME"
-				}
+      transformations {
+        info_types {
+          name = "EMAIL_ADDRESS"
+        }
+        info_types {
+          name = "LAST_NAME"
+        }
 
-				primitive_transformation {
-					character_mask_config {
-						number_to_mask = 3
-						reverse_order = true
-					}
-				}
-			}
+        primitive_transformation {
+          character_mask_config {
+            number_to_mask = 3
+            reverse_order = true
+          }
+        }
+      }
 
-			transformations {
-				info_types {
-					name = "DATE_OF_BIRTH"
-				}
+      transformations {
+        info_types {
+          name = "DATE_OF_BIRTH"
+        }
 
-				primitive_transformation {
-					replace_config {
-						new_value {
-							date_value {
-								year  = 2020
-								month = 1
-								day   = 1
-							}
-						}
-					}
-				}
-			}
+        primitive_transformation {
+          replace_config {
+            new_value {
+              date_value {
+                year  = 2020
+                month = 1
+                day   = 1
+              }
+            }
+          }
+        }
+      }
 
-			transformations {
+      transformations {
         info_types {
           name = "CREDIT_CARD_NUMBERR"
         }
@@ -344,8 +386,8 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           }
         }
       }
-		}
-	}
+    }
+  }
 }
 
 resource "google_kms_crypto_key" "my_key" {
