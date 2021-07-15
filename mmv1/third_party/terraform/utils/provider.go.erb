@@ -515,14 +515,11 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		BillingProject:      d.Get("billing_project").(string),
         <% if version.nil? || version == 'ga' -%>
         userAgent: p.UserAgent("terraform-provider-google", version.ProviderVersion),
+		ProviderVersion = "google/" + version.ProviderVersion,
         <% else -%>
         userAgent: p.UserAgent("terraform-provider-google-<%= version -%>", version.ProviderVersion),
-        <% end -%>
-		<% if version.nil? || version == 'ga' -%>
-		ProviderVersion = "google/" + version.ProviderVersion,
-		<% else -%>
 		ProviderVersion: "google-<%= version -%>/"  + version.ProviderVersion,
-		<% end -%>
+       <% end -%>
 	}
 
 	// opt in extension for adding to the User-Agent header
