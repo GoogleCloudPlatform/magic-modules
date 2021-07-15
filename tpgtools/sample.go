@@ -47,11 +47,8 @@ type Substitution struct {
 	// Substitution is the text to be substituted, e.g. topic_name
 	Substitution *string
 
-	// TestValue is the value of the substituted text for tests
-	TestValue *string `yaml:"test_value"`
-
-	// TestValue is the value of the substituted text for docs
-	DocsValue *string `yaml:"docs_value"`
+	// Value is the value of the substituted text
+	Value *string `yaml:"value"`
 }
 
 // Dependency contains data that describes a single resource in a sample
@@ -167,15 +164,15 @@ func (s Sample) GenerateHCLDocs() string {
 }
 
 // GenerateHCL generates sample HCL using docs substitution metadata
-func (s Sample) GenerateHCL() string {
+func (s Sample) GenerateHCL(isDocs bool) string {
 	hcl, err := s.generateHCLTemplate()
 	if err != nil {
 		glog.Exit(err)
 	}
 
 	for _, sub := range s.Substitutions {
-		re := regexp.MustCompile(fmt.Sprintf(`tf-test-{{%s}}-%s`, *sub.Substitution))
-		hcl = re.ReplaceAllString(hcl, *sub.DocsValue)
+		re := regexp.MustCompile(fmt.Sprintf(`{{%s}}`, *sub.Substitution))
+		hcl = re.ReplaceAllString(hcl, *sub.TestValue)
 	}
 	return hcl
 }
