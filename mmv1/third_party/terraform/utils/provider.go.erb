@@ -516,7 +516,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		BillingProject:      d.Get("billing_project").(string),
         <% if version.nil? || version == 'ga' -%>
         userAgent: p.UserAgent("terraform-provider-google", version.ProviderVersion),
-        ProviderVersion = "google/" + version.ProviderVersion,
+        ProviderVersion: "google/" + version.ProviderVersion,
         <% else -%>
         userAgent: p.UserAgent("terraform-provider-google-<%= version -%>", version.ProviderVersion),
         ProviderVersion: "google-<%= version -%>/"  + version.ProviderVersion,
