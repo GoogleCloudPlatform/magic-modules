@@ -9,11 +9,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 <% unless version == 'ga' -%>
 	"github.com/hashicorp/terraform-provider-google-beta/version"
 <% else -%>
 	"github.com/hashicorp/terraform-provider-google/version"
-<% end -%>	
+<% end -%>
 	googleoauth "golang.org/x/oauth2/google"
 )
 
@@ -515,10 +516,10 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		BillingProject:      d.Get("billing_project").(string),
         <% if version.nil? || version == 'ga' -%>
         userAgent: p.UserAgent("terraform-provider-google", version.ProviderVersion),
-		ProviderVersion = "google/" + version.ProviderVersion,
+        ProviderVersion = "google/" + version.ProviderVersion,
         <% else -%>
         userAgent: p.UserAgent("terraform-provider-google-<%= version -%>", version.ProviderVersion),
-		ProviderVersion: "google-<%= version -%>/"  + version.ProviderVersion,
+        ProviderVersion: "google-<%= version -%>/"  + version.ProviderVersion,
         <% end -%>
 	}
 
