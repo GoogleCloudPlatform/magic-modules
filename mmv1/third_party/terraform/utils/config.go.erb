@@ -12,11 +12,6 @@ import (
 
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
-<% unless version == 'ga' -%>
-	"github.com/hashicorp/terraform-provider-google-beta/version"
-<% else -%>
-	"github.com/hashicorp/terraform-provider-google/version"
-<% end -%>	
 	"google.golang.org/api/option"
 
 	"golang.org/x/oauth2"
@@ -83,8 +78,6 @@ type providerMeta struct {
 	ModuleName string `cty:"module_name"`
 }
 
-var providerVersion string
-
 // Config is the configuration structure used to instantiate the Google
 // provider.
 type Config struct {
@@ -100,6 +93,7 @@ type Config struct {
 	BatchingConfig                      *batchingConfig
 	UserProjectOverride                 bool
 	RequestTimeout                      time.Duration
+    providerVersion                     string
 	// PollInterval is passed to resource.StateChangeConf in common_operation.go
 	// It controls the interval at which we poll for successful operations
 	PollInterval time.Duration
@@ -247,12 +241,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	c.requestBatcherServiceUsage = NewRequestBatcher("Service Usage", ctx, c.BatchingConfig)
 	c.requestBatcherIam = NewRequestBatcher("IAM", ctx, c.BatchingConfig)
 	c.PollInterval = 10 * time.Second
-
-<% if version.nil? || version == 'ga' -%>
-	providerVersion = "google/" + version.ProviderVersion
-<% else -%>
-	providerVersion = "google-<%= version -%>/"  + version.ProviderVersion
-<% end -%>
 
 	return nil
 }

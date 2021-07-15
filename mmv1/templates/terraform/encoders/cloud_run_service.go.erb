@@ -12,6 +12,7 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
+config := meta.(*Config)
 name := d.Get("name").(string)
 if obj["metadata"] == nil {
 	obj["metadata"] = make(map[string]interface{})
@@ -30,6 +31,6 @@ if metadata["annotations"] == nil {
 
 annotations := metadata["annotations"].(map[string]interface{})
 annotations["run.googleapis.com/client-name"] = "hashicorp-terraform"
-annotations["run.googleapis.com/client-version"] = providerVersion
+annotations["run.googleapis.com/client-version"] = config.ProviderVersion
 
 return obj, nil
