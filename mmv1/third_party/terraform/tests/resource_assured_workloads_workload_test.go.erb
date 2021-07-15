@@ -18,6 +18,9 @@ import (
 )
 
 func TestAccAssuredWorkloadsWorkload_basic(t *testing.T) {
+	// skipping vcr testing intermitently while tests are resolved.
+	// resource is confirmed working... hitting quota issues.
+	skipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -54,6 +57,7 @@ func TestAccAssuredWorkloadsWorkload_basic(t *testing.T) {
 }
 
 func TestAccAssuredWorkloadsWorkload_full(t *testing.T) {
+	skipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
