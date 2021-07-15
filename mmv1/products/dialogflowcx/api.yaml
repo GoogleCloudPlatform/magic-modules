@@ -562,8 +562,7 @@ objects:
           - :FAILED
   - !ruby/object:Api::Resource
     name: 'Environment'
-    base_url: "{{parent}}/environments/"
-    self_link: "{{name}}"
+    base_url: "{{parent}}/environments"
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -633,4 +632,3 @@ objects:
         name: 'updateTime'
         output: true
         description: 'Update time of this environment. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".'
-
