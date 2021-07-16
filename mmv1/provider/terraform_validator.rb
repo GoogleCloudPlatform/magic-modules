@@ -71,7 +71,7 @@ module Provider
                           ['google/iam_kms_key_ring.go',
                            'third_party/terraform/utils/iam_kms_key_ring.go.erb'],
                           ['google/iam_kms_crypto_key.go',
-                           'third_party/terraform/utils/iam_kms_crypto_key.go.erb'] 
+                           'third_party/terraform/utils/iam_kms_crypto_key.go.erb']
                         ],
                         file_template)
     end
