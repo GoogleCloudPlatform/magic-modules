@@ -168,15 +168,20 @@ func deleteAssuredWorkloadProvisionedResources(t *testing.T) resource.TestCheckF
 func testAccAssuredWorkloadsWorkload_basic(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_assured_workloads_workload" "meep" {
-	display_name = "workloadExample-%{random_suffix}"
-	labels = {
-		a = "a"
-	}
-	billing_account = "billingAccounts/%{billing_account}"
-	compliance_regime = "FEDRAMP_MODERATE"
-	provisioned_resources_parent = "folders/177863664720"
-	organization = "%{org_id}"
-	location = "us-central1"
+  display_name = "workloadExample-%{random_suffix}"
+  labels = {
+    a = "a"
+  }
+  billing_account = "billingAccounts/%{billing_account}"
+  compliance_regime = "FEDRAMP_MODERATE"
+  provisioned_resources_parent = google_folder.folder1.name
+  organization = "%{org_id}"
+  location = "us-central1"
+}
+
+resource "google_folder" "folder1" {
+  display_name = "tf-test-%{random_suffix}"
+  parent       = "organizations/%{org_id}"
 }
 `, context)
 }
@@ -184,15 +189,20 @@ resource "google_assured_workloads_workload" "meep" {
 func testAccAssuredWorkloadsWorkload_basicUpdate(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_assured_workloads_workload" "meep" {
-	display_name = "updatedExample-%{random_suffix}"
-	labels = {
-		a = "b"
-	}
-	billing_account = "billingAccounts/%{billing_account}"
-	compliance_regime = "FEDRAMP_MODERATE"
-	provisioned_resources_parent = "folders/177863664720"
-	organization = "%{org_id}"
-	location = "us-central1"
+  display_name = "updatedExample-%{random_suffix}"
+  labels = {
+    a = "b"
+  }
+  billing_account = "billingAccounts/%{billing_account}"
+  compliance_regime = "FEDRAMP_MODERATE"
+  provisioned_resources_parent = google_folder.folder1.name
+  organization = "%{org_id}"
+  location = "us-central1"
+}
+
+resource "google_folder" "folder1" {
+  display_name = "tf-test-%{random_suffix}"
+  parent       = "organizations/%{org_id}"
 }
 `, context)
 }
@@ -200,16 +210,21 @@ resource "google_assured_workloads_workload" "meep" {
 func testAccAssuredWorkloadsWorkload_full(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_assured_workloads_workload" "meep" {
-	display_name = "workloadExample-%{random_suffix}"
-	billing_account = "billingAccounts/%{billing_account}"
-	compliance_regime = "FEDRAMP_MODERATE"
-	organization = "%{org_id}"
-	location = "us-central1"
-	kms_settings {
-		next_rotation_time = "2021-10-02T15:01:23Z"
-		rotation_period = "864000s"
-	}
-	provisioned_resources_parent = "folders/177863664720"
+  display_name = "workloadExample-%{random_suffix}"
+  billing_account = "billingAccounts/%{billing_account}"
+  compliance_regime = "FEDRAMP_MODERATE"
+  organization = "%{org_id}"
+  location = "us-central1"
+  kms_settings {
+    next_rotation_time = "2021-10-02T15:01:23Z"
+    rotation_period = "864000s"
+  }
+  provisioned_resources_parent = google_folder.folder1.name
+}
+
+resource "google_folder" "folder1" {
+  display_name = "tf-test-%{random_suffix}"
+  parent       = "organizations/%{org_id}"
 }
 `, context)
 }
