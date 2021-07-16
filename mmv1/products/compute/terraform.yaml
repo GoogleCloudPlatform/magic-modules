@@ -511,6 +511,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # https://github.com/hashicorp/terraform-provider-google/issues/703
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 5
+    exclude_validator: true
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true

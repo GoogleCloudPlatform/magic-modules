@@ -187,6 +187,8 @@ module Provider
                         'third_party/validator/kms_key_ring_iam.go'],
                        ['google/kms_crypto_key_iam.go',
                         'third_party/validator/kms_crypto_key_iam.go'],
+                       ['google/compute_disk.go',
+                        'third_party/validator/compute_disk.go'],
                        ['google/dcl_logger.go',
                         '../tpgtools/handwritten/dcl_logger.go'],
                        ['google/utils.go',
