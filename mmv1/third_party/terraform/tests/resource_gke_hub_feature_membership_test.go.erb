@@ -1,6 +1,5 @@
 <% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"testing"
@@ -89,7 +88,7 @@ resource "google_gke_hub_feature" "feature" {
   labels = {
     foo = "bar"
   }
-  provider = google-beta
+
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
@@ -107,7 +106,7 @@ resource "google_gke_hub_feature_membership" "feature_member_1" {
       }
     }
   }
-  provider = google-beta
+
 }
 
 resource "google_gke_hub_feature_membership" "feature_member_2" {
@@ -124,7 +123,7 @@ resource "google_gke_hub_feature_membership" "feature_member_2" {
       }
     }
   }
-  provider = google-beta
+
 }
 `, context)
 }
@@ -139,7 +138,7 @@ resource "google_gke_hub_feature" "feature" {
   labels = {
     foo = "changed"
   }
-  provider = google-beta
+
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
@@ -157,7 +156,7 @@ resource "google_gke_hub_feature_membership" "feature_member_1" {
       }
     }
   }
-  provider = google-beta
+
 }
 
 resource "google_gke_hub_feature_membership" "feature_member_2" {
@@ -180,7 +179,7 @@ resource "google_gke_hub_feature_membership" "feature_member_2" {
       template_library_installed = true
     }
   }
-  provider = google-beta
+
 }
 `, context)
 }
@@ -195,7 +194,7 @@ resource "google_gke_hub_feature" "feature" {
   labels = {
     foo = "changed"
   }
-  provider = google-beta
+
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
@@ -224,7 +223,7 @@ resource "google_gke_hub_feature_membership" "feature_member_2" {
       enabled = true
     }
   }
-  provider = google-beta
+
 }
 
 resource "google_gke_hub_feature_membership" "feature_member_3" {
@@ -252,7 +251,7 @@ resource "google_gke_hub_feature_membership" "feature_member_3" {
       enabled = false
     }
   }
-  provider = google-beta
+
 }
 `, context)
 }
@@ -267,7 +266,7 @@ resource "google_gke_hub_feature" "feature" {
   labels = {
     foo = "changed"
   }
-  provider = google-beta
+
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
@@ -285,7 +284,7 @@ resource "google_gke_hub_feature_membership" "feature_member_3" {
       template_library_installed = true
     }
   }
-  provider = google-beta
+
 }
 `, context)
 }
@@ -350,7 +349,7 @@ resource "google_container_cluster" "primary" {
   name               = "tf-test-cl%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
-  provider = google-beta
+
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
@@ -363,7 +362,7 @@ resource "google_gke_hub_membership" "membership" {
     }
   }
   description = "test resource."
-  provider = google-beta
+
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -374,7 +373,7 @@ resource "google_gke_hub_feature" "feature" {
   labels = {
     foo = "bar"
   }
-  provider = google-beta
+
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
@@ -404,7 +403,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
       log_denies_enabled = true
     }
   }
-  provider = google-beta
+
 }
 `, context)
 }
@@ -416,7 +415,7 @@ resource "google_container_cluster" "primary" {
   name               = "tf-test-cl%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
-  provider = google-beta
+
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub, google_project_service.acm]
 }
 
@@ -429,7 +428,7 @@ resource "google_gke_hub_membership" "membership" {
     }
   }
   description = "test resource."
-  provider = google-beta
+
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -440,14 +439,14 @@ resource "google_gke_hub_feature" "feature" {
   labels = {
     foo = "bar"
   }
-  provider = google-beta
+
   depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
 resource "google_service_account" "feature_sa" {
   project = google_project.project.project_id
   account_id = "feature-sa"
-  provider = google-beta
+
 }
 
 resource "google_gke_hub_feature_membership" "feature_member" {
@@ -463,7 +462,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
       }
     }
   }
-  provider = google-beta
+
 }
 `, context)
 }
@@ -475,7 +474,7 @@ resource "google_container_cluster" "primary" {
   location           = "us-central1-a"
   initial_node_count = 1
   project = google_project.project.project_id
-  provider = google-beta
+
   depends_on = [google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
@@ -484,7 +483,7 @@ resource "google_container_cluster" "secondary" {
   location           = "us-central1-a"
   initial_node_count = 1
   project = google_project.project.project_id
-  provider = google-beta
+
   depends_on = [google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
@@ -493,7 +492,7 @@ resource "google_container_cluster" "tertiary" {
   location           = "us-central1-a"
   initial_node_count = 1
   project = google_project.project.project_id
-  provider = google-beta
+
   depends_on = [google_project_service.container, google_project_service.container, google_project_service.gkehub]
 }
 
@@ -506,7 +505,7 @@ resource "google_gke_hub_membership" "membership" {
     }
   }
   description = "test resource."
-  provider = google-beta
+
 }
 
 resource "google_gke_hub_membership" "membership_second" {
@@ -518,7 +517,7 @@ resource "google_gke_hub_membership" "membership_second" {
     }
   }
   description = "test resource."
-  provider = google-beta
+
 }
 
 resource "google_gke_hub_membership" "membership_third" {
@@ -530,7 +529,7 @@ resource "google_gke_hub_membership" "membership_third" {
     }
   }
   description = "test resource."
-  provider = google-beta
+
 }
 `, context)
 }
@@ -573,4 +572,3 @@ func testAccCheckGkeHubFeatureMembershipNotPresent(t *testing.T, project, locati
     return err
   }
 }
-<% end -%>
