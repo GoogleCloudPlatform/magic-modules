@@ -54,7 +54,7 @@ var (
 		"config.0.web_server_network_access_control",
 		"config.0.database_config",
 		"config.0.web_server_config",
-	    "config.0.encryption_config",
+		"config.0.encryption_config",
 		"config.0.maintenance_window",
 <% end -%>
 	}
@@ -463,7 +463,7 @@ func resourceComposerEnvironment() *schema.Resource {
 						"maintenance_window": {
 							Type:         schema.TypeList,
 							Optional:     true,
-							Computed:     false,
+							Computed:     true,
 							AtLeastOneOf: composerConfigKeys,
 							MaxItems:     1,
 							Description:  `The configuration for Cloud Composer maintenance window.`,
@@ -1106,8 +1106,6 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 		return nil, err
 	}
 	transformed.EncryptionConfig = transformedEncryptionConfig
-
-	log.Printf("tst tst tst")
 
 	transformedMaintenanceWindow, err := expandComposerEnvironmentConfigMaintenanceWindow(original["maintenance_window"], d, config)
 	if err != nil {
