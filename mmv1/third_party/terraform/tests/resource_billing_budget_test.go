@@ -301,25 +301,22 @@ func TestAccBillingBudget_budgetFilterProjectsOrdering(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBillingBudget_budgetFilterProjectsOrdering1(context),
-				Check:  resource.ComposeTestCheckFunc(),
 			},
 			{
-				ResourceName:       "google_billing_budget.budget",
-				ImportState:        true,
-				ImportStateVerify:  true,
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: false,
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 
 			{
-				Config: testAccBillingBudget_budgetFilterProjectsOrdering2(context),
-			},
-			{
-				ResourceName:       "google_billing_budget.budget",
-				ImportState:        true,
-				ImportStateVerify:  true,
+				Config:             testAccBillingBudget_budgetFilterProjectsOrdering2(context),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: false,
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
