@@ -78,7 +78,6 @@ objects:
           The name is ignored when creating a transfer config.
       - !ruby/object:Api::Type::String
         name: 'destinationDatasetId'
-        required: true
         description: |
           The BigQuery target dataset id.
       - !ruby/object:Api::Type::String
