@@ -87,6 +87,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       budgetFilter.labels: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      budgetFilter.projects: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
