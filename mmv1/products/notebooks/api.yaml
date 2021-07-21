@@ -282,41 +282,41 @@ objects:
               Enabled by default.
             default_value: true
       - !ruby/object:Api::Type::NestedObject
-      name: 'NicType'
-      description: |
+        name: 'NicType'
+        description: |
           The type of vNIC driver.
-      properties:
-        - !ruby/object:Api::Type::Enum
-          name: 'type'
-          values:
-            - UNSPECIFIED_NIC_TYPE
-            - VIRTIO_NET
-            - GVNIC
-          description: |
-            The type of vNIC to be used on this interface. This may be gVNIC or VirtioNet.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'type'
+            description: |
+              The type of vNIC to be used on this interface. This may be gVNIC or VirtioNet.
+            values:
+              - UNSPECIFIED_NIC_TYPE
+              - VIRTIO_NET
+              - GVNIC          
       - !ruby/object:Api::Type::NestedObject
-      name: 'ReservationAffinity'
-      description: |
+        name: 'ReservationAffinity'
+        description: |
           Reservation Affinity for consuming Zonal reservation.
-      properties:
-        - !ruby/object:Api::Type::Enum
-          name: 'type'
-          values:
-            - TYPE_UNSPECIFIED
-            - NO_RESERVATION
-            - ANY_RESERVATION
-            - SPECIFIC_RESERVATION
-          description: |
-            The type of vNIC to be used on this interface. This may be gVNIC or VirtioNet.     
-        - !ruby/object:Api::Type::String
-          name: 'key'
-          description: |
-            Corresponds to the label key of reservation resource.
-        - !ruby/object:Api::Type::Array
-          name: 'values'
-          description: |
-            Corresponds to the label values of reservation resource.
-          item_type: Api::Type::String
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'type'
+            description: |
+              The type of Compute Reservation.
+            values:
+              - TYPE_UNSPECIFIED
+              - NO_RESERVATION
+              - ANY_RESERVATION
+              - SPECIFIC_RESERVATION               
+          - !ruby/object:Api::Type::String
+            name: 'key'
+            description: |
+              Corresponds to the label key of reservation resource.
+          - !ruby/object:Api::Type::Array
+            name: 'values'
+            description: |
+              Corresponds to the label values of reservation resource.
+            item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'state'
         description: |
