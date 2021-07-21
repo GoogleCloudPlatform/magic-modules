@@ -1719,7 +1719,7 @@ resource "google_container_node_pool" "with_manual_pod_cidr" {
   cluster            = google_container_cluster.cluster.name
   node_count = 1
   network_config {
-	create_pod_range = false
+    create_pod_range = false
     pod_range = google_compute_subnetwork.container_subnetwork.secondary_ip_range[2].range_name
   }
   node_config {
