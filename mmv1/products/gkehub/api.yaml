@@ -77,8 +77,9 @@ objects:
           The unique identifier of the membership.
       - !ruby/object:Api::Type::String
         name: 'description'
+        min_version: beta
         description: |
-          The name of this entity type to be displayed on the console.
+          The name of this entity type to be displayed on the console. This field is unavailable in v1 of the API.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
