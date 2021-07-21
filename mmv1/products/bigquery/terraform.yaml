@@ -323,6 +323,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           The dataset. Can be specified `{{dataset_id}}` if `project_id` is also set,
           or of the form `projects/{{project}}/datasets/{{dataset_id}}` if not.
         diff_suppress_func: 'compareSelfLinkRelativePaths'
+      configuration.copy.destinationEncryptionConfiguration: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/bigquery_kms_version.go.erb'
+      configuration.load.destinationEncryptionConfiguration: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/bigquery_kms_version.go.erb'
+      configuration.query.destinationEncryptionConfiguration: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/bigquery_kms_version.go.erb'
       jobReference: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
       jobReference.projectId: !ruby/object:Overrides::Terraform::PropertyOverride

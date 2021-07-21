@@ -17,7 +17,7 @@ import (
 const (
 	composerEnvironmentEnvVariablesRegexp          = "[a-zA-Z_][a-zA-Z0-9_]*."
 	composerEnvironmentReservedAirflowEnvVarRegexp = "AIRFLOW__[A-Z0-9_]+__[A-Z0-9_]+"
-	composerEnvironmentVersionRegexp               = `composer-([0-9]+\.[0-9]+\.[0-9]+|latest)-airflow-([0-9]+\.[0-9]+(\.[0-9]+.*)?)`
+	composerEnvironmentVersionRegexp               = `composer-([0-9]+\.[0-9]+\.[0-9]+(-preview.[0-9]+)?|latest)-airflow-([0-9]+\.[0-9]+(\.[0-9]+.*)?)`
 )
 
 var composerEnvironmentReservedEnvVar = map[string]struct{}{
@@ -200,6 +200,15 @@ func resourceComposerEnvironment() *schema.Resource {
 										DiffSuppressFunc: compareServiceAccountEmailToLink,
 										Description:      `The Google Cloud Platform Service Account to be used by the node VMs. If a service account is not specified, the "default" Compute Engine service account is used. Cannot be updated. If given, note that the service account must have roles/composer.worker for any GCP resources created under the Cloud Composer Environment.`,
 									},
+<% unless version == "ga" -%>	
+									"max_pods_per_node": {
+										Type:             schema.TypeInt,
+										Computed:         true,
+										Optional:         true,
+										ForceNew:         true,
+										Description:      `The maximum pods per node in the GKE cluster allocated during environment creation. Lowering this value reduces IP address consumption by the Cloud Composer Kubernetes cluster. This value can only be set during environment creation, and only if the environment is VPC-Native. The range of possible values is 8-110, and the default is 32.`,
+									},
+<% end -%>
 									"tags": {
 										Type:     schema.TypeSet,
 										Optional: true,
@@ -935,6 +944,9 @@ func flattenComposerEnvironmentConfigNodeConfig(nodeCfg *composer.NodeConfig) in
 	transformed["disk_size_gb"] = nodeCfg.DiskSizeGb
 	transformed["service_account"] = nodeCfg.ServiceAccount
 	transformed["oauth_scopes"] = flattenComposerEnvironmentConfigNodeConfigOauthScopes(nodeCfg.OauthScopes)
+<% unless version == "ga" -%>	
+	transformed["max_pods_per_node"] = nodeCfg.MaxPodsPerNode
+<% end -%>
 	transformed["tags"] = flattenComposerEnvironmentConfigNodeConfigTags(nodeCfg.Tags)
 	transformed["ip_allocation_policy"] = flattenComposerEnvironmentConfigNodeConfigIPAllocationPolicy(nodeCfg.IpAllocationPolicy)
 	return []interface{}{transformed}
@@ -1188,6 +1200,12 @@ func expandComposerEnvironmentConfigNodeConfig(v interface{}, d *schema.Resource
 		}
 		transformed.ServiceAccount = transformedServiceAccount
 	}
+
+<% unless version == "ga" -%>	
+	if transformedMaxPodsPerNode, ok := original["max_pods_per_node"]; ok {
+		transformed.MaxPodsPerNode = int64(transformedMaxPodsPerNode.(int))
+	}
+<% end -%>
 
 	var nodeConfigZone string
 	if v, ok := original["zone"]; ok {
@@ -1540,7 +1558,7 @@ func composerImageVersionDiffSuppress(_, old, new string, _ *schema.ResourceData
 	versionRe := regexp.MustCompile(composerEnvironmentVersionRegexp)
 	oldVersions := versionRe.FindStringSubmatch(old)
 	newVersions := versionRe.FindStringSubmatch(new)
-	if oldVersions == nil || len(oldVersions) < 3 {
+	if oldVersions == nil || len(oldVersions) < 4 {
 		// Somehow one of the versions didn't match the regexp or didn't
 		// have values in the capturing groups. In that case, fall back to
 		// an equality check.
@@ -1557,7 +1575,7 @@ func composerImageVersionDiffSuppress(_, old, new string, _ *schema.ResourceData
 
 	// Check airflow version using the version package to account for
 	// diffs like 1.10 and 1.10.0
-	eq, err := versionsEqual(oldVersions[2], newVersions[2])
+	eq, err := versionsEqual(oldVersions[3], newVersions[3])
 	if err != nil {
 		log.Printf("[WARN] Could not parse airflow version, %s", err)
 	}

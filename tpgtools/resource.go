@@ -93,6 +93,9 @@ type Resource struct {
 	// ListFields is the list of fields required for a list call.
 	ListFields []string
 
+	// HasProject tells us if the resource has a project field
+	HasProject bool
+
 	// HasSweeper says if this resource has a generated sweeper.
 	HasSweeper bool
 
@@ -128,7 +131,7 @@ func (r Resource) DCLName() string {
 // Path is the provider name of a resource, product_name. For example,
 // "cloud_run_service".
 func (r Resource) Path() string {
-	return r.Package() + "_" + r.Name()
+	return r.ProductName() + "_" + r.Name()
 }
 
 // TerraformName is the Terraform resource type used in HCL configuration.
@@ -161,6 +164,12 @@ func (r Resource) ProductType() string {
 	return r.productMetadata.ProductType()
 }
 
+// ProductType is the snakecase product name of a resource. For example,
+// "network_services".
+func (r Resource) ProductName() string {
+	return r.productMetadata.ProductName
+}
+
 func (r Resource) ProductMetadata() *ProductMetadata {
 	copy := *r.productMetadata
 	return &copy
@@ -170,7 +179,7 @@ func (r Resource) ProductMetadata() *ProductMetadata {
 // resource. For example, the Package "access_context_manager" would have a
 // DCLPackage of "accesscontextmanager"
 func (r Resource) DCLPackage() string {
-	return strings.Replace(r.productMetadata.PackagePath, "_", "", -1)
+	return r.productMetadata.DCLPackage()
 }
 
 // SidebarCurrent is the website sidebar identifier, for example
@@ -386,6 +395,7 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 	}
 
 	res.Properties = props
+	_, res.HasProject = schema.Properties["project"]
 
 	// Resource Override: Virtual field
 	for _, vfd := range overrides.ResourceOverridesWithDetails(VirtualField, location) {

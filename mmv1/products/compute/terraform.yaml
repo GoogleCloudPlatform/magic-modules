@@ -48,7 +48,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "compute_address_ipsec_interconnect"
         primary_resource_id: "ipsec-interconnect-address"
-        min_version: beta
         vars:
           address_name: "test-address"
           network_name: "test-network"
@@ -156,7 +155,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           bucket_name: "image-store-bucket"
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_bucket_full"
-        min_version: beta
         primary_resource_id: "image_backend_full"
         skip_docs: true
         vars:
@@ -221,7 +219,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           http_health_check_name: "health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_cache"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           backend_service_name: "backend-service"
@@ -1100,12 +1097,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "compute_interconnect_attachment_ipsec_encryption"
         primary_resource_id: "ipsec-encrypted-interconnect-attachment"
-        min_version: beta
         vars:
           interconnect_attachment_name: "test-interconnect-attachment"
           address_name: "test-address"
           router_name: "test-router"
           network_name: "test-network"
+        min_version: beta
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1129,6 +1126,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       edgeAvailabilityDomain: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      encryption: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
       mtu: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/float64_to_int_to_string.go.erb
         default_from_api: true
@@ -1515,7 +1514,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           mirroring_name: "my-mirroring"
           ilb_rule_name: "my-ilb"
           network_name: "my-network"
-
+        cloud_docs_region_tag: compute_vm_packet_mirror
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
@@ -2084,10 +2083,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "compute_router_encrypted_interconnect"
         primary_resource_id: "encrypted-interconnect-router"
-        min_version: beta
         vars:
           router_name: "test-router"
           network_name: "test-network"
+        min_version: beta
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/router.go.erb
       resource_definition: templates/terraform/resource_definition/router.go.erb
@@ -2197,6 +2196,38 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           If it is not provided, the provider region is used.
   SecurityPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
+  ServiceAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "service_attachment_basic"
+        primary_resource_id: "psc_ilb_service_attachment"
+        vars:
+          service_attachment_name: "my-psc-ilb"
+          network_name: "psc-ilb-network"
+          nat_subnetwork_name: "psc-ilb-nat"
+          producer_subnetwork_name: "psc-ilb-producer-subnetwork"
+          producer_health_check_name: "producer-service-health-check"
+          producer_service_name: "producer-service"
+          producer_forwarding_rule_name: "producer-forwarding-rule"
+          consumer_address_name: "psc-ilb-consumer-address"
+          consumer_forwarding_rule_name: "psc-ilb-consumer-forwarding-rule"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "service_attachment_explicit_projects"
+        primary_resource_id: "psc_ilb_service_attachment"
+        vars:
+          service_attachment_name: "my-psc-ilb"
+          network_name: "psc-ilb-network"
+          nat_subnetwork_name: "psc-ilb-nat"
+          producer_subnetwork_name: "psc-ilb-producer-subnetwork"
+          producer_health_check_name: "producer-service-health-check"
+          producer_service_name: "producer-service"
+          producer_forwarding_rule_name: "producer-forwarding-rule"
+          consumer_address_name: "psc-ilb-consumer-address"
+          consumer_forwarding_rule_name: "psc-ilb-consumer-forwarding-rule"
+    properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
   Snapshot: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 5
@@ -2746,7 +2777,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "compute_ha_vpn_gateway_encrypted_interconnect"
         primary_resource_id: "vpn-gateway"
-        min_version: beta
         vars:
           ha_vpn_gateway_name: "test-ha-vpngw"
           interconnect_attachment1_name: "test-interconnect-attachment1"
@@ -2755,6 +2785,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           address2_name: "test-address2"
           router_name: "test-router"
           network_name: "test-network"
+        min_version: beta
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
