@@ -402,7 +402,12 @@ func TestAccContainerNodePool_withNetworkConfig(t *testing.T) {
 				Config: testAccContainerNodePool_withNetworkConfig(cluster, np, network),
 			},
 			{
-				ResourceName:      "google_container_node_pool.with_linux_node_config",
+				ResourceName:      "google_container_node_pool.with_manual_pod_cidr",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_auto_pod_cidr",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
