@@ -1650,6 +1650,13 @@ resource "google_compute_subnetwork" "container_subnetwork" {
     range_name    = "another-pod"
     ip_cidr_range = "10.1.32.0/22"
   }
+
+  lifecycle {
+    ignore_changes = [
+      # The auto nodepool creates a secondary range which diffs this resource.
+      secondary_ip_range,
+    ]
+  }
 }
 
 resource "google_container_cluster" "cluster" {
