@@ -77,7 +77,8 @@ func sampleNameToTitleCase(s string) string {
 
 func sampleNameToTitleParts(s string) []string {
 	parts := []string{}
-	s = strings.ReplaceAll(s, "/", "")
+	s = strings.ReplaceAll(s, "/", " ")
+	s = strings.ReplaceAll(s, "_", " ")
 	segments := strings.Split(s, " ")
 	for _, seg := range segments {
 		if v, ok := initialisms[seg]; ok {

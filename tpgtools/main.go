@@ -35,6 +35,7 @@ var fPath = flag.String("path", "", "path to the root service directory holding 
 var tPath = flag.String("overrides", "", "path to the root directory holding overrides files")
 var cPath = flag.String("handwritten", "handwritten", "path to the root directory holding handwritten files to copy")
 var oPath = flag.String("output", "", "path to output generated files to")
+var sPath = flag.String("samples", "samples", "path to the directory holding the samples and substitution data")
 
 var sFilter = flag.String("service", "", "optional service name. If specified, only this service is generated")
 var rFilter = flag.String("resource", "", "optional resource name (from filename). If specified, only resources with this name are generated")
@@ -86,8 +87,8 @@ func main() {
 
 		generateResourceFile(resource)
 		generateSweeperFile(resource)
+		generateResourceTestFile(resource)
 		generateResourceWebsiteFile(resource, resources, version)
-		// generateResourceTestFile(resource, resources, version)
 	}
 
 	// product specific generation
@@ -160,10 +161,8 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 				continue
 			}
 			products[version] = append(products[version], newProduct)
-
 			newResources := getResources(packagePath, specs, version)
 			resources[version] = append(resources[version], newResources...)
-
 		}
 	}
 
@@ -205,8 +204,6 @@ func getResources(packagePath string, specs []os.FileInfo, version Version) []*R
 
 		overrides := loadOverrides(packagePath, f.Name())
 
-		samples := loadSamples(packagePath, f.Name(), version)
-
 		if schema == nil {
 			glog.Exit(fmt.Sprintf("Could not find document schema for %s", document.Info.Title))
 		}
@@ -237,7 +234,7 @@ func getResources(packagePath string, specs []os.FileInfo, version Version) []*R
 		}
 
 		for _, l := range locations {
-			res, err := createResource(schema, typeFetcher, overrides, productMetadata, samples, l)
+			res, err := createResource(schema, typeFetcher, overrides, productMetadata, version, l)
 			if err != nil {
 				glog.Exit(err)
 			}
@@ -340,79 +337,6 @@ func loadOverrides(packagePath, fileName string) Overrides {
 	return overrides
 }
 
-func loadSamples(packagePath, fileName string, version Version) Samples {
-	samples := Samples{}
-
-	if mode != nil && *mode == "serialization" {
-		return samples
-	}
-
-	// Samples appear in the root product folder
-	packagePath = strings.Split(packagePath, "beta")[0]
-	samplesPath := path.Join(*fPath, packagePath, "samples")
-	files, err := ioutil.ReadDir(samplesPath)
-	if err != nil {
-		// ignore the error if the file just doesn't exist
-		if !os.IsNotExist(err) {
-			glog.Exit(err)
-		}
-	}
-	for _, file := range files {
-		if !strings.HasSuffix(file.Name(), ".yaml") {
-			continue
-		}
-		sample := Sample{}
-		tc, err := ioutil.ReadFile(path.Join(samplesPath, file.Name()))
-		if err != nil {
-			glog.Exit(err)
-		}
-
-		err = yaml.UnmarshalStrict(tc, &sample)
-		if err != nil {
-			glog.Exit(err)
-		}
-
-		versionMatch := false
-		hasGA := false
-		for _, v := range sample.Versions {
-			if v == version.V {
-				versionMatch = true
-			}
-			if v == "ga" {
-				hasGA = true
-			}
-		}
-		if !versionMatch {
-			continue
-		}
-
-		var dependencies []Dependency
-		mainResource := loadSampleDependency(samplesPath, *sample.PrimaryResource, version)
-		dependencies = append(dependencies, mainResource)
-		for _, dFileName := range sample.DependencyFileNames {
-			dependency := loadSampleDependency(samplesPath, dFileName, version)
-			dependencies = append(dependencies, dependency)
-		}
-		sample.DependencyList = dependencies
-		sample.TestSlug = sampleNameToTitleCase(*sample.Name)
-		sample.HasGAEquivalent = hasGA
-		samples = append(samples, sample)
-	}
-
-	return samples
-}
-
-func loadSampleDependency(samplesPath, fileName string, version Version) Dependency {
-	dFileNameParts := strings.Split(fileName, "samples/")
-	fileName = dFileNameParts[len(dFileNameParts)-1]
-	dependencyBytes, err := ioutil.ReadFile(path.Join(samplesPath, fileName))
-	d, err := BuildDependency(fileName, version, dependencyBytes)
-	if err != nil {
-		glog.Exit(err)
-	}
-	return *d
-}
-
 func generateResourceFile(res *Resource) {
 	// Generate resource file
 	tmplInput := ResourceInput{
@@ -452,10 +376,6 @@ func generateResourceFile(res *Resource) {
 }
 
 func generateSweeperFile(res *Resource) {
-	if !res.HasSweeper {
-		return
-	}
-
 	// Generate resource file
 	tmplInput := ResourceInput{
 		Resource: *res,
@@ -486,6 +406,49 @@ func generateSweeperFile(res *Resource) {
 		fmt.Printf("%v", string(formatted))
 	} else {
 		outname := fmt.Sprintf("resource_%s_%s_sweeper_test.go", res.ProductName(), res.Name())
+		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
+		if err != nil {
+			glog.Exit(err)
+		}
+	}
+}
+
+func generateResourceTestFile(res *Resource) {
+	if len(res.TestSamples()) < 1 {
+		return
+	}
+	// Generate resource file
+	tmplInput := ResourceInput{
+		Resource: *res,
+	}
+
+	tmpl, err := template.New("test_file.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
+		"templates/test_file.go.tmpl",
+	)
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	contents := bytes.Buffer{}
+	if err = tmpl.ExecuteTemplate(&contents, "test_file.go.tmpl", tmplInput); err != nil {
+		fmt.Println(contents.String())
+		glog.Exit(err)
+	}
+
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	formatted, err := formatSource(&contents)
+	if err != nil {
+		err := ioutil.WriteFile("./temp/temp.go", []byte(contents.String()), 0644)
+		glog.Error(fmt.Errorf("error formatting %v: %v - test_file \n ", res.ProductName()+res.Name(), err))
+	}
+
+	if oPath == nil || *oPath == "" {
+		fmt.Printf("%v", string(formatted))
+	} else {
+		outname := fmt.Sprintf("resource_%s_%s_generated_test.go", res.ProductName(), res.Name())
 		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
 		if err != nil {
 			glog.Exit(err)
@@ -535,6 +498,7 @@ var TemplateFunctions = template.FuncMap{
 	"title":          strings.Title,
 	"patternToRegex": PatternToRegex,
 	"replace":        strings.Replace,
+	"isLastIndex":    isLastIndex,
 }
 
 // TypeFetcher fetches reused types, as marked by the $ref field being marked on an OpenAPI schema.

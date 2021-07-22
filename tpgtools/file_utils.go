@@ -2,27 +2,28 @@ package main
 
 import (
 	"io/ioutil"
+	"os"
 
 	"gopkg.in/yaml.v2"
 )
 
-func mergeYaml(fileA, fileB string) string {
+func mergeYaml(fileA, fileB string) ([]byte, error) {
 	var objA map[string]interface{}
 	bs, err := ioutil.ReadFile(fileA)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	if err := yaml.Unmarshal(bs, &objA); err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	var objB map[string]interface{}
 	bs, err = ioutil.ReadFile(fileB)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	if err := yaml.Unmarshal(bs, &objB); err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	for k, v := range objB {
@@ -31,7 +32,14 @@ func mergeYaml(fileA, fileB string) string {
 
 	out, err := yaml.Marshal(objA)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return string(out)
+	return out, nil
+}
+
+func pathExists(filePath string) bool {
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }

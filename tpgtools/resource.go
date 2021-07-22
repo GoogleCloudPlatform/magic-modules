@@ -16,11 +16,16 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path"
 	"sort"
 	"strings"
 
 	"bitbucket.org/creachadair/stringset"
+	"github.com/golang/glog"
 	"github.com/nasa9084/go-openapi"
+	"gopkg.in/yaml.v2"
 )
 
 const GoPkgTerraformSdkValidation = "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -123,6 +128,8 @@ type Resource struct {
 	TerraformProductName *string
 
 	Samples []Sample
+
+	versionMetadata Version
 }
 
 // Name is the shortname of a resource. For example, "instance".
@@ -332,7 +339,7 @@ func (r Resource) RegisterReusedType(p Property) []Property {
 	return r.ReusedTypes
 }
 
-func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides Overrides, product *ProductMetadata, samples []Sample, location string) (*Resource, error) {
+func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides Overrides, product *ProductMetadata, version Version, location string) (*Resource, error) {
 	resourceTitle := schema.Title
 
 	// Attempt to construct the resource name using location. Other than
@@ -347,11 +354,11 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 		title:                jsonToSnakeCase(resourceTitle),
 		dclname:              jsonToSnakeCase(schema.Title),
 		productMetadata:      product,
+		versionMetadata:      version,
 		Description:          schema.Description,
 		InsertTimeoutMinutes: 10,
 		UpdateTimeoutMinutes: 10,
 		DeleteTimeoutMinutes: 10,
-		Samples:              samples,
 	}
 
 	crname := CustomResourceNameDetails{}
@@ -512,6 +519,8 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 		res.TerraformProductName = &terraformProductName.Product
 	}
 
+	res.Samples = res.loadSamples()
+
 	return &res, nil
 }
 
@@ -533,4 +542,208 @@ func readVirtualField(vf VirtualFieldDetails) Property {
 		prop.Settable = true
 	}
 	return prop
+}
+
+func (r Resource) TestSamples() []Sample {
+	return r.getSamples(false)
+}
+
+func (r Resource) DocSamples() []Sample {
+	return r.getSamples(true)
+}
+
+func (r Resource) getSamples(docs bool) []Sample {
+	out := []Sample{}
+	if len(r.Samples) < 1 {
+		return out
+	}
+	var hideList []string
+	if docs {
+		hideList = r.Samples[0].DocHide
+	} else {
+		hideList = r.Samples[0].Testhide
+	}
+	for _, sample := range r.Samples {
+		shouldhide := false
+		for _, hideName := range hideList {
+			if sample.FileName == hideName {
+				shouldhide = true
+			}
+		}
+		if !shouldhide {
+			out = append(out, sample)
+		}
+	}
+
+	return out
+}
+
+func (r *Resource) getSampleAccessoryFolder() string {
+	resourceType := strings.ToLower(r.Type())
+	packageName := strings.ToLower(r.productMetadata.PackageName)
+	sampleFriendlyFolder := path.Join(*sPath, packageName, resourceType)
+	return sampleFriendlyFolder
+}
+
+func (r *Resource) loadSamples() []Sample {
+	samples := []Sample{}
+
+	handWritten := r.loadHandWrittenSamples()
+	dclSamples := r.loadDCLSamples()
+	samples = append(samples, dclSamples...)
+	samples = append(samples, handWritten...)
+	return samples
+}
+
+func (r *Resource) loadHandWrittenSamples() []Sample {
+	sampleFriendlyFolder := r.getSampleAccessoryFolder()
+	sampleFriendlyMetaPath := path.Join(sampleFriendlyFolder, "meta.yaml")
+	samples := []Sample{}
+
+	if !pathExists(sampleFriendlyMetaPath) {
+		return samples
+	}
+
+	files, err := ioutil.ReadDir(sampleFriendlyFolder)
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	for _, file := range files {
+		if fileName := strings.ToLower(file.Name()); !strings.HasSuffix(fileName, ".tf") ||
+			strings.Contains(fileName, "_update") {
+			continue
+		}
+		sample := Sample{}
+		sampleName := strings.Split(file.Name(), ".")[0]
+		sampleDefinitionFile := path.Join(sampleFriendlyFolder, sampleName+".yaml")
+		var tc []byte
+		if pathExists(sampleDefinitionFile) {
+			tc, err = mergeYaml(sampleDefinitionFile, sampleFriendlyMetaPath)
+		} else {
+			tc, err = ioutil.ReadFile(sampleFriendlyMetaPath)
+		}
+		if err != nil {
+			glog.Exit(err)
+		}
+		err = yaml.UnmarshalStrict(tc, &sample)
+		if err != nil {
+			glog.Exit(err)
+		}
+
+		hasGA := false
+		versionMatch := false
+
+		// if no versions provided assume all versions
+		if len(sample.Versions) <= 0 {
+			hasGA = true
+			versionMatch = true
+		} else {
+			for _, v := range sample.Versions {
+				if v == r.versionMetadata.V {
+					versionMatch = true
+				}
+				if v == "ga" {
+					hasGA = true
+				}
+			}
+		}
+
+		if !versionMatch {
+			continue
+		}
+
+		sample.SamplesPath = sampleFriendlyFolder
+		sample.resourceReference = r
+		sample.FileName = file.Name()
+		sample.PrimaryResource = &(sample.FileName)
+		sample.TestSlug = snakeToTitleCase(sampleName) + "HandWritten"
+		sample.HasGAEquivalent = hasGA
+		samples = append(samples, sample)
+	}
+
+	return samples
+}
+
+func (r *Resource) loadDCLSamples() []Sample {
+	sampleFriendlyFolder := r.getSampleAccessoryFolder()
+	packagePath := r.productMetadata.PackagePath
+	version := r.versionMetadata.V
+	resourceType := strings.ToLower(r.Type())
+	sampleFriendlyMetaPath := path.Join(sampleFriendlyFolder, "meta.yaml")
+	samples := []Sample{}
+
+	if mode != nil && *mode == "serialization" {
+		return samples
+	}
+
+	// Samples appear in the root product folder
+	packagePath = strings.Split(packagePath, "beta")[0]
+	samplesPath := path.Join(*fPath, packagePath, "samples")
+	files, err := ioutil.ReadDir(samplesPath)
+	if err != nil {
+		// ignore the error if the file just doesn't exist
+		if !os.IsNotExist(err) {
+			glog.Exit(err)
+		}
+	}
+	for _, file := range files {
+		if !strings.HasSuffix(file.Name(), ".yaml") {
+			continue
+		}
+		sample := Sample{}
+
+		sampleOG := path.Join(samplesPath, file.Name())
+		var tc []byte
+		if pathExists(sampleFriendlyMetaPath) {
+			tc, err = mergeYaml(sampleOG, sampleFriendlyMetaPath)
+		} else {
+			tc, err = ioutil.ReadFile(path.Join(samplesPath, file.Name()))
+		}
+		if err != nil {
+			glog.Exit(err)
+		}
+
+		err = yaml.UnmarshalStrict(tc, &sample)
+		if err != nil {
+			glog.Exit(err)
+		}
+
+		versionMatch := false
+		hasGA := false
+		for _, v := range sample.Versions {
+			if v == version {
+				versionMatch = true
+			}
+			if v == "ga" {
+				hasGA = true
+			}
+		}
+
+		primaryResource := *sample.PrimaryResource
+		parts := strings.Split(primaryResource, ".")
+		primaryResourceName := parts[len(parts)-2]
+
+		if !versionMatch || primaryResourceName != resourceType {
+			continue
+		}
+
+		sample.SamplesPath = samplesPath
+		sample.resourceReference = r
+		sample.FileName = file.Name()
+
+		var dependencies []Dependency
+		mainResource := sample.generateSampleDependencyWithName(primaryResource, "primary")
+		dependencies = append(dependencies, mainResource)
+		for _, dFileName := range sample.DependencyFileNames {
+			dependency := sample.generateSampleDependency(dFileName)
+			dependencies = append(dependencies, dependency)
+		}
+		sample.DependencyList = dependencies
+		sample.TestSlug = sampleNameToTitleCase(*sample.Name)
+		sample.HasGAEquivalent = hasGA
+		samples = append(samples, sample)
+	}
+
+	return samples
 }

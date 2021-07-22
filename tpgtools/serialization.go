@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"strings"
 
+	assuredworkloads "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads"
+	assuredworkloadsBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads/beta"
+	cloudbuildBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudbuild/beta"
 	dataproc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc"
 	dataprocBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc/beta"
 	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc"
@@ -20,18 +23,24 @@ import (
 func DCLToTerraformReference(resourceType, version string) (string, error) {
 	if version == "beta" {
 		switch resourceType {
+		case "AssuredWorkloadsWorkload":
+			return "google_assured_workloads_workload", nil
+		case "CloudbuildWorkerPool":
+			return "google_cloudbuild_worker_pool", nil
 		case "DataprocWorkflowTemplate":
 			return "google_dataproc_workflow_template", nil
 		case "EventarcTrigger":
 			return "google_eventarc_trigger", nil
-		case "GkehubFeature":
+		case "GkeHubFeature":
 			return "google_gke_hub_feature", nil
-		case "GkehubFeatureMembership":
+		case "GkeHubFeatureMembership":
 			return "google_gke_hub_feature_membership", nil
 		}
 	}
 	// If not found in sample version, fallthrough to GA
 	switch resourceType {
+	case "AssuredWorkloadsWorkload":
+		return "google_assured_workloads_workload", nil
 	case "DataprocWorkflowTemplate":
 		return "google_dataproc_workflow_template", nil
 	case "EventarcTrigger":
@@ -48,6 +57,18 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (string, error) {
 	if version == "beta" {
 		switch resourceType {
+		case "AssuredWorkloadsWorkload":
+			r := &assuredworkloadsBeta.Workload{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return AssuredWorkloadsWorkloadBetaAsHCL(*r)
+		case "CloudbuildWorkerPool":
+			r := &cloudbuildBeta.WorkerPool{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return CloudbuildWorkerPoolBetaAsHCL(*r)
 		case "DataprocWorkflowTemplate":
 			r := &dataprocBeta.WorkflowTemplate{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -60,22 +81,28 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 				return "", err
 			}
 			return EventarcTriggerBetaAsHCL(*r)
-		case "GkehubFeature":
+		case "GkeHubFeature":
 			r := &gkehubBeta.Feature{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return GkehubFeatureBetaAsHCL(*r)
-		case "GkehubFeatureMembership":
+			return GkeHubFeatureBetaAsHCL(*r)
+		case "GkeHubFeatureMembership":
 			r := &gkehubBeta.FeatureMembership{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return GkehubFeatureMembershipBetaAsHCL(*r)
+			return GkeHubFeatureMembershipBetaAsHCL(*r)
 		}
 	}
 	// If not found in sample version, fallthrough to GA
 	switch resourceType {
+	case "AssuredWorkloadsWorkload":
+		r := &assuredworkloads.Workload{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return AssuredWorkloadsWorkloadAsHCL(*r)
 	case "DataprocWorkflowTemplate":
 		r := &dataproc.WorkflowTemplate{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -99,6 +126,133 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 		return "", fmt.Errorf("Error converting sample JSON to HCL: %s not found", resourceType)
 	}
 
+}
+
+// AssuredWorkloadsWorkloadBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func AssuredWorkloadsWorkloadBetaAsHCL(r assuredworkloadsBeta.Workload) (string, error) {
+	outputConfig := "resource \"google_assured_workloads_workload\" \"output\" {\n"
+	if r.BillingAccount != nil {
+		outputConfig += fmt.Sprintf("\tbilling_account = %#v\n", *r.BillingAccount)
+	}
+	if r.ComplianceRegime != nil {
+		outputConfig += fmt.Sprintf("\tcompliance_regime = %#v\n", *r.ComplianceRegime)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Organization != nil {
+		outputConfig += fmt.Sprintf("\torganization = %#v\n", *r.Organization)
+	}
+	if v := convertAssuredWorkloadsWorkloadBetaKmsSettingsToHCL(r.KmsSettings); v != "" {
+		outputConfig += fmt.Sprintf("\tkms_settings %s\n", v)
+	}
+	if r.ProvisionedResourcesParent != nil {
+		outputConfig += fmt.Sprintf("\tprovisioned_resources_parent = %#v\n", *r.ProvisionedResourcesParent)
+	}
+	if r.ResourceSettings != nil {
+		for _, v := range r.ResourceSettings {
+			outputConfig += fmt.Sprintf("\tresource_settings %s\n", convertAssuredWorkloadsWorkloadBetaResourceSettingsToHCL(&v))
+		}
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+func convertAssuredWorkloadsWorkloadBetaKmsSettingsToHCL(r *assuredworkloadsBeta.WorkloadKmsSettings) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.NextRotationTime != nil {
+		outputConfig += fmt.Sprintf("\tnext_rotation_time = %#v\n", *r.NextRotationTime)
+	}
+	if r.RotationPeriod != nil {
+		outputConfig += fmt.Sprintf("\trotation_period = %#v\n", *r.RotationPeriod)
+	}
+	return outputConfig + "}"
+}
+
+func convertAssuredWorkloadsWorkloadBetaResourceSettingsToHCL(r *assuredworkloadsBeta.WorkloadResourceSettings) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ResourceId != nil {
+		outputConfig += fmt.Sprintf("\tresource_id = %#v\n", *r.ResourceId)
+	}
+	if r.ResourceType != nil {
+		outputConfig += fmt.Sprintf("\tresource_type = %#v\n", *r.ResourceType)
+	}
+	return outputConfig + "}"
+}
+
+func convertAssuredWorkloadsWorkloadBetaResourcesToHCL(r *assuredworkloadsBeta.WorkloadResources) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+// CloudbuildWorkerPoolBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func CloudbuildWorkerPoolBetaAsHCL(r cloudbuildBeta.WorkerPool) (string, error) {
+	outputConfig := "resource \"google_cloudbuild_worker_pool\" \"output\" {\n"
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if v := convertCloudbuildWorkerPoolBetaNetworkConfigToHCL(r.NetworkConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tnetwork_config %s\n", v)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if v := convertCloudbuildWorkerPoolBetaWorkerConfigToHCL(r.WorkerConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tworker_config %s\n", v)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+func convertCloudbuildWorkerPoolBetaNetworkConfigToHCL(r *cloudbuildBeta.WorkerPoolNetworkConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.PeeredNetwork != nil {
+		outputConfig += fmt.Sprintf("\tpeered_network = %#v\n", *r.PeeredNetwork)
+	}
+	return outputConfig + "}"
+}
+
+func convertCloudbuildWorkerPoolBetaWorkerConfigToHCL(r *cloudbuildBeta.WorkerPoolWorkerConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.DiskSizeGb != nil {
+		outputConfig += fmt.Sprintf("\tdisk_size_gb = %#v\n", *r.DiskSizeGb)
+	}
+	if r.MachineType != nil {
+		outputConfig += fmt.Sprintf("\tmachine_type = %#v\n", *r.MachineType)
+	}
+	if r.NoExternalIP != nil {
+		outputConfig += fmt.Sprintf("\tno_external_ip = %#v\n", *r.NoExternalIP)
+	}
+	return outputConfig + "}"
 }
 
 // DataprocWorkflowTemplateBetaAsHCL returns a string representation of the specified resource in HCL.
@@ -1177,13 +1331,13 @@ func convertEventarcTriggerBetaTransportPubsubToHCL(r *eventarcBeta.TriggerTrans
 	return outputConfig + "}"
 }
 
-// GkehubFeatureBetaAsHCL returns a string representation of the specified resource in HCL.
+// GkeHubFeatureBetaAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func GkehubFeatureBetaAsHCL(r gkehubBeta.Feature) (string, error) {
+func GkeHubFeatureBetaAsHCL(r gkehubBeta.Feature) (string, error) {
 	outputConfig := "resource \"google_gke_hub_feature\" \"output\" {\n"
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
@@ -1194,24 +1348,24 @@ func GkehubFeatureBetaAsHCL(r gkehubBeta.Feature) (string, error) {
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
-	if v := convertGkehubFeatureBetaSpecToHCL(r.Spec); v != "" {
+	if v := convertGkeHubFeatureBetaSpecToHCL(r.Spec); v != "" {
 		outputConfig += fmt.Sprintf("\tspec %s\n", v)
 	}
 	return formatHCL(outputConfig + "}")
 }
 
-func convertGkehubFeatureBetaSpecToHCL(r *gkehubBeta.FeatureSpec) string {
+func convertGkeHubFeatureBetaSpecToHCL(r *gkehubBeta.FeatureSpec) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if v := convertGkehubFeatureBetaSpecMulticlusteringressToHCL(r.Multiclusteringress); v != "" {
+	if v := convertGkeHubFeatureBetaSpecMulticlusteringressToHCL(r.Multiclusteringress); v != "" {
 		outputConfig += fmt.Sprintf("\tmulticlusteringress %s\n", v)
 	}
 	return outputConfig + "}"
 }
 
-func convertGkehubFeatureBetaSpecMulticlusteringressToHCL(r *gkehubBeta.FeatureSpecMulticlusteringress) string {
+func convertGkeHubFeatureBetaSpecMulticlusteringressToHCL(r *gkehubBeta.FeatureSpecMulticlusteringress) string {
 	if r == nil {
 		return ""
 	}
@@ -1222,15 +1376,15 @@ func convertGkehubFeatureBetaSpecMulticlusteringressToHCL(r *gkehubBeta.FeatureS
 	return outputConfig + "}"
 }
 
-// GkehubFeatureMembershipBetaAsHCL returns a string representation of the specified resource in HCL.
+// GkeHubFeatureMembershipBetaAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func GkehubFeatureMembershipBetaAsHCL(r gkehubBeta.FeatureMembership) (string, error) {
+func GkeHubFeatureMembershipBetaAsHCL(r gkehubBeta.FeatureMembership) (string, error) {
 	outputConfig := "resource \"google_gke_hub_feature_membership\" \"output\" {\n"
-	if v := convertGkehubFeatureMembershipBetaConfigmanagementToHCL(r.Configmanagement); v != "" {
+	if v := convertGkeHubFeatureMembershipBetaConfigmanagementToHCL(r.Configmanagement); v != "" {
 		outputConfig += fmt.Sprintf("\tconfigmanagement %s\n", v)
 	}
 	if r.Feature != nil {
@@ -1248,21 +1402,21 @@ func GkehubFeatureMembershipBetaAsHCL(r gkehubBeta.FeatureMembership) (string, e
 	return formatHCL(outputConfig + "}")
 }
 
-func convertGkehubFeatureMembershipBetaConfigmanagementToHCL(r *gkehubBeta.FeatureMembershipConfigmanagement) string {
+func convertGkeHubFeatureMembershipBetaConfigmanagementToHCL(r *gkehubBeta.FeatureMembershipConfigmanagement) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if v := convertGkehubFeatureMembershipBetaConfigmanagementBinauthzToHCL(r.Binauthz); v != "" {
+	if v := convertGkeHubFeatureMembershipBetaConfigmanagementBinauthzToHCL(r.Binauthz); v != "" {
 		outputConfig += fmt.Sprintf("\tbinauthz %s\n", v)
 	}
-	if v := convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncToHCL(r.ConfigSync); v != "" {
+	if v := convertGkeHubFeatureMembershipBetaConfigmanagementConfigSyncToHCL(r.ConfigSync); v != "" {
 		outputConfig += fmt.Sprintf("\tconfig_sync %s\n", v)
 	}
-	if v := convertGkehubFeatureMembershipBetaConfigmanagementHierarchyControllerToHCL(r.HierarchyController); v != "" {
+	if v := convertGkeHubFeatureMembershipBetaConfigmanagementHierarchyControllerToHCL(r.HierarchyController); v != "" {
 		outputConfig += fmt.Sprintf("\thierarchy_controller %s\n", v)
 	}
-	if v := convertGkehubFeatureMembershipBetaConfigmanagementPolicyControllerToHCL(r.PolicyController); v != "" {
+	if v := convertGkeHubFeatureMembershipBetaConfigmanagementPolicyControllerToHCL(r.PolicyController); v != "" {
 		outputConfig += fmt.Sprintf("\tpolicy_controller %s\n", v)
 	}
 	if r.Version != nil {
@@ -1271,7 +1425,7 @@ func convertGkehubFeatureMembershipBetaConfigmanagementToHCL(r *gkehubBeta.Featu
 	return outputConfig + "}"
 }
 
-func convertGkehubFeatureMembershipBetaConfigmanagementBinauthzToHCL(r *gkehubBeta.FeatureMembershipConfigmanagementBinauthz) string {
+func convertGkeHubFeatureMembershipBetaConfigmanagementBinauthzToHCL(r *gkehubBeta.FeatureMembershipConfigmanagementBinauthz) string {
 	if r == nil {
 		return ""
 	}
@@ -1282,12 +1436,12 @@ func convertGkehubFeatureMembershipBetaConfigmanagementBinauthzToHCL(r *gkehubBe
 	return outputConfig + "}"
 }
 
-func convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncToHCL(r *gkehubBeta.FeatureMembershipConfigmanagementConfigSync) string {
+func convertGkeHubFeatureMembershipBetaConfigmanagementConfigSyncToHCL(r *gkehubBeta.FeatureMembershipConfigmanagementConfigSync) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if v := convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncGitToHCL(r.Git); v != "" {
+	if v := convertGkeHubFeatureMembershipBetaConfigmanagementConfigSyncGitToHCL(r.Git); v != "" {
 		outputConfig += fmt.Sprintf("\tgit %s\n", v)
 	}
 	if r.SourceFormat != nil {
@@ -1296,7 +1450,7 @@ func convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncToHCL(r *gkehub
 	return outputConfig + "}"
 }
 
-func convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncGitToHCL(r *gkehubBeta.FeatureMembershipConfigmanagementConfigSyncGit) string {
+func convertGkeHubFeatureMembershipBetaConfigmanagementConfigSyncGitToHCL(r *gkehubBeta.FeatureMembershipConfigmanagementConfigSyncGit) string {
 	if r == nil {
 		return ""
 	}
@@ -1325,7 +1479,7 @@ func convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncGitToHCL(r *gke
 	return outputConfig + "}"
 }
 
-func convertGkehubFeatureMembershipBetaConfigmanagementHierarchyControllerToHCL(r *gkehubBeta.FeatureMembershipConfigmanagementHierarchyController) string {
+func convertGkeHubFeatureMembershipBetaConfigmanagementHierarchyControllerToHCL(r *gkehubBeta.FeatureMembershipConfigmanagementHierarchyController) string {
 	if r == nil {
 		return ""
 	}
@@ -1342,7 +1496,7 @@ func convertGkehubFeatureMembershipBetaConfigmanagementHierarchyControllerToHCL(
 	return outputConfig + "}"
 }
 
-func convertGkehubFeatureMembershipBetaConfigmanagementPolicyControllerToHCL(r *gkehubBeta.FeatureMembershipConfigmanagementPolicyController) string {
+func convertGkeHubFeatureMembershipBetaConfigmanagementPolicyControllerToHCL(r *gkehubBeta.FeatureMembershipConfigmanagementPolicyController) string {
 	if r == nil {
 		return ""
 	}
@@ -1369,6 +1523,79 @@ func convertGkehubFeatureMembershipBetaConfigmanagementPolicyControllerToHCL(r *
 	if r.TemplateLibraryInstalled != nil {
 		outputConfig += fmt.Sprintf("\ttemplate_library_installed = %#v\n", *r.TemplateLibraryInstalled)
 	}
+	return outputConfig + "}"
+}
+
+// AssuredWorkloadsWorkloadAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func AssuredWorkloadsWorkloadAsHCL(r assuredworkloads.Workload) (string, error) {
+	outputConfig := "resource \"google_assured_workloads_workload\" \"output\" {\n"
+	if r.BillingAccount != nil {
+		outputConfig += fmt.Sprintf("\tbilling_account = %#v\n", *r.BillingAccount)
+	}
+	if r.ComplianceRegime != nil {
+		outputConfig += fmt.Sprintf("\tcompliance_regime = %#v\n", *r.ComplianceRegime)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Organization != nil {
+		outputConfig += fmt.Sprintf("\torganization = %#v\n", *r.Organization)
+	}
+	if v := convertAssuredWorkloadsWorkloadKmsSettingsToHCL(r.KmsSettings); v != "" {
+		outputConfig += fmt.Sprintf("\tkms_settings %s\n", v)
+	}
+	if r.ProvisionedResourcesParent != nil {
+		outputConfig += fmt.Sprintf("\tprovisioned_resources_parent = %#v\n", *r.ProvisionedResourcesParent)
+	}
+	if r.ResourceSettings != nil {
+		for _, v := range r.ResourceSettings {
+			outputConfig += fmt.Sprintf("\tresource_settings %s\n", convertAssuredWorkloadsWorkloadResourceSettingsToHCL(&v))
+		}
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+func convertAssuredWorkloadsWorkloadKmsSettingsToHCL(r *assuredworkloads.WorkloadKmsSettings) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.NextRotationTime != nil {
+		outputConfig += fmt.Sprintf("\tnext_rotation_time = %#v\n", *r.NextRotationTime)
+	}
+	if r.RotationPeriod != nil {
+		outputConfig += fmt.Sprintf("\trotation_period = %#v\n", *r.RotationPeriod)
+	}
+	return outputConfig + "}"
+}
+
+func convertAssuredWorkloadsWorkloadResourceSettingsToHCL(r *assuredworkloads.WorkloadResourceSettings) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ResourceId != nil {
+		outputConfig += fmt.Sprintf("\tresource_id = %#v\n", *r.ResourceId)
+	}
+	if r.ResourceType != nil {
+		outputConfig += fmt.Sprintf("\tresource_type = %#v\n", *r.ResourceType)
+	}
+	return outputConfig + "}"
+}
+
+func convertAssuredWorkloadsWorkloadResourcesToHCL(r *assuredworkloads.WorkloadResources) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
 	return outputConfig + "}"
 }
 
@@ -3278,6 +3505,116 @@ func convertRunServiceStatusTrafficToHCL(r *run.ServiceStatusTraffic) string {
 	return outputConfig + "}"
 }
 
+func convertAssuredWorkloadsWorkloadBetaKmsSettings(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"nextRotationTime": in["next_rotation_time"],
+		"rotationPeriod":   in["rotation_period"],
+	}
+}
+
+func convertAssuredWorkloadsWorkloadBetaKmsSettingsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertAssuredWorkloadsWorkloadBetaKmsSettings(v))
+	}
+	return out
+}
+
+func convertAssuredWorkloadsWorkloadBetaResourceSettings(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"resourceId":   in["resource_id"],
+		"resourceType": in["resource_type"],
+	}
+}
+
+func convertAssuredWorkloadsWorkloadBetaResourceSettingsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertAssuredWorkloadsWorkloadBetaResourceSettings(v))
+	}
+	return out
+}
+
+func convertAssuredWorkloadsWorkloadBetaResources(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"resourceId":   in["resource_id"],
+		"resourceType": in["resource_type"],
+	}
+}
+
+func convertAssuredWorkloadsWorkloadBetaResourcesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertAssuredWorkloadsWorkloadBetaResources(v))
+	}
+	return out
+}
+
+func convertCloudbuildWorkerPoolBetaNetworkConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"peeredNetwork": in["peered_network"],
+	}
+}
+
+func convertCloudbuildWorkerPoolBetaNetworkConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertCloudbuildWorkerPoolBetaNetworkConfig(v))
+	}
+	return out
+}
+
+func convertCloudbuildWorkerPoolBetaWorkerConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"diskSizeGb":   in["disk_size_gb"],
+		"machineType":  in["machine_type"],
+		"noExternalIP": in["no_external_ip"],
+	}
+}
+
+func convertCloudbuildWorkerPoolBetaWorkerConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertCloudbuildWorkerPoolBetaWorkerConfig(v))
+	}
+	return out
+}
+
 func convertDataprocWorkflowTemplateBetaJobs(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -4502,28 +4839,28 @@ func convertEventarcTriggerBetaTransportPubsubList(i interface{}) (out []map[str
 	return out
 }
 
-func convertGkehubFeatureBetaSpec(i interface{}) map[string]interface{} {
+func convertGkeHubFeatureBetaSpec(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"multiclusteringress": convertGkehubFeatureBetaSpecMulticlusteringress(in["multiclusteringress"]),
+		"multiclusteringress": convertGkeHubFeatureBetaSpecMulticlusteringress(in["multiclusteringress"]),
 	}
 }
 
-func convertGkehubFeatureBetaSpecList(i interface{}) (out []map[string]interface{}) {
+func convertGkeHubFeatureBetaSpecList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertGkehubFeatureBetaSpec(v))
+		out = append(out, convertGkeHubFeatureBetaSpec(v))
 	}
 	return out
 }
 
-func convertGkehubFeatureBetaSpecMulticlusteringress(i interface{}) map[string]interface{} {
+func convertGkeHubFeatureBetaSpecMulticlusteringress(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -4533,43 +4870,43 @@ func convertGkehubFeatureBetaSpecMulticlusteringress(i interface{}) map[string]i
 	}
 }
 
-func convertGkehubFeatureBetaSpecMulticlusteringressList(i interface{}) (out []map[string]interface{}) {
+func convertGkeHubFeatureBetaSpecMulticlusteringressList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertGkehubFeatureBetaSpecMulticlusteringress(v))
+		out = append(out, convertGkeHubFeatureBetaSpecMulticlusteringress(v))
 	}
 	return out
 }
 
-func convertGkehubFeatureMembershipBetaConfigmanagement(i interface{}) map[string]interface{} {
+func convertGkeHubFeatureMembershipBetaConfigmanagement(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"binauthz":            convertGkehubFeatureMembershipBetaConfigmanagementBinauthz(in["binauthz"]),
-		"configSync":          convertGkehubFeatureMembershipBetaConfigmanagementConfigSync(in["config_sync"]),
-		"hierarchyController": convertGkehubFeatureMembershipBetaConfigmanagementHierarchyController(in["hierarchy_controller"]),
-		"policyController":    convertGkehubFeatureMembershipBetaConfigmanagementPolicyController(in["policy_controller"]),
+		"binauthz":            convertGkeHubFeatureMembershipBetaConfigmanagementBinauthz(in["binauthz"]),
+		"configSync":          convertGkeHubFeatureMembershipBetaConfigmanagementConfigSync(in["config_sync"]),
+		"hierarchyController": convertGkeHubFeatureMembershipBetaConfigmanagementHierarchyController(in["hierarchy_controller"]),
+		"policyController":    convertGkeHubFeatureMembershipBetaConfigmanagementPolicyController(in["policy_controller"]),
 		"version":             in["version"],
 	}
 }
 
-func convertGkehubFeatureMembershipBetaConfigmanagementList(i interface{}) (out []map[string]interface{}) {
+func convertGkeHubFeatureMembershipBetaConfigmanagementList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertGkehubFeatureMembershipBetaConfigmanagement(v))
+		out = append(out, convertGkeHubFeatureMembershipBetaConfigmanagement(v))
 	}
 	return out
 }
 
-func convertGkehubFeatureMembershipBetaConfigmanagementBinauthz(i interface{}) map[string]interface{} {
+func convertGkeHubFeatureMembershipBetaConfigmanagementBinauthz(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -4579,40 +4916,40 @@ func convertGkehubFeatureMembershipBetaConfigmanagementBinauthz(i interface{}) m
 	}
 }
 
-func convertGkehubFeatureMembershipBetaConfigmanagementBinauthzList(i interface{}) (out []map[string]interface{}) {
+func convertGkeHubFeatureMembershipBetaConfigmanagementBinauthzList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertGkehubFeatureMembershipBetaConfigmanagementBinauthz(v))
+		out = append(out, convertGkeHubFeatureMembershipBetaConfigmanagementBinauthz(v))
 	}
 	return out
 }
 
-func convertGkehubFeatureMembershipBetaConfigmanagementConfigSync(i interface{}) map[string]interface{} {
+func convertGkeHubFeatureMembershipBetaConfigmanagementConfigSync(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"git":          convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncGit(in["git"]),
+		"git":          convertGkeHubFeatureMembershipBetaConfigmanagementConfigSyncGit(in["git"]),
 		"sourceFormat": in["source_format"],
 	}
 }
 
-func convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncList(i interface{}) (out []map[string]interface{}) {
+func convertGkeHubFeatureMembershipBetaConfigmanagementConfigSyncList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertGkehubFeatureMembershipBetaConfigmanagementConfigSync(v))
+		out = append(out, convertGkeHubFeatureMembershipBetaConfigmanagementConfigSync(v))
 	}
 	return out
 }
 
-func convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncGit(i interface{}) map[string]interface{} {
+func convertGkeHubFeatureMembershipBetaConfigmanagementConfigSyncGit(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -4628,18 +4965,18 @@ func convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncGit(i interface
 	}
 }
 
-func convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncGitList(i interface{}) (out []map[string]interface{}) {
+func convertGkeHubFeatureMembershipBetaConfigmanagementConfigSyncGitList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertGkehubFeatureMembershipBetaConfigmanagementConfigSyncGit(v))
+		out = append(out, convertGkeHubFeatureMembershipBetaConfigmanagementConfigSyncGit(v))
 	}
 	return out
 }
 
-func convertGkehubFeatureMembershipBetaConfigmanagementHierarchyController(i interface{}) map[string]interface{} {
+func convertGkeHubFeatureMembershipBetaConfigmanagementHierarchyController(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -4651,18 +4988,18 @@ func convertGkehubFeatureMembershipBetaConfigmanagementHierarchyController(i int
 	}
 }
 
-func convertGkehubFeatureMembershipBetaConfigmanagementHierarchyControllerList(i interface{}) (out []map[string]interface{}) {
+func convertGkeHubFeatureMembershipBetaConfigmanagementHierarchyControllerList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertGkehubFeatureMembershipBetaConfigmanagementHierarchyController(v))
+		out = append(out, convertGkeHubFeatureMembershipBetaConfigmanagementHierarchyController(v))
 	}
 	return out
 }
 
-func convertGkehubFeatureMembershipBetaConfigmanagementPolicyController(i interface{}) map[string]interface{} {
+func convertGkeHubFeatureMembershipBetaConfigmanagementPolicyController(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -4677,13 +5014,79 @@ func convertGkehubFeatureMembershipBetaConfigmanagementPolicyController(i interf
 	}
 }
 
-func convertGkehubFeatureMembershipBetaConfigmanagementPolicyControllerList(i interface{}) (out []map[string]interface{}) {
+func convertGkeHubFeatureMembershipBetaConfigmanagementPolicyControllerList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertGkehubFeatureMembershipBetaConfigmanagementPolicyController(v))
+		out = append(out, convertGkeHubFeatureMembershipBetaConfigmanagementPolicyController(v))
+	}
+	return out
+}
+
+func convertAssuredWorkloadsWorkloadKmsSettings(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"nextRotationTime": in["next_rotation_time"],
+		"rotationPeriod":   in["rotation_period"],
+	}
+}
+
+func convertAssuredWorkloadsWorkloadKmsSettingsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertAssuredWorkloadsWorkloadKmsSettings(v))
+	}
+	return out
+}
+
+func convertAssuredWorkloadsWorkloadResourceSettings(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"resourceId":   in["resource_id"],
+		"resourceType": in["resource_type"],
+	}
+}
+
+func convertAssuredWorkloadsWorkloadResourceSettingsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertAssuredWorkloadsWorkloadResourceSettings(v))
+	}
+	return out
+}
+
+func convertAssuredWorkloadsWorkloadResources(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"resourceId":   in["resource_id"],
+		"resourceType": in["resource_type"],
+	}
+}
+
+func convertAssuredWorkloadsWorkloadResourcesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertAssuredWorkloadsWorkloadResources(v))
 	}
 	return out
 }

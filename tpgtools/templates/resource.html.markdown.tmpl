@@ -42,11 +42,11 @@ description: |-
 {{- /* TODO version notice */}}
 {{- /* TODO references */}}
 {{- /* TODO warning */}}
-{{- range $s := $.Samples}}
+{{- range $s := $.DocSamples}}
 ## Example Usage - {{$s.Name}}
 {{$s.Description}}
 ```hcl
-{{$s.GenerateHCLDocs}}
+{{ $s.GenerateHCL true }}
 ```
 {{- end }}
 

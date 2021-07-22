@@ -32,103 +32,111 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
+{{$s := index ($.TestSamples) 0 -}}
+{{- range $extra_d := $s.ExtraDependencies -}}
+		"{{ $extra_d}}"
+{{ end -}}
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	{{$.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$.DCLPackage}}"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-{{- range $s := $.Samples}}
-{{ $testSlug = $.PathType + "_" + $s.TestSlug }}
-func TestAcc{{$testSlug}}(t *testing.T) {
+{{- range $s := $.TestSamples }}
+func TestAcc{{$.PathType}}_{{$s.TestSlug}}(t *testing.T) {
   t.Parallel()
 
 	context := map[string]interface{} {
-<%= lines(indent(compile(pwd + '/templates/terraform/env_var_context.go.erb'), 4)) -%>
-	<% unless example.test_vars_overrides.nil? -%>
-	<% example.test_vars_overrides.each do |var_name, override| -%>
-			"<%= var_name %>": <%= override %>,
-	<% end -%>
-	<% end -%>
+		{{- range $contextkey, $contextvalue := $s.ExpandContext }}
+		  "{{$contextkey}}" : {{$contextvalue}},
+		{{- end }}
 			"random_suffix": randString(t, 10),
 	}
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		{{ if $.HasGAEquivalent -}}
+	{{ if $s.HasGAEquivalent -}}
 		Providers: testAccProviders,
-		{{- else }}
+	{{- else }}
 		Providers: testAccProvidersOiCS,
-		{{- end }}
-		// placeholder code if we need to grab external providers
-		// {{ pull external }}
-		// ExternalProviders: map[string]resource.ExternalProvider{
-		// 	"random": {},
-		// },
-		// {{- end }}
-		<% unless object.skip_delete -%>
-		CheckDestroy: testAccCheck<%= "#{resource_name}" -%>DestroyProducer(t),
-		<% end -%>
+	{{- end }}
+	{{ if true -}}
+		CheckDestroy: testAccCheck{{$.PathType}}DestroyProducer(t),
+	{{- end }}
 		Steps: []resource.TestStep{
+		{{- range $se := $s.EnumerateWithUpdateSamples }}
 			{
-				Config: testAcc<%= test_slug -%>(context),
+				Config: testAcc{{$.PathType}}_{{$se.TestSlug}}(context),
+			{{- if $se.CustomCheck }}
+				Check:  resource.ComposeTestCheckFunc(
+				{{- range $index, $check := $se.CustomCheck -}}
+					{{ $check }} {{- if isLastIndex $se.CustomCheck $index }}, {{end -}}
+				{{- end }}
+				),
+			{{- end }}
 			},
-		<%#- The Terraform test runner doesn't let us import resources with aliased providers (yet) -%>
-		<% unless example.skip_import_test || versioned_provider -%>
 			{
-				ResourceName:      "<%= terraform_name -%>.<%= example.primary_resource_id -%>",
+				ResourceName:      "{{$.TerraformName}}.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
-		<%- unless ignore_read.empty? -%>
-				ImportStateVerifyIgnore: <%= go_literal(ignore_read) %>,
-		<%- end -%>
+			{{ if $se.IgnoreRead -}}
+				ImportStateVerifyIgnore: []string{ {{- range $ignoreReadValue := $se.IgnoreRead -}}"{{$ignoreReadValue}}", {{- end -}} },
+			{{- end }}
 			},
-		<% end -%>
+		{{- end }}
 		},
 	})
 }
-
-func testAcc<%= test_slug -%>(context map[string]interface{}) string {
-<%= example.config_test(pwd) -%>
-}
 {{- end }}
 
-<% unless object.skip_delete -%>
-func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terraform.State) error {
+{{$s := index ($.TestSamples) 0 -}}
+{{- range $cti := $s.GetCodeToInject }}
+{{ $cti }}
+{{ end }}
+
+{{- range $s := $.TestSamples -}}
+{{ range $se := $s.EnumerateWithUpdateSamples }}
+func testAcc{{$.PathType}}_{{$se.TestSlug}}(context map[string]interface{}) string {
+	return Nprintf(`
+{{ $se.GenerateHCL false }}
+`, context)
+}
+{{ end }}
+{{- end }}
+
+func testAccCheck{{$.PathType}}DestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
-			if rs.Type != "<%= terraform_name -%>" {
+			if rs.Type != "rs.{{$.TerraformName}}" {
 				continue
 			}
 			if strings.HasPrefix(name, "data.") {
 				continue
 			}
 
-		<% if object.custom_code.test_check_destroy -%>
-	<%= lines(compile(pwd + '/' + object.custom_code.test_check_destroy)) -%>
-		<% else -%>
-		config := googleProviderConfig(t)
+			config := googleProviderConfig(t)
 
-		url, err := replaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
-		if err != nil {
-			return err
-		}
-
-		billingProject := ""
-
-		if config.BillingProject != "" {
-			billingProject = config.BillingProject
-		}
-
-		_, err = sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, config.userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
-		if err == nil {
-				return fmt.Errorf("<%= resource_name -%> still exists at %s", url)
+			billingProject := ""
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
 			}
-		<% end -%>
-		}
 
+			obj := &{{$.Package}}.{{$.Type}}{
+				{{- range $v := .Properties }}
+				{{- if $v.StateGetterForDestroyTest }}
+					{{$v.PackageName}}: {{ $v.StateGetterForDestroyTest }},
+				{{- end }}
+				{{- end }}
+			}
+
+			client := NewDCL{{$.ProductType}}Client(config, config.userAgent, billingProject)
+			_, err := client.Get{{$.Type}}(context.Background(), obj)
+			if err == nil {
+				return fmt.Errorf("{{$.TerraformName}} still exists %v", obj)
+			}
+	  }
 		return nil
 	}
 }
-<% end -%>
+
+

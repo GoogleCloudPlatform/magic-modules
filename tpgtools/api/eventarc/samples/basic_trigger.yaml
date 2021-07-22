@@ -18,12 +18,4 @@ name: basic_trigger
 resource: samples/trigger.eventarc.trigger.json
 versions:
 - beta
-extra_substitutions:
-  - substitution: "project"
-    value: "my-project"
-  - substitution: "region"
-    value: "us-central1"
-  - substitution: "name"
-    value: "trigger"
-  - substitution: "topic"
-    value: "topic"
+- ga
