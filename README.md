@@ -100,9 +100,9 @@ Before making any changes, you can compile the Terraform provider you're working
 on by running the following command. If Magic Modules has been installed
 correctly, you'll get no errors.
 
-Generally, you'll want to generate into the same output.  For terraform, that
-will be `$GOPATH/src/github.com/hashicorp/terraform-provider-google` (optionally `-beta`).
-
+The following commands should be run from the root directory of the repository.
+OUTPUT_PATH should be set to the location of your provider repository, which is
+recommended to be inside your GOPATH.
 
 ```bash
 make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google"
