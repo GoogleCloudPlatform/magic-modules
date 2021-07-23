@@ -589,7 +589,6 @@ func (r *Resource) getSampleAccessoryFolder() string {
 
 func (r *Resource) loadSamples() []Sample {
 	samples := []Sample{}
-
 	handWritten := r.loadHandWrittenSamples()
 	dclSamples := r.loadDCLSamples()
 	samples = append(samples, dclSamples...)
@@ -694,11 +693,10 @@ func (r *Resource) loadDCLSamples() []Sample {
 			continue
 		}
 		sample := Sample{}
-
-		sampleOG := path.Join(samplesPath, file.Name())
+		sampleOGFilePath := path.Join(samplesPath, file.Name())
 		var tc []byte
 		if pathExists(sampleFriendlyMetaPath) {
-			tc, err = mergeYaml(sampleOG, sampleFriendlyMetaPath)
+			tc, err = mergeYaml(sampleOGFilePath, sampleFriendlyMetaPath)
 		} else {
 			tc, err = ioutil.ReadFile(path.Join(samplesPath, file.Name()))
 		}
