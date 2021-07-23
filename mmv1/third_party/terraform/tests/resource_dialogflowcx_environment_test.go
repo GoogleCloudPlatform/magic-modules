@@ -65,7 +65,7 @@ func testAccDialogflowCXEnvironment_basic(context map[string]interface{}) string
 		parent       = google_dialogflow_cx_agent.agent_version.start_flow
 		display_name = "1.0.0"
 		description  = "version 1.0.0"
-	}
+	}	
 
 	resource "google_dialogflow_cx_environment" "development" {
         parent       = google_dialogflow_cx_agent.agent_version.id
@@ -89,18 +89,13 @@ func testAccDialogflowCXEnvironment_full(context map[string]interface{}) string 
 	}
 
 	resource "google_dialogflow_cx_agent" "agent_version" {
-		display_name = "tf-test-%{random_suffix}update"
+		display_name = "tf-test-%{random_suffix}"
 		location = "global"
 		default_language_code = "en"
-		supported_language_codes = ["no"]
-		time_zone = "Europe/London"
-		description = "Description 2!"
-		avatar_uri = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo-2.png"
-		enable_stackdriver_logging = true
-        enable_spell_correction    = true
-		speech_to_text_settings {
-			enable_speech_adaptation = true
-		}
+		supported_language_codes = ["fr","de","es"]
+		time_zone = "America/New_York"
+		description = "Description 1."
+		avatar_uri = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
 		depends_on = [google_project_iam_member.agent_create]
 	}
 
@@ -110,11 +105,17 @@ func testAccDialogflowCXEnvironment_full(context map[string]interface{}) string 
 		description  = "version 1.0.0"
 	}
 
+	resource "google_dialogflow_cx_version" "version2" {
+		parent       = google_dialogflow_cx_agent.agent_version.start_flow
+		display_name = "2.0.0"
+		description  = "version 2.0.0"
+	}
+
 	resource "google_dialogflow_cx_environment" "development" {
         parent       = google_dialogflow_cx_agent.agent_version.id
         display_name = "Development"
         version_configs {
-            version = google_dialogflow_cx_version.version1.id
+            version = google_dialogflow_cx_version.version2.id
         }
     }
 	  `, context)
