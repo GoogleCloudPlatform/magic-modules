@@ -376,6 +376,9 @@ func generateResourceFile(res *Resource) {
 }
 
 func generateSweeperFile(res *Resource) {
+	if !res.HasSweeper {
+		return
+	}
 	// Generate resource file
 	tmplInput := ResourceInput{
 		Resource: *res,
