@@ -231,16 +231,6 @@ func (p Property) StateGetterForDestroyTest() string {
 			return fmt.Sprintf("dcl.StringOrNil(%s)", pullValueFromState)
 		}
 		return fmt.Sprintf("dcl.String(%s)", pullValueFromState)
-		// case SchemaTypeFloat:
-		// 	if p.Computed {
-		// 		return fmt.Sprintf("dcl.Float64OrNil(%s)", pullValueFromState)
-		// 	}
-		// 	return fmt.Sprintf("dcl.Float64(%s.(float64))", rawGetter)
-		// case SchemaTypeInt:
-		// 	if p.Computed {
-		// 		return fmt.Sprintf("dcl.Int64OrNil(int64(%s.(int)))", rawGetter)
-		// 	}
-		// 	return fmt.Sprintf("dcl.Int64(int64(%s.(int)))", rawGetter)
 	}
 
 	return ""
@@ -601,7 +591,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		}
 
 		if !p.Computed {
-			// glog.Infof("Looking for %q in %v.", v.Title, schema.Required)
+			glog.Infof("Looking for %q in %v.", v.Title, schema.Required)
 			if stringInSlice(v.Title, schema.Required) {
 				p.Required = true
 			} else {

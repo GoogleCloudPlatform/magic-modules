@@ -35,10 +35,13 @@ type Sample struct {
 	// DependencyList is a list of objects containing metadata for each sample resource
 	DependencyList []Dependency
 
+	// The name of the test
 	TestSlug string
 
+	// The raw versions stated in the yaml
 	Versions []string
 
+	// A list of updates that the resource can transition between
 	Updates []map[string]string
 
 	// HasGAEquivalent tells us if we should have `provider = google-beta`
@@ -63,6 +66,7 @@ type Sample struct {
 	// Testhide specifies a list of samples to hide from tests
 	Testhide []string `yaml:"test_hide"`
 
+	// ExtraDependencies are the additional golang dependencies the injected code may require
 	ExtraDependencies []string `yaml:"extra_dependencies"`
 }
 
@@ -235,10 +239,13 @@ func (s Sample) GenerateHCL(isDocs bool) string {
 	return hcl
 }
 
+// isNativeHCL returns whether the resource file is terraform synatax
 func (s Sample) isNativeHCL() bool {
-	return strings.HasSuffix(s.FileName, ".tf")
+	return strings.HasSuffix(*s.PrimaryResource, ".tf")
 }
 
+// EnumerateWithUpdateSamples returns an array of new samples expanded with
+// any subsequent samples
 func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 	out := []Sample{*s}
 	for i, update := range s.Updates {
@@ -254,6 +261,7 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 	return out
 }
 
+// ExpandContext expands the context model used in the generated tests
 func (s Sample) ExpandContext() map[string]string {
 	out := map[string]string{}
 	for _, sub := range s.Substitutions {
@@ -334,6 +342,7 @@ var translationMap = map[string]translationIndex{
 	},
 }
 
+// translateValue returns the value to embed in the hcl
 func (sub *Substitution) translateValue(isDocs bool) string {
 	value := *sub.Value
 	translation, hasTranslation := translationMap[value]

@@ -127,8 +127,10 @@ type Resource struct {
 	// TerraformProductName is the Product name overriden from the DCL
 	TerraformProductName *string
 
+	// The array of Samples associated with the resource
 	Samples []Sample
 
+	// Versions specific information about this resource
 	versionMetadata Version
 }
 
