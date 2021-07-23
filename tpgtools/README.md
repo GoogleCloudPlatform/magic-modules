@@ -48,7 +48,7 @@ go run . --path "api" --overrides "overrides" --output ~/tpg-fork --version "bet
 To generate accessory code such as `serializarion`, you can specify the `--mode`:
 
 ```
-go run . --path "api" --overrides "overrides" --output ./serialization.go --mode "serialization"
+go run . --path "api" --overrides "overrides" --output ~/some/dir --mode "serialization"
 ```
 
 ## Development
