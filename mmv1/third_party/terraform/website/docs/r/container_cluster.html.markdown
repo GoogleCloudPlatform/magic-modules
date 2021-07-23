@@ -236,11 +236,7 @@ region are guaranteed to support the same version.
     Terraform. Structure is documented below.
 
 * `network_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for
-   [Adding Pod IP address ranges](https://cloud.google.com/kubernetes-engine/docs/how-to/multi-pod-cidr))  used in creating the default node pool.
-    Generally, this field should not be used at the same time as a
-    `google_container_node_pool` or a `node_pool` block; this configuration
-    manages the default node pool, which isn't recommended to be used with
-    Terraform. Structure is documented below.
+   [Adding Pod IP address ranges](https://cloud.google.com/kubernetes-engine/docs/how-to/multi-pod-cidr)) to the node pool.
 
 * `node_pool` - (Optional) List of node pools associated with this cluster.
     See [google_container_node_pool](container_node_pool.html) for schema.
