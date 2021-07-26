@@ -104,6 +104,12 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 	// The API docs don't specify that you can do connections/-,
 	// but that's what gcloud does, and it's easier than grabbing
 	// the connection name.
+
+	// err == nil indicates that the billing_project value was found
+	if bp, err := getBillingProject(d, config); err == nil {
+		project = bp
+	}
+
 	createCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.Patch(parentService+"/connections/-", connection).UpdateMask("reservedPeeringRanges").Force(true)
 	if config.UserProjectOverride {
 		createCall.Header().Add("X-Goog-User-Project", project)
@@ -149,6 +155,11 @@ func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interf
 		return errwrap.Wrapf("Failed to retrieve network field value, err: {{err}}", err)
 	}
 	project := networkFieldValue.Project
+
+	// err == nil indicates that the billing_project value was found
+	if bp, err := getBillingProject(d, config); err == nil {
+		project = bp
+	}
 
 	parentService := formatParentService(connectionId.Service)
 	readCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.List(parentService).Network(serviceNetworkingNetworkName)
@@ -223,6 +234,12 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 
 		// The API docs don't specify that you can do connections/-, but that's what gcloud does,
 		// and it's easier than grabbing the connection name.
+
+		// err == nil indicates that the billing_project value was found
+		if bp, err := getBillingProject(d, config); err == nil {
+			project = bp
+		}
+
 		patchCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.Patch(parentService+"/connections/-", connection).UpdateMask("reservedPeeringRanges").Force(true)
 		if config.UserProjectOverride {
 			patchCall.Header().Add("X-Goog-User-Project", project)
@@ -352,9 +369,15 @@ func retrieveServiceNetworkingNetworkName(d *schema.ResourceData, config *Config
 		return "", fmt.Errorf("Could not determine project")
 	}
 	log.Printf("[DEBUG] Retrieving project number by doing a GET with the project id, as required by service networking")
+	// err == nil indicates that the billing_project value was found
+	billingProject := pid
+	if bp, err := getBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
 	getProjectCall := config.NewResourceManagerClient(userAgent).Projects.Get(pid)
 	if config.UserProjectOverride {
-		getProjectCall.Header().Add("X-Goog-User-Project", pid)
+		getProjectCall.Header().Add("X-Goog-User-Project", billingProject)
 	}
 	project, err := getProjectCall.Do()
 	if err != nil {
