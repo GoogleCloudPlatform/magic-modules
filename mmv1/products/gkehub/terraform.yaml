@@ -17,14 +17,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        min_version: beta
         name: "gkehub_membership_basic"
         primary_resource_id: "basic_membership"
         vars:
           name: "basic"
           cluster_name: "basiccluster"
       - !ruby/object:Provider::Terraform::Examples
-        min_version: beta
         name: "gkehub_membership_issuer"
         primary_resource_id: "issuer_membership"
         vars:
