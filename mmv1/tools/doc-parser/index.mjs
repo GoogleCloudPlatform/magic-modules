@@ -83,7 +83,6 @@ async function generateProperties(window, object, tabIndex){
     var row = [... element.querySelectorAll(`td`)]
     var name = row[0].textContent
     if (row[1] == undefined) {
-      console.log("hi scott")
       console.log(name)
       console.log(object)
     }
