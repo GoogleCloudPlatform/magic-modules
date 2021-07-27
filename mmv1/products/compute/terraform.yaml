@@ -419,6 +419,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       timeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   RegionInstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   BackendServiceSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -1884,6 +1886,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'portDiffSuppress'
       grpcHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
+      logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/health_check_log_config.go.erb'
   RegionUrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
