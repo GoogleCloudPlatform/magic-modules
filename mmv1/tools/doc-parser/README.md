@@ -1,7 +1,7 @@
 ## doc parser
 
 This tool assists in creating mmv1 yaml fields from cloud documentation.
-It was designed with generation of subfields inmind but should work for any scenario.
+It was designed with generation of subfields in mind but should work for any scenario.
 
 To use this tool edit the path in index.mjs to point to the documentation path to
 the resource and or field in question.
