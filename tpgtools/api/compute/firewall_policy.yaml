@@ -56,6 +56,9 @@ components:
       x-dcl-locations:
       - global
       type: object
+      required:
+      - shortName
+      - parent
       properties:
         creationTimestamp:
           type: string
@@ -71,8 +74,10 @@ components:
         fingerprint:
           type: string
           x-dcl-go-name: Fingerprint
+          readOnly: true
           description: Fingerprint of the resource. This field is used internally
             during updates of this resource.
+          x-kubernetes-immutable: true
         id:
           type: string
           x-dcl-go-name: Id
@@ -83,7 +88,6 @@ components:
         name:
           type: string
           x-dcl-go-name: Name
-          readOnly: true
           description: Name of the resource. It is a numeric ID allocated by GCP which
             uniquely identifies the Firewall Policy.
           x-kubernetes-immutable: true
@@ -97,8 +101,10 @@ components:
           x-dcl-references:
           - resource: Cloudresourcemanager/Folder
             field: name
+            parent: true
           - resource: Cloudresourcemanager/Organization
             field: name
+            parent: true
         ruleTupleCount:
           type: integer
           format: int64
