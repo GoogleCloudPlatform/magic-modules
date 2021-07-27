@@ -32,7 +32,6 @@ module Provider
       return unless generate_docs
 
       examples = data.object.examples
-                     .reject { |e| e.cloud_docs_region_tag.nil? || e.cloud_docs_region_tag.empty? }
 
       examples.each do |example|
         target_folder = data.output_folder
@@ -41,10 +40,16 @@ module Provider
 
         data.example = example
 
-        data.generate(pwd,
-                      'templates/terraform/examples/base_configs/cloud_docs_example_file.tf.erb',
-                      File.join(target_folder, 'main.tf'),
-                      self)
+        File.open(pwd + '/' + example.config_path).each_line do |line|
+          if line.include? "# [START"
+            Google::LOGGER.info "Found CGC sample #{example.name}"
+            data.generate(pwd,
+              'templates/terraform/examples/base_configs/cloud_docs_example_file.tf.erb',
+              File.join(target_folder, 'main.tf'),
+              self)
+            return
+          end
+        end
       end
     end
 
