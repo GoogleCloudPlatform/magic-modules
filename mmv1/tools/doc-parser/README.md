@@ -18,3 +18,11 @@ node ./index.mjs
 ```
 
 The generated yaml will be located at `./out.yaml`
+
+## Limitations and disclaimer
+
+Note that this will assist in the generation of the yaml but is not to be used
+as a full replacement for manual intervention. Sometimes documentation is incorrect
+and fields may need to be quantified that they are not updatable or exclusion scenarios
+may need to be cover (this tool does not handle that). Please thoroughly test the
+resource before committing anything generated from this tool.
