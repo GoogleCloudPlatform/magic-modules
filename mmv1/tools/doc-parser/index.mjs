@@ -2,11 +2,11 @@ import {JSDOM} from "jsdom"
 import fetch from "node-fetch"
 import fs from "fs"
 import TurndownService from 'turndown'
+var turndownService = new TurndownService()
 
 
-const turndownService = new TurndownService()
 const host = "https://cloud.google.com"
-const path = "/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#DeidentifyTemplate.PrimitiveTransformation"
+const path = "/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#DeidentifyTemplate.CryptoReplaceFfxFpeConfig"
 const subObject = path.split('#').pop().split(".").join("\\.")
 const responses = {}
 
@@ -80,7 +80,6 @@ async function generateProperties(window, object, tabIndex){
   fields = fields.filter( element => shouldBeFiltered(element.getAttribute("id")))
   var out = await Promise.all(fields.map( async element => {
     console.log(element.getAttribute("id"))
-    console.log(element.innerHtml)
     var row = [... element.querySelectorAll(`td`)]
     var name = row[0].textContent
     if (row[1] == undefined) {
@@ -115,22 +114,22 @@ async function generateProperties(window, object, tabIndex){
     } else {
       sout = printLine(tabIndex, "- !WARNING_NOT_SUPPORTED " + inter.textContent)
     }
-    tabIndex++
-    sout += printLine(tabIndex, `name: '${name}'`)
+    var forkedTabIndex = tabIndex + 1
+    sout += printLine(forkedTabIndex, `name: '${name}'`)
     if (required){
-      sout += printLine(tabIndex,"required: true")
+      sout += printLine(forkedTabIndex,"required: true")
     }
-    sout += printDescription(tabIndex, description)
+    sout += printDescription(forkedTabIndex, description)
     if(inter.textContent.indexOf("enum") != -1){
-      sout += printLine(tabIndex, `values:`)
+      sout += printLine(forkedTabIndex, `values:`)
       var newPath = inter.querySelector('a').getAttribute('href')
       var newObject = newPath.split('#').length > 1 ?
         newPath.split('#').pop().split(".").join("\\."):
         ""
-      sout += await generateEnumValues(newPath, newObject, tabIndex)
+      sout += await generateEnumValues(newPath, newObject, forkedTabIndex)
       sout += "\n"
     }
-    tabIndex--
+    forkedTabIndex--
     return sout
   }))
   return out.join('')
@@ -150,11 +149,7 @@ async function buildObject(path, object ,tabIndex, name, description, required){
   tabIndex++
   out += printLine(tabIndex, `name: '${name}'`)
   out += printDescription(tabIndex, description)
-  if (required){
-    out += printLine(tabIndex,"required: true")
-  }
   out += printLine(tabIndex, `properties:`)
-
   tabIndex++
   out += await generateProperties(window, object, tabIndex)
   return out
