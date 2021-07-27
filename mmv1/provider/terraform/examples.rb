@@ -177,8 +177,8 @@ module Provider
                      ))
 
         # Remove region tags
-        body = body.gsub(/# \[[a-zA-Z_ ]+\]\n/,'')
-        body = body.gsub(/\n# \[[a-zA-Z_ ]+\]/,'')
+        body = body.gsub(/# \[[a-zA-Z_ ]+\]\n/, '')
+        body = body.gsub(/\n# \[[a-zA-Z_ ]+\]/, '')
         lines(compile_file(
                 { content: body },
                 pwd + '/templates/terraform/examples/base_configs/documentation.tf.erb'
@@ -205,14 +205,14 @@ module Provider
 
         vars.merge!(cloud_docs_vars_overrides) unless cloud_docs_vars_overrides.empty?
 
-        body = lines(compile_file(
-                       {
-                         vars: vars,
-                         test_env_vars: test_env_vars.map { |k, v| [k, docs_defaults[v]] }.to_h,
-                         primary_resource_id: primary_resource_id
-                       },
-                       pwd + '/' + config_path
-                     ))
+        lines(compile_file(
+                {
+                  vars: vars,
+                  test_env_vars: test_env_vars.map { |k, v| [k, docs_defaults[v]] }.to_h,
+                  primary_resource_id: primary_resource_id
+                },
+                pwd + '/' + config_path
+              ))
       end
 
       def config_test(pwd)
@@ -261,8 +261,8 @@ module Provider
                      ))
 
         # Remove region tags
-        body = body.gsub(/# \[[a-zA-Z_ ]+\]\n/,'')
-        body = body.gsub(/\n# \[[a-zA-Z_ ]+\]/,'')
+        body = body.gsub(/# \[[a-zA-Z_ ]+\]\n/, '')
+        body = body.gsub(/\n# \[[a-zA-Z_ ]+\]/, '')
         substitute_test_paths body
       end
 
@@ -281,10 +281,9 @@ module Provider
                        pwd + '/' + config_path
                      ))
 
-
         # Remove region tags
-        body = body.gsub(/# \[[a-zA-Z_ ]+\]\n/,'')
-        body = body.gsub(/\n# \[[a-zA-Z_ ]+\]/,'')
+        body = body.gsub(/# \[[a-zA-Z_ ]+\]\n/, '')
+        body = body.gsub(/\n# \[[a-zA-Z_ ]+\]/, '')
         substitute_example_paths body
       end
 

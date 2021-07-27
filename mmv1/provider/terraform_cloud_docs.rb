@@ -41,13 +41,13 @@ module Provider
         data.example = example
 
         File.open(pwd + '/' + example.config_path).each_line do |line|
-          if line.include? "# [START"
+          next unless line.include '# [START'
             Google::LOGGER.info "Found CGC sample #{example.name}"
             data.generate(pwd,
-              'templates/terraform/examples/base_configs/cloud_docs_example_file.tf.erb',
-              File.join(target_folder, 'main.tf'),
-              self)
-            return
+                'templates/terraform/examples/base_configs/cloud_docs_example_file.tf.erb',
+                File.join(target_folder, 'main.tf'),
+                self)
+            break
           end
         end
       end
