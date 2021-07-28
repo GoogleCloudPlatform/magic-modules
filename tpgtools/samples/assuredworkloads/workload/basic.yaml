@@ -1,0 +1,6 @@
+# optional test level config -- needed for updates basic.tf def
+updates:
+- resource: ./basic_update.tf
+versions:
+- ga
+- beta
