@@ -1,5 +1,6 @@
 # Internal HTTP load balancer with a managed instance group backend
 
+# [START cloudloadbalancing_int_http_gce]
 # VPC
 resource "google_compute_network" "default" {
   name                    = "<%= ctx[:vars]['ilb_network'] %>"
@@ -187,3 +188,4 @@ resource "google_compute_instance" "vm-test" {
     }
   }
 }
+# [END cloudloadbalancing_int_http_gce]
