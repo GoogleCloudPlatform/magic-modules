@@ -401,6 +401,34 @@ func TestAccComputeInstanceTemplate_networkIPAddress(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstanceTemplate_PTRRecord(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	var ptrName = fmt.Sprintf("tf-test-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_PTR(ptrName, randString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate),
+					testAccCheckComputeInstanceTemplateAccessConfigHasPTR(&instanceTemplate),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccComputeInstanceTemplate_disks(t *testing.T) {
 	t.Parallel()
 
@@ -1162,6 +1190,20 @@ func testAccCheckComputeInstanceTemplateNetwork(instanceTemplate *compute.Instan
 	}
 }
 
+func testAccCheckComputeInstanceTemplateAccessConfigHasPTR(instanceTemplate *compute.InstanceTemplate) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, i := range instanceTemplate.Properties.NetworkInterfaces {
+			for _, c := range i.AccessConfigs {
+				if c.PublicPtrDomainName == "" {
+					return fmt.Errorf("no PTR Record")
+				}
+			}
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckComputeInstanceTemplateNetworkName(instanceTemplate *compute.InstanceTemplate, network string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, i := range instanceTemplate.Properties.NetworkInterfaces {
@@ -1584,6 +1626,36 @@ resource "google_compute_instance_template" "foobar" {
   }
 }
 `, suffix, suffix)
+}
+
+func testAccComputeInstanceTemplate_PTR(record, suffix string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name         = "tf-test-instance-template-%s"
+  machine_type = "e2-medium"
+  tags         = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+  }
+
+  network_interface {
+    network = "default"
+    access_config {
+      public_ptr_domain_name = "%s.gcp.tfacc.hashicorptest.com."
+    }
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+}
+`, suffix, record)
 }
 
 func testAccComputeInstanceTemplate_networkTier(suffix string) string {

@@ -386,6 +386,11 @@ The `access_config` block supports:
     this instance template. This field can take the following values: PREMIUM or
     STANDARD. If this field is not specified, it is assumed to be PREMIUM.
 
+* `public_ptr_domain_name` - (Optional) The DNS domain name for the public PTR record.
+    To set this field on an instance template, you must be verified as the owner of the domain.
+    See [the docs](https://cloud.google.com/compute/docs/instances/create-ptr-record) for how
+    to become verified as a domain owner.
+
 The `alias_ip_range` block supports:
 
 * `ip_cidr_range` - The IP CIDR range represented by this alias IP range. This IP CIDR range
