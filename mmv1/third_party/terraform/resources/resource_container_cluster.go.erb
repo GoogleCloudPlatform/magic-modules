@@ -1909,6 +1909,33 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s master authorized networks config has been updated", d.Id())
 	}
 
+	if d.HasChange("workload_identity_config") {
+		// Because GKE uses a non-RESTful update function, when removing the
+		// feature you need to specify a fairly full request body or it fails:
+		// "update": {"desiredWorkloadIdentityConfig": {"identityNamespace": ""}}
+		req := &containerBeta.UpdateClusterRequest{}
+		if v, ok := d.GetOk("workload_identity_config"); !ok {
+			req.Update = &containerBeta.ClusterUpdate{
+				DesiredWorkloadIdentityConfig: &containerBeta.WorkloadIdentityConfig{
+					IdentityNamespace: "",
+					ForceSendFields:   []string{"IdentityNamespace"},
+				},
+			}
+		} else {
+			req.Update = &containerBeta.ClusterUpdate{
+				DesiredWorkloadIdentityConfig: expandWorkloadIdentityConfig(v),
+			}
+		}
+
+		updateF := updateFunc(req, "updating GKE cluster workload identity config")
+		// Call update serially.
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s workload identity config has been updated", d.Id())
+	}
+
 	if d.HasChange("addons_config") {
 		if ac, ok := d.GetOk("addons_config"); ok {
 			req := &containerBeta.UpdateClusterRequest{
@@ -2583,33 +2610,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s pod security policy config has been updated", d.Id())
 	}
 <% end -%>
-
-	if d.HasChange("workload_identity_config") {
-		// Because GKE uses a non-RESTful update function, when removing the
-		// feature you need to specify a fairly full request body or it fails:
-		// "update": {"desiredWorkloadIdentityConfig": {"identityNamespace": ""}}
-		req := &containerBeta.UpdateClusterRequest{}
-		if v, ok := d.GetOk("workload_identity_config"); !ok {
-			req.Update = &containerBeta.ClusterUpdate{
-				DesiredWorkloadIdentityConfig: &containerBeta.WorkloadIdentityConfig{
-					IdentityNamespace: "",
-					ForceSendFields:   []string{"IdentityNamespace"},
-				},
-			}
-		} else {
-			req.Update = &containerBeta.ClusterUpdate{
-				DesiredWorkloadIdentityConfig: expandWorkloadIdentityConfig(v),
-			}
-		}
-
-		updateF := updateFunc(req, "updating GKE cluster workload identity config")
-		// Call update serially.
-		if err := lockedCall(lockKey, updateF); err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] GKE cluster %s workload identity config has been updated", d.Id())
-	}
 
 	if d.HasChange("resource_labels") {
 		resourceLabels := d.Get("resource_labels").(map[string]interface{})
