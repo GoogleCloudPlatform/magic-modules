@@ -444,7 +444,6 @@ func generateResourceTestFile(res *Resource) {
 
 	formatted, err := formatSource(&contents)
 	if err != nil {
-		err := ioutil.WriteFile("./temp/temp.go", []byte(contents.String()), 0644)
 		glog.Error(fmt.Errorf("error formatting %v: %v - test_file \n ", res.ProductName()+res.Name(), err))
 	}
 

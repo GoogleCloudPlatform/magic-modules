@@ -23,7 +23,7 @@ extra_dependencies:
   - "strconv"
   - "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 code_inject:
-  - workload_post_destory.go
+  - delete_assured_workload_provisioned_resources.go
 doc_hide:
   - basic.tf # basic_update.tf auto hides
   - full.tf

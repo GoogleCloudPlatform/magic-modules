@@ -114,7 +114,6 @@ func BuildDependency(fileName, product, localname, version string, b []byte) (*D
 		localname = fileParts[0]
 	}
 	dclResourceType := product + resourceName
-	// terraformResourceType := fmt.Sprintf("google_%s_%s", fileParts[1], fileParts[2])
 	terraformResourceType, err := DCLToTerraformReference(dclResourceType, version)
 	if err != nil {
 		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)
@@ -156,10 +155,10 @@ func (s *Sample) generateSampleDependencyWithName(fileName, localname string) De
 }
 
 func (s *Sample) GetCodeToInject() []string {
-	sampleFriendlyFolder := s.resourceReference.getSampleAccessoryFolder()
+	sampleAccessoryFolder := s.resourceReference.getSampleAccessoryFolder()
 	var out []string
 	for _, fileName := range s.CodeInject {
-		filePath := path.Join(sampleFriendlyFolder, fileName)
+		filePath := path.Join(sampleAccessoryFolder, fileName)
 		tc, err := ioutil.ReadFile(filePath)
 		if err != nil {
 			glog.Exit(err)
@@ -197,22 +196,16 @@ func (s Sample) generateHCLTemplate() (string, error) {
 	if len(s.DependencyList) == 0 {
 		return "", fmt.Errorf("Could not generate HCL template for %s: there are no dependencies", *s.Name)
 	}
+
 	var hcl string
-	// var primaryIndex int
 	for index := range s.DependencyList {
 		err := s.ReplaceReferences(&s.DependencyList[index])
 		if err != nil {
 			return "", fmt.Errorf("Could not generate HCL template for %s: %s", *s.Name, err)
 		}
-		// Skip appending the primary resource, it should go last
-		// if strings.Contains(*s.PrimaryResource, s.DependencyList[index].FileName) {
-		// 	primaryIndex = index
-		// 	continue
-		// }
 		hcl = fmt.Sprintf("%s%s\n", hcl, s.DependencyList[index].HCLBlock)
 	}
 
-	// hcl = fmt.Sprintf("%s%s", hcl, s.DependencyList[primaryIndex].HCLBlock)
 	return hcl, nil
 }
 

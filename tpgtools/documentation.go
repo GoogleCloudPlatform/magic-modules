@@ -89,6 +89,7 @@ func generateResourceWebsiteFile(res *Resource, resources map[Version][]*Resourc
 	res = mergeResource(res, resources, version)
 
 	if len(res.DocSamples()) <= 0 {
+		fmt.Printf(" %-40s no samples, skipping doc generation\n", res.TerraformName())
 		return
 	}
 

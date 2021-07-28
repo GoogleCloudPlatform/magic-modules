@@ -583,8 +583,8 @@ func (r Resource) getSamples(docs bool) []Sample {
 func (r *Resource) getSampleAccessoryFolder() string {
 	resourceType := strings.ToLower(r.Type())
 	packageName := strings.ToLower(r.productMetadata.PackageName)
-	sampleFriendlyFolder := path.Join(*sPath, packageName, resourceType)
-	return sampleFriendlyFolder
+	sampleAccessoryFolder := path.Join(*sPath, packageName, resourceType)
+	return sampleAccessoryFolder
 }
 
 func (r *Resource) loadSamples() []Sample {
@@ -597,15 +597,15 @@ func (r *Resource) loadSamples() []Sample {
 }
 
 func (r *Resource) loadHandWrittenSamples() []Sample {
-	sampleFriendlyFolder := r.getSampleAccessoryFolder()
-	sampleFriendlyMetaPath := path.Join(sampleFriendlyFolder, "meta.yaml")
+	sampleAccessoryFolder := r.getSampleAccessoryFolder()
+	sampleFriendlyMetaPath := path.Join(sampleAccessoryFolder, "meta.yaml")
 	samples := []Sample{}
 
 	if !pathExists(sampleFriendlyMetaPath) {
 		return samples
 	}
 
-	files, err := ioutil.ReadDir(sampleFriendlyFolder)
+	files, err := ioutil.ReadDir(sampleAccessoryFolder)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -617,7 +617,7 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 		}
 		sample := Sample{}
 		sampleName := strings.Split(file.Name(), ".")[0]
-		sampleDefinitionFile := path.Join(sampleFriendlyFolder, sampleName+".yaml")
+		sampleDefinitionFile := path.Join(sampleAccessoryFolder, sampleName+".yaml")
 		var tc []byte
 		if pathExists(sampleDefinitionFile) {
 			tc, err = mergeYaml(sampleDefinitionFile, sampleFriendlyMetaPath)
@@ -654,7 +654,7 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 			continue
 		}
 
-		sample.SamplesPath = sampleFriendlyFolder
+		sample.SamplesPath = sampleAccessoryFolder
 		sample.resourceReference = r
 		sample.FileName = file.Name()
 		sample.PrimaryResource = &(sample.FileName)
@@ -667,11 +667,11 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 }
 
 func (r *Resource) loadDCLSamples() []Sample {
-	sampleFriendlyFolder := r.getSampleAccessoryFolder()
+	sampleAccessoryFolder := r.getSampleAccessoryFolder()
 	packagePath := r.productMetadata.PackagePath
 	version := r.versionMetadata.V
 	resourceType := strings.ToLower(r.Type())
-	sampleFriendlyMetaPath := path.Join(sampleFriendlyFolder, "meta.yaml")
+	sampleFriendlyMetaPath := path.Join(sampleAccessoryFolder, "meta.yaml")
 	samples := []Sample{}
 
 	if mode != nil && *mode == "serialization" {
