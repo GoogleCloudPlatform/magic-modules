@@ -703,6 +703,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   ForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        name: "internal_http_lb_with_mig_backend"
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "forwarding-rule"
+          region: "europe-west1"
+          ip_protocol: "TCP"
+          load_balancing_scheme: "INTERNAL_MANAGED"
+          port_range: "80"
+          network_tier: "PREMIUM"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
         name: "forwarding_rule_externallb"
         primary_resource_id: "default"
         vars:
@@ -831,16 +842,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           backend_service_name: "backend"
           igm_name: "igm-internal"
       - !ruby/object:Provider::Terraform::Examples
-        name: "private_service_connect_google_apis"
+        name: "global_forwarding_rule_private_services_connect"
         min_version: beta
         primary_resource_id: "default"
         vars:
-          network_name: "my-network"
-          subnetwork_name: "my-subnetwork"
           global_address_name: "global-psconnect-ip"
           forwarding_rule_name: "globalrule"
-        test_env_vars:
-          project: :PROJECT_NAME
     properties:
       creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
