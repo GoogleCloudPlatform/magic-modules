@@ -7,7 +7,7 @@ ifeq ($(ENGINE),tpgtools)
   # we specify the product to one that doesn't
   # exist so exclusively build base tpgtools implementation
   mmv1_compile=-p does-not-exist
-else ifne ($(PRODUCT),)
+else ifneq ($(PRODUCT),)
   mmv1_compile=-p products/$(PRODUCT)
 else
   mmv1_compile=-a
