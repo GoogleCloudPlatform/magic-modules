@@ -182,9 +182,10 @@ wrapping those lines of code in version guards;
 ### Testing your changes
 
 Once you've made changes to resource definition, you can run Magic Modules
-to generate changes to your tool; see "Generating downstream tools" above if
-you need a refresher. Once it's generated, you should run the tool-specific
-tests as if you were submitting a PR against that tool.
+to generate changes to your tool; see
+["Generating the Terraform Providers"](#generating-the-terraform-providers)
+above if you need a refresher. Once it's generated, you should run the
+tool-specific tests as if you were submitting a PR against that tool.
 
 You can run tests in the `{{output_folder}}` you generated the tool in.
 See the following tool-specific documentation for more details on testing that
