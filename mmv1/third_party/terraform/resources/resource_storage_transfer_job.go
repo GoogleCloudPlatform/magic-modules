@@ -843,10 +843,6 @@ func expandAzureBlobStorageData(azureBlobStorageDatas []interface{}) *storagetra
 
 	azureBlobStorageData := azureBlobStorageDatas[0].(map[string]interface{})
 
-	if azureBlobStorageData["azure_credentials"] == nil {
-		log.Printf("[DEBUG] azure_credentials is not found")
-		return nil
-	}
 	return &storagetransfer.AzureBlobStorageData{
 		Container:        azureBlobStorageData["container"].(string),
 		Path:             azureBlobStorageData["path"].(string),
