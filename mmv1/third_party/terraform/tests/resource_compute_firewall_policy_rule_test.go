@@ -205,6 +205,7 @@ resource "google_compute_firewall_policy_rule" "default" {
   		ip_protocol = "udp"
   		ports = [22]
   	}
+  	src_ip_ranges = ["11.100.0.1/32", "10.0.0.0/24"]
   }
   target_resources = [google_compute_network.network1.self_link]
   target_service_accounts = [google_service_account.service_account.email, google_service_account.service_account2.email]
