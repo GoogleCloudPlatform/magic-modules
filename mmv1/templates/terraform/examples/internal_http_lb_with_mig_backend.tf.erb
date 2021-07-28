@@ -1,13 +1,13 @@
-// Internal HTTP load balancer with a managed instance group backend
+# Internal HTTP load balancer with a managed instance group backend
 
-// VPC
+# VPC
 resource "google_compute_network" "default" {
   name                    = "<%= ctx[:vars]['ilb_network'] %>"
   provider                = google-beta
   auto_create_subnetworks = false
 }
 
-// proxy-only subnet
+# proxy-only subnet
 resource "google_compute_subnetwork" "proxy" {
   name          = "<%= ctx[:vars]['lb'] %>"
   provider      = google-beta
@@ -18,7 +18,7 @@ resource "google_compute_subnetwork" "proxy" {
   network       = google_compute_network.default.id
 }
 
-// backed subnet
+# backed subnet
 resource "google_compute_subnetwork" "default" {
   name          = "<%= ctx[:vars]['backend'] %>"
   provider      = google-beta
@@ -27,7 +27,7 @@ resource "google_compute_subnetwork" "default" {
   network       = google_compute_network.default.id
 }
 
-// forwarding rule
+# forwarding rule
 resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   name                  = "<%= ctx[:vars]['forwarding_rule'] %>"
   provider              = google-beta
@@ -42,7 +42,7 @@ resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   network_tier          = "PREMIUM"
 }
 
-// http proxy
+# http proxy
 resource "google_compute_region_target_http_proxy" "default" {
   name     = "<%= ctx[:vars]['proxy'] %>"
   provider = google-beta
@@ -50,7 +50,7 @@ resource "google_compute_region_target_http_proxy" "default" {
   url_map  = google_compute_region_url_map.default.id
 }
 
-// url map
+# url map
 resource "google_compute_region_url_map" "default" {
   name            = "<%= ctx[:vars]['map'] %>"
   provider        = google-beta
@@ -58,7 +58,7 @@ resource "google_compute_region_url_map" "default" {
   default_service = google_compute_region_backend_service.default.id
 }
 
-// backend service
+# backend service
 resource "google_compute_region_backend_service" "default" {
   name                  = "<%= ctx[:vars]['backend'] %>"
   provider              = google-beta
@@ -74,7 +74,7 @@ resource "google_compute_region_backend_service" "default" {
   }
 }
 
-// instance template
+# instance template
 resource "google_compute_instance_template" "instance_template" {
   name         = "<%= ctx[:vars]['mig_template'] %>"
   provider     = google-beta
@@ -85,7 +85,7 @@ resource "google_compute_instance_template" "instance_template" {
     network    = google_compute_network.default.id
     subnetwork = google_compute_subnetwork.default.id
     access_config {
-      // add external ip to fetch packages
+      # add external ip to fetch packages
     }
   }
   disk {
@@ -94,7 +94,7 @@ resource "google_compute_instance_template" "instance_template" {
     boot         = true
   }
 
-  // install nginx and serve a simple web page
+  # install nginx and serve a simple web page
   metadata = {
     startup-script = <<-EOF1
       #! /bin/bash
@@ -122,7 +122,7 @@ resource "google_compute_instance_template" "instance_template" {
   }
 }
 
-// health check
+# health check
 resource "google_compute_region_health_check" "default" {
   name     = "<%= ctx[:vars]['hc'] %>"
   provider = google-beta
@@ -132,7 +132,7 @@ resource "google_compute_region_health_check" "default" {
   }
 }
 
-// MIG
+# MIG
 resource "google_compute_region_instance_group_manager" "mig" {
   name     = "<%= ctx[:vars]['mig'] %>"
   provider = google-beta
@@ -145,7 +145,7 @@ resource "google_compute_region_instance_group_manager" "mig" {
   target_size        = 2
 }
 
-// allow all access from IAP and health check ranges
+# allow all access from IAP and health check ranges
 resource "google_compute_firewall" "fw-iap" {
   name          = "<%= ctx[:vars]['allow_iap_hc'] %>"
   provider      = google-beta
@@ -157,7 +157,7 @@ resource "google_compute_firewall" "fw-iap" {
   }
 }
 
-// allow http from proxy subnet to backends
+# allow http from proxy subnet to backends
 resource "google_compute_firewall" "fw-ilb-to-backends" {
   name          = "<%= ctx[:vars]['allow_ilb_to_backends'] %>"
   provider      = google-beta
@@ -171,7 +171,7 @@ resource "google_compute_firewall" "fw-ilb-to-backends" {
   }
 }
 
-// test instance
+# test instance
 resource "google_compute_instance" "vm-test" {
   name         = "<%= ctx[:vars]['vm_test'] %>"
   provider     = google-beta

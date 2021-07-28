@@ -703,6 +703,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   ForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        name: "internal_http_lb_with_mig_backend"
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "forwarding-rule"
+          region: "europe-west1"
+          ip_protocol: "TCP"
+          load_balancing_scheme: "INTERNAL_MANAGED"
+          port_range: "80"
+          network_tier: "PREMIUM"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
         name: "forwarding_rule_externallb"
         primary_resource_id: "default"
         vars:
