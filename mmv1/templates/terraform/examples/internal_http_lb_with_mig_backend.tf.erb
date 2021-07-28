@@ -26,7 +26,7 @@ resource "google_compute_subnetwork" "default" {
 }
 
 # forwarding rule
-resource "google_compute_forwarding_rule" {
+resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   name                  = "<%= ctx[:vars]['forwarding_rule'] %>"
   provider              = google-beta
   region                = "europe-west1"
