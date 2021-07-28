@@ -20,7 +20,7 @@ resource "google_compute_subnetwork" "vpc_subnetwork" {
 # [START compute_internal_ip_private_access]
 resource "google_compute_global_address" "default" {
   provider      = google-beta
-  project      = google_compute_network.network.project
+  project       = google_compute_network.network.project
   name          = "<%= ctx[:vars]['global_address_name'] %>"
   address_type  = "INTERNAL"
   purpose       = "PRIVATE_SERVICE_CONNECT"
