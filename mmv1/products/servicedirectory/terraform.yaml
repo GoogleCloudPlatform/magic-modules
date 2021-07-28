@@ -32,6 +32,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_import: templates/terraform/custom_import/service_directory_namespace.go.erb
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}"]
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "service_directory_service_basic"
