@@ -39,10 +39,10 @@ import(
 )
 
 func init() {
-		resource.AddTestSweepers("{{$.SweeperName}}", &resource.Sweeper{
-				Name: "{{$.SweeperName}}",
-				F: testSweep{{$.SweeperName}},
-		})
+	resource.AddTestSweepers("{{$.SweeperName}}", &resource.Sweeper{
+		Name: "{{$.SweeperName}}",
+		F: testSweep{{$.SweeperName}},
+	})
 }
 
 func testSweep{{$.SweeperName}}(region string) error {
