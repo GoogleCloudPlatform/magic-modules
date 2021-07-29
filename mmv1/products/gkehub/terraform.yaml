@@ -33,7 +33,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # Skip sweeper gen since this is a child resource.
     skip_sweeper: true
     id_format: "{{name}}"
-    import_format: ["{{name}}"]
+    import_format: ["{{%name}}"]
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
