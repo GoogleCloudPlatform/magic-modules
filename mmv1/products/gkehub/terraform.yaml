@@ -33,7 +33,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # Skip sweeper gen since this is a child resource.
     skip_sweeper: true
     id_format: "{{name}}"
-    import_format: ["{{name}}"]
+    import_format: ["{{%name}}"]
     properties:
       endpoint.gkeCluster.resourceLink: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: suppressGkeHubEndpointSelfLinkDiff
