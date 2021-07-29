@@ -349,6 +349,11 @@ end     # products.each do
 -%>
 			},
 			map[string]*schema.Resource{
+				"google_gkemulticloud_aws_cluster":             resourceGkemulticloudAwsCluster(),
+				"google_gkemulticloud_aws_node_pool":           resourceGkemulticloudAwsNodePool(),
+				"google_gkemulticloud_azure_client":            resourceGkemulticloudAzureClient(),
+				"google_gkemulticloud_azure_cluster":           resourceGkemulticloudAzureCluster(),
+				"google_gkemulticloud_azure_node_pool":         resourceGkemulticloudAzureNodePool(),
 				"google_assured_workloads_workload":            resourceAssuredWorkloadsWorkload(),
 				"google_app_engine_application":                resourceAppEngineApplication(),
 				"google_bigquery_table":                        resourceBigQueryTable(),
@@ -397,11 +402,6 @@ end     # products.each do
 				<% unless version == 'ga' -%>
 				"google_gke_hub_feature":                        resourceGkeHubFeature(),
 				"google_gke_hub_feature_membership":             resourceGkeHubFeatureMembership(),
-				"google_gkemulticloud_aws_cluster":             resourceGkemulticloudAwsCluster(),
-				"google_gkemulticloud_aws_node_pool":           resourceGkemulticloudAwsNodePool(),
-				"google_gkemulticloud_azure_client":            resourceGkemulticloudAzureClient(),
-				"google_gkemulticloud_azure_cluster":           resourceGkemulticloudAzureCluster(),
-				"google_gkemulticloud_azure_node_pool":         resourceGkemulticloudAzureNodePool(),
 				<% end -%>
 				"google_logging_billing_account_sink":          resourceLoggingBillingAccountSink(),
 				"google_logging_billing_account_exclusion":     ResourceLoggingExclusion(BillingAccountLoggingExclusionSchema, NewBillingAccountLoggingExclusionUpdater, billingAccountLoggingExclusionIdParseFunc),
