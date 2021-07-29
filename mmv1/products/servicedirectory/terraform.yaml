@@ -15,6 +15,7 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Namespace: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}"]
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "service_directory_namespace_basic"
@@ -32,6 +33,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_import: templates/terraform/custom_import/service_directory_namespace.go.erb
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}"]
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "service_directory_service_basic"
@@ -49,6 +51,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/service_directory_service.go.erb
   Endpoint: !ruby/object:Overrides::Terraform::ResourceOverride
+    skip_sweeper: true
     import_format: ["projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}/endpoints/{{endpoint_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples

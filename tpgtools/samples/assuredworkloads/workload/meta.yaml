@@ -1,0 +1,31 @@
+# meta.yaml
+# this is a shared config file that all the tests merge with
+#
+substitutions:
+  - substitution: "name"
+    value: "workload"
+  - substitution: "region"
+    value: ":REGION"
+  - substitution: "org_id"
+    value: ":ORG_ID"
+  - substitution: "billing_account"
+    value: ":BILLING_ACCT"
+ignore_read:
+  - "billing_account"
+  - "kms_settings"
+  - "resource_settings"
+  - "provisioned_resources_parent"
+check:
+  -  deleteAssuredWorkloadProvisionedResources(t)
+extra_dependencies:
+  - "time"
+  - "log"
+  - "strconv"
+  - "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+code_inject:
+  - delete_assured_workload_provisioned_resources.go
+doc_hide:
+  - basic.tf # basic_update.tf auto hides
+  - full.tf
+test_hide:
+  - basic_workload.yaml

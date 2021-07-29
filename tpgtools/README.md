@@ -6,7 +6,7 @@ to describe the available types, and `tpgtools` uses those to construct
 Terraform resource schemas.
 
 ## Usage
- 
+
 `tpgtools` expects to run targetting a "root service directory", a dir-of-dirs
 where the child dirs contain OpenApi specs for resources such as the `api/` path
 above. Additionally, overrides are expected in a similar structure (as seen in

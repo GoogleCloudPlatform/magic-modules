@@ -18,13 +18,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "gkehub_membership_basic"
-        primary_resource_id: "basic_membership"
+        primary_resource_id: "membership"
         vars:
           name: "basic"
           cluster_name: "basiccluster"
       - !ruby/object:Provider::Terraform::Examples
         name: "gkehub_membership_issuer"
-        primary_resource_id: "issuer_membership"
+        primary_resource_id: "membership"
         vars:
           name: "basic"
           cluster_name: "basiccluster"

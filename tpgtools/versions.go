@@ -1,11 +1,11 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,8 +17,9 @@ package main
 import "github.com/golang/glog"
 
 type Version struct {
-	V     string
-	Order int
+	V                   string
+	Order               int
+	SerializationSuffix string
 }
 
 func fromString(v string) *Version {
@@ -38,8 +39,8 @@ const (
 	BETA
 )
 
-var GA_VERSION = Version{V: "ga", Order: GA}
-var BETA_VERSION = Version{V: "beta", Order: BETA}
+var GA_VERSION = Version{V: "ga", Order: GA, SerializationSuffix: ""}
+var BETA_VERSION = Version{V: "beta", Order: BETA, SerializationSuffix: "Beta"}
 
 func allVersions() []Version {
 	return []Version{GA_VERSION, BETA_VERSION}
