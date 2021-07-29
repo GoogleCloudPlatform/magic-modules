@@ -13,7 +13,7 @@
 	limitations under the License. */}}
 // ----------------------------------------------------------------------------
 //
-//     ***     AUTO GENERATED CODE    ***    AUTO GENERATED CODE     ***
+//     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
 //
 // ----------------------------------------------------------------------------
 //
@@ -45,7 +45,7 @@ import (
 
 {{- range $s := $.TestSamples }}
 func TestAcc{{$.PathType}}_{{$s.TestSlug}}(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
 	context := map[string]interface{} {
 		{{- range $contextkey, $contextvalue := $s.ExpandContext }}
@@ -135,7 +135,7 @@ func testAccCheck{{$.PathType}}DestroyProducer(t *testing.T) func(s *terraform.S
 			if err == nil {
 				return fmt.Errorf("{{$.TerraformName}} still exists %v", obj)
 			}
-	  }
+		}
 		return nil
 	}
 }
