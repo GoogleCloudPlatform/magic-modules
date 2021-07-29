@@ -397,11 +397,11 @@ end     # products.each do
 				<% unless version == 'ga' -%>
 				"google_gke_hub_feature":                        resourceGkeHubFeature(),
 				"google_gke_hub_feature_membership":             resourceGkeHubFeatureMembership(),
-				"google_gke_multicloud_aws_cluster":             resourceGkeMulticloudAwsCluster(),
-				"google_gke_multicloud_aws_node_pool":           resourceGkeMulticloudAwsNodePool(),
-				"google_gke_multicloud_azure_client":            resourceGkeMulticloudAzureClient(),
-				"google_gke_multicloud_azure_cluster":           resourceGkeMulticloudAzureCluster(),
-				"google_gke_multicloud_azure_node_pool":         resourceGkeMulticloudAzureNodePool(),
+				"google_gkemulticloud_aws_cluster":             resourceGkemulticloudAwsCluster(),
+				"google_gkemulticloud_aws_node_pool":           resourceGkemulticloudAwsNodePool(),
+				"google_gkemulticloud_azure_client":            resourceGkemulticloudAzureClient(),
+				"google_gkemulticloud_azure_cluster":           resourceGkemulticloudAzureCluster(),
+				"google_gkemulticloud_azure_node_pool":         resourceGkemulticloudAzureNodePool(),
 				<% end -%>
 				"google_logging_billing_account_sink":          resourceLoggingBillingAccountSink(),
 				"google_logging_billing_account_exclusion":     ResourceLoggingExclusion(BillingAccountLoggingExclusionSchema, NewBillingAccountLoggingExclusionUpdater, billingAccountLoggingExclusionIdParseFunc),
@@ -606,7 +606,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.AssuredWorkloadsBasePath = d.Get(AssuredWorkloadsEndpointEntryKey).(string)
 	config.EventarcBasePath = d.Get(EventarcEndpointEntryKey).(string)
 	config.GkeHubBasePath = d.Get(GkeHubFeatureCustomEndpointEntryKey).(string)
-	config.GkeMulitcloudBasePath = d.Get(GkeMulticloudEndpointEntryKey).(string)
+	config.GkemulticloudBasePath = d.Get(GkemulticloudEndpointEntryKey).(string)
 	<% unless version == "ga" -%>
 	config.CloudBuildWorkerPoolBasePath = d.Get(CloudBuildWorkerPoolEndpointEntryKey).(string)
 	<% end -%>

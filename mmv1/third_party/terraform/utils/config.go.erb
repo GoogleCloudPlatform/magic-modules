@@ -130,10 +130,10 @@ type Config struct {
 	AssuredWorkloadsBasePath string
 	EventarcBasePath string
 	GkeHubBasePath string
+	GkemulticloudBasePath string
 	<% unless version == 'ga' -%>
 	// CloudBuild WorkerPool uses a different endpoint (v1beta1) than any other CloudBuild resources
 	CloudBuildWorkerPoolBasePath string
-	GkeMulticloudBasePath string
 	<% end -%>
 }
 
