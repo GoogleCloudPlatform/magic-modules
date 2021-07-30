@@ -1683,12 +1683,14 @@ objects:
           # TODO: make a ResourceRef to ClientTlsPolicy
           - !ruby/object:Api::Type::String
             name: 'clientTlsPolicy'
+            min_version: beta
             description: |
               ClientTlsPolicy is a resource that specifies how a client should authenticate
               connections to backends of a service. This resource itself does not affect
               configuration unless it is attached to a backend service resource.
           - !ruby/object:Api::Type::Array
             name: 'subjectAltNames'
+            min_version: beta
             description: |
               A list of alternate names to verify the subject identity in the certificate.
               If specified, the client will verify that the server certificate's subject
