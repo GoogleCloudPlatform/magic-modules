@@ -1746,6 +1746,13 @@ func convertDataprocWorkflowTemplateBetaClusterClusterConfigSoftwareConfigToHCL(
 	if r.ImageVersion != nil {
 		outputConfig += fmt.Sprintf("\timage_version = %#v\n", *r.ImageVersion)
 	}
+	if r.OptionalComponents != nil {
+		outputConfig += "\toptional_components = ["
+		for _, v := range r.OptionalComponents {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
 	return outputConfig + "}"
 }
 
@@ -1788,6 +1795,9 @@ func convertEventarcTriggerBetaDestinationToHCL(r *eventarcBeta.TriggerDestinati
 		return ""
 	}
 	outputConfig := "{\n"
+	if r.CloudFunction != nil {
+		outputConfig += fmt.Sprintf("\tcloud_function = %#v\n", *r.CloudFunction)
+	}
 	if v := convertEventarcTriggerBetaDestinationCloudRunServiceToHCL(r.CloudRunService); v != "" {
 		outputConfig += fmt.Sprintf("\tcloud_run_service %s\n", v)
 	}
@@ -1892,6 +1902,30 @@ func convertGkeHubFeatureBetaSpecMulticlusteringressToHCL(r *gkehubBeta.FeatureS
 	return outputConfig + "}"
 }
 
+func convertGkeHubFeatureBetaResourceStateToHCL(r *gkehubBeta.FeatureResourceState) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertGkeHubFeatureBetaStateToHCL(r *gkehubBeta.FeatureState) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertGkeHubFeatureBetaStateStateToHCL(r *gkehubBeta.FeatureStateState) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
 // GkeHubFeatureMembershipBetaAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -1971,6 +2005,9 @@ func convertGkeHubFeatureMembershipBetaConfigmanagementConfigSyncGitToHCL(r *gke
 		return ""
 	}
 	outputConfig := "{\n"
+	if r.GcpServiceAccountEmail != nil {
+		outputConfig += fmt.Sprintf("\tgcp_service_account_email = %#v\n", *r.GcpServiceAccountEmail)
+	}
 	if r.HttpsProxy != nil {
 		outputConfig += fmt.Sprintf("\thttps_proxy = %#v\n", *r.HttpsProxy)
 	}
@@ -2864,6 +2901,9 @@ func DataprocWorkflowTemplateAsHCL(r dataproc.WorkflowTemplate) (string, error) 
 	}
 	if v := convertDataprocWorkflowTemplatePlacementToHCL(r.Placement); v != "" {
 		outputConfig += fmt.Sprintf("\tplacement %s\n", v)
+	}
+	if r.DagTimeout != nil {
+		outputConfig += fmt.Sprintf("\tdag_timeout = %#v\n", *r.DagTimeout)
 	}
 	if r.Parameters != nil {
 		for _, v := range r.Parameters {
@@ -3772,6 +3812,13 @@ func convertDataprocWorkflowTemplateClusterClusterConfigSoftwareConfigToHCL(r *d
 	outputConfig := "{\n"
 	if r.ImageVersion != nil {
 		outputConfig += fmt.Sprintf("\timage_version = %#v\n", *r.ImageVersion)
+	}
+	if r.OptionalComponents != nil {
+		outputConfig += "\toptional_components = ["
+		for _, v := range r.OptionalComponents {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
 	}
 	return outputConfig + "}"
 }
@@ -5570,8 +5617,9 @@ func convertDataprocWorkflowTemplateBetaClusterClusterConfigSoftwareConfig(i int
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"imageVersion": in["image_version"],
-		"properties":   in["properties"],
+		"imageVersion":       in["image_version"],
+		"optionalComponents": in["optional_components"],
+		"properties":         in["properties"],
 	}
 }
 
@@ -5592,6 +5640,7 @@ func convertEventarcTriggerBetaDestination(i interface{}) map[string]interface{}
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
+		"cloudFunction":   in["cloud_function"],
 		"cloudRunService": convertEventarcTriggerBetaDestinationCloudRunService(in["cloud_run_service"]),
 	}
 }
@@ -5737,6 +5786,72 @@ func convertGkeHubFeatureBetaSpecMulticlusteringressList(i interface{}) (out []m
 	return out
 }
 
+func convertGkeHubFeatureBetaResourceState(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"hasResources": in["has_resources"],
+		"state":        in["state"],
+	}
+}
+
+func convertGkeHubFeatureBetaResourceStateList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertGkeHubFeatureBetaResourceState(v))
+	}
+	return out
+}
+
+func convertGkeHubFeatureBetaState(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"state": convertGkeHubFeatureBetaStateState(in["state"]),
+	}
+}
+
+func convertGkeHubFeatureBetaStateList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertGkeHubFeatureBetaState(v))
+	}
+	return out
+}
+
+func convertGkeHubFeatureBetaStateState(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"code":        in["code"],
+		"description": in["description"],
+		"updateTime":  in["update_time"],
+	}
+}
+
+func convertGkeHubFeatureBetaStateStateList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertGkeHubFeatureBetaStateState(v))
+	}
+	return out
+}
+
 func convertGkeHubFeatureMembershipBetaConfigmanagement(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -5811,13 +5926,14 @@ func convertGkeHubFeatureMembershipBetaConfigmanagementConfigSyncGit(i interface
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"httpsProxy":   in["https_proxy"],
-		"policyDir":    in["policy_dir"],
-		"secretType":   in["secret_type"],
-		"syncBranch":   in["sync_branch"],
-		"syncRepo":     in["sync_repo"],
-		"syncRev":      in["sync_rev"],
-		"syncWaitSecs": in["sync_wait_secs"],
+		"gcpServiceAccountEmail": in["gcp_service_account_email"],
+		"httpsProxy":             in["https_proxy"],
+		"policyDir":              in["policy_dir"],
+		"secretType":             in["secret_type"],
+		"syncBranch":             in["sync_branch"],
+		"syncRepo":               in["sync_repo"],
+		"syncRev":                in["sync_rev"],
+		"syncWaitSecs":           in["sync_wait_secs"],
 	}
 }
 
@@ -7466,8 +7582,9 @@ func convertDataprocWorkflowTemplateClusterClusterConfigSoftwareConfig(i interfa
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"imageVersion": in["image_version"],
-		"properties":   in["properties"],
+		"imageVersion":       in["image_version"],
+		"optionalComponents": in["optional_components"],
+		"properties":         in["properties"],
 	}
 }
 
