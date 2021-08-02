@@ -18,10 +18,43 @@ else
     exit 1
 fi
 
-scratch_path=https://$github_username:$GITHUB_TOKEN@github.com/$github_username/$gh_repo
-local_path=$GOPATH/src/github.com/terraform-providers/$gh_repo
+
+new_branch="auto-pr-$pr_number"
+old_branch="auto-pr-$pr_number-old"
+
+# https://docs.github.com/en/rest/reference/repos#compare-two-commits
+echo "Fetching diff from Github"
+http_response=$(curl \
+  -X GET \
+  -u "$github_username:$GITHUB_TOKEN" \
+  -H "Accept: application/vnd.github.v3+json" \
+  -o response.txt \
+  -w "%{http_code}" \
+  "https://api.github.com/repos/$github_username/$gh_repo/compare/$old_branch...$new_branch")
+
+# Only skip tests if we can tell for sure that no go files were changed
+if [ $http_response != "200" ]; then
+    echo "Running tests: Could not determine whether diff contains go files due to non-200 response"
+    echo "Github response content:"
+    cat response.txt
+else
+    echo "Successfully requested diff from Github; checking for go files"
+    # Read the response, parse out the filenames, and look for go files
+    # (ignoring "no matches found" errors from grep)
+    gofiles=$(cat response.txt | jq -r ".files[].filename" | { grep "\.go$" || test $? = 1; })
+    if [[ -z $gofiles ]]; then
+        echo "Skipping tests: No go files changed"
+        exit 0
+    else
+        echo "Running tests: Go files changed"
+    fi
+fi
+
+
+git_remote=https://$github_username:$GITHUB_TOKEN@github.com/$github_username/$gh_repo
+local_path=$GOPATH/src/github.com/hashicorp/$gh_repo
 mkdir -p "$(dirname $local_path)"
-git clone $scratch_path $local_path --single-branch --branch "auto-pr-$pr_number" --depth 1
+git clone $git_remote $local_path --single-branch --branch $new_branch --depth 1
 pushd $local_path
 
 
