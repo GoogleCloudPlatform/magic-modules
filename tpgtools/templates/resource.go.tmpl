@@ -403,6 +403,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	}
 	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject)
 	res, err := client.Apply{{$.Type}}(context.Background(), obj, directive...)
+
 	if _, ok := err.(dcl.DiffAfterApplyError); ok {
 		log.Printf("[DEBUG] Diff after apply returned from the DCL: %s", err)
 	} else if err != nil {
