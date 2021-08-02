@@ -583,7 +583,8 @@ func (r Resource) getSamples(docs bool) []Sample {
 func (r *Resource) getSampleAccessoryFolder() string {
 	resourceType := strings.ToLower(r.Type())
 	packageName := strings.ToLower(r.productMetadata.PackageName)
-	sampleAccessoryFolder := path.Join(*sPath, packageName, resourceType)
+	sampleAccessoryFolder := path.Join(*tPath, packageName, "samples", resourceType)
+	fmt.Println(sampleAccessoryFolder)
 	return sampleAccessoryFolder
 }
 

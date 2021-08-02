@@ -35,7 +35,6 @@ var fPath = flag.String("path", "", "path to the root service directory holding 
 var tPath = flag.String("overrides", "", "path to the root directory holding overrides files")
 var cPath = flag.String("handwritten", "handwritten", "path to the root directory holding handwritten files to copy")
 var oPath = flag.String("output", "", "path to output generated files to")
-var sPath = flag.String("samples", "samples", "path to the directory holding the samples and substitution data")
 
 var sFilter = flag.String("service", "", "optional service name. If specified, only this service is generated")
 var rFilter = flag.String("resource", "", "optional resource name (from filename). If specified, only resources with this name are generated")
