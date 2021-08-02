@@ -1680,9 +1680,11 @@ objects:
           load_balancing_scheme set to INTERNAL_MANAGED; or a global backend service with the
           load_balancing_scheme set to INTERNAL_SELF_MANAGED.
         properties:
-          # TODO: make a ResourceRef to ClientTlsPolicy
-          - !ruby/object:Api::Type::String
+          # TODO: 'Region' resource type is incorrect and should be ClientTLSPolicy
+          - !ruby/object:Api::Type::ResourceRef
             name: 'clientTlsPolicy'
+            resource: 'Region'
+            imports: 'name'
             min_version: beta
             description: |
               ClientTlsPolicy is a resource that specifies how a client should authenticate
