@@ -170,7 +170,7 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 
 func getProductInformation(packagePath string, specs []os.FileInfo) *ProductMetadata {
 	for _, f := range specs {
-		if f.IsDir() {
+		if f.IsDir() || !strings.HasSuffix(f.Name(), "yaml") {
 			continue
 		}
 
@@ -185,7 +185,7 @@ func getProductInformation(packagePath string, specs []os.FileInfo) *ProductMeta
 func getResources(packagePath string, specs []os.FileInfo, version Version) []*Resource {
 	var resources []*Resource
 	for _, f := range specs {
-		if f.IsDir() {
+		if f.IsDir() || !strings.HasSuffix(f.Name(), "yaml") {
 			continue
 		}
 
@@ -256,7 +256,7 @@ func loadDocument(packagePath string, f *os.FileInfo) *openapi.Document {
 	}
 	err = yaml.Unmarshal(b, document)
 	if err != nil {
-		glog.Exit(err)
+		panic(err)
 	}
 	return document
 }
