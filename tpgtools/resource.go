@@ -584,7 +584,6 @@ func (r *Resource) getSampleAccessoryFolder() string {
 	resourceType := strings.ToLower(r.Type())
 	packageName := strings.ToLower(r.productMetadata.PackageName)
 	sampleAccessoryFolder := path.Join(*tPath, packageName, "samples", resourceType)
-	fmt.Println(sampleAccessoryFolder)
 	return sampleAccessoryFolder
 }
 

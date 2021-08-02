@@ -85,6 +85,14 @@ For example, override entries will look like the following:
 We will autoingest samples from the dcl, however we currently must
 manually fill the substitutions for these samples.
 
+You may need to re-serialize `serialization.go` if you are adding newer resources.
+To do this
+```
+cd tpgtools
+go get -u github.com/GoogleCloudPlatform/declarative-resource-client-library
+make serialize
+```
+
 To do so, first create a folder in the relevant product
 ```
 $ cd overrides/{{product}}/

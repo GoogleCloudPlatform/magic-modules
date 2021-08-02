@@ -46,4 +46,11 @@ validator:
 		bundle; \
 		bundle exec compiler -e terraform -f validator -o $(OUTPUT_PATH) $(mmv1_compile);
 
+serialize:
+	cd tpgtools;\
+		go run . --path "api" --overrides "overrides" --mode "serialization" > temp.serial;\
+		cat temp.serial > serialization.go;\
+		rm temp.serial;
+
 .PHONY: mmv1 tpgtools
+
