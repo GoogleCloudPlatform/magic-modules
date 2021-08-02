@@ -15,7 +15,7 @@ require 'provider/terraform_oics'
 
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
-  class TerraformObjectLibrary < Provider::Terraform
+  class TerraformValidator < Provider::Terraform
     def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
       @base_url = @version.base_url
       generate_objects(
