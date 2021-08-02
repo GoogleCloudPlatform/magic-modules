@@ -234,7 +234,7 @@ func (s Sample) GenerateHCL(isDocs bool) string {
 
 // isNativeHCL returns whether the resource file is terraform synatax
 func (s Sample) isNativeHCL() bool {
-	return strings.HasSuffix(*s.PrimaryResource, ".tf")
+	return strings.HasSuffix(*s.PrimaryResource, ".tft")
 }
 
 // EnumerateWithUpdateSamples returns an array of new samples expanded with

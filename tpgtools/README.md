@@ -143,8 +143,8 @@ rules (updates, ect), you can create a yaml file with the same name as the `.tft
 or version requirements specific to this test. If version is ommitted the sample assumed to run against all versions.
 ```
 updates:
-  - resource: basic_update_transport.tf
-  - resource: basic_update_transport_2.tf
+  - resource: basic_update_transport.tft
+  - resource: basic_update_transport_2.tft
 version:
   - beta
 ```
@@ -171,8 +171,8 @@ extra_dependencies:
 code_inject:
   - delete_assured_workload_provisioned_resources.go
 doc_hide:
-  - basic.tf # basic_update.tf auto hides
-  - full.tf
+  - basic.tft # basic_update.tft auto hides
+  - full.tft
 test_hide:
   - basic_workload.yaml
 ```
