@@ -57,6 +57,7 @@ var (
 		"config.0.web_server_config",
 		"config.0.encryption_config",
 		"config.0.maintenance_window",
+		"config.0.workloads_config",
 <% end -%>
 	}
 
@@ -393,6 +394,13 @@ func resourceComposerEnvironment() *schema.Resource {
 										ForceNew:    true,
 										Description: `The CIDR block from which IP range in tenant project will be reserved for Cloud SQL. Needs to be disjoint from web_server_ipv4_cidr_block.`,
 									},
+									"cloud_composer_network_ipv4_cidr_block": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										ForceNew: true,
+										Description: `The CIDR block from which IP range for Cloud Composer Network in tenant project will be reserved. Needs to be disjoint from private_cluster_config.master_ipv4_cidr_block and cloud_sql_ipv4_cidr_block. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
+									},
 								},
 							},
 						},
@@ -495,6 +503,132 @@ func resourceComposerEnvironment() *schema.Resource {
 										Required:    true,
 										ForceNew:    false,
 										Description: `Maintenance window recurrence. Format is a subset of RFC-5545 (https://tools.ietf.org/html/rfc5545) 'RRULE'. The only allowed values for 'FREQ' field are 'FREQ=DAILY' and 'FREQ=WEEKLY;BYDAY=...'. Example values: 'FREQ=WEEKLY;BYDAY=TU,WE', 'FREQ=DAILY'.`,
+									},
+								},
+							},
+						},
+						"workloads_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: composerConfigKeys,
+							MaxItems:     1,
+							Description:  `The workloads configuration settings for the GKE cluster associated with the Cloud Composer environment. Supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"scheduler": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										ForceNew:    false,
+										Description: `Configuration for resources used by Airflow schedulers.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"cpu": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `Configuration for resources used by Airflow web server.`,
+												},
+												"memory_gb": {
+													Type:        schema.TypeFloat,
+													Optional:    true,
+													ForceNew:    false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description: `Configuration for resources used by Airflow web server.`,
+												},
+												"storage_gb": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `Configuration for resources used by Airflow web server.`,
+												},
+												"count": {
+													Type:         schema.TypeInt,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.IntAtLeast(0),
+													Description:  `Configuration for resources used by Airflow web server.`,
+												},
+											},
+										},
+									},
+									"web_server": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										ForceNew:    false,
+										Description: `Configuration for resources used by Airflow web server.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"cpu": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `Configuration for resources used by Airflow web server.`,
+												},
+												"memory_gb": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `Configuration for resources used by Airflow web server.`,
+												},
+												"storage_gb": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `Configuration for resources used by Airflow web server.`,
+												},
+											},
+										},
+									},
+									"worker": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										ForceNew:    false,
+										Description: `Configuration for resources used by Airflow workers.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"cpu": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `Configuration for resources used by Airflow web server.`,
+												},
+												"memory_gb": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `Configuration for resources used by Airflow web server.`,
+												},
+												"storage_gb": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `Configuration for resources used by Airflow web server.`,
+												},
+												"min_count": {
+													Type:         schema.TypeInt,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.IntAtLeast(0),
+													Description:  `Configuration for resources used by Airflow web server.`,
+												},
+												"max_count": {
+													Type:         schema.TypeInt,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.IntAtLeast(0),
+													Description:  `Configuration for resources used by Airflow web server.`,
+												},
+											},
+										},
 									},
 								},
 							},
@@ -778,6 +912,17 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
 		}
+
+		if d.HasChange("config.0.workloads_config") {
+			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
+			if config != nil {
+				patchObj.Config.WorkloadsConfig = config.WorkloadsConfig
+			}
+			err = resourceComposerEnvironmentPatchField("config.WorkloadsConfig", userAgent, patchObj, d, tfConfig)
+			if err != nil {
+				return err
+			}
+		}
 <% end -%>
 	}
 
@@ -903,6 +1048,7 @@ func flattenComposerEnvironmentConfig(envCfg *composer.EnvironmentConfig) interf
 	transformed["web_server_config"] = flattenComposerEnvironmentConfigWebServerConfig(envCfg.WebServerConfig)
 	transformed["encryption_config"] = flattenComposerEnvironmentConfigEncryptionConfig(envCfg.EncryptionConfig)
 	transformed["maintenance_window"] = flattenComposerEnvironmentConfigMaintenanceWindow(envCfg.MaintenanceWindow)
+	transformed["workloads_config"] = flattenComposerEnvironmentConfigWorkloadsConfig(envCfg.WorkloadsConfig)
 <% end -%>
 
 	return []interface{}{transformed}
@@ -974,6 +1120,19 @@ func flattenComposerEnvironmentConfigMaintenanceWindow(maintenanceWindow *compos
 	transformed["start_time"] = maintenanceWindow.StartTime
 	transformed["end_time"] = maintenanceWindow.EndTime
 	transformed["recurrence"] = maintenanceWindow.Recurrence
+
+	return []interface{}{transformed}
+}
+
+func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.WorkloadsConfig) interface{} {
+	if workloadsConfig == nil {
+		return nil
+	}
+
+	transformed := make(map[string]interface{})
+	transformed["scheduler"] = workloadsConfig.Scheduler
+	transformed["web_server"] = workloadsConfig.WebServer
+	transformed["worker"] = workloadsConfig.Worker
 
 	return []interface{}{transformed}
 }
@@ -1122,6 +1281,12 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 		return nil, err
 	}
 	transformed.MaintenanceWindow = transformedMaintenanceWindow
+
+	transformedWorkloadsConfig, err := expandComposerEnvironmentConfigWorkloadsConfig(original["workloads_config"], d, config)
+	if err != nil {
+		return nil, err
+	}
+	transformed.WorkloadsConfig = transformedWorkloadsConfig
 <% end -%>
 	return transformed, nil
 }
@@ -1230,6 +1395,54 @@ func expandComposerEnvironmentConfigMaintenanceWindow(v interface{}, d *schema.R
 
 	if v, ok := original["recurrence"]; ok {
 		transformed.Recurrence = v.(string)
+	}
+
+	return transformed, nil
+}
+
+func expandComposerEnvironmentConfigWorkloadsConfig(v interface{}, d *schema.ResourceData, config *Config) (*composer.WorkloadsConfig, error) {
+	l := v.([]interface{})
+	if len(l) == 0 {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	transformed := &composer.WorkloadsConfig{}
+
+	if v, ok := original["scheduler"]; ok {
+		if len(v.([]interface{})) > 0 {
+			transformedScheduler := &composer.SchedulerResource{}
+			originalSchedulerRaw := v.([]interface{})[0].(map[string]interface{})
+			transformedScheduler.Count = int64(originalSchedulerRaw["count"].(int))
+			transformedScheduler.Cpu = originalSchedulerRaw["cpu"].(float64)
+			transformedScheduler.MemoryGb = originalSchedulerRaw["memory_gb"].(float64)
+			transformedScheduler.StorageGb = originalSchedulerRaw["storage_gb"].(float64)
+			transformed.Scheduler = transformedScheduler
+		}
+	}
+
+	if v, ok := original["web_server"]; ok {
+		if len(v.([]interface{})) > 0 {
+			transformedWebServer := &composer.WebServerResource{}
+			originalWebServerRaw := v.([]interface{})[0].(map[string]interface{})
+			transformedWebServer.Cpu = originalWebServerRaw["cpu"].(float64)
+			transformedWebServer.MemoryGb = originalWebServerRaw["memory_gb"].(float64)
+			transformedWebServer.StorageGb = originalWebServerRaw["storage_gb"].(float64)
+			transformed.WebServer = transformedWebServer
+		}
+	}
+
+	if v, ok := original["worker"]; ok {
+		if len(v.([]interface{})) > 0 {
+			transformedWorker := &composer.WorkerResource{}
+			originalWorkerRaw := v.([]interface{})[0].(map[string]interface{})
+			transformedWorker.Cpu = originalWorkerRaw["cpu"].(float64)
+			transformedWorker.MemoryGb = originalWorkerRaw["memory_gb"].(float64)
+			transformedWorker.StorageGb = originalWorkerRaw["storage_gb"].(float64)
+			transformedWorker.MinCount = int64(originalWorkerRaw["min_count"].(int))
+			transformedWorker.MaxCount = int64(originalWorkerRaw["max_count"].(int))
+			transformed.Worker = transformedWorker
+		}
 	}
 
 	return transformed, nil
