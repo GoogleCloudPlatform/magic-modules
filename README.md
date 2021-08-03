@@ -100,9 +100,9 @@ Before making any changes, you can compile the Terraform provider you're working
 on by running the following command. If Magic Modules has been installed
 correctly, you'll get no errors.
 
-Generally, you'll want to generate into the same output.  For terraform, that
-will be `$GOPATH/src/github.com/hashicorp/terraform-provider-google` (optionally `-beta`).
-
+The following commands should be run from the root directory of the repository.
+OUTPUT_PATH should be set to the location of your provider repository, which is
+recommended to be inside your GOPATH.
 
 ```bash
 make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google"
@@ -182,9 +182,10 @@ wrapping those lines of code in version guards;
 ### Testing your changes
 
 Once you've made changes to resource definition, you can run Magic Modules
-to generate changes to your tool; see "Generating downstream tools" above if
-you need a refresher. Once it's generated, you should run the tool-specific
-tests as if you were submitting a PR against that tool.
+to generate changes to your tool; see
+["Generating the Terraform Providers"](#generating-the-terraform-providers)
+above if you need a refresher. Once it's generated, you should run the
+tool-specific tests as if you were submitting a PR against that tool.
 
 You can run tests in the `{{output_folder}}` you generated the tool in.
 See the following tool-specific documentation for more details on testing that

@@ -35,6 +35,7 @@ var fPath = flag.String("path", "", "path to the root service directory holding 
 var tPath = flag.String("overrides", "", "path to the root directory holding overrides files")
 var cPath = flag.String("handwritten", "handwritten", "path to the root directory holding handwritten files to copy")
 var oPath = flag.String("output", "", "path to output generated files to")
+var sPath = flag.String("samples", "samples", "path to the directory holding the samples and substitution data")
 
 var sFilter = flag.String("service", "", "optional service name. If specified, only this service is generated")
 var rFilter = flag.String("resource", "", "optional resource name (from filename). If specified, only resources with this name are generated")
@@ -46,6 +47,15 @@ var terraformResourceDirectory = "google-beta"
 
 func main() {
 	resources, products := loadAndModelResources()
+
+	if mode != nil && *mode == "serialization" {
+		if vFilter != nil {
+			glog.Warning("[WARNING] serialization mode uses all resource versions. version flag is ignored")
+		}
+		generateSerializationLogic(resources)
+		return
+	}
+
 	var resourcesForVersion []*Resource
 	var productsForVersion []*ProductMetadata
 	var version *Version
@@ -64,11 +74,6 @@ func main() {
 		terraformResourceDirectory = "google"
 	}
 
-	if mode != nil && *mode == "serialization" {
-		generateSerializationLogic(resourcesForVersion)
-		return
-	}
-
 	for _, resource := range resourcesForVersion {
 		if skipResource(resource) {
 			continue
@@ -82,8 +87,8 @@ func main() {
 
 		generateResourceFile(resource)
 		generateSweeperFile(resource)
-		// Disabled to allow handwriting files until samples exist
-		// generateResourceWebsiteFile(resource, resources, version)
+		generateResourceTestFile(resource)
+		generateResourceWebsiteFile(resource, resources, version)
 	}
 
 	// product specific generation
@@ -112,7 +117,9 @@ func skipResource(r *Resource) bool {
 	if rFilter != nil && *rFilter != "" && strings.ToLower(*rFilter) != snakeToLowercase(r.DCLName()) {
 		return true
 	}
-	return false
+
+	// skip if set to SerializationOnly
+	return r.SerializationOnly
 }
 
 // TODO(rileykarson): Change interface to an error, handle exceptional stuff in
@@ -154,10 +161,8 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 				continue
 			}
 			products[version] = append(products[version], newProduct)
-
-			newResources := getResources(packagePath, specs)
+			newResources := getResources(packagePath, specs, version)
 			resources[version] = append(resources[version], newResources...)
-
 		}
 	}
 
@@ -178,7 +183,7 @@ func getProductInformation(packagePath string, specs []os.FileInfo) *ProductMeta
 	return nil
 }
 
-func getResources(packagePath string, specs []os.FileInfo) []*Resource {
+func getResources(packagePath string, specs []os.FileInfo, version Version) []*Resource {
 	var resources []*Resource
 	for _, f := range specs {
 		if f.IsDir() {
@@ -229,7 +234,7 @@ func getResources(packagePath string, specs []os.FileInfo) []*Resource {
 		}
 
 		for _, l := range locations {
-			res, err := createResource(schema, typeFetcher, overrides, productMetadata, l)
+			res, err := createResource(schema, typeFetcher, overrides, productMetadata, version, l)
 			if err != nil {
 				glog.Exit(err)
 			}
@@ -257,7 +262,13 @@ func loadDocument(packagePath string, f *os.FileInfo) *openapi.Document {
 	return document
 }
 
-func generateSerializationLogic(specs []*Resource) {
+// SerializationInput contains an array of resources along with additional generation metadata.
+type SerializationInput struct {
+	Resources map[Version][]*Resource
+	Packages  map[string]string
+}
+
+func generateSerializationLogic(specs map[Version][]*Resource) {
 	buf := bytes.Buffer{}
 	tmpl, err := template.New("serialization.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
 		"templates/serialization.go.tmpl",
@@ -266,7 +277,29 @@ func generateSerializationLogic(specs []*Resource) {
 		glog.Exit(err)
 	}
 
-	if err = tmpl.ExecuteTemplate(&buf, "serialization.go.tmpl", specs); err != nil {
+	packageMap := make(map[string]string)
+	for v, resList := range specs {
+		for _, res := range resList {
+			var pkgName, pkgPath string
+			pkgName = res.Package() + v.SerializationSuffix
+			if v == BETA_VERSION {
+				pkgPath = path.Join(res.Package(), v.V)
+			} else {
+				pkgPath = res.Package()
+			}
+
+			if _, ok := packageMap[pkgPath]; !ok {
+				packageMap[pkgName] = pkgPath
+			}
+		}
+	}
+
+	tmplInput := SerializationInput{
+		Resources: specs,
+		Packages:  packageMap,
+	}
+
+	if err = tmpl.ExecuteTemplate(&buf, "serialization.go.tmpl", tmplInput); err != nil {
 		glog.Exit(err)
 	}
 
@@ -346,7 +379,6 @@ func generateSweeperFile(res *Resource) {
 	if !res.HasSweeper {
 		return
 	}
-
 	// Generate resource file
 	tmplInput := ResourceInput{
 		Resource: *res,
@@ -377,6 +409,48 @@ func generateSweeperFile(res *Resource) {
 		fmt.Printf("%v", string(formatted))
 	} else {
 		outname := fmt.Sprintf("resource_%s_%s_sweeper_test.go", res.ProductName(), res.Name())
+		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
+		if err != nil {
+			glog.Exit(err)
+		}
+	}
+}
+
+func generateResourceTestFile(res *Resource) {
+	if len(res.TestSamples()) < 1 {
+		return
+	}
+	// Generate resource file
+	tmplInput := ResourceInput{
+		Resource: *res,
+	}
+
+	tmpl, err := template.New("test_file.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
+		"templates/test_file.go.tmpl",
+	)
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	contents := bytes.Buffer{}
+	if err = tmpl.ExecuteTemplate(&contents, "test_file.go.tmpl", tmplInput); err != nil {
+		fmt.Println(contents.String())
+		glog.Exit(err)
+	}
+
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	formatted, err := formatSource(&contents)
+	if err != nil {
+		glog.Error(fmt.Errorf("error formatting %v: %v - test_file \n ", res.ProductName()+res.Name(), err))
+	}
+
+	if oPath == nil || *oPath == "" {
+		fmt.Printf("%v", string(formatted))
+	} else {
+		outname := fmt.Sprintf("resource_%s_%s_generated_test.go", res.ProductName(), res.Name())
 		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
 		if err != nil {
 			glog.Exit(err)
@@ -426,6 +500,7 @@ var TemplateFunctions = template.FuncMap{
 	"title":          strings.Title,
 	"patternToRegex": PatternToRegex,
 	"replace":        strings.Replace,
+	"isLastIndex":    isLastIndex,
 }
 
 // TypeFetcher fetches reused types, as marked by the $ref field being marked on an OpenAPI schema.
