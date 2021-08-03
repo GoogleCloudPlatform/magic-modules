@@ -6,6 +6,26 @@ mm_commit_sha=$2
 echo "PR number: ${pr_number}"
 echo "Commit SHA: ${mm_commit_sha}"
 github_username=modular-magician
+gh_repo=terraform-provider-google-beta
+
+new_branch="auto-pr-$pr_number"
+git_remote=https://github.com/$github_username/$gh_repo
+local_path=$GOPATH/src/github.com/hashicorp/$gh_repo
+mkdir -p "$(dirname $local_path)"
+git clone $git_remote $local_path --branch $new_branch --depth 2
+pushd $local_path
+
+# Only skip tests if we can tell for sure that no go files were changed
+echo "Checking for modified go files"
+# get the names of changed files and look for go files
+# (ignoring "no matches found" errors from grep)
+gofiles=$(git diff --name-only HEAD~1 | { grep "\.go$" || test $? = 1; })
+if [[ -z $gofiles ]]; then
+    echo "Skipping tests: No go files changed"
+    exit 0
+else
+    echo "Running tests: Go files changed"
+fi
 
 sed -i 's/{{PR_NUMBER}}/'"$pr_number"'/g' /teamcityparams.xml
 curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" https://ci-oss.hashicorp.engineering/app/rest/buildQueue --request POST --header "Content-Type:application/xml" --data-binary @/teamcityparams.xml -o build.json
