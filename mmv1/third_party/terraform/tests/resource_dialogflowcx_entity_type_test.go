@@ -113,11 +113,11 @@ func testAccDialogflowCXEntityType_full(context map[string]interface{}) string {
             synonyms = ["synonym3","synonym4"]
         }
         enable_fuzzy_extraction = false
-		redact                  = true
-		auto_expansion_mode     = "AUTO_EXPANSION_MODE_DEFAULT"
-		excluded_phrases {
+        redact                  = true
+        auto_expansion_mode     = "AUTO_EXPANSION_MODE_DEFAULT"
+        excluded_phrases {
 			value = "excluded1"
-		}
+        }
 		
     } 
 	  `, context)
