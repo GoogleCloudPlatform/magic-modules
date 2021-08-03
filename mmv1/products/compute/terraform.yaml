@@ -258,6 +258,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         set_hash_func: 'resourceGoogleComputeBackendServiceBackendHash'
       backends.group: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkRelativePaths'
+      backends.maxConnections: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      backends.maxConnectionsPerEndpoint: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      backends.maxConnectionsPerInstance: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      backends.maxRate: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      backends.maxRatePerEndpoint: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      backends.maxRatePerInstance: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      backends.maxUtilization: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       cdnPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       cdnPolicy.cacheKeyPolicy.queryStringWhitelist: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -418,6 +432,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       sessionAffinity: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       timeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   RegionInstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
@@ -815,12 +831,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           backend_service_name: "backend"
           igm_name: "igm-internal"
       - !ruby/object:Provider::Terraform::Examples
-        name: "global_forwarding_rule_private_services_connect"
+        name: "private_service_connect_google_apis"
         min_version: beta
         primary_resource_id: "default"
         vars:
+          network_name: "my-network"
+          subnetwork_name: "my-subnetwork"
           global_address_name: "global-psconnect-ip"
           forwarding_rule_name: "globalrule"
+        test_env_vars:
+          project: :PROJECT_NAME
     properties:
       creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1102,7 +1122,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           address_name: "test-address"
           router_name: "test-router"
           network_name: "test-network"
-        min_version: beta
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -2086,7 +2105,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           router_name: "test-router"
           network_name: "test-network"
-        min_version: beta
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/router.go.erb
       resource_definition: templates/terraform/resource_definition/router.go.erb
@@ -2785,7 +2803,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           address2_name: "test-address2"
           router_name: "test-router"
           network_name: "test-network"
-        min_version: beta
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation

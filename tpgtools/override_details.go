@@ -162,6 +162,11 @@ type SkipDeleteFunctionDetails struct {
 	Function string
 }
 
+type TerraformProductNameDetails struct {
+	// The name of the product in terraform.
+	Product string
+}
+
 type ProductBasePathDetails struct {
 	// If set to true, generating the product base path should be skipped
 	// This is the case when mmv1 already generates base path support

@@ -175,6 +175,10 @@ module Provider
                        },
                        pwd + '/' + config_path
                      ))
+
+        # Remove region tags
+        body = body.gsub(/# \[[a-zA-Z_ ]+\]\n/, '')
+        body = body.gsub(/\n# \[[a-zA-Z_ ]+\]/, '')
         lines(compile_file(
                 { content: body },
                 pwd + '/templates/terraform/examples/base_configs/documentation.tf.erb'
@@ -201,16 +205,14 @@ module Provider
 
         vars.merge!(cloud_docs_vars_overrides) unless cloud_docs_vars_overrides.empty?
 
-        body = lines(compile_file(
-                       {
-                         vars: vars,
-                         test_env_vars: test_env_vars.map { |k, v| [k, docs_defaults[v]] }.to_h,
-                         primary_resource_id: primary_resource_id
-                       },
-                       pwd + '/' + config_path
-                     ))
-
-        insert_region_tag(body, primary_resource_id, @cloud_docs_region_tag)
+        lines(compile_file(
+                {
+                  vars: vars,
+                  test_env_vars: test_env_vars.map { |k, v| [k, docs_defaults[v]] }.to_h,
+                  primary_resource_id: primary_resource_id
+                },
+                pwd + '/' + config_path
+              ))
       end
 
       def config_test(pwd)
@@ -258,6 +260,9 @@ module Provider
                        pwd + '/' + config_path
                      ))
 
+        # Remove region tags
+        body = body.gsub(/# \[[a-zA-Z_ ]+\]\n/, '')
+        body = body.gsub(/\n# \[[a-zA-Z_ ]+\]/, '')
         substitute_test_paths body
       end
 
@@ -276,6 +281,9 @@ module Provider
                        pwd + '/' + config_path
                      ))
 
+        # Remove region tags
+        body = body.gsub(/# \[[a-zA-Z_ ]+\]\n/, '')
+        body = body.gsub(/\n# \[[a-zA-Z_ ]+\]/, '')
         substitute_example_paths body
       end
 
@@ -293,14 +301,6 @@ module Provider
           path: '/cloudshell/open',
           query: URI.encode_www_form(hash)
         )
-      end
-
-      def insert_region_tag(config, primary_resource_id, tag)
-        index_before = config.index(/resource [a-z_\" ]+#{primary_resource_id}/)
-        index_after = config.index(/\n}\n/, index_before)
-
-        config.insert(index_after + 3, "# [END #{tag}]\n")
-        config.insert(index_before, "# [START #{tag}]\n")
       end
 
       # rubocop:disable Metrics/LineLength
