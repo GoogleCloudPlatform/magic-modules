@@ -49,8 +49,7 @@ validator:
 serialize:
 	cd tpgtools;\
 		go run . --path "api" --overrides "overrides" --mode "serialization" > temp.serial;\
-		cat temp.serial > serialization.go;\
-		rm temp.serial;
+		mv -f temp.serial serialization.go;\
 
 .PHONY: mmv1 tpgtools
 
