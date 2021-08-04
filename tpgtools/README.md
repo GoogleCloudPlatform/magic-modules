@@ -130,21 +130,21 @@ substitutions:
 If you need to hide sample from doc or hide a sample from docs you can do so here as well.
 ```
 doc_hide:
-  - basic.tft
+  - basic.tf.tmplt
 test_hide:
   - basic_trigger.yaml
 ```
 
-Any files with a `.tft` (terraform template) extension located in the `override/{{product}}samples/{{resource}}` directory
+Any files with a `.tf.tmplt` (terraform template) extension located in the `override/{{product}}samples/{{resource}}` directory
 and without `_update` in the name are considered to be tests independently.
 These are normal terraform files with the desired sustituted variables surrounded by `{{}}`.
 These tests will also use the substitutions defined in the `meta.yaml`. If you want to provide test specific
-rules (updates, ect), you can create a yaml file with the same name as the `.tft` file. Here you can supply updates
+rules (updates, ect), you can create a yaml file with the same name as the `.tf.tmplt` file. Here you can supply updates
 or version requirements specific to this test. If version is ommitted the sample assumed to run against all versions.
 ```
 updates:
-  - resource: basic_update_transport.tft
-  - resource: basic_update_transport_2.tft
+  - resource: basic_update_transport.tf.tmplt
+  - resource: basic_update_transport_2.tf.tmplt
 version:
   - beta
 ```
@@ -171,8 +171,8 @@ extra_dependencies:
 code_inject:
   - delete_assured_workload_provisioned_resources.go
 doc_hide:
-  - basic.tft # basic_update.tft auto hides
-  - full.tft
+  - basic.tf.tmplt # basic_update.tf.tmplt auto hides
+  - full.tf.tmplt
 test_hide:
   - basic_workload.yaml
 ```

@@ -25,7 +25,7 @@ extra_dependencies:
 code_inject:
   - delete_assured_workload_provisioned_resources.go
 doc_hide:
-  - basic.tft # basic_update.tft auto hides
-  - full.tft
+  - basic.tf.tmplt # basic_update.tf.tmplt auto hides
+  - full.tf.tmplt
 test_hide:
   - basic_workload.yaml

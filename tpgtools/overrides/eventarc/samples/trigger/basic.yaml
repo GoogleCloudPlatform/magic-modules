@@ -1,3 +1,3 @@
 updates:
-  - resource: basic_update_transport.tft
-  - resource: basic_update_transport_2.tft
+  - resource: basic_update_transport.tf.tmplt
+  - resource: basic_update_transport_2.tf.tmplt

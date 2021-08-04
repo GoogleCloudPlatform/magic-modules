@@ -15,6 +15,6 @@ substitutions:
   - substitution: "service_account"
     value: "sa"
 doc_hide:
-  - basic.tft
+  - basic.tf.tmplt
 test_hide:
   - basic_trigger.yaml
