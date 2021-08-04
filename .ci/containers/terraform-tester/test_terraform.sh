@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source /utils.sh
+
 set -e
 
 version=$1
@@ -37,32 +39,8 @@ else
     echo "Running tests: Go files changed"
 fi
 
-post_body=$( jq -n \
-    --arg context "${gh_repo}-test" \
-    --arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
-    --arg state "pending" \
-    '{context: $context, target_url: $target_url, state: $state}')
-
-curl \
-  -X POST \
-  -u "$github_username:$GITHUB_TOKEN" \
-  -H "Accept: application/vnd.github.v3+json" \
-  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
-  -d "$post_body"
-
-
-post_body=$( jq -n \
-    --arg context "${gh_repo}-lint" \
-    --arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
-    --arg state "pending" \
-    '{context: $context, target_url: $target_url, state: $state}')
-
-curl \
-  -X POST \
-  -u "$github_username:$GITHUB_TOKEN" \
-  -H "Accept: application/vnd.github.v3+json" \
-  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
-  -d "$post_body"
+update_status "${gh_repo}-test" "pending" "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}"
+update_status "${gh_repo}-lint" "pending" "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}"
 
 set +e
 
@@ -97,29 +75,5 @@ else
     lint_state="success"
 fi
 
-post_body=$( jq -n \
-    --arg context "${gh_repo}-test" \
-    --arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
-    --arg state "${test_state}" \
-    '{context: $context, target_url: $target_url, state: $state}')
-
-curl \
-  -X POST \
-  -u "$github_username:$GITHUB_TOKEN" \
-  -H "Accept: application/vnd.github.v3+json" \
-  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
-  -d "$post_body"
-
-
-post_body=$( jq -n \
-    --arg context "${gh_repo}-lint" \
-    --arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
-    --arg state "${lint_state}" \
-    '{context: $context, target_url: $target_url, state: $state}')
-
-curl \
-  -X POST \
-  -u "$github_username:$GITHUB_TOKEN" \
-  -H "Accept: application/vnd.github.v3+json" \
-  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
-  -d "$post_body"
+update_status "${gh_repo}-test" "${test_state}" "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}"
+update_status "${gh_repo}-lint" "${lint_state}" "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}"
