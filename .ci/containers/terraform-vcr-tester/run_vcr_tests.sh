@@ -27,6 +27,19 @@ else
     echo "Running tests: Go files changed"
 fi
 
+
+$BRANCHNAME=$(echo -n "/auto-pr-${pr_number}"| base64)
+curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" https://ci-oss.hashicorp.engineering/app/rest/builds/multiple/branch:$BRANCHNAME,defaultFilter=false --request POST --header "Content-Type:application/xml" --data-binary @/teamcitycancelparams.xml -o result.json
+
+ERRS=$(cat result.json | jq .errorCount -r)
+if [ "$ERRS" -gt "0" ]; then
+	for row in $(cat result.json | jq -r '.operationResult[] | @base64'); do
+	    build_url=$(${row} | base64 --decode | jq -r '.related.build.webUrl')
+	done
+	update_status "${build_url}" "error"
+	exit 0
+fi
+
 sed -i 's/{{PR_NUMBER}}/'"$pr_number"'/g' /teamcityparams.xml
 curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" https://ci-oss.hashicorp.engineering/app/rest/buildQueue --request POST --header "Content-Type:application/xml" --data-binary @/teamcityparams.xml -o build.json
 
