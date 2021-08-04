@@ -256,7 +256,7 @@ func loadDocument(packagePath string, f *os.FileInfo) *openapi.Document {
 	}
 	err = yaml.Unmarshal(b, document)
 	if err != nil {
-		panic(err)
+		glog.Exit(err)
 	}
 	return document
 }
