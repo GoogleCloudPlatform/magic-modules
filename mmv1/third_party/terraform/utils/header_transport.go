@@ -11,7 +11,7 @@ type headerTransportLayer struct {
 	baseTransit http.RoundTripper
 }
 
-func newTransportWithHeaders(baseTransit http.RoundTripper) headerTransportLayer {
+func newTransportWithHeaders(baseTransit http.RoundTripper, configRequestReason string) headerTransportLayer {
 	if baseTransit == nil {
 		baseTransit = http.DefaultTransport
 	}
@@ -19,6 +19,8 @@ func newTransportWithHeaders(baseTransit http.RoundTripper) headerTransportLayer
 	headers := make(http.Header)
 	if requestReason := os.Getenv("CLOUDSDK_CORE_REQUEST_REASON"); requestReason != "" {
 		headers.Set("X-Goog-Request-Reason", requestReason)
+	} else if configRequestReason != "" {
+		headers.Set("X-Goog-Request-Reason", configRequestReason)
 	}
 
 	return headerTransportLayer{Header: headers, baseTransit: baseTransit}

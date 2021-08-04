@@ -148,6 +148,8 @@ the provider should wait for a single HTTP request.  This will not adjust the
 amount of time the provider will wait for a logical operation - use the resource
 timeout blocks for that.
 
+* `request_reason` - (Optional) Send a Request Reason [System Parameter](https://cloud.google.com/apis/docs/system-parameters).
+
 The `batching` fields supports:
 
 * `send_after` - (Optional) A duration string representing the amount of time

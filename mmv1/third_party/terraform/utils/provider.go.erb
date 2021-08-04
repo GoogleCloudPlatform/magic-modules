@@ -138,6 +138,11 @@ func Provider() *schema.Provider {
 			    Optional: true,
 			},
 
+			"request_reason": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
 			// Generated Products
 			<% products.each do |product| -%>
 			"<%= product[:definitions].name.underscore -%>_custom_endpoint": &schema.Schema{
