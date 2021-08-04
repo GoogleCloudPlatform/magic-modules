@@ -1,3 +1,16 @@
+# Usage: grep_files_modified grep_pattern
+# Must be called while inside a downstream git repository.
+# Requires 2 commits of depth.
+# Returns 0 if there are matches and 1 otherwise.
+function grep_files_modified {
+	matching_files=$(git diff --name-only HEAD~1 | { grep "${1}" || test $? = 1; })
+	if [[ -z $matching_files ]]; then
+		return 1
+	else
+		return 0
+	fi
+}
+
 # Usage: update_status context state target_url
 # Expected env: GITHUB_TOKEN
 function update_status {

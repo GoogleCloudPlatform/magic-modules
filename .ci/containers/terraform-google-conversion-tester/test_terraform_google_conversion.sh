@@ -17,16 +17,13 @@ mkdir -p "$(dirname $local_path)"
 git clone $git_remote $local_path --branch $new_branch --depth 2
 pushd $local_path
 
-# Only skip tests if we can tell for sure that no go files were changed
+# Only skip tests if no go files were changed
 echo "Checking for modified go files"
-# get the names of changed files and look for go files
-# (ignoring "no matches found" errors from grep)
-gofiles=$(git diff --name-only HEAD~1 | { grep "\.go$" || test $? = 1; })
-if [[ -z $gofiles ]]; then
+if grep_files_modified "\.go$"; then
+    echo "Running tests: Go files changed"
+else
     echo "Skipping tests: No go files changed"
     exit 0
-else
-    echo "Running tests: Go files changed"
 fi
 
 update_status "terraform-google-conversion-test" "pending" "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}"
