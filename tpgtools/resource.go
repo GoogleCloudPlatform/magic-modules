@@ -583,7 +583,7 @@ func (r Resource) getSamples(docs bool) []Sample {
 func (r *Resource) getSampleAccessoryFolder() string {
 	resourceType := strings.ToLower(r.Type())
 	packageName := strings.ToLower(r.productMetadata.PackageName)
-	sampleAccessoryFolder := path.Join(*sPath, packageName, resourceType)
+	sampleAccessoryFolder := path.Join(*tPath, packageName, "samples", resourceType)
 	return sampleAccessoryFolder
 }
 
@@ -611,7 +611,7 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 	}
 
 	for _, file := range files {
-		if fileName := strings.ToLower(file.Name()); !strings.HasSuffix(fileName, ".tf") ||
+		if fileName := strings.ToLower(file.Name()); !strings.HasSuffix(fileName, ".tf.tmpl") ||
 			strings.Contains(fileName, "_update") {
 			continue
 		}

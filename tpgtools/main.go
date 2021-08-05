@@ -35,7 +35,6 @@ var fPath = flag.String("path", "", "path to the root service directory holding 
 var tPath = flag.String("overrides", "", "path to the root directory holding overrides files")
 var cPath = flag.String("handwritten", "handwritten", "path to the root directory holding handwritten files to copy")
 var oPath = flag.String("output", "", "path to output generated files to")
-var sPath = flag.String("samples", "samples", "path to the directory holding the samples and substitution data")
 
 var sFilter = flag.String("service", "", "optional service name. If specified, only this service is generated")
 var rFilter = flag.String("resource", "", "optional resource name (from filename). If specified, only resources with this name are generated")
@@ -171,7 +170,7 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 
 func getProductInformation(packagePath string, specs []os.FileInfo) *ProductMetadata {
 	for _, f := range specs {
-		if f.IsDir() {
+		if f.IsDir() || !strings.HasSuffix(f.Name(), "yaml") {
 			continue
 		}
 
@@ -186,7 +185,7 @@ func getProductInformation(packagePath string, specs []os.FileInfo) *ProductMeta
 func getResources(packagePath string, specs []os.FileInfo, version Version) []*Resource {
 	var resources []*Resource
 	for _, f := range specs {
-		if f.IsDir() {
+		if f.IsDir() || !strings.HasSuffix(f.Name(), "yaml") {
 			continue
 		}
 
