@@ -825,6 +825,10 @@ func resourceComputeInstance() *schema.Resource {
 					},
 				},
 			},
+			"operation": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 		CustomizeDiff: customdiff.All(
 			customdiff.If(
@@ -1077,6 +1081,20 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 	// Wait for the operation to complete
 	waitErr := computeOperationWaitTime(config, op, project, "instance to create", userAgent, d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
+		// Check if the create operation failed because Terraform was prematurely terminated. If it was we can persist the
+		// operation id to state so that a subsequent refresh of this resource will wait until the operation has terminated
+		// before attempting to Read the state of the cluster. This allows a graceful resumption of a Create that was killed
+		// by the upstream Terraform process exiting early such as a sigterm.
+		select {
+		case <-config.context.Done():
+			log.Printf("[DEBUG] Persisting %s so this operation can be resumed \n", op.Name)
+			if err := d.Set("operation", op.Name); err != nil {
+				return fmt.Errorf("Error setting operation: %s", err)
+			}
+			return nil
+		default:
+			// leaving default case to ensure this is non blocking
+		}
 		// The resource didn't actually create
 		d.SetId("")
 		return waitErr
@@ -1092,6 +1110,10 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 
 func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -1101,6 +1123,21 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	instance, err := getInstance(config, d)
 	if err != nil || instance == nil {
 		return err
+	}
+
+	operation := d.Get("operation").(string)
+	if operation != "" {
+		log.Printf("[DEBUG] in progress operation detected at %v, attempting to resume", operation)
+		op := &computeBeta.Operation{
+			Name: operation,
+		}
+		if err := d.Set("operation", ""); err != nil {
+			return fmt.Errorf("Error setting operation: %s", err)
+		}
+		waitErr := computeOperationWaitTime(config, op, project, "instance to create", userAgent, d.Timeout(schema.TimeoutCreate))
+		if waitErr != nil {
+			return waitErr
+		}
 	}
 
 	md := flattenMetadataBeta(instance.Metadata)
