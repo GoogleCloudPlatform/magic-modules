@@ -268,6 +268,8 @@ an access token using the service account key specified in `credentials`.
     * https://www.googleapis.com/auth/devstorage.full_control
     * https://www.googleapis.com/auth/userinfo.email
 
+* `request_reason` - (Optional) Send a Request Reason [System Parameter](https://cloud.google.com/apis/docs/system-parameters) for each API call made by the provider.  The `X-Goog-Request-Reason` header value is used to provide a user-supplied justification into GCP AuditLogs. Alternatively, this can be specified using the `CLOUDSDK_CORE_REQUEST_REASON` environment variable.
+
 ---
 
 * `{{service}}_custom_endpoint` - (Optional) The endpoint for a service's APIs,
