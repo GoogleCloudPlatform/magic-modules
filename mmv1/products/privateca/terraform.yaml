@@ -134,6 +134,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.erb'
       issuancePolicy.baselineValues.caOptions.maxIssuerPathLength: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
+      publishingOptions: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'emptyOrUnsetBlockDiffSuppress'
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/privateca.certificateManager'
       method_name_separator: ':'

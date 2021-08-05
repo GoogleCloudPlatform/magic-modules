@@ -1517,6 +1517,7 @@ objects:
           - !ruby/object:Api::Type::Boolean
             name: 'publishCaCert'
             required: true
+            send_empty_value: true
             description: |
               When true, publishes each CertificateAuthority's CA certificate and includes its URL in the "Authority Information Access"
               X.509 extension in all issued Certificates. If this is false, the CA certificate will not be published and the corresponding
@@ -1524,6 +1525,7 @@ objects:
           - !ruby/object:Api::Type::Boolean
             name: 'publishCrl'
             required: true
+            send_empty_value: true
             description: |
               When true, publishes each CertificateAuthority's CRL and includes its URL in the "CRL Distribution Points" X.509 extension
               in all issued Certificates. If this is false, CRLs will not be published and the corresponding X.509 extension will not
