@@ -1,3 +1,3 @@
-# optional test level config -- needed for updates basic.tf.tmplt def
+# optional test level config -- needed for updates basic.tf.tmpl def
 updates:
-- resource: ./basic_update.tf.tmplt
+- resource: ./basic_update.tf.tmpl

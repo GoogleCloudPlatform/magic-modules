@@ -611,7 +611,7 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 	}
 
 	for _, file := range files {
-		if fileName := strings.ToLower(file.Name()); !strings.HasSuffix(fileName, ".tf.tmplt") ||
+		if fileName := strings.ToLower(file.Name()); !strings.HasSuffix(fileName, ".tf.tmpl") ||
 			strings.Contains(fileName, "_update") {
 			continue
 		}
