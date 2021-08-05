@@ -281,6 +281,25 @@ func (c *Config) synchronousTimeout() time.Duration {
 	return c.RequestTimeout
 }
 
+func (c *Config) Client() *http.Client {
+	client := *(c.client)
+	return &client
+}
+
+func (c *Config) Context() context.Context {
+	context := c.context
+	return context
+}
+
+func (c *Config) UserAgent() string {
+	return c.userAgent
+}
+
+func (c *Config) TokenSource() oauth2.TokenSource {
+	tokenSource := c.tokenSource
+	return tokenSource
+}
+
 // Print Identities executing terraform API Calls.
 func (c *Config) logGoogleIdentities() error {
 	if c.ImpersonateServiceAccount == "" {
