@@ -535,6 +535,10 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		}
 	}
 
+	if v, ok := d.GetOk("request_reason"); ok {
+		config.RequestReason = v.(string)
+	}	
+
 	// Search for default credentials
 	config.Credentials = multiEnvSearch([]string{
 		"GOOGLE_CREDENTIALS",
