@@ -1,3 +1,0 @@
-updates:
-  - resource: basic_update_transport.tf
-  - resource: basic_update_transport_2.tf
