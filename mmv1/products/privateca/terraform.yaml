@@ -24,8 +24,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           certificate_authority_id: "my-certificate-authority"
+          pool_name: "ca-pool"
+          pool_location: "us-central1"
         test_vars_overrides:
-          pool: "\"static-ca-pool\""
+          pool_name: 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
+          pool_location: "\"us-central1\""
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_authority_byo_key"
         primary_resource_id: "default"
@@ -34,9 +37,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           kms_key_name: "projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key"
           certificate_authority_id: "my-certificate-authority"
+          pool_name: "ca-pool"
+          pool_location: "us-central1"
         test_vars_overrides:
           kms_key_name: 'BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN", "us-central1").CryptoKey.Name'
-          pool: "\"static-ca-pool\""
+          pool_name: 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
+          pool_location: "\"us-central1\""
     properties:
       type: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
