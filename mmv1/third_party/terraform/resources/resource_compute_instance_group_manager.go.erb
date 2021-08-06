@@ -462,6 +462,13 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 
+	if d.Get("wait_for_instances").(bool) {
+		err := computeIGMWaitForInstanceStatus(d, meta)
+		if err != nil {
+			return err
+		}
+	}
+
 	return resourceComputeInstanceGroupManagerRead(d, meta)
 }
 
@@ -758,6 +765,13 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 
 	d.Partial(false)
 
+	if d.Get("wait_for_instances").(bool) {
+		err := computeIGMWaitForInstanceStatus(d, meta)
+		if err != nil {
+			return err
+		}
+	}
+
 	return resourceComputeInstanceGroupManagerRead(d, meta)
 }
 
@@ -816,6 +830,28 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 	}
 
 	d.SetId("")
+	return nil
+}
+
+func computeIGMWaitForInstanceStatus(d *schema.ResourceData, meta interface{}) error {
+	// If unset in state set to default value
+	if d.Get("wait_for_instances_status").(string) == "" {
+		if err := d.Set("wait_for_instances_status", "STABLE"); err != nil {
+			return fmt.Errorf("Error setting wait_for_instances_status in state: %s", err.Error())
+		}
+	}
+
+	waitForUpdates := d.Get("wait_for_instances_status").(string) == "UPDATED"
+	conf := resource.StateChangeConf{
+		Pending: []string{"creating", "error", "updating per instance configs", "reaching version target"},
+		Target:  []string{"created"},
+		Refresh: waitForInstancesRefreshFunc(getManager, waitForUpdates, d, meta),
+		Timeout: d.Timeout(schema.TimeoutCreate),
+	}
+	_, err := conf.WaitForState()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
