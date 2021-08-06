@@ -30,6 +30,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           pool_name: 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
           pool_location: "\"us-central1\""
       - !ruby/object:Provider::Terraform::Examples
+        name: "privateca_certificate_authority_subordinate"
+        primary_resource_id: "default"
+        vars:
+          certificate_authority_id: "my-certificate-authority"
+          pool_name: "ca-pool"
+          pool_location: "us-central1"
+        test_vars_overrides:
+          pool_name: 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
+          pool_location: "\"us-central1\""
+      - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_authority_byo_key"
         primary_resource_id: "default"
         # Multiple IAM bindings on the same key cause non-determinism
