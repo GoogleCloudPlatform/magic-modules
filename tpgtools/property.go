@@ -632,7 +632,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 			// special handling for project/region/zone/other fields with
 			// provider defaults
-			if stringInSlice(p.title, []string{"project", "region", "zone"}) {
+			if stringInSlice(p.title, []string{"project", "region", "zone"}) || stringInSlice(p.customName, []string{"region", "project", "zone"}) {
 				p.Optional = true
 				p.Required = false
 				p.Computed = true
@@ -646,7 +646,11 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 					return nil, fmt.Errorf("failed to decode custom identity getter details")
 				}
 
-				ig := fmt.Sprintf("get%s(d, config)", p.PackageName)
+				capitalizedPropertyName := p.PackageName
+				if p.customName != "" {
+					capitalizedPropertyName = snakeToTitleCase(p.customName)
+				}
+				ig := fmt.Sprintf("get%s(d, config)", capitalizedPropertyName)
 				if cigOk {
 					ig = fmt.Sprintf("%s(d, config)", cig.Function)
 				}

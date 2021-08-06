@@ -766,6 +766,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           forwarding_rule_name: "website-forwarding-rule"
           target_pool_name: "website-target-pool"
+        ignore_read_extra: 
+          - "port_range"
+          - "target"
       - !ruby/object:Provider::Terraform::Examples
         name: "forwarding_rule_l3_default"
         primary_resource_id: "fwd_rule"
@@ -872,6 +875,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           forwarding_rule_name: "global-rule"
           http_proxy_name: "target-proxy"
           backend_service_name: "backend"
+        ignore_read_extra: 
+          - "port_range"
+          - "target"
       - !ruby/object:Provider::Terraform::Examples
         name: "global_forwarding_rule_internal"
         min_version: beta

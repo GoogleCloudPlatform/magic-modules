@@ -1,0 +1,15 @@
+- type: EXCLUDE
+  field: id
+- type: CUSTOM_RESOURCE_NAME
+  details:
+    title: forwarding_rule
+  location: region
+- type: EXCLUDE
+  field: region
+- type: CUSTOM_NAME
+  details:
+    name: region
+  field: location
+- type: EXCLUDE
+  field: location
+  location: global
