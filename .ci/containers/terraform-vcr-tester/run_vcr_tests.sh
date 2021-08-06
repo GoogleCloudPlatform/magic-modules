@@ -34,7 +34,14 @@ function add_comment {
 }
 
 BRANCHNAME=$(echo -n "/auto-pr-${pr_number}"| base64)
-curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" https://ci-oss.hashicorp.engineering/app/rest/builds/multiple/branch:name:\(\$base64:$BRANCHNAME\),buildType:id:GoogleCloudBeta_ProviderGoogleCloudBetaMmUpstreamVcr,property:\(name:env.VCR_MODE,value:REPLAYING\),defaultFilter=false --request POST --header "Content-Type:application/xml" --data-binary @/teamcitycancelparams.xml -o result.json
+curl \
+	--header "Accept: application/json" \
+	--header "Authorization: Bearer $TEAMCITY_TOKEN" \
+	--header "Content-Type:application/xml" \
+	--data-binary @/teamcitycancelparams.xml \
+	--request POST \
+	-o result.json \
+	"https://ci-oss.hashicorp.engineering/app/rest/builds/multiple/branch:name:(\$base64:$BRANCHNAME),buildType:(id:GoogleCloudBeta_ProviderGoogleCloudBetaMmUpstreamVcr),property:(name:env.VCR_MODE,value:REPLAYING),defaultFilter:false"
 
 ERRS=$(cat result.json | jq .errorCount -r)
 if [ "$ERRS" -gt "0" ]; then
