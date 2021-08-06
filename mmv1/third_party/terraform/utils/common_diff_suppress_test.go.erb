@@ -171,3 +171,115 @@ func TestPortRangeDiffSuppress(t *testing.T) {
 		}
 	}
 }
+
+func TestLocationDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"locations to zones": {
+			Old:                "projects/x/locations/y/resource/z",
+			New:                "projects/x/zones/y/resource/z",
+			ExpectDiffSuppress: true,
+		},
+		"regions to locations": {
+			Old:                "projects/x/regions/y/resource/z",
+			New:                "projects/x/locations/y/resource/z",
+			ExpectDiffSuppress: true,
+		},
+		"locations to locations": {
+			Old:                "projects/x/locations/y/resource/z",
+			New:                "projects/x/locations/y/resource/z",
+			ExpectDiffSuppress: false,
+		},
+		"zones to regions": {
+			Old:                "projects/x/zones/y/resource/z",
+			New:                "projects/x/regions/y/resource/z",
+			ExpectDiffSuppress: false,
+		},
+		"different locations": {
+			Old:                "projects/x/locations/a/resource/z",
+			New:                "projects/x/locations/b/resource/z",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if locationDiffSuppress("policy_uri", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
+
+func TestAbsoluteDomainSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"new trailing dot": {
+			Old:                "sslcert.tf-test.club",
+			New:                "sslcert.tf-test.club.",
+			ExpectDiffSuppress: true,
+		},
+		"old trailing dot": {
+			Old:                "sslcert.tf-test.club.",
+			New:                "sslcert.tf-test.club",
+			ExpectDiffSuppress: true,
+		},
+		"same trailing dot": {
+			Old:                "sslcert.tf-test.club.",
+			New:                "sslcert.tf-test.club.",
+			ExpectDiffSuppress: false,
+		},
+		"different trailing dot": {
+			Old:                "sslcert.tf-test.club.",
+			New:                "sslcert.tf-test.clubs.",
+			ExpectDiffSuppress: false,
+		},
+		"different no trailing dot": {
+			Old:                "sslcert.tf-test.club",
+			New:                "sslcert.tf-test.clubs",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if absoluteDomainSuppress("managed.0.domains.", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
+
+func TestDurationDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"different values": {
+			Old:                "60s",
+			New:                "65s",
+			ExpectDiffSuppress: false,
+		},
+		"same values": {
+			Old:                "60s",
+			New:                "60s",
+			ExpectDiffSuppress: true,
+		},
+		"different values, different formats": {
+			Old:                "65s",
+			New:                "60.0s",
+			ExpectDiffSuppress: false,
+		},
+		"same values, different formats": {
+			Old:                "60.0s",
+			New:                "60s",
+			ExpectDiffSuppress: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		if durationDiffSuppress("duration", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
