@@ -51,7 +51,7 @@ func (TestWaiter) TargetStates() []string {
 	return []string{"DONE"}
 }
 
-func TestOperationWait_TimeoutsShouldRetry(t *testing.T) {
+func TestOperationWait_TimeoutsShouldRetryNew(t *testing.T) {
 	testWaiter := TestWaiter{
 		runCount: 0,
 	}

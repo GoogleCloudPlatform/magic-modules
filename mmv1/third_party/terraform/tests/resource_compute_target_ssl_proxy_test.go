@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccComputeTargetSslProxy_update(t *testing.T) {
+func TestAccComputeTargetSslProxy_updateNew(t *testing.T) {
 	target := fmt.Sprintf("tssl-test-%s", randString(t, 10))
 	sslPolicy := fmt.Sprintf("tssl-test-%s", randString(t, 10))
 	cert1 := fmt.Sprintf("tssl-test-%s", randString(t, 10))
