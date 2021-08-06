@@ -41,3 +41,133 @@ func TestOptionalPrefixSuppress(t *testing.T) {
 		}
 	}
 }
+
+func TestIgnoreMissingKeyInMap(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		Key                string
+		ExpectDiffSuppress bool
+	}{
+		"missing key in map": {
+			Old:                "",
+			New:                "v1",
+			Key:                "x-goog-version",
+			ExpectDiffSuppress: true,
+		},
+		"different values": {
+			Old:                "v1",
+			New:                "v2",
+			Key:                "x-goog-version",
+			ExpectDiffSuppress: false,
+		},
+		"same values": {
+			Old:                "v1",
+			New:                "v1",
+			Key:                "x-goog-version",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if ignoreMissingKeyInMap(tc.Key)("push_config.0.attributes."+tc.Key, tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
+
+func TestOptionalSurroundingSpacesSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"surrounding spaces": {
+			Old:                "value",
+			New:                " value ",
+			ExpectDiffSuppress: true,
+		},
+		"no surrounding spaces": {
+			Old:                "value",
+			New:                "value",
+			ExpectDiffSuppress: true,
+		},
+		"one space each": {
+			Old:                " value",
+			New:                "value ",
+			ExpectDiffSuppress: true,
+		},
+		"different values": {
+			Old:                " different",
+			New:                "values ",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if optionalSurroundingSpacesSuppress("filter", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
+
+func TestCaseDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"differents cases": {
+			Old:                "Value",
+			New:                "value",
+			ExpectDiffSuppress: true,
+		},
+		"different values": {
+			Old:                "value",
+			New:                "NewValue",
+			ExpectDiffSuppress: false,
+		},
+		"same cases": {
+			Old:                "value",
+			New:                "value",
+			ExpectDiffSuppress: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		if caseDiffSuppress("key", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
+
+func TestPortRangeDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"different single values": {
+			Old:                "80-80",
+			New:                "443",
+			ExpectDiffSuppress: false,
+		},
+		"different ranges": {
+			Old:                "80-80",
+			New:                "443-444",
+			ExpectDiffSuppress: false,
+		},
+		"same single values": {
+			Old:                "80-80",
+			New:                "80",
+			ExpectDiffSuppress: true,
+		},
+		"same ranges": {
+			Old:                "80-80",
+			New:                "80-80",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if portRangeDiffSuppress("ports", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
