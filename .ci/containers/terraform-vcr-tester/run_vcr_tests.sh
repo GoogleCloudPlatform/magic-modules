@@ -27,6 +27,17 @@ else
     echo "Running tests: Go files changed"
 fi
 
+function add_comment {
+	local context="beta-provider-vcr-test"
+	local post_body='{body: "Error trying to cancel build (${1})"}'
+	echo "Error trying to cancel build (${1})"
+	curl \
+	  -X POST \
+	  -u "$github_username:$GITHUB_TOKEN" \
+	  -H "Accept: application/vnd.github.v3+json" \
+	  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${pr_number}/comments" \
+	  -d "$post_body"
+}
 
 $BRANCHNAME=$(echo -n "/auto-pr-${pr_number}"| base64)
 curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" https://ci-oss.hashicorp.engineering/app/rest/builds/multiple/branch:name:\(\$base64:$BRANCHNAME\),buildType:id:GoogleCloudBeta_ProviderGoogleCloudBetaMmUpstreamVcr,property:\(name:env.VCR_MODE,value:REPLAYING\),defaultFilter=false --request POST --header "Content-Type:application/xml" --data-binary @/teamcitycancelparams.xml -o result.json
@@ -36,7 +47,7 @@ if [ "$ERRS" -gt "0" ]; then
 	for row in $(cat result.json | jq -r '.operationResult[] | @base64'); do
 	    build_url=$(${row} | base64 --decode | jq -r '.related.build.webUrl')
 	done
-	update_status "${build_url}" "error"
+	add_comment "${build_url}"
 	exit 0
 fi
 
