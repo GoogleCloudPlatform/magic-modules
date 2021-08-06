@@ -28,15 +28,9 @@ else
 fi
 
 function add_comment {
-	local context="beta-provider-vcr-test"
-	local post_body='{body: "Error trying to cancel build (${1})"}'
-	echo "Error trying to cancel build (${1})"
-	curl \
-	  -X POST \
-	  -u "$github_username:$GITHUB_TOKEN" \
-	  -H "Accept: application/vnd.github.v3+json" \
-	  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${pr_number}/comments" \
-	  -d "$post_body"
+      curl -H "Authorization: token ${GITHUB_TOKEN}" \
+        -d "$(jq -r --arg comment "${1}" -n "{body: \$comment}")" \
+        "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${pr_number}/comments"
 }
 
 $BRANCHNAME=$(echo -n "/auto-pr-${pr_number}"| base64)
@@ -47,7 +41,7 @@ if [ "$ERRS" -gt "0" ]; then
 	for row in $(cat result.json | jq -r '.operationResult[] | @base64'); do
 	    build_url=$(${row} | base64 --decode | jq -r '.related.build.webUrl')
 	done
-	add_comment "${build_url}"
+	add_comment "Error trying to cancel build (${build_url})"
 	exit 0
 fi
 
@@ -120,11 +114,7 @@ curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCI
 build_url=$(cat record.json | jq -r .webUrl)
 comment="I have triggered VCR tests in RECORDING mode for the following tests that failed during VCR: $FAILED_TESTS You can view the result here: $build_url"
 
-curl -H "Authorization: token ${GITHUB_TOKEN}" \
-      -d "$(jq -r --arg comment "$comment" -n "{body: \$comment}")" \
-      "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${pr_number}/comments"
-
-
+add_comment "${comment}"
 update_status "${build_url}" "pending"
 
 # Reset for checking failed tests
@@ -174,9 +164,7 @@ set -e
 
 comment="Tests failed during RECORDING mode: $FAILED_TESTS Please fix these to complete your PR"
 
-curl -H "Authorization: token ${GITHUB_TOKEN}" \
-      -d "$(jq -r --arg comment "$comment" -n "{body: \$comment}")" \
-      "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${pr_number}/comments"
+add_comment "${comment}"
 update_status "${build_url}" "failure"
 
 # exit 0 because this script didn't have an error; the failure
