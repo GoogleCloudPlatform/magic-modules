@@ -94,9 +94,29 @@ if [ "$STATUS" == "SUCCESS" ]; then
 	exit 0
 fi
 
-curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" http://ci-oss.hashicorp.engineering/app/rest/testOccurrences?locator=build:$ID,status:FAILURE --output failed.json -L
+curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" http://ci-oss.hashicorp.engineering/app/rest/testOccurrences?locator=build:$ID --output tests.json -L
 set +e
-FAILED_TESTS=$(cat failed.json | jq -r '.testOccurrence | map(.name) | join("|")')
+
+# This is an intentionally dumb list; if something is removed and re-added with
+# the same name, we'll still catch it. If that ends up causing noise, we can do
+# something more clever.
+NEW_TESTS=$(git diff --unified=0 | { grep -oP '(?<=^\+func )Test\w+(?=\(t \*testing.T\) {)' || test $? = 1; } | tr '\n' ' ')
+ALL_TESTS=$(cat tests.json | jq -r '.testOccurrence | map(.name) | .[]')
+MISSING_TESTS=""
+for new_test in $NEW_TESTS; do
+	if ! echo "${ALL_TESTS}" | grep -P "^${new_test}$"; then
+		MISSING_TESTS+="- ${new_test}"
+		MISSING_TESTS+=$'\n'
+	fi
+done
+
+if [[ -n $MISSING_TESTS ]]; then
+	comment=$'Tests were added that did not run in TeamCity:\n\n'
+	comment+=${MISSING_TESTS}
+	add_comment "${comment}" "${pr_number}"
+fi
+
+FAILED_TESTS=$(cat tests.json | jq -r '.testOccurrence | select(.status == "FAILURE") | map(.name) | join("|")')
 ret=$?
 if [ $ret -ne 0 ]; then
 	echo "Job failed without failing tests"
@@ -118,7 +138,7 @@ update_status "${build_url}" "pending"
 
 # Reset for checking failed tests
 rm poll.json
-rm failed.json
+rm tests.json
 
 ID=$(cat record.json | jq .id -r)
 curl --header "Authorization: Bearer $TEAMCITY_TOKEN" --header "Accept: application/json" https://ci-oss.hashicorp.engineering/app/rest/builds/id:$ID --output poll.json
