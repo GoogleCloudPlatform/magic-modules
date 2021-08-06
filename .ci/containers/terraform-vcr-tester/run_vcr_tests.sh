@@ -39,10 +39,9 @@ curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCI
 ERRS=$(cat result.json | jq .errorCount -r)
 if [ "$ERRS" -gt "0" ]; then
 	for row in $(cat result.json | jq -r '.operationResult[] | @base64'); do
-	    build_url=$(${row} | base64 --decode | jq -r '.related.build.webUrl')
+	    build_url=$(${row} | base64 --decode | jq -r '.related.build | select(.state == "running") | .webUrl')
+	    add_comment "Error trying to cancel build (${build_url})" ${pr_number}
 	done
-	add_comment "Error trying to cancel build (${build_url})" ${pr_number}
-	exit 0
 fi
 
 sed -i 's/{{PR_NUMBER}}/'"$pr_number"'/g' /teamcityparams.xml
