@@ -27,6 +27,30 @@ else
     echo "Running tests: Go files changed"
 fi
 
+function add_comment {
+      curl -H "Authorization: token ${GITHUB_TOKEN}" \
+        -d "$(jq -r --arg comment "${1}" -n "{body: \$comment}")" \
+        "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${2}/comments"
+}
+
+BRANCHNAME=$(echo -n "/auto-pr-${pr_number}"| base64)
+curl \
+	--header "Accept: application/json" \
+	--header "Authorization: Bearer $TEAMCITY_TOKEN" \
+	--header "Content-Type:application/xml" \
+	--data-binary @/teamcitycancelparams.xml \
+	--request POST \
+	-o result.json \
+	"https://ci-oss.hashicorp.engineering/app/rest/builds/multiple/branch:name:(\$base64:$BRANCHNAME),buildType:(id:GoogleCloudBeta_ProviderGoogleCloudBetaMmUpstreamVcr),property:(name:env.VCR_MODE,value:REPLAYING),defaultFilter:false"
+
+ERRS=$(cat result.json | jq .errorCount -r)
+if [ "$ERRS" -gt "0" ]; then
+	for row in $(cat result.json | jq -r '.operationResult[] | @base64'); do
+	    build_url=$(${row} | base64 --decode | jq -r '.related.build | select(.state == "running") | .webUrl')
+	    add_comment "Error trying to cancel build (${build_url})" ${pr_number}
+	done
+fi
+
 sed -i 's/{{PR_NUMBER}}/'"$pr_number"'/g' /teamcityparams.xml
 curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" https://ci-oss.hashicorp.engineering/app/rest/buildQueue --request POST --header "Content-Type:application/xml" --data-binary @/teamcityparams.xml -o build.json
 
@@ -77,9 +101,29 @@ if [ "$STATUS" == "SUCCESS" ]; then
 	exit 0
 fi
 
-curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" http://ci-oss.hashicorp.engineering/app/rest/testOccurrences?locator=build:$ID,status:FAILURE --output failed.json -L
+curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" http://ci-oss.hashicorp.engineering/app/rest/testOccurrences?locator=build:$ID --output tests.json -L
 set +e
-FAILED_TESTS=$(cat failed.json | jq -r '.testOccurrence | map(.name) | join("|")')
+
+# This is an intentionally dumb list; if something is removed and re-added with
+# the same name, we'll still catch it. If that ends up causing noise, we can do
+# something more clever.
+NEW_TESTS=$(git diff --unified=0 | { grep -oP '(?<=^\+func )Test\w+(?=\(t \*testing.T\) {)' || test $? = 1; } | tr '\n' ' ')
+ALL_TESTS=$(cat tests.json | jq -r '.testOccurrence | map(.name) | .[]')
+MISSING_TESTS=""
+for new_test in $NEW_TESTS; do
+	if ! echo "${ALL_TESTS}" | grep -P "^${new_test}$"; then
+		MISSING_TESTS+="- ${new_test}"
+		MISSING_TESTS+=$'\n'
+	fi
+done
+
+if [[ -n $MISSING_TESTS ]]; then
+	comment=$'Tests were added that did not run in TeamCity:\n\n'
+	comment+=${MISSING_TESTS}
+	add_comment "${comment}" "${pr_number}"
+fi
+
+FAILED_TESTS=$(cat tests.json | jq -r '.testOccurrence | select(.status == "FAILURE") | map(.name) | join("|")')
 ret=$?
 if [ $ret -ne 0 ]; then
 	echo "Job failed without failing tests"
@@ -96,16 +140,12 @@ curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCI
 build_url=$(cat record.json | jq -r .webUrl)
 comment="I have triggered VCR tests in RECORDING mode for the following tests that failed during VCR: $FAILED_TESTS You can view the result here: $build_url"
 
-curl -H "Authorization: token ${GITHUB_TOKEN}" \
-      -d "$(jq -r --arg comment "$comment" -n "{body: \$comment}")" \
-      "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${pr_number}/comments"
-
-
+add_comment "${comment}" ${pr_number}
 update_status "${build_url}" "pending"
 
 # Reset for checking failed tests
 rm poll.json
-rm failed.json
+rm tests.json
 
 ID=$(cat record.json | jq .id -r)
 curl --header "Authorization: Bearer $TEAMCITY_TOKEN" --header "Accept: application/json" https://ci-oss.hashicorp.engineering/app/rest/builds/id:$ID --output poll.json
@@ -150,9 +190,7 @@ set -e
 
 comment="Tests failed during RECORDING mode: $FAILED_TESTS Please fix these to complete your PR"
 
-curl -H "Authorization: token ${GITHUB_TOKEN}" \
-      -d "$(jq -r --arg comment "$comment" -n "{body: \$comment}")" \
-      "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${pr_number}/comments"
+add_comment "${comment}" ${pr_number}
 update_status "${build_url}" "failure"
 
 # exit 0 because this script didn't have an error; the failure
