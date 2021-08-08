@@ -2654,6 +2654,7 @@ objects:
           - :TCP
           - :UDP
           - :GRPC
+          - :UNSPECIFIED
       - !ruby/object:Api::Type::Enum
         name: 'sessionAffinity'
         description: |
@@ -3697,6 +3698,7 @@ objects:
           - :AH
           - :SCTP
           - :ICMP
+          - :L3_DEFAULT
       # This is a multi-resource resource reference (BackendService (global), RegionBackendService)
       # We have custom expands that manage this.
       - !ruby/object:Api::Type::ResourceRef
