@@ -29,9 +29,7 @@ resource "google_notebooks_instance" "<%= ctx[:primary_resource_id] %>" {
     terraform = "true"
   }
 
-  nic_type {
-    type = "VIRTIO_NET"
-  }
+  nic_type = "VIRTIO_NET"
 
   reservation_affinity {
     type = "NO_RESERVATION"
