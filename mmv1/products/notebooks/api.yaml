@@ -305,7 +305,6 @@ objects:
             description: |
               The type of Compute Reservation.
             values:
-              - TYPE_UNSPECIFIED
               - NO_RESERVATION
               - ANY_RESERVATION
               - SPECIFIC_RESERVATION               
