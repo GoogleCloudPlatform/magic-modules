@@ -281,19 +281,14 @@ objects:
               Defines whether the instance has the vTPM enabled.
               Enabled by default.
             default_value: true
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Enum
         name: 'nicType'
         description: |
           The type of vNIC driver.
-        properties:
-          - !ruby/object:Api::Type::Enum
-            name: 'type'
-            description: |
-              The type of vNIC to be used on this interface. This may be gVNIC or VirtioNet.
-            values:
-              - UNSPECIFIED_NIC_TYPE
-              - VIRTIO_NET
-              - GVNIC          
+        values:
+          - UNSPECIFIED_NIC_TYPE
+          - VIRTIO_NET
+          - GVNIC         
       - !ruby/object:Api::Type::NestedObject
         name: 'reservationAffinity'
         description: |
