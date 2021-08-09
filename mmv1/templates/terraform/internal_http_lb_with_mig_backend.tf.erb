@@ -1,35 +1,36 @@
 # Internal HTTP load balancer with a managed instance group backend
 
+# [START cloudloadbalancing_int_http_gce]
 # VPC
-resource "google_compute_network" "default" {
-  name                    = "<%= ctx[:vars]['ilb_network'] %>"
+resource "google_compute_network" "ilb_network" {
+  name                    = "<%= ctx[:vars]['ilb_network_name'] %>"
   provider                = google-beta
   auto_create_subnetworks = false
 }
 
 # proxy-only subnet
-resource "google_compute_subnetwork" "proxy" {
-  name          = "<%= ctx[:vars]['lb'] %>"
+resource "google_compute_subnetwork" "proxy_subnet" {
+  name          = "<%= ctx[:vars]['proxy_subnet_name'] %>"
   provider      = google-beta
   ip_cidr_range = "10.0.0.0/24"
   region        = "europe-west1"
   purpose       = "INTERNAL_HTTPS_LOAD_BALANCER"
   role          = "ACTIVE"
-  network       = google_compute_network.default.id
+  network       = google_compute_network.ilb_network.id
 }
 
 # backed subnet
-resource "google_compute_subnetwork" "default" {
-  name          = "<%= ctx[:vars]['backend'] %>"
+resource "google_compute_subnetwork" "ilb_subnet" {
+  name          = "<%= ctx[:vars]['backend_subnet_name'] %>"
   provider      = google-beta
   ip_cidr_range = "10.0.1.0/24"
   region        = "europe-west1"
-  network       = google_compute_network.default.id
+  network       = google_compute_network.ilb_network.id
 }
 
 # forwarding rule
 resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
-  name                  = "<%= ctx[:vars]['forwarding_rule'] %>"
+  name                  = "<%= ctx[:vars]['forwarding_rule_name'] %>"
   provider              = google-beta
   region                = "europe-west1"
   depends_on            = [google_compute_subnetwork.proxy]
@@ -37,14 +38,14 @@ resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   load_balancing_scheme = "INTERNAL_MANAGED"
   port_range            = "80"
   target                = google_compute_region_target_http_proxy.default.id
-  network               = google_compute_network.default.id
+  network               = google_compute_network.ilb_network.id
   subnetwork            = google_compute_subnetwork.default.id
   network_tier          = "PREMIUM"
 }
 
 # http proxy
 resource "google_compute_region_target_http_proxy" "default" {
-  name     = "<%= ctx[:vars]['proxy'] %>"
+  name     = "<%= ctx[:vars]['target_http_proxy_name'] %>"
   provider = google-beta
   region   = "europe-west1"
   url_map  = google_compute_region_url_map.default.id
@@ -52,7 +53,7 @@ resource "google_compute_region_target_http_proxy" "default" {
 
 # url map
 resource "google_compute_region_url_map" "default" {
-  name            = "<%= ctx[:vars]['map'] %>"
+  name            = "<%= ctx[:vars]['regional_url_map_name'] %>"
   provider        = google-beta
   region          = "europe-west1"
   default_service = google_compute_region_backend_service.default.id
@@ -60,7 +61,7 @@ resource "google_compute_region_url_map" "default" {
 
 # backend service
 resource "google_compute_region_backend_service" "default" {
-  name                  = "<%= ctx[:vars]['backend'] %>"
+  name                  = "<%= ctx[:vars]['backend_service_name'] %>"
   provider              = google-beta
   region                = "europe-west1"
   protocol              = "HTTP"
@@ -76,13 +77,13 @@ resource "google_compute_region_backend_service" "default" {
 
 # instance template
 resource "google_compute_instance_template" "instance_template" {
-  name         = "<%= ctx[:vars]['mig_template'] %>"
+  name         = "<%= ctx[:vars]['mig_template_name'] %>"
   provider     = google-beta
   machine_type = "e2-small"
   tags         = ["http-server"]
 
   network_interface {
-    network    = google_compute_network.default.id
+    network    = google_compute_network.ilb_network.id
     subnetwork = google_compute_subnetwork.default.id
     access_config {
       # add external ip to fetch packages
@@ -124,7 +125,7 @@ resource "google_compute_instance_template" "instance_template" {
 
 # health check
 resource "google_compute_region_health_check" "default" {
-  name     = "<%= ctx[:vars]['hc'] %>"
+  name     = "<%= ctx[:vars]['hc_name'] %>"
   provider = google-beta
   region   = "europe-west1"
   http_health_check {
@@ -134,7 +135,7 @@ resource "google_compute_region_health_check" "default" {
 
 # MIG
 resource "google_compute_region_instance_group_manager" "mig" {
-  name     = "<%= ctx[:vars]['mig'] %>"
+  name     = "<%= ctx[:vars]['mig_name'] %>"
   provider = google-beta
   region   = "europe-west1"
   version {
@@ -147,10 +148,10 @@ resource "google_compute_region_instance_group_manager" "mig" {
 
 # allow all access from IAP and health check ranges
 resource "google_compute_firewall" "fw-iap" {
-  name          = "<%= ctx[:vars]['allow_iap_hc'] %>"
+  name          = "<%= ctx[:vars]['fw-allow_iap_hc_name'] %>"
   provider      = google-beta
   direction     = "INGRESS"
-  network       = google_compute_network.default.id
+  network       = google_compute_network.ilb_network.id
   source_ranges = ["130.211.0.0/22", "35.191.0.0/16", "35.235.240.0/20"]
   allow {
     protocol = "tcp"
@@ -159,10 +160,10 @@ resource "google_compute_firewall" "fw-iap" {
 
 # allow http from proxy subnet to backends
 resource "google_compute_firewall" "fw-ilb-to-backends" {
-  name          = "<%= ctx[:vars]['allow_ilb_to_backends'] %>"
+  name          = "<%= ctx[:vars]['fw_allow_ilb_to_backends_name'] %>"
   provider      = google-beta
   direction     = "INGRESS"
-  network       = google_compute_network.default.id
+  network       = google_compute_network.ilb_network.id
   source_ranges = "10.0.0.0/24"
   target_tags   = ["http-server"]
   allow {
@@ -173,12 +174,12 @@ resource "google_compute_firewall" "fw-ilb-to-backends" {
 
 # test instance
 resource "google_compute_instance" "vm-test" {
-  name         = "<%= ctx[:vars]['vm_test'] %>"
+  name         = "<%= ctx[:vars]['vm_test_name'] %>"
   provider     = google-beta
   zone         = "europe-west1-b"
   machine_type = "e2-small"
   network_interface {
-    network    = google_compute_network.default.id
+    network    = google_compute_network.ilb_network.id
     subnetwork = google_compute_subnetwork.default.id
   }
   boot_disk {
@@ -187,3 +188,4 @@ resource "google_compute_instance" "vm-test" {
     }
   }
 }
+# [END cloudloadbalancing_int_http_gce]
