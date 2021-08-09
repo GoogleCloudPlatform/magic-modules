@@ -281,8 +281,8 @@ objects:
               Defines whether the instance has the vTPM enabled.
               Enabled by default.
             default_value: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'NicType'
+      - !ruby/object:Api::Type::String
+        name: 'nicType'
         description: |
           The type of vNIC driver.
         properties:
