@@ -842,16 +842,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           backend_service_name: "backend"
           igm_name: "igm-internal"
       - !ruby/object:Provider::Terraform::Examples
-        name: "private_service_connect_google_apis"
+        name: "global_forwarding_rule_private_services_connect"
         min_version: beta
         primary_resource_id: "default"
         vars:
-          network_name: "my-network"
-          subnetwork_name: "my-subnetwork"
           global_address_name: "global-psconnect-ip"
           forwarding_rule_name: "globalrule"
-        test_env_vars:
-          project: :PROJECT_NAME
     properties:
       creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
