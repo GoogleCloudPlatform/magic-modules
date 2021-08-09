@@ -295,7 +295,7 @@ objects:
               - VIRTIO_NET
               - GVNIC          
       - !ruby/object:Api::Type::NestedObject
-        name: 'ReservationAffinity'
+        name: 'reservationAffinity'
         description: |
           Reservation Affinity for consuming Zonal reservation.
         properties:
