@@ -301,6 +301,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::Enum
             name: 'type'
+            required: true
             description: |
               The type of Compute Reservation.
             values:
