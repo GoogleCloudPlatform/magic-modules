@@ -10,15 +10,12 @@ type headerTransportLayer struct {
 	baseTransit http.RoundTripper
 }
 
-func newTransportWithHeaders(baseTransit http.RoundTripper, configRequestReason string) headerTransportLayer {
+func newTransportWithHeaders(baseTransit http.RoundTripper) headerTransportLayer {
 	if baseTransit == nil {
 		baseTransit = http.DefaultTransport
 	}
 
 	headers := make(http.Header)
-	if configRequestReason != "" {
-		headers.Set("X-Goog-Request-Reason", configRequestReason)
-	}
 
 	return headerTransportLayer{Header: headers, baseTransit: baseTransit}
 }
