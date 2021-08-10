@@ -101,38 +101,56 @@ if [ "$STATUS" == "SUCCESS" ]; then
 	exit 0
 fi
 
-curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" http://ci-oss.hashicorp.engineering/app/rest/testOccurrences?locator=build:$ID --output tests.json -L
-set +e
-
 # This is an intentionally dumb list; if something is removed and re-added with
 # the same name, we'll still catch it. If that ends up causing noise, we can do
 # something more clever.
-NEW_TESTS=$(git diff --unified=0 | { grep -oP '(?<=^\+func )Test\w+(?=\(t \*testing.T\) {)' || test $? = 1; } | tr '\n' ' ')
-ALL_TESTS=$(cat tests.json | jq -r '.testOccurrence | map(.name) | .[]')
+NEW_TESTS=$(git diff --unified=0 HEAD~1 | { grep -oP '(?<=^\+func )TestAcc\w+(?=\(t \*testing.T\) {)' || test $? = 1; } | tr '\n' ' ')
+RUN_TESTS=""
+FAILED_TESTS=""
+NEWLINE=$'\n'
+set +e
+TEST_RESULTS_URL="http://ci-oss.hashicorp.engineering/app/rest/testOccurrences?locator=build:${ID}"
+while [ -n "${TEST_RESULTS_URL}" ]; do
+	echo $TEST_RESULTS_URL
+	curl \
+		--header "Accept: application/json" \
+		--header "Authorization: Bearer $TEAMCITY_TOKEN" \
+		--output tests.json \
+		-L \
+		"${TEST_RESULTS_URL}"
+
+	# Alert on tests that failed without running anything
+	if [[ $(cat tests.json | jq -r '.count') == "0" ]]; then
+		echo "Job failed without failing tests"
+		update_status "${build_url}" "failure"
+		# exit 0 because this script didn't have an error; the failure
+		# is reported via the Github Status API
+		exit 0
+	fi
+
+	RUN_TESTS+=$(cat tests.json | jq -r '.testOccurrence | map(select(.status != "UNKNOWN"))| map(.name) | .[]')
+	FAILED_TESTS+=$(cat tests.json | jq -r '.testOccurrence | map(select(.status == "FAILURE")) | map(.name) | join("|")')
+	next_href=$(cat tests.json | jq -r '.nextHref')
+	if [[ $next_href == "null" ]]; then
+		break
+	else
+		TEST_RESULTS_URL="http://ci-oss.hashicorp.engineering$next_href"
+	fi
+done
+
 MISSING_TESTS=""
 for new_test in $NEW_TESTS; do
-	if ! echo "${ALL_TESTS}" | grep -P "^${new_test}$"; then
-		MISSING_TESTS+="- ${new_test}"
-		MISSING_TESTS+=$'\n'
+	if ! echo "${RUN_TESTS}" | grep -qP "^${new_test}$"; then
+		MISSING_TESTS+="- ${new_test}${NEWLINE}"
 	fi
 done
 
 if [[ -n $MISSING_TESTS ]]; then
-	comment=$'Tests were added that did not run in TeamCity:\n\n'
+	comment="Tests were added that did not run in TeamCity:${NEWLINE}${NEWLINE}"
 	comment+=${MISSING_TESTS}
 	add_comment "${comment}" "${pr_number}"
 fi
 
-FAILED_TESTS=$(cat tests.json | jq -r '.testOccurrence | map(select(.status == "FAILURE")) | map(.name) | join("|")')
-ret=$?
-if [ $ret -ne 0 ]; then
-	echo "Job failed without failing tests"
-	cat tests.json
-	update_status "${build_url}" "failure"
-	# exit 0 because this script didn't have an error; the failure
-	# is reported via the Github Status API
-	exit 0
-fi
 set -e
 
 sed -i 's/{{PR_NUMBER}}/'"$pr_number"'/g' /teamcityparamsrecording.xml
