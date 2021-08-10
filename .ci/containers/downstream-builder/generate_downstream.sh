@@ -29,14 +29,6 @@ function clone_repo() {
         UPSTREAM_OWNER=terraform-google-modules
         GH_REPO=terraform-docs-samples
         LOCAL_PATH=$GOPATH/src/github.com/terraform-google-modules/terraform-docs-samples
-    elif [ "$REPO" == "ansible" ]; then
-        UPSTREAM_OWNER=ansible-collections
-        GH_REPO=google.cloud
-        LOCAL_PATH=$PWD/../ansible
-    elif [ "$REPO" == "inspec" ]; then
-        UPSTREAM_OWNER=modular-magician
-        GH_REPO=inspec-gcp
-        LOCAL_PATH=$PWD/../inspec
     else
         echo "Unrecognized repo $REPO"
         exit 1
@@ -49,7 +41,7 @@ function clone_repo() {
 }
 
 if [ $# -lt 4 ]; then
-    echo "Usage: $0 (build|diff|downstream) (terraform|tf-conversion|ansible|inspec) (ga|beta) (pr number|sha)"
+    echo "Usage: $0 (build|diff|downstream) (terraform|tf-conversion) (ga|beta) (pr number|sha)"
     exit 1
 fi
 if [ -z "$GITHUB_TOKEN" ]; then
