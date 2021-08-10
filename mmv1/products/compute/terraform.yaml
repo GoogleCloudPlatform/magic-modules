@@ -718,8 +718,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           mig_template_name: "l7-ilb-mig-template"
           hc_name: "l7-ilb-hc"
           mig_name: "l7-ilb-mig1"
-          fw-allow_iap_hc_name: "l7-ilb-fw-allow_iap_hc"
-          fw_allow_ilb_to_backends_name: "l7-ilb-fw_allow_ilb_to_backends"
+          fw-allow_iap_hc_name: "l7-ilb-fw-allow-iap-hc"
+          fw_allow_ilb_to_backends_name: "l7-ilb-fw-allow-ilb-to-backends"
           vm_test_name: "l7-ilb-test-vm"
         min_version: beta
       - !ruby/object:Provider::Terraform::Examples
