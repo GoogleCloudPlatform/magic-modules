@@ -1,4 +1,4 @@
-func firestoreIFieldsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+func firestoreIFieldsDiffSuppressFunc(k, old, new string, d TerraformResourceDataChange) bool {
 	kLength := "fields.#"
 	oldLength, newLength := d.GetChange(kLength)
 	oldInt, ok := oldLength.(int)
@@ -9,10 +9,8 @@ func firestoreIFieldsDiffSuppress(k, old, new string, d *schema.ResourceData) bo
 	if !ok {
 		return false
 	}
+
 	if oldInt == newInt+1 {
-		if k == kLength {
-			return true
-		}
 		kold := fmt.Sprintf("fields.%v.field_path", oldInt-1)
 		knew := fmt.Sprintf("fields.%v.field_path", newInt-1)
 
@@ -20,10 +18,14 @@ func firestoreIFieldsDiffSuppress(k, old, new string, d *schema.ResourceData) bo
 		_, newLastIndexName := d.GetChange(knew)
 		if oldLastIndexName == "__name__" && newLastIndexName != "__name__" {
 			oldBase := fmt.Sprintf("fields.%v", oldInt-1)
-			if strings.HasPrefix(k, oldBase) {
+			if strings.HasPrefix(k, oldBase) || k == kLength {
 				return true
 			}
 		}
 	}
 	return false
+}
+
+func firestoreIFieldsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	return firestoreIFieldsDiffSuppressFunc(k, old, new, d)
 }
