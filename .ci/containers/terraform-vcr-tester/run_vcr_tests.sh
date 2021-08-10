@@ -123,7 +123,7 @@ if [[ -n $MISSING_TESTS ]]; then
 	add_comment "${comment}" "${pr_number}"
 fi
 
-FAILED_TESTS=$(cat tests.json | jq -r '.testOccurrence | select(.status == "FAILURE") | map(.name) | join("|")')
+FAILED_TESTS=$(cat tests.json | jq -r '.testOccurrence | map(select(.status == "FAILURE")) | map(.name) | join("|")')
 ret=$?
 if [ $ret -ne 0 ]; then
 	echo "Job failed without failing tests"
