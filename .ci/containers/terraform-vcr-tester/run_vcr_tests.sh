@@ -127,6 +127,7 @@ FAILED_TESTS=$(cat tests.json | jq -r '.testOccurrence | select(.status == "FAIL
 ret=$?
 if [ $ret -ne 0 ]; then
 	echo "Job failed without failing tests"
+	cat tests.json
 	update_status "${build_url}" "failure"
 	# exit 0 because this script didn't have an error; the failure
 	# is reported via the Github Status API
