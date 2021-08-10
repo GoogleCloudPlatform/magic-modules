@@ -164,7 +164,7 @@ resource "google_compute_firewall" "fw-ilb-to-backends" {
   provider      = google-beta
   direction     = "INGRESS"
   network       = google_compute_network.ilb_network.id
-  source_ranges = "10.0.0.0/24"
+  source_ranges = ["10.0.0.0/24"]
   target_tags   = ["http-server"]
   allow {
     protocol = "tcp"
