@@ -1,56 +1,28 @@
 package google
 
 import (
-	"testing"
+	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func TestAccDataSourceSecretManagerSecret_basic(t *testing.T) {
-	t.Parallel()
+func dataSourceSecretManagerSecret() *schema.Resource {
 
-	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+	dsSchema := datasourceSchemaFromResourceSchema(resourceSecretManagerSecret().Schema)
+	addRequiredFieldsToSchema(dsSchema, "secret_id")
+	addOptionalFieldsToSchema(dsSchema, "project")
+
+	return &schema.Resource{
+		Read:   dataSourceSecretManagerSecretRead,
+		Schema: dsSchema,
 	}
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataSourceSecretManagerSecret_basic(context),
-				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_secret_manager_secret.foo", "google_secret_manager_secret.bar"),
-				),
-			},
-		},
-	})
 }
 
-func testAccDataSourceSecretManagerSecret_basic(context map[string]interface{}) string {
-	return Nprintf(`
-resource "google_secret_manager_secret" "foo" {
-  secret_id = "tf-test-secret-%{random_suffix}"
-  
-  labels = {
-    label = "my-label"
-  }
-
-  replication {
-    user_managed {
-      replicas {
-        location = "us-central1"
-      }
-      replicas {
-        location = "us-east1"
-      }
-    }
-  }
-}
-
-data "google_secret_manager_secret" "bar" {
-    secret_id = google_secret_manager_secret.foo.secret_id
-}
-`, context)
+func dataSourceSecretManagerSecretRead(d *schema.ResourceData, meta interface{}) error {
+	id, err := replaceVars(d, meta.(*Config), "projects/{{project}}/secrets/{{secret_id}}")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+	return resourceSecretManagerSecretRead(d, meta)
 }
