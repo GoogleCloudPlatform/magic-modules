@@ -24,8 +24,8 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 			State: resourceRegionInstanceGroupManagerStateImporter,
 		},
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(5 * time.Minute),
-			Update: schema.DefaultTimeout(5 * time.Minute),
+			Create: schema.DefaultTimeout(15 * time.Minute),
+			Update: schema.DefaultTimeout(15 * time.Minute),
 			Delete: schema.DefaultTimeout(15 * time.Minute),
 		},
 
@@ -444,6 +444,14 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 	if err != nil {
 		return err
 	}
+
+	if d.Get("wait_for_instances").(bool) {
+		err := computeIGMWaitForInstanceStatus(d, meta)
+		if err != nil {
+			return err
+		}
+	}
+
 	return resourceComputeRegionInstanceGroupManagerRead(d, config)
 }
 
@@ -583,20 +591,6 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 		}
 	}
 
-	if d.Get("wait_for_instances").(bool) {
-		waitForUpdates := d.Get("wait_for_instances_status").(string) == "UPDATED"
-		conf := resource.StateChangeConf{
-			Pending: []string{"creating", "error", "updating per instance configs", "reaching version target"},
-			Target:  []string{"created"},
-			Refresh: waitForInstancesRefreshFunc(getRegionalManager, waitForUpdates, d, meta),
-			Timeout: d.Timeout(schema.TimeoutCreate),
-		}
-		_, err := conf.WaitForState()
-		if err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
@@ -695,6 +689,13 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		}
 
 		err = computeOperationWaitTime(config, op, project, "Resizing RegionInstanceGroupManager", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return err
+		}
+	}
+
+	if d.Get("wait_for_instances").(bool) {
+		err := computeIGMWaitForInstanceStatus(d, meta)
 		if err != nil {
 			return err
 		}
