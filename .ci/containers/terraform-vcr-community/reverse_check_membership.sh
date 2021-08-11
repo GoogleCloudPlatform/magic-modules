@@ -31,4 +31,4 @@ else
 fi
 
 # Pass args through to runner
-sh /run_vcr_tests.sh $pr_number $mm_commit_sha
+bash /run_vcr_tests.sh $pr_number $mm_commit_sha

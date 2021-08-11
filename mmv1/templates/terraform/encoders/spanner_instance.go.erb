@@ -1,3 +1,7 @@
+// Temp Logic to accommodate processing_units and num_nodes
+if obj["processingUnits"] == nil && obj["nodeCount"] == nil {
+	obj["nodeCount"] = 1
+}
 newObj := make(map[string]interface{})
 newObj["instance"] = obj
 if obj["name"] == nil {
