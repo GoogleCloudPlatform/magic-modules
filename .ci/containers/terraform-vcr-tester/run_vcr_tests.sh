@@ -21,35 +21,69 @@ echo "Checking for modified go files"
 # (ignoring "no matches found" errors from grep)
 gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
 if [[ -z $gofiles ]]; then
-    echo "Skipping tests: No go files changed"
-    exit 0
+  echo "Skipping tests: No go files changed"
+  exit 0
 else
-    echo "Running tests: Go files changed"
+  echo "Running tests: Go files changed"
 fi
 
 function add_comment {
-      curl -H "Authorization: token ${GITHUB_TOKEN}" \
-        -d "$(jq -r --arg comment "${1}" -n "{body: \$comment}")" \
-        "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${2}/comments"
+  curl -H "Authorization: token ${GITHUB_TOKEN}" \
+    -d "$(jq -r --arg comment "${1}" -n "{body: \$comment}")" \
+    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${2}/comments"
 }
 
-BRANCHNAME=$(echo -n "/auto-pr-${pr_number}"| base64)
+
+# The following section is to cancel jobs that may be running for the given PR, before starting to run new tests
+function cancel_queued {
+  # Cancel tests that are queued up to run in TeamCity
+  curl \
+    --header "Accept: application/json" \
+    --header "Authorization: Bearer $TEAMCITY_TOKEN" \
+    --header "Content-Type:application/xml" \
+    --data-binary @teamcitycancelparams.xml \
+    --request POST \
+    -o canceled-queue.json \
+    "https://ci-oss.hashicorp.engineering/app/rest/buildQueue/id:${1}"
+}
+
+function cancel_running {
+  # Cancel tests that are currently running in TeamCity
+  curl \
+    --header "Accept: application/json" \
+    --header "Authorization: Bearer $TEAMCITY_TOKEN" \
+    --header "Content-Type:application/xml" \
+    --data-binary @teamcitycancelparams.xml \
+    --request POST \
+    -o canceled-running.json \
+    "https://ci-oss.hashicorp.engineering/app/rest/builds/multiple/branch:name:(\$base64:${1}),buildType:(id:GoogleCloudBeta_ProviderGoogleCloudBetaMmUpstreamVcr),property:(name:env.VCR_MODE,value:REPLAYING),running:true,defaultFilter:false"
+}
+
+# We need to get the ids of the tests that are queued up to run before we can cancel them
 curl \
   --header "Accept: application/json" \
   --header "Authorization: Bearer $TEAMCITY_TOKEN" \
-  --header "Content-Type:application/xml" \
-  --data-binary @/teamcitycancelparams.xml \
-  --request POST \
-  -o result.json \
-  "https://ci-oss.hashicorp.engineering/app/rest/builds/multiple/branch:name:(\$base64:$BRANCHNAME),buildType:(id:GoogleCloudBeta_ProviderGoogleCloudBetaMmUpstreamVcr),property:(name:env.VCR_MODE,value:REPLAYING),defaultFilter:false"
+  --header "Content-Type:application/json" \
+  -o existing-queue.json \
+  "https://ci-oss.hashicorp.engineering/app/rest/buildQueue?locator=buildType:(id:GoogleCloudBeta_ProviderGoogleCloudBetaMmUpstreamVcr)&fields=build(id,comment)"
 
-ERRS=$(cat result.json | jq .errorCount -r)
-if [ "$ERRS" -gt "0" ]; then
-  for row in $(cat result.json | jq -r '.operationResult[] | @base64'); do
-      build_url=$(${row} | base64 --decode | jq -r '.related.build | select(.state == "running") | .webUrl')
-      add_comment "Error trying to cancel build (${build_url})" ${pr_number}
+queued_ids=$(cat existing-queue.json | jq -r '.build[] | select(.comment.text | endswith("${pr_number}")) | .id')
+for id in $queued_ids; do
+  cancel_queued ${id}
+done
+
+# We can just cancel running jobs by a filter
+branchname=$(echo -n "/auto-pr-${pr_number}"| base64)
+cancel_running ${branchname}
+canceled_errs=$(cat canceled-running.json | jq .errorCount -r)
+if [ "${canceled_errs}" -gt "0" ]; then
+  for row in $(cat canceled-running.json | jq -r '.operationResult[] | @base64'); do
+    build_url=$(${row} | base64 --decode | jq -r '.related.build | select(.state == "running") | .webUrl')
+    add_comment "Error trying to cancel build (${build_url})" ${pr_number}
   done
 fi
+
+# Old jobs should have been canceled, create the new jobs
 
 sed -i 's/{{PR_NUMBER}}/'"$pr_number"'/g' /teamcityparams.xml
 curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" https://ci-oss.hashicorp.engineering/app/rest/buildQueue --request POST --header "Content-Type:application/xml" --data-binary @/teamcityparams.xml -o build.json
@@ -94,6 +128,11 @@ while [[ "$STATE" != "finished" ]]; do
   echo "Trying again, State: $STATE Status: $STATUS"
   counter=$((counter + 1))
 done
+
+if [ "$STATUS" == "UNKNOWN" ]; then
+    echo "Run canceled."
+    exit 0
+fi
 
 if [ "$STATUS" == "SUCCESS" ]; then
   echo "Tests succeeded."
