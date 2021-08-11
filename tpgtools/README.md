@@ -7,7 +7,7 @@ Terraform resource schemas.
 
 ## Usage
 
-`tpgtools` expects to run targetting a "root service directory", a dir-of-dirs
+`tpgtools` expects to run targeting a "root service directory", a dir-of-dirs
 where the child dirs contain OpenApi specs for resources such as the `api/` path
 above. Additionally, overrides are expected in a similar structure (as seen in
 the `overrides/` path. For example:

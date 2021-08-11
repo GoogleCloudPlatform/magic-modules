@@ -13379,6 +13379,14 @@ objects:
           PARTNER InterconnectAttachment is created, updated,
           or deleted.
         output: true
+      - !ruby/object:Api::Type::Boolean
+         name: 'enable'
+         description: |
+           The status of the BGP peer connection. If set to false, any active session
+           with the peer is terminated and all associated routing information is removed.
+           If set to true, the peer connection can be established with routing information.
+           The default is true.
+         default_value: true
   - !ruby/object:Api::Resource
     name: 'SecurityPolicy'
     kind: 'compute#securityPolicy'
