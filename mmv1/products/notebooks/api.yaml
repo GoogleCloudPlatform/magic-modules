@@ -288,14 +288,15 @@ objects:
         values:
           - UNSPECIFIED_NIC_TYPE
           - VIRTIO_NET
-          - GVNIC         
+          - GVNIC
+        min_version: beta
       - !ruby/object:Api::Type::NestedObject
         name: 'reservationAffinity'
         description: |
           Reservation Affinity for consuming Zonal reservation.
         properties:
           - !ruby/object:Api::Type::Enum
-            name: 'type'
+            name: 'consume_reservation_type'
             required: true
             description: |
               The type of Compute Reservation.
@@ -312,6 +313,7 @@ objects:
             description: |
               Corresponds to the label values of reservation resource.
             item_type: Api::Type::String
+        min_version: beta
       - !ruby/object:Api::Type::String
         name: 'state'
         description: |
