@@ -60,6 +60,11 @@ func newKmsKeyRingIamAsset(
 }
 
 func FetchKmsKeyRingIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+	// Check if the identity field returns a value
+	if _, ok := d.GetOk("{{key_ring_id}}"); !ok {
+		return Asset{}, ErrEmptyIdentityField
+	}
+
 	// We use key_ring_id in the asset name template to be consistent with newKmsKeyRingIamAsset.
 	return fetchIamPolicy(
 		NewKmsKeyRingIamUpdater,
