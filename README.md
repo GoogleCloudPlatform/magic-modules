@@ -4,17 +4,13 @@
 
 ## Overview
 
-Magic Modules is a tool used to autogenerate support in a variety of open source DevOps
-tools for Google Cloud Platform. [GCP "resource"](https://cloud.google.com/docs/overview/#gcp_resources)
+Magic Modules is a tool used to autogenerate `terraform-provider-google-beta` and 
+`terraform-provider-google-beta`. [GCP "resource"](https://cloud.google.com/docs/overview/#gcp_resources)
 definitions are encoded in a shared data file, and that data is used to fill in
 tool-specific templates across each of the tools Magic Modules
 generates.
 
-Magic Modules generates GCP support for:
-
-* Terraform
-* Ansible
-* InSpec
+Magic Modules previously generated `Ansible` and `Inspec`. This functionality has been deprecated and existing generated libraries are provided 'as-is'.
 
 In addition, Magic Modules generates support for several companion
 features/tools:
@@ -157,7 +153,7 @@ While most small changes won't require fiddling with overrides, each tool has
 often minor differences- the naming of a field, or whether it's required or not.
 
 You can find them under the folder for a product, with the name `{{tool}}.yaml`.
-For example, Ansible's overrides for Cloud SQL are present at `products/sql/ansible.yaml`
+For example, Terraform's overrides for Cloud SQL are present at `products/sql/terraform.yaml`
 
 You can find a full reference for each tool under `overrides/{{tool}}/resource_override.rb`
 and `overrides/{{tool}}/property_override.rb`, as well as some other tool-specific
@@ -193,19 +189,9 @@ tool;
 
 Tool             | Testing Guide
 -----------------|--------------
-ansible          | [instructions](https://docs.ansible.com/ansible/devel/dev_guide/testing.html)
-inspec           | [testing inspec-gcp](https://github.com/inspec/inspec-gcp/#test-inspec-gcp-resources)
 terraform        | [`google` provider testing guide](https://github.com/hashicorp/terraform-provider-google/blob/master/.github/CONTRIBUTING.md#tests)
 terraform (beta) | [`google-beta` provider testing guide](https://github.com/hashicorp/terraform-provider-google-beta/blob/master/.github/CONTRIBUTING.md#tests)
 
-Don't worry about testing every tool, only the primary tool you're making
-changes against. The Magic Modules maintainers will ensure your changes work
-against each tool.
-
-If your changes have unintended consequences in another tool, a reviewer will
-instruct you to mark the field excluded or provide specific feedback on what
-changes to make to the tool-specific overrides in order for them to work
-correctly.
 
 ### Submitting a PR
 
@@ -227,15 +213,6 @@ Once your PR is submitted, one of the Magic Modules maintainers will review it.
 They'll look over the code before running the "Magician", the Magic Modules CI
 system that generates PRs against each tool. Each review pass, your reviewer
 will run the Magician again to update the PRs against the tools.
-
-If there are multiple tools affected, that first reviewer will be the "primary"
-reviewer, and for each other affected tool a maintainer for that specific tool
-will make a pass. The primary reviewer will make it clear which other
-maintainers need to review, and prompt them to review your code; you will
-communicate primarily with the first reviewer.
-
-Even when multiple tools are affected, this will generally be a quick look by
-that maintainer with no changes needing to be made.
 
 Once you've gotten approvals from the primary reviewer and the reviewers for
 any affected tools, the primary reviewer will merge your changes.
