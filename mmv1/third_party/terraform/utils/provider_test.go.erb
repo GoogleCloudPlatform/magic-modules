@@ -965,7 +965,6 @@ func isUpstreamDiffEnabled() bool {
 func initializeUpstreamDiffTest(c resource.TestCase) resource.TestCase {
 	var upstreamProvider string
 	packagePath := fmt.Sprint(reflect.TypeOf(Config{}).PkgPath())
-	log.Println(packagePath)
 	if strings.Contains(packagePath, "google-beta") {
 		upstreamProvider = "google-beta"
 	} else {
@@ -992,7 +991,7 @@ func initializeUpstreamDiffTest(c resource.TestCase) resource.TestCase {
 			ogConfig := teststep.Config
 			teststep.Config = reformConfigWithProvider(ogConfig, localProviderName)
 			replacementSteps = append(replacementSteps, teststep)
-			if teststep.ExpectError == nil {
+			if teststep.ExpectError == nil && teststep.PlanOnly == false {
 				newStep := resource.TestStep{
 					Config:   reformConfigWithProvider(ogConfig, upstreamProvider),
 					PlanOnly: true,
