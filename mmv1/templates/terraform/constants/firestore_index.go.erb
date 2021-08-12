@@ -1,3 +1,8 @@
+/*
+ * FirestoreIndex api apends __name__ as an item to the
+ * end of the fields list if not present. We are suppressing
+ * this server generated field.
+ */
 func firestoreIFieldsDiffSuppressFunc(k, old, new string, d TerraformResourceDataChange) bool {
 	kLength := "fields.#"
 	oldLength, newLength := d.GetChange(kLength)

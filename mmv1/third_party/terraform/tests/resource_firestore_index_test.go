@@ -6,19 +6,19 @@ import (
 )
 
 func TestUnitFirestoreIndex_firestoreIFieldsDiffSuppress(t *testing.T) {
-	for _, tc := range firestoreIndexDiffSupressTestCases {
+	for _, tc := range firestoreIndexDiffSuppressTestCases {
 		tc.Test(t)
 	}
 }
 
-type FirestoreIndexDiffSupressTestCase struct {
+type FirestoreIndexDiffSuppressTestCase struct {
 	Name           string
 	KeysToSuppress []string
 	Before         map[string]interface{}
 	After          map[string]interface{}
 }
 
-var firestoreIndexDiffSupressTestCases = []FirestoreIndexDiffSupressTestCase{
+var firestoreIndexDiffSuppressTestCases = []FirestoreIndexDiffSupressTestCase{
 	{
 		Name:           "working_as_intended",
 		KeysToSuppress: []string{"fields.#", "fields.2.field_path", "fields.2.banana"},
@@ -89,7 +89,7 @@ var firestoreIndexDiffSupressTestCases = []FirestoreIndexDiffSupressTestCase{
 	},
 }
 
-func (tc *FirestoreIndexDiffSupressTestCase) Test(t *testing.T) {
+func (tc *FirestoreIndexDiffSuppressTestCase) Test(t *testing.T) {
 	mockResourceDiff := &ResourceDiffMock{
 		Before: tc.Before,
 		After:  tc.After,
