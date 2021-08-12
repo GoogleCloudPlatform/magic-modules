@@ -132,7 +132,7 @@ while [ -n "${TEST_RESULTS_URL}" ]; do
   NEW_FAILED_TESTS=$(cat tests.json | jq -r '.testOccurrence | map(select(.status == "FAILURE")) | map(.name) | join("|")')
   if [ -n "$NEW_RUN_TESTS" ] && [ -n "$RUN_TESTS" ]
   then
-    RUN_TESTS+=$'\n'
+    RUN_TESTS+="${NEWLINE}"
   fi
   if [ -n "$NEW_FAILED_TESTS" ] && [ -n "$FAILED_TESTS" ]
   then
