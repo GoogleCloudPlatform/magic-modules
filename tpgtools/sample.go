@@ -247,7 +247,7 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 		newSample.PrimaryResource = &primaryResource
 		if !newSample.isNativeHCL() {
 			var newDeps []Dependency
-			copy(newDeps, newSample.DependencyList)
+			newDeps = append(newDeps, newSample.DependencyList...)
 			newDeps[0] = newSample.generateSampleDependencyWithName(*newSample.PrimaryResource, "primary")
 			newSample.DependencyList = newDeps
 		}
