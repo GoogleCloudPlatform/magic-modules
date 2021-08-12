@@ -246,7 +246,10 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 		primaryResource := update["resource"]
 		newSample.PrimaryResource = &primaryResource
 		if !newSample.isNativeHCL() {
-			newSample.DependencyList[0] = newSample.generateSampleDependencyWithName(*newSample.PrimaryResource, "primary")
+			var newDeps []Dependency
+			copy(newDeps, newSample.DependencyList)
+			newDeps[0] = newSample.generateSampleDependencyWithName(*newSample.PrimaryResource, "primary")
+			newSample.DependencyList = newDeps
 		}
 		newSample.TestSlug = fmt.Sprintf("%sUpdate%v", newSample.TestSlug, i)
 		newSample.Updates = nil
