@@ -724,6 +724,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           forwarding_rule_name: "website-forwarding-rule"
           target_pool_name: "website-target-pool"
       - !ruby/object:Provider::Terraform::Examples
+        name: "forwarding_rule_l3_default"
+        primary_resource_id: "fwd_rule"
+        vars:
+          forwarding_rule_name: "l3-forwarding-rule"
+          service_name: "service"
+          health_check_name: "health-check"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
         name: "forwarding_rule_internallb"
         primary_resource_id: "default"
         vars:
