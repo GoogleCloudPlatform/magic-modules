@@ -243,7 +243,8 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 	out := []Sample{*s}
 	for i, update := range s.Updates {
 		newSample := *s
-		*newSample.PrimaryResource = update["resource"]
+		primaryResource := update["resource"]
+		newSample.PrimaryResource = &primaryResource
 		if !newSample.isNativeHCL() {
 			newSample.DependencyList[0] = newSample.generateSampleDependencyWithName(*newSample.PrimaryResource, "primary")
 		}
