@@ -15,11 +15,6 @@ ignore_read:
   - "kms_settings"
   - "resource_settings"
   - "provisioned_resources_parent"
-extra_dependencies:
-  - "time"
-  - "log"
-  - "strconv"
-  - "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 doc_hide:
   - basic.tf.tmpl # basic_update.tf.tmpl auto hides
   - full.tf.tmpl
