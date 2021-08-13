@@ -41,7 +41,7 @@ function cancel_queued {
     --header "Accept: application/json" \
     --header "Authorization: Bearer $TEAMCITY_TOKEN" \
     --header "Content-Type:application/xml" \
-    --data-binary @teamcitycancelparams.xml \
+    --data-binary @/teamcitycancelparams.xml \
     --request POST \
     -o canceled-queue.json \
     "https://ci-oss.hashicorp.engineering/app/rest/buildQueue/id:${1}"
@@ -53,7 +53,7 @@ function cancel_running {
     --header "Accept: application/json" \
     --header "Authorization: Bearer $TEAMCITY_TOKEN" \
     --header "Content-Type:application/xml" \
-    --data-binary @teamcitycancelparams.xml \
+    --data-binary @/teamcitycancelparams.xml \
     --request POST \
     -o canceled-running.json \
     "https://ci-oss.hashicorp.engineering/app/rest/builds/multiple/branch:name:(\$base64:${1}),buildType:(id:GoogleCloudBeta_ProviderGoogleCloudBetaMmUpstreamVcr),property:(name:env.VCR_MODE,value:REPLAYING),running:true,defaultFilter:false"
