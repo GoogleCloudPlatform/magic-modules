@@ -18,7 +18,7 @@ type FirestoreIndexDiffSuppressTestCase struct {
 	After          map[string]interface{}
 }
 
-var firestoreIndexDiffSuppressTestCases = []FirestoreIndexDiffSupressTestCase{
+var firestoreIndexDiffSuppressTestCases = []FirestoreIndexDiffSuppressTestCase{
 	{
 		Name:           "working_as_intended",
 		KeysToSuppress: []string{"fields.#", "fields.2.field_path", "fields.2.banana"},
