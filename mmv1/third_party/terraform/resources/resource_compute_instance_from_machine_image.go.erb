@@ -2,6 +2,8 @@
 package google
 <% unless version == 'ga' -%>
 
+package google
+
 import (
 	"fmt"
 	"log"
@@ -69,28 +71,8 @@ func computeInstanceFromMachineImageSchema() map[string]*schema.Schema {
 		Description: `Name or self link of a machine image to create the instance from on.`,
 	}
 
-	// Modifying the schema to disable disk overrides, due to an API bug (b/170964971)
-	// TODO: (camthornton) Remove this when disk override functionality in the API is restored
-	for _, field := range []string{"boot_disk", "attached_disk", "scratch_disk"} {
-		s[field].Required = false
-		s[field].Optional = false
-		s[field].Computed = true
-		s[field].MaxItems = 0
-	}
-	bootDiskSchema := s["boot_disk"].Elem.(*schema.Resource).Schema
-	for _, field := range bootDiskSchema {
-		field.AtLeastOneOf = []string{}
-		field.ConflictsWith = []string{}
-	}
-	initializeParamsSchema := bootDiskSchema["initialize_params"].Elem.(*schema.Resource).Schema
-	for _, field := range initializeParamsSchema {
-		field.AtLeastOneOf = []string{}
-	}
-	// End disk schema modifications
-
 	return s
 }
-
 
 func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
@@ -120,26 +102,16 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 		return err
 	}
 
-	tpl, err := ParseMachineImageFieldValue(d.Get("source_machine_image").(string), d, config)
-	if err != nil {
-		return err
+	instance.SourceMachineImage = d.Get("source_machine_image").(string)
+
+	// email is required when the image is from a different project
+	accounts := make([]*computeBeta.ServiceAccount, 1)
+	accounts[0] = &computeBeta.ServiceAccount{
+		Email:  "default",
+		Scopes: nil,
 	}
 
-	mi, err := config.NewComputeBetaClient(userAgent).MachineImages.Get(project, tpl.Name).Do()
-	if err != nil {
-		return err
-	}
-
-	instance.Disks, err = adjustInstanceFromMachineImageDisks(d, config, mi, zone, project)
-	if err != nil {
-		return err
-	}
-
-	// when we make the original call to expandComputeInstance expandScheduling is called, which sets default values.
-	// However, we want the values to be read from the machine image instead.
-	if _, hasSchedule := d.GetOk("scheduling"); !hasSchedule {
-		instance.Scheduling = mi.SourceInstanceProperties.Scheduling
-	}
+	instance.ServiceAccounts = accounts
 
 	// Force send all top-level fields that have been set in case they're overridden to zero values.
 	// Initialize ForceSendFields to empty so we don't get things that the instance resource
@@ -162,7 +134,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	}
 
 	log.Printf("[INFO] Requesting instance creation")
-	op, err := config.NewComputeBetaClient(userAgent).Instances.Insert(project, zone.Name, instance).SourceMachineImage(tpl.RelativeLink()).Do()
+	op, err := config.NewComputeBetaClient(userAgent).Instances.Insert(project, zone.Name, instance).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating instance: %s", err)
 	}
@@ -172,7 +144,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 
 	// Wait for the operation to complete
 	waitErr := computeOperationWaitTime(config, op, project,
-		"instance to create",userAgent, d.Timeout(schema.TimeoutCreate))
+		"instance to create", userAgent, d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		// The resource didn't actually create
 		d.SetId("")
@@ -257,6 +229,7 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *Config,
 
 	return disks, nil
 }
+
 
 <% else %>
 // Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
