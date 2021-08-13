@@ -281,8 +281,8 @@ func vcrTest(t *testing.T, c resource.TestCase) {
 		providers := getTestAccProviders(t.Name())
 		c.Providers = providers
 		defer closeRecorder(t)
-	} else if isUpstreamDiffEnabled() {
-		c = initializeUpstreamDiffTest(c)
+	} else if isDownstreamDiffEnabled() {
+		c = initializeDownstreamDiffTest(c)
 	}
 	resource.Test(t, c)
 }
@@ -957,25 +957,25 @@ func sleepInSecondsForTest(t int) resource.TestCheckFunc {
 	}
 }
 
-func isUpstreamDiffEnabled() bool {
-	upstreamDiff := os.Getenv("UPSTREAM_DIFF")
-	return upstreamDiff != ""
+func isDownstreamDiffEnabled() bool {
+	downstreamDiff := os.Getenv("DOWNSTREAM_DIFF")
+	return downstreamDiff != ""
 }
 
-func initializeUpstreamDiffTest(c resource.TestCase) resource.TestCase {
-	var upstreamProvider string
+func initializeDownstreamDiffTest(c resource.TestCase) resource.TestCase {
+	var downstreamProvider string
 	packagePath := fmt.Sprint(reflect.TypeOf(Config{}).PkgPath())
 	if strings.Contains(packagePath, "google-beta") {
-		upstreamProvider = "google-beta"
+		downstreamProvider = "google-beta"
 	} else {
-		upstreamProvider = "google"
+		downstreamProvider = "google"
 	}
 
 	if c.ExternalProviders != nil {
-		c.ExternalProviders[upstreamProvider] = resource.ExternalProvider{}
+		c.ExternalProviders[downstreamProvider] = resource.ExternalProvider{}
 	} else {
 		c.ExternalProviders = map[string]resource.ExternalProvider{
-			upstreamProvider: {},
+			downstreamProvider: {},
 		}
 	}
 
@@ -993,7 +993,7 @@ func initializeUpstreamDiffTest(c resource.TestCase) resource.TestCase {
 			replacementSteps = append(replacementSteps, teststep)
 			if teststep.ExpectError == nil && teststep.PlanOnly == false {
 				newStep := resource.TestStep{
-					Config:   reformConfigWithProvider(ogConfig, upstreamProvider),
+					Config:   reformConfigWithProvider(ogConfig, downstreamProvider),
 					PlanOnly: true,
 				}
 				replacementSteps = append(replacementSteps, newStep)
