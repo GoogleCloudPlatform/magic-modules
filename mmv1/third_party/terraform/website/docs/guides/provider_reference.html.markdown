@@ -463,7 +463,7 @@ gcloud with Terraform, it is recommended to set this property to true.
 `user_project_override` uses the `X-Goog-User-Project`
 [system parameter](https://cloud.google.com/apis/docs/system-parameters). When
 set to true, the caller must have `serviceusage.services.use` permission on the
-resource project.
+quota project.
 
 ---
 
