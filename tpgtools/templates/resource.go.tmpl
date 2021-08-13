@@ -392,11 +392,8 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	if err != nil {
 		return err
 	}
-{{- if $.HasProject }}
-	billingProject := project
-{{- else }}
+
 	billingProject := ""
-{{- end}}
 	// err == nil indicates that the billing_project value was found
 	if bp, err := getBillingProject(d, config); err == nil {
 		billingProject = bp
