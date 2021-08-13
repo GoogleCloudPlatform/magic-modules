@@ -250,18 +250,19 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 	out := []Sample{*s}
 	for i, update := range s.Updates {
 		newSample := *s
-		*newSample.PrimaryResource = update["resource"]
+		primaryResource := update["resource"]
+		newSample.PrimaryResource = &primaryResource
 		if !newSample.isNativeHCL() {
-			newSample.DependencyList = make([]Dependency, 0)
-			newSample.DependencyList = append(newSample.DependencyList, newSample.generateSampleDependencyWithName(*newSample.PrimaryResource, "primary"))
+			var newDeps []Dependency
+			newDeps = append(newDeps, newSample.DependencyList...)
+			newDeps[0] = newSample.generateSampleDependencyWithName(*newSample.PrimaryResource, "primary")
+
 			// add the old primary resource to the list
 			oldPrimaryResource := newSample.generateSampleDependency(*s.PrimaryResource)
 			oldPrimaryResource.skipHCL = true
-			newSample.DependencyList = append(newSample.DependencyList, oldPrimaryResource)
-			// add the other dependencies
-			for i := 1; i < len(s.DependencyList); i++ {
-				newSample.DependencyList = append(newSample.DependencyList, s.DependencyList[0])
-			}
+			newDeps = append(newDeps, oldPrimaryResource)
+
+			newSample.DependencyList = newDeps
 		}
 		newSample.TestSlug = fmt.Sprintf("%sUpdate%v", newSample.TestSlug, i)
 		newSample.Updates = nil
