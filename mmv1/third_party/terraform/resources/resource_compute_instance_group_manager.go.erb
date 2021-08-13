@@ -633,6 +633,13 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 		return fmt.Errorf("Error setting status in state: %s", err.Error())
 	}
 
+	// If unset in state set to default value
+	if d.Get("wait_for_instances_status").(string) == "" {
+		if err := d.Set("wait_for_instances_status", "STABLE"); err != nil {
+			return fmt.Errorf("Error setting wait_for_instances_status in state: %s", err.Error())
+		}
+	}
+
 	return nil
 }
 
@@ -822,13 +829,6 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 		log.Printf("[INFO] timeout occurred, but instance group is shrinking (%d < %d)", instanceGroupSize, currentSize)
 		currentSize = instanceGroupSize
 		err = computeOperationWaitTime(config, op, project, "Deleting InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutDelete))
-	}
-
-	// If unset in state set to default value
-	if d.Get("wait_for_instances_status").(string) == "" {
-		if err := d.Set("wait_for_instances_status", "STABLE"); err != nil {
-			return fmt.Errorf("Error setting wait_for_instances_status in state: %s", err.Error())
-		}
 	}
 
 	d.SetId("")
