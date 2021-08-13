@@ -1,0 +1,20 @@
+# meta.yaml
+#
+#
+substitutions:
+  - substitution: "project"
+    value: ":PROJECT"
+  - substitution: "region"
+    value: ":REGION"
+  - substitution: "name"
+    value: "trigger"
+  - substitution: "topic"
+    value: "topic"
+  - substitution: "event_arc_service"
+    value: "service-eventarc"
+  - substitution: "service_account"
+    value: "sa"
+doc_hide:
+  - basic.tf.tmpl
+test_hide:
+  - basic_trigger.yaml

@@ -20,7 +20,7 @@ resource "google_data_loss_prevention_deidentify_template" "<%= ctx[:primary_res
 					name = "PHONE_NUMBER"
 				}
 				info_types {
-					name = "CREDIT_CARD_NUMBER"
+					name = "AGE"
 				}
 
 				primitive_transformation {
@@ -69,6 +69,28 @@ resource "google_data_loss_prevention_deidentify_template" "<%= ctx[:primary_res
 					}
 				}
 			}
+
+      transformations {
+        info_types {
+          name = "CREDIT_CARD_NUMBER"
+        }
+
+        primitive_transformation {
+          crypto_deterministic_config {
+            context {
+              name = "sometweak"
+            }
+            crypto_key {
+              transient {
+                name = "beep"
+              }
+            }
+            surrogate_info_type {
+              name = "abc"
+            }
+          }
+        }
+      }
 		}
 	}
 }

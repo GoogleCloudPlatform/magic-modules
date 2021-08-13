@@ -59,3 +59,4 @@
 <% end -%>
 <% end -%>
 'version': 'third_party/terraform/version'
+'go.sum': 'third_party/terraform/go.sum'

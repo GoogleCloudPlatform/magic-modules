@@ -7,7 +7,7 @@ ifeq ($(ENGINE),tpgtools)
   # we specify the product to one that doesn't
   # exist so exclusively build base tpgtools implementation
   mmv1_compile=-p does-not-exist
-else ifne ($(PRODUCT),)
+else ifneq ($(PRODUCT),)
   mmv1_compile=-p products/$(PRODUCT)
 else
   mmv1_compile=-a
@@ -46,4 +46,10 @@ validator:
 		bundle; \
 		bundle exec compiler -e terraform -f validator -o $(OUTPUT_PATH) $(mmv1_compile);
 
+serialize:
+	cd tpgtools;\
+		go run . --path "api" --overrides "overrides" --mode "serialization" > temp.serial;\
+		mv -f temp.serial serialization.go;\
+
 .PHONY: mmv1 tpgtools
+

@@ -920,12 +920,9 @@ objects:
                 either maxRate or maxRatePerEndpoint must be set.
             - !ruby/object:Api::Type::Double
               name: 'maxUtilization'
-              send_empty_value: true
-              default_value: 0.8
               description: |
                 Used when balancingMode is UTILIZATION. This ratio defines the
-                CPU utilization target for the group. The default is 0.8. Valid
-                range is [0.0, 1.0].
+                CPU utilization target for the group. Valid range is [0.0, 1.0].
       - !ruby/object:Api::Type::NestedObject
         name: 'circuitBreakers'
         description: |
@@ -11062,7 +11059,7 @@ objects:
                     item_type: Api::Type::String
                     description: |
                       The list of path patterns to match. Each must start with / and the only place a
-                      * is allowed is at the end following a /. The string fed to the path matcher
+                      \* is allowed is at the end following a /. The string fed to the path matcher
                       does not include any text after the first ? or #, and those chars are not
                       allowed here.
                   - !ruby/object:Api::Type::NestedObject
@@ -13382,6 +13379,14 @@ objects:
           PARTNER InterconnectAttachment is created, updated,
           or deleted.
         output: true
+      - !ruby/object:Api::Type::Boolean
+         name: 'enable'
+         description: |
+           The status of the BGP peer connection. If set to false, any active session
+           with the peer is terminated and all associated routing information is removed.
+           If set to true, the peer connection can be established with routing information.
+           The default is true.
+         default_value: true
   - !ruby/object:Api::Resource
     name: 'SecurityPolicy'
     kind: 'compute#securityPolicy'
@@ -15988,7 +15993,7 @@ objects:
                     item_type: Api::Type::String
                     description: |
                       The list of path patterns to match. Each must start with / and the only place a
-                      * is allowed is at the end following a /. The string fed to the path matcher
+                      \* is allowed is at the end following a /. The string fed to the path matcher
                       does not include any text after the first ? or #, and those chars are not
                       allowed here.
                   - !ruby/object:Api::Type::NestedObject
