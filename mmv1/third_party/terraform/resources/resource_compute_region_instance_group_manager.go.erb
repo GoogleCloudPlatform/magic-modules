@@ -702,14 +702,14 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		}
 	}
 
+	d.Partial(false)
+
 	if d.Get("wait_for_instances").(bool) {
 		err := computeIGMWaitForInstanceStatus(d, meta)
 		if err != nil {
 			return err
 		}
 	}
-
-	d.Partial(false)
 
 	return resourceComputeRegionInstanceGroupManagerRead(d, meta)
 }
