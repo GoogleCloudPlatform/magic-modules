@@ -1672,6 +1672,34 @@ objects:
         name: 'securityPolicy'
         description: |
           The security policy associated with this backend service.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'securitySettings'
+        min_version: beta
+        description: |
+          The security settings that apply to this backend service. This field is applicable to either
+          a regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2, and
+          load_balancing_scheme set to INTERNAL_MANAGED; or a global backend service with the
+          load_balancing_scheme set to INTERNAL_SELF_MANAGED.
+        properties:
+          - !ruby/object:Api::Type::ResourceRef
+            name: 'clientTlsPolicy'
+            resource: 'Region' # TODO: 'Region' is incorrect and should be 'ClientTlsPolicy'
+            imports: 'name'
+            min_version: beta
+            description: |
+              ClientTlsPolicy is a resource that specifies how a client should authenticate
+              connections to backends of a service. This resource itself does not affect
+              configuration unless it is attached to a backend service resource.
+            required: true
+          - !ruby/object:Api::Type::Array
+            name: 'subjectAltNames'
+            min_version: beta
+            description: |
+              A list of alternate names to verify the subject identity in the certificate.
+              If specified, the client will verify that the server certificate's subject
+              alt name matches one of the specified values.
+            required: true
+            item_type: Api::Type::String
       - !ruby/object:Api::Type::Enum
         name: 'sessionAffinity'
         description: |
@@ -2654,6 +2682,7 @@ objects:
           - :TCP
           - :UDP
           - :GRPC
+          - :UNSPECIFIED
       - !ruby/object:Api::Type::Enum
         name: 'sessionAffinity'
         description: |
@@ -3697,6 +3726,7 @@ objects:
           - :AH
           - :SCTP
           - :ICMP
+          - :L3_DEFAULT
       # This is a multi-resource resource reference (BackendService (global), RegionBackendService)
       # We have custom expands that manage this.
       - !ruby/object:Api::Type::ResourceRef
@@ -3770,15 +3800,18 @@ objects:
         name: 'ports'
         max_size: 5
         description: |
-          This field is used along with the backend_service field for internal
-          load balancing.
+          This field is used along with internal load balancing and network
+          load balancer when the forwarding rule references a backend service
+          and when protocol is not L3_DEFAULT.
 
-          When the load balancing scheme is INTERNAL, a single port or a comma
-          separated list of ports can be configured. Only packets addressed to
-          these ports will be forwarded to the backends configured with this
-          forwarding rule.
+          A single port or a comma separated list of ports can be configured.
+          Only packets addressed to these ports will be forwarded to the backends
+          configured with this forwarding rule.
 
-          You may specify a maximum of up to 5 ports.
+          You can only use one of ports and portRange, or allPorts.
+          The three are mutually exclusive.
+
+          You may specify a maximum of up to 5 ports, which can be non-contiguous.
         item_type: Api::Type::String
       - !ruby/object:Api::Type::ResourceRef
         name: 'subnetwork'
@@ -3832,11 +3865,13 @@ objects:
       - !ruby/object:Api::Type::Boolean
         name: 'allPorts'
         description: |
-          For internal TCP/UDP load balancing (i.e. load balancing scheme is
-          INTERNAL and protocol is TCP/UDP), set this to true to allow packets
-          addressed to any ports to be forwarded to the backends configured
-          with this forwarding rule. Used with backend service. Cannot be set
-          if port or portRange are set.
+          This field can be used with internal load balancer or network load balancer
+          when the forwarding rule references a backend service, or with the target
+          field when it references a TargetInstance. Set this to true to
+          allow packets addressed to any ports to be forwarded to the backends configured
+          with this forwarding rule. This can be used when the protocol is TCP/UDP, and it
+          must be set to true when the protocol is set to L3_DEFAULT.
+          Cannot be set if port or portRange are set.
       - !ruby/object:Api::Type::Enum
         name: 'networkTier'
         description: |

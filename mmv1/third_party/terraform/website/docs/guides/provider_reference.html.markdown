@@ -75,8 +75,7 @@ credential/authentication file. Ensure that the scope of the VM/Cluster is set t
 
 ### Running Terraform outside of Google Cloud
 
-If you are running terraform outside of Google Cloud, generate a service account key and set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to
-the path of the service account key. Terraform will use that key for authentication.
+If you are running terraform outside of Google Cloud, generate an external credential configuration file ([example for OIDC based federation](https://cloud.google.com/iam/docs/access-resources-oidc#generate-automatic)) or a service account key file and set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the path of the JSON file. Terraform will use that file for authentication. In general Terraform supports the full range of authentication options [documented for Google Cloud](https://cloud.google.com/docs/authentication).
 
 ### Disabling mtls authentication
 
@@ -147,6 +146,8 @@ resources, you may need to adjust one or both of 1) the core [`-parallelism`](ht
 the provider should wait for a single HTTP request.  This will not adjust the
 amount of time the provider will wait for a logical operation - use the resource
 timeout blocks for that.
+
+* `request_reason` - (Optional) Send a Request Reason [System Parameter](https://cloud.google.com/apis/docs/system-parameters) for each API call made by the provider.  The `X-Goog-Request-Reason` header value is used to provide a user-supplied justification into GCP AuditLogs.
 
 The `batching` fields supports:
 
@@ -265,6 +266,8 @@ an access token using the service account key specified in `credentials`.
     * https://www.googleapis.com/auth/ndev.clouddns.readwrite
     * https://www.googleapis.com/auth/devstorage.full_control
     * https://www.googleapis.com/auth/userinfo.email
+
+* `request_reason` - (Optional) Send a Request Reason [System Parameter](https://cloud.google.com/apis/docs/system-parameters) for each API call made by the provider.  The `X-Goog-Request-Reason` header value is used to provide a user-supplied justification into GCP AuditLogs. Alternatively, this can be specified using the `CLOUDSDK_CORE_REQUEST_REASON` environment variable.
 
 ---
 
