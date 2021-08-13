@@ -16,8 +16,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   CertificateAuthority: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     import_format: ["projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}"]
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate_authority.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_authority_basic"
@@ -67,6 +65,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
       post_create: templates/terraform/post_create/privateca_authority_enable.go.erb
       pre_delete: templates/terraform/pre_delete/privateca_authority_disable.go.erb
+      post_import: templates/terraform/post_import/privateca_import.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate_authority.go.erb
   Certificate: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
