@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccComputeFirewallPolicyAssociation_update(t *testing.T) {
+func TestAccComputeFirewallPolicyAssociation_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -20,7 +20,7 @@ func TestAccComputeFirewallPolicyAssociation_update(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeFirewallPolicyAssociation_start(context),
+				Config: testAccComputeFirewallPolicyAssociation_basic(context),
 			},
 			{
 				ResourceName:      "google_compute_firewall_policy_association.default",
@@ -31,10 +31,15 @@ func TestAccComputeFirewallPolicyAssociation_update(t *testing.T) {
 	})
 }
 
-func testAccComputeFirewallPolicyAssociation_start(context map[string]interface{}) string {
+func testAccComputeFirewallPolicyAssociation_basic(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_folder" "folder" {
   display_name = "tf-test-folder-%{random_suffix}"
+  parent       = "%{org_name}"
+}
+
+resource "google_folder" "target_folder" {
+  display_name = "tf-test-target-%{random_suffix}"
   parent       = "%{org_name}"
 }
 
@@ -46,7 +51,7 @@ resource "google_compute_firewall_policy" "default" {
 
 resource "google_compute_firewall_policy_association" "default" {
 	firewall_policy = google_compute_firewall_policy.default.name
-  attachment_target = google_folder.folder.name
+  attachment_target = google_folder.target_folder.name
   name = "tf-test-association-%{random_suffix}"
 }
 `, context)
