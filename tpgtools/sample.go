@@ -95,6 +95,11 @@ type Dependency struct {
 
 	// HCLBlock is the snippet of HCL config that declares this resource
 	HCLBlock string // Path to the directory where the sample data is stored
+
+	// skipHCL denotes if the dependency should be skipped for HCL generation
+	// Usually needed for dependencies that are referenced but should not appear in the
+	// sample HCL (i.e. the pre-updated resource in an update sample)
+	skipHCL bool
 }
 
 // BuildDependency produces a Dependency using a file and filename
@@ -171,7 +176,7 @@ func (s *Sample) GetCodeToInject() []string {
 // ReplaceReferences substitutes any reference tags for their HCL address
 // This should only be called after every dependency for a sample is built
 func (s Sample) ReplaceReferences(d *Dependency) error {
-	re := regexp.MustCompile(`"{{ref:([a-z.]*):(\w*)}}"`)
+	re := regexp.MustCompile(`"{{ref:([a-z._]*):(\w*)}}"`)
 	matches := re.FindAllStringSubmatch(d.HCLBlock, -1)
 
 	for _, match := range matches {
@@ -199,11 +204,13 @@ func (s Sample) generateHCLTemplate() (string, error) {
 
 	var hcl string
 	for index := range s.DependencyList {
-		err := s.ReplaceReferences(&s.DependencyList[index])
-		if err != nil {
-			return "", fmt.Errorf("Could not generate HCL template for %s: %s", *s.Name, err)
+		if !s.DependencyList[index].skipHCL {
+			err := s.ReplaceReferences(&s.DependencyList[index])
+			if err != nil {
+				return "", fmt.Errorf("Could not generate HCL template for %s: %s", *s.Name, err)
+			}
+			hcl = fmt.Sprintf("%s%s\n", hcl, s.DependencyList[index].HCLBlock)
 		}
-		hcl = fmt.Sprintf("%s%s\n", hcl, s.DependencyList[index].HCLBlock)
 	}
 
 	return hcl, nil
@@ -245,7 +252,16 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 		newSample := *s
 		*newSample.PrimaryResource = update["resource"]
 		if !newSample.isNativeHCL() {
-			newSample.DependencyList[0] = newSample.generateSampleDependencyWithName(*newSample.PrimaryResource, "primary")
+			newSample.DependencyList = make([]Dependency, 0)
+			newSample.DependencyList = append(newSample.DependencyList, newSample.generateSampleDependencyWithName(*newSample.PrimaryResource, "primary"))
+			// add the old primary resource to the list
+			oldPrimaryResource := newSample.generateSampleDependency(*s.PrimaryResource)
+			oldPrimaryResource.skipHCL = true
+			newSample.DependencyList = append(newSample.DependencyList, oldPrimaryResource)
+			// add the other dependencies
+			for i := 1; i < len(s.DependencyList); i++ {
+				newSample.DependencyList = append(newSample.DependencyList, s.DependencyList[0])
+			}
 		}
 		newSample.TestSlug = fmt.Sprintf("%sUpdate%v", newSample.TestSlug, i)
 		newSample.Updates = nil
