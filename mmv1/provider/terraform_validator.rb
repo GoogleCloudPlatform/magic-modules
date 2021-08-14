@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2021 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -183,6 +183,8 @@ module Provider
                         'third_party/terraform/utils/utils.go'],
                        ['google/kms_key_ring_iam.go',
                         'third_party/validator/kms_key_ring_iam.go'],
+                       ['google/kms_crypto_key.go',
+                        'third_party/validator/kms_crypto_key.go'],
                        ['google/kms_crypto_key_iam.go',
                         'third_party/validator/kms_crypto_key_iam.go']
                      ])
