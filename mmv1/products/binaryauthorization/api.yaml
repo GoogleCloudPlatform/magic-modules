@@ -85,7 +85,7 @@ objects:
                 - !ruby/object:Api::Type::String
                   name: id
                   description: |
-                    The ID of this public key. Signatures verified by BinAuthz
+                    The D of this public key. Signatures verified by BinAuthz
                     must include the ID of the public key that can be used to
                     verify them, and that ID must match the contents of this
                     field exactly. Additional restrictions on this field can
@@ -109,7 +109,7 @@ objects:
                   # TODO (mbang): Exactly one of asciiArmoredPgpPublicKey or pkixPublicKey must be set
                   description: |
                     A raw PKIX SubjectPublicKeyInfo format public key.
-                    
+
                     NOTE: id may be explicitly provided by the caller when using this
                     type of public key, but it MUST be a valid RFC3986 URI. If id is left
                     blank, a default one will be computed based on the digest of the DER

@@ -66,20 +66,21 @@ curl \
 
 set +e
 
-make
+make -v
 lint_exit_code=$?
 test_exit_code=1
 
+make tools
+lint_exit_code=$lint_exit_code || $?
+
 if [ $lint_exit_code -eq 0 ]; then
-    # only run lint & tests if the code compiled
+    # only run lint & tests if the code compiled and tools downloaded
     make lint
     lint_exit_code=$lint_exit_code || $?
     make test
     test_exit_code=$?
 fi
 
-make tools
-lint_exit_code=$lint_exit_code || $?
 make docscheck
 lint_exit_code=$lint_exit_code || $?
 
