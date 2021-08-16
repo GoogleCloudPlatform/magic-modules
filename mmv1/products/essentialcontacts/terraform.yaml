@@ -21,7 +21,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         in the provider configuration. Otherwise the Essential Contacts API will return a 403 error. 
         Your account must have the `serviceusage.services.use` permission on the 
         `billing_project` you defined.
-    import_format: ["{{name}}"]
+    import_format: ["{{%name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "essential_contact"
