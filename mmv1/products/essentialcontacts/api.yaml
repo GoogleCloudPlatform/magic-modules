@@ -16,9 +16,6 @@ name: EssentialContacts
 display_name: Essential Contacts
 versions:
   - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://essentialcontacts.googleapis.com/v1beta1/
-  - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://essentialcontacts.googleapis.com/v1/
 scopes:
@@ -56,11 +53,6 @@ objects:
         output: true
         description: |
           The identifier for the contact. Format: {resourceType}/{resource_id}/contacts/{contact_id}
-      - !ruby/object:Api::Type::String
-        name: 'contactId'
-        output: true
-        description: |
-          Contact Id value
       - !ruby/object:Api::Type::String
         name: 'email'
         required: true
