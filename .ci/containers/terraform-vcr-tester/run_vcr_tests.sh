@@ -36,6 +36,7 @@ function add_comment {
 
 # The following section is to cancel jobs that may be running for the given PR, before starting to run new tests
 function cancel_queued {
+  add_comment "Canceling build id ${1}"
   # Cancel tests that are queued up to run in TeamCity
   curl \
     --header "Accept: application/json" \
@@ -48,6 +49,7 @@ function cancel_queued {
 }
 
 function cancel_running {
+  add_comment "Canceling build for running pr number ${1}"
   # Cancel tests that are currently running in TeamCity
   curl \
     --header "Accept: application/json" \
@@ -67,7 +69,7 @@ curl \
   -o existing-queue.json \
   "https://ci-oss.hashicorp.engineering/app/rest/buildQueue?locator=buildType:(id:GoogleCloudBeta_ProviderGoogleCloudBetaMmUpstreamVcr)&fields=build(id,comment)"
 
-queued_ids=$(cat existing-queue.json | jq -r '.build[] | select(.comment.text | endswith("${pr_number}")) | .id')
+queued_ids=$(cat existing-queue.json | jq -r ".build[] | select(.comment.text | endswith(\"${pr_number}\")) | .id")
 for id in $queued_ids; do
   cancel_queued ${id}
 done
