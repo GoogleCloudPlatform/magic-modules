@@ -18,6 +18,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://essentialcontacts.googleapis.com/v1beta1/
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://essentialcontacts.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -27,7 +30,6 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'Contact'
-    min_version: beta
     create_url: '{{parent}}/contacts'
     self_link: '{{name}}'
     base_url: '{{name}}'
@@ -54,6 +56,11 @@ objects:
         output: true
         description: |
           The identifier for the contact. Format: {resourceType}/{resource_id}/contacts/{contact_id}
+      - !ruby/object:Api::Type::String
+        name: 'contactId'
+        output: true
+        description: |
+          Contact Id value
       - !ruby/object:Api::Type::String
         name: 'email'
         required: true

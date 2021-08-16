@@ -26,7 +26,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "essential_contact"
         primary_resource_id: "contact"
-        min_version: "beta"
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
