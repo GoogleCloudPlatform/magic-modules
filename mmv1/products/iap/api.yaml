@@ -79,7 +79,7 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'appId'
-        description: Id of the App Engine application.
+        description: ID of the App Engine application.
         required: true
       - !ruby/object:Api::Type::String
         name: 'service'
