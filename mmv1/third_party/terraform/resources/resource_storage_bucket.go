@@ -388,7 +388,7 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 	bucket := d.Get("name").(string)
 	location := d.Get("location").(string)
 
-	// Create a bucket, setting the labels, location and name.
+	// Create a bucket, setting the labels, location and name
 	sb := &storage.Bucket{
 		Name:             bucket,
 		Labels:           expandLabels(d),
