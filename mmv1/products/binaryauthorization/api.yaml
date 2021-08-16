@@ -85,7 +85,7 @@ objects:
                 - !ruby/object:Api::Type::String
                   name: id
                   description: |
-                    The D of this public key. Signatures verified by BinAuthz
+                    The ID of this public key. Signatures verified by BinAuthz
                     must include the ID of the public key that can be used to
                     verify them, and that ID must match the contents of this
                     field exactly. Additional restrictions on this field can
