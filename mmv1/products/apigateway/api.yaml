@@ -185,6 +185,8 @@ objects:
     base_url: projects/{{project}}/locations/{{region}}/gateways
     update_verb: :PATCH
     update_mask: true
+    identity:
+      - gatewayId
     description: |
       A consumable API that can be used by multiple Gateways.
     references: !ruby/object:Api::Resource::ReferenceLinks
