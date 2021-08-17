@@ -18,6 +18,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://bigquery.googleapis.com/bigquery/v2/
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://bigquery.googleapis.com/bigquery/v2/
 scopes:
   - https://www.googleapis.com/auth/bigquery
 apis_required:
@@ -229,6 +232,35 @@ objects:
               Describes the Cloud KMS encryption key that will be used to protect destination
               BigQuery table. The BigQuery Service Account associated with your project requires
               access to this encryption key.
+      - !ruby/object:Api::Type::String
+        name: type
+        min_version: beta
+        description: |
+          The type of the dataset, one of:
+            DEFAULT - only accessible by owner and authorized accounts,
+            LINKED - linked dataset,
+            EXTERNAL - dataset with definition in external metadata catalog.
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'linkedDatasetSource'
+        min_version: beta
+        description: The source when the dataset is of type LINKED.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'sourceDataset'
+            min_version: beta
+            description: The source dataset reference contains project numbers and not project ids.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'projectId'
+                min_version: beta
+                description: The unique ID of the source dataset.
+                input: true
+              - !ruby/object:Api::Type::String
+                name: 'datasetId'
+                min_version: beta
+                description: The ID of the project containing the source dataset.
+                input: true
   - !ruby/object:Api::Resource
     name: 'DatasetAccess'
     input: true
