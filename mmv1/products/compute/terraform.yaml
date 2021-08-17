@@ -2233,6 +2233,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: 'templates/terraform/custom_expand/bool_to_upper_string.erb'
         custom_flatten: 'templates/terraform/custom_flatten/string_to_bool.erb'
         send_empty_value: true
+      ipAddress: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   SecurityPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   ServiceAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
