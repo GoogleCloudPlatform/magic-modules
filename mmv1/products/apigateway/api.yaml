@@ -46,6 +46,8 @@ objects:
     base_url: projects/{{project}}/locations/global/apis
     update_verb: :PATCH
     update_mask: true
+    identity:
+      - apiId
     description: |
       A consumable API that can be used by multiple Gateways.
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -96,6 +98,8 @@ objects:
     update_mask: true
     description: |
       An API Configuration is an association of an API Controller Config and a Gateway Config
+    identity:
+      - apiConfigId
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
