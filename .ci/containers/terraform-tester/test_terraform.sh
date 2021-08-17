@@ -66,6 +66,7 @@ curl \
 
 set +e
 
+make
 lint_exit_code=$?
 test_exit_code=1
 
