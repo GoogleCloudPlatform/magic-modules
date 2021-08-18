@@ -718,9 +718,25 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           mig_template_name: "l7-ilb-mig-template"
           hc_name: "l7-ilb-hc"
           mig_name: "l7-ilb-mig1"
-          fw-allow_iap_hc_name: "l7-ilb-fw-allow-iap-hc"
+          fw_allow_iap_hc_name: "l7-ilb-fw-allow-iap-hc"
           fw_allow_ilb_to_backends_name: "l7-ilb-fw-allow-ilb-to-backends"
           vm_test_name: "l7-ilb-test-vm"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "internal_tcp_udp_lb_with_mig_backend"
+        primary_resource_id: "google_compute_forwarding_rule"
+        vars:
+          ilb_network_name: "l4-ilb-network"
+          backend_subnet_name: "l4-ilb-subnet"
+          forwarding_rule_name: "l4-ilb-forwarding-rule"
+          backend_service_name: "l4-ilb-backend-subnet"
+          mig_template_name: "l4-ilb-mig-template"
+          hc_name: "l4-ilb-hc"
+          mig_name: "l4-ilb-mig1"
+          fw_allow_hc_name: "l4-ilb-fw-allow-hc"
+          fw_allow_ilb_to_backends_name: "l4-ilb-fw-allow-ilb-to-backends"
+          fw_allow_ilb_ssh_name: "l4-ilb-fw-ssh"
+          vm_test_name: "l4-ilb-test-vm"
         min_version: beta
       - !ruby/object:Provider::Terraform::Examples
         name: "forwarding_rule_externallb"
