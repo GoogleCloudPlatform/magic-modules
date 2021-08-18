@@ -39,6 +39,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       update_minutes: 40  
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/dialogflowcx_intent.go.erb   
+      pre_create: templates/terraform/pre_create/dialogflow_set_location.go.erb 
+      pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
+      pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.erb
+      pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dialogflowcx_intent_full"
@@ -63,6 +67,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       update_minutes: 40 
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/dialogflowcx_flow.go.erb 
+      pre_create: templates/terraform/pre_create/dialogflow_set_location.go.erb 
+      pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
+      pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.erb
+      pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dialogflowcx_flow_full"
@@ -85,7 +93,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       insert_minutes: 40
       update_minutes: 40
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/dialogflowcx_version.go.erb   
+      custom_import: templates/terraform/custom_import/dialogflowcx_version.go.erb  
+      pre_create: templates/terraform/pre_create/dialogflow_set_location.go.erb 
+      pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
+      pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.erb
+      pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dialogflowcx_version_full"
@@ -110,7 +122,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       insert_minutes: 40
       update_minutes: 40
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/dialogflowcx_page.go.erb   
+      custom_import: templates/terraform/custom_import/dialogflowcx_page.go.erb  
+      pre_create: templates/terraform/pre_create/dialogflow_set_location.go.erb 
+      pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
+      pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.erb
+      pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dialogflowcx_page_full"
@@ -131,7 +147,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       insert_minutes: 40
       update_minutes: 40
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/dialogflowcx_entity_type.go.erb   
+      custom_import: templates/terraform/custom_import/dialogflowcx_entity_type.go.erb
+      pre_create: templates/terraform/pre_create/dialogflow_set_location.go.erb 
+      pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
+      pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.erb
+      pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dialogflowcx_entity_type_full"
@@ -152,7 +172,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       insert_minutes: 40
       update_minutes: 40
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/dialogflowcx_environment.go.erb   
+      custom_import: templates/terraform/custom_import/dialogflowcx_environment.go.erb
+      pre_create: templates/terraform/pre_create/dialogflow_set_location.go.erb 
+      pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
+      pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.erb
+      pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb  
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dialogflowcx_environment_full"

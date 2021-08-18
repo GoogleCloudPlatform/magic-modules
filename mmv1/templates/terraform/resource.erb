@@ -469,6 +469,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
       billingProject = bp
     }
 
+    <%= lines(compile(pwd + '/' + object.custom_code.pre_read)) if object.custom_code.pre_read -%>
     res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
 <%  if object.read_error_transform -%>

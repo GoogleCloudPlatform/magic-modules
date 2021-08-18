@@ -121,6 +121,9 @@ module Provider
       # resource was successfully deleted. Use this if the API responds
       # with a success HTTP code for deleted resources
       attr_reader :test_check_destroy
+      # This code is run before the Read call happens.  It's placed
+      # in the Read function.
+      attr_reader :pre_read
 
       def validate
         super
@@ -140,6 +143,7 @@ module Provider
         check :custom_import, type: String
         check :post_import, type: String
         check :test_check_destroy, type: String
+        check :pre_read, type: String
       end
     end
   end
