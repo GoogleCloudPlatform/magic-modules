@@ -235,7 +235,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// Ensure $userProject is set for all HTTP requests using the client if specified by the provider config
 	// See https://cloud.google.com/apis/docs/system-parameters
 	if c.UserProjectOverride && c.BillingProject != "" {
-		headers.Set("X-Goog-User-Project", c.BillingProject)
+		headerTransport.Set("X-Goog-User-Project", c.BillingProject)
 	}
 
 	// Set final transport value.
