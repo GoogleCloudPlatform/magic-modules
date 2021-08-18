@@ -496,6 +496,7 @@ objects:
                 - :HIVE_WEBHCAT
                 - :JUPYTER
                 - :ZEPPELIN
+                - :FLINK
           - !ruby/object:Api::Type::Array
             name: 'initializationActions'
             description: |
