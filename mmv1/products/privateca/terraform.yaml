@@ -61,6 +61,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           issue certificates.
       config.x509Config: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.erb'
+      config.x509Config.caOptions.maxIssuerPathLength: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
       post_create: templates/terraform/post_create/privateca_authority_enable.go.erb
