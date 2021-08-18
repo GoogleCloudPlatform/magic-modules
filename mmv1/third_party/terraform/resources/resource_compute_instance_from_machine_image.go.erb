@@ -120,14 +120,16 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 		return err
 	}
 
-	// ServiceAccount is required when the image is from a different project
-	// it will be overridden by a call, SetServiceAccount(), if service_account is provided in the config
-	accounts := make([]*computeBeta.ServiceAccount, 1)
-	accounts[0] = &computeBeta.ServiceAccount{
-		Email:  "default",
-		Scopes: nil,
+	sa := d.Get("service_account").([]interface{})
+	if len(sa) == 0 {
+		// ServiceAccount is required when the image is from a different project
+		accounts := make([]*computeBeta.ServiceAccount, 1)
+		accounts[0] = &computeBeta.ServiceAccount{
+			Email:  "default",
+			Scopes: nil,
+		}
+		instance.ServiceAccounts = accounts
 	}
-	instance.ServiceAccounts = accounts
 
 	src := d.Get("source_machine_image").(string)
 	instance.SourceMachineImage = src
