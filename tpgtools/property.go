@@ -488,7 +488,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 		if parent == nil && v.Title == "id" {
 			// If top-level field is named `id`, rename to avoid collision with Terraform id
-			v.Title = "otherId"
+			v.Title = fmt.Sprintf("%s%s", resource.Name(), "Id")
 		}
 
 		p := Property{
