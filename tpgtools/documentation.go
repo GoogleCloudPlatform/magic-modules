@@ -86,8 +86,13 @@ func mergeProperties(ga, beta []Property) []Property {
 }
 
 func generateResourceWebsiteFile(res *Resource, resources map[Version][]*Resource, version *Version) {
-
 	res = mergeResource(res, resources, version)
+
+	if len(res.DocSamples()) <= 0 {
+		fmt.Printf(" %-40s no samples, skipping doc generation\n", res.TerraformName())
+		return
+	}
+
 	// Generate resource website file
 	tmplInput := ResourceInput{
 		Resource: *res,

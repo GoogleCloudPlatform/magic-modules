@@ -15,7 +15,7 @@ require 'provider/terraform_oics'
 
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
-  class TerraformObjectLibrary < Provider::Terraform
+  class TerraformValidator < Provider::Terraform
     def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
       @base_url = @version.base_url
       generate_objects(
@@ -67,7 +67,11 @@ module Provider
                           ['google/transport.go',
                            'third_party/terraform/utils/transport.go.erb'],
                           ['google/mappers.go',
-                           'templates/validator/mappers/mappers.go.erb']
+                           'templates/validator/mappers/mappers.go.erb'],
+                          ['google/iam_kms_key_ring.go',
+                           'third_party/terraform/utils/iam_kms_key_ring.go.erb'],
+                          ['google/iam_kms_crypto_key.go',
+                           'third_party/terraform/utils/iam_kms_crypto_key.go.erb']
                         ],
                         file_template)
     end
@@ -176,7 +180,11 @@ module Provider
                        ['google/dcl_logger.go',
                         '../tpgtools/handwritten/dcl_logger.go'],
                        ['google/utils.go',
-                        'third_party/terraform/utils/utils.go']
+                        'third_party/terraform/utils/utils.go'],
+                       ['google/kms_key_ring_iam.go',
+                        'third_party/validator/kms_key_ring_iam.go'],
+                       ['google/kms_crypto_key_iam.go',
+                        'third_party/validator/kms_crypto_key_iam.go']
                      ])
     end
 

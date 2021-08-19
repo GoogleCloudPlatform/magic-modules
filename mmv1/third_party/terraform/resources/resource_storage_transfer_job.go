@@ -842,11 +842,12 @@ func expandAzureBlobStorageData(azureBlobStorageDatas []interface{}) *storagetra
 	}
 
 	azureBlobStorageData := azureBlobStorageDatas[0].(map[string]interface{})
+
 	return &storagetransfer.AzureBlobStorageData{
 		Container:        azureBlobStorageData["container"].(string),
 		Path:             azureBlobStorageData["path"].(string),
 		StorageAccount:   azureBlobStorageData["storage_account"].(string),
-		AzureCredentials: expandAzureCredentials(azureBlobStorageData["sas_token"].([]interface{})),
+		AzureCredentials: expandAzureCredentials(azureBlobStorageData["azure_credentials"].([]interface{})),
 	}
 }
 

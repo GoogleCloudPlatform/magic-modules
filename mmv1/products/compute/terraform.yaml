@@ -258,6 +258,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         set_hash_func: 'resourceGoogleComputeBackendServiceBackendHash'
       backends.group: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkRelativePaths'
+      backends.maxConnections: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      backends.maxConnectionsPerEndpoint: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      backends.maxConnectionsPerInstance: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      backends.maxRate: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      backends.maxRatePerEndpoint: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      backends.maxRatePerInstance: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      backends.maxUtilization: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       cdnPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       cdnPolicy.cacheKeyPolicy.queryStringWhitelist: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -268,6 +282,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       cdnPolicy.negativeCaching: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      cdnPolicy.negativeCachingPolicy.ttl: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
       cdnPolicy.serveWhileStale: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       cdnPolicy.clientTtl: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -623,6 +639,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           firewall_name: "test-firewall"
           network_name: "test-network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firewall_with_target_tags"
+        primary_resource_id: "rules"
+        vars:
+          firewall_name: "my-firewall-rule"
+        test_env_vars:
+          project: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/firewall.erb
       resource_definition: templates/terraform/resource_definition/firewall.erb
@@ -689,6 +712,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   ForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        name: "internal_http_lb_with_mig_backend"
+        primary_resource_id: "google_compute_forwarding_rule"
+        vars:
+          ilb_network_name: "l7-ilb-network"
+          proxy_subnet_name: "l7-ilb-proxy-subnet"
+          backend_subnet_name: "l7-ilb-subnet"
+          forwarding_rule_name: "l7-ilb-forwarding-rule"
+          target_http_proxy_name: "l7-ilb-target-http-proxy"
+          regional_url_map_name: "l7-ilb-regional-url-map"
+          backend_service_name: "l7-ilb-backend-subnet"
+          mig_template_name: "l7-ilb-mig-template"
+          hc_name: "l7-ilb-hc"
+          mig_name: "l7-ilb-mig1"
+          fw-allow_iap_hc_name: "l7-ilb-fw-allow-iap-hc"
+          fw_allow_ilb_to_backends_name: "l7-ilb-fw-allow-ilb-to-backends"
+          vm_test_name: "l7-ilb-test-vm"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
         name: "forwarding_rule_externallb"
         primary_resource_id: "default"
         vars:
@@ -709,6 +750,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           forwarding_rule_name: "website-forwarding-rule"
           target_pool_name: "website-target-pool"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "forwarding_rule_l3_default"
+        primary_resource_id: "fwd_rule"
+        vars:
+          forwarding_rule_name: "l3-forwarding-rule"
+          service_name: "service"
+          health_check_name: "health-check"
+        min_version: beta
       - !ruby/object:Provider::Terraform::Examples
         name: "forwarding_rule_internallb"
         primary_resource_id: "default"
@@ -817,12 +866,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           backend_service_name: "backend"
           igm_name: "igm-internal"
       - !ruby/object:Provider::Terraform::Examples
-        name: "global_forwarding_rule_private_services_connect"
+        name: "private_service_connect_google_apis"
         min_version: beta
         primary_resource_id: "default"
         vars:
+          network_name: "my-network"
+          subnetwork_name: "my-subnetwork"
           global_address_name: "global-psconnect-ip"
           forwarding_rule_name: "globalrule"
+        test_env_vars:
+          project: :PROJECT_NAME
     properties:
       creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1104,7 +1157,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           address_name: "test-address"
           router_name: "test-router"
           network_name: "test-network"
-        min_version: beta
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1177,6 +1229,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "vpc_network"
         vars:
           network_name: "vpc-network"
+        test_env_vars:
+          project: :PROJECT_NAME
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'delete_default_routes_on_create'
@@ -2088,7 +2142,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           router_name: "test-router"
           network_name: "test-network"
-        min_version: beta
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/router.go.erb
       resource_definition: templates/terraform/resource_definition/router.go.erb
@@ -2181,6 +2234,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           router_name: "my-router"
           peer_name: "my-router-peer"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "router_peer_disabled"
+        primary_resource_id: "peer"
+        skip_test: true
+        vars:
+          router_name: "my-router"
+          peer_name: "my-router-peer"
     properties:
       advertiseMode: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
@@ -2196,6 +2256,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           {{description}}
           If it is not provided, the provider region is used.
+      enable: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/bool_to_upper_string.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/string_to_bool.erb'
+        send_empty_value: true
   SecurityPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   ServiceAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -2787,7 +2851,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           address2_name: "test-address2"
           router_name: "test-router"
           network_name: "test-network"
-        min_version: beta
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation

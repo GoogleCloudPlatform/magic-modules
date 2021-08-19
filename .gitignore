@@ -44,5 +44,11 @@ mmv1/tools/ansible-pr/templates/*
 # Used by OiCS tutorial
 mmv1/build/*
 
+# ignore node modules folders utilized by npm
+**/node_modules
+
 # vscode workspace settings
 .vscode
+
+# ignore serialization generation build data
+tpgtools/temp.serial
