@@ -486,6 +486,11 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		// won't be set initially.
 		v.Title = k
 
+		if parent == nil && v.Title == "id" {
+			// If top-level field is named `id`, rename to avoid collision with Terraform id
+			v.Title = "otherId"
+		}
+
 		p := Property{
 			title:       jsonToSnakeCase(v.Title),
 			Type:        Type{typ: v},

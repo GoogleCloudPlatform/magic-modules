@@ -26,6 +26,8 @@ func TestAccComputeFirewallPolicyRule_update(t *testing.T) {
 				ResourceName:      "google_compute_firewall_policy_rule.default",
 				ImportState:       true,
 				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
 			},
 			{
 				Config: testAccComputeFirewallPolicyRule_update(context),
@@ -34,6 +36,8 @@ func TestAccComputeFirewallPolicyRule_update(t *testing.T) {
 				ResourceName:      "google_compute_firewall_policy_rule.default",
 				ImportState:       true,
 				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
 			},
 			{
 				Config: testAccComputeFirewallPolicyRule_removeConfigs(context),
@@ -42,6 +46,8 @@ func TestAccComputeFirewallPolicyRule_update(t *testing.T) {
 				ResourceName:      "google_compute_firewall_policy_rule.default",
 				ImportState:       true,
 				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
 			},
 			{
 				Config: testAccComputeFirewallPolicyRule_start(context),
@@ -50,6 +56,8 @@ func TestAccComputeFirewallPolicyRule_update(t *testing.T) {
 				ResourceName:      "google_compute_firewall_policy_rule.default",
 				ImportState:       true,
 				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
 			},
 		},
 	})
@@ -81,13 +89,13 @@ resource "google_folder" "folder" {
 }
 
 resource "google_compute_firewall_policy" "default" {
-	parent      = google_folder.folder.name
+  parent      = google_folder.folder.name
   short_name  = "tf-test-policy-%{random_suffix}"
   description = "Resource created for Terraform acceptance testing"
 }
 
 resource "google_compute_firewall_policy_rule" "default" {
-	firewall_policy = google_compute_firewall_policy.default.name
+  firewall_policy = google_compute_firewall_policy.default.id
   description = "Resource created for Terraform acceptance testing"
   priority = 9000
   enable_logging = true
@@ -95,11 +103,11 @@ resource "google_compute_firewall_policy_rule" "default" {
   direction = "EGRESS"
   disabled = false
   match {
-  	layer4_configs {
-  		ip_protocol = "tcp"
-  		ports = [80, 8080]
-  	}
-  	dest_ip_ranges = ["11.100.0.1/32"]
+    layer4_configs {
+      ip_protocol = "tcp"
+      ports = [80, 8080]
+    }
+    dest_ip_ranges = ["11.100.0.1/32"]
   }
 }
 `, context)
@@ -131,13 +139,13 @@ resource "google_folder" "folder" {
 }
 
 resource "google_compute_firewall_policy" "default" {
-	parent      = google_folder.folder.name
+  parent      = google_folder.folder.name
   short_name  = "tf-test-policy-%{random_suffix}"
   description = "Resource created for Terraform acceptance testing"
 }
 
 resource "google_compute_firewall_policy_rule" "default" {
-	firewall_policy = google_compute_firewall_policy.default.name
+  firewall_policy = google_compute_firewall_policy.default.id
   description = "Resource created for Terraform acceptance testing"
   priority = 9000
   enable_logging = true
@@ -145,15 +153,15 @@ resource "google_compute_firewall_policy_rule" "default" {
   direction = "EGRESS"
   disabled = false
   match {
-  	layer4_configs {
-  		ip_protocol = "tcp"
-  		ports = [8080]
-  	}
-  	layer4_configs {
-  		ip_protocol = "udp"
-  		ports = [22]
-  	}
-  	dest_ip_ranges = ["11.100.0.1/32", "10.0.0.0/24"]
+    layer4_configs {
+      ip_protocol = "tcp"
+      ports = [8080]
+    }
+    layer4_configs {
+      ip_protocol = "udp"
+      ports = [22]
+    }
+    dest_ip_ranges = ["11.100.0.1/32", "10.0.0.0/24"]
   }
   target_resources = [google_compute_network.network1.self_link, google_compute_network.network2.self_link]
   target_service_accounts = [google_service_account.service_account.email]
@@ -187,13 +195,13 @@ resource "google_folder" "folder" {
 }
 
 resource "google_compute_firewall_policy" "default" {
-	parent      = google_folder.folder.name
+  parent      = google_folder.folder.id
   short_name  = "tf-test-policy-%{random_suffix}"
   description = "Resource created for Terraform acceptance testing"
 }
 
 resource "google_compute_firewall_policy_rule" "default" {
-	firewall_policy = google_compute_firewall_policy.default.name
+  firewall_policy = google_compute_firewall_policy.default.id
   description = "Test description"
   priority = 9000
   enable_logging = false
@@ -201,11 +209,11 @@ resource "google_compute_firewall_policy_rule" "default" {
   direction = "INGRESS"
   disabled = true
   match {
-  	layer4_configs {
-  		ip_protocol = "udp"
-  		ports = [22]
-  	}
-  	src_ip_ranges = ["11.100.0.1/32", "10.0.0.0/24"]
+    layer4_configs {
+      ip_protocol = "udp"
+      ports = [22]
+    }
+    src_ip_ranges = ["11.100.0.1/32", "10.0.0.0/24"]
   }
   target_resources = [google_compute_network.network1.self_link]
   target_service_accounts = [google_service_account.service_account.email, google_service_account.service_account2.email]
@@ -232,11 +240,15 @@ func TestAccComputeFirewallPolicyRule_multipleRules(t *testing.T) {
 				ResourceName:      "google_compute_firewall_policy_rule.rule1",
 				ImportState:       true,
 				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
 			},
 			{
 				ResourceName:      "google_compute_firewall_policy_rule.rule2",
 				ImportState:       true,
 				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
 			},
 			{
 				Config: testAccComputeFirewallPolicyRule_multipleAdd(context),
@@ -245,6 +257,8 @@ func TestAccComputeFirewallPolicyRule_multipleRules(t *testing.T) {
 				ResourceName:      "google_compute_firewall_policy_rule.rule3",
 				ImportState:       true,
 				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
 			},
 			{
 				Config: testAccComputeFirewallPolicyRule_multipleRemove(context),
@@ -261,13 +275,13 @@ resource "google_folder" "folder" {
 }
 
 resource "google_compute_firewall_policy" "default" {
-	parent      = google_folder.folder.name
+  parent      = google_folder.folder.name
   short_name  = "tf-test-policy-%{random_suffix}"
   description = "Resource created for Terraform acceptance testing"
 }
 
 resource "google_compute_firewall_policy_rule" "rule1" {
-	firewall_policy = google_compute_firewall_policy.default.name
+  firewall_policy = google_compute_firewall_policy.default.id
   description = "Resource created for Terraform acceptance testing"
   priority = 9000
   enable_logging = true
@@ -275,16 +289,16 @@ resource "google_compute_firewall_policy_rule" "rule1" {
   direction = "EGRESS"
   disabled = false
   match {
-  	layer4_configs {
-  		ip_protocol = "tcp"
-  		ports = [80, 8080]
-  	}
-  	dest_ip_ranges = ["11.100.0.1/32"]
+    layer4_configs {
+      ip_protocol = "tcp"
+      ports = [80, 8080]
+    }
+    dest_ip_ranges = ["11.100.0.1/32"]
   }
 }
 
 resource "google_compute_firewall_policy_rule" "rule2" {
-	firewall_policy = google_compute_firewall_policy.default.name
+  firewall_policy = google_compute_firewall_policy.default.id
   description = "Resource created for Terraform acceptance testing"
   priority = 9001
   enable_logging = false
@@ -292,14 +306,14 @@ resource "google_compute_firewall_policy_rule" "rule2" {
   direction = "INGRESS"
   disabled = false
   match {
-  	layer4_configs {
-  		ip_protocol = "tcp"
-  		ports = [80, 8080]
-  	}
-  	layer4_configs {
-  		ip_protocol = "all"
-  	}
-  	src_ip_ranges = ["11.100.0.1/32"]
+    layer4_configs {
+      ip_protocol = "tcp"
+      ports = [80, 8080]
+    }
+    layer4_configs {
+      ip_protocol = "all"
+    }
+    src_ip_ranges = ["11.100.0.1/32"]
   }
 }
 `, context)
@@ -313,13 +327,13 @@ resource "google_folder" "folder" {
 }
 
 resource "google_compute_firewall_policy" "default" {
-	parent      = google_folder.folder.name
+  parent      = google_folder.folder.id
   short_name  = "tf-test-policy-%{random_suffix}"
   description = "Description Update"
 }
 
 resource "google_compute_firewall_policy_rule" "rule1" {
-	firewall_policy = google_compute_firewall_policy.default.name
+  firewall_policy = google_compute_firewall_policy.default.id
   description = "Resource created for Terraform acceptance testing"
   priority = 9000
   enable_logging = true
@@ -327,15 +341,15 @@ resource "google_compute_firewall_policy_rule" "rule1" {
   direction = "EGRESS"
   disabled = false
   match {
-  	layer4_configs {
-  		ip_protocol = "tcp"
-  	}
-  	dest_ip_ranges = ["11.100.0.1/32"]
+    layer4_configs {
+      ip_protocol = "tcp"
+    }
+    dest_ip_ranges = ["11.100.0.1/32"]
   }
 }
 
 resource "google_compute_firewall_policy_rule" "rule2" {
-	firewall_policy = google_compute_firewall_policy.default.name
+  firewall_policy = google_compute_firewall_policy.default.id
   description = "Resource created for Terraform acceptance testing"
   priority = 9001
   enable_logging = false
@@ -343,19 +357,19 @@ resource "google_compute_firewall_policy_rule" "rule2" {
   direction = "INGRESS"
   disabled = false
   match {
-  	layer4_configs {
-  		ip_protocol = "tcp"
-  		ports = [80, 8080]
-  	}
-  	layer4_configs {
-  		ip_protocol = "all"
-  	}
-  	src_ip_ranges = ["11.100.0.1/32"]
+    layer4_configs {
+      ip_protocol = "tcp"
+      ports = [80, 8080]
+    }
+    layer4_configs {
+      ip_protocol = "all"
+    }
+    src_ip_ranges = ["11.100.0.1/32"]
   }
 }
 
 resource "google_compute_firewall_policy_rule" "rule3" {
-	firewall_policy = google_compute_firewall_policy.default.name
+  firewall_policy = google_compute_firewall_policy.default.id
   description = "Resource created for Terraform acceptance testing"
   priority = 40
   enable_logging = true
@@ -363,11 +377,11 @@ resource "google_compute_firewall_policy_rule" "rule3" {
   direction = "INGRESS"
   disabled = true
   match {
-  	layer4_configs {
-  		ip_protocol = "udp"
-  		ports = [8000]
-  	}
-  	src_ip_ranges = ["11.100.0.1/32", "10.0.0.0/24"]
+    layer4_configs {
+      ip_protocol = "udp"
+      ports = [8000]
+    }
+    src_ip_ranges = ["11.100.0.1/32", "10.0.0.0/24"]
   }
 }
 `, context)
@@ -381,13 +395,13 @@ resource "google_folder" "folder" {
 }
 
 resource "google_compute_firewall_policy" "default" {
-	parent      = google_folder.folder.name
+  parent      = google_folder.folder.name
   short_name  = "tf-test-policy-%{random_suffix}"
   description = "Resource created for Terraform acceptance testing"
 }
 
 resource "google_compute_firewall_policy_rule" "rule1" {
-	firewall_policy = google_compute_firewall_policy.default.name
+  firewall_policy = google_compute_firewall_policy.default.id
   description = "Resource created for Terraform acceptance testing"
   priority = 9000
   enable_logging = true
@@ -395,16 +409,16 @@ resource "google_compute_firewall_policy_rule" "rule1" {
   direction = "EGRESS"
   disabled = false
   match {
-  	layer4_configs {
-  		ip_protocol = "tcp"
-  		ports = [80, 8080]
-  	}
-  	dest_ip_ranges = ["11.100.0.1/32"]
+    layer4_configs {
+      ip_protocol = "tcp"
+      ports = [80, 8080]
+    }
+    dest_ip_ranges = ["11.100.0.1/32"]
   }
 }
 
 resource "google_compute_firewall_policy_rule" "rule3" {
-	firewall_policy = google_compute_firewall_policy.default.name
+  firewall_policy = google_compute_firewall_policy.default.id
   description = "Resource created for Terraform acceptance testing"
   priority = 40
   enable_logging = true
@@ -412,11 +426,11 @@ resource "google_compute_firewall_policy_rule" "rule3" {
   direction = "INGRESS"
   disabled = true
   match {
-  	layer4_configs {
-  		ip_protocol = "udp"
-  		ports = [8000]
-  	}
-  	src_ip_ranges = ["11.100.0.1/32", "10.0.0.0/24"]
+    layer4_configs {
+      ip_protocol = "udp"
+      ports = [8000]
+    }
+    src_ip_ranges = ["11.100.0.1/32", "10.0.0.0/24"]
   }
 }
 `, context)

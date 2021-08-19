@@ -26,6 +26,8 @@ func TestAccComputeFirewallPolicyAssociation_basic(t *testing.T) {
 				ResourceName:      "google_compute_firewall_policy_association.default",
 				ImportState:       true,
 				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
 			},
 		},
 	})
@@ -44,13 +46,13 @@ resource "google_folder" "target_folder" {
 }
 
 resource "google_compute_firewall_policy" "default" {
-	parent      = google_folder.folder.name
+  parent      = google_folder.folder.id
   short_name  = "tf-test-policy-%{random_suffix}"
   description = "Resource created for Terraform acceptance testing"
 }
 
 resource "google_compute_firewall_policy_association" "default" {
-	firewall_policy = google_compute_firewall_policy.default.name
+  firewall_policy = google_compute_firewall_policy.default.id
   attachment_target = google_folder.target_folder.name
   name = "tf-test-association-%{random_suffix}"
 }

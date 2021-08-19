@@ -37,7 +37,7 @@ resource "google_compute_firewall_policy" "default" {
 }
 
 resource "google_compute_firewall_policy_association" "default" {
-  firewall_policy = google_compute_firewall_policy.default.name
+  firewall_policy = google_compute_firewall_policy.default.id
   attachment_target = google_folder.folder.name
   name = "my-association"
 }
