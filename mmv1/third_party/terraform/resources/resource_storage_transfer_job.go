@@ -334,7 +334,6 @@ func gcsDataSchema() *schema.Resource {
 				Computed:     true,
 				Type:         schema.TypeString,
 				Description:  `Google Cloud Storage path in bucket to transfer`,
-				ValidateFunc: validateRegexp("^[^/].*/$"),
 			},
 		},
 	}
