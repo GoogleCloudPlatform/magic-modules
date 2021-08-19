@@ -4,7 +4,6 @@ package google
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -63,6 +62,37 @@ func TestAccComputeInstanceFromMachineImage_overrideMetadataDotStartupScript(t *
 		},
 	})
 
+}
+
+func TestAccComputeInstanceFromMachineImage_diffProject(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("terraform-test-%s", randString(t, 10))
+	generatedInstanceName := fmt.Sprintf("terraform-test-generated-%s", randString(t, 10))
+	resourceName := "google_compute_instance_from_machine_image.foobar"
+	org := getTestOrgFromEnv(t)
+	billingId := getTestBillingAccountFromEnv(t)
+	projectID := fmt.Sprintf("tf-test-%d", randInt(t))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProvidersOiCS,
+		CheckDestroy: testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromMachineImage_diffProject(projectID, org, billingId, instanceName, generatedInstanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, resourceName, &instance),
+
+					// Check that fields were set based on the template
+					resource.TestCheckResourceAttr(resourceName, "machine_type", "n1-standard-1"),
+					resource.TestCheckResourceAttr(resourceName, "attached_disk.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "scheduling.0.automatic_restart", "false"),
+				),
+			},
+		},
+	})
 }
 
 func testAccCheckComputeInstanceFromMachineImageDestroyProducer(t *testing.T) func(s *terraform.State) error {
@@ -182,6 +212,95 @@ resource "google_compute_instance_from_machine_image" "foobar" {
   }
 }
 `, instanceName, instanceName, generatedInstanceName)
+}
+
+func testAccComputeInstanceFromMachineImage_diffProject(projectID, org, billingId, instance, newInstance string) string {
+	return fmt.Sprintf(`
+resource "google_project" "project" {
+	provider     = google-beta
+	project_id      = "%s"
+	name            = "%s"
+	org_id          = "%s"
+	billing_account = "%s"
+}
+
+resource "google_project_service" "service" {
+	provider     = google-beta
+	project = google_project.project.project_id
+	service = "compute.googleapis.com"
+	timeouts {
+	  create = "30m"
+	  update = "40m"
+	}
+	disable_dependent_services = true
+}
+
+resource "google_project_service" "monitoring" {
+	provider     = google-beta
+	project = google_project.project.project_id
+	service = "monitoring.googleapis.com"
+	timeouts {
+	  create = "30m"
+	  update = "40m"
+	}
+	disable_dependent_services = true
+
+	depends_on = [google_project_service.service]
+}
+
+resource "google_compute_instance" "vm" {
+  provider     = google-beta
+  project = google_project.project.project_id
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-10"
+    }
+  }
+
+  name         = "%s"
+  machine_type = "n1-standard-1"
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  scheduling {
+    automatic_restart = true
+  }
+
+  can_ip_forward = true
+
+  depends_on = [google_project_service.monitoring]
+}
+
+resource "google_compute_machine_image" "foobar" {
+  provider        = google-beta
+  project = google_project.project.project_id
+  name            = "%s"
+  source_instance = google_compute_instance.vm.self_link
+}
+
+resource "google_compute_instance_from_machine_image" "foobar" {
+  provider = google-beta
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_machine_image = google_compute_machine_image.foobar.self_link
+
+  // Overrides
+  can_ip_forward = false
+  labels = {
+    my_key = "my_value"
+  }
+  scheduling {
+    automatic_restart = false
+  }
+}
+`, projectID, projectID, org, billingId, instance, instance, newInstance)
 }
 
 <% else %>
