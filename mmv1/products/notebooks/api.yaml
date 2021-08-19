@@ -227,7 +227,7 @@ objects:
             machineType you have selected.
         # AcceleratorConfig is updatable, but requires the instance to be stopped, just like
         # for compute instances.
-        # TODO: Implement allow_stopping_for_update here and for machineType
+        # TODO: Implement allow_stopping_for_update here and for machineType.
         # update_verb: :PATCH
         # update_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}:setAccelerator'
         properties:
