@@ -740,11 +740,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           mig_template_name: "l4-ilb-mig-template"
           hc_name: "l4-ilb-hc"
           mig_name: "l4-ilb-mig1"
-<<<<<<< HEAD
           fw_allow_hc_name: "l4-ilb-fw-allow-hc"
-=======
-          fw_allow_iap_hc_name: "l4-ilb-fw-allow-hc"
->>>>>>> 8772b2f2bbff65581db9d192485a4c853cb3b9dd
           fw_allow_ilb_to_backends_name: "l4-ilb-fw-allow-ilb-to-backends"
           fw_allow_ilb_ssh_name: "l4-ilb-fw-ssh"
           vm_test_name: "l4-ilb-test-vm"
