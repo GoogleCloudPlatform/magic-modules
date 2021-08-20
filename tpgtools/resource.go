@@ -658,6 +658,10 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 		sample.resourceReference = r
 		sample.FileName = file.Name()
 		sample.PrimaryResource = &(sample.FileName)
+		if sample.Name == nil || *sample.Name == "" {
+			sampleName = strings.Split(sample.FileName, ".")[0]
+			sample.Name = &sampleName
+		}
 		sample.TestSlug = snakeToTitleCase(sampleName) + "HandWritten"
 		sample.HasGAEquivalent = hasGA
 		samples = append(samples, sample)
