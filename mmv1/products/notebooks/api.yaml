@@ -296,7 +296,7 @@ objects:
           Reservation Affinity for consuming Zonal reservation.
         properties:
           - !ruby/object:Api::Type::Enum
-            name: 'consume_reservation_type'
+            name: 'consumeReservationType'
             required: true
             description: |
               The type of Compute Reservation.
