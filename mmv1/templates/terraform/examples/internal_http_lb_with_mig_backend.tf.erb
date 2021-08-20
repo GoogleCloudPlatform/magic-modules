@@ -148,7 +148,7 @@ resource "google_compute_region_instance_group_manager" "mig" {
 
 # allow all access from IAP and health check ranges
 resource "google_compute_firewall" "fw-iap" {
-  name          = "<%= ctx[:vars]['fw-allow_iap_hc_name'] %>"
+  name          = "<%= ctx[:vars]['fw_allow_iap_hc_name'] %>"
   provider      = google-beta
   direction     = "INGRESS"
   network       = google_compute_network.ilb_network.id
