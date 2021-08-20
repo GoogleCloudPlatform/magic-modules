@@ -43,6 +43,9 @@ var (
 		"config.0.software_config.0.env_variables",
 		"config.0.software_config.0.image_version",
 		"config.0.software_config.0.python_version",
+<% unless version == "ga" -%>
+		"config.0.software_config.0.scheduler_count",
+<% end -%>
 	}
 
 	composerConfigKeys = []string{
@@ -320,6 +323,15 @@ func resourceComposerEnvironment() *schema.Resource {
 										ForceNew:     true,
 										Description:  `The major version of Python used to run the Apache Airflow scheduler, worker, and webserver processes. Can be set to '2' or '3'. If not specified, the default is '2'. Cannot be updated.`,
 									},
+<% unless version == "ga" -%>
+									"scheduler_count": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										AtLeastOneOf: composerSoftwareConfigKeys,
+										Computed:     true,
+										Description:  'The number of schedulers for Airflow. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-2.*.*.',
+									},
+<% end -%>
 								},
 							},
 						},
