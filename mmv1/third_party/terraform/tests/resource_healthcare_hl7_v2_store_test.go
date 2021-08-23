@@ -113,6 +113,38 @@ func TestAccHealthcareHl7V2Store_basic(t *testing.T) {
 	})
 }
 
+func TestAccHealthcareHl7V2Store_updateSchema(t *testing.T) {
+	t.Parallel()
+
+	datasetName := fmt.Sprintf("tf-test-dataset-%s", randString(t, 10))
+	hl7_v2StoreName := fmt.Sprintf("tf-test-hl7_v2-store-%s", randString(t, 10))
+	resourceName := "google_healthcare_hl7_v2_store.default"
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProvidersOiCS,
+		CheckDestroy: testAccCheckHealthcareHl7V2StoreDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleHealthcareHl7V2Store_basicSchema(hl7_v2StoreName, datasetName),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testGoogleHealthcareHl7V2Store_updateSchema(hl7_v2StoreName, datasetName),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testGoogleHealthcareHl7V2Store_basic(hl7_v2StoreName, datasetName string) string {
 	return fmt.Sprintf(`
 resource "google_healthcare_hl7_v2_store" "default" {
@@ -156,6 +188,59 @@ resource "google_pubsub_topic" "topic" {
   name = "%s"
 }
 `, hl7_v2StoreName, datasetName, pubsubTopic)
+}
+
+func testGoogleHealthcareHl7V2Store_basicSchema(hl7_v2StoreName, datasetName string) string {
+	return fmt.Sprintf(`
+resource "google_healthcare_hl7_v2_store" "default" {
+  provider = google-beta
+  name     = "%s"
+  dataset  = google_healthcare_dataset.dataset.id
+
+  parser_config {
+    schema  = <<EOF
+          {
+            "schematizedParsingType": "SOFT_FAIL",
+            "ignoreMinOccurs": true
+          }
+        EOF
+    version = "V2"
+  }
+}
+
+resource "google_healthcare_dataset" "dataset" {
+  provider = google-beta
+  name     = "%s"
+  location = "us-central1"
+}
+`, hl7_v2StoreName, datasetName)
+}
+
+func testGoogleHealthcareHl7V2Store_updateSchema(hl7_v2StoreName, datasetName string) string {
+	return fmt.Sprintf(`
+resource "google_healthcare_hl7_v2_store" "default" {
+  provider = google-beta
+  name     = "%s"
+  dataset  = google_healthcare_dataset.dataset.id
+
+  parser_config {
+    schema  = <<EOF
+          {
+            "schematizedParsingType": "SOFT_FAIL",
+            "ignoreMinOccurs": true,
+            "unexpectedSegmentHandling": "PARSE"
+          }
+        EOF
+    version = "V2"
+  }
+}
+
+resource "google_healthcare_dataset" "dataset" {
+  provider = google-beta
+  name     = "%s"
+  location = "us-central1"
+}
+`, hl7_v2StoreName, datasetName)
 }
 
 func testAccCheckGoogleHealthcareHl7V2StoreUpdate(t *testing.T, pubsubTopic string) resource.TestCheckFunc {
