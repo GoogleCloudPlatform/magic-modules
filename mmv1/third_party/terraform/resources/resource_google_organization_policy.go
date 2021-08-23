@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -249,17 +250,34 @@ func resourceGoogleOrganizationPolicyDelete(d *schema.ResourceData, meta interfa
 	if err != nil {
 		return err
 	}
-	org := "organizations/" + d.Get("org_id").(string)
 
-	err = retryTimeDuration(func() error {
-		_, dErr := config.NewResourceManagerClient(userAgent).Organizations.ClearOrgPolicy(org, &cloudresourcemanager.ClearOrgPolicyRequest{
-			Constraint: canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
-		}).Do()
-		return dErr
-	}, d.Timeout(schema.TimeoutDelete))
+	obj := map[string]interface{}{
+		"spec": map[string]interface{}{
+			"reset": true,
+		},
+	}
+
+	url, err := replaceVars(d, config, "{{OrgPolicyBasePath}}organizations/{{org_id}}/policies/{{constraint}}")
 	if err != nil {
 		return err
 	}
+
+	// Strip contraints/ prefix from {{constraint}}
+	url = strings.ReplaceAll(url, "constraints/", "")
+
+	billingProject := ""
+
+	// err == nil indicates that the billing_project value was found
+	if bp, err := getBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	res, err := sendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	if err != nil {
+		return handleNotFoundError(err, d, "Topic")
+	}
+
+	log.Printf("[DEBUG] Finished deleting OrgPolicy %q: %#v", d.Id(), res)
 
 	return nil
 }

@@ -166,6 +166,7 @@ func Provider() *schema.Provider {
 			ServiceUsageCustomEndpointEntryKey:           ServiceUsageCustomEndpointEntry,
 			StorageTransferCustomEndpointEntryKey:        StorageTransferCustomEndpointEntry,
 			BigtableAdminCustomEndpointEntryKey:          BigtableAdminCustomEndpointEntry,
+			OrgPolicyCustomEndpointEntryKey:              OrgPolicyCustomEndpointEntry,
 
 			// dcl
 			AssuredWorkloadsEndpointEntryKey:               AssuredWorkloadsEndpointEntry,
@@ -595,6 +596,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.ServiceUsageBasePath = d.Get(ServiceUsageCustomEndpointEntryKey).(string)
 	config.StorageTransferBasePath = d.Get(StorageTransferCustomEndpointEntryKey).(string)
 	config.BigtableAdminBasePath = d.Get(BigtableAdminCustomEndpointEntryKey).(string)
+	config.OrgPolicyBasePath = d.Get(OrgPolicyCustomEndpointEntryKey).(string)
 
 	// dcl
 	config.AssuredWorkloadsBasePath = d.Get(AssuredWorkloadsEndpointEntryKey).(string)
