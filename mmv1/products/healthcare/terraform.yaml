@@ -137,6 +137,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "parser_config.allow_null_header"
           - "parser_config.segment_terminator"
           - "parser_config.schema"
+        default_from_api: true
       parserConfig.segmentTerminator: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateBase64String'
