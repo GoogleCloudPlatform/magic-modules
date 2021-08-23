@@ -1042,7 +1042,7 @@ resource "google_project_iam_member" "composer-worker" {
 `, environment, network, subnetwork, serviceAccount)
 }
 
-func testAccComposerEnvironment_softwareCfg(name, network, subnetwork string) string {
+func testAccComposerEnvironment_softwareCfg(name, network, subnetwork string) string {	
 	return fmt.Sprintf(`
 resource "google_composer_environment" "test" {
 	name   = "%s"
