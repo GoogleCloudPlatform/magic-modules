@@ -2274,7 +2274,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           If it is not provided, the provider region is used.
       enable: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bool_to_upper_string.erb'
-        custom_flatten: 'templates/terraform/custom_flatten/string_to_bool.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/string_to_bool_default_true.erb'
         send_empty_value: true
       ipAddress: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
