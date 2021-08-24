@@ -5,7 +5,7 @@ import (
 )
 
 func GetCloudFunctionsFunctionCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
-	name, err := assetName(d, config, "//cloudfunctions.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/functions/{{name}}")
+	name, err := assetName(d, config, "//cloudfunctions.googleapis.com/projects/{{project}}/locations/{{region}}/functions/{{name}}")
 	if err != nil {
 		return []Asset{}, err
 	}
@@ -95,7 +95,7 @@ func GetCloudFunctionsFunctionApiObject(d TerraformResourceData, config *Config)
 	} else if v, ok := d.GetOkExists("available_memory_mb"); !isEmptyValue(reflect.ValueOf(availableMemoryMbProp)) && (ok || !reflect.DeepEqual(v, availableMemoryMbProp)) {
 		obj["availableMemoryMb"] = availableMemoryMbProp
 	}
-	
+
 	vpcConnectorProp, err := expandCloudFunctionsFunctionVpcConnector(d.Get("vpc_connector"), d, config)
 	if err != nil {
 		return nil, err
@@ -117,7 +117,7 @@ func GetCloudFunctionsFunctionApiObject(d TerraformResourceData, config *Config)
 		obj["ingressSettings"] = ingressSettingsProp
 	}
 
-	serviceAccountEmailProp , err := expandCloudFunctionsFunctionServiceAccountEmail(d.Get("service_account_email"), d, config)
+	serviceAccountEmailProp, err := expandCloudFunctionsFunctionServiceAccountEmail(d.Get("service_account_email"), d, config)
 	if err != nil {
 		return nil, err
 	} else if v, ok := d.GetOkExists("service_account_email"); !isEmptyValue(reflect.ValueOf(serviceAccountEmailProp)) && (ok || !reflect.DeepEqual(v, serviceAccountEmailProp)) {
