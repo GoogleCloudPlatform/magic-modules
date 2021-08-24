@@ -379,7 +379,7 @@ objects:
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'metadata'
         description: |
-            Custom metadata to apply to this instance.
+            Custom metadata to apply to this runtime.
             An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
       - !ruby/object:Api::Type::Time
         name: 'createTime'
@@ -444,6 +444,7 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/ai-platform-notebooks'
       api: 'https://cloud.google.com/ai-platform/notebooks/docs/reference/rest'
+    # TODO(mayran): Check whether use runtimes or instances.
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       method_name_separator: ':'
       fetch_iam_policy_verb: :GET
@@ -494,16 +495,12 @@ objects:
                 name: "zone"
                 description: |
                   The zone where the virtual machine is located.
+                output: true
               - !ruby/object:Api::Type::String
                 name: "machineType"
                 description: |
                   The Compute Engine machine type used for runtimes.
                 required: true
-              - !ruby/object:Api::Type::Array
-                name: "containerImages"
-                description: |
-                  Use a list of container images to start the notebook instance.
-                item_type: Api::Type::NestedObject
               - !ruby/object:Api::Type::NestedObject
                 name: "dataDisk"
                 description: |
@@ -631,6 +628,22 @@ objects:
                     description: |
                       Specifies the type of the disk, either SCRATCH or PERSISTENT.
                       If not specified, the default is PERSISTENT.
+              - !ruby/object:Api::Type::Array
+                name: "containerImages"
+                description: |
+                  Use a list of container images to start the notebook instance.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'repository'
+                      description: |
+                        The path to the container image repository.
+                        For example: gcr.io/{project_id}/{imageName}
+                      required: true
+                    - !ruby/object:Api::Type::String
+                      name: 'tag'
+                      description: |
+                          The tag of the container image. If not specified, this defaults to the latest tag.
               - !ruby/object:Api::Type::NestedObject
                 name: "encryptionConfig"
                 description: |
@@ -816,12 +829,10 @@ objects:
             values:
               - RUNTIME_ACCESS_TYPE_UNSPECIFIED
               - SINGLE_USER
-            output: true
             description: |
               The type of access mode this instance.
           - !ruby/object:Api::Type::String
             name: 'runtimeOwner'
-            required: true
             description: |
               The owner of this runtime after creation. Format: `alias@example.com`.
               Currently supports one owner only.
@@ -840,7 +851,6 @@ objects:
             description: |
               Cron expression in UTC timezone for schedule instance auto upgrade.
               Please follow the [cron format](https://en.wikipedia.org/wiki/Cron).
-            required: true
           - !ruby/object:Api::Type::Boolean
             name: "enableHealthMonitoring"
             description: |

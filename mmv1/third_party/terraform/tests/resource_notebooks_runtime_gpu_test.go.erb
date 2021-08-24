@@ -2,7 +2,6 @@
 package google
 
 <% unless version == 'ga' %>
-
 import (
 	"fmt"
 	"testing"
@@ -10,36 +9,41 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccNotebooksRuntime_basic(t *testing.T) {
+func TestAccNotebooksRuntime_create_gpu(t *testing.T) {
 	t.Parallel()
 
 	prefix := fmt.Sprintf("%d", randInt(t))
 	name := fmt.Sprintf("tf-%s", prefix)
 
 	vcrTest(t, resource.TestCase{
-		Providers: testAccProviders,
+		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNotebooksRuntime_basic(name),
+				Config: testAccNotebooksRuntime_create_gpu(name),
 			},
 			{
-				ResourceName:            "google_notebooks_runtime.runtime",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"virtual_machine", "metadata"},
+				ResourceName:      "google_notebooks_runtime.runtime_gpu",
+				ImportState:        true,
+				ImportStateVerify:  true,
+				ExpectNonEmptyPlan: true,
+				ImportStateVerifyIgnore: []string{"virtual_machine", "software_config"},
 			},
 		},
 	})
 }
 
-func testAccNotebooksRuntime_basic(name string) string {
+func testAccNotebooksRuntime_create_gpu(name string) string {
 	return fmt.Sprintf(`
-resource "google_notebooks_runtime" "runtime" {
+
+resource "google_notebooks_runtime" "runtime_gpu" {
   name = "%s"
   location = "us-central1-a"
-  access_config {
+	access_config {
     access_type = "SINGLE_USER"
     runtime_owner = "admin@hashicorptest.com"
+  }
+  software_config {
+    install_gpu_driver = true
   }
   virtual_machine {
     virtual_machine_config {
@@ -49,6 +53,10 @@ resource "google_notebooks_runtime" "runtime" {
           disk_size_gb = "100"
           disk_type = "PD_STANDARD"
         }
+      }
+      accelerator_config {
+        core_count = "1"
+        type = "NVIDIA_TESLA_V100"
       }
     }
   }

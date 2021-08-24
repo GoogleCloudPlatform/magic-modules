@@ -14,6 +14,14 @@ resource "google_notebooks_runtime" "<%= ctx[:primary_resource_id] %>" {
           disk_type = "PD_STANDARD"
         }
       }
+      container_images {
+        repository = "gcr.io/deeplearning-platform-release/base-cpu"
+        tag = "latest"
+      }
+      container_images {
+        repository = "gcr.io/deeplearning-platform-release/beam-notebooks"
+        tag = "latest"
+      }
     }
   }
 }

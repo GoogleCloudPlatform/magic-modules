@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccNotebooksRuntime_basic(t *testing.T) {
+func TestAccNotebooksRuntime_create_container(t *testing.T) {
 	t.Parallel()
 
 	prefix := fmt.Sprintf("%d", randInt(t))
@@ -20,21 +20,23 @@ func TestAccNotebooksRuntime_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNotebooksRuntime_basic(name),
+				Config: testAccNotebooksRuntime_create_container(name),
 			},
 			{
-				ResourceName:            "google_notebooks_runtime.runtime",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"virtual_machine", "metadata"},
+				ResourceName:       "google_notebooks_runtime.runtime_container",
+				ImportState:        true,
+				ImportStateVerify:  true,
+				ExpectNonEmptyPlan: true,
+				ImportStateVerifyIgnore: []string{"virtual_machine", "container_images", "metadata"},
 			},
 		},
 	})
 }
 
-func testAccNotebooksRuntime_basic(name string) string {
+func testAccNotebooksRuntime_create_container(name string) string {
 	return fmt.Sprintf(`
-resource "google_notebooks_runtime" "runtime" {
+
+resource "google_notebooks_runtime" "runtime_container" {
   name = "%s"
   location = "us-central1-a"
   access_config {
@@ -49,6 +51,14 @@ resource "google_notebooks_runtime" "runtime" {
           disk_size_gb = "100"
           disk_type = "PD_STANDARD"
         }
+      }
+      container_images {
+        repository = "gcr.io/deeplearning-platform-release/base-cpu"
+        tag = "latest"
+      }
+      container_images {
+        repository = "gcr.io/deeplearning-platform-release/beam-notebooks"
+        tag = "latest"
       }
     }
   }
