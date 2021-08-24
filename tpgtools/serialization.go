@@ -24,6 +24,8 @@ import (
 	assuredworkloads "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads"
 	assuredworkloadsBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads/beta"
 	cloudbuildBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudbuild/beta"
+	compute "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/compute"
+	computeBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/compute/beta"
 	dataproc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc"
 	dataprocBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc/beta"
 	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc"
@@ -43,6 +45,12 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 			return "google_assured_workloads_workload", nil
 		case "CloudbuildWorkerPool":
 			return "google_cloudbuild_worker_pool", nil
+		case "ComputeFirewallPolicy":
+			return "google_compute_firewall_policy", nil
+		case "ComputeFirewallPolicyAssociation":
+			return "google_compute_firewall_policy_association", nil
+		case "ComputeFirewallPolicyRule":
+			return "google_compute_firewall_policy_rule", nil
 		case "DataprocWorkflowTemplate":
 			return "google_dataproc_workflow_template", nil
 		case "EventarcTrigger":
@@ -59,6 +67,12 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 	switch resourceType {
 	case "AssuredWorkloadsWorkload":
 		return "google_assured_workloads_workload", nil
+	case "ComputeFirewallPolicy":
+		return "google_compute_firewall_policy", nil
+	case "ComputeFirewallPolicyAssociation":
+		return "google_compute_firewall_policy_association", nil
+	case "ComputeFirewallPolicyRule":
+		return "google_compute_firewall_policy_rule", nil
 	case "DataprocWorkflowTemplate":
 		return "google_dataproc_workflow_template", nil
 	case "EventarcTrigger":
@@ -87,6 +101,24 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 				return "", err
 			}
 			return CloudbuildWorkerPoolBetaAsHCL(*r)
+		case "ComputeFirewallPolicy":
+			r := &computeBeta.FirewallPolicy{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ComputeFirewallPolicyBetaAsHCL(*r)
+		case "ComputeFirewallPolicyAssociation":
+			r := &computeBeta.FirewallPolicyAssociation{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ComputeFirewallPolicyAssociationBetaAsHCL(*r)
+		case "ComputeFirewallPolicyRule":
+			r := &computeBeta.FirewallPolicyRule{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ComputeFirewallPolicyRuleBetaAsHCL(*r)
 		case "DataprocWorkflowTemplate":
 			r := &dataprocBeta.WorkflowTemplate{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -127,6 +159,24 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 			return "", err
 		}
 		return AssuredWorkloadsWorkloadAsHCL(*r)
+	case "ComputeFirewallPolicy":
+		r := &compute.FirewallPolicy{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeFirewallPolicyAsHCL(*r)
+	case "ComputeFirewallPolicyAssociation":
+		r := &compute.FirewallPolicyAssociation{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeFirewallPolicyAssociationAsHCL(*r)
+	case "ComputeFirewallPolicyRule":
+		r := &compute.FirewallPolicyRule{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeFirewallPolicyRuleAsHCL(*r)
 	case "DataprocWorkflowTemplate":
 		r := &dataproc.WorkflowTemplate{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -275,6 +325,140 @@ func convertCloudbuildWorkerPoolBetaWorkerConfigToHCL(r *cloudbuildBeta.WorkerPo
 	}
 	if r.NoExternalIP != nil {
 		outputConfig += fmt.Sprintf("\tno_external_ip = %#v\n", *r.NoExternalIP)
+	}
+	return outputConfig + "}"
+}
+
+// ComputeFirewallPolicyBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeFirewallPolicyBetaAsHCL(r computeBeta.FirewallPolicy) (string, error) {
+	outputConfig := "resource \"google_compute_firewall_policy\" \"output\" {\n"
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	if r.ShortName != nil {
+		outputConfig += fmt.Sprintf("\tshort_name = %#v\n", *r.ShortName)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+// ComputeFirewallPolicyAssociationBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeFirewallPolicyAssociationBetaAsHCL(r computeBeta.FirewallPolicyAssociation) (string, error) {
+	outputConfig := "resource \"google_compute_firewall_policy_association\" \"output\" {\n"
+	if r.AttachmentTarget != nil {
+		outputConfig += fmt.Sprintf("\tattachment_target = %#v\n", *r.AttachmentTarget)
+	}
+	if r.FirewallPolicy != nil {
+		outputConfig += fmt.Sprintf("\tfirewall_policy = %#v\n", *r.FirewallPolicy)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+// ComputeFirewallPolicyRuleBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeFirewallPolicyRuleBetaAsHCL(r computeBeta.FirewallPolicyRule) (string, error) {
+	outputConfig := "resource \"google_compute_firewall_policy_rule\" \"output\" {\n"
+	if r.Action != nil {
+		outputConfig += fmt.Sprintf("\taction = %#v\n", *r.Action)
+	}
+	if r.Direction != nil {
+		outputConfig += fmt.Sprintf("\tdirection = %#v\n", *r.Direction)
+	}
+	if r.FirewallPolicy != nil {
+		outputConfig += fmt.Sprintf("\tfirewall_policy = %#v\n", *r.FirewallPolicy)
+	}
+	if v := convertComputeFirewallPolicyRuleBetaMatchToHCL(r.Match); v != "" {
+		outputConfig += fmt.Sprintf("\tmatch %s\n", v)
+	}
+	if r.Priority != nil {
+		outputConfig += fmt.Sprintf("\tpriority = %#v\n", *r.Priority)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Disabled != nil {
+		outputConfig += fmt.Sprintf("\tdisabled = %#v\n", *r.Disabled)
+	}
+	if r.EnableLogging != nil {
+		outputConfig += fmt.Sprintf("\tenable_logging = %#v\n", *r.EnableLogging)
+	}
+	if r.TargetResources != nil {
+		outputConfig += "\ttarget_resources = ["
+		for _, v := range r.TargetResources {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.TargetServiceAccounts != nil {
+		outputConfig += "\ttarget_service_accounts = ["
+		for _, v := range r.TargetServiceAccounts {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+func convertComputeFirewallPolicyRuleBetaMatchToHCL(r *computeBeta.FirewallPolicyRuleMatch) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Layer4Configs != nil {
+		for _, v := range r.Layer4Configs {
+			outputConfig += fmt.Sprintf("\tlayer4_configs %s\n", convertComputeFirewallPolicyRuleBetaMatchLayer4ConfigsToHCL(&v))
+		}
+	}
+	if r.DestIPRanges != nil {
+		outputConfig += "\tdest_ip_ranges = ["
+		for _, v := range r.DestIPRanges {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.SrcIPRanges != nil {
+		outputConfig += "\tsrc_ip_ranges = ["
+		for _, v := range r.SrcIPRanges {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertComputeFirewallPolicyRuleBetaMatchLayer4ConfigsToHCL(r *computeBeta.FirewallPolicyRuleMatchLayer4Configs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.IPProtocol != nil {
+		outputConfig += fmt.Sprintf("\tip_protocol = %#v\n", *r.IPProtocol)
+	}
+	if r.Ports != nil {
+		outputConfig += "\tports = ["
+		for _, v := range r.Ports {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
 	}
 	return outputConfig + "}"
 }
@@ -1914,6 +2098,140 @@ func convertAssuredWorkloadsWorkloadResourcesToHCL(r *assuredworkloads.WorkloadR
 	return outputConfig + "}"
 }
 
+// ComputeFirewallPolicyAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeFirewallPolicyAsHCL(r compute.FirewallPolicy) (string, error) {
+	outputConfig := "resource \"google_compute_firewall_policy\" \"output\" {\n"
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	if r.ShortName != nil {
+		outputConfig += fmt.Sprintf("\tshort_name = %#v\n", *r.ShortName)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+// ComputeFirewallPolicyAssociationAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeFirewallPolicyAssociationAsHCL(r compute.FirewallPolicyAssociation) (string, error) {
+	outputConfig := "resource \"google_compute_firewall_policy_association\" \"output\" {\n"
+	if r.AttachmentTarget != nil {
+		outputConfig += fmt.Sprintf("\tattachment_target = %#v\n", *r.AttachmentTarget)
+	}
+	if r.FirewallPolicy != nil {
+		outputConfig += fmt.Sprintf("\tfirewall_policy = %#v\n", *r.FirewallPolicy)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+// ComputeFirewallPolicyRuleAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeFirewallPolicyRuleAsHCL(r compute.FirewallPolicyRule) (string, error) {
+	outputConfig := "resource \"google_compute_firewall_policy_rule\" \"output\" {\n"
+	if r.Action != nil {
+		outputConfig += fmt.Sprintf("\taction = %#v\n", *r.Action)
+	}
+	if r.Direction != nil {
+		outputConfig += fmt.Sprintf("\tdirection = %#v\n", *r.Direction)
+	}
+	if r.FirewallPolicy != nil {
+		outputConfig += fmt.Sprintf("\tfirewall_policy = %#v\n", *r.FirewallPolicy)
+	}
+	if v := convertComputeFirewallPolicyRuleMatchToHCL(r.Match); v != "" {
+		outputConfig += fmt.Sprintf("\tmatch %s\n", v)
+	}
+	if r.Priority != nil {
+		outputConfig += fmt.Sprintf("\tpriority = %#v\n", *r.Priority)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Disabled != nil {
+		outputConfig += fmt.Sprintf("\tdisabled = %#v\n", *r.Disabled)
+	}
+	if r.EnableLogging != nil {
+		outputConfig += fmt.Sprintf("\tenable_logging = %#v\n", *r.EnableLogging)
+	}
+	if r.TargetResources != nil {
+		outputConfig += "\ttarget_resources = ["
+		for _, v := range r.TargetResources {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.TargetServiceAccounts != nil {
+		outputConfig += "\ttarget_service_accounts = ["
+		for _, v := range r.TargetServiceAccounts {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+func convertComputeFirewallPolicyRuleMatchToHCL(r *compute.FirewallPolicyRuleMatch) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Layer4Configs != nil {
+		for _, v := range r.Layer4Configs {
+			outputConfig += fmt.Sprintf("\tlayer4_configs %s\n", convertComputeFirewallPolicyRuleMatchLayer4ConfigsToHCL(&v))
+		}
+	}
+	if r.DestIPRanges != nil {
+		outputConfig += "\tdest_ip_ranges = ["
+		for _, v := range r.DestIPRanges {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.SrcIPRanges != nil {
+		outputConfig += "\tsrc_ip_ranges = ["
+		for _, v := range r.SrcIPRanges {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertComputeFirewallPolicyRuleMatchLayer4ConfigsToHCL(r *compute.FirewallPolicyRuleMatchLayer4Configs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.IPProtocol != nil {
+		outputConfig += fmt.Sprintf("\tip_protocol = %#v\n", *r.IPProtocol)
+	}
+	if r.Ports != nil {
+		outputConfig += "\tports = ["
+		for _, v := range r.Ports {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
 // DataprocWorkflowTemplateAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -3345,6 +3663,51 @@ func convertCloudbuildWorkerPoolBetaWorkerConfigList(i interface{}) (out []map[s
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertCloudbuildWorkerPoolBetaWorkerConfig(v))
+	}
+	return out
+}
+
+func convertComputeFirewallPolicyRuleBetaMatch(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"layer4Configs": in["layer4_configs"],
+		"destIPRanges":  in["dest_ip_ranges"],
+		"srcIPRanges":   in["src_ip_ranges"],
+	}
+}
+
+func convertComputeFirewallPolicyRuleBetaMatchList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeFirewallPolicyRuleBetaMatch(v))
+	}
+	return out
+}
+
+func convertComputeFirewallPolicyRuleBetaMatchLayer4Configs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iPProtocol": in["ip_protocol"],
+		"ports":      in["ports"],
+	}
+}
+
+func convertComputeFirewallPolicyRuleBetaMatchLayer4ConfigsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeFirewallPolicyRuleBetaMatchLayer4Configs(v))
 	}
 	return out
 }
@@ -5122,6 +5485,51 @@ func convertAssuredWorkloadsWorkloadResourcesList(i interface{}) (out []map[stri
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertAssuredWorkloadsWorkloadResources(v))
+	}
+	return out
+}
+
+func convertComputeFirewallPolicyRuleMatch(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"layer4Configs": in["layer4_configs"],
+		"destIPRanges":  in["dest_ip_ranges"],
+		"srcIPRanges":   in["src_ip_ranges"],
+	}
+}
+
+func convertComputeFirewallPolicyRuleMatchList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeFirewallPolicyRuleMatch(v))
+	}
+	return out
+}
+
+func convertComputeFirewallPolicyRuleMatchLayer4Configs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iPProtocol": in["ip_protocol"],
+		"ports":      in["ports"],
+	}
+}
+
+func convertComputeFirewallPolicyRuleMatchLayer4ConfigsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeFirewallPolicyRuleMatchLayer4Configs(v))
 	}
 	return out
 }
