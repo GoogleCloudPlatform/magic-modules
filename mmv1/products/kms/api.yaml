@@ -148,6 +148,12 @@ objects:
         description: |
           The time when KMS will create a new version of this Crypto Key.
         output: true
+      - !ruby/object:Api::Type::String
+        name: 'destroyScheduledDuration'
+        input: true
+        description: |
+          The period of time that versions of this key spend in the DESTROY_SCHEDULED state before transitioning to DESTROYED.
+          If not specified at creation time, the default duration is 24 hours.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Creating a key':
