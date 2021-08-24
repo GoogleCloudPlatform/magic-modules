@@ -70,6 +70,44 @@ func TestAccComputeImage_update(t *testing.T) {
 	})
 }
 
+func TestAccComputeImage_update2(t *testing.T) {
+	t.Parallel()
+
+	var image compute.Image
+
+	name := "image-test-" + randString(t, 10)
+	// Only labels supports an update
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeImageDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeImage_update2(name),
+				Check:  resource.ComposeTestCheckFunc(),
+			},
+			{
+				ResourceName:            "google_compute_image.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"raw_disk"},
+			},
+			{
+				Config: testAccComputeImage_basic(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeImageDoesNotContainOsFeature(&image),
+				),
+			},
+			{
+				ResourceName:            "google_compute_image.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"raw_disk"},
+			},
+		},
+	})
+}
+
 func TestAccComputeImage_basedondisk(t *testing.T) {
 	t.Parallel()
 
@@ -295,6 +333,15 @@ func testAccCheckComputeImageDoesNotContainLabel(image *compute.Image, key strin
 	}
 }
 
+func testAccCheckComputeImageDoesNotContainOsFeature(image *compute.Image) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if image.GuestOsFeatures != nil {
+			return fmt.Errorf("guest_os_features is found")
+		}
+		return nil
+	}
+}
+
 func testAccCheckComputeImageHasSourceType(image *compute.Image) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if image.SourceType == "" {
@@ -383,6 +430,22 @@ resource "google_compute_image" "foobar" {
   labels = {
     empty-label = "oh-look-theres-a-label-now"
     new-field   = "only-shows-up-when-updated"
+  }
+}
+`, name)
+}
+
+func testAccComputeImage_update2(name string) string {
+	return fmt.Sprintf(`
+resource "google_compute_image" "foobar" {
+  name        = "%s"
+  description = "description-test"
+  family      = "family-test"
+  raw_disk {
+    source = "https://storage.googleapis.com/bosh-gce-raw-stemcells/bosh-stemcell-97.98-google-kvm-ubuntu-xenial-go_agent-raw-1557960142.tar.gz"
+  }
+  guest_os_features {
+    type = "SEV_CAPABLE"
   }
 }
 `, name)
