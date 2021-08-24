@@ -729,7 +729,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 		parts := strings.Split(primaryResource, ".")
 		primaryResourceName := snakeToTitleCase(parts[len(parts)-2])
 
-		if !versionMatch ||  {
+		if !versionMatch {
 			continue
 		} else if primaryResourceName != resourceType {
 			glog.Errorf("skipping %s since no match with %s.", primaryResourceName, resourceType)

@@ -25,3 +25,4 @@ variables:
   type: region
 versions:
 - ga
+- beta

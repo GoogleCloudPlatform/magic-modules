@@ -30,6 +30,7 @@ import (
 	eventarcBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc/beta"
 	gkehubBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub/beta"
 	privateca "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/privateca"
+	privatecaBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/privateca/beta"
 	fmtcmd "github.com/hashicorp/hcl/hcl/fmtcmd"
 )
 
@@ -50,6 +51,8 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 			return "google_gke_hub_feature", nil
 		case "GkeHubFeatureMembership":
 			return "google_gke_hub_feature_membership", nil
+		case "PrivatecaCertificateTemplate":
+			return "google_privateca_certificate_template", nil
 		}
 	}
 	// If not found in sample version, fallthrough to GA
@@ -108,6 +111,12 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 				return "", err
 			}
 			return GkeHubFeatureMembershipBetaAsHCL(*r)
+		case "PrivatecaCertificateTemplate":
+			r := &privatecaBeta.CertificateTemplate{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return PrivatecaCertificateTemplateBetaAsHCL(*r)
 		}
 	}
 	// If not found in sample version, fallthrough to GA
@@ -1537,6 +1546,297 @@ func convertGkeHubFeatureMembershipBetaConfigmanagementPolicyControllerToHCL(r *
 	}
 	if r.TemplateLibraryInstalled != nil {
 		outputConfig += fmt.Sprintf("\ttemplate_library_installed = %#v\n", *r.TemplateLibraryInstalled)
+	}
+	return outputConfig + "}"
+}
+
+// PrivatecaCertificateTemplateBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func PrivatecaCertificateTemplateBetaAsHCL(r privatecaBeta.CertificateTemplate) (string, error) {
+	outputConfig := "resource \"google_privateca_certificate_template\" \"output\" {\n"
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if v := convertPrivatecaCertificateTemplateBetaIdentityConstraintsToHCL(r.IdentityConstraints); v != "" {
+		outputConfig += fmt.Sprintf("\tidentity_constraints %s\n", v)
+	}
+	if v := convertPrivatecaCertificateTemplateBetaPassthroughExtensionsToHCL(r.PassthroughExtensions); v != "" {
+		outputConfig += fmt.Sprintf("\tpassthrough_extensions %s\n", v)
+	}
+	if v := convertPrivatecaCertificateTemplateBetaPredefinedValuesToHCL(r.PredefinedValues); v != "" {
+		outputConfig += fmt.Sprintf("\tpredefined_values %s\n", v)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+func convertPrivatecaCertificateTemplateBetaIdentityConstraintsToHCL(r *privatecaBeta.CertificateTemplateIdentityConstraints) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowSubjectAltNamesPassthrough != nil {
+		outputConfig += fmt.Sprintf("\tallow_subject_alt_names_passthrough = %#v\n", *r.AllowSubjectAltNamesPassthrough)
+	}
+	if r.AllowSubjectPassthrough != nil {
+		outputConfig += fmt.Sprintf("\tallow_subject_passthrough = %#v\n", *r.AllowSubjectPassthrough)
+	}
+	if v := convertPrivatecaCertificateTemplateBetaIdentityConstraintsCelExpressionToHCL(r.CelExpression); v != "" {
+		outputConfig += fmt.Sprintf("\tcel_expression %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaIdentityConstraintsCelExpressionToHCL(r *privatecaBeta.CertificateTemplateIdentityConstraintsCelExpression) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Expression != nil {
+		outputConfig += fmt.Sprintf("\texpression = %#v\n", *r.Expression)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Title != nil {
+		outputConfig += fmt.Sprintf("\ttitle = %#v\n", *r.Title)
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPassthroughExtensionsToHCL(r *privatecaBeta.CertificateTemplatePassthroughExtensions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AdditionalExtensions != nil {
+		for _, v := range r.AdditionalExtensions {
+			outputConfig += fmt.Sprintf("\tadditional_extensions %s\n", convertPrivatecaCertificateTemplateBetaPassthroughExtensionsAdditionalExtensionsToHCL(&v))
+		}
+	}
+	if r.KnownExtensions != nil {
+		outputConfig += "\tknown_extensions = ["
+		for _, v := range r.KnownExtensions {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPassthroughExtensionsAdditionalExtensionsToHCL(r *privatecaBeta.CertificateTemplatePassthroughExtensionsAdditionalExtensions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ObjectIdPath != nil {
+		outputConfig += "\tobject_id_path = ["
+		for _, v := range r.ObjectIdPath {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesToHCL(r *privatecaBeta.CertificateTemplatePredefinedValues) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AdditionalExtensions != nil {
+		for _, v := range r.AdditionalExtensions {
+			outputConfig += fmt.Sprintf("\tadditional_extensions %s\n", convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensionsToHCL(&v))
+		}
+	}
+	if r.AiaOcspServers != nil {
+		outputConfig += "\taia_ocsp_servers = ["
+		for _, v := range r.AiaOcspServers {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertPrivatecaCertificateTemplateBetaPredefinedValuesCaOptionsToHCL(r.CaOptions); v != "" {
+		outputConfig += fmt.Sprintf("\tca_options %s\n", v)
+	}
+	if v := convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageToHCL(r.KeyUsage); v != "" {
+		outputConfig += fmt.Sprintf("\tkey_usage %s\n", v)
+	}
+	if r.PolicyIds != nil {
+		for _, v := range r.PolicyIds {
+			outputConfig += fmt.Sprintf("\tpolicy_ids %s\n", convertPrivatecaCertificateTemplateBetaPredefinedValuesPolicyIdsToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensionsToHCL(r *privatecaBeta.CertificateTemplatePredefinedValuesAdditionalExtensions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensionsObjectIdToHCL(r.ObjectId); v != "" {
+		outputConfig += fmt.Sprintf("\tobject_id %s\n", v)
+	}
+	if r.Value != nil {
+		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
+	}
+	if r.Critical != nil {
+		outputConfig += fmt.Sprintf("\tcritical = %#v\n", *r.Critical)
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensionsObjectIdToHCL(r *privatecaBeta.CertificateTemplatePredefinedValuesAdditionalExtensionsObjectId) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ObjectIdPath != nil {
+		outputConfig += "\tobject_id_path = ["
+		for _, v := range r.ObjectIdPath {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesCaOptionsToHCL(r *privatecaBeta.CertificateTemplatePredefinedValuesCaOptions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.IsCa != nil {
+		outputConfig += fmt.Sprintf("\tis_ca = %#v\n", *r.IsCa)
+	}
+	if r.MaxIssuerPathLength != nil {
+		outputConfig += fmt.Sprintf("\tmax_issuer_path_length = %#v\n", *r.MaxIssuerPathLength)
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageToHCL(r *privatecaBeta.CertificateTemplatePredefinedValuesKeyUsage) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageBaseKeyUsageToHCL(r.BaseKeyUsage); v != "" {
+		outputConfig += fmt.Sprintf("\tbase_key_usage %s\n", v)
+	}
+	if v := convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageExtendedKeyUsageToHCL(r.ExtendedKeyUsage); v != "" {
+		outputConfig += fmt.Sprintf("\textended_key_usage %s\n", v)
+	}
+	if r.UnknownExtendedKeyUsages != nil {
+		for _, v := range r.UnknownExtendedKeyUsages {
+			outputConfig += fmt.Sprintf("\tunknown_extended_key_usages %s\n", convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageUnknownExtendedKeyUsagesToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageBaseKeyUsageToHCL(r *privatecaBeta.CertificateTemplatePredefinedValuesKeyUsageBaseKeyUsage) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.CertSign != nil {
+		outputConfig += fmt.Sprintf("\tcert_sign = %#v\n", *r.CertSign)
+	}
+	if r.ContentCommitment != nil {
+		outputConfig += fmt.Sprintf("\tcontent_commitment = %#v\n", *r.ContentCommitment)
+	}
+	if r.CrlSign != nil {
+		outputConfig += fmt.Sprintf("\tcrl_sign = %#v\n", *r.CrlSign)
+	}
+	if r.DataEncipherment != nil {
+		outputConfig += fmt.Sprintf("\tdata_encipherment = %#v\n", *r.DataEncipherment)
+	}
+	if r.DecipherOnly != nil {
+		outputConfig += fmt.Sprintf("\tdecipher_only = %#v\n", *r.DecipherOnly)
+	}
+	if r.DigitalSignature != nil {
+		outputConfig += fmt.Sprintf("\tdigital_signature = %#v\n", *r.DigitalSignature)
+	}
+	if r.EncipherOnly != nil {
+		outputConfig += fmt.Sprintf("\tencipher_only = %#v\n", *r.EncipherOnly)
+	}
+	if r.KeyAgreement != nil {
+		outputConfig += fmt.Sprintf("\tkey_agreement = %#v\n", *r.KeyAgreement)
+	}
+	if r.KeyEncipherment != nil {
+		outputConfig += fmt.Sprintf("\tkey_encipherment = %#v\n", *r.KeyEncipherment)
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageExtendedKeyUsageToHCL(r *privatecaBeta.CertificateTemplatePredefinedValuesKeyUsageExtendedKeyUsage) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ClientAuth != nil {
+		outputConfig += fmt.Sprintf("\tclient_auth = %#v\n", *r.ClientAuth)
+	}
+	if r.CodeSigning != nil {
+		outputConfig += fmt.Sprintf("\tcode_signing = %#v\n", *r.CodeSigning)
+	}
+	if r.EmailProtection != nil {
+		outputConfig += fmt.Sprintf("\temail_protection = %#v\n", *r.EmailProtection)
+	}
+	if r.OcspSigning != nil {
+		outputConfig += fmt.Sprintf("\tocsp_signing = %#v\n", *r.OcspSigning)
+	}
+	if r.ServerAuth != nil {
+		outputConfig += fmt.Sprintf("\tserver_auth = %#v\n", *r.ServerAuth)
+	}
+	if r.TimeStamping != nil {
+		outputConfig += fmt.Sprintf("\ttime_stamping = %#v\n", *r.TimeStamping)
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageUnknownExtendedKeyUsagesToHCL(r *privatecaBeta.CertificateTemplatePredefinedValuesKeyUsageUnknownExtendedKeyUsages) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ObjectIdPath != nil {
+		outputConfig += "\tobject_id_path = ["
+		for _, v := range r.ObjectIdPath {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesPolicyIdsToHCL(r *privatecaBeta.CertificateTemplatePredefinedValuesPolicyIds) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ObjectIdPath != nil {
+		outputConfig += "\tobject_id_path = ["
+		for _, v := range r.ObjectIdPath {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
 	}
 	return outputConfig + "}"
 }
@@ -4455,6 +4755,307 @@ func convertGkeHubFeatureMembershipBetaConfigmanagementPolicyControllerList(i in
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertGkeHubFeatureMembershipBetaConfigmanagementPolicyController(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaIdentityConstraints(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowSubjectAltNamesPassthrough": in["allow_subject_alt_names_passthrough"],
+		"allowSubjectPassthrough":         in["allow_subject_passthrough"],
+		"celExpression":                   convertPrivatecaCertificateTemplateBetaIdentityConstraintsCelExpression(in["cel_expression"]),
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaIdentityConstraintsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaIdentityConstraints(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaIdentityConstraintsCelExpression(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"description": in["description"],
+		"expression":  in["expression"],
+		"location":    in["location"],
+		"title":       in["title"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaIdentityConstraintsCelExpressionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaIdentityConstraintsCelExpression(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPassthroughExtensions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"additionalExtensions": in["additional_extensions"],
+		"knownExtensions":      in["known_extensions"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPassthroughExtensionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPassthroughExtensions(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPassthroughExtensionsAdditionalExtensions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"objectIdPath": in["object_id_path"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPassthroughExtensionsAdditionalExtensionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPassthroughExtensionsAdditionalExtensions(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValues(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"additionalExtensions": in["additional_extensions"],
+		"aiaOcspServers":       in["aia_ocsp_servers"],
+		"caOptions":            convertPrivatecaCertificateTemplateBetaPredefinedValuesCaOptions(in["ca_options"]),
+		"keyUsage":             convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsage(in["key_usage"]),
+		"policyIds":            in["policy_ids"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPredefinedValues(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"objectId": convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensionsObjectId(in["object_id"]),
+		"value":    in["value"],
+		"critical": in["critical"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensions(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensionsObjectId(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"objectIdPath": in["object_id_path"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensionsObjectIdList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensionsObjectId(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesCaOptions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"isCa":                in["is_ca"],
+		"maxIssuerPathLength": in["max_issuer_path_length"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesCaOptionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPredefinedValuesCaOptions(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsage(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"baseKeyUsage":             convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageBaseKeyUsage(in["base_key_usage"]),
+		"extendedKeyUsage":         convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageExtendedKeyUsage(in["extended_key_usage"]),
+		"unknownExtendedKeyUsages": in["unknown_extended_key_usages"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsage(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageBaseKeyUsage(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"certSign":          in["cert_sign"],
+		"contentCommitment": in["content_commitment"],
+		"crlSign":           in["crl_sign"],
+		"dataEncipherment":  in["data_encipherment"],
+		"decipherOnly":      in["decipher_only"],
+		"digitalSignature":  in["digital_signature"],
+		"encipherOnly":      in["encipher_only"],
+		"keyAgreement":      in["key_agreement"],
+		"keyEncipherment":   in["key_encipherment"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageBaseKeyUsageList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageBaseKeyUsage(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageExtendedKeyUsage(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"clientAuth":      in["client_auth"],
+		"codeSigning":     in["code_signing"],
+		"emailProtection": in["email_protection"],
+		"ocspSigning":     in["ocsp_signing"],
+		"serverAuth":      in["server_auth"],
+		"timeStamping":    in["time_stamping"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageExtendedKeyUsageList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageExtendedKeyUsage(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageUnknownExtendedKeyUsages(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"objectIdPath": in["object_id_path"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageUnknownExtendedKeyUsagesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageUnknownExtendedKeyUsages(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesPolicyIds(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"objectIdPath": in["object_id_path"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesPolicyIdsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPredefinedValuesPolicyIds(v))
 	}
 	return out
 }
