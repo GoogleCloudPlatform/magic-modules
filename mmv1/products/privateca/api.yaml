@@ -891,6 +891,17 @@ objects:
           Output only. The time at which this CertificateAuthority was updated.
           This is in RFC3339 text format.
         output: true
+        # Note: would be a resourceref, except that CertificateTemplate is in the DCL
+        # and we don't have references across mmv1-dcl bridge yet.
+      - !ruby/object:Api::Type::String
+        name: 'certificateTemplate'
+        input: true
+        description: |
+          The resource name for a CertificateTemplate used to issue this certificate,
+          in the format `projects/*/locations/*/certificateTemplates/*`. If this is specified,
+          the caller must have the necessary permission to use this template. If this is
+          omitted, no template will be used. This template must be in the same location
+          as the Certificate.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
