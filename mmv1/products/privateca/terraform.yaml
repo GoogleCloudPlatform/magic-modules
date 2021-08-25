@@ -81,6 +81,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       config.x509Config: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.erb'
+      certificateTemplate: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_config"
@@ -88,6 +90,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           certificate_authority_id: "my-certificate-authority" 
           certificate_name: "my-certificate"
+        test_env_vars:
+          project: :PROJECT_NAME
+        test_vars_overrides:
+          pool: "\"static-ca-pool\""
+      - !ruby/object:Provider::Terraform::Examples
+        name: "privateca_certificate_with_template"
+        primary_resource_id: "default"
+        vars:
+          certificate_name: "my-certificate"
+          certificate_authority_id: "my-certificate-authority"
+          certificate_template_name: "my-certificate-template"
         test_env_vars:
           project: :PROJECT_NAME
         test_vars_overrides:
