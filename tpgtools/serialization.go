@@ -23,6 +23,8 @@ import (
 
 	assuredworkloads "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads"
 	assuredworkloadsBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads/beta"
+	bigqueryreservation "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/bigqueryreservation"
+	bigqueryreservationBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/bigqueryreservation/beta"
 	cloudbuildBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudbuild/beta"
 	compute "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/compute"
 	computeBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/compute/beta"
@@ -43,6 +45,8 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 		switch resourceType {
 		case "AssuredWorkloadsWorkload":
 			return "google_assured_workloads_workload", nil
+		case "BigqueryReservationAssignment":
+			return "google_bigquery_reservation_assignment", nil
 		case "CloudbuildWorkerPool":
 			return "google_cloudbuild_worker_pool", nil
 		case "ComputeFirewallPolicy":
@@ -67,6 +71,8 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 	switch resourceType {
 	case "AssuredWorkloadsWorkload":
 		return "google_assured_workloads_workload", nil
+	case "BigqueryReservationAssignment":
+		return "google_bigquery_reservation_assignment", nil
 	case "ComputeFirewallPolicy":
 		return "google_compute_firewall_policy", nil
 	case "ComputeFirewallPolicyAssociation":
@@ -95,6 +101,12 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 				return "", err
 			}
 			return AssuredWorkloadsWorkloadBetaAsHCL(*r)
+		case "BigqueryReservationAssignment":
+			r := &bigqueryreservationBeta.Assignment{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return BigqueryReservationAssignmentBetaAsHCL(*r)
 		case "CloudbuildWorkerPool":
 			r := &cloudbuildBeta.WorkerPool{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -159,6 +171,12 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 			return "", err
 		}
 		return AssuredWorkloadsWorkloadAsHCL(*r)
+	case "BigqueryReservationAssignment":
+		r := &bigqueryreservation.Assignment{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return BigqueryReservationAssignmentAsHCL(*r)
 	case "ComputeFirewallPolicy":
 		r := &compute.FirewallPolicy{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -273,6 +291,32 @@ func convertAssuredWorkloadsWorkloadBetaResourcesToHCL(r *assuredworkloadsBeta.W
 	}
 	outputConfig := "{\n"
 	return outputConfig + "}"
+}
+
+// BigqueryReservationAssignmentBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func BigqueryReservationAssignmentBetaAsHCL(r bigqueryreservationBeta.Assignment) (string, error) {
+	outputConfig := "resource \"google_bigquery_reservation_assignment\" \"output\" {\n"
+	if r.Assignee != nil {
+		outputConfig += fmt.Sprintf("\tassignee = %#v\n", *r.Assignee)
+	}
+	if r.JobType != nil {
+		outputConfig += fmt.Sprintf("\tjob_type = %#v\n", *r.JobType)
+	}
+	if r.Reservation != nil {
+		outputConfig += fmt.Sprintf("\treservation = %#v\n", *r.Reservation)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	return formatHCL(outputConfig + "}")
 }
 
 // CloudbuildWorkerPoolBetaAsHCL returns a string representation of the specified resource in HCL.
@@ -2096,6 +2140,32 @@ func convertAssuredWorkloadsWorkloadResourcesToHCL(r *assuredworkloads.WorkloadR
 	}
 	outputConfig := "{\n"
 	return outputConfig + "}"
+}
+
+// BigqueryReservationAssignmentAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func BigqueryReservationAssignmentAsHCL(r bigqueryreservation.Assignment) (string, error) {
+	outputConfig := "resource \"google_bigquery_reservation_assignment\" \"output\" {\n"
+	if r.Assignee != nil {
+		outputConfig += fmt.Sprintf("\tassignee = %#v\n", *r.Assignee)
+	}
+	if r.JobType != nil {
+		outputConfig += fmt.Sprintf("\tjob_type = %#v\n", *r.JobType)
+	}
+	if r.Reservation != nil {
+		outputConfig += fmt.Sprintf("\treservation = %#v\n", *r.Reservation)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	return formatHCL(outputConfig + "}")
 }
 
 // ComputeFirewallPolicyAsHCL returns a string representation of the specified resource in HCL.
