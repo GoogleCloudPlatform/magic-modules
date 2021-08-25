@@ -179,6 +179,8 @@ func Provider() *schema.Provider {
 			AssuredWorkloadsEndpointEntryKey:               AssuredWorkloadsEndpointEntry,
 			EventarcEndpointEntryKey:               EventarcEndpointEntry,
 			GkeHubFeatureCustomEndpointEntryKey:               GkeHubFeatureCustomEndpointEntry,
+			PrivatecaCertificateTemplateEndpointEntryKey:               PrivatecaCertificateTemplateCustomEndpointEntry,
+
 			<% unless version == "ga" -%>
 			CloudBuildWorkerPoolEndpointEntryKey:               CloudBuildWorkerPoolEndpointEntry,
 			<% end -%>
@@ -404,6 +406,7 @@ end     # products.each do
 				"google_eventarc_trigger":                      resourceEventarcTrigger(),
 				"google_folder":                                resourceGoogleFolder(),
 				"google_folder_organization_policy":            resourceGoogleFolderOrganizationPolicy(),
+				"google_privateca_certificate_template":                        resourcePrivatecaCertificateTemplate(),
 				<% unless version == 'ga' -%>
 				"google_gke_hub_feature":                        resourceGkeHubFeature(),
 				"google_gke_hub_feature_membership":             resourceGkeHubFeatureMembership(),
@@ -615,6 +618,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.AssuredWorkloadsBasePath = d.Get(AssuredWorkloadsEndpointEntryKey).(string)
 	config.EventarcBasePath = d.Get(EventarcEndpointEntryKey).(string)
 	config.GkeHubBasePath = d.Get(GkeHubFeatureCustomEndpointEntryKey).(string)
+	config.PrivatecaBasePath = d.Get(PrivatecaCertificateTemplateEndpointEntryKey).(string)
 	<% unless version == "ga" -%>
 	config.CloudBuildWorkerPoolBasePath = d.Get(CloudBuildWorkerPoolEndpointEntryKey).(string)
 	<% end -%>
