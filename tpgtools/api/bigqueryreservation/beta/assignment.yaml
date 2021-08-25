@@ -68,7 +68,7 @@ components:
   schemas:
     Assignment:
       title: Assignment
-      x-dcl-id: assignees/{{assignee}}/job_types/{{job_type}}
+      x-dcl-id: projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments/{{name}}
       x-dcl-parent-container: project
       type: object
       required:
@@ -82,6 +82,13 @@ components:
           description: The resource which will use the reservation. E.g. projects/myproject,
             folders/123, organizations/456.
           x-kubernetes-immutable: true
+          x-dcl-references:
+          - resource: Cloudresourcemanager/Project
+            field: name
+          - resource: Cloudresourcemanager/Folder
+            field: name
+          - resource: Cloudresourcemanager/Organization
+            field: name
         jobType:
           type: string
           x-dcl-go-name: JobType
@@ -127,6 +134,7 @@ components:
           type: string
           x-dcl-go-name: State
           x-dcl-go-type: AssignmentStateEnum
+          readOnly: true
           description: 'Assignment will remain in PENDING state if no active capacity
             commitment is present. It will become ACTIVE when some capacity commitment
             becomes active. Possible values: STATE_UNSPECIFIED, PENDING, ACTIVE'
