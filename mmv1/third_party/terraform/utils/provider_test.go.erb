@@ -997,8 +997,8 @@ func initializeReleaseDiffTest(c resource.TestCase) resource.TestCase {
 				testStep.PlanOnly = true
 				testStep.ExpectNonEmptyPlan = false
 				replacementSteps = append(replacementSteps, newStep)
-				replacementSteps = append(replacementSteps, testStep)
 			}
+			replacementSteps = append(replacementSteps, testStep)
 		} else {
 			replacementSteps = append(replacementSteps, testStep)
 		}
