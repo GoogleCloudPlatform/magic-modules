@@ -444,12 +444,12 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/ai-platform-notebooks'
       api: 'https://cloud.google.com/ai-platform/notebooks/docs/reference/rest'
-    # TODO(mayran): Check whether use runtimes or instances.
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       method_name_separator: ':'
       fetch_iam_policy_verb: :GET
       parent_resource_attribute: 'runtime_name'
       import_format: ["projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}", "{{runtime_name}}"]
+      # Sets the base url for base_url:GetIamPolicy and base_url:SetIamPolicy in function `qualifyRuntimeUrl`
       base_url: projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}
     parameters:
       - !ruby/object:Api::Type::ResourceRef
