@@ -1,3 +1,8 @@
+# TODO(ndmckinley): This one should be upstreamed to the DCL.
+- type: CUSTOM_ID
+  details:
+    id: projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}
+  location: region
 - type: EXCLUDE
   field: id
 - type: CUSTOM_RESOURCE_NAME
