@@ -889,6 +889,8 @@ objects:
     update_verb: :PATCH
     self_link: "projects/{{project}}/guestPolicies/{{guest_policy_id}}"
     min_version: beta
+    identity:
+      - guestPolicyId
     description: |
       An OS Config resource representing a guest configuration policy. These policies represent
       the desired state for VM instance guest environments including packages to install or remove,

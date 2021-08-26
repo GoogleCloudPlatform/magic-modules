@@ -24,10 +24,6 @@ TFOICS_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-ma
 TFOICS_LOCAL_PATH=$PWD/../tfoics
 TFCD_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/terraform-docs-samples
 TFCD_LOCAL_PATH=$PWD/../tfcd
-ANSIBLE_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/google.cloud
-ANSIBLE_LOCAL_PATH=$PWD/../ansible
-INSPEC_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/inspec-gcp
-INSPEC_LOCAL_PATH=$PWD/../inspec
 
 DIFFS=""
 NEWLINE=$'\n'
@@ -51,17 +47,6 @@ git fetch origin $OLD_BRANCH
 if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
     SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
     DIFFS="${DIFFS}${NEWLINE}Terraform Beta: [Diff](https://github.com/modular-magician/terraform-provider-google-beta/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
-fi
-popd
-
-# Ansible
-mkdir -p $ANSIBLE_LOCAL_PATH
-git clone -b $NEW_BRANCH $ANSIBLE_SCRATCH_PATH $ANSIBLE_LOCAL_PATH
-pushd $ANSIBLE_LOCAL_PATH
-git fetch origin $OLD_BRANCH
-if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
-    SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
-    DIFFS="${DIFFS}${NEWLINE}Ansible: [Diff](https://github.com/modular-magician/google.cloud/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
 fi
 popd
 
@@ -95,17 +80,6 @@ git fetch origin $OLD_BRANCH
 if ! git diff --exit-code --quiet origin/$OLD_BRANCH origin/$NEW_BRANCH; then
     SUMMARY="$(git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat)"
     DIFFS="${DIFFS}${NEWLINE}TF Cloud Doc Samples: [Diff](https://github.com/modular-magician/terraform-docs-samples/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
-fi
-popd
-
-# Inspec
-mkdir -p $INSPEC_LOCAL_PATH
-git clone -b $NEW_BRANCH $INSPEC_SCRATCH_PATH $INSPEC_LOCAL_PATH
-pushd $INSPEC_LOCAL_PATH
-git fetch origin $OLD_BRANCH
-if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
-    SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
-    DIFFS="${DIFFS}${NEWLINE}Inspec: [Diff](https://github.com/modular-magician/inspec-gcp/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
 fi
 popd
 

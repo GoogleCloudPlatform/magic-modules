@@ -24,7 +24,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "firebase_project_basic"
         min_version: 'beta'
-        primary_resource_id: "basic"
+        primary_resource_id: "default"
         vars:
           instance_name: "memory-cache"
         test_env_vars:

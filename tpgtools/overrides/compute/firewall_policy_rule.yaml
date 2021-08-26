@@ -1,0 +1,6 @@
+# Fine-grained resource, no sweeper
+- type: NO_SWEEPER
+- type: DIFF_SUPPRESS_FUNC
+  field: target_resources
+  details:
+    diffsuppressfunc: compareSelfLinkOrResourceName

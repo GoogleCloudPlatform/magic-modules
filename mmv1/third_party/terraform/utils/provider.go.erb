@@ -138,6 +138,14 @@ func Provider() *schema.Provider {
 			    Optional: true,
 			},
 
+			"request_reason": {
+				Type:     schema.TypeString,
+				Optional: true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"CLOUDSDK_CORE_REQUEST_REASON",
+				}, nil),
+			},
+
 			// Generated Products
 			<% products.each do |product| -%>
 			"<%= product[:definitions].name.underscore -%>_custom_endpoint": &schema.Schema{
@@ -171,6 +179,8 @@ func Provider() *schema.Provider {
 			AssuredWorkloadsEndpointEntryKey:               AssuredWorkloadsEndpointEntry,
 			EventarcEndpointEntryKey:               EventarcEndpointEntry,
 			GkeHubFeatureCustomEndpointEntryKey:               GkeHubFeatureCustomEndpointEntry,
+			PrivatecaCertificateTemplateEndpointEntryKey:               PrivatecaCertificateTemplateCustomEndpointEntry,
+
 			<% unless version == "ga" -%>
 			CloudBuildWorkerPoolEndpointEntryKey:               CloudBuildWorkerPoolEndpointEntry,
 			<% end -%>
@@ -361,6 +371,9 @@ end     # products.each do
 				"google_cloudfunctions_function":               resourceCloudFunctionsFunction(),
 				"google_composer_environment":                  resourceComposerEnvironment(),
 				"google_compute_attached_disk":                 resourceComputeAttachedDisk(),
+				"google_compute_firewall_policy_association":   resourceComputeFirewallPolicyAssociation(),
+				"google_compute_firewall_policy":               resourceComputeFirewallPolicy(),
+				"google_compute_firewall_policy_rule":          resourceComputeFirewallPolicyRule(),
 				"google_compute_instance":                      resourceComputeInstance(),
 				<% unless version == 'ga' -%>
 				"google_compute_instance_from_machine_image":   resourceComputeInstanceFromMachineImage(),
@@ -393,6 +406,7 @@ end     # products.each do
 				"google_eventarc_trigger":                      resourceEventarcTrigger(),
 				"google_folder":                                resourceGoogleFolder(),
 				"google_folder_organization_policy":            resourceGoogleFolderOrganizationPolicy(),
+				"google_privateca_certificate_template":                        resourcePrivatecaCertificateTemplate(),
 				<% unless version == 'ga' -%>
 				"google_gke_hub_feature":                        resourceGkeHubFeature(),
 				"google_gke_hub_feature_membership":             resourceGkeHubFeatureMembership(),
@@ -530,6 +544,10 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		}
 	}
 
+	if v, ok := d.GetOk("request_reason"); ok {
+		config.RequestReason = v.(string)
+	}	
+
 	// Search for default credentials
 	config.Credentials = multiEnvSearch([]string{
 		"GOOGLE_CREDENTIALS",
@@ -600,6 +618,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.AssuredWorkloadsBasePath = d.Get(AssuredWorkloadsEndpointEntryKey).(string)
 	config.EventarcBasePath = d.Get(EventarcEndpointEntryKey).(string)
 	config.GkeHubBasePath = d.Get(GkeHubFeatureCustomEndpointEntryKey).(string)
+	config.PrivatecaBasePath = d.Get(PrivatecaCertificateTemplateEndpointEntryKey).(string)
 	<% unless version == "ga" -%>
 	config.CloudBuildWorkerPoolBasePath = d.Get(CloudBuildWorkerPoolEndpointEntryKey).(string)
 	<% end -%>

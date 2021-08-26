@@ -268,6 +268,8 @@ objects:
     base_url: 'envgroups'
     create_url: '{{org_id}}/envgroups'
     self_link: '{{org_id}}/envgroups/{{name}}'
+    update_verb: :PATCH
+    update_mask: true
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'

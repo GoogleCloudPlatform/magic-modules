@@ -282,6 +282,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       cdnPolicy.negativeCaching: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      cdnPolicy.negativeCachingPolicy.ttl: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
       cdnPolicy.serveWhileStale: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       cdnPolicy.clientTtl: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -637,6 +639,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           firewall_name: "test-firewall"
           network_name: "test-network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firewall_with_target_tags"
+        primary_resource_id: "rules"
+        vars:
+          firewall_name: "my-firewall-rule"
+        test_env_vars:
+          project: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/firewall.erb
       resource_definition: templates/terraform/resource_definition/firewall.erb
@@ -703,6 +712,40 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   ForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        name: "internal_http_lb_with_mig_backend"
+        primary_resource_id: "google_compute_forwarding_rule"
+        vars:
+          ilb_network_name: "l7-ilb-network"
+          proxy_subnet_name: "l7-ilb-proxy-subnet"
+          backend_subnet_name: "l7-ilb-subnet"
+          forwarding_rule_name: "l7-ilb-forwarding-rule"
+          target_http_proxy_name: "l7-ilb-target-http-proxy"
+          regional_url_map_name: "l7-ilb-regional-url-map"
+          backend_service_name: "l7-ilb-backend-subnet"
+          mig_template_name: "l7-ilb-mig-template"
+          hc_name: "l7-ilb-hc"
+          mig_name: "l7-ilb-mig1"
+          fw_allow_iap_hc_name: "l7-ilb-fw-allow-iap-hc"
+          fw_allow_ilb_to_backends_name: "l7-ilb-fw-allow-ilb-to-backends"
+          vm_test_name: "l7-ilb-test-vm"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "internal_tcp_udp_lb_with_mig_backend"
+        primary_resource_id: "google_compute_forwarding_rule"
+        vars:
+          ilb_network_name: "l4-ilb-network"
+          backend_subnet_name: "l4-ilb-subnet"
+          forwarding_rule_name: "l4-ilb-forwarding-rule"
+          backend_service_name: "l4-ilb-backend-subnet"
+          mig_template_name: "l4-ilb-mig-template"
+          hc_name: "l4-ilb-hc"
+          mig_name: "l4-ilb-mig1"
+          fw_allow_hc_name: "l4-ilb-fw-allow-hc"
+          fw_allow_ilb_to_backends_name: "l4-ilb-fw-allow-ilb-to-backends"
+          fw_allow_ilb_ssh_name: "l4-ilb-fw-ssh"
+          vm_test_name: "l4-ilb-test-vm"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
         name: "forwarding_rule_externallb"
         primary_resource_id: "default"
         vars:
@@ -723,6 +766,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           forwarding_rule_name: "website-forwarding-rule"
           target_pool_name: "website-target-pool"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "forwarding_rule_l3_default"
+        primary_resource_id: "fwd_rule"
+        vars:
+          forwarding_rule_name: "l3-forwarding-rule"
+          service_name: "service"
+          health_check_name: "health-check"
+        min_version: beta
       - !ruby/object:Provider::Terraform::Examples
         name: "forwarding_rule_internallb"
         primary_resource_id: "default"
@@ -2199,6 +2250,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           router_name: "my-router"
           peer_name: "my-router-peer"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "router_peer_disabled"
+        primary_resource_id: "peer"
+        skip_test: true
+        vars:
+          router_name: "my-router"
+          peer_name: "my-router-peer"
     properties:
       advertiseMode: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
@@ -2214,6 +2272,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           {{description}}
           If it is not provided, the provider region is used.
+      enable: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/bool_to_upper_string.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/string_to_bool.erb'
+        send_empty_value: true
+      ipAddress: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   SecurityPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   ServiceAttachment: !ruby/object:Overrides::Terraform::ResourceOverride

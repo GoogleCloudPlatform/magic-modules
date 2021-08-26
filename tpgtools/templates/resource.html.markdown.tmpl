@@ -43,7 +43,9 @@ description: |-
 {{- /* TODO warning */}}
 {{- range $s := $.DocSamples}}
 ## Example Usage - {{$s.Name}}
+{{- if $s.Description}}
 {{$s.Description}}
+{{- end }}
 ```hcl
 {{ $s.GenerateHCL true }}
 ```
