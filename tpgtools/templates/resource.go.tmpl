@@ -283,7 +283,7 @@ func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) erro
 {{ end }}
 
 {{ if $.PostCreateFunction }}
-	if err := {{$.PostCreateFunction}}(d, config, res); err != nil {
+	if err := {{$.PostCreateFunction}}(d, client, config, res); err != nil {
 		return fmt.Errorf("error encountered in post-create: %v", err)
 	}
 {{ end }}

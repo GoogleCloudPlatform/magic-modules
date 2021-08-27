@@ -19,11 +19,5 @@
 - type: POST_CREATE_FUNCTION
   details:
     function: deleteComputeNetworkDefaultRoutes
-- type: REMOVED
-  field: ipv4_range
-  details:
-    message: >-
-      Legacy Networks are deprecated and you will no longer be able to
-      create them using this field from Feb 1, 2020 onwards.
 - type: COLLAPSED_OBJECT
   field: routing_config
