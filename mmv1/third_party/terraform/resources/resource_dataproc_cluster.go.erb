@@ -1450,7 +1450,7 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 <% unless version == 'ga' -%>
 		"lifecycle_config": flattenLifecycleConfig(d, cfg.LifecycleConfig),
 		"endpoint_config":  flattenEndpointConfig(d, cfg.EndpointConfig),
-		"metastore_config":          flattenMetastoreConfig(d, cfg.MetastoreConfig),
+		"metastore_config": flattenMetastoreConfig(d, cfg.MetastoreConfig),
 <% end -%>
 	}
 
