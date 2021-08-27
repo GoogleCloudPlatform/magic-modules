@@ -630,6 +630,7 @@ resource "google_kms_crypto_key" "crypto_key" {
   labels = {
     key = "value"
   }
+  skip_initial_version_creation = true
   import_only = true
 }
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
