@@ -1,0 +1,2 @@
+# Sweeper depends on parent we can't generate due to multi-parent possibilities
+- type: NO_SWEEPER
