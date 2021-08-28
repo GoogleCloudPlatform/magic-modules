@@ -102,6 +102,9 @@ func resource{{$.PathType}}() *schema.Resource {
 	{{- if $p.MaxItems }}
 				MaxItems: {{$p.MaxItems}},
 	{{- end }}
+	{{- if $p.MinItems }}
+				MinItems: {{$p.MinItems}},
+	{{- end }}
 	{{- if $p.Elem }}
 				Elem: {{$p.Elem}},
 	{{- end }}
@@ -161,6 +164,9 @@ func {{$.PathType}}{{$v.PackagePath}}Schema() *schema.Resource {
 					Description: `{{/* TODO fix formatting for $p.Description */}}`,
 		{{- if $p.MaxItems }}
 					MaxItems: {{$p.MaxItems}},
+		{{- end }}
+		{{- if $p.MinItems }}
+					MinItems: {{$p.MinItems}},
 		{{- end }}
 		{{- if $p.Elem }}
 					Elem: {{$p.Elem}},

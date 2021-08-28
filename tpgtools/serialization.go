@@ -51,8 +51,8 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 			return "google_compute_firewall_policy_association", nil
 		case "ComputeFirewallPolicyRule":
 			return "google_compute_firewall_policy_rule", nil
-		case "ComputeRegionForwardingRule":
-			return "google_compute_region_forwarding_rule", nil
+		case "ComputeForwardingRule":
+			return "google_compute_forwarding_rule", nil
 		case "ComputeGlobalForwardingRule":
 			return "google_compute_global_forwarding_rule", nil
 		case "DataprocWorkflowTemplate":
@@ -127,12 +127,12 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 				return "", err
 			}
 			return ComputeFirewallPolicyRuleBetaAsHCL(*r)
-		case "ComputeRegionForwardingRule":
+		case "ComputeForwardingRule":
 			r := &computeBeta.ForwardingRule{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return ComputeRegionForwardingRuleBetaAsHCL(*r)
+			return ComputeForwardingRuleBetaAsHCL(*r)
 		case "ComputeGlobalForwardingRule":
 			r := &computeBeta.ForwardingRule{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -495,14 +495,17 @@ func convertComputeFirewallPolicyRuleBetaMatchLayer4ConfigsToHCL(r *computeBeta.
 	return outputConfig + "}"
 }
 
-// ComputeRegionForwardingRuleBetaAsHCL returns a string representation of the specified resource in HCL.
+// ComputeForwardingRuleBetaAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func ComputeRegionForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string, error) {
-	outputConfig := "resource \"google_compute_region_forwarding_rule\" \"output\" {\n"
+func ComputeForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string, error) {
+	outputConfig := "resource \"google_compute_forwarding_rule\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
 	if r.AllPorts != nil {
 		outputConfig += fmt.Sprintf("\tall_ports = %#v\n", *r.AllPorts)
 	}
@@ -530,16 +533,10 @@ func ComputeRegionForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string,
 	if r.LoadBalancingScheme != nil {
 		outputConfig += fmt.Sprintf("\tload_balancing_scheme = %#v\n", *r.LoadBalancingScheme)
 	}
-	if r.Location != nil {
-		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
-	}
 	if r.MetadataFilter != nil {
 		for _, v := range r.MetadataFilter {
-			outputConfig += fmt.Sprintf("\tmetadata_filter %s\n", convertComputeRegionForwardingRuleBetaMetadataFilterToHCL(&v))
+			outputConfig += fmt.Sprintf("\tmetadata_filter %s\n", convertComputeForwardingRuleBetaMetadataFilterToHCL(&v))
 		}
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
 	if r.Network != nil {
 		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
@@ -560,14 +557,11 @@ func ComputeRegionForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string,
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
-	if r.Region != nil {
-		outputConfig += fmt.Sprintf("\tregion = %#v\n", *r.Region)
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tregion = %#v\n", *r.Location)
 	}
 	if r.ServiceLabel != nil {
 		outputConfig += fmt.Sprintf("\tservice_label = %#v\n", *r.ServiceLabel)
-	}
-	if r.ServiceName != nil {
-		outputConfig += fmt.Sprintf("\tservice_name = %#v\n", *r.ServiceName)
 	}
 	if r.Subnetwork != nil {
 		outputConfig += fmt.Sprintf("\tsubnetwork = %#v\n", *r.Subnetwork)
@@ -578,14 +572,14 @@ func ComputeRegionForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string,
 	return formatHCL(outputConfig + "}")
 }
 
-func convertComputeRegionForwardingRuleBetaMetadataFilterToHCL(r *computeBeta.ForwardingRuleMetadataFilter) string {
+func convertComputeForwardingRuleBetaMetadataFilterToHCL(r *computeBeta.ForwardingRuleMetadataFilter) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
 	if r.FilterLabel != nil {
 		for _, v := range r.FilterLabel {
-			outputConfig += fmt.Sprintf("\tfilter_label %s\n", convertComputeRegionForwardingRuleBetaMetadataFilterFilterLabelToHCL(&v))
+			outputConfig += fmt.Sprintf("\tfilter_label %s\n", convertComputeForwardingRuleBetaMetadataFilterFilterLabelToHCL(&v))
 		}
 	}
 	if r.FilterMatchCriteria != nil {
@@ -594,7 +588,7 @@ func convertComputeRegionForwardingRuleBetaMetadataFilterToHCL(r *computeBeta.Fo
 	return outputConfig + "}"
 }
 
-func convertComputeRegionForwardingRuleBetaMetadataFilterFilterLabelToHCL(r *computeBeta.ForwardingRuleMetadataFilterFilterLabel) string {
+func convertComputeForwardingRuleBetaMetadataFilterFilterLabelToHCL(r *computeBeta.ForwardingRuleMetadataFilterFilterLabel) string {
 	if r == nil {
 		return ""
 	}
@@ -616,6 +610,9 @@ func convertComputeRegionForwardingRuleBetaMetadataFilterFilterLabelToHCL(r *com
 // validation unless is an object returned from the API after an Apply.
 func ComputeGlobalForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string, error) {
 	outputConfig := "resource \"google_compute_global_forwarding_rule\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
 	if r.AllPorts != nil {
 		outputConfig += fmt.Sprintf("\tall_ports = %#v\n", *r.AllPorts)
 	}
@@ -643,16 +640,10 @@ func ComputeGlobalForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string,
 	if r.LoadBalancingScheme != nil {
 		outputConfig += fmt.Sprintf("\tload_balancing_scheme = %#v\n", *r.LoadBalancingScheme)
 	}
-	if r.Location != nil {
-		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
-	}
 	if r.MetadataFilter != nil {
 		for _, v := range r.MetadataFilter {
 			outputConfig += fmt.Sprintf("\tmetadata_filter %s\n", convertComputeGlobalForwardingRuleBetaMetadataFilterToHCL(&v))
 		}
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
 	if r.Network != nil {
 		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
@@ -673,14 +664,8 @@ func ComputeGlobalForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string,
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
-	if r.Region != nil {
-		outputConfig += fmt.Sprintf("\tregion = %#v\n", *r.Region)
-	}
 	if r.ServiceLabel != nil {
 		outputConfig += fmt.Sprintf("\tservice_label = %#v\n", *r.ServiceLabel)
-	}
-	if r.ServiceName != nil {
-		outputConfig += fmt.Sprintf("\tservice_name = %#v\n", *r.ServiceName)
 	}
 	if r.Subnetwork != nil {
 		outputConfig += fmt.Sprintf("\tsubnetwork = %#v\n", *r.Subnetwork)
@@ -2498,6 +2483,9 @@ func convertComputeFirewallPolicyRuleMatchLayer4ConfigsToHCL(r *compute.Firewall
 // validation unless is an object returned from the API after an Apply.
 func ComputeForwardingRuleAsHCL(r compute.ForwardingRule) (string, error) {
 	outputConfig := "resource \"google_compute_forwarding_rule\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
 	if r.AllPorts != nil {
 		outputConfig += fmt.Sprintf("\tall_ports = %#v\n", *r.AllPorts)
 	}
@@ -2530,9 +2518,6 @@ func ComputeForwardingRuleAsHCL(r compute.ForwardingRule) (string, error) {
 			outputConfig += fmt.Sprintf("\tmetadata_filter %s\n", convertComputeForwardingRuleMetadataFilterToHCL(&v))
 		}
 	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
 	if r.Network != nil {
 		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
 	}
@@ -2557,9 +2542,6 @@ func ComputeForwardingRuleAsHCL(r compute.ForwardingRule) (string, error) {
 	}
 	if r.ServiceLabel != nil {
 		outputConfig += fmt.Sprintf("\tservice_label = %#v\n", *r.ServiceLabel)
-	}
-	if r.ServiceName != nil {
-		outputConfig += fmt.Sprintf("\tservice_name = %#v\n", *r.ServiceName)
 	}
 	if r.Subnetwork != nil {
 		outputConfig += fmt.Sprintf("\tsubnetwork = %#v\n", *r.Subnetwork)
@@ -2608,6 +2590,9 @@ func convertComputeForwardingRuleMetadataFilterFilterLabelToHCL(r *compute.Forwa
 // validation unless is an object returned from the API after an Apply.
 func ComputeGlobalForwardingRuleAsHCL(r compute.ForwardingRule) (string, error) {
 	outputConfig := "resource \"google_compute_global_forwarding_rule\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
 	if r.AllPorts != nil {
 		outputConfig += fmt.Sprintf("\tall_ports = %#v\n", *r.AllPorts)
 	}
@@ -2640,9 +2625,6 @@ func ComputeGlobalForwardingRuleAsHCL(r compute.ForwardingRule) (string, error) 
 			outputConfig += fmt.Sprintf("\tmetadata_filter %s\n", convertComputeGlobalForwardingRuleMetadataFilterToHCL(&v))
 		}
 	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
 	if r.Network != nil {
 		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
 	}
@@ -2664,9 +2646,6 @@ func ComputeGlobalForwardingRuleAsHCL(r compute.ForwardingRule) (string, error) 
 	}
 	if r.ServiceLabel != nil {
 		outputConfig += fmt.Sprintf("\tservice_label = %#v\n", *r.ServiceLabel)
-	}
-	if r.ServiceName != nil {
-		outputConfig += fmt.Sprintf("\tservice_name = %#v\n", *r.ServiceName)
 	}
 	if r.Subnetwork != nil {
 		outputConfig += fmt.Sprintf("\tsubnetwork = %#v\n", *r.Subnetwork)
@@ -4187,7 +4166,7 @@ func convertComputeFirewallPolicyRuleBetaMatchLayer4ConfigsList(i interface{}) (
 	return out
 }
 
-func convertComputeRegionForwardingRuleBetaMetadataFilter(i interface{}) map[string]interface{} {
+func convertComputeForwardingRuleBetaMetadataFilter(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -4198,18 +4177,18 @@ func convertComputeRegionForwardingRuleBetaMetadataFilter(i interface{}) map[str
 	}
 }
 
-func convertComputeRegionForwardingRuleBetaMetadataFilterList(i interface{}) (out []map[string]interface{}) {
+func convertComputeForwardingRuleBetaMetadataFilterList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertComputeRegionForwardingRuleBetaMetadataFilter(v))
+		out = append(out, convertComputeForwardingRuleBetaMetadataFilter(v))
 	}
 	return out
 }
 
-func convertComputeRegionForwardingRuleBetaMetadataFilterFilterLabel(i interface{}) map[string]interface{} {
+func convertComputeForwardingRuleBetaMetadataFilterFilterLabel(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -4220,13 +4199,13 @@ func convertComputeRegionForwardingRuleBetaMetadataFilterFilterLabel(i interface
 	}
 }
 
-func convertComputeRegionForwardingRuleBetaMetadataFilterFilterLabelList(i interface{}) (out []map[string]interface{}) {
+func convertComputeForwardingRuleBetaMetadataFilterFilterLabelList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertComputeRegionForwardingRuleBetaMetadataFilterFilterLabel(v))
+		out = append(out, convertComputeForwardingRuleBetaMetadataFilterFilterLabel(v))
 	}
 	return out
 }

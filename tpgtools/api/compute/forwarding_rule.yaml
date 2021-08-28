@@ -68,6 +68,8 @@ components:
       x-dcl-labels: labels
       type: object
       required:
+      - name
+      - target
       - project
       properties:
         allPorts:
@@ -88,8 +90,6 @@ components:
             If the field is set to `TRUE`, clients can access ILB from all regions.
             Otherwise only allows access from clients in the same region as the internal
             load balancer.
-          x-kubernetes-immutable: true
-          x-dcl-server-default: true
         backendService:
           type: string
           x-dcl-go-name: BackendService
@@ -149,6 +149,7 @@ components:
           - AH
           - SCTP
           - ICMP
+          - L3_DEFAULT
         ipVersion:
           type: string
           x-dcl-go-name: IPVersion
@@ -171,7 +172,12 @@ components:
             a `PacketMirroring` rule applies to them. This can only be set to true
             for load balancers that have their `loadBalancingScheme` set to `INTERNAL`.
           x-kubernetes-immutable: true
-          x-dcl-server-default: true
+        labelFingerprint:
+          type: string
+          x-dcl-go-name: LabelFingerprint
+          readOnly: true
+          description: Used internally during label updates.
+          x-kubernetes-immutable: true
         labels:
           type: object
           additionalProperties:
@@ -199,7 +205,6 @@ components:
 
             For more information about forwarding rules, refer to [Forwarding rule concepts](/load-balancing/docs/forwarding-rule-concepts). Possible values: INVALID, INTERNAL, INTERNAL_MANAGED, INTERNAL_SELF_MANAGED, EXTERNAL
           x-kubernetes-immutable: true
-          x-dcl-server-default: true
           enum:
           - INVALID
           - INTERNAL
@@ -228,6 +233,9 @@ components:
           items:
             type: object
             x-dcl-go-type: ForwardingRuleMetadataFilter
+            required:
+            - filterMatchCriteria
+            - filterLabel
             properties:
               filterLabel:
                 type: array
@@ -242,6 +250,9 @@ components:
                 items:
                   type: object
                   x-dcl-go-type: ForwardingRuleMetadataFilterFilterLabel
+                  required:
+                  - name
+                  - value
                   properties:
                     name:
                       type: string
@@ -294,6 +305,7 @@ components:
             network that the load balanced IP should belong to for this Forwarding
             Rule. If this field is not specified, the default network will be used.
           x-kubernetes-immutable: true
+          x-dcl-server-default: true
         networkTier:
           type: string
           x-dcl-go-name: NetworkTier
@@ -338,7 +350,7 @@ components:
             [Port specifications](/load-balancing/docs/forwarding-rule-concepts#port_specifications).'
           x-kubernetes-immutable: true
           x-dcl-send-empty: true
-          x-dcl-list-type: list
+          x-dcl-list-type: set
           items:
             type: string
             x-dcl-go-type: string
@@ -381,6 +393,7 @@ components:
         serviceName:
           type: string
           x-dcl-go-name: ServiceName
+          readOnly: true
           description: '[Output Only] The internal fully qualified service name for
             this Forwarding Rule. This field is only used for internal load balancing.'
           x-kubernetes-immutable: true
@@ -393,6 +406,7 @@ components:
             specified is in auto subnet mode, this field is optional. However, if
             the network is in custom subnet mode, a subnetwork must be specified.
           x-kubernetes-immutable: true
+          x-dcl-server-default: true
         target:
           type: string
           x-dcl-go-name: Target

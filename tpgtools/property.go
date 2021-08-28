@@ -71,6 +71,7 @@ type Property struct {
 	ValidateFunc     *string
 	SetHashFunc      *string
 	MaxItems         *int64
+	MinItems         *int64
 	ConfigMode       *string
 
 	Removed    *string
@@ -372,7 +373,7 @@ func (p Property) flattenGetterWithParent(parent string) string {
 func (p Property) DefaultValidator() *string {
 	switch p.Type.String() {
 	case SchemaTypeString:
-		if p.Type.IsEnum() && len(p.typ.Enum) > 0 && !p.Computed {
+		if p.Type.IsEnum() && len(p.typ.Enum) > 0 && p.Settable {
 			enumValues := ""
 			for _, v := range p.typ.Enum {
 				enumValues += fmt.Sprintf(`"%s", `, v)
@@ -515,8 +516,18 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			continue
 		}
 
-		if v.Default != "" {
-			d, err := renderDefault(p.Type, v.Default)
+		do := CustomDefaultDetails{}
+		doOk, err := overrides.PropertyOverrideWithDetails(CustomDefault, p, &do, location)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode custom list size details")
+		}
+
+		if v.Default != "" || doOk {
+			def := v.Default
+			if doOk {
+				def = do.Default
+			}
+			d, err := renderDefault(p.Type, def)
 			if err != nil {
 				return nil, fmt.Errorf("failed to render default: %v", err)
 			}
@@ -582,6 +593,20 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 		// Handle array properties
 		if v.Items != nil {
+			ls := CustomListSizeConstraintDetails{}
+			lsOk, err := overrides.PropertyOverrideWithDetails(CustomListSize, p, &ls, location)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decode custom list size details")
+			}
+			if lsOk {
+				if ls.Max > 0 {
+					p.MaxItems = &ls.Max
+				}
+				if ls.Min > 0 {
+					p.MinItems = &ls.Min
+				}
+			}
+
 			// We end up handling arrays of objects very similarly to nested objects
 			// themselves
 			if len(v.Items.Properties) > 0 {
@@ -611,6 +636,16 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				p.Required = true
 			} else {
 				p.Optional = true
+			}
+			cr := CustomRequiredDetails{}
+			crOk, err := overrides.PropertyOverrideWithDetails(CustomRequired, p, &cr, location)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decode custom required details")
+			}
+			if crOk {
+				p.Required = cr.Required
+				p.Optional = cr.Optional
+				p.Computed = cr.Computed
 			}
 
 			p.Settable = true
