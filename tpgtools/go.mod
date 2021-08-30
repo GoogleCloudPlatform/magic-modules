@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	bitbucket.org/creachadair/stringset v0.0.9
-	github.com/GoogleCloudPlatform/declarative-resource-client-library v0.0.0-20210828005957-5e300a425b22
+	github.com/GoogleCloudPlatform/declarative-resource-client-library v0.0.0-20210830202814-90d607e5aba1
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/hashicorp/hcl v1.0.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.4.0

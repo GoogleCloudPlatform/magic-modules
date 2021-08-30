@@ -524,19 +524,11 @@ func ComputeForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string, error
 	if r.IPProtocol != nil {
 		outputConfig += fmt.Sprintf("\tip_protocol = %#v\n", *r.IPProtocol)
 	}
-	if r.IPVersion != nil {
-		outputConfig += fmt.Sprintf("\tip_version = %#v\n", *r.IPVersion)
-	}
 	if r.IsMirroringCollector != nil {
 		outputConfig += fmt.Sprintf("\tis_mirroring_collector = %#v\n", *r.IsMirroringCollector)
 	}
 	if r.LoadBalancingScheme != nil {
 		outputConfig += fmt.Sprintf("\tload_balancing_scheme = %#v\n", *r.LoadBalancingScheme)
-	}
-	if r.MetadataFilter != nil {
-		for _, v := range r.MetadataFilter {
-			outputConfig += fmt.Sprintf("\tmetadata_filter %s\n", convertComputeForwardingRuleBetaMetadataFilterToHCL(&v))
-		}
 	}
 	if r.Network != nil {
 		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
@@ -572,36 +564,6 @@ func ComputeForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string, error
 	return formatHCL(outputConfig + "}")
 }
 
-func convertComputeForwardingRuleBetaMetadataFilterToHCL(r *computeBeta.ForwardingRuleMetadataFilter) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.FilterLabel != nil {
-		for _, v := range r.FilterLabel {
-			outputConfig += fmt.Sprintf("\tfilter_label %s\n", convertComputeForwardingRuleBetaMetadataFilterFilterLabelToHCL(&v))
-		}
-	}
-	if r.FilterMatchCriteria != nil {
-		outputConfig += fmt.Sprintf("\tfilter_match_criteria = %#v\n", *r.FilterMatchCriteria)
-	}
-	return outputConfig + "}"
-}
-
-func convertComputeForwardingRuleBetaMetadataFilterFilterLabelToHCL(r *computeBeta.ForwardingRuleMetadataFilterFilterLabel) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Value != nil {
-		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
-	}
-	return outputConfig + "}"
-}
-
 // ComputeGlobalForwardingRuleBetaAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -613,14 +575,8 @@ func ComputeGlobalForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string,
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
-	if r.AllPorts != nil {
-		outputConfig += fmt.Sprintf("\tall_ports = %#v\n", *r.AllPorts)
-	}
-	if r.AllowGlobalAccess != nil {
-		outputConfig += fmt.Sprintf("\tallow_global_access = %#v\n", *r.AllowGlobalAccess)
-	}
-	if r.BackendService != nil {
-		outputConfig += fmt.Sprintf("\tbackend_service = %#v\n", *r.BackendService)
+	if r.Target != nil {
+		outputConfig += fmt.Sprintf("\ttarget = %#v\n", *r.Target)
 	}
 	if r.Description != nil {
 		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
@@ -634,44 +590,22 @@ func ComputeGlobalForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string,
 	if r.IPVersion != nil {
 		outputConfig += fmt.Sprintf("\tip_version = %#v\n", *r.IPVersion)
 	}
-	if r.IsMirroringCollector != nil {
-		outputConfig += fmt.Sprintf("\tis_mirroring_collector = %#v\n", *r.IsMirroringCollector)
-	}
 	if r.LoadBalancingScheme != nil {
 		outputConfig += fmt.Sprintf("\tload_balancing_scheme = %#v\n", *r.LoadBalancingScheme)
 	}
 	if r.MetadataFilter != nil {
 		for _, v := range r.MetadataFilter {
-			outputConfig += fmt.Sprintf("\tmetadata_filter %s\n", convertComputeGlobalForwardingRuleBetaMetadataFilterToHCL(&v))
+			outputConfig += fmt.Sprintf("\tmetadata_filters %s\n", convertComputeGlobalForwardingRuleBetaMetadataFilterToHCL(&v))
 		}
 	}
 	if r.Network != nil {
 		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
 	}
-	if r.NetworkTier != nil {
-		outputConfig += fmt.Sprintf("\tnetwork_tier = %#v\n", *r.NetworkTier)
-	}
 	if r.PortRange != nil {
 		outputConfig += fmt.Sprintf("\tport_range = %#v\n", *r.PortRange)
 	}
-	if r.Ports != nil {
-		outputConfig += "\tports = ["
-		for _, v := range r.Ports {
-			outputConfig += fmt.Sprintf("%#v, ", v)
-		}
-		outputConfig += "]\n"
-	}
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
-	}
-	if r.ServiceLabel != nil {
-		outputConfig += fmt.Sprintf("\tservice_label = %#v\n", *r.ServiceLabel)
-	}
-	if r.Subnetwork != nil {
-		outputConfig += fmt.Sprintf("\tsubnetwork = %#v\n", *r.Subnetwork)
-	}
-	if r.Target != nil {
-		outputConfig += fmt.Sprintf("\ttarget = %#v\n", *r.Target)
 	}
 	return formatHCL(outputConfig + "}")
 }
@@ -683,7 +617,7 @@ func convertComputeGlobalForwardingRuleBetaMetadataFilterToHCL(r *computeBeta.Fo
 	outputConfig := "{\n"
 	if r.FilterLabel != nil {
 		for _, v := range r.FilterLabel {
-			outputConfig += fmt.Sprintf("\tfilter_label %s\n", convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelToHCL(&v))
+			outputConfig += fmt.Sprintf("\tfilter_labels %s\n", convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelToHCL(&v))
 		}
 	}
 	if r.FilterMatchCriteria != nil {
@@ -2504,19 +2438,11 @@ func ComputeForwardingRuleAsHCL(r compute.ForwardingRule) (string, error) {
 	if r.IPProtocol != nil {
 		outputConfig += fmt.Sprintf("\tip_protocol = %#v\n", *r.IPProtocol)
 	}
-	if r.IPVersion != nil {
-		outputConfig += fmt.Sprintf("\tip_version = %#v\n", *r.IPVersion)
-	}
 	if r.IsMirroringCollector != nil {
 		outputConfig += fmt.Sprintf("\tis_mirroring_collector = %#v\n", *r.IsMirroringCollector)
 	}
 	if r.LoadBalancingScheme != nil {
 		outputConfig += fmt.Sprintf("\tload_balancing_scheme = %#v\n", *r.LoadBalancingScheme)
-	}
-	if r.MetadataFilter != nil {
-		for _, v := range r.MetadataFilter {
-			outputConfig += fmt.Sprintf("\tmetadata_filter %s\n", convertComputeForwardingRuleMetadataFilterToHCL(&v))
-		}
 	}
 	if r.Network != nil {
 		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
@@ -2552,36 +2478,6 @@ func ComputeForwardingRuleAsHCL(r compute.ForwardingRule) (string, error) {
 	return formatHCL(outputConfig + "}")
 }
 
-func convertComputeForwardingRuleMetadataFilterToHCL(r *compute.ForwardingRuleMetadataFilter) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.FilterLabel != nil {
-		for _, v := range r.FilterLabel {
-			outputConfig += fmt.Sprintf("\tfilter_label %s\n", convertComputeForwardingRuleMetadataFilterFilterLabelToHCL(&v))
-		}
-	}
-	if r.FilterMatchCriteria != nil {
-		outputConfig += fmt.Sprintf("\tfilter_match_criteria = %#v\n", *r.FilterMatchCriteria)
-	}
-	return outputConfig + "}"
-}
-
-func convertComputeForwardingRuleMetadataFilterFilterLabelToHCL(r *compute.ForwardingRuleMetadataFilterFilterLabel) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Value != nil {
-		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
-	}
-	return outputConfig + "}"
-}
-
 // ComputeGlobalForwardingRuleAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -2593,14 +2489,8 @@ func ComputeGlobalForwardingRuleAsHCL(r compute.ForwardingRule) (string, error) 
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
-	if r.AllPorts != nil {
-		outputConfig += fmt.Sprintf("\tall_ports = %#v\n", *r.AllPorts)
-	}
-	if r.AllowGlobalAccess != nil {
-		outputConfig += fmt.Sprintf("\tallow_global_access = %#v\n", *r.AllowGlobalAccess)
-	}
-	if r.BackendService != nil {
-		outputConfig += fmt.Sprintf("\tbackend_service = %#v\n", *r.BackendService)
+	if r.Target != nil {
+		outputConfig += fmt.Sprintf("\ttarget = %#v\n", *r.Target)
 	}
 	if r.Description != nil {
 		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
@@ -2614,44 +2504,22 @@ func ComputeGlobalForwardingRuleAsHCL(r compute.ForwardingRule) (string, error) 
 	if r.IPVersion != nil {
 		outputConfig += fmt.Sprintf("\tip_version = %#v\n", *r.IPVersion)
 	}
-	if r.IsMirroringCollector != nil {
-		outputConfig += fmt.Sprintf("\tis_mirroring_collector = %#v\n", *r.IsMirroringCollector)
-	}
 	if r.LoadBalancingScheme != nil {
 		outputConfig += fmt.Sprintf("\tload_balancing_scheme = %#v\n", *r.LoadBalancingScheme)
 	}
 	if r.MetadataFilter != nil {
 		for _, v := range r.MetadataFilter {
-			outputConfig += fmt.Sprintf("\tmetadata_filter %s\n", convertComputeGlobalForwardingRuleMetadataFilterToHCL(&v))
+			outputConfig += fmt.Sprintf("\tmetadata_filters %s\n", convertComputeGlobalForwardingRuleMetadataFilterToHCL(&v))
 		}
 	}
 	if r.Network != nil {
 		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
 	}
-	if r.NetworkTier != nil {
-		outputConfig += fmt.Sprintf("\tnetwork_tier = %#v\n", *r.NetworkTier)
-	}
 	if r.PortRange != nil {
 		outputConfig += fmt.Sprintf("\tport_range = %#v\n", *r.PortRange)
 	}
-	if r.Ports != nil {
-		outputConfig += "\tports = ["
-		for _, v := range r.Ports {
-			outputConfig += fmt.Sprintf("%#v, ", v)
-		}
-		outputConfig += "]\n"
-	}
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
-	}
-	if r.ServiceLabel != nil {
-		outputConfig += fmt.Sprintf("\tservice_label = %#v\n", *r.ServiceLabel)
-	}
-	if r.Subnetwork != nil {
-		outputConfig += fmt.Sprintf("\tsubnetwork = %#v\n", *r.Subnetwork)
-	}
-	if r.Target != nil {
-		outputConfig += fmt.Sprintf("\ttarget = %#v\n", *r.Target)
 	}
 	return formatHCL(outputConfig + "}")
 }
@@ -2663,7 +2531,7 @@ func convertComputeGlobalForwardingRuleMetadataFilterToHCL(r *compute.Forwarding
 	outputConfig := "{\n"
 	if r.FilterLabel != nil {
 		for _, v := range r.FilterLabel {
-			outputConfig += fmt.Sprintf("\tfilter_label %s\n", convertComputeGlobalForwardingRuleMetadataFilterFilterLabelToHCL(&v))
+			outputConfig += fmt.Sprintf("\tfilter_labels %s\n", convertComputeGlobalForwardingRuleMetadataFilterFilterLabelToHCL(&v))
 		}
 	}
 	if r.FilterMatchCriteria != nil {
@@ -4166,57 +4034,13 @@ func convertComputeFirewallPolicyRuleBetaMatchLayer4ConfigsList(i interface{}) (
 	return out
 }
 
-func convertComputeForwardingRuleBetaMetadataFilter(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"filterLabel":         in["filter_label"],
-		"filterMatchCriteria": in["filter_match_criteria"],
-	}
-}
-
-func convertComputeForwardingRuleBetaMetadataFilterList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertComputeForwardingRuleBetaMetadataFilter(v))
-	}
-	return out
-}
-
-func convertComputeForwardingRuleBetaMetadataFilterFilterLabel(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"name":  in["name"],
-		"value": in["value"],
-	}
-}
-
-func convertComputeForwardingRuleBetaMetadataFilterFilterLabelList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertComputeForwardingRuleBetaMetadataFilterFilterLabel(v))
-	}
-	return out
-}
-
 func convertComputeGlobalForwardingRuleBetaMetadataFilter(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"filterLabel":         in["filter_label"],
+		"filterLabel":         in["filter_labels"],
 		"filterMatchCriteria": in["filter_match_criteria"],
 	}
 }
@@ -6076,57 +5900,13 @@ func convertComputeFirewallPolicyRuleMatchLayer4ConfigsList(i interface{}) (out 
 	return out
 }
 
-func convertComputeForwardingRuleMetadataFilter(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"filterLabel":         in["filter_label"],
-		"filterMatchCriteria": in["filter_match_criteria"],
-	}
-}
-
-func convertComputeForwardingRuleMetadataFilterList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertComputeForwardingRuleMetadataFilter(v))
-	}
-	return out
-}
-
-func convertComputeForwardingRuleMetadataFilterFilterLabel(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"name":  in["name"],
-		"value": in["value"],
-	}
-}
-
-func convertComputeForwardingRuleMetadataFilterFilterLabelList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertComputeForwardingRuleMetadataFilterFilterLabel(v))
-	}
-	return out
-}
-
 func convertComputeGlobalForwardingRuleMetadataFilter(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"filterLabel":         in["filter_label"],
+		"filterLabel":         in["filter_labels"],
 		"filterMatchCriteria": in["filter_match_criteria"],
 	}
 }
