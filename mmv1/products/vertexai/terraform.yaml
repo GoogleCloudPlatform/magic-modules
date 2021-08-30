@@ -44,7 +44,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "vertex_ai_featurestore"
-        primary_resource_id: "dataset"
+        primary_resource_id: "featurestore"
         vars:
           name: "terraform"
     properties:
