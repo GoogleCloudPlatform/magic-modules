@@ -75,9 +75,10 @@ func resourceSqlUser() *schema.Resource {
 			},
 
 			"type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: emptyOrDefaultStringSuppress("BUILT_IN"),
 				Description: `The user type. It determines the method to authenticate the user during login.
                 The default is the database's built-in user type. Flags include "BUILT_IN", "CLOUD_IAM_USER", or "CLOUD_IAM_SERVICE_ACCOUNT".`,
 				ValidateFunc: validation.StringInSlice([]string{"BUILT_IN", "CLOUD_IAM_USER", "CLOUD_IAM_SERVICE_ACCOUNT", ""}, false),
@@ -186,9 +187,15 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	var user *sqladmin.User
-	for _, currentUser := range users.Items {
+	databaseInstance, err := config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
+	if err != nil {
+		return err
+	}
 
-		name = strings.Split(name, "@")[0]
+	for _, currentUser := range users.Items {
+		if !strings.Contains(databaseInstance.DatabaseVersion, "POSTGRES") {
+			name = strings.Split(name, "@")[0]
+		}
 
 		if currentUser.Name == name {
 			// Host can only be empty for postgres instances,

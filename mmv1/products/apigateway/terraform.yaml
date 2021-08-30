@@ -24,6 +24,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       method_name_separator: ':'
       parent_resource_attribute: 'api'
       base_url: projects/{{project}}/locations/global/apis/{{api}}
+      import_format: ["projects/{{project}}/locations/global/apis/{{api}}", "{{project}}/{{api}}", "{{api}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         min_version: beta
@@ -99,6 +100,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       method_name_separator: ':'
       parent_resource_attribute: 'gateway'
       base_url: projects/{{project}}/locations/{{region}}/gateways/{{gateway}}
+      import_format: ["projects/{{project}}/locations/{{region}}/gateways/{{gateway}}", "{{project}}/{{region}}/{{gateway}}", "{{region}}/{{gateway}}", "{{gateway}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         min_version: beta

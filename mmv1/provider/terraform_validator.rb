@@ -39,7 +39,7 @@ module Provider
       target_folder = data.output_folder
       product_ns = data.object.__product.name
       data.generate(pwd,
-                    'templates/terraform/objectlib/base.go.erb',
+                    'templates/validator/resource_conversion.go.erb',
                     File.join(target_folder,
                               "google/#{product_ns.downcase}_#{data.object.name.underscore}.go"),
                     self)

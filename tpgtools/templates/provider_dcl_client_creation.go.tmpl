@@ -37,28 +37,21 @@ import (
 
 {{range $index, $pkg := .}}
 func NewDCL{{$pkg.ProductType}}Client(config *Config, userAgent, billingProject string ) *{{$pkg.PackageName}}.Client {
-	dclClientOptions := dcl.WithHTTPClient(config.client)
-	dclUserAgentOptions:=dcl.WithUserAgent(userAgent)
-	dclLoggerOptions := dcl.WithLogger(dclLogger{})
-	var dclConfig *dcl.Config
-	if config.UserProjectOverride && billingProject != "" {
-		dclBillingProjectHeader := dcl.WithHeader("X-Goog-User-Project", billingProject)
-		dclConfig = dcl.NewConfig(
-			dclClientOptions,
-			dclUserAgentOptions,
-			dclLoggerOptions,
-			dcl.WithBasePath(config.{{$pkg.BasePathIdentifier}}BasePath),
-			dclBillingProjectHeader,
-		)
-	} else{
-		dclConfig = dcl.NewConfig(
-			dclClientOptions,
-			dclUserAgentOptions,
-			dclLoggerOptions,
-			dcl.WithBasePath(config.{{$pkg.BasePathIdentifier}}BasePath),
-		)
+	configOptions := []dcl.ConfigOption{
+		dcl.WithHTTPClient(config.client),
+		dcl.WithUserAgent(userAgent),
+		dcl.WithLogger(dclLogger{}),
+		dcl.WithBasePath(config.{{$pkg.BasePathIdentifier}}BasePath),
 	}
 
+	if config.UserProjectOverride {
+		configOptions = append(configOptions, dcl.WithUserProjectOverride())
+		if billingProject != "" {
+			configOptions = append(configOptions, dcl.WithBillingProject(billingProject))
+		}
+	}
+
+	dclConfig := dcl.NewConfig(configOptions...)
 	return {{$pkg.PackageName}}.NewClient(dclConfig)
 }
 {{end}}

@@ -68,6 +68,17 @@ type Sample struct {
 
 	// ExtraDependencies are the additional golang dependencies the injected code may require
 	ExtraDependencies []string `yaml:"extra_dependencies"`
+
+	// Variables are the various attributes of the set of resources that need to be filled in.
+	Variables []Variable `yaml:"variables"`
+}
+
+// Variable contains metadata about the types of variables in a sample.
+type Variable struct {
+	// Name is the variable name in the JSON.
+	Name string `yaml:"name"`
+	// Type is the variable type.
+	Type string `yaml:"type"`
 }
 
 // Substitution contains metadata that varies for the sample context
@@ -113,7 +124,7 @@ func BuildDependency(fileName, product, localname, version string, b []byte) (*D
 	if localname == "" {
 		localname = fileParts[0]
 	}
-	dclResourceType := product + resourceName
+	dclResourceType := product + snakeToTitleCase(resourceName)
 	terraformResourceType, err := DCLToTerraformReference(dclResourceType, version)
 	if err != nil {
 		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)
@@ -243,9 +254,13 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 	out := []Sample{*s}
 	for i, update := range s.Updates {
 		newSample := *s
-		*newSample.PrimaryResource = update["resource"]
+		primaryResource := update["resource"]
+		newSample.PrimaryResource = &primaryResource
 		if !newSample.isNativeHCL() {
-			newSample.DependencyList[0] = newSample.generateSampleDependencyWithName(*newSample.PrimaryResource, "primary")
+			var newDeps []Dependency
+			newDeps = append(newDeps, newSample.DependencyList...)
+			newDeps[0] = newSample.generateSampleDependencyWithName(*newSample.PrimaryResource, "primary")
+			newSample.DependencyList = newDeps
 		}
 		newSample.TestSlug = fmt.Sprintf("%sUpdate%v", newSample.TestSlug, i)
 		newSample.Updates = nil

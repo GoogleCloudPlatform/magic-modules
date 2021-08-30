@@ -658,6 +658,10 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 		sample.resourceReference = r
 		sample.FileName = file.Name()
 		sample.PrimaryResource = &(sample.FileName)
+		if sample.Name == nil || *sample.Name == "" {
+			sampleName = strings.Split(sample.FileName, ".")[0]
+			sample.Name = &sampleName
+		}
 		sample.TestSlug = snakeToTitleCase(sampleName) + "HandWritten"
 		sample.HasGAEquivalent = hasGA
 		samples = append(samples, sample)
@@ -670,7 +674,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 	sampleAccessoryFolder := r.getSampleAccessoryFolder()
 	packagePath := r.productMetadata.PackagePath
 	version := r.versionMetadata.V
-	resourceType := strings.ToLower(r.Type())
+	resourceType := r.Type()
 	sampleFriendlyMetaPath := path.Join(sampleAccessoryFolder, "meta.yaml")
 	samples := []Sample{}
 
@@ -698,6 +702,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 		if pathExists(sampleFriendlyMetaPath) {
 			tc, err = mergeYaml(sampleOGFilePath, sampleFriendlyMetaPath)
 		} else {
+			glog.Errorf("warning : sample meta does not exist for %v at %q", r.TerraformName(), sampleFriendlyMetaPath)
 			tc, err = ioutil.ReadFile(path.Join(samplesPath, file.Name()))
 		}
 		if err != nil {
@@ -722,9 +727,12 @@ func (r *Resource) loadDCLSamples() []Sample {
 
 		primaryResource := *sample.PrimaryResource
 		parts := strings.Split(primaryResource, ".")
-		primaryResourceName := parts[len(parts)-2]
+		primaryResourceName := snakeToTitleCase(parts[len(parts)-2])
 
-		if !versionMatch || primaryResourceName != resourceType {
+		if !versionMatch {
+			continue
+		} else if primaryResourceName != resourceType {
+			glog.Errorf("skipping %s since no match with %s.", primaryResourceName, resourceType)
 			continue
 		}
 

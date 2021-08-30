@@ -16,8 +16,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   CertificateAuthority: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     import_format: ["projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}"]
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate_authority.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_authority_basic"
@@ -63,10 +61,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           issue certificates.
       config.x509Config: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.erb'
+      config.x509Config.caOptions.maxIssuerPathLength: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
       post_create: templates/terraform/post_create/privateca_authority_enable.go.erb
       pre_delete: templates/terraform/pre_delete/privateca_authority_disable.go.erb
+      post_import: templates/terraform/post_import/privateca_import.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate_authority.go.erb
   Certificate: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
@@ -80,6 +81,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       config.x509Config: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.erb'
+      certificateTemplate: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareResourceNames'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_config"
@@ -87,6 +90,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           certificate_authority_id: "my-certificate-authority" 
           certificate_name: "my-certificate"
+        test_env_vars:
+          project: :PROJECT_NAME
+        test_vars_overrides:
+          pool: "\"static-ca-pool\""
+      - !ruby/object:Provider::Terraform::Examples
+        name: "privateca_certificate_with_template"
+        primary_resource_id: "default"
+        vars:
+          certificate_name: "my-certificate"
+          certificate_authority_id: "my-certificate-authority"
+          certificate_template_name: "my-certificate-template"
         test_env_vars:
           project: :PROJECT_NAME
         test_vars_overrides:
@@ -118,6 +132,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       issuancePolicy.baselineValues: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.erb'
+      issuancePolicy.baselineValues.caOptions.maxIssuerPathLength: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
+      publishingOptions: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'emptyOrUnsetBlockDiffSuppress'
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/privateca.certificateManager'
       method_name_separator: ':'

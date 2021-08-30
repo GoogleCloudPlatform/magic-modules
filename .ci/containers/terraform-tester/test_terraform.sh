@@ -29,7 +29,7 @@ pushd $local_path
 echo "Checking for modified go files"
 # get the names of changed files and look for go files
 # (ignoring "no matches found" errors from grep)
-gofiles=$(git diff --name-only HEAD~1 | { grep "\.go$" || test $? = 1; })
+gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
 if [[ -z $gofiles ]]; then
     echo "Skipping tests: No go files changed"
     exit 0
@@ -70,18 +70,19 @@ make
 lint_exit_code=$?
 test_exit_code=1
 
+make tools
+lint_exit_code=$(($lint_exit_code || $?))
+
 if [ $lint_exit_code -eq 0 ]; then
-    # only run lint & tests if the code compiled
+    # only run lint & tests if the code compiled and tools downloaded
     make lint
-    lint_exit_code=$lint_exit_code || $?
+    lint_exit_code=$(($lint_exit_code || $?))
     make test
     test_exit_code=$?
 fi
 
-make tools
-lint_exit_code=$lint_exit_code || $?
 make docscheck
-lint_exit_code=$lint_exit_code || $?
+lint_exit_code=$(($lint_exit_code || $?))
 
 set -e
 
