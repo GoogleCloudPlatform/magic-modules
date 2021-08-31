@@ -14129,7 +14129,7 @@ objects:
     kind: 'compute#ServiceAttachment'
     base_url: projects/{{project}}/regions/{{region}}/serviceAttachments
     has_self_link: true
-    input: true
+    update_verb: :PATCH
     description: |
       Represents a ServiceAttachment resource.
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -14177,6 +14177,11 @@ objects:
         name: 'description'
         description: |
           An optional description of this resource.
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'fingerprint'
+        description: |
+          Fingerprint of this resource. This field is used internally during
+          updates of this resource.
       - !ruby/object:Api::Type::String
         name: 'connectionPreference'
         required: true
@@ -14205,6 +14210,7 @@ objects:
       - !ruby/object:Api::Type::ResourceRef
         name: targetService
         required: true
+        input: true
         resource: 'ForwardingRule'
         imports: 'selfLink'
         description: |
