@@ -1,10 +1,11 @@
+# [START cloudvpn_ha_external]
 resource "google_compute_ha_vpn_gateway" "ha_gateway" {
   region   = "us-central1"
   name     = "<%= ctx[:vars]['ha_vpn_gateway_name'] %>"
   network  = google_compute_network.network.id
 }
 
-resource "google_compute_external_vpn_gateway" "external_gateway" {
+resource "google_compute_external_vpn_gateway" "<%= ctx[:primary_resource_id] %>" {
   name            = "<%= ctx[:vars]['external_gateway_name'] %>"
   redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
   description     = "An externally managed VPN gateway"
@@ -99,3 +100,4 @@ resource "google_compute_router_peer" "router1_peer2" {
   advertised_route_priority = 100
   interface                 = google_compute_router_interface.router1_interface2.name
 }
+# [START cloudvpn_ha_external]
