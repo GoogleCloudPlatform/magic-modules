@@ -13226,6 +13226,7 @@ objects:
         name: logConfig
         description: |
           Configuration for logging on NAT
+        send_empty_value: true
         properties:
           - !ruby/object:Api::Type::Boolean
             name: 'enable'
