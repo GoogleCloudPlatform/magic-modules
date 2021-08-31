@@ -359,16 +359,28 @@ objects:
                       Regex matching branches to build. Exactly one a of branch name, tag, or commit SHA must be provided.
                       The syntax of the regular expressions accepted is the syntax accepted by RE2 and 
                       described at https://github.com/google/re2/wiki/Syntax
+                    exactly_one_of:
+                      - branch_name
+                      - commit_sha
+                      - tag_name
                   - !ruby/object:Api::Type::String
                     name: 'tagName'
                     description: |
                       Regex matching tags to build. Exactly one a of branch name, tag, or commit SHA must be provided.
                       The syntax of the regular expressions accepted is the syntax accepted by RE2 and 
                       described at https://github.com/google/re2/wiki/Syntax
+                    exactly_one_of:
+                      - branch_name
+                      - commit_sha
+                      - tag_name
                   - !ruby/object:Api::Type::String
                     name: 'commitSha'
                     description: |
                       Explicit commit SHA to build. Exactly one a of branch name, tag, or commit SHA must be provided.
+                    exactly_one_of:
+                      - branch_name
+                      - commit_sha
+                      - tag_name
           - !ruby/object:Api::Type::Array
             name: 'tags'
             item_type: Api::Type::String
