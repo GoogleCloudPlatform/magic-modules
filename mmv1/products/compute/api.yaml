@@ -14162,6 +14162,7 @@ objects:
         description: |
           URL of the region where the resource resides.
         required: true
+        input: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -14173,6 +14174,7 @@ objects:
           which means the first character must be a lowercase letter, and all
           following characters must be a dash, lowercase letter, or digit,
           except the last character, which cannot be a dash.
+        input: true
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
