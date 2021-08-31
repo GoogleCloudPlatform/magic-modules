@@ -97,7 +97,7 @@ module Provider
       !property.output &&
         (property.input || (resource.input && property.update_url.nil? && property.input.nil? &&
                             (property.parent.nil? ||
-                             force_new?(property.parent, resource))) || property.force_new)
+                             force_new?(property.parent, resource))))
     end
 
     # Returns tuples of (fieldName, list of update masks) for

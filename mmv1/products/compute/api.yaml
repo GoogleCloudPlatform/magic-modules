@@ -14221,6 +14221,7 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'natSubnets'
         required: true
+        send_empty_value: true
         description: |
           An array of subnets that is provided for NAT in this service attachment.
         item_type: !ruby/object:Api::Type::ResourceRef
@@ -14232,6 +14233,7 @@ objects:
       - !ruby/object:Api::Type::Boolean
         name: 'enableProxyProtocol'
         required: true
+        input: true
         description: |
           If true, enable the proxy protocol which is for supplying client TCP/IP
           address data in TCP connections that traverse proxies on their way to
@@ -14239,6 +14241,7 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'consumerRejectLists'
         item_type: Api::Type::String
+        send_empty_value: true
         description: |
           An array of projects that are not allowed to connect to this service
           attachment.
@@ -14247,6 +14250,7 @@ objects:
         description: |
           An array of projects that are allowed to connect to this service
           attachment.
+        send_empty_value: true
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
           - !ruby/object:Api::Type::String
