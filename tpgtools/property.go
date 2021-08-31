@@ -190,7 +190,7 @@ func (p Property) ObjectType() string {
 		}
 		parent = *parent.parent
 	}
-	return fmt.Sprintf("%s%s", p.resource.Type(), p.PackagePath())
+	return fmt.Sprintf("%s%s", p.resource.DCLTitle(), p.PackagePath())
 }
 
 func (p Property) IsArray() bool {

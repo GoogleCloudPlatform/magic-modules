@@ -37,11 +37,13 @@ type VersionOrder int
 const (
 	GA = iota
 	BETA
+	ALPHA
 )
 
 var GA_VERSION = Version{V: "ga", Order: GA, SerializationSuffix: ""}
 var BETA_VERSION = Version{V: "beta", Order: BETA, SerializationSuffix: "Beta"}
+var ALPHA_VERSION = Version{V: "alpha", Order: ALPHA, SerializationSuffix: "Alpha"}
 
 func allVersions() []Version {
-	return []Version{GA_VERSION, BETA_VERSION}
+	return []Version{GA_VERSION, BETA_VERSION, ALPHA_VERSION}
 }
