@@ -69,7 +69,6 @@ components:
       type: object
       required:
       - name
-      - target
       - project
       properties:
         allPorts:

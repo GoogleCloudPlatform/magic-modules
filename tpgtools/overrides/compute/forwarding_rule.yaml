@@ -10,11 +10,11 @@
     title: forwarding_rule
   location: region
 - type: REQUIRED_OVERRIDE
-  location: region
+  location: global
   field: target
   details:
-    required: false
-    optional: true
+    required: true
+    optional: false
     computed: false
 - type: CUSTOM_DEFAULT
   field: load_balancing_scheme
