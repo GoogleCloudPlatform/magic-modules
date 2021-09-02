@@ -327,9 +327,8 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject)
 	res, err := client.Get{{$.Type}}(context.Background(), obj)
 	if err != nil {
-		// Resource not found
-		d.SetId("")
-		return err
+		resourceName := fmt.Sprintf("{{$.PathType}} %q", d.Id())
+		return handleNotFoundDCLError(err, d, resourceName)
 	}
 
 {{ range $v := .Properties -}}
