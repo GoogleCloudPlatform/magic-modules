@@ -14130,7 +14130,7 @@ objects:
     kind: 'compute#ServiceAttachment'
     base_url: projects/{{project}}/regions/{{region}}/serviceAttachments
     has_self_link: true
-    input: true
+    update_verb: :PATCH
     description: |
       Represents a ServiceAttachment resource.
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -14163,6 +14163,7 @@ objects:
         description: |
           URL of the region where the resource resides.
         required: true
+        input: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -14174,10 +14175,16 @@ objects:
           which means the first character must be a lowercase letter, and all
           following characters must be a dash, lowercase letter, or digit,
           except the last character, which cannot be a dash.
+        input: true
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
           An optional description of this resource.
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'fingerprint'
+        description: |
+          Fingerprint of this resource. This field is used internally during
+          updates of this resource.
       - !ruby/object:Api::Type::String
         name: 'connectionPreference'
         required: true
@@ -14206,6 +14213,7 @@ objects:
       - !ruby/object:Api::Type::ResourceRef
         name: targetService
         required: true
+        input: true
         resource: 'ForwardingRule'
         imports: 'selfLink'
         description: |
@@ -14214,6 +14222,7 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'natSubnets'
         required: true
+        send_empty_value: true
         description: |
           An array of subnets that is provided for NAT in this service attachment.
         item_type: !ruby/object:Api::Type::ResourceRef
@@ -14225,6 +14234,7 @@ objects:
       - !ruby/object:Api::Type::Boolean
         name: 'enableProxyProtocol'
         required: true
+        input: true
         description: |
           If true, enable the proxy protocol which is for supplying client TCP/IP
           address data in TCP connections that traverse proxies on their way to
@@ -14232,6 +14242,7 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'consumerRejectLists'
         item_type: Api::Type::String
+        send_empty_value: true
         description: |
           An array of projects that are not allowed to connect to this service
           attachment.
@@ -14240,6 +14251,7 @@ objects:
         description: |
           An array of projects that are allowed to connect to this service
           attachment.
+        send_empty_value: true
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
           - !ruby/object:Api::Type::String
