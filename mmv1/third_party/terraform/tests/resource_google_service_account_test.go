@@ -113,7 +113,7 @@ func TestAccServiceAccount_Disabled(t *testing.T) {
 			},
 			// The second step disables the service account
 			{
-				Config: testAccServiceAccountBasicDisabled(accountId, displayName, desc, true),
+				Config: testAccServiceAccountDisabled(accountId, displayName, desc, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_service_account.acceptance", "project", project),
@@ -125,9 +125,9 @@ func TestAccServiceAccount_Disabled(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			// The second step enables the disabled service account
+			// The third step enables the disabled service account
 			{
-				Config: testAccServiceAccountBasicDisabled(accountId, displayName, desc, false),
+				Config: testAccServiceAccountDisabled(accountId, displayName, desc, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_service_account.acceptance", "project", project),
@@ -171,7 +171,7 @@ resource "google_service_account" "acceptance" {
 `, project, account, name)
 }
 
-func testAccServiceAccountBasicDisabled(account, name, desc string, disabled bool) string {
+func testAccServiceAccountDisabled(account, name, desc string, disabled bool) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "acceptance" {
   account_id   = "%v"

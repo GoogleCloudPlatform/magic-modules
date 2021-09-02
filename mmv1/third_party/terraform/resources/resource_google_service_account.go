@@ -191,10 +191,8 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 		updateMask = append(updateMask, "display_name")
 	}
 
-	// We want to skip the Patch Call below if only the enabled field has been changed
-
+	// We want to skip the Patch Call below if only the disabled field has been changed
 	if d.HasChange("disabled") && !d.Get("disabled").(bool) {
-
 		_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Enable(d.Id(),
 			&iam.EnableServiceAccountRequest{}).Do()
 		if err != nil {
