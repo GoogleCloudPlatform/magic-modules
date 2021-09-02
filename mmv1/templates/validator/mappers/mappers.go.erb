@@ -191,50 +191,6 @@ func Mappers() map[string][]Mapper {
 				Fetch:             FetchProjectIamPolicy,
 			},
 		},
-		"google_kms_key_ring_iam_policy": {
-			{
-				Convert:           GetKmsKeyRingIamPolicyCaiObject,
-				MergeCreateUpdate: MergeKmsKeyRingIamPolicy,
-			},
-		},
-		"google_kms_key_ring_iam_binding": {
-			{
-				Convert:           GetKmsKeyRingIamBindingCaiObject,
-				MergeCreateUpdate: MergeKmsKeyRingIamBinding,
-				MergeDelete:       MergeKmsKeyRingIamBindingDelete,
-				Fetch:             FetchKmsKeyRingIamPolicy,
-			},
-		},
-		"google_kms_key_ring_iam_member": {
-			{
-				Convert:           GetKmsKeyRingIamMemberCaiObject,
-				MergeCreateUpdate: MergeKmsKeyRingIamMember,
-				MergeDelete:       MergeKmsKeyRingIamMemberDelete,
-				Fetch:             FetchKmsKeyRingIamPolicy,
-			},
-		},
-		"google_kms_crypto_key_iam_policy": {
-			{
-				Convert:           GetKmsCryptoKeyIamPolicyCaiObject,
-				MergeCreateUpdate: MergeKmsCryptoKeyIamPolicy,
-			},
-		},
-		"google_kms_crypto_key_iam_binding": {
-			{
-				Convert:           GetKmsCryptoKeyIamBindingCaiObject,
-				MergeCreateUpdate: MergeKmsCryptoKeyIamBinding,
-				MergeDelete:       MergeKmsCryptoKeyIamBindingDelete,
-				Fetch:             FetchKmsCryptoKeyIamPolicy,
-			},
-		},
-		"google_kms_crypto_key_iam_member": {
-			{
-				Convert:           GetKmsCryptoKeyIamMemberCaiObject,
-				MergeCreateUpdate: MergeKmsCryptoKeyIamMember,
-				MergeDelete:       MergeKmsCryptoKeyIamMemberDelete,
-				Fetch:             FetchKmsCryptoKeyIamPolicy,
-			},
-		},
 	}
 }
 
