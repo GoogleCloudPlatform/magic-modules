@@ -206,7 +206,6 @@ func fetchIamPolicy(
 		return Asset{}, ErrLackingReadPermission
 	}
 
-	iamPolicy, err := updater.GetResourceIamPolicy()
 	if err != nil {
 		return Asset{}, err
 	}
