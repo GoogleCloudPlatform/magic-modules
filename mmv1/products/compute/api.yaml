@@ -2696,6 +2696,53 @@ objects:
           - :GENERATED_COOKIE
           - :HEADER_FIELD
           - :HTTP_COOKIE
+          - :CLIENT_IP_NO_DESTINATION
+      - !ruby/object:Api::Type::NestedObject
+        name: 'connectionTrackingPolicy'
+        description: |
+          Connection Tracking configuration for this BackendService. 
+          This is available only for Layer 4 Internal Load Balancing and Network Load Balancing.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'idleTimeoutSec'
+            default_value: 600
+            description: |
+              Specifies how long to keep a Connection Tracking entry while there is no matching traffic (in seconds).
+          - !ruby/object:Api::Type::Enum
+            name: 'trackingMode'
+            description: |
+              This specifies the key used for connection tracking. There are two options:
+              PER_CONNECTION
+              This is the default mode. The Connection Tracking is performed as per the 
+              Default Connection Key for the specific protocol in Table 1 for NLB and Table 2 for L4 ILB. 
+              PER_SESSION
+              Connection Tracking is performed as per the configured Session Affinity. 
+              It matches the configured Session Affinity (so if 3-tuple Session Affinity is configured for TCP packets, then the connection key will be 3-tuple also).
+            default_value: :PER_CONNECTION
+            values:
+              - :PER_CONNECTION
+              - :PER_SESSION
+          - !ruby/object:Api::Type::Enum
+            name: 'connectionPersistenceOnUnhealthyBackends'
+            description: |
+              If set to DEFAULT_FOR_PROTOCOL (default mode), the existing connections persist on unhealthy backends 
+              only for connection-oriented protocols (TCP and SCTP), and only if either 
+              the Tracking Mode is PER_CONNECTION (default tracking mode) or the Session Affinity is NONE or CLIENT_IP_PORT_PROTO.
+              
+              If set to NEVER_PERSIST, after a backend becomes unhealthy, the existing connections on the unhealthy backend 
+              are never persisted on the unhealthy backend. 
+              They are always diverted to newly selected healthy backends (unless all backends are unhealthy). 
+              This is very useful for NFS resiliency optimizations. 
+              Note, once redirected, these rerouted connections from existing clients are then sticky to the other backends. 
+              When that unhealthy backend instance recovers, only new connections are populated to the newly recovered backend instance. 
+
+              If set to ALWAYS_PERSIST, existing connections always persist on unhealthy backends regardless of protocol and session affinity. 
+              This mode cannot be used along with TrackingMode PER_SESSION. It is generally not recommended to use this mode, overriding the default. 
+            default_value: :DEFAULT_FOR_PROTOCOL
+            values:
+              - :DEFAULT_FOR_PROTOCOL
+              - :NEVER_PERSIST
+              - :ALWAYS_PERSIST
       - !ruby/object:Api::Type::Integer
         name: 'timeoutSec'
         description: |
