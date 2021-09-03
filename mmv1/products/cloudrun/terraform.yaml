@@ -89,7 +89,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_vpc_connector"
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random$
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
         vars:
           cloud_run_service_name: "cloudrun-srv"
         test_env_vars:
