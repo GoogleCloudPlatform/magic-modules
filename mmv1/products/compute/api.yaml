@@ -2708,6 +2708,19 @@ objects:
             default_value: 600
             description: |
               Specifies how long to keep a Connection Tracking entry while there is no matching traffic (in seconds).
+
+              For L4 Internal Load Balancing:
+              The minimum (default) is 10 minutes and the maximum is 16 hours. 
+              It can be set only if Connection Tracking is less than 5-tuple (i.e. Session Affinity is CLIENT_IP_NO_DESTINATION, CLIENT_IP or CLIENT_IP_PROTO, and Tracking Mode is PER_SESSION).
+              For Network Load Balancing:
+
+              The minimum (default) is 60 seconds and the maximum is 10 minutes.
+              The maximum is 16 hours if Strong Session Affinity is configured and Connection Tracking is less than 5-tuple (i.e. Session Affinity is CLIENT_IP or CLIENT_IP_PROTO and Tracking Mode is PER_SESSION).
+          - !ruby/object:Api::Type::Boolean
+            name: 'enableStrongAffinity'
+            default_value: false
+            description: |
+              Enable Strong Session Affinity. This is only available for loadbalancingScheme EXTERNAL (Network Load Balancing).
           - !ruby/object:Api::Type::Enum
             name: 'trackingMode'
             description: |
