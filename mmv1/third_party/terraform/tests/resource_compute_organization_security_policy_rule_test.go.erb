@@ -47,18 +47,15 @@ func TestAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRule
 func testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRulePreUpdateExample(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_folder" "security_policy_target" {
-  provider     = google-beta
   display_name = "tf-test-security-policy-%{random_suffix}"
   parent       = "organizations/%{org_id}"
 }
 
 resource "google_compute_organization_security_policy" "policy" {
-  provider = google-beta
   display_name = "tf-test%{random_suffix}"
   parent       = google_folder.security_policy_target.name
 }
 resource "google_compute_organization_security_policy_rule" "policy" {
-
   policy_id = google_compute_organization_security_policy.policy.id
   action = "allow"
 
@@ -84,19 +81,16 @@ resource "google_compute_organization_security_policy_rule" "policy" {
 func testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRulePostUpdateExample(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_folder" "security_policy_target" {
-  provider     = google-beta
   display_name = "tf-test-security-policy-%{random_suffix}"
   parent       = "organizations/%{org_id}"
 }
 
 resource "google_compute_organization_security_policy" "policy" {
-  provider = google-beta
   display_name = "tf-test%{random_suffix}"
   parent       = google_folder.security_policy_target.name
 }
 
 resource "google_compute_organization_security_policy_rule" "policy" {
-
   policy_id = google_compute_organization_security_policy.policy.id
   action = "deny"
 
