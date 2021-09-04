@@ -233,6 +233,7 @@ objects:
                 DIRECT_PEERING.
               input: true
               min_version: beta
+              default_value: :DIRECT_PEERING
               values:
                 - :DIRECT_PEERING
                 - :PRIVATE_SERVICE_ACCESS
