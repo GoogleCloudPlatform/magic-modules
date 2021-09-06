@@ -64,6 +64,10 @@ objects:
         output: true
         description: |
           Time when the trigger was created.
+      - !ruby/object:Api::Type::String
+        name: 'serviceAccount'
+        description: |
+          Service account to run build's trigger.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'substitutions'
         description: |

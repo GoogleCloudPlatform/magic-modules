@@ -160,6 +160,35 @@ func TestAccCloudBuildTrigger_disable(t *testing.T) {
 	})
 }
 
+func TestAccCloudBuildTrigger_assignServiceAccount(t *testing.T) {
+	t.Parallel()
+	name := fmt.Sprintf("tf-test-%d", randInt(t))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCloudBuildTriggerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudBuildTrigger_basic(name),
+			},
+			{
+				ResourceName:      "google_cloudbuild_trigger.build_trigger",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccCloudBuildTrigger_basicServiceAccountAssigned(name),
+			},
+			{
+				ResourceName:      "google_cloudbuild_trigger.build_trigger",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccCloudBuildTrigger_fullStep(t *testing.T) {
 	t.Parallel()
 
@@ -247,6 +276,38 @@ resource "google_cloudbuild_trigger" "build_trigger" {
     branch_name = "master"
     repo_name   = "some-repo"
   }
+  build {
+    images = ["gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA"]
+    tags   = ["team-a", "service-b"]
+    step {
+      name = "gcr.io/cloud-builders/gsutil"
+      args = ["cp", "gs://mybucket/remotefile.zip", "localfile.zip"]
+    }
+    step {
+      name = "gcr.io/cloud-builders/go"
+      args = ["build", "my_package"]
+      env  = ["env1=two"]
+    }
+    step {
+      name = "gcr.io/cloud-builders/docker"
+      args = ["build", "-t", "gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA", "-f", "Dockerfile", "."]
+    }
+  }
+}
+`, name)
+}
+
+func testAccCloudBuildTrigger_basicServiceAccountAssigned(name string) string {
+	return fmt.Sprintf(`
+resource "google_cloudbuild_trigger" "build_trigger" {
+  disabled    = false
+  name        = "%s"
+  description = "acceptance test build trigger"
+  trigger_template {
+    branch_name = "master"
+    repo_name   = "some-repo"
+  }
+  service_account = "some-sa-email"
   build {
     images = ["gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA"]
     tags   = ["team-a", "service-b"]
