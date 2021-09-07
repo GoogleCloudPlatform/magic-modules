@@ -1055,6 +1055,9 @@ func flattenComposerEnvironmentConfigSoftwareConfig(softwareCfg *composer.Softwa
 	transformed["airflow_config_overrides"] = softwareCfg.AirflowConfigOverrides
 	transformed["pypi_packages"] = softwareCfg.PypiPackages
 	transformed["env_variables"] = softwareCfg.EnvVariables
+<% unless version == "ga" -%>
+	transformed["scheduler_count"] = softwareCfg.SchedulerCount
+<% end -%>
 	return []interface{}{transformed}
 }
 
@@ -1480,6 +1483,9 @@ func expandComposerEnvironmentConfigSoftwareConfig(v interface{}, d *schema.Reso
 	transformed.AirflowConfigOverrides = expandComposerEnvironmentConfigSoftwareConfigStringMap(original, "airflow_config_overrides")
 	transformed.PypiPackages = expandComposerEnvironmentConfigSoftwareConfigStringMap(original, "pypi_packages")
 	transformed.EnvVariables = expandComposerEnvironmentConfigSoftwareConfigStringMap(original, "env_variables")
+<% unless version == "ga" -%>
+	transformed.SchedulerCount = int64(original["scheduler_count"].(int))
+<% end -%>
 	return transformed, nil
 }
 
