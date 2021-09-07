@@ -120,6 +120,7 @@ module Api
       check :allow_empty_object, type: :boolean
       check :url_param_only, type: :boolean
       check :read_query_params, type: ::String
+      check :input, type: :boolean
 
       raise 'Property cannot be output and required at the same time.' \
         if @output && @required

@@ -14,5 +14,9 @@ var ErrNoConversion = errors.New("no conversion")
 // due to the identity field of that resource returning empty.
 var ErrEmptyIdentityField = errors.New("empty identity field")
 
+// ErrLackingReadPermissions can be returned when fetching a resource is not possible
+// due to the user not having read permissions.
+var ErrLackingReadPermission = errors.New("lacking read permissions")
+
 // Global MutexKV
 var mutexKV = NewMutexKV()

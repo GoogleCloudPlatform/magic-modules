@@ -179,6 +179,8 @@ func Provider() *schema.Provider {
 			AssuredWorkloadsEndpointEntryKey:               AssuredWorkloadsEndpointEntry,
 			EventarcEndpointEntryKey:               EventarcEndpointEntry,
 			GkeHubFeatureCustomEndpointEntryKey:               GkeHubFeatureCustomEndpointEntry,
+			PrivatecaCertificateTemplateEndpointEntryKey:               PrivatecaCertificateTemplateCustomEndpointEntry,
+
 			<% unless version == "ga" -%>
 			CloudBuildWorkerPoolEndpointEntryKey:               CloudBuildWorkerPoolEndpointEntry,
 			<% end -%>
@@ -276,6 +278,7 @@ func Provider() *schema.Provider {
 			<% unless version == 'ga' -%>
 			"google_runtimeconfig_variable":                    dataSourceGoogleRuntimeconfigVariable(),
 			<% end -%>
+			"google_secret_manager_secret":                     dataSourceSecretManagerSecret(),
 			"google_secret_manager_secret_version":             dataSourceSecretManagerSecretVersion(),
 			"google_service_account":                           dataSourceGoogleServiceAccount(),
 			"google_service_account_access_token":              dataSourceGoogleServiceAccountAccessToken(),
@@ -356,16 +359,12 @@ end     # products.each do
 -%>
 			},
 			map[string]*schema.Resource{
-				"google_assured_workloads_workload":            resourceAssuredWorkloadsWorkload(),
 				"google_app_engine_application":                resourceAppEngineApplication(),
 				"google_bigquery_table":                        resourceBigQueryTable(),
 				"google_bigtable_gc_policy":                    resourceBigtableGCPolicy(),
 				"google_bigtable_instance":                     resourceBigtableInstance(),
 				"google_bigtable_table":                        resourceBigtableTable(),
 				"google_billing_subaccount":                    resourceBillingSubaccount(),
-				<% unless version == 'ga' -%>
-				"google_cloudbuild_worker_pool":                resourceCloudbuildWorkerPool(),
-				<% end -%>
 				"google_cloudfunctions_function":               resourceCloudFunctionsFunction(),
 				"google_composer_environment":                  resourceComposerEnvironment(),
 				"google_compute_attached_disk":                 resourceComputeAttachedDisk(),
@@ -396,15 +395,9 @@ end     # products.each do
 				<% end -%>
 				"google_dataproc_cluster":                      resourceDataprocCluster(),
 				"google_dataproc_job":                          resourceDataprocJob(),
-				"google_dataproc_workflow_template":            resourceDataprocWorkflowTemplate(),
 				"google_endpoints_service":                     resourceEndpointsService(),
-				"google_eventarc_trigger":                      resourceEventarcTrigger(),
 				"google_folder":                                resourceGoogleFolder(),
 				"google_folder_organization_policy":            resourceGoogleFolderOrganizationPolicy(),
-				<% unless version == 'ga' -%>
-				"google_gke_hub_feature":                        resourceGkeHubFeature(),
-				"google_gke_hub_feature_membership":             resourceGkeHubFeatureMembership(),
-				<% end -%>
 				"google_logging_billing_account_sink":          resourceLoggingBillingAccountSink(),
 				"google_logging_billing_account_exclusion":     ResourceLoggingExclusion(BillingAccountLoggingExclusionSchema, NewBillingAccountLoggingExclusionUpdater, billingAccountLoggingExclusionIdParseFunc),
 				"google_logging_billing_account_bucket_config": ResourceLoggingBillingAccountBucketConfig(),
@@ -445,6 +438,24 @@ end     # products.each do
 				"google_storage_notification":                  resourceStorageNotification(),
 				"google_storage_transfer_job":                  resourceStorageTransferJob(),
 			},
+			// resources implemented within tpgtools
+			map[string]*schema.Resource{
+				"google_assured_workloads_workload":            resourceAssuredWorkloadsWorkload(),
+				<% unless version == 'ga' -%>
+				"google_cloudbuild_worker_pool":                resourceCloudbuildWorkerPool(),
+				<% end -%>
+				"google_compute_firewall_policy_association":   resourceComputeFirewallPolicyAssociation(),
+				"google_compute_firewall_policy":               resourceComputeFirewallPolicy(),
+				"google_compute_firewall_policy_rule":          resourceComputeFirewallPolicyRule(),
+				"google_dataproc_workflow_template":            resourceDataprocWorkflowTemplate(),
+				"google_eventarc_trigger":                      resourceEventarcTrigger(),
+				<% unless version == 'ga' -%>
+				"google_gke_hub_feature":                       resourceGkeHubFeature(),
+				"google_gke_hub_feature_membership":            resourceGkeHubFeatureMembership(),
+				<% end -%>
+				"google_privateca_certificate_template":        resourcePrivatecaCertificateTemplate(),
+			},
+			// ------------------------------------
 			map[string]*schema.Resource{
 				"google_bigtable_instance_iam_binding":         ResourceIamBinding(IamBigtableInstanceSchema, NewBigtableInstanceUpdater, BigtableInstanceIdParseFunc),
 				"google_bigtable_instance_iam_member":          ResourceIamMember(IamBigtableInstanceSchema, NewBigtableInstanceUpdater, BigtableInstanceIdParseFunc),
@@ -540,7 +551,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 
 	if v, ok := d.GetOk("request_reason"); ok {
 		config.RequestReason = v.(string)
-	}	
+	}
 
 	// Search for default credentials
 	config.Credentials = multiEnvSearch([]string{
@@ -612,6 +623,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.AssuredWorkloadsBasePath = d.Get(AssuredWorkloadsEndpointEntryKey).(string)
 	config.EventarcBasePath = d.Get(EventarcEndpointEntryKey).(string)
 	config.GkeHubBasePath = d.Get(GkeHubFeatureCustomEndpointEntryKey).(string)
+	config.PrivatecaBasePath = d.Get(PrivatecaCertificateTemplateEndpointEntryKey).(string)
 	<% unless version == "ga" -%>
 	config.CloudBuildWorkerPoolBasePath = d.Get(CloudBuildWorkerPoolEndpointEntryKey).(string)
 	<% end -%>

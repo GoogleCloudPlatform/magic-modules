@@ -98,7 +98,7 @@ func resource{{$.PathType}}() *schema.Resource {
 	{{- if $p.DiffSuppressFunc }}
 				DiffSuppressFunc: {{$p.DiffSuppressFunc}},
 	{{- end }}
-				Description: `{{/* TODO fix formatting for $p.Description - see https://github.com/hashicorp/terraform-provider-google/issues/9197 */}}`,
+				Description: "{{escapeDescription $p.Description}}",
 	{{- if $p.MaxItems }}
 				MaxItems: {{$p.MaxItems}},
 	{{- end }}
@@ -158,7 +158,7 @@ func {{$.PathType}}{{$v.PackagePath}}Schema() *schema.Resource {
 		{{- if $p.DiffSuppressFunc }}
 					DiffSuppressFunc: {{$p.DiffSuppressFunc}},
 		{{- end }}
-					Description: `{{/* TODO fix formatting for $p.Description */}}`,
+					Description: "{{escapeDescription $p.Description}}",
 		{{- if $p.MaxItems }}
 					MaxItems: {{$p.MaxItems}},
 		{{- end }}
@@ -327,9 +327,8 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject)
 	res, err := client.Get{{$.Type}}(context.Background(), obj)
 	if err != nil {
-		// Resource not found
-		d.SetId("")
-		return err
+		resourceName := fmt.Sprintf("{{$.PathType}} %q", d.Id())
+		return handleNotFoundDCLError(err, d, resourceName)
 	}
 
 {{ range $v := .Properties -}}
