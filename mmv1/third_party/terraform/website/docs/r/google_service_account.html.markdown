@@ -15,8 +15,7 @@ Allows management of a Google Cloud service account.
 * How-to Guides
     * [Official Documentation](https://cloud.google.com/compute/docs/access/service-accounts)
 
--> **Warning:**  If you delete and recreate a service account, you must reapply any IAM roles that it had before. Also don't use this resource to 
-import the Compute Engine default service account as account_id field **cannot** start with a number.
+-> **Warning:**  If you delete and recreate a service account, you must reapply any IAM roles that it had before.
 
 -> Creation of service accounts is eventually consistent, and that can lead to
 errors when you try to apply ACLs to service accounts immediately after
