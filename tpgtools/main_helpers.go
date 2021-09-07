@@ -46,6 +46,10 @@ func formatComparator(formats []string) func(i, j int) bool {
 	}
 }
 
+func escapeDescription(in string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(in, `\`, `\\`), `"`, `\"`), "\n", `\n`)
+}
+
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {

@@ -84,7 +84,7 @@ components:
               type: object
               x-dcl-go-name: Binauthz
               x-dcl-go-type: FeatureMembershipConfigmanagementBinauthz
-              description: Binauthz conifguration for the cluster.
+              description: Binauthz configuration for the cluster.
               properties:
                 enabled:
                   type: boolean
