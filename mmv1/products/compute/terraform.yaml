@@ -753,6 +753,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           backend_name: "website-backend"
           network_name: "website-net"
         min_version: beta
+        ignore_read_extra: 
+          - "port_range"
       - !ruby/object:Provider::Terraform::Examples
         name: "forwarding_rule_global_internallb"
         primary_resource_id: "default"
@@ -784,6 +786,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           forwarding_rule_name: "website-forwarding-rule"
           backend_name: "website-backend"
           network_name: "website-net"
+        ignore_read_extra: 
+          - "port_range"
+          - "target"
       - !ruby/object:Provider::Terraform::Examples
         name: "forwarding_rule_http_lb"
         min_version: 'beta'
@@ -797,6 +802,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           rigm_name: "website-rigm"
           network_name: "website-net"
           fw_name: "website-fw"
+        ignore_read_extra: 
+          - "port_range"
+          - "target"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
     properties:
@@ -887,6 +895,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           http_proxy_name: "target-proxy"
           backend_service_name: "backend"
           igm_name: "igm-internal"
+        ignore_read_extra: 
+          - "port_range"
+          - "target"
       - !ruby/object:Provider::Terraform::Examples
         name: "private_service_connect_google_apis"
         min_version: beta
@@ -898,6 +909,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           forwarding_rule_name: "globalrule"
         test_env_vars:
           project: :PROJECT_NAME
+        ignore_read_extra: 
+          - "ip_address"
     properties:
       creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
