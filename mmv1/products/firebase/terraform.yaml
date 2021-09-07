@@ -43,7 +43,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           org_id: :ORG_ID
   WebApp: !ruby/object:Overrides::Terraform::ResourceOverride
-    # id_format: '{{name}}'
     import_format: ['{{name}}']
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 10
