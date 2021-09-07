@@ -729,6 +729,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           fw_allow_ilb_to_backends_name: "l7-ilb-fw-allow-ilb-to-backends"
           vm_test_name: "l7-ilb-test-vm"
         min_version: beta
+        ignore_read_extra: 
+          - "port_range"
+          - "target"
       - !ruby/object:Provider::Terraform::Examples
         name: "internal_tcp_udp_lb_with_mig_backend"
         primary_resource_id: "google_compute_forwarding_rule"
