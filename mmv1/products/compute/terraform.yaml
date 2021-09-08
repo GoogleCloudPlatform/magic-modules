@@ -712,6 +712,21 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   ForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        name: "external_http_lb_mig_backend_custom_header"
+        primary_resource_id: "google_compute_global_forwarding_rule"
+        vars:
+          xlb_network_name: "l7-xlb-network"
+          backend_subnet_name: "l7-xlb-subnet"
+          forwarding_rule_name: "l7-xlb-forwarding-rule"
+          target_http_proxy_name: "l7-xlb-target-http-proxy"
+          url_map_name: "l7-xlb-url-map"
+          backend_service_name: "l7-xlb-backend-service"
+          mig_template_name: "l7-xlb-mig-template"
+          hc_name: "l7-xlb-hc"
+          mig_name: "l7-xlb-mig1"
+          fw_health_check: "l7-xlb-fw-allow-hc"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
         name: "internal_http_lb_with_mig_backend"
         primary_resource_id: "google_compute_forwarding_rule"
         vars:
