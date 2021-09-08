@@ -19,7 +19,6 @@ resource "google_compute_subnetwork" "xlb_subnet" {
 resource "google_compute_instance_group_named_port" "my_port" {
   group = google_compute_instance_group_manager.mig.instance_group
   zone = "us-east1-b"
-
   name = "http"
   port = 8080
 }
