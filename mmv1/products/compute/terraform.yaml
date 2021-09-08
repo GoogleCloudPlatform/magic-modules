@@ -1533,7 +1533,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
   OrganizationSecurityPolicyAssociation: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{policy_id}}/association/{{name}}"
-    import_format: ["{{policy_id}}/association/{{name}}"]
+    import_format: ["{{%policy_id}}/association/{{name}}"]
     base_url: '{{policy_id}}'
     self_link: '{{policy_id}}/getAssociation?name={{name}}'
     create_url: '{{policy_id}}/addAssociation'
@@ -1553,7 +1553,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
   OrganizationSecurityPolicyRule: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{policy_id}}/priority/{{priority}}"
-    import_format: ["{{policy_id}}/priority/{{priority}}"]
+    import_format: ["{{%policy_id}}/priority/{{priority}}"]
     base_url: '{{policy_id}}'
     self_link: '{{policy_id}}/getRule?priority={{priority}}'
     create_url: '{{policy_id}}/addRule?priority={{priority}}'
@@ -1567,7 +1567,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           org_id: :ORG_ID
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/organization_security_policy_rule.go.erb
       post_create: templates/terraform/post_create/org_security_policy_rule.go.erb
       post_delete: templates/terraform/post_create/org_security_policy_rule.go.erb
       post_update: templates/terraform/post_create/org_security_policy_rule.go.erb
