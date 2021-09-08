@@ -427,6 +427,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: templates/terraform/custom_flatten/guard_self_link_array.go.erb
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      iap: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
+      iap.enabled: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      iap.oauth2ClientSecret: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
+        # We don't support ignore_read on nested fields
+        ignore_read: true
+        sensitive: true
+        custom_flatten: templates/terraform/custom_flatten/compute_backend_service_iap_oauth2_client_secret.go.erb
+      iap.oauth2ClientSecretSha256: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
       protocol: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       portName: !ruby/object:Overrides::Terraform::PropertyOverride
