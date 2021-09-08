@@ -60,6 +60,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           bucket_name: "fb-webapp-"
         test_env_vars:
           org_id: :ORG_ID
+        ignore_read_extra:
+          - project
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
 # This is for copying files over

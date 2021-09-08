@@ -104,7 +104,7 @@ objects:
     name: 'WebApp'
     min_version: beta
     base_url: projects/{{project}}/webApps
-    self_link: '{{project}} {{name}}'
+    self_link: '{{name}}'
     update_verb: :PATCH
     update_mask: true
     description: |
