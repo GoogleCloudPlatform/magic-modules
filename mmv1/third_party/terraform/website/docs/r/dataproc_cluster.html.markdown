@@ -484,6 +484,7 @@ cluster_config {
     Accepted values are:
     * ANACONDA
     * DRUID
+    * FLINK
     * HBASE
     * HIVE_WEBHCAT
     * JUPYTER
