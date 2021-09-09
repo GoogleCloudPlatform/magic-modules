@@ -724,7 +724,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           mig_template_name: "l7-xlb-mig-template"
           hc_name: "l7-xlb-hc"
           mig_name: "l7-xlb-mig1"
-          fw_health_check: "l7-xlb-fw-allow-hc"
+          fw_allow_hc_name: "l7-xlb-fw-allow-hc"
         min_version: beta
       - !ruby/object:Provider::Terraform::Examples
         name: "internal_http_lb_with_mig_backend"

@@ -131,7 +131,6 @@ resource "google_compute_instance_group_manager" "mig" {
   name     = "<%= ctx[:vars]['mig_name'] %>"
   provider = google
   zone     = "us-east1-b"
-  region   = "us-east1"
   version {
     instance_template = google_compute_instance_template.instance_template.id
     name              = "primary"
