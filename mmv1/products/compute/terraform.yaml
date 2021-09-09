@@ -2133,6 +2133,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           health_check_name: "proxy-health-check"
           backend_name: "compute-backend"
           route_name: "route-ilb"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "route_ilb_vip"
+        primary_resource_id: "route-ilb"
+        min_version: beta
+        vars:
+          producer_name: "producer"
+          consumer_name: "consumer"
+          forwarding_rule_name: "compute-forwarding-rule"
+          health_check_name: "proxy-health-check"
+          backend_name: "compute-backend"
+          route_name: "route-ilb"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
@@ -2164,6 +2175,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           * `projects/project/zones/zone/instances/instance`
           * `zones/zone/instances/instance`
           * Just the instance name, with the zone in `next_hop_instance_zone`.
+      nextHopIlb: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareIpAddressOrSelfLinkOrResourceName'
       tags: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/set_to_list.erb
         is_set: true
