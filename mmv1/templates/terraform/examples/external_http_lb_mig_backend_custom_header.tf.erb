@@ -14,14 +14,14 @@ resource "google_compute_subnetwork" "xlb_subnet" {
   name          = "<%= ctx[:vars]['backend_subnet_name'] %>"
   provider      = google
   ip_cidr_range = "10.0.1.0/24"
-  region        = "us-east1"
+  region        = "us-central1"
   network       = google_compute_network.xlb_network.id
 }
 
 resource "google_compute_instance_group_named_port" "my_port" {
   provider = google
   group    = google_compute_instance_group_manager.mig.instance_group
-  zone     = "us-east1-b"
+  zone     = "us-central1-c"
   name     = "http"
   port     = 8080
 }
@@ -130,7 +130,7 @@ resource "google_compute_health_check" "default" {
 resource "google_compute_instance_group_manager" "mig" {
   name     = "<%= ctx[:vars]['mig_name'] %>"
   provider = google
-  zone     = "us-east1-b"
+  zone     = "us-central1-c"
   version {
     instance_template = google_compute_instance_template.instance_template.id
     name              = "primary"
