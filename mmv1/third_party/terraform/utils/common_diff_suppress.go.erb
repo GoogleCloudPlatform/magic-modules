@@ -179,3 +179,8 @@ func durationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	}
 	return oDuration == nDuration
 }
+
+// Suppress all diffs, used for Disk.Interface which is a nonfunctional field
+func alwaysDiffSuppress(_, _, _ string, _ *schema.ResourceData) bool {
+	return true
+}

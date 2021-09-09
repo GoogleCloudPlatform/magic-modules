@@ -605,7 +605,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           [`google_compute_disk_resource_policy_attachment`](https://www.terraform.io/docs/providers/google/r/compute_disk_resource_policy_attachment.html)
           to allow for updating the resource policy attached to the disk.
       interface: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+        diff_suppress_func: 'alwaysDiffSuppress'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       constants: templates/terraform/constants/disk.erb
@@ -1837,7 +1837,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       diskEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
       interface: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+        diff_suppress_func: 'alwaysDiffSuppress'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       encoder: templates/terraform/encoders/disk.erb
