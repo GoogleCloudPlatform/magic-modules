@@ -330,10 +330,10 @@ func gcsDataSchema() *schema.Resource {
 				Description: `Google Cloud Storage bucket name.`,
 			},
 			"path": {
-				Optional:     true,
-				Computed:     true,
-				Type:         schema.TypeString,
-				Description:  `Google Cloud Storage path in bucket to transfer`,
+				Optional:    true,
+				Computed:    true,
+				Type:        schema.TypeString,
+				Description: `Google Cloud Storage path in bucket to transfer`,
 			},
 		},
 	}
