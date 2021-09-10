@@ -3307,15 +3307,16 @@ objects:
           are 4096 and 16384, other sizes may be added in the future.
           If an unsupported value is requested, the error message will list
           the supported values for the caller's project.
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'interface'
         min_version: 'beta'
+        # interface is removed using url_param_only to preserve schema definition
+        # and prevent sending or reading in API requests
+        url_param_only: true
+        default_value: 'SCSI'
+        deprecation_message: This field is no longer in use, disk interfaces will be automatically determined on attachment. To resolve this issue, remove this field from your config.
         description: |
           Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
-        default_value: :SCSI
-        values:
-          - :SCSI
-          - :NVME
       - !ruby/object:Api::Type::ResourceRef
         name: 'type'
         resource: 'DiskType'
@@ -10246,15 +10247,16 @@ objects:
         description: |
           URL of the disk type resource describing which disk type to use to
           create the disk. Provide this when creating the disk.
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'interface'
         min_version: 'beta'
+        # interface is removed using url_param_only to preserve schema definition
+        # and prevent sending or reading in API requests
+        url_param_only: true
+        default_value: 'SCSI'
+        deprecation_message: This field is no longer in use, disk interfaces will be automatically determined on attachment. To resolve this issue, remove this field from your config.
         description: |
           Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
-        default_value: :SCSI
-        values:
-          - :SCSI
-          - :NVME
   - !ruby/object:Api::Resource
     name: 'RegionUrlMap'
     kind: 'compute#urlMap'
