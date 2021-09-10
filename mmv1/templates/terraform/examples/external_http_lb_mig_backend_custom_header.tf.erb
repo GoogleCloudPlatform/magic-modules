@@ -18,14 +18,6 @@ resource "google_compute_subnetwork" "xlb_subnet" {
   network       = google_compute_network.xlb_network.id
 }
 
-resource "google_compute_instance_group_named_port" "my_port" {
-  provider = google
-  group    = google_compute_instance_group_manager.mig.instance_group
-  zone     = "us-central1-c"
-  name     = "http"
-  port     = 8080
-}
-
 # forwarding rule
 resource "google_compute_global_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   name                  = "<%= ctx[:vars]['forwarding_rule_name'] %>"
@@ -131,6 +123,10 @@ resource "google_compute_instance_group_manager" "mig" {
   name     = "<%= ctx[:vars]['mig_name'] %>"
   provider = google
   zone     = "us-central1-c"
+  named_port {
+    name = "http"
+    port = 8080
+  }
   version {
     instance_template = google_compute_instance_template.instance_template.id
     name              = "primary"
