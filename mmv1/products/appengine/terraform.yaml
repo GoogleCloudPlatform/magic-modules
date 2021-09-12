@@ -115,7 +115,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'version_id'
       deployment: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
+        custom_flatten: templates/terraform/custom_flatten/app_version.go.erb
+      deployment.container: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       entrypoint: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       envVariables: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -145,6 +147,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "myapp_v1"
         ignore_read_extra:
           - "noop_on_destroy"
+          - "deployment.0.zip"
         vars:
           bucket_name: "appengine-static-content"
           project: "appeng-flex"
