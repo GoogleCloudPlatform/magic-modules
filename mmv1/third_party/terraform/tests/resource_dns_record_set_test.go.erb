@@ -9,49 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
-func TestIpv6AddressDiffSuppress(t *testing.T) {
-	cases := map[string]struct {
-		Old, New       []string
-		ShouldSuppress bool
-	}{
-		"compact form should suppress diff": {
-			Old:            []string{"2a03:b0c0:1:e0::29b:8001"},
-			New:            []string{"2a03:b0c0:0001:00e0:0000:0000:029b:8001"},
-			ShouldSuppress: true,
-		},
-		"different address should not suppress diff": {
-			Old:            []string{"2a03:b0c0:1:e00::29b:8001"},
-			New:            []string{"2a03:b0c0:0001:00e0:0000:0000:029b:8001"},
-			ShouldSuppress: false,
-		},
-		"increase address should not suppress diff": {
-			Old:            []string{""},
-			New:            []string{"2a03:b0c0:0001:00e0:0000:0000:029b:8001"},
-			ShouldSuppress: false,
-		},
-		"decrease address should not suppress diff": {
-			Old:            []string{"2a03:b0c0:1:e00::29b:8001"},
-			New:            []string{""},
-			ShouldSuppress: false,
-		},
-		"switch address positions should suppress diff": {
-			Old:            []string{"2a03:b0c0:1:e00::28b:8001", "2a03:b0c0:1:e0::29b:8001"},
-			New:            []string{"2a03:b0c0:1:e0::29b:8001", "2a03:b0c0:1:e00::28b:8001"},
-			ShouldSuppress: true,
-		},
-	}
-
-	parseFunc := func(x string) string {
-		return net.ParseIP(x).String()
-	}
-
-	for tn, tc := range cases {
-		shouldSuppress := rrdatasListDiffSuppress(tc.Old, tc.New, parseFunc, nil)
-		if shouldSuppress != tc.ShouldSuppress {
-			t.Errorf("%s: expected %t", tn, tc.ShouldSuppress)
-		}
-	}
-}
 func TestAccDNSRecordSet_basic(t *testing.T) {
 	t.Parallel()
 
@@ -143,8 +100,39 @@ func TestAccDNSRecordSet_changeType(t *testing.T) {
 				Config: testAccDnsRecordSet_bigChange(zoneName, 600),
 			},
 			{
+				ResourceName:  "google_dns_record_set.foobar",
+				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./CNAME", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportState:   true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccDNSRecordSet_rrdatasUpdate(t *testing.T) {
+	t.Parallel()
+
+	zoneName := fmt.Sprintf("dnszone-test-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDnsRecordSet_basic(zoneName, "127.0.0.10", 300),
+			},
+			{
 				ResourceName:      "google_dns_record_set.foobar",
-				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./CNAME", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccDnsRecordSet_rrdatasUpdate(zoneName, "127.0.0.10", 300),
+			},
+			{
+				ResourceName:      "google_dns_record_set.foobar",
+				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", getTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -265,6 +253,24 @@ resource "google_dns_record_set" "foobar" {
   name         = "test-record.%s.hashicorptest.com."
   type         = "A"
   rrdatas      = ["127.0.0.1", "%s"]
+  ttl          = %d
+}
+`, zoneName, zoneName, zoneName, addr2, ttl)
+}
+
+func testAccDnsRecordSet_rrdatasUpdate(zoneName string, addr2 string, ttl int) string {
+	return fmt.Sprintf(`
+resource "google_dns_managed_zone" "parent-zone" {
+  name        = "%s"
+  dns_name    = "%s.hashicorptest.com."
+  description = "Test Description"
+}
+
+resource "google_dns_record_set" "foobar" {
+  managed_zone = google_dns_managed_zone.parent-zone.name
+  name         = "test-record.%s.hashicorptest.com."
+  type         = "A"
+  rrdatas      = ["127.0.0.2", "%s"]
   ttl          = %d
 }
 `, zoneName, zoneName, zoneName, addr2, ttl)
