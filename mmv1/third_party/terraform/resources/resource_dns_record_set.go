@@ -332,6 +332,8 @@ func resourceDnsRecordSetUpdate(d *schema.ResourceData, meta interface{}) error 
 		return fmt.Errorf("Error waiting for Google DNS change: %s", err)
 	}
 
+	d.SetId(fmt.Sprintf("%s/%s/%s", zone, recordName, newType))
+
 	return resourceDnsRecordSetRead(d, meta)
 }
 
