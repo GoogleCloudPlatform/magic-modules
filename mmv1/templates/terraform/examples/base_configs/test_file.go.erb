@@ -64,7 +64,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
-			"time": {}
+			"time": {},
 		},
 		<% end -%>
 		<% unless object.skip_delete -%>
