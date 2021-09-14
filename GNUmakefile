@@ -52,5 +52,16 @@ serialize:
 		go run . --path "api" --overrides "overrides" --mode "serialization" > temp.serial;\
 		mv -f temp.serial serialization.go;\
 
+upgrade-dcl:
+	cd tpgtools && \
+		go mod edit -require=github.com/GoogleCloudPlatform/declarative-resource-client-library@latest &&\
+		go mod tidy;\
+		MOD_LINE=$$(grep declarative-resource-client-library go.mod);\
+		SUM_LINE=$$(grep declarative-resource-client-library go.sum);\
+	cd ../mmv1/third_party/terraform && \
+		sed -i "/declarative-resource-client-library/c$$(printf '\t')$$MOD_LINE" go.mod.erb; echo -e "$$SUM_LINE" >> go.sum
+
+
+
 .PHONY: mmv1 tpgtools
 
