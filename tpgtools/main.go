@@ -496,10 +496,11 @@ func generateProductsFile(fileName string, products []*ProductMetadata) {
 }
 
 var TemplateFunctions = template.FuncMap{
-	"title":          strings.Title,
-	"patternToRegex": PatternToRegex,
-	"replace":        strings.Replace,
-	"isLastIndex":    isLastIndex,
+	"title":             strings.Title,
+	"patternToRegex":    PatternToRegex,
+	"replace":           strings.Replace,
+	"isLastIndex":       isLastIndex,
+	"escapeDescription": escapeDescription,
 }
 
 // TypeFetcher fetches reused types, as marked by the $ref field being marked on an OpenAPI schema.

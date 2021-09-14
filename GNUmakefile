@@ -29,6 +29,7 @@ ifneq ($(RESOURCE),)
   tpgtools_compile += --resource $(RESOURCE)
 endif
 terraform build:
+	make serialize
 	make mmv1
 	make tpgtools
 

@@ -227,7 +227,7 @@ objects:
             machineType you have selected.
         # AcceleratorConfig is updatable, but requires the instance to be stopped, just like
         # for compute instances.
-        # TODO: Implement allow_stopping_for_update here and for machineType
+        # TODO: Implement allow_stopping_for_update here and for machineType.
         # update_verb: :PATCH
         # update_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}:setAccelerator'
         properties:
@@ -281,6 +281,39 @@ objects:
               Defines whether the instance has the vTPM enabled.
               Enabled by default.
             default_value: true
+      - !ruby/object:Api::Type::Enum
+        name: 'nicType'
+        description: |
+          The type of vNIC driver.
+        values:
+          - UNSPECIFIED_NIC_TYPE
+          - VIRTIO_NET
+          - GVNIC
+        min_version: beta
+      - !ruby/object:Api::Type::NestedObject
+        name: 'reservationAffinity'
+        description: |
+          Reservation Affinity for consuming Zonal reservation.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'consumeReservationType'
+            required: true
+            description: |
+              The type of Compute Reservation.
+            values:
+              - NO_RESERVATION
+              - ANY_RESERVATION
+              - SPECIFIC_RESERVATION               
+          - !ruby/object:Api::Type::String
+            name: 'key'
+            description: |
+              Corresponds to the label key of reservation resource.
+          - !ruby/object:Api::Type::Array
+            name: 'values'
+            description: |
+              Corresponds to the label values of reservation resource.
+            item_type: Api::Type::String
+        min_version: beta
       - !ruby/object:Api::Type::String
         name: 'state'
         description: |

@@ -89,6 +89,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::Boolean
             name: automatic
+            input: true
             exactly_one_of:
               - replication.0.automatic
               - replication.0.user_managed
@@ -96,6 +97,7 @@ objects:
               The Secret will automatically be replicated without any restrictions.
           - !ruby/object:Api::Type::NestedObject
             name: userManaged
+            input: true
             exactly_one_of:
               - replication.0.automatic
               - replication.0.user_managed
@@ -104,6 +106,7 @@ objects:
             properties:
               - !ruby/object:Api::Type::Array
                 name: replicas
+                input: true
                 required: true
                 min_size: 1
                 description: |
@@ -113,16 +116,19 @@ objects:
                     - !ruby/object:Api::Type::String
                       name: location
                       required: true
+                      input: true
                       description: |
                         The canonical IDs of the location to replicate data. For example: "us-east1".
                     - !ruby/object:Api::Type::NestedObject
                       name: customerManagedEncryption
+                      input: true
                       description: |
                         Customer Managed Encryption for the secret.
                       properties:
                         - !ruby/object:Api::Type::String
                           name: kmsKeyName
                           required: true
+                          input: true
                           description: |
                             Describes the Cloud KMS encryption key that will be used to protect destination secret.  
       - !ruby/object:Api::Type::Array
