@@ -1,0 +1,4 @@
+- type: SERIALIZATION_ONLY
+- type: CUSTOM_TERRAFORM_PRODUCT_NAME
+  details:
+    product: ""

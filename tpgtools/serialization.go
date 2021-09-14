@@ -24,6 +24,8 @@ import (
 	assuredworkloads "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads"
 	assuredworkloadsBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads/beta"
 	cloudbuildBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudbuild/beta"
+	cloudresourcemanager "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudresourcemanager"
+	cloudresourcemanagerBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudresourcemanager/beta"
 	compute "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/compute"
 	computeBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/compute/beta"
 	dataproc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc"
@@ -31,12 +33,14 @@ import (
 	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc"
 	eventarcBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc/beta"
 	gkehubBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub/beta"
+	orgpolicy "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/orgpolicy"
+	orgpolicyBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/orgpolicy/beta"
 	privateca "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/privateca"
 	privatecaBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/privateca/beta"
 	fmtcmd "github.com/hashicorp/hcl/hcl/fmtcmd"
 )
 
-// DCLToTerraformReferencce converts a DCL resource name to the final tpgtools name
+// DCLToTerraformReference converts a DCL resource name to the final tpgtools name
 // after overrides are applied
 func DCLToTerraformReference(resourceType, version string) (string, error) {
 	if version == "beta" {
@@ -45,6 +49,10 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 			return "google_assured_workloads_workload", nil
 		case "CloudbuildWorkerPool":
 			return "google_cloudbuild_worker_pool", nil
+		case "CloudResourceManagerFolder":
+			return "google_folder", nil
+		case "CloudResourceManagerProject":
+			return "google_project", nil
 		case "ComputeFirewallPolicy":
 			return "google_compute_firewall_policy", nil
 		case "ComputeFirewallPolicyAssociation":
@@ -63,6 +71,8 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 			return "google_gke_hub_feature", nil
 		case "GkeHubFeatureMembership":
 			return "google_gke_hub_feature_membership", nil
+		case "OrgPolicyPolicy":
+			return "google_org_policy_policy", nil
 		case "PrivatecaCertificateTemplate":
 			return "google_privateca_certificate_template", nil
 		}
@@ -71,6 +81,10 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 	switch resourceType {
 	case "AssuredWorkloadsWorkload":
 		return "google_assured_workloads_workload", nil
+	case "CloudResourceManagerFolder":
+		return "google_folder", nil
+	case "CloudResourceManagerProject":
+		return "google_project", nil
 	case "ComputeFirewallPolicy":
 		return "google_compute_firewall_policy", nil
 	case "ComputeFirewallPolicyAssociation":
@@ -85,6 +99,8 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 		return "google_dataproc_workflow_template", nil
 	case "EventarcTrigger":
 		return "google_eventarc_trigger", nil
+	case "OrgPolicyPolicy":
+		return "google_org_policy_policy", nil
 	case "PrivatecaCertificateTemplate":
 		return "google_privateca_certificate_template", nil
 	default:
@@ -93,7 +109,40 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 
 }
 
-// ConvertSampleJSONToDCLResource unmarshals json to a DCL resource specified by the resource type
+// DCLToTerraformSampleName converts a DCL resource name to the final tpgtools name
+// after overrides are applied.
+// e.g. cloudresourcemanager.project -> CloudResourceManagerProject
+func DCLToTerraformSampleName(service, resource string) (string, string, error) {
+	switch service + resource {
+	case "assuredworkloadsworkload":
+		return "AssuredWorkloads", "Workload", nil
+	case "cloudresourcemanagerfolder":
+		return "CloudResourceManager", "Folder", nil
+	case "cloudresourcemanagerproject":
+		return "CloudResourceManager", "Project", nil
+	case "computefirewallpolicy":
+		return "Compute", "FirewallPolicy", nil
+	case "computefirewallpolicyassociation":
+		return "Compute", "FirewallPolicyAssociation", nil
+	case "computefirewallpolicyrule":
+		return "Compute", "FirewallPolicyRule", nil
+	case "computeforwardingrule":
+		return "Compute", "ForwardingRule", nil
+	case "dataprocworkflowtemplate":
+		return "Dataproc", "WorkflowTemplate", nil
+	case "eventarctrigger":
+		return "Eventarc", "Trigger", nil
+	case "orgpolicypolicy":
+		return "OrgPolicy", "Policy", nil
+	case "privatecacertificatetemplate":
+		return "Privateca", "CertificateTemplate", nil
+	default:
+		return "", "", fmt.Errorf("Error retrieving Terraform sample name from DCL resource type: %s.%s not found", service, resource)
+	}
+
+}
+
+// ConvertSampleJSONToHCL unmarshals json to an HCL string.
 func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (string, error) {
 	if version == "beta" {
 		switch resourceType {
@@ -109,6 +158,18 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 				return "", err
 			}
 			return CloudbuildWorkerPoolBetaAsHCL(*r)
+		case "CloudResourceManagerFolder":
+			r := &cloudresourcemanagerBeta.Folder{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return CloudResourceManagerFolderBetaAsHCL(*r)
+		case "CloudResourceManagerProject":
+			r := &cloudresourcemanagerBeta.Project{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return serializeBetaProjectToHCL(*r)
 		case "ComputeFirewallPolicy":
 			r := &computeBeta.FirewallPolicy{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -163,6 +224,12 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 				return "", err
 			}
 			return GkeHubFeatureMembershipBetaAsHCL(*r)
+		case "OrgPolicyPolicy":
+			r := &orgpolicyBeta.Policy{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return OrgPolicyPolicyBetaAsHCL(*r)
 		case "PrivatecaCertificateTemplate":
 			r := &privatecaBeta.CertificateTemplate{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -179,6 +246,18 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 			return "", err
 		}
 		return AssuredWorkloadsWorkloadAsHCL(*r)
+	case "CloudResourceManagerFolder":
+		r := &cloudresourcemanager.Folder{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return CloudResourceManagerFolderAsHCL(*r)
+	case "CloudResourceManagerProject":
+		r := &cloudresourcemanager.Project{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return CloudResourceManagerProjectAsHCL(*r)
 	case "ComputeFirewallPolicy":
 		r := &compute.FirewallPolicy{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -221,6 +300,12 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 			return "", err
 		}
 		return EventarcTriggerAsHCL(*r)
+	case "OrgPolicyPolicy":
+		r := &orgpolicy.Policy{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return OrgPolicyPolicyAsHCL(*r)
 	case "PrivatecaCertificateTemplate":
 		r := &privateca.CertificateTemplate{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -359,6 +444,43 @@ func convertCloudbuildWorkerPoolBetaWorkerConfigToHCL(r *cloudbuildBeta.WorkerPo
 		outputConfig += fmt.Sprintf("\tno_external_ip = %#v\n", *r.NoExternalIP)
 	}
 	return outputConfig + "}"
+}
+
+// CloudResourceManagerFolderBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func CloudResourceManagerFolderBetaAsHCL(r cloudresourcemanagerBeta.Folder) (string, error) {
+	outputConfig := "resource \"google_folder\" \"output\" {\n"
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+// CloudResourceManagerProjectBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func CloudResourceManagerProjectBetaAsHCL(r cloudresourcemanagerBeta.Project) (string, error) {
+	outputConfig := "resource \"google_project\" \"output\" {\n"
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplayname = %#v\n", *r.DisplayName)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	return formatHCL(outputConfig + "}")
 }
 
 // ComputeFirewallPolicyBetaAsHCL returns a string representation of the specified resource in HCL.
@@ -1911,6 +2033,110 @@ func convertGkeHubFeatureMembershipBetaConfigmanagementPolicyControllerToHCL(r *
 	return outputConfig + "}"
 }
 
+// OrgPolicyPolicyBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func OrgPolicyPolicyBetaAsHCL(r orgpolicyBeta.Policy) (string, error) {
+	outputConfig := "resource \"google_org_policy_policy\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	if v := convertOrgPolicyPolicyBetaSpecToHCL(r.Spec); v != "" {
+		outputConfig += fmt.Sprintf("\tspec %s\n", v)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+func convertOrgPolicyPolicyBetaSpecToHCL(r *orgpolicyBeta.PolicySpec) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.InheritFromParent != nil {
+		outputConfig += fmt.Sprintf("\tinherit_from_parent = %#v\n", *r.InheritFromParent)
+	}
+	if r.Reset != nil {
+		outputConfig += fmt.Sprintf("\treset = %#v\n", *r.Reset)
+	}
+	if r.Rules != nil {
+		for _, v := range r.Rules {
+			outputConfig += fmt.Sprintf("\trules %s\n", convertOrgPolicyPolicyBetaSpecRulesToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertOrgPolicyPolicyBetaSpecRulesToHCL(r *orgpolicyBeta.PolicySpecRules) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowAll != nil {
+		outputConfig += fmt.Sprintf("\tallow_all = %#v\n", *r.AllowAll)
+	}
+	if v := convertOrgPolicyPolicyBetaSpecRulesConditionToHCL(r.Condition); v != "" {
+		outputConfig += fmt.Sprintf("\tcondition %s\n", v)
+	}
+	if r.DenyAll != nil {
+		outputConfig += fmt.Sprintf("\tdeny_all = %#v\n", *r.DenyAll)
+	}
+	if r.Enforce != nil {
+		outputConfig += fmt.Sprintf("\tenforce = %#v\n", *r.Enforce)
+	}
+	if v := convertOrgPolicyPolicyBetaSpecRulesValuesToHCL(r.Values); v != "" {
+		outputConfig += fmt.Sprintf("\tvalues %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOrgPolicyPolicyBetaSpecRulesConditionToHCL(r *orgpolicyBeta.PolicySpecRulesCondition) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Expression != nil {
+		outputConfig += fmt.Sprintf("\texpression = %#v\n", *r.Expression)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Title != nil {
+		outputConfig += fmt.Sprintf("\ttitle = %#v\n", *r.Title)
+	}
+	return outputConfig + "}"
+}
+
+func convertOrgPolicyPolicyBetaSpecRulesValuesToHCL(r *orgpolicyBeta.PolicySpecRulesValues) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedValues != nil {
+		outputConfig += "\tallowed_values = ["
+		for _, v := range r.AllowedValues {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.DeniedValues != nil {
+		outputConfig += "\tdenied_values = ["
+		for _, v := range r.DeniedValues {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
 // PrivatecaCertificateTemplateBetaAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -2273,6 +2499,43 @@ func convertAssuredWorkloadsWorkloadResourcesToHCL(r *assuredworkloads.WorkloadR
 	}
 	outputConfig := "{\n"
 	return outputConfig + "}"
+}
+
+// CloudResourceManagerFolderAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func CloudResourceManagerFolderAsHCL(r cloudresourcemanager.Folder) (string, error) {
+	outputConfig := "resource \"google_folder\" \"output\" {\n"
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+// CloudResourceManagerProjectAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func CloudResourceManagerProjectAsHCL(r cloudresourcemanager.Project) (string, error) {
+	outputConfig := "resource \"google_project\" \"output\" {\n"
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplayname = %#v\n", *r.DisplayName)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	return formatHCL(outputConfig + "}")
 }
 
 // ComputeFirewallPolicyAsHCL returns a string representation of the specified resource in HCL.
@@ -3584,6 +3847,110 @@ func convertEventarcTriggerTransportPubsubToHCL(r *eventarc.TriggerTransportPubs
 	outputConfig := "{\n"
 	if r.Topic != nil {
 		outputConfig += fmt.Sprintf("\ttopic = %#v\n", *r.Topic)
+	}
+	return outputConfig + "}"
+}
+
+// OrgPolicyPolicyAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func OrgPolicyPolicyAsHCL(r orgpolicy.Policy) (string, error) {
+	outputConfig := "resource \"google_org_policy_policy\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	if v := convertOrgPolicyPolicySpecToHCL(r.Spec); v != "" {
+		outputConfig += fmt.Sprintf("\tspec %s\n", v)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+func convertOrgPolicyPolicySpecToHCL(r *orgpolicy.PolicySpec) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.InheritFromParent != nil {
+		outputConfig += fmt.Sprintf("\tinherit_from_parent = %#v\n", *r.InheritFromParent)
+	}
+	if r.Reset != nil {
+		outputConfig += fmt.Sprintf("\treset = %#v\n", *r.Reset)
+	}
+	if r.Rules != nil {
+		for _, v := range r.Rules {
+			outputConfig += fmt.Sprintf("\trules %s\n", convertOrgPolicyPolicySpecRulesToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertOrgPolicyPolicySpecRulesToHCL(r *orgpolicy.PolicySpecRules) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowAll != nil {
+		outputConfig += fmt.Sprintf("\tallow_all = %#v\n", *r.AllowAll)
+	}
+	if v := convertOrgPolicyPolicySpecRulesConditionToHCL(r.Condition); v != "" {
+		outputConfig += fmt.Sprintf("\tcondition %s\n", v)
+	}
+	if r.DenyAll != nil {
+		outputConfig += fmt.Sprintf("\tdeny_all = %#v\n", *r.DenyAll)
+	}
+	if r.Enforce != nil {
+		outputConfig += fmt.Sprintf("\tenforce = %#v\n", *r.Enforce)
+	}
+	if v := convertOrgPolicyPolicySpecRulesValuesToHCL(r.Values); v != "" {
+		outputConfig += fmt.Sprintf("\tvalues %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOrgPolicyPolicySpecRulesConditionToHCL(r *orgpolicy.PolicySpecRulesCondition) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Expression != nil {
+		outputConfig += fmt.Sprintf("\texpression = %#v\n", *r.Expression)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Title != nil {
+		outputConfig += fmt.Sprintf("\ttitle = %#v\n", *r.Title)
+	}
+	return outputConfig + "}"
+}
+
+func convertOrgPolicyPolicySpecRulesValuesToHCL(r *orgpolicy.PolicySpecRulesValues) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedValues != nil {
+		outputConfig += "\tallowed_values = ["
+		for _, v := range r.AllowedValues {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.DeniedValues != nil {
+		outputConfig += "\tdenied_values = ["
+		for _, v := range r.DeniedValues {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
 	}
 	return outputConfig + "}"
 }
@@ -5488,6 +5855,102 @@ func convertGkeHubFeatureMembershipBetaConfigmanagementPolicyControllerList(i in
 	return out
 }
 
+func convertOrgPolicyPolicyBetaSpec(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"inheritFromParent": in["inherit_from_parent"],
+		"reset":             in["reset"],
+		"rules":             in["rules"],
+		"etag":              in["etag"],
+		"updateTime":        in["update_time"],
+	}
+}
+
+func convertOrgPolicyPolicyBetaSpecList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOrgPolicyPolicyBetaSpec(v))
+	}
+	return out
+}
+
+func convertOrgPolicyPolicyBetaSpecRules(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowAll":  in["allow_all"],
+		"condition": convertOrgPolicyPolicyBetaSpecRulesCondition(in["condition"]),
+		"denyAll":   in["deny_all"],
+		"enforce":   in["enforce"],
+		"values":    convertOrgPolicyPolicyBetaSpecRulesValues(in["values"]),
+	}
+}
+
+func convertOrgPolicyPolicyBetaSpecRulesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOrgPolicyPolicyBetaSpecRules(v))
+	}
+	return out
+}
+
+func convertOrgPolicyPolicyBetaSpecRulesCondition(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"description": in["description"],
+		"expression":  in["expression"],
+		"location":    in["location"],
+		"title":       in["title"],
+	}
+}
+
+func convertOrgPolicyPolicyBetaSpecRulesConditionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOrgPolicyPolicyBetaSpecRulesCondition(v))
+	}
+	return out
+}
+
+func convertOrgPolicyPolicyBetaSpecRulesValues(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedValues": in["allowed_values"],
+		"deniedValues":  in["denied_values"],
+	}
+}
+
+func convertOrgPolicyPolicyBetaSpecRulesValuesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOrgPolicyPolicyBetaSpecRulesValues(v))
+	}
+	return out
+}
+
 func convertPrivatecaCertificateTemplateBetaIdentityConstraints(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -7099,6 +7562,102 @@ func convertEventarcTriggerTransportPubsubList(i interface{}) (out []map[string]
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertEventarcTriggerTransportPubsub(v))
+	}
+	return out
+}
+
+func convertOrgPolicyPolicySpec(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"inheritFromParent": in["inherit_from_parent"],
+		"reset":             in["reset"],
+		"rules":             in["rules"],
+		"etag":              in["etag"],
+		"updateTime":        in["update_time"],
+	}
+}
+
+func convertOrgPolicyPolicySpecList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOrgPolicyPolicySpec(v))
+	}
+	return out
+}
+
+func convertOrgPolicyPolicySpecRules(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowAll":  in["allow_all"],
+		"condition": convertOrgPolicyPolicySpecRulesCondition(in["condition"]),
+		"denyAll":   in["deny_all"],
+		"enforce":   in["enforce"],
+		"values":    convertOrgPolicyPolicySpecRulesValues(in["values"]),
+	}
+}
+
+func convertOrgPolicyPolicySpecRulesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOrgPolicyPolicySpecRules(v))
+	}
+	return out
+}
+
+func convertOrgPolicyPolicySpecRulesCondition(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"description": in["description"],
+		"expression":  in["expression"],
+		"location":    in["location"],
+		"title":       in["title"],
+	}
+}
+
+func convertOrgPolicyPolicySpecRulesConditionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOrgPolicyPolicySpecRulesCondition(v))
+	}
+	return out
+}
+
+func convertOrgPolicyPolicySpecRulesValues(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedValues": in["allowed_values"],
+		"deniedValues":  in["denied_values"],
+	}
+}
+
+func convertOrgPolicyPolicySpecRulesValuesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOrgPolicyPolicySpecRulesValues(v))
 	}
 	return out
 }

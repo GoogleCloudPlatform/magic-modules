@@ -47,6 +47,7 @@ const (
 	CustomCreateDirective              = "CUSTOM_CREATE_DIRECTIVE_FUNCTION"
 	SkipDelete                         = "SKIP_DELETE_FUNCTION"
 	SerializationOnly                  = "SERIALIZATION_ONLY"
+	CustomSerializer                   = "CUSTOM_SERIALIZER"
 	TerraformProductName               = "CUSTOM_TERRAFORM_PRODUCT_NAME"
 )
 

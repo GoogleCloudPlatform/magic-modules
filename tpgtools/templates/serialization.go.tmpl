@@ -40,7 +40,7 @@ import (
 {{- end }}
 )
 
-// DCLToTerraformReferencce converts a DCL resource name to the final tpgtools name
+// DCLToTerraformReference converts a DCL resource name to the final tpgtools name
 // after overrides are applied
 func DCLToTerraformReference(resourceType, version string) (string, error) {
 	{{- range $version, $resList := $.Resources   }}
@@ -67,7 +67,27 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 	{{- end }}
 }
 
-// ConvertSampleJSONToDCLResource unmarshals json to a DCL resource specified by the resource type
+// DCLToTerraformSampleName converts a DCL resource name to the final tpgtools name
+// after overrides are applied.
+// e.g. cloudresourcemanager.project -> CloudResourceManagerProject
+func DCLToTerraformSampleName(service, resource string) (string, string, error) {
+	{{- range $version, $resList := $.Resources   }}
+		{{- if eq $version.V "ga" }}
+	switch service + resource {
+	{{- range $res := $resList   }}
+		{{- if not $res.IsAlternateLocation }}
+	case "{{$res.DCLPackage}}{{replace $res.DCLName "_" "" -1}}":
+		return "{{$res.ProductType }}", "{{ $res.Type }}", nil
+		{{- end }}
+	{{- end }}
+	default:
+		return "", "", fmt.Errorf("Error retrieving Terraform sample name from DCL resource type: %s.%s not found", service, resource)
+	}
+		{{ end }}
+	{{- end }}
+}
+
+// ConvertSampleJSONToHCL unmarshals json to an HCL string.
 func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (string, error) {
 	{{- range $version, $resList := $.Resources   }}
 		{{- if not (eq $version.V "ga") }}
@@ -79,7 +99,11 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
+				{{- if $res.CustomSerializer }}
+			return {{$res.CustomSerializer}}(*r)
+				{{- else }}
 			return {{$res.PathType}}{{$version.SerializationSuffix}}AsHCL(*r)
+				{{- end }}
 			{{- end }}
 		}	
 	}

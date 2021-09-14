@@ -98,6 +98,9 @@ type Resource struct {
 	// ListFields is the list of fields required for a list call.
 	ListFields []string
 
+	// location is one of "zone", "region", or "global".
+	location string
+
 	// HasProject tells us if the resource has a project field
 	HasProject bool
 
@@ -123,6 +126,9 @@ type Resource struct {
 	// SerializationOnly defines if this resource should not generate provider files
 	// and only be used for serialization
 	SerializationOnly bool
+
+	// CustomSerializer defines the function this resource should use to serialize itself.
+	CustomSerializer *string
 
 	// TerraformProductName is the Product name overriden from the DCL
 	TerraformProductName *string
@@ -156,6 +162,9 @@ func (r Resource) Path() string {
 // For example, "google_compute_instance"
 func (r Resource) TerraformName() string {
 	if r.TerraformProductName != nil {
+		if *r.TerraformProductName == "" {
+			return fmt.Sprintf("google_%s", r.Name())
+		}
 		return fmt.Sprintf("google_%s_%s", *r.TerraformProductName, r.Name())
 	}
 	return "google_" + r.Path()
@@ -167,7 +176,7 @@ func (r Resource) Type() string {
 	return snakeToTitleCase(r.DCLName())
 }
 
-// PathType is the title-cased name of a resource preceded by it's package, for
+// PathType is the title-cased name of a resource preceded by its package,
 // often used to namespace functions. For example, "RedisInstance".
 func (r Resource) PathType() string {
 	return snakeToTitleCase(r.Path())
@@ -201,6 +210,14 @@ func (r Resource) ProductMetadata() *ProductMetadata {
 // DCLPackage of "accesscontextmanager"
 func (r Resource) DCLPackage() string {
 	return r.productMetadata.DCLPackage()
+}
+
+// IsAlternateLocation returns whether this resource is an additional version
+// of the DCL resource with a different location type. All references in samples
+// to a resource with an alternate location will point to the main version.
+func (r Resource) IsAlternateLocation() bool {
+	// For now, we consider non-regional resources to be alternate.
+	return r.location != "" && r.location != "region"
 }
 
 // SidebarCurrent is the website sidebar identifier, for example
@@ -358,6 +375,7 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 		productMetadata:      product,
 		versionMetadata:      version,
 		Description:          schema.Description,
+		location:             location,
 		InsertTimeoutMinutes: 10,
 		UpdateTimeoutMinutes: 10,
 		DeleteTimeoutMinutes: 10,
@@ -510,6 +528,16 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 
 	// Resource Override: SerializationOnly
 	res.SerializationOnly = overrides.ResourceOverride(SerializationOnly, location)
+
+	// Resource Override: CustomSerializer
+	customSerializerFunc := CustomSerializerDetails{}
+	customSerializerFuncOk, err := overrides.ResourceOverrideWithDetails(CustomSerializer, &customSerializerFunc, location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode custom serializer function details: %v", err)
+	}
+	if customSerializerFuncOk {
+		res.CustomSerializer = &customSerializerFunc.Function
+	}
 
 	// Resource Override: TerraformProductName
 	terraformProductName := TerraformProductNameDetails{}
