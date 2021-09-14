@@ -432,6 +432,7 @@ func skipIfEnvNotSet(t *testing.T, envs ...string) {
 
 	for _, k := range envs {
 		if os.Getenv(k) == "" {
+			log.Printf("[DEBUG] Environment variable %s is not set - skipping test", k)
 			t.Skipf("Environment variable %s is not set", k)
 		}
 	}

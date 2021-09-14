@@ -17,6 +17,7 @@ var testResourcePrefixes = []string{
 	"df-",                 // https://github.com/hashicorp/terraform-provider-google/issues/8909
 	"resourcegroup-",      // https://github.com/hashicorp/terraform-provider-google/issues/8924
 	"cluster-",            // https://github.com/hashicorp/terraform-provider-google/issues/8924
+	"k8s-fw-",
 }
 
 func TestMain(m *testing.M) {
