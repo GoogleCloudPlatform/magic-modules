@@ -124,7 +124,7 @@ func TestAccStorageSignedUrl_accTest(t *testing.T) {
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", randInt(t))
 
 	headers := map[string]string{
-		"x-goog-test":                "foo",
+		"x-goog-test":                    "foo",
 		"x-goog-if-metageneration-match": "1",
 	}
 
