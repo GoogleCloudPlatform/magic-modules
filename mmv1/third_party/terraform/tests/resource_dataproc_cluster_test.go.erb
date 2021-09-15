@@ -572,7 +572,7 @@ func TestAccDataprocCluster_withOptionalComponents(t *testing.T) {
 				Config: testAccDataprocCluster_withOptionalComponents(rnd),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_opt_components", &cluster),
-					testAccCheckDataprocClusterHasOptionalComponents(&cluster, "ZOOKEEPER", "DOCKER", "ANACONDA", "DRUID", "HBASE", "FLINK", "SOLR", "ZEPPELIN", "HIVE_WEBHCAT", "JUPYTER", "KERBEROS", "PRESTO", "RANGER"),
+					testAccCheckDataprocClusterHasOptionalComponents(&cluster, "ZOOKEEPER", "DOCKER"),
 				),
 			},
 		},
