@@ -51,6 +51,10 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 			return "google_compute_firewall_policy_association", nil
 		case "ComputeFirewallPolicyRule":
 			return "google_compute_firewall_policy_rule", nil
+		case "ComputeForwardingRule":
+			return "google_compute_forwarding_rule", nil
+		case "ComputeGlobalForwardingRule":
+			return "google_compute_global_forwarding_rule", nil
 		case "DataprocWorkflowTemplate":
 			return "google_dataproc_workflow_template", nil
 		case "EventarcTrigger":
@@ -73,6 +77,10 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 		return "google_compute_firewall_policy_association", nil
 	case "ComputeFirewallPolicyRule":
 		return "google_compute_firewall_policy_rule", nil
+	case "ComputeForwardingRule":
+		return "google_compute_forwarding_rule", nil
+	case "ComputeGlobalForwardingRule":
+		return "google_compute_global_forwarding_rule", nil
 	case "DataprocWorkflowTemplate":
 		return "google_dataproc_workflow_template", nil
 	case "EventarcTrigger":
@@ -119,6 +127,18 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 				return "", err
 			}
 			return ComputeFirewallPolicyRuleBetaAsHCL(*r)
+		case "ComputeForwardingRule":
+			r := &computeBeta.ForwardingRule{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ComputeForwardingRuleBetaAsHCL(*r)
+		case "ComputeGlobalForwardingRule":
+			r := &computeBeta.ForwardingRule{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ComputeGlobalForwardingRuleBetaAsHCL(*r)
 		case "DataprocWorkflowTemplate":
 			r := &dataprocBeta.WorkflowTemplate{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -177,6 +197,18 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 			return "", err
 		}
 		return ComputeFirewallPolicyRuleAsHCL(*r)
+	case "ComputeForwardingRule":
+		r := &compute.ForwardingRule{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeForwardingRuleAsHCL(*r)
+	case "ComputeGlobalForwardingRule":
+		r := &compute.ForwardingRule{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeGlobalForwardingRuleAsHCL(*r)
 	case "DataprocWorkflowTemplate":
 		r := &dataproc.WorkflowTemplate{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -459,6 +491,151 @@ func convertComputeFirewallPolicyRuleBetaMatchLayer4ConfigsToHCL(r *computeBeta.
 			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
 		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+// ComputeForwardingRuleBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string, error) {
+	outputConfig := "resource \"google_compute_forwarding_rule\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.AllPorts != nil {
+		outputConfig += fmt.Sprintf("\tall_ports = %#v\n", *r.AllPorts)
+	}
+	if r.AllowGlobalAccess != nil {
+		outputConfig += fmt.Sprintf("\tallow_global_access = %#v\n", *r.AllowGlobalAccess)
+	}
+	if r.BackendService != nil {
+		outputConfig += fmt.Sprintf("\tbackend_service = %#v\n", *r.BackendService)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.IPAddress != nil {
+		outputConfig += fmt.Sprintf("\tip_address = %#v\n", *r.IPAddress)
+	}
+	if r.IPProtocol != nil {
+		outputConfig += fmt.Sprintf("\tip_protocol = %#v\n", *r.IPProtocol)
+	}
+	if r.IsMirroringCollector != nil {
+		outputConfig += fmt.Sprintf("\tis_mirroring_collector = %#v\n", *r.IsMirroringCollector)
+	}
+	if r.LoadBalancingScheme != nil {
+		outputConfig += fmt.Sprintf("\tload_balancing_scheme = %#v\n", *r.LoadBalancingScheme)
+	}
+	if r.Network != nil {
+		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
+	}
+	if r.NetworkTier != nil {
+		outputConfig += fmt.Sprintf("\tnetwork_tier = %#v\n", *r.NetworkTier)
+	}
+	if r.PortRange != nil {
+		outputConfig += fmt.Sprintf("\tport_range = %#v\n", *r.PortRange)
+	}
+	if r.Ports != nil {
+		outputConfig += "\tports = ["
+		for _, v := range r.Ports {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tregion = %#v\n", *r.Location)
+	}
+	if r.ServiceLabel != nil {
+		outputConfig += fmt.Sprintf("\tservice_label = %#v\n", *r.ServiceLabel)
+	}
+	if r.Subnetwork != nil {
+		outputConfig += fmt.Sprintf("\tsubnetwork = %#v\n", *r.Subnetwork)
+	}
+	if r.Target != nil {
+		outputConfig += fmt.Sprintf("\ttarget = %#v\n", *r.Target)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+// ComputeGlobalForwardingRuleBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeGlobalForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string, error) {
+	outputConfig := "resource \"google_compute_global_forwarding_rule\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Target != nil {
+		outputConfig += fmt.Sprintf("\ttarget = %#v\n", *r.Target)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.IPAddress != nil {
+		outputConfig += fmt.Sprintf("\tip_address = %#v\n", *r.IPAddress)
+	}
+	if r.IPProtocol != nil {
+		outputConfig += fmt.Sprintf("\tip_protocol = %#v\n", *r.IPProtocol)
+	}
+	if r.IPVersion != nil {
+		outputConfig += fmt.Sprintf("\tip_version = %#v\n", *r.IPVersion)
+	}
+	if r.LoadBalancingScheme != nil {
+		outputConfig += fmt.Sprintf("\tload_balancing_scheme = %#v\n", *r.LoadBalancingScheme)
+	}
+	if r.MetadataFilter != nil {
+		for _, v := range r.MetadataFilter {
+			outputConfig += fmt.Sprintf("\tmetadata_filters %s\n", convertComputeGlobalForwardingRuleBetaMetadataFilterToHCL(&v))
+		}
+	}
+	if r.Network != nil {
+		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
+	}
+	if r.PortRange != nil {
+		outputConfig += fmt.Sprintf("\tport_range = %#v\n", *r.PortRange)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+func convertComputeGlobalForwardingRuleBetaMetadataFilterToHCL(r *computeBeta.ForwardingRuleMetadataFilter) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.FilterLabel != nil {
+		for _, v := range r.FilterLabel {
+			outputConfig += fmt.Sprintf("\tfilter_labels %s\n", convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelToHCL(&v))
+		}
+	}
+	if r.FilterMatchCriteria != nil {
+		outputConfig += fmt.Sprintf("\tfilter_match_criteria = %#v\n", *r.FilterMatchCriteria)
+	}
+	return outputConfig + "}"
+}
+
+func convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelToHCL(r *computeBeta.ForwardingRuleMetadataFilterFilterLabel) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Value != nil {
+		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
 	}
 	return outputConfig + "}"
 }
@@ -2232,6 +2409,151 @@ func convertComputeFirewallPolicyRuleMatchLayer4ConfigsToHCL(r *compute.Firewall
 	return outputConfig + "}"
 }
 
+// ComputeForwardingRuleAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeForwardingRuleAsHCL(r compute.ForwardingRule) (string, error) {
+	outputConfig := "resource \"google_compute_forwarding_rule\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.AllPorts != nil {
+		outputConfig += fmt.Sprintf("\tall_ports = %#v\n", *r.AllPorts)
+	}
+	if r.AllowGlobalAccess != nil {
+		outputConfig += fmt.Sprintf("\tallow_global_access = %#v\n", *r.AllowGlobalAccess)
+	}
+	if r.BackendService != nil {
+		outputConfig += fmt.Sprintf("\tbackend_service = %#v\n", *r.BackendService)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.IPAddress != nil {
+		outputConfig += fmt.Sprintf("\tip_address = %#v\n", *r.IPAddress)
+	}
+	if r.IPProtocol != nil {
+		outputConfig += fmt.Sprintf("\tip_protocol = %#v\n", *r.IPProtocol)
+	}
+	if r.IsMirroringCollector != nil {
+		outputConfig += fmt.Sprintf("\tis_mirroring_collector = %#v\n", *r.IsMirroringCollector)
+	}
+	if r.LoadBalancingScheme != nil {
+		outputConfig += fmt.Sprintf("\tload_balancing_scheme = %#v\n", *r.LoadBalancingScheme)
+	}
+	if r.Network != nil {
+		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
+	}
+	if r.NetworkTier != nil {
+		outputConfig += fmt.Sprintf("\tnetwork_tier = %#v\n", *r.NetworkTier)
+	}
+	if r.PortRange != nil {
+		outputConfig += fmt.Sprintf("\tport_range = %#v\n", *r.PortRange)
+	}
+	if r.Ports != nil {
+		outputConfig += "\tports = ["
+		for _, v := range r.Ports {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tregion = %#v\n", *r.Location)
+	}
+	if r.ServiceLabel != nil {
+		outputConfig += fmt.Sprintf("\tservice_label = %#v\n", *r.ServiceLabel)
+	}
+	if r.Subnetwork != nil {
+		outputConfig += fmt.Sprintf("\tsubnetwork = %#v\n", *r.Subnetwork)
+	}
+	if r.Target != nil {
+		outputConfig += fmt.Sprintf("\ttarget = %#v\n", *r.Target)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+// ComputeGlobalForwardingRuleAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeGlobalForwardingRuleAsHCL(r compute.ForwardingRule) (string, error) {
+	outputConfig := "resource \"google_compute_global_forwarding_rule\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Target != nil {
+		outputConfig += fmt.Sprintf("\ttarget = %#v\n", *r.Target)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.IPAddress != nil {
+		outputConfig += fmt.Sprintf("\tip_address = %#v\n", *r.IPAddress)
+	}
+	if r.IPProtocol != nil {
+		outputConfig += fmt.Sprintf("\tip_protocol = %#v\n", *r.IPProtocol)
+	}
+	if r.IPVersion != nil {
+		outputConfig += fmt.Sprintf("\tip_version = %#v\n", *r.IPVersion)
+	}
+	if r.LoadBalancingScheme != nil {
+		outputConfig += fmt.Sprintf("\tload_balancing_scheme = %#v\n", *r.LoadBalancingScheme)
+	}
+	if r.MetadataFilter != nil {
+		for _, v := range r.MetadataFilter {
+			outputConfig += fmt.Sprintf("\tmetadata_filters %s\n", convertComputeGlobalForwardingRuleMetadataFilterToHCL(&v))
+		}
+	}
+	if r.Network != nil {
+		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
+	}
+	if r.PortRange != nil {
+		outputConfig += fmt.Sprintf("\tport_range = %#v\n", *r.PortRange)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+func convertComputeGlobalForwardingRuleMetadataFilterToHCL(r *compute.ForwardingRuleMetadataFilter) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.FilterLabel != nil {
+		for _, v := range r.FilterLabel {
+			outputConfig += fmt.Sprintf("\tfilter_labels %s\n", convertComputeGlobalForwardingRuleMetadataFilterFilterLabelToHCL(&v))
+		}
+	}
+	if r.FilterMatchCriteria != nil {
+		outputConfig += fmt.Sprintf("\tfilter_match_criteria = %#v\n", *r.FilterMatchCriteria)
+	}
+	return outputConfig + "}"
+}
+
+func convertComputeGlobalForwardingRuleMetadataFilterFilterLabelToHCL(r *compute.ForwardingRuleMetadataFilterFilterLabel) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Value != nil {
+		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
+	}
+	return outputConfig + "}"
+}
+
 // DataprocWorkflowTemplateAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -3708,6 +4030,50 @@ func convertComputeFirewallPolicyRuleBetaMatchLayer4ConfigsList(i interface{}) (
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertComputeFirewallPolicyRuleBetaMatchLayer4Configs(v))
+	}
+	return out
+}
+
+func convertComputeGlobalForwardingRuleBetaMetadataFilter(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"filterLabel":         in["filter_labels"],
+		"filterMatchCriteria": in["filter_match_criteria"],
+	}
+}
+
+func convertComputeGlobalForwardingRuleBetaMetadataFilterList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeGlobalForwardingRuleBetaMetadataFilter(v))
+	}
+	return out
+}
+
+func convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabel(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"name":  in["name"],
+		"value": in["value"],
+	}
+}
+
+func convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabel(v))
 	}
 	return out
 }
@@ -5530,6 +5896,50 @@ func convertComputeFirewallPolicyRuleMatchLayer4ConfigsList(i interface{}) (out 
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertComputeFirewallPolicyRuleMatchLayer4Configs(v))
+	}
+	return out
+}
+
+func convertComputeGlobalForwardingRuleMetadataFilter(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"filterLabel":         in["filter_labels"],
+		"filterMatchCriteria": in["filter_match_criteria"],
+	}
+}
+
+func convertComputeGlobalForwardingRuleMetadataFilterList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeGlobalForwardingRuleMetadataFilter(v))
+	}
+	return out
+}
+
+func convertComputeGlobalForwardingRuleMetadataFilterFilterLabel(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"name":  in["name"],
+		"value": in["value"],
+	}
+}
+
+func convertComputeGlobalForwardingRuleMetadataFilterFilterLabelList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeGlobalForwardingRuleMetadataFilterFilterLabel(v))
 	}
 	return out
 }

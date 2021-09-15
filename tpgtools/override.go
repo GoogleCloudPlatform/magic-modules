@@ -68,6 +68,9 @@ const (
 	CollapsedObject                   = "COLLAPSED_OBJECT"
 	IgnoreRead                        = "IGNORE_READ"
 	GenerateIfNotSet                  = "GENERATE_IF_NOT_SET"
+	CustomListSize                    = "CUSTOM_LIST_SIZE_CONSTRAINT"
+	CustomDefault                     = "CUSTOM_DEFAULT"
+	CustomRequired                    = "REQUIRED_OVERRIDE"
 )
 
 // Overrides represents the type a resource's override file can be marshalled

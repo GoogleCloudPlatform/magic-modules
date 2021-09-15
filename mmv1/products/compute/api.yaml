@@ -2348,6 +2348,28 @@ objects:
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'iap'
+        description: Settings for enabling Cloud Identity Aware Proxy
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enabled'
+            description: Enables IAP.
+          - !ruby/object:Api::Type::String
+            name: 'oauth2ClientId'
+            required: true
+            description: |
+              OAuth2 Client ID for IAP
+          - !ruby/object:Api::Type::String
+            name: 'oauth2ClientSecret'
+            required: true
+            description: |
+              OAuth2 Client Secret for IAP
+          - !ruby/object:Api::Type::String
+            name: 'oauth2ClientSecretSha256'
+            output: true
+            description: |
+              OAuth2 Client Secret SHA-256 for IAP
       - !ruby/object:Api::Type::Enum
         name: 'loadBalancingScheme'
         input: true
@@ -3285,15 +3307,16 @@ objects:
           are 4096 and 16384, other sizes may be added in the future.
           If an unsupported value is requested, the error message will list
           the supported values for the caller's project.
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'interface'
         min_version: 'beta'
+        # interface is removed using url_param_only to preserve schema definition
+        # and prevent sending or reading in API requests
+        url_param_only: true
+        default_value: 'SCSI'
+        deprecation_message: This field is no longer in use, disk interfaces will be automatically determined on attachment. To resolve this issue, remove this field from your config.
         description: |
           Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
-        default_value: :SCSI
-        values:
-          - :SCSI
-          - :NVME
       - !ruby/object:Api::Type::ResourceRef
         name: 'type'
         resource: 'DiskType'
@@ -10224,15 +10247,16 @@ objects:
         description: |
           URL of the disk type resource describing which disk type to use to
           create the disk. Provide this when creating the disk.
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'interface'
         min_version: 'beta'
+        # interface is removed using url_param_only to preserve schema definition
+        # and prevent sending or reading in API requests
+        url_param_only: true
+        default_value: 'SCSI'
+        deprecation_message: This field is no longer in use, disk interfaces will be automatically determined on attachment. To resolve this issue, remove this field from your config.
         description: |
           Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
-        default_value: :SCSI
-        values:
-          - :SCSI
-          - :NVME
   - !ruby/object:Api::Resource
     name: 'RegionUrlMap'
     kind: 'compute#urlMap'
@@ -12877,16 +12901,25 @@ objects:
         output: true
         description: |
           URL to a Network that should handle matching packets.
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::String
         name: 'nextHopIlb'
-        resource: 'ForwardingRule'
-        imports: 'selfLink'
         description: |
-          The URL to a forwarding rule of type loadBalancingScheme=INTERNAL that should handle matching packets.
-          You can only specify the forwarding rule as a partial or full URL. For example, the following are all valid URLs:
-          https://www.googleapis.com/compute/v1/projects/project/regions/region/forwardingRules/forwardingRule
-          regions/region/forwardingRules/forwardingRule
-          Note that this can only be used when the destinationRange is a public (non-RFC 1918) IP CIDR range.
+          The IP address or URL to a forwarding rule of type
+          loadBalancingScheme=INTERNAL that should handle matching
+          packets.
+
+          With the GA provider you can only specify the forwarding
+          rule as a partial or full URL. For example, the following
+          are all valid values:
+          * 10.128.0.56
+          * https://www.googleapis.com/compute/v1/projects/project/regions/region/forwardingRules/forwardingRule
+          * regions/region/forwardingRules/forwardingRule
+
+          When the beta provider, you can also specify the IP address
+          of a forwarding rule from the same VPC or any peered VPC.
+
+          Note that this can only be used when the destinationRange is
+          a public (non-RFC 1918) IP CIDR range.
         input: true
         exactly_one_of:
           - next_hop_gateway

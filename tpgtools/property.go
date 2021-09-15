@@ -71,6 +71,7 @@ type Property struct {
 	ValidateFunc     *string
 	SetHashFunc      *string
 	MaxItems         *int64
+	MinItems         *int64
 	ConfigMode       *string
 
 	Removed    *string
@@ -368,22 +369,6 @@ func (p Property) flattenGetterWithParent(parent string) string {
 	return "<unknown>"
 }
 
-// DefaultValidator returns a default ValidateFunc for a given field
-func (p Property) DefaultValidator() *string {
-	switch p.Type.String() {
-	case SchemaTypeString:
-		if p.Type.IsEnum() && len(p.typ.Enum) > 0 && !p.Computed {
-			enumValues := ""
-			for _, v := range p.typ.Enum {
-				enumValues += fmt.Sprintf(`"%s", `, v)
-			}
-			enumF := fmt.Sprintf(`validation.StringInSlice([]string{%s ""}, false)`, enumValues)
-			return &enumF
-		}
-	}
-	return nil
-}
-
 func getSchemaExtensionMap(v interface{}) map[interface{}]interface{} {
 	if v != nil {
 		return nil
@@ -515,8 +500,18 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			continue
 		}
 
-		if v.Default != "" {
-			d, err := renderDefault(p.Type, v.Default)
+		do := CustomDefaultDetails{}
+		doOk, err := overrides.PropertyOverrideWithDetails(CustomDefault, p, &do, location)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode custom list size details")
+		}
+
+		if v.Default != "" || doOk {
+			def := v.Default
+			if doOk {
+				def = do.Default
+			}
+			d, err := renderDefault(p.Type, def)
 			if err != nil {
 				return nil, fmt.Errorf("failed to render default: %v", err)
 			}
@@ -582,6 +577,20 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 		// Handle array properties
 		if v.Items != nil {
+			ls := CustomListSizeConstraintDetails{}
+			lsOk, err := overrides.PropertyOverrideWithDetails(CustomListSize, p, &ls, location)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decode custom list size details")
+			}
+			if lsOk {
+				if ls.Max > 0 {
+					p.MaxItems = &ls.Max
+				}
+				if ls.Min > 0 {
+					p.MinItems = &ls.Min
+				}
+			}
+
 			// We end up handling arrays of objects very similarly to nested objects
 			// themselves
 			if len(v.Items.Properties) > 0 {
@@ -612,6 +621,16 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			} else {
 				p.Optional = true
 			}
+			cr := CustomRequiredDetails{}
+			crOk, err := overrides.PropertyOverrideWithDetails(CustomRequired, p, &cr, location)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decode custom required details")
+			}
+			if crOk {
+				p.Required = cr.Required
+				p.Optional = cr.Optional
+				p.Computed = cr.Computed
+			}
 
 			p.Settable = true
 
@@ -632,7 +651,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 			// special handling for project/region/zone/other fields with
 			// provider defaults
-			if stringInSlice(p.title, []string{"project", "region", "zone"}) {
+			if stringInSlice(p.title, []string{"project", "region", "zone"}) || stringInSlice(p.customName, []string{"region", "project", "zone"}) {
 				p.Optional = true
 				p.Required = false
 				p.Computed = true
@@ -646,7 +665,11 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 					return nil, fmt.Errorf("failed to decode custom identity getter details")
 				}
 
-				ig := fmt.Sprintf("get%s(d, config)", p.PackageName)
+				capitalizedPropertyName := p.PackageName
+				if p.customName != "" {
+					capitalizedPropertyName = snakeToTitleCase(p.customName)
+				}
+				ig := fmt.Sprintf("get%s(d, config)", capitalizedPropertyName)
 				if cigOk {
 					ig = fmt.Sprintf("%s(d, config)", cig.Function)
 				}
@@ -710,8 +733,6 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 		if vfOk {
 			p.ValidateFunc = &vf.Function
-		} else {
-			p.ValidateFunc = p.DefaultValidator()
 		}
 
 		if p.Type.String() == SchemaTypeSet {
