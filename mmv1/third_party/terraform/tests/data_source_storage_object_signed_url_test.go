@@ -125,7 +125,7 @@ func TestAccStorageSignedUrl_accTest(t *testing.T) {
 
 	headers := map[string]string{
 		"x-goog-test":                "foo",
-		"x-goog-if-generation-match": "1",
+		"x-goog-if-metageneration-match": "1",
 	}
 
 	vcrTest(t, resource.TestCase{
