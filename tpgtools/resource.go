@@ -217,6 +217,7 @@ func (r Resource) DCLPackage() string {
 // to a resource with an alternate location will point to the main version.
 func (r Resource) IsAlternateLocation() bool {
 	// For now, we consider non-regional resources to be alternate.
+	// Non-locational resources will have an empty string as their location.
 	return r.location != "" && r.location != "region"
 }
 

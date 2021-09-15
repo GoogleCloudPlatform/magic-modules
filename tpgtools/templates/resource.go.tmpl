@@ -235,6 +235,7 @@ func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) erro
 	}
 {{ end }}
 
+	{{/* TODO(magic-modules-eng): Remove $.IdFunction and $.ID fields as they are no longer needed. */}}
 	id, err := obj.ID()
 	if err != nil {
 		return err

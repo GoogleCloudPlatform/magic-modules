@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// OrgPolicyPolicy has a custom import method because the parent field needs to allow an additional forward slash
+// to represent the type of parent (e.g. projects/{project_id}).
 func resourceOrgPolicyPolicyCustomImport(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	if err := parseImportId([]string{
