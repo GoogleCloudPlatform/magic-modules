@@ -235,8 +235,13 @@ func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) erro
 	}
 {{ end }}
 
-	{{/* TODO(magic-modules-eng): Remove $.IdFunction and $.ID fields as they are no longer needed. */}}
+{{- if $.UseDCLID }}
+{{/* TODO(magic-modules-eng): When the DCL can correctly handle IDs for regional/global splits, all resources
+should be converted to use the DCL's ID method, so normalization can be uniform. */}}
 	id, err := obj.ID()
+{{- else }}
+	id, err := {{ $.IdFunction }}(d, config, "{{$.ID}}")
+{{- end }}
 	if err != nil {
 		return err
 	}

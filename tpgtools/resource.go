@@ -39,6 +39,10 @@ type Resource struct {
 	// import formats can be derived from it.
 	ID string
 
+	// If the DCL ID formatter should be used.  For example, resources with multiple parent types
+	// need to use the DCL ID formatter.
+	UseDCLID bool
+
 	// ImportFormats are pattern format strings for importing the Terraform resource.
 	// TODO: if none are set, the resource does not support import.
 	ImportFormats []string
@@ -380,6 +384,7 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 		InsertTimeoutMinutes: 10,
 		UpdateTimeoutMinutes: 10,
 		DeleteTimeoutMinutes: 10,
+		UseDCLID:             overrides.ResourceOverride(UseDCLID, location),
 	}
 
 	crname := CustomResourceNameDetails{}

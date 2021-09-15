@@ -1,3 +1,4 @@
 - type: CUSTOM_IMPORT_FUNCTION
   details:
     function: resourceOrgPolicyPolicyCustomImport
+- type: USE_DCL_ID
