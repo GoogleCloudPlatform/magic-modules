@@ -1447,7 +1447,7 @@ resource "google_dataproc_cluster" "with_opt_components" {
 
   cluster_config {
     software_config {
-      optional_components = ["ZOOKEEPER", "DOCKER", "ANACONDA", "DRUID", "HBASE", "FLINK", "SOLR", "ZEPPELIN", "HIVE_WEBHCAT", "JUPYTER", "KERBEROS", "PRESTO", "RANGER"]
+      optional_components = ["DOCKER", "ZOOKEEPER"]
     }
   }
 }
