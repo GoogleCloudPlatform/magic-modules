@@ -1,7 +1,6 @@
 #! /bin/bash
 
 set -e
-set -x
 
 function clone_repo() {
     SCRATCH_OWNER=modular-magician
