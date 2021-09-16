@@ -452,8 +452,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       connectionTrackingPolicy.idleTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      connectionTrackingPolicy.enableStrongAffinity: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
   RegionInstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   BackendServiceSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
