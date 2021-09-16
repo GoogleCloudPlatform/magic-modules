@@ -2078,16 +2078,16 @@ func convertOrgPolicyPolicyBetaSpecRulesToHCL(r *orgpolicyBeta.PolicySpecRules) 
 	}
 	outputConfig := "{\n"
 	if r.AllowAll != nil {
-		outputConfig += fmt.Sprintf("\tallow_all = %#v\n", *r.AllowAll)
+		outputConfig += fmt.Sprintf("\tallow_all = %q\n", serializeEnumBool(r.AllowAll))
 	}
 	if v := convertOrgPolicyPolicyBetaSpecRulesConditionToHCL(r.Condition); v != "" {
 		outputConfig += fmt.Sprintf("\tcondition %s\n", v)
 	}
 	if r.DenyAll != nil {
-		outputConfig += fmt.Sprintf("\tdeny_all = %#v\n", *r.DenyAll)
+		outputConfig += fmt.Sprintf("\tdeny_all = %q\n", serializeEnumBool(r.DenyAll))
 	}
 	if r.Enforce != nil {
-		outputConfig += fmt.Sprintf("\tenforce = %#v\n", *r.Enforce)
+		outputConfig += fmt.Sprintf("\tenforce = %q\n", serializeEnumBool(r.Enforce))
 	}
 	if v := convertOrgPolicyPolicyBetaSpecRulesValuesToHCL(r.Values); v != "" {
 		outputConfig += fmt.Sprintf("\tvalues %s\n", v)
@@ -3896,16 +3896,16 @@ func convertOrgPolicyPolicySpecRulesToHCL(r *orgpolicy.PolicySpecRules) string {
 	}
 	outputConfig := "{\n"
 	if r.AllowAll != nil {
-		outputConfig += fmt.Sprintf("\tallow_all = %#v\n", *r.AllowAll)
+		outputConfig += fmt.Sprintf("\tallow_all = %q\n", serializeEnumBool(r.AllowAll))
 	}
 	if v := convertOrgPolicyPolicySpecRulesConditionToHCL(r.Condition); v != "" {
 		outputConfig += fmt.Sprintf("\tcondition %s\n", v)
 	}
 	if r.DenyAll != nil {
-		outputConfig += fmt.Sprintf("\tdeny_all = %#v\n", *r.DenyAll)
+		outputConfig += fmt.Sprintf("\tdeny_all = %q\n", serializeEnumBool(r.DenyAll))
 	}
 	if r.Enforce != nil {
-		outputConfig += fmt.Sprintf("\tenforce = %#v\n", *r.Enforce)
+		outputConfig += fmt.Sprintf("\tenforce = %q\n", serializeEnumBool(r.Enforce))
 	}
 	if v := convertOrgPolicyPolicySpecRulesValuesToHCL(r.Values); v != "" {
 		outputConfig += fmt.Sprintf("\tvalues %s\n", v)

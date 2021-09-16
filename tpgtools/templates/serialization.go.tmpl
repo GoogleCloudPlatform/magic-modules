@@ -144,6 +144,10 @@ func {{ $res.PathType}}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{
 	if !r.{{$field.PackageName}}.IsZero() {
 		outputConfig += fmt.Sprintf("\t{{$field.Name}} = %v\n", r.{{$field.PackageName}})
 	}
+					{{- else if $field.EnumBool }}
+	if r.{{$field.PackageName}} != nil {
+		outputConfig += fmt.Sprintf("\t{{$field.Name}} = %q\n", serializeEnumBool(r.{{$field.PackageName}}))
+	}
 					{{- else }}
 	if r.{{$field.PackageName}} != nil {
 		outputConfig += fmt.Sprintf("\t{{$field.Name}} = %#v\n", *r.{{$field.PackageName}})
@@ -186,9 +190,15 @@ func convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$v.PackagePath}}T
 			{{- range $field := $v.Properties}}
 				{{- if $field.Settable }}
 					{{- if eq $field.Type.String "TypeString" "TypeInt" "TypeBool" "TypeFloat" }}
+						{{- if $field.EnumBool }}
+	if r.{{$field.PackageName}} != nil {
+		outputConfig += fmt.Sprintf("{{ if not $v.Collapsed }}\t{{end}}{{$field.Name}} = %q\n", serializeEnumBool(r.{{$field.PackageName}}))
+	}
+						{{- else }}
 	if r.{{$field.PackageName}} != nil {
 		outputConfig += fmt.Sprintf("{{ if not $v.Collapsed }}\t{{end}}{{$field.Name}} = %#v\n", *r.{{$field.PackageName}})
 	}
+						{{- end }}
 					{{- else if $field.Type.IsObject }}
 	if v := convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(r.{{$field.PackageName}}); v != "" {
 		outputConfig += fmt.Sprintf("{{ if not $v.Collapsed }}\t{{end}}{{$field.Name}} %s\n", v)

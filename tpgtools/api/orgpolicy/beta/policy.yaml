@@ -122,15 +122,10 @@ components:
                 x-dcl-go-type: PolicySpecRules
                 properties:
                   allowAll:
-                    type: string
+                    type: boolean
                     x-dcl-go-name: AllowAll
-                    x-dcl-go-type: PolicySpecRulesAllowAllEnum
-                    description: 'Setting this to true means that all values are allowed.
+                    description: Setting this to true means that all values are allowed.
                       This field can be set only in Policies for list constraints.
-                      Possible values: TRUE, FALSE'
-                    enum:
-                    - "TRUE"
-                    - "FALSE"
                   condition:
                     type: object
                     x-dcl-go-name: Condition
@@ -170,26 +165,16 @@ components:
                           string describing its purpose. This can be used e.g. in
                           UIs which allow to enter the expression.
                   denyAll:
-                    type: string
+                    type: boolean
                     x-dcl-go-name: DenyAll
-                    x-dcl-go-type: PolicySpecRulesDenyAllEnum
-                    description: 'Setting this to true means that all values are denied.
+                    description: Setting this to true means that all values are denied.
                       This field can be set only in Policies for list constraints.
-                      Possible values: TRUE, FALSE'
-                    enum:
-                    - "TRUE"
-                    - "FALSE"
                   enforce:
-                    type: string
+                    type: boolean
                     x-dcl-go-name: Enforce
-                    x-dcl-go-type: PolicySpecRulesEnforceEnum
-                    description: 'If `true`, then the `Policy` is enforced. If `false`,
+                    description: If `true`, then the `Policy` is enforced. If `false`,
                       then any configuration is acceptable. This field can be set
-                      only in Policies for boolean constraints. Possible values: TRUE,
-                      FALSE'
-                    enum:
-                    - "TRUE"
-                    - "FALSE"
+                      only in Policies for boolean constraints.
                   values:
                     type: object
                     x-dcl-go-name: Values
