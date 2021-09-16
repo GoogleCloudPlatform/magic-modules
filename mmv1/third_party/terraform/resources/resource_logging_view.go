@@ -214,7 +214,7 @@ func resourceLoggingViewUpdateWithUpdateMask(d *schema.ResourceData, meta interf
 
 func resourceLoggingViewDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, _ := generateUserAgentString(d, config.userAgent)
 
 	url, err := replaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", d.Id()))
 	if err != nil {
