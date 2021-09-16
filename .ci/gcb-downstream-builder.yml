@@ -11,6 +11,8 @@ steps:
             './.ci/containers/downstream-builder'
         ]
 # the downstream-builder takes around 15 minutes to build
-timeout: "8000s"
+timeout: "14400s"
+options:
+    machineType: 'N1_HIGHCPU_32'
 # note: this container is also used for the run-rake-tests build
 images: ['gcr.io/$PROJECT_ID/downstream-builder:latest']
