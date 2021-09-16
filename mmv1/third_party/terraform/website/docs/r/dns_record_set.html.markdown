@@ -168,6 +168,7 @@ The following arguments are supported:
 DNS record sets can be imported using either of these accepted formats:
 
 ```
+$ terraform import google_dns_record_set.frontend projects/{{project}}/managedZones/{{zone}}/rrsets/{{name}}/{{type}}
 $ terraform import google_dns_record_set.frontend {{project}}/{{zone}}/{{name}}/{{type}}
 $ terraform import google_dns_record_set.frontend {{zone}}/{{name}}/{{type}}
 ```

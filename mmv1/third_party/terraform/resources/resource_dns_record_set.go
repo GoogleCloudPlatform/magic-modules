@@ -12,6 +12,58 @@ import (
 	"google.golang.org/api/dns/v1"
 )
 
+func rrdatasDnsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	o, n := d.GetChange("rrdatas")
+	if o == nil || n == nil {
+		return false
+	}
+
+	oList := convertStringArr(o.([]interface{}))
+	nList := convertStringArr(n.([]interface{}))
+
+	parseFunc := func(record string) string {
+		switch d.Get("type") {
+		case "AAAA":
+			// parse ipv6 to a key from one list
+			return net.ParseIP(record).String()
+		case "MX", "DS":
+			return strings.ToLower(record)
+		case "TXT":
+			return strings.ToLower(strings.Trim(record, `"`))
+		default:
+			return record
+		}
+	}
+	return rrdatasListDiffSuppress(oList, nList, parseFunc, d)
+}
+
+// suppress on a list when 1) its items have dups that need to be ignored
+// and 2) string comparison on the items may need a special parse function
+// example of usage can be found ../../../third_party/terraform/tests/resource_dns_record_set_test.go.erb
+func rrdatasListDiffSuppress(oldList, newList []string, fun func(x string) string, _ *schema.ResourceData) bool {
+	// compare two lists of unordered records
+	diff := make(map[string]bool, len(oldList))
+	for _, oldRecord := range oldList {
+		// set all new IPs to true
+		diff[fun(oldRecord)] = true
+	}
+	for _, newRecord := range newList {
+		// set matched IPs to false otherwise can't suppress
+		if diff[fun(newRecord)] {
+			diff[fun(newRecord)] = false
+		} else {
+			return false
+		}
+	}
+	// can't suppress if unmatched records are found
+	for _, element := range diff {
+		if element {
+			return false
+		}
+	}
+	return true
+}
+
 func resourceDnsRecordSet() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDnsRecordSetCreate,
@@ -24,10 +76,11 @@ func resourceDnsRecordSet() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"managed_zone": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: `The name of the zone in which this record set will reside.`,
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				Description:      `The name of the zone in which this record set will reside.`,
 			},
 
 			"name": {
@@ -42,17 +95,9 @@ func resourceDnsRecordSet() *schema.Resource {
 				Required: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
-					DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-						if d.Get("type") == "AAAA" {
-							return ipv6AddressDiffSuppress(k, old, new, d)
-						}
-						return false
-					},
 				},
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return strings.ToLower(strings.Trim(old, `"`)) == strings.ToLower(strings.Trim(new, `"`))
-				},
-				Description: `The string data for the records in this record set whose meaning depends on the DNS type. For TXT record, if the string data contains spaces, add surrounding \" if you don't want your string to get split on spaces. To specify a single record value longer than 255 characters such as a TXT record for DKIM, add \"\" inside the Terraform configuration string (e.g. "first255characters\"\"morecharacters").`,
+				DiffSuppressFunc: rrdatasDnsDiffSuppress,
+				Description:      `The string data for the records in this record set whose meaning depends on the DNS type. For TXT record, if the string data contains spaces, add surrounding \" if you don't want your string to get split on spaces. To specify a single record value longer than 255 characters such as a TXT record for DKIM, add \"\" inside the Terraform configuration string (e.g. "first255characters\"\"morecharacters").`,
 			},
 
 			"ttl": {
@@ -134,7 +179,7 @@ func resourceDnsRecordSetCreate(d *schema.ResourceData, meta interface{}) error 
 		return fmt.Errorf("Error creating DNS RecordSet: %s", err)
 	}
 
-	d.SetId(fmt.Sprintf("%s/%s/%s", zone, name, rType))
+	d.SetId(fmt.Sprintf("projects/%s/managedZones/%s/rrsets/%s/%s", project, zone, name, rType))
 
 	w := &DnsChangeWaiter{
 		Service:     config.NewDnsClient(userAgent),
@@ -332,40 +377,27 @@ func resourceDnsRecordSetUpdate(d *schema.ResourceData, meta interface{}) error 
 		return fmt.Errorf("Error waiting for Google DNS change: %s", err)
 	}
 
-	d.SetId(fmt.Sprintf("%s/%s/%s", zone, recordName, newType))
+	d.SetId(fmt.Sprintf("projects/%s/managedZones/%s/rrsets/%s/%s", project, zone, recordName, newType))
 
 	return resourceDnsRecordSetRead(d, meta)
 }
 
-func resourceDnsRecordSetImportState(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) == 3 {
-		if err := d.Set("managed_zone", parts[0]); err != nil {
-			return nil, fmt.Errorf("Error setting managed_zone: %s", err)
-		}
-		if err := d.Set("name", parts[1]); err != nil {
-			return nil, fmt.Errorf("Error setting name: %s", err)
-		}
-		if err := d.Set("type", parts[2]); err != nil {
-			return nil, fmt.Errorf("Error setting type: %s", err)
-		}
-	} else if len(parts) == 4 {
-		if err := d.Set("project", parts[0]); err != nil {
-			return nil, fmt.Errorf("Error setting project: %s", err)
-		}
-		if err := d.Set("managed_zone", parts[1]); err != nil {
-			return nil, fmt.Errorf("Error setting managed_zone: %s", err)
-		}
-		if err := d.Set("name", parts[2]); err != nil {
-			return nil, fmt.Errorf("Error setting name: %s", err)
-		}
-		if err := d.Set("type", parts[3]); err != nil {
-			return nil, fmt.Errorf("Error setting type: %s", err)
-		}
-		d.SetId(parts[1] + "/" + parts[2] + "/" + parts[3])
-	} else {
-		return nil, fmt.Errorf("Invalid dns record specifier. Expecting {zone-name}/{record-name}/{record-type} or {project}/{zone-name}/{record-name}/{record-type}. The record name must include a trailing '.' at the end.")
+func resourceDnsRecordSetImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	config := meta.(*Config)
+	if err := parseImportId([]string{
+		"projects/(?P<project>[^/]+)/managedZones/(?P<managed_zone>[^/]+)/rrsets/(?P<name>[^/]+)/(?P<type>[^/]+)",
+		"(?P<project>[^/]+)/(?P<managed_zone>[^/]+)/(?P<name>[^/]+)/(?P<type>[^/]+)",
+		"(?P<managed_zone>[^/]+)/(?P<name>[^/]+)/(?P<type>[^/]+)",
+	}, d, config); err != nil {
+		return nil, err
 	}
+
+	// Replace import id for the resource id
+	id, err := replaceVars(d, config, "projects/{{project}}/managedZones/{{managed_zone}}/rrsets/{{name}}/{{type}}")
+	if err != nil {
+		return nil, fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
 }
