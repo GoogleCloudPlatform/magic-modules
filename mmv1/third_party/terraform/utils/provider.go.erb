@@ -411,6 +411,7 @@ end     # products.each do
 				"google_logging_project_sink":                  resourceLoggingProjectSink(),
 				"google_logging_project_exclusion":             ResourceLoggingExclusion(ProjectLoggingExclusionSchema, NewProjectLoggingExclusionUpdater, projectLoggingExclusionIdParseFunc),
 				"google_logging_project_bucket_config":         ResourceLoggingProjectBucketConfig(),
+				"google_logging_view":                          ResourceLoggingView(),
 				"google_monitoring_dashboard":                  resourceMonitoringDashboard(),
 				<% unless version == 'ga' -%>
 				"google_project_service_identity":              resourceProjectServiceIdentity(),
