@@ -775,7 +775,6 @@ func resourceComputeInstance() *schema.Resource {
 				Elem:             &schema.Schema{Type: schema.TypeString},
 				DiffSuppressFunc: compareSelfLinkRelativePaths,
 				Optional:         true,
-				ForceNew:         true,
 				MaxItems:         1,
 				Description:      `A list of short names or self_links of resource policies to attach to the instance. Currently a max of 1 resource policy is supported.`,
 			},
