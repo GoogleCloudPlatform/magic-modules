@@ -1,3 +1,16 @@
+# Copyright 2021 Google LLC. All Rights Reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 info:
   title: OrgPolicy/Policy
   description: DCL Specification for the OrgPolicy Policy resource
@@ -122,15 +135,10 @@ components:
                 x-dcl-go-type: PolicySpecRules
                 properties:
                   allowAll:
-                    type: string
+                    type: boolean
                     x-dcl-go-name: AllowAll
-                    x-dcl-go-type: PolicySpecRulesAllowAllEnum
-                    description: 'Setting this to true means that all values are allowed.
+                    description: Setting this to true means that all values are allowed.
                       This field can be set only in Policies for list constraints.
-                      Possible values: TRUE, FALSE'
-                    enum:
-                    - "TRUE"
-                    - "FALSE"
                   condition:
                     type: object
                     x-dcl-go-name: Condition
@@ -170,26 +178,16 @@ components:
                           string describing its purpose. This can be used e.g. in
                           UIs which allow to enter the expression.
                   denyAll:
-                    type: string
+                    type: boolean
                     x-dcl-go-name: DenyAll
-                    x-dcl-go-type: PolicySpecRulesDenyAllEnum
-                    description: 'Setting this to true means that all values are denied.
+                    description: Setting this to true means that all values are denied.
                       This field can be set only in Policies for list constraints.
-                      Possible values: TRUE, FALSE'
-                    enum:
-                    - "TRUE"
-                    - "FALSE"
                   enforce:
-                    type: string
+                    type: boolean
                     x-dcl-go-name: Enforce
-                    x-dcl-go-type: PolicySpecRulesEnforceEnum
-                    description: 'If `true`, then the `Policy` is enforced. If `false`,
+                    description: If `true`, then the `Policy` is enforced. If `false`,
                       then any configuration is acceptable. This field can be set
-                      only in Policies for boolean constraints. Possible values: TRUE,
-                      FALSE'
-                    enum:
-                    - "TRUE"
-                    - "FALSE"
+                      only in Policies for boolean constraints.
                   values:
                     type: object
                     x-dcl-go-name: Values
