@@ -34,6 +34,4 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Policy: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  ResourceDnsRecordSet: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true  
 

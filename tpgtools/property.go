@@ -369,22 +369,6 @@ func (p Property) flattenGetterWithParent(parent string) string {
 	return "<unknown>"
 }
 
-// DefaultValidator returns a default ValidateFunc for a given field
-func (p Property) DefaultValidator() *string {
-	switch p.Type.String() {
-	case SchemaTypeString:
-		if p.Type.IsEnum() && len(p.typ.Enum) > 0 && p.Settable {
-			enumValues := ""
-			for _, v := range p.typ.Enum {
-				enumValues += fmt.Sprintf(`"%s", `, v)
-			}
-			enumF := fmt.Sprintf(`validation.StringInSlice([]string{%s ""}, false)`, enumValues)
-			return &enumF
-		}
-	}
-	return nil
-}
-
 func getSchemaExtensionMap(v interface{}) map[interface{}]interface{} {
 	if v != nil {
 		return nil
@@ -749,8 +733,6 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 		if vfOk {
 			p.ValidateFunc = &vf.Function
-		} else {
-			p.ValidateFunc = p.DefaultValidator()
 		}
 
 		if p.Type.String() == SchemaTypeSet {
