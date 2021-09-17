@@ -186,7 +186,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	if !d.Get("auto_create_network").(bool) {
 		// The compute API has to be enabled before we can delete a network.
 
-		billingProject := ProjectId
+		billingProject := project.ProjectId
 		// err == nil indicates that the billing_project value was found
 		if bp, err := getBillingProject(d, config); err == nil {
 			billingProject = bp
