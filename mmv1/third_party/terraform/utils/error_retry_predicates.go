@@ -213,7 +213,7 @@ func retryOn403NTimes(n int) func(error) (bool, string) {
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 403 {
 			if count < n {
 				count += 1
-				return true, fmt.Sprintf("retrying on 403 %s more times", count-n-1)
+				return true, fmt.Sprintf("retrying on 403 %v more times", count-n-1)
 			}
 		}
 		return false, ""

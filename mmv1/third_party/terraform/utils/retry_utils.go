@@ -29,19 +29,6 @@ func retryTimeDuration(retryFunc func() error, duration time.Duration, errorRetr
 	})
 }
 
-func retryTimeDurationWithPrecondition(retryFunc func() error, duration time.Duration, errorRetryPredicates ...RetryErrorPredicateFunc) error {
-	return resource.Retry(duration, func() *resource.RetryError {
-		err := retryFunc()
-		if err == nil {
-			return nil
-		}
-		if isRetryableError(err, errorRetryPredicates...) {
-			return resource.RetryableError(err)
-		}
-		return resource.NonRetryableError(err)
-	})
-}
-
 func isRetryableError(topErr error, customPredicates ...RetryErrorPredicateFunc) bool {
 	if topErr == nil {
 		return false
