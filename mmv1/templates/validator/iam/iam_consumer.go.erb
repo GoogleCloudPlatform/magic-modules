@@ -15,7 +15,10 @@
 
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-<% resource_name = product_ns + object.name -%>
+<%
+  resource_name = product_ns + object.name
+  product_backend_name=@base_url.split('://')[1].split('.googleapis.com')[0]
+-%>
 
 package google
 
@@ -64,14 +67,14 @@ func new<%= resource_name -%>IamAsset(
 		return []Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
-	name, err := assetName(d, config, "//<%= product_ns.downcase -%>.googleapis.com/{{<%= object.name.downcase -%>}}")
+	name, err := assetName(d, config, "//<%= product_backend_name.downcase -%>.googleapis.com/{{<%= object.name.downcase -%>}}")
 	if err != nil {
 		return []Asset{}, err
 	}
 
 	return []Asset{{
 		Name: name,
-		Type: "<%= product_ns.downcase -%>.googleapis.com/<%= object.name -%>",
+		Type: "<%= product_backend_name.downcase -%>.googleapis.com/<%= object.name -%>",
 		IAMPolicy: &IAMPolicy{
 			Bindings: bindings,
 		},
@@ -88,7 +91,7 @@ func Fetch<%= resource_name -%>IamPolicy(d TerraformResourceData, config *Config
 		<%= resource_name -%>IamUpdaterProducer,
 		d,
 		config,
-		"//<%= product_ns.downcase  -%>.googleapis.com/{{<%= object.name.downcase -%>}}",
-		"<%= product_ns.downcase  -%>.googleapis.com/<%= object.name -%>",
+		"//<%= product_backend_name.downcase  -%>.googleapis.com/{{<%= object.name.downcase -%>}}",
+		"<%= product_backend_name.downcase  -%>.googleapis.com/<%= object.name -%>",
 	)
 }

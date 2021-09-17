@@ -39,10 +39,10 @@ func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *Config) 
     if obj, err := Get<%= resource_name -%>ApiObject(d, config); err == nil {
         return []Asset{{
             Name: name,
-            Type: "<%= product_ns.downcase -%>.googleapis.com/<%= object.name -%>",
+            Type: "<%= product_backend_name.downcase -%>.googleapis.com/<%= object.name -%>",
             Resource: &AssetResource{
                 Version: "<%= api_version -%>",
-                DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/<%= product_ns.downcase -%>/<%= api_version -%>/rest",
+                DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/<%= product_backend_name.downcase -%>/<%= api_version -%>/rest",
                 DiscoveryName: "<%= object.name -%>",
                 Data: obj,
             },
