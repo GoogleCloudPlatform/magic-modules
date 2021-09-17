@@ -185,7 +185,14 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	// a network and deleting it in the background.
 	if !d.Get("auto_create_network").(bool) {
 		// The compute API has to be enabled before we can delete a network.
-		if err = enableServiceUsageProjectServices([]string{"compute.googleapis.com"}, project.ProjectId, "", userAgent, config, d.Timeout(schema.TimeoutCreate)); err != nil {
+
+		billingProject := ProjectId
+		// err == nil indicates that the billing_project value was found
+		if bp, err := getBillingProject(d, config); err == nil {
+			billingProject = bp
+		}
+
+		if err = enableServiceUsageProjectServices([]string{"compute.googleapis.com"}, project.ProjectId, billingProject, userAgent, config, d.Timeout(schema.TimeoutCreate)); err != nil {
 			return errwrap.Wrapf("Error enabling the Compute Engine API required to delete the default network: {{err}} ", err)
 		}
 
