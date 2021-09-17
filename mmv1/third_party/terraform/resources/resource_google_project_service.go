@@ -187,7 +187,13 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 	// Verify project for services still exists
 	projectGetCall := config.NewResourceManagerClient(userAgent).Projects.Get(project)
 	if config.UserProjectOverride {
-		projectGetCall.Header().Add("X-Goog-User-Project", project)
+		billingProject := project
+
+		// err == nil indicates that the billing_project value was found
+		if bp, err := getBillingProject(d, config); err == nil {
+			billingProject = bp
+		}
+		projectGetCall.Header().Add("X-Goog-User-Project", billingProject)
 	}
 	p, err := projectGetCall.Do()
 
@@ -268,7 +274,14 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 			DisableDependentServices: disableDependentServices,
 		})
 		if config.UserProjectOverride {
-			servicesDisableCall.Header().Add("X-Goog-User-Project", project)
+			billingProject := project
+
+			// err == nil indicates that the billing_project value was found
+			if bp, err := getBillingProject(d, config); err == nil {
+				billingProject = bp
+			}
+
+			servicesDisableCall.Header().Add("X-Goog-User-Project", billingProject)
 		}
 		sop, err := servicesDisableCall.Do()
 		if err != nil {

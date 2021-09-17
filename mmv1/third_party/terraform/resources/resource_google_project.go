@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -16,6 +17,11 @@ import (
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/serviceusage/v1"
 )
+
+type ServicesCall interface {
+	Header() http.Header
+	Do(opts ...googleapi.CallOption) (*serviceusage.Operation, error)
+}
 
 // resourceGoogleProject returns a *schema.Resource that allows a customer
 // to declare a Google Cloud Project resource.
@@ -179,7 +185,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	// a network and deleting it in the background.
 	if !d.Get("auto_create_network").(bool) {
 		// The compute API has to be enabled before we can delete a network.
-		if err = enableServiceUsageProjectServices([]string{"compute.googleapis.com"}, project.ProjectId, userAgent, config, d.Timeout(schema.TimeoutCreate)); err != nil {
+		if err = enableServiceUsageProjectServices([]string{"compute.googleapis.com"}, project.ProjectId, "", userAgent, config, d.Timeout(schema.TimeoutCreate)); err != nil {
 			return errwrap.Wrapf("Error enabling the Compute Engine API required to delete the default network: {{err}} ", err)
 		}
 
@@ -580,7 +586,7 @@ func readGoogleProject(d *schema.ResourceData, config *Config, userAgent string)
 }
 
 // Enables services. WARNING: Use BatchRequestEnableServices for better batching if possible.
-func enableServiceUsageProjectServices(services []string, project, userAgent string, config *Config, timeout time.Duration) error {
+func enableServiceUsageProjectServices(services []string, project, billingProject, userAgent string, config *Config, timeout time.Duration) error {
 	// ServiceUsage does not allow more than 20 services to be enabled per
 	// batchEnable API call. See
 	// https://cloud.google.com/service-usage/docs/reference/rest/v1/services/batchEnable
@@ -595,7 +601,7 @@ func enableServiceUsageProjectServices(services []string, project, userAgent str
 			return nil
 		}
 
-		if err := doEnableServicesRequest(nextBatch, project, userAgent, config, timeout); err != nil {
+		if err := doEnableServicesRequest(nextBatch, project, billingProject, userAgent, config, timeout); err != nil {
 			return err
 		}
 		log.Printf("[DEBUG] Finished enabling next batch of %d project services: %+v", len(nextBatch), nextBatch)
@@ -605,9 +611,9 @@ func enableServiceUsageProjectServices(services []string, project, userAgent str
 	return waitForServiceUsageEnabledServices(services, project, userAgent, config, timeout)
 }
 
-func doEnableServicesRequest(services []string, project, userAgent string, config *Config, timeout time.Duration) error {
+func doEnableServicesRequest(services []string, project, billingProject, userAgent string, config *Config, timeout time.Duration) error {
 	var op *serviceusage.Operation
-
+	var call ServicesCall
 	err := retryTimeDuration(func() error {
 		var rerr error
 		if len(services) == 1 {
@@ -615,15 +621,23 @@ func doEnableServicesRequest(services []string, project, userAgent string, confi
 			// using service endpoint.
 			name := fmt.Sprintf("projects/%s/services/%s", project, services[0])
 			req := &serviceusage.EnableServiceRequest{}
-			op, rerr = config.NewServiceUsageClient(userAgent).Services.Enable(name, req).Do()
+			call = config.NewServiceUsageClient(userAgent).Services.Enable(name, req)
 		} else {
 			// Batch enable for multiple services.
 			name := fmt.Sprintf("projects/%s", project)
 			req := &serviceusage.BatchEnableServicesRequest{ServiceIds: services}
-			op, rerr = config.NewServiceUsageClient(userAgent).Services.BatchEnable(name, req).Do()
+			call = config.NewServiceUsageClient(userAgent).Services.BatchEnable(name, req)
 		}
+		if config.UserProjectOverride && billingProject != "" {
+			call.Header().Add("X-Goog-User-Project", billingProject)
+		}
+		op, rerr = call.Do()
 		return handleServiceUsageRetryableError(rerr)
-	}, timeout, serviceUsageServiceBeingActivated)
+	},
+		timeout,
+		serviceUsageServiceBeingActivated,
+		retryOn403NTimes(4), // retry 4 times due to self referential activation taking time to propagate tpg#9489
+	)
 	if err != nil {
 		return errwrap.Wrapf("failed to send enable services request: {{err}}", err)
 	}
