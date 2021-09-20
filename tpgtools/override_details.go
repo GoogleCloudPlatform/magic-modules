@@ -173,6 +173,11 @@ type CustomCreateDirectiveDetails struct {
 	Function string
 }
 
+type CustomSerializerDetails struct {
+	// The name of the function that will serialize this resource.
+	Function string
+}
+
 type SkipDeleteFunctionDetails struct {
 	// The name of the function that determines if we should skip delete.
 	Function string

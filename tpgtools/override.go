@@ -47,7 +47,9 @@ const (
 	CustomCreateDirective              = "CUSTOM_CREATE_DIRECTIVE_FUNCTION"
 	SkipDelete                         = "SKIP_DELETE_FUNCTION"
 	SerializationOnly                  = "SERIALIZATION_ONLY"
+	CustomSerializer                   = "CUSTOM_SERIALIZER"
 	TerraformProductName               = "CUSTOM_TERRAFORM_PRODUCT_NAME"
+	UseDCLID                           = "USE_DCL_ID"
 )
 
 // Field-level Overrides
@@ -61,6 +63,7 @@ const (
 	CustomValidation                  = "CUSTOM_VALIDATION"
 	Deprecated                        = "DEPRECATED"
 	DiffSuppressFunc                  = "DIFF_SUPPRESS_FUNC"
+	EnumBool                          = "ENUM_BOOL"
 	Exclude                           = "EXCLUDE"
 	CustomIdentityGetter              = "CUSTOM_IDENTITY_GETTER"
 	Removed                           = "REMOVED"
