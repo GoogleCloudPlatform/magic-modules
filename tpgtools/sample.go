@@ -42,7 +42,7 @@ type Sample struct {
 	Versions []string
 
 	// A list of updates that the resource can transition between
-	Updates []map[string]string
+	Updates []Update
 
 	// HasGAEquivalent tells us if we should have `provider = google-beta`
 	// in the testcase. (if the test doesn't have a ga version of the test)
@@ -68,6 +68,9 @@ type Sample struct {
 
 	// ExtraDependencies are the additional golang dependencies the injected code may require
 	ExtraDependencies []string `yaml:"extra_dependencies"`
+
+	// Type is the resource type.
+	Type string `yaml:"type"`
 
 	// Variables are the various attributes of the set of resources that need to be filled in.
 	Variables []Variable `yaml:"variables"`
@@ -108,13 +111,26 @@ type Dependency struct {
 	HCLBlock string // Path to the directory where the sample data is stored
 }
 
+type Update struct {
+	// The list of dependency resources to update.
+	Dependencies []string `yaml:"dependencies"`
+
+	// The resource to update.
+	Resource string `yaml:"resource"`
+}
+
 // BuildDependency produces a Dependency using a file and filename
 func BuildDependency(fileName, product, localname, version string, b []byte) (*Dependency, error) {
 	var resourceName string
 	fileParts := strings.Split(fileName, ".")
 	if len(fileParts) == 4 {
-		product = strings.Title(fileParts[1])
-		resourceName = strings.Title(fileParts[2])
+		var err error
+		// TODO(magic-modules-eng): Allow for resources which are split in terraform but not in DCL
+		// (e.g. locational split) to find the right resource here.
+		product, resourceName, err = DCLToTerraformSampleName(fileParts[1], fileParts[2])
+		if err != nil {
+			return nil, err
+		}
 	} else if len(fileParts) == 3 {
 		resourceName = strings.Title(fileParts[1])
 	} else {
@@ -182,23 +198,34 @@ func (s *Sample) GetCodeToInject() []string {
 // ReplaceReferences substitutes any reference tags for their HCL address
 // This should only be called after every dependency for a sample is built
 func (s Sample) ReplaceReferences(d *Dependency) error {
-	re := regexp.MustCompile(`"{{ref:([a-z.]*):(\w*)}}"`)
+	re := regexp.MustCompile(`"?{{\s*ref:([a-z_]*\.[a-z_]*\.[a-z_]*(?:\.[a-z_]*)?):([a-zA-Z0-9_\.\[\]]*)\s*}}"?`)
 	matches := re.FindAllStringSubmatch(d.HCLBlock, -1)
 
 	for _, match := range matches {
 		referenceFileName := match[1]
 		idField := match[2]
-		var replacingText string
-		for _, dep := range s.DependencyList {
-			if dep.FileName == referenceFileName {
-				replacingText = dep.TerraformResourceType + "." + dep.HCLLocalName + "." + idField
-				break
+		var tfReference string
+			for _, dep := range s.DependencyList {
+				if dep.FileName == referenceFileName {
+					tfReference = dep.TerraformResourceType + "." + dep.HCLLocalName + "." + idField
+					break
+				}
 			}
-		}
-		if replacingText == "" {
+		if tfReference == "" {
 			return fmt.Errorf("Could not find reference file name: %s", referenceFileName)
 		}
-		d.HCLBlock = re.ReplaceAllString(d.HCLBlock, replacingText)
+		startsWithQuote := strings.HasPrefix(match[0], `"`)
+		endsWithQuote := strings.HasSuffix(match[0], `"`)
+		if !(startsWithQuote && endsWithQuote) {
+			tfReference = fmt.Sprintf("${%s}", tfReference)
+			if startsWithQuote {
+				tfReference = `"` + tfReference
+			}
+			if endsWithQuote {
+				tfReference += `"`
+			}
+		}
+		d.HCLBlock = strings.Replace(d.HCLBlock, match[0], tfReference, 1)
 	}
 	return nil
 }
@@ -254,7 +281,8 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 	out := []Sample{*s}
 	for i, update := range s.Updates {
 		newSample := *s
-		primaryResource := update["resource"]
+		primaryResource := update.Resource
+		// TODO(magic-modules-eng): Consume new dependency list.
 		newSample.PrimaryResource = &primaryResource
 		if !newSample.isNativeHCL() {
 			var newDeps []Dependency
