@@ -243,7 +243,7 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 	id, err := {{ $.IdFunction }}(d, config, "{{$.ID}}")
 {{- end }}
 	if err != nil {
-		return err
+		return fmt.Errorf("error constructing id: %s", err)
 	}
 	d.SetId(id)
 
