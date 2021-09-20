@@ -54,6 +54,7 @@ serialize:
 
 upgrade-dcl:
 	cd tpgtools && \
+		go mod edit -dropreplace=github.com/GoogleCloudPlatform/declarative-resource-client-library &&\
 		go mod edit -require=github.com/GoogleCloudPlatform/declarative-resource-client-library@latest &&\
 		go mod tidy;\
 		MOD_LINE=$$(grep declarative-resource-client-library go.mod);\
