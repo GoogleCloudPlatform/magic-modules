@@ -250,20 +250,18 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	    if err != nil {
 	      return err
 	    }
-	    cmdLineArr := strings.Split(cmdLine, " ")
-	    verb = cmdLineArr[len(cmdLineArr)-1]
-	    log.Printf("[INFO] verb: %v", verb)
-	    log.Printf("[INFO] process name: %v", processName)
+            
+            re := regexp.MustCompile(" plan| apply| refresh| import")
+            verb = re.FindString(cmdLine)
+            log.Printf("[DEBUG] cmdLine %v", cmdLine)
+            log.Printf("[DEBUG] verb: %v", verb)
+            log.Printf("[DEBUG] process name: %v", processName)
 	  }
         }
 
-        if c.RequestReason != "" {
-	  requestReason := fmt.Sprintf("%s - %s", verb, c.RequestReason)
-	  headerTransport.Set("X-Goog-Request-Reason", requestReason)
-	} else if verb != "" {
-	  requestReason := fmt.Sprintf("%s - %s", verb, "_")
-	  headerTransport.Set("X-Goog-Request-Reason", requestReason)
-	}
+        // Append verb to user agent
+        ua := c.userAgent
+        c.userAgent = fmt.Sprintf("%v - %v", ua, verb)
 
 	// Set final transport value.
 	client.Transport = headerTransport
