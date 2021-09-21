@@ -206,21 +206,6 @@ func serviceUsageServiceBeingActivated(err error) (bool, string) {
 	return false, ""
 }
 
-// Retries errors on 403 n number of times if the error message
-// returned contains `has not been used in project`
-func retryOn403NTimes(n int) func(error) (bool, string) {
-	count := 0
-	return func(err error) (bool, string) {
-		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 403 {
-			if count < n && strings.Contains(gerr.Body, "has not been used in project") {
-				count += 1
-				return true, fmt.Sprintf("retrying on 403 %v more times", count-n-1)
-			}
-		}
-		return false, ""
-	}
-}
-
 // Retry if Bigquery operation returns a 403 with a specific message for
 // concurrent operations (which are implemented in terms of 'edit quota').
 func isBigqueryIAMQuotaError(err error) (bool, string) {

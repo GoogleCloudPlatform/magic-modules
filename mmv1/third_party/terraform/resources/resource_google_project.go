@@ -642,8 +642,7 @@ func doEnableServicesRequest(services []string, project, billingProject, userAge
 		return handleServiceUsageRetryableError(rerr)
 	},
 		timeout,
-		serviceUsageServiceBeingActivated,
-		retryOn403NTimes(4), // retry 4 times due to self referential activation taking time to propagate tpg#9489
+		serviceUsageServiceBeingActivated
 	)
 	if err != nil {
 		return errwrap.Wrapf("failed to send enable services request: {{err}}", err)
