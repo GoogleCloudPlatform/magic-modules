@@ -449,6 +449,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      logConfig.sampleRate: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   RegionInstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   BackendServiceSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
