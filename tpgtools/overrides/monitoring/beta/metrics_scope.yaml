@@ -13,6 +13,8 @@
 # limitations under the License.
 
 - type: UNDELETABLE
-- type: APPEND_TO_BASE_PATH
+# need to append version to dcl monitoring since the mm basepath declaration we share
+# does not include version https://git.io/Jz4Wn
+- type: APPEND_TO_BASE_PATH 
   details:
     string: v1

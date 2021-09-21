@@ -48,6 +48,8 @@ type Resource struct {
 	ImportFormats []string
 
 	// AppendToBasePath is a string that will be appended to the end of the API base path.
+	// rarely needed in cases where the shared mm basepath does not include the version
+	// as in Montioring https://git.io/Jz4Wn
 	AppendToBasePath string
 
 	// title is the name of the resource in snake_case. For example,
