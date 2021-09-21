@@ -591,6 +591,7 @@ func resourceComposerEnvironment() *schema.Resource {
 										Optional:    true,
 										ForceNew:    false,
 										Description: `Configuration for resources used by Airflow workers.`,
+										MaxItems:     1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"cpu": {
