@@ -1,14 +1,10 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccFilestoreInstance_update(t *testing.T) {
@@ -81,6 +77,75 @@ resource "google_filestore_instance" "instance" {
 }
 `, name)
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
+
+func TestAccFilestoreInstance_reservedIpRange_update(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", randInt(t))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccFilestoreInstance_reservedIpRange_update(name),
+			},
+			resource.TestStep{
+				ResourceName:      "google_filestore_instance.instance",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			resource.TestStep{
+				Config: testAccFilestoreInstance_reservedIpRange_update2(name),
+			},
+			resource.TestStep{
+				ResourceName:      "google_filestore_instance.instance",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccFilestoreInstance_reservedIpRange_update(name string) string {
+	return fmt.Sprintf(`
+resource "google_filestore_instance" "instance" {
+  name = "tf-instance-%s"
+  zone = "us-central1-b"
+  tier    = "BASIC_HDD"
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share1"
+  }
+
+  networks {
+    network           = "default"
+    modes             = ["MODE_IPV4"]
+    reserved_ip_range = "172.19.30.0/29"
+  }
+}
+`, name)
+}
+
+func testAccFilestoreInstance_reservedIpRange_update2(name string) string {
+	return fmt.Sprintf(`
+resource "google_filestore_instance" "instance" {
+  name = "tf-instance-%s"
+  zone = "us-central1-b"
+  tier    = "BASIC_HDD"
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share1"
+  }
+
+  networks {
+    network           = "default"
+    modes             = ["MODE_IPV4"]
+    reserved_ip_range = "172.19.31.0/29"
+  }
+}
+`, name)
+}
