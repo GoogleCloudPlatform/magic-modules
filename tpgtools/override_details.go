@@ -126,6 +126,22 @@ type CustomIdentityGetterDetails struct {
 	Function string
 }
 
+type CustomDefaultDetails struct {
+	Default string
+}
+
+type CustomListSizeConstraintDetails struct {
+	Min int64
+	Max int64
+}
+
+type CustomRequiredDetails struct {
+	Required bool
+	Optional bool
+	Computed bool
+	ForceNew bool
+}
+
 type ImportFormatDetails struct {
 	// List of import format pattern strings
 	Formats []string
@@ -160,6 +176,11 @@ type CustomCreateDirectiveDetails struct {
 type SkipDeleteFunctionDetails struct {
 	// The name of the function that determines if we should skip delete.
 	Function string
+}
+
+type TerraformProductNameDetails struct {
+	// The name of the product in terraform.
+	Product string
 }
 
 type ProductBasePathDetails struct {

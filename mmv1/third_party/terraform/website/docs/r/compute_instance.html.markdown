@@ -44,7 +44,7 @@ resource "google_compute_instance" "default" {
     network = "default"
 
     access_config {
-      // Ephemeral IP
+      // Ephemeral public IP
     }
   }
 
@@ -137,7 +137,7 @@ The following arguments are supported:
     startup-script metadata key on the created instance and thus the two
     mechanisms are not allowed to be used simultaneously.  Users are free to use
     either mechanism - the only distinction is that this separate attribute
-    willl cause a recreate on modification.  On import, `metadata_startup_script`
+    will cause a recreate on modification.  On import, `metadata_startup_script`
     will be set, but `metadata.startup-script` will not - if you choose to use the
     other mechanism, you will see a diff immediately after import, which will cause a
     destroy/recreate operation.  You may want to modify your state file manually
@@ -176,7 +176,7 @@ The following arguments are supported:
 
 * `confidential_instance_config` (Optional) - Enable [Confidential Mode](https://cloud.google.com/compute/confidential-vm/docs/about-cvm) on this VM.
 
-* `advanced_machine_config` (Optional) - Configure Nested Virtualisation and Simultaneous Hyper Threading  on this VM.
+* `advanced_machine_features` (Optional) - Configure Nested Virtualisation and Simultaneous Hyper Threading  on this VM.
 
 * `network_performance_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)
     Configures network performance settings for the instance. Structure is

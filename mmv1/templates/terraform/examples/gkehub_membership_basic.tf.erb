@@ -2,7 +2,6 @@ resource "google_container_cluster" "primary" {
   name               = "<%= ctx[:vars]['cluster_name'] %>"
   location           = "us-central1-a"
   initial_node_count = 1
-  provider = google-beta
 }
 
 resource "google_gke_hub_membership" "membership" {
@@ -12,6 +11,4 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-  description = "test resource."
-  provider = google-beta
 }

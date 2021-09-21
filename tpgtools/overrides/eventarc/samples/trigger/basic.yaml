@@ -1,0 +1,3 @@
+updates:
+  - resource: basic_update_transport.tf.tmpl
+  - resource: basic_update_transport_2.tf.tmpl

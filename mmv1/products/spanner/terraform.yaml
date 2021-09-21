@@ -82,6 +82,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # Randomness
         skip_vcr: true
       - !ruby/object:Provider::Terraform::Examples
+        name: "spanner_instance_processing_units"
+        primary_resource_id: "example"
+        # Randomness
+        skip_vcr: true
+      - !ruby/object:Provider::Terraform::Examples
         name: "spanner_instance_multi_regional"
         primary_resource_id: "example"
         # Randomness
@@ -108,6 +113,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       nodeCount: !ruby/object:Overrides::Terraform::PropertyOverride
         name: num_nodes
+        default_from_api: true
+      processingUnits: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       config: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/spanner_instance_config.go.erb
       state: !ruby/object:Overrides::Terraform::PropertyOverride

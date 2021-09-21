@@ -329,6 +329,12 @@ func gcsDataSchema() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: `Google Cloud Storage bucket name.`,
 			},
+			"path": {
+				Optional:    true,
+				Computed:    true,
+				Type:        schema.TypeString,
+				Description: `Google Cloud Storage path in bucket to transfer`,
+			},
 		},
 	}
 }
@@ -743,16 +749,20 @@ func expandGcsData(gcsDatas []interface{}) *storagetransfer.GcsData {
 	}
 
 	gcsData := gcsDatas[0].(map[string]interface{})
-	return &storagetransfer.GcsData{
+	var apiData = &storagetransfer.GcsData{
 		BucketName: gcsData["bucket_name"].(string),
 	}
+	var path = gcsData["path"].(string)
+	apiData.Path = path
+
+	return apiData
 }
 
 func flattenGcsData(gcsData *storagetransfer.GcsData) []map[string]interface{} {
 	data := map[string]interface{}{
 		"bucket_name": gcsData.BucketName,
+		"path":        gcsData.Path,
 	}
-
 	return []map[string]interface{}{data}
 }
 
@@ -842,11 +852,12 @@ func expandAzureBlobStorageData(azureBlobStorageDatas []interface{}) *storagetra
 	}
 
 	azureBlobStorageData := azureBlobStorageDatas[0].(map[string]interface{})
+
 	return &storagetransfer.AzureBlobStorageData{
 		Container:        azureBlobStorageData["container"].(string),
 		Path:             azureBlobStorageData["path"].(string),
 		StorageAccount:   azureBlobStorageData["storage_account"].(string),
-		AzureCredentials: expandAzureCredentials(azureBlobStorageData["sas_token"].([]interface{})),
+		AzureCredentials: expandAzureCredentials(azureBlobStorageData["azure_credentials"].([]interface{})),
 	}
 }
 

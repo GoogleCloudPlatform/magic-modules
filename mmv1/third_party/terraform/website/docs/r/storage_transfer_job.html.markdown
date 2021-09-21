@@ -63,6 +63,7 @@ resource "google_storage_transfer_job" "s3-bucket-nightly-backup" {
     }
     gcs_data_sink {
       bucket_name = google_storage_bucket.s3-backup-bucket.name
+      path        = "foo/bar/"
     }
   }
 
@@ -137,7 +138,7 @@ The `object_conditions` block supports:
 * `min_time_elapsed_since_last_modification` - (Optional)
 A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
 
-* `include_prefixes` - (Optional) If `include_refixes` is specified, objects that satisfy the object conditions must have names that start with one of the `include_prefixes` and that do not start with any of the `exclude_prefixes`. If `include_prefixes` is not specified, all objects except those that have names starting with one of the `exclude_prefixes` must satisfy the object conditions. See [Requirements](https://cloud.google.com/storage-transfer/docs/reference/rest/v1/TransferSpec#ObjectConditions).
+* `include_prefixes` - (Optional) If `include_prefixes` is specified, objects that satisfy the object conditions must have names that start with one of the `include_prefixes` and that do not start with any of the `exclude_prefixes`. If `include_prefixes` is not specified, all objects except those that have names starting with one of the `exclude_prefixes` must satisfy the object conditions. See [Requirements](https://cloud.google.com/storage-transfer/docs/reference/rest/v1/TransferSpec#ObjectConditions).
 
 * `exclude_prefixes` - (Optional) `exclude_prefixes` must follow the requirements described for `include_prefixes`. See [Requirements](https://cloud.google.com/storage-transfer/docs/reference/rest/v1/TransferSpec#ObjectConditions).
 
@@ -154,9 +155,13 @@ The `gcs_data_sink` block supports:
 
 * `bucket_name` - (Required) Google Cloud Storage bucket name.
 
+* `path` - (Optional) Root path to transfer objects. Must be an empty string or full path name that ends with a '/'. This field is treated as an object prefix. As such, it should generally not begin with a '/'.
+
 The `gcs_data_source` block supports:
 
 * `bucket_name` - (Required) Google Cloud Storage bucket name.
+
+* `path` - (Optional) Root path to transfer objects. Must be an empty string or full path name that ends with a '/'. This field is treated as an object prefix. As such, it should generally not begin with a '/'.
 
 The `aws_s3_data_source` block supports:
 

@@ -305,89 +305,6 @@ func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 }
 <% end -%>
 
-func TestAccContainerCluster_withMasterAuthConfig(t *testing.T) {
-	t.Parallel()
-
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:	  func() { testAccPreCheck(t) },
-		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccContainerCluster_withMasterAuth(clusterName),
-			},
-			{
-				ResourceName:		 "google_container_cluster.with_master_auth",
-				ImportState:		 true,
-				ImportStateVerify:	 true,
-			},
-			{
-				Config: testAccContainerCluster_updateMasterAuth(clusterName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_container_cluster.with_master_auth", "master_auth.0.username", "mr.yoda.adoy.mr"),
-					resource.TestCheckResourceAttr("google_container_cluster.with_master_auth", "master_auth.0.password", "adoy.rm.123456789.mr.yoda"),
-				),
-			},
-			{
-				ResourceName:		 "google_container_cluster.with_master_auth",
-				ImportState:		 true,
-				ImportStateVerify:	 true,
-			},
-			{
-				Config: testAccContainerCluster_disableMasterAuth(clusterName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_container_cluster.with_master_auth", "master_auth.0.username", ""),
-					resource.TestCheckResourceAttr("google_container_cluster.with_master_auth", "master_auth.0.password", ""),
-				),
-			},
-			{
-				ResourceName:		 "google_container_cluster.with_master_auth",
-				ImportState:		 true,
-				ImportStateVerify:	 true,
-			},
-			{
-				Config: testAccContainerCluster_updateMasterAuth(clusterName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_container_cluster.with_master_auth", "master_auth.0.username", "mr.yoda.adoy.mr"),
-					resource.TestCheckResourceAttr("google_container_cluster.with_master_auth", "master_auth.0.password", "adoy.rm.123456789.mr.yoda"),
-				),
-			},
-			{
-				ResourceName:		 "google_container_cluster.with_master_auth",
-				ImportState:		 true,
-				ImportStateVerify:	 true,
-			},
-		},
-	})
-}
-
-func TestAccContainerCluster_withMasterAuthConfig_NoCert(t *testing.T) {
-	t.Parallel()
-
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:	  func() { testAccPreCheck(t) },
-		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccContainerCluster_withMasterAuthNoCert(clusterName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_container_cluster.with_master_auth_no_cert", "master_auth.0.client_certificate", ""),
-				),
-			},
-			{
-				ResourceName:		 "google_container_cluster.with_master_auth_no_cert",
-				ImportState:		 true,
-				ImportStateVerify:	 true,
-			},
-		},
-	})
-}
-
 func TestAccContainerCluster_withAuthenticatorGroupsConfig(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
@@ -1499,6 +1416,48 @@ func TestAccContainerCluster_withMaintenanceExclusionWindow(t *testing.T) {
 	})
 }
 
+
+func TestAccContainerCluster_deleteExclusionWindow(t *testing.T) {
+	t.Parallel()
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	resourceName := "google_container_cluster.with_maintenance_exclusion_window"
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withExclusion_DailyMaintenanceWindow(cluster, "2020-01-01T00:00:00Z", "2020-01-02T00:00:00Z"),
+			},
+			{
+				ResourceName:        resourceName,
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+			{
+				Config: testAccContainerCluster_withExclusion_RecurringMaintenanceWindow(cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z"),
+			},
+			{
+				ResourceName:        resourceName,
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+			{
+				Config: testAccContainerCluster_withExclusion_NoMaintenanceWindow(cluster, "2020-01-01T00:00:00Z", "2020-01-02T00:00:00Z"),
+			},
+			{
+				ResourceName:        resourceName,
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withIPAllocationPolicy_existingSecondaryRanges(t *testing.T) {
 	t.Parallel()
 
@@ -2140,6 +2099,30 @@ func TestAccContainerCluster_withIPv4Error(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
+func TestAccContainerCluster_withDNSConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	domainName := fmt.Sprintf("tf-test-domain-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withDNSConfig(clusterName, "CLOUD_DNS", domainName, "CLUSTER_SCOPE"),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_dns_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+<% end -%>
+
 func testAccContainerCluster_masterAuthorizedNetworksDisabled(t *testing.T, resource_name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resource_name]
@@ -2643,70 +2626,6 @@ resource "google_container_cluster" "confidential_nodes" {
 `, clusterName, npName)
 }
 <% end -%>
-
-func testAccContainerCluster_withMasterAuth(clusterName string) string {
-	return fmt.Sprintf(`
-resource "google_container_cluster" "with_master_auth" {
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 3
-  enable_shielded_nodes = false
-
-  master_auth {
-    username = "mr.yoda"
-    password = "adoy.rm.123456789"
-  }
-}
-`, clusterName)
-}
-
-func testAccContainerCluster_updateMasterAuth(clusterName string) string {
-	return fmt.Sprintf(`
-resource "google_container_cluster" "with_master_auth" {
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 3
-
-  master_auth {
-    username = "mr.yoda.adoy.mr"
-    password = "adoy.rm.123456789.mr.yoda"
-  }
-}
-`, clusterName)
-}
-
-func testAccContainerCluster_disableMasterAuth(clusterName string) string {
-	return fmt.Sprintf(`
-resource "google_container_cluster" "with_master_auth" {
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 3
-
-  master_auth {
-    username = ""
-    password = ""
-  }
-}
-`, clusterName)
-}
-
-func testAccContainerCluster_withMasterAuthNoCert(clusterName string) string {
-	return fmt.Sprintf(`
-resource "google_container_cluster" "with_master_auth_no_cert" {
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 3
-
-  master_auth {
-    username = "mr.yoda"
-    password = "adoy.rm.123456789"
-    client_certificate_config {
-      issue_client_certificate = false
-    }
-  }
-}
-`, clusterName)
-}
 
 func testAccContainerCluster_withNetworkPolicyEnabled(clusterName string) string {
 	return fmt.Sprintf(`
@@ -3886,6 +3805,25 @@ resource "google_container_cluster" "with_maintenance_exclusion_window" {
 `, clusterName, w1startTime, w1endTime, w1startTime, w1endTime, w2startTime, w2endTime)
 }
 
+func testAccContainerCluster_withExclusion_NoMaintenanceWindow(clusterName string, w1startTime, w1endTime string) string {
+
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_maintenance_exclusion_window" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  maintenance_policy {
+	recurring_window {
+		start_time = "%s"
+		end_time = "%s"
+		recurrence = "FREQ=DAILY"
+	}
+ }
+}
+`, clusterName, w1startTime, w1endTime)
+}
+
 func testAccContainerCluster_withExclusion_DailyMaintenanceWindow(clusterName string, w1startTime, w1endTime string) string {
 
 	return fmt.Sprintf(`
@@ -4654,3 +4592,20 @@ resource "google_container_cluster" "with_invalid_location" {
 }
 `, clusterName, location)
 }
+
+<% unless version == 'ga' -%>
+func testAccContainerCluster_withDNSConfig(clusterName string, clusterDns string, clusterDnsDomain string, clusterDnsScope string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_dns_config" {
+	name               = "%s"
+	location           = "us-central1-f"
+	initial_node_count = 1
+	dns_config {
+		cluster_dns 	   = "%s"
+		cluster_dns_domain = "%s"
+		cluster_dns_scope  = "%s"
+	}
+}
+`, clusterName, clusterDns, clusterDnsDomain, clusterDnsScope)
+}
+<% end -%>

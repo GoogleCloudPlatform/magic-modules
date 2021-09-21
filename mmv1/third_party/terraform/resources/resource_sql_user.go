@@ -11,6 +11,18 @@ import (
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
+func diffSuppressIamUserName(_, old, new string, d *schema.ResourceData) bool {
+	strippedName := strings.Split(new, "@")[0]
+
+	userType := d.Get("type").(string)
+
+	if old == strippedName && strings.Contains(userType, "IAM") {
+		return true
+	}
+
+	return false
+}
+
 func resourceSqlUser() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceSqlUserCreate,
@@ -34,6 +46,7 @@ func resourceSqlUser() *schema.Resource {
 			"host": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: `The host the user can connect from. This is only supported for MySQL instances. Don't set this field for PostgreSQL instances. Can be an IP address. Changing this forces a new resource to be created.`,
 			},
@@ -46,10 +59,11 @@ func resourceSqlUser() *schema.Resource {
 			},
 
 			"name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: `The name of the user. Changing this forces a new resource to be created.`,
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: diffSuppressIamUserName,
+				Description:      `The name of the user. Changing this forces a new resource to be created.`,
 			},
 
 			"password": {
@@ -61,9 +75,10 @@ func resourceSqlUser() *schema.Resource {
 			},
 
 			"type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: emptyOrDefaultStringSuppress("BUILT_IN"),
 				Description: `The user type. It determines the method to authenticate the user during login.
                 The default is the database's built-in user type. Flags include "BUILT_IN", "CLOUD_IAM_USER", or "CLOUD_IAM_SERVICE_ACCOUNT".`,
 				ValidateFunc: validation.StringInSlice([]string{"BUILT_IN", "CLOUD_IAM_USER", "CLOUD_IAM_SERVICE_ACCOUNT", ""}, false),
@@ -172,11 +187,20 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	var user *sqladmin.User
+	databaseInstance, err := config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
+	if err != nil {
+		return err
+	}
+
 	for _, currentUser := range users.Items {
+		if !strings.Contains(databaseInstance.DatabaseVersion, "POSTGRES") {
+			name = strings.Split(name, "@")[0]
+		}
+
 		if currentUser.Name == name {
 			// Host can only be empty for postgres instances,
 			// so don't compare the host if the API host is empty.
-			if currentUser.Host == "" || currentUser.Host == host {
+			if host == "" || currentUser.Host == host {
 				user = currentUser
 				break
 			}

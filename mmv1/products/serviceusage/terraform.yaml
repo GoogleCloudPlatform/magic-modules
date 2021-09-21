@@ -53,6 +53,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           org_id: :ORG_ID
     id_format: "projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}"
+    import_format: [ "services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}", "projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}" ]
     skip_sweeper: true
     autogen_async: true
     properties:

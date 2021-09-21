@@ -40,6 +40,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       networks.reservedIpRange: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      networks.connectMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/filestore.erb
 
