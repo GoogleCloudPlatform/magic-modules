@@ -283,7 +283,7 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return CloudResourceManagerProjectAsHCL(*r)
+		return serializeGAProjectToHCL(*r)
 	case "ComputeFirewallPolicy":
 		r := &compute.FirewallPolicy{}
 		if err := json.Unmarshal(b, r); err != nil {
