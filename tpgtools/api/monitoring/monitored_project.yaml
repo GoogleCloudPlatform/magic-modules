@@ -52,7 +52,7 @@ components:
   schemas:
     MonitoredProject:
       title: MonitoredProject
-      x-dcl-id: locations/global/metricsScopes/{{metrics_scope}}
+      x-dcl-id: locations/global/metricsScopes/{{metrics_scope}}/projects/{{name}}
       x-dcl-locations:
       - global
       type: object
