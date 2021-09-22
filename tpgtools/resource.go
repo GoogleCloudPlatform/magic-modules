@@ -519,9 +519,30 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 		}
 	}
 
-	// Resource Override: No Sweeper
+	// Determine if a resource can use a generated sweeper or not
+	// We only supply a certain set of parent values to sweepers, so only generate
+	// one if it will actually work- resources with resource parents are not
+	// sweepable, in particular, such as nested resources or fine-grained
+	// resources. Additional special cases can be handled with overrides.
 	res.HasSweeper = true
+	validSweeperParameters := []string{"project", "region", "location", "zone", "billing_account"}
+	if deleteAllInfo, ok := typeFetcher.doc.Paths["deleteAll"]; ok {
+		for _, p := range deleteAllInfo.Parameters {
+			// if any field isn't a standard sweeper parameter, don't make a sweeper
+			if !stringInSlice(p.Name, validSweeperParameters) {
+				res.HasSweeper = false
+			}
+		}
+	} else {
+		// if deleteAll wasn't found, the DCL hasn't published a sweeper
+		res.HasSweeper = false
+	}
+
 	if overrides.ResourceOverride(NoSweeper, location) {
+		if res.HasSweeper == false {
+			return nil, fmt.Errorf("superfluous NO_SWEEPER specified for %q", res.TerraformName())
+		}
+
 		res.HasSweeper = false
 	}
 
