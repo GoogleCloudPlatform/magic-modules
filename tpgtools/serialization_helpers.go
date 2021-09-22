@@ -21,6 +21,7 @@ func serializeBetaProjectToHCL(r cloudresourcemanagerBeta.Project) (string, erro
 	return serializeProjectToHCL(m)
 }
 
+
 func serializeGAProjectToHCL(r cloudresourcemanager.Project) (string, error) {
 	b, err := json.Marshal(r)
 	if err != nil {
