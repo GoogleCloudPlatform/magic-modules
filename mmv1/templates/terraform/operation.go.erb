@@ -15,6 +15,9 @@ type <%= product_name -%>OperationWaiter struct {
 <% if has_project -%>
   Project string
 <% end -%>
+<%  if object.__product.operation_retry -%>
+	retryCount int
+<% end -%>
   CommonOperationWaiter
 }
 
@@ -27,6 +30,13 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
 
   return sendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, w.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 }
+
+<%  if object.__product.operation_retry -%>
+func (w *<%= product_name -%>OperationWaiter) IsRetryable(err error) bool {
+	<%= lines(compile(pwd + '/' + object.__product.operation_retry)) -%>
+}
+<% end -%>
+
 
 func create<%= product_name %>Waiter(config *Config, op map[string]interface{}, <% if has_project -%> project, <% end -%> activity, userAgent string) (*<%=product_name%>OperationWaiter, error) {
   w := &<%= product_name -%>OperationWaiter{
