@@ -17,18 +17,18 @@ func TestAccFilestoreInstance_update(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFilestoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccFilestoreInstance_update(name),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_filestore_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccFilestoreInstance_update2(name),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_filestore_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -88,18 +88,18 @@ func TestAccFilestoreInstance_reservedIpRange_update(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckFilestoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccFilestoreInstance_reservedIpRange_update(name),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_filestore_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccFilestoreInstance_reservedIpRange_update2(name),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_filestore_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
