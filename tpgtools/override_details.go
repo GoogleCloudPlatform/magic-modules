@@ -66,6 +66,12 @@ type CustomImportFunctionDetails struct {
 	Function string
 }
 
+type AppendToBasePathDetails struct {
+	// Append to base path appends this string to the end of the resource's
+	// base path.
+	String string
+}
+
 type CustomizeDiffDetails struct {
 	// Functions is a list of CustomizeDiffFunc to use with
 	// customdiff.All(...).

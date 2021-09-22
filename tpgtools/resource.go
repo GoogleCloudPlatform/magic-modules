@@ -47,6 +47,11 @@ type Resource struct {
 	// TODO: if none are set, the resource does not support import.
 	ImportFormats []string
 
+	// AppendToBasePath is a string that will be appended to the end of the API base path.
+	// rarely needed in cases where the shared mm basepath does not include the version
+	// as in Montioring https://git.io/Jz4Wn
+	AppendToBasePath string
+
 	// title is the name of the resource in snake_case. For example,
 	// "instance", "backend_service".
 	title string
@@ -121,6 +126,9 @@ type Resource struct {
 	// object to be created and returns a list of directive to use for the apply
 	// call
 	CustomCreateDirectiveFunction *string
+
+	// Undeletable is true if this resource has no delete method.
+	Undeletable bool
 
 	// SkipDeleteFunction is the name of a function that takes the
 	// object and config and returns a boolean for if Terraform should make
@@ -413,6 +421,16 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 		res.CustomImportFunction = &cifd.Function
 	}
 
+	// Resource Override: Append to Base Path
+	atbpd := AppendToBasePathDetails{}
+	atbpOk, err := overrides.ResourceOverrideWithDetails(AppendToBasePath, &atbpd, location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode append to base path details: %v", err)
+	}
+	if atbpOk {
+		res.AppendToBasePath = atbpd.String
+	}
+
 	// Resource Override: Import formats
 	ifd := ImportFormatDetails{}
 	ifdOk, err := overrides.ResourceOverrideWithDetails(ImportFormat, &ifd, location)
@@ -522,11 +540,14 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 		res.CustomCreateDirectiveFunction = &createDirectiveFunc.Function
 	}
 
+	// Resource Override: Undeletable
+	res.Undeletable = overrides.ResourceOverride(Undeletable, location)
+
 	// Resource Override: SkipDeleteFunction
 	skipDeleteFunc := SkipDeleteFunctionDetails{}
-	skipDeleteFuncOk, err := overrides.ResourceOverrideWithDetails(SkipDelete, &skipDeleteFunc, location)
+	skipDeleteFuncOk, err := overrides.ResourceOverrideWithDetails(SkipDeleteFunction, &skipDeleteFunc, location)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode skip delete function details: %v", err)
+		return nil, fmt.Errorf("failed to decode skip delete details: %v", err)
 	}
 	if skipDeleteFuncOk {
 		res.SkipDeleteFunction = &skipDeleteFunc.Function
