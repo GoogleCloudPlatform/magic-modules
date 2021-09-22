@@ -33,8 +33,6 @@ import (
 	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc"
 	eventarcBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc/beta"
 	gkehubBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub/beta"
-	monitoring "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/monitoring"
-	monitoringBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/monitoring/beta"
 	orgpolicy "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/orgpolicy"
 	orgpolicyBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/orgpolicy/beta"
 	privateca "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/privateca"
@@ -73,10 +71,6 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 			return "google_gke_hub_feature", nil
 		case "GkeHubFeatureMembership":
 			return "google_gke_hub_feature_membership", nil
-		case "MonitoringMetricsScope":
-			return "google_monitoring_metrics_scope", nil
-		case "MonitoringMonitoredProject":
-			return "google_monitoring_monitored_project", nil
 		case "OrgPolicyPolicy":
 			return "google_org_policy_policy", nil
 		case "PrivatecaCertificateTemplate":
@@ -105,10 +99,6 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 		return "google_dataproc_workflow_template", nil
 	case "EventarcTrigger":
 		return "google_eventarc_trigger", nil
-	case "MonitoringMetricsScope":
-		return "google_monitoring_metrics_scope", nil
-	case "MonitoringMonitoredProject":
-		return "google_monitoring_monitored_project", nil
 	case "OrgPolicyPolicy":
 		return "google_org_policy_policy", nil
 	case "PrivatecaCertificateTemplate":
@@ -142,10 +132,6 @@ func DCLToTerraformSampleName(service, resource string) (string, string, error) 
 		return "Dataproc", "WorkflowTemplate", nil
 	case "eventarctrigger":
 		return "Eventarc", "Trigger", nil
-	case "monitoringmetricsscope":
-		return "Monitoring", "MetricsScope", nil
-	case "monitoringmonitoredproject":
-		return "Monitoring", "MonitoredProject", nil
 	case "orgpolicypolicy":
 		return "OrgPolicy", "Policy", nil
 	case "privatecacertificatetemplate":
@@ -238,18 +224,6 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 				return "", err
 			}
 			return GkeHubFeatureMembershipBetaAsHCL(*r)
-		case "MonitoringMetricsScope":
-			r := &monitoringBeta.MetricsScope{}
-			if err := json.Unmarshal(b, r); err != nil {
-				return "", err
-			}
-			return MonitoringMetricsScopeBetaAsHCL(*r)
-		case "MonitoringMonitoredProject":
-			r := &monitoringBeta.MonitoredProject{}
-			if err := json.Unmarshal(b, r); err != nil {
-				return "", err
-			}
-			return MonitoringMonitoredProjectBetaAsHCL(*r)
 		case "OrgPolicyPolicy":
 			r := &orgpolicyBeta.Policy{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -283,7 +257,7 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return serializeGAProjectToHCL(*r)
+		return CloudResourceManagerProjectAsHCL(*r)
 	case "ComputeFirewallPolicy":
 		r := &compute.FirewallPolicy{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -326,18 +300,6 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 			return "", err
 		}
 		return EventarcTriggerAsHCL(*r)
-	case "MonitoringMetricsScope":
-		r := &monitoring.MetricsScope{}
-		if err := json.Unmarshal(b, r); err != nil {
-			return "", err
-		}
-		return MonitoringMetricsScopeAsHCL(*r)
-	case "MonitoringMonitoredProject":
-		r := &monitoring.MonitoredProject{}
-		if err := json.Unmarshal(b, r); err != nil {
-			return "", err
-		}
-		return MonitoringMonitoredProjectAsHCL(*r)
 	case "OrgPolicyPolicy":
 		r := &orgpolicy.Policy{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -2069,45 +2031,6 @@ func convertGkeHubFeatureMembershipBetaConfigmanagementPolicyControllerToHCL(r *
 		outputConfig += fmt.Sprintf("\ttemplate_library_installed = %#v\n", *r.TemplateLibraryInstalled)
 	}
 	return outputConfig + "}"
-}
-
-// MonitoringMetricsScopeBetaAsHCL returns a string representation of the specified resource in HCL.
-// The generated HCL will include every settable field as a literal - that is, no
-// variables, no references.  This may not be the best possible representation, but
-// the crucial point is that `terraform import; terraform apply` will not produce
-// any changes.  We do not validate that the resource specified will pass terraform
-// validation unless is an object returned from the API after an Apply.
-func MonitoringMetricsScopeBetaAsHCL(r monitoringBeta.MetricsScope) (string, error) {
-	outputConfig := "resource \"google_monitoring_metrics_scope\" \"output\" {\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	return formatHCL(outputConfig + "}")
-}
-
-func convertMonitoringMetricsScopeBetaMonitoredProjectsToHCL(r *monitoringBeta.MetricsScopeMonitoredProjects) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-// MonitoringMonitoredProjectBetaAsHCL returns a string representation of the specified resource in HCL.
-// The generated HCL will include every settable field as a literal - that is, no
-// variables, no references.  This may not be the best possible representation, but
-// the crucial point is that `terraform import; terraform apply` will not produce
-// any changes.  We do not validate that the resource specified will pass terraform
-// validation unless is an object returned from the API after an Apply.
-func MonitoringMonitoredProjectBetaAsHCL(r monitoringBeta.MonitoredProject) (string, error) {
-	outputConfig := "resource \"google_monitoring_monitored_project\" \"output\" {\n"
-	if r.MetricsScope != nil {
-		outputConfig += fmt.Sprintf("\tmetrics_scope = %#v\n", *r.MetricsScope)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	return formatHCL(outputConfig + "}")
 }
 
 // OrgPolicyPolicyBetaAsHCL returns a string representation of the specified resource in HCL.
@@ -3926,45 +3849,6 @@ func convertEventarcTriggerTransportPubsubToHCL(r *eventarc.TriggerTransportPubs
 		outputConfig += fmt.Sprintf("\ttopic = %#v\n", *r.Topic)
 	}
 	return outputConfig + "}"
-}
-
-// MonitoringMetricsScopeAsHCL returns a string representation of the specified resource in HCL.
-// The generated HCL will include every settable field as a literal - that is, no
-// variables, no references.  This may not be the best possible representation, but
-// the crucial point is that `terraform import; terraform apply` will not produce
-// any changes.  We do not validate that the resource specified will pass terraform
-// validation unless is an object returned from the API after an Apply.
-func MonitoringMetricsScopeAsHCL(r monitoring.MetricsScope) (string, error) {
-	outputConfig := "resource \"google_monitoring_metrics_scope\" \"output\" {\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	return formatHCL(outputConfig + "}")
-}
-
-func convertMonitoringMetricsScopeMonitoredProjectsToHCL(r *monitoring.MetricsScopeMonitoredProjects) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-// MonitoringMonitoredProjectAsHCL returns a string representation of the specified resource in HCL.
-// The generated HCL will include every settable field as a literal - that is, no
-// variables, no references.  This may not be the best possible representation, but
-// the crucial point is that `terraform import; terraform apply` will not produce
-// any changes.  We do not validate that the resource specified will pass terraform
-// validation unless is an object returned from the API after an Apply.
-func MonitoringMonitoredProjectAsHCL(r monitoring.MonitoredProject) (string, error) {
-	outputConfig := "resource \"google_monitoring_monitored_project\" \"output\" {\n"
-	if r.MetricsScope != nil {
-		outputConfig += fmt.Sprintf("\tmetrics_scope = %#v\n", *r.MetricsScope)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	return formatHCL(outputConfig + "}")
 }
 
 // OrgPolicyPolicyAsHCL returns a string representation of the specified resource in HCL.
@@ -5971,28 +5855,6 @@ func convertGkeHubFeatureMembershipBetaConfigmanagementPolicyControllerList(i in
 	return out
 }
 
-func convertMonitoringMetricsScopeBetaMonitoredProjects(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"createTime": in["create_time"],
-		"name":       in["name"],
-	}
-}
-
-func convertMonitoringMetricsScopeBetaMonitoredProjectsList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertMonitoringMetricsScopeBetaMonitoredProjects(v))
-	}
-	return out
-}
-
 func convertOrgPolicyPolicyBetaSpec(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -7700,28 +7562,6 @@ func convertEventarcTriggerTransportPubsubList(i interface{}) (out []map[string]
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertEventarcTriggerTransportPubsub(v))
-	}
-	return out
-}
-
-func convertMonitoringMetricsScopeMonitoredProjects(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"createTime": in["create_time"],
-		"name":       in["name"],
-	}
-}
-
-func convertMonitoringMetricsScopeMonitoredProjectsList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertMonitoringMetricsScopeMonitoredProjects(v))
 	}
 	return out
 }

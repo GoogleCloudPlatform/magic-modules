@@ -1,3 +1,0 @@
-substitutions:
-  - substitution: "project"
-    value: ":PROJECT"
