@@ -29,13 +29,18 @@
 package google
 
 import(
+{{- if $.Undeletable }}
+	"log"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+{{- else }}
 	"context"
 	"log"
 	"testing"
 
-		"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	{{$.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$.DCLPackage}}"
-
+{{- end }}
 )
 
 func init() {
@@ -45,9 +50,14 @@ func init() {
 	})
 }
 
+{{- if $.Undeletable }}
 func testSweep{{$.SweeperName}}(region string) error {
-	resourceName := "{{ $.SweeperName}}"
-	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s",resourceName)
+	log.Print("[INFO][SWEEPER_LOG] No-op sweeper called for undeletable {{$.SweeperName}}")
+	return nil
+}
+{{- else }}
+func testSweep{{$.SweeperName}}(region string) error {
+	log.Print("[INFO][SWEEPER_LOG] Starting sweeper for {{$.SweeperName}}")
 
 	config, err := sharedConfigForRegion(region)
 	if err != nil {
@@ -84,3 +94,4 @@ func testSweep{{$.SweeperName}}(region string) error {
 func isDeletable{{$.SweeperName}}(r *{{$.Package}}.{{$.Type}}) bool {
 	return isSweepableTestResource(*r.Name)
 }
+{{- end }}
