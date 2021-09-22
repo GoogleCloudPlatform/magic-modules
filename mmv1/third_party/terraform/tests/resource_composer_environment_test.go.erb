@@ -971,15 +971,10 @@ func testAccComposerEnvironment_composerV2(pid, envName, network, subnetwork str
 resource "google_composer_environment" "test" {
 	name   = "%s"
 	region = "europe-west3"
-	locals {
-  	composer_version = "2"  # both composer_version and airflow_version are parts of regex, so if either 1 or 2 version is ok "[12]" should be used,
-  	airflow_version = "2"   # if subversion is needed remember to escape "." with "\\." for example 1.2 should be written as "1\\.2"
-  	reg_ex = join("", ["composer-", local.composer_version, "\\.[\\d+\\.]*\\d+.*-airflow-", local.airflow_version, "\\.[\\d+\\.]*\\d+"])
-  	matching_images = [for v in data.google_composer_image_versions.all.image_versions[*].image_version_id: v if length(regexall(local.reg_ex, v)) > 0]
-  }
+
 		config {
   		software_config {
-  			image_version = local.matching_images[length(local.matching_images)-1]
+  		  image_version = "composer-2.0.0-preview.1-airflow-2.1.2"
   		}
   		maintenance_window {
   			start_time = "2019-08-01T01:00:00Z"
