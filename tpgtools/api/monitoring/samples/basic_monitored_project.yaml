@@ -26,5 +26,4 @@ variables:
 - name: project
   type: project
 versions:
-- ga
 - beta
