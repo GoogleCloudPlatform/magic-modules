@@ -29,6 +29,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudbuild_trigger_build"
         primary_resource_id: "build-trigger"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudbuild_trigger_service_account"
+        primary_resource_id: "service-account-trigger"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'trigger_id'
