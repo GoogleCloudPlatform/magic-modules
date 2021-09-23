@@ -353,9 +353,10 @@ func TestAccKmsCryptoKey_importOnly(t *testing.T) {
 				Config: testGoogleKmsCryptoKey_importOnly(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
 			},
 			{
-				ResourceName:      "google_kms_crypto_key.crypto_key",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_kms_crypto_key.crypto_key",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"skip_initial_version_creation"},
 			},
 			// Use a separate TestStep rather than a CheckDestroy because we need the project to still exist.
 			{
