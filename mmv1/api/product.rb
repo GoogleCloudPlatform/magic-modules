@@ -49,7 +49,7 @@ module Api
     # A function reference designed for the rare case where you
     # need to use retries in operation calls. Used for the service api
     # as it enables itself (self referential) and can result in occasional
-    # failures on operation_get. see https://git.io/Jzu04
+    # failures on operation_get. see github.com/hashicorp/terraform-provider-google/issues/9489
     attr_reader :operation_retry
 
     # The APIs required to be enabled for this product.
