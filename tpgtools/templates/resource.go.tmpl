@@ -436,10 +436,6 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 {{- end }}
 
 func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) error {
-{{- if $.Undeletable }}
-	log.Printf(`[WARNING] {{$.PathType}} resources cannot be deleted from Google Cloud.
-The resource %s will be removed from Terraform state, but will still be present on Google Cloud.`, d.Id())
-{{- else }}
 	config := meta.(*Config)
 
 {{- range $v := .Properties }}
@@ -507,7 +503,6 @@ The resource %s will be removed from Terraform state, but will still be present 
 	}
 
 	log.Printf("[DEBUG] Finished deleting {{$.Type}} %q", d.Id())
-{{- end }}
 	return nil
 }
 

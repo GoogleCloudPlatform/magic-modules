@@ -46,7 +46,6 @@ const (
 	NoSweeper                          = "NO_SWEEPER"
 	CustomImport                       = "CUSTOM_IMPORT_FUNCTION"
 	CustomCreateDirective              = "CUSTOM_CREATE_DIRECTIVE_FUNCTION"
-	Undeletable                        = "UNDELETABLE"
 	SkipDeleteFunction                 = "SKIP_DELETE_FUNCTION"
 	SerializationOnly                  = "SERIALIZATION_ONLY"
 	CustomSerializer                   = "CUSTOM_SERIALIZER"
