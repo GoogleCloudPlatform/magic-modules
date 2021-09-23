@@ -114,7 +114,7 @@ curl \
   -X POST \
   -u "$github_username:$GITHUB_TOKEN" \
   -H "Accept: application/vnd.github.v3+json" \
-  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
+  "https://api.github.com/repos/$repo_name/statuses/$mm_commit_sha" \
   -d "$post_body"
 
 
@@ -128,5 +128,5 @@ curl \
   -X POST \
   -u "$github_username:$GITHUB_TOKEN" \
   -H "Accept: application/vnd.github.v3+json" \
-  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
+  "https://api.github.com/repos/$repo_name/statuses/$mm_commit_sha" \
   -d "$post_body"
