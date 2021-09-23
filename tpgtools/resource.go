@@ -51,9 +51,11 @@ type Resource struct {
 	// "instance", "backend_service".
 	title string
 
-	// dclname is the name of the DCL resource in snake_case. For example,
-	// "instance", "backend_service".
-	dclname string
+	// dclTitle is the name of the resource in TitleCase. For example,
+	// "Instance", "BackendService".
+	// This is particularly useful for acronymizations that exist in
+	// resource names, like OSPolicy
+	dclTitle string
 
 	// Description of the Terraform resource
 	Description string
@@ -150,10 +152,14 @@ func (r Resource) Name() string {
 }
 
 func (r Resource) DCLName() string {
-	if r.dclname != "" {
-		return r.dclname
+	if r.dclTitle != "" {
+		return jsonToSnakeCase(r.dclTitle)
 	}
 	return r.title
+}
+
+func (r Resource) DCLTitle() string {
+	return r.dclTitle
 }
 
 // Path is the provider name of a resource, product_name. For example,
@@ -376,7 +382,7 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 	}
 	res := Resource{
 		title:                jsonToSnakeCase(resourceTitle),
-		dclname:              jsonToSnakeCase(schema.Title),
+		dclTitle:             schema.Title,
 		productMetadata:      product,
 		versionMetadata:      version,
 		Description:          schema.Description,
