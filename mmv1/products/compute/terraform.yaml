@@ -381,13 +381,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           region_backend_service_name: "region-service"
           health_check_name: "rbs-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_backend_service_strong_affinity"
-        primary_resource_id: "default"
-        vars:
-          region_backend_service_name: "region-service"
-          health_check_name: "rbs-health-check"
-        skip_docs: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/region_backend_service.go.erb
       encoder: templates/terraform/encoders/region_backend_service.go.erb
