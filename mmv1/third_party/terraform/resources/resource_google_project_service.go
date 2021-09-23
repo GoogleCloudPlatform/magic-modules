@@ -275,12 +275,10 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 		})
 		if config.UserProjectOverride {
 			billingProject := project
-
 			// err == nil indicates that the billing_project value was found
 			if bp, err := getBillingProject(d, config); err == nil {
 				billingProject = bp
 			}
-
 			servicesDisableCall.Header().Add("X-Goog-User-Project", billingProject)
 		}
 		sop, err := servicesDisableCall.Do()

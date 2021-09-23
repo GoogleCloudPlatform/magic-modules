@@ -81,12 +81,18 @@ func BatchRequestReadServices(project string, d *schema.ResourceData, config *Co
 		return nil, err
 	}
 
+	billingProject := project
+	// err == nil indicates that the billing_project value was found
+	if bp, err := getBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
 	req := &BatchRequest{
 		ResourceName: project,
 		Body:         nil,
 		// Use empty CombineF since the request is exactly the same no matter how many services we read.
 		CombineF: func(body interface{}, toAdd interface{}) (interface{}, error) { return nil, nil },
-		SendF:    sendListServices(config, userAgent, d.Timeout(schema.TimeoutRead)),
+		SendF:    sendListServices(config, billingProject, userAgent, d.Timeout(schema.TimeoutRead)),
 		DebugId:  fmt.Sprintf("List Project Services %s", project),
 	}
 
@@ -119,8 +125,8 @@ func sendBatchFuncEnableServices(config *Config, userAgent, billingProject strin
 	}
 }
 
-func sendListServices(config *Config, userAgent string, timeout time.Duration) BatcherSendFunc {
+func sendListServices(config *Config, billingProject, userAgent string, timeout time.Duration) BatcherSendFunc {
 	return func(project string, _ interface{}) (interface{}, error) {
-		return listCurrentlyEnabledServices(project, userAgent, config, timeout)
+		return listCurrentlyEnabledServices(project, billingProject, userAgent, config, timeout)
 	}
 }
