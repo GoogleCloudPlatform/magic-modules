@@ -893,10 +893,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "external_http_lb_mig_backend_custom_header"
-        primary_resource_id: "google_compute_global_forwarding_rule"
+        primary_resource_id: "default"
         vars:
           xlb_network_name: "l7-xlb-network"
           backend_subnet_name: "l7-xlb-subnet"
+          address_name: "l7-xlb-static-ip"
           forwarding_rule_name: "l7-xlb-forwarding-rule"
           target_http_proxy_name: "l7-xlb-target-http-proxy"
           url_map_name: "l7-xlb-url-map"
