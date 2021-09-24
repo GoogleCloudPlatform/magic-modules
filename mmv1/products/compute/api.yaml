@@ -14674,6 +14674,36 @@ objects:
               https://cloud.google.com/vpc/docs/flow-logs#filtering for details on how to format this field.
               The default value is 'true', which evaluates to include everything.
             default_value: "true"
+      - !ruby/object:Api::Type::Enum
+        name: 'stackType'
+        update_verb: :PATCH
+        update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        fingerprint_name: 'fingerprint'
+        values:
+          - :IPV4_ONLY
+          - :IPV4_IPV6
+        default_value: :IPV4_ONLY
+        description: |
+          The stack type for this subnet to identify whether the IPv6 feature is enabled or not.
+          If not specified IPV4_ONLY will be used.
+      - !ruby/object:Api::Type::Enum
+        name: 'ipv6AccessType'
+        values:
+          - :EXTERNAL
+        description: |
+          The access type of IPv6 address this subnet holds. It's immutable and can only be specified during creation
+          or the first time the subnet is updated into IPV4_IPV6 dual stack. If the ipv6_type is EXTERNAL then this subnet
+          cannot enable direct path.
+      - !ruby/object:Api::Type::String
+        name: 'ipv6CidrRange'
+        output: true
+        description: |
+          The range of internal IPv6 addresses that are owned by this subnetwork.
+      - !ruby/object:Api::Type::String
+        name: 'externalIpv6Prefix'
+        output: true
+        description: |
+          The range of external IPv6 addresses that are owned by this subnetwork.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Private Google Access':
