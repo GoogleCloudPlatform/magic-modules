@@ -34,10 +34,8 @@ UNAME := $(shell uname)
 # The inplace editing semantics are different between linux and osx.
 ifeq ($(UNAME), Linux)
 SED_I := -i
-ECHO_ARGS = -e
 else
 SED_I := -i '' -E
-ECHO_ARGS :=
 endif
 
 ifeq ($(FORCE_DCL),)
@@ -75,7 +73,7 @@ upgrade-dcl:
 		MOD_LINE=$$(grep declarative-resource-client-library go.mod);\
 		SUM_LINE=$$(grep declarative-resource-client-library go.sum);\
 	cd ../mmv1/third_party/terraform && \
-		sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod.erb; echo ${ECHO_ARGS} "$$SUM_LINE" >> go.sum
+		sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod.erb; echo "$$SUM_LINE" >> go.sum
 
 
 
