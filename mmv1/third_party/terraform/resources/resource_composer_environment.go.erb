@@ -1133,8 +1133,17 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 	}
 
 	transformed := make(map[string]interface{})
+  	if workloadsConfig.Scheduler != nil {
+  		transformed["scheduler"] = []interface{}{workloadsConfig.Scheduler}
+  	}
+  	if workloadsConfig.Scheduler != nil {
+  		transformed["web_server"] = []interface{}{workloadsConfig.WebServer}
+  	}
+  	if workloadsConfig.Scheduler != nil {
+  		transformed["worker"] = []interface{}{workloadsConfig.Worker}
+  	}
 
-	wlCfgScheduler := workloadsConfig.Scheduler
+	/* wlCfgScheduler := workloadsConfig.Scheduler
 	wlCfgWebServer := workloadsConfig.WebServer
 	wlCfgWorker := workloadsConfig.Worker
 
@@ -1168,16 +1177,16 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
     transformedWorker["storage_gb"] = wlCfgWorker.StorageGb
     transformedWorker["min_count"] = wlCfgWorker.MinCount
     transformedWorker["max_count"] = wlCfgWorker.MaxCount
-  }
+  } */
 
 	/* transformed["scheduler"] = transformedScheduler
 	transformed["web_server"] = transformedWebServer
 	transformed["worker"] = transformedWorker
   fmt.Printf("HERE!!!!!!!!!!!! \n %s\n", transformed) */
 
-  transformed["scheduler"] = []interface{}{transformedScheduler}
+  /* transformed["scheduler"] = []interface{}{transformedScheduler}
   transformed["web_server"] = []interface{}{transformedWebServer}
-  transformed["worker"] = []interface{}{transformedWorker}
+  transformed["worker"] = []interface{}{transformedWorker} */
 
 
 	return []interface{}{transformed}
