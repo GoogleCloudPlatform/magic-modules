@@ -33,6 +33,7 @@ import (
 	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc"
 	eventarcBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc/beta"
 	gkehubBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub/beta"
+	monitoringBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/monitoring/beta"
 	orgpolicy "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/orgpolicy"
 	orgpolicyBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/orgpolicy/beta"
 	privateca "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/privateca"
@@ -71,6 +72,8 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 			return "google_gke_hub_feature", nil
 		case "GkeHubFeatureMembership":
 			return "google_gke_hub_feature_membership", nil
+		case "MonitoringMonitoredProject":
+			return "google_monitoring_monitored_project", nil
 		case "OrgPolicyPolicy":
 			return "google_org_policy_policy", nil
 		case "PrivatecaCertificateTemplate":
@@ -224,6 +227,12 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 				return "", err
 			}
 			return GkeHubFeatureMembershipBetaAsHCL(*r)
+		case "MonitoringMonitoredProject":
+			r := &monitoringBeta.MonitoredProject{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return MonitoringMonitoredProjectBetaAsHCL(*r)
 		case "OrgPolicyPolicy":
 			r := &orgpolicyBeta.Policy{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -257,7 +266,7 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return CloudResourceManagerProjectAsHCL(*r)
+		return serializeGAProjectToHCL(*r)
 	case "ComputeFirewallPolicy":
 		r := &compute.FirewallPolicy{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -2031,6 +2040,23 @@ func convertGkeHubFeatureMembershipBetaConfigmanagementPolicyControllerToHCL(r *
 		outputConfig += fmt.Sprintf("\ttemplate_library_installed = %#v\n", *r.TemplateLibraryInstalled)
 	}
 	return outputConfig + "}"
+}
+
+// MonitoringMonitoredProjectBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func MonitoringMonitoredProjectBetaAsHCL(r monitoringBeta.MonitoredProject) (string, error) {
+	outputConfig := "resource \"google_monitoring_monitored_project\" \"output\" {\n"
+	if r.MetricsScope != nil {
+		outputConfig += fmt.Sprintf("\tmetrics_scope = %#v\n", *r.MetricsScope)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	return formatHCL(outputConfig + "}")
 }
 
 // OrgPolicyPolicyBetaAsHCL returns a string representation of the specified resource in HCL.

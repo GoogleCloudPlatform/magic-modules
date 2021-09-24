@@ -192,6 +192,7 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
+          - GoogleCloudPlatform/magic-modules
           - "22"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
@@ -204,6 +205,7 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
+          - GoogleCloudPlatform/magic-modules
           - "23"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-vcr-tester'

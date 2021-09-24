@@ -47,13 +47,20 @@ type Resource struct {
 	// TODO: if none are set, the resource does not support import.
 	ImportFormats []string
 
+	// AppendToBasePath is a string that will be appended to the end of the API base path.
+	// rarely needed in cases where the shared mm basepath does not include the version
+	// as in Montioring https://git.io/Jz4Wn
+	AppendToBasePath string
+
 	// title is the name of the resource in snake_case. For example,
 	// "instance", "backend_service".
 	title string
 
-	// dclname is the name of the DCL resource in snake_case. For example,
-	// "instance", "backend_service".
-	dclname string
+	// dclTitle is the name of the resource in TitleCase. For example,
+	// "Instance", "BackendService".
+	// This is particularly useful for acronymizations that exist in
+	// resource names, like OSPolicy
+	dclTitle string
 
 	// Description of the Terraform resource
 	Description string
@@ -150,10 +157,14 @@ func (r Resource) Name() string {
 }
 
 func (r Resource) DCLName() string {
-	if r.dclname != "" {
-		return r.dclname
+	if r.dclTitle != "" {
+		return jsonToSnakeCase(r.dclTitle)
 	}
 	return r.title
+}
+
+func (r Resource) DCLTitle() string {
+	return r.dclTitle
 }
 
 // Path is the provider name of a resource, product_name. For example,
@@ -376,7 +387,7 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 	}
 	res := Resource{
 		title:                jsonToSnakeCase(resourceTitle),
-		dclname:              jsonToSnakeCase(schema.Title),
+		dclTitle:             schema.Title,
 		productMetadata:      product,
 		versionMetadata:      version,
 		Description:          schema.Description,
@@ -411,6 +422,16 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 	}
 	if cifdOk {
 		res.CustomImportFunction = &cifd.Function
+	}
+
+	// Resource Override: Append to Base Path
+	atbpd := AppendToBasePathDetails{}
+	atbpOk, err := overrides.ResourceOverrideWithDetails(AppendToBasePath, &atbpd, location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode append to base path details: %v", err)
+	}
+	if atbpOk {
+		res.AppendToBasePath = atbpd.String
 	}
 
 	// Resource Override: Import formats
@@ -501,9 +522,30 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 		}
 	}
 
-	// Resource Override: No Sweeper
+	// Determine if a resource can use a generated sweeper or not
+	// We only supply a certain set of parent values to sweepers, so only generate
+	// one if it will actually work- resources with resource parents are not
+	// sweepable, in particular, such as nested resources or fine-grained
+	// resources. Additional special cases can be handled with overrides.
 	res.HasSweeper = true
+	validSweeperParameters := []string{"project", "region", "location", "zone", "billing_account"}
+	if deleteAllInfo, ok := typeFetcher.doc.Paths["deleteAll"]; ok {
+		for _, p := range deleteAllInfo.Parameters {
+			// if any field isn't a standard sweeper parameter, don't make a sweeper
+			if !stringInSlice(p.Name, validSweeperParameters) {
+				res.HasSweeper = false
+			}
+		}
+	} else {
+		// if deleteAll wasn't found, the DCL hasn't published a sweeper
+		res.HasSweeper = false
+	}
+
 	if overrides.ResourceOverride(NoSweeper, location) {
+		if res.HasSweeper == false {
+			return nil, fmt.Errorf("superfluous NO_SWEEPER specified for %q", res.TerraformName())
+		}
+
 		res.HasSweeper = false
 	}
 
@@ -524,9 +566,9 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 
 	// Resource Override: SkipDeleteFunction
 	skipDeleteFunc := SkipDeleteFunctionDetails{}
-	skipDeleteFuncOk, err := overrides.ResourceOverrideWithDetails(SkipDelete, &skipDeleteFunc, location)
+	skipDeleteFuncOk, err := overrides.ResourceOverrideWithDetails(SkipDeleteFunction, &skipDeleteFunc, location)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode skip delete function details: %v", err)
+		return nil, fmt.Errorf("failed to decode skip delete details: %v", err)
 	}
 	if skipDeleteFuncOk {
 		res.SkipDeleteFunction = &skipDeleteFunc.Function

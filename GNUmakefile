@@ -28,6 +28,19 @@ ifneq ($(RESOURCE),)
   mmv1_compile += -t $(RESOURCE)
   tpgtools_compile += --resource $(RESOURCE)
 endif
+
+UNAME := $(shell uname)
+
+# The inplace editing semantics are different between linux and osx.
+ifeq ($(UNAME), Linux)
+SED_I := -i
+else
+SED_I := -i '' -E
+endif
+
+ifeq ($(FORCE_DCL),)
+  FORCE_DCL=latest
+endif
 terraform build:
 	make serialize
 	make mmv1
@@ -55,12 +68,12 @@ serialize:
 upgrade-dcl:
 	cd tpgtools && \
 		go mod edit -dropreplace=github.com/GoogleCloudPlatform/declarative-resource-client-library &&\
-		go mod edit -require=github.com/GoogleCloudPlatform/declarative-resource-client-library@latest &&\
+		go mod edit -require=github.com/GoogleCloudPlatform/declarative-resource-client-library@$(FORCE_DCL) &&\
 		go mod tidy;\
 		MOD_LINE=$$(grep declarative-resource-client-library go.mod);\
 		SUM_LINE=$$(grep declarative-resource-client-library go.sum);\
 	cd ../mmv1/third_party/terraform && \
-		sed -i "/declarative-resource-client-library/c$$(printf '\t')$$MOD_LINE" go.mod.erb; echo -e "$$SUM_LINE" >> go.sum
+		sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod.erb; echo "$$SUM_LINE" >> go.sum
 
 
 
