@@ -110,14 +110,18 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 		{{- else }}
 	// If not found in sample version, fallthrough to GA
 	switch resourceType {
-	{{- range $res := $resList   }}
+			{{- range $res := $resList   }}
 	case "{{$res.PathType}}":
 		r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.Type}}{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return {{$res.PathType}}{{$version.SerializationSuffix}}AsHCL(*r)
-	{{- end }}
+				{{- if $res.CustomSerializer }}
+			return {{$res.CustomSerializer}}(*r)
+				{{- else }}
+			return {{$res.PathType}}{{$version.SerializationSuffix}}AsHCL(*r)
+				{{- end }}
+			{{- end }}
 	default:
 		//return fmt.Sprintf("%s resource not supported in tpgtools", resourceType), nil
 		return "", fmt.Errorf("Error converting sample JSON to HCL: %s not found", resourceType)

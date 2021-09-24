@@ -33,9 +33,8 @@ import(
 	"log"
 	"testing"
 
-		"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	{{$.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$.DCLPackage}}"
-
 )
 
 func init() {
@@ -46,8 +45,7 @@ func init() {
 }
 
 func testSweep{{$.SweeperName}}(region string) error {
-	resourceName := "{{ $.SweeperName}}"
-	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s",resourceName)
+	log.Print("[INFO][SWEEPER_LOG] Starting sweeper for {{$.SweeperName}}")
 
 	config, err := sharedConfigForRegion(region)
 	if err != nil {
