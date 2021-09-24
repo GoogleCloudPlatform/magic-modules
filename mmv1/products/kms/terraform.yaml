@@ -97,6 +97,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       destroyScheduledDuration: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      importOnly: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/kms_crypto_key.erb
       custom_import: templates/terraform/custom_import/kms_crypto_key.go.erb
