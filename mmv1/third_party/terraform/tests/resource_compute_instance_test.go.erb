@@ -3327,7 +3327,7 @@ resource "google_compute_instance" "foobar" {
   network_interface {
     subnetwork = google_compute_subnetwork.subnetwork-ipv6.name
     stack_type = "IPV4_IPV6"
-    ipv6_access_configs {
+    ipv6_access_config {
       network_tier = "PREMIUM"
       public_ptr_domain_name = "%s.gcp.tfacc.hashicorptest.com."
     }
