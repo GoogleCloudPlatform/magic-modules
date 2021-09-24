@@ -1133,12 +1133,86 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 	}
 
 	transformed := make(map[string]interface{})
-	transformed["scheduler"] = workloadsConfig.Scheduler
-	transformed["web_server"] = workloadsConfig.WebServer
-	transformed["worker"] = workloadsConfig.Worker
+
+	wlCfgScheduler := workloadsConfig.Scheduler
+	wlCfgWebServer := workloadsConfig.WebServer
+	wlCfgWorker := workloadsConfig.Worker
+
+
+  transformedScheduler := make(map[string]interface{})
+  transformedWebServer := make(map[string]interface{})
+  transformedWorker := make(map[string]interface{})
+
+	if wlCfgScheduler == nil {
+	  transformedScheduler = nil
+	} else {
+    transformedScheduler["cpu"] = wlCfgScheduler.Cpu
+    transformedScheduler["memory_gb"] = wlCfgScheduler.MemoryGb
+    transformedScheduler["storage_gb"] = wlCfgScheduler.StorageGb
+    transformedScheduler["count"] = wlCfgScheduler.Count
+  }
+
+  if wlCfgWebServer == nil {
+    transformedWebServer = nil
+  } else {
+    transformedWebServer["cpu"] = wlCfgWebServer.Cpu
+    transformedWebServer["memory_gb"] = wlCfgWebServer.MemoryGb
+    transformedWebServer["storage_gb"] = wlCfgWebServer.StorageGb
+  }
+
+  if wlCfgWorker == nil {
+    transformedWorker = nil
+  } else {
+    transformedWorker["cpu"] = wlCfgWorker.Cpu
+    transformedWorker["memory_gb"] = wlCfgWorker.MemoryGb
+    transformedWorker["storage_gb"] = wlCfgWorker.StorageGb
+    transformedWorker["min_count"] = wlCfgWorker.MinCount
+    transformedWorker["max_count"] = wlCfgWorker.MaxCount
+  }
+
+	/* transformed["scheduler"] = transformedScheduler
+	transformed["web_server"] = transformedWebServer
+	transformed["worker"] = transformedWorker
+  fmt.Printf("HERE!!!!!!!!!!!! \n %s\n", transformed) */
+
+  transformed["scheduler"] = []interface{}{transformedScheduler}
+  transformed["web_server"] = []interface{}{transformedWebServer}
+  transformed["worker"] = []interface{}{transformedWorker}
+
 
 	return []interface{}{transformed}
 }
+
+/* func flattenComposerEnvironmentConfigWorkloadsConfigScheduler(wlCfgScheduler *composer.WorkloadsConfigScheduler) interface{} {
+  transformed := make(map[string]interface{})
+  transformed["cpu"] = wlCfgScheduler.Cpu
+  transformed["memory_gb"] = wlCfgScheduler.MemoryGb
+  transformed["storage_gb"] = wlCfgScheduler.StorageGb
+  transformed["count"] = wlCfgScheduler.Count
+  return []interface{}{transformed}
+}
+
+func flattenComposerEnvironmentConfigWorkloadsConfigWebServer(wlCfgWebServer *composer.WorkloadsConfigWebServer) interface{} {
+
+    transformed := make(map[string]interface{})
+    transformed["cpu"] = wlCfgWebServer.Cpu
+    transformed["memory_gb"] = wlCfgWebServer.MemoryGb
+    transformed["storage_gb"] = wlCfgWebServer.StorageGb
+    return []interface{}{transformed}
+
+}
+
+func flattenComposerEnvironmentConfigWorkloadsConfigWorker(wlCfgWorker *composer.WorkloadsConfigWorker) interface{} {
+
+			transformed := make(map[string]interface{})
+      transformed["cpu"] = wlCfgWorker.Cpu
+      transformed["memory_gb"] = wlCfgWorker.MemoryGb
+      transformed["storage_gb"] = wlCfgWorker.StorageGb
+      transformed["min_count"] = wlCfgWorker.MinCount
+      transformed["max_count"] = wlCfgWorker.MaxCount
+      return []interface{}{transformed}
+
+} */
 <% end -%>
 
 func flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg *composer.PrivateEnvironmentConfig) interface{} {
