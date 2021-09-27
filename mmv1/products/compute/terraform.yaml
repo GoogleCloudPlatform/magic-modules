@@ -910,6 +910,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "port_range"
           - "target"
+          - "ip_address"
       - !ruby/object:Provider::Terraform::Examples
         name: "global_forwarding_rule_http"
         primary_resource_id: "default"
