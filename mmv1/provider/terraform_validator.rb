@@ -39,7 +39,7 @@ module Provider
       target_folder = data.output_folder
       product_ns = data.object.__product.name
       data.generate(pwd,
-                    'templates/validator/resource_conversion.go.erb',
+                    'templates/validator/resource_converter.go.erb',
                     File.join(target_folder,
                               "google/#{product_ns.downcase}_#{data.object.name.underscore}.go"),
                     self)
@@ -66,8 +66,8 @@ module Provider
                            'third_party/terraform/utils/provider_handwritten_endpoint.go.erb'],
                           ['google/transport.go',
                            'third_party/terraform/utils/transport.go.erb'],
-                          ['google/mappers.go',
-                           'templates/validator/mappers/mappers.go.erb'],
+                          ['google/resource_converters.go',
+                           'templates/validator/resource_converters.go.erb'],
                           ['google/iam_kms_key_ring.go',
                            'third_party/terraform/utils/iam_kms_key_ring.go.erb'],
                           ['google/iam_kms_crypto_key.go',
@@ -202,7 +202,7 @@ module Provider
 
       FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
       data.generate(pwd,
-                    'templates/validator/iam/iam_consumer.go.erb',
+                    'templates/validator/resource_converter_iam.go.erb',
                     "#{target_folder}/#{product_name}_#{name}_iam.go",
                     self)
 

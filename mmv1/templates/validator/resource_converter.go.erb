@@ -31,6 +31,13 @@ import (
 
 <%= lines(compile(pwd + '/' + object.custom_code.constants)) if object.custom_code.constants -%>
 
+func resourceConverter<%= resource_name -%>() ResourceConverter {
+    return ResourceConverter{
+        AssetType: "<%= product_backend_name.downcase -%>.googleapis.com/<%= object.name -%>",
+        Convert: Get<%= resource_name -%>CaiObject,
+    }
+}
+
 func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
     name, err := assetName(d, config, "<%= asset_name_template -%>")
     if err != nil {
