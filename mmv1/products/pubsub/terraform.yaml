@@ -150,9 +150,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'ignoreMissingKeyInMap("x-goog-version")'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/subscription.go.erb
-      decoder: templates/terraform/decoders/pubsub_subscription.erb
       encoder: templates/terraform/encoders/no_send_name.go.erb
-      extra_schema_entry: templates/terraform/extra_schema_entry/pubsub_subscription_path.erb
       update_encoder: templates/terraform/update_encoder/pubsub_subscription.erb
   Schema: !ruby/object:Overrides::Terraform::ResourceOverride
     async: !ruby/object:Provider::Terraform::PollAsync
