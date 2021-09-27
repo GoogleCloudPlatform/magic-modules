@@ -1132,61 +1132,69 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 		return nil
 	}
 
-	transformed := make(map[string]interface{})
-  	if workloadsConfig.Scheduler != nil {
+    // version_1 - write own flatten for Scheduler, WebServer and Worker
+    // version_2 (Scott idea) - use different types for inner structs in flatten
+    // version_3 - v1 and v2 combined
+
+	  transformed := make(map[string]interface{})
+  	// v2 - extra safe check
+  	/*if workloadsConfig.Scheduler != nil {
   		transformed["scheduler"] = []interface{}{workloadsConfig.Scheduler}
   	}
-  	if workloadsConfig.Scheduler != nil {
+  	if workloadsConfig.WebServer != nil {
   		transformed["web_server"] = []interface{}{workloadsConfig.WebServer}
   	}
-  	if workloadsConfig.Scheduler != nil {
+  	if workloadsConfig.Worker != nil {
   		transformed["worker"] = []interface{}{workloadsConfig.Worker}
-  	}
+  	}*/
 
-	/* wlCfgScheduler := workloadsConfig.Scheduler
-	wlCfgWebServer := workloadsConfig.WebServer
-	wlCfgWorker := workloadsConfig.Worker
+    // v1/v3
+    transformedScheduler := make(map[string]interface{})
+    transformedWebServer := make(map[string]interface{})
+    transformedWorker := make(map[string]interface{})
 
+    // v1/v2/v3
+    wlCfgScheduler := workloadsConfig.Scheduler
+    wlCfgWebServer := workloadsConfig.WebServer
+    wlCfgWorker := workloadsConfig.Worker
 
-  transformedScheduler := make(map[string]interface{})
-  transformedWebServer := make(map[string]interface{})
-  transformedWorker := make(map[string]interface{})
+    // v1/v3
+    if wlCfgScheduler == nil {
+      transformedScheduler = nil
+    } else {
+      transformedScheduler["cpu"] = wlCfgScheduler.Cpu
+      transformedScheduler["memory_gb"] = wlCfgScheduler.MemoryGb
+      transformedScheduler["storage_gb"] = wlCfgScheduler.StorageGb
+      transformedScheduler["count"] = wlCfgScheduler.Count
+    }
 
-	if wlCfgScheduler == nil {
-	  transformedScheduler = nil
-	} else {
-    transformedScheduler["cpu"] = wlCfgScheduler.Cpu
-    transformedScheduler["memory_gb"] = wlCfgScheduler.MemoryGb
-    transformedScheduler["storage_gb"] = wlCfgScheduler.StorageGb
-    transformedScheduler["count"] = wlCfgScheduler.Count
-  }
+    if wlCfgWebServer == nil {
+      transformedWebServer = nil
+    } else {
+      transformedWebServer["cpu"] = wlCfgWebServer.Cpu
+      transformedWebServer["memory_gb"] = wlCfgWebServer.MemoryGb
+      transformedWebServer["storage_gb"] = wlCfgWebServer.StorageGb
+    }
 
-  if wlCfgWebServer == nil {
-    transformedWebServer = nil
-  } else {
-    transformedWebServer["cpu"] = wlCfgWebServer.Cpu
-    transformedWebServer["memory_gb"] = wlCfgWebServer.MemoryGb
-    transformedWebServer["storage_gb"] = wlCfgWebServer.StorageGb
-  }
+    if wlCfgWorker == nil {
+      transformedWorker = nil
+    } else {
+      transformedWorker["cpu"] = wlCfgWorker.Cpu
+      transformedWorker["memory_gb"] = wlCfgWorker.MemoryGb
+      transformedWorker["storage_gb"] = wlCfgWorker.StorageGb
+      transformedWorker["min_count"] = wlCfgWorker.MinCount
+      transformedWorker["max_count"] = wlCfgWorker.MaxCount
+    }
 
-  if wlCfgWorker == nil {
-    transformedWorker = nil
-  } else {
-    transformedWorker["cpu"] = wlCfgWorker.Cpu
-    transformedWorker["memory_gb"] = wlCfgWorker.MemoryGb
-    transformedWorker["storage_gb"] = wlCfgWorker.StorageGb
-    transformedWorker["min_count"] = wlCfgWorker.MinCount
-    transformedWorker["max_count"] = wlCfgWorker.MaxCount
-  } */
+    // v1
+    /* transformed["scheduler"] = transformedScheduler
+    transformed["web_server"] = transformedWebServer
+    transformed["worker"] = transformedWorker*/
 
-	/* transformed["scheduler"] = transformedScheduler
-	transformed["web_server"] = transformedWebServer
-	transformed["worker"] = transformedWorker
-  fmt.Printf("HERE!!!!!!!!!!!! \n %s\n", transformed) */
-
-  /* transformed["scheduler"] = []interface{}{transformedScheduler}
-  transformed["web_server"] = []interface{}{transformedWebServer}
-  transformed["worker"] = []interface{}{transformedWorker} */
+    // v3/v2
+    transformed["scheduler"] = []interface{}{transformedScheduler}
+    transformed["web_server"] = []interface{}{transformedWebServer}
+    transformed["worker"] = []interface{}{transformedWorker}
 
 
 	return []interface{}{transformed}
