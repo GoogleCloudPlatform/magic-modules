@@ -40,6 +40,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_authority_byo_key"
         primary_resource_id: "default"
+        min_version: beta
         # Multiple IAM bindings on the same key cause non-determinism
         skip_vcr: true
         vars:
