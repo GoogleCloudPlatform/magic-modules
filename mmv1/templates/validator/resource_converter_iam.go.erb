@@ -26,7 +26,7 @@ import "fmt"
 
 func resourceConverter<%= resource_name -%>IamPolicy() ResourceConverter {
     return ResourceConverter{
-        AssetType: "<%= product_backend_name.downcase -%>.googleapis.com/<%= object.name -%>",
+        AssetType: <%= resource_name -%>AssetType,
         Convert: Get<%= resource_name -%>IamPolicyCaiObject,
         MergeCreateUpdate: Merge<%= resource_name -%>IamPolicy,
     }
@@ -34,7 +34,7 @@ func resourceConverter<%= resource_name -%>IamPolicy() ResourceConverter {
 
 func resourceConverter<%= resource_name -%>IamBinding() ResourceConverter {
     return ResourceConverter{
-        AssetType: "<%= product_backend_name.downcase -%>.googleapis.com/<%= object.name -%>",
+        AssetType: <%= resource_name -%>AssetType,
         Convert: Get<%= resource_name -%>IamBindingCaiObject,
         FetchFullResource: Fetch<%= resource_name -%>IamPolicy,
         MergeCreateUpdate: Merge<%= resource_name -%>IamBinding,
@@ -44,7 +44,7 @@ func resourceConverter<%= resource_name -%>IamBinding() ResourceConverter {
 
 func resourceConverter<%= resource_name -%>IamMember() ResourceConverter {
     return ResourceConverter{
-        AssetType: "<%= product_backend_name.downcase -%>.googleapis.com/<%= object.name -%>",
+        AssetType: <%= resource_name -%>AssetType,
         Convert: Get<%= resource_name -%>IamMemberCaiObject,
         FetchFullResource: Fetch<%= resource_name -%>IamPolicy,
         MergeCreateUpdate: Merge<%= resource_name -%>IamMember,
@@ -102,7 +102,7 @@ func new<%= resource_name -%>IamAsset(
 
 	return []Asset{{
 		Name: name,
-		Type: "<%= product_backend_name.downcase -%>.googleapis.com/<%= object.name -%>",
+		Type: <%= resource_name -%>AssetType,
 		IAMPolicy: &IAMPolicy{
 			Bindings: bindings,
 		},
