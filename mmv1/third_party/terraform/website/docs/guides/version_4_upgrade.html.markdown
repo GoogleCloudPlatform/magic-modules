@@ -6,6 +6,20 @@ description: |-
   Terraform Google Provider 4.0.0 Upgrade Guide
 ---
 
+<!-- TOC depthFrom:2 depthTo:2 -->
+
+- [Terraform Google Provider 4.0.0 Upgrade Guide](#terraform-google-provider-400-upgrade-guide)
+  - [I accidentally upgraded to 4.0.0, how do I downgrade to `3.X`?](#i-accidentally-upgraded-to-400-how-do-i-downgrade-to-3x)
+  - [Provider Version Configuration](#provider-version-configuration)
+  - [Provider](#provider)
+    - [Provider-level change example](#provider-level-change-example)
+  - [Datasource: `google_product_resource`](#datasource-google_product_resource)
+    - [Datasource-level change example](#datasource-level-change-example)
+  - [Resource: `google_product_resource`](#resource-google_product_resource)
+    - [Resource-level change example](#resource-level-change-example)
+
+<!-- /TOC -->
+
 # Terraform Google Provider 4.0.0 Upgrade Guide
 
 The `4.0.0` release of the Google provider for Terraform is a major version and
@@ -46,20 +60,6 @@ you can revert the Terraform state file to a previous version. If you do
 so and Terraform had created resources as part of a `terraform apply` in the
 meantime, you'll need to either delete them by hand or `terraform import` them
 so Terraform knows to manage them.
-
-## Upgrade Topics
-
-<!-- TOC depthFrom:2 depthTo:2 -->
-
-- [Terraform Google Provider 4.0.0 Upgrade Guide](#terraform-google-provider-400-upgrade-guide)
-  - [I accidentally upgraded to 4.0.0, how do I downgrade to `3.X`?](#i-accidentally-upgraded-to-400-how-do-i-downgrade-to-3x)
-  - [Upgrade Topics](#upgrade-topics)
-  - [Provider Version Configuration](#provider-version-configuration)
-  - [Provider](#provider)
-  - [Resource: `google_pubsub_subscription`](#resource-google_pubsub_subscription)
-    - [`path` is now removed](#path-is-now-removed)
-
-<!-- /TOC -->
 
 ## Provider Version Configuration
 
@@ -106,8 +106,18 @@ terraform {
 
 ## Provider
 
-## Resource: `google_pubsub_subscription`
+### Provider-level change example
 
-### `path` is now removed
+Description of the change and how users should adjust their configuration (if needed).
 
-`path` has been removed in favor of `id` which has an identical value.
+## Datasource: `google_product_resource`
+
+### Datasource-level change example
+
+Description of the change and how users should adjust their configuration (if needed).
+
+## Resource: `google_product_resource`
+
+### Resource-level change example
+
+Description of the change and how users should adjust their configuration (if needed).
