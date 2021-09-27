@@ -11,12 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-- type: CUSTOM_ID
-  details:
-    id: 'projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}'
-- type: MUTEX
-  details:
-    mutex: '{{project}}/{{location}}/{{feature}}'
-- type: CUSTOM_TERRAFORM_PRODUCT_NAME
-  details:
-    product: gke_hub
+dependencies:
+- samples/basic.cloudresourcemanager.project.json
+description: A basic example of a monitoring monitored project
+name: basic_monitored_project
+resource: samples/basic.monitored_project.json
+type: monitored_project
+variables:
+- name: id
+  type: resource_name
+- name: org_id
+  type: org_id
+- name: project
+  type: project
+versions:
+- beta

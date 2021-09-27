@@ -34,15 +34,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "network_services_edge_cache_origin_basic"
         primary_resource_id: "default"
         vars:
-          resource_name: "default"
+          resource_name: "my-origin"
         ignore_read_extra:
          - "timeout"
       - !ruby/object:Provider::Terraform::Examples
         name: "network_services_edge_cache_origin_advanced"
         primary_resource_id: "default"
         vars:
-          resource_name: "default"
-          resource_name_2: "fallback"
+          resource_name: "my-origin"
+          resource_name_2: "my-fallback"
         ignore_read_extra:
          - "timeout"
     properties:
@@ -79,7 +79,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           bucket_name: "my-bucket"
           origin_name: "my-origin"
-          origin_google: "google"
+          origin_google: "origin-google"
           service_name: "my-service"
     properties:
       disableQuic: !ruby/object:Overrides::Terraform::PropertyOverride
