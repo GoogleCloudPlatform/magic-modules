@@ -24,9 +24,12 @@ package google
 
 import "fmt"
 
+// Provide a separate asset type constant so we don't have to worry about name conflicts between IAM and non-IAM converter files
+const <%= resource_name -%>IAMAssetType string = "<%= product_backend_name.downcase -%>.googleapis.com/<%= object.name -%>"
+
 func resourceConverter<%= resource_name -%>IamPolicy() ResourceConverter {
     return ResourceConverter{
-        AssetType: <%= resource_name -%>AssetType,
+        AssetType: <%= resource_name -%>IAMAssetType,
         Convert: Get<%= resource_name -%>IamPolicyCaiObject,
         MergeCreateUpdate: Merge<%= resource_name -%>IamPolicy,
     }
@@ -34,7 +37,7 @@ func resourceConverter<%= resource_name -%>IamPolicy() ResourceConverter {
 
 func resourceConverter<%= resource_name -%>IamBinding() ResourceConverter {
     return ResourceConverter{
-        AssetType: <%= resource_name -%>AssetType,
+        AssetType: <%= resource_name -%>IAMAssetType,
         Convert: Get<%= resource_name -%>IamBindingCaiObject,
         FetchFullResource: Fetch<%= resource_name -%>IamPolicy,
         MergeCreateUpdate: Merge<%= resource_name -%>IamBinding,
@@ -44,7 +47,7 @@ func resourceConverter<%= resource_name -%>IamBinding() ResourceConverter {
 
 func resourceConverter<%= resource_name -%>IamMember() ResourceConverter {
     return ResourceConverter{
-        AssetType: <%= resource_name -%>AssetType,
+        AssetType: <%= resource_name -%>IAMAssetType,
         Convert: Get<%= resource_name -%>IamMemberCaiObject,
         FetchFullResource: Fetch<%= resource_name -%>IamPolicy,
         MergeCreateUpdate: Merge<%= resource_name -%>IamMember,
@@ -102,7 +105,7 @@ func new<%= resource_name -%>IamAsset(
 
 	return []Asset{{
 		Name: name,
-		Type: <%= resource_name -%>AssetType,
+		Type: <%= resource_name -%>IAMAssetType,
 		IAMPolicy: &IAMPolicy{
 			Bindings: bindings,
 		},
@@ -120,6 +123,6 @@ func Fetch<%= resource_name -%>IamPolicy(d TerraformResourceData, config *Config
 		d,
 		config,
 		"//<%= product_backend_name.downcase  -%>.googleapis.com/{{<%= object.name.downcase -%>}}",
-		<%= resource_name -%>AssetType,
+		<%= resource_name -%>IAMAssetType,
 	)
 }
