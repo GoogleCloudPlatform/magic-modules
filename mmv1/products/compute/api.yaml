@@ -14682,7 +14682,6 @@ objects:
         values:
           - :IPV4_ONLY
           - :IPV4_IPV6
-        default_value: :IPV4_ONLY
         description: |
           The stack type for this subnet to identify whether the IPv6 feature is enabled or not.
           If not specified IPV4_ONLY will be used.

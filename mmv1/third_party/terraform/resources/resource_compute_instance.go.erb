@@ -357,7 +357,6 @@ func resourceComputeInstance() *schema.Resource {
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"IPV4_ONLY", "IPV4_IPV6", ""}, false),
 							Description: `The stack type for this network interface to identify whether the IPv6 feature is enabled or not. If not specified, IPV4_ONLY will be used.`,
-							Default:      "IPV4_ONLY",
 						},
 
 						"ipv6_access_type": {
@@ -392,7 +391,7 @@ func resourceComputeInstance() *schema.Resource {
 
 									"network_tier": {
 										Type:         schema.TypeString,
-										Optional:     true,
+										Required:     true,
 										ValidateFunc: validation.StringInSlice([]string{"PREMIUM"}, false),
 										Description:  `The service-level to be provided for IPv6 traffic when the subnet has an external subnet. Only PREMIUM tier is valid for IPv6`,
 									},
