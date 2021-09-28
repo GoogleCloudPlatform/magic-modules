@@ -8,6 +8,21 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
+func resourceConverterProject() ResourceConverter {
+	return ResourceConverter{
+		AssetType:         "cloudresourcemanager.googleapis.com/Project",
+		Convert:           GetProjectCaiObject,
+		MergeCreateUpdate: MergeProject,
+	}
+}
+
+func resourceConverterProjectBillingInfo() ResourceConverter {
+	return ResourceConverter{
+		AssetType: "cloudbilling.googleapis.com/ProjectBillingInfo",
+		Convert:   GetProjectBillingInfoCaiObject,
+	}
+}
+
 func GetProjectCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	// use project number if it's available; otherwise, fill in project id so that we
 	// keep the CAI assets apart for different uncreated projects.
@@ -131,4 +146,9 @@ func GetProjectBillingInfoApiObject(d TerraformResourceData, config *Config) (ma
 	}
 
 	return jsonMap(ba)
+}
+
+func MergeProject(existing, incoming Asset) Asset {
+	existing.Resource = incoming.Resource
+	return existing
 }

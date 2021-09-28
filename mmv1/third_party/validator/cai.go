@@ -6,6 +6,26 @@ import (
 	"regexp"
 )
 
+type ConvertFunc func(d TerraformResourceData, config *Config) ([]Asset, error)
+type GetApiObjectFunc func(d TerraformResourceData, config *Config) (map[string]interface{}, error)
+
+// FetchFullResourceFunc allows initial data for a resource to be fetched from the API and merged
+// with the planned changes. This is useful for resources that are only partially managed
+// by Terraform, like IAM policies managed with member/binding resources.
+type FetchFullResourceFunc func(d TerraformResourceData, config *Config) (Asset, error)
+
+// MergeFunc combines multiple terraform resources into a single CAI asset.
+// The incoming asset will either be an asset that was created/updated or deleted.
+type MergeFunc func(existing, incoming Asset) Asset
+
+type ResourceConverter struct {
+	AssetType         string
+	Convert           ConvertFunc
+	FetchFullResource FetchFullResourceFunc
+	MergeCreateUpdate MergeFunc
+	MergeDelete       MergeFunc
+}
+
 // Asset is the CAI representation of a resource.
 type Asset struct {
 	// The name, in a peculiar format: `\\<api>.googleapis.com/<self_link>`
