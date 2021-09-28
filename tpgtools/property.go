@@ -625,7 +625,6 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			}
 		}
 
-
 		if !p.Computed {
 			glog.Infof("Looking for %q in %v.", v.Title, schema.Required)
 			if stringInSlice(v.Title, schema.Required) {
@@ -634,16 +633,16 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				p.Optional = true
 			}
 		}
-			cr := CustomSchemaValuesDetails{}
-			crOk, err := overrides.PropertyOverrideWithDetails(CustomSchemaValues, p, &cr, location)
-			if err != nil {
-				return nil, fmt.Errorf("failed to decode custom required details")
-			}
-			if crOk {
-				p.Required = cr.Required
-				p.Optional = cr.Optional
-				p.Computed = cr.Computed
-			}
+		cr := CustomSchemaValuesDetails{}
+		crOk, err := overrides.PropertyOverrideWithDetails(CustomSchemaValues, p, &cr, location)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode custom required details")
+		}
+		if crOk {
+			p.Required = cr.Required
+			p.Optional = cr.Optional
+			p.Computed = cr.Computed
+		}
 
 		// Handle settable fields. If the field is computed it's not settable but
 		// if it's also optional (O+C), it is.
