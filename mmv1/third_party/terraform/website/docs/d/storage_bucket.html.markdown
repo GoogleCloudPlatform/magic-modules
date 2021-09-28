@@ -19,7 +19,7 @@ and
 
 ```hcl
 data "google_storage_bucket" "my-bucket" {
-  bucket = "my-bucket"
+  name = "my-bucket"
 }
 ```
 
@@ -27,7 +27,7 @@ data "google_storage_bucket" "my-bucket" {
 
 The following arguments are supported:
 
-* `bucket` - (Required) The name of the bucket.
+* `name` - (Required) The name of the bucket.
 
 ## Attributes Reference
 
