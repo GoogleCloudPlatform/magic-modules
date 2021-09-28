@@ -1,0 +1,6 @@
+- type: CUSTOM_SCHEMA_VALUES
+  field: version
+  details:
+    required: false
+    optional: true
+    computed: true

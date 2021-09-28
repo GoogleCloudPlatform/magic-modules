@@ -632,8 +632,8 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			} else {
 				p.Optional = true
 			}
-			cr := CustomRequiredDetails{}
-			crOk, err := overrides.PropertyOverrideWithDetails(CustomRequired, p, &cr, location)
+			cr := CustomSchemaValuesDetails{}
+			crOk, err := overrides.PropertyOverrideWithDetails(CustomSchemaValues, p, &cr, location)
 			if err != nil {
 				return nil, fmt.Errorf("failed to decode custom required details")
 			}
