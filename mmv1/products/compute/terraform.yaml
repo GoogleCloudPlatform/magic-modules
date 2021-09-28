@@ -2038,7 +2038,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           l7_ilb_test_vm: "l7-ilb-test-vm"
           l7_ilb_redirect: "l7-ilb-redirect"
           l7_ilb_target_http_proxy: "l7-ilb-target-http-proxy"
-          l7_ilb_redirect_url_map "l7-ilb-redirect-url-map"
+          l7_ilb_redirect_url_map: "l7-ilb-redirect-url-map"
         min_version: beta
         ignore_read_extra:
           - "target"
