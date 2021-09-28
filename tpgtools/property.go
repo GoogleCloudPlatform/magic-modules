@@ -625,6 +625,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			}
 		}
 
+
 		if !p.Computed {
 			glog.Infof("Looking for %q in %v.", v.Title, schema.Required)
 			if stringInSlice(v.Title, schema.Required) {
@@ -632,6 +633,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			} else {
 				p.Optional = true
 			}
+		}
 			cr := CustomSchemaValuesDetails{}
 			crOk, err := overrides.PropertyOverrideWithDetails(CustomSchemaValues, p, &cr, location)
 			if err != nil {
@@ -643,6 +645,9 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				p.Computed = cr.Computed
 			}
 
+		// Handle settable fields. If the field is computed it's not settable but
+		// if it's also optional (O+C), it is.
+		if !p.Computed || (p.Optional) {
 			p.Settable = true
 
 			// NOTE: x-kubernetes-immmutable implies that all children of a field

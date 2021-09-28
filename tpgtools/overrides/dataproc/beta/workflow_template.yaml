@@ -4,3 +4,8 @@
     required: false
     optional: true
     computed: true
+- type: DEPRECATED
+  field: version
+  details:
+    message: >-
+      version is not useful as a configurable field, and will be removed in the future.
