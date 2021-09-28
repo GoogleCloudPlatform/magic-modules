@@ -141,11 +141,10 @@ type CustomListSizeConstraintDetails struct {
 	Max int64
 }
 
-type CustomRequiredDetails struct {
+type CustomSchemaValuesDetails struct {
 	Required bool
 	Optional bool
 	Computed bool
-	ForceNew bool
 }
 
 type ImportFormatDetails struct {
