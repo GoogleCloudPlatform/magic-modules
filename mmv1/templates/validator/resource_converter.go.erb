@@ -31,6 +31,16 @@ import (
 
 <%= lines(compile(pwd + '/' + object.custom_code.constants)) if object.custom_code.constants -%>
 
+const <%= resource_name -%>AssetType string = "<%= product_backend_name.downcase -%>.googleapis.com/<%= object.name -%>"
+
+
+func resourceConverter<%= resource_name -%>() ResourceConverter {
+    return ResourceConverter{
+        AssetType: <%= resource_name -%>AssetType,
+        Convert: Get<%= resource_name -%>CaiObject,
+    }
+}
+
 func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
     name, err := assetName(d, config, "<%= asset_name_template -%>")
     if err != nil {
@@ -39,7 +49,7 @@ func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *Config) 
     if obj, err := Get<%= resource_name -%>ApiObject(d, config); err == nil {
         return []Asset{{
             Name: name,
-            Type: "<%= product_backend_name.downcase -%>.googleapis.com/<%= object.name -%>",
+            Type: <%= resource_name -%>AssetType,
             Resource: &AssetResource{
                 Version: "<%= api_version -%>",
                 DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/<%= product_backend_name.downcase -%>/<%= api_version -%>/rest",
