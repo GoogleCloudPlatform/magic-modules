@@ -38,9 +38,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           pool_name: 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
           pool_location: "\"us-central1\""
       - !ruby/object:Provider::Terraform::Examples
+        # Skip test because it depends on a beta resource, but PrivateCA does
+        # not have a beta endpoint
+        skip_test: true
         name: "privateca_certificate_authority_byo_key"
         primary_resource_id: "default"
-        min_version: beta
         # Multiple IAM bindings on the same key cause non-determinism
         skip_vcr: true
         vars:
