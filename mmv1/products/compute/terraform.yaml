@@ -2021,8 +2021,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "int_https_lb_https_redirect"
         primary_resource_id: "default"
         vars:
-          l7_ilb_network: "l7-ilb-network”
-          l7_ilb_proxy_subnet: “proxy_subnet"
+          l7_ilb_network: "l7-ilb-network"
+          l7_ilb_proxy_subnet: "proxy_subnet"
           l7_ilb_subnet: "l7-ilb-subnet"
           l7_ilb_ip: "l7-ilb-ip"
           l7_ilb_forwarding_rule: "l7-ilb-forwarding-rule"
@@ -2031,7 +2031,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           l7_ilb_regional_url_map: "l7-ilb-regional-url-map"
           l7_ilb_backend_service: "l7-ilb-backend-service"
           l7_ilb_mig_template: "l7-ilb-mig-template"
-          l7_ilb_hc: ""l7-ilb-hc"
+          l7_ilb_hc: "l7-ilb-hc"
           l7_ilb_mig1: "l7-ilb-mig1"
           l7_ilb_fw_allow_hc: "l7-ilb-fw-allow-hc"
           l7_ilb_fw_allow_ilb_to_backends: "l7-ilb-fw-allow-ilb-to-backends"
