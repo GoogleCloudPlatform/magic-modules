@@ -2018,6 +2018,32 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RegionUrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        name: "int_https_lb_https_redirect"
+        primary_resource_id: "default"
+        vars:
+          l7_ilb_network: "l7-ilb-network”
+          l7_ilb_proxy_subnet: “proxy_subnet"
+          l7_ilb_subnet: "l7-ilb-subnet"
+          l7_ilb_ip: "l7-ilb-ip"
+          l7_ilb_forwarding_rule: "l7-ilb-forwarding-rule"
+          l7_ilb_regional_ssl_cert: "l7-ilb-regional-ssl-cert"
+          l7_ilb_target_https_proxy: "l7-ilb-target-https-proxy"
+          l7_ilb_regional_url_map: "l7-ilb-regional-url-map"
+          l7_ilb_backend_service: "l7-ilb-backend-service"
+          l7_ilb_mig_template: "l7-ilb-mig-template"
+          l7_ilb_hc: ""l7-ilb-hc"
+          l7_ilb_mig1: "l7-ilb-mig1"
+          l7_ilb_fw_allow_hc: "l7-ilb-fw-allow-hc"
+          l7_ilb_fw_allow_ilb_to_backends: "l7-ilb-fw-allow-ilb-to-backends"
+          l7_ilb_test_vm: "l7-ilb-test-vm"
+          l7_ilb_redirect: "l7-ilb-redirect"
+          l7_ilb_target_http_proxy: "l7-ilb-target-http-proxy"
+          l7_ilb_redirect_url_map "l7-ilb-redirect-url-map"
+        min_version: beta
+        ignore_read_extra:
+          - "target"
+          - "ip_address"
+      - !ruby/object:Provider::Terraform::Examples
         name: "region_url_map_basic"
         primary_resource_id: "regionurlmap"
         vars:
