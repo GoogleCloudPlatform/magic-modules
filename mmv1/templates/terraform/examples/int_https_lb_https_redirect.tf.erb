@@ -55,15 +55,15 @@ resource "google_compute_forwarding_rule" "default" {
   network_tier          = "PREMIUM"
 }
 
-# Regional SSL certificate
-resource "tls_private_key" "example" {
+# Self-signed regional SSL certificate for testing
+resource "tls_private_key" "default" {
   algorithm = "RSA"
   rsa_bits  = 2048
 }
 
-resource "tls_self_signed_cert" "example" {
-  key_algorithm   = tls_private_key.example.algorithm
-  private_key_pem = tls_private_key.example.private_key_pem
+resource "tls_self_signed_cert" "default" {
+  key_algorithm   = tls_private_key.default.algorithm
+  private_key_pem = tls_private_key.default.private_key_pem
 
   # Certificate expires after 12 hours.
   validity_period_hours = 12
@@ -89,22 +89,20 @@ resource "tls_self_signed_cert" "example" {
 
 resource "google_compute_region_ssl_certificate" "default" {
   name_prefix = "my-certificate-"
-  private_key = tls_private_key.example.private_key_pem
-  certificate = tls_self_signed_cert.example.cert_pem
+  private_key = tls_private_key.default.private_key_pem
+  certificate = tls_self_signed_cert.default.cert_pem
 
   lifecycle {
     create_before_destroy = true
   }
-
 }
-
 
 # Regional target HTTPS proxy
 resource "google_compute_region_target_https_proxy" "default" {
   name             = "<%= ctx[:vars]['l7_ilb_target_https_proxy'] %>"
   region           = "europe-west1"
   url_map          = google_compute_region_url_map.default.id
-  ssl_certificates = google_compute_region_ssl_certificate.default.id
+  ssl_certificates = [google_compute_region_ssl_certificate.default.self_link]
 }
 
 # Regional url map
