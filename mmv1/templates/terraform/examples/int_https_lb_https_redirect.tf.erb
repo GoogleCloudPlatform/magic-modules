@@ -61,6 +61,10 @@ resource "google_compute_region_ssl_certificate" "default" {
   name        = "<%= ctx[:vars]['l7_ilb_regional_ssl_cert'] %>"
   private_key = file("path/to/private.key")
   certificate = file("path/to/certificate.crt")
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # Regional target HTTPS proxy
