@@ -1,18 +1,14 @@
 # Internal HTTPS load balancer with HTTP-to-HTTPS redirect
 
 # [START cloudloadbalancing_int_https_with_redirect]
-# Enable API
-resource "google_project_service" "default" {
-  service = "compute.googleapis.com"
-}
 
-# VPC
+# VPC network
 resource "google_compute_network" "default" {
   name                    = "<%= ctx[:vars]['l7_ilb_network'] %>"
   auto_create_subnetworks = false
 }
 
-# proxy-only subnet
+# Proxy-only subnet
 resource "google_compute_subnetwork" "proxy_subnet" {
   name          = "<%= ctx[:vars]['l7_ilb_proxy_subnet'] %>"
   ip_cidr_range = "10.0.0.0/24"
@@ -22,7 +18,7 @@ resource "google_compute_subnetwork" "proxy_subnet" {
   network       = google_compute_network.default.id
 }
 
-# backend subnet
+# Backend subnet
 resource "google_compute_subnetwork" "default" {
   name          = "<%= ctx[:vars]['l7_ilb_subnet'] %>"
   ip_cidr_range = "10.0.1.0/24"
@@ -30,6 +26,7 @@ resource "google_compute_subnetwork" "default" {
   network       = google_compute_network.default.id
 }
 
+# Reserved internal address
 resource "google_compute_address" "default" {
   name         = "<%= ctx[:vars]['l7_ilb_ip'] %>"
   provider     = google-beta
@@ -105,7 +102,7 @@ resource "google_compute_region_target_https_proxy" "default" {
   ssl_certificates = [google_compute_region_ssl_certificate.default.self_link]
 }
 
-# Regional url map
+# Regional URL map
 resource "google_compute_region_url_map" "default" {
   name            = "<%= ctx[:vars]['l7_ilb_regional_url_map'] %>"
   region          = "europe-west1"
@@ -128,7 +125,7 @@ resource "google_compute_region_backend_service" "<%= ctx[:primary_resource_id] 
   }
 }
 
-# instance template
+# Instance template
 resource "google_compute_instance_template" "default" {
   name         = "<%= ctx[:vars]['l7_ilb_mig_template'] %>"
   machine_type = "e2-small"
@@ -199,7 +196,7 @@ resource "google_compute_region_instance_group_manager" "default" {
   target_size        = 2
 }
 
-# allow all access to health check ranges
+# Allow all access to health check ranges
 resource "google_compute_firewall" "default" {
   name          = "<%= ctx[:vars]['l7_ilb_fw_allow_hc'] %>"
   direction     = "INGRESS"
@@ -210,7 +207,7 @@ resource "google_compute_firewall" "default" {
   }
 }
 
-# allow http from proxy subnet to backends
+# Allow http from proxy subnet to backends
 resource "google_compute_firewall" "backends" {
   name          = "<%= ctx[:vars]['l7_ilb_fw_allow_ilb_to_backends'] %>"
   direction     = "INGRESS"
@@ -223,7 +220,7 @@ resource "google_compute_firewall" "backends" {
   }
 }
 
-# test instance
+# Test instance
 resource "google_compute_instance" "default" {
   name         = "<%= ctx[:vars]['l7_ilb_test_vm'] %>"
   zone         = "europe-west1-b"
@@ -239,7 +236,7 @@ resource "google_compute_instance" "default" {
   }
 }
 
-### http-to-https redirect ###
+### HTTP-to-HTTPS redirect ###
 
 # Regional forwarding rule
 resource "google_compute_forwarding_rule" "redirect" {
@@ -255,14 +252,14 @@ resource "google_compute_forwarding_rule" "redirect" {
   network_tier          = "PREMIUM"
 }
 
-# Regional http proxy
+# Regional HTTP proxy
 resource "google_compute_region_target_http_proxy" "default" {
   name    = "<%= ctx[:vars]['l7_ilb_target_http_proxy'] %>"
   region  = "europe-west1"
   url_map = google_compute_region_url_map.redirect.id
 }
 
-# Regional url map
+# Regional URL map
 resource "google_compute_region_url_map" "redirect" {
   name            = "<%= ctx[:vars]['l7_ilb_redirect_url_map'] %>"
   region          = "europe-west1"
