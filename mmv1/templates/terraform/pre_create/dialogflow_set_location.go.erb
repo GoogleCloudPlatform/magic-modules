@@ -1,7 +1,10 @@
 
 // extract location from the parent
-stringParts := strings.Split(d.Get("parent").(string), "/")
-if stringParts[2] != "locations" {
+location := ""
+ 
+if parts := regexp.MustCompile(`locations\/([^\/]*)\/`).FindStringSubmatch(d.Get("parent").(string)); parts != nil {
+    location = parts[1]
+} else {
     return fmt.Errorf(
         "Saw %s when the parent is expected to contains location %s",
         d.Get("parent"),
@@ -9,5 +12,4 @@ if stringParts[2] != "locations" {
     )
 }
 
-url = strings.Replace(url,"-dialogflow",fmt.Sprintf("%s-dialogflow",stringParts[3]),1)
-  
+url = strings.Replace(url,"-dialogflow",fmt.Sprintf("%s-dialogflow",location),1)
