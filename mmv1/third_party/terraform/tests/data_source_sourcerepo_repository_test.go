@@ -13,8 +13,8 @@ func TestAccDataSourceGoogleSourceRepoRepository_basic(t *testing.T) {
 	name := "tf-repository-" + randString(t, 10)
 
 	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSourceRepoRepositoryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
