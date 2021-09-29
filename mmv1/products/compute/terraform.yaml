@@ -340,7 +340,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           l7_ilb_network: "l7-ilb-network"
-          l7_ilb_proxy_subnet: "proxy_subnet"
+          l7_ilb_proxy_subnet: "l7-ilb-proxy-subnet"
           l7_ilb_subnet: "l7-ilb-subnet"
           l7_ilb_ip: "l7-ilb-ip"
           l7_ilb_forwarding_rule: "l7-ilb-forwarding-rule"
