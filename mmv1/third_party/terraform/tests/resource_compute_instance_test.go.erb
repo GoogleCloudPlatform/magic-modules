@@ -267,6 +267,11 @@ func TestAccComputeInstance_IPv6(t *testing.T) {
 						t, "google_compute_instance.foobar", &instance),
 				),
 			},
+			{
+				ResourceName:      "google_compute_instance.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -3306,7 +3311,6 @@ resource "google_compute_network" "custom-test" {
   name                    = "%s-network"
   auto_create_subnetworks = false
 }
-
 
 resource "google_compute_address" "foo" {
   name = "%s"
