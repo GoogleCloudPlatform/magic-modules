@@ -58,7 +58,7 @@ resource "google_compute_forwarding_rule" "default" {
 # Regional SSL certificate
 resource "google_compute_region_ssl_certificate" "default" {
   region      = "europe-west1"
-  name        = "<%= ctx[:vars]['l7_ilb_regional_ssl_cert'] %>"
+  name_prefix = "my-certificate-"
   private_key = file("path/to/private.key")
   certificate = file("path/to/certificate.crt")
 

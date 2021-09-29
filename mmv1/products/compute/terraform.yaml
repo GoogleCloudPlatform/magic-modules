@@ -344,7 +344,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           l7_ilb_subnet: "l7-ilb-subnet"
           l7_ilb_ip: "l7-ilb-ip"
           l7_ilb_forwarding_rule: "l7-ilb-forwarding-rule"
-          l7_ilb_regional_ssl_cert: "l7-ilb-regional-ssl-cert"
           l7_ilb_target_https_proxy: "l7-ilb-target-https-proxy"
           l7_ilb_regional_url_map: "l7-ilb-regional-url-map"
           l7_ilb_backend_service: "l7-ilb-backend-service"
