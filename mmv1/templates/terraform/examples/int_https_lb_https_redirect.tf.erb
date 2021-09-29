@@ -79,7 +79,7 @@ resource "google_compute_region_url_map" "default" {
 }
 
 # Regional backend service
-resource "google_compute_region_backend_service" "default" {
+resource "google_compute_region_backend_service" "<%= ctx[:primary_resource_id] %>" {
   name                  = "<%= ctx[:vars]['l7_ilb_backend_service'] %>"
   region                = "europe-west1"
   protocol              = "HTTP"
@@ -229,7 +229,7 @@ resource "google_compute_region_target_http_proxy" "default" {
 }
 
 # Regional url map
-resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_region_url_map" "redirect" {
   name            = "<%= ctx[:vars]['l7_ilb_redirect_url_map'] %>"
   region          = "europe-west1"
   default_service = google_compute_region_backend_service.default.id
