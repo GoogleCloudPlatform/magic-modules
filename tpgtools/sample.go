@@ -355,6 +355,11 @@ var translationMap = map[string]translationIndex{
 		contextKey:   "region",
 		contextValue: "getTestRegionFromEnv()",
 	},
+	":ZONE": {
+		docsValue:    "us-west1-a",
+		contextKey:   "zone",
+		contextValue: "getTestZoneFromEnv()",
+	},
 	":ORG_TARGET": {
 		docsValue:    "123456789",
 		contextKey:   "org_target",

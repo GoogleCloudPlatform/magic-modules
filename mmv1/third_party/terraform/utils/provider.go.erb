@@ -180,12 +180,16 @@ func Provider() *schema.Provider {
 			BigtableAdminCustomEndpointEntryKey:          BigtableAdminCustomEndpointEntry,
 
 			// dcl
-			AssuredWorkloadsEndpointEntryKey:               AssuredWorkloadsEndpointEntry,
-			CloudResourceManagerEndpointEntryKey:           CloudResourceManagerEndpointEntry,
-			EventarcEndpointEntryKey:               EventarcEndpointEntry,
-			GkeHubFeatureCustomEndpointEntryKey:               GkeHubFeatureCustomEndpointEntry,
-			OrgPolicyEndpointEntryKey:               OrgPolicyEndpointEntry,
-			PrivatecaCertificateTemplateEndpointEntryKey:               PrivatecaCertificateTemplateCustomEndpointEntry,
+			AssuredWorkloadsEndpointEntryKey:                AssuredWorkloadsEndpointEntry,
+			CloudResourceManagerEndpointEntryKey:            CloudResourceManagerEndpointEntry,
+			EventarcEndpointEntryKey:                        EventarcEndpointEntry,
+			GkeHubFeatureCustomEndpointEntryKey:             GkeHubFeatureCustomEndpointEntry,
+			OrgPolicyEndpointEntryKey:                       OrgPolicyEndpointEntry,
+			PrivatecaCertificateTemplateEndpointEntryKey:    PrivatecaCertificateTemplateCustomEndpointEntry,
+
+			<% if version == "private" -%>
+			VmwareEndpointEntryKey:                          VmwareEndpointEntry,
+			<% end -%>
 
 			<% unless version == "ga" -%>
 			CloudBuildWorkerPoolEndpointEntryKey:               CloudBuildWorkerPoolEndpointEntry,
@@ -470,6 +474,8 @@ end     # products.each do
 				"google_org_policy_policy":             resourceOrgPolicyPolicy(),
 				<% if version == 'private' -%>
 				"google_os_config_os_policy_assignment": resourceOsConfigOsPolicyAssignment(),
+				"google_vmware_private_cloud":           resourceVmwarePrivateCloud(),
+				"google_vmware_cluster":                 resourceVmwareCluster(),
 				<% end -%>
 				"google_privateca_certificate_template":        resourcePrivatecaCertificateTemplate(),
 			},
