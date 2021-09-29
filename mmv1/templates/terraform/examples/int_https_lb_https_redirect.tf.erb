@@ -91,7 +91,7 @@ resource "google_compute_region_ssl_certificate" "default" {
   name_prefix = "my-certificate-"
   private_key = tls_private_key.default.private_key_pem
   certificate = tls_self_signed_cert.default.cert_pem
-
+  region      = "europe-west1" 
   lifecycle {
     create_before_destroy = true
   }
