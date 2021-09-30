@@ -462,6 +462,9 @@ end     # products.each do
 				"google_monitoring_monitored_project":          resourceMonitoringMonitoredProject(),
 				<% end -%>
 				"google_org_policy_policy":             resourceOrgPolicyPolicy(),
+				<% if version == 'private' -%>
+				"google_os_config_os_policy_assignment": resourceOsConfigOsPolicyAssignment(),
+				<% end -%>
 				"google_privateca_certificate_template":        resourcePrivatecaCertificateTemplate(),
 			},
 			// ------------------------------------

@@ -560,7 +560,11 @@ func expand{{$.PathType}}{{$v.PackagePath}}Collapsed(d *schema.ResourceData) *{{
 		{{ if $v.IsArray -}}
 func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.{{$v.ObjectType}} {
 	if o == nil {
+	{{- if $v.Computed }}
 		return nil
+	{{- else }}
+		return make([]{{$.Package}}.{{$v.ObjectType}}, 0)
+	{{- end }}
 	}
 
 			{{ if $v.IsSet -}}
@@ -569,7 +573,11 @@ func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.
 
 	objs := o.([]interface{})
 	if len(objs) == 0 {
+	{{- if $v.Computed }}
 		return nil
+	{{- else }}
+		return make([]{{$.Package}}.{{$v.ObjectType}}, 0)
+	{{- end }}
 	}
 
 	items := make([]{{$.Package}}.{{$v.ObjectType}}, 0, len(objs))
