@@ -256,7 +256,7 @@ resource "google_compute_forwarding_rule" "redirect" {
 resource "google_compute_region_target_http_proxy" "default" {
   name    = "<%= ctx[:vars]['l7_ilb_target_http_proxy'] %>"
   region  = "europe-west1"
-  url_map = google_compute_region_url_map.default.id
+  url_map = google_compute_region_url_map.redirect.id
 }
 
 # Regional URL map

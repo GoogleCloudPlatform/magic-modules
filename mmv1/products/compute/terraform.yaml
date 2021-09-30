@@ -2055,7 +2055,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           region_health_check_name: "health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "int_https_lb_https_redirect"
-        primary_resource_id: "default"
+        primary_resource_id: "redirect"
+        skip_test: true
         vars:
           l7_ilb_network: "l7-ilb-network"
           l7_ilb_proxy_subnet: "l7-ilb-proxy-subnet"
