@@ -8,7 +8,20 @@ import (
 
 	cloudresourcemanager "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudresourcemanager"
 	cloudresourcemanagerBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudresourcemanager/beta"
+	cloudresourcemanagerAlpha "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudresourcemanager/alpha"
 )
+
+func serializeAlphaProjectToHCL(r cloudresourcemanagerAlpha.Project, hasGAEquivalent bool) (string, error) {
+	b, err := json.Marshal(r)
+	if err != nil {
+		return "", err
+	}
+	var m map[string]interface{}
+	if err := json.Unmarshal(b, &m); err != nil {
+		return "", err
+	}
+	return serializeProjectToHCL(m, hasGAEquivalent)
+}
 
 func serializeBetaProjectToHCL(r cloudresourcemanagerBeta.Project, hasGAEquivalent bool) (string, error) {
 	b, err := json.Marshal(r)

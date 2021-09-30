@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-  gkehub "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub/beta"
+  gkehub "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub/<% if version == 'beta' -%>beta<% else -%>alpha<% end -%>"
 )
 
 func TestAccGkeHubFeatureMembership_gkehubFeatureAcmUpdate(t *testing.T) {
