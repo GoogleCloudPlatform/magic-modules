@@ -69,7 +69,7 @@ validator:
 
 serialize:
 	cd tpgtools;\
-		go run . --path "api" --overrides $(OVERRIDES)/tpgtools/overrides --mode "serialization" > temp.serial &&\
+		go run . --path "api" --overrides "overrides" --mode "serialization" > temp.serial &&\
 		mv -f temp.serial serialization.go;\
 
 upgrade-dcl:
