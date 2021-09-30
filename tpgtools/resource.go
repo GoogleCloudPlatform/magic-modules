@@ -708,12 +708,11 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 			glog.Exit(err)
 		}
 
-		hasGA := false
 		versionMatch := false
 
 		// if no versions provided assume all versions
 		if len(sample.Versions) <= 0 {
-			hasGA = true
+			sample.HasGAEquivalent = true
 			versionMatch = true
 		} else {
 			for _, v := range sample.Versions {
@@ -721,7 +720,7 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 					versionMatch = true
 				}
 				if v == "ga" {
-					hasGA = true
+					sample.HasGAEquivalent = true
 				}
 			}
 		}
@@ -739,7 +738,6 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 			sample.Name = &sampleName
 		}
 		sample.TestSlug = snakeToTitleCase(sampleName) + "HandWritten"
-		sample.HasGAEquivalent = hasGA
 		samples = append(samples, sample)
 	}
 
@@ -791,13 +789,12 @@ func (r *Resource) loadDCLSamples() []Sample {
 		}
 
 		versionMatch := false
-		hasGA := false
 		for _, v := range sample.Versions {
 			if v == version {
 				versionMatch = true
 			}
 			if v == "ga" {
-				hasGA = true
+				sample.HasGAEquivalent = true
 			}
 		}
 
@@ -825,7 +822,6 @@ func (r *Resource) loadDCLSamples() []Sample {
 		}
 		sample.DependencyList = dependencies
 		sample.TestSlug = sampleNameToTitleCase(*sample.Name)
-		sample.HasGAEquivalent = hasGA
 		samples = append(samples, sample)
 	}
 

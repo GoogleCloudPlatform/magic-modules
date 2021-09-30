@@ -3,13 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 
 	cloudresourcemanager "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudresourcemanager"
 	cloudresourcemanagerBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudresourcemanager/beta"
 )
 
-func serializeBetaProjectToHCL(r cloudresourcemanagerBeta.Project) (string, error) {
+func serializeBetaProjectToHCL(r cloudresourcemanagerBeta.Project, hasGAEquivalent bool) (string, error) {
 	b, err := json.Marshal(r)
 	if err != nil {
 		return "", err
@@ -18,10 +19,10 @@ func serializeBetaProjectToHCL(r cloudresourcemanagerBeta.Project) (string, erro
 	if err := json.Unmarshal(b, &m); err != nil {
 		return "", err
 	}
-	return serializeProjectToHCL(m)
+	return serializeProjectToHCL(m, hasGAEquivalent)
 }
 
-func serializeGAProjectToHCL(r cloudresourcemanager.Project) (string, error) {
+func serializeGAProjectToHCL(r cloudresourcemanager.Project, hasGAEquivalent bool) (string, error) {
 	b, err := json.Marshal(r)
 	if err != nil {
 		return "", err
@@ -30,10 +31,10 @@ func serializeGAProjectToHCL(r cloudresourcemanager.Project) (string, error) {
 	if err := json.Unmarshal(b, &m); err != nil {
 		return "", err
 	}
-	return serializeProjectToHCL(m)
+	return serializeProjectToHCL(m, hasGAEquivalent)
 }
 
-func serializeProjectToHCL(m map[string]interface{}) (string, error) {
+func serializeProjectToHCL(m map[string]interface{}, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_project\" \"output\" {\n"
 	if name, ok := m["name"]; ok {
 		outputConfig += fmt.Sprintf("\tproject_id = %#v\n", name)
@@ -56,7 +57,15 @@ func serializeProjectToHCL(m map[string]interface{}) (string, error) {
 	} else {
 		return "", fmt.Errorf("parent was not provided")
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return "", err
+	}
+	if !hasGAEquivalent {
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 // Returns the terraform representation of a three-state boolean value represented by a pointer to bool in DCL.
@@ -69,4 +78,14 @@ func serializeEnumBool(v interface{}) string {
 		return "TRUE"
 	}
 	return "FALSE"
+}
+
+// Returns the given formatted hcl with the provider = google-beta line added at the end.
+func withProviderLine(hcl string) string {
+	// Count the number of characters before the first = to determine how to space the provider line.
+	equalsPosition := len(regexp.MustCompile(".*=").FindString(hcl)) - 1
+	if equalsPosition < 11 {
+		equalsPosition = 11
+	}
+	return hcl[0:len(hcl)-2] + "  provider" + strings.Repeat(" ", equalsPosition-10) + "= google-beta\n}"
 }

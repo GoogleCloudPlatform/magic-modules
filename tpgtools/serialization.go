@@ -44,6 +44,10 @@ import (
 // DCLToTerraformReference converts a DCL resource name to the final tpgtools name
 // after overrides are applied
 func DCLToTerraformReference(resourceType, version string) (string, error) {
+	if version == "alpha" {
+		switch resourceType {
+		}
+	}
 	if version == "beta" {
 		switch resourceType {
 		case "AssuredWorkloadsWorkload":
@@ -146,7 +150,11 @@ func DCLToTerraformSampleName(service, resource string) (string, string, error) 
 }
 
 // ConvertSampleJSONToHCL unmarshals json to an HCL string.
-func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (string, error) {
+func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent bool, b []byte) (string, error) {
+	if version == "alpha" {
+		switch resourceType {
+		}
+	}
 	if version == "beta" {
 		switch resourceType {
 		case "AssuredWorkloadsWorkload":
@@ -154,97 +162,97 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return AssuredWorkloadsWorkloadBetaAsHCL(*r)
+			return AssuredWorkloadsWorkloadBetaAsHCL(*r, hasGAEquivalent)
 		case "CloudbuildWorkerPool":
 			r := &cloudbuildBeta.WorkerPool{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return CloudbuildWorkerPoolBetaAsHCL(*r)
+			return CloudbuildWorkerPoolBetaAsHCL(*r, hasGAEquivalent)
 		case "CloudResourceManagerFolder":
 			r := &cloudresourcemanagerBeta.Folder{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return CloudResourceManagerFolderBetaAsHCL(*r)
+			return CloudResourceManagerFolderBetaAsHCL(*r, hasGAEquivalent)
 		case "CloudResourceManagerProject":
 			r := &cloudresourcemanagerBeta.Project{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return serializeBetaProjectToHCL(*r)
+			return serializeBetaProjectToHCL(*r, hasGAEquivalent)
 		case "ComputeFirewallPolicy":
 			r := &computeBeta.FirewallPolicy{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return ComputeFirewallPolicyBetaAsHCL(*r)
+			return ComputeFirewallPolicyBetaAsHCL(*r, hasGAEquivalent)
 		case "ComputeFirewallPolicyAssociation":
 			r := &computeBeta.FirewallPolicyAssociation{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return ComputeFirewallPolicyAssociationBetaAsHCL(*r)
+			return ComputeFirewallPolicyAssociationBetaAsHCL(*r, hasGAEquivalent)
 		case "ComputeFirewallPolicyRule":
 			r := &computeBeta.FirewallPolicyRule{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return ComputeFirewallPolicyRuleBetaAsHCL(*r)
+			return ComputeFirewallPolicyRuleBetaAsHCL(*r, hasGAEquivalent)
 		case "ComputeForwardingRule":
 			r := &computeBeta.ForwardingRule{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return ComputeForwardingRuleBetaAsHCL(*r)
+			return ComputeForwardingRuleBetaAsHCL(*r, hasGAEquivalent)
 		case "ComputeGlobalForwardingRule":
 			r := &computeBeta.ForwardingRule{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return ComputeGlobalForwardingRuleBetaAsHCL(*r)
+			return ComputeGlobalForwardingRuleBetaAsHCL(*r, hasGAEquivalent)
 		case "DataprocWorkflowTemplate":
 			r := &dataprocBeta.WorkflowTemplate{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return DataprocWorkflowTemplateBetaAsHCL(*r)
+			return DataprocWorkflowTemplateBetaAsHCL(*r, hasGAEquivalent)
 		case "EventarcTrigger":
 			r := &eventarcBeta.Trigger{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return EventarcTriggerBetaAsHCL(*r)
+			return EventarcTriggerBetaAsHCL(*r, hasGAEquivalent)
 		case "GkeHubFeature":
 			r := &gkehubBeta.Feature{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return GkeHubFeatureBetaAsHCL(*r)
+			return GkeHubFeatureBetaAsHCL(*r, hasGAEquivalent)
 		case "GkeHubFeatureMembership":
 			r := &gkehubBeta.FeatureMembership{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return GkeHubFeatureMembershipBetaAsHCL(*r)
+			return GkeHubFeatureMembershipBetaAsHCL(*r, hasGAEquivalent)
 		case "MonitoringMonitoredProject":
 			r := &monitoringBeta.MonitoredProject{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return MonitoringMonitoredProjectBetaAsHCL(*r)
+			return MonitoringMonitoredProjectBetaAsHCL(*r, hasGAEquivalent)
 		case "OrgPolicyPolicy":
 			r := &orgpolicyBeta.Policy{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return OrgPolicyPolicyBetaAsHCL(*r)
+			return OrgPolicyPolicyBetaAsHCL(*r, hasGAEquivalent)
 		case "PrivatecaCertificateTemplate":
 			r := &privatecaBeta.CertificateTemplate{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return PrivatecaCertificateTemplateBetaAsHCL(*r)
+			return PrivatecaCertificateTemplateBetaAsHCL(*r, hasGAEquivalent)
 		}
 	}
 	// If not found in sample version, fallthrough to GA
@@ -254,73 +262,73 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return AssuredWorkloadsWorkloadAsHCL(*r)
+		return AssuredWorkloadsWorkloadAsHCL(*r, hasGAEquivalent)
 	case "CloudResourceManagerFolder":
 		r := &cloudresourcemanager.Folder{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return CloudResourceManagerFolderAsHCL(*r)
+		return CloudResourceManagerFolderAsHCL(*r, hasGAEquivalent)
 	case "CloudResourceManagerProject":
 		r := &cloudresourcemanager.Project{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return serializeGAProjectToHCL(*r)
+		return serializeGAProjectToHCL(*r, hasGAEquivalent)
 	case "ComputeFirewallPolicy":
 		r := &compute.FirewallPolicy{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return ComputeFirewallPolicyAsHCL(*r)
+		return ComputeFirewallPolicyAsHCL(*r, hasGAEquivalent)
 	case "ComputeFirewallPolicyAssociation":
 		r := &compute.FirewallPolicyAssociation{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return ComputeFirewallPolicyAssociationAsHCL(*r)
+		return ComputeFirewallPolicyAssociationAsHCL(*r, hasGAEquivalent)
 	case "ComputeFirewallPolicyRule":
 		r := &compute.FirewallPolicyRule{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return ComputeFirewallPolicyRuleAsHCL(*r)
+		return ComputeFirewallPolicyRuleAsHCL(*r, hasGAEquivalent)
 	case "ComputeForwardingRule":
 		r := &compute.ForwardingRule{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return ComputeForwardingRuleAsHCL(*r)
+		return ComputeForwardingRuleAsHCL(*r, hasGAEquivalent)
 	case "ComputeGlobalForwardingRule":
 		r := &compute.ForwardingRule{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return ComputeGlobalForwardingRuleAsHCL(*r)
+		return ComputeGlobalForwardingRuleAsHCL(*r, hasGAEquivalent)
 	case "DataprocWorkflowTemplate":
 		r := &dataproc.WorkflowTemplate{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return DataprocWorkflowTemplateAsHCL(*r)
+		return DataprocWorkflowTemplateAsHCL(*r, hasGAEquivalent)
 	case "EventarcTrigger":
 		r := &eventarc.Trigger{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return EventarcTriggerAsHCL(*r)
+		return EventarcTriggerAsHCL(*r, hasGAEquivalent)
 	case "OrgPolicyPolicy":
 		r := &orgpolicy.Policy{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return OrgPolicyPolicyAsHCL(*r)
+		return OrgPolicyPolicyAsHCL(*r, hasGAEquivalent)
 	case "PrivatecaCertificateTemplate":
 		r := &privateca.CertificateTemplate{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return PrivatecaCertificateTemplateAsHCL(*r)
+		return PrivatecaCertificateTemplateAsHCL(*r, hasGAEquivalent)
 	default:
 		//return fmt.Sprintf("%s resource not supported in tpgtools", resourceType), nil
 		return "", fmt.Errorf("Error converting sample JSON to HCL: %s not found", resourceType)
@@ -334,7 +342,7 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func AssuredWorkloadsWorkloadBetaAsHCL(r assuredworkloadsBeta.Workload) (string, error) {
+func AssuredWorkloadsWorkloadBetaAsHCL(r assuredworkloadsBeta.Workload, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_assured_workloads_workload\" \"output\" {\n"
 	if r.BillingAccount != nil {
 		outputConfig += fmt.Sprintf("\tbilling_account = %#v\n", *r.BillingAccount)
@@ -362,7 +370,15 @@ func AssuredWorkloadsWorkloadBetaAsHCL(r assuredworkloadsBeta.Workload) (string,
 			outputConfig += fmt.Sprintf("\tresource_settings %s\n", convertAssuredWorkloadsWorkloadBetaResourceSettingsToHCL(&v))
 		}
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertAssuredWorkloadsWorkloadBetaKmsSettingsToHCL(r *assuredworkloadsBeta.WorkloadKmsSettings) string {
@@ -407,7 +423,7 @@ func convertAssuredWorkloadsWorkloadBetaResourcesToHCL(r *assuredworkloadsBeta.W
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func CloudbuildWorkerPoolBetaAsHCL(r cloudbuildBeta.WorkerPool) (string, error) {
+func CloudbuildWorkerPoolBetaAsHCL(r cloudbuildBeta.WorkerPool, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_cloudbuild_worker_pool\" \"output\" {\n"
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
@@ -424,7 +440,15 @@ func CloudbuildWorkerPoolBetaAsHCL(r cloudbuildBeta.WorkerPool) (string, error) 
 	if v := convertCloudbuildWorkerPoolBetaWorkerConfigToHCL(r.WorkerConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tworker_config %s\n", v)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertCloudbuildWorkerPoolBetaNetworkConfigToHCL(r *cloudbuildBeta.WorkerPoolNetworkConfig) string {
@@ -461,7 +485,7 @@ func convertCloudbuildWorkerPoolBetaWorkerConfigToHCL(r *cloudbuildBeta.WorkerPo
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func CloudResourceManagerFolderBetaAsHCL(r cloudresourcemanagerBeta.Folder) (string, error) {
+func CloudResourceManagerFolderBetaAsHCL(r cloudresourcemanagerBeta.Folder, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_folder\" \"output\" {\n"
 	if r.Parent != nil {
 		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
@@ -469,7 +493,15 @@ func CloudResourceManagerFolderBetaAsHCL(r cloudresourcemanagerBeta.Folder) (str
 	if r.DisplayName != nil {
 		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 // CloudResourceManagerProjectBetaAsHCL returns a string representation of the specified resource in HCL.
@@ -478,7 +510,7 @@ func CloudResourceManagerFolderBetaAsHCL(r cloudresourcemanagerBeta.Folder) (str
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func CloudResourceManagerProjectBetaAsHCL(r cloudresourcemanagerBeta.Project) (string, error) {
+func CloudResourceManagerProjectBetaAsHCL(r cloudresourcemanagerBeta.Project, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_project\" \"output\" {\n"
 	if r.DisplayName != nil {
 		outputConfig += fmt.Sprintf("\tdisplayname = %#v\n", *r.DisplayName)
@@ -489,7 +521,15 @@ func CloudResourceManagerProjectBetaAsHCL(r cloudresourcemanagerBeta.Project) (s
 	if r.Parent != nil {
 		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 // ComputeFirewallPolicyBetaAsHCL returns a string representation of the specified resource in HCL.
@@ -498,7 +538,7 @@ func CloudResourceManagerProjectBetaAsHCL(r cloudresourcemanagerBeta.Project) (s
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func ComputeFirewallPolicyBetaAsHCL(r computeBeta.FirewallPolicy) (string, error) {
+func ComputeFirewallPolicyBetaAsHCL(r computeBeta.FirewallPolicy, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_compute_firewall_policy\" \"output\" {\n"
 	if r.Parent != nil {
 		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
@@ -509,7 +549,15 @@ func ComputeFirewallPolicyBetaAsHCL(r computeBeta.FirewallPolicy) (string, error
 	if r.Description != nil {
 		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 // ComputeFirewallPolicyAssociationBetaAsHCL returns a string representation of the specified resource in HCL.
@@ -518,7 +566,7 @@ func ComputeFirewallPolicyBetaAsHCL(r computeBeta.FirewallPolicy) (string, error
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func ComputeFirewallPolicyAssociationBetaAsHCL(r computeBeta.FirewallPolicyAssociation) (string, error) {
+func ComputeFirewallPolicyAssociationBetaAsHCL(r computeBeta.FirewallPolicyAssociation, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_compute_firewall_policy_association\" \"output\" {\n"
 	if r.AttachmentTarget != nil {
 		outputConfig += fmt.Sprintf("\tattachment_target = %#v\n", *r.AttachmentTarget)
@@ -529,7 +577,15 @@ func ComputeFirewallPolicyAssociationBetaAsHCL(r computeBeta.FirewallPolicyAssoc
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 // ComputeFirewallPolicyRuleBetaAsHCL returns a string representation of the specified resource in HCL.
@@ -538,7 +594,7 @@ func ComputeFirewallPolicyAssociationBetaAsHCL(r computeBeta.FirewallPolicyAssoc
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func ComputeFirewallPolicyRuleBetaAsHCL(r computeBeta.FirewallPolicyRule) (string, error) {
+func ComputeFirewallPolicyRuleBetaAsHCL(r computeBeta.FirewallPolicyRule, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_compute_firewall_policy_rule\" \"output\" {\n"
 	if r.Action != nil {
 		outputConfig += fmt.Sprintf("\taction = %#v\n", *r.Action)
@@ -578,7 +634,15 @@ func ComputeFirewallPolicyRuleBetaAsHCL(r computeBeta.FirewallPolicyRule) (strin
 		}
 		outputConfig += "]\n"
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertComputeFirewallPolicyRuleBetaMatchToHCL(r *computeBeta.FirewallPolicyRuleMatch) string {
@@ -632,7 +696,7 @@ func convertComputeFirewallPolicyRuleBetaMatchLayer4ConfigsToHCL(r *computeBeta.
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func ComputeForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string, error) {
+func ComputeForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_compute_forwarding_rule\" \"output\" {\n"
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
@@ -692,7 +756,15 @@ func ComputeForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string, error
 	if r.Target != nil {
 		outputConfig += fmt.Sprintf("\ttarget = %#v\n", *r.Target)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 // ComputeGlobalForwardingRuleBetaAsHCL returns a string representation of the specified resource in HCL.
@@ -701,7 +773,7 @@ func ComputeForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string, error
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func ComputeGlobalForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string, error) {
+func ComputeGlobalForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_compute_global_forwarding_rule\" \"output\" {\n"
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
@@ -738,7 +810,15 @@ func ComputeGlobalForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule) (string,
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertComputeGlobalForwardingRuleBetaMetadataFilterToHCL(r *computeBeta.ForwardingRuleMetadataFilter) string {
@@ -777,7 +857,7 @@ func convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelToHCL(r *com
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func DataprocWorkflowTemplateBetaAsHCL(r dataprocBeta.WorkflowTemplate) (string, error) {
+func DataprocWorkflowTemplateBetaAsHCL(r dataprocBeta.WorkflowTemplate, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_dataproc_workflow_template\" \"output\" {\n"
 	if r.Jobs != nil {
 		for _, v := range r.Jobs {
@@ -807,7 +887,15 @@ func DataprocWorkflowTemplateBetaAsHCL(r dataprocBeta.WorkflowTemplate) (string,
 	if r.Version != nil {
 		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertDataprocWorkflowTemplateBetaJobsToHCL(r *dataprocBeta.WorkflowTemplateJobs) string {
@@ -1762,7 +1850,7 @@ func convertDataprocWorkflowTemplateBetaClusterClusterConfigSoftwareConfigToHCL(
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func EventarcTriggerBetaAsHCL(r eventarcBeta.Trigger) (string, error) {
+func EventarcTriggerBetaAsHCL(r eventarcBeta.Trigger, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_eventarc_trigger\" \"output\" {\n"
 	if v := convertEventarcTriggerBetaDestinationToHCL(r.Destination); v != "" {
 		outputConfig += fmt.Sprintf("\tdestination %s\n", v)
@@ -1787,7 +1875,15 @@ func EventarcTriggerBetaAsHCL(r eventarcBeta.Trigger) (string, error) {
 	if v := convertEventarcTriggerBetaTransportToHCL(r.Transport); v != "" {
 		outputConfig += fmt.Sprintf("\ttransport %s\n", v)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertEventarcTriggerBetaDestinationToHCL(r *eventarcBeta.TriggerDestination) string {
@@ -1863,7 +1959,7 @@ func convertEventarcTriggerBetaTransportPubsubToHCL(r *eventarcBeta.TriggerTrans
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func GkeHubFeatureBetaAsHCL(r gkehubBeta.Feature) (string, error) {
+func GkeHubFeatureBetaAsHCL(r gkehubBeta.Feature, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_gke_hub_feature\" \"output\" {\n"
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
@@ -1877,7 +1973,15 @@ func GkeHubFeatureBetaAsHCL(r gkehubBeta.Feature) (string, error) {
 	if v := convertGkeHubFeatureBetaSpecToHCL(r.Spec); v != "" {
 		outputConfig += fmt.Sprintf("\tspec %s\n", v)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertGkeHubFeatureBetaSpecToHCL(r *gkehubBeta.FeatureSpec) string {
@@ -1932,7 +2036,7 @@ func convertGkeHubFeatureBetaStateStateToHCL(r *gkehubBeta.FeatureStateState) st
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func GkeHubFeatureMembershipBetaAsHCL(r gkehubBeta.FeatureMembership) (string, error) {
+func GkeHubFeatureMembershipBetaAsHCL(r gkehubBeta.FeatureMembership, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_gke_hub_feature_membership\" \"output\" {\n"
 	if v := convertGkeHubFeatureMembershipBetaConfigmanagementToHCL(r.Configmanagement); v != "" {
 		outputConfig += fmt.Sprintf("\tconfigmanagement %s\n", v)
@@ -1949,7 +2053,15 @@ func GkeHubFeatureMembershipBetaAsHCL(r gkehubBeta.FeatureMembership) (string, e
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertGkeHubFeatureMembershipBetaConfigmanagementToHCL(r *gkehubBeta.FeatureMembershipConfigmanagement) string {
@@ -2085,7 +2197,7 @@ func convertGkeHubFeatureMembershipBetaConfigmanagementPolicyControllerToHCL(r *
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func MonitoringMonitoredProjectBetaAsHCL(r monitoringBeta.MonitoredProject) (string, error) {
+func MonitoringMonitoredProjectBetaAsHCL(r monitoringBeta.MonitoredProject, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_monitoring_monitored_project\" \"output\" {\n"
 	if r.MetricsScope != nil {
 		outputConfig += fmt.Sprintf("\tmetrics_scope = %#v\n", *r.MetricsScope)
@@ -2093,7 +2205,15 @@ func MonitoringMonitoredProjectBetaAsHCL(r monitoringBeta.MonitoredProject) (str
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 // OrgPolicyPolicyBetaAsHCL returns a string representation of the specified resource in HCL.
@@ -2102,7 +2222,7 @@ func MonitoringMonitoredProjectBetaAsHCL(r monitoringBeta.MonitoredProject) (str
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func OrgPolicyPolicyBetaAsHCL(r orgpolicyBeta.Policy) (string, error) {
+func OrgPolicyPolicyBetaAsHCL(r orgpolicyBeta.Policy, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_org_policy_policy\" \"output\" {\n"
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
@@ -2113,7 +2233,15 @@ func OrgPolicyPolicyBetaAsHCL(r orgpolicyBeta.Policy) (string, error) {
 	if v := convertOrgPolicyPolicyBetaSpecToHCL(r.Spec); v != "" {
 		outputConfig += fmt.Sprintf("\tspec %s\n", v)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertOrgPolicyPolicyBetaSpecToHCL(r *orgpolicyBeta.PolicySpec) string {
@@ -2206,7 +2334,7 @@ func convertOrgPolicyPolicyBetaSpecRulesValuesToHCL(r *orgpolicyBeta.PolicySpecR
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func PrivatecaCertificateTemplateBetaAsHCL(r privatecaBeta.CertificateTemplate) (string, error) {
+func PrivatecaCertificateTemplateBetaAsHCL(r privatecaBeta.CertificateTemplate, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_privateca_certificate_template\" \"output\" {\n"
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
@@ -2229,7 +2357,15 @@ func PrivatecaCertificateTemplateBetaAsHCL(r privatecaBeta.CertificateTemplate) 
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertPrivatecaCertificateTemplateBetaIdentityConstraintsToHCL(r *privatecaBeta.CertificateTemplateIdentityConstraints) string {
@@ -2497,7 +2633,7 @@ func convertPrivatecaCertificateTemplateBetaPredefinedValuesPolicyIdsToHCL(r *pr
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func AssuredWorkloadsWorkloadAsHCL(r assuredworkloads.Workload) (string, error) {
+func AssuredWorkloadsWorkloadAsHCL(r assuredworkloads.Workload, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_assured_workloads_workload\" \"output\" {\n"
 	if r.BillingAccount != nil {
 		outputConfig += fmt.Sprintf("\tbilling_account = %#v\n", *r.BillingAccount)
@@ -2525,7 +2661,15 @@ func AssuredWorkloadsWorkloadAsHCL(r assuredworkloads.Workload) (string, error) 
 			outputConfig += fmt.Sprintf("\tresource_settings %s\n", convertAssuredWorkloadsWorkloadResourceSettingsToHCL(&v))
 		}
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertAssuredWorkloadsWorkloadKmsSettingsToHCL(r *assuredworkloads.WorkloadKmsSettings) string {
@@ -2570,7 +2714,7 @@ func convertAssuredWorkloadsWorkloadResourcesToHCL(r *assuredworkloads.WorkloadR
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func CloudResourceManagerFolderAsHCL(r cloudresourcemanager.Folder) (string, error) {
+func CloudResourceManagerFolderAsHCL(r cloudresourcemanager.Folder, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_folder\" \"output\" {\n"
 	if r.Parent != nil {
 		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
@@ -2578,7 +2722,15 @@ func CloudResourceManagerFolderAsHCL(r cloudresourcemanager.Folder) (string, err
 	if r.DisplayName != nil {
 		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 // CloudResourceManagerProjectAsHCL returns a string representation of the specified resource in HCL.
@@ -2587,7 +2739,7 @@ func CloudResourceManagerFolderAsHCL(r cloudresourcemanager.Folder) (string, err
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func CloudResourceManagerProjectAsHCL(r cloudresourcemanager.Project) (string, error) {
+func CloudResourceManagerProjectAsHCL(r cloudresourcemanager.Project, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_project\" \"output\" {\n"
 	if r.DisplayName != nil {
 		outputConfig += fmt.Sprintf("\tdisplayname = %#v\n", *r.DisplayName)
@@ -2598,7 +2750,15 @@ func CloudResourceManagerProjectAsHCL(r cloudresourcemanager.Project) (string, e
 	if r.Parent != nil {
 		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 // ComputeFirewallPolicyAsHCL returns a string representation of the specified resource in HCL.
@@ -2607,7 +2767,7 @@ func CloudResourceManagerProjectAsHCL(r cloudresourcemanager.Project) (string, e
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func ComputeFirewallPolicyAsHCL(r compute.FirewallPolicy) (string, error) {
+func ComputeFirewallPolicyAsHCL(r compute.FirewallPolicy, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_compute_firewall_policy\" \"output\" {\n"
 	if r.Parent != nil {
 		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
@@ -2618,7 +2778,15 @@ func ComputeFirewallPolicyAsHCL(r compute.FirewallPolicy) (string, error) {
 	if r.Description != nil {
 		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 // ComputeFirewallPolicyAssociationAsHCL returns a string representation of the specified resource in HCL.
@@ -2627,7 +2795,7 @@ func ComputeFirewallPolicyAsHCL(r compute.FirewallPolicy) (string, error) {
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func ComputeFirewallPolicyAssociationAsHCL(r compute.FirewallPolicyAssociation) (string, error) {
+func ComputeFirewallPolicyAssociationAsHCL(r compute.FirewallPolicyAssociation, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_compute_firewall_policy_association\" \"output\" {\n"
 	if r.AttachmentTarget != nil {
 		outputConfig += fmt.Sprintf("\tattachment_target = %#v\n", *r.AttachmentTarget)
@@ -2638,7 +2806,15 @@ func ComputeFirewallPolicyAssociationAsHCL(r compute.FirewallPolicyAssociation) 
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 // ComputeFirewallPolicyRuleAsHCL returns a string representation of the specified resource in HCL.
@@ -2647,7 +2823,7 @@ func ComputeFirewallPolicyAssociationAsHCL(r compute.FirewallPolicyAssociation) 
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func ComputeFirewallPolicyRuleAsHCL(r compute.FirewallPolicyRule) (string, error) {
+func ComputeFirewallPolicyRuleAsHCL(r compute.FirewallPolicyRule, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_compute_firewall_policy_rule\" \"output\" {\n"
 	if r.Action != nil {
 		outputConfig += fmt.Sprintf("\taction = %#v\n", *r.Action)
@@ -2687,7 +2863,15 @@ func ComputeFirewallPolicyRuleAsHCL(r compute.FirewallPolicyRule) (string, error
 		}
 		outputConfig += "]\n"
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertComputeFirewallPolicyRuleMatchToHCL(r *compute.FirewallPolicyRuleMatch) string {
@@ -2741,7 +2925,7 @@ func convertComputeFirewallPolicyRuleMatchLayer4ConfigsToHCL(r *compute.Firewall
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func ComputeForwardingRuleAsHCL(r compute.ForwardingRule) (string, error) {
+func ComputeForwardingRuleAsHCL(r compute.ForwardingRule, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_compute_forwarding_rule\" \"output\" {\n"
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
@@ -2801,7 +2985,15 @@ func ComputeForwardingRuleAsHCL(r compute.ForwardingRule) (string, error) {
 	if r.Target != nil {
 		outputConfig += fmt.Sprintf("\ttarget = %#v\n", *r.Target)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 // ComputeGlobalForwardingRuleAsHCL returns a string representation of the specified resource in HCL.
@@ -2810,7 +3002,7 @@ func ComputeForwardingRuleAsHCL(r compute.ForwardingRule) (string, error) {
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func ComputeGlobalForwardingRuleAsHCL(r compute.ForwardingRule) (string, error) {
+func ComputeGlobalForwardingRuleAsHCL(r compute.ForwardingRule, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_compute_global_forwarding_rule\" \"output\" {\n"
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
@@ -2847,7 +3039,15 @@ func ComputeGlobalForwardingRuleAsHCL(r compute.ForwardingRule) (string, error) 
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertComputeGlobalForwardingRuleMetadataFilterToHCL(r *compute.ForwardingRuleMetadataFilter) string {
@@ -2886,7 +3086,7 @@ func convertComputeGlobalForwardingRuleMetadataFilterFilterLabelToHCL(r *compute
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func DataprocWorkflowTemplateAsHCL(r dataproc.WorkflowTemplate) (string, error) {
+func DataprocWorkflowTemplateAsHCL(r dataproc.WorkflowTemplate, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_dataproc_workflow_template\" \"output\" {\n"
 	if r.Jobs != nil {
 		for _, v := range r.Jobs {
@@ -2916,7 +3116,15 @@ func DataprocWorkflowTemplateAsHCL(r dataproc.WorkflowTemplate) (string, error) 
 	if r.Version != nil {
 		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertDataprocWorkflowTemplateJobsToHCL(r *dataproc.WorkflowTemplateJobs) string {
@@ -3829,7 +4037,7 @@ func convertDataprocWorkflowTemplateClusterClusterConfigSoftwareConfigToHCL(r *d
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func EventarcTriggerAsHCL(r eventarc.Trigger) (string, error) {
+func EventarcTriggerAsHCL(r eventarc.Trigger, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_eventarc_trigger\" \"output\" {\n"
 	if v := convertEventarcTriggerDestinationToHCL(r.Destination); v != "" {
 		outputConfig += fmt.Sprintf("\tdestination %s\n", v)
@@ -3854,7 +4062,15 @@ func EventarcTriggerAsHCL(r eventarc.Trigger) (string, error) {
 	if v := convertEventarcTriggerTransportToHCL(r.Transport); v != "" {
 		outputConfig += fmt.Sprintf("\ttransport %s\n", v)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertEventarcTriggerDestinationToHCL(r *eventarc.TriggerDestination) string {
@@ -3930,7 +4146,7 @@ func convertEventarcTriggerTransportPubsubToHCL(r *eventarc.TriggerTransportPubs
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func OrgPolicyPolicyAsHCL(r orgpolicy.Policy) (string, error) {
+func OrgPolicyPolicyAsHCL(r orgpolicy.Policy, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_org_policy_policy\" \"output\" {\n"
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
@@ -3941,7 +4157,15 @@ func OrgPolicyPolicyAsHCL(r orgpolicy.Policy) (string, error) {
 	if v := convertOrgPolicyPolicySpecToHCL(r.Spec); v != "" {
 		outputConfig += fmt.Sprintf("\tspec %s\n", v)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertOrgPolicyPolicySpecToHCL(r *orgpolicy.PolicySpec) string {
@@ -4034,7 +4258,7 @@ func convertOrgPolicyPolicySpecRulesValuesToHCL(r *orgpolicy.PolicySpecRulesValu
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func PrivatecaCertificateTemplateAsHCL(r privateca.CertificateTemplate) (string, error) {
+func PrivatecaCertificateTemplateAsHCL(r privateca.CertificateTemplate, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_privateca_certificate_template\" \"output\" {\n"
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
@@ -4057,7 +4281,15 @@ func PrivatecaCertificateTemplateAsHCL(r privateca.CertificateTemplate) (string,
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertPrivatecaCertificateTemplateIdentityConstraintsToHCL(r *privateca.CertificateTemplateIdentityConstraints) string {
