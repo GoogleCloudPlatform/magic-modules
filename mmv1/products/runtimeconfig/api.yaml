@@ -36,6 +36,7 @@ objects:
       parent_resource_attribute: 'config'
       method_name_separator: ':'
       exclude: false
+      ga_deprecation: true
     parameters:
       - !ruby/object:Api::Type::String
         name: 'name'
