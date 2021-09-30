@@ -11,16 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-- type: CUSTOM_NAME
-  field: policy
-  details:
-    name: parent
-- type: CUSTOM_NAME
-  field: basic.conditions.device_policy.require_screenlock
-  details:
-    name: require_screen_lock
-- type: NO_SWEEPER
-- type: CUSTOM_IMPORT_FUNCTION
-  details:
-    function: accessLevelImport
