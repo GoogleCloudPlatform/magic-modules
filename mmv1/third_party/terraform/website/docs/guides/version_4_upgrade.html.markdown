@@ -12,6 +12,7 @@ description: |-
   - [I accidentally upgraded to 4.0.0, how do I downgrade to `3.X`?](#i-accidentally-upgraded-to-400-how-do-i-downgrade-to-3x)
   - [Provider Version Configuration](#provider-version-configuration)
   - [Provider](#provider)
+<<<<<<< HEAD
     - [`credentials`, `access_token` precedence has changed](#credentials-access_token-precedence-has-changed)
     - [Redundant default scopes are removed](#redundant-default-scopes-are-removed)
     - [Runtime Configurator (`runtimeconfig`) resources have been removed from the GA provider](#runtime-configurator-runtimeconfig-resources-have-been-removed-from-the-ga-provider)
@@ -36,12 +37,18 @@ description: |-
     - [At least one of `autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.fixed` or `autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.percent` is required](#at-least-one-of-autoscaling_policy0scale_in_control0max_scaled_in_replicas0fixed-or-autoscaling_policy0scale_in_control0max_scaled_in_replicas0percent-is-required)
   - [Resource: `google_compute_firewall`](#resource-google_compute_firewall)
     - [One of `source_tags`, `source_ranges` or `source_service_accounts` are required on INGRESS firewalls](#one-of-source_tags-source_ranges-or-source_service_accounts-are-required-on-ingress-firewalls)
+=======
+    - [Runtime Configurator (`runtimeconfig`) resources have been removed from the GA provider](#runtime-configurator-runtimeconfig-resources-have-been-removed-from-the-ga-provider)
+  - [Datasource: `google_product_resource`](#datasource-google_product_resource)
+    - [Datasource-level change example](#datasource-level-change-example)
+>>>>>>> Default `enable_shielded_nodes` to true
   - [Resource: `google_compute_instance_group_manager`](#resource-google_compute_instance_group_manager)
     - [`update_policy.min_ready_sec` is removed from the GA provider](#update_policymin_ready_sec-is-removed-from-the-ga-provider)
   - [Resource: `google_compute_region_instance_group_manager`](#resource-google_compute_region_instance_group_manager)
     - [`update_policy.min_ready_sec` is removed from the GA provider](#update_policymin_ready_sec-is-removed-from-the-ga-provider-1)
   - [Resource: `google_compute_instance_template`](#resource-google_compute_instance_template)
     - [`enable_display` is removed from the GA provider](#enable_display-is-removed-from-the-ga-provider)
+<<<<<<< HEAD
   - [Resource: `google_compute_url_map`](#resource-google_compute_url_map)
     - [At least one of `default_route_action.0.fault_injection_policy.0.delay.0.fixed_delay` or `default_route_action.0.fault_injection_policy.0.delay.0.percentage` is required](#at-least-one-of-default_route_action0fault_injection_policy0delay0fixed_delay-or-default_route_action0fault_injection_policy0delay0percentage-is-required)
   - [Resource: `google_container_cluster`](#resource-google_container_cluster)
@@ -75,6 +82,13 @@ description: |-
     - [`location` is now required](#location-is-now-required)
   - [Resource: `google_sql_database_instance`](#resource-google_sql_database_instance)
     - [`database_version` field is now required](#database_version-field-is-now-required)
+=======
+  - [Resource: `google_container_cluster`](#resource-google_container_cluster)
+    - [`enable_shielded_nodes` now defaults to `true`](#enable_shielded_nodes-now-defaults-to-true)
+    - [`node_config.workload_metadata_config.node_metadata` is now removed](#node_configworkload_metadata_confignode_metadata-is-now-removed)
+    - [`workload_identity_config.0.identity_namespace` is now removed](#workload_identity_config0identity_namespace-is-now-removed)
+    - [`pod_security_policy_config` is removed from the GA provider](#pod_security_policy_config-is-removed-from-the-ga-provider)
+>>>>>>> Default `enable_shielded_nodes` to true
 
 <!-- /TOC -->
 
@@ -352,6 +366,11 @@ The provider will now enforce at plan time that one of these fields be set.
 
 ## Resource: `google_container_cluster`
 
+### `enable_shielded_nodes` now defaults to `true`
+
+Previously the provider defaulted `enable_shielded_nodes` to false, despite the API default of `true`.
+Unless explicitly configured, users may see a diff changing `enable_shielded_nodes` to `true`.
+
 ### `instance_group_urls` is now removed
 
 `instance_group_urls` has been removed in favor of `node_pool.instance_group_urls`
@@ -388,6 +407,7 @@ resource "google_container_cluster" "cluster" {
 This field was incorrectly included in the GA `google` provider in past releases.
 In order to continue to use the feature, add `provider = google-beta` to your
 resource definition.
+<<<<<<< HEAD
 
 ## Resource: `google_data_loss_prevention_trigger`
 
@@ -478,3 +498,6 @@ conbination of `storageClass` value and default `location` value, `location` fie
 
 The `database_version` field is now required.
 Previously, it was an optional field and the default value was `MYSQL_5_6`.
+=======
+Description of the change and how users should adjust their configuration (if needed).
+>>>>>>> Default `enable_shielded_nodes` to true
