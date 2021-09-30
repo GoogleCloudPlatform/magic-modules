@@ -209,6 +209,12 @@ func (r Resource) ProductType() string {
 	return r.productMetadata.ProductType()
 }
 
+// DocsSection is *usuallu* the title-cased product name of a resource. For example,
+// "NetworkServices" - but subject to overrides.
+func (r Resource) DocsSection() string {
+	return r.productMetadata.DocsSection()
+}
+
 // ProductType is the snakecase product name of a resource. For example,
 // "network_services".
 func (r Resource) ProductName() string {
