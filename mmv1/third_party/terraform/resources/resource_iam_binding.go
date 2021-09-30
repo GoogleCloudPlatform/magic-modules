@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -220,7 +219,7 @@ func iamBindingImport(newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser
 		}
 		var binding *cloudresourcemanager.Binding
 		for _, b := range p.Bindings {
-			if (b.Role == role && conditionKeyFromCondition(b.Condition).Title == conditionTitle) {
+			if b.Role == role && conditionKeyFromCondition(b.Condition).Title == conditionTitle {
 				if binding != nil {
 					return nil, fmt.Errorf("Cannot import IAM member with condition title %q, it matches multiple conditions", conditionTitle)
 				}
@@ -282,8 +281,8 @@ func resourceIamBindingDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBa
 func getResourceIamBinding(d *schema.ResourceData) *cloudresourcemanager.Binding {
 	members := d.Get("members").(*schema.Set).List()
 	b := &cloudresourcemanager.Binding{
-		Members:   convertStringArr(members),
-		Role:      d.Get("role").(string),
+		Members: convertStringArr(members),
+		Role:    d.Get("role").(string),
 	}
 	if c := expandIamCondition(d.Get("condition")); c != nil {
 		b.Condition = c
