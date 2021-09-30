@@ -1,5 +1,0 @@
-## product level overrides
-
-- type: PRODUCT_DOCS_SECTION
-  details:
-    docssection: Cloud (Stackdriver) Monitoring
