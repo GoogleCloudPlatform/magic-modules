@@ -98,19 +98,19 @@ resource "google_compute_region_ssl_certificate" "default" {
 resource "google_compute_region_target_https_proxy" "default" {
   name             = "<%= ctx[:vars]['l7_ilb_target_https_proxy'] %>"
   region           = "europe-west1"
-  url_map          = google_compute_region_url_map.default.id
+  url_map          = google_compute_region_url_map.https_lb.id
   ssl_certificates = [google_compute_region_ssl_certificate.default.self_link]
 }
 
 # Regional URL map
-resource "google_compute_region_url_map" "default" {
+resource "google_compute_region_url_map" "https_lb" {
   name            = "<%= ctx[:vars]['l7_ilb_regional_url_map'] %>"
   region          = "europe-west1"
   default_service = google_compute_region_backend_service.default.id
 }
 
 # Regional backend service
-resource "google_compute_region_backend_service" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_region_backend_service" "default" {
   name                  = "<%= ctx[:vars]['l7_ilb_backend_service'] %>"
   region                = "europe-west1"
   protocol              = "HTTP"
@@ -256,11 +256,11 @@ resource "google_compute_forwarding_rule" "redirect" {
 resource "google_compute_region_target_http_proxy" "default" {
   name    = "<%= ctx[:vars]['l7_ilb_target_http_proxy'] %>"
   region  = "europe-west1"
-  url_map = google_compute_region_url_map.redirect.id
+  url_map = google_compute_region_url_map.default.id
 }
 
 # Regional URL map
-resource "google_compute_region_url_map" "redirect" {
+resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
   name            = "<%= ctx[:vars]['l7_ilb_redirect_url_map'] %>"
   region          = "europe-west1"
   default_service = google_compute_region_backend_service.default.id
