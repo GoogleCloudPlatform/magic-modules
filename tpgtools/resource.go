@@ -759,7 +759,6 @@ func (r *Resource) loadDCLSamples() []Sample {
 	// Samples appear in the root product folder
 	packagePath = strings.Split(packagePath, "/")[0]
 	samplesPath := path.Join(*fPath, packagePath, "samples")
-	glog.Error(packagePath)
 	files, err := ioutil.ReadDir(samplesPath)
 	if err != nil {
 		// ignore the error if the file just doesn't exist
@@ -826,7 +825,5 @@ func (r *Resource) loadDCLSamples() []Sample {
 		samples = append(samples, sample)
 	}
 
-	glog.Error(r.DCLTitle())
-	glog.Errorf("%#v", samples)
 	return samples
 }
