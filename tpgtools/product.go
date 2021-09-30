@@ -128,6 +128,23 @@ func (pm *ProductMetadata) ProductType() string {
 	return snakeToTitleCase(pm.ProductName)
 }
 
+func (pm *ProductMetadata) DocsSection() string {
+	overrides, ok := productOverrides[pm.PackagePath]
+	if !ok {
+		glog.Fatalf("product overrides should be loaded already for packagePath %s", pm.PackagePath)
+	}
+	pt := ProductDocsSectionDetails{}
+	ptOk, err := overrides.ProductOverrideWithDetails(ProductDocsSection, &pt)
+	if err != nil {
+		glog.Fatalf("could not parse override %v", err)
+	}
+	if ptOk {
+		return pt.DocsSection
+	}
+
+	return pm.ProductType()
+}
+
 // ProductNameUpper is the all caps snakecase product name of a resource.
 // For example, "NETWORK_SERVICES".
 func (pm *ProductMetadata) ProductNameUpper() string {

@@ -206,3 +206,8 @@ type ProductTitleDetails struct {
 	// alternative name to be used for the product resources
 	Title string
 }
+
+type ProductDocsSectionDetails struct {
+	// alternative name to be used for the product resources in docs.
+	DocsSection string
+}
