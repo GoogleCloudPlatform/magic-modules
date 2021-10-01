@@ -214,11 +214,6 @@ func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 				ResourceName:      "google_container_node_pool.with_workload_metadata_config",
 				ImportState:       true,
 				ImportStateVerify: true,
-				// Import always uses the v1 API, so beta features don't get imported.
-				ImportStateVerifyIgnore: []string{
-					"node_config.0.workload_metadata_config.#",
-					"node_config.0.workload_metadata_config.0.mode",
-				},
 			},
 			{
 				Config: testAccContainerNodePool_withWorkloadMetadataConfig_gkeMetadata(pid, cluster, np),
@@ -258,11 +253,6 @@ func TestAccContainerNodePool_withWorkloadIdentityConfigDeprecated(t *testing.T)
 				ResourceName:      "google_container_node_pool.with_workload_metadata_config",
 				ImportState:       true,
 				ImportStateVerify: true,
-				// Import always uses the v1 API, so beta features don't get imported.
-				ImportStateVerifyIgnore: []string{
-					"node_config.0.workload_metadata_config.#",
-					"node_config.0.workload_metadata_config.0.node_metadata",
-				},
 			},
 			{
 				Config: testAccContainerNodePool_withWorkloadMetadataConfig(cluster, np),
@@ -275,10 +265,6 @@ func TestAccContainerNodePool_withWorkloadIdentityConfigDeprecated(t *testing.T)
 				ResourceName:      "google_container_node_pool.with_workload_metadata_config",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"node_config.0.workload_metadata_config.#",
-					"node_config.0.workload_metadata_config.0.mode",
-				},
 			},
 		},
 	})
