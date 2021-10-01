@@ -180,7 +180,6 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 				newResources = append(newResources, createResourcesFromDocumentAndOverrides(document, overrides, packagePath, version)...)
 			}
 
-
 			// if we found no resources, just keep going
 			if document == nil {
 				continue
@@ -194,55 +193,54 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 	return resources, products
 }
 
-
 func createResourcesFromDocumentAndOverrides(document *openapi.Document, overrides Overrides, packagePath string, version Version) (resources []*Resource) {
-		productMetadata := GetProductMetadataFromDocument(document, packagePath)
-		titleParts := strings.Split(document.Info.Title, "/")
+	productMetadata := GetProductMetadataFromDocument(document, packagePath)
+	titleParts := strings.Split(document.Info.Title, "/")
 
-		var schema *openapi.Schema
-		for k, v := range document.Components.Schemas {
-			if k == titleParts[len(titleParts)-1] {
-				schema = v
-				schema.Title = k
-			}
+	var schema *openapi.Schema
+	for k, v := range document.Components.Schemas {
+		if k == titleParts[len(titleParts)-1] {
+			schema = v
+			schema.Title = k
 		}
+	}
 
-		if schema == nil {
-			glog.Exit(fmt.Sprintf("Could not find document schema for %s", document.Info.Title))
+	if schema == nil {
+		glog.Exit(fmt.Sprintf("Could not find document schema for %s", document.Info.Title))
+	}
+
+	if err := schema.Validate(); err != nil {
+		glog.Exit(err)
+	}
+
+	lRaw := schema.Extension["x-dcl-locations"]
+	var schemaLocations []interface{}
+	if lRaw == nil {
+		schemaLocations = make([]interface{}, 0)
+	} else {
+		schemaLocations = lRaw.([]interface{})
+	}
+
+	typeFetcher := NewTypeFetcher(document)
+	var locations []string
+	// If the schema cannot be split into two or more locations, we specify this
+	// by passing a single empty location string.
+	if len(schemaLocations) < 2 {
+		locations = make([]string, 1)
+	} else {
+		locations = make([]string, 0, len(schemaLocations))
+		for _, l := range schemaLocations {
+			locations = append(locations, l.(string))
 		}
+	}
 
-		if err := schema.Validate(); err != nil {
+	for _, l := range locations {
+		res, err := createResource(schema, typeFetcher, overrides, productMetadata, version, l)
+		if err != nil {
 			glog.Exit(err)
 		}
 
-		lRaw := schema.Extension["x-dcl-locations"]
-		var schemaLocations []interface{}
-		if lRaw == nil {
-			schemaLocations = make([]interface{}, 0)
-		} else {
-			schemaLocations = lRaw.([]interface{})
-		}
-
-		typeFetcher := NewTypeFetcher(document)
-		var locations []string
-		// If the schema cannot be split into two or more locations, we specify this
-		// by passing a single empty location string.
-		if len(schemaLocations) < 2 {
-			locations = make([]string, 1)
-		} else {
-			locations = make([]string, 0, len(schemaLocations))
-			for _, l := range schemaLocations {
-				locations = append(locations, l.(string))
-			}
-		}
-
-		for _, l := range locations {
-			res, err := createResource(schema, typeFetcher, overrides, productMetadata, version, l)
-			if err != nil {
-				glog.Exit(err)
-			}
-
-			resources = append(resources, res)
+		resources = append(resources, res)
 	}
 
 	return resources
