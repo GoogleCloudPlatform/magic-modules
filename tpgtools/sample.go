@@ -120,7 +120,7 @@ type Update struct {
 }
 
 // BuildDependency produces a Dependency using a file and filename
-func BuildDependency(fileName, product, localname, version string, b []byte) (*Dependency, error) {
+func BuildDependency(fileName, product, localname, version string, hasGAEquivalent bool, b []byte) (*Dependency, error) {
 	var resourceName string
 	fileParts := strings.Split(fileName, ".")
 	if len(fileParts) == 4 {
@@ -146,7 +146,7 @@ func BuildDependency(fileName, product, localname, version string, b []byte) (*D
 		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)
 	}
 
-	block, err := ConvertSampleJSONToHCL(dclResourceType, version, b)
+	block, err := ConvertSampleJSONToHCL(dclResourceType, version, hasGAEquivalent, b)
 	if err != nil {
 		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)
 	}
@@ -174,7 +174,7 @@ func (s *Sample) generateSampleDependencyWithName(fileName, localname string) De
 	dependencyBytes, err := ioutil.ReadFile(path.Join(s.SamplesPath, fileName))
 	version := s.resourceReference.versionMetadata.V
 	product := s.resourceReference.productMetadata.ProductType()
-	d, err := BuildDependency(fileName, product, localname, version, dependencyBytes)
+	d, err := BuildDependency(fileName, product, localname, version, s.HasGAEquivalent, dependencyBytes)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -205,12 +205,12 @@ func (s Sample) ReplaceReferences(d *Dependency) error {
 		referenceFileName := match[1]
 		idField := match[2]
 		var tfReference string
-			for _, dep := range s.DependencyList {
-				if dep.FileName == referenceFileName {
-					tfReference = dep.TerraformResourceType + "." + dep.HCLLocalName + "." + idField
-					break
-				}
+		for _, dep := range s.DependencyList {
+			if dep.FileName == referenceFileName {
+				tfReference = dep.TerraformResourceType + "." + dep.HCLLocalName + "." + idField
+				break
 			}
+		}
 		if tfReference == "" {
 			return fmt.Errorf("Could not find reference file name: %s", referenceFileName)
 		}
