@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -16,6 +17,10 @@ func resourceRuntimeconfigConfig() *schema.Resource {
 		Read:   resourceRuntimeconfigConfigRead,
 		Update: resourceRuntimeconfigConfigUpdate,
 		Delete: resourceRuntimeconfigConfigDelete,
+
+<% unless version == 'ga' -%>
+		DeprecationMessage: "This resource has been deprecated in the google (GA) provider, and will only be available in the google-beta provider in a future release.",
+<% end -%>
 
 		Importer: &schema.ResourceImporter{
 			State: resourceRuntimeconfigConfigImport,
