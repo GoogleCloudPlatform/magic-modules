@@ -354,9 +354,9 @@ products.each do |product|
 	unless iam_policy.nil? || iam_policy.exclude
 	  iam_class_name = product_definition.name + object.name
 -%>
-	"<%= terraform_name -%>_iam_binding":              ResourceIamBinding(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc),
-	"<%= terraform_name -%>_iam_member":               ResourceIamMember(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc),
-	"<%= terraform_name -%>_iam_policy":               ResourceIamPolicy(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc),
+	"<%= terraform_name -%>_iam_binding":              ResourceIamBinding(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc<% if iam_policy.ga_deprecation %>, IamWithGAResourceDeprecation()<% end %>),
+	"<%= terraform_name -%>_iam_member":               ResourceIamMember(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc<% if iam_policy.ga_deprecation %>, IamWithGAResourceDeprecation()<% end %>),
+	"<%= terraform_name -%>_iam_policy":               ResourceIamPolicy(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc<% if iam_policy.ga_deprecation %>, IamWithGAResourceDeprecation()<% end %>),
 <%
 	end # unless iam_policy.nil? || iam_policy.exclude
   end   # product_definition.objects.each do
