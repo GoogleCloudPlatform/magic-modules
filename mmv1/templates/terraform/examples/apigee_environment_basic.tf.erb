@@ -29,5 +29,5 @@ resource "google_apigee_environment" "<%= ctx[:primary_resource_id] %>" {
   name         = "<%= ctx[:vars]['apigee_env_id'] %>"
   description  = "Apigee Environment"
   display_name = "environment-1"
-  org_name     = google_apigee_organization.apigee_org.name
+  org_id     = google_apigee_organization.apigee_org.id
 }

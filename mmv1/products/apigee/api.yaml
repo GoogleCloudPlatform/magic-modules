@@ -209,8 +209,8 @@ objects:
       api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances/create'
   - !ruby/object:Api::Resource
     name: 'Environment'
-    base_url: 'organizations/{{org_name}}/environments'
-    self_link: 'organizations/{{org_name}}/environments/{{name}}'
+    base_url: '{{org_id}}/environments'
+    self_link: '{{org_id}}/environments/{{name}}'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
@@ -233,10 +233,10 @@ objects:
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
       method_name_separator: ':'
-      parent_resource_attribute: 'env_name'
-      import_format: ["organizations/{{org_name}}/environments/{{name}}", "{{name}}"]
-      base_url: "organizations/{{org_name}}/environments/{{name}}"
-      self_link: "organizations/{{org_name}}/environments/{{name}}"
+      parent_resource_attribute: 'env_id'
+      import_format: ["{{org_id}}/environments/{{name}}", "{{name}}"]
+      base_url: "{{org_id}}/environments/{{name}}"
+      self_link: "{{org_id}}/environments/{{name}}"
     parameters:
       - !ruby/object:Api::Type::String
         name: 'orgName'
