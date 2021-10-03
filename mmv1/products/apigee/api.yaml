@@ -209,7 +209,8 @@ objects:
       api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances/create'
   - !ruby/object:Api::Resource
     name: 'Environment'
-    base_url: '{{org_id}}/environments'
+    base_url: 'environments'
+    create_url: '{{org_id}}/environments'
     self_link: '{{org_id}}/environments/{{name}}'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
