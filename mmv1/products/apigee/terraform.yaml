@@ -59,6 +59,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 10
       delete_minutes: 10
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/apigee_organization.go.erb
+      encoder: templates/terraform/encoders/apigee_organization.go.erb
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     import_format: ["{{org_id}}/instances/{{name}}", "{{org_id}}/{{name}}"]
@@ -99,6 +102,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_import: templates/terraform/custom_import/apigee_instance.go.erb
   Environment: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
+    import_format: ["{{org_id}}/environments/{{name}}", "{{org_id}}/{{name}}"]
     examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "apigee_environment_basic"
@@ -113,6 +117,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 30
       delete_minutes: 30
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/apigee_environment.go.erb
   Envgroup: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     import_format: ["{{org_id}}/envgroups/{{name}}", "{{org_id}}/{{name}}"]
