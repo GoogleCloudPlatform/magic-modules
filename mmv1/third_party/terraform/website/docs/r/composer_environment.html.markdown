@@ -341,7 +341,7 @@ See [documentation](https://cloud.google.com/composer/docs/how-to/managing/confi
 * `enable_privately_used_public_ips` -
   (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
   When enabled, IPs from public (non-RFC1918) ranges can be used for 
-  `IPAllocationPolicy.cluster_ipv4_cidr_block` and `IPAllocationPolicy.service_ipv4_cidr_block`.
+  `ip_allocation_policy.cluster_ipv4_cidr_block` and `ip_allocation_policy.service_ipv4_cidr_block`.
 
 The `web_server_network_access_control` supports:
 
