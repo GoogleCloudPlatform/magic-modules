@@ -201,7 +201,7 @@ func resourceComposerEnvironment() *schema.Resource {
 										DiffSuppressFunc: compareServiceAccountEmailToLink,
 										Description:      `The Google Cloud Platform Service Account to be used by the node VMs. If a service account is not specified, the "default" Compute Engine service account is used. Cannot be updated. If given, note that the service account must have roles/composer.worker for any GCP resources created under the Cloud Composer Environment.`,
 									},
-<% unless version == "ga" -%>	
+<% unless version == "ga" -%>
 									"max_pods_per_node": {
 										Type:             schema.TypeInt,
 										Computed:         true,
@@ -351,6 +351,7 @@ func resourceComposerEnvironment() *schema.Resource {
 											"config.0.private_environment_config.0.master_ipv4_cidr_block",
 											"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
 											"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
+											"config.0.private_environment_config.0.cloud_composer_network_ipv4_cidr_block",
 										},
 										ForceNew:    true,
 										Description: `If true, access to the public endpoint of the GKE cluster is denied.`,
@@ -364,6 +365,7 @@ func resourceComposerEnvironment() *schema.Resource {
 											"config.0.private_environment_config.0.master_ipv4_cidr_block",
 											"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
 											"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
+											"config.0.private_environment_config.0.cloud_composer_network_ipv4_cidr_block",
 										},
 										ForceNew:    true,
 										Description: `The IP range in CIDR notation to use for the hosted master network. This range is used for assigning internal IP addresses to the cluster master or set of masters and to the internal load balancer virtual IP. This range must not overlap with any other ranges in use within the cluster's network. If left blank, the default value of '172.16.0.0/28' is used.`,
@@ -377,6 +379,7 @@ func resourceComposerEnvironment() *schema.Resource {
 											"config.0.private_environment_config.0.master_ipv4_cidr_block",
 											"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
 											"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
+											"config.0.private_environment_config.0.cloud_composer_network_ipv4_cidr_block",
 										},
 										ForceNew:    true,
 										Description: `The CIDR block from which IP range for web server will be reserved. Needs to be disjoint from master_ipv4_cidr_block and cloud_sql_ipv4_cidr_block.`,
@@ -390,6 +393,7 @@ func resourceComposerEnvironment() *schema.Resource {
 											"config.0.private_environment_config.0.master_ipv4_cidr_block",
 											"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
 											"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
+											"config.0.private_environment_config.0.cloud_composer_network_ipv4_cidr_block",
 										},
 										ForceNew:    true,
 										Description: `The CIDR block from which IP range in tenant project will be reserved for Cloud SQL. Needs to be disjoint from web_server_ipv4_cidr_block.`,
@@ -398,6 +402,13 @@ func resourceComposerEnvironment() *schema.Resource {
 										Type:     schema.TypeString,
 										Optional: true,
 										Computed: true,
+										AtLeastOneOf: []string{
+											"config.0.private_environment_config.0.enable_private_endpoint",
+											"config.0.private_environment_config.0.master_ipv4_cidr_block",
+											"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
+											"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
+											"config.0.private_environment_config.0.cloud_composer_network_ipv4_cidr_block",
+										},
 										ForceNew: true,
 										Description: `The CIDR block from which IP range for Cloud Composer Network in tenant project will be reserved. Needs to be disjoint from private_cluster_config.master_ipv4_cidr_block and cloud_sql_ipv4_cidr_block. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
 									},
@@ -1242,6 +1253,7 @@ func flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg *composer.P
 	transformed["master_ipv4_cidr_block"] = envCfg.PrivateClusterConfig.MasterIpv4CidrBlock
 	transformed["cloud_sql_ipv4_cidr_block"] = envCfg.CloudSqlIpv4CidrBlock
 	transformed["web_server_ipv4_cidr_block"] = envCfg.WebServerIpv4CidrBlock
+	transformed["cloud_composer_network_ipv4_cidr_block"] = envCfg.CloudComposerNetworkIpv4CidrBlock
 
 	return []interface{}{transformed}
 }
@@ -1258,7 +1270,7 @@ func flattenComposerEnvironmentConfigNodeConfig(nodeCfg *composer.NodeConfig) in
 	transformed["disk_size_gb"] = nodeCfg.DiskSizeGb
 	transformed["service_account"] = nodeCfg.ServiceAccount
 	transformed["oauth_scopes"] = flattenComposerEnvironmentConfigNodeConfigOauthScopes(nodeCfg.OauthScopes)
-<% unless version == "ga" -%>	
+<% unless version == "ga" -%>
 	transformed["max_pods_per_node"] = nodeCfg.MaxPodsPerNode
 <% end -%>
 	transformed["tags"] = flattenComposerEnvironmentConfigNodeConfigTags(nodeCfg.Tags)
@@ -1572,6 +1584,10 @@ func expandComposerEnvironmentConfigPrivateEnvironmentConfig(v interface{}, d *s
 		transformed.WebServerIpv4CidrBlock = v.(string)
 	}
 
+	if v, ok := original["cloud_composer_network_ipv4_cidr_block"]; ok {
+		transformed.CloudComposerNetworkIpv4CidrBlock = v.(string)
+	}
+
 	transformed.PrivateClusterConfig = subBlock
 
 	return transformed, nil
@@ -1598,7 +1614,7 @@ func expandComposerEnvironmentConfigNodeConfig(v interface{}, d *schema.Resource
 		transformed.ServiceAccount = transformedServiceAccount
 	}
 
-<% unless version == "ga" -%>	
+<% unless version == "ga" -%>
 	if transformedMaxPodsPerNode, ok := original["max_pods_per_node"]; ok {
 		transformed.MaxPodsPerNode = int64(transformedMaxPodsPerNode.(int))
 	}
