@@ -50,7 +50,7 @@ resource "google_privateca_ca_pool" "<%= ctx[:primary_resource_id] %>" {
         object_id_path = [1, 5, 7]
       }
       ca_options {
-        is_ca = true
+        is_ca = false
         max_issuer_path_length = 10
       }
       key_usage {

@@ -167,6 +167,7 @@ objects:
                 properties:
                   - !ruby/object:Api::Type::Boolean
                     name: 'isCa'
+                    send_empty_value: true
                     required: true
                     description: |
                       Refers to the "CA" X.509 extension, which is a boolean value. When this value is missing,
@@ -983,6 +984,7 @@ objects:
               properties:
                 - !ruby/object:Api::Type::Boolean
                   name: 'isCa'
+                  send_empty_value: true
                   description: |
                     Refers to the "CA" X.509 extension, which is a boolean value. When this value is missing,
                     the extension will be omitted from the CA certificate.
@@ -1410,6 +1412,7 @@ objects:
                 properties:
                   - !ruby/object:Api::Type::Boolean
                     name: 'isCa'
+                    send_empty_value: true
                     description: |
                       Refers to the "CA" X.509 extension, which is a boolean value. When this value is missing,
                       the extension will be omitted from the CA certificate.
