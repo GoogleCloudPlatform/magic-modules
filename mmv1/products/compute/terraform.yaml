@@ -377,6 +377,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           network_name: "rbs-net"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_connection_tracking"
+        min_version: 'beta'
         primary_resource_id: "default"
         vars:
           region_backend_service_name: "region-service"
