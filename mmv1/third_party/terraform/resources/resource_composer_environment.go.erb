@@ -1516,7 +1516,7 @@ func expandComposerEnvironmentConfigWorkloadsConfig(v interface{}, d *schema.Res
 	transformed := &composer.WorkloadsConfig{}
 
 	if v, ok := original["scheduler"]; ok {
-		if len(v.([]interface{})) > 0 {
+		if len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 			transformedScheduler := &composer.SchedulerResource{}
 			originalSchedulerRaw := v.([]interface{})[0].(map[string]interface{})
 			transformedScheduler.Count = int64(originalSchedulerRaw["count"].(int))
@@ -1528,7 +1528,7 @@ func expandComposerEnvironmentConfigWorkloadsConfig(v interface{}, d *schema.Res
 	}
 
 	if v, ok := original["web_server"]; ok {
-		if len(v.([]interface{})) > 0 {
+		if len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 			transformedWebServer := &composer.WebServerResource{}
 			originalWebServerRaw := v.([]interface{})[0].(map[string]interface{})
 			transformedWebServer.Cpu = originalWebServerRaw["cpu"].(float64)
@@ -1539,7 +1539,7 @@ func expandComposerEnvironmentConfigWorkloadsConfig(v interface{}, d *schema.Res
 	}
 
 	if v, ok := original["worker"]; ok {
-		if len(v.([]interface{})) > 0 {
+		if len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 			transformedWorker := &composer.WorkerResource{}
 			originalWorkerRaw := v.([]interface{})[0].(map[string]interface{})
 			transformedWorker.Cpu = originalWorkerRaw["cpu"].(float64)
