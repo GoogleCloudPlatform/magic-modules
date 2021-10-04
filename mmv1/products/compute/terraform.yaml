@@ -375,6 +375,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           rigm_name: "rbs-rigm"
           region_health_check_name: "rbs-health-check"
           network_name: "rbs-net"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_backend_service_connection_tracking"
+        min_version: 'beta'
+        primary_resource_id: "default"
+        vars:
+          region_backend_service_name: "region-service"
+          health_check_name: "rbs-health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/region_backend_service.go.erb
       encoder: templates/terraform/encoders/region_backend_service.go.erb
@@ -448,6 +455,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       timeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      connectionTrackingPolicy.idleTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   RegionInstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
