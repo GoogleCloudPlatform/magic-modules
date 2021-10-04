@@ -2,6 +2,34 @@ package google
 
 import "fmt"
 
+func resourceConverterKmsCryptoKeyIamPolicy() ResourceConverter {
+	return ResourceConverter{
+		AssetType:         "cloudkms.googleapis.com/CryptoKey",
+		Convert:           GetKmsCryptoKeyIamPolicyCaiObject,
+		MergeCreateUpdate: MergeKmsCryptoKeyIamPolicy,
+	}
+}
+
+func resourceConverterKmsCryptoKeyIamBinding() ResourceConverter {
+	return ResourceConverter{
+		AssetType:         "cloudkms.googleapis.com/CryptoKey",
+		Convert:           GetKmsCryptoKeyIamBindingCaiObject,
+		FetchFullResource: FetchKmsCryptoKeyIamPolicy,
+		MergeCreateUpdate: MergeKmsCryptoKeyIamBinding,
+		MergeDelete:       MergeKmsCryptoKeyIamBindingDelete,
+	}
+}
+
+func resourceConverterKmsCryptoKeyIamMember() ResourceConverter {
+	return ResourceConverter{
+		AssetType:         "cloudkms.googleapis.com/CryptoKey",
+		Convert:           GetKmsCryptoKeyIamMemberCaiObject,
+		FetchFullResource: FetchKmsCryptoKeyIamPolicy,
+		MergeCreateUpdate: MergeKmsCryptoKeyIamMember,
+		MergeDelete:       MergeKmsCryptoKeyIamMemberDelete,
+	}
+}
+
 func GetKmsCryptoKeyIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return newKmsCryptoKeyIamAsset(d, config, expandIamPolicyBindings)
 }
