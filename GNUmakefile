@@ -33,7 +33,7 @@ ifneq ($(OVERRIDES),)
   mmv1_compile += -r $(OVERRIDES)
   tpgtools_compile += --overrides $(OVERRIDES)/tpgtools/overrides
 else
-	tpgtools_compile += --overrides "overrides"
+  tpgtools_compile += --overrides "overrides"
 endif
 
 UNAME := $(shell uname)
