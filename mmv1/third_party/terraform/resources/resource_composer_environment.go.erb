@@ -393,6 +393,15 @@ func resourceComposerEnvironment() *schema.Resource {
 										ForceNew:    true,
 										Description: `The CIDR block from which IP range in tenant project will be reserved for Cloud SQL. Needs to be disjoint from web_server_ipv4_cidr_block.`,
 									},
+<% unless version == "ga" -%>
+									"enable_privately_used_public_ips": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Computed: true,
+										ForceNew: true,
+										Description: `When enabled, IPs from public (non-RFC1918) ranges can be used for ip_allocation_policy.cluster_ipv4_cidr_block and ip_allocation_policy.service_ipv4_cidr_block.`,
+									},
+<% end -%>
 								},
 							},
 						},
@@ -989,6 +998,9 @@ func flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg *composer.P
 	transformed["master_ipv4_cidr_block"] = envCfg.PrivateClusterConfig.MasterIpv4CidrBlock
 	transformed["cloud_sql_ipv4_cidr_block"] = envCfg.CloudSqlIpv4CidrBlock
 	transformed["web_server_ipv4_cidr_block"] = envCfg.WebServerIpv4CidrBlock
+<% unless version == "ga" -%>
+	transformed["enable_privately_used_public_ips"] = envCfg.EnablePrivatelyUsedPublicIps
+<% end -%>
 
 	return []interface{}{transformed}
 }
@@ -1005,7 +1017,7 @@ func flattenComposerEnvironmentConfigNodeConfig(nodeCfg *composer.NodeConfig) in
 	transformed["disk_size_gb"] = nodeCfg.DiskSizeGb
 	transformed["service_account"] = nodeCfg.ServiceAccount
 	transformed["oauth_scopes"] = flattenComposerEnvironmentConfigNodeConfigOauthScopes(nodeCfg.OauthScopes)
-<% unless version == "ga" -%>	
+<% unless version == "ga" -%>
 	transformed["max_pods_per_node"] = nodeCfg.MaxPodsPerNode
 <% end -%>
 	transformed["tags"] = flattenComposerEnvironmentConfigNodeConfigTags(nodeCfg.Tags)
@@ -1265,6 +1277,12 @@ func expandComposerEnvironmentConfigPrivateEnvironmentConfig(v interface{}, d *s
 		transformed.WebServerIpv4CidrBlock = v.(string)
 	}
 
+<% unless version == "ga" -%>
+	if v, ok := original["enable_privately_used_public_ips"]; ok {
+		transformed.EnablePrivatelyUsedPublicIps = v.(bool)
+	}
+<% end -%>
+
 	transformed.PrivateClusterConfig = subBlock
 
 	return transformed, nil
@@ -1291,7 +1309,7 @@ func expandComposerEnvironmentConfigNodeConfig(v interface{}, d *schema.Resource
 		transformed.ServiceAccount = transformedServiceAccount
 	}
 
-<% unless version == "ga" -%>	
+<% unless version == "ga" -%>
 	if transformedMaxPodsPerNode, ok := original["max_pods_per_node"]; ok {
 		transformed.MaxPodsPerNode = int64(transformedMaxPodsPerNode.(int))
 	}
