@@ -185,12 +185,6 @@ func (r Resource) TerraformName() string {
 	return "google_" + r.Path()
 }
 
-// Type is the title-cased name of a resource, for printing information about
-// the type". For example, "Instance".
-func (r Resource) Type() string {
-	return snakeToTitleCase(r.DCLName())
-}
-
 // PathType is the title-cased name of a resource preceded by its package,
 // often used to namespace functions. For example, "RedisInstance".
 func (r Resource) PathType() string {
@@ -663,7 +657,7 @@ func (r Resource) getSamples(docs bool) []Sample {
 }
 
 func (r *Resource) getSampleAccessoryFolder() string {
-	resourceType := strings.ToLower(r.Type())
+	resourceType := strings.ToLower(r.DCLTitle())
 	packageName := strings.ToLower(r.productMetadata.PackageName)
 	sampleAccessoryFolder := path.Join(*tPath, packageName, "samples", resourceType)
 	return sampleAccessoryFolder
@@ -754,7 +748,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 	sampleAccessoryFolder := r.getSampleAccessoryFolder()
 	packagePath := r.productMetadata.PackagePath
 	version := r.versionMetadata.V
-	resourceType := r.Type()
+	resourceType := r.DCLTitle()
 	sampleFriendlyMetaPath := path.Join(sampleAccessoryFolder, "meta.yaml")
 	samples := []Sample{}
 
@@ -763,7 +757,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 	}
 
 	// Samples appear in the root product folder
-	packagePath = strings.Split(packagePath, "beta")[0]
+	packagePath = strings.Split(packagePath, "/")[0]
 	samplesPath := path.Join(*fPath, packagePath, "samples")
 	files, err := ioutil.ReadDir(samplesPath)
 	if err != nil {
@@ -810,7 +804,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 
 		if !versionMatch {
 			continue
-		} else if primaryResourceName != resourceType {
+		} else if !strings.EqualFold(primaryResourceName, resourceType) {
 			glog.Errorf("skipping %s since no match with %s.", primaryResourceName, resourceType)
 			continue
 		}
