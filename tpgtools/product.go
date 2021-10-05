@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"regexp"
 	"strings"
 
 	"github.com/golang/glog"
@@ -18,6 +17,9 @@ type ProductMetadata struct {
 	// ProductName is the case accounted (snake case) name of the product
 	// that the resource belongs to.
 	ProductName string
+	// DCL name for the product. Used for correctly casing product name for
+	// references within the DCL (BasePath etc)
+	DCLProductName string
 }
 
 var productOverrides map[string]Overrides = make(map[string]Overrides, 0)
@@ -28,19 +30,17 @@ func GetProductMetadataFromDocument(document *openapi.Document, packagePath stri
 		productOverrides[packagePath] = loadOverrides(packagePath, "tpgtools_product.yaml")
 	}
 	title := getProductTitle(document.Info.Title, packagePath)
-	productMetadata := NewProductMetadata(packagePath, jsonToSnakeCase(title))
+	productMetadata := NewProductMetadata(packagePath, title)
 	return productMetadata
 }
 
 func NewProductMetadata(packagePath, productName string) *ProductMetadata {
-	if regexp.MustCompile("[A-Z]+").Match([]byte(productName)) {
-		log.Fatalln("error - expected product name to be snakecase")
-	}
 	packageName := strings.Split(packagePath, "/")[0]
 	return &ProductMetadata{
-		PackagePath: packagePath,
-		PackageName: packageName,
-		ProductName: productName,
+		PackagePath:    packagePath,
+		PackageName:    packageName,
+		ProductName:    jsonToSnakeCase(productName),
+		DCLProductName: productName,
 	}
 }
 
@@ -125,7 +125,7 @@ func getProductTitle(documentTitle, packagePath string) string {
 // ProductType is the title-cased product name of a resource. For example,
 // "NetworkServices".
 func (pm *ProductMetadata) ProductType() string {
-	return snakeToTitleCase(pm.ProductName)
+	return pm.DCLProductName
 }
 
 func (pm *ProductMetadata) DocsSection() string {

@@ -72,6 +72,8 @@ func main() {
 	}
 	if *version == GA_VERSION {
 		terraformResourceDirectory = "google"
+	} else if *version == ALPHA_VERSION {
+		terraformResourceDirectory = "google-private"
 	}
 
 	for _, resource := range resourcesForVersion {
@@ -266,10 +268,10 @@ func generateSerializationLogic(specs map[Version][]*Resource) {
 		for _, res := range resList {
 			var pkgName, pkgPath string
 			pkgName = res.Package() + v.SerializationSuffix
-			if v == BETA_VERSION {
-				pkgPath = path.Join(res.Package(), v.V)
-			} else {
+			if v == GA_VERSION {
 				pkgPath = res.Package()
+			} else {
+				pkgPath = path.Join(res.Package(), v.V)
 			}
 
 			if _, ok := packageMap[pkgPath]; !ok {
