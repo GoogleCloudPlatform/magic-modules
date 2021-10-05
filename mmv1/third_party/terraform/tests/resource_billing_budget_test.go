@@ -44,7 +44,7 @@ resource "google_billing_budget" "budget" {
   budget_filter {
     projects = ["projects/${data.google_project.project.number}"]
     labels  = {
-      "foo" = "bar"
+      label = "bar"
     }
   }
 
