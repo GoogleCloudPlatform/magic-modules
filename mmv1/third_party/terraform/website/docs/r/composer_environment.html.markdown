@@ -153,7 +153,9 @@ The `config` block supports:
 * `node_count` -
   (Optional)
   The number of nodes in the Kubernetes Engine cluster that
-  will be used to run this environment.
+  will be used to run this environment. This field is 
+  supported for Cloud Composer environments in versions
+  composer-1.*.*-airflow-*.*.*.
 
 * `node_config` -
   (Optional)
@@ -169,19 +171,28 @@ The `config` block supports:
 
 * `web_server_network_access_control` -
   (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
-  The network-level access control policy for the Airflow web server. If unspecified, no network-level access restrictions will be applied.
+  The network-level access control policy for the Airflow web server.
+  If unspecified, no network-level access restrictions will be applied.
+  This field is supported for Cloud Composer environments in versions
+  composer-1.*.*-airflow-*.*.*.
 
 * `database_config` -
   (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
-  The configuration settings for Cloud SQL instance used internally by Apache Airflow software.
+  The configuration settings for Cloud SQL instance used internally
+  by Apache Airflow software. This field is supported for Cloud 
+  Composer environments in versions composer-1.*.*-airflow-*.*.*.
 
 * `web_server_config` -
   (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
   The configuration settings for the Airflow web server App Engine instance.
+  This field is supported for Cloud Composer environments in versions 
+  composer-1.*.*-airflow-*.*.*.
 
 * `encryption_config` -
   (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
-  The encryption options for the Cloud Composer environment and its dependencies.
+  The encryption options for the Cloud Composer environment and its 
+  dependencies. This field is supported for Cloud Composer environments in 
+  versions composer-1.*.*-airflow-*.*.*.
   
 * `maintenance_window` -
   (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
@@ -189,7 +200,9 @@ The `config` block supports:
   
 * `workloads_config` -
   (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
-  The configuration settings for Cloud Composer workloads config.
+  The Kubernetes workloads configuration for GKE cluster associated with the 
+  Cloud Composer environment. Supported for Cloud Composer environments in
+  versions composer-2.*.*-airflow-*.*.* and newer.
 
 The `node_config` block supports:
 
@@ -197,15 +210,19 @@ The `node_config` block supports:
   (Required)
   The Compute Engine zone in which to deploy the VMs running the
   Apache Airflow software, specified as the zone name or
-  relative resource name (e.g. "projects/{project}/zones/{zone}"). Must belong to the enclosing environment's project 
-  and region.
+  relative resource name (e.g. "projects/{project}/zones/{zone}"). Must 
+  belong to the enclosing environment's project and region. This field is 
+  supported for Cloud Composer environments in versions 
+  composer-1.*.*-airflow-*.*.*.
 
 * `machine_type` -
   (Optional)
   The Compute Engine machine type used for cluster instances,
   specified as a name or relative resource name. For example:
-  "projects/{project}/zones/{zone}/machineTypes/{machineType}". Must belong to the enclosing environment's project and 
-  region/zone.
+  "projects/{project}/zones/{zone}/machineTypes/{machineType}". Must belong 
+  to the enclosing environment's project and region/zone. This field is 
+  supported for Cloud Composer environments in versions 
+  composer-1.*.*-airflow-*.*.*.
 
 * `network` -
   (Optional)
@@ -226,13 +243,16 @@ The `node_config` block supports:
 * `disk_size_gb` -
   (Optional)
   The disk size in GB used for node VMs. Minimum size is 20GB.
-  If unspecified, defaults to 100GB. Cannot be updated.
+  If unspecified, defaults to 100GB. Cannot be updated. This field is supported
+  for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.
 
 * `oauth_scopes` -
   (Optional)
   The set of Google API scopes to be made available on all node
   VMs. Cannot be updated. If empty, defaults to
-  `["https://www.googleapis.com/auth/cloud-platform"]`
+  `["https://www.googleapis.com/auth/cloud-platform"]`. This field is 
+  supported for Cloud Composer environments in versions 
+  composer-1.*.*-airflow-*.*.*.
 
 * `service_account` -
   (Optional)
@@ -247,7 +267,8 @@ The `node_config` block supports:
   The list of instance tags applied to all node VMs. Tags are
   used to identify valid sources or targets for network
   firewalls. Each tag within the list must comply with RFC1035.
-  Cannot be updated.
+  Cannot be updated. This field is supported for Cloud Composer 
+  environments in versions composer-1.*.*-airflow-*.*.*.
 
 * `ip_allocation_policy` -
   (Optional)
@@ -261,7 +282,8 @@ The `node_config` block supports:
   creation. Lowering this value reduces IP address consumption by the Cloud 
   Composer Kubernetes cluster. This value can only be set if the environment is VPC-Native. 
   The range of possible values is 8-110, and the default is 32.
-  Cannot be updated.
+  Cannot be updated. This field is supported for Cloud Composer environments 
+  in versions composer-1.*.*-airflow-*.*.*.
 
 The `software_config` block supports:
 
@@ -316,7 +338,10 @@ The `software_config` block supports:
 
 * `python_version` (Optional) -
   The major version of Python used to run the Apache Airflow scheduler, worker, and webserver processes.
-  Can be set to '2' or '3'. If not specified, the default is '2'. Cannot be updated.
+  Can be set to '2' or '3'. If not specified, the default is '2'. Cannot be 
+  updated. This field is supported for Cloud Composer environments in versions
+  composer-1.*.*-airflow-*.*.*. Environments in newer versions always use 
+  Python major version 3.
 
 * `scheduler_count` (Optional) -
   The number of schedulers for Airflow. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-2.*.*.`
@@ -325,6 +350,9 @@ See [documentation](https://cloud.google.com/composer/docs/how-to/managing/confi
 
 * `enable_private_endpoint` -
   If true, access to the public endpoint of the GKE cluster is denied.
+  If this field is set to true, `ip_allocation_policy.use_ip_aliases` must 
+  be set to true for Cloud Composer environments in versions 
+  composer-1.*.*-airflow-*.*.*.
 
 * `master_ipv4_cidr_block` -
   (Optional)
@@ -344,7 +372,7 @@ See [documentation](https://cloud.google.com/composer/docs/how-to/managing/confi
   
 * `web_server_ipv4_cidr_block` -
   (Optional)
-  The CIDR block from which IP range for web server will be reserved. Needs to be disjoint from `master_ipv4_cidr_block` and `cloud_sql_ipv4_cidr_block`.
+  The CIDR block from which IP range for web server will be reserved. Needs to be disjoint from `master_ipv4_cidr_block` and `cloud_sql_ipv4_cidr_block`. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.
 
 The `web_server_network_access_control` supports:
 
@@ -369,23 +397,30 @@ The `ip_allocation_policy` block supports:
 * `use_ip_aliases` -
   (Required)
   Whether or not to enable Alias IPs in the GKE cluster. If true, a VPC-native cluster is created.
-  Defaults to true if the `ip_allocation_policy` block is present in config.
+  Defaults to true if the `ip_allocation_policy` block is present in config. 
+  This field is only supported for Cloud Composer environments in versions
+  composer-1.*.*-airflow-*.*.*. Environments in newer versions always use 
+  VPC-native GKE clusters.
 
 * `cluster_secondary_range_name` -
   (Optional)
   The name of the cluster's secondary range used to allocate IP addresses to pods.
   Specify either `cluster_secondary_range_name` or `cluster_ipv4_cidr_block` but not both.
-  This field is applicable only when `use_ip_aliases` is true.
+  For Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*, 
+  this field is applicable only when `use_ip_aliases` is true. 
 
 * `services_secondary_range_name` -
   (Optional)
   The name of the services' secondary range used to allocate IP addresses to the cluster.
   Specify either `services_secondary_range_name` or `services_ipv4_cidr_block` but not both.
-  This field is applicable only when `use_ip_aliases` is true.
+  For Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*, 
+  this field is applicable only when `use_ip_aliases` is true.
 
 * `cluster_ipv4_cidr_block` -
   (Optional)
   The IP address range used to allocate IP addresses to pods in the cluster.
+  For Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*, 
+  this field is applicable only when `use_ip_aliases` is true.
   Set to blank to have GKE choose a range with the default size.
   Set to /netmask (e.g. /14) to have GKE choose a range with a specific netmask.
   Set to a CIDR notation (e.g. 10.96.0.0/14) from the RFC-1918 private networks
@@ -395,6 +430,8 @@ The `ip_allocation_policy` block supports:
 * `services_ipv4_cidr_block` -
   (Optional)
   The IP address range used to allocate IP addresses in this cluster.
+  For Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*, 
+  this field is applicable only when `use_ip_aliases` is true.
   Set to blank to have GKE choose a range with the default size.
   Set to /netmask (e.g. /14) to have GKE choose a range with a specific netmask.
   Set to a CIDR notation (e.g. 10.96.0.0/14) from the RFC-1918 private networks
@@ -441,6 +478,75 @@ The `maintenance_window` block supports:
   Maintenance window recurrence. Format is a subset of RFC-5545 (https://tools.ietf.org/html/rfc5545) 'RRULE'.
   The only allowed values for 'FREQ' field are 'FREQ=DAILY' and 'FREQ=WEEKLY;BYDAY=...'.
   Example values: 'FREQ=WEEKLY;BYDAY=TU,WE', 'FREQ=DAILY'.
+  
+The `workloads_config` block supports:
+
+* `scheduler` - 
+  (Optional)
+  Configuration for resources used by Airflow schedulers.
+  
+* `web_server` -
+  (Optional)
+  Configuration for resources used by Airflow web server.
+  
+* `worker` -
+  (Optional)
+  Configuration for resources used by Airflow workers.
+  
+The `scheduler` block supports:
+
+* `cpu` -
+  (Optional)
+  CPU request and limit for a single Airflow scheduler replica.
+  
+* `memory_gb` -
+  (Optional)
+  Memory (GB) request and limit for a single Airflow scheduler replica.
+  
+* `storage_gb` - 
+  (Optional)
+  Storage (GB) request and limit for a single Airflow scheduler replica.
+  
+* `count` -
+  (Optional)
+  The number of schedulers.
+
+The `web_server` block supports:
+
+* `cpu` - 
+  (Optional)
+  CPU request and limit for Airflow web server.
+  
+* `memory_gb` - 
+  (Optional)
+  Memory (GB) request and limit for Airflow web server.
+
+* `storage_gb` - 
+  (Optional)
+  Storage (GB) request and limit for Airflow web server.
+
+The `worker` block supports:
+
+* `cpu` -
+  (Optional)
+  CPU request and limit for a single Airflow worker replica.
+
+* `memory_gb` - 
+  (Optional)
+  Memory (GB) request and limit for a single Airflow worker replica.
+
+* `float storage_gb`
+  (Optional)
+  Storage (GB) request and limit for a single Airflow worker replica.
+  
+* `min_count` - 
+  (Optional)
+  Minimum number of workers for autoscaling.
+  
+* `max_count` -
+  (Optional)
+  Maximum number of workers for autoscaling.
+  
 
 ## Attributes Reference
 
