@@ -398,6 +398,7 @@ func resourceComposerEnvironment() *schema.Resource {
 										ForceNew:    true,
 										Description: `The CIDR block from which IP range in tenant project will be reserved for Cloud SQL. Needs to be disjoint from web_server_ipv4_cidr_block.`,
 									},
+<% unless version == "ga" -%>
 									"cloud_composer_network_ipv4_cidr_block": {
 										Type:     schema.TypeString,
 										Optional: true,
@@ -412,7 +413,6 @@ func resourceComposerEnvironment() *schema.Resource {
 										ForceNew: true,
 										Description: `The CIDR block from which IP range for Cloud Composer Network in tenant project will be reserved. Needs to be disjoint from private_cluster_config.master_ipv4_cidr_block and cloud_sql_ipv4_cidr_block. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
 									},
-<% unless version == "ga" -%>
 									"enable_privately_used_public_ips": {
 										Type:     schema.TypeBool,
 										Optional: true,
@@ -1208,8 +1208,8 @@ func flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg *composer.P
 	transformed["master_ipv4_cidr_block"] = envCfg.PrivateClusterConfig.MasterIpv4CidrBlock
 	transformed["cloud_sql_ipv4_cidr_block"] = envCfg.CloudSqlIpv4CidrBlock
 	transformed["web_server_ipv4_cidr_block"] = envCfg.WebServerIpv4CidrBlock
-	transformed["cloud_composer_network_ipv4_cidr_block"] = envCfg.CloudComposerNetworkIpv4CidrBlock
 <% unless version == "ga" -%>
+	transformed["cloud_composer_network_ipv4_cidr_block"] = envCfg.CloudComposerNetworkIpv4CidrBlock
 	transformed["enable_privately_used_public_ips"] = envCfg.EnablePrivatelyUsedPublicIps
 <% end -%>
 
@@ -1541,11 +1541,11 @@ func expandComposerEnvironmentConfigPrivateEnvironmentConfig(v interface{}, d *s
 	if v, ok := original["web_server_ipv4_cidr_block"]; ok {
 		transformed.WebServerIpv4CidrBlock = v.(string)
 	}
-
+<% unless version == "ga" -%>
 	if v, ok := original["cloud_composer_network_ipv4_cidr_block"]; ok {
 		transformed.CloudComposerNetworkIpv4CidrBlock = v.(string)
 	}
-<% unless version == "ga" -%>
+
 	if v, ok := original["enable_privately_used_public_ips"]; ok {
 		transformed.EnablePrivatelyUsedPublicIps = v.(bool)
 	}
