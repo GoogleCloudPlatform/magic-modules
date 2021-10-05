@@ -908,17 +908,13 @@ func resourceContainerCluster() *schema.Resource {
 				Description: `The Kubernetes version on the nodes. Must either be unset or set to the same value as min_master_version on create. Defaults to the default version set by GKE which is not necessarily the latest version. This only affects nodes in the default node pool. While a fuzzy version can be specified, it's recommended that you specify explicit versions as Terraform will see spurious diffs when fuzzy versions are used. See the google_container_engine_versions data source's version_prefix field to approximate fuzzy versions in a Terraform-compatible way. To update nodes in other node pools, use the version attribute on the node pool.`,
 			},
 
+<% unless version == "ga" -%>
 			"pod_security_policy_config": {
-<% unless version == 'ga' -%>
-				DiffSuppressFunc: podSecurityPolicyCfgSuppress,
-<% end -%>
 				Type:        schema.TypeList,
 				Optional:    true,
-				MaxItems:    1,
 				Description: `Configuration for the PodSecurityPolicy feature.`,
-<% if version == "ga" -%>
-				Deprecated:   `This attribute is currently in beta and will be removed from the google provider. Please use the google-beta provider to continue using this attribute.`,
-<% end -%>
+				MaxItems:    1,
+				DiffSuppressFunc: podSecurityPolicyCfgSuppress,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
@@ -929,6 +925,7 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+<% end -%>
 
 			"project": {
 				Type:        schema.TypeString,
@@ -1469,7 +1466,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		AddonsConfig:            expandClusterAddonsConfig(d.Get("addons_config")),
 		EnableKubernetesAlpha:   d.Get("enable_kubernetes_alpha").(bool),
 		IpAllocationPolicy:      ipAllocationBlock,
+<% unless version == "ga" -%>
 		PodSecurityPolicyConfig: expandPodSecurityPolicyConfig(d.Get("pod_security_policy_config")),
+<% end -%>
 		Autoscaling:             expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
 		BinaryAuthorization: &containerBeta.BinaryAuthorization{
 			Enabled:         d.Get("enable_binary_authorization").(bool),
@@ -1933,7 +1932,6 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 <% unless version == 'ga' -%>
-
 	if err := d.Set("pod_security_policy_config", flattenPodSecurityPolicyConfig(cluster.PodSecurityPolicyConfig)); err != nil {
 		return err
 	}
@@ -3563,8 +3561,8 @@ func expandWorkloadIdentityConfig(configured interface{}) *containerBeta.Workloa
 	return v
 }
 
-func expandPodSecurityPolicyConfig(configured interface{}) *containerBeta.PodSecurityPolicyConfig {
 <% unless version == 'ga' -%>
+func expandPodSecurityPolicyConfig(configured interface{}) *containerBeta.PodSecurityPolicyConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil
@@ -3575,12 +3573,8 @@ func expandPodSecurityPolicyConfig(configured interface{}) *containerBeta.PodSec
 		Enabled:         config["enabled"].(bool),
 		ForceSendFields: []string{"Enabled"},
 	}
-<% else -%>
-	// Removing lists is hard - the element count (#) will have a diff from nil -> computed
-	// If we set this to empty on Read, it will be stable.
-	return nil
-<% end -%>
 }
+<% end -%>
 
 func expandDefaultMaxPodsConstraint(v interface{}) *containerBeta.MaxPodsConstraint {
 	if v == nil {
@@ -4369,5 +4363,4 @@ func podSecurityPolicyCfgSuppress(k, old, new string, r *schema.ResourceData) bo
 	}
 	return false
 }
-
 <% end -%>
