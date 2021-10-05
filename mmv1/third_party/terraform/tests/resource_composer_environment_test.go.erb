@@ -1021,6 +1021,7 @@ resource "google_composer_environment" "test" {
 			service_account = google_service_account.test.name
 <% unless version == "ga" -%>
 			max_pods_per_node = 33
+			enable_ip_masq_agent = true
 <% end -%>
 			ip_allocation_policy {
 				use_ip_aliases          = true
