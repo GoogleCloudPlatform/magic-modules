@@ -412,6 +412,15 @@ func resourceComposerEnvironment() *schema.Resource {
 										ForceNew: true,
 										Description: `The CIDR block from which IP range for Cloud Composer Network in tenant project will be reserved. Needs to be disjoint from private_cluster_config.master_ipv4_cidr_block and cloud_sql_ipv4_cidr_block. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
 									},
+<% unless version == "ga" -%>
+									"enable_privately_used_public_ips": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Computed: true,
+										ForceNew: true,
+										Description: `When enabled, IPs from public (non-RFC1918) ranges can be used for ip_allocation_policy.cluster_ipv4_cidr_block and ip_allocation_policy.service_ipv4_cidr_block.`,
+									},
+<% end -%>
 								},
 							},
 						},
@@ -1200,6 +1209,9 @@ func flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg *composer.P
 	transformed["cloud_sql_ipv4_cidr_block"] = envCfg.CloudSqlIpv4CidrBlock
 	transformed["web_server_ipv4_cidr_block"] = envCfg.WebServerIpv4CidrBlock
 	transformed["cloud_composer_network_ipv4_cidr_block"] = envCfg.CloudComposerNetworkIpv4CidrBlock
+<% unless version == "ga" -%>
+	transformed["enable_privately_used_public_ips"] = envCfg.EnablePrivatelyUsedPublicIps
+<% end -%>
 
 	return []interface{}{transformed}
 }
@@ -1533,6 +1545,11 @@ func expandComposerEnvironmentConfigPrivateEnvironmentConfig(v interface{}, d *s
 	if v, ok := original["cloud_composer_network_ipv4_cidr_block"]; ok {
 		transformed.CloudComposerNetworkIpv4CidrBlock = v.(string)
 	}
+<% unless version == "ga" -%>
+	if v, ok := original["enable_privately_used_public_ips"]; ok {
+		transformed.EnablePrivatelyUsedPublicIps = v.(bool)
+	}
+<% end -%>
 
 	transformed.PrivateClusterConfig = subBlock
 

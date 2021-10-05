@@ -17,6 +17,15 @@ import (
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
+const SQLDatabaseInstanceAssetType string = "sqladmin.googleapis.com/Instance"
+
+func resourceConverterSQLDatabaseInstance() ResourceConverter {
+	return ResourceConverter{
+		AssetType: SQLDatabaseInstanceAssetType,
+		Convert:   GetSQLDatabaseInstanceCaiObject,
+	}
+}
+
 func GetSQLDatabaseInstanceCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}")
 	if err != nil {
@@ -25,7 +34,7 @@ func GetSQLDatabaseInstanceCaiObject(d TerraformResourceData, config *Config) ([
 	if obj, err := GetSQLDatabaseInstanceApiObject(d, config); err == nil {
 		return []Asset{{
 			Name: name,
-			Type: "sqladmin.googleapis.com/Instance",
+			Type: SQLDatabaseInstanceAssetType,
 			Resource: &AssetResource{
 				Version:              "v1beta4",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/sqladmin/v1beta4/rest",

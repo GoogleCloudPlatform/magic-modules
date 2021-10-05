@@ -377,6 +377,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           network_name: "rbs-net"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_connection_tracking"
+        min_version: 'beta'
         primary_resource_id: "default"
         vars:
           region_backend_service_name: "region-service"
@@ -901,10 +902,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "external_http_lb_mig_backend_custom_header"
-        primary_resource_id: "google_compute_global_forwarding_rule"
+        primary_resource_id: "default"
         vars:
           xlb_network_name: "l7-xlb-network"
           backend_subnet_name: "l7-xlb-subnet"
+          address_name: "l7-xlb-static-ip"
           forwarding_rule_name: "l7-xlb-forwarding-rule"
           target_http_proxy_name: "l7-xlb-target-http-proxy"
           url_map_name: "l7-xlb-url-map"
@@ -917,6 +919,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "port_range"
           - "target"
+          - "ip_address"
       - !ruby/object:Provider::Terraform::Examples
         name: "global_forwarding_rule_http"
         primary_resource_id: "default"
@@ -2053,6 +2056,32 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           region_url_map_name: "regionurlmap"
           home_region_backend_service_name: "home"
           region_health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "int_https_lb_https_redirect"
+        primary_resource_id: "redirect"
+        skip_test: true
+        vars:
+          l7_ilb_network: "l7-ilb-network"
+          l7_ilb_proxy_subnet: "l7-ilb-proxy-subnet"
+          l7_ilb_subnet: "l7-ilb-subnet"
+          l7_ilb_ip: "l7-ilb-ip"
+          l7_ilb_forwarding_rule: "l7-ilb-forwarding-rule"
+          l7_ilb_target_https_proxy: "l7-ilb-target-https-proxy"
+          l7_ilb_regional_url_map: "l7-ilb-regional-url-map"
+          l7_ilb_backend_service: "l7-ilb-backend-service"
+          l7_ilb_mig_template: "l7-ilb-mig-template"
+          l7_ilb_hc: "l7-ilb-hc"
+          l7_ilb_mig1: "l7-ilb-mig1"
+          l7_ilb_fw_allow_hc: "l7-ilb-fw-allow-hc"
+          l7_ilb_fw_allow_ilb_to_backends: "l7-ilb-fw-allow-ilb-to-backends"
+          l7_ilb_test_vm: "l7-ilb-test-vm"
+          l7_ilb_redirect: "l7-ilb-redirect"
+          l7_ilb_target_http_proxy: "l7-ilb-target-http-proxy"
+          l7_ilb_redirect_url_map: "l7-ilb-redirect-url-map"
+        min_version: beta
+        ignore_read_extra:
+          - "target"
+          - "ip_address"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -2683,6 +2712,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       logConfig.metadataFields: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
+      stackType: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'
@@ -2719,6 +2750,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           subnetwork_name: "l7lb-test-subnetwork"
           network_name: "l7lb-test-network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "subnetwork_ipv6"
+        primary_resource_id: "subnetwork-ipv6"
+        vars:
+          subnetwork_name: "ipv6-test-subnetwork"
+          network_name: "ipv6-test-network"
   TargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples

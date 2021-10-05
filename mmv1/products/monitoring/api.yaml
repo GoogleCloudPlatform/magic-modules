@@ -1716,7 +1716,7 @@ objects:
             - :CONTAINS_STRING
             - :NOT_CONTAINS_STRING
             - :MATCHES_REGEX
-            - :NON_MATCHES_REGEX
+            - :NOT_MATCHES_REGEX
     - !ruby/object:Api::Type::Array
       name: selectedRegions
       description: The list of regions from which the check will be run. Some regions
