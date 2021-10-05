@@ -1,4 +1,7 @@
+<% autogen_exception -%>
 package google
+
+<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -36,3 +39,5 @@ data "google_runtimeconfig_config" "default" {
 }
 `, suffix, suffix)
 }
+
+<% end -%>
