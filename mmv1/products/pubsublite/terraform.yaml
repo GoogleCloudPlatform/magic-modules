@@ -33,6 +33,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "example"
         primary_resource_name: "fmt.Sprintf(\"tf-test-example-topic%s\", context[\"random_suffix\"])"
         vars:
+          reservation_name: "example-reservation"
           topic_name: "example-topic"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
