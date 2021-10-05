@@ -13,6 +13,19 @@
 
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Reservation: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "pubsub_lite_reservation_basic"
+      primary_resource_id: "example"
+      primary_resource_name: "fmt.Sprintf(\"tf-test-example-reservation%s\", context[\"random_suffix\"])"
+      vars:
+        reservation_name: "example-reservation"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   Topic: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
