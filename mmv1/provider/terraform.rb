@@ -321,7 +321,7 @@ module Provider
     def dcl_version(version)
       return '' if version == 'ga'
       return '/beta' if version == 'beta'
-      return '/alpha' if verison == 'private'
+      return '/alpha' if version == 'private'
     end
   end
 end
