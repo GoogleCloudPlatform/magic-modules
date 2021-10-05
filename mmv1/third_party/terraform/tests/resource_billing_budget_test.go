@@ -42,10 +42,10 @@ resource "google_billing_budget" "budget" {
   display_name    = "Example Billing Budget%{random_suffix}"
 
   budget_filter {
-	projects = ["projects/${data.google_project.project.number}"]
-	labels  = {
-		"foo" = "bar"
-	}
+    projects = ["projects/${data.google_project.project.number}"]
+    labels  = {
+      "foo" = "bar"
+    }
   }
 
   amount {
