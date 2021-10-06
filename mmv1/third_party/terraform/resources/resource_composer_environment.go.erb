@@ -351,8 +351,9 @@ func resourceComposerEnvironment() *schema.Resource {
 											"config.0.private_environment_config.0.master_ipv4_cidr_block",
 											"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
 											"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
+<% unless version == "ga" -%>
 											"config.0.private_environment_config.0.cloud_composer_network_ipv4_cidr_block",
-										},
+<% end -%>										},
 										ForceNew:    true,
 										Description: `If true, access to the public endpoint of the GKE cluster is denied. If this field is set to true, ip_allocation_policy.use_ip_aliases must be set to true for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
 									},
@@ -365,8 +366,9 @@ func resourceComposerEnvironment() *schema.Resource {
 											"config.0.private_environment_config.0.master_ipv4_cidr_block",
 											"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
 											"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
+<% unless version == "ga" -%>
 											"config.0.private_environment_config.0.cloud_composer_network_ipv4_cidr_block",
-										},
+<% end -%>										},
 										ForceNew:    true,
 										Description: `The IP range in CIDR notation to use for the hosted master network. This range is used for assigning internal IP addresses to the cluster master or set of masters and to the internal load balancer virtual IP. This range must not overlap with any other ranges in use within the cluster's network. If left blank, the default value of '172.16.0.0/28' is used.`,
 									},
@@ -379,8 +381,9 @@ func resourceComposerEnvironment() *schema.Resource {
 											"config.0.private_environment_config.0.master_ipv4_cidr_block",
 											"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
 											"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
+<% unless version == "ga" -%>
 											"config.0.private_environment_config.0.cloud_composer_network_ipv4_cidr_block",
-										},
+<% end -%>										},
 										ForceNew:    true,
 										Description: `The CIDR block from which IP range for web server will be reserved. Needs to be disjoint from master_ipv4_cidr_block and cloud_sql_ipv4_cidr_block. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
 									},
@@ -393,7 +396,9 @@ func resourceComposerEnvironment() *schema.Resource {
 											"config.0.private_environment_config.0.master_ipv4_cidr_block",
 											"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
 											"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
+<% unless version == "ga" -%>
 											"config.0.private_environment_config.0.cloud_composer_network_ipv4_cidr_block",
+<% end -%>
 										},
 										ForceNew:    true,
 										Description: `The CIDR block from which IP range in tenant project will be reserved for Cloud SQL. Needs to be disjoint from web_server_ipv4_cidr_block.`,
