@@ -52,7 +52,7 @@ objects:
       url_param_only: true
     properties:
     - !ruby/object:Api::Type::Integer
-      name: 'throughput_capacity'
+      name: 'throughputCapacity'
       description: |
         The reserved throughput capacity. Every unit of throughput capacity is
         equivalent to 1 MiB/s of published messages or 2 MiB/s of subscribed
@@ -136,7 +136,7 @@ objects:
           The settings for this topic's Reservation usage.
         properties:
         - !ruby/object:Api::Type::ResourceRef
-          name: 'throughput_reservation'
+          name: 'throughputReservation'
           resource: 'Reservation'
           imports: 'name'
           description: |
