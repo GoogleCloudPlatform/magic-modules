@@ -2721,6 +2721,7 @@ objects:
           - :CLIENT_IP_NO_DESTINATION
       - !ruby/object:Api::Type::NestedObject
         name: 'connectionTrackingPolicy'
+        min_version: 'beta'
         description: |
           Connection Tracking configuration for this BackendService.
           This is available only for Layer 4 Internal Load Balancing and
