@@ -108,7 +108,7 @@ func sqlAdminOperationWaitTime(config *Config, res interface{}, project, activit
 	}
 
 	w := &SqlAdminOperationWaiter{
-		Service: config.NewSqlAdminClient(userAgent),
+		Service: config.NewSqlAdminClient(userAgent, project),
 		Op:      op,
 		Project: project,
 	}

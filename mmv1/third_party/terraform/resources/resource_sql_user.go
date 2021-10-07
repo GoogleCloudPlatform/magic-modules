@@ -135,7 +135,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	defer mutexKV.Unlock(instanceMutexKey(project, instance))
 	var op *sqladmin.Operation
 	insertFunc := func() error {
-		op, err = config.NewSqlAdminClient(userAgent).Users.Insert(project, instance,
+		op, err = config.NewSqlAdminClient(userAgent, project).Users.Insert(project, instance,
 			user).Do()
 		return err
 	}
@@ -179,7 +179,7 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	var users *sqladmin.UsersListResponse
 	err = nil
 	err = retryTime(func() error {
-		users, err = config.NewSqlAdminClient(userAgent).Users.List(project, instance).Do()
+		users, err = config.NewSqlAdminClient(userAgent, project).Users.List(project, instance).Do()
 		return err
 	}, 5)
 	if err != nil {
@@ -187,7 +187,7 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	var user *sqladmin.User
-	databaseInstance, err := config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
+	databaseInstance, err := config.NewSqlAdminClient(userAgent, project).Instances.Get(project, instance).Do()
 	if err != nil {
 		return err
 	}
@@ -261,7 +261,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 		defer mutexKV.Unlock(instanceMutexKey(project, instance))
 		var op *sqladmin.Operation
 		updateFunc := func() error {
-			op, err = config.NewSqlAdminClient(userAgent).Users.Update(project, instance, user).Host(host).Name(name).Do()
+			op, err = config.NewSqlAdminClient(userAgent, project).Users.Update(project, instance, user).Host(host).Name(name).Do()
 			return err
 		}
 		err = retryTimeDuration(updateFunc, d.Timeout(schema.TimeoutUpdate))
@@ -312,7 +312,7 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 
 	var op *sqladmin.Operation
 	err = retryTimeDuration(func() error {
-		op, err = config.NewSqlAdminClient(userAgent).Users.Delete(project, instance).Host(host).Name(name).Do()
+		op, err = config.NewSqlAdminClient(userAgent, project).Users.Delete(project, instance).Host(host).Name(name).Do()
 		if err != nil {
 			return err
 		}
