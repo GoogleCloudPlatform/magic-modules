@@ -1,6 +1,6 @@
 resource "google_compute_region_backend_service" "<%= ctx[:primary_resource_id] %>" {
   name                            = "<%= ctx[:vars]['region_backend_service_name'] %>"
-  region                          = "us-central1"
+  region                          = "us-west1"
   health_checks                   = [google_compute_region_health_check.health_check.id]
   connection_draining_timeout_sec = 10
   session_affinity                = "CLIENT_IP"
@@ -13,7 +13,7 @@ resource "google_compute_region_backend_service" "<%= ctx[:primary_resource_id] 
 
 resource "google_compute_region_health_check" "health_check" {
   name     = "<%= ctx[:vars]['health_check_name'] %>"
-  region   = "us-central1"
+  region   = "us-west1"
 
   tcp_health_check {
     port = 22
