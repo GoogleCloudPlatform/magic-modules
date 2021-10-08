@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	"github.com/golang/glog"
 )
 
@@ -286,8 +287,11 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 		newSample.PrimaryResource = &primaryResource
 		if !newSample.isNativeHCL() {
 			var newDeps []Dependency
-			newDeps = append(newDeps, newSample.DependencyList...)
-			newDeps[0] = newSample.generateSampleDependencyWithName(*newSample.PrimaryResource, "primary")
+			newDeps = append(newDeps, newSample.generateSampleDependencyWithName(*newSample.PrimaryResource, "primary"))
+			for _, newDepFilename := range update.Dependencies {
+				newDepFilename = strings.TrimPrefix(newDepFilename, "samples/")
+				newDeps = append(newDeps, newSample.generateSampleDependencyWithName(newDepFilename, basicResourceName(newDepFilename)))
+			}
 			newSample.DependencyList = newDeps
 		}
 		newSample.TestSlug = fmt.Sprintf("%sUpdate%v", newSample.TestSlug, i)
@@ -295,6 +299,16 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 		out = append(out, newSample)
 	}
 	return out
+}
+
+func basicResourceName(depFilename string) string {
+	re := regexp.MustCompile("^update(_\\d)?\\.")
+	// update_1.resource.json -> basic.resource.json
+	basicReplaced := re.ReplaceAllString(depFilename, "basic.")
+	re = regexp.MustCompile("^update(_\\d)?_")
+	// update_1_name.resource.json -> name.resource.json
+	prefixTrimmed := re.ReplaceAllString(basicReplaced, "")
+	return dcl.SnakeToJSONCase(strings.Split(prefixTrimmed, ".")[0])
 }
 
 // ExpandContext expands the context model used in the generated tests
