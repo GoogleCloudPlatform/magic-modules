@@ -470,7 +470,7 @@ The `logging_config` block supports:
 
 The `monitoring_config` block supports:
 
-*  `enable_components` - (Required) The GKE components exposing logs. Only `SYSTEM_COMPONENTS` and `WORKLOADS`
+*  `enable_components` - (Required) The GKE components exposing logs. `SYSTEM_COMPONENTS` and in beta provider `WORKLOADS`
 are supported.
 
 The `maintenance_policy` block supports:
