@@ -901,6 +901,25 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   GlobalForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        name: "external_tcp_proxy_lb_mig_backend_custom_header"
+        primary_resource_id: "default"
+        vars:
+          tcp_proxy_xlb_network: "tcp-proxy-xlb-network"
+          tcp_proxy_xlb_subnet: "tcp-proxy-xlb-subnet"
+          tcp_proxy_xlb_ip: "tcp-proxy-xlb-ip"
+          tcp_proxy_xlb_forwarding_rule: "tcp-proxy-xlb-forwarding-rule"
+          test_proxy_health_check: "test-proxy-health-check"
+          tcp_proxy_xlb_backend_service: "tcp-proxy-xlb-backend-service"
+          tcp_proxy_health_check: "tcp-proxy-health-check"
+          tcp_proxy_xlb_mig_template: "tcp-proxy-xlb-mig-template"
+          tcp_proxy_xlb_mig1: "tcp-proxy-xlb-mig1"
+          tcp_proxy_xlb_fw_allow_hc: "tcp-proxy-xlb-fw-allow-hc"
+        min_version: beta
+        ignore_read_extra:
+          - "port_range"
+          - "target"
+          - "ip_address"
+      - !ruby/object:Provider::Terraform::Examples
         name: "external_http_lb_mig_backend_custom_header"
         primary_resource_id: "default"
         vars:
