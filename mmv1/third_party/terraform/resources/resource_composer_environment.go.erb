@@ -18,7 +18,13 @@ const (
 	composerEnvironmentEnvVariablesRegexp          = "[a-zA-Z_][a-zA-Z0-9_]*."
 	composerEnvironmentReservedAirflowEnvVarRegexp = "AIRFLOW__[A-Z0-9_]+__[A-Z0-9_]+"
 	composerEnvironmentVersionRegexp               = `composer-([0-9]+\.[0-9]+\.[0-9]+(-preview\.[0-9]+)?|latest)-airflow-([0-9]+\.[0-9]+(\.[0-9]+.*)?)`
+//	composerEnvironmentV2VersionRegexp						 = `composer-(2\.[0-9]+\.[0-9]+(-preview\.[0-9]+)?|latest)-airflow-([0-9]+\.[0-9]+(\.[0-9]+.*)?)`
 )
+
+//func isComposerV2(imageVersion string) bool {
+//	regex := regexp.MustCompile(composerEnvironmentV2VersionRegexp)
+//	return regex.MatchString(imageVersion)
+//}
 
 var composerEnvironmentReservedEnvVar = map[string]struct{}{
 	"AIRFLOW_HOME":     {},
@@ -147,7 +153,7 @@ func resourceComposerEnvironment() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"zone": {
 										Type:             schema.TypeString,
-										Required:         true,
+										Optional:         true,
 										ForceNew:         true,
 										DiffSuppressFunc: compareSelfLinkOrResourceName,
 										Description:      `The Compute Engine zone in which to deploy the VMs running the Apache Airflow software, specified as the zone name or relative resource name (e.g. "projects/{project}/zones/{zone}"). Must belong to the enclosing environment's project and region. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
@@ -1329,6 +1335,12 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 	}
 	transformed.SoftwareConfig = transformedSoftwareConfig
 
+//	transformedNodeConfig, err := expandComposerEnvironmentConfigNodeConfig(original["node_config"], d, config, isComposerV2(transformed.SoftwareConfig.ImageVersion))
+//	if err != nil {
+//		return nil, err
+//	}
+//	transformed.NodeConfig = transformedNodeConfig
+
 	transformedPrivateEnvironmentConfig, err := expandComposerEnvironmentConfigPrivateEnvironmentConfig(original["private_environment_config"], d, config)
 	if err != nil {
 		return nil, err
@@ -1592,6 +1604,7 @@ func expandComposerEnvironmentConfigPrivateEnvironmentConfig(v interface{}, d *s
 	return transformed, nil
 }
 
+//func expandComposerEnvironmentConfigNodeConfig(v interface{}, d *schema.ResourceData, config *Config,isComposerV2 bool) (*composer.NodeConfig, error) {
 func expandComposerEnvironmentConfigNodeConfig(v interface{}, d *schema.ResourceData, config *Config) (*composer.NodeConfig, error) {
 	l := v.([]interface{})
 	if len(l) == 0 {
@@ -1640,6 +1653,19 @@ func expandComposerEnvironmentConfigNodeConfig(v interface{}, d *schema.Resource
 		}
 		transformed.MachineType = transformedMachineType
 	}
+//	if isComposerV2 {
+//		if _, ok := original["machine_type"]; ok {
+//			return nil, fmt.Errorf("expected machine_type to be empty for composer v2")
+//		}
+//	} else {
+//		if v, ok := original["machine_type"]; ok {
+//			transformedMachineType, err := expandComposerEnvironmentMachineType(v, d, config, nodeConfigZone)
+//			if err != nil {
+//				return nil, err
+//			}
+//			transformed.MachineType = transformedMachineType
+//		}
+//	}
 
 	if v, ok := original["network"]; ok {
 		transformedNetwork, err := expandComposerEnvironmentNetwork(v, d, config)
