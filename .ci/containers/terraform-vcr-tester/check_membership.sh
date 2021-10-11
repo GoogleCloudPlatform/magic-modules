@@ -8,7 +8,7 @@ USER=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${pr_number}" | jq -r .user.login)
 
 # Only run tests for safe users
-if $(echo $USER | fgrep -wq -e ndmckinley -e danawillow -e emilymye -e megan07 -e paddycarver -e rambleraptor -e SirGitsalot -e slevenick -e c2thorn -e rileykarson -e melinath -e scottsuarez); then
+if $(echo $USER | fgrep -wq -e ndmckinley -e danawillow -e emilymye -e megan07 -e paddycarver -e rambleraptor -e SirGitsalot -e slevenick -e c2thorn -e rileykarson -e melinath -e scottsuarez -e shuyama1); then
 	echo "User is on the list, not skipping."
 else
 	echo "Checking GCP org membership"
