@@ -192,3 +192,21 @@ Removed in favor of `node_config.workload_metadata_config.mode`.
 This field was incorrectly included in the GA `google` provider in past releases.
 In order to continue to use the feature, add `provider = google-beta` to your
 resource definition.
+
+## Resource: `google_kms_crypto_key`
+
+### `self_link` is now removed
+
+Removed in favor of `id`.
+
+## Resource: `google_kms_key_ring`
+
+### `self_link` is now removed
+
+Removed in favor of `id`.
+
+## Resource: `google_pubsub_subscription`
+
+### `path` is now removed
+
+Removed in favor of `id`.
