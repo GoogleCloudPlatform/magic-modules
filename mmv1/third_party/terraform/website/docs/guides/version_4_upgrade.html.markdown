@@ -193,6 +193,12 @@ This field was incorrectly included in the GA `google` provider in past releases
 In order to continue to use the feature, add `provider = google-beta` to your
 resource definition.
 
+## Resource: `google_compute_snapshot`
+
+### `self_link` is now removed
+
+Removed in favor of `id`.
+
 ## Resource: `google_kms_crypto_key`
 
 ### `self_link` is now removed
