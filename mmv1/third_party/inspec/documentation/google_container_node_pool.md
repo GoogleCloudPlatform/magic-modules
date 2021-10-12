@@ -7,19 +7,19 @@
 ### Test GCP container node pool disk size in GB is as expected
 
     describe google_container_node_pool(project: 'chef-inspec-gcp', locations: 'europe-west2-a', cluster_name: 'inspec-gcp-kube-cluster', nodepool_name: 'inspec-gcp-kube-node-pool') do
-      its('node_config.disk_size_gb'){should eq 100}
+      its('config.disk_size_gb'){should eq 100}
     end
 
 ### Test GCP container node pool machine type is as expected
 
     describe google_container_node_pool(project: 'chef-inspec-gcp', locations: 'europe-west2-a', cluster_name: 'inspec-gcp-kube-cluster', nodepool_name: 'inspec-gcp-kube-node-pool') do
-      its('node_config.machine_type'){should eq "n1-standard-1"}
+      its('config.machine_type'){should eq "n1-standard-1"}
     end
 
 ### Test GCP container node pool node image type is as expected
 
     describe google_container_node_pool(project: 'chef-inspec-gcp', locations: 'europe-west2-a', cluster_name: 'inspec-gcp-kube-cluster', nodepool_name: 'inspec-gcp-kube-node-pool') do
-      its('node_config.image_type'){should eq "COS"}
+      its('config.image_type'){should eq "COS"}
     end
 
 ### Test GCP container node pool initial node count is as expected
