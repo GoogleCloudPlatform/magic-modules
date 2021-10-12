@@ -740,7 +740,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validation.IntBetween(0, 65535)'
       sourceRanges: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
-        default_from_api: true
+        diff_suppress_func: 'diffSuppressSourceRanges'
       sourceTags: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
       sourceServiceAccounts: !ruby/object:Overrides::Terraform::PropertyOverride
