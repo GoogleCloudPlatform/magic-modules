@@ -181,6 +181,12 @@ This field was incorrectly included in the GA `google` provider in past releases
 In order to continue to use the feature, add `provider = google-beta` to your
 resource definition.
 
+### `advanced_machine_features` will track changes when unspecified in a config
+
+In `3.X`, `advanced_machine_features` wouldn't cause a diff if it was undefined in
+config but was set on the instance template itself. With 4.0.0 Terraform will now
+track changes on the block when it is not specified in a user's config.
+
 ## Resource: `google_container_cluster`
 
 ### `node_config.workload_metadata_config.node_metadata` is now removed
