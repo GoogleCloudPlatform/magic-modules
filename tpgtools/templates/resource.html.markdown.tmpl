@@ -26,7 +26,7 @@
 #     are required, please file an issue at https:#github.com/hashicorp/terraform-provider-google/issues/new/choose
 #
 # ----------------------------------------------------------------------------
-subcategory: "{{$.ProductType}}"
+subcategory: "{{$.DocsSection}}"
 layout: "google"
 page_title: "Google: {{$.TerraformName}}"
 sidebar_current: "{{$.SidebarCurrent}}"
@@ -137,7 +137,7 @@ This resource provides the following
 
 ## Import
 {{/* TODO excluded imports */}}
-{{$.Type}} can be imported using any of these accepted formats:
+{{$.DCLTitle}} can be imported using any of these accepted formats:
 
 ```
 {{- range $format := $.ImportFormats }}

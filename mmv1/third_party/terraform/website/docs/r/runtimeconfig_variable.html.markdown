@@ -14,6 +14,8 @@ Manages a RuntimeConfig variable in Google Cloud. For more information, see the
 or the
 [JSON API](https://cloud.google.com/deployment-manager/runtime-configurator/reference/rest/).
 
+!> This resource has been deprecated in the google (GA) provider, and will only be available in the google-beta provider in a future release.
+
 ## Example Usage
 
 Example creating a RuntimeConfig variable.
@@ -45,7 +47,7 @@ resource "google_runtimeconfig_config" "my-runtime-config" {
 resource "google_runtimeconfig_variable" "my-secret" {
   parent = google_runtimeconfig_config.my-runtime-config.name
   name   = "secret"
-  value  = base64encode(file("my-encrypted-secret.dat"))
+  value  = filebase64("my-encrypted-secret.dat")
 }
 ```
 

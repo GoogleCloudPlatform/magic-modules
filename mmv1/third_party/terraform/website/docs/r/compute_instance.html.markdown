@@ -266,12 +266,16 @@ The `network_performance_config` block supports:
 The `network_interface` block supports:
 
 * `network` - (Optional) The name or self_link of the network to attach this interface to.
-    Either `network` or `subnetwork` must be provided.
+    Either `network` or `subnetwork` must be provided. If network isn't provided it will
+    be inferred from the subnetwork.
 
 *  `subnetwork` - (Optional) The name or self_link of the subnetwork to attach this
-    interface to. The subnetwork must exist in the same region this instance will be
-    created in. If network isn't provided it will be inferred from the subnetwork.
-    Either `network` or `subnetwork` must be provided.
+    interface to. Either `network` or `subnetwork` must be provided. If network isn't provided
+    it will be inferred from the subnetwork. The subnetwork must exist in the same region this
+    instance will be created in. If the network resource is in
+    [legacy](https://cloud.google.com/vpc/docs/legacy) mode, do not specify this field. If the
+    network is in auto subnet mode, specifying the subnetwork is optional. If the network is
+    in custom subnet mode, specifying the subnetwork is required.
 
 *  `subnetwork_project` - (Optional) The project in which the subnetwork belongs.
    If the `subnetwork` is a self_link, this field is ignored in favor of the project
@@ -294,6 +298,13 @@ The `network_interface` block supports:
 
 * `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET.
 
+* `stack_type` - (Optional) The stack type for this network interface to identify whether the IPv6 feature is enabled or not. Values are IPV4_IPV6 or IPV4_ONLY. If not specified, IPV4_ONLY will be used.
+
+* `ipv6_access_config` - (Optional) An array of IPv6 access configurations for this interface.
+Currently, only one IPv6 access config, DIRECT_IPV6, is supported. If there is no ipv6AccessConfig
+specified, then this instance will have no external IPv6 Internet access. Structure documented below.
+
+
 The `access_config` block supports:
 
 * `nat_ip` - (Optional) The IP address that will be 1:1 mapped to the instance's
@@ -307,6 +318,14 @@ The `access_config` block supports:
 * `network_tier` - (Optional) The [networking tier][network-tier] used for configuring this instance.
     This field can take the following values: PREMIUM or STANDARD. If this field is
     not specified, it is assumed to be PREMIUM.
+
+The `ipv6_access_config` block supports:
+
+* `public_ptr_domain_name` - (Optional) The domain name to be used when creating DNSv6
+    records for the external IPv6 ranges..
+
+* `network_tier` - (Optional) The service-level to be provided for IPv6 traffic when the
+    subnet has an external subnet. Only PREMIUM tier is valid for IPv6.
 
 The `alias_ip_range` block supports:
 
@@ -420,9 +439,18 @@ exported:
 
 * `cpu_platform` - The CPU platform used by this instance.
 
+* `ipv6_access_type` - One of EXTERNAL, INTERNAL to indicate whether the IP can be accessed from the Internet.
+This field is always inherited from its subnetwork.
+
 * `network_interface.0.network_ip` - The internal ip address of the instance, either manually or dynamically assigned.
 
 * `network_interface.0.access_config.0.nat_ip` - If the instance has an access config, either the given external ip (in the `nat_ip` field) or the ephemeral (generated) ip (if you didn't provide one).
+
+* `network_interface.0.ipv6_access_config.0.external_ipv6` - The first IPv6 address of the external IPv6 range
+associated with this instance, prefix length is stored in externalIpv6PrefixLength in ipv6AccessConfig.
+The field is output only, an IPv6 address from a subnetwork associated with the instance will be allocated dynamically.
+
+* `network_interface.0.ipv6_access_config.0.external_ipv6_prefix_length` - The prefix length of the external IPv6 range.
 
 * `attached_disk.0.disk_encryption_key_sha256` - The [RFC 4648 base64](https://tools.ietf.org/html/rfc4648#section-4)
     encoded SHA-256 hash of the [customer-supplied encryption key]

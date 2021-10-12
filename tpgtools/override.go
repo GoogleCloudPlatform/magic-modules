@@ -27,8 +27,9 @@ type OverrideType string // enum
 
 // Product-level Overrides
 const (
-	ProductBasePath OverrideType = "PRODUCT_BASE_PATH"
-	ProductTitle    OverrideType = "PRODUCT_TITLE"
+	ProductBasePath    OverrideType = "PRODUCT_BASE_PATH"
+	ProductTitle       OverrideType = "PRODUCT_TITLE"
+	ProductDocsSection OverrideType = "PRODUCT_DOCS_SECTION"
 )
 
 // Resource-level Overrides
@@ -37,6 +38,7 @@ const (
 	CustomID                           = "CUSTOM_ID"
 	CustomizeDiff                      = "CUSTOMIZE_DIFF"
 	ImportFormat                       = "IMPORT_FORMAT"
+	AppendToBasePath                   = "APPEND_TO_BASE_PATH"
 	Mutex                              = "MUTEX"
 	PreCreate                          = "PRE_CREATE_FUNCTION"
 	PostCreate                         = "POST_CREATE_FUNCTION"
@@ -45,7 +47,7 @@ const (
 	NoSweeper                          = "NO_SWEEPER"
 	CustomImport                       = "CUSTOM_IMPORT_FUNCTION"
 	CustomCreateDirective              = "CUSTOM_CREATE_DIRECTIVE_FUNCTION"
-	SkipDelete                         = "SKIP_DELETE_FUNCTION"
+	SkipDeleteFunction                 = "SKIP_DELETE_FUNCTION"
 	SerializationOnly                  = "SERIALIZATION_ONLY"
 	CustomSerializer                   = "CUSTOM_SERIALIZER"
 	TerraformProductName               = "CUSTOM_TERRAFORM_PRODUCT_NAME"
@@ -73,7 +75,7 @@ const (
 	GenerateIfNotSet                  = "GENERATE_IF_NOT_SET"
 	CustomListSize                    = "CUSTOM_LIST_SIZE_CONSTRAINT"
 	CustomDefault                     = "CUSTOM_DEFAULT"
-	CustomRequired                    = "REQUIRED_OVERRIDE"
+	CustomSchemaValues                = "CUSTOM_SCHEMA_VALUES"
 )
 
 // Overrides represents the type a resource's override file can be marshalled

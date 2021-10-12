@@ -190,7 +190,7 @@ func (p Property) ObjectType() string {
 		}
 		parent = *parent.parent
 	}
-	return fmt.Sprintf("%s%s", p.resource.Type(), p.PackagePath())
+	return fmt.Sprintf("%s%s", p.resource.DCLTitle(), p.PackagePath())
 }
 
 func (p Property) IsArray() bool {
@@ -632,17 +632,21 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			} else {
 				p.Optional = true
 			}
-			cr := CustomRequiredDetails{}
-			crOk, err := overrides.PropertyOverrideWithDetails(CustomRequired, p, &cr, location)
-			if err != nil {
-				return nil, fmt.Errorf("failed to decode custom required details")
-			}
-			if crOk {
-				p.Required = cr.Required
-				p.Optional = cr.Optional
-				p.Computed = cr.Computed
-			}
+		}
+		cr := CustomSchemaValuesDetails{}
+		crOk, err := overrides.PropertyOverrideWithDetails(CustomSchemaValues, p, &cr, location)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode custom required details")
+		}
+		if crOk {
+			p.Required = cr.Required
+			p.Optional = cr.Optional
+			p.Computed = cr.Computed
+		}
 
+		// Handle settable fields. If the field is computed it's not settable but
+		// if it's also optional (O+C), it is.
+		if !p.Computed || (p.Optional) {
 			p.Settable = true
 
 			// NOTE: x-kubernetes-immmutable implies that all children of a field

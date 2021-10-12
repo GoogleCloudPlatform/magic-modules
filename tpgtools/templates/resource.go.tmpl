@@ -212,7 +212,7 @@ func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) erro
 	{{- end -}}
 {{ end }}
 
-	obj := &{{$.Package}}.{{$.Type}}{
+	obj := &{{$.Package}}.{{$.DCLTitle}}{
 {{- range $v := .Properties }}
 	{{- if and ($v.Settable) ($v.StateGetter) }}
 	{{$v.PackageName}}: {{$v.StateGetter}},
@@ -266,17 +266,20 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 		billingProject = bp
 	}
 	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject)
-	res, err := client.Apply{{$.Type}}(context.Background(), obj, createDirective...)
+	{{- if $.AppendToBasePath }}
+	client.Config.BasePath += "{{$.AppendToBasePath}}"
+	{{- end }}
+	res, err := client.Apply{{$.DCLTitle}}(context.Background(), obj, createDirective...)
 
 	if _, ok := err.(dcl.DiffAfterApplyError); ok {
 		log.Printf("[DEBUG] Diff after apply returned from the DCL: %s", err)
 	} else if err != nil {
 		// The resource didn't actually create
 		d.SetId("")
-		return fmt.Errorf("Error creating {{$.Type}}: %s", err)
+		return fmt.Errorf("Error creating {{$.DCLTitle}}: %s", err)
 	}
 
-	log.Printf("[DEBUG] Finished creating {{$.Type}} %q: %#v", d.Id(), res)
+	log.Printf("[DEBUG] Finished creating {{$.DCLTitle}} %q: %#v", d.Id(), res)
 
 {{ if $.HasServerGeneratedName }}
   {{ range $v := .Properties -}}
@@ -315,7 +318,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 	{{- end -}}
 {{ end }}
 
-	obj := &{{$.Package}}.{{$.Type}}{
+	obj := &{{$.Package}}.{{$.DCLTitle}}{
 {{- range $v := .Properties }}
 	{{- if ($v.StateGetter) }}
 	{{$v.PackageName}}: {{$v.StateGetter}},
@@ -337,7 +340,10 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 		billingProject = bp
 	}
 	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject)
-	res, err := client.Get{{$.Type}}(context.Background(), obj)
+	{{- if $.AppendToBasePath }}
+	client.Config.BasePath += "{{$.AppendToBasePath}}"
+	{{- end }}
+	res, err := client.Get{{$.DCLTitle}}(context.Background(), obj)
 	if err != nil {
 		resourceName := fmt.Sprintf("{{$.PathType}} %q", d.Id())
 		return handleNotFoundDCLError(err, d, resourceName)
@@ -367,7 +373,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	{{- end -}}
 {{ end }}
 
-	obj := &{{$.Package}}.{{$.Type}}{
+	obj := &{{$.Package}}.{{$.DCLTitle}}{
 {{- range $v := .Properties }}
 	{{- if ($v.StateGetter) }}
 	{{$v.PackageName}}: {{$v.StateGetter}},
@@ -377,7 +383,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 
 {{- if $.StateHint }}
   // Construct state hint from old values
-  old := &{{$.Package}}.{{$.Type}}{
+  old := &{{$.Package}}.{{$.DCLTitle}}{
   {{- range $v := .Properties }}
     {{- if ($v.StateGetter) }}
     {{$v.PackageName}}: {{$v.ChangeStateGetter}},
@@ -410,17 +416,20 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 		billingProject = bp
 	}
 	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject)
-	res, err := client.Apply{{$.Type}}(context.Background(), obj, directive...)
+	{{- if $.AppendToBasePath }}
+	client.Config.BasePath += "{{$.AppendToBasePath}}"
+	{{- end }}
+	res, err := client.Apply{{$.DCLTitle}}(context.Background(), obj, directive...)
 
 	if _, ok := err.(dcl.DiffAfterApplyError); ok {
 		log.Printf("[DEBUG] Diff after apply returned from the DCL: %s", err)
 	} else if err != nil {
 		// The resource didn't actually create
 		d.SetId("")
-		return fmt.Errorf("Error updating {{$.Type}}: %s", err)
+		return fmt.Errorf("Error updating {{$.DCLTitle}}: %s", err)
 	}
 
-	log.Printf("[DEBUG] Finished creating {{$.Type}} %q: %#v", d.Id(), res)
+	log.Printf("[DEBUG] Finished creating {{$.DCLTitle}} %q: %#v", d.Id(), res)
 
 	return resource{{$.PathType}}Read(d, meta)
 }
@@ -438,7 +447,7 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 	{{- end -}}
 {{ end }}
 
-	obj := &{{$.Package}}.{{$.Type}}{
+	obj := &{{$.Package}}.{{$.DCLTitle}}{
 {{- range $v := .Properties }}
 	{{- if ($v.StateGetter) }}
 	{{$v.PackageName}}: {{$v.StateGetter}},
@@ -462,16 +471,16 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 {{ end }}
 
 {{- if $.SkipDeleteFunction }}
-  skip, err := {{$.SkipDeleteFunction}}(config, obj)
-  if err != nil {
-    return fmt.Errorf("error encountered in skip-delete: %v", err)
-  }
-  if skip {
-    return nil
-  }
-{{- end}}
+	skip, err := {{$.SkipDeleteFunction}}(config, obj)
+	if err != nil {
+		return fmt.Errorf("error encountered in skip-delete: %v", err)
+	}
+	if skip {
+		return nil
+	}
+{{- end }}
 
-	log.Printf("[DEBUG] Deleting {{$.Type}} %q", d.Id())
+	log.Printf("[DEBUG] Deleting {{$.DCLTitle}} %q", d.Id())
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
@@ -486,11 +495,14 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 		billingProject = bp
 	}
 	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject)
-	if err := client.Delete{{$.Type}}(context.Background(), obj); err != nil {
-		return fmt.Errorf("Error deleting {{$.Type}}: %s", err)
+	{{- if $.AppendToBasePath }}
+	client.Config.BasePath += "{{$.AppendToBasePath}}"
+	{{- end }}
+	if err := client.Delete{{$.DCLTitle}}(context.Background(), obj); err != nil {
+		return fmt.Errorf("Error deleting {{$.DCLTitle}}: %s", err)
 	}
 
-	log.Printf("[DEBUG] Finished deleting {{$.Type}} %q", d.Id())
+	log.Printf("[DEBUG] Finished deleting {{$.DCLTitle}} %q", d.Id())
 	return nil
 }
 
@@ -548,7 +560,11 @@ func expand{{$.PathType}}{{$v.PackagePath}}Collapsed(d *schema.ResourceData) *{{
 		{{ if $v.IsArray -}}
 func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.{{$v.ObjectType}} {
 	if o == nil {
+	{{- if $v.Computed }}
 		return nil
+	{{- else }}
+		return make([]{{$.Package}}.{{$v.ObjectType}}, 0)
+	{{- end }}
 	}
 
 			{{ if $v.IsSet -}}
@@ -557,7 +573,11 @@ func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.
 
 	objs := o.([]interface{})
 	if len(objs) == 0 {
+	{{- if $v.Computed }}
 		return nil
+	{{- else }}
+		return make([]{{$.Package}}.{{$v.ObjectType}}, 0)
+	{{- end }}
 	}
 
 	items := make([]{{$.Package}}.{{$v.ObjectType}}, 0, len(objs))
