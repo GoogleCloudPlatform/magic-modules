@@ -178,7 +178,7 @@ data "google_kms_key_ring" "keyring" {
 
 data "google_kms_crypto_key" "crypto-key" {
   name     = "%{crypto_key}"
-  key_ring = data.google_kms_key_ring.keyring.self_link
+  key_ring = data.google_kms_key_ring.keyring.id
 }
 
 data "google_kms_crypto_key_version" "version" {
@@ -240,12 +240,12 @@ data "google_kms_key_ring" "keyring" {
 
 data "google_kms_crypto_key" "crypto-key1" {
   name     = "%{key1}"
-  key_ring = data.google_kms_key_ring.keyring.self_link
+  key_ring = data.google_kms_key_ring.keyring.id
 }
 
 data "google_kms_crypto_key" "crypto-key2" {
   name     = "%{key2}"
-  key_ring = data.google_kms_key_ring.keyring.self_link
+  key_ring = data.google_kms_key_ring.keyring.id
 }
 
 data "google_kms_crypto_key_version" "version-key1" {

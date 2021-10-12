@@ -195,9 +195,9 @@ resource definition.
 
 ## Resource: `google_compute_snapshot`
 
-### `self_link` is now removed
+### `source_disk_link` is now removed
 
-Removed in favor of `id`.
+Removed in favor of `source_disk`.
 
 ## Resource: `google_kms_crypto_key`
 
