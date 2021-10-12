@@ -1711,6 +1711,55 @@ func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withWorkloadIdentityConfigDeprecation(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	pid := getTestProjectFromEnv()
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withWorkloadIdentityConfigDeprecationDisabled(pid, clusterName),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_workload_identity_config",
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
+			},
+			{
+				Config: testAccContainerCluster_withWorkloadIdentityConfigDeprecationIdentityNamespace(pid, clusterName),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_workload_identity_config",
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
+			},
+			{
+				Config: testAccContainerCluster_withWorkloadIdentityConfigDeprecationWorkloadPool(pid, clusterName),
+			},
+			// skip ISV here + below as ignoring nested fields is a pain. It will import with `identity_namespace` only.
+			{
+				Config: testAccContainerCluster_withWorkloadIdentityConfigDeprecationBoth(pid, clusterName),
+			},
+			{
+				Config: testAccContainerCluster_withWorkloadIdentityConfigDeprecationDisabled(pid, clusterName),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_workload_identity_config",
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
+			},
+		},
+	})
+}
+
 
 func TestAccContainerCluster_withLoggingConfig(t *testing.T) {
 	t.Parallel()
@@ -2407,7 +2456,7 @@ resource "google_container_cluster" "primary" {
   min_master_version = "latest"
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
 
   addons_config {
@@ -2460,7 +2509,7 @@ resource "google_container_cluster" "primary" {
   min_master_version = "latest"
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
 
   addons_config {
@@ -2513,7 +2562,7 @@ resource "google_container_cluster" "primary" {
   min_master_version = "latest"
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
 
   addons_config {
@@ -4166,7 +4215,7 @@ resource "google_container_cluster" "with_workload_identity_config" {
   initial_node_count = 1
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
   remove_default_node_pool = true
 
@@ -4179,12 +4228,12 @@ func testAccContainerCluster_updateWorkloadIdentityConfig(projectID string, clus
 	if enable {
 		workloadIdentityConfig = `
 			workload_identity_config {
-			identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+		  workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
 		}`
         } else {
 		workloadIdentityConfig = `
 			workload_identity_config {
-			identity_namespace = ""
+			workload_pool = ""
 		}`
         }
 	return fmt.Sprintf(`
@@ -4202,6 +4251,78 @@ resource "google_container_cluster" "with_workload_identity_config" {
 `, projectID, clusterName, workloadIdentityConfig)
 }
 
+// TODO: remove until next TODO during `4.0.0`
+func testAccContainerCluster_withWorkloadIdentityConfigDeprecationDisabled(projectID string, clusterName string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_container_cluster" "with_workload_identity_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  workload_identity_config {}
+}
+`, projectID, clusterName)
+}
+
+func testAccContainerCluster_withWorkloadIdentityConfigDeprecationIdentityNamespace(projectID string, clusterName string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_container_cluster" "with_workload_identity_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  workload_identity_config {
+    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+  }
+}
+`, projectID, clusterName)
+}
+
+func testAccContainerCluster_withWorkloadIdentityConfigDeprecationWorkloadPool(projectID string, clusterName string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_container_cluster" "with_workload_identity_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  workload_identity_config {
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+  }
+}
+`, projectID, clusterName)
+}
+
+func testAccContainerCluster_withWorkloadIdentityConfigDeprecationBoth(projectID string, clusterName string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_container_cluster" "with_workload_identity_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  workload_identity_config {
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+  }
+}
+`, projectID, clusterName)
+}
+// TODO: remove until above TODO during `4.0.0`
 
 
 <% unless version.nil? || version == 'ga' -%>
