@@ -2721,6 +2721,7 @@ objects:
           - :CLIENT_IP_NO_DESTINATION
       - !ruby/object:Api::Type::NestedObject
         name: 'connectionTrackingPolicy'
+        min_version: 'beta'
         description: |
           Connection Tracking configuration for this BackendService.
           This is available only for Layer 4 Internal Load Balancing and
@@ -13439,6 +13440,7 @@ objects:
           The priority of routes advertised to this BGP peer.
           Where there is more than one matching route of maximum
           length, the routes with the lowest priority value win.
+        send_empty_value: true
       - !ruby/object:Api::Type::Enum
         name: advertiseMode
         description: |
