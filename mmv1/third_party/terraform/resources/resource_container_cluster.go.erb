@@ -670,6 +670,7 @@ func resourceContainerCluster() *schema.Resource {
 				},
 			},
 
+
 			"monitoring_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -681,10 +682,20 @@ func resourceContainerCluster() *schema.Resource {
 						"enable_components": {
 							Type:        schema.TypeList,
 							Required:    true,
+<% if version == "ga" -%>
 							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS.`,
+<% end -%>
+<% if version == "beta" -%>
+							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS and WORKLOADS.`,
+<% end -%>
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
+<% if version == "ga" -%>
 								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS"}, false),
+<% end -%>
+<% if version == "beta" -%>
+								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS", "WORKLOADS"}, false),
+<% end -%>
 							},
 						},
 					},
