@@ -19,7 +19,7 @@ and
 ## Example Usage
 
 ```hcl
-data "google_compute_router" "my-router" {
+data "google_compute_router_status" "my-router" {
   name   = "myrouter"
 }
 ```
@@ -44,6 +44,6 @@ In addition to the arguments listed above, the following attributes are exported
 * `network` - The network name or resource link to the parent
     network of this subnetwork.
 
-* `best_routes` - List of best `compute#routes` configurations for this router's network. Structure is documented below. See [google_compute_route](https://www.terraform.io/docs/providers/google/r/compute_route.html) resource for available attributes.
+* `best_routes` - List of best `compute#routes` configurations for this router's network. See [google_compute_route](https://www.terraform.io/docs/providers/google/r/compute_route.html) resource for available attributes.
 
-* `best_routes_for_router` - List of best `compute#routes` for this specific router. Structure is documented below. See [google_compute_route](https://www.terraform.io/docs/providers/google/r/compute_route.html) resource for available attributes.
+* `best_routes_for_router` - List of best `compute#routes` for this specific router. See [google_compute_route](https://www.terraform.io/docs/providers/google/r/compute_route.html) resource for available attributes.

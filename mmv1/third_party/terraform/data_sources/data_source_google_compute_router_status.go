@@ -15,7 +15,7 @@ func dataSourceGoogleComputeRouterStatus() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,
-				Description: "Name of the router to query. This can be the router name, or a fully qualified self-link.",
+				Description: "Name of the router to query.",
 				Required:    true,
 				Computed:    false,
 			},
