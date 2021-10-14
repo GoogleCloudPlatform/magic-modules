@@ -323,6 +323,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      logConfig.sampleRate: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'suppressWhenDisabled'
+      logConfig.enable: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
       portName: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       protocol: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -456,6 +460,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      logConfig.sampleRate: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'suppressWhenDisabled'
+      logConfig.enable: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
       failoverPolicy.disableConnectionDrainOnFailover: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
       failoverPolicy.dropTrafficIfUnhealthy: !ruby/object:Overrides::Terraform::PropertyOverride
