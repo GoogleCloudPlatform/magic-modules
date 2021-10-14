@@ -70,14 +70,14 @@ func resourceGoogleProject() *schema.Resource {
 			"org_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Computed:    true,
+				ConflictsWith: []string{"folder_id"},
 				Description: `The numeric ID of the organization this project belongs to. Changing this forces a new project to be created.  Only one of org_id or folder_id may be specified. If the org_id is specified then the project is created at the top level. Changing this forces the project to be migrated to the newly specified organization.`,
 			},
 			"folder_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Computed:    true,
 				StateFunc:   parseFolderId,
+				ConflictsWith: []string{"org_id"},
 				Description: `The numeric ID of the folder this project should be created under. Only one of org_id or folder_id may be specified. If the folder_id is specified, then the project is created under the specified folder. Changing this forces the project to be migrated to the newly specified folder.`,
 			},
 			"number": {
