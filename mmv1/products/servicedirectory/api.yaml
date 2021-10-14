@@ -181,5 +181,5 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'network'
         description: |
-          Network.          
+          The URL to the network, such as projects/PROJECT_NUMBER/locations/global/networks/NETWORK_NAME.          
 
