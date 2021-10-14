@@ -1141,7 +1141,7 @@ func resourceContainerCluster() *schema.Resource {
 				MaxItems: 1,
 				Optional: true,
 				// Computed is unsafe to remove- this API may return `"workloadIdentityConfig": {},` or omit the key entirely
-				// and both will be valid. Note that we don't handle the case where the API returns nothing & the user defined
+				// and both will be valid. Note that we don't handle the case where the API returns nothing & the user has defined
 				// workload_identity_config today.
 				Computed: true,
 				Description: `Configuration for the use of Kubernetes Service Accounts in GCP IAM policies.`,
@@ -3537,7 +3537,8 @@ func expandWorkloadIdentityConfig(configured interface{}) *containerBeta.Workloa
 	v := &containerBeta.WorkloadIdentityConfig{}
 
 	// this API considers unset and set-to-empty equivalent. Note that it will
-	// always return an empty block given that we always send one.
+	// always return an empty block given that we always send one, but clusters
+	// not created in TF will not always return one (and may return nil)
 	if len(l) == 0 || l[0] == nil {
 		return v
 	}
