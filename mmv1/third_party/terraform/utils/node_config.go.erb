@@ -71,7 +71,7 @@ func schemaNodeConfig() *schema.Schema {
 								DiffSuppressFunc: compareSelfLinkOrResourceName,
 								Description: `The accelerator type resource name.`,
 							},
-							"partition_size": &schema.Schema{
+							"gpu_partition_size": &schema.Schema{
 								Type:             schema.TypeString,
 								Optional:         true,
 								ForceNew:         true,
@@ -394,7 +394,7 @@ func expandNodeConfig(v interface{}) *containerBeta.NodeConfig {
 			guestAccelerators = append(guestAccelerators, &containerBeta.AcceleratorConfig{
 				AcceleratorCount: int64(data["count"].(int)),
 				AcceleratorType:  data["type"].(string),
-				GpuPartitionSize: data["partition_size"].(string),
+				GpuPartitionSize: data["gpu_partition_size"].(string),
 			})
 		}
 		nc.Accelerators = guestAccelerators
@@ -647,7 +647,7 @@ func flattenContainerGuestAccelerators(c []*containerBeta.AcceleratorConfig) []m
 		result = append(result, map[string]interface{}{
 			"count": accel.AcceleratorCount,
 			"type":  accel.AcceleratorType,
-			"partition_size": accel.GpuPartitionSize,
+			"gpu_partition_size": accel.GpuPartitionSize,
 		})
 	}
 	return result

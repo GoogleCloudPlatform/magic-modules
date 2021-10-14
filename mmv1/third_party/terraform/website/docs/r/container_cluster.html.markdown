@@ -737,7 +737,7 @@ The `guest_accelerator` block supports:
 
 * `count` (Required) - The number of the guest accelerator cards exposed to this instance.
 
-* `partition_size` (Optional) - Size of partitions to create on the GPU. Valid values are described in the NVIDIA mig [user guide](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/#partitioning).
+* `gpu_partition_size` (Optional) - Size of partitions to create on the GPU. Valid values are described in the NVIDIA mig [user guide](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/#partitioning).
 
 The `workload_identity_config` block supports:
 
