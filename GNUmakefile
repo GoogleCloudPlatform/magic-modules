@@ -49,9 +49,9 @@ ifeq ($(FORCE_DCL),)
   FORCE_DCL=latest
 endif
 terraform build:
-	make serialize
-	make mmv1
-	make tpgtools
+	$(MAKE) serialize
+	$(MAKE) mmv1
+	$(MAKE) tpgtools
 
 mmv1:
 	cd mmv1;\
@@ -85,4 +85,3 @@ upgrade-dcl:
 
 
 .PHONY: mmv1 tpgtools
-
