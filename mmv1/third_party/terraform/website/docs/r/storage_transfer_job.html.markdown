@@ -125,9 +125,9 @@ The following arguments are supported:
 
 <a name="nested_schedule"></a>The `schedule` block supports:
 
-* `schedule_start_date` - (Required) The first day the recurring transfer is scheduled to run. If `schedule_start_date` is in the past, the transfer will run for the first time on the following day. Structure [documented below](#nested_schedule_start_date).
+* `schedule_start_date` - (Required) The first day the recurring transfer is scheduled to run. If `schedule_start_date` is in the past, the transfer will run for the first time on the following day. Structure [documented below](#nested_schedule_start_end_date).
 
-* `schedule_end_date` - (Optional) The last day the recurring transfer will be run. If `schedule_end_date` is the same as `schedule_start_date`, the transfer will be executed only once. Structure [documented below](#nested_schedule_end_date).
+* `schedule_end_date` - (Optional) The last day the recurring transfer will be run. If `schedule_end_date` is the same as `schedule_start_date`, the transfer will be executed only once. Structure [documented below](#nested_schedule_start_end_date).
 
 * `start_time_of_day` - (Optional) The time in UTC at which the transfer will be scheduled to start in a day. Transfers may start later than this time. If not specified, recurring and one-time transfers that are scheduled to run today will run immediately; recurring transfers that are scheduled to run on a future date will start at approximately midnight UTC on that date. Note that when configuring a transfer with the Cloud Platform Console, the transfer's start time in a day is specified in your local timezone. Structure [documented below](#nested_start_time_of_day).
 
@@ -193,7 +193,7 @@ The `azure_credentials` block supports:
 
 * `sas_token` - (Required) Azure shared access signature. See [Grant limited access to Azure Storage resources using shared access signatures (SAS)](https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview).
 
-<a name="nested_schedule_start_date"></a>The `schedule_start_date` and `schedule_end_date` blocks support:
+<a name="nested_schedule_start_end_date"></a>The `schedule_start_date` and `schedule_end_date` blocks support:
 
 * `year` - (Required) Year of date. Must be from 1 to 9999.
 

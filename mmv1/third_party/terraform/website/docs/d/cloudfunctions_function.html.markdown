@@ -49,7 +49,7 @@ exported:
 * `runtime` - The runtime in which the function is running.
 * `entry_point` - Name of a JavaScript function that will be executed when the Google Cloud Function is triggered.
 * `trigger_http` - If function is triggered by HTTP, this boolean is set.
-* `event_trigger` - A source that fires events in response to a condition in another service. Structure is [documented below](#nested_trigger_http).
+* `event_trigger` - A source that fires events in response to a condition in another service. Structure is [documented below](#nested_event_trigger).
 * `https_trigger_url` - If function is triggered by HTTP, trigger URL is set here.
 * `ingress_settings` - Controls what traffic can reach the function.
 * `labels` - A map of labels applied to this function.

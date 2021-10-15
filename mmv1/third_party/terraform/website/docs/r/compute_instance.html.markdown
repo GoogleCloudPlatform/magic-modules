@@ -154,7 +154,7 @@ The following arguments are supported:
     this configuration option are [detailed below](#nested_scheduling).
 
 * `scratch_disk` - (Optional) Scratch disks to attach to the instance. This can be
-    specified multiple times for multiple scratch disks. Structure is [documented below](#nested_scheduling).
+    specified multiple times for multiple scratch disks. Structure is [documented below](#nested_scratch_disk).
 
 * `service_account` - (Optional) Service account to attach to the instance.
     Structure is [documented below](#nested_service_account).

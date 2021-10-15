@@ -101,7 +101,7 @@ The following arguments are supported:
 * `scheduling` - The scheduling strategy to use. More details about
     this configuration option are detailed below.
 
-* `service_account` - Service account to attach to the instance. Structure is [[documented below](#nested_service_account)](#nested_scheduling).
+* `service_account` - Service account to attach to the instance. Structure is [documented below](#nested_service_account).
 
 * `tags` - Tags to attach to the instance.
 
