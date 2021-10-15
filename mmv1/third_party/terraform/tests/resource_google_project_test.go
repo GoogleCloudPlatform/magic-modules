@@ -485,7 +485,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
 
-  org_id    = ""%s"
+  org_id = "%s"
 }
 
 resource "google_folder" "folder1" {
