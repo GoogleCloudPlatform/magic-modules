@@ -53,6 +53,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "instance"
         vars:
           name: "my-instance"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_source_representation_instance_from_dump_file"
+        primary_resource_id: "instance"
+        vars:
+          name: "my-instance"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_source_representation_instance_with_ssl"
+        primary_resource_id: "instance"
+        vars:
+          name: "my-instance"
     properties:
       onPremisesConfiguration: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
@@ -62,6 +72,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       onPremisesConfiguration.port: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(0, 65535)'
+      onPremisesConfiguration.password: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+      onPremisesConfiguration.clientKey: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true

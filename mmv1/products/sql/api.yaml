@@ -726,6 +726,30 @@ objects:
             description: |
               The externally accessible port for the source database server.
               Defaults to 3306.
+          - !ruby/object:Api::Type::String
+            name: 'username'
+            description: |
+              The username for connecting to the on-premises instance.
+          - !ruby/object:Api::Type::String
+            name: 'password'
+            description: |
+              The password for connecting to the on-premises instance.
+          - !ruby/object:Api::Type::String
+            name: 'caCertificate'
+            description: |
+              PEM representation of the trusted CA's x509 certificate.
+          - !ruby/object:Api::Type::String
+            name: 'clientCertificate'
+            description: |
+              PEM representation of the replica's x509 certificate.
+          - !ruby/object:Api::Type::String
+            name: 'clientKey'
+            description: |
+              PEM representation of the replica's private key. The corresponsing public key is encoded in the client's certificate.
+          - !ruby/object:Api::Type::String
+            name: 'dumpFilePath'
+            description: |
+              The dump file to create the Cloud SQL replica.
 
   # 'Operation' is not idempotent and will not be covered.
   # (it is used internally to assert the state of operations being performed)
