@@ -453,8 +453,6 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
 
-  # ensures we can set both org_id and folder_id as long as only one is not empty.
-  org_id    = ""
   folder_id = google_folder.folder1.id
 }
 
@@ -487,7 +485,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
 
-  org_id    = "organizations/%s"
+  org_id    = ""%s"
 }
 
 resource "google_folder" "folder1" {
