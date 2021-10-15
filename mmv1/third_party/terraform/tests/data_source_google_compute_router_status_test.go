@@ -27,7 +27,7 @@ func TestAccDataSourceComputeRouterStatus(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair("data.google_compute_router_status.router1", "name", "google_compute_router.router1", "name"),
 					resource.TestCheckResourceAttrPair("data.google_compute_router_status.router1", "region", "google_compute_router.router1", "region"),
-					resource.TestCheckResourceAttrPair("data.google_compute_router_status.router1", "network", "google_compute_network.network1", "self_link"),
+					resource.TestCheckResourceAttrSet("data.google_compute_router_status.router1", "network"),
 					resource.TestCheckResourceAttr("data.google_compute_router_status.router1", "best_routes.#", "2"),
 					resource.TestCheckResourceAttr("data.google_compute_router_status.router1", "best_routes_for_router.#", "2"),
 					resource.TestCheckResourceAttrPair("data.google_compute_router_status.router1", "best_routes.0.next_hop_ip", "google_compute_router_peer.router1_peer1", "peer_ip_address"),

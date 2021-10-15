@@ -23,7 +23,7 @@ func dataSourceGoogleComputeRouterStatus() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Project ID of the target router.",
 				Optional:    true,
-				Computed:    true,
+				Computed:    false,
 			},
 			"region": {
 				Type:        schema.TypeString,
