@@ -90,6 +90,12 @@ func main() {
 		generateResourceFile(resource)
 		generateSweeperFile(resource)
 		generateResourceTestFile(resource)
+	}
+	// Website files are always generated for the beta version.
+	for _, resource := range resources[BETA_VERSION] {
+		if skipResource(resource) {
+			continue
+		}
 		generateResourceWebsiteFile(resource, resources, version)
 	}
 
@@ -210,6 +216,10 @@ func createResourcesFromDocumentAndOverrides(document *openapi.Document, overrid
 	if schema == nil {
 		glog.Exit(fmt.Sprintf("Could not find document schema for %s", document.Info.Title))
 	}
+
+	// Later on we expect this schema's object to contain the relevant description, but in fact
+	// it is the Info object that has it.  We'll just override it rather than do a real refactor.
+	schema.Description = document.Info.Description
 
 	if err := schema.Validate(); err != nil {
 		glog.Exit(err)

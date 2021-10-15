@@ -1,7 +1,10 @@
 substitutions:
   - substitution: "id"
     value: "id"
+    docs_value: "project-to-be-monitored"
   - substitution: "org_id"
     value: ":ORG_ID"
+    docs_value: "my-org-id"
   - substitution: "project"
     value: ":PROJECT"
+    docs_value: "preexisting-project-to-monitor-with"

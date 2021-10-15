@@ -97,6 +97,9 @@ type Substitution struct {
 
 	// Value is the value of the substituted text
 	Value *string `yaml:"value"`
+
+	// DocsValue is the value of the substituted text for documentation purposes.
+	DocsValue *string `yaml:"docs_value"`
 }
 
 // Dependency contains data that describes a single resource in a sample
@@ -408,6 +411,9 @@ func (sub *Substitution) translateValue(isDocs bool) string {
 	translation, hasTranslation := translationMap[value]
 
 	if isDocs {
+		if sub.DocsValue != nil {
+			return *sub.DocsValue
+		}
 		if hasTranslation {
 			return translation.docsValue
 		}
