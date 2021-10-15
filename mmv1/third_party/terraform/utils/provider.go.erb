@@ -575,11 +575,11 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 
 	if v, ok := d.GetOk("credentials"); ok {
 		config.Credentials = v.(string)
-  }
+	}
 
-  // only check environment variables is neither value was set in config- this
-  // means config beats env var in all cases.
-  if config.AccessToken == "" && config.Credentials == "" {
+	// only check environment variables is neither value was set in config- this
+	// means config beats env var in all cases.
+	if config.AccessToken == "" && config.Credentials == "" {
 		config.Credentials = multiEnvSearch([]string{
 			"GOOGLE_CREDENTIALS",
 			"GOOGLE_CLOUD_KEYFILE_JSON",
