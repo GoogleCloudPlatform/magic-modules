@@ -409,7 +409,7 @@ resource "google_project_iam_member" "instance_user" {
 }
 
 resource "google_project_iam_member" "sa_user" {
-project = data.google_project.project.project_id
+  project = data.google_project.project.project_id
   role    = "roles/iam.serviceAccountUser"
   member  = "serviceAccount:${google_service_account.sa.email}"
 }

@@ -75,10 +75,10 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 	return Nprintf(`
 	data "google_project" "project" {}
 
-  resource "google_service_account" "dialogflowcx_service_account" {
+	resource "google_service_account" "dialogflowcx_service_account" {
 		account_id = "tf-test-dialogflow-%{random_suffix}"
 	}
-	  
+
 	resource "google_project_iam_member" "agent_create" {
 		project = data.google_project.project.project_id
 		role    = "roles/dialogflow.admin"
