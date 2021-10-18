@@ -127,7 +127,7 @@ func testGoogleSqlClientCert_postgres(instance string) string {
 		database_version = "POSTGRES_9_6"
 		deletion_protection = false
 		settings {
-			tier = "db-f1-micro"s
+			tier = "db-f1-micro"
 		}
 
 		timeouts {
