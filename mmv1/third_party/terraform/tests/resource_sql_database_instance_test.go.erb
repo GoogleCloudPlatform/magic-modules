@@ -957,7 +957,7 @@ resource "google_sql_database_instance" "instance" {
 var testGoogleSqlDatabaseInstance_basic_mssql = `
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
-  database_version    = "SQLSERVER_2017_STANDARD"
+  database_version    = "SQLSERVER_2019_STANDARD"
   root_password       = "%s"
   deletion_protection = false
   settings {
