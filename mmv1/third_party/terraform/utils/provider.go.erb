@@ -577,7 +577,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		config.Credentials = v.(string)
 	}
 
-	// only check environment variables is neither value was set in config- this
+	// only check environment variables if neither value was set in config- this
 	// means config beats env var in all cases.
 	if config.AccessToken == "" && config.Credentials == "" {
 		config.Credentials = multiEnvSearch([]string{
