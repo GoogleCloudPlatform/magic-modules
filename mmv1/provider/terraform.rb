@@ -132,7 +132,7 @@ module Provider
       path_tkns = schema_path.split('.0.').map do |pname|
         camel_pname = pname.camelize(:lower)
         prop = nested_props.find { |p| p.name == camel_pname }
-        return nil if prop.nil?
+        return schema_path if prop.nil?
 
         nested_props = prop.nested_properties || []
         prop.flatten_object ? nil : pname.underscore

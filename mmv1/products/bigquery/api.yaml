@@ -589,25 +589,25 @@ objects:
                     name: 'statementTimeoutMs'
                     description: 'Timeout period for each statement in a script.'
                     at_least_one_of:
-                      - query.0.scriptOptions.0.statementTimeoutMs
-                      - query.0.scriptOptions.0.statementByteBudget
-                      - query.0.scriptOptions.0.keyResultStatement
+                      - query.0.script_options.0.statement_timeout_ms
+                      - query.0.script_options.0.statement_byte_budget
+                      - query.0.script_options.0.key_result_statement
                   - !ruby/object:Api::Type::String
                     name: 'statementByteBudget'
                     description: 'Limit on the number of bytes billed per statement. Exceeding this budget results in an error.'
                     at_least_one_of:
-                      - query.0.scriptOptions.0.statementTimeoutMs
-                      - query.0.scriptOptions.0.statementByteBudget
-                      - query.0.scriptOptions.0.keyResultStatement
+                      - query.0.script_options.0.statement_timeout_ms
+                      - query.0.script_options.0.statement_byte_budget
+                      - query.0.script_options.0.key_result_statement
                   - !ruby/object:Api::Type::Enum
                     name: 'keyResultStatement'
                     description: |
                       Determines which statement in the script represents the "key result",
                       used to populate the schema and query results of the script job.
                     at_least_one_of:
-                      - query.0.scriptOptions.0.statementTimeoutMs
-                      - query.0.scriptOptions.0.statementByteBudget
-                      - query.0.scriptOptions.0.keyResultStatement
+                      - query.0.script_options.0.statement_timeout_ms
+                      - query.0.script_options.0.statement_byte_budget
+                      - query.0.script_options.0.key_result_statement
                     values:
                       - :LAST
                       - :FIRST_SELECT
