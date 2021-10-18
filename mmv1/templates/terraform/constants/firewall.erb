@@ -104,6 +104,9 @@ func diffSuppressSourceRanges(k, old, new string, d *schema.ResourceData) bool {
 	}
 
 	// Diff suppress only should suppress removing the default range
+	// This should probably be newInt == 0, but due to Terraform core internals
+	// (bug?) values found via GetChange may not have the correct new value
+	// in some circumstances
 	if oldInt == 1 && newInt == 1 {
 		if old == "0.0.0.0/0" && new == "" {
 			return true
