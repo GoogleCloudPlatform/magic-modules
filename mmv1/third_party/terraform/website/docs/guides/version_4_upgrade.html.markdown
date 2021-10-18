@@ -211,6 +211,14 @@ Removed in favor of `id`.
 
 Removed in favor of `id`.
 
+## Datasource: `google_kms_key_ring`
+
+### `id` now matches the `google_kms_key_ring` id format
+
+The format has changed to better match the resource's ID format.
+
+Interpolations based on the `id` of the datasource may require updates.
+
 ## Resource: `google_pubsub_subscription`
 
 ### `path` is now removed
