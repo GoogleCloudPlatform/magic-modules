@@ -266,6 +266,8 @@ region are guaranteed to support the same version.
 
 * `notification_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the [cluster upgrade notifications](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-upgrade-notifications) feature. Structure is documented below.
 
+* `confidential_nodes` - Configuration for [Confidential Nodes](https://cloud.google.com/kubernetes-engine/docs/how-to/confidential-gke-nodes) feature. Structure is documented below.
+
 * `pod_security_policy_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
     [PodSecurityPolicy](https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies) feature.
     Structure is documented below.
@@ -765,6 +767,10 @@ notification_config {
   }
 }
 ```
+
+The `confidential_nodes` block supports:
+
+* `enabled` (Required) - Enable Confidential Nodes for this cluster.
 
 The `pod_security_policy_config` block supports:
 
