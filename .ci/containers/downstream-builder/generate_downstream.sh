@@ -17,10 +17,10 @@ function clone_repo() {
             echo "Unrecognized version $VERSION"
             exit 1
         fi
-    elif [ "$REPO" == "tf-conversion" ]; then
+    elif [ "$REPO" == "terraform-validator" ]; then
         UPSTREAM_OWNER=GoogleCloudPlatform
-        GH_REPO=terraform-google-conversion
-        LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
+        GH_REPO=terraform-validator
+        LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-validator
     elif [ "$REPO" == "tf-oics" ]; then
         UPSTREAM_OWNER=terraform-google-modules
         GH_REPO=docs-examples
@@ -41,7 +41,7 @@ function clone_repo() {
 }
 
 if [ $# -lt 4 ]; then
-    echo "Usage: $0 (build|diff|downstream) (terraform|tf-conversion) (ga|beta) (pr number|sha)"
+    echo "Usage: $0 (build|diff|downstream) (terraform|terraform-validator) (ga|beta) (pr number|sha)"
     exit 1
 fi
 if [ -z "$GITHUB_TOKEN" ]; then
@@ -89,7 +89,7 @@ if [ "$REPO" == "terraform" ]; then
     popd
 fi
 
-if [ "$REPO" == "tf-conversion" ]; then
+if [ "$REPO" == "terraform-validator" ]; then
     # use terraform generator with validator overrides.
     bundle exec compiler -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
 elif [ "$REPO" == "tf-oics" ]; then
