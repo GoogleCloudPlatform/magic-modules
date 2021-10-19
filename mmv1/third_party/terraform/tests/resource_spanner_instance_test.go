@@ -82,16 +82,8 @@ func TestAccSpannerInstance_noNodeCountSpecified(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSpannerInstance_noNodeCountSpecified(idName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
-				),
+				ExpectError: regexp.MustCompile("one of `num_nodes,processing_units` must be specified"),
 			},
-			{
-				ResourceName:      "google_spanner_instance.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
 	})
 }
 

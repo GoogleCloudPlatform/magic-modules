@@ -123,6 +123,10 @@ module Provider
     # 'a_field', 'parent_field.0.child_name'). Returns nil if the property
     # is not included in the resource's properties and removes keys that have
     # been flattened
+    # FYI: Fields that have been renamed should use the new name, however, flattened
+    # fields still need to be included, ie:
+    # flattenedField > newParent > renameMe should be passed to this function as
+    # flattened_field.0.new_parent.0.im_renamed
     # TODO(emilymye): Change format of input for
     # exactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
     # convert to snake in this method
