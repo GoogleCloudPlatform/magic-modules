@@ -4,7 +4,7 @@ layout: "google"
 page_title: "Google: google_composer_environment"
 sidebar_current: "docs-google-composer-environment"
 description: |-
-An environment for running orchestration tasks.
+  An environment for running orchestration tasks.
 ---
 
 # google\_composer\_environment
@@ -299,7 +299,7 @@ The following arguments are supported:
 <a name="nested_node_config"></a>The `node_config` block supports:
 
 * `zone` -
-  (Required, Cloud Composer 1 only)
+  (Optional, Cloud Composer 1 only)
   The Compute Engine zone in which to deploy the VMs running the
   Apache Airflow software, specified as the zone name or
   relative resource name (e.g. "projects/{project}/zones/{zone}"). Must
@@ -488,7 +488,7 @@ The `web_server_network_access_control` supports:
 <a name="nested_ip_allocation_policy"></a>The `ip_allocation_policy` block supports:
 
 * `use_ip_aliases` -
-  (Required, Cloud Composer 1 only)
+  (Optional, Cloud Composer 1 only)
   Whether or not to enable Alias IPs in the GKE cluster. If true, a VPC-native cluster is created.
   Defaults to true if the `ip_allocation_policy` block is present in config.
 

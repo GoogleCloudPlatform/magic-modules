@@ -242,7 +242,7 @@ func resourceComposerEnvironment() *schema.Resource {
 											Schema: map[string]*schema.Schema{
 												"use_ip_aliases": {
 													Type:        schema.TypeBool,
-													Required:    true,
+													Optional:    true,
 													ForceNew:    true,
 													Description: `Whether or not to enable Alias IPs in the GKE cluster. If true, a VPC-native cluster is created. Defaults to true if the ip_allocation_policy block is present in config. This field is only supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*. Environments in newer versions always use VPC-native GKE clusters.`,
 												},
