@@ -4,6 +4,13 @@ import (
 	"reflect"
 )
 
+func resourceConverterBigtableCluster() ResourceConverter {
+	return ResourceConverter{
+		AssetType: "bigtableadmin.googleapis.com/Cluster",
+		Convert:   GetBigtableClusterCaiObject,
+	}
+}
+
 func GetBigtableClusterCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 
 	objs, err := GetBigtableClusterApiObjects(d, config)

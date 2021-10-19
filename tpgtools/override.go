@@ -27,8 +27,9 @@ type OverrideType string // enum
 
 // Product-level Overrides
 const (
-	ProductBasePath OverrideType = "PRODUCT_BASE_PATH"
-	ProductTitle    OverrideType = "PRODUCT_TITLE"
+	ProductBasePath    OverrideType = "PRODUCT_BASE_PATH"
+	ProductTitle       OverrideType = "PRODUCT_TITLE"
+	ProductDocsSection OverrideType = "PRODUCT_DOCS_SECTION"
 )
 
 // Resource-level Overrides
@@ -74,7 +75,7 @@ const (
 	GenerateIfNotSet                  = "GENERATE_IF_NOT_SET"
 	CustomListSize                    = "CUSTOM_LIST_SIZE_CONSTRAINT"
 	CustomDefault                     = "CUSTOM_DEFAULT"
-	CustomRequired                    = "REQUIRED_OVERRIDE"
+	CustomSchemaValues                = "CUSTOM_SCHEMA_VALUES"
 )
 
 // Overrides represents the type a resource's override file can be marshalled

@@ -46,6 +46,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
          - "timeout"
     properties:
+      failoverOrigin: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareResourceNames'
       protocol: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       maxAttempts: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -116,6 +118,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       routing.pathMatchers.routeRules.headerAction.responseHeadersToAdd.replace: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      routing.pathMatchers.routeRules.origin: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
       routing.pathMatchers.routeRules.routeAction.cdnPolicy.cacheMode: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       routing.pathMatchers.routeRules.routeAction.cdnPolicy.defaultTtl: !ruby/object:Overrides::Terraform::PropertyOverride
