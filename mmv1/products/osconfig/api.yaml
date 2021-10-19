@@ -547,8 +547,8 @@ objects:
              - !ruby/object:Api::Type::NestedObject
               name: 'linuxExecStepConfig'
               at_least_one_of:
-                - patch_config.0.post_step.linux_exec_step_config
-                - patch_config.0.post_step.windows_exec_step_config
+                - patch_config.0.post_step.0.linux_exec_step_config
+                - patch_config.0.post_step.0.windows_exec_step_config
               description: |
                 The ExecStepConfig for all Linux VMs targeted by the PatchJob.
               properties:
@@ -598,8 +598,8 @@ objects:
              - !ruby/object:Api::Type::NestedObject
               name: 'windowsExecStepConfig'
               at_least_one_of:
-                - patch_config.0.post_step.linux_exec_step_config
-                - patch_config.0.post_step.windows_exec_step_config
+                - patch_config.0.post_step.0.linux_exec_step_config
+                - patch_config.0.post_step.0.windows_exec_step_config
               description: |
                 The ExecStepConfig for all Windows VMs targeted by the PatchJob.
               properties:

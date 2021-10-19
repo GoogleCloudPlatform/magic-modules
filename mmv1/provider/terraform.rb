@@ -124,7 +124,7 @@ module Provider
     # is not included in the resource's properties and removes keys that have
     # been flattened
     # TODO(emilymye): Change format of input for
-    # xactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
+    # exactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
     # convert to snake in this method
     def get_property_schema_path(schema_path, resource)
       nested_props = resource.properties
@@ -132,7 +132,11 @@ module Provider
       path_tkns = schema_path.split('.0.').map do |pname|
         camel_pname = pname.camelize(:lower)
         prop = nested_props.find { |p| p.name == camel_pname }
-        return schema_path if prop.nil?
+        # if we couldn't find it, see if it was renamed at the top level
+        if prop.nil?
+          prop = nested_props.find{ |p| p.name == schema_path }
+        end
+        return nil if prop.nil?
 
         nested_props = prop.nested_properties || []
         prop.flatten_object ? nil : pname.underscore
