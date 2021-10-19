@@ -133,9 +133,7 @@ module Provider
         camel_pname = pname.camelize(:lower)
         prop = nested_props.find { |p| p.name == camel_pname }
         # if we couldn't find it, see if it was renamed at the top level
-        if prop.nil?
-          prop = nested_props.find{ |p| p.name == schema_path }
-        end
+        prop = nested_props.find { |p| p.name == schema_path } if prop.nil?
         return nil if prop.nil?
 
         nested_props = prop.nested_properties || []
