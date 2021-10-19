@@ -447,3 +447,6 @@ security_policy:
 
 memcache_instance:
   name: mem-instance
+
+accelerator_type:
+  name: accelerator_id

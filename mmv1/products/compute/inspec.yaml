@@ -212,7 +212,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: "vpn_tunnel_name"
   Zone: !ruby/object:Overrides::Inspec::ResourceOverride
-    additional_functions: third_party/inspec/custom_functions/google_compute_zone.erb
+    additional_functions: third_party/inspec/custom_functions/google_compute_accelerator_type.erb
     singular_extra_examples: third_party/inspec/documentation/google_compute_zone.md
     plural_extra_examples: third_party/inspec/documentation/google_compute_zones.md
     properties:
