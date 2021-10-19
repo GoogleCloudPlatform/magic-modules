@@ -70,9 +70,9 @@ func main() {
 		resourcesForVersion = resources[allVersions()[0]]
 		productsForVersion = products[allVersions()[0]]
 	}
-	if *version == GA_VERSION {
+	if version != nil && *version == GA_VERSION {
 		terraformResourceDirectory = "google"
-	} else if *version == ALPHA_VERSION {
+	} else if version != nil && *version == ALPHA_VERSION {
 		terraformResourceDirectory = "google-private"
 	}
 

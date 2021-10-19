@@ -7,8 +7,8 @@ Terraform resource schemas.
 
 ## Usage
 
-`tpgtools` expects to run targeting a "root service directory", a dir-of-dirs
-where the child dirs contain OpenApi specs for resources such as the `api/` path
+`tpgtools` consumes OpenAPI specs from the DCL client library specified in the `go.mod` file.
+It expects to run targeting a directory containing DCL sample data such as the `api/` path
 above. Additionally, overrides are expected in a similar structure (as seen in
 the `overrides/` path. For example:
 
@@ -38,14 +38,13 @@ correspond to the line numbers in the output.
 
 You can specify a version such as `beta` using the `--version`:
 
-
 ```
 go run . --path "api" --overrides "overrides" --output ~/tpg-fork --version "beta"
 ```
 
 ### Accessory Code
 
-To generate accessory code such as `serializarion`, you can specify the `--mode`:
+To generate accessory code such as `serialization`, you can specify the `--mode`:
 
 ```
 go run . --path "api" --overrides "overrides" --output ~/some/dir --mode "serialization"
@@ -66,7 +65,13 @@ Templates.
 ### Overrides
 
 Overrides are specified per-resource, with a directory structure parallel to the
-OpenAPI specs. Inside each resource file is an unordered array of overrides made
+OpenAPI specs. The resource file name and directory structure must match the 
+DCL client library's exactly. 
+
+**Override files opt-in a resource for `tpgtools` generation.** Without it, `tpgtools` 
+will not consume the resource from the DCL client library.
+
+Inside each resource file is an unordered array of overrides made
 up of an override type (like `CUSTOM_DESCRIPTION` or `VIRTUAL_FIELD`) as well as
 a field they affect (if a field is omitted, they affect the resource) and an
 optional `details` object that will be parsed for additional metadata.
@@ -82,20 +87,33 @@ For example, override entries will look like the following:
 
 #### Samples
 
-We will autoingest samples from the dcl, however we currently must
-manually fill the substitutions for these samples.
+We will (soon) auto-ingest samples from the DCL, however we currently must
+copy sample files over to the `api/` folder, and manually fill the substitutions 
+for these samples.
 
-You may need to re-serialize `serialization.go` if you are adding newer resources.
-To do this
+Find the exported sample files from the DCL client library, and copy them to the 
+`api/` folder, mirroring the directory structure. For example:
+
 ```
-cd tpgtools
-go get -u github.com/GoogleCloudPlatform/declarative-resource-client-library
+tpgtools
+└──api
+│  └──your_service
+│     └──samples
+│         | sample_resource.yaml
+│         | sample.resource.json
+```
+
+You may need to re-serialize `serialization.go` if you are adding new resources,
+or have modified your resource schema since the last serialization.
+To do this, run the following in the **top level directory**:
+```
+make upgrade-dcl
 make serialize
 ```
 
-To do so, first create a folder in the relevant product
+To do enable your sample, first create a folder in the relevant product
 ```
-$ cd overrides/{{product}}/
+$ cd tpgtools/overrides/{{product}}/
 $ mkdir samples
 $ cd samples
 ```
