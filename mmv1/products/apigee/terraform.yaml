@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Organization: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -18,44 +17,35 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "apigee_organization_cloud_basic"
-      primary_resource_id: "apigee-org"
-      vars:
-        network_id: "apigee-network"
-        network_range_id: "apigee-range"
+      skip_test: true
+    - !ruby/object:Provider::Terraform::Examples
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
+      name: "apigee_organization_cloud_basic_test"
+      primary_resource_id: "org"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_docs: true
       # Resource creation race
       skip_vcr: true
     - !ruby/object:Provider::Terraform::Examples
       name: "apigee_organization_cloud_full"
-      primary_resource_id: "apigee-org"
-      vars:
-        network_id: "apigee-network"
-        network_range_id: "apigee-range"
-        keyring_id: "apigee-keyring"
-        key_id: "apigee-key"
-      # While all Apigee resources in this test are in the GA API, we depend
-      # on a service identity resource which is only available in the beta
-      # provider.
-      min_version: beta
-      # This example is for docs purpose only.
-      # For test to pass, google-beta-provider needs to be added to all
-      # resources, and KMS key lifecycle has to be removed. These are set
-      # in "apigee_organization_cloud_full_test" below.
       skip_test: true
     - !ruby/object:Provider::Terraform::Examples
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test. While all Apigee
+      # resources in this test are in the GA API, we depend on a service
+      # identity resource which is only available in the beta provider.
       name: "apigee_organization_cloud_full_test"
-      primary_resource_id: "apigee-org"
-      vars:
-        network_id: "apigee-network"
-        network_range_id: "apigee-range"
-        keyring_id: "apigee-keyring"
-        key_id: "apigee-key"
-      # While all Apigee resources in this test are in the GA API, we depend
-      # on a service identity resource which is only available in the beta
-      # provider.
+      primary_resource_id: "org"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_docs: true
       min_version: beta
       # Resource creation race
       skip_vcr: true
-      skip_docs: true
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 10
       delete_minutes: 10
@@ -106,12 +96,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "apigee_environment_basic"
+      skip_test: true
+    - !ruby/object:Provider::Terraform::Examples
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
+      name: "apigee_environment_basic_test"
       primary_resource_id: "apigee_environment"
-      primary_resource_name: "getTestProjectFromEnv(), fmt.Sprintf(\"tf-test-apigee-env%s\", context[\"random_suffix\"])"
-      vars:
-        network_id: "apigee-network"
-        network_range_id: "apigee-range"
-        apigee_env_id: "apigee-env"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_docs: true
       # Resource creation race
       skip_vcr: true
     timeouts: !ruby/object:Api::Timeouts
