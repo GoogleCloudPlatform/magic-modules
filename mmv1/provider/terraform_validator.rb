@@ -12,11 +12,17 @@
 # limitations under the License.
 
 require 'provider/terraform_oics'
+require 'fileutils'
 
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
   class TerraformValidator < Provider::Terraform
     def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
+      # Temporary shim to generate the missing resources directory. Can be removed
+      # once the folder exists downstream.
+      resources_folder = File.join(output_folder, "converters/google/resources")
+      FileUtils.mkdir_p(resources_folder)
+
       @base_url = @version.base_url
       generate_objects(
         output_folder,
