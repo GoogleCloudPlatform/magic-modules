@@ -17,6 +17,11 @@ function clone_repo() {
             echo "Unrecognized version $VERSION"
             exit 1
         fi
+    elif [ "$REPO" == "tf-conversion" ]; then
+        # This is here for backwards compatibility and can be removed after Nov 15 2021
+        UPSTREAM_OWNER=GoogleCloudPlatform
+        GH_REPO=terraform-google-conversion
+        LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
     elif [ "$REPO" == "terraform-validator" ]; then
         UPSTREAM_OWNER=GoogleCloudPlatform
         GH_REPO=terraform-validator
@@ -89,8 +94,9 @@ if [ "$REPO" == "terraform" ]; then
     popd
 fi
 
-if [ "$REPO" == "terraform-validator" ]; then
+if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     # use terraform generator with validator overrides.
+    # tf-conversion is legacy and can be removed after Nov 15 2021
     bundle exec compiler -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
 elif [ "$REPO" == "tf-oics" ]; then
     # use terraform generator with oics override
