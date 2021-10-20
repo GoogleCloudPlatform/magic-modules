@@ -22,8 +22,6 @@ description: |-
   - [Resource: `google_compute_instance_template`](#resource-google_compute_instance_template)
     - [`enable_display` is removed from the GA provider](#enable_display-is-removed-from-the-ga-provider)
   - [Resource: `google_container_cluster`](#resource-google_container_cluster)
-    - [`cluster_ipv4_cidr` is now removed](#cluster_ipv4_cidr-is-now-removed)
-    - [`initial_node_count` is now removed](#initial_node_count-is-now-removed)
     - [`instance_group_urls` is now removed](#instance_group_urls-is-now-removed)
     - [`master_auth` is now removed](#master_auth-is-now-removed)
     - [`node_config.workload_metadata_config.node_metadata` is now removed](#node_configworkload_metadata_confignode_metadata-is-now-removed)
@@ -190,14 +188,6 @@ In order to continue to use the feature, add `provider = google-beta` to your
 resource definition.
 
 ## Resource: `google_container_cluster`
-
-### `cluster_ipv4_cidr` is now removed
-
-`cluster_ipv4_cidr` has been removed in favor of `ip_allocation_policy.cluster_ipv4_cidr_block`
-
-### `initial_node_count` is now removed
-
-`initial_node_count` has been removed in favor of `node_pool.initial_node_count`
 
 ### `instance_group_urls` is now removed
 
