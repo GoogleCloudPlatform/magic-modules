@@ -96,7 +96,14 @@ fi
 
 if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     # use terraform generator with validator overrides.
-    # tf-conversion is legacy and can be removed after Nov 15 2021
+    # Check for tf-conversion is legacy and can be removed after Nov 15 2021
+    if [ "$REPO" == "terraform-validator" ] && [ "$COMMAND" == "base" ] && [ ! -d "../.ci/containers/terraform-validator-tester" ]; then
+        # Temporary shim to allow building a "base" version; only required until after
+        # initial merge. If we're building a base branch on an old mmv1 master (which
+        # we can detect by the lack of files added in this PR) the base version will
+        # require a `google` folder to exist.
+        mkdir -p $LOCAL_PATH/google
+    fi
     bundle exec compiler -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
 elif [ "$REPO" == "tf-oics" ]; then
     # use terraform generator with oics override
