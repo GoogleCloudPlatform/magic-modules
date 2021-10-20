@@ -110,22 +110,22 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
-      id: tgc-head
+      id: tfv-head
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       args:
           - 'head'
-          - 'tf-conversion'
+          - 'terraform-validator'
           - 'ga'
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
-      id: tgc-base
+      id: tfv-base
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       args:
           - 'base'
-          - 'tf-conversion'
+          - 'terraform-validator'
           - 'ga'
           - $_PR_NUMBER
 
@@ -171,10 +171,10 @@ steps:
       args:
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/terraform-google-conversion-tester'
-      id: tgc-test
+    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester'
+      id: tfv-test
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tgc-head", "tgc-base"]
+      waitFor: ["tfv-head", "tfv-base"]
       args:
           - $_PR_NUMBER
           - $COMMIT_SHA

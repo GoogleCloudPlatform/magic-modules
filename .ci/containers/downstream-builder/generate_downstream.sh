@@ -18,9 +18,14 @@ function clone_repo() {
             exit 1
         fi
     elif [ "$REPO" == "tf-conversion" ]; then
+        # This is here for backwards compatibility and can be removed after Nov 15 2021
         UPSTREAM_OWNER=GoogleCloudPlatform
         GH_REPO=terraform-google-conversion
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
+    elif [ "$REPO" == "terraform-validator" ]; then
+        UPSTREAM_OWNER=GoogleCloudPlatform
+        GH_REPO=terraform-validator
+        LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-validator
     elif [ "$REPO" == "tf-oics" ]; then
         UPSTREAM_OWNER=terraform-google-modules
         GH_REPO=docs-examples
@@ -41,7 +46,7 @@ function clone_repo() {
 }
 
 if [ $# -lt 4 ]; then
-    echo "Usage: $0 (build|diff|downstream) (terraform|tf-conversion) (ga|beta) (pr number|sha)"
+    echo "Usage: $0 (build|diff|downstream) (terraform|terraform-validator) (ga|beta) (pr number|sha)"
     exit 1
 fi
 if [ -z "$GITHUB_TOKEN" ]; then
@@ -89,8 +94,16 @@ if [ "$REPO" == "terraform" ]; then
     popd
 fi
 
-if [ "$REPO" == "tf-conversion" ]; then
+if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     # use terraform generator with validator overrides.
+    # Check for tf-conversion is legacy and can be removed after Nov 15 2021
+    if [ "$REPO" == "terraform-validator" ] && [ "$COMMAND" == "base" ] && [ ! -d "../.ci/containers/terraform-validator-tester" ]; then
+        # Temporary shim to allow building a "base" version; only required until after
+        # initial merge. If we're building a base branch on an old mmv1 master (which
+        # we can detect by the lack of files added in this PR) the base version will
+        # require a `google` folder to exist.
+        mkdir -p $LOCAL_PATH/google
+    fi
     bundle exec compiler -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
 elif [ "$REPO" == "tf-oics" ]; then
     # use terraform generator with oics override
