@@ -310,7 +310,7 @@ func TestAccStorageBucket_storageClass(t *testing.T) {
 		CheckDestroy: testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageBucket_storageClass(bucketName, "MULTI_REGIONAL", ""),
+				Config: testAccStorageBucket_storageClass(bucketName, "MULTI_REGIONAL", "US"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &bucket),
@@ -323,7 +323,7 @@ func TestAccStorageBucket_storageClass(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_storageClass(bucketName, "NEARLINE", ""),
+				Config: testAccStorageBucket_storageClass(bucketName, "NEARLINE", "US"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &updated),
@@ -1219,20 +1219,14 @@ resource "google_storage_bucket" "bucket" {
 }
 
 func testAccStorageBucket_storageClass(bucketName, storageClass, location string) string {
-	locationBlock := `
-	location = "US"`
-
-	if location != "" {
-		locationBlock = fmt.Sprintf(`
-	location = "%s"`, location)
-	}
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name          = "%s"
-  storage_class = "%s"%s
+  storage_class = "%s"
+  location      = "%s"
   force_destroy = true
 }
-`, bucketName, storageClass, locationBlock)
+`, bucketName, storageClass, location)
 }
 
 func testGoogleStorageBucketsCors(bucketName string) string {
