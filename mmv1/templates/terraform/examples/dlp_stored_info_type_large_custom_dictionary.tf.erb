@@ -15,6 +15,7 @@ resource "google_data_loss_prevention_stored_info_type" "<%= ctx[:primary_resour
 
 resource "google_storage_bucket" "bucket" {
   name          = "<%= ctx[:vars]['bucket_name'] %>"
+  location      = "US"
   force_destroy = true
 }
 

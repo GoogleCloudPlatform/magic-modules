@@ -21,6 +21,8 @@ description: |-
     - [`update_policy.min_ready_sec` is removed from the GA provider](#update_policymin_ready_sec-is-removed-from-the-GA-provider)
   - [Resource: `google_container_cluster`](#resource-google_container_cluster)
     - [`node_config.workload_metadata_config.node_metadata` is now removed](#node_configworkload_metadata_confignode_metadata-is-now-removed)
+  - [Resource: `google_storage_bucket`](#resource-google_storage_bucket)
+    - [`location` is now required](#location-is-now-required)
 
 <!-- /TOC -->
 
@@ -210,3 +212,10 @@ resource "google_container_cluster" "cluster" {
 This field was incorrectly included in the GA `google` provider in past releases.
 In order to continue to use the feature, add `provider = google-beta` to your
 resource definition.
+
+## Resource: `google_storage_bucket`
+
+### `location` field is now required.
+
+Previously, the default value of `location` was `US`. In an attempt to avoid allowing invalid 
+conbination of `storageClass` value and default `location` value, `location` field is now required.
