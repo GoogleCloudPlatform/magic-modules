@@ -37,11 +37,12 @@ module Provider
 
     def generate_resource(pwd, data, _generate_code, _generate_docs)
       target_folder = data.output_folder
-      product_ns = data.object.__product.name
+      product_name = data.object.__product.name.downcase
+      object_name = data.object.name.underscore
       data.generate(pwd,
                     'templates/validator/resource_converter.go.erb',
                     File.join(target_folder,
-                              "converters/google/resources/#{product_ns.downcase}_#{data.object.name.underscore}.go"),
+                              "converters/google/resources/#{product_name}_#{object_name}.go"),
                     self)
     end
 
