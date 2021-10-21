@@ -193,6 +193,8 @@ if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ]; then
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/$PR_NUMBER" | \
         jq -r .html_url)
 
+    echo "Base: $UPSTREAM_OWNER:$UPSTREAM_BRANCH"
+    echo "Head: $SCRATCH_OWNER:$BRANCH"
     NEW_PR_URL=$(hub pull-request -b $UPSTREAM_OWNER:$UPSTREAM_BRANCH -h $SCRATCH_OWNER:$BRANCH -m "$PR_TITLE" -m "$PR_BODY" -m "Derived from $MM_PR_URL")
     if [ $? != 0 ]; then
         exit $?
