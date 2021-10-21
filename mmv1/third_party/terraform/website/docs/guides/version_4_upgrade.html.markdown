@@ -15,6 +15,8 @@ description: |-
     - [Runtime Configurator (`runtimeconfig`) resources have been removed from the GA provider](#runtime-configurator-runtimeconfig-resources-have-been-removed-from-the-ga-provider)
   - [Datasource: `google_product_resource`](#datasource-google_product_resource)
     - [Datasource-level change example](#datasource-level-change-example)
+  - [Resource: `google_compute_firewall`](#resource-google_compute_firewall)
+    - [One of `source_tags`, `source_ranges` or `source_service_accounts` are required on INGRESS firewalls](#one-of-source_tags-source_ranges-or-source_service_accounts-are-required-on-ingress-firewalls)
   - [Resource: `google_compute_instance_group_manager`](#resource-google_compute_instance_group_manager)
     - [`update_policy.min_ready_sec` is removed from the GA provider](#update_policymin_ready_sec-is-removed-from-the-ga-provider)
   - [Resource: `google_compute_region_instance_group_manager`](#resource-google_compute_region_instance_group_manager)
