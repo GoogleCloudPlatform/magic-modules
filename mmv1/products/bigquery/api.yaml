@@ -23,7 +23,7 @@ scopes:
 apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: BigQuery API
-    url: https://console.cloud.google.com/apis/library/bigquery-json.googleapis.com/
+    url: https://console.cloud.google.com/apis/library/bigquery.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
     name: 'Dataset'
