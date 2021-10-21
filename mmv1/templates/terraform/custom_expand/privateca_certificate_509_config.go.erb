@@ -1,0 +1,33 @@
+<%# See mmv1/third_party/terraform/utils/privateca_utils.go for the sub-expanders and explanation %>
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	if v == nil {
+               return v, nil
+	}
+        l := v.([]interface{})
+        if len(l) == 0 || l[0] == nil {
+                return nil, nil
+        }
+        raw := l[0]
+        original := raw.(map[string]interface{})
+        if len(original) == 0 {
+                return nil, nil
+        }
+        transformed := make(map[string]interface{})
+
+	caOptions, _ := expandPrivatecaCertificateConfigX509ConfigCaOptions(original["ca_options"], d, config)
+        transformed["caOptions"] = caOptions
+
+        keyUsage, _ := expandPrivatecaCertificateConfigX509ConfigKeyUsage(original["key_usage"], d, config)
+	transformed["keyUsage"] = keyUsage
+
+	policyIds, _ := expandPrivatecaCertificateConfigX509ConfigPolicyIds(original["policy_ids"], d, config)
+	transformed["policyIds"] = policyIds
+
+        aiaOcspServers, _ := expandPrivatecaCertificateConfigX509ConfigAiaOcspServers(original["aia_ocsp_servers"], d, config)
+        transformed["aiaOcspServers"] = aiaOcspServers
+
+	addExts, _ := expandPrivatecaCertificateConfigX509ConfigAdditionalExtensions(original["additional_extensions"], d, config)
+        transformed["additionalExtensions"] = addExts
+
+	return transformed, nil
+}

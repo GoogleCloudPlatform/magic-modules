@@ -97,6 +97,10 @@ module Api
 
       # A pattern that maps expected user input to expected API input.
       attr_reader :pattern
+
+      # Used in the schema to indicate if a change in a field requires
+      # the resource to be destroyed and recreated.
+      attr_reader :force_new
     end
 
     include Fields
@@ -132,6 +136,7 @@ module Api
       check :update_id, type: ::String
       check :fingerprint_name, type: ::String
       check :pattern, type: ::String
+      check :force_new, type: :boolean
 
       check_default_value_property
       check_conflicts
