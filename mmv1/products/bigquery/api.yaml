@@ -423,10 +423,10 @@ objects:
             name: 'query'
             description: 'Configures a query job.'
             exactly_one_of:
-              - query
-              - load
-              - copy
-              - extract
+              - configuration.0.query
+              - configuration.0.load
+              - configuration.0.copy
+              - configuration.0.extract
             properties:
               - !ruby/object:Api::Type::String
                 name: 'query'
@@ -589,25 +589,25 @@ objects:
                     name: 'statementTimeoutMs'
                     description: 'Timeout period for each statement in a script.'
                     at_least_one_of:
-                      - query.0.scriptOptions.0.statementTimeoutMs
-                      - query.0.scriptOptions.0.statementByteBudget
-                      - query.0.scriptOptions.0.keyResultStatement
+                      - configuration.0.query.0.script_options.0.statement_timeout_ms
+                      - configuration.0.query.0.script_options.0.statement_byte_budget
+                      - configuration.0.query.0.script_options.0.key_result_statement
                   - !ruby/object:Api::Type::String
                     name: 'statementByteBudget'
                     description: 'Limit on the number of bytes billed per statement. Exceeding this budget results in an error.'
                     at_least_one_of:
-                      - query.0.scriptOptions.0.statementTimeoutMs
-                      - query.0.scriptOptions.0.statementByteBudget
-                      - query.0.scriptOptions.0.keyResultStatement
+                      - configuration.0.query.0.script_options.0.statement_timeout_ms
+                      - configuration.0.query.0.script_options.0.statement_byte_budget
+                      - configuration.0.query.0.script_options.0.key_result_statement
                   - !ruby/object:Api::Type::Enum
                     name: 'keyResultStatement'
                     description: |
                       Determines which statement in the script represents the "key result",
                       used to populate the schema and query results of the script job.
                     at_least_one_of:
-                      - query.0.scriptOptions.0.statementTimeoutMs
-                      - query.0.scriptOptions.0.statementByteBudget
-                      - query.0.scriptOptions.0.keyResultStatement
+                      - configuration.0.query.0.script_options.0.statement_timeout_ms
+                      - configuration.0.query.0.script_options.0.statement_byte_budget
+                      - configuration.0.query.0.script_options.0.key_result_statement
                     values:
                       - :LAST
                       - :FIRST_SELECT
@@ -615,10 +615,10 @@ objects:
             name: 'load'
             description: 'Configures a load job.'
             exactly_one_of:
-              - query
-              - load
-              - copy
-              - extract
+              - configuration.0.query
+              - configuration.0.load
+              - configuration.0.copy
+              - configuration.0.extract
             properties:
               - !ruby/object:Api::Type::Array
                 name: 'sourceUris'
@@ -815,10 +815,10 @@ objects:
             name: 'copy'
             description: 'Copies a table.'
             exactly_one_of:
-              - query
-              - load
-              - copy
-              - extract
+              - configuration.0.query
+              - configuration.0.load
+              - configuration.0.copy
+              - configuration.0.extract
             properties:
               - !ruby/object:Api::Type::Array
                 name: 'sourceTables'
@@ -900,10 +900,10 @@ objects:
             name: 'extract'
             description: 'Configures an extract job.'
             exactly_one_of:
-              - query
-              - load
-              - copy
-              - extract
+              - configuration.0.query
+              - configuration.0.load
+              - configuration.0.copy
+              - configuration.0.extract
             properties:
               - !ruby/object:Api::Type::Array
                 name: 'destinationUris'
@@ -942,8 +942,8 @@ objects:
                 description: |
                   A reference to the table being exported.
                 exactly_one_of:
-                  - extract.0.source_table
-                  - extract.0.source_model
+                  - configuration.0.extract.0.source_table
+                  - configuration.0.extract.0.source_model
                 properties:
                   - !ruby/object:Api::Type::String
                     name: 'projectId'
@@ -962,8 +962,8 @@ objects:
                 description: |
                   A reference to the model being exported.
                 exactly_one_of:
-                  - extract.0.source_table
-                  - extract.0.source_model
+                  - configuration.0.extract.0.source_table
+                  - configuration.0.extract.0.source_model
                 properties:
                   - !ruby/object:Api::Type::String
                     name: 'projectId'
