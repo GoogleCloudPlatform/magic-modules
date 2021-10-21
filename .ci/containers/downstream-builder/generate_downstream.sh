@@ -4,6 +4,7 @@ set -e
 
 function clone_repo() {
     SCRATCH_OWNER=modular-magician
+    UPSTREAM_BRANCH=master
     if [ "$REPO" == "terraform" ]; then
         if [ "$VERSION" == "ga" ]; then
             UPSTREAM_OWNER=hashicorp
@@ -24,6 +25,7 @@ function clone_repo() {
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
     elif [ "$REPO" == "terraform-validator" ]; then
         UPSTREAM_OWNER=GoogleCloudPlatform
+        UPSTREAM_BRANCH=main
         GH_REPO=terraform-validator
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-validator
     elif [ "$REPO" == "tf-oics" ]; then
@@ -164,7 +166,7 @@ if [ "$REPO" == "terraform" ]; then
 fi
 
 PR_NUMBER=$(curl -L -s -H "Authorization: token ${GITHUB_TOKEN}" \
-    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=closed&base=master&sort=updated&direction=desc" | \
+    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=closed&base=$UPSTREAM_BRANCH&sort=updated&direction=desc" | \
     jq -r ".[] | if .merge_commit_sha == \"$REFERENCE\" then .number else empty end")
 if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ] && [ "$CHANGELOG" == "true" ]; then
     # Add the changelog entry!
@@ -191,7 +193,7 @@ if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ]; then
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/$PR_NUMBER" | \
         jq -r .html_url)
 
-    NEW_PR_URL=$(hub pull-request -b $UPSTREAM_OWNER:master -h $SCRATCH_OWNER:$BRANCH -m "$PR_TITLE" -m "$PR_BODY" -m "Derived from $MM_PR_URL")
+    NEW_PR_URL=$(hub pull-request -b $UPSTREAM_OWNER:$UPSTREAM_BRANCH -h $SCRATCH_OWNER:$BRANCH -m "$PR_TITLE" -m "$PR_BODY" -m "Derived from $MM_PR_URL")
     if [ $? != 0 ]; then
         exit $?
     fi
