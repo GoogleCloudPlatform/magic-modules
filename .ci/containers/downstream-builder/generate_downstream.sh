@@ -199,10 +199,12 @@ if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ]; then
     if [ $? != 0 ]; then
         exit $?
     fi
+    echo "Created PR $NEW_PR_URL"
     NEW_PR_NUMBER=$(echo $NEW_PR_URL | awk -F '/' '{print $NF}')
 
     # Wait a few seconds, then merge the PR.
     sleep 5
+    echo "Merging PR $NEW_PR_URL"
     curl -L -H "Authorization: token ${GITHUB_TOKEN}" \
         -X PUT \
         -d '{"merge_method": "squash"}' \
