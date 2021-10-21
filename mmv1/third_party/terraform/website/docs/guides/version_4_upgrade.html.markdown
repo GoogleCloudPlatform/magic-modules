@@ -60,8 +60,7 @@ description: |-
     - [Exactly one of `patch_config.0.windows_update.0.classifications`, `patch_config.0.windows_update.0.excludes` or `patch_config.0.windows_update.0.exclusive_patches` is required](#exactly-one-of-patch_config0windows_update0classifications-patch_config0windows_update0excludes-or-patch_config0windows_update0exclusive_patches-is-required)
     - [At least one of `patch_config.0.pre_step.0.linux_exec_step_config` or `patch_config.0.pre_step.0.windows_exec_step_config` is required](#at-least-one-of-patch_config0pre_step0linux_exec_step_config-or-patch_config0pre_step0windows_exec_step_config-is-required)
     - [At least one of `patch_config.0.post_step.0.linux_exec_step_config` or `patch_config.0.post_step.0.windows_exec_step_config` is required](#at-least-one-of-patch_config0post_step0linux_exec_step_config-or-patch_config0post_step0windows_exec_step_config-is-required)
-- [Resource: `google_spanner_instance`](#resource-google_spanner_instance)
-
+  - [Resource: `google_spanner_instance`](#resource-google_spanner_instance)
     - [Exactly one of `num_nodes` or `processing_units` is required](#exactly-one-of-num_nodes-or-processing_units-is-required)
 
 <!-- /TOC -->
