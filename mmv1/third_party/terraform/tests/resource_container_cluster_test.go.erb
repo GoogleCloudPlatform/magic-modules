@@ -221,6 +221,30 @@ func TestAccContainerCluster_withNotificationConfig(t *testing.T) {
 		},
 	})
 }
+
+func TestAccContainerCluster_withWorkloadCertificates(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", randString(t, 10))
+	pid := getTestProjectFromEnv()
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:	  func() { testAccPreCheck(t) },
+		Providers:	  testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withWorkloadCertificates(pid, clusterName, npName),
+			},
+			{
+				ResourceName:            "google_container_cluster.cluster",
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
+		},
+	})
+}
 <% end -%>
 
 <% unless version == 'ga' -%>
@@ -2571,6 +2595,37 @@ resource "google_container_cluster" "notification_config" {
 }
 `, clusterName)
 }
+
+func testAccContainerCluster_withWorkloadCertificates(pid string, clusterName string, npName string) string {
+	return fmt.Sprintf(`
+
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  release_channel {
+    channel = "RAPID"
+  }
+
+  node_pool {
+    name = "%s"
+    initial_node_count = 1
+    node_config {
+      machine_type = "e2-medium"
+    }
+  }
+
+  workload_identity_config {
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+  }
+
+}
+`, pid, clusterName, npName)
+}
+
 <% end -%>
 <% unless version == 'ga' -%>
 func testAccContainerCluster_withConfidentialNodes(clusterName string, npName string) string {

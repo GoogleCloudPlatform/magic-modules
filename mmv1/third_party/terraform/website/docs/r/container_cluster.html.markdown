@@ -266,6 +266,8 @@ region are guaranteed to support the same version.
 
 * `notification_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the [cluster upgrade notifications](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-upgrade-notifications) feature. Structure is documented below.
 
+* `workload_certificates` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for [Workload Certificates](https://cloud.google.com/traffic-director/docs/security-envoy-setup) feature. Structure is documented below [documented below](#nested_workload_certificates).
+
 * `pod_security_policy_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
     [PodSecurityPolicy](https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies) feature.
     Structure is documented below.
@@ -765,6 +767,11 @@ notification_config {
   }
 }
 ```
+
+<a name="nested_workload_certificates"></a> The `workload_certificates` block supports:
+
+* `enable_certificates` (Required) - Whether Workload Certificates is enabled. 
+    If set, the GKE Workload Identity Certificates controller and node agent will be deployed in the cluster, which can then be configured by creating a WorkloadCertificateConfig Custom Resource.
 
 The `pod_security_policy_config` block supports:
 

@@ -1341,6 +1341,25 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+
+			"workload_certificates": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				MaxItems:    1,
+				Description: `Configuration for issuance of mTLS keys and certificates to Kubernetes pods. Warning: This configuration can't be changed (or added/removed) after cluster creation without deleting and recreating the entire cluster.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enable_certificates": {
+							Type:        schema.TypeBool,
+							Required:    true,
+							ForceNew:    true,
+							Description: `Whether Workload Certificates is enabled. If set, the GKE Workload Identity Certificates controller and node agent will be deployed in the cluster, which can then be configured by creating a WorkloadCertificateConfig Custom Resource.`,
+						},
+					},
+				},
+			},
 <% end -%>
 		},
 	}
@@ -1480,6 +1499,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		ConfidentialNodes: expandConfidentialNodes(d.Get("confidential_nodes")),
 <% end -%>
 		ResourceLabels: expandStringMap(d, "resource_labels"),
+<% unless version == 'ga' -%>
+		WorkloadCertificates: expandWorkloadCertificates(d.Get("workload_certificates")),
+<% end -%>
 	}
 
 	// shielded nodes is computed and optional yet serverside
@@ -1831,6 +1853,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 	if err := d.Set("enable_l4_ilb_subsetting", cluster.NetworkConfig.EnableL4ilbSubsetting); err != nil {
 		return fmt.Errorf("Error setting enable_l4_ilb_subsetting: %s", err)
+	}
+	if err := d.Set("workload_certificates", flattenWorkloadCertificates(cluster.WorkloadCertificates)); err != nil {
+		return err
 	}
 <% end -%>
 	if err := d.Set("enable_tpu", cluster.EnableTpu); err != nil {
@@ -3353,6 +3378,17 @@ func expandNotificationConfig(configured interface{}) *containerBeta.Notificatio
 		},
 	}
 }
+func expandWorkloadCertificates(configured interface{}) *containerBeta.WorkloadCertificates {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	config := l[0].(map[string]interface{})
+	return &containerBeta.WorkloadCertificates{
+		EnableCertificates: config["enable_certificates"].(bool),
+	}
+}
+
 <% end -%>
 
 <% unless version == 'ga' -%>
@@ -3651,6 +3687,16 @@ func flattenNotificationConfig(c *containerBeta.NotificationConfig) []map[string
 			},
 		},
 	}
+}
+
+func flattenWorkloadCertificates(c *containerBeta.WorkloadCertificates) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"enable_certificates": c.EnableCertificates,
+		})
+	}
+	return result
 }
 <% end -%>
 
