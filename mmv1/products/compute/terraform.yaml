@@ -176,10 +176,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       cdnPolicy.clientTtl: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        send_empty_value: true
       cdnPolicy.defaultTtl: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        send_empty_value: true
       cdnPolicy.maxTtl: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        send_empty_value: true
+      cdnPolicy.signedUrlCacheMaxAgeSec: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
+      cdnPolicy.negativeCachingPolicy.ttl: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_import: true
     exclude_validator: true
@@ -456,6 +463,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      failoverPolicy.disableConnectionDrainOnFailover: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
+      failoverPolicy.dropTrafficIfUnhealthy: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
       connectionTrackingPolicy.idleTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   RegionInstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride

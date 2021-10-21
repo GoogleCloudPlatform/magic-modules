@@ -14,4 +14,7 @@
 -%>
 SchemaVersion: 1,
 MigrateState:  resourceComputeFirewallMigrateState,
-CustomizeDiff: resourceComputeFirewallEnableLoggingCustomizeDiff,
+CustomizeDiff: customdiff.All(
+		resourceComputeFirewallEnableLoggingCustomizeDiff,
+		resourceComputeFirewallSourceFieldsCustomizeDiff,
+	),
