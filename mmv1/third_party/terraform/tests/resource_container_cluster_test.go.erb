@@ -2619,7 +2619,11 @@ resource "google_container_cluster" "cluster" {
   }
 
   workload_identity_config {
-    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+  }
+
+  workload_certificates {
+	enable_certificates = true
   }
 
 }
