@@ -138,7 +138,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'protectionLevel'
             description: |
-              The protection level to use when creating a version based on this template.
+              The protection level to use when creating a version based on this template. Possible values include "SOFTWARE", "HSM", "EXTERNAL". Defaults to "SOFTWARE".
             input: true
       - !ruby/object:Api::Type::Time
         name: 'nextRotationTime'
