@@ -1,6 +1,7 @@
 package google
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -21,14 +22,6 @@ import (
 // Expander utilities
 
 func expandPrivatecaCertificateConfigX509ConfigCaOptions(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	if v == nil {
-		return v, nil
-	}
-	l := v.([]interface{})
-	if len(l) == 0 || l[0] == nil {
-		return nil, nil
-	}
-
 	// Virtual fields to distinguish between unset booleans and booleans set with a default value.
 	// Unset is_ca or unset max_issuer_path_length either allow any values for these fields when
 	// used in an issuance policy, or allow the API to use default values when used in a
@@ -38,9 +31,36 @@ func expandPrivatecaCertificateConfigX509ConfigCaOptions(v interface{}, d Terraf
 	allowIsCa, _ := d.GetOk("allow_is_ca")
 	allowPathLength, _ := d.GetOk("allow_max_path_length")
 
+	if v == nil {
+		if allowIsCa.(bool) {
+			return nil, fmt.Errorf("allow_is_ca cannot be set without setting ca_options.is_ca")
+		}
+		if allowPathLength.(bool) {
+			return nil, fmt.Errorf("allow_max_path_length cannot be set without setting ca_options.max_issuer_path_length")
+		}
+		return v, nil
+	}
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		if allowIsCa.(bool) {
+			return nil, fmt.Errorf("allow_is_ca cannot be set without setting ca_options.is_ca")
+		}
+		if allowPathLength.(bool) {
+			return nil, fmt.Errorf("allow_max_path_length cannot be set without setting ca_options.max_issuer_path_length")
+		}
+		return nil, nil
+	}
+
 	raw := l[0]
 	original := raw.(map[string]interface{})
 	transformed := make(map[string]interface{})
+
+	if original["is_ca"].(bool) && !allowIsCa.(bool) {
+		return nil, fmt.Errorf("You must set allow_is_ca=true with ca_options.is_ca=true")
+	}
+	if original["max_issuer_path_length"].(int) > 0 && !allowPathLength.(bool) {
+		return nil, fmt.Errorf("You must set allow_max_path_length=true with ca_options.max_issuer_path_length>0")
+	}
 
 	if allowIsCa.(bool) {
 		transformed["isCa"] = original["is_ca"]

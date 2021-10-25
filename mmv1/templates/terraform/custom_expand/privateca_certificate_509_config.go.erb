@@ -14,19 +14,34 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
         }
         transformed := make(map[string]interface{})
 
-	caOptions, _ := expandPrivatecaCertificateConfigX509ConfigCaOptions(original["ca_options"], d, config)
+	caOptions, err := expandPrivatecaCertificateConfigX509ConfigCaOptions(original["ca_options"], d, config)
+        if err != nil {
+                return nil, err
+        }
         transformed["caOptions"] = caOptions
 
-        keyUsage, _ := expandPrivatecaCertificateConfigX509ConfigKeyUsage(original["key_usage"], d, config)
+        keyUsage, err := expandPrivatecaCertificateConfigX509ConfigKeyUsage(original["key_usage"], d, config)
+        if err != nil {
+                return nil, err
+        }
 	transformed["keyUsage"] = keyUsage
 
-	policyIds, _ := expandPrivatecaCertificateConfigX509ConfigPolicyIds(original["policy_ids"], d, config)
+	policyIds, err := expandPrivatecaCertificateConfigX509ConfigPolicyIds(original["policy_ids"], d, config)
+        if err != nil {
+                return nil, err
+        }
 	transformed["policyIds"] = policyIds
 
-        aiaOcspServers, _ := expandPrivatecaCertificateConfigX509ConfigAiaOcspServers(original["aia_ocsp_servers"], d, config)
+        aiaOcspServers, err := expandPrivatecaCertificateConfigX509ConfigAiaOcspServers(original["aia_ocsp_servers"], d, config)
+        if err != nil {
+                return nil, err
+        }
         transformed["aiaOcspServers"] = aiaOcspServers
 
-	addExts, _ := expandPrivatecaCertificateConfigX509ConfigAdditionalExtensions(original["additional_extensions"], d, config)
+	addExts, err := expandPrivatecaCertificateConfigX509ConfigAdditionalExtensions(original["additional_extensions"], d, config)
+        if err != nil {
+                return nil, err
+        }
         transformed["additionalExtensions"] = addExts
 
 	return transformed, nil
