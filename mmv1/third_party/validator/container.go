@@ -740,7 +740,7 @@ func expandContainerClusterWorkloadIdentityConfig(v interface{}, d TerraformReso
 	original := raw.(map[string]interface{})
 	transformed := make(map[string]interface{})
 
-	transformedWorkloadPool, err := expandContainerClusterWorkloadIdentityConfigWorkloadPool(original["identity_namespace"], d, config)
+	transformedWorkloadPool, err := expandContainerClusterWorkloadIdentityConfigWorkloadPool(original["workload_pool"], d, config)
 	if err != nil {
 		return nil, err
 	} else if val := reflect.ValueOf(transformedWorkloadPool); val.IsValid() && !isEmptyValue(val) {
