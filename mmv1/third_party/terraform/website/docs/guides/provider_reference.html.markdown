@@ -64,31 +64,32 @@ provider "google-beta" {}
 
 #### Running Terraform on your workstation.
 
-If you are using Terraform on your workstation it's recommended that you install
+If you are using Terraform on your workstation we recommend that you install
 `gcloud` and authenticate using [User Application Default Credentials ("ADCs")](https://cloud.google.com/sdk/gcloud/reference/auth/application-default)
 as a primary authentication method. You can enable ADCs by running the command
 `gcloud auth application-default login`.
 
-The quota project for requests will be read automatically from the `core/project`
-value. You can override this project by specifying `--project` flag when running
-`gcloud auth application-default login`. `gcloud` should return this message if
-you have set the correct billing project: `Quota project "your-project" was added to ADC which can be used by Google client libraries for billing and quota.`
+Google Cloud reads the quota project for requests will be read automatically
+from the `core/project` value. You can override this project by specifying the
+`--project` flag when running `gcloud auth application-default login`. `gcloud`
+should return this message if you have set the correct billing project:
+`Quota project "your-project" was added to ADC which can be used by Google client libraries for billing and quota.`
 
 #### Running Terraform on Google Cloud
 
 If you are running Terraform in a machine on Google Cloud, you can configure
 that instance or cluster to use a [Google Service Account](https://cloud.google.com/compute/docs/authentication).
-This will allow Terraform to authenticate to Google Cloud without having to bake
-in a separate credential/authentication file. Ensure that the scope of the
-VM/Cluster is set to or includes `https://www.googleapis.com/auth/cloud-platform`.
+This allows Terraform to authenticate to Google Cloud without a separate
+credential/authentication file. Ensure that the scope of the VM/Cluster is set
+to or includes `https://www.googleapis.com/auth/cloud-platform`.
 
-#### Running Terraform outside of Google Cloud
+#### Running Terraform Outside of Google Cloud
 
-If you are running terraform outside of Google Cloud, generate an external
+If you are running Terraform outside of Google Cloud, generate an external
 credential configuration file ([example for OIDC based federation](https://cloud.google.com/iam/docs/access-resources-oidc#generate-automatic))
 or a service account key file and set the `GOOGLE_APPLICATION_CREDENTIALS`
 environment variable to the path of the JSON file. Terraform will use that file
-for authentication. In general Terraform supports the full range of
+for authentication. Terraform supports the full range of
 authentication options [documented for Google Cloud](https://cloud.google.com/docs/authentication).
 
 #### Using Terraform Cloud
@@ -102,11 +103,12 @@ All runs within the workspace will use the `GOOGLE_CREDENTIALS` variable to auth
 
 ### Impersonating Service Accounts
 
-Terraform can [impersonate a Google Service Account](https://cloud.google.com/iam/docs/creating-short-lived-service-account-credentials),
+Terraform can [impersonate a Google service account](https://cloud.google.com/iam/docs/creating-short-lived-service-account-credentials),
 allowing you to act as an appropriate service account regardless of your primary
-authentication mechanism. If you authenticate as a service account, your quota
-project and permissions will be derived from the service account rather than
-your primary authentication method (even if it was another service account).
+authentication mechanism. If you authenticate as a service account, Google Cloud
+derives your quota project and permissions from that service account rather than
+your primary authentication method, even if your primary authentication method
+was another service account.
 
 A valid primary authentication mechanism must be provided for the impersonation
 call, and your primary identity must have the `roles/iam.serviceAccountTokenCreator`
@@ -114,7 +116,7 @@ role on the service account you are impersonating.
 
 ## Configuration Reference
 
-The following attributes can be used to configure the provider. The quick
+You can use the following attributes to configure the provider. The quick
 reference should be sufficient for most use cases, but see the full reference
 if you're interested in more details. Both `google` and `google-beta` share the
 same configuration.
@@ -194,8 +196,8 @@ after which a request should be sent. Defaults to 3s. Note that if you increase
 [manage key files using the Cloud Console]. Your service account key file is
 used to complete a two-legged OAuth 2.0 flow to obtain access tokens to
 authenticate with the GCP API as needed; Terraform will use it to reauthenticate
-automatically when tokens expire. Alternatively, this can be specified using the
-`GOOGLE_CREDENTIALS` environment variable or any of the following ordered
+automatically when tokens expire. You can alternatively use the
+`GOOGLE_CREDENTIALS` environment variable, or any of the following ordered
 by precedence.
 
     * GOOGLE_CREDENTIALS
@@ -223,14 +225,14 @@ running [`gcloud auth application-default login`][gcloud adc].
 * `access_token` - (Optional) A temporary [OAuth 2.0 access token] obtained from
 the Google Authorization server, i.e. the `Authorization: Bearer` token used to
 authenticate HTTP requests to GCP APIs. This is an alternative to `credentials`,
-and ignores the `scopes` field. Alternatively, this can be specified using the
-`GOOGLE_OAUTH_ACCESS_TOKEN` environment variable. If both are specified using
-environment variables, `access_token` will be used over the `credentials` field.
+and ignores the `scopes` field. You can alternatively use the
+`GOOGLE_OAUTH_ACCESS_TOKEN` environment variable. If you specify both with
+environment variables, Terraform uses the `access_token` instead of the
+`credentials` field.
 
-    -> These access tokens cannot be renewed by Terraform and thus will only
-    work until they expire. If you anticipate Terraform needing access for
-    longer than a token's lifetime (default `1 hour`), please use a service
-    account key with `credentials` instead.
+    -> Terraform cannot renew these access tokens, and they will eventually
+expire (default `1 hour`). If Terraform needs access for longer than a token's
+lifetime, use a service account key with `credentials` instead.
 
 ---
 

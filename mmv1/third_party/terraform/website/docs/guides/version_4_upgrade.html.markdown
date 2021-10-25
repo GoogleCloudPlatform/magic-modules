@@ -159,17 +159,18 @@ terraform {
 
 ### `credentials`, `access_token` precedence has changed
 
-Both the `credentials` and `access_token` values can be drawn from the config
-directly or specified through environment variables. In earlier versions of the
-provider, `access_token` values specified through environment variables took
-precedence over `credentials` values specified in config. From `4.0.0` onwards,
-config will take precedence over environment variables for those values, and
-`access_token` will take precedence over `credentials` if both are specified
-through environment variables.
+Terraform can draw values for both the `credentials` and `access_token` from the
+config directly or from environment variables. 
 
-Note that service account impersonation is unchanged, and will continue to be
-used if specified through an environment variable while `credentials` or
-`access_token` is specified in config.
+In earlier versions of the provider, `access_token` values specified through
+environment variables took precedence over `credentials` values specified in
+config. From `4.0.0` onwards, config takes precedence over environment variables,
+and the `access_token` environment variable takes precedence over the
+`credential` environment variable.
+
+Service account impersonation is unchanged. Terraform will continue to use
+the service account if it is specified through an environment variable, even
+if `credentials` or `access_token` are specified in config.
 
 ### Redundant default scopes are removed
 
