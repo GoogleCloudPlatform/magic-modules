@@ -83,6 +83,11 @@ type Variable struct {
 	Name string `yaml:"name"`
 	// Type is the variable type.
 	Type string `yaml:"type"`
+	// DocsValue is an optional value that should be substituted directly into
+	// the documentation for this variable.  If not provided, tpgtools makes
+	// its best guess about a suitable value.  Generally, this is only provided
+	// if the "best guess" is a poor one.
+	DocsValue string `yaml:"docs_value"`
 }
 
 // Substitution contains metadata that varies for the sample context

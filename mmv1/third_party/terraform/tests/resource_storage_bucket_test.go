@@ -766,37 +766,6 @@ func TestAccStorageBucket_encryption(t *testing.T) {
 	})
 }
 
-func TestAccStorageBucket_bucketPolicyOnly(t *testing.T) {
-	t.Parallel()
-
-	bucketName := fmt.Sprintf("tf-test-acl-bucket-%d", randInt(t))
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccStorageBucket_bucketPolicyOnly(bucketName, true),
-			},
-			{
-				ResourceName:            "google_storage_bucket.bucket",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
-			},
-			{
-				Config: testAccStorageBucket_bucketPolicyOnly(bucketName, false),
-			},
-			{
-				ResourceName:            "google_storage_bucket.bucket",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
-			},
-		},
-	})
-}
-
 func TestAccStorageBucket_uniformBucketAccessOnly(t *testing.T) {
 	t.Parallel()
 
@@ -1482,17 +1451,6 @@ resource "google_storage_bucket" "bucket" {
   }
 }
 `, bucketName)
-}
-
-func testAccStorageBucket_bucketPolicyOnly(bucketName string, enabled bool) string {
-	return fmt.Sprintf(`
-resource "google_storage_bucket" "bucket" {
-  name               = "%s"
-  location           = "US"
-  bucket_policy_only = %t
-  force_destroy      = true
-}
-`, bucketName, enabled)
 }
 
 func testAccStorageBucket_uniformBucketAccessOnly(bucketName string, enabled bool) string {

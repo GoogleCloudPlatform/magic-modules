@@ -725,6 +725,8 @@ resource "google_dataflow_job" "big_data" {
 
 func testAccDataflowJob_serviceAccount(bucket, job, accountId string) string {
 	return fmt.Sprintf(`
+data "google_project" "project" {}
+
 resource "google_storage_bucket" "temp" {
   name          = "%s"
   location      = "US"
@@ -743,6 +745,7 @@ resource "google_storage_bucket_iam_member" "dataflow-gcs" {
 }
 
 resource "google_project_iam_member" "dataflow-worker" {
+  project = data.google_project.project.project_id
   role   = "roles/dataflow.worker"
   member = "serviceAccount:${google_service_account.dataflow-sa.email}"
 }

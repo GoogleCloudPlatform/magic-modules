@@ -92,7 +92,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         update_mask_fields:
           - "versionTemplate.algorithm"
       versionTemplate.protectionLevel: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_value: :SOFTWARE
+        default_value: "SOFTWARE"
       nextRotationTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       destroyScheduledDuration: !ruby/object:Overrides::Terraform::PropertyOverride
