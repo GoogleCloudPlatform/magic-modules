@@ -488,7 +488,7 @@ had been set in config explicitly.
 drift even when unset. Previously, Terraform only detected drift when the field
 had been set in config explicitly.
 
-    * `availability_type` will now detect drift even when unset. Previously,
+    * `encryption_key_name` will now detect drift even when unset. Previously,
 Terraform only detected drift when the field had been set in config explicitly.
 
 ## Resource: `google_storage_bucket`
