@@ -474,17 +474,17 @@ func expandContainerClusterNodeConfigWorkloadMetadataConfig(v interface{}, d Ter
 	original := raw.(map[string]interface{})
 	transformed := make(map[string]interface{})
 
-	transformedNodeMetadata, err := expandContainerClusterNodeConfigWorkloadMetadataConfigNodeMetadata(original["node_metadata"], d, config)
+	transformedMode, err := expandContainerClusterNodeConfigWorkloadMetadataConfigMode(original["mode"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedNodeMetadata); val.IsValid() && !isEmptyValue(val) {
-		transformed["nodeMetadata"] = transformedNodeMetadata
+	} else if val := reflect.ValueOf(transformedMode); val.IsValid() && !isEmptyValue(val) {
+		transformed["mode"] = transformedMode
 	}
 
 	return transformed, nil
 }
 
-func expandContainerClusterNodeConfigWorkloadMetadataConfigNodeMetadata(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandContainerClusterNodeConfigWorkloadMetadataConfigMode(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	return v, nil
 }
 
