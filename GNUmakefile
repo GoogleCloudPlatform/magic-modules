@@ -31,12 +31,10 @@ endif
 
 ifneq ($(OVERRIDES),)
   mmv1_compile += -r $(OVERRIDES)
-  tpgtools_compile += --overrides $(OVERRIDES)/tpgtools/overrides
-  tpgtools_compile += --path $(OVERRIDES)/tpgtools/api
+  tpgtools_compile += --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
   serialize_compile = --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
 else
-  tpgtools_compile += --overrides "overrides"
-  tpgtools_compile += --path "api"
+  tpgtools_compile += --path "api" --overrides "overrides"
   serialize_compile = --path "api" --overrides "overrides"
 endif
 
