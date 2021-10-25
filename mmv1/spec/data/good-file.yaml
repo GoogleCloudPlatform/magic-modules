@@ -123,6 +123,9 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'stringOne'
         description: 'a string property (depth 0)'
+      - !ruby/object:Api::Type::String
+        name: 'stringRename'
+        description: 'a string property (depth 0)'
       - !ruby/object:Api::Type::NestedObject
         name: 'objectOne'
         description: 'a NestedObject property (depth 0)'
@@ -137,6 +140,9 @@ objects:
               - !ruby/object:Api::Type::Integer
                 name: 'objectOneNestedNestedInteger'
                 description: 'a nested integer (depth 2)'
+          - !ruby/object:Api::Type::String
+            name: 'objectOneRename'
+            description: 'a string property (depth 1)'
       - !ruby/object:Api::Type::NestedObject
         name: 'objectTwoFlattened'
         description: 'a NestedObject property that is flattened (depth 0)'
