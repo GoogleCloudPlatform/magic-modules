@@ -1,5 +1,4 @@
 <% autogen_exception -%>
-
 package google
 
 import (
@@ -1688,7 +1687,7 @@ func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 				ResourceName:        "google_container_cluster.with_workload_identity_config",
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateVerifyIgnore: []string{"remove_default_node_pool",
+				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
 			},
 			{
 				Config: testAccContainerCluster_updateWorkloadIdentityConfig(pid, clusterName, false),
