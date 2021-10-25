@@ -70,6 +70,9 @@ description: |-
     - [At least one of `patch_config.0.post_step.0.linux_exec_step_config` or `patch_config.0.post_step.0.windows_exec_step_config` is required](#at-least-one-of-patch_config0post_step0linux_exec_step_config-or-patch_config0post_step0windows_exec_step_config-is-required)
   - [Resource: `google_spanner_instance`](#resource-google_spanner_instance)
     - [Exactly one of `num_nodes` or `processing_units` is required](#exactly-one-of-num_nodes-or-processing_units-is-required)
+  - [Resource: `google_sql_database_instance`](#resource-google_sql_database_instance)
+    - [First-generation fields have been removed](#first-generation-fields-have-been-removed)
+    - [Drift detection and defaults enabled on fields](#drift-detection-and-defaults-enabled-on-fields)
   - [Resource: `google_storage_bucket`](#resource-google_storage_bucket)
     - [`bucket_policy_only` is now removed](#bucket_policy_only-is-now-removed)
 
@@ -457,6 +460,36 @@ the provider will no longer convert the service name. Use `bigquery.googleapis.c
 ### Exactly one of `num_nodes` or `processing_units` is required
 
 The provider will now enforce at plan time that one of these fields be set.
+
+### Resource: `google_sql_database_instance`
+
+### First-generation fields have been removed
+
+Removed fields specific to first-generation SQL instances:
+`authorized_gae_applications`, `crash_safe_replication`, `replication_type`
+
+### Drift detection and defaults enabled on fields
+
+Added drift detection and plan-time defaults to several fields used to configure
+second-generation SQL instances. If you see changes flagged by Terraform after
+running `terraform plan`, amend your config to resolve them.
+
+The affected fields are:
+
+    * `activation_policy` will now default to `ALWAYS` at plan time, and detect
+drift even when unset. Previously, Terraform only detected drift when the field
+had been set in config explicitly.
+
+    * `availability_type` will now default to `ZONAL` at plan time, and detect
+drift even when unset. Previously, Terraform only detected drift when the field
+had been set in config explicitly.
+
+    * `disk_type` will now default to `PD_SSD` at plan time, and detect
+drift even when unset. Previously, Terraform only detected drift when the field
+had been set in config explicitly.
+
+    * `availability_type` will now detect drift even when unset. Previously,
+Terraform only detected drift when the field had been set in config explicitly.
 
 ## Resource: `google_storage_bucket`
 

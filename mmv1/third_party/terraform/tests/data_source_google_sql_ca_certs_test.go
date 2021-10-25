@@ -76,7 +76,6 @@ resource "google_sql_database_instance" "foo" {
   region = "us-central1"
   settings {
     tier                   = "db-f1-micro"
-    crash_safe_replication = false
   }
 
   deletion_protection = false
