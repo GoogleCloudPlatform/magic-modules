@@ -1082,48 +1082,10 @@ func testAccCheckComputeInstanceTemplateExists(t *testing.T, n string, instanceT
 		panic("Attempted to check existence of Instance template that was nil.")
 	}
 
-	switch instanceTemplate.(type) {
-	case *compute.InstanceTemplate:
-		return testAccCheckComputeInstanceTemplateExistsInProject(t, n, getTestProjectFromEnv(), instanceTemplate.(*compute.InstanceTemplate))
-	case *compute.InstanceTemplate:
-		return testAccCheckComputeBetaInstanceTemplateExistsInProject(t, n, getTestProjectFromEnv(), instanceTemplate.(*compute.InstanceTemplate))
-	default:
-		panic("Attempted to check existence of an Instance template of unknown type.")
-	}
+	return testAccCheckComputeInstanceTemplateExistsInProject(t, n, getTestProjectFromEnv(), instanceTemplate.(*compute.InstanceTemplate))
 }
 
 func testAccCheckComputeInstanceTemplateExistsInProject(t *testing.T, n, p string, instanceTemplate *compute.InstanceTemplate) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
-		}
-
-		config := googleProviderConfig(t)
-
-		splits := strings.Split(rs.Primary.ID, "/")
-		templateName := splits[len(splits)-1]
-		found, err := config.NewComputeClient(config.userAgent).InstanceTemplates.Get(
-			p, templateName).Do()
-		if err != nil {
-			return err
-		}
-
-		if found.Name != templateName {
-			return fmt.Errorf("Instance template not found")
-		}
-
-		*instanceTemplate = *found
-
-		return nil
-	}
-}
-
-func testAccCheckComputeBetaInstanceTemplateExistsInProject(t *testing.T, n, p string, instanceTemplate *compute.InstanceTemplate) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
