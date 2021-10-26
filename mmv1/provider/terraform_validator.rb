@@ -83,8 +83,8 @@ module Provider
                            'third_party/terraform/utils/iam_kms_crypto_key.go.erb'],
                           ['converters/google/resources/metadata.go.erb',
                            'third_party/terraform/utils/metadata.go'],
-                         ['converters/google/resources/compute_instance.go.erb',
-                        '  third_party/validator/compute_instance.go'],
+                          ['converters/google/resources/compute_instance.go.erb',
+                           'third_party/validator/compute_instance.go']
                         ],
                         file_template)
     end
