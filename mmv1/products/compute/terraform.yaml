@@ -1440,6 +1440,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
+      subnetwork: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareOptionalSubnet'
   GlobalNetworkEndpoint: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{global_network_endpoint_group}}/{{ip_address}}/{{fqdn}}/{{port}}"
     mutex: networkEndpoint/{{project}}/{{global_network_endpoint_group}}
