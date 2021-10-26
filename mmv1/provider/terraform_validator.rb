@@ -81,10 +81,10 @@ module Provider
                            'third_party/terraform/utils/iam_kms_key_ring.go.erb'],
                           ['converters/google/resources/iam_kms_crypto_key.go',
                            'third_party/terraform/utils/iam_kms_crypto_key.go.erb'],
-                          ['converters/google/resources/metadata.go.erb',
-                           'third_party/terraform/utils/metadata.go'],
-                          ['converters/google/resources/compute_instance.go.erb',
-                           'third_party/validator/compute_instance.go']
+                          ['converters/google/resources/metadata.go',
+                           'third_party/terraform/utils/metadata.go.erb'],
+                          ['converters/google/resources/compute_instance.go',
+                           'third_party/validator/compute_instance.go.erb']
                         ],
                         file_template)
     end
