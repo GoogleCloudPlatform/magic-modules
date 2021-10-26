@@ -271,7 +271,6 @@ settings.backup_configuration.binary_log_enabled are both set to true.`,
 						"disk_type": {
 							Type:     schema.TypeString,
 							Optional: true,
-							// Set computed instead of default because this property is for second-gen only.
 							Default: "PD_SSD",
 							Description: `The type of data disk: PD_SSD or PD_HDD.`,
 						},
