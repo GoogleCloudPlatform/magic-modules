@@ -80,7 +80,11 @@ module Provider
                           ['converters/google/resources/iam_kms_key_ring.go',
                            'third_party/terraform/utils/iam_kms_key_ring.go.erb'],
                           ['converters/google/resources/iam_kms_crypto_key.go',
-                           'third_party/terraform/utils/iam_kms_crypto_key.go.erb']
+                           'third_party/terraform/utils/iam_kms_crypto_key.go.erb'],
+                          ['converters/google/resources/metadata.go.erb',
+                           'third_party/terraform/utils/metadata.go'],
+                         ['converters/google/resources/compute_instance.go.erb',
+                        '  third_party/validator/compute_instance.go'],
                         ],
                         file_template)
     end
@@ -100,8 +104,6 @@ module Provider
                         'third_party/validator/json_map.go'],
                        ['converters/google/resources/project.go',
                         'third_party/validator/project.go'],
-                       ['converters/google/resources/compute_instance.go',
-                        'third_party/validator/compute_instance.go'],
                        ['converters/google/resources/sql_database_instance.go',
                         'third_party/validator/sql_database_instance.go'],
                        ['converters/google/resources/storage_bucket.go',
@@ -154,8 +156,7 @@ module Provider
                         'third_party/terraform/utils/common_operation.go'],
                        ['converters/google/resources/convert.go',
                         'third_party/terraform/utils/convert.go'],
-                       ['converters/google/resources/metadata.go',
-                        'third_party/terraform/utils/metadata.go'],
+
                        ['converters/google/resources/service_scope.go',
                         'third_party/terraform/utils/service_scope.go'],
                        ['converters/google/resources/kms_utils.go',
