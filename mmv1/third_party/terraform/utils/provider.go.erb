@@ -170,7 +170,9 @@ func Provider() *schema.Provider {
 			DataflowCustomEndpointEntryKey:               DataflowCustomEndpointEntry,
 			IamCredentialsCustomEndpointEntryKey:         IamCredentialsCustomEndpointEntry,
 			ResourceManagerV2CustomEndpointEntryKey:      ResourceManagerV2CustomEndpointEntry,
+			<% unless version == "ga" -%>
 			RuntimeConfigCustomEndpointEntryKey:          RuntimeConfigCustomEndpointEntry,
+			<% end -%>
 			IAMCustomEndpointEntryKey:                    IAMCustomEndpointEntry,
 			ServiceNetworkingCustomEndpointEntryKey:      ServiceNetworkingCustomEndpointEntry,
 			ServiceUsageCustomEndpointEntryKey:           ServiceUsageCustomEndpointEntry,
@@ -278,8 +280,8 @@ func Provider() *schema.Provider {
 			"google_projects":                                  dataSourceGoogleProjects(),
 			"google_project_organization_policy":               dataSourceGoogleProjectOrganizationPolicy(),
 			"google_pubsub_topic":                              dataSourceGooglePubsubTopic(),
-			"google_runtimeconfig_config":                      dataSourceGoogleRuntimeconfigConfig(),
 			<% unless version == 'ga' -%>
+			"google_runtimeconfig_config":                      dataSourceGoogleRuntimeconfigConfig(),
 			"google_runtimeconfig_variable":                    dataSourceGoogleRuntimeconfigVariable(),
 			<% end -%>
 			"google_secret_manager_secret":                     dataSourceSecretManagerSecret(),
@@ -356,9 +358,9 @@ products.each do |product|
 	unless iam_policy.nil? || iam_policy.exclude
 	  iam_class_name = product_definition.name + object.name
 -%>
-	"<%= terraform_name -%>_iam_binding":              ResourceIamBinding(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc<% if iam_policy.ga_deprecation %>, IamWithGAResourceDeprecation()<% end %>),
-	"<%= terraform_name -%>_iam_member":               ResourceIamMember(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc<% if iam_policy.ga_deprecation %>, IamWithGAResourceDeprecation()<% end %>),
-	"<%= terraform_name -%>_iam_policy":               ResourceIamPolicy(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc<% if iam_policy.ga_deprecation %>, IamWithGAResourceDeprecation()<% end %>),
+	"<%= terraform_name -%>_iam_binding":              ResourceIamBinding(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc),
+	"<%= terraform_name -%>_iam_member":               ResourceIamMember(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc),
+	"<%= terraform_name -%>_iam_policy":               ResourceIamPolicy(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc),
 <%
 	end # unless iam_policy.nil? || iam_policy.exclude
   end   # product_definition.objects.each do
@@ -434,8 +436,10 @@ end     # products.each do
 				"google_project_iam_custom_role":               resourceGoogleProjectIamCustomRole(),
 				"google_project_organization_policy":           resourceGoogleProjectOrganizationPolicy(),
 				"google_project_usage_export_bucket":           resourceProjectUsageBucket(),
+				<% unless version == 'ga' -%>
 				"google_runtimeconfig_config":                  resourceRuntimeconfigConfig(),
 				"google_runtimeconfig_variable":                resourceRuntimeconfigVariable(),
+				<% end -%>
 				"google_service_account":                       resourceGoogleServiceAccount(),
 				"google_service_account_key":                   resourceGoogleServiceAccountKey(),
 				"google_service_networking_peered_dns_domain":  resourceGoogleServiceNetworkingPeeredDNSDomain(),
@@ -635,7 +639,9 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.DataflowBasePath = d.Get(DataflowCustomEndpointEntryKey).(string)
 	config.IamCredentialsBasePath = d.Get(IamCredentialsCustomEndpointEntryKey).(string)
 	config.ResourceManagerV2BasePath = d.Get(ResourceManagerV2CustomEndpointEntryKey).(string)
+	<% unless version == "ga" -%>
 	config.RuntimeConfigBasePath = d.Get(RuntimeConfigCustomEndpointEntryKey).(string)
+	<% end -%>
 	config.IAMBasePath = d.Get(IAMCustomEndpointEntryKey).(string)
 	config.ServiceNetworkingBasePath = d.Get(ServiceNetworkingCustomEndpointEntryKey).(string)
 	config.ServiceUsageBasePath = d.Get(ServiceUsageCustomEndpointEntryKey).(string)
