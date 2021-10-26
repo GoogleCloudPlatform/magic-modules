@@ -684,12 +684,7 @@ ephemeral_storage_config {
 
 * `taint` - (Optional) A list of [Kubernetes taints](https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/)
 to apply to nodes. GKE's API can only set this field on cluster creation.
-However, GKE will add taints to your nodes if you enable certain features such
-as GPUs. If this field is set, any diffs on this field will cause Terraform to
-recreate the underlying resource. Taint values can be updated safely in
-Kubernetes (eg. through `kubectl`), and it's recommended that you do not use
-this field to manage taints. If you do, `lifecycle.ignore_changes` is
-recommended. Structure is [documented below](#nested_taint).
+Structure is [documented below](#nested_taint)
 
 * `workload_metadata_config` - (Optional) Metadata configuration to expose to workloads on the node pool.
     Structure is [documented below](#nested_workload_metadata_config).
