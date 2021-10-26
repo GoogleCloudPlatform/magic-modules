@@ -15,6 +15,10 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   ResourceWithTerraformOverride: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
+      stringRename: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'stringRenamed'
+      objectOne.objectOneRename: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'objectOneRenamed'
       objectOne.objectOneFlattenedObject: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
       objectTwoFlattened: !ruby/object:Overrides::Terraform::PropertyOverride

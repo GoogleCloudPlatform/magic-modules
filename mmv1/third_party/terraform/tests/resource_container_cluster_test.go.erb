@@ -1,5 +1,4 @@
 <% autogen_exception -%>
-
 package google
 
 import (
@@ -149,6 +148,7 @@ func TestAccContainerCluster_withAddons(t *testing.T) {
 				ResourceName:            "google_container_cluster.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
+				// TODO: clean up this list in `4.0.0`, remove both `workload_identity_config` fields (same for below)
 				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 			{
@@ -2407,7 +2407,7 @@ resource "google_container_cluster" "primary" {
   min_master_version = "latest"
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
 
   addons_config {
@@ -2460,7 +2460,7 @@ resource "google_container_cluster" "primary" {
   min_master_version = "latest"
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
 
   addons_config {
@@ -2513,7 +2513,7 @@ resource "google_container_cluster" "primary" {
   min_master_version = "latest"
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
 
   addons_config {
@@ -2578,7 +2578,6 @@ func testAccContainerCluster_withConfidentialNodes(clusterName string, npName st
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
   location           = "us-central1-a"
-  enable_shielded_nodes = true
   release_channel {
     channel = "RAPID"
   }
@@ -2603,7 +2602,6 @@ func testAccContainerCluster_disableConfidentialNodes(clusterName string, npName
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
   location           = "us-central1-a"
-  enable_shielded_nodes = true
   release_channel {
     channel = "RAPID"
   }
@@ -2630,7 +2628,6 @@ func testAccContainerCluster_withILBSubSetting(clusterName string, npName string
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
   location           = "us-central1-a"
-  enable_shielded_nodes = true
   release_channel {
     channel = "RAPID"
   }
@@ -2653,7 +2650,6 @@ func testAccContainerCluster_disableILBSubSetting(clusterName string, npName str
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
   location           = "us-central1-a"
-  enable_shielded_nodes = true
   release_channel {
     channel = "RAPID"
   }
@@ -4166,7 +4162,7 @@ resource "google_container_cluster" "with_workload_identity_config" {
   initial_node_count = 1
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
   remove_default_node_pool = true
 
@@ -4179,12 +4175,12 @@ func testAccContainerCluster_updateWorkloadIdentityConfig(projectID string, clus
 	if enable {
 		workloadIdentityConfig = `
 			workload_identity_config {
-			identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+		  workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
 		}`
         } else {
 		workloadIdentityConfig = `
 			workload_identity_config {
-			identity_namespace = ""
+			workload_pool = ""
 		}`
         }
 	return fmt.Sprintf(`
@@ -4201,7 +4197,6 @@ resource "google_container_cluster" "with_workload_identity_config" {
 }
 `, projectID, clusterName, workloadIdentityConfig)
 }
-
 
 
 <% unless version.nil? || version == 'ga' -%>

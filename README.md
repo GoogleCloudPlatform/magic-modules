@@ -116,13 +116,13 @@ It's worth noting that Magic Modules will only generate new files when run
 locally. The "Magician"- the Magic Modules CI system- handles deletion of old
 files when creating PRs.
 
-#### Generating terraform-google-conversion
+#### Generating terraform-validator
 
-You can compile terraform-google-conversion by running the following command.
+You can compile terraform-validator by running the following command.
 If Magic Modules has been installed correctly, you'll get no errors.
 
 ```bash
-make validator OUTPUT_PATH="/path/to/your/terraform-google-conversion"
+make validator OUTPUT_PATH="/path/to/your/terraform-validator"
 ```
 
 ### Making changes to resources

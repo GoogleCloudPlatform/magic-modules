@@ -165,6 +165,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "example"
         vars:
           schema_name: "example"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "pubsub_schema_protobuf"
+        primary_resource_id: "example"
+        vars:
+          schema_name: "example"
+        test_env_vars:
+          project_name: :PROJECT_NAME
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
