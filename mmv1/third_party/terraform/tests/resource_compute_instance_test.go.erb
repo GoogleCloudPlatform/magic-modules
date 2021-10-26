@@ -2983,16 +2983,16 @@ func testAccCheckComputeInstanceHasReservationAffinity(instance *compute.Instanc
 func testAccCheckComputeInstanceHasShieldedVmConfig(instance *compute.Instance, enableSecureBoot bool, enableVtpm bool, enableIntegrityMonitoring bool) resource.TestCheckFunc {
 
 	return func(s *terraform.State) error {
-		if instance.ShieldedVmConfig.EnableSecureBoot != enableSecureBoot {
-			return fmt.Errorf("Wrong shieldedVmConfig enableSecureBoot: expected %t, got, %t", enableSecureBoot, instance.ShieldedVmConfig.EnableSecureBoot)
+		if instance.ShieldedInstanceConfig.EnableSecureBoot != enableSecureBoot {
+			return fmt.Errorf("Wrong shieldedVmConfig enableSecureBoot: expected %t, got, %t", enableSecureBoot, instance.ShieldedInstanceConfig.EnableSecureBoot)
 		}
 
-		if instance.ShieldedVmConfig.EnableVtpm != enableVtpm {
-			return fmt.Errorf("Wrong shieldedVmConfig enableVtpm: expected %t, got, %t", enableVtpm, instance.ShieldedVmConfig.EnableVtpm)
+		if instance.ShieldedInstanceConfig.EnableVtpm != enableVtpm {
+			return fmt.Errorf("Wrong shieldedVmConfig enableVtpm: expected %t, got, %t", enableVtpm, instance.ShieldedInstanceConfig.EnableVtpm)
 		}
 
-		if instance.ShieldedVmConfig.EnableIntegrityMonitoring != enableIntegrityMonitoring {
-			return fmt.Errorf("Wrong shieldedVmConfig enableIntegrityMonitoring: expected %t, got, %t", enableIntegrityMonitoring, instance.ShieldedVmConfig.EnableIntegrityMonitoring)
+		if instance.ShieldedInstanceConfig.EnableIntegrityMonitoring != enableIntegrityMonitoring {
+			return fmt.Errorf("Wrong shieldedVmConfig enableIntegrityMonitoring: expected %t, got, %t", enableIntegrityMonitoring, instance.ShieldedInstanceConfig.EnableIntegrityMonitoring)
 		}
 		return nil
 	}
@@ -3011,7 +3011,7 @@ func testAccCheckComputeInstanceHasConfidentialInstanceConfig(instance *compute.
 
 func testAccCheckComputeInstanceLacksShieldedVmConfig(instance *compute.Instance) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		if instance.ShieldedVmConfig != nil {
+		if instance.ShieldedInstanceConfig != nil {
 			return fmt.Errorf("Expected no shielded vm config")
 		}
 
