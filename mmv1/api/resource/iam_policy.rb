@@ -98,10 +98,6 @@ module Api
       # if set, it overrides the default iamPolicyVersion
       attr_reader :iam_policy_version
 
-      # [Optional] If true, this resource has been deprecated at GA only.
-      # This can probably be removed after `4.0.0`.
-      attr_reader :ga_deprecation
-
       def validate
         super
 
@@ -126,7 +122,6 @@ module Api
           type: String, default: 'templates/terraform/iam/iam_attributes.tf.erb'
         )
         check :iam_policy_version, type: String
-        check :ga_deprecation, type: :boolean, default: false
       end
     end
   end
