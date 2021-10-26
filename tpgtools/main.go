@@ -91,8 +91,12 @@ func main() {
 		generateSweeperFile(resource)
 		generateResourceTestFile(resource)
 	}
-	// Website files are always generated for the beta version.
-	for _, resource := range resources[BETA_VERSION] {
+	// GA website files are always generated for the beta version.
+	websiteVersion := *version
+	if *version == GA_VERSION {
+		websiteVersion = BETA_VERSION
+	}
+	for _, resource := range resources[websiteVersion] {
 		if skipResource(resource) {
 			continue
 		}
