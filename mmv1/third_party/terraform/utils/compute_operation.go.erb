@@ -9,18 +9,16 @@ import (
 	"log"
 	"time"
 
+<% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
-	computeBeta "google.golang.org/api/compute/v0.beta"
+<% else -%>
+	"google.golang.org/api/compute/v0.beta"
+<% end -%>
 )
 
 type ComputeOperationWaiter struct {
-<% if version == 'ga' -%>
 	Service *compute.Service
 	Op      *compute.Operation
-<% else -%>
-	Service *computeBeta.Service
-	Op      *computeBeta.Operation
-<% end -%>
 	Context context.Context
 	Project string
 <% unless version == 'ga' -%>
@@ -56,11 +54,7 @@ func (w *ComputeOperationWaiter) IsRetryable(err error) bool {
 
 func (w *ComputeOperationWaiter) SetOp(op interface{}) error {
 	var ok bool
-<% if version == 'ga' -%>
 	w.Op, ok = op.(*compute.Operation)
-<% else -%>
-	w.Op, ok = op.(*computeBeta.Operation)
-<% end -%>
 	if !ok {
 		return fmt.Errorf("Unable to set operation. Bad type!")
 	}
@@ -111,22 +105,14 @@ func (w *ComputeOperationWaiter) TargetStates() []string {
 }
 
 func computeOperationWaitTime(config *Config, res interface{}, project, activity, userAgent string, timeout time.Duration) error {
-<% if version == 'ga' -%>
 	op := &compute.Operation{}
-<% else -%>
-	op := &computeBeta.Operation{}
-<% end -%>
 	err := Convert(res, op)
 	if err != nil {
 		return err
 	}
 
 	w := &ComputeOperationWaiter{
-<% if version == 'ga' -%>
 		Service: config.NewComputeClient(userAgent),
-<% else -%>
-		Service: config.NewComputeBetaClient(userAgent),
-<% end -%>
 		Context: config.context,
 		Op:      op,
 		Project: project,
@@ -140,14 +126,14 @@ func computeOperationWaitTime(config *Config, res interface{}, project, activity
 
 <% unless version == 'ga' -%>
 func computeOrgOperationWaitTimeWithResponse(config *Config, res interface{}, response *map[string]interface{}, parent, activity, userAgent string, timeout time.Duration) error {
-	op := &computeBeta.Operation{}
+	op := &compute.Operation{}
 	err := Convert(res, op)
 	if err != nil {
 		return err
 	}
 
 	w := &ComputeOperationWaiter{
-		Service: config.NewComputeBetaClient(userAgent),
+		Service: config.NewComputeClient(userAgent),
 		Op:      op,
 		Parent:  parent,
 	}
@@ -166,13 +152,10 @@ func computeOrgOperationWaitTimeWithResponse(config *Config, res interface{}, re
 }
 
 <% end -%>
+
 // ComputeOperationError wraps compute.OperationError and implements the
 // error interface so it can be returned.
-<% if version == 'ga' -%>
 type ComputeOperationError compute.OperationError
-<% else -%>
-type ComputeOperationError computeBeta.OperationError
-<% end -%>
 
 func (e ComputeOperationError) Error() string {
 	var buf bytes.Buffer

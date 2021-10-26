@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 // ----------------------------------------------------------------------------
 //
 //     This file is copied here by Magic Modules. The code for building up a
@@ -13,8 +14,13 @@ import (
 	"fmt"
 	"strings"
 
-	computeBeta "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/googleapi"
+
+<% if version == "ga" -%>
+	"google.golang.org/api/compute/v1"
+<% else -%>
+	"google.golang.org/api/compute/v0.beta"
+<% end -%>
 )
 
 const ComputeInstanceAssetType string = "compute.googleapis.com/Instance"
@@ -61,7 +67,7 @@ func GetComputeInstanceApiObject(d TerraformResourceData, config *Config) (map[s
 	return jsonMap(instance)
 }
 
-func expandComputeInstance(project string, d TerraformResourceData, config *Config) (*computeBeta.Instance, error) {
+func expandComputeInstance(project string, d TerraformResourceData, config *Config) (*compute.Instance, error) {
 	// Get the machine type
 	var machineTypeUrl string
 	if mt, ok := d.GetOk("machine_type"); ok {
@@ -76,7 +82,7 @@ func expandComputeInstance(project string, d TerraformResourceData, config *Conf
 
 	// Build up the list of disks
 
-	disks := []*computeBeta.AttachedDisk{}
+	disks := []*compute.AttachedDisk{}
 	if _, hasBootDisk := d.GetOk("boot_disk"); hasBootDisk {
 		bootDisk, err := expandBootDisk(d, config, project)
 		if err != nil {
@@ -106,16 +112,16 @@ func expandComputeInstance(project string, d TerraformResourceData, config *Conf
 	}
 
 	sch := d.Get("scheduling").([]interface{})
-	var scheduling *computeBeta.Scheduling
+	var scheduling *compute.Scheduling
 	if len(sch) == 0 {
 		// TF doesn't do anything about defaults inside of nested objects, so if
 		// scheduling hasn't been set, then send it with its default values.
-		scheduling = &computeBeta.Scheduling{
+		scheduling = &compute.Scheduling{
 			AutomaticRestart: googleapi.Bool(true),
 		}
 	} else {
 		prefix := "scheduling.0"
-		scheduling = &computeBeta.Scheduling{
+		scheduling = &compute.Scheduling{
 			AutomaticRestart:  googleapi.Bool(d.Get(prefix + ".automatic_restart").(bool)),
 			Preemptible:       d.Get(prefix + ".preemptible").(bool),
 			OnHostMaintenance: d.Get(prefix + ".on_host_maintenance").(string),
@@ -139,7 +145,7 @@ func expandComputeInstance(project string, d TerraformResourceData, config *Conf
 	}
 
 	// Create the instance information
-	return &computeBeta.Instance{
+	return &compute.Instance{
 		CanIpForward:           d.Get("can_ip_forward").(bool),
 		Description:            d.Get("description").(string),
 		Disks:                  disks,
@@ -161,7 +167,7 @@ func expandComputeInstance(project string, d TerraformResourceData, config *Conf
 	}, nil
 }
 
-func expandAttachedDisk(diskConfig map[string]interface{}, d TerraformResourceData, meta interface{}) (*computeBeta.AttachedDisk, error) {
+func expandAttachedDisk(diskConfig map[string]interface{}, d TerraformResourceData, meta interface{}) (*compute.AttachedDisk, error) {
 	config := meta.(*Config)
 
 	s := diskConfig["source"].(string)
@@ -180,7 +186,7 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d TerraformResourceDa
 		sourceLink = source.RelativeLink()
 	}
 
-	disk := &computeBeta.AttachedDisk{
+	disk := &compute.AttachedDisk{
 		Source: sourceLink,
 	}
 
@@ -195,7 +201,7 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d TerraformResourceDa
 	keyValue, keyOk := diskConfig["disk_encryption_key_raw"]
 	if keyOk {
 		if keyValue != "" {
-			disk.DiskEncryptionKey = &computeBeta.CustomerEncryptionKey{
+			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
 				RawKey: keyValue.(string),
 			}
 		}
@@ -207,7 +213,7 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d TerraformResourceDa
 			return nil, errors.New("Only one of kms_key_self_link and disk_encryption_key_raw can be set")
 		}
 		if kmsValue != "" {
-			disk.DiskEncryptionKey = &computeBeta.CustomerEncryptionKey{
+			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
 				KmsKeyName: kmsValue.(string),
 			}
 		}
@@ -217,13 +223,13 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d TerraformResourceDa
 
 // See comment on expandInstanceTemplateGuestAccelerators regarding why this
 // code is duplicated.
-func expandInstanceGuestAccelerators(d TerraformResourceData, config *Config) ([]*computeBeta.AcceleratorConfig, error) {
+func expandInstanceGuestAccelerators(d TerraformResourceData, config *Config) ([]*compute.AcceleratorConfig, error) {
 	configs, ok := d.GetOk("guest_accelerator")
 	if !ok {
 		return nil, nil
 	}
 	accels := configs.([]interface{})
-	guestAccelerators := make([]*computeBeta.AcceleratorConfig, 0, len(accels))
+	guestAccelerators := make([]*compute.AcceleratorConfig, 0, len(accels))
 	for _, raw := range accels {
 		data := raw.(map[string]interface{})
 		if data["count"].(int) == 0 {
@@ -233,7 +239,7 @@ func expandInstanceGuestAccelerators(d TerraformResourceData, config *Config) ([
 		if err != nil {
 			return nil, fmt.Errorf("cannot parse accelerator type: %v", err)
 		}
-		guestAccelerators = append(guestAccelerators, &computeBeta.AcceleratorConfig{
+		guestAccelerators = append(guestAccelerators, &compute.AcceleratorConfig{
 			AcceleratorCount: int64(data["count"].(int)),
 			AcceleratorType:  at.RelativeLink(),
 		})
@@ -242,13 +248,13 @@ func expandInstanceGuestAccelerators(d TerraformResourceData, config *Config) ([
 	return guestAccelerators, nil
 }
 
-func expandBootDisk(d TerraformResourceData, config *Config, project string) (*computeBeta.AttachedDisk, error) {
+func expandBootDisk(d TerraformResourceData, config *Config, project string) (*compute.AttachedDisk, error) {
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return nil, err
 	}
 
-	disk := &computeBeta.AttachedDisk{
+	disk := &compute.AttachedDisk{
 		AutoDelete: d.Get("boot_disk.0.auto_delete").(bool),
 		Boot:       true,
 	}
@@ -259,7 +265,7 @@ func expandBootDisk(d TerraformResourceData, config *Config, project string) (*c
 
 	if v, ok := d.GetOk("boot_disk.0.disk_encryption_key_raw"); ok {
 		if v != "" {
-			disk.DiskEncryptionKey = &computeBeta.CustomerEncryptionKey{
+			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
 				RawKey: v.(string),
 			}
 		}
@@ -267,7 +273,7 @@ func expandBootDisk(d TerraformResourceData, config *Config, project string) (*c
 
 	if v, ok := d.GetOk("boot_disk.0.kms_key_self_link"); ok {
 		if v != "" {
-			disk.DiskEncryptionKey = &computeBeta.CustomerEncryptionKey{
+			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
 				KmsKeyName: v.(string),
 			}
 		}
@@ -282,7 +288,7 @@ func expandBootDisk(d TerraformResourceData, config *Config, project string) (*c
 	}
 
 	if _, ok := d.GetOk("boot_disk.0.initialize_params"); ok {
-		disk.InitializeParams = &computeBeta.AttachedDiskInitializeParams{}
+		disk.InitializeParams = &compute.AttachedDiskInitializeParams{}
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.size"); ok {
 			disk.InitializeParams.DiskSizeGb = int64(v.(int))
@@ -319,20 +325,20 @@ func expandBootDisk(d TerraformResourceData, config *Config, project string) (*c
 	return disk, nil
 }
 
-func expandScratchDisks(d TerraformResourceData, config *Config, project string) ([]*computeBeta.AttachedDisk, error) {
+func expandScratchDisks(d TerraformResourceData, config *Config, project string) ([]*compute.AttachedDisk, error) {
 	diskType, err := readDiskType(config, d, "local-ssd")
 	if err != nil {
 		return nil, fmt.Errorf("Error loading disk type 'local-ssd': %s", err)
 	}
 
 	n := d.Get("scratch_disk.#").(int)
-	scratchDisks := make([]*computeBeta.AttachedDisk, 0, n)
+	scratchDisks := make([]*compute.AttachedDisk, 0, n)
 	for i := 0; i < n; i++ {
-		scratchDisks = append(scratchDisks, &computeBeta.AttachedDisk{
+		scratchDisks = append(scratchDisks, &compute.AttachedDisk{
 			AutoDelete: true,
 			Type:       "SCRATCH",
 			Interface:  d.Get(fmt.Sprintf("scratch_disk.%d.interface", i)).(string),
-			InitializeParams: &computeBeta.AttachedDiskInitializeParams{
+			InitializeParams: &compute.AttachedDiskInitializeParams{
 				DiskType: diskType.RelativeLink(),
 			},
 		})

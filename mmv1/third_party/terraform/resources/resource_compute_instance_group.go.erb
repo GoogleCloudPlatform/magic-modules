@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -6,10 +7,15 @@ import (
 	"strings"
 	"time"
 
-	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/googleapi"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+<% if version == "ga" -%>
+	"google.golang.org/api/compute/v1"
+<% else -%>
+	"google.golang.org/api/compute/v0.beta"
+<% end -%>
 )
 
 func resourceComputeInstanceGroup() *schema.Resource {

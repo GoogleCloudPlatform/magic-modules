@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -6,9 +7,13 @@ import (
 	"strconv"
 	"strings"
 
-	"google.golang.org/api/compute/v1"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+<% if version == "ga" -%>
+	"google.golang.org/api/compute/v1"
+<% else -%>
+	"google.golang.org/api/compute/v0.beta"
+<% end -%>
 )
 
 func resourceComputeInstanceMigrateState(
