@@ -226,7 +226,7 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error)
 		}
 		mapNew := bigQueryArrayToMapIndexedByName(arrayNew)
 		for key := range mapNew {
-			// making inchnagable if an newly added column is with REQUIRED mode
+			// making unchangeable if an newly added column is with REQUIRED mode
 			if _, ok := mapOld[key]; !ok {
 				items := mapNew[key].(map[string]interface{})
 				for k := range items {
