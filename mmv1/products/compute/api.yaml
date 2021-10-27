@@ -18651,3 +18651,179 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'zone'
         description: 'The name of the zone where the accelerator type resides.'
+
+  - !ruby/object:Api::Resource
+    name: 'DiskTypes'
+    kind: 'compute#diskTypes'
+    base_url: projects/{{project}}/zones/{{zone}}/diskTypes
+    collection_url_key: 'items'
+    has_self_link: true
+    readonly: true
+    description: 'Represents a Zone resource.'
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'deprecated'
+        description: 'The deprecation status associated with this accelerator type.'
+        properties:
+          - !ruby/object:Api::Type::Time
+            name: 'state'
+            description: |
+              An optional RFC3339 timestamp on or after which the state of this
+              resource is intended to change to DELETED. This is only
+              informational and the status will not change unless the client
+              explicitly changes it.
+            output: true
+          - !ruby/object:Api::Type::Time
+            name: 'deprecated'
+            description: |
+              An optional RFC3339 timestamp on or after which the state of this
+              resource is intended to change to DEPRECATED. This is only
+              informational and the status will not change unless the client
+              explicitly changes it.
+            output: true
+          - !ruby/object:Api::Type::Time
+            name: 'obsolete'
+            description: |
+              An optional RFC3339 timestamp on or after which the state of this
+              resource is intended to change to OBSOLETE. This is only
+              informational and the status will not change unless the client
+              explicitly changes it.
+            output: true
+          - !ruby/object:Api::Type::String
+            name: 'replacement'
+            description: |
+              The URL of the suggested replacement for a deprecated resource.
+              The suggested replacement resource must be the same kind of
+              resource as the deprecated resource.
+            output: true
+          - !ruby/object:Api::Type::Enum
+            name: 'state'
+            description: |
+              The deprecation state of this resource. This can be DEPRECATED,
+              OBSOLETE, or DELETED. Operations which create a new resource
+              using a DEPRECATED resource will return successfully, but with a
+              warning indicating the deprecated resource and recommending its
+              replacement. Operations which use OBSOLETE or DELETED resources
+              will be rejected and result in an error.
+            values:
+              - :DEPRECATED
+              - :OBSOLETE
+              - :DELETED
+            output: true
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional textual description of the resource.'
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the resource.'
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        exclude: true
+        description: 'Server-defined, fully qualified URL for this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'zone'
+        description: 'The name of the zone where the accelerator type resides.'
+      - !ruby/object:Api::Type::String
+        name: 'defaultDiskSizeGb'
+        description: 'Server-defined default disk size in GB.'
+
+  - !ruby/object:Api::Resource
+    name: 'externalVpnGateway'
+    kind: 'compute#externalVpnGateway'
+    base_url: projects/{{project}}/global/externalVpnGateways
+    collection_url_key: 'items'
+    has_self_link: true
+    readonly: true
+    description: 'Returns the specified externalVpnGateway.
+     globalOperations.get a list of available externalVpnGateways by making a list() request.'
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::Enum
+        name: 'redundancyType'
+        description: |
+          Indicates the user-supplied redundancy type of this external VPN gateway.
+        values:
+          - :SINGLE_IP_INTERNALLY_REDUNDANT
+          - :TWO_IPS_REDUNDANCY
+          - :FOUR_IPS_REDUNDANCY
+        output: true
+      - !ruby/object:Api::Type::Array
+        name: 'interfaces'
+        description: 'A list of interfaces for this external VPN gateway.
+        If your peer-side gateway is an on-premises gateway and non-AWS cloud providers
+        gateway, at most two interfaces can be provided for an external VPN gateway.
+        If your peer side is an AWS virtual private gateway, four interfaces should be
+        provided for an external VPN gateway.'
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'id'
+              description: |
+                The numeric ID of this interface.
+                The allowed input values for this id for different redundancy types of external VPN gateway:
+                SINGLE_IP_INTERNALLY_REDUNDANT - 0
+                TWO_IPS_REDUNDANCY - 0, 1
+                FOUR_IPS_REDUNDANCY - 0, 1, 2, 3'
+              required: true
+            - !ruby/object:Api::Type::String
+              name: 'ipAddress'
+              description: |
+                IP address of the interface in the external VPN gateway.
+                Only IPv4 is supported. This IP address can be either from your on-premise gateway
+                or another Cloud provider's VPN gateway, it cannot be an IP address from Google Compute Engine.
+        output: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          map (key: string, value: string)
+          Labels for this resource. These can only be added or modified by the setLabels method.
+          Each label key/value pair must comply with RFC1035. Label values may be empty.
+          An object containing a list of "key": value pairs.
+          Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'labelFingerprint'
+        description: |
+          A fingerprint for the labels being applied to this ExternalVpnGateway,
+          which is essentially a hash of the labels set used for optimistic locking.
+          The fingerprint is initially generated by Compute Engine and changes after every request
+          to modify or update labels. You must always provide an up-to-date fingerprint
+          hash in order to update or change labels, otherwise the request will fail with error 412 conditionNotMet.
+          To see the latest fingerprint, make a get() request to retrieve an ExternalVpnGateway.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'nextPageToken'
+        description: |
+          This token allows you to get the next page of results for list requests.
+          If the number of results is larger than maxResults, use the nextPageToken as
+          a value for the query parameter pageToken in the next list request.
+          Subsequent list requests will have their own nextPageToken to continue paging through the results.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional textual description of the resource.'
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the resource.'
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        exclude: true
+        description: 'Server-defined, fully qualified URL for this resource.'

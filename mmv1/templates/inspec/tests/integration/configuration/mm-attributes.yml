@@ -450,3 +450,11 @@ memcache_instance:
 
 accelerator_type:
   name: accelerator_id
+
+disk_type:
+  name: disk_type_name
+
+external_vpn_gateway:
+  name: external-gateway
+  redundancy_type: SINGLE_IP_INTERNALLY_REDUNDANT
+  description: "An externally managed VPN gateway"
