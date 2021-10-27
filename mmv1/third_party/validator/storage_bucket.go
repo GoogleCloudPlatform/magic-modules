@@ -295,34 +295,12 @@ func resourceGCSBucketLifecycleCreateOrUpdate(d TerraformResourceData, sb *stora
 	return nil
 }
 
-// remove this on next major release of the provider.
 func expandIamConfiguration(d TerraformResourceData) *storage.BucketIamConfiguration {
-	// We are checking for a change because the last else block is only executed on Create.
-	enabled := false
-	if d.HasChange("bucket_policy_only") {
-		enabled = d.Get("bucket_policy_only").(bool)
-	} else if d.HasChange("uniform_bucket_level_access") {
-		enabled = d.Get("uniform_bucket_level_access").(bool)
-	} else {
-		enabled = d.Get("bucket_policy_only").(bool) || d.Get("uniform_bucket_level_access").(bool)
-	}
-
 	return &storage.BucketIamConfiguration{
 		ForceSendFields: []string{"UniformBucketLevelAccess"},
 		UniformBucketLevelAccess: &storage.BucketIamConfigurationUniformBucketLevelAccess{
-			Enabled:         enabled,
+			Enabled:         d.Get("uniform_bucket_level_access").(bool),
 			ForceSendFields: []string{"Enabled"},
 		},
 	}
 }
-
-// Uncomment once the previous function is removed.
-// func expandIamConfiguration(d TerraformResourceData) *storage.BucketIamConfiguration {
-// 	return &storage.BucketIamConfiguration{
-// 		ForceSendFields: []string{"UniformBucketLevelAccess"},
-// 		UniformBucketLevelAccess: &storage.BucketIamConfigurationUniformBucketLevelAccess{
-// 			Enabled:         d.Get("uniform_bucket_level_access").(bool),
-// 			ForceSendFields: []string{"Enabled"},
-// 		},
-// 	}
-// }

@@ -102,15 +102,12 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, secondGen bool)
 		ForceSendFields:             []string{"StorageAutoResize"},
 		ActivationPolicy:            _settings["activation_policy"].(string),
 		AvailabilityType:            _settings["availability_type"].(string),
-		CrashSafeReplicationEnabled: _settings["crash_safe_replication"].(bool),
 		DataDiskSizeGb:              int64(_settings["disk_size"].(int)),
 		DataDiskType:                _settings["disk_type"].(string),
 		PricingPlan:                 _settings["pricing_plan"].(string),
-		ReplicationType:             _settings["replication_type"].(string),
 		UserLabels:                  convertStringMap(_settings["user_labels"].(map[string]interface{})),
 		BackupConfiguration:         expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
 		DatabaseFlags:               expandDatabaseFlags(_settings["database_flags"].([]interface{})),
-		AuthorizedGaeApplications:   expandAuthorizedGaeApplications(_settings["authorized_gae_applications"].([]interface{})),
 		IpConfiguration:             expandIpConfiguration(_settings["ip_configuration"].([]interface{})),
 		LocationPreference:          expandLocationPreference(_settings["location_preference"].([]interface{})),
 		MaintenanceWindow:           expandMaintenanceWindow(_settings["maintenance_window"].([]interface{})),
@@ -206,14 +203,6 @@ func expandAuthorizedNetworks(configured []interface{}) []*sqladmin.AclEntry {
 	}
 
 	return an
-}
-
-func expandAuthorizedGaeApplications(configured []interface{}) []string {
-	aga := make([]string, 0, len(configured))
-	for _, app := range configured {
-		aga = append(aga, app.(string))
-	}
-	return aga
 }
 
 func expandDatabaseFlags(configured []interface{}) []*sqladmin.DatabaseFlags {

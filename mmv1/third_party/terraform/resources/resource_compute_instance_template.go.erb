@@ -248,15 +248,14 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 				Description: `A brief description of this resource.`,
 			},
 
+<% unless version == 'ga' -%>
 			"enable_display": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				ForceNew:    true,
-				<% if version == 'ga' -%>
-				Deprecated:  "This attribute is currently in beta and will be removed from the google provider. Please use the google-beta provider to continue using this attribute.",
-				<% end -%>
 				Description: `Enable Virtual Displays on this instance. Note: allow_stopping_for_update must be set to true in order to update this field.`,
 			},
+<% end -%>
 
 			"instance_description": {
 				Type:        schema.TypeString,
@@ -1041,7 +1040,9 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		ConfidentialInstanceConfig: expandConfidentialInstanceConfig(d),
 		ShieldedInstanceConfig:     expandShieldedVmConfigs(d),
 		AdvancedMachineFeatures:    expandAdvancedMachineFeatures(d),
+<% unless version == 'ga' -%>
 		DisplayDevice:              expandDisplayDevice(d),
+<% end -%>
 		ReservationAffinity:        reservationAffinity,
 	}
 
@@ -1324,8 +1325,10 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			if err = d.Set("metadata_startup_script", script); err != nil {
 				return fmt.Errorf("Error setting metadata_startup_script: %s", err)
 			}
+
 			delete(_md, "startup-script")
 		}
+
 		if err = d.Set("metadata", _md); err != nil {
 			return fmt.Errorf("Error setting metadata: %s", err)
 		}
@@ -1442,11 +1445,13 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error setting advanced_machine_features: %s", err)
 		}
 	}
+<% unless version == 'ga' -%>
 	if instanceTemplate.Properties.DisplayDevice != nil {
 		if err = d.Set("enable_display", flattenEnableDisplay(instanceTemplate.Properties.DisplayDevice)); err != nil {
 			return fmt.Errorf("Error setting enable_display: %s", err)
 		}
 	}
+<% end -%>
 
 	if reservationAffinity := instanceTemplate.Properties.ReservationAffinity; reservationAffinity != nil {
 		if err = d.Set("reservation_affinity", flattenReservationAffinity(reservationAffinity)); err != nil {

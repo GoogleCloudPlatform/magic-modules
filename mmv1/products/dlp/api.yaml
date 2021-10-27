@@ -111,15 +111,18 @@ objects:
                 properties:
                   - !ruby/object:Api::Type::String
                     name: 'startTime'
+                    at_least_one_of:
+                      - inspect_job.0.storage_config.0.timespan_config.0.start_time
+                      - inspect_job.0.storage_config.0.timespan_config.0.end_time
                     description: Exclude files or rows older than this value.
                   - !ruby/object:Api::Type::String
                     name: 'endTime'
+                    at_least_one_of:
+                      - inspect_job.0.storage_config.0.timespan_config.0.start_time
+                      - inspect_job.0.storage_config.0.timespan_config.0.end_time
                     description: Exclude files or rows newer than this value. If set to zero, no upper time limit is applied.
                   - !ruby/object:Api::Type::Boolean
                     name: 'enableAutoPopulationOfTimespanConfig'
-                    at_least_one_of:
-                      - inspect_job_config.0.storage_config.0.timespan_config.0.start_time
-                      - inspect_job_config.0.storage_config.0.timespan_config.0.end_time
                     description: |
                       When the job is started by a JobTrigger we will automatically figure out a valid startTime to avoid
                       scanning files that have not been modified since the last time the JobTrigger executed. This will
@@ -182,8 +185,8 @@ objects:
                       - !ruby/object:Api::Type::String
                         name: 'url'
                         exactly_one_of:
-                          - inspect_job_config.0.storage_config.0.cloud_storage_options.fileset.0.url
-                          - inspect_job_config.0.storage_config.0.cloud_storage_options.fileset.0.regex_file_set
+                          - inspect_job.0.storage_config.0.cloud_storage_options.0.file_set.0.url
+                          - inspect_job.0.storage_config.0.cloud_storage_options.0.file_set.0.regex_file_set
                         description: |
                           The Cloud Storage url of the file(s) to scan, in the format `gs://<bucket>/<path>`. Trailing wildcard
                           in the path is allowed.
@@ -194,8 +197,8 @@ objects:
                       - !ruby/object:Api::Type::NestedObject
                         name: 'regexFileSet'
                         exactly_one_of:
-                          - inspect_job_config.0.storage_config.0.cloud_storage_options.fileset.0.url
-                          - inspect_job_config.0.storage_config.0.cloud_storage_options.fileset.0.regex_file_set
+                          - inspect_job.0.storage_config.0.cloud_storage_options.0.file_set.0.url
+                          - inspect_job.0.storage_config.0.cloud_storage_options.0.file_set.0.regex_file_set
                         description: |
                           The regex-filtered set of files to scan.
                         properties:

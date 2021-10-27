@@ -613,7 +613,8 @@ func testAccDataflowJobHasTempLocation(t *testing.T, res, targetLocation string)
 func testAccDataflowJob_zone(bucket, job, zone string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
 }
 
@@ -637,7 +638,8 @@ resource "google_dataflow_job" "big_data" {
 func testAccDataflowJob_region(bucket, job string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
 }
 
@@ -660,7 +662,8 @@ resource "google_dataflow_job" "big_data" {
 func testAccDataflowJob_network(bucket, job, network string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
 }
 
@@ -688,7 +691,8 @@ resource "google_dataflow_job" "big_data" {
 func testAccDataflowJob_subnetwork(bucket, job, network, subnet string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
 }
 
@@ -721,8 +725,11 @@ resource "google_dataflow_job" "big_data" {
 
 func testAccDataflowJob_serviceAccount(bucket, job, accountId string) string {
 	return fmt.Sprintf(`
+data "google_project" "project" {}
+
 resource "google_storage_bucket" "temp" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
 }
 
@@ -738,6 +745,7 @@ resource "google_storage_bucket_iam_member" "dataflow-gcs" {
 }
 
 resource "google_project_iam_member" "dataflow-worker" {
+  project = data.google_project.project.project_id
   role   = "roles/dataflow.worker"
   member = "serviceAccount:${google_service_account.dataflow-sa.email}"
 }
@@ -764,7 +772,8 @@ resource "google_dataflow_job" "big_data" {
 func testAccDataflowJob_ipConfig(bucket, job string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
 }
 
@@ -787,7 +796,8 @@ resource "google_dataflow_job" "big_data" {
 func testAccDataflowJob_labels(bucket, job, labelKey, labelVal string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
 }
 
@@ -839,7 +849,8 @@ resource "google_kms_crypto_key" "crypto_key" {
 }
 
 resource "google_storage_bucket" "temp" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
 }
 
@@ -864,7 +875,8 @@ resource "google_dataflow_job" "big_data" {
 func testAccDataflowJob_additionalExperiments(bucket string, job string, experiments []string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
 }
 
@@ -890,11 +902,13 @@ resource "google_pubsub_topic" "topic" {
 	name     = "tf-test-dataflow-job-%s"
 }
 resource "google_storage_bucket" "bucket1" {
-	name = "tf-test-bucket1-%s"
+	name          = "tf-test-bucket1-%s"
+	location      = "US"
 	force_destroy = true
 }
 resource "google_storage_bucket" "bucket2" {
-	name = "tf-test-bucket2-%s"
+	name          = "tf-test-bucket2-%s"
+	location      = "US"
 	force_destroy = true
 }
 resource "google_dataflow_job" "pubsub_stream" {
@@ -920,7 +934,8 @@ resource "google_pubsub_topic" "topic" {
 	name     = "tf-test-dataflow-job-%s"
 }
 resource "google_storage_bucket" "bucket" {
-	name = "tf-test-bucket-%s"
+	name          = "tf-test-bucket-%s"
+	location      = "US"
 	force_destroy = true
 }
 resource "google_dataflow_job" "pubsub_stream" {

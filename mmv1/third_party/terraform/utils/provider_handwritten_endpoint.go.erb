@@ -109,6 +109,7 @@ var ResourceManagerV2CustomEndpointEntry = &schema.Schema{
 	}, DefaultBasePaths[ResourceManagerV2BasePathKey]),
 }
 
+<% unless version == 'ga' -%>
 var RuntimeConfigCustomEndpointEntryKey = "runtimeconfig_custom_endpoint"
 var RuntimeConfigCustomEndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
@@ -118,6 +119,7 @@ var RuntimeConfigCustomEndpointEntry = &schema.Schema{
 		"GOOGLE_RUNTIMECONFIG_CUSTOM_ENDPOINT",
 	}, DefaultBasePaths[RuntimeConfigBasePathKey]),
 }
+<% end -%>
 
 var ServiceNetworkingCustomEndpointEntryKey = "service_networking_custom_endpoint"
 var ServiceNetworkingCustomEndpointEntry = &schema.Schema{

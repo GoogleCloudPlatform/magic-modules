@@ -25,7 +25,8 @@ resource "random_id" "db_name_suffix" {
 }
 
 resource "google_sql_database_instance" "master" {
-  name = "master-instance-${random_id.db_name_suffix.hex}"
+  name             = "master-instance-${random_id.db_name_suffix.hex}"
+  database_version = "MYSQL_5_7"
 
   settings {
     tier = "db-f1-micro"
@@ -40,7 +41,7 @@ resource "google_sql_user" "users" {
 }
 ```
 
-Example creating a Cloud IAM User.
+Example creating a Cloud IAM User. (For MySQL, specify `cloudsql_iam_authentication`)
 
 ```hcl
 resource "random_id" "db_name_suffix" {
@@ -62,7 +63,7 @@ resource "google_sql_database_instance" "master" {
 }
 
 resource "google_sql_user" "users" {
-  name     = "me"
+  name     = "me@example.com"
   instance = google_sql_database_instance.master.name
   type     = "CLOUD_IAM_USER"
 }
