@@ -50,6 +50,7 @@ description: |-
     - [`enable_shielded_nodes` now defaults to `true`](#enable_shielded_nodes-now-defaults-to-true)
     - [`instance_group_urls` is now removed](#instance_group_urls-is-now-removed)
     - [`master_auth.username` and `master_auth.password` are now removed](#master_authusername-and-master_authpassword-are-now-removed)
+    - [`master_auth.client_certificate_config` is now required](#master_authclient_certificate_config-is-now-required)
     - [`node_config.workload_metadata_config.node_metadata` is now removed](#node_configworkload_metadata_confignode_metadata-is-now-removed)
     - [`workload_identity_config.0.identity_namespace` is now removed](#workload_identity_config0identity_namespace-is-now-removed)
     - [`pod_security_policy_config` is removed from the GA provider](#pod_security_policy_config-is-removed-from-the-ga-provider)
@@ -379,6 +380,12 @@ Unless explicitly configured, users may see a diff changing `enable_shielded_nod
 
 `master_auth.username` and `master_auth.password` have been removed. 
 Basic authentication was removed for GKE cluster versions >= 1.19. The cluster cannot be created with basic authentication enabled. Instructions for choosing an alternative authentication method can be found at: cloud.google.com/kubernetes-engine/docs/how-to/api-server-authentication.
+
+### `master_auth.client_certificate_config` is now required
+
+With the removal of `master_auth.username` and `master_auth.password`, `master_auth.client_certificate_config` is now
+the only configurable field in `master_auth`. If you do not wish to configure `master_auth.client_certificate_config`, 
+remove the `master_auth` block from your configuration entirely.
 
 ### `node_config.workload_metadata_config.node_metadata` is now removed
 
