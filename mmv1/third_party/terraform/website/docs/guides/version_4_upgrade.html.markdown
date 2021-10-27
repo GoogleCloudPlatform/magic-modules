@@ -385,7 +385,7 @@ Basic authentication was removed for GKE cluster versions >= 1.19. The cluster c
 
 With the removal of `master_auth.username` and `master_auth.password`, `master_auth.client_certificate_config` is now
 the only configurable field in `master_auth`. If you do not wish to configure `master_auth.client_certificate_config`, 
-remove the `master_auth` block from your configuration entirely.
+remove the `master_auth` block from your configuration entirely. You will still be able to reference the outputted fields under `master_auth` without the block defined.
 
 ### `node_config.workload_metadata_config.node_metadata` is now removed
 
