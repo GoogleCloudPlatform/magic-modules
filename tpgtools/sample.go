@@ -396,11 +396,11 @@ func (sub *Variable) translateValue(isDocs bool) string {
 		return fmt.Sprintf("%%{%s}", translation.contextKey)
 	}
 
-	// Use '-' if already present, or '_' otherwise.
-	if strings.Contains(value, "-") {
-		value = fmt.Sprintf("tf-test-%s", value)
-	} else {
+	// Use '_' if already present, or '-' otherwise (some APIs require '-').
+	if strings.Contains(value, "_") {
 		value = fmt.Sprintf("tf_test_%s", value)
+	} else {
+		value = fmt.Sprintf("tf-test-%s", value)
 	}
 
 	// Random suffix is 10 characters and standard name length <= 64
