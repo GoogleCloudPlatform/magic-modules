@@ -14,6 +14,7 @@ ENV GO111MODULE "on"
 # Install Ruby from source.
 RUN apt-get update
 RUN apt-get install -y bzip2 libssl-dev libreadline-dev zlib1g-dev
+RUN apt-get install -y rsync
 RUN git clone https://github.com/rbenv/rbenv.git /rbenv
 ENV PATH /rbenv/bin:/root/.rbenv/shims:$PATH
 

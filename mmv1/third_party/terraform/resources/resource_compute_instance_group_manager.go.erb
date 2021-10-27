@@ -101,7 +101,6 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Description: `An optional textual description of the instance group manager.`,
 			},
 
@@ -247,15 +246,14 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 							Description:   `The maximum number of instances(calculated as percentage) that can be unavailable during the update process. Conflicts with max_unavailable_fixed.`,
 						},
 
+<% unless version == "ga" -%>
 						"min_ready_sec": {
 							Type:         schema.TypeInt,
 							Optional:     true,
-							ValidateFunc: validation.IntBetween(0, 3600),
 							Description:  `Minimum number of seconds to wait for after a newly created instance becomes available. This value must be from range [0, 3600].`,
-						<% if version == "ga" -%>
-							Deprecated:   `This attribute is currently in beta and will be removed from the google provider. Please use the google-beta provider to continue using this attribute.`,
-						<% end -%>
+							ValidateFunc: validation.IntBetween(0, 3600),
 						},
+<% end -%>
 						"replacement_method": {
 							Type:             schema.TypeString,
 							Optional:         true,
@@ -673,6 +671,12 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 	}
 	var change bool
 
+	if d.HasChange("description") {
+		updatedManager.Description = d.Get("description").(string)
+		updatedManager.ForceSendFields = append(updatedManager.ForceSendFields, "Description")
+		change = true
+	}
+
 	if d.HasChange("target_pools") {
 		updatedManager.TargetPools = convertStringSet(d.Get("target_pools").(*schema.Set))
 		updatedManager.ForceSendFields = append(updatedManager.ForceSendFields, "TargetPools")
@@ -952,9 +956,11 @@ func expandUpdatePolicy(configured []interface{}) *computeBeta.InstanceGroupMana
 			}
 		}
 
+<% unless version == "ga" -%>
 		if v, ok := data["min_ready_sec"]; ok {
 			updatePolicy.MinReadySec = int64(v.(int))
 		}
+<% end -%>
 	}
 	return updatePolicy
 }
@@ -1006,7 +1012,9 @@ func flattenUpdatePolicy(updatePolicy *computeBeta.InstanceGroupManagerUpdatePol
 			up["max_unavailable_fixed"] = 0
 			up["max_unavailable_percent"] = 0
 		}
+<% unless version == "ga" -%>
 		up["min_ready_sec"] = updatePolicy.MinReadySec
+<% end -%>
 		up["minimal_action"] = updatePolicy.MinimalAction
 		up["type"] = updatePolicy.Type
 		up["replacement_method"] = updatePolicy.ReplacementMethod

@@ -350,7 +350,7 @@ resource "google_cloudfunctions_function" "function" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name = "example-bucket"
+  name     = "example-bucket"
 }
 
 resource "google_storage_bucket_object" "archive" {

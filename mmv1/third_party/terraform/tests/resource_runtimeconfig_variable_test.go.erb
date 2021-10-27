@@ -1,4 +1,7 @@
+<% autogen_exception -%>
 package google
+
+<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -235,3 +238,5 @@ resource "google_runtimeconfig_variable" "foobar" {
 }
 `, suffix, name, value)
 }
+
+<% end -%>

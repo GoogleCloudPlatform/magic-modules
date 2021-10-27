@@ -307,6 +307,7 @@ func resourceContainerCluster() *schema.Resource {
 							AtLeastOneOf: addonsConfigKeys,
 							MaxItems:     1,
 							Description:  `The status of the NodeLocal DNSCache addon. It is disabled by default. Set enabled = true to enable.`,
+							ConflictsWith: []string{"enable_autopilot"},
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"enabled": {
@@ -509,8 +510,8 @@ func resourceContainerCluster() *schema.Resource {
 			"enable_shielded_nodes": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Computed:     true,
-				Description: `Enable Shielded Nodes features on all nodes in this cluster.`,
+				Default:     true,
+				Description: `Enable Shielded Nodes features on all nodes in this cluster. Defaults to true.`,
 				ConflictsWith: []string{"enable_autopilot"},
 			},
 
@@ -669,6 +670,7 @@ func resourceContainerCluster() *schema.Resource {
 				},
 			},
 
+
 			"monitoring_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -680,10 +682,20 @@ func resourceContainerCluster() *schema.Resource {
 						"enable_components": {
 							Type:        schema.TypeList,
 							Required:    true,
+<% if version == "ga" -%>
 							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS.`,
+<% end -%>
+<% if version == "beta" -%>
+							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS and WORKLOADS.`,
+<% end -%>
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
+<% if version == "ga" -%>
 								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS"}, false),
+<% end -%>
+<% if version == "beta" -%>
+								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS", "WORKLOADS"}, false),
+<% end -%>
 							},
 						},
 					},
@@ -750,6 +762,7 @@ func resourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				MaxItems:    1,
 				Computed:    true,
+				Deprecated:  `Basic authentication was removed for GKE cluster versions >= 1.19.`,
 				Description: `The authentication information for accessing the Kubernetes master. Some values in this block are only returned by the API if your service account has permission to get credentials for your GKE cluster. If you see an unexpected diff removing a username/password or unsetting your client cert, ensure you have the container.clusters.getCredentials permission.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -895,17 +908,13 @@ func resourceContainerCluster() *schema.Resource {
 				Description: `The Kubernetes version on the nodes. Must either be unset or set to the same value as min_master_version on create. Defaults to the default version set by GKE which is not necessarily the latest version. This only affects nodes in the default node pool. While a fuzzy version can be specified, it's recommended that you specify explicit versions as Terraform will see spurious diffs when fuzzy versions are used. See the google_container_engine_versions data source's version_prefix field to approximate fuzzy versions in a Terraform-compatible way. To update nodes in other node pools, use the version attribute on the node pool.`,
 			},
 
+<% unless version == "ga" -%>
 			"pod_security_policy_config": {
-<% unless version == 'ga' -%>
-				DiffSuppressFunc: podSecurityPolicyCfgSuppress,
-<% end -%>
 				Type:        schema.TypeList,
 				Optional:    true,
-				MaxItems:    1,
 				Description: `Configuration for the PodSecurityPolicy feature.`,
-<% if version == "ga" -%>
-				Deprecated:   `This attribute is currently in beta and will be removed from the google provider. Please use the google-beta provider to continue using this attribute.`,
-<% end -%>
+				MaxItems:    1,
+				DiffSuppressFunc: podSecurityPolicyCfgSuppress,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
@@ -916,6 +925,7 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+<% end -%>
 
 			"project": {
 				Type:        schema.TypeString,
@@ -949,6 +959,7 @@ func resourceContainerCluster() *schema.Resource {
 			"instance_group_urls": {
 				Type:        schema.TypeList,
 				Computed:    true,
+				Deprecated:  `Please use node_pool.instance_group_urls instead.`,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: `List of instance group URLs which have been assigned to the cluster.`,
 			},
@@ -1140,15 +1151,18 @@ func resourceContainerCluster() *schema.Resource {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
+				// Computed is unsafe to remove- this API may return `"workloadIdentityConfig": {},` or omit the key entirely
+				// and both will be valid. Note that we don't handle the case where the API returns nothing & the user has defined
+				// workload_identity_config today.
 				Computed: true,
 				Description: `Configuration for the use of Kubernetes Service Accounts in GCP IAM policies.`,
 				ConflictsWith: []string{"enable_autopilot"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"identity_namespace": {
+						"workload_pool": {
 							Type:     schema.TypeString,
-							Required: true,
-							Description: `Enables workload identity.`,
+							Optional: true,
+							Description: "The workload pool to attach all Kubernetes service accounts to.",
 						},
 					},
 				},
@@ -1445,7 +1459,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		AddonsConfig:            expandClusterAddonsConfig(d.Get("addons_config")),
 		EnableKubernetesAlpha:   d.Get("enable_kubernetes_alpha").(bool),
 		IpAllocationPolicy:      ipAllocationBlock,
+<% unless version == "ga" -%>
 		PodSecurityPolicyConfig: expandPodSecurityPolicyConfig(d.Get("pod_security_policy_config")),
+<% end -%>
 		Autoscaling:             expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
 		BinaryAuthorization: &containerBeta.BinaryAuthorization{
 			Enabled:         d.Get("enable_binary_authorization").(bool),
@@ -1482,10 +1498,6 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		ResourceLabels: expandStringMap(d, "resource_labels"),
 	}
 
-	// shielded nodes is computed and optional yet serverside
-	// default is true. Forcing true here esentially serves
-	// as a default false but is unavoidable due to how
-	// computed and GetOk work together.
 	v:= d.Get("enable_shielded_nodes")
 	cluster.ShieldedNodes = &containerBeta.ShieldedNodes{
 		Enabled:         v.(bool),
@@ -1900,7 +1912,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-	if err := d.Set("workload_identity_config", flattenWorkloadIdentityConfig(cluster.WorkloadIdentityConfig)); err != nil {
+	if err := d.Set("workload_identity_config", flattenWorkloadIdentityConfig(cluster.WorkloadIdentityConfig, d, config)); err != nil {
 		return err
 	}
 
@@ -1909,7 +1921,6 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 <% unless version == 'ga' -%>
-
 	if err := d.Set("pod_security_policy_config", flattenPodSecurityPolicyConfig(cluster.PodSecurityPolicyConfig)); err != nil {
 		return err
 	}
@@ -3524,17 +3535,22 @@ func expandDefaultSnatStatus(configured interface{}) *containerBeta.DefaultSnatS
 
 func expandWorkloadIdentityConfig(configured interface{}) *containerBeta.WorkloadIdentityConfig {
 	l := configured.([]interface{})
+	v := &containerBeta.WorkloadIdentityConfig{}
+
+	// this API considers unset and set-to-empty equivalent. Note that it will
+	// always return an empty block given that we always send one, but clusters
+	// not created in TF will not always return one (and may return nil)
 	if len(l) == 0 || l[0] == nil {
-		return nil
+		return v
 	}
+
 	config := l[0].(map[string]interface{})
-	return &containerBeta.WorkloadIdentityConfig{
-		IdentityNamespace: config["identity_namespace"].(string),
-	}
+	v.WorkloadPool = config["workload_pool"].(string)
+	return v
 }
 
-func expandPodSecurityPolicyConfig(configured interface{}) *containerBeta.PodSecurityPolicyConfig {
 <% unless version == 'ga' -%>
+func expandPodSecurityPolicyConfig(configured interface{}) *containerBeta.PodSecurityPolicyConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil
@@ -3545,12 +3561,8 @@ func expandPodSecurityPolicyConfig(configured interface{}) *containerBeta.PodSec
 		Enabled:         config["enabled"].(bool),
 		ForceSendFields: []string{"Enabled"},
 	}
-<% else -%>
-	// Removing lists is hard - the element count (#) will have a diff from nil -> computed
-	// If we set this to empty on Read, it will be stable.
-	return nil
-<% end -%>
 }
+<% end -%>
 
 func expandDefaultMaxPodsConstraint(v interface{}) *containerBeta.MaxPodsConstraint {
 	if v == nil {
@@ -3868,13 +3880,14 @@ func flattenDefaultSnatStatus(c *containerBeta.DefaultSnatStatus) []map[string]i
 	return result
 }
 
-func flattenWorkloadIdentityConfig(c *containerBeta.WorkloadIdentityConfig) []map[string]interface{} {
+func flattenWorkloadIdentityConfig(c *containerBeta.WorkloadIdentityConfig, d *schema.ResourceData, config *Config) []map[string]interface{} {
 	if c == nil {
 		return nil
 	}
+
 	return []map[string]interface{}{
 		{
-			"identity_namespace": c.IdentityNamespace,
+			"workload_pool": c.WorkloadPool,
 		},
 	}
 }
@@ -4283,9 +4296,6 @@ func containerClusterAutopilotCustomizeDiff(_ context.Context, d *schema.Resourc
 		if err := d.SetNew("enable_intranode_visibility", true); err != nil {
 			return err
 		}
-		if err := d.SetNew("enable_shielded_nodes", true); err != nil {
-			return err
-		}
 	}
 	return nil
 }
@@ -4317,5 +4327,4 @@ func podSecurityPolicyCfgSuppress(k, old, new string, r *schema.ResourceData) bo
 	}
 	return false
 }
-
 <% end -%>
