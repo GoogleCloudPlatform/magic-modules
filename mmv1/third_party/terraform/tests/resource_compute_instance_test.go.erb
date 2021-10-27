@@ -2424,35 +2424,6 @@ func testAccCheckComputeInstanceExistsInProject(t *testing.T, n, p string, insta
 	}
 }
 
-func testAccCheckComputeBetaInstanceExistsInProject(t *testing.T, n, p string, instance *compute.Instance) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
-		}
-
-		config := googleProviderConfig(t)
-
-		found, err := config.NewComputeClient(config.userAgent).Instances.Get(
-			p, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
-		if err != nil {
-			return err
-		}
-
-		if found.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("Instance not found")
-		}
-
-		*instance = *found
-
-		return nil
-	}
-}
-
 func testAccCheckComputeInstanceMetadata(
 	instance *compute.Instance,
 	k string, v string) resource.TestCheckFunc {
