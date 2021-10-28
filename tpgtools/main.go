@@ -186,6 +186,11 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 				if err != nil {
 					glog.Exit(err)
 				}
+				// TODO: the openapi library cannot handle extensions except in the Schema object.  If this is ever added,
+				// this workaround can be removed.
+				if err := addInfoExtensionsToSchemaObjects(document, b.Bytes()); err != nil {
+					glog.Exit(err)
+				}
 
 				overrides := loadOverrides(packagePath, resourceFile.Name())
 
@@ -205,6 +210,19 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 	return resources, products
 }
 
+func addInfoExtensionsToSchemaObjects(document *openapi.Document, b []byte) error {
+	var m map[string]interface{}
+	if err := yaml.Unmarshal(b, &m); err != nil {
+		return err
+	}
+	info := m["info"].(map[interface{}]interface{})
+	for _, s := range document.Components.Schemas {
+		s.Extension["x-dcl-ref"] = info["x-dcl-ref"]
+		s.Extension["x-dcl-guides"] = info["x-dcl-guides"]
+	}
+	return nil
+}
+
 func createResourcesFromDocumentAndOverrides(document *openapi.Document, overrides Overrides, packagePath string, version Version) (resources []*Resource) {
 	productMetadata := GetProductMetadataFromDocument(document, packagePath)
 	titleParts := strings.Split(document.Info.Title, "/")
@@ -220,10 +238,6 @@ func createResourcesFromDocumentAndOverrides(document *openapi.Document, overrid
 	if schema == nil {
 		glog.Exit(fmt.Sprintf("Could not find document schema for %s", document.Info.Title))
 	}
-
-	// Later on we expect this schema's object to contain the relevant description, but in fact
-	// it is the Info object that has it.  We'll just override it rather than do a real refactor.
-	schema.Description = document.Info.Description
 
 	if err := schema.Validate(); err != nil {
 		glog.Exit(err)
@@ -251,7 +265,7 @@ func createResourcesFromDocumentAndOverrides(document *openapi.Document, overrid
 	}
 
 	for _, l := range locations {
-		res, err := createResource(schema, typeFetcher, overrides, productMetadata, version, l)
+		res, err := createResource(schema, document.Info, typeFetcher, overrides, productMetadata, version, l)
 		if err != nil {
 			glog.Exit(err)
 		}

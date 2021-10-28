@@ -386,13 +386,10 @@ func (sub *Variable) translateValue(isDocs bool) string {
 		if sub.Type != "resource_name" {
 			glog.Exitf("Cannot generte docs for variable of type %q.", sub.Type)
 		}
-		glog.Errorf("Warning: variable %q has no docs value.", sub.Name)
 		return value
 	}
 
-	glog.Errorf("Translating test value for %q.", sub.Name)
 	if hasTranslation {
-		glog.Errorf("has translation %q.", translation)
 		return fmt.Sprintf("%%{%s}", translation.contextKey)
 	}
 

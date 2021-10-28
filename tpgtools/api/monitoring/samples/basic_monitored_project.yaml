@@ -20,9 +20,11 @@ type: monitored_project
 variables:
 - name: id
   type: resource_name
+  docs_value: my-monitored-project
 - name: org_id
   type: org_id
 - name: project
   type: project
+  docs_value: existing-metrics-scope-project
 versions:
 - beta
