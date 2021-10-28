@@ -451,7 +451,7 @@ objects:
         name: 'entrypoint'
         description: |
           The entrypoint for the application.
-        required: false
+        required: true
         properties:
           - !ruby/object:Api::Type::String
             name: 'shell'

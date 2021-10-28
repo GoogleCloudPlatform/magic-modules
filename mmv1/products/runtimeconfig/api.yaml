@@ -16,7 +16,7 @@ name: RuntimeConfig
 display_name: Runtime Configurator
 versions:
   - !ruby/object:Api::Product::Version
-    name: ga
+    name: beta
     base_url: https://runtimeconfig.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloudruntimeconfig
@@ -29,6 +29,7 @@ objects:
     name: 'Config'
     base_url: projects/{{project}}/configs
     self_link: projects/{{project}}/configs/{{name}}
+    min_version: beta
     description: |
       A RuntimeConfig resource is the primary resource in the Cloud RuntimeConfig service.
       A RuntimeConfig resource consists of metadata and a hierarchy of variables.
@@ -36,7 +37,6 @@ objects:
       parent_resource_attribute: 'config'
       method_name_separator: ':'
       exclude: false
-      ga_deprecation: true
     parameters:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -54,6 +54,7 @@ objects:
     name: 'Variable'
     base_url: projects/{{project}}/configs/{{config}}/variables
     self_link: projects/{{project}}/configs/{{config}}/variables/{{name}}
+    min_version: beta
     description: |
       Describes a single variable within a runtime config resource.
     parameters:

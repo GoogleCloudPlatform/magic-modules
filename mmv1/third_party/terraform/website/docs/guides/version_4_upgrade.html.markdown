@@ -12,6 +12,7 @@ description: |-
   - [I accidentally upgraded to 4.0.0, how do I downgrade to `3.X`?](#i-accidentally-upgraded-to-400-how-do-i-downgrade-to-3x)
   - [Provider Version Configuration](#provider-version-configuration)
   - [Provider](#provider)
+    - [`credentials`, `access_token` precedence has changed](#credentials-access_token-precedence-has-changed)
     - [Redundant default scopes are removed](#redundant-default-scopes-are-removed)
     - [Runtime Configurator (`runtimeconfig`) resources have been removed from the GA provider](#runtime-configurator-runtimeconfig-resources-have-been-removed-from-the-ga-provider)
     - [Service account scopes no longer accept `trace-append` or `trace-ro`, use `trace` instead](#service-account-scopes-no-longer-accept-trace-append-or-trace-ro-use-trace-instead)
@@ -29,12 +30,14 @@ description: |-
     - [At least one of `autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas` or `autoscaling_policy.0.scale_in_control.0.time_window_sec` is required](#at-least-one-of-autoscaling_policy0scale_in_control0max_scaled_in_replicas-or-autoscaling_policy0scale_in_control0time_window_sec-is-required)
     - [At least one of `autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.fixed` or `autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.percent` is required](#at-least-one-of-autoscaling_policy0scale_in_control0max_scaled_in_replicas0fixed-or-autoscaling_policy0scale_in_control0max_scaled_in_replicas0percent-is-required)
   - [Resource: `google_compute_region_autoscaler`](#resource-google_compute_region_autoscaler)
-    - [At least one of `autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas` or `autoscaling_policy.0.scale_down_control.0.time_window_sec` is required](#at-least-one-of-autoscaling_policy0scale_down_control0max_scaled_down_replicas-or-autoscaling_policy0scale_down_control0time_window_sec-is-required)
-    - [At least one of `autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.fixed` or `autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.percent` is required](#at-least-one-of-autoscaling_policy0scale_down_control0max_scaled_down_replicas0fixed-or-autoscaling_policy0scale_down_control0max_scaled_down_replicas0percent-is-required)
-    - [At least one of `autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas` or `autoscaling_policy.0.scale_in_control.0.time_window_sec` is required](#at-least-one-of-autoscaling_policy0scale_in_control0max_scaled_in_replicas-or-autoscaling_policy0scale_in_control0time_window_sec-is-required)
-    - [At least one of `autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.fixed` or `autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.percent` is required](#at-least-one-of-autoscaling_policy0scale_in_control0max_scaled_in_replicas0fixed-or-autoscaling_policy0scale_in_control0max_scaled_in_replicas0percent-is-required)
+    - [At least one of `autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas` or `autoscaling_policy.0.scale_down_control.0.time_window_sec` is required](#at-least-one-of-autoscaling_policy0scale_down_control0max_scaled_down_replicas-or-autoscaling_policy0scale_down_control0time_window_sec-is-required-1)
+    - [At least one of `autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.fixed` or `autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.percent` is required](#at-least-one-of-autoscaling_policy0scale_down_control0max_scaled_down_replicas0fixed-or-autoscaling_policy0scale_down_control0max_scaled_down_replicas0percent-is-required-1)
+    - [At least one of `autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas` or `autoscaling_policy.0.scale_in_control.0.time_window_sec` is required](#at-least-one-of-autoscaling_policy0scale_in_control0max_scaled_in_replicas-or-autoscaling_policy0scale_in_control0time_window_sec-is-required-1)
+    - [At least one of `autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.fixed` or `autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.percent` is required](#at-least-one-of-autoscaling_policy0scale_in_control0max_scaled_in_replicas0fixed-or-autoscaling_policy0scale_in_control0max_scaled_in_replicas0percent-is-required-1)
   - [Resource: `google_compute_firewall`](#resource-google_compute_firewall)
     - [One of `source_tags`, `source_ranges` or `source_service_accounts` are required on INGRESS firewalls](#one-of-source_tags-source_ranges-or-source_service_accounts-are-required-on-ingress-firewalls)
+  - [Resource: `google_compute_instance`](#resource-google_compute_instance)
+    - [`metadata_startup_script` is no longer set on import](#metadata_startup_script-is-no-longer-set-on-import)
   - [Resource: `google_compute_instance_group_manager`](#resource-google_compute_instance_group_manager)
     - [`update_policy.min_ready_sec` is removed from the GA provider](#update_policymin_ready_sec-is-removed-from-the-ga-provider)
   - [Resource: `google_compute_region_instance_group_manager`](#resource-google_compute_region_instance_group_manager)
@@ -44,16 +47,12 @@ description: |-
   - [Resource: `google_compute_url_map`](#resource-google_compute_url_map)
     - [At least one of `default_route_action.0.fault_injection_policy.0.delay.0.fixed_delay` or `default_route_action.0.fault_injection_policy.0.delay.0.percentage` is required](#at-least-one-of-default_route_action0fault_injection_policy0delay0fixed_delay-or-default_route_action0fault_injection_policy0delay0percentage-is-required)
   - [Resource: `google_container_cluster`](#resource-google_container_cluster)
+    - [`enable_shielded_nodes` now defaults to `true`](#enable_shielded_nodes-now-defaults-to-true)
     - [`instance_group_urls` is now removed](#instance_group_urls-is-now-removed)
     - [`master_auth` is now removed](#master_auth-is-now-removed)
     - [`node_config.workload_metadata_config.node_metadata` is now removed](#node_configworkload_metadata_confignode_metadata-is-now-removed)
     - [`workload_identity_config.0.identity_namespace` is now removed](#workload_identity_config0identity_namespace-is-now-removed)
     - [`pod_security_policy_config` is removed from the GA provider](#pod_security_policy_config-is-removed-from-the-ga-provider)
-  - [Resource: `google_project`](#resource-google_project)
-    - [`org_id`, `folder_id` now conflict at plan time](#org_id-folder_id-now-confict-at-plan-time)
-    - [`org_id`, `folder_id` are unset when removed from config](#org_id-folder_id-are-unset-when-removed-from-config)
-  - [Resource: `google_project_service`](#resource-google_project_service)
-    - [`bigquery-json.googleapis.com` is no longer a valid service name](#bigquery-json.googleapis.com-is-no-longer-a-valid-service-name)
   - [Resource: `google_data_loss_prevention_trigger`](#resource-google_data_loss_prevention_trigger)
     - [Exactly one of `inspect_job.0.storage_config.0.cloud_storage_options.0.file_set.0.url` or `inspect_job.0.storage_config.0.cloud_storage_options.0.file_set.0.regex_file_set` is required](#exactly-one-of-inspect_job0storage_config0cloud_storage_options0file_set0url-or-inspect_job0storage_config0cloud_storage_options0file_set0regex_file_set-is-required)
     - [At least one of `inspect_job.0.storage_config.0.timespan_config.0.start_time` or `inspect_job.0.storage_config.0.timespan_config.0.end_time` is required](#at-least-one-of-inspect_job0storage_config0timespan_config0start_time-or-inspect_job0storage_config0timespan_config0end_time-is-required)
@@ -65,8 +64,25 @@ description: |-
     - [Exactly one of `patch_config.0.windows_update.0.classifications`, `patch_config.0.windows_update.0.excludes` or `patch_config.0.windows_update.0.exclusive_patches` is required](#exactly-one-of-patch_config0windows_update0classifications-patch_config0windows_update0excludes-or-patch_config0windows_update0exclusive_patches-is-required)
     - [At least one of `patch_config.0.pre_step.0.linux_exec_step_config` or `patch_config.0.pre_step.0.windows_exec_step_config` is required](#at-least-one-of-patch_config0pre_step0linux_exec_step_config-or-patch_config0pre_step0windows_exec_step_config-is-required)
     - [At least one of `patch_config.0.post_step.0.linux_exec_step_config` or `patch_config.0.post_step.0.windows_exec_step_config` is required](#at-least-one-of-patch_config0post_step0linux_exec_step_config-or-patch_config0post_step0windows_exec_step_config-is-required)
+  - [Resource: `google_project`](#resource-google_project)
+    - [`org_id`, `folder_id` now conflict at plan time](#org_id-folder_id-now-conflict-at-plan-time)
+    - [`org_id`, `folder_id` are unset when removed from config](#org_id-folder_id-are-unset-when-removed-from-config)
+  - [Resource: `google_project_iam`](#resource-google_project_iam)
+    - [`project` field is now required](#project-field-is-now-required)
+  - [Resource: `google_project_service`](#resource-google_project_service)
+    - [`bigquery-json.googleapis.com` is no longer a valid service name](#bigquery-jsongoogleapiscom-is-no-longer-a-valid-service-name)
   - [Resource: `google_spanner_instance`](#resource-google_spanner_instance)
     - [Exactly one of `num_nodes` or `processing_units` is required](#exactly-one-of-num_nodes-or-processing_units-is-required)
+  - [Resource: `google_sql_database_instance`](#resource-google_sql_database_instance)
+    - [First-generation fields have been removed](#first-generation-fields-have-been-removed)
+    - [Drift detection and defaults enabled on fields](#drift-detection-and-defaults-enabled-on-fields)
+  - [Resource: `google_storage_bucket`](#resource-google_storage_bucket)
+    - [`bucket_policy_only` field is now removed](#bucket_policy_only-field-is-now-removed)
+    - [`location` field is now required.](#location-field-is-now-required)
+  - [Resource: `google_sql_database_instance`](#resource-google_sql_database_instance)
+    - [`database_version` field is now required](#database_version-field-is-now-required)
+  - [Resource: `google_pubsub_subscription`](#resource-google_pubsub_subscription)
+    - [`path` is now removed](#path-is-now-removed)
 
 <!-- /TOC -->
 
@@ -155,6 +171,21 @@ terraform {
 ```
 
 ## Provider
+
+### `credentials`, `access_token` precedence has changed
+
+Terraform can draw values for both the `credentials` and `access_token` from the
+config directly or from environment variables. 
+
+In earlier versions of the provider, `access_token` values specified through
+environment variables took precedence over `credentials` values specified in
+config. From `4.0.0` onwards, config takes precedence over environment variables,
+and the `access_token` environment variable takes precedence over the
+`credential` environment variable.
+
+Service account impersonation is unchanged. Terraform will continue to use
+the service account if it is specified through an environment variable, even
+if `credentials` or `access_token` are specified in config.
 
 ### Redundant default scopes are removed
 
@@ -277,6 +308,28 @@ The provider will now enforce at plan time that one of these fields be set.
 
 Previously, if all of these fields were left empty, the firewall defaulted to allowing traffic from 0.0.0.0/0, which is a suboptimal default.
 
+## Resource: `google_compute_instance`
+
+### `metadata_startup_script` is no longer set on import
+
+Earlier versions of the provider set the `metadata_startup_script` value on
+import, omitting the value of `metadata.startup-script` for historical backwards
+compatibility. This was dangerous in practice, as `metadata_startup_script`
+would flag an instance for recreation if the values differed rather than for
+just an update.
+
+In `4.0.0` the behaviour has been flipped, and `metadata.startup-script` is the
+default value that gets written. Users who want `metadata_startup_script` set
+on an imported instance will need to modify their state manually. This is more
+consistent with our expectations for the field, that a user who manages an
+instance **only** through Terraform uses it but that most users should prefer
+the `metadata` block.
+
+No action is required for user configs with instances already imported. If you
+have a config or module where neither is specified- where `import` will be run,
+or an old config that is not reconciled with the API- the value that gets set
+will change.
+
 ## Resource: `google_compute_instance_group_manager`
 
 ### `update_policy.min_ready_sec` is removed from the GA provider
@@ -300,12 +353,23 @@ This field was incorrectly included in the GA `google` provider in past releases
 In order to continue to use the feature, add `provider = google-beta` to your
 resource definition.
 
+### `advanced_machine_features` will track changes when unspecified in a config
+
+In `3.X`, `advanced_machine_features` wouldn't cause a diff if it was undefined in
+config but was set on the instance template itself. With 4.0.0 Terraform will now
+track changes on the block when it is not specified in a user's config.
+
 ## Resource: `google_compute_url_map`
 
 ### At least one of `default_route_action.0.fault_injection_policy.0.delay.0.fixed_delay` or `default_route_action.0.fault_injection_policy.0.delay.0.percentage` is required
 The provider will now enforce at plan time that one of these fields be set.
 
 ## Resource: `google_container_cluster`
+
+### `enable_shielded_nodes` now defaults to `true`
+
+Previously the provider defaulted `enable_shielded_nodes` to false, despite the API default of `true`.
+Unless explicitly configured, users may see a diff changing `enable_shielded_nodes` to `true`.
 
 ### `instance_group_urls` is now removed
 
@@ -343,6 +407,39 @@ resource "google_container_cluster" "cluster" {
 This field was incorrectly included in the GA `google` provider in past releases.
 In order to continue to use the feature, add `provider = google-beta` to your
 resource definition.
+
+## Resource: `google_app_engine_standard_app_version`
+
+### `entrypoint` is now required
+
+This resource would fail to deploy without this field defined. Specify the
+`entrypoint` block to fix any issues
+
+## Resource: `google_compute_snapshot`
+
+### `source_disk_link` is now removed
+
+Removed in favor of `source_disk`.
+
+## Resource: `google_kms_crypto_key`
+
+### `self_link` is now removed
+
+Removed in favor of `id`.
+
+## Resource: `google_kms_key_ring`
+
+### `self_link` is now removed
+
+Removed in favor of `id`.
+
+## Datasource: `google_kms_key_ring`
+
+### `id` now matches the `google_kms_key_ring` id format
+
+The format has changed to better match the resource's ID format.
+
+Interpolations based on the `id` of the datasource may require updates.
 
 ## Resource: `google_data_loss_prevention_trigger`
 
@@ -389,6 +486,19 @@ from config, changing the value on next refresh. Going forward, removing one of
 the values or switching values will generate a correct plan that removes the
 value.
 
+## Resource: `google_project_iam`
+
+### `project` field is now required
+
+The `project` field is now required for all `google_project_iam_*` resources.
+Previously, it was only required for `google_project_iam_policy`. This will make
+configuration of the project IAM resources more explicit, given that the project
+is the targeted resource.
+
+`terraform plan` will indicate any project IAM resources that had drawn a value
+with a provider, and you are able to specify the project explicitly to remove
+the proposed diff.
+
 ## Resource: `google_project_service`
 
 ### `bigquery-json.googleapis.com` is no longer a valid service name
@@ -400,4 +510,60 @@ the provider will no longer convert the service name. Use `bigquery.googleapis.c
 ## Resource: `google_spanner_instance`
 
 ### Exactly one of `num_nodes` or `processing_units` is required
+
 The provider will now enforce at plan time that one of these fields be set.
+
+### Resource: `google_sql_database_instance`
+
+### First-generation fields have been removed
+
+Removed fields specific to first-generation SQL instances:
+`authorized_gae_applications`, `crash_safe_replication`, `replication_type`
+
+### Drift detection and defaults enabled on fields
+
+Added drift detection and plan-time defaults to several fields used to configure
+second-generation SQL instances. If you see changes flagged by Terraform after
+running `terraform plan`, amend your config to resolve them.
+
+The affected fields are:
+
+    * `activation_policy` will now default to `ALWAYS` at plan time, and detect
+drift even when unset. Previously, Terraform only detected drift when the field
+had been set in config explicitly.
+
+    * `availability_type` will now default to `ZONAL` at plan time, and detect
+drift even when unset. Previously, Terraform only detected drift when the field
+had been set in config explicitly.
+
+    * `disk_type` will now default to `PD_SSD` at plan time, and detect
+drift even when unset. Previously, Terraform only detected drift when the field
+had been set in config explicitly.
+
+    * `encryption_key_name` will now detect drift even when unset. Previously,
+Terraform only detected drift when the field had been set in config explicitly.
+
+## Resource: `google_storage_bucket`
+
+### `bucket_policy_only` field is now removed
+
+`bucket_policy_only` field is now removed in favor of `uniform_bucket_level_access`.
+
+### `location` field is now required.
+
+Previously, the default value of `location` was `US`. In an attempt to avoid allowing invalid 
+conbination of `storageClass` value and default `location` value, `location` field is now required.
+
+## Resource: `google_sql_database_instance`
+
+### `database_version` field is now required
+
+The `database_version` field is now required.
+Previously, it was an optional field and the default value was `MYSQL_5_6`.
+Description of the change and how users should adjust their configuration (if needed).
+
+## Resource: `google_pubsub_subscription`
+
+### `path` is now removed
+
+`path` has been removed in favor of `id` which has an identical value.

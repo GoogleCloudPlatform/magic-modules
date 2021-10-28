@@ -4,6 +4,7 @@ set -e
 
 function clone_repo() {
     SCRATCH_OWNER=modular-magician
+    UPSTREAM_BRANCH=master
     if [ "$REPO" == "terraform" ]; then
         if [ "$VERSION" == "ga" ]; then
             UPSTREAM_OWNER=hashicorp
@@ -24,6 +25,7 @@ function clone_repo() {
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
     elif [ "$REPO" == "terraform-validator" ]; then
         UPSTREAM_OWNER=GoogleCloudPlatform
+        UPSTREAM_BRANCH=main
         GH_REPO=terraform-validator
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-validator
     elif [ "$REPO" == "tf-oics" ]; then
@@ -191,14 +193,18 @@ if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ]; then
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/$PR_NUMBER" | \
         jq -r .html_url)
 
-    NEW_PR_URL=$(hub pull-request -b $UPSTREAM_OWNER:master -h $SCRATCH_OWNER:$BRANCH -m "$PR_TITLE" -m "$PR_BODY" -m "Derived from $MM_PR_URL")
+    echo "Base: $UPSTREAM_OWNER:$UPSTREAM_BRANCH"
+    echo "Head: $SCRATCH_OWNER:$BRANCH"
+    NEW_PR_URL=$(hub pull-request -b $UPSTREAM_OWNER:$UPSTREAM_BRANCH -h $SCRATCH_OWNER:$BRANCH -m "$PR_TITLE" -m "$PR_BODY" -m "Derived from $MM_PR_URL")
     if [ $? != 0 ]; then
         exit $?
     fi
+    echo "Created PR $NEW_PR_URL"
     NEW_PR_NUMBER=$(echo $NEW_PR_URL | awk -F '/' '{print $NF}')
 
     # Wait a few seconds, then merge the PR.
     sleep 5
+    echo "Merging PR $NEW_PR_URL"
     curl -L -H "Authorization: token ${GITHUB_TOKEN}" \
         -X PUT \
         -d '{"merge_method": "squash"}' \

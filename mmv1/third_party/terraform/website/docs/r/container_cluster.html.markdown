@@ -161,7 +161,7 @@ for more information.
     will have statically granted permissions beyond those provided by the RBAC configuration or IAM.
     Defaults to `false`
 
-* `enable_shielded_nodes` - (Optional) Enable Shielded Nodes features on all nodes in this cluster.  Defaults to `false`.
+* `enable_shielded_nodes` - (Optional) Enable Shielded Nodes features on all nodes in this cluster.  Defaults to `true`.
 
 * `enable_autopilot` - (Optional) Enable Autopilot for this cluster. Defaults to `false`.
     Note that when this option is enabled, certain features of Standard GKE are not available.
@@ -742,8 +742,6 @@ linux_node_config {
 
 <a name="nested_workload_identity_config"></a> The `workload_identity_config` block supports:
 
-* `identity_namespace` (Optional, Deprecated) - Currently, the only supported identity namespace is the project's default.
-
 * `workload_pool` (Optional) - The workload pool to attach all Kubernetes service accounts to. Currently, the only supported identity namespace is the project of the cluster.
 
 ```hcl
@@ -877,16 +875,9 @@ Enables monitoring and attestation of the boot integrity of the instance. The at
 
 * `effect` (Required) Effect for taint. Accepted values are `NO_SCHEDULE`, `PREFER_NO_SCHEDULE`, and `NO_EXECUTE`.
 
-<a name="nested_workload_metadata_config"></a>The `workload_metadata_config` must have exactly one of `node_metadata` (deprecated) or `mode` set. This block supports:
+<a name="nested_workload_metadata_config"></a>The `workload_metadata_config` block supports:
 
-* `node_metadata` (Optional, Deprecated) How to expose the node metadata to the workload running on the node. This is deprecated in favor of `mode`
-    Accepted values are:
-    * UNSPECIFIED: Not Set
-    * SECURE: Prevent workloads not in hostNetwork from accessing certain VM metadata, specifically kube-env, which contains Kubelet credentials, and the instance identity token. See [Metadata Concealment](https://cloud.google.com/kubernetes-engine/docs/how-to/metadata-proxy) documentation.
-    * EXPOSE: Expose all VM metadata to pods.
-    * GKE_METADATA_SERVER: Enables [workload identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) on the node.
-
-* `mode` (Optional) How to expose the node metadata to the workload running on the node.
+* `mode` (Required) How to expose the node metadata to the workload running on the node.
     Accepted values are:
     * UNSPECIFIED: Not Set
     * GCE_METADATA: Expose all Compute Engine metadata to pods.

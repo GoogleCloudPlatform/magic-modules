@@ -135,12 +135,7 @@ func GetContainerClusterApiObject(d TerraformResourceData, config *Config) (map[
 	} else if v, ok := d.GetOkExists("enable_kubernetes_alpha"); !isEmptyValue(reflect.ValueOf(enableKubernetesAlphaProp)) && (ok || !reflect.DeepEqual(v, enableKubernetesAlphaProp)) {
 		obj["enableKubernetesAlpha"] = enableKubernetesAlphaProp
 	}
-	podSecurityPolicyConfigProp, err := expandContainerClusterPodSecurityPolicyConfig(d.Get("pod_security_policy_config"), d, config)
-	if err != nil {
-		return nil, err
-	} else if v, ok := d.GetOkExists("pod_security_policy_config"); !isEmptyValue(reflect.ValueOf(podSecurityPolicyConfigProp)) && (ok || !reflect.DeepEqual(v, podSecurityPolicyConfigProp)) {
-		obj["podSecurityPolicyConfig"] = podSecurityPolicyConfigProp
-	}
+
 	nameProp, err := expandContainerClusterName(d.Get("name"), d, config)
 	if err != nil {
 		return nil, err
@@ -474,17 +469,17 @@ func expandContainerClusterNodeConfigWorkloadMetadataConfig(v interface{}, d Ter
 	original := raw.(map[string]interface{})
 	transformed := make(map[string]interface{})
 
-	transformedNodeMetadata, err := expandContainerClusterNodeConfigWorkloadMetadataConfigNodeMetadata(original["node_metadata"], d, config)
+	transformedMode, err := expandContainerClusterNodeConfigWorkloadMetadataConfigMode(original["mode"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedNodeMetadata); val.IsValid() && !isEmptyValue(val) {
-		transformed["nodeMetadata"] = transformedNodeMetadata
+	} else if val := reflect.ValueOf(transformedMode); val.IsValid() && !isEmptyValue(val) {
+		transformed["mode"] = transformedMode
 	}
 
 	return transformed, nil
 }
 
-func expandContainerClusterNodeConfigWorkloadMetadataConfigNodeMetadata(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandContainerClusterNodeConfigWorkloadMetadataConfigMode(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	return v, nil
 }
 
@@ -745,7 +740,7 @@ func expandContainerClusterWorkloadIdentityConfig(v interface{}, d TerraformReso
 	original := raw.(map[string]interface{})
 	transformed := make(map[string]interface{})
 
-	transformedWorkloadPool, err := expandContainerClusterWorkloadIdentityConfigWorkloadPool(original["identity_namespace"], d, config)
+	transformedWorkloadPool, err := expandContainerClusterWorkloadIdentityConfigWorkloadPool(original["workload_pool"], d, config)
 	if err != nil {
 		return nil, err
 	} else if val := reflect.ValueOf(transformedWorkloadPool); val.IsValid() && !isEmptyValue(val) {
