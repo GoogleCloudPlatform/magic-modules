@@ -14,6 +14,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/storage/v1"
+
+<% if version == "ga" -%>
+	"google.golang.org/api/composer/v1"
+<% else -%>
+	"google.golang.org/api/composer/v1beta1"
+<% end -%>
 )
 
 const testComposerEnvironmentPrefix = "tf-test-composer-env"
