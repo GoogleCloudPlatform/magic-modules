@@ -2562,48 +2562,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 <% end -%>
 
-<<<<<<< HEAD
-	if d.HasChange("master_auth") {
-		var req *container.SetMasterAuthRequest
-		if ma, ok := d.GetOk("master_auth"); ok {
-			req = &container.SetMasterAuthRequest{
-				Action: "SET_USERNAME",
-				Update: expandMasterAuth(ma),
-			}
-		} else {
-			req = &container.SetMasterAuthRequest{
-				Action: "SET_USERNAME",
-				Update: &container.MasterAuth{
-					Username: "admin",
-				},
-			}
-		}
-
-		updateF := func() error {
-			name := containerClusterFullName(project, location, clusterName)
-			clusterSetMasterAuthCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.SetMasterAuth(name, req)
-			if config.UserProjectOverride {
-				clusterSetMasterAuthCall.Header().Add("X-Goog-User-Project", project)
-			}
-			op, err := clusterSetMasterAuthCall.Do()
-			if err != nil {
-				return err
-			}
-
-			// Wait until it's updated
-			return containerOperationWait(config, op, project, location, "updating master auth", userAgent, d.Timeout(schema.TimeoutUpdate))
-		}
-
-		// Call update serially.
-		if err := lockedCall(lockKey, updateF); err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] GKE cluster %s: master auth has been updated", d.Id())
-	}
-
-=======
->>>>>>> 29a604e12 (Remove `username` and `password` from `master_auth`)
 	if d.HasChange("vertical_pod_autoscaling") {
 		if ac, ok := d.GetOk("vertical_pod_autoscaling"); ok {
 			req := &container.UpdateClusterRequest{
