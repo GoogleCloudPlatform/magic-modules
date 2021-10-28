@@ -17,16 +17,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        min_version: beta
         name: "gkehub_membership_basic"
-        primary_resource_id: "basic_membership"
+        primary_resource_id: "membership"
         vars:
           name: "basic"
           cluster_name: "basiccluster"
       - !ruby/object:Provider::Terraform::Examples
-        min_version: beta
         name: "gkehub_membership_issuer"
-        primary_resource_id: "issuer_membership"
+        primary_resource_id: "membership"
         vars:
           name: "basic"
           cluster_name: "basiccluster"
@@ -35,7 +33,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # Skip sweeper gen since this is a child resource.
     skip_sweeper: true
     id_format: "{{name}}"
-    import_format: ["{{name}}"]
+    import_format: ["{{%name}}"]
+    properties:
+      endpoint.gkeCluster.resourceLink: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: suppressGkeHubEndpointSelfLinkDiff
+        custom_expand: 'templates/terraform/custom_expand/gke_hub_membership.erb'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/gke_hub_membership_diff.go
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

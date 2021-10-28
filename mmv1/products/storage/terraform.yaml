@@ -72,7 +72,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         bucket_name: "static-content-bucket"
         object_name: "public-object"
     id_format: "{{bucket}}/{{object}}/{{entity}}"
-    import_format: ["{{bucket}}/{{object}}/{{entity}}"]
+    import_format: ["{{bucket}}/{{%object}}/{{entity}}"]
     mutex: "storage/buckets/{{bucket}}/objects/{{object}}"
     # This resource is a child resource
     skip_sweeper: true

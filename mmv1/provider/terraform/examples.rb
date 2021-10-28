@@ -87,6 +87,14 @@ module Provider
       # See test_vars_overrides for more details
       attr_reader :oics_vars_overrides
 
+      # Hash to provider custom override values for generating tf_cloud_docs
+      # configs. See test_vars_overrides for more details
+      attr_reader :cloud_docs_vars_overrides
+
+      # The region tag that wraps the primary resource as a snippet in a
+      # cloud docs sample.
+      attr_reader :cloud_docs_region_tag
+
       # The version name of of the example's version if it's different than the
       # resource version, eg. `beta`
       #
@@ -167,9 +175,43 @@ module Provider
                        },
                        pwd + '/' + config_path
                      ))
+
+        # Remove region tags
+        body = body.gsub(/# \[[a-zA-Z_ ]+\]\n/, '')
+        body = body.gsub(/\n# \[[a-zA-Z_ ]+\]/, '')
         lines(compile_file(
                 { content: body },
                 pwd + '/templates/terraform/examples/base_configs/documentation.tf.erb'
+              ))
+      end
+
+      def config_cloud_docs(pwd)
+        docs_defaults = {
+          PROJECT_NAME: 'my-project-name',
+          FIRESTORE_PROJECT_NAME: 'my-project-name',
+          CREDENTIALS: 'my/credentials/filename.json',
+          REGION: 'us-west1',
+          ORG_ID: '123456789',
+          ORG_DOMAIN: 'example.com',
+          ORG_TARGET: '123456789',
+          BILLING_ACCT: '000000-0000000-0000000-000000',
+          SERVICE_ACCT: 'emailAddress:my@service-account.com',
+          CUST_ID: 'A01b123xz',
+          IDENTITY_USER: 'cloud_identity_user'
+        }
+        @vars ||= {}
+        @test_env_vars ||= {}
+        @cloud_docs_vars_overrides ||= {}
+
+        vars.merge!(cloud_docs_vars_overrides) unless cloud_docs_vars_overrides.empty?
+
+        lines(compile_file(
+                {
+                  vars: vars,
+                  test_env_vars: test_env_vars.map { |k, v| [k, docs_defaults[v]] }.to_h,
+                  primary_resource_id: primary_resource_id
+                },
+                pwd + '/' + config_path
               ))
       end
 
@@ -218,10 +260,13 @@ module Provider
                        pwd + '/' + config_path
                      ))
 
+        # Remove region tags
+        body = body.gsub(/# \[[a-zA-Z_ ]+\]\n/, '')
+        body = body.gsub(/\n# \[[a-zA-Z_ ]+\]/, '')
         substitute_test_paths body
       end
 
-      def config_example(pwd)
+      def config_oics(pwd)
         @vars ||= []
         @oics_vars_overrides ||= {}
 
@@ -236,6 +281,9 @@ module Provider
                        pwd + '/' + config_path
                      ))
 
+        # Remove region tags
+        body = body.gsub(/# \[[a-zA-Z_ ]+\]\n/, '')
+        body = body.gsub(/\n# \[[a-zA-Z_ ]+\]/, '')
         substitute_example_paths body
       end
 
@@ -287,6 +335,8 @@ module Provider
         check :ignore_read_extra, type: Array, item_type: String, default: []
         check :primary_resource_name, type: String
         check :skip_test, type: TrueClass
+        check :cloud_docs_vars_overrides, type: Hash
+        check :cloud_docs_region_tag, type: String
         check :skip_import_test, type: TrueClass
         check :skip_docs, type: TrueClass
         check :config_path, type: String, default: "templates/terraform/examples/#{name}.tf.erb"

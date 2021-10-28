@@ -68,6 +68,7 @@ var (
 <% unless version == 'ga' -%>
 		"cluster_config.0.lifecycle_config",
 		"cluster_config.0.endpoint_config",
+		"cluster_config.0.metastore_config",
 <% end -%>
 	}
 )
@@ -676,6 +677,23 @@ by Dataproc`,
 								},
 							},
 						},
+						"metastore_config": {
+							Type:             schema.TypeList,
+							Optional:         true,
+							AtLeastOneOf:     clusterConfigKeys,
+							MaxItems:         1,
+							Description:      `Specifies a Metastore configuration.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"dataproc_metastore_service": {
+										Type:             schema.TypeString,
+										Required:         true,
+										ForceNew:         true,
+										Description:      `Resource name of an existing Dataproc Metastore service.`,
+									},
+								},
+							},
+						},
 <% end -%>
 					},
 				},
@@ -945,6 +963,10 @@ func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.Clus
 	if cfg, ok := configOptions(d, "cluster_config.0.endpoint_config"); ok {
 		conf.EndpointConfig = expandEndpointConfig(cfg)
 	}
+
+	if cfg, ok := configOptions(d, "cluster_config.0.metastore_config"); ok {
+		conf.MetastoreConfig = expandMetastoreConfig(cfg)
+	}
 <% end -%>
 
 	if cfg, ok := configOptions(d, "cluster_config.0.master_config"); ok {
@@ -1149,6 +1171,13 @@ func expandEndpointConfig(cfg map[string]interface{}) *dataproc.EndpointConfig {
 	return conf
 }
 
+func expandMetastoreConfig(cfg map[string]interface{}) *dataproc.MetastoreConfig {
+	conf := &dataproc.MetastoreConfig{}
+	if v, ok := cfg["dataproc_metastore_service"]; ok {
+		conf.DataprocMetastoreService = v.(string)
+	}
+	return conf
+}
 <% end -%>
 
 func expandInitializationActions(v interface{}) []*dataproc.NodeInitializationAction {
@@ -1421,6 +1450,7 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 <% unless version == 'ga' -%>
 		"lifecycle_config": flattenLifecycleConfig(d, cfg.LifecycleConfig),
 		"endpoint_config":  flattenEndpointConfig(d, cfg.EndpointConfig),
+		"metastore_config": flattenMetastoreConfig(d, cfg.MetastoreConfig),
 <% end -%>
 	}
 
@@ -1529,6 +1559,17 @@ func flattenEndpointConfig(d *schema.ResourceData, ec *dataproc.EndpointConfig) 
 	return []map[string]interface{}{data}
 }
 
+func flattenMetastoreConfig(d *schema.ResourceData, ec *dataproc.MetastoreConfig) []map[string]interface{} {
+	if ec == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{
+		"dataproc_metastore_service": ec.DataprocMetastoreService,
+	}
+
+	return []map[string]interface{}{data}
+}
 <% end -%>
 
 func flattenAccelerators(accelerators []*dataproc.AcceleratorConfig) interface{} {

@@ -3,21 +3,18 @@ resource "google_container_cluster" "primary" {
   location           = "us-central1-a"
   initial_node_count = 1
   workload_identity_config {
-    identity_namespace = "<%= ctx[:test_env_vars]['project'] %>.svc.id.goog"
+    workload_pool = "<%= ctx[:test_env_vars]['project'] %>.svc.id.goog"
   }
-  provider = google-beta
 }
 
 resource "google_gke_hub_membership" "membership" {
   membership_id = "<%= ctx[:vars]['name'] %>"
   endpoint {
     gke_cluster {
-      resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
+      resource_link = google_container_cluster.primary.id
     }
   }
   authority {
     issuer = "https://container.googleapis.com/v1/${google_container_cluster.primary.id}"
   }
-  description = "test resource."
-  provider = google-beta
 }

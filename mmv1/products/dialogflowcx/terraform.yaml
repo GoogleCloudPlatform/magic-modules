@@ -33,6 +33,145 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       description: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.StringLenBetween(0, 500)'
+  Intent: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 40
+      update_minutes: 40  
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/dialogflowcx_intent.go.erb   
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dialogflowcx_intent_full"
+        primary_resource_id: "basic_intent"
+        vars:
+          agent_name: "dialogflowcx-agent"
+    skip_sweeper: true
+    id_format: "{{parent}}/intents/{{name}}"
+    import_format: ["{{parent}}/intents/{{name}}"]
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      displayName: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(0, 64)'
+      description: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(0, 140)'
+  Flow: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 40
+      update_minutes: 40 
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/dialogflowcx_flow.go.erb 
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dialogflowcx_flow_full"
+        primary_resource_id: "basic_flow"
+        vars:
+          agent_name: "dialogflowcx-agent"
+    skip_sweeper: true
+    id_format: "{{parent}}/flows/{{name}}"
+    import_format: ["{{parent}}/flows/{{name}}"]
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      description: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(0, 500)'
+      eventHandlers: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+  Version: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 40
+      update_minutes: 40
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/dialogflowcx_version.go.erb   
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dialogflowcx_version_full"
+        primary_resource_id: "version_1"
+        vars:
+          agent_name: "dialogflowcx-agent"
+    skip_sweeper: true
+    id_format: "{{parent}}/versions/{{name}}"
+    import_format: ["{{parent}}/versions/{{name}}"]
+    autogen_async: true
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      description: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(0, 500)'
+      displayName: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(0, 64)'
+  Page: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 40
+      update_minutes: 40
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/dialogflowcx_page.go.erb   
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dialogflowcx_page_full"
+        primary_resource_id: "basic_page"
+        vars:
+          agent_name: "dialogflowcx-agent"
+    skip_sweeper: true
+    id_format: "{{parent}}/pages/{{name}}"
+    import_format: ["{{parent}}/pages/{{name}}"]
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      displayName: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(0, 64)'
+  EntityType: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 40
+      update_minutes: 40
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/dialogflowcx_entity_type.go.erb   
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dialogflowcx_entity_type_full"
+        primary_resource_id: "basic_entity_type"
+        vars:
+          agent_name: "dialogflowcx-agent"
+    skip_sweeper: true
+    id_format: "{{parent}}/entityTypes/{{name}}"
+    import_format: ["{{parent}}/entityTypes/{{name}}"]
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      displayName: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(0, 64)'
+  Environment: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 40
+      update_minutes: 40
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/dialogflowcx_environment.go.erb   
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dialogflowcx_environment_full"
+        primary_resource_id: "development"
+        vars:
+          agent_name: "dialogflowcx-agent"
+    skip_sweeper: true
+    id_format: "{{parent}}/environments/{{name}}"
+    import_format: ["{{parent}}/environments/{{name}}"]
+    autogen_async: true
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      description: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(0, 500)'
+      displayName: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(0, 64)'
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

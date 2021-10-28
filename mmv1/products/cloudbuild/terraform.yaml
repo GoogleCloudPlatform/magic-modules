@@ -29,6 +29,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudbuild_trigger_build"
         primary_resource_id: "build-trigger"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudbuild_trigger_service_account"
+        primary_resource_id: "service-account-trigger"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'trigger_id'
@@ -45,11 +48,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       triggerTemplate: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           {{description}}
-          One of `trigger_template` or `github` must be provided.
+          One of `trigger_template`, `github`, `pubsub_config` or `webhook_config` must be provided.
       github: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           {{description}}
-          One of `trigger_template` or `github` must be provided.
+          One of `trigger_template`, `github`, `pubsub_config` or `webhook_config` must be provided.
+      pubsubConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          {{description}}
+          One of `trigger_template`, `github`, `pubsub_config` or `webhook_config` must be provided.
+      webhookConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          {{description}}
+          One of `trigger_template`, `github`, `pubsub_config` or `webhook_config` must be provided.
       triggerTemplate.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode

@@ -51,6 +51,12 @@ import (
     timeouts ||= Api::Timeouts.new
 -%>
 
+<%  if object.async&.is_a? Api::OpAsync -%>
+    <%  if object.async.include_project -%>
+var project string
+    <%  end -%>
+<% end -%>
+
 func resource<%= resource_name -%>() *schema.Resource {
     return &schema.Resource{
         Create: resource<%= resource_name -%>Create,
@@ -261,7 +267,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     // identity fields and d.Id() before read
     var opRes map[string]interface{}
     err = <%= client_name_camel -%>OperationWaitTimeWithResponse(
-    config, res, &opRes, <% if has_project -%> project, <% end -%> "Creating <%= object.name -%>", userAgent,
+    config, res, &opRes, <% if has_project || object.async.include_project -%> project, <% end -%> "Creating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutCreate))
     if err != nil {
 <%        if object.custom_code.post_create_failure -%>
@@ -311,7 +317,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 
     <% else -%>
     err = <%= client_name_camel -%>OperationWaitTime(
-    config, res, <% if has_project -%> project, <% end -%> "Creating <%= object.name -%>", userAgent,
+    config, res, <% if has_project || object.async.include_project -%> project, <% end -%> "Creating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutCreate))
 
     if err != nil {
@@ -660,7 +666,7 @@ if len(updateMask) > 0 {
 <%  if object.async&.allow?('update') -%>
 <%    if object.async.is_a? Api::OpAsync -%>
     err = <%= client_name_camel -%>OperationWaitTime(
-        config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>", userAgent,
+        config, res, <% if has_project || object.async.include_project -%> project, <% end -%> "Updating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutUpdate))
 
     if err != nil {
@@ -792,7 +798,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <%      if object.async&.allow?('update') -%>
 <%          if object.async.is_a? Api::OpAsync-%>
         err = <%= client_name_camel -%>OperationWaitTime(
-            config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>", userAgent,
+            config, res, <% if has_project || object.async.include_project -%> project, <% end -%> "Updating <%= object.name -%>", userAgent,
             d.Timeout(schema.TimeoutUpdate))
         if err != nil {
             return err
@@ -909,7 +915,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     }
 <%    else -%>
     err = <%= client_name_camel -%>OperationWaitTime(
-        config, res, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>", userAgent,
+        config, res, <% if has_project || object.async.include_project-%> project, <% end -%> "Deleting <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutDelete))
 
     if err != nil {

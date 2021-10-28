@@ -1,6 +1,4 @@
 resource "google_compute_service_attachment" "<%= ctx[:primary_resource_id] %>" {
-  provider = "google-beta"
-
   name        = "<%= ctx[:vars]['service_attachment_name'] %>"
   region      = "us-west2"
   description = "A service attachment configured with Terraform"
@@ -12,19 +10,14 @@ resource "google_compute_service_attachment" "<%= ctx[:primary_resource_id] %>" 
 }
 
 resource "google_compute_address" "psc_ilb_consumer_address" {
-  provider = "google-beta"
-
   name   = "<%= ctx[:vars]['consumer_address_name'] %>"
   region = "us-west2"
 
   subnetwork   = "default"
   address_type = "INTERNAL"
-  address      = "10.168.0.17"
 }
 
 resource "google_compute_forwarding_rule" "psc_ilb_consumer" {
-  provider = "google-beta"
-
   name   = "<%= ctx[:vars]['consumer_forwarding_rule_name'] %>"
   region = "us-west2"
 
@@ -35,8 +28,6 @@ resource "google_compute_forwarding_rule" "psc_ilb_consumer" {
 }
 
 resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
-  provider = "google-beta"
-
   name   = "<%= ctx[:vars]['producer_forwarding_rule_name'] %>"
   region = "us-west2"
 
@@ -48,8 +39,6 @@ resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
 }
 
 resource "google_compute_region_backend_service" "producer_service_backend" {
-  provider = "google-beta"
-
   name   = "<%= ctx[:vars]['producer_service_name'] %>"
   region = "us-west2"
 
@@ -57,8 +46,6 @@ resource "google_compute_region_backend_service" "producer_service_backend" {
 }
 
 resource "google_compute_health_check" "producer_service_health_check" {
-  provider = "google-beta"
-
   name = "<%= ctx[:vars]['producer_health_check_name'] %>"
 
   check_interval_sec = 1
@@ -69,15 +56,11 @@ resource "google_compute_health_check" "producer_service_health_check" {
 }
 
 resource "google_compute_network" "psc_ilb_network" {
-  provider = "google-beta"
-
   name = "<%= ctx[:vars]['network_name'] %>"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "psc_ilb_producer_subnetwork" {
-  provider = "google-beta"
-
   name   = "<%= ctx[:vars]['producer_subnetwork_name'] %>"
   region = "us-west2"
 
@@ -86,8 +69,6 @@ resource "google_compute_subnetwork" "psc_ilb_producer_subnetwork" {
 }
 
 resource "google_compute_subnetwork" "psc_ilb_nat" {
-  provider = "google-beta"
-
   name   = "<%= ctx[:vars]['nat_subnetwork_name'] %>"
   region = "us-west2"
 

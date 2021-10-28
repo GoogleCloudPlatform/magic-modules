@@ -1,11 +1,11 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -64,6 +64,12 @@ type CustomImportFunctionDetails struct {
 	// (d *schema.ResourceData, config *Config, project, location, name string)
 	// This function is expected to return an error.
 	Function string
+}
+
+type AppendToBasePathDetails struct {
+	// Append to base path appends this string to the end of the resource's
+	// base path.
+	String string
 }
 
 type CustomizeDiffDetails struct {
@@ -126,6 +132,21 @@ type CustomIdentityGetterDetails struct {
 	Function string
 }
 
+type CustomDefaultDetails struct {
+	Default string
+}
+
+type CustomListSizeConstraintDetails struct {
+	Min int64
+	Max int64
+}
+
+type CustomSchemaValuesDetails struct {
+	Required bool
+	Optional bool
+	Computed bool
+}
+
 type ImportFormatDetails struct {
 	// List of import format pattern strings
 	Formats []string
@@ -157,9 +178,19 @@ type CustomCreateDirectiveDetails struct {
 	Function string
 }
 
+type CustomSerializerDetails struct {
+	// The name of the function that will serialize this resource.
+	Function string
+}
+
 type SkipDeleteFunctionDetails struct {
 	// The name of the function that determines if we should skip delete.
 	Function string
+}
+
+type TerraformProductNameDetails struct {
+	// The name of the product in terraform.
+	Product string
 }
 
 type ProductBasePathDetails struct {
@@ -169,4 +200,14 @@ type ProductBasePathDetails struct {
 	// Alternative product base path name to allow for DCL-based resources to use
 	// different default base paths than mmv1 generated resources
 	BasePathIdentifier string
+}
+
+type ProductTitleDetails struct {
+	// alternative name to be used for the product resources
+	Title string
+}
+
+type ProductDocsSectionDetails struct {
+	// alternative name to be used for the product resources in docs.
+	DocsSection string
 }

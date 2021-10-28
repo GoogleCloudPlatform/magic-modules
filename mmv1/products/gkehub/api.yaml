@@ -18,6 +18,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://gkehub.googleapis.com/v1beta1/
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://gkehub.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -26,7 +29,6 @@ apis_required:
     url: https://console.cloud.google.com/apis/library/gkehub.googleapis.com
 objects:
   - !ruby/object:Api::Resource
-    min_version: beta
     name: 'Membership'
     base_url: "projects/{{project}}/locations/global/memberships"
     create_url: "projects/{{project}}/locations/global/memberships?membershipId={{membership_id}}"
@@ -40,7 +42,7 @@ objects:
       guides:
         'Registering a Cluster':
           'https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster'
-      api: 'https://cloud.google.com/gkehub/docs/reference/rest/v1beta1/projects.locations.memberships'
+      api: 'https://cloud.google.com/anthos/multicluster-management/reference/rest/v1/projects.locations.memberships'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'gkehub#operation'
@@ -75,8 +77,10 @@ objects:
           The unique identifier of the membership.
       - !ruby/object:Api::Type::String
         name: 'description'
+        deprecation_message: This field is unavailable in the GA provider and will be removed from the beta provider in a future release.
+        min_version: beta
         description: |
-          The name of this entity type to be displayed on the console.
+          The name of this entity type to be displayed on the console. This field is unavailable in v1 of the API.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
@@ -99,7 +103,8 @@ objects:
                   Self-link of the GCP resource for the GKE cluster.
                   For example: `//container.googleapis.com/projects/my-project/zones/us-west1-a/clusters/my-cluster`.
                   It can be at the most 1000 characters in length. If the cluster is provisioned with Terraform,
-                  this is `"//container.googleapis.com/${google_container_cluster.my-cluster.id}"`.
+                  this can be `"//container.googleapis.com/${google_container_cluster.my-cluster.id}"` or
+                  `google_container_cluster.my-cluster.id`.
                 input: true
                 required: true
       - !ruby/object:Api::Type::NestedObject

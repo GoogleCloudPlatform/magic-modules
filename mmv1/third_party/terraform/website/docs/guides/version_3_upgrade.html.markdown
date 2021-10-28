@@ -460,10 +460,10 @@ In an attempt to avoid allowing empty blocks in config files, at least one of `s
 
 ## Resource: `google_composer_environment`
 
-### At least one of `airflow_config_overrides`, `pypi_packages`, `env_variables`, `image_version`, or `python_version` is now required on `google_composer_environment.config.software_config`
+### At least one of `airflow_config_overrides`, `pypi_packages`, `env_variables`, `image_version`, `python_version` or `scheduler_count` is now required on `google_composer_environment.config.software_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `airflow_config_overrides`,
-`pypi_packages`, `env_variables`, `image_version`, or `python_version` is now required on the
+`pypi_packages`, `env_variables`, `image_version`, `python_version` or `scheduler_count` is now required on the
 `config.software_config` block.
 
 ### `use_ip_aliases` is now required on block `google_composer_environment.ip_allocation_policy`
@@ -549,7 +549,7 @@ Previously documentation suggested Terraform could use the same range of valid
 IP Address formats for `ip_address` as accepted by the API (e.g. named addresses
 or URLs to GCP Address resources). However, the server returns only literal IP
 addresses and thus caused diffs on re-apply (i.e. a permadiff). We amended
-documenation to say Terraform only accepts literal IP addresses.
+documentation to say Terraform only accepts literal IP addresses.
 
 This is now strictly validated. While this shouldn't have a large breaking
 impact as users would have already run into permadiff issues on re-apply,

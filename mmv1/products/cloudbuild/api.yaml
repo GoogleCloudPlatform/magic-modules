@@ -69,6 +69,16 @@ objects:
         description: |
           Substitutions data for Build resource.
       - !ruby/object:Api::Type::String
+        name: 'serviceAccount'
+        description: |
+          The service account used for all user-controlled operations including
+          triggers.patch, triggers.run, builds.create, and builds.cancel.
+          
+          If no service account is set, then the standard Cloud Build service account
+          ([PROJECT_NUM]@system.gserviceaccount.com) will be used instead.
+          
+          Format: projects/{PROJECT_ID}/serviceAccounts/{ACCOUNT_ID_OR_EMAIL}
+      - !ruby/object:Api::Type::String
         name: 'filename'
         exactly_one_of:
           - filename
@@ -111,6 +121,11 @@ objects:
           Branch and tag names in trigger templates are interpreted as regular
           expressions. Any branch or tag change that matches that regular
           expression will trigger a build.
+        exactly_one_of:
+          - trigger_template
+          - github
+          - pubsub_config
+          - webhook_config
         properties:
           - !ruby/object:Api::Type::String
             name: 'projectId'
@@ -168,6 +183,8 @@ objects:
         exactly_one_of:
           - trigger_template
           - github
+          - pubsub_config
+          - webhook_config
         properties:
           - !ruby/object:Api::Type::String
             name: 'owner'
@@ -230,6 +247,59 @@ objects:
                 exactly_one_of:
                   - github.0.push.0.branch
                   - github.0.push.0.tag
+      - !ruby/object:Api::Type::NestedObject
+        name: 'pubsubConfig'
+        description: |
+          PubsubConfig describes the configuration of a trigger that creates 
+          a build whenever a Pub/Sub message is published.
+        exactly_one_of:
+          - trigger_template
+          - github
+          - pubsub_config
+          - webhook_config
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'subscription'
+            description: |
+              Output only. Name of the subscription.
+            output: true
+          - !ruby/object:Api::Type::String
+            name: 'topic'
+            required: true
+            description: |
+              The name of the topic from which this subscription is receiving messages.
+          - !ruby/object:Api::Type::String
+            name: 'service_account_email'
+            description: |
+              Service account that will make the push request.
+          - !ruby/object:Api::Type::String
+            name: 'state'
+            output: true
+            description: |
+              Potential issues with the underlying Pub/Sub subscription configuration.
+              Only populated on get requests.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'webhookConfig'
+        description: |
+          WebhookConfig describes the configuration of a trigger that creates 
+          a build whenever a webhook is sent to a trigger's webhook URL.
+        exactly_one_of:
+          - trigger_template
+          - github
+          - pubsub_config
+          - webhook_config
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'secret'
+            required: true
+            description: |
+              Resource name for the secret required as a URL parameter.
+          - !ruby/object:Api::Type::String
+            name: 'state'
+            output: true
+            description: |
+              Potential issues with the underlying Pub/Sub subscription configuration.
+              Only populated on get requests.
       - !ruby/object:Api::Type::NestedObject
         name: 'build'
         exactly_one_of:
@@ -299,16 +369,28 @@ objects:
                       Regex matching branches to build. Exactly one a of branch name, tag, or commit SHA must be provided.
                       The syntax of the regular expressions accepted is the syntax accepted by RE2 and 
                       described at https://github.com/google/re2/wiki/Syntax
+                    exactly_one_of:
+                      - build.0.source.0.repo_source.0.branch_name
+                      - build.0.source.0.repo_source.0.commit_sha
+                      - build.0.source.0.repo_source.0.tag_name
                   - !ruby/object:Api::Type::String
                     name: 'tagName'
                     description: |
                       Regex matching tags to build. Exactly one a of branch name, tag, or commit SHA must be provided.
                       The syntax of the regular expressions accepted is the syntax accepted by RE2 and 
                       described at https://github.com/google/re2/wiki/Syntax
+                    exactly_one_of:
+                      - build.0.source.0.repo_source.0.branch_name
+                      - build.0.source.0.repo_source.0.commit_sha
+                      - build.0.source.0.repo_source.0.tag_name
                   - !ruby/object:Api::Type::String
                     name: 'commitSha'
                     description: |
                       Explicit commit SHA to build. Exactly one a of branch name, tag, or commit SHA must be provided.
+                    exactly_one_of:
+                      - build.0.source.0.repo_source.0.branch_name
+                      - build.0.source.0.repo_source.0.commit_sha
+                      - build.0.source.0.repo_source.0.tag_name
           - !ruby/object:Api::Type::Array
             name: 'tags'
             item_type: Api::Type::String

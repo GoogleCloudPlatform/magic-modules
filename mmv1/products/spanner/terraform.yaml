@@ -70,6 +70,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
     id_format: "{{project}}/{{name}}"
     import_format:
       - "projects/{{project}}/instances/{{name}}"
@@ -78,6 +82,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "spanner_instance_basic"
+        primary_resource_id: "example"
+        # Randomness
+        skip_vcr: true
+      - !ruby/object:Provider::Terraform::Examples
+        name: "spanner_instance_processing_units"
         primary_resource_id: "example"
         # Randomness
         skip_vcr: true
@@ -108,6 +117,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       nodeCount: !ruby/object:Overrides::Terraform::PropertyOverride
         name: num_nodes
+        default_from_api: true
+      processingUnits: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       config: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/spanner_instance_config.go.erb
       state: !ruby/object:Overrides::Terraform::PropertyOverride

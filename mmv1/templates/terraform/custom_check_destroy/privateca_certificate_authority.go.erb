@@ -1,6 +1,6 @@
 config := googleProviderConfig(t)
 
-url, err := replaceVarsForTest(config, rs, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/certificateAuthorities/{{certificate_authority_id}}")
+url, err := replaceVarsForTest(config, rs, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}")
 if err != nil {
 	return err
 }
@@ -10,6 +10,6 @@ if err != nil {
 	return nil
 }
 
-if s := res["state"]; s != "PENDING_DELETION" {
-	return fmt.Errorf("CertificateAuthority %s got %s, want PENDING_DELETION", url, s)
+if s := res["state"]; s != "DELETED" {
+	return fmt.Errorf("CertificateAuthority %s got %s, want DELETED", url, s)
 }

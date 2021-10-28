@@ -102,8 +102,20 @@ objects:
         required: true
       - !ruby/object:Api::Type::Integer
         name: 'nodeCount'
-        description: 'The number of nodes allocated to this instance.'
-        default_value: 1
+        description: |
+          The number of nodes allocated to this instance. At most one of either node_count or processing_units
+          can be present in terraform.
+        exactly_one_of:
+          - num_nodes
+          - processing_units
+      - !ruby/object:Api::Type::Integer
+        name: 'processingUnits'
+        description: |
+          The number of processing units allocated to this instance. At most one of processing_units 
+          or node_count can be present in terraform.
+        exactly_one_of:
+          - num_nodes
+          - processing_units
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
@@ -197,4 +209,3 @@ objects:
             description: |
               Fully qualified name of the KMS key to use to encrypt this database. This key must exist
               in the same location as the Spanner Database.
-

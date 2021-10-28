@@ -2,6 +2,34 @@ package google
 
 import "fmt"
 
+func resourceConverterOrganizationIamPolicy() ResourceConverter {
+	return ResourceConverter{
+		AssetType:         "cloudresourcemanager.googleapis.com/Organization",
+		Convert:           GetOrganizationIamPolicyCaiObject,
+		MergeCreateUpdate: MergeOrganizationIamPolicy,
+	}
+}
+
+func resourceConverterOrganizationIamBinding() ResourceConverter {
+	return ResourceConverter{
+		AssetType:         "cloudresourcemanager.googleapis.com/Organization",
+		Convert:           GetOrganizationIamBindingCaiObject,
+		FetchFullResource: FetchOrganizationIamPolicy,
+		MergeCreateUpdate: MergeOrganizationIamBinding,
+		MergeDelete:       MergeOrganizationIamBindingDelete,
+	}
+}
+
+func resourceConverterOrganizationIamMember() ResourceConverter {
+	return ResourceConverter{
+		AssetType:         "cloudresourcemanager.googleapis.com/Organization",
+		Convert:           GetOrganizationIamMemberCaiObject,
+		FetchFullResource: FetchOrganizationIamPolicy,
+		MergeCreateUpdate: MergeOrganizationIamMember,
+		MergeDelete:       MergeOrganizationIamMemberDelete,
+	}
+}
+
 func GetOrganizationIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return newOrganizationIamAsset(d, config, expandIamPolicyBindings)
 }

@@ -1,6 +1,4 @@
-
 ---
-
 subcategory: "GKEHub"
 layout: "google"
 page_title: "Google: google_gke_hub_feature"
@@ -11,7 +9,7 @@ description: |-
 
 # google\_gkehub\_feature
 
-Contains information about a GKEHub Feature.
+Contains information about a GKEHub Feature. The google_gke_hub is the Fleet API.
 
 * [API documentation](https://cloud.google.com/anthos/multicluster-management/reference/rest/v1beta/projects.locations.features)
 

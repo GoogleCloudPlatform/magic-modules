@@ -135,19 +135,27 @@ objects:
                The algorithm to use when creating a version based on this template.
                See the [algorithm reference](https://cloud.google.com/kms/docs/reference/rest/v1/CryptoKeyVersionAlgorithm) for possible inputs.
             required: true
-          - !ruby/object:Api::Type::Enum
+          - !ruby/object:Api::Type::String
             name: 'protectionLevel'
             description: |
-              The protection level to use when creating a version based on this template.
-            values:
-              - "SOFTWARE"
-              - "HSM"
+              The protection level to use when creating a version based on this template. Possible values include "SOFTWARE", "HSM", "EXTERNAL". Defaults to "SOFTWARE".
             input: true
       - !ruby/object:Api::Type::Time
         name: 'nextRotationTime'
         description: |
           The time when KMS will create a new version of this Crypto Key.
         output: true
+      - !ruby/object:Api::Type::String
+        name: 'destroyScheduledDuration'
+        input: true
+        description: |
+          The period of time that versions of this key spend in the DESTROY_SCHEDULED state before transitioning to DESTROYED.
+          If not specified at creation time, the default duration is 24 hours.
+      - !ruby/object:Api::Type::Boolean
+        name: 'importOnly'
+        input: true
+        description: |
+          Whether this key may contain imported versions only.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Creating a key':

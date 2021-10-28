@@ -207,24 +207,19 @@ func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 				Config: testAccContainerNodePool_withWorkloadMetadataConfig(cluster, np),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_node_pool.with_workload_metadata_config",
-						"node_config.0.workload_metadata_config.0.node_metadata", "SECURE"),
+						"node_config.0.workload_metadata_config.0.mode", "GCE_METADATA"),
 				),
 			},
 			{
 				ResourceName:      "google_container_node_pool.with_workload_metadata_config",
 				ImportState:       true,
 				ImportStateVerify: true,
-				// Import always uses the v1 API, so beta features don't get imported.
-				ImportStateVerifyIgnore: []string{
-					"node_config.0.workload_metadata_config.#",
-					"node_config.0.workload_metadata_config.0.node_metadata",
-				},
 			},
 			{
-				Config: testAccContainerNodePool_withWorkloadMetadataConfig_gkeMetadataServer(pid, cluster, np),
+				Config: testAccContainerNodePool_withWorkloadMetadataConfig_gkeMetadata(pid, cluster, np),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_node_pool.with_workload_metadata_config",
-						"node_config.0.workload_metadata_config.0.node_metadata", "GKE_METADATA_SERVER"),
+						"node_config.0.workload_metadata_config.0.mode", "GKE_METADATA"),
 				),
 			},
 			{
@@ -379,6 +374,39 @@ func TestAccContainerNodePool_withLinuxNodeConfig(t *testing.T) {
 				ResourceName:      "google_container_node_pool.with_linux_node_config",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+<% end -%>
+
+<% unless version == 'ga' -%>
+func TestAccContainerNodePool_withNetworkConfig(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
+	network := fmt.Sprintf("tf-test-net-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withNetworkConfig(cluster, np, network),
+			},
+			{
+				ResourceName:            "google_container_node_pool.with_manual_pod_cidr",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"network_config.0.create_pod_range"},
+			},
+			{
+				ResourceName:            "google_container_node_pool.with_auto_pod_cidr",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"network_config.0.create_pod_range"},
 			},
 		},
 	})
@@ -942,7 +970,7 @@ func testAccCheckContainerNodePoolDestroyProducer(t *testing.T) func(s *terrafor
 					attributes["cluster"],
 					attributes["name"],
 				)
-				_, err = config.NewContainerBetaClient(config.userAgent).Projects.Locations.Clusters.NodePools.Get(name).Do()
+				_, err = config.NewContainerClient(config.userAgent).Projects.Locations.Clusters.NodePools.Get(name).Do()
 			}
 
 			if err == nil {
@@ -1407,14 +1435,14 @@ resource "google_container_node_pool" "with_workload_metadata_config" {
     ]
 
     workload_metadata_config {
-      node_metadata = "SECURE"
+      mode = "GCE_METADATA"
     }
   }
 }
 `, cluster, np)
 }
 
-func testAccContainerNodePool_withWorkloadMetadataConfig_gkeMetadataServer(projectID, cluster, np string) string {
+func testAccContainerNodePool_withWorkloadMetadataConfig_gkeMetadata(projectID, cluster, np string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
   project_id = "%s"
@@ -1431,7 +1459,7 @@ resource "google_container_cluster" "cluster" {
   min_master_version = data.google_container_engine_versions.central1a.latest_master_version
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
 }
 
@@ -1447,7 +1475,7 @@ resource "google_container_node_pool" "with_workload_metadata_config" {
     ]
 
     workload_metadata_config {
-      node_metadata = "GKE_METADATA_SERVER"
+      mode = "GKE_METADATA"
     }
   }
 }
@@ -1632,6 +1660,99 @@ resource "google_container_node_pool" "with_linux_node_config" {
 }
 <% end -%>
 
+
+<% unless  version == 'ga' -%>
+func testAccContainerNodePool_withNetworkConfig(cluster, np, network string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "container_network" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "container_subnetwork" {
+  name                     = google_compute_network.container_network.name
+  network                  = google_compute_network.container_network.name
+  ip_cidr_range            = "10.0.36.0/24"
+  region                   = "us-central1"
+  private_ip_google_access = true
+
+  secondary_ip_range {
+    range_name    = "pod"
+    ip_cidr_range = "10.0.0.0/19"
+  }
+
+  secondary_ip_range {
+    range_name    = "svc"
+    ip_cidr_range = "10.0.32.0/22"
+  }
+
+  secondary_ip_range {
+    range_name    = "another-pod"
+    ip_cidr_range = "10.1.32.0/22"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      # The auto nodepool creates a secondary range which diffs this resource.
+      secondary_ip_range,
+    ]
+  }
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1"
+  initial_node_count = 1
+
+  network    = google_compute_network.container_network.name
+  subnetwork = google_compute_subnetwork.container_subnetwork.name
+  ip_allocation_policy {
+    cluster_secondary_range_name  = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
+    services_secondary_range_name = google_compute_subnetwork.container_subnetwork.secondary_ip_range[1].range_name
+  }
+  release_channel {
+	channel = "RAPID"
+  }
+}
+
+resource "google_container_node_pool" "with_manual_pod_cidr" {
+  name               = "%s-manual"
+  location           = "us-central1"
+  cluster            = google_container_cluster.cluster.name
+  node_count = 1
+  network_config {
+    create_pod_range = false
+    pod_range = google_compute_subnetwork.container_subnetwork.secondary_ip_range[2].range_name
+  }
+  node_config {
+	oauth_scopes = [
+	  "https://www.googleapis.com/auth/cloud-platform",
+	]
+  }
+}
+
+resource "google_container_node_pool" "with_auto_pod_cidr" {
+  name               = "%s-auto"
+  location           = "us-central1"
+  cluster            = google_container_cluster.cluster.name
+  node_count = 1
+  network_config {
+	create_pod_range    = true
+    pod_range           = "auto-pod-range"
+	pod_ipv4_cidr_block = "10.2.0.0/20"
+  }
+  node_config {
+	oauth_scopes = [
+	  "https://www.googleapis.com/auth/cloud-platform",
+	]
+  }
+}
+
+`, network, cluster, np, np)
+}
+<% end -%>
+
+
 <% unless version.nil? || version == 'ga' -%>
 func testAccContainerNodePool_withBootDiskKmsKey(project, cluster, np string) string {
 	return fmt.Sprintf(`
@@ -1656,7 +1777,7 @@ resource "google_kms_key_ring" "keyring" {
 
 resource "google_kms_crypto_key" "example-key" {
   name            = "%s-kms-key"
-  key_ring        = google_kms_key_ring.keyring.self_link
+  key_ring        = google_kms_key_ring.keyring.id
   rotation_period = "100000s"
 }
 
@@ -1733,7 +1854,7 @@ resource "google_container_node_pool" "np_with_gpu" {
   initial_node_count = 1
 
   node_config {
-    machine_type = "n1-standard-1"  // can't be e2 because of accelerator
+    machine_type = "a2-highgpu-1g"  // can't be e2 because of accelerator
     disk_size_gb = 32
 
     oauth_scopes = [
@@ -1750,7 +1871,8 @@ resource "google_container_node_pool" "np_with_gpu" {
     image_type      = "COS"
 
     guest_accelerator {
-      type  = "nvidia-tesla-k80"
+      type  = "nvidia-tesla-a100"
+      gpu_partition_size = "1g.5gb"
       count = 1
     }
   }

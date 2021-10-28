@@ -216,6 +216,7 @@ objects:
                   - MODE_IPV6
             - !ruby/object:Api::Type::String
               name: 'reservedIpRange'
+              input: true
               description: |
                 A /29 CIDR block that identifies the range of IP
                 addresses reserved for this instance.
@@ -225,6 +226,18 @@ objects:
                 A list of IPv4 or IPv6 addresses.
               output: true
               item_type: Api::Type::String
+            - !ruby/object:Api::Type::Enum
+              name: 'connectMode'
+              description: |
+                The network connect mode of the Filestore instance.
+                If not provided, the connect mode defaults to
+                DIRECT_PEERING.
+              input: true
+              min_version: beta
+              default_value: :DIRECT_PEERING
+              values:
+                - :DIRECT_PEERING
+                - :PRIVATE_SERVICE_ACCESS
       - !ruby/object:Api::Type::String
         name: 'etag'
         description: |

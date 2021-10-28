@@ -34,7 +34,8 @@ require 'provider/ansible_devel'
 require 'provider/inspec'
 require 'provider/terraform'
 require 'provider/terraform_oics'
-require 'provider/terraform_object_library'
+require 'provider/terraform_cloud_docs'
+require 'provider/terraform_validator'
 require 'pp' if ENV['COMPILER_DEBUG']
 
 products_to_generate = nil
@@ -201,7 +202,8 @@ all_product_files.each do |product_name|
   else
     override_providers = {
       'oics' => Provider::TerraformOiCS,
-      'validator' => Provider::TerraformObjectLibrary,
+      'cloud_docs' => Provider::TerraformCloudDocs,
+      'validator' => Provider::TerraformValidator,
       'ansible_devel' => Provider::Ansible::Devel
     }
 
