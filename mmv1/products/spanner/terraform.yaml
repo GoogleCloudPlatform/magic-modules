@@ -70,6 +70,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
     id_format: "{{project}}/{{name}}"
     import_format:
       - "projects/{{project}}/instances/{{name}}"
