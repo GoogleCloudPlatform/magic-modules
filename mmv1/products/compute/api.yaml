@@ -13540,7 +13540,6 @@ objects:
         name: bfd
         description: |
           BFD configuration for the BGP peering.
-        min_version: beta
         properties:
           - !ruby/object:Api::Type::Enum
             name: sessionInitializationMode
