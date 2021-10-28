@@ -31,7 +31,7 @@ func TestAccDataSourceComputeRouterStatus(t *testing.T) {
 					resource.TestCheckResourceAttr("data.google_compute_router_status.router1", "best_routes.#", "2"),
 					resource.TestCheckResourceAttr("data.google_compute_router_status.router1", "best_routes_for_router.#", "2"),
 					resource.TestCheckResourceAttrPair("data.google_compute_router_status.router1", "best_routes.0.next_hop_ip", "google_compute_router_peer.router1_peer1", "peer_ip_address"),
-					resource.TestCheckResourceAttrPair("data.google_compute_router_status.router1", "best_routes.0.next_hop_vpn_tunnel", "google_compute_vpn_tunnel.tunnel1", "self_link"),
+					resource.TestCheckResourceAttrSet("data.google_compute_router_status.router1", "best_routes.0.next_hop_vpn_tunnel"),
 				),
 			},
 		},
