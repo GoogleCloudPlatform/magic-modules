@@ -435,7 +435,7 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 
 	if v, ok := nodeConfig["gcfs_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
-		nc.GcfsConfig = &containerBeta.GcfsConfig{
+		nc.GcfsConfig = &container.GcfsConfig{
 			Enabled: conf["enabled"].(bool),
 		}
 	}
@@ -691,7 +691,7 @@ func flattenEphemeralStorageConfig(c *container.EphemeralStorageConfig) []map[st
 	return result
 }
 
-func flattenGcfsConfig(c *containerBeta.GcfsConfig) []map[string]interface{} {
+func flattenGcfsConfig(c *container.GcfsConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
