@@ -1,8 +1,8 @@
-<% autogen_exception -%>
 package google
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -21,8 +21,8 @@ func dataSourceGoogleContainerEngineVersions() *schema.Resource {
 				Optional: true,
 			},
 			"location": {
-				Type:          schema.TypeString,
-				Optional:      true,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"default_cluster_version": {
 				Type:     schema.TypeString,
@@ -83,16 +83,16 @@ func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta in
 
 	validMasterVersions := make([]string, 0)
 	for _, v := range resp.ValidMasterVersions {
-			if strings.HasPrefix(v, d.Get("version_prefix").(string)) {
-					validMasterVersions = append(validMasterVersions, v)
-			}
+		if strings.HasPrefix(v, d.Get("version_prefix").(string)) {
+			validMasterVersions = append(validMasterVersions, v)
+		}
 	}
 
 	validNodeVersions := make([]string, 0)
 	for _, v := range resp.ValidNodeVersions {
-			if strings.HasPrefix(v, d.Get("version_prefix").(string)) {
-					validNodeVersions = append(validNodeVersions, v)
-			}
+		if strings.HasPrefix(v, d.Get("version_prefix").(string)) {
+			validNodeVersions = append(validNodeVersions, v)
+		}
 	}
 
 	if err := d.Set("valid_master_versions", validMasterVersions); err != nil {

@@ -16,11 +16,7 @@ import (
 
 	"golang.org/x/oauth2"
 	googleoauth "golang.org/x/oauth2/google"
-	"golang.org/x/oauth2/jwt"
 	appengine "google.golang.org/api/appengine/v1"
-<% unless version == 'ga' -%>
-	"google.golang.org/api/accesscontextmanager/v1beta"
-<% end -%>
 	"google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/bigtableadmin/v2"
 	"google.golang.org/api/cloudbilling/v1"
@@ -39,12 +35,12 @@ import (
 <% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
 <% else -%>
-	"google.golang.org/api/compute/v0.beta"
+	compute "google.golang.org/api/compute/v0.beta"
 <% end -%>
 <% if version == 'ga' -%>
 	"google.golang.org/api/container/v1"
 <% else -%>
-	"google.golang.org/api/container/v1beta1"
+	container "google.golang.org/api/container/v1beta1"
 <% end -%>
 	dataflow "google.golang.org/api/dataflow/v1b3"
 <% unless version == 'ga' -%>
@@ -70,15 +66,6 @@ import (
 	"google.golang.org/api/storage/v1"
 	"google.golang.org/api/storagetransfer/v1"
 	"google.golang.org/api/transport"
-	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
-<% unless version == 'ga' -%>
-	cloudbuildDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudbuild/beta"
-<% end -%>
-	dataprocDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc<% unless version == 'ga' -%>/beta<% end -%>"
-	eventarcDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc<% unless version == 'ga' -%>/beta<% end -%>"
-<% unless version == 'ga' -%>
-	gkehubDcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub/beta"
-<% end -%>
 )
 
 type providerMeta struct {
