@@ -1,8 +1,8 @@
 <%# See mmv1/third_party/terraform/utils/privateca_utils.go for the sub-expanders and explanation %>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	if v == nil {
+        if v == nil {
                return v, nil
-	}
+        }
         l := v.([]interface{})
         if len(l) == 0 || l[0] == nil {
                 return nil, nil
@@ -14,7 +14,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
         }
         transformed := make(map[string]interface{})
 
-	caOptions, err := expandPrivatecaCertificateConfigX509ConfigCaOptions(original["ca_options"], d, config)
+        caOptions, err := expandPrivatecaCertificateConfigX509ConfigCaOptions(original["ca_options"], d, config)
         if err != nil {
                 return nil, err
         }
@@ -24,13 +24,13 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
         if err != nil {
                 return nil, err
         }
-	transformed["keyUsage"] = keyUsage
+        transformed["keyUsage"] = keyUsage
 
-	policyIds, err := expandPrivatecaCertificateConfigX509ConfigPolicyIds(original["policy_ids"], d, config)
+        policyIds, err := expandPrivatecaCertificateConfigX509ConfigPolicyIds(original["policy_ids"], d, config)
         if err != nil {
                 return nil, err
         }
-	transformed["policyIds"] = policyIds
+        transformed["policyIds"] = policyIds
 
         aiaOcspServers, err := expandPrivatecaCertificateConfigX509ConfigAiaOcspServers(original["aia_ocsp_servers"], d, config)
         if err != nil {
@@ -38,11 +38,11 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
         }
         transformed["aiaOcspServers"] = aiaOcspServers
 
-	addExts, err := expandPrivatecaCertificateConfigX509ConfigAdditionalExtensions(original["additional_extensions"], d, config)
+        addExts, err := expandPrivatecaCertificateConfigX509ConfigAdditionalExtensions(original["additional_extensions"], d, config)
         if err != nil {
                 return nil, err
         }
         transformed["additionalExtensions"] = addExts
 
-	return transformed, nil
+        return transformed, nil
 }

@@ -28,25 +28,27 @@ func expandPrivatecaCertificateConfigX509ConfigCaOptions(v interface{}, d Terraf
 	// certificate config. A default value of is_ca=false means that issued certificates cannot
 	// be CA certificates. A default value of max_issuer_path_length=0 means that the CA cannot
 	// issue CA certificates.
-	allowIsCa, _ := d.GetOk("allow_is_ca")
-	allowPathLength, _ := d.GetOk("allow_max_path_length")
+
+	// includeIsCa can be nil for Certificate Authority resources
+	includeIsCa := d.Get("include_is_ca")
+	includePathLength := d.Get("include_max_path_length")
 
 	if v == nil {
-		if allowIsCa.(bool) {
-			return nil, fmt.Errorf("allow_is_ca cannot be set without setting ca_options.is_ca")
+		if includeIsCa != nil && includeIsCa.(bool) {
+			return nil, fmt.Errorf("include_is_ca cannot be set without setting ca_options.is_ca")
 		}
-		if allowPathLength.(bool) {
-			return nil, fmt.Errorf("allow_max_path_length cannot be set without setting ca_options.max_issuer_path_length")
+		if includePathLength.(bool) {
+			return nil, fmt.Errorf("include_max_path_length cannot be set without setting ca_options.max_issuer_path_length")
 		}
 		return v, nil
 	}
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
-		if allowIsCa.(bool) {
-			return nil, fmt.Errorf("allow_is_ca cannot be set without setting ca_options.is_ca")
+		if includeIsCa != nil && includeIsCa.(bool) {
+			return nil, fmt.Errorf("include_is_ca cannot be set without setting ca_options.is_ca")
 		}
-		if allowPathLength.(bool) {
-			return nil, fmt.Errorf("allow_max_path_length cannot be set without setting ca_options.max_issuer_path_length")
+		if includePathLength.(bool) {
+			return nil, fmt.Errorf("include_max_path_length cannot be set without setting ca_options.max_issuer_path_length")
 		}
 		return nil, nil
 	}
@@ -55,17 +57,17 @@ func expandPrivatecaCertificateConfigX509ConfigCaOptions(v interface{}, d Terraf
 	original := raw.(map[string]interface{})
 	transformed := make(map[string]interface{})
 
-	if original["is_ca"].(bool) && !allowIsCa.(bool) {
-		return nil, fmt.Errorf("You must set allow_is_ca=true with ca_options.is_ca=true")
-	}
-	if original["max_issuer_path_length"].(int) > 0 && !allowPathLength.(bool) {
-		return nil, fmt.Errorf("You must set allow_max_path_length=true with ca_options.max_issuer_path_length>0")
-	}
+	//if original["is_ca"].(bool) && !includeIsCa.(bool) {
+	//	return nil, fmt.Errorf("You must set include_is_ca=true with ca_options.is_ca=true")
+	//}
+	//if original["max_issuer_path_length"].(int) > 0 && !includePathLength.(bool) {
+	//	return nil, fmt.Errorf("You must set include_max_path_length=true with ca_options.max_issuer_path_length>0")
+	//}
 
-	if allowIsCa.(bool) {
+	if (includeIsCa != nil && includeIsCa.(bool)) || original["is_ca"].(bool) {
 		transformed["isCa"] = original["is_ca"]
 	}
-	if allowPathLength.(bool) {
+	if includePathLength.(bool) || original["max_issuer_path_length"].(int) > 0 {
 		transformed["maxIssuerPathLength"] = original["max_issuer_path_length"]
 	}
 	return transformed, nil
@@ -324,12 +326,12 @@ func flattenPrivatecaCertificateConfigX509ConfigCaOptions(v interface{}, d *sche
 	val, exists := original["isCa"]
 	transformed["is_ca"] =
 		flattenPrivatecaCertificateConfigX509ConfigCaOptionsIsCa(val, d, config)
-	d.Set("allow_is_ca", exists)
+	_ = d.Set("include_is_ca", exists)
 
 	val, exists = original["maxIssuerPathLength"]
 	transformed["max_issuer_path_length"] =
 		flattenPrivatecaCertificateConfigX509ConfigCaOptionsMaxIssuerPathLength(val, d, config)
-	d.Set("allow_max_path_length", exists)
+	_ = d.Set("include_max_path_length", exists)
 
 	return []interface{}{transformed}
 }
