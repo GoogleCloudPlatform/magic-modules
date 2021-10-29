@@ -56,14 +56,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           pool_location: "\"us-central1\""
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
-        name: 'allow_is_ca'
-        default_value: false
-        description: |
-          Must be set to use the value of is_ca, either true or false. If not set, is_ca will
-          be unset.
-        force_new: true
-      - !ruby/object:Api::Type::Boolean
-        name: 'allow_max_path_length'
+        name: 'include_max_path_length'
         default_value: false
         description: |
           Must be set to use the value of max_issuer_path_length, either 0 or greater than 0.
@@ -97,14 +90,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       `tier = "ENTERPRISE"`
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
-        name: 'allow_is_ca'
+        name: 'include_is_ca'
         default_value: false
         description: |
           Must be set to use the value of is_ca, either true or false. If not set, is_ca will
           be unset.
         force_new: true
       - !ruby/object:Api::Type::Boolean
-        name: 'allow_max_path_length'
+        name: 'include_max_path_length'
         default_value: false
         description: |
           Must be set to use the value of max_issuer_path_length, either 0 or greater than 0.
@@ -170,13 +163,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'emptyOrUnsetBlockDiffSuppress'
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
-        name: 'allow_is_ca'
+        name: 'include_is_ca'
         default_value: false
         description: |
           Must be set to use the value of is_ca, either true or false. If not set, is_ca will
           be unset.
       - !ruby/object:Api::Type::Boolean
-        name: 'allow_max_path_length'
+        name: 'include_max_path_length'
         default_value: false
         description: |
           Must be set to use the value of max_issuer_path_length, either 0 or greater than 0.

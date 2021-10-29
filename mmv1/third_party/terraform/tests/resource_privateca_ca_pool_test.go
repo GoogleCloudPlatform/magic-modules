@@ -55,8 +55,8 @@ resource "google_privateca_ca_pool" "default" {
   name = "tf-test-my-capool%{random_suffix}"
   location = "us-central1"
   tier = "ENTERPRISE"
-  allow_is_ca = true
-  allow_max_path_length = true
+  include_is_ca = true
+  include_max_path_length = true
   publishing_options {
     publish_ca_cert = false
     publish_crl = true
@@ -139,8 +139,8 @@ resource "google_privateca_ca_pool" "default" {
   name = "tf-test-my-capool%{random_suffix}"
   location = "us-central1"
   tier = "ENTERPRISE"
-  allow_is_ca = true
-  allow_max_path_length = true
+  include_is_ca = true
+  include_max_path_length = true
   publishing_options {
     publish_ca_cert = true
     publish_crl = true
