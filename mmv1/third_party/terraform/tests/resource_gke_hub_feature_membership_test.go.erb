@@ -3,14 +3,14 @@ package google
 <% unless version == 'ga' -%>
 
 import (
-  "context"
-  "fmt"
+	"context"
+	"fmt"
 	"testing"
 
   dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
   gkehub "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub<%= dcl_version(version) -%>"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccGkeHubFeatureMembership_gkehubFeatureAcmUpdate(t *testing.T) {

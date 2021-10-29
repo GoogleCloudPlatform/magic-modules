@@ -9,8 +9,9 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"time"
-
+<% unless version == "ga" -%>
+		"time"
+<% end -%>
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
