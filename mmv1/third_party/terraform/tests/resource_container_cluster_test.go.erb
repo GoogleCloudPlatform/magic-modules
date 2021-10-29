@@ -3388,7 +3388,7 @@ resource "google_container_cluster" "with_boot_disk_kms_key" {
 
     image_type = "COS_CONTAINERD"
 
-    boot_disk_kms_key = google_kms_crypto_key.example-key.self_link
+    boot_disk_kms_key = google_kms_crypto_key.example-key.id
   }
 }
 `, project, clusterName, clusterName, clusterName)
