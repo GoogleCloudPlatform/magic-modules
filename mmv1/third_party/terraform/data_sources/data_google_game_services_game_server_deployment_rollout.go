@@ -1,8 +1,8 @@
-<% autogen_exception -%>
 package google
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -24,8 +24,8 @@ func dataSourceGameServicesGameServerDeploymentRolloutRead(d *schema.ResourceDat
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
+
 	d.SetId(id)
 
 	return resourceGameServicesGameServerDeploymentRolloutRead(d, meta)
-
 }
