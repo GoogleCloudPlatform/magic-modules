@@ -32,7 +32,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: "vpc-con"
       - !ruby/object:Provider::Terraform::Examples
-        name: "cloudrun-vpc-access-connector"
+        name: "cloudrun_vpc_access_connector"
         primary_resource_id: "connector"
         vars:
           cloudrun_network: "cloudrun-network"
