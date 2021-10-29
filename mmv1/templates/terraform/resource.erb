@@ -17,17 +17,19 @@
 package google
 
 import (
-<%- # We list all the v2 imports here, because we run 'goimports' to guess the correct
-    # set of imports, which will never guess the major version correctly. -%>
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+
+ "fmt"
+ "log"
+ "reflect"
+<% if updatable?(object, object.root_properties) && object.update_mask -%>
+ "strings"
+<% end -%>
+ "time"
+
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+<% if object.gettable_properties.reject { |p| p.ignore_read }.any? { |prop| prop.flatten_object } -%>
+  "google.golang.org/api/googleapi"
+<% end -%>
 )
 
 <%= lines(compile(pwd + '/' + object.custom_code.constants)) if object.custom_code.constants -%>
@@ -410,11 +412,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
         }
 
         if res == nil {
-            // Nested object not found, spoof a 404 error for poll
-            return nil, &googleapi.Error{
-                Code: 404,
-                Message: "nested object <%= resource_name%> not found",
-            }
+            return nil, fake404("nested", "<%= resource_name%>")
         }
 
     <%  end -%>
@@ -424,11 +422,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
             return nil, err
         }
         if res == nil {
-            // Decoded object not found, spoof a 404 error for poll
-            return nil, &googleapi.Error{
-                Code: 404,
-                Message: "could not find object <%= resource_name%>",
-            }
+            return nil, fake404("decoded", "<%= resource_name%>")
         }
 
     <%  end -%>
