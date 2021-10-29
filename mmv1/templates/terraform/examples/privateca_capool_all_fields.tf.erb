@@ -9,6 +9,8 @@ resource "google_privateca_ca_pool" "<%= ctx[:primary_resource_id] %>" {
   labels = {
     foo = "bar"
   }
+  include_is_ca = true
+  include_max_path_length = true
   issuance_policy {
     allowed_key_types {
       elliptic_curve {
