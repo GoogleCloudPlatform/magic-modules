@@ -85,9 +85,7 @@ module Provider
       elsif path.end_with?('.go') && @env[:goformat_enabled]
         run_formatter("gofmt -w -s #{path}")
 
-        unless template.include?('third_party/terraform')
-          run_formatter("goimports -w #{path}")
-        end
+        run_formatter("goimports -w #{path}") unless template.include?('third_party/terraform')
       end
     end
 

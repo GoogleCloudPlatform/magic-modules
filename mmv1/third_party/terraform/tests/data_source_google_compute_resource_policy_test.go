@@ -32,7 +32,6 @@ func TestAccDataSourceComputeResourcePolicy(t *testing.T) {
 	})
 }
 
-
 func testAccCheckDataSourceComputeResourcePolicyDestroy(t *testing.T, name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
