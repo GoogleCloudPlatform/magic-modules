@@ -1,10 +1,15 @@
+<% autogen_exception -%>
 package google
 
 import (
 	"fmt"
 	"time"
 
-	composer "google.golang.org/api/composer/v1beta1"
+<% if version == "ga" -%>
+	"google.golang.org/api/composer/v1"
+<% else -%>
+	"google.golang.org/api/composer/v1beta1"
+<% end -%>
 )
 
 type ComposerOperationWaiter struct {
