@@ -785,6 +785,10 @@ func expandRegionUpdatePolicy(configured []interface{}) *compute.InstanceGroupMa
 		updatePolicy.Type = data["type"].(string)
 		updatePolicy.InstanceRedistributionType = data["instance_redistribution_type"].(string)
 		updatePolicy.ReplacementMethod = data["replacement_method"].(string)
+<% unless version == "ga" -%>
+		updatePolicy.MinReadySec = int64(data["min_ready_sec"].(int))
+		updatePolicy.ForceSendFields = []string{"MinReadySec"}
+<% end -%>
 
 		// percent and fixed values are conflicting
 		// when the percent values are set, the fixed values will be ignored
@@ -815,12 +819,6 @@ func expandRegionUpdatePolicy(configured []interface{}) *compute.InstanceGroupMa
 				NullFields:      []string{"Percent"},
 			}
 		}
-
-<% unless version == "ga" -%>
-		if v, ok := data["min_ready_sec"]; ok {
-			updatePolicy.MinReadySec = int64(v.(int))
-		}
-<% end -%>
 	}
 	return updatePolicy
 }
