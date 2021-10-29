@@ -1,8 +1,8 @@
-<% autogen_exception -%>
 package google
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -31,7 +31,6 @@ func TestAccDataSourceComputeResourcePolicy(t *testing.T) {
 		},
 	})
 }
-
 
 func testAccCheckDataSourceComputeResourcePolicyDestroy(t *testing.T, name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
