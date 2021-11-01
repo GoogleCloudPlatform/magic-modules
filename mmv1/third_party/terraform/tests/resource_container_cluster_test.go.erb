@@ -3,7 +3,9 @@ package google
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"log"
 	"testing"
 	"regexp"
 	"strconv"
@@ -3386,7 +3388,7 @@ resource "google_container_cluster" "with_boot_disk_kms_key" {
 
     image_type = "COS_CONTAINERD"
 
-    boot_disk_kms_key = google_kms_crypto_key.example-key.self_link
+    boot_disk_kms_key = google_kms_crypto_key.example-key.id
   }
 }
 `, project, clusterName, clusterName, clusterName)
@@ -3426,7 +3428,7 @@ resource "google_compute_backend_service" "my-backend-service" {
   protocol  = "HTTP"
 
   backend {
-    group = element(google_container_cluster.primary.instance_group_urls, 1)
+    group = element(google_container_cluster.primary.node_pool[0].managed_instance_group_urls, 1)
   }
 
   health_checks = [google_compute_http_health_check.default.self_link]

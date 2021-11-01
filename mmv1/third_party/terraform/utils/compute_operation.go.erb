@@ -4,6 +4,9 @@ package google
 import (
 	"bytes"
 	"context"
+<% unless version == 'ga' -%>
+	"encoding/json"
+<% end -%>
 	"errors"
 	"fmt"
 	"log"
@@ -12,7 +15,7 @@ import (
 <% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
 <% else -%>
-	"google.golang.org/api/compute/v0.beta"
+	compute "google.golang.org/api/compute/v0.beta"
 <% end -%>
 )
 

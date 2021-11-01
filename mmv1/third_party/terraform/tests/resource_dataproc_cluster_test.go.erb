@@ -9,7 +9,9 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+<% unless version == "ga" -%>
 	"time"
+<% end -%>
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -19,7 +21,7 @@ import (
 <% if version == "ga" -%>
 	"google.golang.org/api/dataproc/v1"
 <% else -%>
-	"google.golang.org/api/dataproc/v1beta2"
+	dataproc "google.golang.org/api/dataproc/v1beta2"
 <% end -%>
 )
 

@@ -3,6 +3,7 @@ package google
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -926,7 +927,6 @@ resource "google_container_cluster" "cluster" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = "1.18"
 }
 
 resource "google_container_node_pool" "np" {
@@ -1845,7 +1845,7 @@ resource "google_container_node_pool" "with_boot_disk_kms_key" {
 
   node_config {
     image_type = "COS_CONTAINERD"
-    boot_disk_kms_key = google_kms_crypto_key.example-key.self_link
+    boot_disk_kms_key = google_kms_crypto_key.example-key.id
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
       "https://www.googleapis.com/auth/monitoring",
