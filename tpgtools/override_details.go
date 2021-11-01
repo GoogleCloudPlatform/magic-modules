@@ -141,11 +141,10 @@ type CustomListSizeConstraintDetails struct {
 	Max int64
 }
 
-type CustomRequiredDetails struct {
+type CustomSchemaValuesDetails struct {
 	Required bool
 	Optional bool
 	Computed bool
-	ForceNew bool
 }
 
 type ImportFormatDetails struct {
@@ -206,4 +205,9 @@ type ProductBasePathDetails struct {
 type ProductTitleDetails struct {
 	// alternative name to be used for the product resources
 	Title string
+}
+
+type ProductDocsSectionDetails struct {
+	// alternative name to be used for the product resources in docs.
+	DocsSection string
 }

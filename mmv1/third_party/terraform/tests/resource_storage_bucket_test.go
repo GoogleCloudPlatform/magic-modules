@@ -310,7 +310,7 @@ func TestAccStorageBucket_storageClass(t *testing.T) {
 		CheckDestroy: testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageBucket_storageClass(bucketName, "MULTI_REGIONAL", ""),
+				Config: testAccStorageBucket_storageClass(bucketName, "MULTI_REGIONAL", "US"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &bucket),
@@ -323,7 +323,7 @@ func TestAccStorageBucket_storageClass(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_storageClass(bucketName, "NEARLINE", ""),
+				Config: testAccStorageBucket_storageClass(bucketName, "NEARLINE", "US"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &updated),
@@ -766,37 +766,6 @@ func TestAccStorageBucket_encryption(t *testing.T) {
 	})
 }
 
-func TestAccStorageBucket_bucketPolicyOnly(t *testing.T) {
-	t.Parallel()
-
-	bucketName := fmt.Sprintf("tf-test-acl-bucket-%d", randInt(t))
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccStorageBucket_bucketPolicyOnly(bucketName, true),
-			},
-			{
-				ResourceName:            "google_storage_bucket.bucket",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
-			},
-			{
-				Config: testAccStorageBucket_bucketPolicyOnly(bucketName, false),
-			},
-			{
-				ResourceName:            "google_storage_bucket.bucket",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
-			},
-		},
-	})
-}
-
 func TestAccStorageBucket_uniformBucketAccessOnly(t *testing.T) {
 	t.Parallel()
 
@@ -1135,7 +1104,8 @@ func testAccStorageBucketDestroyProducer(t *testing.T) func(s *terraform.State) 
 func testAccStorageBucket_basic(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name     = "%s"
+  location = "US"
 }
 `, bucketName)
 }
@@ -1144,8 +1114,9 @@ func testAccStorageBucket_requesterPays(bucketName string, pays bool) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name           = "%s"
+  location       = "US"
   requester_pays = %t
-  force_destroy = true
+  force_destroy  = true
 }
 `, bucketName, pays)
 }
@@ -1153,8 +1124,8 @@ resource "google_storage_bucket" "bucket" {
 func testAccStorageBucket_lowercaseLocation(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name     = "%s"
-  location = "eu"
+  name          = "%s"
+  location      = "eu"
   force_destroy = true
 }
 `, bucketName)
@@ -1217,24 +1188,21 @@ resource "google_storage_bucket" "bucket" {
 }
 
 func testAccStorageBucket_storageClass(bucketName, storageClass, location string) string {
-	var locationBlock string
-	if location != "" {
-		locationBlock = fmt.Sprintf(`
-	location = "%s"`, location)
-	}
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name          = "%s"
-  storage_class = "%s"%s
+  storage_class = "%s"
+  location      = "%s"
   force_destroy = true
 }
-`, bucketName, storageClass, locationBlock)
+`, bucketName, storageClass, location)
 }
 
 func testGoogleStorageBucketsCors(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name          = "%s"
+  location      = "US"
   force_destroy = true
   cors {
     origin          = ["abc", "def"]
@@ -1256,9 +1224,10 @@ resource "google_storage_bucket" "bucket" {
 func testAccStorageBucket_defaultEventBasedHold(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name                     = "%s"
+  location                 = "US"
   default_event_based_hold = true
-  force_destroy = true
+  force_destroy            = true
 }
 `, bucketName)
 }
@@ -1267,6 +1236,7 @@ func testAccStorageBucket_forceDestroyWithVersioning(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name          = "%s"
+  location      = "US"
   force_destroy = "true"
   versioning {
     enabled = "true"
@@ -1278,7 +1248,8 @@ resource "google_storage_bucket" "bucket" {
 func testAccStorageBucket_versioning(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
   versioning {
     enabled = "true"
@@ -1290,7 +1261,8 @@ resource "google_storage_bucket" "bucket" {
 func testAccStorageBucket_logging(bucketName string, logBucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
   logging {
     log_bucket = "%s"
@@ -1302,7 +1274,8 @@ resource "google_storage_bucket" "bucket" {
 func testAccStorageBucket_loggingWithPrefix(bucketName string, logBucketName string, prefix string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
   logging {
     log_bucket        = "%s"
@@ -1315,7 +1288,8 @@ resource "google_storage_bucket" "bucket" {
 func testAccStorageBucket_lifecycleRulesMultiple(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
   lifecycle_rule {
     action {
@@ -1379,7 +1353,8 @@ resource "google_storage_bucket" "bucket" {
 func testAccStorageBucket_lifecycleRule_emptyArchived(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
   lifecycle_rule {
     action {
@@ -1397,7 +1372,8 @@ resource "google_storage_bucket" "bucket" {
 func testAccStorageBucket_lifecycleRule_withStateArchived(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
   lifecycle_rule {
     action {
@@ -1416,7 +1392,8 @@ resource "google_storage_bucket" "bucket" {
 func testAccStorageBucket_lifecycleRule_withStateLive(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
   lifecycle_rule {
     action {
@@ -1446,7 +1423,8 @@ resource "google_storage_bucket" "bucket" {
 func testAccStorageBucket_lifecycleRule_withStateAny(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
   lifecycle_rule {
     action {
@@ -1465,7 +1443,8 @@ resource "google_storage_bucket" "bucket" {
 func testAccStorageBucket_labels(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
   labels = {
     my-label = "my-label-value"
@@ -1474,22 +1453,13 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName)
 }
 
-func testAccStorageBucket_bucketPolicyOnly(bucketName string, enabled bool) string {
-	return fmt.Sprintf(`
-resource "google_storage_bucket" "bucket" {
-  name               = "%s"
-  bucket_policy_only = %t
-  force_destroy      = true
-}
-`, bucketName, enabled)
-}
-
 func testAccStorageBucket_uniformBucketAccessOnly(bucketName string, enabled bool) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name               = "%s"
+  name                        = "%s"
+  location                    = "US"
   uniform_bucket_level_access = %t
-  force_destroy = true
+  force_destroy               = true
 }
 `, bucketName, enabled)
 }
@@ -1530,10 +1500,11 @@ resource "google_kms_crypto_key_iam_member" "iam" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name = "tf-test-crypto-bucket-%{random_int}"
+  name          = "tf-test-crypto-bucket-%{random_int}"
+  location      = "US"
   force_destroy = true
   encryption {
-    default_kms_key_name = google_kms_crypto_key.crypto_key.self_link
+    default_kms_key_name = google_kms_crypto_key.crypto_key.id
   }
 
   depends_on = [google_kms_crypto_key_iam_member.iam]
@@ -1544,7 +1515,8 @@ resource "google_storage_bucket" "bucket" {
 func testAccStorageBucket_updateLabels(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
   labels = {
     my-label    = "my-updated-label-value"
@@ -1573,7 +1545,8 @@ resource "google_storage_bucket" "website" {
 func testAccStorageBucket_retentionPolicy(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
 
   retention_policy {
@@ -1586,7 +1559,8 @@ resource "google_storage_bucket" "bucket" {
 func testAccStorageBucket_lockedRetentionPolicy(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
 
   retention_policy {
@@ -1629,7 +1603,8 @@ resource "google_storage_bucket" "website" {
 func testAccStorageBucket_forceDestroy(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
 }
 `, bucketName)
@@ -1638,7 +1613,8 @@ resource "google_storage_bucket" "bucket" {
 func testAccStorageBucket_forceDestroyWithRetentionPolicy(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name          = "%s"
+  location      = "US"
   force_destroy = true
 
   retention_policy {

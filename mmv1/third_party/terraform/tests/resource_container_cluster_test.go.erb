@@ -1,10 +1,11 @@
 <% autogen_exception -%>
-
 package google
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"log"
 	"testing"
 	"regexp"
 	"strconv"
@@ -149,6 +150,7 @@ func TestAccContainerCluster_withAddons(t *testing.T) {
 				ResourceName:            "google_container_cluster.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
+				// TODO: clean up this list in `4.0.0`, remove both `workload_identity_config` fields (same for below)
 				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 			{
@@ -304,6 +306,31 @@ func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 	})
 }
 <% end -%>
+
+func TestAccContainerCluster_withMasterAuthConfig_NoCert(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withMasterAuthNoCert(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_master_auth_no_cert", "master_auth.0.client_certificate", ""),
+				),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_master_auth_no_cert",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
 
 func TestAccContainerCluster_withAuthenticatorGroupsConfig(t *testing.T) {
 	t.Parallel()
@@ -922,7 +949,7 @@ func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 				Config: testAccContainerCluster_withWorkloadMetadataConfig(clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_workload_metadata_config",
-						"node_config.0.workload_metadata_config.0.node_metadata", "SECURE"),
+						"node_config.0.workload_metadata_config.0.mode", "GCE_METADATA"),
 				),
 			},
 			{
@@ -2407,7 +2434,7 @@ resource "google_container_cluster" "primary" {
   min_master_version = "latest"
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
 
   addons_config {
@@ -2460,7 +2487,7 @@ resource "google_container_cluster" "primary" {
   min_master_version = "latest"
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
 
   addons_config {
@@ -2513,7 +2540,7 @@ resource "google_container_cluster" "primary" {
   min_master_version = "latest"
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
 
   addons_config {
@@ -2578,7 +2605,6 @@ func testAccContainerCluster_withConfidentialNodes(clusterName string, npName st
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
   location           = "us-central1-a"
-  enable_shielded_nodes = true
   release_channel {
     channel = "RAPID"
   }
@@ -2603,7 +2629,6 @@ func testAccContainerCluster_disableConfidentialNodes(clusterName string, npName
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
   location           = "us-central1-a"
-  enable_shielded_nodes = true
   release_channel {
     channel = "RAPID"
   }
@@ -2630,7 +2655,6 @@ func testAccContainerCluster_withILBSubSetting(clusterName string, npName string
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
   location           = "us-central1-a"
-  enable_shielded_nodes = true
   release_channel {
     channel = "RAPID"
   }
@@ -2653,7 +2677,6 @@ func testAccContainerCluster_disableILBSubSetting(clusterName string, npName str
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
   location           = "us-central1-a"
-  enable_shielded_nodes = true
   release_channel {
     channel = "RAPID"
   }
@@ -3033,6 +3056,21 @@ resource "google_container_cluster" "with_version" {
 `, clusterName)
 }
 
+func testAccContainerCluster_withMasterAuthNoCert(clusterName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_master_auth_no_cert" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 3
+  master_auth {
+    client_certificate_config {
+      issue_client_certificate = false
+    }
+  }
+}
+`, clusterName)
+}
+
 func testAccContainerCluster_updateVersion(clusterName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -3222,7 +3260,7 @@ resource "google_container_cluster" "with_workload_metadata_config" {
     ]
 
     workload_metadata_config {
-      node_metadata = "SECURE"
+      mode = "GCE_METADATA"
     }
   }
 }
@@ -3332,7 +3370,7 @@ resource "google_kms_key_ring" "keyring" {
 
 resource "google_kms_crypto_key" "example-key" {
   name            = "%s-kms-key"
-  key_ring        = google_kms_key_ring.keyring.self_link
+  key_ring        = google_kms_key_ring.keyring.id
   rotation_period = "100000s"
 }
 
@@ -3350,7 +3388,7 @@ resource "google_container_cluster" "with_boot_disk_kms_key" {
 
     image_type = "COS_CONTAINERD"
 
-    boot_disk_kms_key = google_kms_crypto_key.example-key.self_link
+    boot_disk_kms_key = google_kms_crypto_key.example-key.id
   }
 }
 `, project, clusterName, clusterName, clusterName)
@@ -3390,7 +3428,7 @@ resource "google_compute_backend_service" "my-backend-service" {
   protocol  = "HTTP"
 
   backend {
-    group = element(google_container_cluster.primary.instance_group_urls, 1)
+    group = element(google_container_cluster.primary.node_pool[0].managed_instance_group_urls, 1)
   }
 
   health_checks = [google_compute_http_health_check.default.self_link]
@@ -4166,7 +4204,7 @@ resource "google_container_cluster" "with_workload_identity_config" {
   initial_node_count = 1
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
   remove_default_node_pool = true
 
@@ -4179,12 +4217,12 @@ func testAccContainerCluster_updateWorkloadIdentityConfig(projectID string, clus
 	if enable {
 		workloadIdentityConfig = `
 			workload_identity_config {
-			identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+		  workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
 		}`
         } else {
 		workloadIdentityConfig = `
 			workload_identity_config {
-			identity_namespace = ""
+			workload_pool = ""
 		}`
         }
 	return fmt.Sprintf(`
@@ -4201,7 +4239,6 @@ resource "google_container_cluster" "with_workload_identity_config" {
 }
 `, projectID, clusterName, workloadIdentityConfig)
 }
-
 
 
 <% unless version.nil? || version == 'ga' -%>

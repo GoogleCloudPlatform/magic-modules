@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	"github.com/golang/glog"
 )
 
@@ -82,6 +83,11 @@ type Variable struct {
 	Name string `yaml:"name"`
 	// Type is the variable type.
 	Type string `yaml:"type"`
+	// DocsValue is an optional value that should be substituted directly into
+	// the documentation for this variable.  If not provided, tpgtools makes
+	// its best guess about a suitable value.  Generally, this is only provided
+	// if the "best guess" is a poor one.
+	DocsValue string `yaml:"docs_value"`
 }
 
 // Substitution contains metadata that varies for the sample context
@@ -120,7 +126,7 @@ type Update struct {
 }
 
 // BuildDependency produces a Dependency using a file and filename
-func BuildDependency(fileName, product, localname, version string, b []byte) (*Dependency, error) {
+func BuildDependency(fileName, product, localname, version string, hasGAEquivalent bool, b []byte) (*Dependency, error) {
 	var resourceName string
 	fileParts := strings.Split(fileName, ".")
 	if len(fileParts) == 4 {
@@ -146,7 +152,7 @@ func BuildDependency(fileName, product, localname, version string, b []byte) (*D
 		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)
 	}
 
-	block, err := ConvertSampleJSONToHCL(dclResourceType, version, b)
+	block, err := ConvertSampleJSONToHCL(dclResourceType, version, hasGAEquivalent, b)
 	if err != nil {
 		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)
 	}
@@ -174,7 +180,7 @@ func (s *Sample) generateSampleDependencyWithName(fileName, localname string) De
 	dependencyBytes, err := ioutil.ReadFile(path.Join(s.SamplesPath, fileName))
 	version := s.resourceReference.versionMetadata.V
 	product := s.resourceReference.productMetadata.ProductType()
-	d, err := BuildDependency(fileName, product, localname, version, dependencyBytes)
+	d, err := BuildDependency(fileName, product, localname, version, s.HasGAEquivalent, dependencyBytes)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -205,12 +211,12 @@ func (s Sample) ReplaceReferences(d *Dependency) error {
 		referenceFileName := match[1]
 		idField := match[2]
 		var tfReference string
-			for _, dep := range s.DependencyList {
-				if dep.FileName == referenceFileName {
-					tfReference = dep.TerraformResourceType + "." + dep.HCLLocalName + "." + idField
-					break
-				}
+		for _, dep := range s.DependencyList {
+			if dep.FileName == referenceFileName {
+				tfReference = dep.TerraformResourceType + "." + dep.HCLLocalName + "." + idField
+				break
 			}
+		}
 		if tfReference == "" {
 			return fmt.Errorf("Could not find reference file name: %s", referenceFileName)
 		}
@@ -286,8 +292,11 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 		newSample.PrimaryResource = &primaryResource
 		if !newSample.isNativeHCL() {
 			var newDeps []Dependency
-			newDeps = append(newDeps, newSample.DependencyList...)
-			newDeps[0] = newSample.generateSampleDependencyWithName(*newSample.PrimaryResource, "primary")
+			newDeps = append(newDeps, newSample.generateSampleDependencyWithName(*newSample.PrimaryResource, "primary"))
+			for _, newDepFilename := range update.Dependencies {
+				newDepFilename = strings.TrimPrefix(newDepFilename, "samples/")
+				newDeps = append(newDeps, newSample.generateSampleDependencyWithName(newDepFilename, basicResourceName(newDepFilename)))
+			}
 			newSample.DependencyList = newDeps
 		}
 		newSample.TestSlug = fmt.Sprintf("%sUpdate%v", newSample.TestSlug, i)
@@ -295,6 +304,16 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 		out = append(out, newSample)
 	}
 	return out
+}
+
+func basicResourceName(depFilename string) string {
+	re := regexp.MustCompile("^update(_\\d)?\\.")
+	// update_1.resource.json -> basic.resource.json
+	basicReplaced := re.ReplaceAllString(depFilename, "basic.")
+	re = regexp.MustCompile("^update(_\\d)?_")
+	// update_1_name.resource.json -> name.resource.json
+	prefixTrimmed := re.ReplaceAllString(basicReplaced, "")
+	return dcl.SnakeToJSONCase(strings.Split(prefixTrimmed, ".")[0])
 }
 
 // ExpandContext expands the context model used in the generated tests
@@ -335,6 +354,11 @@ var translationMap = map[string]translationIndex{
 		docsValue:    "us-west1",
 		contextKey:   "region",
 		contextValue: "getTestRegionFromEnv()",
+	},
+	":ZONE": {
+		docsValue:    "us-west1-a",
+		contextKey:   "zone",
+		contextValue: "getTestZoneFromEnv()",
 	},
 	":ORG_TARGET": {
 		docsValue:    "123456789",

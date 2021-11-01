@@ -77,7 +77,7 @@ func DCLToTerraformSampleName(service, resource string) (string, string, error) 
 	{{- range $res := $resList   }}
 		{{- if not $res.IsAlternateLocation }}
 	case "{{$res.DCLPackage}}{{replace $res.DCLName "_" "" -1}}":
-		return "{{$res.ProductType }}", "{{ $res.Type }}", nil
+		return "{{$res.ProductType }}", "{{ $res.DCLTitle }}", nil
 		{{- end }}
 	{{- end }}
 	default:
@@ -88,21 +88,21 @@ func DCLToTerraformSampleName(service, resource string) (string, string, error) 
 }
 
 // ConvertSampleJSONToHCL unmarshals json to an HCL string.
-func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (string, error) {
+func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent bool, b []byte) (string, error) {
 	{{- range $version, $resList := $.Resources   }}
 		{{- if not (eq $version.V "ga") }}
 	if version == "{{$version.V}}" {
 		switch resourceType {
 			{{- range $res := $resList   }}
 		case "{{$res.PathType}}":
-			r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.Type}}{}
+			r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLTitle}}{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
 				{{- if $res.CustomSerializer }}
-			return {{$res.CustomSerializer}}(*r)
+			return {{$res.CustomSerializer}}(*r, hasGAEquivalent)
 				{{- else }}
-			return {{$res.PathType}}{{$version.SerializationSuffix}}AsHCL(*r)
+			return {{$res.PathType}}{{$version.SerializationSuffix}}AsHCL(*r, hasGAEquivalent)
 				{{- end }}
 			{{- end }}
 		}	
@@ -112,14 +112,14 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 	switch resourceType {
 			{{- range $res := $resList   }}
 	case "{{$res.PathType}}":
-		r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.Type}}{}
+		r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLTitle}}{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
 				{{- if $res.CustomSerializer }}
-			return {{$res.CustomSerializer}}(*r)
+			return {{$res.CustomSerializer}}(*r, hasGAEquivalent)
 				{{- else }}
-			return {{$res.PathType}}{{$version.SerializationSuffix}}AsHCL(*r)
+			return {{$res.PathType}}{{$version.SerializationSuffix}}AsHCL(*r, hasGAEquivalent)
 				{{- end }}
 			{{- end }}
 	default:
@@ -139,7 +139,7 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func {{ $res.PathType}}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{{$version.SerializationSuffix}}.{{$res.Type}}) (string, error) {
+func {{ $res.PathType}}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLTitle}}, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"{{$res.TerraformName}}\" \"output\" {\n"
 		{{- range $field := $res.Properties}}
 			{{- if $field.Settable }}
@@ -182,7 +182,15 @@ func {{ $res.PathType}}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{
 				{{- end}}
 			{{- end}}
 		{{- end}}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 		{{ range $v := $res.Objects}}

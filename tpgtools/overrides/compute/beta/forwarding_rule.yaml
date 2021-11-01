@@ -9,7 +9,7 @@
   details:
     title: forwarding_rule
   location: region
-- type: REQUIRED_OVERRIDE
+- type: CUSTOM_SCHEMA_VALUES
   location: global
   field: target
   details:

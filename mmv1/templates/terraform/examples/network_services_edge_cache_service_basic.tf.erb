@@ -1,6 +1,6 @@
 resource "google_storage_bucket" "dest" {
-  name = "<%= ctx[:vars]['bucket_name'] %>"
-
+  name          = "<%= ctx[:vars]['bucket_name'] %>"
+  location      = "US"
   force_destroy = true
 }
 
