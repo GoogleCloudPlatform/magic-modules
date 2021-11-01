@@ -909,6 +909,7 @@ func TestAccComputeInstanceTemplate_AdvancedMachineFeatures(t *testing.T) {
 	})
 }
 
+<% unless version == "ga" -%>
 func TestAccComputeInstanceTemplate_enableDisplay(t *testing.T) {
 	t.Parallel()
 
@@ -929,6 +930,7 @@ func TestAccComputeInstanceTemplate_enableDisplay(t *testing.T) {
 	})
 }
 
+<% end -%>
 func TestAccComputeInstanceTemplate_invalidDiskType(t *testing.T) {
 	t.Parallel()
 
@@ -2447,6 +2449,7 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix)
 }
 
+<% unless version == "ga" -%>
 func testAccComputeInstanceTemplate_enableDisplay(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -2471,6 +2474,7 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix)
 }
 
+<% end -%>
 func testAccComputeInstanceTemplate_invalidDiskType(suffix string) string {
 	return fmt.Sprintf(`
 # Use this datasource insead of hardcoded values when https://github.com/hashicorp/terraform/issues/22679
