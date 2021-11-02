@@ -496,19 +496,19 @@ running `terraform plan`, amend your config to resolve them.
 
 The affected fields are:
 
-    * `activation_policy` will now default to `ALWAYS` at plan time, and detect
+  * `activation_policy` will now default to `ALWAYS` at plan time, and detect
 drift even when unset. Previously, Terraform only detected drift when the field
 had been set in config explicitly.
 
-    * `availability_type` will now default to `ZONAL` at plan time, and detect
+  * `availability_type` will now default to `ZONAL` at plan time, and detect
 drift even when unset. Previously, Terraform only detected drift when the field
 had been set in config explicitly.
 
-    * `disk_type` will now default to `PD_SSD` at plan time, and detect
+  * `disk_type` will now default to `PD_SSD` at plan time, and detect
 drift even when unset. Previously, Terraform only detected drift when the field
 had been set in config explicitly.
 
-    * `encryption_key_name` will now detect drift even when unset. Previously,
+  * `encryption_key_name` will now detect drift even when unset. Previously,
 Terraform only detected drift when the field had been set in config explicitly.
 
 ## Resource: `google_storage_bucket`
