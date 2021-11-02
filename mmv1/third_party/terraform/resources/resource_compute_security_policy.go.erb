@@ -14,7 +14,7 @@ import (
 <% if version == 'ga' -%>
 	"google.golang.org/api/compute/v1"
 <% else -%>
-	"google.golang.org/api/compute/v0.beta"
+	compute "google.golang.org/api/compute/v0.beta"
 <% end -%>
 )
 
@@ -259,7 +259,7 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 <% if version == 'ga' -%>
 	client := config.NewComputeClient(userAgent)
 <% else -%>
-	client := config.NewComputeBetaClient(userAgent)
+	client := config.NewComputeClient(userAgent)
 <% end -%>
 
 	op, err := client.SecurityPolicies.Insert(project, securityPolicy).Do()
@@ -299,7 +299,7 @@ func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{})
 <% if version == 'ga' -%>
 	client := config.NewComputeClient(userAgent)
 <% else -%>
-	client := config.NewComputeBetaClient(userAgent)
+	client := config.NewComputeClient(userAgent)
 <% end -%>
 
 	securityPolicy, err := client.SecurityPolicies.Get(project, sp).Do()
@@ -358,7 +358,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 	<% if version == 'ga' -%>
 		client := config.NewComputeClient(userAgent)
 	<% else -%>
-		client := config.NewComputeBetaClient(userAgent)
+		client := config.NewComputeClient(userAgent)
 	<% end -%>
 	
 		op, err := client.SecurityPolicies.Patch(project, sp, securityPolicy).Do()
@@ -391,7 +391,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 			<% if version == 'ga' -%>
 				client := config.NewComputeClient(userAgent)
 			<% else -%>
-				client := config.NewComputeBetaClient(userAgent)
+				client := config.NewComputeClient(userAgent)
 			<% end -%>
 
 				// If the rule is in new and its priority does not exist in old, then add it.
@@ -409,7 +409,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 			<% if version == 'ga' -%>
 				client := config.NewComputeClient(userAgent)
 			<% else -%>
-				client := config.NewComputeBetaClient(userAgent)
+				client := config.NewComputeClient(userAgent)
 			<% end -%>
 
 				// If the rule is in new, and its priority is in old, but its hash is different than the one in old, update it.
@@ -432,7 +432,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 			<% if version == 'ga' -%>
 				client := config.NewComputeClient(userAgent)
 			<% else -%>
-				client := config.NewComputeBetaClient(userAgent)
+				client := config.NewComputeClient(userAgent)
 			<% end -%>
 
 				// If the rule's priority is in old but not new, remove it.
@@ -468,7 +468,7 @@ func resourceComputeSecurityPolicyDelete(d *schema.ResourceData, meta interface{
 <% if version == 'ga' -%>
 	client := config.NewComputeClient(userAgent)
 <% else -%>
-	client := config.NewComputeBetaClient(userAgent)
+	client := config.NewComputeClient(userAgent)
 <% end -%>
 
 	// Delete the SecurityPolicy

@@ -32,11 +32,13 @@ resource "google_pubsub_topic" "topic" {
 	name     = "dataflow-job1"
 }
 resource "google_storage_bucket" "bucket1" {
-	name = "tf-test-bucket1"
+	name          = "tf-test-bucket1"
+	location      = "US"
 	force_destroy = true
 }
 resource "google_storage_bucket" "bucket2" {
-	name = "tf-test-bucket2"
+	name          = "tf-test-bucket2"
+	location      = "US"
 	force_destroy = true
 }
 resource "google_dataflow_job" "pubsub_stream" {
@@ -61,7 +63,7 @@ There are many types of Dataflow jobs.  Some Dataflow jobs run constantly, getti
 
 The Dataflow resource is considered 'existing' while it is in a nonterminal state.  If it reaches a terminal state (e.g. 'FAILED', 'COMPLETE', 'CANCELLED'), it will be recreated on the next 'apply'.  This is as expected for jobs which run continuously, but may surprise users who use this resource for other kinds of Dataflow jobs.
 
-A Dataflow job which is 'destroyed' may be "cancelled" or "drained".  If "cancelled", the job terminates - any data written remains where it is, but no new data will be processed.  If "drained", no new data will enter the pipeline, but any data currently in the pipeline will finish being processed.  The default is "cancelled", but if a user sets `on_delete` to `"drain"` in the configuration, you may experience a long wait for your `terraform destroy` to complete.
+A Dataflow job which is 'destroyed' may be "cancelled" or "drained".  If "cancelled", the job terminates - any data written remains where it is, but no new data will be processed.  If "drained", no new data will enter the pipeline, but any data currently in the pipeline will finish being processed.  The default is "drain". When `on_delete` is set to `"drain"` in the configuration, you may experience a long wait for your `terraform destroy` to complete.
 
 ## Argument Reference
 

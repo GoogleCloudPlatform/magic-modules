@@ -66,7 +66,8 @@ resource "google_compute_instance" "my-logged-instance" {
 
 # A bucket to store logs in
 resource "google_storage_bucket" "log-bucket" {
-  name = "my-unique-logging-bucket"
+  name     = "my-unique-logging-bucket"
+  location = "US"
 }
 
 # Our sink; this logs all activity related to our "my-logged-instance" instance
@@ -81,6 +82,7 @@ resource "google_logging_project_sink" "instance-sink" {
 
 # Because our sink uses a unique_writer, we must grant that writer access to the bucket.
 resource "google_project_iam_binding" "log-writer" {
+  project = "your-project-id"
   role = "roles/storage.objectCreator"
 
   members = [

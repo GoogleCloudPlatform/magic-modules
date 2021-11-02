@@ -161,7 +161,7 @@ for more information.
     will have statically granted permissions beyond those provided by the RBAC configuration or IAM.
     Defaults to `false`
 
-* `enable_shielded_nodes` - (Optional) Enable Shielded Nodes features on all nodes in this cluster.  Defaults to `false`.
+* `enable_shielded_nodes` - (Optional) Enable Shielded Nodes features on all nodes in this cluster.  Defaults to `true`.
 
 * `enable_autopilot` - (Optional) Enable Autopilot for this cluster. Defaults to `false`.
     Note that when this option is enabled, certain features of Standard GKE are not available.
@@ -197,9 +197,9 @@ and requires the `ip_allocation_policy` block to be defined. By default when thi
 * `master_auth` - (Optional) The authentication information for accessing the
 Kubernetes master. Some values in this block are only returned by the API if
 your service account has permission to get credentials for your GKE cluster. If
-you see an unexpected diff removing a username/password or unsetting your client
-cert, ensure you have the `container.clusters.getCredentials` permission.
-Structure is [documented below](#nested_master_auth). This has been deprecated as of GKE 1.19.
+you see an unexpected diff unsetting your client cert, ensure you have the 
+`container.clusters.getCredentials` permission.
+Structure is [documented below](#nested_master_auth).
 
 * `master_authorized_networks_config` - (Optional) The desired
     configuration options for master authorized networks. Omit the
@@ -292,7 +292,7 @@ clusters with private nodes. Structure is [documented below](#nested_private_clu
 Configuration options for the [Release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels)
 feature, which provide more control over automatic upgrades of your GKE clusters.
 When updating this field, GKE imposes specific version requirements. See
-[Migrating between release channels](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels#migrating_between_release_channels)
+[Selecting a new release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels#selecting_a_new_release_channel)
 for more details; the `google_container_engine_versions` datasource can provide
 the default version for a channel. Note that removing the `release_channel`
 field from your config will cause Terraform to stop managing your cluster's
@@ -578,13 +578,7 @@ pick a specific range to use.
 
 <a name="nested_master_auth"></a>The `master_auth` block supports:
 
-* `password` - (Optional) The password to use for HTTP basic authentication when accessing
-    the Kubernetes master endpoint. This has been deprecated as of GKE 1.19.
-
-* `username` - (Optional) The username to use for HTTP basic authentication when accessing
-    the Kubernetes master endpoint. If not present basic auth will be disabled. This has been deprecated as of GKE 1.19.
-
-* `client_certificate_config` - (Optional) Whether client certificate authorization is enabled for this cluster.  For example:
+* `client_certificate_config` - (Required) Whether client certificate authorization is enabled for this cluster.  For example:
 
 ```hcl
 master_auth {
@@ -744,8 +738,6 @@ linux_node_config {
 
 <a name="nested_workload_identity_config"></a> The `workload_identity_config` block supports:
 
-* `identity_namespace` (Optional, Deprecated) - Currently, the only supported identity namespace is the project's default.
-
 * `workload_pool` (Optional) - The workload pool to attach all Kubernetes service accounts to. Currently, the only supported identity namespace is the project of the cluster.
 
 ```hcl
@@ -883,16 +875,9 @@ Enables monitoring and attestation of the boot integrity of the instance. The at
 
 * `effect` (Required) Effect for taint. Accepted values are `NO_SCHEDULE`, `PREFER_NO_SCHEDULE`, and `NO_EXECUTE`.
 
-<a name="nested_workload_metadata_config"></a>The `workload_metadata_config` must have exactly one of `node_metadata` (deprecated) or `mode` set. This block supports:
+<a name="nested_workload_metadata_config"></a>The `workload_metadata_config` block supports:
 
-* `node_metadata` (Optional, Deprecated) How to expose the node metadata to the workload running on the node. This is deprecated in favor of `mode`
-    Accepted values are:
-    * UNSPECIFIED: Not Set
-    * SECURE: Prevent workloads not in hostNetwork from accessing certain VM metadata, specifically kube-env, which contains Kubelet credentials, and the instance identity token. See [Metadata Concealment](https://cloud.google.com/kubernetes-engine/docs/how-to/metadata-proxy) documentation.
-    * EXPOSE: Expose all VM metadata to pods.
-    * GKE_METADATA_SERVER: Enables [workload identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) on the node.
-
-* `mode` (Optional) How to expose the node metadata to the workload running on the node.
+* `mode` (Required) How to expose the node metadata to the workload running on the node.
     Accepted values are:
     * UNSPECIFIED: Not Set
     * GCE_METADATA: Expose all Compute Engine metadata to pods.
@@ -945,9 +930,6 @@ exported:
 * `self_link` - The server-defined URL for the resource.
 
 * `endpoint` - The IP address of this cluster's Kubernetes master.
-
-* `instance_group_urls` - List of instance group URLs which have been assigned
-    to the cluster.
 
 * `label_fingerprint` - The fingerprint of the set of labels for this cluster.
 

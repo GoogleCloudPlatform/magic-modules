@@ -1,6 +1,7 @@
 <% autogen_exception -%>
 package google
 
+<% unless version == 'ga' -%>
 import (
 	"fmt"
 
@@ -16,9 +17,6 @@ func dataSourceGoogleRuntimeconfigConfig() *schema.Resource {
 	return &schema.Resource{
 		Read:   dataSourceGoogleRuntimeconfigConfigRead,
 		Schema: dsSchema,
-<% if version == 'ga' -%>
-		DeprecationMessage: "This datasource has been deprecated in the google (GA) provider, and will only be available in the google-beta provider in a future release.",
-<% end -%>
 	}
 }
 
@@ -32,3 +30,4 @@ func dataSourceGoogleRuntimeconfigConfigRead(d *schema.ResourceData, meta interf
 	d.SetId(id)
 	return resourceRuntimeconfigConfigRead(d, meta)
 }
+<% end %>
