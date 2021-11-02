@@ -798,6 +798,7 @@ objects:
         for optimistic concurrency, change detection, and the watch operation on a
         resource or set of resources. They may only be valid for a
         particular resource or set of resources.
+
         More info:
         https://git.k8s.io/community/contributors/devel/api-conventions.md#concurrency-control-and-consistency
       output: true
