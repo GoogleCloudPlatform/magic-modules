@@ -71,7 +71,7 @@ terraform {
   # ... other configuration ...
   required_providers {
     google = {
-      version = "~> 3.87.0"
+      version = "~> 3.90.0"
     }
   }
 }
