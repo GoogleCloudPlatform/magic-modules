@@ -16,10 +16,14 @@ name: Notebooks
 display_name: Cloud AI Notebooks
 versions:
   - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://notebooks.googleapis.com/v1beta1/
-  - !ruby/object:Api::Product::Version
     name: ga
+    base_url: https://notebooks.googleapis.com/v1/
+  # Notebooks has an old beta API but since Beatrix, features
+  # features are only in V1 with some changes to Spanner which
+  # makes backporting to v1beta1 challenging. In case, users
+  # decided to use beta, we use v1 as the API reference.
+  - !ruby/object:Api::Product::Version
+    name: beta
     base_url: https://notebooks.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
@@ -303,7 +307,7 @@ objects:
             values:
               - NO_RESERVATION
               - ANY_RESERVATION
-              - SPECIFIC_RESERVATION               
+              - SPECIFIC_RESERVATION
           - !ruby/object:Api::Type::String
             name: 'key'
             description: |

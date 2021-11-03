@@ -1,6 +1,6 @@
 resource "google_notebooks_runtime" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]["runtime_name"] %>"
-  location = "us-central1-a"
+  location = "us-central1"
   access_config {
     access_type = "SINGLE_USER"
     runtime_owner = "admin@hashicorptest.com"
@@ -25,3 +25,11 @@ resource "google_notebooks_runtime" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 }
+
+# resource "google_notebooks_runtime_iam_binding" "<%= ctx[:primary_resource_id] %>" {
+#   project = google_notebooks_runtime.<%= ctx[:primary_resource_id] %>.project
+#   location = google_notebooks_runtime.<%= ctx[:primary_resource_id] %>.location
+#   runtime_name = google_notebooks_runtime.<%= ctx[:primary_resource_id] %>.name
+#   role = "roles/viewer"
+#   members = ["user:admin@hashicorptest.com"]
+# }

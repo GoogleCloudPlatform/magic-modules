@@ -29,6 +29,13 @@ func TestAccNotebooksRuntime_create_container(t *testing.T) {
 				ExpectNonEmptyPlan: true,
 				ImportStateVerifyIgnore: []string{"virtual_machine", "container_images", "metadata"},
 			},
+      # {
+			# 	ResourceName:       "google_notebooks_runtime_iam_binding.runtime_container",
+			# 	ImportState:        true,
+			# 	ImportStateVerify:  true,
+			# 	ExpectNonEmptyPlan: true,
+			# 	ImportStateVerifyIgnore: []string{"virtual_machine", "container_images", "metadata"},
+			# },
 		},
 	})
 }
@@ -38,7 +45,7 @@ func testAccNotebooksRuntime_create_container(name string) string {
 
 resource "google_notebooks_runtime" "runtime_container" {
   name = "%s"
-  location = "us-central1-a"
+  location = "us-central1"
   access_config {
     access_type = "SINGLE_USER"
     runtime_owner = "admin@hashicorptest.com"
@@ -63,6 +70,14 @@ resource "google_notebooks_runtime" "runtime_container" {
     }
   }
 }
+
+# resource "google_notebooks_runtime_iam_binding" "runtime_container" {
+#   project = google_notebooks_runtime.runtime_container.project
+#   location = google_notebooks_runtime.runtime_container.location
+#   runtime_name = google_notebooks_runtime.runtime_container.name
+#   role = "roles/viewer"
+#   members = ["user:admin@hashicorptest.com"]
+# }
 `, name)
 }
 

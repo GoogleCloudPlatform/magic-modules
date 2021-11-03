@@ -28,6 +28,12 @@ func TestAccNotebooksRuntime_basic(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"virtual_machine", "metadata"},
 			},
+			# {
+			# 	ResourceName:            "google_notebooks_runtime_iam_binding.runtime",
+			# 	ImportState:             true,
+			# 	ImportStateVerify:       true,
+			# 	ImportStateVerifyIgnore: []string{"virtual_machine", "metadata"},
+			# },
 		},
 	})
 }
@@ -36,7 +42,7 @@ func testAccNotebooksRuntime_basic(name string) string {
 	return fmt.Sprintf(`
 resource "google_notebooks_runtime" "runtime" {
   name = "%s"
-  location = "us-central1-a"
+  location = "us-central1"
   access_config {
     access_type = "SINGLE_USER"
     runtime_owner = "admin@hashicorptest.com"
@@ -53,6 +59,14 @@ resource "google_notebooks_runtime" "runtime" {
     }
   }
 }
+
+# resource "google_notebooks_runtime_iam_binding" "runtime" {
+#   project = google_notebooks_runtime.runtime.project
+#   location = google_notebooks_runtime.runtime.location
+#   runtime_name = google_notebooks_runtime.runtime.name
+#   role = "roles/viewer"
+#   members = ["user:admin@hashicorptest.com"]
+# }
 `, name)
 }
 
