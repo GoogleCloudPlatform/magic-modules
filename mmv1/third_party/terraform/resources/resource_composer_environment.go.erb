@@ -11,7 +11,12 @@ import (
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"google.golang.org/api/composer/v1beta1"
+
+<% if version == "ga" -%>
+	"google.golang.org/api/composer/v1"
+<% else -%>
+	composer "google.golang.org/api/composer/v1beta1"
+<% end -%>
 )
 
 const (
@@ -43,6 +48,7 @@ var (
 		"config.0.software_config.0.env_variables",
 		"config.0.software_config.0.image_version",
 		"config.0.software_config.0.python_version",
+		"config.0.software_config.0.scheduler_count",
 	}
 
 	composerConfigKeys = []string{
@@ -56,7 +62,17 @@ var (
 		"config.0.web_server_config",
 		"config.0.encryption_config",
 		"config.0.maintenance_window",
+		"config.0.workloads_config",
+		"config.0.environment_size",
 <% end -%>
+	}
+
+	composerIpAllocationPolicyKeys = []string{
+		"config.0.node_config.0.ip_allocation_policy.0.use_ip_aliases",
+		"config.0.node_config.0.ip_allocation_policy.0.cluster_secondary_range_name",
+		"config.0.node_config.0.ip_allocation_policy.0.services_secondary_range_name",
+		"config.0.node_config.0.ip_allocation_policy.0.cluster_ipv4_cidr_block",
+		"config.0.node_config.0.ip_allocation_policy.0.services_ipv4_cidr_block",
 	}
 
 <% unless version == "ga" -%>
@@ -131,7 +147,7 @@ func resourceComposerEnvironment() *schema.Resource {
 							Optional:     true,
 							AtLeastOneOf: composerConfigKeys,
 							ValidateFunc: validation.IntAtLeast(3),
-							Description:  `The number of nodes in the Kubernetes Engine cluster that will be used to run this environment.`,
+							Description:  `The number of nodes in the Kubernetes Engine cluster that will be used to run this environment. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
 						},
 						"node_config": {
 							Type:         schema.TypeList,
@@ -144,10 +160,11 @@ func resourceComposerEnvironment() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"zone": {
 										Type:             schema.TypeString,
-										Required:         true,
+										Optional:         true,
+										Computed:         true,
 										ForceNew:         true,
 										DiffSuppressFunc: compareSelfLinkOrResourceName,
-										Description:      `The Compute Engine zone in which to deploy the VMs running the Apache Airflow software, specified as the zone name or relative resource name (e.g. "projects/{project}/zones/{zone}"). Must belong to the enclosing environment's project and region.`,
+										Description:      `The Compute Engine zone in which to deploy the VMs running the Apache Airflow software, specified as the zone name or relative resource name (e.g. "projects/{project}/zones/{zone}"). Must belong to the enclosing environment's project and region. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
 									},
 									"machine_type": {
 										Type:             schema.TypeString,
@@ -155,7 +172,7 @@ func resourceComposerEnvironment() *schema.Resource {
 										Optional:         true,
 										ForceNew:         true,
 										DiffSuppressFunc: compareSelfLinkOrResourceName,
-										Description:      `The Compute Engine machine type used for cluster instances, specified as a name or relative resource name. For example: "projects/{project}/zones/{zone}/machineTypes/{machineType}". Must belong to the enclosing environment's project and region/zone.`,
+										Description:      `The Compute Engine machine type used for cluster instances, specified as a name or relative resource name. For example: "projects/{project}/zones/{zone}/machineTypes/{machineType}". Must belong to the enclosing environment's project and region/zone. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
 									},
 									"network": {
 										Type:             schema.TypeString,
@@ -177,7 +194,7 @@ func resourceComposerEnvironment() *schema.Resource {
 										Computed:    true,
 										Optional:    true,
 										ForceNew:    true,
-										Description: `The disk size in GB used for node VMs. Minimum size is 20GB. If unspecified, defaults to 100GB. Cannot be updated.`,
+										Description: `The disk size in GB used for node VMs. Minimum size is 20GB. If unspecified, defaults to 100GB. Cannot be updated. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
 									},
 									"oauth_scopes": {
 										Type:     schema.TypeSet,
@@ -188,7 +205,7 @@ func resourceComposerEnvironment() *schema.Resource {
 											Type: schema.TypeString,
 										},
 										Set:         schema.HashString,
-										Description: `The set of Google API scopes to be made available on all node VMs. Cannot be updated. If empty, defaults to ["https://www.googleapis.com/auth/cloud-platform"].`,
+										Description: `The set of Google API scopes to be made available on all node VMs. Cannot be updated. If empty, defaults to ["https://www.googleapis.com/auth/cloud-platform"]. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
 									},
 									"service_account": {
 										Type:             schema.TypeString,
@@ -199,14 +216,21 @@ func resourceComposerEnvironment() *schema.Resource {
 										DiffSuppressFunc: compareServiceAccountEmailToLink,
 										Description:      `The Google Cloud Platform Service Account to be used by the node VMs. If a service account is not specified, the "default" Compute Engine service account is used. Cannot be updated. If given, note that the service account must have roles/composer.worker for any GCP resources created under the Cloud Composer Environment.`,
 									},
-<% unless version == "ga" -%>	
+<% unless version == "ga" -%>
 									"max_pods_per_node": {
 										Type:             schema.TypeInt,
 										Computed:         true,
 										Optional:         true,
 										ForceNew:         true,
 										ValidateFunc:     validation.IntBetween(8, 110),
-										Description:      `The maximum pods per node in the GKE cluster allocated during environment creation. Lowering this value reduces IP address consumption by the Cloud Composer Kubernetes cluster. This value can only be set during environment creation, and only if the environment is VPC-Native. The range of possible values is 8-110, and the default is 32.`,
+										Description:      `The maximum pods per node in the GKE cluster allocated during environment creation. Lowering this value reduces IP address consumption by the Cloud Composer Kubernetes cluster. This value can only be set during environment creation, and only if the environment is VPC-Native. The range of possible values is 8-110, and the default is 32. Cannot be updated. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
+									},
+									"enable_ip_masq_agent": {
+										Type:             schema.TypeBool,
+										Computed:         true,
+										Optional:         true,
+										ForceNew:         true,
+										Description:      `Deploys 'ip-masq-agent' daemon set in the GKE cluster and defines nonMasqueradeCIDRs equals to pod IP range so IP masquerading is used for all destination addresses, except between pods traffic. See: https://cloud.google.com/kubernetes-engine/docs/how-to/ip-masquerade-agent`,
 									},
 <% end -%>
 									"tags": {
@@ -217,7 +241,7 @@ func resourceComposerEnvironment() *schema.Resource {
 											Type: schema.TypeString,
 										},
 										Set:         schema.HashString,
-										Description: `The list of instance tags applied to all node VMs. Tags are used to identify valid sources or targets for network firewalls. Each tag within the list must comply with RFC1035. Cannot be updated.`,
+										Description: `The list of instance tags applied to all node VMs. Tags are used to identify valid sources or targets for network firewalls. Each tag within the list must comply with RFC1035. Cannot be updated. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
 									},
 									"ip_allocation_policy": {
 										Type:        schema.TypeList,
@@ -230,30 +254,34 @@ func resourceComposerEnvironment() *schema.Resource {
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"use_ip_aliases": {
-													Type:        schema.TypeBool,
-													Required:    true,
-													ForceNew:    true,
-													Description: `Whether or not to enable Alias IPs in the GKE cluster. If true, a VPC-native cluster is created. Defaults to true if the ip_allocation_policy block is present in config.`,
+													Type:         schema.TypeBool,
+													Optional:     true,
+													ForceNew:     true,
+													AtLeastOneOf: composerIpAllocationPolicyKeys,
+													Description:  `Whether or not to enable Alias IPs in the GKE cluster. If true, a VPC-native cluster is created. Defaults to true if the ip_allocation_policy block is present in config. This field is only supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*. Environments in newer versions always use VPC-native GKE clusters.`,
 												},
 												"cluster_secondary_range_name": {
 													Type:          schema.TypeString,
 													Optional:      true,
 													ForceNew:      true,
-													Description:   `The name of the cluster's secondary range used to allocate IP addresses to pods. Specify either cluster_secondary_range_name or cluster_ipv4_cidr_block but not both. This field is applicable only when use_ip_aliases is true.`,
+													AtLeastOneOf:  composerIpAllocationPolicyKeys,
+													Description:   `The name of the cluster's secondary range used to allocate IP addresses to pods. Specify either cluster_secondary_range_name or cluster_ipv4_cidr_block but not both. For Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*, this field is applicable only when use_ip_aliases is true.`,
 													ConflictsWith: []string{"config.0.node_config.0.ip_allocation_policy.0.cluster_ipv4_cidr_block"},
 												},
 												"services_secondary_range_name": {
 													Type:          schema.TypeString,
 													Optional:      true,
 													ForceNew:      true,
-													Description:   `The name of the services' secondary range used to allocate IP addresses to the cluster. Specify either services_secondary_range_name or services_ipv4_cidr_block but not both. This field is applicable only when use_ip_aliases is true.`,
+													AtLeastOneOf:  composerIpAllocationPolicyKeys,
+													Description:   `The name of the services' secondary range used to allocate IP addresses to the cluster. Specify either services_secondary_range_name or services_ipv4_cidr_block but not both. For Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*, this field is applicable only when use_ip_aliases is true.`,
 													ConflictsWith: []string{"config.0.node_config.0.ip_allocation_policy.0.services_ipv4_cidr_block"},
 												},
 												"cluster_ipv4_cidr_block": {
 													Type:             schema.TypeString,
 													Optional:         true,
 													ForceNew:         true,
-													Description:      `The IP address range used to allocate IP addresses to pods in the cluster. Set to blank to have GKE choose a range with the default size. Set to /netmask (e.g. /14) to have GKE choose a range with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14) from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to pick a specific range to use. Specify either cluster_secondary_range_name or cluster_ipv4_cidr_block but not both.`,
+													AtLeastOneOf: 		composerIpAllocationPolicyKeys,
+													Description:      `The IP address range used to allocate IP addresses to pods in the cluster. For Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*, this field is applicable only when use_ip_aliases is true. Set to blank to have GKE choose a range with the default size. Set to /netmask (e.g. /14) to have GKE choose a range with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14) from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to pick a specific range to use. Specify either cluster_secondary_range_name or cluster_ipv4_cidr_block but not both.`,
 													DiffSuppressFunc: cidrOrSizeDiffSuppress,
 													ConflictsWith:    []string{"config.0.node_config.0.ip_allocation_policy.0.cluster_secondary_range_name"},
 												},
@@ -261,7 +289,8 @@ func resourceComposerEnvironment() *schema.Resource {
 													Type:             schema.TypeString,
 													Optional:         true,
 													ForceNew:         true,
-													Description:      `The IP address range used to allocate IP addresses in this cluster. Set to blank to have GKE choose a range with the default size. Set to /netmask (e.g. /14) to have GKE choose a range with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14) from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to pick a specific range to use. Specify either services_secondary_range_name or services_ipv4_cidr_block but not both.`,
+													AtLeastOneOf: 		composerIpAllocationPolicyKeys,
+													Description:      `The IP address range used to allocate IP addresses in this cluster. For Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*, this field is applicable only when use_ip_aliases is true. Set to blank to have GKE choose a range with the default size. Set to /netmask (e.g. /14) to have GKE choose a range with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14) from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to pick a specific range to use. Specify either services_secondary_range_name or services_ipv4_cidr_block but not both.`,
 													DiffSuppressFunc: cidrOrSizeDiffSuppress,
 													ConflictsWith:    []string{"config.0.node_config.0.ip_allocation_policy.0.services_secondary_range_name"},
 												},
@@ -301,7 +330,7 @@ func resourceComposerEnvironment() *schema.Resource {
 										AtLeastOneOf: composerSoftwareConfigKeys,
 										Elem:         &schema.Schema{Type: schema.TypeString},
 										ValidateFunc: validateComposerEnvironmentEnvVariables,
-										Description:  `Additional environment variables to provide to the Apache Airflow scheduler, worker, and webserver processes. Environment variable names must match the regular expression [a-zA-Z_][a-zA-Z0-9_]*. They cannot specify Apache Airflow software configuration overrides (they cannot match the regular expression AIRFLOW__[A-Z0-9_]+__[A-Z0-9_]+), and they cannot match any of the following reserved names: AIRFLOW_HOME C_FORCE_ROOT CONTAINER_NAME DAGS_FOLDER GCP_PROJECT GCS_BUCKET GKE_CLUSTER_NAME SQL_DATABASE SQL_INSTANCE SQL_PASSWORD SQL_PROJECT SQL_REGION SQL_USER.`,
+										Description:  `Additional environment variables to provide to the Apache Airflow schedulerf, worker, and webserver processes. Environment variable names must match the regular expression [a-zA-Z_][a-zA-Z0-9_]*. They cannot specify Apache Airflow software configuration overrides (they cannot match the regular expression AIRFLOW__[A-Z0-9_]+__[A-Z0-9_]+), and they cannot match any of the following reserved names: AIRFLOW_HOME C_FORCE_ROOT CONTAINER_NAME DAGS_FOLDER GCP_PROJECT GCS_BUCKET GKE_CLUSTER_NAME SQL_DATABASE SQL_INSTANCE SQL_PASSWORD SQL_PROJECT SQL_REGION SQL_USER.`,
 									},
 									"image_version": {
 										Type:             schema.TypeString,
@@ -318,7 +347,14 @@ func resourceComposerEnvironment() *schema.Resource {
 										AtLeastOneOf: composerSoftwareConfigKeys,
 										Computed:     true,
 										ForceNew:     true,
-										Description:  `The major version of Python used to run the Apache Airflow scheduler, worker, and webserver processes. Can be set to '2' or '3'. If not specified, the default is '2'. Cannot be updated.`,
+										Description:  `The major version of Python used to run the Apache Airflow scheduler, worker, and webserver processes. Can be set to '2' or '3'. If not specified, the default is '2'. Cannot be updated. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*. Environments in newer versions always use Python major version 3.`,
+									},
+									"scheduler_count": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										AtLeastOneOf: composerSoftwareConfigKeys,
+										Computed:     true,
+										Description:  `The number of schedulers for Airflow. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-2.*.*.`,
 									},
 								},
 							},
@@ -342,9 +378,11 @@ func resourceComposerEnvironment() *schema.Resource {
 											"config.0.private_environment_config.0.master_ipv4_cidr_block",
 											"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
 											"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
-										},
+<% unless version == "ga" -%>
+											"config.0.private_environment_config.0.cloud_composer_network_ipv4_cidr_block",
+<% end -%>										},
 										ForceNew:    true,
-										Description: `If true, access to the public endpoint of the GKE cluster is denied.`,
+										Description: `If true, access to the public endpoint of the GKE cluster is denied. If this field is set to true, ip_allocation_policy.use_ip_aliases must be set to true for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
 									},
 									"master_ipv4_cidr_block": {
 										Type:     schema.TypeString,
@@ -355,7 +393,9 @@ func resourceComposerEnvironment() *schema.Resource {
 											"config.0.private_environment_config.0.master_ipv4_cidr_block",
 											"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
 											"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
-										},
+<% unless version == "ga" -%>
+											"config.0.private_environment_config.0.cloud_composer_network_ipv4_cidr_block",
+<% end -%>										},
 										ForceNew:    true,
 										Description: `The IP range in CIDR notation to use for the hosted master network. This range is used for assigning internal IP addresses to the cluster master or set of masters and to the internal load balancer virtual IP. This range must not overlap with any other ranges in use within the cluster's network. If left blank, the default value of '172.16.0.0/28' is used.`,
 									},
@@ -368,9 +408,11 @@ func resourceComposerEnvironment() *schema.Resource {
 											"config.0.private_environment_config.0.master_ipv4_cidr_block",
 											"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
 											"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
-										},
+<% unless version == "ga" -%>
+											"config.0.private_environment_config.0.cloud_composer_network_ipv4_cidr_block",
+<% end -%>										},
 										ForceNew:    true,
-										Description: `The CIDR block from which IP range for web server will be reserved. Needs to be disjoint from master_ipv4_cidr_block and cloud_sql_ipv4_cidr_block.`,
+										Description: `The CIDR block from which IP range for web server will be reserved. Needs to be disjoint from master_ipv4_cidr_block and cloud_sql_ipv4_cidr_block. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
 									},
 									"cloud_sql_ipv4_cidr_block": {
 										Type:     schema.TypeString,
@@ -381,10 +423,36 @@ func resourceComposerEnvironment() *schema.Resource {
 											"config.0.private_environment_config.0.master_ipv4_cidr_block",
 											"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
 											"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
+<% unless version == "ga" -%>
+											"config.0.private_environment_config.0.cloud_composer_network_ipv4_cidr_block",
+<% end -%>
 										},
 										ForceNew:    true,
 										Description: `The CIDR block from which IP range in tenant project will be reserved for Cloud SQL. Needs to be disjoint from web_server_ipv4_cidr_block.`,
 									},
+<% unless version == "ga" -%>
+									"cloud_composer_network_ipv4_cidr_block": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: []string{
+											"config.0.private_environment_config.0.enable_private_endpoint",
+											"config.0.private_environment_config.0.master_ipv4_cidr_block",
+											"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
+											"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
+											"config.0.private_environment_config.0.cloud_composer_network_ipv4_cidr_block",
+										},
+										ForceNew: true,
+										Description: `The CIDR block from which IP range for Cloud Composer Network in tenant project will be reserved. Needs to be disjoint from private_cluster_config.master_ipv4_cidr_block and cloud_sql_ipv4_cidr_block. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
+									},
+									"enable_privately_used_public_ips": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Computed: true,
+										ForceNew: true,
+										Description: `When enabled, IPs from public (non-RFC1918) ranges can be used for ip_allocation_policy.cluster_ipv4_cidr_block and ip_allocation_policy.service_ipv4_cidr_block.`,
+									},
+<% end -%>
 								},
 							},
 						},
@@ -394,7 +462,7 @@ func resourceComposerEnvironment() *schema.Resource {
 							Optional:    true,
 							Computed:    true,
 							MaxItems:    1,
-							Description: `The network-level access control policy for the Airflow web server. If unspecified, no network-level access restrictions will be applied.`,
+							Description: `The network-level access control policy for the Airflow web server. If unspecified, no network-level access restrictions will be applied. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"allowed_ip_range": {
@@ -415,7 +483,7 @@ func resourceComposerEnvironment() *schema.Resource {
 							Computed:     true,
 							AtLeastOneOf: composerConfigKeys,
 							MaxItems:     1,
-							Description:  `The configuration of Cloud SQL instance that is used by the Apache Airflow software.`,
+							Description:  `The configuration of Cloud SQL instance that is used by the Apache Airflow software. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"machine_type": {
@@ -432,7 +500,7 @@ func resourceComposerEnvironment() *schema.Resource {
 							Computed:     true,
 							AtLeastOneOf: composerConfigKeys,
 							MaxItems:     1,
-							Description:  `The configuration settings for the Airflow web server App Engine instance.`,
+							Description:  `The configuration settings for the Airflow web server App Engine instance. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"machine_type": {
@@ -449,7 +517,7 @@ func resourceComposerEnvironment() *schema.Resource {
 							Computed:     true,
 							AtLeastOneOf: composerConfigKeys,
 							MaxItems:     1,
-							Description:  `The encryption options for the Composer environment and its dependencies.`,
+							Description:  `The encryption options for the Composer environment and its dependencies. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"kms_key_name": {
@@ -491,6 +559,143 @@ func resourceComposerEnvironment() *schema.Resource {
 								},
 							},
 						},
+						"workloads_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: composerConfigKeys,
+							MaxItems:     1,
+							Description:  `The workloads configuration settings for the GKE cluster associated with the Cloud Composer environment. Supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"scheduler": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										ForceNew:    false,
+										Description: `Configuration for resources used by Airflow schedulers.`,
+										MaxItems:     1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"cpu": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `CPU request and limit for a single Airflow scheduler replica`,
+												},
+												"memory_gb": {
+													Type:        schema.TypeFloat,
+													Optional:    true,
+													ForceNew:    false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description: `Memory (GB) request and limit for a single Airflow scheduler replica.`,
+												},
+												"storage_gb": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `Storage (GB) request and limit for a single Airflow scheduler replica.`,
+												},
+												"count": {
+													Type:         schema.TypeInt,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.IntAtLeast(0),
+													Description:  `The number of schedulers.`,
+												},
+											},
+										},
+									},
+									"web_server": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										ForceNew:    false,
+										Description: `Configuration for resources used by Airflow web server.`,
+										MaxItems:     1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"cpu": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `CPU request and limit for Airflow web server.`,
+												},
+												"memory_gb": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `Memory (GB) request and limit for Airflow web server.`,
+												},
+												"storage_gb": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `Storage (GB) request and limit for Airflow web server.`,
+												},
+											},
+										},
+									},
+									"worker": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										ForceNew:    false,
+										Description: `Configuration for resources used by Airflow workers.`,
+										MaxItems:     1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"cpu": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `CPU request and limit for a single Airflow worker replica.`,
+												},
+												"memory_gb": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `Memory (GB) request and limit for a single Airflow worker replica.`,
+												},
+												"storage_gb": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `Storage (GB) request and limit for a single Airflow worker replica.`,
+												},
+												"min_count": {
+													Type:         schema.TypeInt,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.IntAtLeast(0),
+													Description:  `Minimum number of workers for autoscaling.`,
+												},
+												"max_count": {
+													Type:         schema.TypeInt,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.IntAtLeast(0),
+													Description:  `Maximum number of workers for autoscaling.`,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						"environment_size": {
+              Type:         schema.TypeString,
+              Optional:     true,
+              ForceNew:     false,
+              AtLeastOneOf: composerConfigKeys,
+              ValidateFunc: validation.StringInSlice([]string{"ENVIRONMENT_SIZE_SMALL", "ENVIRONMENT_SIZE_MEDIUM", "ENVIRONMENT_SIZE_LARGE"}, false),
+              Description:  `The size of the Cloud Composer environment. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
+            },
 <% end -%>
 						"airflow_uri": {
 							Type:        schema.TypeString,
@@ -770,6 +975,17 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
 		}
+
+		if d.HasChange("config.0.workloads_config") {
+			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
+			if config != nil {
+				patchObj.Config.WorkloadsConfig = config.WorkloadsConfig
+			}
+			err = resourceComposerEnvironmentPatchField("config.WorkloadsConfig", userAgent, patchObj, d, tfConfig)
+			if err != nil {
+				return err
+			}
+		}
 <% end -%>
 	}
 
@@ -895,6 +1111,8 @@ func flattenComposerEnvironmentConfig(envCfg *composer.EnvironmentConfig) interf
 	transformed["web_server_config"] = flattenComposerEnvironmentConfigWebServerConfig(envCfg.WebServerConfig)
 	transformed["encryption_config"] = flattenComposerEnvironmentConfigEncryptionConfig(envCfg.EncryptionConfig)
 	transformed["maintenance_window"] = flattenComposerEnvironmentConfigMaintenanceWindow(envCfg.MaintenanceWindow)
+	transformed["workloads_config"] = flattenComposerEnvironmentConfigWorkloadsConfig(envCfg.WorkloadsConfig)
+	transformed["environment_size"] = envCfg.EnvironmentSize
 <% end -%>
 
 	return []interface{}{transformed}
@@ -969,6 +1187,56 @@ func flattenComposerEnvironmentConfigMaintenanceWindow(maintenanceWindow *compos
 
 	return []interface{}{transformed}
 }
+
+func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.WorkloadsConfig) interface{} {
+	if workloadsConfig == nil {
+		return nil
+	}
+
+	  transformed := make(map[string]interface{})
+    transformedScheduler := make(map[string]interface{})
+    transformedWebServer := make(map[string]interface{})
+    transformedWorker := make(map[string]interface{})
+
+    wlCfgScheduler := workloadsConfig.Scheduler
+    wlCfgWebServer := workloadsConfig.WebServer
+    wlCfgWorker := workloadsConfig.Worker
+
+    if wlCfgScheduler == nil {
+      transformedScheduler = nil
+    } else {
+      transformedScheduler["cpu"] = wlCfgScheduler.Cpu
+      transformedScheduler["memory_gb"] = wlCfgScheduler.MemoryGb
+      transformedScheduler["storage_gb"] = wlCfgScheduler.StorageGb
+      transformedScheduler["count"] = wlCfgScheduler.Count
+    }
+
+    if wlCfgWebServer == nil {
+      transformedWebServer = nil
+    } else {
+      transformedWebServer["cpu"] = wlCfgWebServer.Cpu
+      transformedWebServer["memory_gb"] = wlCfgWebServer.MemoryGb
+      transformedWebServer["storage_gb"] = wlCfgWebServer.StorageGb
+    }
+
+    if wlCfgWorker == nil {
+      transformedWorker = nil
+    } else {
+      transformedWorker["cpu"] = wlCfgWorker.Cpu
+      transformedWorker["memory_gb"] = wlCfgWorker.MemoryGb
+      transformedWorker["storage_gb"] = wlCfgWorker.StorageGb
+      transformedWorker["min_count"] = wlCfgWorker.MinCount
+      transformedWorker["max_count"] = wlCfgWorker.MaxCount
+    }
+
+    transformed["scheduler"] = []interface{}{transformedScheduler}
+    transformed["web_server"] = []interface{}{transformedWebServer}
+    transformed["worker"] = []interface{}{transformedWorker}
+
+
+	return []interface{}{transformed}
+}
+
 <% end -%>
 
 func flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg *composer.PrivateEnvironmentConfig) interface{} {
@@ -981,6 +1249,10 @@ func flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg *composer.P
 	transformed["master_ipv4_cidr_block"] = envCfg.PrivateClusterConfig.MasterIpv4CidrBlock
 	transformed["cloud_sql_ipv4_cidr_block"] = envCfg.CloudSqlIpv4CidrBlock
 	transformed["web_server_ipv4_cidr_block"] = envCfg.WebServerIpv4CidrBlock
+<% unless version == "ga" -%>
+	transformed["cloud_composer_network_ipv4_cidr_block"] = envCfg.CloudComposerNetworkIpv4CidrBlock
+	transformed["enable_privately_used_public_ips"] = envCfg.EnablePrivatelyUsedPublicIps
+<% end -%>
 
 	return []interface{}{transformed}
 }
@@ -997,8 +1269,9 @@ func flattenComposerEnvironmentConfigNodeConfig(nodeCfg *composer.NodeConfig) in
 	transformed["disk_size_gb"] = nodeCfg.DiskSizeGb
 	transformed["service_account"] = nodeCfg.ServiceAccount
 	transformed["oauth_scopes"] = flattenComposerEnvironmentConfigNodeConfigOauthScopes(nodeCfg.OauthScopes)
-<% unless version == "ga" -%>	
+<% unless version == "ga" -%>
 	transformed["max_pods_per_node"] = nodeCfg.MaxPodsPerNode
+	transformed["enable_ip_masq_agent"] = nodeCfg.EnableIpMasqAgent
 <% end -%>
 	transformed["tags"] = flattenComposerEnvironmentConfigNodeConfigTags(nodeCfg.Tags)
 	transformed["ip_allocation_policy"] = flattenComposerEnvironmentConfigNodeConfigIPAllocationPolicy(nodeCfg.IpAllocationPolicy)
@@ -1043,6 +1316,7 @@ func flattenComposerEnvironmentConfigSoftwareConfig(softwareCfg *composer.Softwa
 	transformed["airflow_config_overrides"] = softwareCfg.AirflowConfigOverrides
 	transformed["pypi_packages"] = softwareCfg.PypiPackages
 	transformed["env_variables"] = softwareCfg.EnvVariables
+	transformed["scheduler_count"] = softwareCfg.SchedulerCount
 	return []interface{}{transformed}
 }
 
@@ -1113,6 +1387,18 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 		return nil, err
 	}
 	transformed.MaintenanceWindow = transformedMaintenanceWindow
+
+	transformedWorkloadsConfig, err := expandComposerEnvironmentConfigWorkloadsConfig(original["workloads_config"], d, config)
+	if err != nil {
+		return nil, err
+	}
+	transformed.WorkloadsConfig = transformedWorkloadsConfig
+
+	transformedEnvironmentSize, err := expandComposerEnvironmentConfigEnvironmentSize(original["environment_size"], d, config)
+  	if err != nil {
+  		return nil, err
+  	}
+  	transformed.EnvironmentSize = transformedEnvironmentSize
 <% end -%>
 	return transformed, nil
 }
@@ -1225,6 +1511,61 @@ func expandComposerEnvironmentConfigMaintenanceWindow(v interface{}, d *schema.R
 
 	return transformed, nil
 }
+
+func expandComposerEnvironmentConfigWorkloadsConfig(v interface{}, d *schema.ResourceData, config *Config) (*composer.WorkloadsConfig, error) {
+	l := v.([]interface{})
+	if len(l) == 0 {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	transformed := &composer.WorkloadsConfig{}
+
+	if v, ok := original["scheduler"]; ok {
+		if len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
+			transformedScheduler := &composer.SchedulerResource{}
+			originalSchedulerRaw := v.([]interface{})[0].(map[string]interface{})
+			transformedScheduler.Count = int64(originalSchedulerRaw["count"].(int))
+			transformedScheduler.Cpu = originalSchedulerRaw["cpu"].(float64)
+			transformedScheduler.MemoryGb = originalSchedulerRaw["memory_gb"].(float64)
+			transformedScheduler.StorageGb = originalSchedulerRaw["storage_gb"].(float64)
+			transformed.Scheduler = transformedScheduler
+		}
+	}
+
+	if v, ok := original["web_server"]; ok {
+		if len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
+			transformedWebServer := &composer.WebServerResource{}
+			originalWebServerRaw := v.([]interface{})[0].(map[string]interface{})
+			transformedWebServer.Cpu = originalWebServerRaw["cpu"].(float64)
+			transformedWebServer.MemoryGb = originalWebServerRaw["memory_gb"].(float64)
+			transformedWebServer.StorageGb = originalWebServerRaw["storage_gb"].(float64)
+			transformed.WebServer = transformedWebServer
+		}
+	}
+
+	if v, ok := original["worker"]; ok {
+		if len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
+			transformedWorker := &composer.WorkerResource{}
+			originalWorkerRaw := v.([]interface{})[0].(map[string]interface{})
+			transformedWorker.Cpu = originalWorkerRaw["cpu"].(float64)
+			transformedWorker.MemoryGb = originalWorkerRaw["memory_gb"].(float64)
+			transformedWorker.StorageGb = originalWorkerRaw["storage_gb"].(float64)
+			transformedWorker.MinCount = int64(originalWorkerRaw["min_count"].(int))
+			transformedWorker.MaxCount = int64(originalWorkerRaw["max_count"].(int))
+			transformed.Worker = transformedWorker
+		}
+	}
+
+	return transformed, nil
+}
+
+func expandComposerEnvironmentConfigEnvironmentSize(v interface{}, d *schema.ResourceData, config *Config) (string, error) {
+	if v == nil {
+		return "", nil
+	}
+	return v.(string), nil
+}
 <% end -%>
 
 func expandComposerEnvironmentConfigPrivateEnvironmentConfig(v interface{}, d *schema.ResourceData, config *Config) (*composer.PrivateEnvironmentConfig, error) {
@@ -1255,6 +1596,15 @@ func expandComposerEnvironmentConfigPrivateEnvironmentConfig(v interface{}, d *s
 	if v, ok := original["web_server_ipv4_cidr_block"]; ok {
 		transformed.WebServerIpv4CidrBlock = v.(string)
 	}
+<% unless version == "ga" -%>
+	if v, ok := original["cloud_composer_network_ipv4_cidr_block"]; ok {
+		transformed.CloudComposerNetworkIpv4CidrBlock = v.(string)
+	}
+
+	if v, ok := original["enable_privately_used_public_ips"]; ok {
+		transformed.EnablePrivatelyUsedPublicIps = v.(bool)
+	}
+<% end -%>
 
 	transformed.PrivateClusterConfig = subBlock
 
@@ -1282,9 +1632,13 @@ func expandComposerEnvironmentConfigNodeConfig(v interface{}, d *schema.Resource
 		transformed.ServiceAccount = transformedServiceAccount
 	}
 
-<% unless version == "ga" -%>	
+<% unless version == "ga" -%>
 	if transformedMaxPodsPerNode, ok := original["max_pods_per_node"]; ok {
 		transformed.MaxPodsPerNode = int64(transformedMaxPodsPerNode.(int))
+	}
+
+	if transformedEnableIpMasqAgent, ok := original["enable_ip_masq_agent"]; ok {
+		transformed.EnableIpMasqAgent = transformedEnableIpMasqAgent.(bool)
 	}
 <% end -%>
 
@@ -1405,9 +1759,6 @@ func expandComposerEnvironmentMachineType(v interface{}, d *schema.ResourceData,
 
 	fv, err := ParseMachineTypesFieldValue(v.(string), d, config)
 	if err != nil {
-		if requiredZone == "" {
-			return "", err
-		}
 
 		// Try to construct machine type with zone/project given in config.
 		project, err := getProject(d, config)
@@ -1468,6 +1819,7 @@ func expandComposerEnvironmentConfigSoftwareConfig(v interface{}, d *schema.Reso
 	transformed.AirflowConfigOverrides = expandComposerEnvironmentConfigSoftwareConfigStringMap(original, "airflow_config_overrides")
 	transformed.PypiPackages = expandComposerEnvironmentConfigSoftwareConfigStringMap(original, "pypi_packages")
 	transformed.EnvVariables = expandComposerEnvironmentConfigSoftwareConfigStringMap(original, "env_variables")
+	transformed.SchedulerCount = int64(original["scheduler_count"].(int))
 	return transformed, nil
 }
 

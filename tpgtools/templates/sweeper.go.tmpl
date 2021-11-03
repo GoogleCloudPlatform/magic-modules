@@ -33,9 +33,8 @@ import(
 	"log"
 	"testing"
 
-		"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	{{$.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$.DCLPackage}}"
-
 )
 
 func init() {
@@ -46,8 +45,7 @@ func init() {
 }
 
 func testSweep{{$.SweeperName}}(region string) error {
-	resourceName := "{{ $.SweeperName}}"
-	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s",resourceName)
+	log.Print("[INFO][SWEEPER_LOG] Starting sweeper for {{$.SweeperName}}")
 
 	config, err := sharedConfigForRegion(region)
 	if err != nil {
@@ -74,13 +72,13 @@ func testSweep{{$.SweeperName}}(region string) error {
 	}
 
 	client := NewDCL{{$.ProductType}}Client(config, config.userAgent, "")
-	err = client.DeleteAll{{$.Type}}(context.Background(), {{$.SweeperFunctionArgs}} isDeletable{{$.SweeperName}})
+	err = client.DeleteAll{{$.DCLTitle}}(context.Background(), {{$.SweeperFunctionArgs}} isDeletable{{$.SweeperName}})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func isDeletable{{$.SweeperName}}(r *{{$.Package}}.{{$.Type}}) bool {
+func isDeletable{{$.SweeperName}}(r *{{$.Package}}.{{$.DCLTitle}}) bool {
 	return isSweepableTestResource(*r.Name)
 }

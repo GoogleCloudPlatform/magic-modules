@@ -26,5 +26,6 @@ resource "google_filestore_instance" "<%= ctx[:primary_resource_id] %>" {
   networks {
     network = "default"
     modes   = ["MODE_IPV4"]
+    connect_mode = "DIRECT_PEERING"
   }
 }

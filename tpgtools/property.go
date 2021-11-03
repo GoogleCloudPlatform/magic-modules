@@ -71,6 +71,7 @@ type Property struct {
 	ValidateFunc     *string
 	SetHashFunc      *string
 	MaxItems         *int64
+	MinItems         *int64
 	ConfigMode       *string
 
 	Removed    *string
@@ -84,6 +85,11 @@ type Property struct {
 	// StateSetter is the line of code to set a field in the `d` ResourceData
 	// or (TODO:) a map[string]interface{}
 	StateSetter *string
+
+	// If this field is a three-state boolean in DCL which is represented as a
+	// string in terraform. This is done so that the DCL can distinguish between
+	// the field being unset and being set to false.
+	EnumBool bool
 
 	// An IdentityGetter is a function to retrieve the value of an "identity" field
 	// from state. Identity fields will sometimes allow retrieval from multiple
@@ -184,7 +190,7 @@ func (p Property) ObjectType() string {
 		}
 		parent = *parent.parent
 	}
-	return fmt.Sprintf("%s%s", p.resource.Type(), p.PackagePath())
+	return fmt.Sprintf("%s%s", p.resource.DCLTitle(), p.PackagePath())
 }
 
 func (p Property) IsArray() bool {
@@ -244,6 +250,9 @@ func buildGetter(p Property, rawGetter string) string {
 	case SchemaTypeString:
 		if p.Type.IsEnum() {
 			return fmt.Sprintf("%s.%sEnumRef(%s.(string))", p.resource.Package(), p.ObjectType(), rawGetter)
+		}
+		if p.EnumBool {
+			return fmt.Sprintf("expandEnumBool(%s.(string))", rawGetter)
 		}
 		if p.Computed {
 			return fmt.Sprintf("dcl.StringOrNil(%s.(string))", rawGetter)
@@ -344,6 +353,9 @@ func (p Property) flattenGetterWithParent(parent string) string {
 	case SchemaTypeFloat:
 		fallthrough
 	case SchemaTypeMap:
+		if p.EnumBool {
+			return fmt.Sprintf("flattenEnumBool(%s.%s)", parent, p.PackageName)
+		}
 		return fmt.Sprintf("%s.%s", parent, p.PackageName)
 	case SchemaTypeList, SchemaTypeSet:
 		if p.Type.IsEnumArray() {
@@ -366,22 +378,6 @@ func (p Property) flattenGetterWithParent(parent string) string {
 	}
 
 	return "<unknown>"
-}
-
-// DefaultValidator returns a default ValidateFunc for a given field
-func (p Property) DefaultValidator() *string {
-	switch p.Type.String() {
-	case SchemaTypeString:
-		if p.Type.IsEnum() && len(p.typ.Enum) > 0 && !p.Computed {
-			enumValues := ""
-			for _, v := range p.typ.Enum {
-				enumValues += fmt.Sprintf(`"%s", `, v)
-			}
-			enumF := fmt.Sprintf(`validation.StringInSlice([]string{%s ""}, false)`, enumValues)
-			return &enumF
-		}
-	}
-	return nil
 }
 
 func getSchemaExtensionMap(v interface{}) map[interface{}]interface{} {
@@ -515,8 +511,18 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			continue
 		}
 
-		if v.Default != "" {
-			d, err := renderDefault(p.Type, v.Default)
+		do := CustomDefaultDetails{}
+		doOk, err := overrides.PropertyOverrideWithDetails(CustomDefault, p, &do, location)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode custom list size details")
+		}
+
+		if v.Default != "" || doOk {
+			def := v.Default
+			if doOk {
+				def = do.Default
+			}
+			d, err := renderDefault(p.Type, def)
 			if err != nil {
 				return nil, fmt.Errorf("failed to render default: %v", err)
 			}
@@ -582,6 +588,20 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 		// Handle array properties
 		if v.Items != nil {
+			ls := CustomListSizeConstraintDetails{}
+			lsOk, err := overrides.PropertyOverrideWithDetails(CustomListSize, p, &ls, location)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decode custom list size details")
+			}
+			if lsOk {
+				if ls.Max > 0 {
+					p.MaxItems = &ls.Max
+				}
+				if ls.Min > 0 {
+					p.MinItems = &ls.Min
+				}
+			}
+
 			// We end up handling arrays of objects very similarly to nested objects
 			// themselves
 			if len(v.Items.Properties) > 0 {
@@ -612,7 +632,21 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			} else {
 				p.Optional = true
 			}
+		}
+		cr := CustomSchemaValuesDetails{}
+		crOk, err := overrides.PropertyOverrideWithDetails(CustomSchemaValues, p, &cr, location)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode custom required details")
+		}
+		if crOk {
+			p.Required = cr.Required
+			p.Optional = cr.Optional
+			p.Computed = cr.Computed
+		}
 
+		// Handle settable fields. If the field is computed it's not settable but
+		// if it's also optional (O+C), it is.
+		if !p.Computed || (p.Optional) {
 			p.Settable = true
 
 			// NOTE: x-kubernetes-immmutable implies that all children of a field
@@ -632,7 +666,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 			// special handling for project/region/zone/other fields with
 			// provider defaults
-			if stringInSlice(p.title, []string{"project", "region", "zone"}) {
+			if stringInSlice(p.title, []string{"project", "region", "zone"}) || stringInSlice(p.customName, []string{"region", "project", "zone"}) {
 				p.Optional = true
 				p.Required = false
 				p.Computed = true
@@ -646,7 +680,11 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 					return nil, fmt.Errorf("failed to decode custom identity getter details")
 				}
 
-				ig := fmt.Sprintf("get%s(d, config)", p.PackageName)
+				capitalizedPropertyName := p.PackageName
+				if p.customName != "" {
+					capitalizedPropertyName = snakeToTitleCase(p.customName)
+				}
+				ig := fmt.Sprintf("get%s(d, config)", capitalizedPropertyName)
 				if cigOk {
 					ig = fmt.Sprintf("%s(d, config)", cig.Function)
 				}
@@ -710,8 +748,6 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 		if vfOk {
 			p.ValidateFunc = &vf.Function
-		} else {
-			p.ValidateFunc = p.DefaultValidator()
 		}
 
 		if p.Type.String() == SchemaTypeSet {
@@ -777,6 +813,21 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		}
 		if csgdOk {
 			p.StateGetter = &csgd.Function
+		}
+
+		if overrides.PropertyOverride(EnumBool, p, location) {
+			p.EnumBool = true
+			p.Type.typ.Type = "string"
+			var parent string
+			if p.parent == nil {
+				parent = "res"
+			} else {
+				parent = "obj"
+			}
+			enumBoolSS := fmt.Sprintf("d.Set(%q, flattenEnumBool(%s.%s))", p.Name(), parent, p.PackageName)
+			p.StateSetter = &enumBoolSS
+			enumBoolSG := fmt.Sprintf("expandEnumBool(d.Get(%q))", p.Name())
+			p.StateGetter = &enumBoolSG
 		}
 
 		if overrides.PropertyOverride(GenerateIfNotSet, p, location) {

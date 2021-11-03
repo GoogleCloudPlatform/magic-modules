@@ -69,6 +69,16 @@ objects:
         description: |
           Substitutions data for Build resource.
       - !ruby/object:Api::Type::String
+        name: 'serviceAccount'
+        description: |
+          The service account used for all user-controlled operations including
+          triggers.patch, triggers.run, builds.create, and builds.cancel.
+          
+          If no service account is set, then the standard Cloud Build service account
+          ([PROJECT_NUM]@system.gserviceaccount.com) will be used instead.
+          
+          Format: projects/{PROJECT_ID}/serviceAccounts/{ACCOUNT_ID_OR_EMAIL}
+      - !ruby/object:Api::Type::String
         name: 'filename'
         exactly_one_of:
           - filename
@@ -359,16 +369,28 @@ objects:
                       Regex matching branches to build. Exactly one a of branch name, tag, or commit SHA must be provided.
                       The syntax of the regular expressions accepted is the syntax accepted by RE2 and 
                       described at https://github.com/google/re2/wiki/Syntax
+                    exactly_one_of:
+                      - build.0.source.0.repo_source.0.branch_name
+                      - build.0.source.0.repo_source.0.commit_sha
+                      - build.0.source.0.repo_source.0.tag_name
                   - !ruby/object:Api::Type::String
                     name: 'tagName'
                     description: |
                       Regex matching tags to build. Exactly one a of branch name, tag, or commit SHA must be provided.
                       The syntax of the regular expressions accepted is the syntax accepted by RE2 and 
                       described at https://github.com/google/re2/wiki/Syntax
+                    exactly_one_of:
+                      - build.0.source.0.repo_source.0.branch_name
+                      - build.0.source.0.repo_source.0.commit_sha
+                      - build.0.source.0.repo_source.0.tag_name
                   - !ruby/object:Api::Type::String
                     name: 'commitSha'
                     description: |
                       Explicit commit SHA to build. Exactly one a of branch name, tag, or commit SHA must be provided.
+                    exactly_one_of:
+                      - build.0.source.0.repo_source.0.branch_name
+                      - build.0.source.0.repo_source.0.commit_sha
+                      - build.0.source.0.repo_source.0.tag_name
           - !ruby/object:Api::Type::Array
             name: 'tags'
             item_type: Api::Type::String

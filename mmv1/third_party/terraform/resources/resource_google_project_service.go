@@ -44,9 +44,7 @@ var bannedProjectServices = []string{"bigquery-json.googleapis.com"}
 // "DEPRECATED FOR {{version}} next to entries slated for removal in {{version}}
 // upon removal, we should disallow the old name from being used even if it's
 // not gone from the underlying API yet
-var renamedServices = map[string]string{
-	"bigquery-json.googleapis.com": "bigquery.googleapis.com", // DEPRECATED FOR 4.0.0. Originally for 3.0.0, but the migration did not happen server-side yet.
-}
+var renamedServices = map[string]string{}
 
 // renamedServices in reverse (new -> old)
 var renamedServicesByNewServiceNames = reverseStringMap(renamedServices)
@@ -187,7 +185,13 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 	// Verify project for services still exists
 	projectGetCall := config.NewResourceManagerClient(userAgent).Projects.Get(project)
 	if config.UserProjectOverride {
-		projectGetCall.Header().Add("X-Goog-User-Project", project)
+		billingProject := project
+
+		// err == nil indicates that the billing_project value was found
+		if bp, err := getBillingProject(d, config); err == nil {
+			billingProject = bp
+		}
+		projectGetCall.Header().Add("X-Goog-User-Project", billingProject)
 	}
 	p, err := projectGetCall.Do()
 
@@ -219,15 +223,8 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 		return nil
 	}
 
-	// If we get here due to eventual consistency, the next apply will fix things
-	// instead of re-creating the resource and if we didn't get here by error,
-	// the next apply will (correctly) remove it from state, anyways. Seeing as
-	// no downstreams can possibly get the result, as we're halting execution,
-	// it's safe to rely on refresh for putting the state back in order.
-	if !d.IsNewResource() {
-		// The service is was not found in enabled services - return an error
-		return fmt.Errorf("service %s not in enabled services for project %s", srv, project)
-	}
+	log.Printf("[DEBUG] service %s not in enabled services for project %s, removing from state", srv, project)
+	d.SetId("")
 	return nil
 }
 
@@ -265,24 +262,28 @@ func resourceGoogleProjectServiceUpdate(d *schema.ResourceData, meta interface{}
 // Disables a project service.
 func disableServiceUsageProjectService(service, project string, d *schema.ResourceData, config *Config, disableDependentServices bool) error {
 	err := retryTimeDuration(func() error {
+		billingProject := project
 		userAgent, err := generateUserAgentString(d, config.userAgent)
 		if err != nil {
 			return err
 		}
-
 		name := fmt.Sprintf("projects/%s/services/%s", project, service)
 		servicesDisableCall := config.NewServiceUsageClient(userAgent).Services.Disable(name, &serviceusage.DisableServiceRequest{
 			DisableDependentServices: disableDependentServices,
 		})
 		if config.UserProjectOverride {
-			servicesDisableCall.Header().Add("X-Goog-User-Project", project)
+			// err == nil indicates that the billing_project value was found
+			if bp, err := getBillingProject(d, config); err == nil {
+				billingProject = bp
+			}
+			servicesDisableCall.Header().Add("X-Goog-User-Project", billingProject)
 		}
 		sop, err := servicesDisableCall.Do()
 		if err != nil {
 			return err
 		}
 		// Wait for the operation to complete
-		waitErr := serviceUsageOperationWait(config, sop, project, "api to disable", userAgent, d.Timeout(schema.TimeoutDelete))
+		waitErr := serviceUsageOperationWait(config, sop, billingProject, "api to disable", userAgent, d.Timeout(schema.TimeoutDelete))
 		if waitErr != nil {
 			return waitErr
 		}

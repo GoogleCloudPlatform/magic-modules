@@ -44,7 +44,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "vertex_ai_featurestore"
-        primary_resource_id: "dataset"
+        primary_resource_id: "featurestore"
         vars:
           name: "terraform"
     properties:
@@ -62,7 +62,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: 'If set to true, any EntityTypes and Features for this Featurestore will also be deleted'
         default_value: false
   FeaturestoreEntitytype: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["{{featurestore}}/entityTypes/{{name}}"]
+    import_format: ["{{%featurestore}}/entityTypes/{{name}}"]
     autogen_async: false
     skip_sweeper: true
     timeouts: !ruby/object:Api::Timeouts

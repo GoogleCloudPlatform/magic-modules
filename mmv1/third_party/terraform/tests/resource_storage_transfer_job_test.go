@@ -125,6 +125,7 @@ data "google_storage_transfer_project_service_account" "default" {
 resource "google_storage_bucket" "data_source" {
   name          = "%s"
   project       = "%s"
+  location      = "US"
   force_destroy = true
 }
 
@@ -137,6 +138,7 @@ resource "google_storage_bucket_iam_member" "data_source" {
 resource "google_storage_bucket" "data_sink" {
   name          = "%s"
   project       = "%s"
+  location      = "US"
   force_destroy = true
 }
 
@@ -153,9 +155,11 @@ resource "google_storage_transfer_job" "transfer_job" {
   transfer_spec {
     gcs_data_source {
       bucket_name = google_storage_bucket.data_source.name
+      path  = "foo/bar/"
     }
     gcs_data_sink {
       bucket_name = google_storage_bucket.data_sink.name
+      path  = "foo/bar/"
     }
   }
 
@@ -195,6 +199,7 @@ data "google_storage_transfer_project_service_account" "default" {
 resource "google_storage_bucket" "data_source" {
   name          = "%s"
   project       = "%s"
+  location      = "US"
   force_destroy = true
 }
 
@@ -207,6 +212,7 @@ resource "google_storage_bucket_iam_member" "data_source" {
 resource "google_storage_bucket" "data_sink" {
   name          = "%s"
   project       = "%s"
+  location      = "US"
   force_destroy = true
 }
 

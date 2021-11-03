@@ -28,6 +28,28 @@ ifneq ($(RESOURCE),)
   mmv1_compile += -t $(RESOURCE)
   tpgtools_compile += --resource $(RESOURCE)
 endif
+
+ifneq ($(OVERRIDES),)
+  mmv1_compile += -r $(OVERRIDES)
+  tpgtools_compile += --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
+  serialize_compile = --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
+else
+  tpgtools_compile += --path "api" --overrides "overrides"
+  serialize_compile = --path "api" --overrides "overrides"
+endif
+
+UNAME := $(shell uname)
+
+# The inplace editing semantics are different between linux and osx.
+ifeq ($(UNAME), Linux)
+SED_I := -i
+else
+SED_I := -i '' -E
+endif
+
+ifeq ($(FORCE_DCL),)
+  FORCE_DCL=latest
+endif
 terraform build:
 	make serialize
 	make mmv1
@@ -40,7 +62,7 @@ mmv1:
 
 tpgtools:
 	cd tpgtools;\
-		go run . --path "api" --overrides "overrides" --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
+		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
 
 validator:
 	cd mmv1;\
@@ -49,8 +71,20 @@ validator:
 
 serialize:
 	cd tpgtools;\
-		go run . --path "api" --overrides "overrides" --mode "serialization" > temp.serial;\
+		go run . $(serialize_compile) --mode "serialization" > temp.serial &&\
 		mv -f temp.serial serialization.go;\
+
+upgrade-dcl:
+	cd tpgtools && \
+		go mod edit -dropreplace=github.com/GoogleCloudPlatform/declarative-resource-client-library &&\
+		go mod edit -require=github.com/GoogleCloudPlatform/declarative-resource-client-library@$(FORCE_DCL) &&\
+		go mod tidy;\
+		MOD_LINE=$$(grep declarative-resource-client-library go.mod);\
+		SUM_LINE=$$(grep declarative-resource-client-library go.sum);\
+	cd ../mmv1/third_party/terraform && \
+		sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod.erb; echo "$$SUM_LINE" >> go.sum
+
+
 
 .PHONY: mmv1 tpgtools
 

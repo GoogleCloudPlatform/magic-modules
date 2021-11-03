@@ -86,9 +86,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         contain_extra_docs: false
   Project: !ruby/object:Overrides::Ansible::ResourceOverride
     # TODO(alexstephen): Re-evaluate merging Project into Ansible
-    exclude: true
-  ResourceDnsRecordSet: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true  
+    exclude: true 
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

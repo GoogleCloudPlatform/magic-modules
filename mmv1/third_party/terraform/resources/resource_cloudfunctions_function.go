@@ -617,7 +617,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if d.HasChange("build_environment_variables") {
-		function.EnvironmentVariables = expandEnvironmentVariables(d)
+		function.BuildEnvironmentVariables = expandBuildEnvironmentVariables(d)
 		updateMaskArr = append(updateMaskArr, "buildEnvironmentVariables")
 	}
 
@@ -655,7 +655,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 				d.Timeout(schema.TimeoutUpdate))
 		}, d.Timeout(schema.TimeoutUpdate))
 		if rerr != nil {
-			return fmt.Errorf("Error while updating cloudfunction configuration: %s", err)
+			return fmt.Errorf("Error while updating cloudfunction configuration: %s", rerr)
 		}
 	}
 	d.Partial(false)

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -447,4 +448,22 @@ func compareAuditConfigs(a, b []*cloudresourcemanager.AuditConfig) bool {
 	aMap := createIamAuditConfigsMap(a)
 	bMap := createIamAuditConfigsMap(b)
 	return reflect.DeepEqual(aMap, bMap)
+}
+
+type IamSettings struct {
+	DeprecationMessage string
+}
+
+func IamWithDeprecationMessage(message string) func(s *IamSettings) {
+	return func(s *IamSettings) {
+		s.DeprecationMessage = message
+	}
+}
+
+func IamWithGAResourceDeprecation() func (s *IamSettings) {
+	<% if version == 'ga' -%>
+	return IamWithDeprecationMessage("This resource has been deprecated in the google (GA) provider, and will only be available in the google-beta provider in a future release.")
+	<% else -%>
+	return IamWithDeprecationMessage("")
+	<% end -%>
 }
