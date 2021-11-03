@@ -70,14 +70,6 @@ resource "google_notebooks_runtime" "runtime_container" {
     }
   }
 }
-
-# resource "google_notebooks_runtime_iam_binding" "runtime_container" {
-#   project = google_notebooks_runtime.runtime_container.project
-#   location = google_notebooks_runtime.runtime_container.location
-#   runtime_name = google_notebooks_runtime.runtime_container.name
-#   role = "roles/viewer"
-#   members = ["user:admin@hashicorptest.com"]
-# }
 `, name)
 }
 

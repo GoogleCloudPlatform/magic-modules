@@ -28,13 +28,6 @@ func TestAccNotebooksRuntime_create_gpu(t *testing.T) {
 				ExpectNonEmptyPlan: true,
 				ImportStateVerifyIgnore: []string{"virtual_machine", "software_config"},
 			},
-      # {
-			# 	ResourceName:      "google_notebooks_runtime_iam_binding.runtime_gpu",
-			# 	ImportState:        true,
-			# 	ImportStateVerify:  true,
-			# 	ExpectNonEmptyPlan: true,
-			# 	ImportStateVerifyIgnore: []string{"virtual_machine", "software_config"},
-			# },
 		},
 	})
 }
@@ -68,14 +61,6 @@ resource "google_notebooks_runtime" "runtime_gpu" {
     }
   }
 }
-
-# resource "google_notebooks_runtime_iam_binding" "runtime_gpu" {
-#   project = google_notebooks_runtime.runtime_gpu.project
-#   location = google_notebooks_runtime.runtime_gpu.location
-#   runtime_name = google_notebooks_runtime.runtime_gpu.name
-#   role = "roles/viewer"
-#   members = ["user:admin@hashicorptest.com"]
-# }
 `, name)
 }
 

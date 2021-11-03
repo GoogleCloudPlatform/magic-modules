@@ -17,11 +17,3 @@ resource "google_notebooks_runtime" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 }
-
-# resource "google_notebooks_runtime_iam_binding" "<%= ctx[:primary_resource_id] %>" {
-#   project = google_notebooks_runtime.<%= ctx[:primary_resource_id] %>.project
-#   location = google_notebooks_runtime.<%= ctx[:primary_resource_id] %>.location
-#   runtime_name = google_notebooks_runtime.<%= ctx[:primary_resource_id] %>.name
-#   role = "roles/viewer"
-#   members = ["user:admin@hashicorptest.com"]
-# }
