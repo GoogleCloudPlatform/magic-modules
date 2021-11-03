@@ -87,6 +87,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       budgetFilter.labels: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        custom_expand: 'templates/terraform/custom_expand/billing_budget_budget_filter_labels.erb'
+        custom_flatten: "templates/terraform/custom_flatten/billing_budget_budget_filter_labels.erb"
       budgetFilter.projects: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
 

@@ -1,0 +1,7 @@
+substitutions:
+  - substitution: "id"
+    value: "id"
+  - substitution: "org_id"
+    value: ":ORG_ID"
+  - substitution: "project"
+    value: ":PROJECT"

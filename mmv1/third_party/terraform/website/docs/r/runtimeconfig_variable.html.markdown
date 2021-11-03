@@ -14,6 +14,9 @@ Manages a RuntimeConfig variable in Google Cloud. For more information, see the
 or the
 [JSON API](https://cloud.google.com/deployment-manager/runtime-configurator/reference/rest/).
 
+~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
+
 ## Example Usage
 
 Example creating a RuntimeConfig variable.
@@ -45,7 +48,7 @@ resource "google_runtimeconfig_config" "my-runtime-config" {
 resource "google_runtimeconfig_variable" "my-secret" {
   parent = google_runtimeconfig_config.my-runtime-config.name
   name   = "secret"
-  value  = base64encode(file("my-encrypted-secret.dat"))
+  value  = filebase64("my-encrypted-secret.dat")
 }
 ```
 

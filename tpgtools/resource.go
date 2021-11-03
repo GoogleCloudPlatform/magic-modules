@@ -39,17 +39,28 @@ type Resource struct {
 	// import formats can be derived from it.
 	ID string
 
+	// If the DCL ID formatter should be used.  For example, resources with multiple parent types
+	// need to use the DCL ID formatter.
+	UseDCLID bool
+
 	// ImportFormats are pattern format strings for importing the Terraform resource.
 	// TODO: if none are set, the resource does not support import.
 	ImportFormats []string
+
+	// AppendToBasePath is a string that will be appended to the end of the API base path.
+	// rarely needed in cases where the shared mm basepath does not include the version
+	// as in Montioring https://git.io/Jz4Wn
+	AppendToBasePath string
 
 	// title is the name of the resource in snake_case. For example,
 	// "instance", "backend_service".
 	title string
 
-	// dclname is the name of the DCL resource in snake_case. For example,
-	// "instance", "backend_service".
-	dclname string
+	// dclTitle is the name of the resource in TitleCase. For example,
+	// "Instance", "BackendService".
+	// This is particularly useful for acronymizations that exist in
+	// resource names, like OSPolicy
+	dclTitle string
 
 	// Description of the Terraform resource
 	Description string
@@ -98,6 +109,9 @@ type Resource struct {
 	// ListFields is the list of fields required for a list call.
 	ListFields []string
 
+	// location is one of "zone", "region", or "global".
+	location string
+
 	// HasProject tells us if the resource has a project field
 	HasProject bool
 
@@ -124,6 +138,9 @@ type Resource struct {
 	// and only be used for serialization
 	SerializationOnly bool
 
+	// CustomSerializer defines the function this resource should use to serialize itself.
+	CustomSerializer *string
+
 	// TerraformProductName is the Product name overriden from the DCL
 	TerraformProductName *string
 
@@ -140,10 +157,14 @@ func (r Resource) Name() string {
 }
 
 func (r Resource) DCLName() string {
-	if r.dclname != "" {
-		return r.dclname
+	if r.dclTitle != "" {
+		return jsonToSnakeCase(r.dclTitle)
 	}
 	return r.title
+}
+
+func (r Resource) DCLTitle() string {
+	return r.dclTitle
 }
 
 // Path is the provider name of a resource, product_name. For example,
@@ -156,18 +177,15 @@ func (r Resource) Path() string {
 // For example, "google_compute_instance"
 func (r Resource) TerraformName() string {
 	if r.TerraformProductName != nil {
+		if *r.TerraformProductName == "" {
+			return fmt.Sprintf("google_%s", r.Name())
+		}
 		return fmt.Sprintf("google_%s_%s", *r.TerraformProductName, r.Name())
 	}
 	return "google_" + r.Path()
 }
 
-// Type is the title-cased name of a resource, for printing information about
-// the type". For example, "Instance".
-func (r Resource) Type() string {
-	return snakeToTitleCase(r.DCLName())
-}
-
-// PathType is the title-cased name of a resource preceded by it's package, for
+// PathType is the title-cased name of a resource preceded by its package,
 // often used to namespace functions. For example, "RedisInstance".
 func (r Resource) PathType() string {
 	return snakeToTitleCase(r.Path())
@@ -183,6 +201,12 @@ func (r Resource) Package() string {
 // "NetworkServices".
 func (r Resource) ProductType() string {
 	return r.productMetadata.ProductType()
+}
+
+// DocsSection is *usuallu* the title-cased product name of a resource. For example,
+// "NetworkServices" - but subject to overrides.
+func (r Resource) DocsSection() string {
+	return r.productMetadata.DocsSection()
 }
 
 // ProductType is the snakecase product name of a resource. For example,
@@ -201,6 +225,15 @@ func (r Resource) ProductMetadata() *ProductMetadata {
 // DCLPackage of "accesscontextmanager"
 func (r Resource) DCLPackage() string {
 	return r.productMetadata.DCLPackage()
+}
+
+// IsAlternateLocation returns whether this resource is an additional version
+// of the DCL resource with a different location type. All references in samples
+// to a resource with an alternate location will point to the main version.
+func (r Resource) IsAlternateLocation() bool {
+	// For now, we consider non-regional resources to be alternate.
+	// Non-locational resources will have an empty string as their location.
+	return r.location != "" && r.location != "region"
 }
 
 // SidebarCurrent is the website sidebar identifier, for example
@@ -354,13 +387,15 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 	}
 	res := Resource{
 		title:                jsonToSnakeCase(resourceTitle),
-		dclname:              jsonToSnakeCase(schema.Title),
+		dclTitle:             schema.Title,
 		productMetadata:      product,
 		versionMetadata:      version,
 		Description:          schema.Description,
+		location:             location,
 		InsertTimeoutMinutes: 10,
 		UpdateTimeoutMinutes: 10,
 		DeleteTimeoutMinutes: 10,
+		UseDCLID:             overrides.ResourceOverride(UseDCLID, location),
 	}
 
 	crname := CustomResourceNameDetails{}
@@ -387,6 +422,16 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 	}
 	if cifdOk {
 		res.CustomImportFunction = &cifd.Function
+	}
+
+	// Resource Override: Append to Base Path
+	atbpd := AppendToBasePathDetails{}
+	atbpOk, err := overrides.ResourceOverrideWithDetails(AppendToBasePath, &atbpd, location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode append to base path details: %v", err)
+	}
+	if atbpOk {
+		res.AppendToBasePath = atbpd.String
 	}
 
 	// Resource Override: Import formats
@@ -477,9 +522,30 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 		}
 	}
 
-	// Resource Override: No Sweeper
+	// Determine if a resource can use a generated sweeper or not
+	// We only supply a certain set of parent values to sweepers, so only generate
+	// one if it will actually work- resources with resource parents are not
+	// sweepable, in particular, such as nested resources or fine-grained
+	// resources. Additional special cases can be handled with overrides.
 	res.HasSweeper = true
+	validSweeperParameters := []string{"project", "region", "location", "zone", "billing_account"}
+	if deleteAllInfo, ok := typeFetcher.doc.Paths["deleteAll"]; ok {
+		for _, p := range deleteAllInfo.Parameters {
+			// if any field isn't a standard sweeper parameter, don't make a sweeper
+			if !stringInSlice(p.Name, validSweeperParameters) {
+				res.HasSweeper = false
+			}
+		}
+	} else {
+		// if deleteAll wasn't found, the DCL hasn't published a sweeper
+		res.HasSweeper = false
+	}
+
 	if overrides.ResourceOverride(NoSweeper, location) {
+		if res.HasSweeper == false {
+			return nil, fmt.Errorf("superfluous NO_SWEEPER specified for %q", res.TerraformName())
+		}
+
 		res.HasSweeper = false
 	}
 
@@ -500,9 +566,9 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 
 	// Resource Override: SkipDeleteFunction
 	skipDeleteFunc := SkipDeleteFunctionDetails{}
-	skipDeleteFuncOk, err := overrides.ResourceOverrideWithDetails(SkipDelete, &skipDeleteFunc, location)
+	skipDeleteFuncOk, err := overrides.ResourceOverrideWithDetails(SkipDeleteFunction, &skipDeleteFunc, location)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode skip delete function details: %v", err)
+		return nil, fmt.Errorf("failed to decode skip delete details: %v", err)
 	}
 	if skipDeleteFuncOk {
 		res.SkipDeleteFunction = &skipDeleteFunc.Function
@@ -510,6 +576,16 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 
 	// Resource Override: SerializationOnly
 	res.SerializationOnly = overrides.ResourceOverride(SerializationOnly, location)
+
+	// Resource Override: CustomSerializer
+	customSerializerFunc := CustomSerializerDetails{}
+	customSerializerFuncOk, err := overrides.ResourceOverrideWithDetails(CustomSerializer, &customSerializerFunc, location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode custom serializer function details: %v", err)
+	}
+	if customSerializerFuncOk {
+		res.CustomSerializer = &customSerializerFunc.Function
+	}
 
 	// Resource Override: TerraformProductName
 	terraformProductName := TerraformProductNameDetails{}
@@ -581,7 +657,7 @@ func (r Resource) getSamples(docs bool) []Sample {
 }
 
 func (r *Resource) getSampleAccessoryFolder() string {
-	resourceType := strings.ToLower(r.Type())
+	resourceType := strings.ToLower(r.DCLTitle())
 	packageName := strings.ToLower(r.productMetadata.PackageName)
 	sampleAccessoryFolder := path.Join(*tPath, packageName, "samples", resourceType)
 	return sampleAccessoryFolder
@@ -632,12 +708,11 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 			glog.Exit(err)
 		}
 
-		hasGA := false
 		versionMatch := false
 
 		// if no versions provided assume all versions
 		if len(sample.Versions) <= 0 {
-			hasGA = true
+			sample.HasGAEquivalent = true
 			versionMatch = true
 		} else {
 			for _, v := range sample.Versions {
@@ -645,7 +720,7 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 					versionMatch = true
 				}
 				if v == "ga" {
-					hasGA = true
+					sample.HasGAEquivalent = true
 				}
 			}
 		}
@@ -663,7 +738,6 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 			sample.Name = &sampleName
 		}
 		sample.TestSlug = snakeToTitleCase(sampleName) + "HandWritten"
-		sample.HasGAEquivalent = hasGA
 		samples = append(samples, sample)
 	}
 
@@ -674,7 +748,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 	sampleAccessoryFolder := r.getSampleAccessoryFolder()
 	packagePath := r.productMetadata.PackagePath
 	version := r.versionMetadata.V
-	resourceType := r.Type()
+	resourceType := r.DCLTitle()
 	sampleFriendlyMetaPath := path.Join(sampleAccessoryFolder, "meta.yaml")
 	samples := []Sample{}
 
@@ -683,7 +757,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 	}
 
 	// Samples appear in the root product folder
-	packagePath = strings.Split(packagePath, "beta")[0]
+	packagePath = strings.Split(packagePath, "/")[0]
 	samplesPath := path.Join(*fPath, packagePath, "samples")
 	files, err := ioutil.ReadDir(samplesPath)
 	if err != nil {
@@ -715,13 +789,12 @@ func (r *Resource) loadDCLSamples() []Sample {
 		}
 
 		versionMatch := false
-		hasGA := false
 		for _, v := range sample.Versions {
 			if v == version {
 				versionMatch = true
 			}
 			if v == "ga" {
-				hasGA = true
+				sample.HasGAEquivalent = true
 			}
 		}
 
@@ -731,7 +804,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 
 		if !versionMatch {
 			continue
-		} else if primaryResourceName != resourceType {
+		} else if !strings.EqualFold(primaryResourceName, resourceType) {
 			glog.Errorf("skipping %s since no match with %s.", primaryResourceName, resourceType)
 			continue
 		}
@@ -749,7 +822,6 @@ func (r *Resource) loadDCLSamples() []Sample {
 		}
 		sample.DependencyList = dependencies
 		sample.TestSlug = sampleNameToTitleCase(*sample.Name)
-		sample.HasGAEquivalent = hasGA
 		samples = append(samples, sample)
 	}
 

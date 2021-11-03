@@ -4,6 +4,13 @@ import (
 	"reflect"
 )
 
+func resourceConverterBigtableInstance() ResourceConverter {
+	return ResourceConverter{
+		AssetType: "bigtableadmin.googleapis.com/Instance",
+		Convert:   GetBigtableInstanceCaiObject,
+	}
+}
+
 func GetBigtableInstanceCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//bigtable.googleapis.com/projects/{{project}}/instances/{{name}}")
 
@@ -41,7 +48,6 @@ func GetBigtableInstanceApiObject(d TerraformResourceData, config *Config) (map[
 	} else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(displayNameProp)) && (ok || !reflect.DeepEqual(v, displayNameProp)) {
 		obj["name"] = nameProp
 	}
-
 
 	labelsProp, err := expandBigtableDisplayName(d.Get("labels"), d, config)
 	if err != nil {

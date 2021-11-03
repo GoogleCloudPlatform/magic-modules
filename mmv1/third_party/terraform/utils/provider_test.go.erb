@@ -4,6 +4,8 @@ package google
 import (
 	"bytes"
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -11,7 +13,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -813,12 +817,12 @@ resource "google_kms_key_ring" "project-2-keyring" {
 resource "google_kms_crypto_key" "project-2-key" {
 	provider = google.project-1-token
 	name     = "%s"
-	key_ring = google_kms_key_ring.project-2-keyring.self_link
+	key_ring = google_kms_key_ring.project-2-keyring.id
 }
 
 data "google_kms_secret_ciphertext" "project-2-ciphertext" {
 	provider   = google.project-1-token
-	crypto_key = google_kms_crypto_key.project-2-key.self_link
+	crypto_key = google_kms_crypto_key.project-2-key.id
 	plaintext  = "my-secret"
 }
 `, testAccProviderIndirectUserProjectOverride_step3(pid, name, org, billing, sa, override), pid, pid)

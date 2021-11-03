@@ -911,13 +911,13 @@ objects:
         description: |
           Immutable. A pem-encoded X.509 certificate signing request (CSR).
         exactly_one_of:
-          - pemCsr
+          - pem_csr
           - config
       - !ruby/object:Api::Type::NestedObject
         name: 'config'
         description: The config used to create a self-signed X.509 certificate or CSR.
         exactly_one_of:
-          - pemCsr
+          - pem_csr
           - config        
         input: true
         properties:

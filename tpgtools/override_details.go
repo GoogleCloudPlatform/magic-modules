@@ -66,6 +66,12 @@ type CustomImportFunctionDetails struct {
 	Function string
 }
 
+type AppendToBasePathDetails struct {
+	// Append to base path appends this string to the end of the resource's
+	// base path.
+	String string
+}
+
 type CustomizeDiffDetails struct {
 	// Functions is a list of CustomizeDiffFunc to use with
 	// customdiff.All(...).
@@ -135,11 +141,10 @@ type CustomListSizeConstraintDetails struct {
 	Max int64
 }
 
-type CustomRequiredDetails struct {
+type CustomSchemaValuesDetails struct {
 	Required bool
 	Optional bool
 	Computed bool
-	ForceNew bool
 }
 
 type ImportFormatDetails struct {
@@ -173,6 +178,11 @@ type CustomCreateDirectiveDetails struct {
 	Function string
 }
 
+type CustomSerializerDetails struct {
+	// The name of the function that will serialize this resource.
+	Function string
+}
+
 type SkipDeleteFunctionDetails struct {
 	// The name of the function that determines if we should skip delete.
 	Function string
@@ -195,4 +205,9 @@ type ProductBasePathDetails struct {
 type ProductTitleDetails struct {
 	// alternative name to be used for the product resources
 	Title string
+}
+
+type ProductDocsSectionDetails struct {
+	// alternative name to be used for the product resources in docs.
+	DocsSection string
 }

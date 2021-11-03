@@ -176,10 +176,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       cdnPolicy.clientTtl: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        send_empty_value: true
       cdnPolicy.defaultTtl: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        send_empty_value: true
       cdnPolicy.maxTtl: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        send_empty_value: true
+      cdnPolicy.signedUrlCacheMaxAgeSec: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
+      cdnPolicy.negativeCachingPolicy.ttl: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_import: true
     exclude_validator: true
@@ -323,6 +330,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      logConfig.sampleRate: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'suppressWhenDisabled'
+      logConfig.enable: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
       portName: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       protocol: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -375,6 +386,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           rigm_name: "rbs-rigm"
           region_health_check_name: "rbs-health-check"
           network_name: "rbs-net"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_backend_service_connection_tracking"
+        min_version: 'beta'
+        primary_resource_id: "default"
+        vars:
+          region_backend_service_name: "region-service"
+          health_check_name: "rbs-health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/region_backend_service.go.erb
       encoder: templates/terraform/encoders/region_backend_service.go.erb
@@ -450,6 +468,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       logConfig.sampleRate: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'suppressWhenDisabled'
+      logConfig.enable: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
+      failoverPolicy.disableConnectionDrainOnFailover: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
+      failoverPolicy.dropTrafficIfUnhealthy: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
+      connectionTrackingPolicy.idleTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   RegionInstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
@@ -714,7 +740,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validation.IntBetween(0, 65535)'
       sourceRanges: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
-        default_from_api: true
+        diff_suppress_func: 'diffSuppressSourceRanges'
       sourceTags: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
       sourceServiceAccounts: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -743,7 +769,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           fw_allow_ilb_to_backends_name: "l7-ilb-fw-allow-ilb-to-backends"
           vm_test_name: "l7-ilb-test-vm"
         min_version: beta
-        ignore_read_extra: 
+        ignore_read_extra:
           - "port_range"
           - "target"
       - !ruby/object:Provider::Terraform::Examples
@@ -770,7 +796,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           backend_name: "website-backend"
           network_name: "website-net"
         min_version: beta
-        ignore_read_extra: 
+        ignore_read_extra:
           - "port_range"
       - !ruby/object:Provider::Terraform::Examples
         name: "forwarding_rule_global_internallb"
@@ -785,7 +811,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           forwarding_rule_name: "website-forwarding-rule"
           target_pool_name: "website-target-pool"
-        ignore_read_extra: 
+        ignore_read_extra:
           - "port_range"
           - "target"
       - !ruby/object:Provider::Terraform::Examples
@@ -803,7 +829,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           forwarding_rule_name: "website-forwarding-rule"
           backend_name: "website-backend"
           network_name: "website-net"
-        ignore_read_extra: 
+        ignore_read_extra:
           - "port_range"
           - "target"
       - !ruby/object:Provider::Terraform::Examples
@@ -819,7 +845,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           rigm_name: "website-rigm"
           network_name: "website-net"
           fw_name: "website-fw"
-        ignore_read_extra: 
+        ignore_read_extra:
           - "port_range"
           - "target"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -894,13 +920,52 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   GlobalForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        name: "external_tcp_proxy_lb_mig_backend_custom_header"
+        primary_resource_id: "default"
+        vars:
+          tcp_proxy_xlb_network: "tcp-proxy-xlb-network"
+          tcp_proxy_xlb_subnet: "tcp-proxy-xlb-subnet"
+          tcp_proxy_xlb_ip: "tcp-proxy-xlb-ip"
+          tcp_proxy_xlb_forwarding_rule: "tcp-proxy-xlb-forwarding-rule"
+          test_proxy_health_check: "test-proxy-health-check"
+          tcp_proxy_xlb_backend_service: "tcp-proxy-xlb-backend-service"
+          tcp_proxy_health_check: "tcp-proxy-health-check"
+          tcp_proxy_xlb_mig_template: "tcp-proxy-xlb-mig-template"
+          tcp_proxy_xlb_mig1: "tcp-proxy-xlb-mig1"
+          tcp_proxy_xlb_fw_allow_hc: "tcp-proxy-xlb-fw-allow-hc"
+        min_version: beta
+        ignore_read_extra:
+          - "port_range"
+          - "target"
+          - "ip_address"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "external_http_lb_mig_backend_custom_header"
+        primary_resource_id: "default"
+        vars:
+          xlb_network_name: "l7-xlb-network"
+          backend_subnet_name: "l7-xlb-subnet"
+          address_name: "l7-xlb-static-ip"
+          forwarding_rule_name: "l7-xlb-forwarding-rule"
+          target_http_proxy_name: "l7-xlb-target-http-proxy"
+          url_map_name: "l7-xlb-url-map"
+          backend_service_name: "l7-xlb-backend-service"
+          mig_template_name: "l7-xlb-mig-template"
+          hc_name: "l7-xlb-hc"
+          mig_name: "l7-xlb-mig1"
+          fw_allow_hc_name: "l7-xlb-fw-allow-hc"
+        min_version: beta
+        ignore_read_extra:
+          - "port_range"
+          - "target"
+          - "ip_address"
+      - !ruby/object:Provider::Terraform::Examples
         name: "global_forwarding_rule_http"
         primary_resource_id: "default"
         vars:
           forwarding_rule_name: "global-rule"
           http_proxy_name: "target-proxy"
           backend_service_name: "backend"
-        ignore_read_extra: 
+        ignore_read_extra:
           - "port_range"
           - "target"
       - !ruby/object:Provider::Terraform::Examples
@@ -912,7 +977,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           http_proxy_name: "target-proxy"
           backend_service_name: "backend"
           igm_name: "igm-internal"
-        ignore_read_extra: 
+        ignore_read_extra:
           - "port_range"
           - "target"
       - !ruby/object:Provider::Terraform::Examples
@@ -926,7 +991,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           forwarding_rule_name: "globalrule"
         test_env_vars:
           project: :PROJECT_NAME
-        ignore_read_extra: 
+        ignore_read_extra:
           - "ip_address"
     properties:
       creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -1375,6 +1440,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
+      subnetwork: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareOptionalSubnet'
   GlobalNetworkEndpoint: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{global_network_endpoint_group}}/{{ip_address}}/{{fqdn}}/{{port}}"
     mutex: networkEndpoint/{{project}}/{{global_network_endpoint_group}}
@@ -2032,6 +2099,32 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           region_url_map_name: "regionurlmap"
           home_region_backend_service_name: "home"
           region_health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "int_https_lb_https_redirect"
+        primary_resource_id: "redirect"
+        skip_test: true
+        vars:
+          l7_ilb_network: "l7-ilb-network"
+          l7_ilb_proxy_subnet: "l7-ilb-proxy-subnet"
+          l7_ilb_subnet: "l7-ilb-subnet"
+          l7_ilb_ip: "l7-ilb-ip"
+          l7_ilb_forwarding_rule: "l7-ilb-forwarding-rule"
+          l7_ilb_target_https_proxy: "l7-ilb-target-https-proxy"
+          l7_ilb_regional_url_map: "l7-ilb-regional-url-map"
+          l7_ilb_backend_service: "l7-ilb-backend-service"
+          l7_ilb_mig_template: "l7-ilb-mig-template"
+          l7_ilb_hc: "l7-ilb-hc"
+          l7_ilb_mig1: "l7-ilb-mig1"
+          l7_ilb_fw_allow_hc: "l7-ilb-fw-allow-hc"
+          l7_ilb_fw_allow_ilb_to_backends: "l7-ilb-fw-allow-ilb-to-backends"
+          l7_ilb_test_vm: "l7-ilb-test-vm"
+          l7_ilb_redirect: "l7-ilb-redirect"
+          l7_ilb_target_http_proxy: "l7-ilb-target-http-proxy"
+          l7_ilb_redirect_url_map: "l7-ilb-redirect-url-map"
+        min_version: beta
+        ignore_read_extra:
+          - "target"
+          - "ip_address"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -2308,6 +2401,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           router_name: "my-router"
           peer_name: "my-router-peer"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "router_peer_bfd"
+        primary_resource_id: "peer"
+        skip_test: true
+        vars:
+          router_name: "my-router"
+          peer_name: "my-router-peer"
     properties:
       advertiseMode: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
@@ -2323,6 +2423,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           {{description}}
           If it is not provided, the provider region is used.
+      bfd: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       enable: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bool_to_upper_string.erb'
         custom_flatten: 'templates/terraform/custom_flatten/string_to_bool_default_true.erb'
@@ -2407,7 +2509,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: templates/terraform/decoders/snapshot.go.erb
-      extra_schema_entry: templates/terraform/extra_schema_entry/snapshot.erb
   ManagedSslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
@@ -2662,6 +2763,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       logConfig.metadataFields: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
+      stackType: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'
@@ -2698,6 +2801,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           subnetwork_name: "l7lb-test-subnetwork"
           network_name: "l7lb-test-network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "subnetwork_ipv6"
+        primary_resource_id: "subnetwork-ipv6"
+        vars:
+          subnetwork_name: "ipv6-test-subnetwork"
+          network_name: "ipv6-test-network"
   TargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples

@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	"github.com/golang/glog"
 )
 
@@ -42,7 +43,7 @@ type Sample struct {
 	Versions []string
 
 	// A list of updates that the resource can transition between
-	Updates []map[string]string
+	Updates []Update
 
 	// HasGAEquivalent tells us if we should have `provider = google-beta`
 	// in the testcase. (if the test doesn't have a ga version of the test)
@@ -69,6 +70,9 @@ type Sample struct {
 	// ExtraDependencies are the additional golang dependencies the injected code may require
 	ExtraDependencies []string `yaml:"extra_dependencies"`
 
+	// Type is the resource type.
+	Type string `yaml:"type"`
+
 	// Variables are the various attributes of the set of resources that need to be filled in.
 	Variables []Variable `yaml:"variables"`
 }
@@ -79,6 +83,11 @@ type Variable struct {
 	Name string `yaml:"name"`
 	// Type is the variable type.
 	Type string `yaml:"type"`
+	// DocsValue is an optional value that should be substituted directly into
+	// the documentation for this variable.  If not provided, tpgtools makes
+	// its best guess about a suitable value.  Generally, this is only provided
+	// if the "best guess" is a poor one.
+	DocsValue string `yaml:"docs_value"`
 }
 
 // Substitution contains metadata that varies for the sample context
@@ -108,13 +117,26 @@ type Dependency struct {
 	HCLBlock string // Path to the directory where the sample data is stored
 }
 
+type Update struct {
+	// The list of dependency resources to update.
+	Dependencies []string `yaml:"dependencies"`
+
+	// The resource to update.
+	Resource string `yaml:"resource"`
+}
+
 // BuildDependency produces a Dependency using a file and filename
-func BuildDependency(fileName, product, localname, version string, b []byte) (*Dependency, error) {
+func BuildDependency(fileName, product, localname, version string, hasGAEquivalent bool, b []byte) (*Dependency, error) {
 	var resourceName string
 	fileParts := strings.Split(fileName, ".")
 	if len(fileParts) == 4 {
-		product = strings.Title(fileParts[1])
-		resourceName = strings.Title(fileParts[2])
+		var err error
+		// TODO(magic-modules-eng): Allow for resources which are split in terraform but not in DCL
+		// (e.g. locational split) to find the right resource here.
+		product, resourceName, err = DCLToTerraformSampleName(fileParts[1], fileParts[2])
+		if err != nil {
+			return nil, err
+		}
 	} else if len(fileParts) == 3 {
 		resourceName = strings.Title(fileParts[1])
 	} else {
@@ -130,7 +152,7 @@ func BuildDependency(fileName, product, localname, version string, b []byte) (*D
 		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)
 	}
 
-	block, err := ConvertSampleJSONToHCL(dclResourceType, version, b)
+	block, err := ConvertSampleJSONToHCL(dclResourceType, version, hasGAEquivalent, b)
 	if err != nil {
 		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)
 	}
@@ -158,7 +180,7 @@ func (s *Sample) generateSampleDependencyWithName(fileName, localname string) De
 	dependencyBytes, err := ioutil.ReadFile(path.Join(s.SamplesPath, fileName))
 	version := s.resourceReference.versionMetadata.V
 	product := s.resourceReference.productMetadata.ProductType()
-	d, err := BuildDependency(fileName, product, localname, version, dependencyBytes)
+	d, err := BuildDependency(fileName, product, localname, version, s.HasGAEquivalent, dependencyBytes)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -182,23 +204,34 @@ func (s *Sample) GetCodeToInject() []string {
 // ReplaceReferences substitutes any reference tags for their HCL address
 // This should only be called after every dependency for a sample is built
 func (s Sample) ReplaceReferences(d *Dependency) error {
-	re := regexp.MustCompile(`"{{ref:([a-z.]*):(\w*)}}"`)
+	re := regexp.MustCompile(`"?{{\s*ref:([a-z_]*\.[a-z_]*\.[a-z_]*(?:\.[a-z_]*)?):([a-zA-Z0-9_\.\[\]]*)\s*}}"?`)
 	matches := re.FindAllStringSubmatch(d.HCLBlock, -1)
 
 	for _, match := range matches {
 		referenceFileName := match[1]
 		idField := match[2]
-		var replacingText string
+		var tfReference string
 		for _, dep := range s.DependencyList {
 			if dep.FileName == referenceFileName {
-				replacingText = dep.TerraformResourceType + "." + dep.HCLLocalName + "." + idField
+				tfReference = dep.TerraformResourceType + "." + dep.HCLLocalName + "." + idField
 				break
 			}
 		}
-		if replacingText == "" {
+		if tfReference == "" {
 			return fmt.Errorf("Could not find reference file name: %s", referenceFileName)
 		}
-		d.HCLBlock = re.ReplaceAllString(d.HCLBlock, replacingText)
+		startsWithQuote := strings.HasPrefix(match[0], `"`)
+		endsWithQuote := strings.HasSuffix(match[0], `"`)
+		if !(startsWithQuote && endsWithQuote) {
+			tfReference = fmt.Sprintf("${%s}", tfReference)
+			if startsWithQuote {
+				tfReference = `"` + tfReference
+			}
+			if endsWithQuote {
+				tfReference += `"`
+			}
+		}
+		d.HCLBlock = strings.Replace(d.HCLBlock, match[0], tfReference, 1)
 	}
 	return nil
 }
@@ -254,12 +287,16 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 	out := []Sample{*s}
 	for i, update := range s.Updates {
 		newSample := *s
-		primaryResource := update["resource"]
+		primaryResource := update.Resource
+		// TODO(magic-modules-eng): Consume new dependency list.
 		newSample.PrimaryResource = &primaryResource
 		if !newSample.isNativeHCL() {
 			var newDeps []Dependency
-			newDeps = append(newDeps, newSample.DependencyList...)
-			newDeps[0] = newSample.generateSampleDependencyWithName(*newSample.PrimaryResource, "primary")
+			newDeps = append(newDeps, newSample.generateSampleDependencyWithName(*newSample.PrimaryResource, "primary"))
+			for _, newDepFilename := range update.Dependencies {
+				newDepFilename = strings.TrimPrefix(newDepFilename, "samples/")
+				newDeps = append(newDeps, newSample.generateSampleDependencyWithName(newDepFilename, basicResourceName(newDepFilename)))
+			}
 			newSample.DependencyList = newDeps
 		}
 		newSample.TestSlug = fmt.Sprintf("%sUpdate%v", newSample.TestSlug, i)
@@ -267,6 +304,16 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 		out = append(out, newSample)
 	}
 	return out
+}
+
+func basicResourceName(depFilename string) string {
+	re := regexp.MustCompile("^update(_\\d)?\\.")
+	// update_1.resource.json -> basic.resource.json
+	basicReplaced := re.ReplaceAllString(depFilename, "basic.")
+	re = regexp.MustCompile("^update(_\\d)?_")
+	// update_1_name.resource.json -> name.resource.json
+	prefixTrimmed := re.ReplaceAllString(basicReplaced, "")
+	return dcl.SnakeToJSONCase(strings.Split(prefixTrimmed, ".")[0])
 }
 
 // ExpandContext expands the context model used in the generated tests
@@ -307,6 +354,11 @@ var translationMap = map[string]translationIndex{
 		docsValue:    "us-west1",
 		contextKey:   "region",
 		contextValue: "getTestRegionFromEnv()",
+	},
+	":ZONE": {
+		docsValue:    "us-west1-a",
+		contextKey:   "zone",
+		contextValue: "getTestZoneFromEnv()",
 	},
 	":ORG_TARGET": {
 		docsValue:    "123456789",
