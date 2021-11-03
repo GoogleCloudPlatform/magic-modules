@@ -23,7 +23,7 @@ resource "google_vpc_access_connector" "<%= ctx[:primary_resource_id] %>" {
 }
 
 # Cloud Router
-resource "google_compute_router" "<%= ctx[:vars]['router'] %>" {
+resource "google_compute_router" "router" {
   name     = "<%= ctx[:vars]['router'] %>"
   provider = google-beta
   region   = "us-west1"
