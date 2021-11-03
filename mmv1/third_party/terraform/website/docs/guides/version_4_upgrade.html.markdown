@@ -71,7 +71,7 @@ terraform {
   # ... other configuration ...
   required_providers {
     google = {
-      version = "~> 3.87.0"
+      version = "~> 3.90.0"
     }
   }
 }
@@ -172,11 +172,24 @@ Previously users could specify `trace-append` or `trace-ro` as scopes for a give
 However, to better align with [Google documentation](https://cloud.google.com/sdk/gcloud/reference/alpha/compute/instances/set-scopes#--scopes), `trace` will now be the only valid scope, as it's an alias for `trace.append` and
 `trace-ro` is no longer a documented option.
 
-## Datasource: `google_product_resource`
+## Datasources
 
-### Datasource-level change example
+## Datasource: `google_kms_key_ring`
 
-Description of the change and how users should adjust their configuration (if needed).
+### `id` now matches the `google_kms_key_ring` id format
+
+The format has changed to better match the resource's ID format.
+
+Interpolations based on the `id` of the datasource may require updates.
+
+## Resources
+
+## Resource: `google_app_engine_standard_app_version`
+
+### `entrypoint` is now required
+
+This resource would fail to deploy without this field defined. Specify the
+`entrypoint` block to fix any issues
 
 ## Resource: `google_bigquery_job`
 
@@ -227,6 +240,12 @@ The provider will now enforce at plan time that one of these fields be set.
 ### One of `source_tags`, `source_ranges` or `source_service_accounts` are required on INGRESS firewalls
 
 Previously, if all of these fields were left empty, the firewall defaulted to allowing traffic from 0.0.0.0/0, which is a suboptimal default.
+
+### `source_ranges` will track changes when unspecified in a config
+
+In `3.X`, `source_ranges` wouldn't cause a diff if it was undefined in
+config but was set on the firewall itself. With 4.0.0 Terraform will now
+track changes on the block when it is not specified in a user's config.
 
 ## Resource: `google_compute_instance`
 
@@ -334,38 +353,23 @@ This field was incorrectly included in the GA `google` provider in past releases
 In order to continue to use the feature, add `provider = google-beta` to your
 resource definition.
 
-## Resource: `google_app_engine_standard_app_version`
-
-### `entrypoint` is now required
-
-This resource would fail to deploy without this field defined. Specify the
-`entrypoint` block to fix any issues
-
 ## Resource: `google_compute_snapshot`
 
 ### `source_disk_link` is now removed
 
-Removed in favor of `source_disk`.
+Removed, as the information available was redundant. You can reconstruct a
+compatible value based on `source_disk` and `zone`. With a reference such as the
+following:
 
-## Resource: `google_kms_crypto_key`
+```
+google_compute_snapshot.my_snapshot.source_disk_link
+```
 
-### `self_link` is now removed
+Substitute the following:
 
-Removed in favor of `id`.
-
-## Resource: `google_kms_key_ring`
-
-### `self_link` is now removed
-
-Removed in favor of `id`.
-
-## Datasource: `google_kms_key_ring`
-
-### `id` now matches the `google_kms_key_ring` id format
-
-The format has changed to better match the resource's ID format.
-
-Interpolations based on the `id` of the datasource may require updates.
+```
+"projects/${google_compute_snapshot.my_snapshot.project}/zones/${google_compute_snapshot.my_snapshot.zone}/disks/${google_compute_snapshot.my_snapshot.source_disk}"
+```
 
 ## Resource: `google_data_loss_prevention_trigger`
 
@@ -397,6 +401,18 @@ The provider will now enforce at plan time that one of these fields be set.
 
 ### At least one of `patch_config.0.post_step.0.linux_exec_step_config` or `patch_config.0.post_step.0.windows_exec_step_config` is required
 The provider will now enforce at plan time that one of these fields be set.
+
+## Resource: `google_kms_crypto_key`
+
+### `self_link` is now removed
+
+Removed in favor of `id`.
+
+## Resource: `google_kms_key_ring`
+
+### `self_link` is now removed
+
+Removed in favor of `id`.
 
 ## Resource: `google_project`
 
@@ -433,6 +449,12 @@ the proposed diff.
 converted it while the upstream API migration was in progress. Now that the API migration has finished,
 the provider will no longer convert the service name. Use `bigquery.googleapis.com` instead.
 
+## Resource: `google_pubsub_subscription`
+
+### `path` is now removed
+
+`path` has been removed in favor of `id` which has an identical value.
+
 ## Resource: `google_spanner_instance`
 
 ### Exactly one of `num_nodes` or `processing_units` is required
@@ -463,12 +485,18 @@ resource "google_spanner_instance" "default" {
 }
 ```
 
-### Resource: `google_sql_database_instance`
+## Resource: `google_sql_database_instance`
 
 ### First-generation fields have been removed
 
 Removed fields specific to first-generation SQL instances:
 `authorized_gae_applications`, `crash_safe_replication`, `replication_type`
+
+### `database_version` field is now required
+
+The `database_version` field is now required.
+Previously, it was an optional field and the default value was `MYSQL_5_6`.
+Description of the change and how users should adjust their configuration (if needed).
 
 ### Drift detection and defaults enabled on fields
 
@@ -478,19 +506,19 @@ running `terraform plan`, amend your config to resolve them.
 
 The affected fields are:
 
-    * `activation_policy` will now default to `ALWAYS` at plan time, and detect
+  * `activation_policy` will now default to `ALWAYS` at plan time, and detect
 drift even when unset. Previously, Terraform only detected drift when the field
 had been set in config explicitly.
 
-    * `availability_type` will now default to `ZONAL` at plan time, and detect
+  * `availability_type` will now default to `ZONAL` at plan time, and detect
 drift even when unset. Previously, Terraform only detected drift when the field
 had been set in config explicitly.
 
-    * `disk_type` will now default to `PD_SSD` at plan time, and detect
+  * `disk_type` will now default to `PD_SSD` at plan time, and detect
 drift even when unset. Previously, Terraform only detected drift when the field
 had been set in config explicitly.
 
-    * `encryption_key_name` will now detect drift even when unset. Previously,
+  * `encryption_key_name` will now detect drift even when unset. Previously,
 Terraform only detected drift when the field had been set in config explicitly.
 
 ## Resource: `google_storage_bucket`
@@ -503,17 +531,3 @@ Terraform only detected drift when the field had been set in config explicitly.
 
 Previously, the default value of `location` was `US`. In an attempt to avoid allowing invalid 
 conbination of `storageClass` value and default `location` value, `location` field is now required.
-
-## Resource: `google_sql_database_instance`
-
-### `database_version` field is now required
-
-The `database_version` field is now required.
-Previously, it was an optional field and the default value was `MYSQL_5_6`.
-Description of the change and how users should adjust their configuration (if needed).
-
-## Resource: `google_pubsub_subscription`
-
-### `path` is now removed
-
-`path` has been removed in favor of `id` which has an identical value.
