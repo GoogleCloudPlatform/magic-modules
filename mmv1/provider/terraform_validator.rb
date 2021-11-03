@@ -191,6 +191,8 @@ module Provider
                         '../tpgtools/handwritten/dcl_logger.go'],
                        ['converters/google/resources/utils.go',
                         'third_party/terraform/utils/utils.go'],
+                       ['converters/google/resources/bigquery_dataset_iam.go',
+                        'third_party/terraform/utils/bigquery_dataset_iam.go'],
                        ['converters/google/resources/kms_key_ring_iam.go',
                         'third_party/validator/kms_key_ring_iam.go'],
                        ['converters/google/resources/kms_crypto_key_iam.go',
