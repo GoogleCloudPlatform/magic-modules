@@ -122,8 +122,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           topic_name: "example-topic"
           subscription_name: "example-subscription"
     docs: !ruby/object:Provider::Terraform::Docs
-      attributes: |
-        * `path`: Deprecated in favor of `id`, which contains an identical value. This field will be removed in the next major release of the provider.
       note: |
         You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding 
         by using the `google_project_service_identity` resource.
@@ -150,9 +148,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'ignoreMissingKeyInMap("x-goog-version")'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/subscription.go.erb
-      decoder: templates/terraform/decoders/pubsub_subscription.erb
       encoder: templates/terraform/encoders/no_send_name.go.erb
-      extra_schema_entry: templates/terraform/extra_schema_entry/pubsub_subscription_path.erb
       update_encoder: templates/terraform/update_encoder/pubsub_subscription.erb
   Schema: !ruby/object:Overrides::Terraform::ResourceOverride
     async: !ruby/object:Provider::Terraform::PollAsync
@@ -169,6 +165,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "example"
         vars:
           schema_name: "example"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "pubsub_schema_protobuf"
+        primary_resource_id: "example"
+        vars:
+          schema_name: "example"
+        test_env_vars:
+          project_name: :PROJECT_NAME
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'

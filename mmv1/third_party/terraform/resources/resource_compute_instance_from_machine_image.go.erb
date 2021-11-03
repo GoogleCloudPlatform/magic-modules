@@ -8,8 +8,12 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	computeBeta "google.golang.org/api/compute/v0.beta"
-	compute "google.golang.org/api/compute/v1"
+
+<% if version == "ga" -%>
+	"google.golang.org/api/compute/v1"
+<% else -%>
+	compute "google.golang.org/api/compute/v0.beta"
+<% end -%>
 )
 
 func resourceComputeInstanceFromMachineImage() *schema.Resource {
@@ -123,8 +127,8 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	sa := d.Get("service_account").([]interface{})
 	if len(sa) == 0 {
 		// ServiceAccount is required when the image is from a different project
-		accounts := make([]*computeBeta.ServiceAccount, 1)
-		accounts[0] = &computeBeta.ServiceAccount{
+		accounts := make([]*compute.ServiceAccount, 1)
+		accounts[0] = &compute.ServiceAccount{
 			Email:  "default",
 			Scopes: nil,
 		}
@@ -143,7 +147,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	tmp := strings.Split(src, "projects/")
 	mi_project := strings.Split(tmp[len(tmp)-1], "/")[0]
 
-	mi, err := config.NewComputeBetaClient(userAgent).MachineImages.Get(mi_project, tpl.Name).Do()
+	mi, err := config.NewComputeClient(userAgent).MachineImages.Get(mi_project, tpl.Name).Do()
 	if err != nil {
 		return err
 	}
@@ -180,7 +184,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	}
 
 	log.Printf("[INFO] Requesting instance creation")
-	op, err := config.NewComputeBetaClient(userAgent).Instances.Insert(project, zone.Name, instance).Do()
+	op, err := config.NewComputeClient(userAgent).Instances.Insert(project, zone.Name, instance).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating instance: %s", err)
 	}
@@ -202,8 +206,8 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 
 // Instances have disks spread across multiple schema properties. This function
 // ensures that overriding one of these properties does not override the others.
-func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *Config, mi *computeBeta.MachineImage, zone *compute.Zone, project string) ([]*computeBeta.AttachedDisk, error) {
-	disks := []*computeBeta.AttachedDisk{}
+func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *Config, mi *compute.MachineImage, zone *compute.Zone, project string) ([]*compute.AttachedDisk, error) {
+	disks := []*compute.AttachedDisk{}
 	if _, hasBootDisk := d.GetOk("boot_disk"); hasBootDisk {
 		bootDisk, err := expandBootDisk(d, config, project)
 		if err != nil {
@@ -214,7 +218,7 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *Config,
 		// boot disk was not overridden, so use the one from the machine image
 		for _, disk := range mi.SourceInstanceProperties.Disks {
 			if disk.Boot {
-				newdisk := &computeBeta.AttachedDisk{
+				newdisk := &compute.AttachedDisk{
 					Source:     disk.Source,
 					AutoDelete: disk.AutoDelete,
 					Type:       disk.Type,
@@ -236,7 +240,7 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *Config,
 		// scratch disks were not overridden, so use the ones from the machine image
 		for _, disk := range mi.SourceInstanceProperties.Disks {
 			if disk.Type == "SCRATCH" {
-				newdisk := &computeBeta.AttachedDisk{
+				newdisk := &compute.AttachedDisk{
 					Source:     disk.Source,
 					AutoDelete: disk.AutoDelete,
 					Type:       disk.Type,
@@ -262,7 +266,7 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *Config,
 		// attached disks were not overridden, so use the ones from the machine image
 		for _, disk := range mi.SourceInstanceProperties.Disks {
 			if !disk.Boot && disk.Type != "SCRATCH" {
-				newdisk := &computeBeta.AttachedDisk{
+				newdisk := &compute.AttachedDisk{
 					Source:     disk.Source,
 					AutoDelete: disk.AutoDelete,
 					Type:       disk.Type,

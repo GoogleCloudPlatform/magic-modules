@@ -4,10 +4,10 @@ if o, n := d.GetChange("security_policy"); o.(string) != n.(string) {
   if err != nil {
     return errwrap.Wrapf("Error parsing Backend Service security policy: {{err}}", err)
   }
-  op, err := config.NewComputeClient(userAgent).BackendServices.SetSecurityPolicy(
-    project, obj["name"].(string), &compute.SecurityPolicyReference{
-      SecurityPolicy: pol.RelativeLink(),
-    }).Do()
+
+  spr := emptySecurityPolicyReference()
+  spr.SecurityPolicy = pol.RelativeLink()
+  op, err := config.NewComputeClient(userAgent).BackendServices.SetSecurityPolicy(project, obj["name"].(string), spr).Do()
   if err != nil {
     return errwrap.Wrapf("Error setting Backend Service security policy: {{err}}", err)
   }

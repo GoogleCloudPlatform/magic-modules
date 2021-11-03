@@ -31,10 +31,12 @@ resource "google_logging_billing_account_sink" "my-sink" {
 }
 
 resource "google_storage_bucket" "log-bucket" {
-  name = "billing-logging-bucket"
+  name     = "billing-logging-bucket"
+  location = "US"
 }
 
 resource "google_project_iam_binding" "log-writer" {
+  project = "your-project-id"
   role = "roles/storage.objectCreator"
 
   members = [

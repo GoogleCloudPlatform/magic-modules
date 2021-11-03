@@ -176,10 +176,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       cdnPolicy.clientTtl: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        send_empty_value: true
       cdnPolicy.defaultTtl: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        send_empty_value: true
       cdnPolicy.maxTtl: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        send_empty_value: true
+      cdnPolicy.signedUrlCacheMaxAgeSec: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
+      cdnPolicy.negativeCachingPolicy.ttl: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_import: true
     exclude_validator: true
@@ -323,6 +330,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      logConfig.sampleRate: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'suppressWhenDisabled'
+      logConfig.enable: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
       portName: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       protocol: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -456,6 +467,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      logConfig.sampleRate: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'suppressWhenDisabled'
+      logConfig.enable: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
       failoverPolicy.disableConnectionDrainOnFailover: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
       failoverPolicy.dropTrafficIfUnhealthy: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -725,7 +740,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validation.IntBetween(0, 65535)'
       sourceRanges: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
-        default_from_api: true
+        diff_suppress_func: 'diffSuppressSourceRanges'
       sourceTags: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
       sourceServiceAccounts: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -1425,6 +1440,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
+      subnetwork: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareOptionalSubnet'
   GlobalNetworkEndpoint: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{global_network_endpoint_group}}/{{ip_address}}/{{fqdn}}/{{port}}"
     mutex: networkEndpoint/{{project}}/{{global_network_endpoint_group}}
@@ -2480,7 +2497,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: templates/terraform/decoders/snapshot.go.erb
-      extra_schema_entry: templates/terraform/extra_schema_entry/snapshot.erb
   ManagedSslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6

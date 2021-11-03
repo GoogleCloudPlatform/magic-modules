@@ -1,6 +1,7 @@
 <% autogen_exception -%>
 package google
 
+<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"regexp"
@@ -17,10 +18,6 @@ func resourceRuntimeconfigConfig() *schema.Resource {
 		Read:   resourceRuntimeconfigConfigRead,
 		Update: resourceRuntimeconfigConfigUpdate,
 		Delete: resourceRuntimeconfigConfigDelete,
-
-<% unless version == 'ga' -%>
-		DeprecationMessage: "This resource has been deprecated in the google (GA) provider, and will only be available in the google-beta provider in a future release.",
-<% end -%>
 
 		Importer: &schema.ResourceImporter{
 			State: resourceRuntimeconfigConfigImport,
@@ -199,3 +196,4 @@ func resourceRuntimeconfigParseFullName(fullName string) (project, name string, 
 	}
 	return matches[1], matches[2], nil
 }
+<% end %>

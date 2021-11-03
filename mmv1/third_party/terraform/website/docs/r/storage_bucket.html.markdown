@@ -74,7 +74,7 @@ The following arguments are supported:
     boolean option will delete all contained objects. If you try to delete a
     bucket that contains objects, Terraform will fail that run.
 
-* `location` - (Optional, Default: 'US') The [GCS location](https://cloud.google.com/storage/docs/bucket-locations)
+* `location` - (Required) The [GCS location](https://cloud.google.com/storage/docs/bucket-locations)
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
@@ -98,8 +98,6 @@ The following arguments are supported:
 * `encryption` - (Optional) The bucket's encryption configuration. Structure is [documented below](#nested_encryption).
 
 * `requester_pays` - (Optional, Default: false) Enables [Requester Pays](https://cloud.google.com/storage/docs/requester-pays) on a storage bucket.
-
-* `bucket_policy_only` - (Deprecated, Default: false) Enables [Bucket Policy Only](https://cloud.google.com/storage/docs/bucket-policy-only) access to a bucket. This field will be removed in the next major release of the provider.
 
 * `uniform_bucket_level_access` - (Optional, Default: false) Enables [Uniform bucket-level access](https://cloud.google.com/storage/docs/uniform-bucket-level-access) access to a bucket.
 
