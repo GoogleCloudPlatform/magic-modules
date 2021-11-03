@@ -9,7 +9,6 @@ resource "google_project_service" "vpcaccess_api" {
 # VPC
 resource "google_compute_network" "default" {
   name                    = "<%= ctx[:vars]['cloudrun_network'] %>"
-  provider                = google
   auto_create_subnetworks = false
 }
 
