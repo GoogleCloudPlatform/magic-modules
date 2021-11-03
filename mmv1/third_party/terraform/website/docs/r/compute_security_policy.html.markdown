@@ -114,12 +114,13 @@ The following arguments are supported:
 <a name="nested_rate_limit_options"></a>The `rate_limit_options` block supports:
 
 * `ban_duration_sec` - (Optional) Can only be specified if the `action` for the rule is "rate_based_ban".
-    If specified, determines the time (in seconds) the traffic will continue to be banned by the ratelimit after the rate falls below the threshold.
+    If specified, determines the time (in seconds) the traffic will continue to be banned by the rate limit after the rate falls below the threshold.
 
 * `ban_threshold` - (Optional) Can only be specified if the `action` for the rule is "rate_based_ban".
-    If specified, the key will be banned for the configured 'ban_duration_sec' when the number of requests that exceed the 'rate_limit_threshold' also exceed this 'ban_threshold'. Structure is [documented below](#nested_threshold).
+    If specified, the key will be banned for the configured 'ban_duration_sec' when the number of requests that exceed the 'rate_limit_threshold' also
+    exceed this 'ban_threshold'. Structure is [documented below](#nested_threshold).
 
-* `conform_action` - (Optional) ConformAction: Action to take for requests that are under the configured rate limit threshold. Valid option is "allow" only.
+* `conform_action` - (Optional) Action to take for requests that are under the configured rate limit threshold. Valid option is "allow" only.
 
 * `enforce_on_key` - (Optional) Determines the key to enforce the rate_limit_threshold on.
     Possible values incude "ALL", "ALL_IPS", "HTTP_HEADER", "IP", "XFF_IP". If not specified, defaults to "ALL".
