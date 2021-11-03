@@ -1,5 +1,6 @@
 # [START vpc_serverless_connector_enable_api]
 resource "google_project_service" "vpcaccess_api" {
+  provider = google-beta
   service = "vpcaccess.googleapis.com"
 }
 # [END vpc_serverless_connector_enable_api]
@@ -8,7 +9,6 @@ resource "google_project_service" "vpcaccess_api" {
 # VPC
 resource "google_compute_network" "default" {
   name                    = "<%= ctx[:vars]['cloudrun_network'] %>"
-  provider                = google
   auto_create_subnetworks = false
 }
 
