@@ -29,13 +29,6 @@ func TestAccNotebooksRuntime_create_container(t *testing.T) {
 				ExpectNonEmptyPlan: true,
 				ImportStateVerifyIgnore: []string{"virtual_machine", "container_images", "metadata"},
 			},
-      # {
-			# 	ResourceName:       "google_notebooks_runtime_iam_binding.runtime_container",
-			# 	ImportState:        true,
-			# 	ImportStateVerify:  true,
-			# 	ExpectNonEmptyPlan: true,
-			# 	ImportStateVerifyIgnore: []string{"virtual_machine", "container_images", "metadata"},
-			# },
 		},
 	})
 }
