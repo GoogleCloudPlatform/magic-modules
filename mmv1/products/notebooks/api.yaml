@@ -411,12 +411,12 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'tags'
         description: |
-            The Compute Engine tags to add to runtime.
+            The Compute Engine tags to add to instance.
         item_type: Api::Type::String
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'metadata'
         description: |
-            Custom metadata to apply to this runtime.
+            Custom metadata to apply to this instance.
             An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
       - !ruby/object:Api::Type::Time
         name: 'createTime'
@@ -575,9 +575,10 @@ objects:
                     name: "guestOsFeatures"
                     description: |
                       Indicates a list of features to enable on the guest operating
-                      system. Applicable only for bootable images. Read Enabling
-                      guest operating system features to see a list of available
-                      options.
+                      system. Applicable only for bootable images. To see a list of
+                      available features, read `https://cloud.google.com/compute/docs/
+                      images/create-delete-deprecate-private-images#guest-os-features`
+                      options. ``
                     output: true
                     item_type: Api::Type::String
                   - !ruby/object:Api::Type::Integer
@@ -615,16 +616,13 @@ objects:
                           specified, the disk will be the same size as the image
                           (usually 10GB). If specified, the size must be equal to
                           or larger than 10GB. Default 100 GB.
-                      - !ruby/object:Api::Type::Enum
+                      - !ruby/object:Api::Type::String
                         name: "diskType"
                         description: |
-                          The type of the boot disk attached to this instance,
-                          defaults to standard persistent disk (`PD_STANDARD`).
-                        values:
-                          - DISK_TYPE_UNSPECIFIED
-                          - PD_STANDARD
-                          - PD_SSD
-                          - PD_BALANCED
+                          The type of the boot disk attached to this runtime,
+                          defaults to standard persistent disk. For valid values,
+                          see `https://cloud.google.com/vertex-ai/docs/workbench/
+                          reference/rest/v1/projects.locations.runtimes#disktype`
                       - !ruby/object:Api::Type::KeyValuePairs
                         name: "labels"
                         description: |
@@ -635,8 +633,12 @@ objects:
                   - !ruby/object:Api::Type::String
                     name: "interface"
                     description: |
-                      Type of the resource. Always compute#attachedDisk for attached
-                      disks.
+                      "Specifies the disk interface to use for attaching this disk,
+                      which is either SCSI or NVME. The default is SCSI. Persistent
+                      disks must always use SCSI and the request will fail if you attempt
+                      to attach a persistent disk in any other format than SCSI. Local SSDs
+                      can use either NVME or SCSI. For performance characteristics of SCSI
+                      over NVMe, see Local SSD performance. Valid values: * NVME * SCSI".
                   - !ruby/object:Api::Type::String
                     name: "kind"
                     description: |
@@ -726,18 +728,12 @@ objects:
                 description: |
                   The Compute Engine accelerator configuration for this runtime.
                 properties:
-                  - !ruby/object:Api::Type::Enum
+                  - !ruby/object:Api::Type::String
                     name: "type"
                     description: |
-                      Accelerator model.
-                    values:
-                      - ACCELERATOR_TYPE_UNSPECIFIED
-                      - NVIDIA_TESLA_K80
-                      - NVIDIA_TESLA_P100
-                      - NVIDIA_TESLA_V100
-                      - NVIDIA_TESLA_P4
-                      - NVIDIA_TESLA_T4
-                      - NVIDIA_TESLA_A100
+                      Accelerator model. For valid values, see
+                      `https://cloud.google.com/vertex-ai/docs/workbench/reference/
+                      rest/v1/projects.locations.runtimes#AcceleratorType`
                   - !ruby/object:Api::Type::Integer
                     name: "coreCount"
                     description: |
@@ -777,22 +773,6 @@ objects:
                   `internal_ip_only` restriction can only be enabled for subnetwork
                   enabled networks, and all dependencies must be configured to be
                   accessible without external IP addresses.
-              - !ruby/object:Api::Type::String
-                name: "serviceAccount"
-                description: |
-                  The service account used by virtual machine to access Google Cloud
-                  Platform services. If not specified, the [Compute Engine default
-                  service account](https://cloud.google.com/compute/docs/access/
-                  service-accounts#default_service_account) is used.
-              - !ruby/object:Api::Type::Array
-                name: "serviceAccountScopes"
-                description: |
-                  The URIs of service account scopes to be included in Compute
-                  Engine instances. If not specified, the following [scopes]
-                  (https://cloud.google.com/compute/docs/access/service-accounts#
-                  accesscopesiam) are defined: - https://www.googleapis.com/auth/
-                  cloud-platform - https://www.googleapis.com/auth/userinfo.email
-                item_type: Api::Type::String
               - !ruby/object:Api::Type::Array
                 name: "tags"
                 description: |
@@ -847,27 +827,24 @@ objects:
         description: |
             The state of this runtime.
         output: true
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'healthState'
-        values:
-          - HEALTH_STATE_UNSPECIFIED
-          - HEALTHY
-          - UNHEALTHY
         description: |
-            The health state of this runtime.
+            The health state of this runtime. For a list of possible output
+            values, see `https://cloud.google.com/vertex-ai/docs/workbench/
+            reference/rest/v1/projects.locations.runtimes#healthstate`.
         output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'accessConfig'
         description: |
           The config settings for accessing runtime.
         properties:
-          - !ruby/object:Api::Type::Enum
+          - !ruby/object:Api::Type::String
             name: 'accessType'
-            values:
-              - RUNTIME_ACCESS_TYPE_UNSPECIFIED
-              - SINGLE_USER
             description: |
-              The type of access mode this instance.
+              The type of access mode this instance. For valid values, see
+              `https://cloud.google.com/vertex-ai/docs/workbench/reference/
+              rest/v1/projects.locations.runtimes#RuntimeAccessType`.
           - !ruby/object:Api::Type::String
             name: 'runtimeOwner'
             description: |
@@ -931,14 +908,6 @@ objects:
               Contains runtime daemon metrics, such as OS and kernels and
               sessions stats.
             output: true
-        output: true
-      - !ruby/object:Api::Type::Time
-        name: 'createTime'
-        description: 'Runtime creation time'
-        output: true
-      - !ruby/object:Api::Type::Time
-        name: 'updateTime'
-        description: 'Runtime update time.'
         output: true
   # Compute Zone (Location)
   - !ruby/object:Api::Resource
