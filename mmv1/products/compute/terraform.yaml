@@ -2494,7 +2494,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       snapshotEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "kmsKeySelfLink"
       sourceDisk: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
       sourceDiskEncryptionKey: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       sourceDiskEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
