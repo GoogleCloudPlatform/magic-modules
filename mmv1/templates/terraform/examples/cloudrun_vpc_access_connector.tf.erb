@@ -2,6 +2,7 @@
 resource "google_project_service" "vpcaccess_api" {
   service  = "vpcaccess.googleapis.com"
   provider = google-beta
+  disable_on_destroy = false
 }
 # [END vpc_serverless_connector_enable_api]
 
@@ -20,6 +21,7 @@ resource "google_vpc_access_connector" "<%= ctx[:primary_resource_id] %>" {
   region        = "us-west1"
   ip_cidr_range = "10.8.0.0/28"
   network       = google_compute_network.default.name
+  depends_on    = [google_project_service.vpcaccess_api]
 }
 
 # Cloud Router
