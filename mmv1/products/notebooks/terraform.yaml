@@ -37,6 +37,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "instance"
         primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"random_suffix\"])"
         region_override: "us-west1-a"
+        ignore_read_extra:
+          - "state"
         vars:
           instance_name: "notebooks-instance"
       - !ruby/object:Provider::Terraform::Examples
@@ -44,6 +46,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "instance"
         primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"random_suffix\"])"
         region_override: "us-west1-a"
+        ignore_read_extra:
+          - "state"
         vars:
           instance_name: "notebooks-instance"
       - !ruby/object:Provider::Terraform::Examples
@@ -51,6 +55,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "instance"
         primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"random_suffix\"])"
         region_override: "us-west1-a"
+        ignore_read_extra:
+          - "state"
         vars:
           instance_name: "notebooks-instance"
       - !ruby/object:Provider::Terraform::Examples
@@ -58,6 +64,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "instance"
         primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"random_suffix\"])"
         region_override: "us-west1-a"
+        ignore_read_extra:
+          - "state"
         vars:
           instance_name: "notebooks-instance"
         test_env_vars:
