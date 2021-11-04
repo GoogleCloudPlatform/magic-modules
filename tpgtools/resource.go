@@ -404,7 +404,6 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode custom timeout details: %v", err)
 	}
-
 	if ctdOk {
 		res.InsertTimeoutMinutes = ctd.TimeoutMinutes
 		res.UpdateTimeoutMinutes = ctd.TimeoutMinutes
