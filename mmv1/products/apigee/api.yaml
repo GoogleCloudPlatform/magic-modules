@@ -235,7 +235,7 @@ objects:
       exclude: false
       method_name_separator: ':'
       parent_resource_attribute: 'env_id'
-      import_format: ["{{org_id}}/environments/{{name}}", "{{name}}"]
+      import_format: ["{{%org_id}}/environments/{{name}}", "{{name}}"]
       base_url: "{{org_id}}/environments/{{name}}"
       self_link: "{{org_id}}/environments/{{name}}"
     parameters:
