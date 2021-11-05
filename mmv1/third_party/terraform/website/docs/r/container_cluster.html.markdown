@@ -628,6 +628,8 @@ ephemeral_storage_config {
     For GKE versions 1.19, 1.20, and 1.21, the recommended minimum `node_version` would be 1.19.15-gke.1300, 1.20.11-gke.1300, and 1.21.5-gke.1300 respectively.
     A `machine_type` that has more than 16 GiB of memory is also recommended.
     Structure is [documented below](#nested_gcfs_config).
+    See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming)
+    on image streaming for more information.
 
 ```hcl
 gcfs_config {
