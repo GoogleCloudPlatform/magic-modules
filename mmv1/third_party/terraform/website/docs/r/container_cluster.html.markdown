@@ -197,9 +197,9 @@ and requires the `ip_allocation_policy` block to be defined. By default when thi
 * `master_auth` - (Optional) The authentication information for accessing the
 Kubernetes master. Some values in this block are only returned by the API if
 your service account has permission to get credentials for your GKE cluster. If
-you see an unexpected diff removing a username/password or unsetting your client
-cert, ensure you have the `container.clusters.getCredentials` permission.
-Structure is [documented below](#nested_master_auth). This has been deprecated as of GKE 1.19.
+you see an unexpected diff unsetting your client cert, ensure you have the 
+`container.clusters.getCredentials` permission.
+Structure is [documented below](#nested_master_auth).
 
 * `master_authorized_networks_config` - (Optional) The desired
     configuration options for master authorized networks. Omit the
@@ -576,13 +576,7 @@ pick a specific range to use.
 
 <a name="nested_master_auth"></a>The `master_auth` block supports:
 
-* `password` - (Optional) The password to use for HTTP basic authentication when accessing
-    the Kubernetes master endpoint. This has been deprecated as of GKE 1.19.
-
-* `username` - (Optional) The username to use for HTTP basic authentication when accessing
-    the Kubernetes master endpoint. If not present basic auth will be disabled. This has been deprecated as of GKE 1.19.
-
-* `client_certificate_config` - (Optional) Whether client certificate authorization is enabled for this cluster.  For example:
+* `client_certificate_config` - (Required) Whether client certificate authorization is enabled for this cluster.  For example:
 
 ```hcl
 master_auth {
@@ -626,6 +620,18 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
 ```hcl
 ephemeral_storage_config {
   local_ssd_count = 2
+}
+```
+
+* `gcfs_config` - (Optional) Parameters for the Google Container Filesystem (GCFS).
+    If unspecified, GCFS will not be enabled on the node pool. When enabling this feature you must specify `image_type = "COS_CONTAINERD"` and `node_version` from GKE versions 1.19 or later to use it.
+    For GKE versions 1.19, 1.20, and 1.21, the recommended minimum `node_version` would be 1.19.15-gke.1300, 1.20.11-gke.1300, and 1.21.5-gke.1300 respectively.
+    A `machine_type` that has more than 16 GiB of memory is also recommended.
+    Structure is [documented below](#nested_gcfs_config).
+
+```hcl
+gcfs_config {
+  enabled = true
 }
 ```
 
@@ -731,6 +737,10 @@ linux_node_config {
 <a name="nested_ephemeral_storage_config"></a>The `ephemeral_storage_config` block supports:
 
 * `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
+
+<a name="nested_gcfs_config"></a>The `gcfs_config` block supports:
+
+* `enabled` (Required) - Whether or not the Google Container Filesystem (GCFS) is enabled
 
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
@@ -930,9 +940,6 @@ exported:
 * `self_link` - The server-defined URL for the resource.
 
 * `endpoint` - The IP address of this cluster's Kubernetes master.
-
-* `instance_group_urls` - List of instance group URLs which have been assigned
-    to the cluster.
 
 * `label_fingerprint` - The fingerprint of the set of labels for this cluster.
 

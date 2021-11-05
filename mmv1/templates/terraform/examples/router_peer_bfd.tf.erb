@@ -6,5 +6,11 @@ resource "google_compute_router_peer" "<%= ctx[:primary_resource_id] %>" {
   peer_asn                  = 65513
   advertised_route_priority = 100
   interface                 = "interface-1"
-  enable                    = false
+
+  bfd {
+    min_receive_interval        = 1000
+    min_transmit_interval       = 1000
+    multiplier                  = 5
+    session_initialization_mode = "ACTIVE"
+  }
 }

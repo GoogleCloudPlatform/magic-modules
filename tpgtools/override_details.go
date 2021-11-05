@@ -211,3 +211,8 @@ type ProductDocsSectionDetails struct {
 	// alternative name to be used for the product resources in docs.
 	DocsSection string
 }
+
+type CustomTimeoutDetails struct {
+	// The overriding Timeouts in Terraform
+	TimeoutMinutes int
+}

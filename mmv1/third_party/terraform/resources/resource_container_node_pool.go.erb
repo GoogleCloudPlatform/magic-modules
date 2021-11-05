@@ -2,20 +2,20 @@
 package google
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"regexp"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 <% if version == "ga" -%>
 	"google.golang.org/api/container/v1"
 <% else -%>
-	"google.golang.org/api/container/v1beta1"
+	container "google.golang.org/api/container/v1beta1"
 <% end -%>
 )
 
@@ -158,6 +158,13 @@ var schemaNodePool = map[string]*schema.Schema{
 		Computed:    true,
 		Elem:        &schema.Schema{Type: schema.TypeString},
 		Description: `The resource URLs of the managed instance groups associated with this node pool.`,
+	},
+
+	"managed_instance_group_urls": {
+		Type:        schema.TypeList,
+		Computed:    true,
+		Elem:        &schema.Schema{Type: schema.TypeString},
+		Description: `List of instance group URLs which have been assigned to this node pool.`,
 	},
 
 	"management": {
@@ -786,6 +793,7 @@ func flattenNodePool(d *schema.ResourceData, config *Config, np *container.NodeP
 	// failed or something else strange happened, we'll just use the average size.
 	size := 0
 	igmUrls := []string{}
+	managedIgmUrls := []string{}
 	for _, url := range np.InstanceGroupUrls {
 		// retrieve instance group manager (InstanceGroupUrls are actually URLs for InstanceGroupManagers)
 		matches := instanceGroupManagerURL.FindStringSubmatch(url)
@@ -802,6 +810,7 @@ func flattenNodePool(d *schema.ResourceData, config *Config, np *container.NodeP
 		}
 		size += int(igm.TargetSize)
 		igmUrls = append(igmUrls, url)
+		managedIgmUrls = append(managedIgmUrls, igm.InstanceGroup)
 	}
 	nodeCount := 0
 	if len(igmUrls) > 0 {
@@ -815,6 +824,7 @@ func flattenNodePool(d *schema.ResourceData, config *Config, np *container.NodeP
 		"node_count":          nodeCount,
 		"node_config":         flattenNodeConfig(np.Config),
 		"instance_group_urls": igmUrls,
+		"managed_instance_group_urls": managedIgmUrls,
 		"version":             np.Version,
 <% unless version == 'ga' -%>
 		"network_config":      flattenNodeNetworkConfig(np.NetworkConfig, d, prefix),
