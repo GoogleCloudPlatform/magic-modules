@@ -124,8 +124,6 @@ objects:
         exactly_one_of:
           - trigger_template
           - github
-          - pubsub_config
-          - webhook_config
         properties:
           - !ruby/object:Api::Type::String
             name: 'projectId'
@@ -183,8 +181,6 @@ objects:
         exactly_one_of:
           - trigger_template
           - github
-          - pubsub_config
-          - webhook_config
         properties:
           - !ruby/object:Api::Type::String
             name: 'owner'
@@ -255,8 +251,6 @@ objects:
         exactly_one_of:
           - trigger_template
           - github
-          - pubsub_config
-          - webhook_config
         properties:
           - !ruby/object:Api::Type::String
             name: 'subscription'
@@ -286,8 +280,6 @@ objects:
         exactly_one_of:
           - trigger_template
           - github
-          - pubsub_config
-          - webhook_config
         properties:
           - !ruby/object:Api::Type::String
             name: 'secret'
