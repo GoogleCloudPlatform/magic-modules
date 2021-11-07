@@ -2,68 +2,68 @@ package google
 
 import "fmt"
 
-func resourceConverterBigQueryDatasetIamPolicy() ResourceConverter {
+func resourceConverterBigqueryDatasetIamPolicy() ResourceConverter {
 	return ResourceConverter{
 		AssetType:         "bigquery.googleapis.com/Dataset",
-		Convert:           GetBigQueryDatasetIamPolicyCaiObject,
-		MergeCreateUpdate: MergeBigQueryDatasetIamPolicy,
+		Convert:           GetBigqueryDatasetIamPolicyCaiObject,
+		MergeCreateUpdate: MergeBigqueryDatasetIamPolicy,
 	}
 }
 
-func resourceConverterBigQueryDatasetIamBinding() ResourceConverter {
+func resourceConverterBigqueryDatasetIamBinding() ResourceConverter {
 	return ResourceConverter{
 		AssetType:         "bigquery.googleapis.com/Dataset",
-		Convert:           GetBigQueryDatasetIamBindingCaiObject,
-		FetchFullResource: FetchBigQueryDatasetIamPolicy,
-		MergeCreateUpdate: MergeBigQueryDatasetIamBinding,
-		MergeDelete:       MergeBigQueryDatasetIamBindingDelete,
+		Convert:           GetBigqueryDatasetIamBindingCaiObject,
+		FetchFullResource: FetchBigqueryDatasetIamPolicy,
+		MergeCreateUpdate: MergeBigqueryDatasetIamBinding,
+		MergeDelete:       MergeBigqueryDatasetIamBindingDelete,
 	}
 }
 
-func resourceConverterBigQueryDatasetIamMember() ResourceConverter {
+func resourceConverterBigqueryDatasetIamMember() ResourceConverter {
 	return ResourceConverter{
 		AssetType:         "bigquery.googleapis.com/Dataset",
-		Convert:           GetBigQueryDatasetIamMemberCaiObject,
-		FetchFullResource: FetchBigQueryDatasetIamPolicy,
-		MergeCreateUpdate: MergeBigQueryDatasetIamMember,
-		MergeDelete:       MergeBigQueryDatasetIamMemberDelete,
+		Convert:           GetBigqueryDatasetIamMemberCaiObject,
+		FetchFullResource: FetchBigqueryDatasetIamPolicy,
+		MergeCreateUpdate: MergeBigqueryDatasetIamMember,
+		MergeDelete:       MergeBigqueryDatasetIamMemberDelete,
 	}
 }
 
-func GetBigQueryDatasetIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
-	return newBigQueryDatasetIamAsset(d, config, expandIamPolicyBindings)
+func GetBigqueryDatasetIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+	return newBigqueryDatasetIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetBigQueryDatasetIamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
-	return newBigQueryDatasetIamAsset(d, config, expandIamRoleBindings)
+func GetBigqueryDatasetIamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+	return newBigqueryDatasetIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetBigQueryDatasetIamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
-	return newBigQueryDatasetIamAsset(d, config, expandIamMemberBindings)
+func GetBigqueryDatasetIamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+	return newBigqueryDatasetIamAsset(d, config, expandIamMemberBindings)
 }
 
-func MergeBigQueryDatasetIamPolicy(existing, incoming Asset) Asset {
+func MergeBigqueryDatasetIamPolicy(existing, incoming Asset) Asset {
 	existing.IAMPolicy = incoming.IAMPolicy
 	return existing
 }
 
-func MergeBigQueryDatasetIamBinding(existing, incoming Asset) Asset {
+func MergeBigqueryDatasetIamBinding(existing, incoming Asset) Asset {
 	return mergeIamAssets(existing, incoming, mergeAuthoritativeBindings)
 }
 
-func MergeBigQueryDatasetIamBindingDelete(existing, incoming Asset) Asset {
+func MergeBigqueryDatasetIamBindingDelete(existing, incoming Asset) Asset {
 	return mergeDeleteIamAssets(existing, incoming, mergeDeleteAuthoritativeBindings)
 }
 
-func MergeBigQueryDatasetIamMember(existing, incoming Asset) Asset {
+func MergeBigqueryDatasetIamMember(existing, incoming Asset) Asset {
 	return mergeIamAssets(existing, incoming, mergeAdditiveBindings)
 }
 
-func MergeBigQueryDatasetIamMemberDelete(existing, incoming Asset) Asset {
+func MergeBigqueryDatasetIamMemberDelete(existing, incoming Asset) Asset {
 	return mergeDeleteIamAssets(existing, incoming, mergeDeleteAdditiveBindings)
 }
 
-func newBigQueryDatasetIamAsset(
+func newBigqueryDatasetIamAsset(
 	d TerraformResourceData,
 	config *Config,
 	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
@@ -73,7 +73,7 @@ func newBigQueryDatasetIamAsset(
 		return []Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
-	name, err := assetName(d, config, "//bigquery.googleapis.com/datasets/{{dataset_id}}")
+	name, err := assetName(d, config, "//bigquery.googleapis.com/{{dataset_id}}")
 	if err != nil {
 		return []Asset{}, err
 	}
@@ -87,12 +87,17 @@ func newBigQueryDatasetIamAsset(
 	}}, nil
 }
 
-func FetchBigQueryDatasetIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+func FetchBigqueryDatasetIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+	// Check if the identity field returns a value
+	if _, ok := d.GetOk("{{dataset_id}}"); !ok {
+		return Asset{}, ErrEmptyIdentityField
+	}
+
 	return fetchIamPolicy(
-		NewBigQueryDatasetIamUpdater,
+		NewBigqueryDatasetIamUpdater,
 		d,
 		config,
-		"//bigquery.googleapis.com/datasets/{{dataset_id}}",
+		"//bigquery.googleapis.com/{{dataset_id}}",
 		"bigquery.googleapis.com/Dataset",
 	)
 }
