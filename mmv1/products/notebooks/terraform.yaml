@@ -125,8 +125,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "notebook_runtime_basic"
-        primary_resource_id: "runtime"
         primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime%s\", context[\"random_suffix\"])"
+        primary_resource_id: "runtime"
         region_override: "us-central1"
         vars:
           runtime_name: "notebooks-runtime"
@@ -154,15 +154,29 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     description: |
       {{description}}
 
-      ~> **Note:** Due to limitations of the Notebooks Instance API, many fields
+      ~> **Note:** Due to limitations of the Notebooks Runtime API, many fields
       in this resource do not properly detect drift. These fields will also not
       appear in state once imported.
-    # `ignore_read` prevents update ie destroy when testing.
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/notebooks_runtime.go
     properties:
-      softwareConfig: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
-      virtualMachine: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
+      virtualMachine.virtualMachineConfig.labels: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        diff_suppress_func: NotebooksRuntimeLabelDiffSuppress
+      virtualMachine.virtualMachineConfig.internalIpOnly: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
+      virtualMachine.virtualMachineConfig.metadata: !ruby/object:Overrides::Terraform::PropertyOverride
+        # API returns empty value.
+        default_from_api: true
+      virtualMachine.virtualMachineConfig.tags: !ruby/object:Overrides::Terraform::PropertyOverride
+        # API returns empty value.
+        default_from_api: true
+      virtualMachine.virtualMachineConfig.dataDisk.initializeParams.labels: !ruby/object:Overrides::Terraform::PropertyOverride
+        # API returns empty value.
+        default_from_api: true
+      virtualMachine.virtualMachineConfig.containerImages: !ruby/object:Overrides::Terraform::PropertyOverride
+        # API does not return this value.
+        diff_suppress_func: NotReturnedByAPIDiffSuppress
   Location: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride

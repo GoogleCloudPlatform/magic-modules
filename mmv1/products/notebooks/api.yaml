@@ -475,7 +475,9 @@ objects:
     create_url: projects/{{project}}/locations/{{location}}/runtimes?runtimeId={{name}}
     self_link: projects/{{project}}/locations/{{location}}/runtimes/{{name}}
     create_verb: :POST
-    input: true
+    # When set, if any parameter change, they will get recreated.
+    # Use wisely because any `update_url:` in the hierarchy below this will get ignored.
+    # input: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
