@@ -52,7 +52,7 @@ func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *Config) 
             Type: <%= resource_name -%>AssetType,
             Resource: &AssetResource{
                 Version: "<%= api_version -%>",
-                DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/<%= product_backend_name.downcase -%>/<%= api_version -%>/rest",
+                DiscoveryDocumentURI: assetName("https://www.googleapis.com/discovery/v1/apis/<%= product_backend_name.downcase -%>/<%= api_version -%>/rest"),
                 DiscoveryName: "<%= object.name -%>",
                 Data: obj,
             },
