@@ -193,6 +193,8 @@ module Provider
                         'third_party/terraform/utils/utils.go'],
                        ['converters/google/resources/kms_key_ring_iam.go',
                         'third_party/validator/kms_key_ring_iam.go'],
+                       ['converters/google/resources/dns_managed_zone.go',
+                        'third_party/validator/dns_managed_zone.go'],
                        ['converters/google/resources/kms_crypto_key_iam.go',
                         'third_party/validator/kms_crypto_key_iam.go']
                      ])
