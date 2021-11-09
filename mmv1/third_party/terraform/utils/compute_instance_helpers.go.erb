@@ -284,6 +284,7 @@ func expandNetworkInterfaces(d TerraformResourceData, config *Config) ([]*comput
 			AliasIpRanges:     expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
 			NicType:           data["nic_type"].(string),
 			StackType:         data["stack_type"].(string),
+			QueueCount:        data["queue_count"].(string),
 			Ipv6AccessConfigs: expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
 		}
 	}
