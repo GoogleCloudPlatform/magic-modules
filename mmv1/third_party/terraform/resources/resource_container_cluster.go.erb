@@ -742,7 +742,6 @@ func resourceContainerCluster() *schema.Resource {
 			},
 <% end -%>
 
-<% unless version == 'ga' -%>
 			"confidential_nodes": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -761,7 +760,6 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 
 			"master_auth": {
 				Type:        schema.TypeList,
@@ -1468,9 +1466,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 <% unless version == 'ga' -%>
 		NotificationConfig: expandNotificationConfig(d.Get("notification_config")),
 <% end -%>
-<% unless version == 'ga' -%>
 		ConfidentialNodes: expandConfidentialNodes(d.Get("confidential_nodes")),
-<% end -%>
 		ResourceLabels: expandStringMap(d, "resource_labels"),
 	}
 
@@ -1814,13 +1810,13 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("notification_config", flattenNotificationConfig(cluster.NotificationConfig)); err != nil {
 		return err
 	}
-	if err := d.Set("confidential_nodes", flattenConfidentialNodes(cluster.ConfidentialNodes)); err != nil {
-		return err
-	}
 	if err := d.Set("enable_l4_ilb_subsetting", cluster.NetworkConfig.EnableL4ilbSubsetting); err != nil {
 		return fmt.Errorf("Error setting enable_l4_ilb_subsetting: %s", err)
 	}
 <% end -%>
+	if err := d.Set("confidential_nodes", flattenConfidentialNodes(cluster.ConfidentialNodes)); err != nil {
+		return err
+	}
 	if err := d.Set("enable_tpu", cluster.EnableTpu); err != nil {
 		return fmt.Errorf("Error setting enable_tpu: %s", err)
 	}
@@ -3271,7 +3267,6 @@ func expandNotificationConfig(configured interface{}) *container.NotificationCon
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func expandConfidentialNodes(configured interface{}) *container.ConfidentialNodes {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -3282,7 +3277,6 @@ func expandConfidentialNodes(configured interface{}) *container.ConfidentialNode
 		Enabled: config["enabled"].(bool),
 	}
 }
-<% end -%>
 
 func expandMasterAuth(configured interface{}) *container.MasterAuth {
 	l := configured.([]interface{})
@@ -3569,7 +3563,6 @@ func flattenNotificationConfig(c *container.NotificationConfig) []map[string]int
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func flattenConfidentialNodes(c *container.ConfidentialNodes) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
@@ -3579,7 +3572,6 @@ func flattenConfidentialNodes(c *container.ConfidentialNodes) []map[string]inter
 	}
 	return result
 }
-<% end -%>
 
 func flattenNetworkPolicy(c *container.NetworkPolicy) []map[string]interface{} {
 	result := []map[string]interface{}{}
