@@ -73,7 +73,11 @@ you create the resource.`,
 				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"GCE_VM_IP_PORT", ""}, false),
-				Description:  `Type of network endpoints in this network endpoint group. Default value: "GCE_VM_IP_PORT" Possible values: ["GCE_VM_IP_PORT"]`,
+            <% if version == 'ga' -%>
+                Description:  `Type of network endpoints in this network endpoint group. Default value: "GCE_VM_IP_PORT" Possible values: ["GCE_VM_IP_PORT"]`,
+            <% else -%>
+                Description:  `Type of network endpoints in this network endpoint group. Default value: "GCE_VM_IP_PORT" Possible values: ["GCE_VM_IP_PORT", "SERVERLESS"]`,
+            <% end -%>
 				Default:      "GCE_VM_IP_PORT",
 			},
 			"subnetwork": {
@@ -106,6 +110,55 @@ you create the resource.`,
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+        <% unless version == 'ga' -%>
+            "serverless_deployment": {
+                Type:           schema.TypeList,
+                Optional:       true,
+                Description:    `Only valid when networkEndpointType is "SERVERLESS"`,
+                MaxItems:       1,
+                Elem: &schema.Resource{
+                    Schema: map[string]*schema.Schema{
+                        "platform": {
+                            Type:   schema.TypeString,
+                            Required: true,
+                            ValidateFunc: validation.StringInSlice(
+                                []string{"apigateway.googleapis.com",
+                                "appengine.googleapis.com",
+                                "cloudfunctions.googleapis.com",
+                                "run.googleapis.com"}
+                                ),
+                            Description: `The platform of the NEG backend target(s). Possible values:
+API Gateway: apigateway.googleapis.com, App Engine: appengine.googleapis.com,
+Cloud Functions: cloudfunctions.googleapis.com, Cloud Run: run.googleapis.com`,
+                        },
+
+                        "resource": {
+                            Type:         schema.TypeString,
+                            Required:     true,
+                            Description:  `The user-defined name of the workload/instance. This value must be provided explicitly or in the urlMask.
+The resource identified by this value is platform-specific and is as follows: API Gateway: The gateway ID, App Engine: The service name,
+Cloud Functions: The function name, Cloud Run: The service name`,
+                        },
+
+                        "version": {
+                            Type:         schema.TypeString,
+                            Optional:     true,
+                            Description:  `The optional resource version. The version identified by this value is platform-specific and is follows:
+API Gateway: Unused, App Engine: The service version, Cloud Functions: Unused, Cloud Run: The service tag`,
+                        },
+
+                        "url_mask": {
+                            Type:         schema.TypeString,
+                            Required:     true,
+                            Description:  `A template to parse platform-specific fields from a request URL. URL mask allows for routing to multiple resources
+on the same serverless platform without having to create multiple Network Endpoint Groups and backend resources.
+The fields parsed by this template are platform-specific and are as follows: API Gateway: The gateway ID,
+App Engine: The service and version, Cloud Functions: The function name, Cloud Run: The service and tag`,
+                        },
+                    },
+                },
+            },
+        <% end -%>
 		},
 		UseJSONNumber: true,
 	}
@@ -161,6 +214,14 @@ func resourceComputeNetworkEndpointGroupCreate(d *schema.ResourceData, meta inte
 	} else if v, ok := d.GetOkExists("zone"); !isEmptyValue(reflect.ValueOf(zoneProp)) && (ok || !reflect.DeepEqual(v, zoneProp)) {
 		obj["zone"] = zoneProp
 	}
+<% unless version == 'ga' -%>
+    serverlessDeploymentProp, err := expandComputeNetworkEndpointGroupServerlessDeployment(d.Get("serverless_deployment"), d, config)
+	if err != nil {
+		return err
+	} else if v, ok := d.GetOkExists("serverless_deployment"); !isEmptyValue(reflect.ValueOf(serverlessDeploymentProp)) && (ok || !reflect.DeepEqual(v, serverlessDeploymentProp)) {
+		obj["serverlessDeployment"] = serverlessDeploymentProp
+	}
+<% end -%>
 
 	url, err := replaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/zones/{{zone}}/networkEndpointGroups")
 	if err != nil {
@@ -266,6 +327,11 @@ func resourceComputeNetworkEndpointGroupRead(d *schema.ResourceData, meta interf
 	if err := d.Set("zone", flattenComputeNetworkEndpointGroupZone(res["zone"], d, config)); err != nil {
 		return fmt.Errorf("Error reading NetworkEndpointGroup: %s", err)
 	}
+<% unless version == 'ga' -%>
+    if err := d.Set("serverless_deployment", flattenComputeNetworkEndpointGroupServerlessDeployment(res["serverlessDeployment"], d, config)); err != nil {
+		return fmt.Errorf("Error reading NetworkEndpointGroup: %s", err)
+	}
+<% end -%>
 	if err := d.Set("self_link", ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
 		return fmt.Errorf("Error reading NetworkEndpointGroup: %s", err)
 	}
@@ -406,6 +472,22 @@ func flattenComputeNetworkEndpointGroupZone(v interface{}, d *schema.ResourceDat
 	return ConvertSelfLinkToV1(v.(string))
 }
 
+<% unless version == 'ga' -%>
+func flattenComputeNetworkEndpointGroupServerlessDeployment(v *compute.NetworkEndpointGroupServerlessDeployment, d *schema.ResourceData, config *Config) map[string]interface{} {
+    if v == nil {
+        return v
+    }
+    
+    data := map[string]interface{}{
+        "platform": v.Platform,
+        "resource": v.Resource,
+        "version":  v.Version,
+        "url_mask": v.UrlMask,
+    }
+	return data
+}
+<% end -%>
+
 func expandComputeNetworkEndpointGroupName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	return v, nil
 }
@@ -445,3 +527,19 @@ func expandComputeNetworkEndpointGroupZone(v interface{}, d TerraformResourceDat
 	}
 	return f.RelativeLink(), nil
 }
+
+<% unless version == 'ga' -%>
+func expandComputeNetworkEndpointGroupServerlessDeployment(v interface{}, d TerraformResourceData, config *Config) (*compute.NetworkEndpointGroupServerlessDeployment, error) {
+    if v == nil {
+        return v, nil
+    }
+
+    data := v.(map[string]interface{})
+    return &compute.NetworkEndpointGroupServerlessDeployment{
+        Platform:   data["platform"].(string),
+        Resource:   data["resource"].(string),
+        UrlMask:    data["url_mask"].(string),
+        Version:    data["version"].(string),
+    }, nil
+}
+<% end -%>
