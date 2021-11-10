@@ -268,6 +268,8 @@ region are guaranteed to support the same version.
 
 * `notification_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the [cluster upgrade notifications](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-upgrade-notifications) feature. Structure is [documented below](#nested_notification_config).
 
+* `confidential_nodes` - Configuration for [Confidential Nodes](https://cloud.google.com/kubernetes-engine/docs/how-to/confidential-gke-nodes) feature. Structure is documented below [documented below](#nested_confidential_nodes).
+
 * `pod_security_policy_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
     [PodSecurityPolicy](https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies) feature.
     Structure is [documented below](#nested_pod_security_policy_config).
@@ -627,6 +629,7 @@ ephemeral_storage_config {
     If unspecified, GCFS will not be enabled on the node pool. When enabling this feature you must specify `image_type = "COS_CONTAINERD"` and `node_version` from GKE versions 1.19 or later to use it.
     For GKE versions 1.19, 1.20, and 1.21, the recommended minimum `node_version` would be 1.19.15-gke.1300, 1.20.11-gke.1300, and 1.21.5-gke.1300 respectively.
     A `machine_type` that has more than 16 GiB of memory is also recommended.
+    GCFS must be enabled in order to use [image streaming](https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming).
     Structure is [documented below](#nested_gcfs_config).
 
 ```hcl
@@ -778,6 +781,10 @@ notification_config {
   }
 }
 ```
+
+<a name="nested_confidential_nodes"></a> The `confidential_nodes` block supports:
+
+* `enabled` (Required) - Enable Confidential Nodes for this cluster.
 
 <a name="nested_pod_security_policy_config"></a>The `pod_security_policy_config` block supports:
 

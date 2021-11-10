@@ -142,6 +142,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     import_format: ["{{instance_id}}/attachments/{{name}}", "{{instance_id}}/{{name}}"]
     delete_url: '{{instance_id}}/attachments/{{name}}'
+    mutex: "{{instance_id}}"
     examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "apigee_instance_attachment_basic"
@@ -186,7 +187,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       insert_minutes: 30
       delete_minutes: 30
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/apigee_environment_group_attachment.go.erb      
+      custom_import: templates/terraform/custom_import/apigee_environment_group_attachment.go.erb
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.

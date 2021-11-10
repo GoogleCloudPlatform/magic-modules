@@ -29,6 +29,7 @@
 package google
 
 import (
+	"time"
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	{{range $index, $pkg := .}}
 	{{$pkg.PackageName}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$pkg.DCLPackage}}"
@@ -41,6 +42,7 @@ func NewDCL{{$pkg.ProductType}}Client(config *Config, userAgent, billingProject 
 		dcl.WithHTTPClient(config.client),
 		dcl.WithUserAgent(userAgent),
 		dcl.WithLogger(dclLogger{}),
+		dcl.WithTimeout(30 * time.Minute),
 		dcl.WithBasePath(config.{{$pkg.BasePathIdentifier}}BasePath),
 	}
 

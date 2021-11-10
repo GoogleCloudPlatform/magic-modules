@@ -2431,6 +2431,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   SecurityPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   ServiceAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "service_attachment_basic"
@@ -2469,7 +2470,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       insert_minutes: 5
       update_minutes: 5
       delete_minutes: 5
-    create_url: projects/{{project}}/zones/{{zone}}/disks/{{source_disk}}/createSnapshot
+    create_url: PRE_CREATE_REPLACE_ME/createSnapshot
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "snapshot_basic"
@@ -2494,7 +2495,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       snapshotEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "kmsKeySelfLink"
       sourceDisk: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
       sourceDiskEncryptionKey: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       sourceDiskEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -2506,6 +2507,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: templates/terraform/decoders/snapshot.go.erb
+      pre_create: templates/terraform/pre_create/compute_snapshot_precreate_url.go.erb
   ManagedSslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
