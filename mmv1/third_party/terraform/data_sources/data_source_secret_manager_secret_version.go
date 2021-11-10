@@ -1,11 +1,10 @@
-<% autogen_exception -%>
 package google
 
 import (
+	"encoding/base64"
 	"fmt"
 	"log"
 	"regexp"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )

@@ -3,12 +3,9 @@ package google
 <% unless version == 'ga' -%>
 
 import (
-	"log"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleUpdateExample(t *testing.T) {

@@ -3,7 +3,9 @@ package google
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"log"
 	"testing"
 	"regexp"
 	"strconv"
@@ -223,7 +225,6 @@ func TestAccContainerCluster_withNotificationConfig(t *testing.T) {
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 	t.Parallel()
 
@@ -262,7 +263,6 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
@@ -304,6 +304,31 @@ func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 	})
 }
 <% end -%>
+
+func TestAccContainerCluster_withMasterAuthConfig_NoCert(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withMasterAuthNoCert(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_master_auth_no_cert", "master_auth.0.client_certificate", ""),
+				),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_master_auth_no_cert",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
 
 func TestAccContainerCluster_withAuthenticatorGroupsConfig(t *testing.T) {
 	t.Parallel()
@@ -2572,7 +2597,7 @@ resource "google_container_cluster" "notification_config" {
 `, clusterName)
 }
 <% end -%>
-<% unless version == 'ga' -%>
+
 func testAccContainerCluster_withConfidentialNodes(clusterName string, npName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "confidential_nodes" {
@@ -2620,7 +2645,6 @@ resource "google_container_cluster" "confidential_nodes" {
 }
 `, clusterName, npName)
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func testAccContainerCluster_withILBSubSetting(clusterName string, npName string) string {
@@ -3029,6 +3053,21 @@ resource "google_container_cluster" "with_version" {
 `, clusterName)
 }
 
+func testAccContainerCluster_withMasterAuthNoCert(clusterName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_master_auth_no_cert" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 3
+  master_auth {
+    client_certificate_config {
+      issue_client_certificate = false
+    }
+  }
+}
+`, clusterName)
+}
+
 func testAccContainerCluster_updateVersion(clusterName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -3346,7 +3385,7 @@ resource "google_container_cluster" "with_boot_disk_kms_key" {
 
     image_type = "COS_CONTAINERD"
 
-    boot_disk_kms_key = google_kms_crypto_key.example-key.self_link
+    boot_disk_kms_key = google_kms_crypto_key.example-key.id
   }
 }
 `, project, clusterName, clusterName, clusterName)
@@ -3386,7 +3425,7 @@ resource "google_compute_backend_service" "my-backend-service" {
   protocol  = "HTTP"
 
   backend {
-    group = element(google_container_cluster.primary.instance_group_urls, 1)
+    group = element(google_container_cluster.primary.node_pool[0].managed_instance_group_urls, 1)
   }
 
   health_checks = [google_compute_http_health_check.default.self_link]

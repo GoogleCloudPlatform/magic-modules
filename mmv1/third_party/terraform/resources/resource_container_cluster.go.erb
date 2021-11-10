@@ -12,13 +12,15 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/go-version"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 <% if version == "ga" -%>
 	"google.golang.org/api/container/v1"
 <% else -%>
-	"google.golang.org/api/container/v1beta1"
+	container "google.golang.org/api/container/v1beta1"
 <% end -%>
 )
 
@@ -740,7 +742,6 @@ func resourceContainerCluster() *schema.Resource {
 			},
 <% end -%>
 
-<% unless version == 'ga' -%>
 			"confidential_nodes": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -759,42 +760,19 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 
 			"master_auth": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				MaxItems:    1,
 				Computed:    true,
-				Deprecated:  `Basic authentication was removed for GKE cluster versions >= 1.19.`,
-				Description: `The authentication information for accessing the Kubernetes master. Some values in this block are only returned by the API if your service account has permission to get credentials for your GKE cluster. If you see an unexpected diff removing a username/password or unsetting your client cert, ensure you have the container.clusters.getCredentials permission.`,
+				Description: `The authentication information for accessing the Kubernetes master. Some values in this block are only returned by the API if your service account has permission to get credentials for your GKE cluster. If you see an unexpected diff unsetting your client cert, ensure you have the container.clusters.getCredentials permission.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"password": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							AtLeastOneOf: []string{"master_auth.0.password", "master_auth.0.username", "master_auth.0.client_certificate_config"},
-							Sensitive:    true,
-							Description:  `The password to use for HTTP basic authentication when accessing the Kubernetes master endpoint.`,
-						},
-
-						"username": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							AtLeastOneOf: []string{"master_auth.0.password", "master_auth.0.username", "master_auth.0.client_certificate_config"},
-							Description:  `The username to use for HTTP basic authentication when accessing the Kubernetes master endpoint. If not present basic auth will be disabled.`,
-						},
-
-						// Ideally, this would be Optional (and not Computed).
-						// In past versions (incl. 2.X series) of the provider
-						// though, being unset was considered identical to set
-						// and the issue_client_certificate value being true.
 						"client_certificate_config": {
 							Type:         schema.TypeList,
 							MaxItems:     1,
-							Optional:     true,
-							Computed:     true,
-							AtLeastOneOf: []string{"master_auth.0.password", "master_auth.0.username", "master_auth.0.client_certificate_config"},
+							Required:     true,
 							ForceNew:     true,
 							Description:  `Whether client certificate authorization is enabled for this cluster.`,
 							Elem: &schema.Resource{
@@ -958,14 +936,6 @@ func resourceContainerCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: `The IP address of this cluster's Kubernetes master.`,
-			},
-
-			"instance_group_urls": {
-				Type:        schema.TypeList,
-				Computed:    true,
-				Deprecated:  `Please use node_pool.instance_group_urls instead.`,
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: `List of instance group URLs which have been assigned to the cluster.`,
 			},
 
 			"master_version": {
@@ -1496,9 +1466,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 <% unless version == 'ga' -%>
 		NotificationConfig: expandNotificationConfig(d.Get("notification_config")),
 <% end -%>
-<% unless version == 'ga' -%>
 		ConfidentialNodes: expandConfidentialNodes(d.Get("confidential_nodes")),
-<% end -%>
 		ResourceLabels: expandStringMap(d, "resource_labels"),
 	}
 
@@ -1842,13 +1810,13 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("notification_config", flattenNotificationConfig(cluster.NotificationConfig)); err != nil {
 		return err
 	}
-	if err := d.Set("confidential_nodes", flattenConfidentialNodes(cluster.ConfidentialNodes)); err != nil {
-		return err
-	}
 	if err := d.Set("enable_l4_ilb_subsetting", cluster.NetworkConfig.EnableL4ilbSubsetting); err != nil {
 		return fmt.Errorf("Error setting enable_l4_ilb_subsetting: %s", err)
 	}
 <% end -%>
+	if err := d.Set("confidential_nodes", flattenConfidentialNodes(cluster.ConfidentialNodes)); err != nil {
+		return err
+	}
 	if err := d.Set("enable_tpu", cluster.EnableTpu); err != nil {
 		return fmt.Errorf("Error setting enable_tpu: %s", err)
 	}
@@ -1901,14 +1869,6 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if err := d.Set("private_cluster_config", flattenPrivateClusterConfig(cluster.PrivateClusterConfig)); err != nil {
-		return err
-	}
-
-	igUrls, err := getInstanceGroupUrlsFromManagerUrls(config, userAgent, cluster.InstanceGroupUrls)
-	if err != nil {
-		return err
-	}
-	if err := d.Set("instance_group_urls", igUrls); err != nil {
 		return err
 	}
 
@@ -2584,45 +2544,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 <% end -%>
 
-	if d.HasChange("master_auth") {
-		var req *container.SetMasterAuthRequest
-		if ma, ok := d.GetOk("master_auth"); ok {
-			req = &container.SetMasterAuthRequest{
-				Action: "SET_USERNAME",
-				Update: expandMasterAuth(ma),
-			}
-		} else {
-			req = &container.SetMasterAuthRequest{
-				Action: "SET_USERNAME",
-				Update: &container.MasterAuth{
-					Username: "admin",
-				},
-			}
-		}
-
-		updateF := func() error {
-			name := containerClusterFullName(project, location, clusterName)
-			clusterSetMasterAuthCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.SetMasterAuth(name, req)
-			if config.UserProjectOverride {
-				clusterSetMasterAuthCall.Header().Add("X-Goog-User-Project", project)
-			}
-			op, err := clusterSetMasterAuthCall.Do()
-			if err != nil {
-				return err
-			}
-
-			// Wait until it's updated
-			return containerOperationWait(config, op, project, location, "updating master auth", userAgent, d.Timeout(schema.TimeoutUpdate))
-		}
-
-		// Call update serially.
-		if err := lockedCall(lockKey, updateF); err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] GKE cluster %s: master auth has been updated", d.Id())
-	}
-
 	if d.HasChange("vertical_pod_autoscaling") {
 		if ac, ok := d.GetOk("vertical_pod_autoscaling"); ok {
 			req := &container.UpdateClusterRequest{
@@ -3025,30 +2946,6 @@ func containerClusterAwaitRestingState(config *Config, project, location, cluste
 	return state, err
 }
 
-// container engine's API returns the instance group manager's URL instead of the instance
-// group's URL in its responses, while the field is named as if it should have been the group
-// and not the manager. This shim should be supported for backwards compatibility reasons.
-func getInstanceGroupUrlsFromManagerUrls(config *Config, userAgent string, igmUrls []string) ([]string, error) {
-	instanceGroupURLs := make([]string, 0, len(igmUrls))
-	for _, u := range igmUrls {
-		if !instanceGroupManagerURL.MatchString(u) {
-			instanceGroupURLs = append(instanceGroupURLs, u)
-			continue
-		}
-		matches := instanceGroupManagerURL.FindStringSubmatch(u)
-		instanceGroupManager, err := config.NewComputeClient(userAgent).InstanceGroupManagers.Get(matches[1], matches[2], matches[3]).Do()
-		if isGoogleApiErrorWithCode(err, 404) {
-			// The IGM URL is stale; don't include it
-			continue
-		}
-		if err != nil {
-			return nil, fmt.Errorf("Error reading instance group manager returned as an instance group URL: %s", err)
-		}
-		instanceGroupURLs = append(instanceGroupURLs, instanceGroupManager.InstanceGroup)
-	}
-	return instanceGroupURLs, nil
-}
-
 func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -3370,7 +3267,6 @@ func expandNotificationConfig(configured interface{}) *container.NotificationCon
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func expandConfidentialNodes(configured interface{}) *container.ConfidentialNodes {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -3381,7 +3277,6 @@ func expandConfidentialNodes(configured interface{}) *container.ConfidentialNode
 		Enabled: config["enabled"].(bool),
 	}
 }
-<% end -%>
 
 func expandMasterAuth(configured interface{}) *container.MasterAuth {
 	l := configured.([]interface{})
@@ -3390,10 +3285,7 @@ func expandMasterAuth(configured interface{}) *container.MasterAuth {
 	}
 
 	masterAuth := l[0].(map[string]interface{})
-	result := &container.MasterAuth{
-		Username: masterAuth["username"].(string),
-		Password: masterAuth["password"].(string),
-	}
+	result := &container.MasterAuth{}
 
 	if v, ok := masterAuth["client_certificate_config"]; ok {
 		if len(v.([]interface{})) > 0 {
@@ -3671,7 +3563,6 @@ func flattenNotificationConfig(c *container.NotificationConfig) []map[string]int
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func flattenConfidentialNodes(c *container.ConfidentialNodes) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
@@ -3681,7 +3572,6 @@ func flattenConfidentialNodes(c *container.ConfidentialNodes) []map[string]inter
 	}
 	return result
 }
-<% end -%>
 
 func flattenNetworkPolicy(c *container.NetworkPolicy) []map[string]interface{} {
 	result := []map[string]interface{}{}
@@ -3972,8 +3862,6 @@ func flattenMasterAuth(ma *container.MasterAuth) []map[string]interface{} {
 	}
 	masterAuth := []map[string]interface{}{
 		{
-			"username":               ma.Username,
-			"password":               ma.Password,
 			"client_certificate":     ma.ClientCertificate,
 			"client_key":             ma.ClientKey,
 			"cluster_ca_certificate": ma.ClusterCaCertificate,
