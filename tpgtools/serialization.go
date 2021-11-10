@@ -68,6 +68,8 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 			return "google_compute_forwarding_rule", nil
 		case "ComputeGlobalForwardingRule":
 			return "google_compute_global_forwarding_rule", nil
+		case "ComputeServiceAttachment":
+			return "google_compute_service_attachment", nil
 		case "DataprocWorkflowTemplate":
 			return "google_dataproc_workflow_template", nil
 		case "EventarcTrigger":
@@ -102,6 +104,8 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 		return "google_compute_forwarding_rule", nil
 	case "ComputeGlobalForwardingRule":
 		return "google_compute_global_forwarding_rule", nil
+	case "ComputeServiceAttachment":
+		return "google_compute_service_attachment", nil
 	case "DataprocWorkflowTemplate":
 		return "google_dataproc_workflow_template", nil
 	case "EventarcTrigger":
@@ -135,6 +139,8 @@ func DCLToTerraformSampleName(service, resource string) (string, string, error) 
 		return "Compute", "FirewallPolicyRule", nil
 	case "computeforwardingrule":
 		return "Compute", "ForwardingRule", nil
+	case "computeserviceattachment":
+		return "Compute", "ServiceAttachment", nil
 	case "dataprocworkflowtemplate":
 		return "Dataproc", "WorkflowTemplate", nil
 	case "eventarctrigger":
@@ -211,6 +217,12 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 				return "", err
 			}
 			return ComputeGlobalForwardingRuleBetaAsHCL(*r, hasGAEquivalent)
+		case "ComputeServiceAttachment":
+			r := &computeBeta.ServiceAttachment{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ComputeServiceAttachmentBetaAsHCL(*r, hasGAEquivalent)
 		case "DataprocWorkflowTemplate":
 			r := &dataprocBeta.WorkflowTemplate{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -305,6 +317,12 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 			return "", err
 		}
 		return ComputeGlobalForwardingRuleAsHCL(*r, hasGAEquivalent)
+	case "ComputeServiceAttachment":
+		r := &compute.ServiceAttachment{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeServiceAttachmentAsHCL(*r, hasGAEquivalent)
 	case "DataprocWorkflowTemplate":
 		r := &dataproc.WorkflowTemplate{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -848,6 +866,95 @@ func convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelToHCL(r *com
 	if r.Value != nil {
 		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
 	}
+	return outputConfig + "}"
+}
+
+// ComputeServiceAttachmentBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeServiceAttachmentBetaAsHCL(r computeBeta.ServiceAttachment, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_compute_service_attachment\" \"output\" {\n"
+	if r.ConnectionPreference != nil {
+		outputConfig += fmt.Sprintf("\tconnection_preference = %#v\n", *r.ConnectionPreference)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.NatSubnets != nil {
+		outputConfig += "\tnat_subnets = ["
+		for _, v := range r.NatSubnets {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.TargetService != nil {
+		outputConfig += fmt.Sprintf("\ttarget_service = %#v\n", *r.TargetService)
+	}
+	if r.ConsumerAcceptLists != nil {
+		for _, v := range r.ConsumerAcceptLists {
+			outputConfig += fmt.Sprintf("\tconsumer_accept_lists %s\n", convertComputeServiceAttachmentBetaConsumerAcceptListsToHCL(&v))
+		}
+	}
+	if r.ConsumerRejectLists != nil {
+		outputConfig += "\tconsumer_reject_lists = ["
+		for _, v := range r.ConsumerRejectLists {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.EnableProxyProtocol != nil {
+		outputConfig += fmt.Sprintf("\tenable_proxy_protocol = %#v\n", *r.EnableProxyProtocol)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tregion = %#v\n", *r.Location)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertComputeServiceAttachmentBetaConsumerAcceptListsToHCL(r *computeBeta.ServiceAttachmentConsumerAcceptLists) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ProjectIdOrNum != nil {
+		outputConfig += fmt.Sprintf("\tproject_id_or_num = %#v\n", *r.ProjectIdOrNum)
+	}
+	if r.ConnectionLimit != nil {
+		outputConfig += fmt.Sprintf("\tconnection_limit = %#v\n", *r.ConnectionLimit)
+	}
+	return outputConfig + "}"
+}
+
+func convertComputeServiceAttachmentBetaConnectedEndpointsToHCL(r *computeBeta.ServiceAttachmentConnectedEndpoints) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertComputeServiceAttachmentBetaPscServiceAttachmentIdToHCL(r *computeBeta.ServiceAttachmentPscServiceAttachmentId) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
 	return outputConfig + "}"
 }
 
@@ -3080,6 +3187,95 @@ func convertComputeGlobalForwardingRuleMetadataFilterFilterLabelToHCL(r *compute
 	return outputConfig + "}"
 }
 
+// ComputeServiceAttachmentAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeServiceAttachmentAsHCL(r compute.ServiceAttachment, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_compute_service_attachment\" \"output\" {\n"
+	if r.ConnectionPreference != nil {
+		outputConfig += fmt.Sprintf("\tconnection_preference = %#v\n", *r.ConnectionPreference)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.NatSubnets != nil {
+		outputConfig += "\tnat_subnets = ["
+		for _, v := range r.NatSubnets {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.TargetService != nil {
+		outputConfig += fmt.Sprintf("\ttarget_service = %#v\n", *r.TargetService)
+	}
+	if r.ConsumerAcceptLists != nil {
+		for _, v := range r.ConsumerAcceptLists {
+			outputConfig += fmt.Sprintf("\tconsumer_accept_lists %s\n", convertComputeServiceAttachmentConsumerAcceptListsToHCL(&v))
+		}
+	}
+	if r.ConsumerRejectLists != nil {
+		outputConfig += "\tconsumer_reject_lists = ["
+		for _, v := range r.ConsumerRejectLists {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.EnableProxyProtocol != nil {
+		outputConfig += fmt.Sprintf("\tenable_proxy_protocol = %#v\n", *r.EnableProxyProtocol)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tregion = %#v\n", *r.Location)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertComputeServiceAttachmentConsumerAcceptListsToHCL(r *compute.ServiceAttachmentConsumerAcceptLists) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ProjectIdOrNum != nil {
+		outputConfig += fmt.Sprintf("\tproject_id_or_num = %#v\n", *r.ProjectIdOrNum)
+	}
+	if r.ConnectionLimit != nil {
+		outputConfig += fmt.Sprintf("\tconnection_limit = %#v\n", *r.ConnectionLimit)
+	}
+	return outputConfig + "}"
+}
+
+func convertComputeServiceAttachmentConnectedEndpointsToHCL(r *compute.ServiceAttachmentConnectedEndpoints) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertComputeServiceAttachmentPscServiceAttachmentIdToHCL(r *compute.ServiceAttachmentPscServiceAttachmentId) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
 // DataprocWorkflowTemplateAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -4746,6 +4942,73 @@ func convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelList(i inter
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabel(v))
+	}
+	return out
+}
+
+func convertComputeServiceAttachmentBetaConsumerAcceptLists(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"projectIdOrNum":  in["project_id_or_num"],
+		"connectionLimit": in["connection_limit"],
+	}
+}
+
+func convertComputeServiceAttachmentBetaConsumerAcceptListsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeServiceAttachmentBetaConsumerAcceptLists(v))
+	}
+	return out
+}
+
+func convertComputeServiceAttachmentBetaConnectedEndpoints(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"endpoint":        in["endpoint"],
+		"pscConnectionId": in["psc_connection_id"],
+		"status":          in["status"],
+	}
+}
+
+func convertComputeServiceAttachmentBetaConnectedEndpointsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeServiceAttachmentBetaConnectedEndpoints(v))
+	}
+	return out
+}
+
+func convertComputeServiceAttachmentBetaPscServiceAttachmentId(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"high": in["high"],
+		"low":  in["low"],
+	}
+}
+
+func convertComputeServiceAttachmentBetaPscServiceAttachmentIdList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeServiceAttachmentBetaPscServiceAttachmentId(v))
 	}
 	return out
 }
@@ -6777,6 +7040,73 @@ func convertComputeGlobalForwardingRuleMetadataFilterFilterLabelList(i interface
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertComputeGlobalForwardingRuleMetadataFilterFilterLabel(v))
+	}
+	return out
+}
+
+func convertComputeServiceAttachmentConsumerAcceptLists(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"projectIdOrNum":  in["project_id_or_num"],
+		"connectionLimit": in["connection_limit"],
+	}
+}
+
+func convertComputeServiceAttachmentConsumerAcceptListsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeServiceAttachmentConsumerAcceptLists(v))
+	}
+	return out
+}
+
+func convertComputeServiceAttachmentConnectedEndpoints(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"endpoint":        in["endpoint"],
+		"pscConnectionId": in["psc_connection_id"],
+		"status":          in["status"],
+	}
+}
+
+func convertComputeServiceAttachmentConnectedEndpointsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeServiceAttachmentConnectedEndpoints(v))
+	}
+	return out
+}
+
+func convertComputeServiceAttachmentPscServiceAttachmentId(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"high": in["high"],
+		"low":  in["low"],
+	}
+}
+
+func convertComputeServiceAttachmentPscServiceAttachmentIdList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeServiceAttachmentPscServiceAttachmentId(v))
 	}
 	return out
 }
