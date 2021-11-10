@@ -122,7 +122,7 @@ func Fetch<%= resource_name -%>IamPolicy(d TerraformResourceData, config *Config
 		<%= resource_name -%>IamUpdaterProducer,
 		d,
 		config,
-		assetName("//<%= product_backend_name.downcase  -%>.googleapis.com/{{<%= object.name.downcase -%>}}"),
+		"//<%= product_backend_name.downcase  -%>.googleapis.com/{{<%= object.name.downcase -%>}}",
 		<%= resource_name -%>IAMAssetType,
 	)
 }

@@ -52,6 +52,10 @@ module Api
       # typical of older GCP APIs.
       attr_reader :has_self_link
 
+      # [Optional] The validator "relative URI" of a resource, relative to the product
+      # base URL. Specific to defining the resource as a CAI asset.
+      attr_reader :validator_base_url
+
       # ====================
       # URL / HTTP Configuration
       # ====================
@@ -136,6 +140,7 @@ module Api
       super
       check :async, type: Api::Async
       check :base_url, type: String
+      check :validator_base_url, type: String, required: false
       check :create_url, type: String
       check :delete_url, type: String
       check :update_url, type: String
