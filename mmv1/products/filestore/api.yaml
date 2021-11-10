@@ -100,19 +100,12 @@ objects:
         name: 'createTime'
         description: Creation timestamp in RFC3339 text format.
         output: true
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'tier'
         description: |
           The service tier of the instance.
         required: true
         input: true
-        values:
-          - :TIER_UNSPECIFIED
-          - :STANDARD
-          - :PREMIUM
-          - :BASIC_HDD
-          - :BASIC_SSD
-          - :HIGH_SCALE_SSD
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
