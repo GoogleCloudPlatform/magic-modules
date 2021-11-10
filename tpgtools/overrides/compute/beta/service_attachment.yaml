@@ -1,0 +1,6 @@
+- type: EXCLUDE
+  field: region
+- type: CUSTOM_NAME
+  details:
+    name: region
+  field: location

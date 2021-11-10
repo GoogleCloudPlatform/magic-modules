@@ -1,0 +1,4 @@
+# optional test level config -- needed for updates basic.tf.tmpl def
+updates:
+- resource: ./basic_update0.tf.tmpl
+- resource: ./basic_update1.tf.tmpl
