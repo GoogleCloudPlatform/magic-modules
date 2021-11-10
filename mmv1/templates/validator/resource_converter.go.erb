@@ -23,7 +23,11 @@ import (
     properties = object.all_user_properties
     # See discussion on asset name here: https://github.com/GoogleCloudPlatform/magic-modules/pull/1520
     product_backend_name=@base_url.split('://')[1].split('.googleapis.com')[0]
-    asset_name_template = '//' + product_backend_name.downcase + '.googleapis.com/' + (object.validator_base_url || object.self_link || object.base_url + '/{{name}}')
+		validator_base_url = nil
+		if object.validator_base_url
+			validator_base_url = object.validator_base_url + '/{{name}}'
+		end
+    asset_name_template = '//' + product_backend_name.downcase + '.googleapis.com/' + (validator_base_url || object.self_link || object.base_url + '/{{name}}')
     version_regex = /\/(v\d[^\/]*)\//
     api_version = version_regex.match?(asset_name_template) ? version_regex.match(asset_name_template)[1] : @base_url.split("/")[-1]
     asset_name_template.gsub!(version_regex, '/')
