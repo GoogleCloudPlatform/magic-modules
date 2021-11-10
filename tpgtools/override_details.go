@@ -212,3 +212,7 @@ type ProductDocsSectionDetails struct {
 	DocsSection string
 }
 
+type CustomTimeoutDetails struct {
+	// The overriding Timeouts in Terraform
+	TimeoutMinutes int
+}
