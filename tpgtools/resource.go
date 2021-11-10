@@ -392,10 +392,22 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 		versionMetadata:      version,
 		Description:          schema.Description,
 		location:             location,
-		InsertTimeoutMinutes: 30,
-		UpdateTimeoutMinutes: 30,
-		DeleteTimeoutMinutes: 30,
+		InsertTimeoutMinutes: 10,
+		UpdateTimeoutMinutes: 10,
+		DeleteTimeoutMinutes: 10,
 		UseDCLID:             overrides.ResourceOverride(UseDCLID, location),
+	}
+
+	// Resource Override: Custom Timeout
+	ctd := CustomTimeoutDetails{}
+	ctdOk, err := overrides.ResourceOverrideWithDetails(CustomTimeout, &ctd, location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode custom timeout details: %v", err)
+	}
+	if ctdOk {
+		res.InsertTimeoutMinutes = ctd.TimeoutMinutes
+		res.UpdateTimeoutMinutes = ctd.TimeoutMinutes
+		res.DeleteTimeoutMinutes = ctd.TimeoutMinutes
 	}
 
 	crname := CustomResourceNameDetails{}
