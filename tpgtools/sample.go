@@ -213,7 +213,7 @@ func (s Sample) ReplaceReferences(d *Dependency) error {
 		var tfReference string
 		for _, dep := range s.DependencyList {
 			if dep.FileName == referenceFileName {
-				tfReference = dep.TerraformResourceType + "." + dep.HCLLocalName + "." + jsonToSnakeCase(idField)
+				tfReference = dep.TerraformResourceType + "." + dep.HCLLocalName + "." + idField
 				break
 			}
 		}

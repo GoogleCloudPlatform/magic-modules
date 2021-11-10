@@ -2431,7 +2431,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   SecurityPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   ServiceAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
-    exclude: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "service_attachment_basic"

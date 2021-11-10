@@ -392,23 +392,11 @@ func getSchemaExtensionMap(v interface{}) map[interface{}]interface{} {
 }
 
 func (p Property) DefaultDiffSuppress() *string {
-	if p.Computed {
-		return nil
-	}
 	switch p.Type.String() {
 	case SchemaTypeString:
+		// Field is reference to another resource
 		if _, ok := p.typ.Extension["x-dcl-references"]; ok {
-			// Field is reference to another resource.
 			dsf := "compareSelfLinkOrResourceName"
-			return &dsf
-		}
-	case SchemaTypeList:
-		if p.typ.Items == nil || len(p.typ.Items.Extension) == 0 {
-			return nil
-		}
-		if _, ok := p.typ.Items.Extension["x-dcl-references"]; ok {
-			// Field is reference to another resource.
-			dsf := "compareSelfLinkOrResourceNameList"
 			return &dsf
 		}
 	}
