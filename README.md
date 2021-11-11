@@ -14,7 +14,6 @@ Magic Modules generates GCP support for:
 
 * Terraform
 * Ansible
-* InSpec
 
 In addition, Magic Modules generates support for several companion
 features/tools:
@@ -194,7 +193,6 @@ tool;
 Tool             | Testing Guide
 -----------------|--------------
 ansible          | [instructions](https://docs.ansible.com/ansible/devel/dev_guide/testing.html)
-inspec           | [testing inspec-gcp](https://github.com/inspec/inspec-gcp/#test-inspec-gcp-resources)
 terraform        | [`google` provider testing guide](https://github.com/hashicorp/terraform-provider-google/blob/master/.github/CONTRIBUTING.md#tests)
 terraform (beta) | [`google-beta` provider testing guide](https://github.com/hashicorp/terraform-provider-google-beta/blob/master/.github/CONTRIBUTING.md#tests)
 
