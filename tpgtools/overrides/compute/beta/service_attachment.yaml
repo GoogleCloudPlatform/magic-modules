@@ -1,5 +1,7 @@
 - type: EXCLUDE
   field: region
+- type: EXCLUDE
+  field: id
 - type: CUSTOM_NAME
   details:
     name: region

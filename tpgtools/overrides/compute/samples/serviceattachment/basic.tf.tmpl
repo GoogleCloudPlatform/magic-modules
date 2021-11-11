@@ -39,7 +39,7 @@ resource "google_compute_region_backend_service" "internal" {
 
 resource "google_compute_subnetwork" "first_private_service_connect" {
   ip_cidr_range = "10.2.0.0/16"
-  name          = "{{compute_psc_subnetwork1}}"
+  name          = "{{compute-psc-subnetwork1}}"
   network       = google_compute_network.basic.self_link
   project       = "{{project}}"
   purpose       = "PRIVATE_SERVICE_CONNECT"
@@ -48,7 +48,7 @@ resource "google_compute_subnetwork" "first_private_service_connect" {
 
 resource "google_compute_subnetwork" "second_private_service_connect" {
   ip_cidr_range = "10.3.0.0/16"
-  name          = "{{compute_psc_subnetwork2}}"
+  name          = "{{compute-psc-subnetwork2}}"
   network       = google_compute_network.basic.self_link
   project       = "{{project}}"
   purpose       = "PRIVATE_SERVICE_CONNECT"
@@ -57,7 +57,7 @@ resource "google_compute_subnetwork" "second_private_service_connect" {
 
 resource "google_compute_subnetwork" "private" {
   ip_cidr_range = "10.4.0.0/16"
-  name          = "{{compute_private_subnetwork}}"
+  name          = "{{compute-private-subnetwork}}"
   network       = google_compute_network.basic.self_link
   project       = "{{project}}"
   purpose       = "PRIVATE"
@@ -65,7 +65,7 @@ resource "google_compute_subnetwork" "private" {
 }
 
 resource "google_compute_network" "basic" {
-  name                    = "{{compute_network}}"
+  name                    = "{{compute-network}}"
   auto_create_subnetworks = false
   project                 = "{{project}}"
 }

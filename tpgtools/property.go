@@ -396,23 +396,11 @@ func getSchemaExtensionMap(v interface{}) map[interface{}]interface{} {
 }
 
 func (p Property) DefaultDiffSuppress() *string {
-	if p.Computed {
-		return nil
-	}
 	switch p.Type.String() {
 	case SchemaTypeString:
 		if _, ok := p.typ.Extension["x-dcl-references"]; ok {
 			// Field is reference to another resource.
 			dsf := "compareSelfLinkOrResourceName"
-			return &dsf
-		}
-	case SchemaTypeList:
-		if p.typ.Items == nil || len(p.typ.Items.Extension) == 0 {
-			return nil
-		}
-		if _, ok := p.typ.Items.Extension["x-dcl-references"]; ok {
-			// Field is reference to another resource.
-			dsf := "compareSelfLinkOrResourceNameList"
 			return &dsf
 		}
 	}
@@ -644,7 +632,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			} else {
 				i := Type{typ: v.Items}
 				e := fmt.Sprintf("&schema.Schema{Type: schema.%s}", i.String())
-				if _, ok := v.Extension["x-dcl-references"]; ok {
+				if _, ok := v.Items.Extension["x-dcl-references"]; ok {
 					e = fmt.Sprintf("&schema.Schema{Type: schema.%s, DiffSuppressFunc: compareSelfLinkOrResourceName, }", i.String())
 				}
 				p.Elem = &e

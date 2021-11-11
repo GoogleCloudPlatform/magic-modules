@@ -2,3 +2,28 @@
 updates:
 - resource: ./basic_update0.tf.tmpl
 - resource: ./basic_update1.tf.tmpl
+variables:
+  - name: "org_id"
+    type: "org_id"
+  - name: "project"
+    type: "project"
+  - name: "region"
+    type: "region"
+  - name: "attachment"
+    type: "resource_name"
+  - name: "service"
+    type: "resource_name"
+  - name: "rule1"
+    type: "resource_name"
+  - name: "compute-psc-subnetwork1"
+    type: "resource_name"
+  - name: "compute-psc-subnetwork2"
+    type: "resource_name"
+  - name: "compute-private-subnetwork"
+    type: "resource_name"
+  - name: "compute-network"
+    type: "resource_name"
+  - name: "id1"
+    type: "resource_name"
+  - name: "id2"
+    type: "resource_name"
