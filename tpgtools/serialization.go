@@ -79,6 +79,8 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 			return "google_compute_forwarding_rule", nil
 		case "compute/global_forwarding_rule":
 			return "google_compute_global_forwarding_rule", nil
+		case "compute/service_attachment":
+			return "google_compute_service_attachment", nil
 		case "containeraws/cluster":
 			return "google_container_aws_cluster", nil
 		case "containeraws/node_pool":
@@ -133,6 +135,7 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 		return "google_compute_forwarding_rule", nil
 	case "compute/global_forwarding_rule":
 		return "google_compute_global_forwarding_rule", nil
+<<<<<<< HEAD
 	case "containeraws/cluster":
 		return "google_container_aws_cluster", nil
 	case "containeraws/node_pool":
@@ -144,6 +147,11 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 	case "containerazure/node_pool":
 		return "google_container_azure_node_pool", nil
 	case "dataproc/workflow_template":
+=======
+	case "ComputeServiceAttachment":
+		return "google_compute_service_attachment", nil
+	case "DataprocWorkflowTemplate":
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 		return "google_dataproc_workflow_template", nil
 	case "eventarc/trigger":
 		return "google_eventarc_trigger", nil
@@ -160,7 +168,48 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 	case "recaptchaenterprise/key":
 		return "google_recaptcha_enterprise_key", nil
 	default:
+<<<<<<< HEAD
 		return "", fmt.Errorf("Error retrieving Terraform name from DCL resource type: %s/%s not found", product, resource)
+=======
+		return "", fmt.Errorf("Error retrieving Terraform name from DCL resource type: %s not found", resourceType)
+	}
+
+}
+
+// DCLToTerraformSampleName converts a DCL resource name to the final tpgtools name
+// after overrides are applied.
+// e.g. cloudresourcemanager.project -> CloudResourceManagerProject
+func DCLToTerraformSampleName(service, resource string) (string, string, error) {
+	switch service + resource {
+	case "assuredworkloadsworkload":
+		return "AssuredWorkloads", "Workload", nil
+	case "cloudbuildworkerpool":
+		return "cloudbuild", "WorkerPool", nil
+	case "cloudresourcemanagerfolder":
+		return "CloudResourceManager", "Folder", nil
+	case "cloudresourcemanagerproject":
+		return "CloudResourceManager", "Project", nil
+	case "computefirewallpolicy":
+		return "Compute", "FirewallPolicy", nil
+	case "computefirewallpolicyassociation":
+		return "Compute", "FirewallPolicyAssociation", nil
+	case "computefirewallpolicyrule":
+		return "Compute", "FirewallPolicyRule", nil
+	case "computeforwardingrule":
+		return "Compute", "ForwardingRule", nil
+	case "computeserviceattachment":
+		return "Compute", "ServiceAttachment", nil
+	case "dataprocworkflowtemplate":
+		return "Dataproc", "WorkflowTemplate", nil
+	case "eventarctrigger":
+		return "Eventarc", "Trigger", nil
+	case "orgpolicypolicy":
+		return "OrgPolicy", "Policy", nil
+	case "privatecacertificatetemplate":
+		return "Privateca", "CertificateTemplate", nil
+	default:
+		return "", "", fmt.Errorf("Error retrieving Terraform sample name from DCL resource type: %s.%s not found", service, resource)
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	}
 
 }
@@ -227,6 +276,7 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 				return "", err
 			}
 			return ComputeGlobalForwardingRuleBetaAsHCL(*r, hasGAEquivalent)
+<<<<<<< HEAD
 		case "containeraws/cluster":
 			r := &containerawsBeta.Cluster{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -258,6 +308,15 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 			}
 			return ContainerAzureNodePoolBetaAsHCL(*r, hasGAEquivalent)
 		case "dataproc/workflow_template":
+=======
+		case "ComputeServiceAttachment":
+			r := &computeBeta.ServiceAttachment{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ComputeServiceAttachmentBetaAsHCL(*r, hasGAEquivalent)
+		case "DataprocWorkflowTemplate":
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 			r := &dataprocBeta.WorkflowTemplate{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
@@ -381,6 +440,7 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 			return "", err
 		}
 		return ComputeGlobalForwardingRuleAsHCL(*r, hasGAEquivalent)
+<<<<<<< HEAD
 	case "containeraws/cluster":
 		r := &containeraws.Cluster{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -412,6 +472,15 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 		}
 		return ContainerAzureNodePoolAsHCL(*r, hasGAEquivalent)
 	case "dataproc/workflow_template":
+=======
+	case "ComputeServiceAttachment":
+		r := &compute.ServiceAttachment{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeServiceAttachmentAsHCL(*r, hasGAEquivalent)
+	case "DataprocWorkflowTemplate":
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 		r := &dataproc.WorkflowTemplate{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
@@ -1008,12 +1077,17 @@ func convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelToHCL(r *com
 	return outputConfig + "}"
 }
 
+<<<<<<< HEAD
 // ContainerAwsClusterBetaAsHCL returns a string representation of the specified resource in HCL.
+=======
+// ComputeServiceAttachmentBetaAsHCL returns a string representation of the specified resource in HCL.
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
+<<<<<<< HEAD
 func ContainerAwsClusterBetaAsHCL(r containerawsBeta.Cluster, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_container_aws_cluster\" \"output\" {\n"
 	if v := convertContainerAwsClusterBetaAuthorizationToHCL(r.Authorization); v != "" {
@@ -1030,10 +1104,17 @@ func ContainerAwsClusterBetaAsHCL(r containerawsBeta.Cluster, hasGAEquivalent bo
 	}
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+=======
+func ComputeServiceAttachmentBetaAsHCL(r computeBeta.ServiceAttachment, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_compute_service_attachment\" \"output\" {\n"
+	if r.ConnectionPreference != nil {
+		outputConfig += fmt.Sprintf("\tconnection_preference = %#v\n", *r.ConnectionPreference)
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	}
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
+<<<<<<< HEAD
 	if v := convertContainerAwsClusterBetaNetworkingToHCL(r.Networking); v != "" {
 		outputConfig += fmt.Sprintf("\tnetworking %s\n", v)
 	}
@@ -1324,6 +1405,41 @@ func ContainerAwsNodePoolBetaAsHCL(r containerawsBeta.NodePool, hasGAEquivalent 
 	outputConfig += "}\n"
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+=======
+	if r.NatSubnets != nil {
+		outputConfig += "\tnat_subnets = ["
+		for _, v := range r.NatSubnets {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.TargetService != nil {
+		outputConfig += fmt.Sprintf("\ttarget_service = %#v\n", *r.TargetService)
+	}
+	if r.ConsumerAcceptLists != nil {
+		for _, v := range r.ConsumerAcceptLists {
+			outputConfig += fmt.Sprintf("\tconsumer_accept_lists %s\n", convertComputeServiceAttachmentBetaConsumerAcceptListsToHCL(&v))
+		}
+	}
+	if r.ConsumerRejectLists != nil {
+		outputConfig += "\tconsumer_reject_lists = ["
+		for _, v := range r.ConsumerRejectLists {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.EnableProxyProtocol != nil {
+		outputConfig += fmt.Sprintf("\tenable_proxy_protocol = %#v\n", *r.EnableProxyProtocol)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tregion = %#v\n", *r.Location)
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	}
 	formatted, err := formatHCL(outputConfig + "}")
 	if err != nil {
@@ -1336,20 +1452,33 @@ func ContainerAwsNodePoolBetaAsHCL(r containerawsBeta.NodePool, hasGAEquivalent 
 	return formatted, nil
 }
 
+<<<<<<< HEAD
 func convertContainerAwsNodePoolBetaAutoscalingToHCL(r *containerawsBeta.NodePoolAutoscaling) string {
+=======
+func convertComputeServiceAttachmentBetaConsumerAcceptListsToHCL(r *computeBeta.ServiceAttachmentConsumerAcceptLists) string {
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
+<<<<<<< HEAD
 	if r.MaxNodeCount != nil {
 		outputConfig += fmt.Sprintf("\tmax_node_count = %#v\n", *r.MaxNodeCount)
 	}
 	if r.MinNodeCount != nil {
 		outputConfig += fmt.Sprintf("\tmin_node_count = %#v\n", *r.MinNodeCount)
+=======
+	if r.ProjectIdOrNum != nil {
+		outputConfig += fmt.Sprintf("\tproject_id_or_num = %#v\n", *r.ProjectIdOrNum)
+	}
+	if r.ConnectionLimit != nil {
+		outputConfig += fmt.Sprintf("\tconnection_limit = %#v\n", *r.ConnectionLimit)
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	}
 	return outputConfig + "}"
 }
 
+<<<<<<< HEAD
 func convertContainerAwsNodePoolBetaConfigToHCL(r *containerawsBeta.NodePoolConfig) string {
 	if r == nil {
 		return ""
@@ -1731,6 +1860,9 @@ func convertContainerAzureClusterBetaNetworkingToHCL(r *containerazureBeta.Clust
 }
 
 func convertContainerAzureClusterBetaWorkloadIdentityConfigToHCL(r *containerazureBeta.ClusterWorkloadIdentityConfig) string {
+=======
+func convertComputeServiceAttachmentBetaConnectedEndpointsToHCL(r *computeBeta.ServiceAttachmentConnectedEndpoints) string {
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	if r == nil {
 		return ""
 	}
@@ -1738,6 +1870,7 @@ func convertContainerAzureClusterBetaWorkloadIdentityConfigToHCL(r *containerazu
 	return outputConfig + "}"
 }
 
+<<<<<<< HEAD
 // ContainerAzureNodePoolBetaAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -1793,10 +1926,14 @@ func ContainerAzureNodePoolBetaAsHCL(r containerazureBeta.NodePool, hasGAEquival
 }
 
 func convertContainerAzureNodePoolBetaAutoscalingToHCL(r *containerazureBeta.NodePoolAutoscaling) string {
+=======
+func convertComputeServiceAttachmentBetaPscServiceAttachmentIdToHCL(r *computeBeta.ServiceAttachmentPscServiceAttachmentId) string {
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
+<<<<<<< HEAD
 	if r.MaxNodeCount != nil {
 		outputConfig += fmt.Sprintf("\tmax_node_count = %#v\n", *r.MaxNodeCount)
 	}
@@ -1858,6 +1995,8 @@ func convertContainerAzureNodePoolBetaMaxPodsConstraintToHCL(r *containerazureBe
 	if r.MaxPodsPerNode != nil {
 		outputConfig += fmt.Sprintf("\tmax_pods_per_node = %#v\n", *r.MaxPodsPerNode)
 	}
+=======
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	return outputConfig + "}"
 }
 
@@ -5430,12 +5569,17 @@ func convertComputeGlobalForwardingRuleMetadataFilterFilterLabelToHCL(r *compute
 	return outputConfig + "}"
 }
 
+<<<<<<< HEAD
 // ContainerAwsClusterAsHCL returns a string representation of the specified resource in HCL.
+=======
+// ComputeServiceAttachmentAsHCL returns a string representation of the specified resource in HCL.
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
+<<<<<<< HEAD
 func ContainerAwsClusterAsHCL(r containeraws.Cluster, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_container_aws_cluster\" \"output\" {\n"
 	if v := convertContainerAwsClusterAuthorizationToHCL(r.Authorization); v != "" {
@@ -5452,10 +5596,17 @@ func ContainerAwsClusterAsHCL(r containeraws.Cluster, hasGAEquivalent bool) (str
 	}
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+=======
+func ComputeServiceAttachmentAsHCL(r compute.ServiceAttachment, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_compute_service_attachment\" \"output\" {\n"
+	if r.ConnectionPreference != nil {
+		outputConfig += fmt.Sprintf("\tconnection_preference = %#v\n", *r.ConnectionPreference)
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	}
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
+<<<<<<< HEAD
 	if v := convertContainerAwsClusterNetworkingToHCL(r.Networking); v != "" {
 		outputConfig += fmt.Sprintf("\tnetworking %s\n", v)
 	}
@@ -5746,6 +5897,41 @@ func ContainerAwsNodePoolAsHCL(r containeraws.NodePool, hasGAEquivalent bool) (s
 	outputConfig += "}\n"
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+=======
+	if r.NatSubnets != nil {
+		outputConfig += "\tnat_subnets = ["
+		for _, v := range r.NatSubnets {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.TargetService != nil {
+		outputConfig += fmt.Sprintf("\ttarget_service = %#v\n", *r.TargetService)
+	}
+	if r.ConsumerAcceptLists != nil {
+		for _, v := range r.ConsumerAcceptLists {
+			outputConfig += fmt.Sprintf("\tconsumer_accept_lists %s\n", convertComputeServiceAttachmentConsumerAcceptListsToHCL(&v))
+		}
+	}
+	if r.ConsumerRejectLists != nil {
+		outputConfig += "\tconsumer_reject_lists = ["
+		for _, v := range r.ConsumerRejectLists {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.EnableProxyProtocol != nil {
+		outputConfig += fmt.Sprintf("\tenable_proxy_protocol = %#v\n", *r.EnableProxyProtocol)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tregion = %#v\n", *r.Location)
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	}
 	formatted, err := formatHCL(outputConfig + "}")
 	if err != nil {
@@ -5758,20 +5944,33 @@ func ContainerAwsNodePoolAsHCL(r containeraws.NodePool, hasGAEquivalent bool) (s
 	return formatted, nil
 }
 
+<<<<<<< HEAD
 func convertContainerAwsNodePoolAutoscalingToHCL(r *containeraws.NodePoolAutoscaling) string {
+=======
+func convertComputeServiceAttachmentConsumerAcceptListsToHCL(r *compute.ServiceAttachmentConsumerAcceptLists) string {
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
+<<<<<<< HEAD
 	if r.MaxNodeCount != nil {
 		outputConfig += fmt.Sprintf("\tmax_node_count = %#v\n", *r.MaxNodeCount)
 	}
 	if r.MinNodeCount != nil {
 		outputConfig += fmt.Sprintf("\tmin_node_count = %#v\n", *r.MinNodeCount)
+=======
+	if r.ProjectIdOrNum != nil {
+		outputConfig += fmt.Sprintf("\tproject_id_or_num = %#v\n", *r.ProjectIdOrNum)
+	}
+	if r.ConnectionLimit != nil {
+		outputConfig += fmt.Sprintf("\tconnection_limit = %#v\n", *r.ConnectionLimit)
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	}
 	return outputConfig + "}"
 }
 
+<<<<<<< HEAD
 func convertContainerAwsNodePoolConfigToHCL(r *containeraws.NodePoolConfig) string {
 	if r == nil {
 		return ""
@@ -6153,6 +6352,9 @@ func convertContainerAzureClusterNetworkingToHCL(r *containerazure.ClusterNetwor
 }
 
 func convertContainerAzureClusterWorkloadIdentityConfigToHCL(r *containerazure.ClusterWorkloadIdentityConfig) string {
+=======
+func convertComputeServiceAttachmentConnectedEndpointsToHCL(r *compute.ServiceAttachmentConnectedEndpoints) string {
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	if r == nil {
 		return ""
 	}
@@ -6160,6 +6362,7 @@ func convertContainerAzureClusterWorkloadIdentityConfigToHCL(r *containerazure.C
 	return outputConfig + "}"
 }
 
+<<<<<<< HEAD
 // ContainerAzureNodePoolAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -6215,10 +6418,14 @@ func ContainerAzureNodePoolAsHCL(r containerazure.NodePool, hasGAEquivalent bool
 }
 
 func convertContainerAzureNodePoolAutoscalingToHCL(r *containerazure.NodePoolAutoscaling) string {
+=======
+func convertComputeServiceAttachmentPscServiceAttachmentIdToHCL(r *compute.ServiceAttachmentPscServiceAttachmentId) string {
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
+<<<<<<< HEAD
 	if r.MaxNodeCount != nil {
 		outputConfig += fmt.Sprintf("\tmax_node_count = %#v\n", *r.MaxNodeCount)
 	}
@@ -6280,6 +6487,8 @@ func convertContainerAzureNodePoolMaxPodsConstraintToHCL(r *containerazure.NodeP
 	if r.MaxPodsPerNode != nil {
 		outputConfig += fmt.Sprintf("\tmax_pods_per_node = %#v\n", *r.MaxPodsPerNode)
 	}
+=======
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	return outputConfig + "}"
 }
 
@@ -9198,54 +9407,94 @@ func convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelList(i inter
 	return out
 }
 
+<<<<<<< HEAD
 func convertContainerAwsClusterBetaAuthorization(i interface{}) map[string]interface{} {
+=======
+func convertComputeServiceAttachmentBetaConsumerAcceptLists(i interface{}) map[string]interface{} {
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
+<<<<<<< HEAD
 		"adminUsers": in["admin_users"],
 	}
 }
 
 func convertContainerAwsClusterBetaAuthorizationList(i interface{}) (out []map[string]interface{}) {
+=======
+		"projectIdOrNum":  in["project_id_or_num"],
+		"connectionLimit": in["connection_limit"],
+	}
+}
+
+func convertComputeServiceAttachmentBetaConsumerAcceptListsList(i interface{}) (out []map[string]interface{}) {
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
+<<<<<<< HEAD
 		out = append(out, convertContainerAwsClusterBetaAuthorization(v))
+=======
+		out = append(out, convertComputeServiceAttachmentBetaConsumerAcceptLists(v))
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	}
 	return out
 }
 
+<<<<<<< HEAD
 func convertContainerAwsClusterBetaAuthorizationAdminUsers(i interface{}) map[string]interface{} {
+=======
+func convertComputeServiceAttachmentBetaConnectedEndpoints(i interface{}) map[string]interface{} {
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
+<<<<<<< HEAD
 		"username": in["username"],
 	}
 }
 
 func convertContainerAwsClusterBetaAuthorizationAdminUsersList(i interface{}) (out []map[string]interface{}) {
+=======
+		"endpoint":        in["endpoint"],
+		"pscConnectionId": in["psc_connection_id"],
+		"status":          in["status"],
+	}
+}
+
+func convertComputeServiceAttachmentBetaConnectedEndpointsList(i interface{}) (out []map[string]interface{}) {
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
+<<<<<<< HEAD
 		out = append(out, convertContainerAwsClusterBetaAuthorizationAdminUsers(v))
+=======
+		out = append(out, convertComputeServiceAttachmentBetaConnectedEndpoints(v))
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	}
 	return out
 }
 
+<<<<<<< HEAD
 func convertContainerAwsClusterBetaControlPlane(i interface{}) map[string]interface{} {
+=======
+func convertComputeServiceAttachmentBetaPscServiceAttachmentId(i interface{}) map[string]interface{} {
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
+<<<<<<< HEAD
 		"awsServicesAuthentication": convertContainerAwsClusterBetaControlPlaneAwsServicesAuthentication(in["aws_services_authentication"]),
 		"configEncryption":          convertContainerAwsClusterBetaControlPlaneConfigEncryption(in["config_encryption"]),
 		"databaseEncryption":        convertContainerAwsClusterBetaControlPlaneDatabaseEncryption(in["database_encryption"]),
@@ -9263,11 +9512,20 @@ func convertContainerAwsClusterBetaControlPlane(i interface{}) map[string]interf
 }
 
 func convertContainerAwsClusterBetaControlPlaneList(i interface{}) (out []map[string]interface{}) {
+=======
+		"high": in["high"],
+		"low":  in["low"],
+	}
+}
+
+func convertComputeServiceAttachmentBetaPscServiceAttachmentIdList(i interface{}) (out []map[string]interface{}) {
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
+<<<<<<< HEAD
 		out = append(out, convertContainerAwsClusterBetaControlPlane(v))
 	}
 	return out
@@ -10030,6 +10288,9 @@ func convertContainerAzureNodePoolBetaMaxPodsConstraintList(i interface{}) (out 
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertContainerAzureNodePoolBetaMaxPodsConstraint(v))
+=======
+		out = append(out, convertComputeServiceAttachmentBetaPscServiceAttachmentId(v))
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	}
 	return out
 }
@@ -13343,54 +13604,94 @@ func convertComputeGlobalForwardingRuleMetadataFilterFilterLabelList(i interface
 	return out
 }
 
+<<<<<<< HEAD
 func convertContainerAwsClusterAuthorization(i interface{}) map[string]interface{} {
+=======
+func convertComputeServiceAttachmentConsumerAcceptLists(i interface{}) map[string]interface{} {
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
+<<<<<<< HEAD
 		"adminUsers": in["admin_users"],
 	}
 }
 
 func convertContainerAwsClusterAuthorizationList(i interface{}) (out []map[string]interface{}) {
+=======
+		"projectIdOrNum":  in["project_id_or_num"],
+		"connectionLimit": in["connection_limit"],
+	}
+}
+
+func convertComputeServiceAttachmentConsumerAcceptListsList(i interface{}) (out []map[string]interface{}) {
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
+<<<<<<< HEAD
 		out = append(out, convertContainerAwsClusterAuthorization(v))
+=======
+		out = append(out, convertComputeServiceAttachmentConsumerAcceptLists(v))
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	}
 	return out
 }
 
+<<<<<<< HEAD
 func convertContainerAwsClusterAuthorizationAdminUsers(i interface{}) map[string]interface{} {
+=======
+func convertComputeServiceAttachmentConnectedEndpoints(i interface{}) map[string]interface{} {
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
+<<<<<<< HEAD
 		"username": in["username"],
 	}
 }
 
 func convertContainerAwsClusterAuthorizationAdminUsersList(i interface{}) (out []map[string]interface{}) {
+=======
+		"endpoint":        in["endpoint"],
+		"pscConnectionId": in["psc_connection_id"],
+		"status":          in["status"],
+	}
+}
+
+func convertComputeServiceAttachmentConnectedEndpointsList(i interface{}) (out []map[string]interface{}) {
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
+<<<<<<< HEAD
 		out = append(out, convertContainerAwsClusterAuthorizationAdminUsers(v))
+=======
+		out = append(out, convertComputeServiceAttachmentConnectedEndpoints(v))
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	}
 	return out
 }
 
+<<<<<<< HEAD
 func convertContainerAwsClusterControlPlane(i interface{}) map[string]interface{} {
+=======
+func convertComputeServiceAttachmentPscServiceAttachmentId(i interface{}) map[string]interface{} {
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
+<<<<<<< HEAD
 		"awsServicesAuthentication": convertContainerAwsClusterControlPlaneAwsServicesAuthentication(in["aws_services_authentication"]),
 		"configEncryption":          convertContainerAwsClusterControlPlaneConfigEncryption(in["config_encryption"]),
 		"databaseEncryption":        convertContainerAwsClusterControlPlaneDatabaseEncryption(in["database_encryption"]),
@@ -13408,11 +13709,20 @@ func convertContainerAwsClusterControlPlane(i interface{}) map[string]interface{
 }
 
 func convertContainerAwsClusterControlPlaneList(i interface{}) (out []map[string]interface{}) {
+=======
+		"high": in["high"],
+		"low":  in["low"],
+	}
+}
+
+func convertComputeServiceAttachmentPscServiceAttachmentIdList(i interface{}) (out []map[string]interface{}) {
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
+<<<<<<< HEAD
 		out = append(out, convertContainerAwsClusterControlPlane(v))
 	}
 	return out
@@ -14175,6 +14485,9 @@ func convertContainerAzureNodePoolMaxPodsConstraintList(i interface{}) (out []ma
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertContainerAzureNodePoolMaxPodsConstraint(v))
+=======
+		out = append(out, convertComputeServiceAttachmentPscServiceAttachmentId(v))
+>>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 	}
 	return out
 }
