@@ -23,7 +23,7 @@ module Provider
       resources_folder = File.join(output_folder, 'converters/google/resources')
       FileUtils.mkdir_p(resources_folder)
 
-      @base_url = @version.validator_base_url || @version.base_url
+      @base_url = @version.cai_base_url || @version.base_url
       generate_objects(
         output_folder,
         types,

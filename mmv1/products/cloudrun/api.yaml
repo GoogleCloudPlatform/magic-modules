@@ -18,11 +18,11 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://{{location}}-run.googleapis.com/
-    validator_base_url: https://run.googleapis.com/
+    cai_base_url: https://run.googleapis.com/v1/
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://{{location}}-run.googleapis.com/
-    validator_base_url: https://run.googleapis.com/
+    cai_base_url: https://run.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 objects:
@@ -31,7 +31,7 @@ objects:
   name: DomainMapping
   kind: DomainMapping
   base_url: apis/domains.cloudrun.com/v1/namespaces/{{project}}/domainmappings
-  validator_base_url: projects/{{project}}/locations/{{location}}/DomainMappings
+  cai_base_url: projects/{{project}}/locations/{{location}}/DomainMappings
   references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -227,7 +227,7 @@ objects:
   name: Service
   kind: Service
   base_url: apis/serving.knative.dev/v1/namespaces/{{project}}/services
-  validator_base_url: projects/{{project}}/locations/{{location}}/services
+  cai_base_url: projects/{{project}}/locations/{{location}}/services
   references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
