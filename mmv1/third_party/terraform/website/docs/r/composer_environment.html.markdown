@@ -618,13 +618,12 @@ The `config` block supports:
   The configuration settings for Cloud Composer maintenance windows.
 
 * `workloads_config` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html),
-  Cloud Composer 2 only)
+  (Optional, Cloud Composer 2 only)
   The Kubernetes workloads configuration for GKE cluster associated with the
   Cloud Composer environment.
 
 * `environment_size` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  (Optional, Cloud Composer 2 only)
   The environment size controls the performance parameters of the managed
   Cloud Composer infrastructure that includes the Airflow database. Values for
   environment size are `ENVIRONMENT_SIZE_SMALL`, `ENVIRONMENT_SIZE_MEDIUM`,

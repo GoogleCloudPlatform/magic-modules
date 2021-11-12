@@ -363,6 +363,7 @@ func TestAccComposerEnvironment_withMaintenanceWindow(t *testing.T) {
     },
   })
 }
+<% end -%>
 
 func TestAccComposerEnvironment_ComposerV2(t *testing.T) {
   t.Parallel()
@@ -397,6 +398,7 @@ func TestAccComposerEnvironment_ComposerV2(t *testing.T) {
   })
 }
 
+<% unless version == "ga" -%>
 func TestAccComposerEnvironment_composerV2PrivateServiceConnect(t *testing.T) {
 	t.Parallel()
 
@@ -1005,6 +1007,7 @@ resource "google_compute_subnetwork" "test" {
 
 `, envName, network, subnetwork)
 }
+<% end -%>
 
 func testAccComposerEnvironment_composerV2(pid, envName, network, subnetwork string) string {
 	return fmt.Sprintf(`
@@ -1019,7 +1022,7 @@ locals {
 }
 resource "google_composer_environment" "test" {
 	name   = "%s"
-	region = "us-east1"
+	region = "us-central1"
 
 		config {
 			node_config {
@@ -1031,14 +1034,7 @@ resource "google_composer_environment" "test" {
     	}
 
   		software_config {
-  		  # image_version = local.matching_images[0]
-				image_version = "composer-2.0.0-preview.6-airflow-2.1.4"
-  		}
-
-  		maintenance_window {
-  			start_time 	= "2019-08-01T01:00:00Z"
-  			end_time 		= "2019-08-01T07:00:00Z"
-  			recurrence 	= "FREQ=WEEKLY;BYDAY=TU,WE"
+  		  image_version = local.matching_images[0]
   		}
 
   		workloads_config {
@@ -1080,7 +1076,7 @@ resource "google_compute_network" "test" {
 resource "google_compute_subnetwork" "test" {
 	name          = "%s"
 	ip_cidr_range = "10.2.0.0/16"
-	region        = "us-east1"
+	region        = "us-central1"
  	network       = google_compute_network.test.self_link
 	private_ip_google_access = true
 }
@@ -1088,7 +1084,7 @@ resource "google_compute_subnetwork" "test" {
 `, envName, network, subnetwork)
 }
 
-
+<% unless version == "ga" -%>
 func testAccComposerEnvironment_composerV2PrivateServiceConnect(envName, network, subnetwork string) string {
 	return fmt.Sprintf(`
 data "google_composer_image_versions" "all" {
