@@ -1,7 +1,7 @@
 - type: EXCLUDE
   field: region
 - type: EXCLUDE
-  field: id
+  field: service_attachment_id
 - type: CUSTOM_NAME
   details:
     name: region
