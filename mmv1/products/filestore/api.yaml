@@ -104,6 +104,7 @@ objects:
         name: 'tier'
         description: |
           The service tier of the instance.
+          Possible values include: STANDARD, PREMIUM, BASIC_HDD, BASIC_SSD, HIGH_SCALE_SSD and ENTERPRISE
         required: true
         input: true
       - !ruby/object:Api::Type::KeyValuePairs
