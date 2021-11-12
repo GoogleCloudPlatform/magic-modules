@@ -229,3 +229,56 @@ objects:
               output: true
               description: |
                 Sha1 Fingerprint of the certificate.
+      - !ruby/object:Api::Type::Integer
+        name: replicaCount
+        description: |
+          Optional. The number of replica nodes. Valid range for standard tier is [1-5]
+          and defaults to 2. Valid value for basic tier is 0 and defaults to 0.
+        min_version: beta
+      - !ruby/object:Api::Type::Array
+        name: nodes
+        description: |
+          Info per node
+        output: true
+        min_version: beta
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'id'
+              output: true
+              description: |
+                Node identifying string. e.g. 'node-0', 'node-1'
+            - !ruby/object:Api::Type::String
+              name: 'zone'
+              output: true
+              description: |
+                Location of the node.
+      - !ruby/object:Api::Type::String
+        name: readEndpoint
+        description: |
+          Hostname or IP address of the exposed readonly Redis endpoint. Standard tier only. 
+          Targets all healthy replica nodes in instance. Replication is asynchronous and replica 
+          nodes will exhibit some lag behind the primary. Write requests must target 'host'.
+        output: true
+        min_version: beta
+      - !ruby/object:Api::Type::Integer
+        name: readEndpointPort
+        description: |
+          The port number of the exposed readonly redis endpoint. Standard tier only. 
+          Write requests should target 'port'.
+        output: true
+        min_version: beta
+      - !ruby/object:Api::Type::Enum
+        name: readReplicasMode
+        description: |
+          Optional. Read replica mode.
+          If not set, Memorystore Redis backend will pick the mode based on other fields in the request.
+          - READ_REPLICAS_DISABLED: If disabled, read endpoint will not be provided and the 
+          instance cannot scale up or down the number of replicas.
+          - READ_REPLICAS_ENABLED: If enabled, read endpoint will be provided and the instance 
+          can scale up and down the number of replicas.
+        values:
+          - :READ_REPLICAS_DISABLED
+          - :READ_REPLICAS_ENABLED
+        default_value: :READ_REPLICAS_DISABLED
+        min_version: beta
