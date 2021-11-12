@@ -42,7 +42,7 @@ import (
 
 // DCLToTerraformReference converts a DCL resource name to the final tpgtools name
 // after overrides are applied
-func DCLToTerraformReference(resourceType, version string) (string, error) {
+func DCLToTerraformReference(resourceType string, version string) (string, error) {
 	{{- range $version, $resList := $.Resources   }}
 		{{- if not (eq $version.V "ga") }}
 	if version == "{{$version.V}}" {
@@ -51,13 +51,13 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 		case "{{$res.PathType}}":
 			return "{{$res.TerraformName}}", nil
 			{{- end }}
-		}	
+		}
 	}
 		{{- else }}
 	// If not found in sample version, fallthrough to GA
 	switch resourceType {
 	{{- range $res := $resList   }}
-	case "{{$res.PathType}}":
+	case "{{$res.SampleTypeName}}":
 		return "{{$res.TerraformName}}", nil
 	{{- end }}
 	default:
@@ -95,7 +95,7 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 		switch resourceType {
 			{{- range $res := $resList   }}
 		case "{{$res.PathType}}":
-			r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLTitle}}{}
+			r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLStructName}}{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
@@ -111,8 +111,8 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 	// If not found in sample version, fallthrough to GA
 	switch resourceType {
 			{{- range $res := $resList   }}
-	case "{{$res.PathType}}":
-		r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLTitle}}{}
+	case "{{$res.SampleTypeName}}":
+		r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLStructName}}{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
@@ -139,7 +139,7 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func {{ $res.PathType}}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLTitle}}, hasGAEquivalent bool) (string, error) {
+func {{ $res.PathType}}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLStructName}}, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"{{$res.TerraformName}}\" \"output\" {\n"
 		{{- range $field := $res.Properties}}
 			{{- if $field.Settable }}

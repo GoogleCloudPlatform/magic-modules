@@ -215,7 +215,7 @@ func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) erro
 	{{- end -}}
 {{ end }}
 
-	obj := &{{$.Package}}.{{$.DCLTitle}}{
+	obj := &{{$.Package}}.{{$.DCLStructName}}{
 {{- range $v := .Properties }}
 	{{- if and ($v.Settable) ($v.StateGetter) }}
 	{{$v.PackageName}}: {{$v.StateGetter}},
@@ -324,7 +324,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 	{{- end -}}
 {{ end }}
 
-	obj := &{{$.Package}}.{{$.DCLTitle}}{
+	obj := &{{$.Package}}.{{$.DCLStructName}}{
 {{- range $v := .Properties }}
 	{{- if ($v.StateGetter) }}
 	{{$v.PackageName}}: {{$v.StateGetter}},
@@ -382,7 +382,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	{{- end -}}
 {{ end }}
 
-	obj := &{{$.Package}}.{{$.DCLTitle}}{
+	obj := &{{$.Package}}.{{$.DCLStructName}}{
 {{- range $v := .Properties }}
 	{{- if ($v.StateGetter) }}
 	{{$v.PackageName}}: {{$v.StateGetter}},
@@ -392,7 +392,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 
 {{- if $.StateHint }}
   // Construct state hint from old values
-  old := &{{$.Package}}.{{$.DCLTitle}}{
+  old := &{{$.Package}}.{{$.DCLStructName}}{
   {{- range $v := .Properties }}
     {{- if ($v.StateGetter) }}
     {{$v.PackageName}}: {{$v.ChangeStateGetter}},
@@ -459,7 +459,7 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 	{{- end -}}
 {{ end }}
 
-	obj := &{{$.Package}}.{{$.DCLTitle}}{
+	obj := &{{$.Package}}.{{$.DCLStructName}}{
 {{- range $v := .Properties }}
 	{{- if ($v.StateGetter) }}
 	{{$v.PackageName}}: {{$v.StateGetter}},

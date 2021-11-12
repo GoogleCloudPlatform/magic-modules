@@ -364,10 +364,80 @@ var translationMap = map[string]translationIndex{
 		contextKey:   "project_name",
 		contextValue: "getTestProjectFromEnv()",
 	},
+	"project_number": {
+		docsValue:    "my-project-number",
+		contextKey:   "project_number",
+		contextValue: "getTestProjectNumberFromEnv()",
+	},
 	"customer_id": {
 		docsValue:    "A01b123xz",
 		contextKey:   "cust_id",
 		contextValue: "getTestCustIdFromEnv(t)",
+	},
+	// Begin a long list of multicloud-only values which are not going to see reuse.
+	// We can hardcode fake values because we are
+	// always going to use the no-provisioning mode for unit testing, of these resources
+	// where we don't have to actually have a real AWS account.
+
+	"aws_account_id": {
+		docsValue:    "012345678910",
+		contextKey:   "aws_acct_id",
+		contextValue: `"111111111111"`,
+	},
+	"aws_database_encryption_key": {
+		docsValue:    "12345678-1234-1234-1234-123456789111",
+		contextKey:   "aws_db_key",
+		contextValue: `"00000000-0000-0000-0000-17aad2f0f61f"`,
+	},
+	"aws_region": {
+		docsValue:    "my-aws-region",
+		contextKey:   "aws_region",
+		contextValue: `"us-west-2"`,
+	},
+	"aws_security_group": {
+		docsValue:    "sg-00000000000000000",
+		contextKey:   "aws_sg",
+		contextValue: `"sg-0b3f63cb91b247628"`,
+	},
+	"aws_volume_encryption_key": {
+		docsValue:    "12345678-1234-1234-1234-123456789111",
+		contextKey:   "aws_vol_key",
+		contextValue: `"00000000-0000-0000-0000-17aad2f0f61f"`,
+	},
+	"aws_vpc": {
+		docsValue:    "vpc-00000000000000000",
+		contextKey:   "aws_vpc",
+		contextValue: `"vpc-0b3f63cb91b247628"`,
+	},
+	"aws_subnet": {
+		docsValue:    "subnet-00000000000000000",
+		contextKey:   "aws_subnet",
+		contextValue: `"subnet-0b3f63cb91b247628"`,
+	},
+	"azure_application": {
+		docsValue:    "12345678-1234-1234-1234-123456789111",
+		contextKey:   "azure_app",
+		contextValue: `"00000000-0000-0000-0000-17aad2f0f61f"`,
+	},
+	"azure_subscription": {
+		docsValue:    "12345678-1234-1234-1234-123456789111",
+		contextKey:   "azure_sub",
+		contextValue: `"00000000-0000-0000-0000-17aad2f0f61f"`,
+	},
+	"azure_ad_tenant": {
+		docsValue:    "12345678-1234-1234-1234-123456789111",
+		contextKey:   "azure_tenant",
+		contextValue: `"00000000-0000-0000-0000-17aad2f0f61f"`,
+	},
+	"azure_proxy_config_secret_version": {
+		docsValue:    "0000000000000000000000000000000000",
+		contextKey:   "azure_config_secret",
+		contextValue: `"07d4b1f1a7cb4b1b91f070c30ae761a1"`,
+	},
+	"byo_multicloud_prefix": {
+		docsValue:    "my-",
+		contextKey:   "byo_prefix",
+		contextValue: `"mmv2"`,
 	},
 }
 
@@ -384,13 +454,17 @@ func (sub *Variable) translateValue(isDocs bool) string {
 			return translation.docsValue
 		}
 		if sub.Type != "resource_name" {
-			glog.Exitf("Cannot generte docs for variable of type %q.", sub.Type)
+			glog.Exitf("Cannot generate docs for variable of type %q.", sub.Type)
 		}
 		return value
 	}
 
 	if hasTranslation {
 		return fmt.Sprintf("%%{%s}", translation.contextKey)
+	}
+
+	if sub.Type != "resource_name" {
+		glog.Exitf("Cannot generate sample test with variable of type %q - please add to sample.go's translationMap.", sub.Type)
 	}
 
 	// Use '_' if already present, or '-' otherwise (some APIs require '-').
