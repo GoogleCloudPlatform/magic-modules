@@ -447,3 +447,10 @@ security_policy:
 
 memcache_instance:
   name: mem-instance
+
+accelerator_type:
+  name: accelerator_id
+
+global_operation:
+  name: operation-1635274037755-5cf45e8217d56-c081cd9a-c3ea7346
+  operationType: "compute.externalVpnGateways.insert"

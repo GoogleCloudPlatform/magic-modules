@@ -5,6 +5,15 @@ import (
 	"reflect"
 )
 
+const ServiceUsageAssetType string = "serviceusage.googleapis.com/Service"
+
+func resourceConverterServiceUsage() ResourceConverter {
+	return ResourceConverter{
+		AssetType: ServiceUsageAssetType,
+		Convert:   GetServiceUsageCaiObject,
+	}
+}
+
 func GetServiceUsageCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//serviceusage.googleapis.com/projects/{{project}}/services/{{service}}")
 	if err != nil {
@@ -13,7 +22,7 @@ func GetServiceUsageCaiObject(d TerraformResourceData, config *Config) ([]Asset,
 	if obj, err := GetServiceUsageApiObject(d, config); err == nil {
 		return []Asset{{
 			Name: name,
-			Type: "serviceusage.googleapis.com/Service",
+			Type: ServiceUsageAssetType,
 			Resource: &AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/serviceusage/v1/rest",

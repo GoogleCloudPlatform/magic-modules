@@ -16,6 +16,15 @@ import (
 	"google.golang.org/api/storage/v1"
 )
 
+const StorageBucketAssetType string = "storage.googleapis.com/Bucket"
+
+func resourceConverterStorageBucket() ResourceConverter {
+	return ResourceConverter{
+		AssetType: StorageBucketAssetType,
+		Convert:   GetStorageBucketCaiObject,
+	}
+}
+
 func GetStorageBucketCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//storage.googleapis.com/{{name}}")
 	if err != nil {
@@ -24,7 +33,7 @@ func GetStorageBucketCaiObject(d TerraformResourceData, config *Config) ([]Asset
 	if obj, err := GetStorageBucketApiObject(d, config); err == nil {
 		return []Asset{{
 			Name: name,
-			Type: "storage.googleapis.com/Bucket",
+			Type: StorageBucketAssetType,
 			Resource: &AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/storage/v1/rest",
@@ -159,7 +168,7 @@ func expandBucketLogging(configured interface{}) *storage.BucketLogging {
 
 func expandBucketVersioning(configured interface{}) *storage.BucketVersioning {
 	versionings := configured.([]interface{})
-	if len(versionings) == 0 || versionings[0] == nil  {
+	if len(versionings) == 0 || versionings[0] == nil {
 		return nil
 	}
 

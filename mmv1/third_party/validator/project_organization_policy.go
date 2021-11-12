@@ -7,6 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+func resourceConverterProjectOrgPolicy() ResourceConverter {
+	return ResourceConverter{
+		AssetType:         "cloudresourcemanager.googleapis.com/Project",
+		Convert:           GetProjectOrgPolicyCaiObject,
+		MergeCreateUpdate: MergeProjectOrgPolicy,
+	}
+}
+
 func GetProjectOrgPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project}}")
 	if err != nil {

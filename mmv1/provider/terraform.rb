@@ -315,5 +315,13 @@ module Provider
         "#{product_name}_#{name}"
       end
     end
+
+    # Returns the extension for DCL packages for the given version. This is needed
+    # as the DCL uses "alpha" for preview resources, while we use "private"
+    def dcl_version(version)
+      return '' if version == 'ga'
+      return '/beta' if version == 'beta'
+      return '/alpha' if version == 'private'
+    end
   end
 end

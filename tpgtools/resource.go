@@ -185,12 +185,6 @@ func (r Resource) TerraformName() string {
 	return "google_" + r.Path()
 }
 
-// Type is the title-cased name of a resource, for printing information about
-// the type". For example, "Instance".
-func (r Resource) Type() string {
-	return snakeToTitleCase(r.DCLName())
-}
-
 // PathType is the title-cased name of a resource preceded by its package,
 // often used to namespace functions. For example, "RedisInstance".
 func (r Resource) PathType() string {
@@ -207,6 +201,12 @@ func (r Resource) Package() string {
 // "NetworkServices".
 func (r Resource) ProductType() string {
 	return r.productMetadata.ProductType()
+}
+
+// DocsSection is *usuallu* the title-cased product name of a resource. For example,
+// "NetworkServices" - but subject to overrides.
+func (r Resource) DocsSection() string {
+	return r.productMetadata.DocsSection()
 }
 
 // ProductType is the snakecase product name of a resource. For example,
@@ -657,7 +657,7 @@ func (r Resource) getSamples(docs bool) []Sample {
 }
 
 func (r *Resource) getSampleAccessoryFolder() string {
-	resourceType := strings.ToLower(r.Type())
+	resourceType := strings.ToLower(r.DCLTitle())
 	packageName := strings.ToLower(r.productMetadata.PackageName)
 	sampleAccessoryFolder := path.Join(*tPath, packageName, "samples", resourceType)
 	return sampleAccessoryFolder
@@ -708,12 +708,11 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 			glog.Exit(err)
 		}
 
-		hasGA := false
 		versionMatch := false
 
 		// if no versions provided assume all versions
 		if len(sample.Versions) <= 0 {
-			hasGA = true
+			sample.HasGAEquivalent = true
 			versionMatch = true
 		} else {
 			for _, v := range sample.Versions {
@@ -721,7 +720,7 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 					versionMatch = true
 				}
 				if v == "ga" {
-					hasGA = true
+					sample.HasGAEquivalent = true
 				}
 			}
 		}
@@ -739,7 +738,6 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 			sample.Name = &sampleName
 		}
 		sample.TestSlug = snakeToTitleCase(sampleName) + "HandWritten"
-		sample.HasGAEquivalent = hasGA
 		samples = append(samples, sample)
 	}
 
@@ -750,7 +748,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 	sampleAccessoryFolder := r.getSampleAccessoryFolder()
 	packagePath := r.productMetadata.PackagePath
 	version := r.versionMetadata.V
-	resourceType := r.Type()
+	resourceType := r.DCLTitle()
 	sampleFriendlyMetaPath := path.Join(sampleAccessoryFolder, "meta.yaml")
 	samples := []Sample{}
 
@@ -759,7 +757,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 	}
 
 	// Samples appear in the root product folder
-	packagePath = strings.Split(packagePath, "beta")[0]
+	packagePath = strings.Split(packagePath, "/")[0]
 	samplesPath := path.Join(*fPath, packagePath, "samples")
 	files, err := ioutil.ReadDir(samplesPath)
 	if err != nil {
@@ -791,13 +789,12 @@ func (r *Resource) loadDCLSamples() []Sample {
 		}
 
 		versionMatch := false
-		hasGA := false
 		for _, v := range sample.Versions {
 			if v == version {
 				versionMatch = true
 			}
 			if v == "ga" {
-				hasGA = true
+				sample.HasGAEquivalent = true
 			}
 		}
 
@@ -807,7 +804,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 
 		if !versionMatch {
 			continue
-		} else if primaryResourceName != resourceType {
+		} else if !strings.EqualFold(primaryResourceName, resourceType) {
 			glog.Errorf("skipping %s since no match with %s.", primaryResourceName, resourceType)
 			continue
 		}
@@ -825,7 +822,6 @@ func (r *Resource) loadDCLSamples() []Sample {
 		}
 		sample.DependencyList = dependencies
 		sample.TestSlug = sampleNameToTitleCase(*sample.Name)
-		sample.HasGAEquivalent = hasGA
 		samples = append(samples, sample)
 	}
 

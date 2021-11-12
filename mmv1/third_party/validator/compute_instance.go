@@ -17,6 +17,15 @@ import (
 	"google.golang.org/api/googleapi"
 )
 
+const ComputeInstanceAssetType string = "compute.googleapis.com/Instance"
+
+func resourceConverterComputeInstance() ResourceConverter {
+	return ResourceConverter{
+		AssetType: ComputeInstanceAssetType,
+		Convert:   GetComputeInstanceCaiObject,
+	}
+}
+
 func GetComputeInstanceCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//compute.googleapis.com/projects/{{project}}/zones/{{zone}}/instances/{{name}}")
 	if err != nil {
@@ -25,7 +34,7 @@ func GetComputeInstanceCaiObject(d TerraformResourceData, config *Config) ([]Ass
 	if obj, err := GetComputeInstanceApiObject(d, config); err == nil {
 		return []Asset{{
 			Name: name,
-			Type: "compute.googleapis.com/Instance",
+			Type: ComputeInstanceAssetType,
 			Resource: &AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",

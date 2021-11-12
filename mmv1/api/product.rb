@@ -46,6 +46,12 @@ module Api
     # For example: `https://www.googleapis.com/compute/v1/`
     attr_reader :base_url
 
+    # A function reference designed for the rare case where you
+    # need to use retries in operation calls. Used for the service api
+    # as it enables itself (self referential) and can result in occasional
+    # failures on operation_get. see github.com/hashicorp/terraform-provider-google/issues/9489
+    attr_reader :operation_retry
+
     # The APIs required to be enabled for this product.
     # Usually just the product's API
     attr_reader :apis_required
@@ -59,6 +65,7 @@ module Api
       check :objects, type: Array, item_type: Api::Resource, required: true
       check :scopes, type: Array, item_type: String, required: true
       check :apis_required, type: Array, item_type: Api::Product::ApiReference
+      check :operation_retry, type: String
 
       check :async, type: Api::Async
 
