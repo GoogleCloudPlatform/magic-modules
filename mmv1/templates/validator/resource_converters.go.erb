@@ -56,6 +56,7 @@ func ResourceConverters() map[string][]ResourceConverter {
 		"google_kms_key_ring":                             {resourceConverterKMSKeyRing()},
 		"google_filestore_instance":                       {resourceConverterFilestoreInstance()},
 		"google_access_context_manager_service_perimeter": {resourceConverterAccessContextManagerServicePerimeter()},
+		"google_monitoring_notification_channel":          {resourceConverterMonitoringNotificationChannel()},
         <% products.each do |product| -%>
             <% (product[:definitions].objects || []).each do |object| -%>
                 <% if object.min_version.name == "ga" -%>
