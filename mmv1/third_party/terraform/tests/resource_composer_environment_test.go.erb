@@ -1034,6 +1034,7 @@ resource "google_composer_environment" "test" {
   			cloud_composer_network_ipv4_cidr_block 	= "10.3.192.0/24"
         master_ipv4_cidr_block 									= "172.16.194.0/23"
         cloud_sql_ipv4_cidr_block 							= "10.3.224.0/20"
+				cloud_composer_connection_subnetwork		= "projects/%s/regions/us-central1/subnetworks/default"  # consider using same value as node_config.subnetwork if that one doesn't work
   		}
   	}
 
@@ -1052,7 +1053,7 @@ resource "google_compute_subnetwork" "test" {
 	private_ip_google_access = true
 }
 
-`, envName, network, subnetwork)
+`, envName, envName, network, subnetwork)
 }
 
 <% end -%>
