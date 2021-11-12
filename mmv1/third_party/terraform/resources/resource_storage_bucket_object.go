@@ -89,9 +89,18 @@ func resourceStorageBucketObject() *schema.Resource {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ForceNew:      true,
-				ConflictsWith: []string{"source"},
+				ConflictsWith: []string{"source", "content_base64"},
 				Sensitive:     true,
-				Description:   `Data as string to be uploaded. Must be defined if source is not. Note: The content field is marked as sensitive. To view the raw contents of the object, please define an output.`,
+				Description:   `Data as string to be uploaded. Must be defined if source and content_base64 are not. Note: The content field is marked as sensitive. To view the raw contents of the object, please define an output.`,
+			},
+
+			"content_base64": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"source", "content"},
+				Sensitive:     true,
+				Description:   `Data as base64 encoded string to be uploaded. Must be defined if source and content are not. Note: The content_base64 field is marked as sensitive. To view the raw contents of the object, please define an output.`,
 			},
 
 			"crc32c": {
@@ -110,8 +119,8 @@ func resourceStorageBucketObject() *schema.Resource {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ForceNew:      true,
-				ConflictsWith: []string{"content"},
-				Description:   `A path to the data you want to upload. Must be defined if content is not.`,
+				ConflictsWith: []string{"content", "content_base64"},
+				Description:   `A path to the data you want to upload. Must be defined if content and content_base64 are not.`,
 			},
 
 			// Detect changes to local file or changes made outside of Terraform to the file stored on the server.
@@ -136,6 +145,13 @@ func resourceStorageBucketObject() *schema.Resource {
 
 					if content, ok := d.GetOkExists("content"); ok {
 						localMd5Hash = getContentMd5Hash([]byte(content.(string)))
+					}
+
+					if content_base64, ok := d.GetOkExists("content_base64"); ok {
+						decoded_content, err := base64.StdEncoding.DecodeString(content_base64.(string))
+						if err == nil {
+							localMd5Hash = getContentMd5Hash(decoded_content)
+						}
 					}
 
 					// If `source` or `content` is dynamically set, both field will be empty.
@@ -284,8 +300,14 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 		}
 	} else if v, ok := d.GetOk("content"); ok {
 		media = bytes.NewReader([]byte(v.(string)))
+	} else if v, ok := d.GetOk("content_base64"); ok {
+		decoded_content, err := base64.StdEncoding.DecodeString(v.(string))
+		if err != nil {
+			return fmt.Errorf("Failed to decode (base64) content_base64, expecting valid base64 string")
+		}
+		media = bytes.NewReader(decoded_content)
 	} else {
-		return fmt.Errorf("Error, either \"content\" or \"source\" must be specified")
+		return fmt.Errorf("Error, either \"content\", \"content_base64\" or \"source\" must be specified")
 	}
 
 	objectsService := storage.NewObjectsService(config.NewStorageClientWithTimeoutOverride(userAgent, d.Timeout(schema.TimeoutCreate)))

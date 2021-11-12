@@ -128,6 +128,41 @@ func TestAccStorageObject_content(t *testing.T) {
 	})
 }
 
+func TestAccStorageObject_contentBase64(t *testing.T) {
+	t.Parallel()
+
+	bucketName := testBucketName(t)
+	data := []byte(content)
+	h := md5.New()
+	if _, err := h.Write(data); err != nil {
+		t.Errorf("error calculating md5: %v", err)
+	}
+	dataMd5 := base64.StdEncoding.EncodeToString(h.Sum(nil))
+	content_base64 := base64.StdEncoding.EncodeToString(data)
+
+	testFile := getNewTmpTestFile(t, "tf-test")
+	if err := ioutil.WriteFile(testFile.Name(), data, 0644); err != nil {
+		t.Errorf("error writing file: %v", err)
+	}
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccStorageObjectDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleStorageBucketsObjectContentBase64(bucketName, content_base64),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket_object.object", "content_type", "text/plain; charset=utf-8"),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket_object.object", "storage_class", "STANDARD"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccStorageObject_withContentCharacteristics(t *testing.T) {
 	t.Parallel()
 
@@ -466,6 +501,22 @@ resource "google_storage_bucket_object" "object" {
   content = "%s"
 }
 `, bucketName, objectName, content)
+}
+
+func testGoogleStorageBucketsObjectContentBase64(bucketName, content_base64 string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_storage_bucket_object" "object" {
+  name           = "%s"
+  bucket         = google_storage_bucket.bucket.name
+  content_base64 = "%s"
+}
+`, bucketName, objectName, content_base64)
 }
 
 func testGoogleStorageBucketsObjectDynamicContent(bucketName string) string {

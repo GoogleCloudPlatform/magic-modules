@@ -41,10 +41,12 @@ The following arguments are supported:
 
 One of the following is required:
 
-* `content` - (Optional, Sensitive) Data as `string` to be uploaded. Must be defined if `source` is not. **Note**: The `content` field is marked as sensitive. To view the raw contents of the object, please define an [output](/docs/configuration/outputs.html).
+* `content_base64` - (Optional, Sensitive) Data as base64 encoded `string` to be uploaded. Must be defined if `source` and `content` are not. **Note**: The `content` field is marked as sensitive. To view the raw contents of the object, please define an [output](/docs/configuration/outputs.html).
 
-* `source` - (Optional) A path to the data you want to upload. Must be defined
-    if `content` is not.
+* `content` - (Optional, Sensitive) Data as `string` to be uploaded. Must be defined if `source` and `content_base64` are not. **Note**: The `content` field is marked as sensitive. To view the raw contents of the object, please define an [output](/docs/configuration/outputs.html).
+
+* `source` - (Optional) A path to the data you want to upload. Must be defined if `content` and `content_base64`
+    if `content` and `content_base64` are not.
 
 - - -
 
