@@ -41,13 +41,17 @@ For more information, see:
 {{- if $.Reference }}
 * {{$.Reference.Markdown}}
 {{- end }}
-{{- range $g := $.Guides }}
-* {{$g.Markdown}}
+{{- if $.Guides }}
+* How-to Guides
+  {{- range $g := $.Guides }}
+  * {{$g.Markdown}}
+  {{- end }}
 {{- end }}
 {{- end }}
 
 {{- /* TODO warning */}}
 {{- range $s := $.DocSamples}}
+
 ## Example Usage - {{$s.Name}}
 {{- if $s.Description}}
 {{$s.Description}}

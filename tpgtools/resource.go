@@ -184,7 +184,7 @@ func (l Link) Markdown() string {
 }
 
 func (r *Resource) fillLinksFromExtensionsMap(m map[string]interface{}) {
-	ref, ok := m["x-dcl-ref"].(map[string]interface{})
+	ref, ok := m["x-dcl-ref"].(map[interface{}]interface{})
 	if ok {
 		r.Reference = &Link{url: ref["url"].(string), text: ref["text"].(string)}
 	}
