@@ -32,6 +32,7 @@ import (
 // N:1 = [ResourceConverter{Convert: convertAbc, merge: mergeAbc}] (len=1)
 func ResourceConverters() map[string][]ResourceConverter {
 	return map[string][]ResourceConverter{
+		"google_compute_address":                          {resourceConverterComputeAddress()},
 		"google_compute_firewall":                         {resourceConverterComputeFirewall()},
 		"google_compute_disk":                             {resourceConverterComputeDisk()},
 		"google_compute_forwarding_rule":                  {resourceConverterComputeForwardingRule()},
