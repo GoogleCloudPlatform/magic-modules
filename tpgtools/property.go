@@ -55,6 +55,10 @@ type Property struct {
 	// ConflictsWith is the list of fields that this field conflicts with
 	ConflictsWith ConflictsWith
 
+	// ConflictsWith is the list of fields that this field conflicts with
+	// in JSONCase. For example, "machineType"
+	JSONCaseConflictsWith []string
+
 	// Default is the default for the field.
 	Default *string
 
@@ -149,6 +153,16 @@ func (p Property) overridePath() string {
 	}
 
 	return p.title
+}
+
+//objectIdxPath is the path of a property used in ConflictsWith. For example,
+// "node_config.0.machine_type".
+func (p Property) objectIdxPath() string {
+	if p.parent != nil {
+		return p.parent.objectIdxPath() + ".0." + p.Name()
+	}
+
+	return p.Name()
 }
 
 // PackageJSONName is the camel-cased shortname of a field as it appears in the
@@ -471,6 +485,10 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		identityFields = idParts(resource.ID)
 	}
 
+	// Maps PackageJSONName back to property Name 
+	// for conflict fields
+	conflictsMap := make(map[string]string)
+
 	for k, v := range schema.Properties {
 		ref := ""
 		packageName := ""
@@ -550,8 +568,12 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 		if v, ok := v.Extension["x-dcl-conflicts"].([]interface{}); ok {
 			for _, ci := range v {
-				p.ConflictsWith = append(p.ConflictsWith, ci.(string))
+				cf := ci.(string)
+				cf = cf[strings.LastIndex(cf, ".")+1:]
+				p.JSONCaseConflictsWith = append(p.JSONCaseConflictsWith, cf)
 			}
+
+			conflictsMap[p.PackageJSONName()] = p.objectIdxPath()
 		}
 
 		// Do this before handling properties so we can check if the parent is readOnly
@@ -866,6 +888,16 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		}
 
 		props = append(props, p)
+	}
+
+	// handle conflict fields
+	for i, _ := range props {
+		p := &props[i]
+		if p.JSONCaseConflictsWith != nil {
+			for _, cf := range p.JSONCaseConflictsWith {
+				p.ConflictsWith = append(p.ConflictsWith, conflictsMap[cf])
+			}
+		}
 	}
 
 	// sort the properties so they're in a nice order
