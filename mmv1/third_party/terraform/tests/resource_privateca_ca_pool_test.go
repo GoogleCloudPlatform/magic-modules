@@ -55,8 +55,6 @@ resource "google_privateca_ca_pool" "default" {
   name = "tf-test-my-capool%{random_suffix}"
   location = "us-central1"
   tier = "ENTERPRISE"
-  include_is_ca = true
-  include_max_path_length = true
   publishing_options {
     publish_ca_cert = false
     publish_crl = true
@@ -105,7 +103,9 @@ resource "google_privateca_ca_pool" "default" {
         object_id_path = [1,5,7]
       }
       ca_options {
+	include_is_ca = true
         is_ca = true
+	include_max_issuer_path_length = true
         max_issuer_path_length = 10
       }
       key_usage {
@@ -139,8 +139,6 @@ resource "google_privateca_ca_pool" "default" {
   name = "tf-test-my-capool%{random_suffix}"
   location = "us-central1"
   tier = "ENTERPRISE"
-  include_is_ca = true
-  include_max_path_length = true
   publishing_options {
     publish_ca_cert = true
     publish_crl = true
@@ -189,7 +187,9 @@ resource "google_privateca_ca_pool" "default" {
         object_id_path = [1, 7]
       }
       ca_options {
+	include_is_ca = true
         is_ca = true
+	include_max_issuer_path_length = true
         max_issuer_path_length = 10
       }
       key_usage {
