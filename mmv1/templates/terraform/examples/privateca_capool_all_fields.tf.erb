@@ -9,8 +9,6 @@ resource "google_privateca_ca_pool" "<%= ctx[:primary_resource_id] %>" {
   labels = {
     foo = "bar"
   }
-  include_is_ca = true
-  include_max_path_length = true
   issuance_policy {
     allowed_key_types {
       elliptic_curve {
@@ -52,7 +50,9 @@ resource "google_privateca_ca_pool" "<%= ctx[:primary_resource_id] %>" {
         object_id_path = [1, 5, 7]
       }
       ca_options {
+        include_is_ca = true
         is_ca = true
+        include_max_issuer_path_length = true
         max_issuer_path_length = 10
       }
       key_usage {
