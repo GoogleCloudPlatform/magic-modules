@@ -11,7 +11,7 @@ resource "google_compute_network" "default" {
 # backend subnet
 resource "google_compute_subnetwork" "default" {
   name          = "<%= ctx[:vars]['ssl_proxy_xlb_subnet'] %>"
-  provider      = google
+  provider      = google-beta
   ip_cidr_range = "10.0.1.0/24"
   region        = "us-central1"
   network       = google_compute_network.default.id
