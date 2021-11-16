@@ -62,6 +62,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           namespace_id: "example-namespace"
           endpoint_id: "example-endpoint"
         min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "service_directory_endpoint_with_network"
+        primary_resource_id: "example"
+        vars:
+          service_id: "example-service"
+          namespace_id: "example-namespace"
+          endpoint_id: "example-endpoint"
+          network_name: "example-network"
+        min_version: beta        
     properties:
       service: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
