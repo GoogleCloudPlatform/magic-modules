@@ -4,8 +4,6 @@ resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id]
   pool = "<%= ctx[:vars]["pool_name"] %>"
   certificate_authority_id = "<%= ctx[:vars]["certificate_authority_id"] %>"
   location = "<%= ctx[:vars]["pool_location"] %>"
-  # Required to set max_issuer_path_length to 0
-  include_max_path_length = true
   config {
     subject_config {
       subject {
@@ -20,6 +18,7 @@ resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id]
       ca_options {
         is_ca = true
         # Force the sub CA to only issue leaf certs
+        include_max_issuer_path_length = true
         max_issuer_path_length = 0
       }
       key_usage {

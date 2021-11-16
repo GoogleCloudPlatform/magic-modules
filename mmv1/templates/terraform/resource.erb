@@ -114,9 +114,6 @@ func resource<%= resource_name -%>() *schema.Resource {
               Type: <%= tf_type(field) -%>,
               Optional: true,
               Default:  <%= go_literal(field.default_value) -%>,
-              <% if field.force_new -%>
-              ForceNew: true,
-              <% end -%>
             },
 <%        end -%>
 <%      end -%>

@@ -1,7 +1,6 @@
 package google
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -22,52 +21,39 @@ import (
 // Expander utilities
 
 func expandPrivatecaCertificateConfigX509ConfigCaOptions(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	// Virtual fields to distinguish between unset booleans and booleans set with a default value.
+	// Fields include_is_ca, include_max_issuer_path_length are used to distinguish between 
+	// unset booleans and booleans set with a default value.
 	// Unset is_ca or unset max_issuer_path_length either allow any values for these fields when
 	// used in an issuance policy, or allow the API to use default values when used in a
 	// certificate config. A default value of is_ca=false means that issued certificates cannot
 	// be CA certificates. A default value of max_issuer_path_length=0 means that the CA cannot
 	// issue CA certificates.
-
-	// includeIsCa can be nil for Certificate Authority resources
-	includeIsCa := d.Get("include_is_ca")
-	includePathLength := d.Get("include_max_path_length")
-
 	if v == nil {
-		if includeIsCa != nil && includeIsCa.(bool) {
-			return nil, fmt.Errorf("include_is_ca cannot be set without setting ca_options.is_ca")
-		}
-		if includePathLength.(bool) {
-			return nil, fmt.Errorf("include_max_path_length cannot be set without setting ca_options.max_issuer_path_length")
-		}
-		return v, nil
+		return nil, nil
 	}
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
-		if includeIsCa != nil && includeIsCa.(bool) {
-			return nil, fmt.Errorf("include_is_ca cannot be set without setting ca_options.is_ca")
-		}
-		if includePathLength.(bool) {
-			return nil, fmt.Errorf("include_max_path_length cannot be set without setting ca_options.max_issuer_path_length")
-		}
 		return nil, nil
 	}
-
 	raw := l[0]
 	original := raw.(map[string]interface{})
+
+	includeIsCa := false
+	// For resource CertificateAuthority, there is not a field named `include_is_ca`.
+	if original["include_is_ca"] != nil && original["include_is_ca"].(bool) {
+		includeIsCa = true
+	}
+	isCa := original["is_ca"].(bool)
+
+	includePathLength := original["include_max_issuer_path_length"].(bool)
+	max_issuer_path_length := original["max_issuer_path_length"].(int)
+
 	transformed := make(map[string]interface{})
 
-	//if original["is_ca"].(bool) && !includeIsCa.(bool) {
-	//	return nil, fmt.Errorf("You must set include_is_ca=true with ca_options.is_ca=true")
-	//}
-	//if original["max_issuer_path_length"].(int) > 0 && !includePathLength.(bool) {
-	//	return nil, fmt.Errorf("You must set include_max_path_length=true with ca_options.max_issuer_path_length>0")
-	//}
-
-	if (includeIsCa != nil && includeIsCa.(bool)) || original["is_ca"].(bool) {
+	if includeIsCa || isCa {
 		transformed["isCa"] = original["is_ca"]
 	}
-	if includePathLength.(bool) || original["max_issuer_path_length"].(int) > 0 {
+	if includePathLength || max_issuer_path_length > 0 {
 		transformed["maxIssuerPathLength"] = original["max_issuer_path_length"]
 	}
 	return transformed, nil
@@ -326,12 +312,18 @@ func flattenPrivatecaCertificateConfigX509ConfigCaOptions(v interface{}, d *sche
 	val, exists := original["isCa"]
 	transformed["is_ca"] =
 		flattenPrivatecaCertificateConfigX509ConfigCaOptionsIsCa(val, d, config)
-	_ = d.Set("include_is_ca", exists)
+	// CertificateAuthority does not fields `include_is_ca`.
+	// Expecting non-CertificateAuthority resource does not have field `certificate_authority_id` at top level.
+	if exists && d.Get("certificate_authority_id") == nil {
+		transformed["include_is_ca"] = true
+	}
 
 	val, exists = original["maxIssuerPathLength"]
 	transformed["max_issuer_path_length"] =
 		flattenPrivatecaCertificateConfigX509ConfigCaOptionsMaxIssuerPathLength(val, d, config)
-	_ = d.Set("include_max_path_length", exists)
+	if exists {
+		transformed["include_max_issuer_path_length"] = true
+	}
 
 	return []interface{}{transformed}
 }

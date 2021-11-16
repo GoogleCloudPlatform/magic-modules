@@ -171,6 +171,12 @@ objects:
                     description: |
                       Refers to the "CA" X.509 extension, which is a boolean value. When this value is missing,
                       the extension will be omitted from the CA certificate.
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'includeMaxIssuerPathLength'
+                    url_param_only: true
+                    description: |
+                      Must be set to use the value of max_issuer_path_length, either 0 or greater than 0.
+                      If not set, max_issuer_path_length will be unset.
                   - !ruby/object:Api::Type::Integer
                     name: 'maxIssuerPathLength'
                     description: |
@@ -982,10 +988,22 @@ objects:
                 Describes values that are relevant in a CA certificate.
               properties:
                 - !ruby/object:Api::Type::Boolean
+                  name: 'includeIsCa'
+                  url_param_only: true
+                  description: |
+                    Must be set to use the value of is_ca, either true or false. If not set, is_ca will
+                    be unset.
+                - !ruby/object:Api::Type::Boolean
                   name: 'isCa'
                   description: |
                     Refers to the "CA" X.509 extension, which is a boolean value. When this value is missing,
                     the extension will be omitted from the CA certificate.
+                - !ruby/object:Api::Type::Boolean
+                  name: 'includeMaxIssuerPathLength'
+                  url_param_only: true
+                  description: |
+                    Must be set to use the value of max_issuer_path_length, either 0 or greater than 0.
+                    If not set, max_issuer_path_length will be unset.
                 - !ruby/object:Api::Type::Integer
                   name: 'maxIssuerPathLength'
                   description: |
@@ -1409,10 +1427,22 @@ objects:
                   Describes values that are relevant in a CA certificate.
                 properties:
                   - !ruby/object:Api::Type::Boolean
+                    name: 'includeIsCa'
+                    url_param_only: true
+                    description: |
+                      Must be set to use the value of is_ca, either true or false. If not set, is_ca will
+                      be unset.
+                  - !ruby/object:Api::Type::Boolean
                     name: 'isCa'
                     description: |
                       Refers to the "CA" X.509 extension, which is a boolean value. When this value is missing,
                       the extension will be omitted from the CA certificate.
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'includeMaxIssuerPathLength'
+                    url_param_only: true
+                    description: |
+                      Must be set to use the value of max_issuer_path_length, either 0 or greater than 0.
+                      If not set, max_issuer_path_length will be unset.
                   - !ruby/object:Api::Type::Integer
                     name: 'maxIssuerPathLength'
                     description: |
