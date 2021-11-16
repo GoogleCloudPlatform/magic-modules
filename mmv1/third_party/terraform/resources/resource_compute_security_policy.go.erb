@@ -165,7 +165,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"rate_limit_threshold": {
 										Type:        schema.TypeList,
-										Optional:    true,
+										Required:    true,
 										Description: `Threshold at which to begin ratelimiting.`,
 										MaxItems:    1,
 										Elem: &schema.Resource{
@@ -187,16 +187,14 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 
 									"conform_action": {
 										Type:         schema.TypeString,
-										Optional:     true,
-										Default:      "allow",
-										ValidateFunc: validation.StringInSlice([]string{"deny(403)", "deny(404)", "deny(429)", "deny(502)"}, false),
+										Required:     true,
+										ValidateFunc: validation.StringInSlice([]string{"allow", "deny(403)", "deny(404)", "deny(429)", "deny(502)"}, false),
 										Description:  `When a request is denied, returns the HTTP response code specified. Valid options are "deny()" where valid values for status are 403, 404, 429, and 502.`,
 									},
 
 									"exceed_action": {
 										Type:         schema.TypeString,
-										Optional:     true,
-										Default:      "deny-429",
+										Required:     true,
 										ValidateFunc: validation.StringInSlice([]string{"allow"}, false),
 										Description:  `Action to take for requests that are under the configured rate limit threshold. Valid option is "allow" only.`,
 									},
