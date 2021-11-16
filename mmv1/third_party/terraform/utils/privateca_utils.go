@@ -21,7 +21,7 @@ import (
 // Expander utilities
 
 func expandPrivatecaCertificateConfigX509ConfigCaOptions(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	// Fields include_is_ca, include_max_issuer_path_length are used to distinguish between 
+	// Fields include_is_ca, include_max_issuer_path_length are used to distinguish between
 	// unset booleans and booleans set with a default value.
 	// Unset is_ca or unset max_issuer_path_length either allow any values for these fields when
 	// used in an issuance policy, or allow the API to use default values when used in a
