@@ -37,9 +37,16 @@ description: |-
 # {{ replace $.TerraformName "_" "\\_" -1 }}
 
 {{$.Description}}
+{{if or $.Reference $.Guides}}
+For more information, see:
+{{- if $.Reference }}
+* {{$.Reference.Markdown}}
+{{- end }}
+{{- range $g := $.Guides }}
+* {{$g.Markdown}}
+{{- end }}
+{{- end }}
 
-{{- /* TODO version notice */}}
-{{- /* TODO references */}}
 {{- /* TODO warning */}}
 {{- range $s := $.DocSamples}}
 ## Example Usage - {{$s.Name}}

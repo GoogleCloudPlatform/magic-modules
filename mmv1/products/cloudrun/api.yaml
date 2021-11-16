@@ -524,7 +524,6 @@ objects:
                     Defaults to "".
                 - !ruby/object:Api::Type::NestedObject
                   name: valueFrom
-                  min_version: beta
                   description: |-
                     Source for the environment variable's value. Only supports secret_key_ref.
                   properties:
@@ -593,7 +592,6 @@ objects:
                   https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
             - !ruby/object:Api::Type::Array
               name: volumeMounts
-              min_version: beta
               description: |-
                 Volume to mount into the container's filesystem.
                 Only supports SecretVolumeSources.
@@ -633,7 +631,6 @@ objects:
             will use the project's default service account.
         - !ruby/object:Api::Type::Array
           name: volumes
-          min_version: beta
           description: |-
             Volume represents a named volume in a container.
           item_type: !ruby/object:Api::Type::NestedObject

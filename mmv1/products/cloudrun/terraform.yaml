@@ -132,7 +132,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_secret_environment_variables"
-        min_version: beta
         primary_resource_id: "default"
         primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
         vars:
@@ -144,7 +143,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "autogenerate_revision_name"
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_secret_volumes"
-        min_version: beta
         primary_resource_id: "default"
         primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
         vars:

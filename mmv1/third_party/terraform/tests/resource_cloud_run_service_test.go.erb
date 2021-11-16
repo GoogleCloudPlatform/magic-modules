@@ -117,7 +117,6 @@ resource "google_cloud_run_service" "default" {
 `, name, project, concurrency, timeoutSeconds)
 }
 
-<% unless version == 'ga' %>
 func TestAccCloudRunService_secretVolume(t *testing.T) {
 	t.Parallel()
 
@@ -223,7 +222,6 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -343,7 +341,6 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -362,4 +359,3 @@ resource "google_cloud_run_service" "default" {
 }
 `, secretName1, secretName2, name, secretRef, project)
 }
-<% end -%>
