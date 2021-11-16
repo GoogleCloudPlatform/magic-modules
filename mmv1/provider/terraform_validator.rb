@@ -209,6 +209,7 @@ module Provider
     # Docs are generated for the terraform provider, not here.
     def generate_iam_policy(pwd, data, generate_code, _generate_docs)
       return unless generate_code
+      return unless !data.object.iam_policy.exclude_validator
 
       target_folder = File.join(data.output_folder, 'converters/google/resources')
       name = data.object.filename_override || data.object.name.underscore

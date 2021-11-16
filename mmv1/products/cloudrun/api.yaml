@@ -252,6 +252,7 @@ objects:
     parent_resource_attribute: 'service'
     base_url: v1/projects/{{project}}/locations/{{location}}/services/{{service}}
     import_format: ["projects/{{project}}/locations/{{location}}/services/{{service}}", "{{service}}"]
+    exclude_validator: true
   parameters:
   - !ruby/object:Api::Type::String
     name: location

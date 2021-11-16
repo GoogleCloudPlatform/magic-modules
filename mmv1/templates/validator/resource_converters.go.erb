@@ -65,7 +65,7 @@ func ResourceConverters() map[string][]ResourceConverter {
 						<% tf_product = (product[:overrides].legacy_name || object.__product.name).underscore -%>
 						<% terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}" -%>
                         <% cai_name =  object.__product.name + object.name -%>
-                        <% if (!object.iam_policy.nil?) && (!object.iam_policy.exclude) -%>
+                        <% if (!object.iam_policy.nil?) && (!object.iam_policy.exclude) && (!object.iam_policy.exclude_validator) -%>
                             "<%= terraform_name -%>_iam_policy": {resourceConverter<%= cai_name -%>IamPolicy()},
                             "<%= terraform_name -%>_iam_binding": {resourceConverter<%= cai_name -%>IamBinding()},
                             "<%= terraform_name -%>_iam_member": {resourceConverter<%= cai_name -%>IamMember()},
