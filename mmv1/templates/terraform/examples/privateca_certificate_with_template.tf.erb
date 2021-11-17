@@ -36,9 +36,7 @@ resource "google_privateca_certificate_template" "template" {
     aia_ocsp_servers = ["string"]
 
     ca_options {
-      include_is_ca                  = true
       is_ca                          = false
-      include_max_issuer_path_length = true
       max_issuer_path_length         = 6
     }
 
