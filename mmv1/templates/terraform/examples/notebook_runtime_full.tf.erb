@@ -24,18 +24,6 @@ resource "google_notebooks_runtime" "<%= ctx[:primary_resource_id] %>" {
         core_count = "1"
         type = "NVIDIA_TESLA_V100"
       }
-      internal_ip_only = true
-      network = data.google_compute_network.my_network.id
-      subnet = data.google_compute_subnetwork.my_subnetwork.id
     }
   }
-}
-
-data "google_compute_network" "my_network" {
-  name = "default"
-}
-
-data "google_compute_subnetwork" "my_subnetwork" {
-  name   = "default"
-  region = "us-central1"
 }
