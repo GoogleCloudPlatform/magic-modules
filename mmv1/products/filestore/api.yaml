@@ -48,9 +48,9 @@ async: !ruby/object:Api::OpAsync
 objects:
   - !ruby/object:Api::Resource
     name: 'Instance'
-    create_url:  projects/{{project}}/locations/{{zone}}/instances?instanceId={{name}}
-    self_link: projects/{{project}}/locations/{{zone}}/instances/{{name}}
-    base_url:  projects/{{project}}/locations/{{zone}}/instances
+    create_url:  projects/{{project}}/locations/{{location}}/instances?instanceId={{name}}
+    self_link: projects/{{project}}/locations/{{location}}/instances/{{name}}
+    base_url:  projects/{{project}}/locations/{{location}}/instances
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -69,7 +69,19 @@ objects:
         name: 'zone'
         description: |
           The name of the Filestore zone of the instance.
-        required: true
+        deprecation_message: "Deprecated in favor of location."
+        exactly_one_of:
+          - 'zone'
+          - 'location'
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        description: |
+          The name of the location of the instance. This can be a region for ENTERPRISE tier instances.
+        exactly_one_of:
+          - zone
+          - location
         input: true
         url_param_only: true
     properties:
@@ -79,7 +91,7 @@ objects:
           The resource name of the instance.
         required: true
         url_param_only: true
-        pattern: projects/{{project}}/locations/{{zone}}/instances/{{name}}
+        pattern: projects/{{project}}/locations/{{location}}/instances/{{name}}
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
