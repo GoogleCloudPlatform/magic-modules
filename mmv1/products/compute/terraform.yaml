@@ -915,7 +915,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           ssl_proxy_xlb_mig_template: "ssl-proxy-xlb-mig-template"
           ssl_proxy_xlb_mig1: "ssl-proxy-xlb-mig1"
           ssl_proxy_xlb_fw_allow_hc: "ssl-proxy-xlb-fw-allow-hc"
-        min_version: beta
+        # min_version: beta
         ignore_read_extra:
           - "port_range"
           - "target"
