@@ -1,4 +1,5 @@
 ignore_read:
+  - target_service
   - nat_subnets.0
   - consumer_accept_lists.0.project_id_or_num
   - consumer_reject_lists.0

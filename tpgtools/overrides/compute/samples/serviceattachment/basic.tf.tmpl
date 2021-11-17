@@ -1,5 +1,5 @@
-resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
-  name        = "{{attachment}}"
+resource "google_compute_service_attachment" "primary" {
+  name        = "{{my-psc-ilb}}"
   region      = "{{region}}"
   description = "A service attachment configured with Terraform"
 
@@ -10,26 +10,26 @@ resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
 }
 
 resource "google_compute_address" "psc_ilb_consumer_address" {
-  name   = "{{address}}"
-  region = "us-west2"
+  name   = "{{psc-ilb-consumer-address}}"
+  region = "{{region}}"
 
   subnetwork   = "default"
   address_type = "INTERNAL"
 }
 
 resource "google_compute_forwarding_rule" "psc_ilb_consumer" {
-  name   = "{{consumer-rule}}"
-  region = "us-west2"
+  name   = "{{psc-ilb-consumer-forwarding-rule}}"
+  region = "{{region}}"
 
-  target                = google_compute_service_attachment.psc_ilb_service_attachment.id
+  target                = google_compute_service_attachment.primary.id
   load_balancing_scheme = "" # need to override EXTERNAL default when target is a service attachment
   network               = "default"
   ip_address            = google_compute_address.psc_ilb_consumer_address.id
 }
 
 resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
-  name   = "{{target-rule}}"
-  region = "us-west2"
+  name   = "{{producer-forwarding-rule}}"
+  region = "{{region}}"
 
   load_balancing_scheme = "INTERNAL"
   backend_service       = google_compute_region_backend_service.producer_service_backend.id
@@ -39,14 +39,14 @@ resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
 }
 
 resource "google_compute_region_backend_service" "producer_service_backend" {
-  name   = "{{service}}"
-  region = "us-west2"
+  name   = "{{producer-service}}"
+  region = "{{region}}"
 
   health_checks = [google_compute_health_check.producer_service_health_check.id]
 }
 
 resource "google_compute_health_check" "producer_service_health_check" {
-  name = "{{check}}"
+  name = "{{producer-service-health-check}}"
 
   check_interval_sec = 1
   timeout_sec        = 1
@@ -56,21 +56,21 @@ resource "google_compute_health_check" "producer_service_health_check" {
 }
 
 resource "google_compute_network" "psc_ilb_network" {
-  name = "{{network}}"
+  name = "{{psc-ilb-network}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "psc_ilb_producer_subnetwork" {
-  name   = "{{subnetwork1}}"
-  region = "us-west2"
+  name   = "{{psc-ilb-producer-subnetwork}}"
+  region = "{{region}}"
 
   network       = google_compute_network.psc_ilb_network.id
   ip_cidr_range = "10.0.0.0/16"
 }
 
 resource "google_compute_subnetwork" "psc_ilb_nat" {
-  name   = "{{subnetwork2}}"
-  region = "us-west2"
+  name   = "{{psc-ilb-nat}}"
+  region = "{{region}}"
 
   network       = google_compute_network.psc_ilb_network.id
   purpose       =  "PRIVATE_SERVICE_CONNECT"
