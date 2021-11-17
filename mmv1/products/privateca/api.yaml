@@ -169,7 +169,7 @@ objects:
                     name: 'includeIsCa'
                     url_param_only: true
                     description: |
-                      Must be set to true when isCa is set to false.
+                      Must be set to true to use is_ca.
                   - !ruby/object:Api::Type::Boolean
                     name: 'isCa'
                     required: true
@@ -180,7 +180,7 @@ objects:
                     name: 'includeMaxIssuerPathLength'
                     url_param_only: true
                     description: |
-                      Must be set to true when max_issuer_path_length is set to 0.
+                      Must be set to true to use max_issuer_path_length.
                   - !ruby/object:Api::Type::Integer
                     name: 'maxIssuerPathLength'
                     description: |
@@ -995,7 +995,7 @@ objects:
                   name: 'includeIsCa'
                   url_param_only: true
                   description: |
-                    Must be set to true when isCa is set to false.
+                    Must be set to true to use is_ca.
                 - !ruby/object:Api::Type::Boolean
                   name: 'isCa'
                   description: |
@@ -1005,7 +1005,7 @@ objects:
                   name: 'includeMaxIssuerPathLength'
                   url_param_only: true
                   description: |
-                    Must be set to true when max_issuer_path_length is set to 0.
+                    Must be set to true to use max_issuer_path_length.
                 - !ruby/object:Api::Type::Integer
                   name: 'maxIssuerPathLength'
                   description: |
@@ -1432,7 +1432,7 @@ objects:
                     name: 'includeIsCa'
                     url_param_only: true
                     description: |
-                      Must be set to true when isCa is set to false.
+                      Must be set to true to use is_ca.
                   - !ruby/object:Api::Type::Boolean
                     name: 'isCa'
                     description: |
@@ -1442,7 +1442,7 @@ objects:
                     name: 'includeMaxIssuerPathLength'
                     url_param_only: true
                     description: |
-                      Must be set to true when max_issuer_path_length is set to 0.
+                      Must be set to true to use max_issuer_path_length.
                   - !ruby/object:Api::Type::Integer
                     name: 'maxIssuerPathLength'
                     description: |
