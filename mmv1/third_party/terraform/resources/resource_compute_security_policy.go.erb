@@ -763,7 +763,7 @@ func expandSecurityPolicyRuleRateLimitOptions(configured []interface{}) *compute
 		ConformAction:      data["conform_action"].(string),
 		EnforceOnKey:       data["enforce_on_key"].(string),
 		EnforceOnKeyName:   data["enforce_on_key_name"].(string),
-		BanDurationSec:     data["ban_duration_sec"].(int),
+		BanDurationSec:     int64(data["ban_duration_sec"].(int)),
 	}
 }
 
@@ -774,8 +774,8 @@ func expandThreshold(configured []interface{}) *compute.SecurityPolicyRuleRateLi
 
 	data := configured[0].(map[string]interface{})
 	return &compute.SecurityPolicyRuleRateLimitOptionsThreshold{
-		Count:       data["count"].(int),
-		IntervalSec: data["interval_sec"].(int),
+		Count:       int64(data["count"].(int)),
+		IntervalSec: int64(data["interval_sec"].(int)),
 	}
 }
 
@@ -785,8 +785,8 @@ func flattenSecurityPolicyRuleRateLimitOptions(conf *compute.SecurityPolicyRuleR
 	}
 
 	data := map[string]interface{}{
-		"ban_threshold":        flattenThreshold(conf.Threshold),
-		"rate_limit_threshold": flattenThreshold(conf.Threshold),
+		"ban_threshold":        flattenThreshold(conf.BanThreshold),
+		"rate_limit_threshold": flattenThreshold(conf.RateLimitThreshold),
 		"exceed_action":        conf.ExceedAction,
 		"conform_action":       conf.ConformAction,
 		"enforce_on_key":       conf.EnforceOnKey,
