@@ -166,6 +166,11 @@ objects:
                   Describes values that are relevant in a CA certificate.
                 properties:
                   - !ruby/object:Api::Type::Boolean
+                    name: 'includeIsCa'
+                    url_param_only: true
+                    description: |
+                      Must be set to true when isCa is set to false.
+                  - !ruby/object:Api::Type::Boolean
                     name: 'isCa'
                     required: true
                     description: |
@@ -175,8 +180,7 @@ objects:
                     name: 'includeMaxIssuerPathLength'
                     url_param_only: true
                     description: |
-                      Must be set to use the value of max_issuer_path_length, either 0 or greater than 0.
-                      If not set, max_issuer_path_length will be unset.
+                      Must be set to true when max_issuer_path_length is set to 0.
                   - !ruby/object:Api::Type::Integer
                     name: 'maxIssuerPathLength'
                     description: |
@@ -991,8 +995,7 @@ objects:
                   name: 'includeIsCa'
                   url_param_only: true
                   description: |
-                    Must be set to use the value of is_ca, either true or false. If not set, is_ca will
-                    be unset.
+                    Must be set to true when isCa is set to false.
                 - !ruby/object:Api::Type::Boolean
                   name: 'isCa'
                   description: |
@@ -1002,8 +1005,7 @@ objects:
                   name: 'includeMaxIssuerPathLength'
                   url_param_only: true
                   description: |
-                    Must be set to use the value of max_issuer_path_length, either 0 or greater than 0.
-                    If not set, max_issuer_path_length will be unset.
+                    Must be set to true when max_issuer_path_length is set to 0.
                 - !ruby/object:Api::Type::Integer
                   name: 'maxIssuerPathLength'
                   description: |
@@ -1430,8 +1432,7 @@ objects:
                     name: 'includeIsCa'
                     url_param_only: true
                     description: |
-                      Must be set to use the value of is_ca, either true or false. If not set, is_ca will
-                      be unset.
+                      Must be set to true when isCa is set to false.
                   - !ruby/object:Api::Type::Boolean
                     name: 'isCa'
                     description: |
@@ -1441,8 +1442,7 @@ objects:
                     name: 'includeMaxIssuerPathLength'
                     url_param_only: true
                     description: |
-                      Must be set to use the value of max_issuer_path_length, either 0 or greater than 0.
-                      If not set, max_issuer_path_length will be unset.
+                      Must be set to true when max_issuer_path_length is set to 0.
                   - !ruby/object:Api::Type::Integer
                     name: 'maxIssuerPathLength'
                     description: |

@@ -38,11 +38,7 @@ func expandPrivatecaCertificateConfigX509ConfigCaOptions(v interface{}, d Terraf
 	raw := l[0]
 	original := raw.(map[string]interface{})
 
-	includeIsCa := false
-	// For resource CertificateAuthority, there is not a field named `include_is_ca`.
-	if original["include_is_ca"] != nil && original["include_is_ca"].(bool) {
-		includeIsCa = true
-	}
+	includeIsCa := original["include_is_ca"].(bool)
 	isCa := original["is_ca"].(bool)
 
 	includePathLength := original["include_max_issuer_path_length"].(bool)
@@ -312,9 +308,7 @@ func flattenPrivatecaCertificateConfigX509ConfigCaOptions(v interface{}, d *sche
 	val, exists := original["isCa"]
 	transformed["is_ca"] =
 		flattenPrivatecaCertificateConfigX509ConfigCaOptionsIsCa(val, d, config)
-	// CertificateAuthority does not fields `include_is_ca`.
-	// Expecting non-CertificateAuthority resource does not have field `certificate_authority_id` at top level.
-	if exists && d.Get("certificate_authority_id") == nil {
+	if exists {
 		transformed["include_is_ca"] = true
 	}
 

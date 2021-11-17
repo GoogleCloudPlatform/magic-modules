@@ -15,6 +15,7 @@ resource "google_privateca_certificate_authority" "test-ca" {
     x509_config {
       ca_options {
         # is_ca *MUST* be true for certificate authorities
+        include_is_ca = true
         is_ca = true
       }
       key_usage {
