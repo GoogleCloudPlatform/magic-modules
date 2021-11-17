@@ -55,6 +55,7 @@ objects:
           The identifier for the contact. Format: {resourceType}/{resource_id}/contacts/{contact_id}
       - !ruby/object:Api::Type::String
         name: 'email'
+        input: true
         required: true
         description: |
           The email address to send notifications to. This does not need to be a Google account.
