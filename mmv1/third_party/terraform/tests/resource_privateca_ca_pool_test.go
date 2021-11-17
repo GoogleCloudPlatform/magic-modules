@@ -103,9 +103,9 @@ resource "google_privateca_ca_pool" "default" {
         object_id_path = [1,5,7]
       }
       ca_options {
-	include_is_ca = true
+        include_is_ca = true
         is_ca = true
-	include_max_issuer_path_length = true
+      	include_max_issuer_path_length = true
         max_issuer_path_length = 10
       }
       key_usage {

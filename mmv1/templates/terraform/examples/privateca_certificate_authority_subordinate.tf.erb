@@ -16,6 +16,7 @@ resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id]
     }
     x509_config {
       ca_options {
+        include_is_ca = true
         is_ca = true
         # Force the sub CA to only issue leaf certs
         include_max_issuer_path_length = true

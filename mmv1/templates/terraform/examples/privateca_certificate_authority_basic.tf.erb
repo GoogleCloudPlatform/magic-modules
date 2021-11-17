@@ -16,7 +16,9 @@ resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id]
     }
     x509_config {
       ca_options {
+        include_is_ca = true
         is_ca = true
+        include_max_issuer_path_length = true
         max_issuer_path_length = 10
       }
       key_usage {
