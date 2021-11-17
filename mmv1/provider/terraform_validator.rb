@@ -198,7 +198,11 @@ module Provider
                        ['converters/google/resources/kms_key_ring_iam.go',
                         'third_party/validator/kms_key_ring_iam.go'],
                        ['converters/google/resources/kms_crypto_key_iam.go',
-                        'third_party/validator/kms_crypto_key_iam.go']
+                        'third_party/validator/kms_crypto_key_iam.go'],
+                       ['converters/google/resources/project_iam_custom_role.go',
+                        'third_party/validator/project_iam_custom_role.go'],
+                       ['converters/google/resources/organization_iam_custom_role.go',
+                        'third_party/validator/organization_iam_custom_role.go'],
                      ])
     end
 
