@@ -135,7 +135,8 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 		return "google_compute_forwarding_rule", nil
 	case "compute/global_forwarding_rule":
 		return "google_compute_global_forwarding_rule", nil
-<<<<<<< HEAD
+	case "compute/service_attachment":
+		return "google_compute_service_attachment", nil
 	case "containeraws/cluster":
 		return "google_container_aws_cluster", nil
 	case "containeraws/node_pool":
@@ -147,11 +148,6 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 	case "containerazure/node_pool":
 		return "google_container_azure_node_pool", nil
 	case "dataproc/workflow_template":
-=======
-	case "ComputeServiceAttachment":
-		return "google_compute_service_attachment", nil
-	case "DataprocWorkflowTemplate":
->>>>>>> 4f49deede (Revert "Revert "Reimplemented compute service attachment using the DCL (#5342)" (#5442)")
 		return "google_dataproc_workflow_template", nil
 	case "eventarc/trigger":
 		return "google_eventarc_trigger", nil
@@ -634,11 +630,14 @@ func CloudbuildWorkerPoolBetaAsHCL(r cloudbuildBeta.WorkerPool, hasGAEquivalent 
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
+<<<<<<< HEAD
 	outputConfig += "\tannotations = {"
 	for k, v := range r.Annotations {
 		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
 	}
 	outputConfig += "}\n"
+=======
+>>>>>>> 9b04e9f66 (Moved mmv1 handwritten test into tpgtools.)
 	if r.DisplayName != nil {
 		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
 	}
