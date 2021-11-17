@@ -438,11 +438,12 @@ objects:
             The URL where this CertificateAuthority's CA certificate is published. This will only be
             set for CAs that have been activated.
           output: true
-        - !ruby/object:Api::Type::String
-          name: 'crlAccessUrl'
+        - !ruby/object:Api::Type::Array
+          name: 'crlAccessUrls'
           description: |
             The URL where this CertificateAuthority's CRLs are published. This will only be set for
             CAs that have been activated.
+          item_type: Api::Type::String
           output: true
       - !ruby/object:Api::Type::String
         name: 'createTime'
