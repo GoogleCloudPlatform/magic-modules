@@ -1255,7 +1255,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: 'templates/terraform/encoders/normalize_group.go.erb'
   InstanceTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
-    exclude: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "compute_instance_template_basic_example"
+        primary_resource_id: "gcloud_with_args"
+        vars:
+          example_template_custom: "example-template-custom"
+        # ignore_read_extra:
+        #   - "port_range"
+        #   - "target"
+        #   - "ip_address"
   InterconnectAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
