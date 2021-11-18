@@ -1,0 +1,11 @@
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% interconnect_location = grab_attributes(pwd)['interconnect_location'] -%>
+describe google_compute_interconnect_location(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, name: <%= doc_generation ? "'#{interconnect_location['name']}'" : "interconnect_location['name']" -%>) do
+  it { should exist }
+  its('facility_provider_facility_id') { should eq <%= doc_generation ? "'#{interconnect_location['facility_provider_facility_id']}'" : "interconnect_location['facility_provider_facility_id']" -%> }
+  its('facility_provider') { should eq <%= doc_generation ? "'#{interconnect_location['facility_provider']}'" : "interconnect_location['facility_provider']" -%> }
+end
+
+describe google_compute_interconnect_location(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

@@ -1317,3 +1317,11 @@ resource "google_memcache_instance" "instance" {
   }
   node_count = 1
 }
+
+resource "google_compute_interconnect_attachment" "on_prem" {
+  name                     = "on-prem-attachment"
+  edge_availability_domain = "AVAILABILITY_DOMAIN_1"
+  type                     = "PARTNER"
+  router                   = google_compute_router.gcp-inspec-router.id
+  mtu                      = 1500
+}

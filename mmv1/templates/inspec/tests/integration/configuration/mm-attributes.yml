@@ -454,3 +454,8 @@ accelerator_type:
 global_operation:
   name: operation-1635274037755-5cf45e8217d56-c081cd9a-c3ea7346
   operationType: "compute.externalVpnGateways.insert"
+
+interconnect_location:
+  name: akl-zone1-1353
+  facility_provider_facility_id: 'Auckland - Albany'
+  facility_provider: Vocus
