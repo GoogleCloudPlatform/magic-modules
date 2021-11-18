@@ -42,6 +42,7 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+  include_billing_project: true
 objects:
   # 'BackupRun' is not idempotent and will not be covered.
   # | - !ruby/object:Api::Resource

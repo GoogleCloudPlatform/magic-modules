@@ -104,6 +104,8 @@ func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
+	quotaProject := getQuotaProjectOrEmpty(d, config, project)
+
 	instance := d.Get("instance").(string)
 	commonName := d.Get("common_name").(string)
 
@@ -113,13 +115,13 @@ func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
 
 	mutexKV.Lock(instanceMutexKey(project, instance))
 	defer mutexKV.Unlock(instanceMutexKey(project, instance))
-	resp, err := config.NewSqlAdminClient(userAgent, project).SslCerts.Insert(project, instance, sslCertsInsertRequest).Do()
+	resp, err := config.NewSqlAdminClient(userAgent, quotaProject).SslCerts.Insert(project, instance, sslCertsInsertRequest).Do()
 	if err != nil {
 		return fmt.Errorf("Error, failed to insert "+
 			"ssl cert %s into instance %s: %s", commonName, instance, err)
 	}
 
-	err = sqlAdminOperationWaitTime(config, resp.Operation, project, "Create Ssl Cert", userAgent, d.Timeout(schema.TimeoutCreate))
+	err = sqlAdminOperationWaitTime(config, resp.Operation, project, quotaProject, "Create Ssl Cert", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error, failure waiting for creation of %q "+
 			"in %q: %s", commonName, instance, err)
@@ -154,11 +156,13 @@ func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
+	quotaProject := getQuotaProjectOrEmpty(d, config, project)
+
 	instance := d.Get("instance").(string)
 	commonName := d.Get("common_name").(string)
 	fingerprint := d.Get("sha1_fingerprint").(string)
 
-	sslCerts, err := config.NewSqlAdminClient(userAgent, project).SslCerts.Get(project, instance, fingerprint).Do()
+	sslCerts, err := config.NewSqlAdminClient(userAgent, quotaProject).SslCerts.Get(project, instance, fingerprint).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("SQL Ssl Cert %q in instance %q", commonName, instance))
 	}
@@ -211,13 +215,15 @@ func resourceSqlSslCertDelete(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
+	quotaProject := getQuotaProjectOrEmpty(d, config, project)
+
 	instance := d.Get("instance").(string)
 	commonName := d.Get("common_name").(string)
 	fingerprint := d.Get("sha1_fingerprint").(string)
 
 	mutexKV.Lock(instanceMutexKey(project, instance))
 	defer mutexKV.Unlock(instanceMutexKey(project, instance))
-	op, err := config.NewSqlAdminClient(userAgent, project).SslCerts.Delete(project, instance, fingerprint).Do()
+	op, err := config.NewSqlAdminClient(userAgent, quotaProject).SslCerts.Delete(project, instance, fingerprint).Do()
 
 	if err != nil {
 		return fmt.Errorf("Error, failed to delete "+
@@ -225,7 +231,7 @@ func resourceSqlSslCertDelete(d *schema.ResourceData, meta interface{}) error {
 			instance, err)
 	}
 
-	err = sqlAdminOperationWaitTime(config, op, project, "Delete Ssl Cert", userAgent, d.Timeout(schema.TimeoutDelete))
+	err = sqlAdminOperationWaitTime(config, op, project, quotaProject, "Delete Ssl Cert", userAgent, d.Timeout(schema.TimeoutDelete))
 
 	if err != nil {
 		return fmt.Errorf("Error, failure waiting for deletion of ssl cert %q "+

@@ -72,6 +72,19 @@ func getBillingProject(d TerraformResourceData, config *Config) (string, error) 
 	return getBillingProjectFromSchema("billing_project", d, config)
 }
 
+func getQuotaProjectOrEmpty(d TerraformResourceData, config *Config, resourceProject string) string {
+	if !config.UserProjectOverride {
+		return ""
+	}
+	if resourceBillingProject, err := getBillingProject(d, config); err != nil {
+		return resourceBillingProject
+	}
+	if config.BillingProject != "" {
+		return config.BillingProject
+	}
+	return resourceProject
+}
+
 // getProjectFromDiff reads the "project" field from the given diff and falls
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.

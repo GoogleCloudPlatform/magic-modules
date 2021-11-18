@@ -462,10 +462,10 @@ func (c *Config) NewStorageClientWithTimeoutOverride(userAgent string, timeout t
 	return clientStorage
 }
 
-func (c *Config) NewSqlAdminClient(userAgent, project string) *sqladmin.Service {
+func (c *Config) NewSqlAdminClient(userAgent, quotaProject string) *sqladmin.Service {
 	sqlClientBasePath := removeBasePathVersion(removeBasePathVersion(c.SQLBasePath))
 	log.Printf("[INFO] Instantiating Google SqlAdmin client for path %s", sqlClientBasePath)
-	clientSqlAdmin, err := sqladmin.NewService(c.context, c.getCommonOptions(project)...)
+	clientSqlAdmin, err := sqladmin.NewService(c.context, c.getCommonOptions(quotaProject)...)
 	if err != nil {
 		log.Printf("[WARN] Error creating client storage: %s", err)
 		return nil
@@ -959,7 +959,7 @@ func ConfigureBasePaths(c *Config) {
 
 // getCommonOptions returns options that are common across GCP APIs
 // (quotaProject, etc)
-func (c *Config) getCommonOptions(resourceProject string) []option.ClientOption {
+func (c *Config) getCommonOptions(quotaProject string) []option.ClientOption {
 	var opts []option.ClientOption
 
 	opts = append(opts, option.WithHTTPClient(c.client))
@@ -968,12 +968,8 @@ func (c *Config) getCommonOptions(resourceProject string) []option.ClientOption 
 		opts = append(opts, option.WithRequestReason(requestReason))
 	}
 
-	if c.UserProjectOverride {
-		if resourceProject != "" {
-			opts = append(opts, option.WithQuotaProject(resourceProject))
-		} else if c.BillingProject != "" {
-			opts = append(opts, option.WithQuotaProject(c.BillingProject))
-		}
+	if quotaProject != "" {
+		opts = append(opts, option.WithQuotaProject(quotaProject))
 	}
 
 	opts = append(opts, option.WithTokenSource(c.tokenSource), option.WithUserAgent(c.userAgent))

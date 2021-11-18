@@ -70,6 +70,10 @@ module Api
     # It is intended for resources that calculate project/region from a selflink field
     attr_reader :include_project
 
+    # If true, include billing_project as an argument to OperationWaitTime.
+    # It is intended for resources that support quota project overrides
+    attr_reader :include_billing_project
+
     # The list of methods where operations are used.
     attr_reader :actions
 
@@ -82,6 +86,7 @@ module Api
       check :error, type: Error, required: true
       check :actions, default: %w[create delete update], type: ::Array, item_type: ::String
       check :include_project, type: :boolean, default: false
+      check :include_billing_project, type: :boolean, default: false
     end
 
     # The main implementation of Operation,

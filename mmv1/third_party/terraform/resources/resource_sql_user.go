@@ -117,6 +117,8 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
+	quotaProject := getQuotaProjectOrEmpty(d, config, project)
+
 	name := d.Get("name").(string)
 	instance := d.Get("instance").(string)
 	password := d.Get("password").(string)
@@ -135,7 +137,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	defer mutexKV.Unlock(instanceMutexKey(project, instance))
 	var op *sqladmin.Operation
 	insertFunc := func() error {
-		op, err = config.NewSqlAdminClient(userAgent, project).Users.Insert(project, instance,
+		op, err = config.NewSqlAdminClient(userAgent, quotaProject).Users.Insert(project, instance,
 			user).Do()
 		return err
 	}
@@ -150,7 +152,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	// for which user.Host is an empty string.  That's okay.
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
 
-	err = sqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutCreate))
+	err = sqlAdminOperationWaitTime(config, op, project, quotaProject, "Insert User", userAgent, d.Timeout(schema.TimeoutCreate))
 
 	if err != nil {
 		return fmt.Errorf("Error, failure waiting for insertion of %s "+
@@ -172,6 +174,8 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
+	quotaProject := getQuotaProjectOrEmpty(d, config, project)
+
 	instance := d.Get("instance").(string)
 	name := d.Get("name").(string)
 	host := d.Get("host").(string)
@@ -179,7 +183,7 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	var users *sqladmin.UsersListResponse
 	err = nil
 	err = retryTime(func() error {
-		users, err = config.NewSqlAdminClient(userAgent, project).Users.List(project, instance).Do()
+		users, err = config.NewSqlAdminClient(userAgent, quotaProject).Users.List(project, instance).Do()
 		return err
 	}, 5)
 	if err != nil {
@@ -187,7 +191,7 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	var user *sqladmin.User
-	databaseInstance, err := config.NewSqlAdminClient(userAgent, project).Instances.Get(project, instance).Do()
+	databaseInstance, err := config.NewSqlAdminClient(userAgent, quotaProject).Instances.Get(project, instance).Do()
 	if err != nil {
 		return err
 	}
@@ -246,6 +250,8 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 
+		quotaProject := getQuotaProjectOrEmpty(d, config, project)
+
 		name := d.Get("name").(string)
 		instance := d.Get("instance").(string)
 		password := d.Get("password").(string)
@@ -261,7 +267,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 		defer mutexKV.Unlock(instanceMutexKey(project, instance))
 		var op *sqladmin.Operation
 		updateFunc := func() error {
-			op, err = config.NewSqlAdminClient(userAgent, project).Users.Update(project, instance, user).Host(host).Name(name).Do()
+			op, err = config.NewSqlAdminClient(userAgent, quotaProject).Users.Update(project, instance, user).Host(host).Name(name).Do()
 			return err
 		}
 		err = retryTimeDuration(updateFunc, d.Timeout(schema.TimeoutUpdate))
@@ -271,7 +277,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 				"user %s into user %s: %s", name, instance, err)
 		}
 
-		err = sqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = sqlAdminOperationWaitTime(config, op, project, quotaProject, "Insert User", userAgent, d.Timeout(schema.TimeoutUpdate))
 
 		if err != nil {
 			return fmt.Errorf("Error, failure waiting for update of %s "+
@@ -303,6 +309,8 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
+	quotaProject := getQuotaProjectOrEmpty(d, config, project)
+
 	name := d.Get("name").(string)
 	host := d.Get("host").(string)
 	instance := d.Get("instance").(string)
@@ -312,12 +320,12 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 
 	var op *sqladmin.Operation
 	err = retryTimeDuration(func() error {
-		op, err = config.NewSqlAdminClient(userAgent, project).Users.Delete(project, instance).Host(host).Name(name).Do()
+		op, err = config.NewSqlAdminClient(userAgent, quotaProject).Users.Delete(project, instance).Host(host).Name(name).Do()
 		if err != nil {
 			return err
 		}
 
-		if err := sqlAdminOperationWaitTime(config, op, project, "Delete User", userAgent, d.Timeout(schema.TimeoutDelete)); err != nil {
+		if err := sqlAdminOperationWaitTime(config, op, project, quotaProject, "Delete User", userAgent, d.Timeout(schema.TimeoutDelete)); err != nil {
 			return err
 		}
 		return nil

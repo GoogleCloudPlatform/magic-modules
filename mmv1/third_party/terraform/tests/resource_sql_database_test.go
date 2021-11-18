@@ -146,7 +146,7 @@ func testAccCheckGoogleSqlDatabaseExists(t *testing.T, n string, database *sqlad
 
 		database_name := rs.Primary.Attributes["name"]
 		instance_name := rs.Primary.Attributes["instance"]
-		found, err := config.NewSqlAdminClient(config.userAgent, config.Project).Databases.Get(config.Project,
+		found, err := config.NewSqlAdminClient(config.userAgent, "").Databases.Get(config.Project,
 			instance_name, database_name).Do()
 
 		if err != nil {
@@ -169,7 +169,7 @@ func testAccSqlDatabaseDestroyProducer(t *testing.T) func(s *terraform.State) er
 
 			database_name := rs.Primary.Attributes["name"]
 			instance_name := rs.Primary.Attributes["instance"]
-			_, err := config.NewSqlAdminClient(config.userAgent, config.Project).Databases.Get(config.Project,
+			_, err := config.NewSqlAdminClient(config.userAgent, "").Databases.Get(config.Project,
 				instance_name, database_name).Do()
 
 			if err == nil {

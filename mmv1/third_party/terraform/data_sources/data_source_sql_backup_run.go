@@ -59,16 +59,18 @@ func dataSourceSqlBackupRunRead(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
+	quotaProject := getQuotaProjectOrEmpty(d, config, project)
+
 	instance := d.Get("instance").(string)
 
 	var backup *sqladmin.BackupRun
 	if backupId, ok := d.GetOk("backup_id"); ok {
-		backup, err = config.NewSqlAdminClient(userAgent, project).BackupRuns.Get(project, instance, int64(backupId.(int))).Do()
+		backup, err = config.NewSqlAdminClient(userAgent, quotaProject).BackupRuns.Get(project, instance, int64(backupId.(int))).Do()
 		if err != nil {
 			return err
 		}
 	} else {
-		res, err := config.NewSqlAdminClient(userAgent, project).BackupRuns.List(project, instance).Do()
+		res, err := config.NewSqlAdminClient(userAgent, quotaProject).BackupRuns.List(project, instance).Do()
 		if err != nil {
 			return err
 		}
