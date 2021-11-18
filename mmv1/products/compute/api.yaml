@@ -18724,3 +18724,127 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'statusMessage'
         description: 'An optional textual description of the current status of the operation.'
+  - !ruby/object:Api::Resource
+    name: 'GlobalOperation'
+    kind: 'compute#globalOperation'
+    base_url: projects/{{project}}/global/operations
+    collection_url_key: 'items'
+    has_self_link: true
+    readonly: true
+    description: 'Represents a Zone resource.'
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.This field is deprecated.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional textual description of the resource.'
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the operation.'
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        exclude: true
+        description: 'Server-defined, fully qualified URL for this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'zone'
+        description: 'The URL of the zone where the operation resides.
+        Only applicable when performing per-zone operations.'
+      - !ruby/object:Api::Type::String
+        name: 'clientOperationId'
+        description: 'The value of requestId if you provided it in the request. Not present otherwise.'
+      - !ruby/object:Api::Type::String
+        name: 'operationType'
+        description: 'The type of operation, such as insert, update, or delete, and so on.'
+      - !ruby/object:Api::Type::String
+        name: 'user'
+        description: 'User who requested the operation, for example: user@example.com.'
+      - !ruby/object:Api::Type::Integer
+        name: 'progress'
+        description: 'An optional progress indicator that ranges from 0 to 100.
+        There is no requirement that this be linear or support any granularity of
+        operations. This should not be used to guess when the operation will be complete.
+        This number should monotonically increase as the operation progresses.'
+      - !ruby/object:Api::Type::Time
+        name: 'insertTime'
+        description: 'The time that this operation was requested. This value is in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'startTime'
+        description: 'The time that this operation was started by the server. This value is in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'endTime'
+        description: 'The time that this operation was completed. This value is in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::Enum
+        name: 'status'
+        description: |
+          The status of the operation, which can be one of the following:
+          * PENDING
+          * PENDINGPENDING
+          * DONE
+        values:
+          - :PENDING
+          - :PENDING
+          - :DONE
+      - !ruby/object:Api::Type::String
+        name: 'statusMessage'
+        description: 'An optional textual description of the current status of the operation.'
+  - !ruby/object:Api::Resource
+    name: 'InterconnectLocation'
+    kind: 'compute#interconnectLocation'
+    base_url: projects/{{project}}/global/interconnectLocations
+    collection_url_key: 'items'
+    has_self_link: true
+    readonly: true
+    description: 'Represents a Zone resource.'
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.This field is deprecated.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional textual description of the resource.'
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the resource.'
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        exclude: true
+        description: 'Server-defined, fully qualified URL for this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'availabilityZone'
+        description: 'Availability zone for this InterconnectLocation.
+        Within a metropolitan area (metro), maintenance will not be simultaneously
+        scheduled in more than one availability zone. Example: "zone1" or "zone2".'
+      - !ruby/object:Api::Type::String
+        name: 'clientOperationId'
+        description: 'The value of requestId if you provided it in the request. Not present otherwise.'
+      - !ruby/object:Api::Type::String
+        name: 'facilityProvider'
+        description: 'The name of the provider for this facility (e.g., EQUINIX).'
+      - !ruby/object:Api::Type::String
+        name: 'facilityProviderFacilityId'
+        description: 'A provider-assigned Identifier for this facility (e.g., Ashburn-DC1).'
+      - !ruby/object:Api::Type::Enum
+        name: 'status'
+        description: |
+          The status of this InterconnectLocation, which can take one of the following values:
+          * CLOSED: The InterconnectLocation is closed and is unavailable for provisioning new Interconnects.
+          * AVAILABLE: The InterconnectLocation is available for provisioning new Interconnects.
+        values:
+          - :CLOSED
+          - :AVAILABLE
