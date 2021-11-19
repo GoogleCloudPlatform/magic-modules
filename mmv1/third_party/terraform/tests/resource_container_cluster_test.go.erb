@@ -225,7 +225,6 @@ func TestAccContainerCluster_withNotificationConfig(t *testing.T) {
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 	t.Parallel()
 
@@ -264,7 +263,6 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
@@ -2599,7 +2597,7 @@ resource "google_container_cluster" "notification_config" {
 `, clusterName)
 }
 <% end -%>
-<% unless version == 'ga' -%>
+
 func testAccContainerCluster_withConfidentialNodes(clusterName string, npName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "confidential_nodes" {
@@ -2647,7 +2645,6 @@ resource "google_container_cluster" "confidential_nodes" {
 }
 `, clusterName, npName)
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func testAccContainerCluster_withILBSubSetting(clusterName string, npName string) string {

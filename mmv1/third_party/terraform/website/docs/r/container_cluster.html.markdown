@@ -268,6 +268,8 @@ region are guaranteed to support the same version.
 
 * `notification_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the [cluster upgrade notifications](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-upgrade-notifications) feature. Structure is [documented below](#nested_notification_config).
 
+* `confidential_nodes` - Configuration for [Confidential Nodes](https://cloud.google.com/kubernetes-engine/docs/how-to/confidential-gke-nodes) feature. Structure is documented below [documented below](#nested_confidential_nodes).
+
 * `pod_security_policy_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
     [PodSecurityPolicy](https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies) feature.
     Structure is [documented below](#nested_pod_security_policy_config).
@@ -676,6 +678,10 @@ gcfs_config {
     are preemptible. See the [official documentation](https://cloud.google.com/container-engine/docs/preemptible-vm)
     for more information. Defaults to false.
 
+* `spot` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) A boolean 
+    that represents whether the underlying node VMs are spot. See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms)
+    for more information. Defaults to false.
+
 * `sandbox_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) [GKE Sandbox](https://cloud.google.com/kubernetes-engine/docs/how-to/sandbox-pods) configuration. When enabling this feature you must specify `image_type = "COS_CONTAINERD"` and `node_version = "1.12.7-gke.17"` or later to use it.
     Structure is [documented below](#nested_sandbox_config).
 
@@ -779,6 +785,10 @@ notification_config {
   }
 }
 ```
+
+<a name="nested_confidential_nodes"></a> The `confidential_nodes` block supports:
+
+* `enabled` (Required) - Enable Confidential Nodes for this cluster.
 
 <a name="nested_pod_security_policy_config"></a>The `pod_security_policy_config` block supports:
 

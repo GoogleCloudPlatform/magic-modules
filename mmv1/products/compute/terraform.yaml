@@ -182,7 +182,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         send_empty_value: true
       cdnPolicy.maxTtl: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-        send_empty_value: true
       cdnPolicy.signedUrlCacheMaxAgeSec: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
       cdnPolicy.negativeCachingPolicy.ttl: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -2058,6 +2057,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'portDiffSuppress'
       grpcHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
+      logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/health_check_log_config.go.erb'
   RegionUrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
