@@ -155,16 +155,6 @@ func (p Property) overridePath() string {
 	return p.title
 }
 
-//objectIdxPath is the path of a property used in ConflictsWith. For example,
-// "node_config.0.machine_type".
-func (p Property) objectIdxPath() string {
-	if p.parent != nil {
-		return p.parent.objectIdxPath() + ".0." + p.Name()
-	}
-
-	return p.Name()
-}
-
 // PackageJSONName is the camel-cased shortname of a field as it appears in the
 // DCL's json serialization.  For example, "machineType".
 func (p Property) PackageJSONName() string {
@@ -567,13 +557,16 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		}
 
 		if v, ok := v.Extension["x-dcl-conflicts"].([]interface{}); ok {
+			// NOTE: DCL only label x-dcl-conflicts for top-level field currently 
+			// TODO(shuya): handle nested field when DCL apply the feature
+			if parent != nil {
+				return nil, fmt.Errorf("The conflict field is not top-level, need a fix in tpgtools")
+			}
 			for _, ci := range v {
-				cf := ci.(string)
-				cf = cf[strings.LastIndex(cf, ".")+1:]
-				p.JSONCaseConflictsWith = append(p.JSONCaseConflictsWith, cf)
+				p.JSONCaseConflictsWith = append(p.JSONCaseConflictsWith, ci.(string))
 			}
 
-			conflictsMap[p.PackageJSONName()] = p.objectIdxPath()
+			conflictsMap[p.PackageJSONName()] = p.Name()
 		}
 
 		// Do this before handling properties so we can check if the parent is readOnly
@@ -895,7 +888,12 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		p := &props[i]
 		if p.JSONCaseConflictsWith != nil {
 			for _, cf := range p.JSONCaseConflictsWith {
-				p.ConflictsWith = append(p.ConflictsWith, conflictsMap[cf])
+				if val, ok := conflictsMap[cf]; ok {
+					p.ConflictsWith = append(p.ConflictsWith, val)
+				} else {
+					return nil, fmt.Errorf("Error generating conflict fields. %s is not labeled as a conflict field in DCL", cf)
+				}
+				
 			}
 		}
 	}
