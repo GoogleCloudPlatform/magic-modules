@@ -70,11 +70,9 @@ the [tpgtools/api folder](https://github.com/GoogleCloudPlatform/magic-modules/t
 These samples can be found under the samples/ folder within the DCL for the resource being added. For example, assured
 workloads can be found [here](https://github.com/GoogleCloudPlatform/declarative-resource-client-library/tree/main/services/google/assuredworkloads/samples).
 
-You may need to re-serialize `serialization.go` if you are adding newer resources.
-To do this
+Re-serialize `serialization.go` to enable generating configs from samples by running:
 ```
-cd tpgtools
-go get -u github.com/GoogleCloudPlatform/declarative-resource-client-library
+make upgrade-dcl
 make serialize
 ```
 
