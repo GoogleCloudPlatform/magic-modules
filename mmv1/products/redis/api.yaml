@@ -284,3 +284,4 @@ objects:
           - :READ_REPLICAS_ENABLED
         default_value: :READ_REPLICAS_DISABLED
         min_version: beta
+        input: true
