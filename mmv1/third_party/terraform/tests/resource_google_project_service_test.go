@@ -142,7 +142,7 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 			},
 			{
 				Config:      testAccProjectService_dependencyRemoved(services, pid, pname, org, billingId),
-				ExpectError: regexp.MustCompile("service .* not in enabled services for project"),
+				ExpectError: regexp.MustCompile("plan was not empty"),
 			},
 		},
 	})
