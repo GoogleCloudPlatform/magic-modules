@@ -231,6 +231,13 @@ objects:
         message: 'message'
     description: |
       An `Environment` in Apigee.
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      parent_resource_attribute: 'env_id'
+      import_format: ["{{%org_id}}/environments/{{name}}", "{{name}}"]
+      base_url: "{{org_id}}/environments/{{name}}"
+      self_link: "{{org_id}}/environments/{{name}}"
     parameters:
       - !ruby/object:Api::Type::String
         name: 'orgId'
