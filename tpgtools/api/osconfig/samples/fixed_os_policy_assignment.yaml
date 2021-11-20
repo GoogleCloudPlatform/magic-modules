@@ -11,7 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-- type: BASE_PATH_REPLACEMENT
-  details:
-    string: 'client.Config.BasePath + "v1"'
+name: fixed_os_policy_assignment
+description: An example of an osconfig os policy assignment with fixed rollout disruption
+  budget
+type: os_policy_assignment
+versions:
+- ga
+- beta
+- alpha
+resource: samples/fixed.os_policy_assignment.json
+updates:
+- resource: samples/update_fixed.os_policy_assignment.json
+  dependencies: []
+- resource: samples/percent.os_policy_assignment.json
+  dependencies: []
+variables:
+- name: assignment
+  type: resource_name
+- name: project
+  type: project
+- name: zone
+  type: zone

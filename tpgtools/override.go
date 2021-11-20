@@ -38,7 +38,7 @@ const (
 	CustomID                           = "CUSTOM_ID"
 	CustomizeDiff                      = "CUSTOMIZE_DIFF"
 	ImportFormat                       = "IMPORT_FORMAT"
-	AppendToBasePath                   = "APPEND_TO_BASE_PATH"
+	BasePathReplacement                = "BASE_PATH_REPLACEMENT"
 	Mutex                              = "MUTEX"
 	PreCreate                          = "PRE_CREATE_FUNCTION"
 	PostCreate                         = "POST_CREATE_FUNCTION"

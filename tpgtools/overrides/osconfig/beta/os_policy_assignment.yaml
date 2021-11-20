@@ -14,4 +14,4 @@
 
 - type: BASE_PATH_REPLACEMENT
   details:
-    string: 'client.Config.BasePath + "v1"'
+    string: 'client.Config.BasePath[0:len(client.Config.BasePath)-7] + "v1"'

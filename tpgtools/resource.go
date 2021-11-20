@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"bitbucket.org/creachadair/stringset"
+	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	"github.com/golang/glog"
 	"github.com/nasa9084/go-openapi"
 	"gopkg.in/yaml.v2"
@@ -47,10 +48,10 @@ type Resource struct {
 	// TODO: if none are set, the resource does not support import.
 	ImportFormats []string
 
-	// AppendToBasePath is a string that will be appended to the end of the API base path.
+	// BasePathReplacement is a string that will be appended to the end of the API base path.
 	// rarely needed in cases where the shared mm basepath does not include the version
 	// as in Montioring https://git.io/Jz4Wn
-	AppendToBasePath string
+	BasePathReplacement string
 
 	// title is the name of the resource in snake_case. For example,
 	// "instance", "backend_service".
@@ -216,7 +217,7 @@ func (r Resource) TerraformName() string {
 // PathType is the title-cased name of a resource preceded by its package,
 // often used to namespace functions. For example, "RedisInstance".
 func (r Resource) PathType() string {
-	return snakeToTitleCase(r.Path())
+	return dcl.SnakeToTitleCase(r.Path())
 }
 
 // Package is the namespace of the package within the dcl
@@ -468,13 +469,13 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	}
 
 	// Resource Override: Append to Base Path
-	atbpd := AppendToBasePathDetails{}
-	atbpOk, err := overrides.ResourceOverrideWithDetails(AppendToBasePath, &atbpd, location)
+	bprd := BasePathReplacementDetails{}
+	bprOk, err := overrides.ResourceOverrideWithDetails(BasePathReplacement, &bprd, location)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode append to base path details: %v", err)
 	}
-	if atbpOk {
-		res.AppendToBasePath = atbpd.String
+	if bprOk {
+		res.BasePathReplacement = bprd.String
 	}
 
 	// Resource Override: Import formats

@@ -66,8 +66,10 @@ type CustomImportFunctionDetails struct {
 	Function string
 }
 
-type AppendToBasePathDetails struct {
-	// Append to base path appends this string to the end of the resource's
+type BasePathReplacementDetails struct {
+	// BasePathReplacement replaces the config base path with the value returned
+	// by the given string.
+	// For example, client.Config.BasePath + "v1" would append "v1" to the current
 	// base path.
 	String string
 }
