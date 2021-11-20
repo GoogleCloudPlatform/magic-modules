@@ -6,7 +6,7 @@
         d.Set("location", zone)
     }
     // re-compute url now that location must be set
-    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.create_uri}" -%>")
+    url, err = replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.create_uri}" -%>")
     if err != nil {
         return err
     }

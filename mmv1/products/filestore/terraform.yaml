@@ -48,7 +48,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/filestore.erb
-      pre_create: templates/terraform/constants/pre_create/filestore_instance.go.erb
+      pre_create: templates/terraform/pre_create/filestore_instance.go.erb
+      resource_definition: templates/terraform/resource_definition/filestore_instance.go.erb
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
