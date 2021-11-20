@@ -53,6 +53,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           network_name: "redis-test-network"
         test_vars_overrides:
           network_name: 'BootstrapSharedTestNetwork(t, "redis-private")'
+      - !ruby/object:Provider::Terraform::Examples
+        name: "redis_instance_mrr"
+        primary_resource_id: "cache"
+        vars:
+          instance_name: "mrr-memory-cache"
+          network_name: "redis-test-network"
+        test_vars_overrides:
+          network_name: 'BootstrapSharedTestNetwork(t, "redis-mrr")'
+        min_version: beta
     properties:
       alternativeLocationId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -76,6 +85,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
       reservedIpRange: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      replicaCount: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
 
 # This is for copying files over

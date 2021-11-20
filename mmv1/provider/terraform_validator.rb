@@ -24,7 +24,7 @@ module Provider
       resources_folder = File.join(output_folder, 'converters/google/resources')
       FileUtils.mkdir_p(resources_folder)
 
-      @base_url = @version.base_url
+      @base_url = @version.cai_base_url || @version.base_url
       generate_objects(
         output_folder,
         types,
@@ -275,6 +275,7 @@ module Provider
     # Docs are generated for the terraform provider, not here.
     def generate_iam_policy(pwd, data, generate_code, _generate_docs)
       return unless generate_code
+      return if data.object.iam_policy.exclude_validator
 
       target_folder = File.join(data.output_folder, 'converters/google/resources')
       name = data.object.filename_override || data.object.name.underscore
