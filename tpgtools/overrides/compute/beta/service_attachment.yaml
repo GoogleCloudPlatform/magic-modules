@@ -6,3 +6,7 @@
   details:
     name: region
   field: location
+- type: DIFF_SUPPRESS_FUNC
+  field: location
+  details:
+    diffsuppressfunc: compareSelfLinkOrResourceName
