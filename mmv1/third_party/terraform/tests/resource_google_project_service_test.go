@@ -141,8 +141,8 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"disable_on_destroy"},
 			},
 			{
-				Config:      testAccProjectService_dependencyRemoved(services, pid, pname, org, billingId),
-				ExpectError: regexp.MustCompile("plan was not empty"),
+				Config:             testAccProjectService_dependencyRemoved(services, pid, pname, org, billingId),
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
