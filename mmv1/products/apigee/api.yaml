@@ -175,9 +175,14 @@ objects:
         description: |
           The size of the CIDR block range that will be reserved by the instance.
         values:
+          - "CIDR_RANGE_UNSPECIFIED"
           - "SLASH_16"
+          - "SLASH_17"
+          - "SLASH_18"
+          - "SLASH_19"
           - "SLASH_20"
           - "SLASH_22"
+          - "SLASH_23"
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
