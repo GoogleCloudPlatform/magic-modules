@@ -23,6 +23,7 @@ import (
 
 	assuredworkloads "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads"
 	assuredworkloadsBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads/beta"
+	cloudbuild "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudbuild"
 	cloudbuildBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudbuild/beta"
 	cloudresourcemanager "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudresourcemanager"
 	cloudresourcemanagerBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudresourcemanager/beta"
@@ -88,6 +89,8 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 	switch resourceType {
 	case "AssuredWorkloadsWorkload":
 		return "google_assured_workloads_workload", nil
+	case "CloudbuildWorkerPool":
+		return "google_cloudbuild_worker_pool", nil
 	case "CloudResourceManagerFolder":
 		return "google_folder", nil
 	case "CloudResourceManagerProject":
@@ -123,6 +126,8 @@ func DCLToTerraformSampleName(service, resource string) (string, string, error) 
 	switch service + resource {
 	case "assuredworkloadsworkload":
 		return "AssuredWorkloads", "Workload", nil
+	case "cloudbuildworkerpool":
+		return "cloudbuild", "WorkerPool", nil
 	case "cloudresourcemanagerfolder":
 		return "CloudResourceManager", "Folder", nil
 	case "cloudresourcemanagerproject":
@@ -263,6 +268,12 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 			return "", err
 		}
 		return AssuredWorkloadsWorkloadAsHCL(*r, hasGAEquivalent)
+	case "CloudbuildWorkerPool":
+		r := &cloudbuild.WorkerPool{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return CloudbuildWorkerPoolAsHCL(*r, hasGAEquivalent)
 	case "CloudResourceManagerFolder":
 		r := &cloudresourcemanager.Folder{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -2705,6 +2716,71 @@ func convertAssuredWorkloadsWorkloadResourcesToHCL(r *assuredworkloads.WorkloadR
 		return ""
 	}
 	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+// CloudbuildWorkerPoolAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func CloudbuildWorkerPoolAsHCL(r cloudbuild.WorkerPool, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_cloudbuild_worker_pool\" \"output\" {\n"
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	if v := convertCloudbuildWorkerPoolNetworkConfigToHCL(r.NetworkConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tnetwork_config %s\n", v)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if v := convertCloudbuildWorkerPoolWorkerConfigToHCL(r.WorkerConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tworker_config %s\n", v)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertCloudbuildWorkerPoolNetworkConfigToHCL(r *cloudbuild.WorkerPoolNetworkConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.PeeredNetwork != nil {
+		outputConfig += fmt.Sprintf("\tpeered_network = %#v\n", *r.PeeredNetwork)
+	}
+	return outputConfig + "}"
+}
+
+func convertCloudbuildWorkerPoolWorkerConfigToHCL(r *cloudbuild.WorkerPoolWorkerConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.DiskSizeGb != nil {
+		outputConfig += fmt.Sprintf("\tdisk_size_gb = %#v\n", *r.DiskSizeGb)
+	}
+	if r.MachineType != nil {
+		outputConfig += fmt.Sprintf("\tmachine_type = %#v\n", *r.MachineType)
+	}
+	if r.NoExternalIP != nil {
+		outputConfig += fmt.Sprintf("\tno_external_ip = %#v\n", *r.NoExternalIP)
+	}
 	return outputConfig + "}"
 }
 
@@ -6688,6 +6764,50 @@ func convertAssuredWorkloadsWorkloadResourcesList(i interface{}) (out []map[stri
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertAssuredWorkloadsWorkloadResources(v))
+	}
+	return out
+}
+
+func convertCloudbuildWorkerPoolNetworkConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"peeredNetwork": in["peered_network"],
+	}
+}
+
+func convertCloudbuildWorkerPoolNetworkConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertCloudbuildWorkerPoolNetworkConfig(v))
+	}
+	return out
+}
+
+func convertCloudbuildWorkerPoolWorkerConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"diskSizeGb":   in["disk_size_gb"],
+		"machineType":  in["machine_type"],
+		"noExternalIP": in["no_external_ip"],
+	}
+}
+
+func convertCloudbuildWorkerPoolWorkerConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertCloudbuildWorkerPoolWorkerConfig(v))
 	}
 	return out
 }
