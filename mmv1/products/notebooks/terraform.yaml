@@ -144,13 +144,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         region_override: "us-central1"
         vars:
           runtime_name: "notebooks-runtime-container"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "notebook_runtime_full"
-        primary_resource_id: "runtime_full"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime-full%s\", context[\"random_suffix\"])"
-        region_override: "us-central1"
-        vars:
-          runtime_name: "notebooks-runtime-full"
     description: |
       {{description}}
 
