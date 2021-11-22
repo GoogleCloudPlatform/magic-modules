@@ -62,9 +62,9 @@ var (
 		"config.0.web_server_config",
 		"config.0.encryption_config",
 		"config.0.maintenance_window",
+<% end -%>
 		"config.0.workloads_config",
 		"config.0.environment_size",
-<% end -%>
 	}
 
 	composerPrivateEnvironmentConfig = []string{
@@ -72,8 +72,8 @@ var (
 		"config.0.private_environment_config.0.master_ipv4_cidr_block",
 		"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
 		"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
-<% unless version == "ga" -%>
 		"config.0.private_environment_config.0.cloud_composer_network_ipv4_cidr_block",
+<% unless version == "ga" -%>
 		"config.0.private_environment_config.0.enable_privately_used_public_ips",
 		"config.0.private_environment_config.0.cloud_composer_connection_subnetwork",
 <% end -%>
@@ -413,7 +413,6 @@ func resourceComposerEnvironment() *schema.Resource {
 										ForceNew:    true,
 										Description: `The CIDR block from which IP range in tenant project will be reserved for Cloud SQL. Needs to be disjoint from web_server_ipv4_cidr_block.`,
 									},
-<% unless version == "ga" -%>
 									"cloud_composer_network_ipv4_cidr_block": {
 										Type:     schema.TypeString,
 										Optional: true,
@@ -422,6 +421,7 @@ func resourceComposerEnvironment() *schema.Resource {
 										ForceNew: true,
 										Description: `The CIDR block from which IP range for Cloud Composer Network in tenant project will be reserved. Needs to be disjoint from private_cluster_config.master_ipv4_cidr_block and cloud_sql_ipv4_cidr_block. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
 									},
+<% unless version == "ga" -%>
 									"enable_privately_used_public_ips": {
 										Type:     schema.TypeBool,
 										Optional: true,
@@ -438,7 +438,7 @@ func resourceComposerEnvironment() *schema.Resource {
 										ForceNew: true,
 										Description: `When specified, the environment will use Private Service Connect instead of VPC peerings to connect to Cloud SQL in the Tenant Project, and the PSC endpoint in the Customer Project will use an IP address from this subnetwork. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
 									},
-									<% end -%>
+<% end -%>
 								},
 							},
 						},
@@ -974,6 +974,17 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
 		}
+
+		if d.HasChange("config.0.environment_size") {
+			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
+			if config != nil {
+				patchObj.Config.EnvironmentSize = config.EnvironmentSize
+			}
+			err = resourceComposerEnvironmentPatchField("config.EnvironmentSize", userAgent, patchObj, d, tfConfig)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	if d.HasChange("labels") {
@@ -1236,8 +1247,8 @@ func flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg *composer.P
 	transformed["master_ipv4_cidr_block"] = envCfg.PrivateClusterConfig.MasterIpv4CidrBlock
 	transformed["cloud_sql_ipv4_cidr_block"] = envCfg.CloudSqlIpv4CidrBlock
 	transformed["web_server_ipv4_cidr_block"] = envCfg.WebServerIpv4CidrBlock
-<% unless version == "ga" -%>
 	transformed["cloud_composer_network_ipv4_cidr_block"] = envCfg.CloudComposerNetworkIpv4CidrBlock
+<% unless version == "ga" -%>
 	transformed["enable_privately_used_public_ips"] = envCfg.EnablePrivatelyUsedPublicIps
 	transformed["cloud_composer_connection_subnetwork"] = envCfg.CloudComposerConnectionSubnetwork
 
@@ -1586,11 +1597,11 @@ func expandComposerEnvironmentConfigPrivateEnvironmentConfig(v interface{}, d *s
 	if v, ok := original["web_server_ipv4_cidr_block"]; ok {
 		transformed.WebServerIpv4CidrBlock = v.(string)
 	}
-<% unless version == "ga" -%>
+
 	if v, ok := original["cloud_composer_network_ipv4_cidr_block"]; ok {
 		transformed.CloudComposerNetworkIpv4CidrBlock = v.(string)
 	}
-
+<% unless version == "ga" -%>
 	if v, ok := original["enable_privately_used_public_ips"]; ok {
 		transformed.EnablePrivatelyUsedPublicIps = v.(bool)
 	}
