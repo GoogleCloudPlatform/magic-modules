@@ -2,49 +2,35 @@ package google
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestFilestoreInstanceMigrateState(t *testing.T) {
-	cases := map[string]struct {
-		StateVersion int
-		Attributes   map[string]string
-		Expected     map[string]string
-		Meta         interface{}
-	}{
-		"migrate zone to location": {
-			StateVersion: 0,
-			Attributes: map[string]string{
-				"zone": "us-central1-a",
-			},
-			Expected: map[string]string{
-				"zone":     "us-central1-a",
-				"location": "us-central1-a",
-			},
-		},
+func testResourceFilestoreInstanceStateDataV0() map[string]interface{} {
+	return map[string]interface{}{
+		"zone": "us-central1-a",
 	}
-	for tn, tc := range cases {
-		is := &terraform.InstanceState{
-			ID:         "i-abc123",
-			Attributes: tc.Attributes,
-		}
-		is, err := resourceFilestoreInstanceMigrateState(
-			tc.StateVersion, is, tc.Meta)
+}
 
-		if err != nil {
-			t.Fatalf("bad: %s, err: %#v", tn, err)
-		}
+func testResourceFilestoreInstanceStateDataV1() map[string]interface{} {
+	v0 := testResourceFilestoreInstanceStateDataV0()
+	return map[string]interface{}{
+		"location": v0["zone"],
+		"zone":     v0["zone"],
+	}
+}
 
-		for k, v := range tc.Expected {
-			if is.Attributes[k] != v {
-				t.Fatalf(
-					"bad: %s\n\n expected: %#v -> %#v\n got: %#v -> %#v\n in: %#v",
-					tn, k, v, k, is.Attributes[k], is.Attributes)
-			}
-		}
+func TestFilestoreInstanceStateUpgradeV0(t *testing.T) {
+	expected := testResourceFilestoreInstanceStateDataV1()
+	actual, err := resourceFilestoreInstanceUpgradeV0(nil, testResourceFilestoreInstanceStateDataV0(), nil)
+	if err != nil {
+		t.Fatalf("error migrating state: %s", err)
+	}
+
+	if !reflect.DeepEqual(expected, actual) {
+		t.Fatalf("\n\nexpected:\n\n%#v\n\ngot:\n\n%#v\n\n", expected, actual)
 	}
 }
 
