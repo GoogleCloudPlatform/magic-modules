@@ -202,7 +202,7 @@ module Provider
                        ['converters/google/resources/project_iam_custom_role.go',
                         'third_party/validator/project_iam_custom_role.go'],
                        ['converters/google/resources/organization_iam_custom_role.go',
-                        'third_party/validator/organization_iam_custom_role.go'],
+                        'third_party/validator/organization_iam_custom_role.go']
                      ])
     end
 
