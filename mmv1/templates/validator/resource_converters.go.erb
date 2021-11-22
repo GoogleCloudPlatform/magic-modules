@@ -49,6 +49,7 @@ func ResourceConverters() map[string][]ResourceConverter {
 		"google_bigquery_dataset_iam_policy":              {resourceConverterBigqueryDatasetIamPolicy()},
 		"google_bigquery_dataset_iam_binding":             {resourceConverterBigqueryDatasetIamBinding()},
 		"google_bigquery_dataset_iam_member":              {resourceConverterBigqueryDatasetIamMember()},
+		"google_bigquery_table":                           {resourceConverterBigQueryTable()},
 		"google_spanner_instance":                         {resourceConverterSpannerInstance()},
 		"google_project_service":                          {resourceConverterServiceUsage()},
 		"google_pubsub_subscription":                      {resourceConverterPubsubSubscription()},
@@ -57,6 +58,8 @@ func ResourceConverters() map[string][]ResourceConverter {
 		"google_kms_key_ring":                             {resourceConverterKMSKeyRing()},
 		"google_filestore_instance":                       {resourceConverterFilestoreInstance()},
 		"google_access_context_manager_service_perimeter": {resourceConverterAccessContextManagerServicePerimeter()},
+		"google_cloud_run_service":                        {resourceConverterCloudRunService()},
+		"google_cloud_run_domain_mapping":                 {resourceConverterCloudRunDomainMapping()},
         <% products.each do |product| -%>
             <% (product[:definitions].objects || []).each do |object| -%>
                 <% if object.min_version.name == "ga" -%>
@@ -64,7 +67,7 @@ func ResourceConverters() map[string][]ResourceConverter {
 						<% tf_product = (product[:overrides].legacy_name || object.__product.name).underscore -%>
 						<% terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}" -%>
                         <% cai_name =  object.__product.name + object.name -%>
-                        <% if (!object.iam_policy.nil?) && (!object.iam_policy.exclude) -%>
+                        <% if (!object.iam_policy.nil?) && (!object.iam_policy.exclude) && (!object.iam_policy.exclude_validator) -%>
                             "<%= terraform_name -%>_iam_policy": {resourceConverter<%= cai_name -%>IamPolicy()},
                             "<%= terraform_name -%>_iam_binding": {resourceConverter<%= cai_name -%>IamBinding()},
                             "<%= terraform_name -%>_iam_member": {resourceConverter<%= cai_name -%>IamMember()},
