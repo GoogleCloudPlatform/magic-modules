@@ -22,6 +22,7 @@ module Api
     class Version < Api::Object::Named
       include Comparable
 
+      attr_reader :cai_base_url
       attr_reader :base_url
       attr_reader :name
 
@@ -29,6 +30,7 @@ module Api
 
       def validate
         super
+        check :cai_base_url, type: String, required: false
         check :base_url, type: String, required: true
         check :name, type: String, allowed: ORDER, required: true
       end
