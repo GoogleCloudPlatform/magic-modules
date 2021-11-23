@@ -1,6 +1,7 @@
 package google
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -21,7 +22,7 @@ import (
 // Expander utilities
 
 func expandPrivatecaCertificateConfigX509ConfigCaOptions(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	// Fields include_is_ca, include_max_issuer_path_length are used to distinguish between
+	// Fields non_ca, zero_max_issuer_path_length are used to distinguish between
 	// unset booleans and booleans set with a default value.
 	// Unset is_ca or unset max_issuer_path_length either allow any values for these fields when
 	// used in an issuance policy, or allow the API to use default values when used in a
@@ -38,18 +39,25 @@ func expandPrivatecaCertificateConfigX509ConfigCaOptions(v interface{}, d Terraf
 	raw := l[0]
 	original := raw.(map[string]interface{})
 
-	includeIsCa := original["include_is_ca"].(bool)
+	nonCa := original["non_ca"].(bool)
 	isCa := original["is_ca"].(bool)
 
-	includePathLength := original["include_max_issuer_path_length"].(bool)
-	max_issuer_path_length := original["max_issuer_path_length"].(int)
+	zeroPathLength := original["zero_max_issuer_path_length"].(bool)
+	maxIssuerPathLength := original["max_issuer_path_length"].(int)
 
 	transformed := make(map[string]interface{})
 
-	if includeIsCa || isCa {
+	if nonCa && isCa {
+		return nil, fmt.Errorf("non_ca, is_ca can not be set to true at the same time.")
+	}
+	if zeroPathLength && maxIssuerPathLength > 0 {
+		return nil, fmt.Errorf("zero_max_issuer_path_length can not be set to true while max_issuer_path_length being set to a positive integer.")
+	}
+
+	if isCa || nonCa {
 		transformed["isCa"] = original["is_ca"]
 	}
-	if includePathLength || max_issuer_path_length > 0 {
+	if maxIssuerPathLength > 0 || zeroPathLength {
 		transformed["maxIssuerPathLength"] = original["max_issuer_path_length"]
 	}
 	return transformed, nil
@@ -308,15 +316,15 @@ func flattenPrivatecaCertificateConfigX509ConfigCaOptions(v interface{}, d *sche
 	val, exists := original["isCa"]
 	transformed["is_ca"] =
 		flattenPrivatecaCertificateConfigX509ConfigCaOptionsIsCa(val, d, config)
-	if exists {
-		transformed["include_is_ca"] = true
+	if exists && !val.(bool) {
+		transformed["non_ca"] = true
 	}
 
 	val, exists = original["maxIssuerPathLength"]
 	transformed["max_issuer_path_length"] =
 		flattenPrivatecaCertificateConfigX509ConfigCaOptionsMaxIssuerPathLength(val, d, config)
-	if exists {
-		transformed["include_max_issuer_path_length"] = true
+	if exists && int(val.(float64)) == 0 {
+		transformed["zero_max_issuer_path_length"] = true
 	}
 
 	return []interface{}{transformed}
