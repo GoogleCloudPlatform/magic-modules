@@ -103,9 +103,7 @@ resource "google_privateca_ca_pool" "default" {
         object_id_path = [1,5,7]
       }
       ca_options {
-        include_is_ca = true
         is_ca = true
-      	include_max_issuer_path_length = true
         max_issuer_path_length = 10
       }
       key_usage {
@@ -187,9 +185,7 @@ resource "google_privateca_ca_pool" "default" {
         object_id_path = [1, 7]
       }
       ca_options {
-	include_is_ca = true
         is_ca = true
-	include_max_issuer_path_length = true
         max_issuer_path_length = 10
       }
       key_usage {
@@ -336,7 +332,7 @@ func TestAccPrivatecaCaPool_updateCaOption(t *testing.T) {
 		CheckDestroy: testAccCheckPrivatecaCaPoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPrivatecaCaPool_privatecaCapoolCaOptionAllFieldsAreSpecified(context),
+				Config: testAccPrivatecaCaPool_privatecaCapoolCaOptionIsCaIsTrueAndMaxPathIsPositive(context),
 			},
 			{
 				ResourceName:            "google_privateca_ca_pool.default",
@@ -366,7 +362,7 @@ func TestAccPrivatecaCaPool_updateCaOption(t *testing.T) {
 	})
 }
 
-func testAccPrivatecaCaPool_privatecaCapoolCaOptionAllFieldsAreSpecified(context map[string]interface{}) string {
+func testAccPrivatecaCaPool_privatecaCapoolCaOptionIsCaIsTrueAndMaxPathIsPositive(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_privateca_ca_pool" "default" {
   name = "tf-test-my-capool%{random_suffix}"
@@ -376,9 +372,7 @@ resource "google_privateca_ca_pool" "default" {
   issuance_policy {
     baseline_values {
       ca_options {
-        include_is_ca = true
         is_ca = true
-        include_max_issuer_path_length = true
         max_issuer_path_length = 10
       }
       key_usage {
@@ -405,7 +399,7 @@ resource "google_privateca_ca_pool" "default" {
   issuance_policy {
     baseline_values {
       ca_options {
-        include_is_ca = true
+        non_ca = true
         is_ca = false
       }
       key_usage {
@@ -432,7 +426,7 @@ resource "google_privateca_ca_pool" "default" {
   issuance_policy {
     baseline_values {
       ca_options {
-        include_max_issuer_path_length = true
+        zero_max_issuer_path_length = true
         max_issuer_path_length = 0
       }
       key_usage {

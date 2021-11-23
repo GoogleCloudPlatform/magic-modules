@@ -15,7 +15,6 @@ resource "google_privateca_certificate_authority" "test-ca" {
     }
     x509_config {
       ca_options {
-        include_is_ca = true
         is_ca = true
       }
       key_usage {
@@ -59,7 +58,7 @@ resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
     }
     x509_config {
       ca_options {
-        include_is_ca = true
+        non_ca = true
         is_ca = false
       }
       key_usage {
