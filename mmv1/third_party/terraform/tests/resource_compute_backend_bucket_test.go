@@ -210,7 +210,6 @@ resource "google_storage_bucket" "bucket" {
 `, backendName, age, max_ttl, ttl, ttl, ttl, code, ttl, storageName)
 }
 
-
 func testAccComputeBackendBucket_withCdnPolicy4(backendName, storageName string, age, code, ttl int) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_bucket" "foobar" {
