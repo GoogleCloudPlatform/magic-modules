@@ -12,6 +12,7 @@
 # As before, we must specify the network tier and SA scopes in order to create
 # an equivalent template
 
+# [START compute_instance_template_basic]
 resource "google_compute_instance_template" "<%= ctx[:primary_resource_id] %>" {
   name         = "<%= ctx[:vars]['example_template_custom'] %>"
   machine_type = "e2-standard-4"
@@ -43,3 +44,4 @@ resource "google_compute_instance_template" "<%= ctx[:primary_resource_id] %>" {
     ]
   }
 }
+# [END compute_instance_template_basic]
