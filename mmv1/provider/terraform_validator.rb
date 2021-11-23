@@ -13,6 +13,7 @@
 
 require 'provider/terraform_oics'
 require 'fileutils'
+require 'set'
 
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
@@ -52,6 +53,59 @@ module Provider
                     self)
     end
 
+    def retrieve_list_of_manually_defined_tests_from_file(file)
+      content = File.read(file)
+      matches = content.scan(/\s*name\s*:\s*\"([^,]+)\"/).flatten(1)
+      matches
+    end
+
+    def retrieve_list_of_manually_defined_tests
+      m1 =
+        retrieve_list_of_manually_defined_tests_from_file(
+          'third_party/validator/tests/manifest/cli_test.go.erb'
+        )
+      m2 =
+        retrieve_list_of_manually_defined_tests_from_file(
+          'third_party/validator/tests/manifest/read_test.go.erb'
+        )
+      m1 | m2 # union of manually defined tests
+    end
+
+    def validate_non_defined_tests(file_set, non_defined_tests)
+      if non_defined_tests.any? { |test| !file_set.member?(test + '.json') }
+        raise 'test file named ' + test + '.json expected but found none'
+      end
+
+      if non_defined_tests.any? { |test| !file_set.member?(test + '.tfplan.json') }
+        raise 'test file named ' + test + '.tfplan.json expected but found none'
+      end
+
+      return unless non_defined_tests.any? { |test| !file_set.member?(test + '.tf') }
+
+      raise 'test file named ' + test + '.tf expected but found none'
+    end
+
+    def retrieve_full_list_of_test_files
+      files = Dir['third_party/validator/tests/data/*']
+      files = files.map { |file| file.split('/')[-1] }
+      files.sort
+    end
+
+    def retrieve_full_list_of_test_files_with_location
+      files = retrieve_full_list_of_test_files
+      files.map do |file|
+        ['testdata/templates/' + file, 'third_party/validator/tests/data/' + file]
+      end
+    end
+
+    def retrieve_full_manifest_of_non_defined_tests
+      files = retrieve_full_list_of_test_files
+      tests = files.map { |file| file.split('.')[0] } | []
+      non_defined_tests = tests - retrieve_list_of_manually_defined_tests
+      validate_non_defined_tests(files.to_set, non_defined_tests)
+      non_defined_tests
+    end
+
     def compile_common_files(output_folder, products, _common_compile_file)
       Google::LOGGER.info 'Compiling common files.'
       file_template = ProviderFileTemplate.new(
@@ -60,6 +114,8 @@ module Provider
         build_env,
         products
       )
+
+      @non_defined_tests = retrieve_full_manifest_of_non_defined_tests
       compile_file_list(output_folder, [
                           ['converters/google/resources/compute_operation.go',
                            'third_party/terraform/utils/compute_operation.go.erb'],
@@ -84,7 +140,11 @@ module Provider
                           ['converters/google/resources/metadata.go',
                            'third_party/terraform/utils/metadata.go.erb'],
                           ['converters/google/resources/compute_instance.go',
-                           'third_party/validator/compute_instance.go.erb']
+                           'third_party/validator/compute_instance.go.erb'],
+                          ['test/cli_test.go',
+                           'third_party/validator/tests/manifest/cli_test.go.erb'],
+                          ['test/read_test.go',
+                           'third_party/validator/tests/manifest/read_test.go.erb']
                         ],
                         file_template)
     end
@@ -92,6 +152,11 @@ module Provider
     def copy_common_files(output_folder, generate_code, _generate_docs)
       Google::LOGGER.info 'Copying common files.'
       return unless generate_code
+
+      copy_file_list(
+        output_folder,
+        retrieve_full_list_of_test_files_with_location
+      )
 
       copy_file_list(output_folder, [
                        ['converters/google/resources/constants.go',
@@ -187,14 +252,14 @@ module Provider
                         'third_party/terraform/utils/iam_folder.go'],
                        ['converters/google/resources/iam_project.go',
                         'third_party/terraform/utils/iam_project.go'],
-                       ['converters/google/resources/dcl_logger.go',
-                        '../tpgtools/handwritten/dcl_logger.go'],
                        ['converters/google/resources/utils.go',
                         'third_party/terraform/utils/utils.go'],
-                       ['converters/google/resources/bigquery_dataset_iam.go',
-                        'third_party/validator/bigquery_dataset_iam.go'],
                        ['converters/google/resources/iam_bigquery_dataset.go',
                         'third_party/terraform/utils/iam_bigquery_dataset.go'],
+                       ['converters/google/resources/dcl_logger.go',
+                        '../tpgtools/handwritten/dcl_logger.go'],
+                       ['converters/google/resources/bigquery_dataset_iam.go',
+                        'third_party/validator/bigquery_dataset_iam.go'],
                        ['converters/google/resources/kms_key_ring_iam.go',
                         'third_party/validator/kms_key_ring_iam.go'],
                        ['converters/google/resources/kms_crypto_key_iam.go',
