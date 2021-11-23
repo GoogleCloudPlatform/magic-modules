@@ -1,6 +1,7 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"testing"
@@ -24,7 +25,8 @@ func testResourceFilestoreInstanceStateDataV1() map[string]interface{} {
 
 func TestFilestoreInstanceStateUpgradeV0(t *testing.T) {
 	expected := testResourceFilestoreInstanceStateDataV1()
-	actual, err := resourceFilestoreInstanceUpgradeV0(nil, testResourceFilestoreInstanceStateDataV0(), nil)
+	// linter complains about nil context even in a test setting
+	actual, err := resourceFilestoreInstanceUpgradeV0(context.Background(), testResourceFilestoreInstanceStateDataV0(), nil)
 	if err != nil {
 		t.Fatalf("error migrating state: %s", err)
 	}
