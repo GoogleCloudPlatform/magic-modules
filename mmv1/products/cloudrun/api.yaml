@@ -246,7 +246,7 @@ objects:
     and Route, reflecting their statuses and conditions as its own.
 
     See also:
-    https://github.com/knative/serving/blob/master/docs/spec/overview.md#service
+    https://github.com/knative/specs/blob/main/specs/serving/overview.md
   iam_policy: !ruby/object:Api::Resource::IamPolicy
     method_name_separator: ':'
     parent_resource_attribute: 'service'
