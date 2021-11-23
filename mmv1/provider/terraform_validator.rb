@@ -72,15 +72,15 @@ module Provider
     end
 
     def validate_non_defined_tests(file_set, non_defined_tests)
-      if non_defined_tests.any?{ |test| !file_set.member?(test + '.json') }
+      if non_defined_tests.any? { |test| !file_set.member?(test + '.json') }
         raise 'test file named ' + test + '.json expected but found none'
       end
 
-      if non_defined_tests.any?{ |test| !file_set.member?(test + '.tfplan.json') }
+      if non_defined_tests.any? { |test| !file_set.member?(test + '.tfplan.json') }
         raise 'test file named ' + test + '.tfplan.json expected but found none'
       end
 
-      return unless non_defined_tests.any?{ |test| !file_set.member?(test + '.tf') }
+      return unless non_defined_tests.any? { |test| !file_set.member?(test + '.tf') }
 
       raise 'test file named ' + test + '.tf expected but found none'
     end
