@@ -172,13 +172,13 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 											Schema: map[string]*schema.Schema{
 												"count": {
 													Type:        schema.TypeInt,
-													Optional:    true,
+													Required:    true,
 													Description: `Number of HTTP(S) requests for calculating the threshold.`,
 												},
 
 												"interval_sec": {
 													Type:        schema.TypeInt,
-													Optional:    true,
+													Required:    true,
 													Description: `Interval over which the threshold is computed.`,
 												},
 											},
