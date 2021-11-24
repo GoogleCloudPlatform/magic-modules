@@ -61,6 +61,7 @@ func ResourceConverters() map[string][]ResourceConverter {
 		"google_cloud_run_service":                        {resourceConverterCloudRunService()},
 		"google_cloud_run_domain_mapping":                 {resourceConverterCloudRunDomainMapping()},
 		"google_monitoring_notification_channel":          {resourceConverterMonitoringNotificationChannel()},
+		"google_monitoring_alert_policy":                  {resourceConverterMonitoringAlertPolicy()},
         <% products.each do |product| -%>
             <% (product[:definitions].objects || []).each do |object| -%>
                 <% if object.min_version.name == "ga" -%>
@@ -101,5 +102,7 @@ func ResourceConverters() map[string][]ResourceConverter {
 		"google_project_iam_policy": {resourceConverterProjectIamPolicy()},
 		"google_project_iam_binding": {resourceConverterProjectIamBinding()},
 		"google_project_iam_member": {resourceConverterProjectIamMember()},
+		"google_project_iam_custom_role": {resourceConverterProjectIAMCustomRole()},
+		"google_organization_iam_custom_role": {resourceConverterOrganizationIAMCustomRole()},
 	}
 }
