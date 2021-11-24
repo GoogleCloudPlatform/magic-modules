@@ -31,13 +31,12 @@
         },
         "settings": {
           "activationPolicy": "test-activation_policy",
-
           "availabilityType": "REGIONAL",
           "backupConfiguration": {
             "binaryLogEnabled": true,
             "enabled": true,
-            "startTime": "42:42",
-            "location": "us"
+            "location": "us",
+            "startTime": "42:42"
           },
           "dataDiskSizeGb": "42",
           "dataDiskType": "test-disk_type",
@@ -83,6 +82,23 @@
             "user_labels_foo": "user_labels_bar"
           }
         }
+      }
+    }
+  },
+  {
+    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/addresses/private-ip-address",
+    "asset_type": "compute.googleapis.com/GlobalAddress",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+      "discovery_name": "GlobalAddress",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "addressType": "INTERNAL",
+        "name": "private-ip-address",
+        "prefixLength": 16,
+        "purpose": "VPC_PEERING"
       }
     }
   },
