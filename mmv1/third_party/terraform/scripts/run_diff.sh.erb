@@ -29,4 +29,4 @@ fi
 
 go mod edit -require=github.com/hashicorp/terraform-provider-clean-<%= provider_name -%>@v0.0.0
 go mod edit -replace github.com/hashicorp/terraform-provider-clean-<%= provider_name -%>=$(realpath ~/go/src/github.com/hashicorp/terraform-provider-clean-<%= provider_name -%>)
-go run scripts/diff.go --resource $1
+go run scripts/diff.go --resource $1 --verbose
