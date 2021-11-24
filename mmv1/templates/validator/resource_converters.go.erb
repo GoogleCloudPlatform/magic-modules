@@ -60,6 +60,7 @@ func ResourceConverters() map[string][]ResourceConverter {
 		"google_access_context_manager_service_perimeter": {resourceConverterAccessContextManagerServicePerimeter()},
 		"google_cloud_run_service":                        {resourceConverterCloudRunService()},
 		"google_cloud_run_domain_mapping":                 {resourceConverterCloudRunDomainMapping()},
+		"google_monitoring_alert_policy":                  {resourceConverterMonitoringAlertPolicy()},
         <% products.each do |product| -%>
             <% (product[:definitions].objects || []).each do |object| -%>
                 <% if object.min_version.name == "ga" -%>
