@@ -107,7 +107,7 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
         mkdir -p $LOCAL_PATH/google
     fi
     pushd $LOCAL_PATH
-    # clear out the templates as they are copied durring
+    # clear out the templates as they are copied during
     # generation from mmv1/third_party/validator/tests/data
     find ./testdata/templates/*.* -exec git rm {} \;
     popd
