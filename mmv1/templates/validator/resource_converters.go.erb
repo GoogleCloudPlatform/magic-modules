@@ -100,5 +100,7 @@ func ResourceConverters() map[string][]ResourceConverter {
 		"google_project_iam_policy": {resourceConverterProjectIamPolicy()},
 		"google_project_iam_binding": {resourceConverterProjectIamBinding()},
 		"google_project_iam_member": {resourceConverterProjectIamMember()},
+		"google_project_iam_custom_role": {resourceConverterProjectIAMCustomRole()},
+		"google_organization_iam_custom_role": {resourceConverterOrganizationIAMCustomRole()},
 	}
 }
