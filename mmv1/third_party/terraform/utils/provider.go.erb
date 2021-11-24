@@ -189,9 +189,7 @@ func Provider() *schema.Provider {
 			VmwareEndpointEntryKey:                          VmwareEndpointEntry,
 			<% end -%>
 
-			<% unless version == "ga" -%>
 			CloudBuildWorkerPoolEndpointEntryKey:               CloudBuildWorkerPoolEndpointEntry,
-			<% end -%>
 },
 
 		ProviderMetaSchema: map[string]*schema.Schema{
@@ -457,9 +455,7 @@ end     # products.each do
 			// resources implemented within tpgtools
 			map[string]*schema.Resource{
 				"google_assured_workloads_workload":            resourceAssuredWorkloadsWorkload(),
-				<% unless version == 'ga' -%>
 				"google_cloudbuild_worker_pool":                resourceCloudbuildWorkerPool(),
-				<% end -%>
 				"google_compute_firewall_policy_association":   resourceComputeFirewallPolicyAssociation(),
 				"google_compute_firewall_policy":               resourceComputeFirewallPolicy(),
 				"google_compute_firewall_policy_rule":          resourceComputeFirewallPolicyRule(),
@@ -656,9 +652,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.GkeHubBasePath = d.Get(GkeHubFeatureCustomEndpointEntryKey).(string)
 	config.OrgPolicyBasePath = d.Get(OrgPolicyEndpointEntryKey).(string)
 	config.PrivatecaBasePath = d.Get(PrivatecaCertificateTemplateEndpointEntryKey).(string)
-	<% unless version == "ga" -%>
 	config.CloudBuildWorkerPoolBasePath = d.Get(CloudBuildWorkerPoolEndpointEntryKey).(string)
-	<% end -%>
 
 	stopCtx, ok := schema.StopContext(ctx)
 	if !ok {
