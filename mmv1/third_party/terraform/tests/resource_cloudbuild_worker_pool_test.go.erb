@@ -1,7 +1,6 @@
 <% autogen_exception -%>
 package google
 
-<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"strings"
@@ -190,4 +189,3 @@ func funcAccTestCloudbuildWorkerPoolCheckDestroy(t *testing.T) func(s *terraform
 		return nil
 	}
 }
-<% end -%>

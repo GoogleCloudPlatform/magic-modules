@@ -182,7 +182,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         send_empty_value: true
       cdnPolicy.maxTtl: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-        send_empty_value: true
       cdnPolicy.signedUrlCacheMaxAgeSec: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
       cdnPolicy.negativeCachingPolicy.ttl: !ruby/object:Overrides::Terraform::PropertyOverride
