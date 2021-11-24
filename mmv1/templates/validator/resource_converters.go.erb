@@ -61,7 +61,7 @@ func ResourceConverters() map[string][]ResourceConverter {
 		"google_cloud_run_service":                        {resourceConverterCloudRunService()},
 		"google_cloud_run_domain_mapping":                 {resourceConverterCloudRunDomainMapping()},
 		"google_monitoring_alert_policy":                  {resourceConverterMonitoringAlertPolicy()},
-		        <% products.each do |product| -%>
+        <% products.each do |product| -%>
             <% (product[:definitions].objects || []).each do |object| -%>
                 <% if object.min_version.name == "ga" -%>
                     <% if !object.exclude && !object.exclude_validator -%>
