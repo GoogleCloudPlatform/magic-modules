@@ -4767,8 +4767,7 @@ resource "google_container_cluster" "primary" {
     machine_type    = "n1-standard-1"  // can't be e2 because of local-ssd
     disk_size_gb    = 15
     disk_type       = "pd-ssd"
-    local_ssd_count = 1
-    node_group = google_compute_node_group.group.id
+    node_group = google_compute_node_group.group.name
   }
 }
 `, name, name, name)
