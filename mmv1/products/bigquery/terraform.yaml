@@ -396,6 +396,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.StringIsJSON'
+      returnTableType: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringIsJSON'
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
 # This is for copying files over
