@@ -435,7 +435,7 @@ in addition to node auto-provisioning. Structure is [documented below](#nested_r
 * `auto_provisioning_defaults` - (Optional) Contains defaults for a node pool created by NAP.
 Structure is [documented below](#nested_auto_provisioning_defaults).
 
-* `autoscaling_profile` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) Configuration
+* `autoscaling_profile` - (Optional) Configuration
 options for the [Autoscaling profile](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#autoscaling_profiles)
 feature, which lets you choose whether the cluster autoscaler should optimize for resource utilization or resource availability
 when deciding to remove nodes from a cluster. Can be `BALANCED` or `OPTIMIZE_UTILIZATION`. Defaults to `BALANCED`.
@@ -462,6 +462,38 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 -> `monitoring.write` is always enabled regardless of user input.  `monitoring` and `logging.write` may also be enabled depending on the values for `monitoring_service` and `logging_service`.
 
 * `service_account` - (Optional) The Google Cloud Platform Service Account to be used by the node VMs.
+
+* `disk_size_gb` - (Optional) Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB. If unspecified, the default disk size is 100GB.
+
+* `disk_type` - (Optional) Type of the disk attached to each node. If unspecified, the default disk type is `pd-standard`.
+
+* `boot_disk_kms_key` - (Optional) The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool. This should be of the form `projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]`. For more information about protecting resources with [Cloud KMS Keys](https://cloud.google.com/compute/docs/disks/customer-managed-encryption).
+
+* `image_type` - (Optional) The image type to use for NAP created node.
+
+* `shielded_instance_config` - (Optional) Shielded Instance options. Structure is [documented below](#nested_shielded_instance_config).
+
+* `upgrade_settings` - (Optional) Specifies the upgrade settings for NAP created node pools. Str)cture is [documented below](#nested_upgrade_settings_.
+
+* `management` - (Optional) Specifies the node management options for NAP created node-pools. Structure is [documented below](#nested_management).
+
+<a name="nested_shielded_instance_config"></a>The `shielded_instance_config` block supports:
+
+* `enable_secure_boot` - (Optional) Defines whether the instance has Secure Boot enabled.
+
+* `enable_integrity_monitoring` - (Optional) Defines whether the instance has integrity monitoring enabled.
+
+<a name="nested_upgrade_settings"></a>The `upgrade_settings` block supports:
+
+* `max_surge` - (Optional) The number of additional nodes that can be added to the node pool during an upgrade. Increasing max_surge raises the number of nodes that can be upgraded simultaneously. Can be set to 0 or greater.
+
+* `max_unavailable` - (Optional) The number of nodes that can be simultaneously unavailable during an upgrade. Increasing max_unavailable raises the number of nodes that can be upgraded in parallel. Can be set to 0 or greater.
+
+<a name="nested_management"></a>The `management` block supports:
+
+* `auto_repair` - (Optional) Whether the nodes will be automatically repaired.
+
+* `auto_upgrade` - (Optional) Whether the nodes will be automatically upgraded.
 
 <a name="nested_authenticator_groups_config"></a>The `authenticator_groups_config` block supports:
 
