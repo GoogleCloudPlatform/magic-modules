@@ -335,7 +335,6 @@ objects:
         input: true
         description: |
           Resource name of the Model Monitoring job associated with this Endpoint if monitoring is enabled.
-      
 # Vertex AI Featurestores
   - !ruby/object:Api::Resource
     name: Featurestore
