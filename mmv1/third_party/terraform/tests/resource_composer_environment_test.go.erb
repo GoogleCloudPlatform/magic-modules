@@ -173,7 +173,6 @@ func TestAccComposerEnvironment_private(t *testing.T) {
 	})
 }
 
-<% unless version == "ga" -%>
 // Checks environment creation with minimum required information.
 func TestAccComposerEnvironment_privateWithWebServerControl(t *testing.T) {
 	t.Parallel()
@@ -222,9 +221,6 @@ func TestAccComposerEnvironment_privateWithWebServerControl(t *testing.T) {
 	})
 }
 
-<% end -%>
-
-<% unless version == "ga" -%>
 func TestAccComposerEnvironment_withDatabaseConfig(t *testing.T) {
 	t.Parallel()
 	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
@@ -330,6 +326,7 @@ func TestAccComposerEnvironment_withEncryptionConfig(t *testing.T) {
   })
 }
 
+<% unless version == "ga" -%>
 func TestAccComposerEnvironment_withMaintenanceWindow(t *testing.T) {
   t.Parallel()
 
@@ -638,7 +635,6 @@ resource "google_compute_subnetwork" "test" {
 `, name, network, subnetwork)
 }
 
-<% unless version == "ga" -%>
 func testAccComposerEnvironment_privateWithWebServerControl(name, network, subnetwork string) string {
 	return fmt.Sprintf(`
 resource "google_composer_environment" "test" {
@@ -743,9 +739,6 @@ resource "google_compute_subnetwork" "test" {
 `, name, network, subnetwork)
 }
 
-<% end -%>
-
-<% unless version == "ga" -%>
 func testAccComposerEnvironment_databaseCfg(name, network, subnetwork string) string {
 	return fmt.Sprintf(`
 resource "google_composer_environment" "test" {
@@ -945,6 +938,7 @@ resource "google_compute_subnetwork" "test" {
 `, pid, kmsKey, name, kmsKey, network, subnetwork)
 }
 
+<% unless version == "ga" -%>
 func testAccComposerEnvironment_maintenanceWindow(pid, envName, network, subnetwork string) string {
 	return fmt.Sprintf(`
 resource "google_composer_environment" "test" {
