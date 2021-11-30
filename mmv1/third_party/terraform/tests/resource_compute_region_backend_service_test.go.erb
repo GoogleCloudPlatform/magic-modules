@@ -93,14 +93,6 @@ func TestAccComputeRegionBackendService_withBackendInternalManaged(t *testing.T)
     CheckDestroy: testAccCheckComputeRegionBackendServiceDestroyProducer(t),
     Steps: []resource.TestStep{
       {
-        Config:      testAccComputeRegionBackendService_internalManagedInvalidBackend(serviceName, igmName, hcName),
-        ExpectError: regexp.MustCompile("non-zero capacity_scaler"),
-      },
-      {
-        Config:      testAccComputeRegionBackendService_internalManagedInvalidMultiBackends(serviceName, igmName, hcName),
-        ExpectError: regexp.MustCompile("non-zero capacity_scaler"),
-      },
-      {
         Config: testAccComputeRegionBackendService_internalManagedMultipleBackends(serviceName, igmName, hcName),
       },
       {
