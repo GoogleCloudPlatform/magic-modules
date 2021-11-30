@@ -103,7 +103,7 @@ objects:
       - !ruby/object:Api::Type::Integer
         name: 'nodeCount'
         description: |
-          The number of nodes allocated to this instance. At most one of either node_count or processing_units
+          The number of nodes allocated to this instance. Exactly one of either node_count or processing_units
           can be present in terraform.
         exactly_one_of:
           - num_nodes
@@ -111,7 +111,7 @@ objects:
       - !ruby/object:Api::Type::Integer
         name: 'processingUnits'
         description: |
-          The number of processing units allocated to this instance. At most one of processing_units 
+          The number of processing units allocated to this instance. Exactly one of processing_units 
           or node_count can be present in terraform.
         exactly_one_of:
           - num_nodes
