@@ -134,7 +134,7 @@ func mergeDeleteAdditiveBindings(existing, incoming []IAMBinding) []IAMBinding {
 		}
 		if newMembers != nil {
 			newExisting = append(newExisting, IAMBinding{
-				Role: binding.Role,
+				Role:    binding.Role,
 				Members: newMembers,
 			})
 		}
@@ -203,7 +203,13 @@ func fetchIamPolicy(
 
 	iamPolicy, err := updater.GetResourceIamPolicy()
 	if isGoogleApiErrorWithCode(err, 403) {
-		return Asset{}, ErrLackingReadPermission
+		// 403s are returned from most IAM APIs if the resource in
+		// question does not exist, and by design the lack of permissions
+		// cannot be distinguished from the resource not existing.
+		// The user will probably have experienced a different 403 on their way to
+		// this one if they genuinely lack perms, so we assume here that the
+		// resource doesn't exist.
+		return Asset{}, ErrNoConversion
 	}
 
 	if err != nil {
