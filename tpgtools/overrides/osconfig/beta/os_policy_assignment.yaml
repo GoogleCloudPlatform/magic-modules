@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- type: BASE_PATH_REPLACEMENT
+- type: REPLACE_IN_BASE_PATH
   details:
-    string: 'client.Config.BasePath[0:len(client.Config.BasePath)-7] + "v1"'
+    old: v1beta
+    new: v1

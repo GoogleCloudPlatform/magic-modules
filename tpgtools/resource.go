@@ -48,10 +48,14 @@ type Resource struct {
 	// TODO: if none are set, the resource does not support import.
 	ImportFormats []string
 
-	// BasePathReplacement is a string that will be appended to the end of the API base path.
+	// AppendToBasePath is a string that will be appended to the end of the API base path.
 	// rarely needed in cases where the shared mm basepath does not include the version
 	// as in Montioring https://git.io/Jz4Wn
-	BasePathReplacement string
+	AppendToBasePath string
+
+	// ReplaceInBasePath contains a string replacement for the config base path,
+	// replacing one substring with another.
+	ReplaceInBasePath BasePathReplacement
 
 	// title is the name of the resource in snake_case. For example,
 	// "instance", "backend_service".
@@ -160,6 +164,12 @@ type Resource struct {
 type Link struct {
 	text string
 	url  string
+}
+
+type BasePathReplacement struct {
+	Present bool
+	Old     string
+	New     string
 }
 
 func (l Link) Markdown() string {
@@ -469,13 +479,15 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	}
 
 	// Resource Override: Append to Base Path
-	bprd := BasePathReplacementDetails{}
-	bprOk, err := overrides.ResourceOverrideWithDetails(BasePathReplacement, &bprd, location)
+	ribpd := ReplaceInBasePathDetails{}
+	ribpOk, err := overrides.ResourceOverrideWithDetails(ReplaceInBasePath, &ribpd, location)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode append to base path details: %v", err)
 	}
-	if bprOk {
-		res.BasePathReplacement = bprd.String
+	if ribpOk {
+		res.ReplaceInBasePath.Present = true
+		res.ReplaceInBasePath.Old = ribpd.Old
+		res.ReplaceInBasePath.New = ribpd.New
 	}
 
 	// Resource Override: Import formats

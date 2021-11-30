@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- type: BASE_PATH_REPLACEMENT
+- type: APPEND_TO_BASE_PATH
   details:
-    string: 'client.Config.BasePath + "v1"'
+    string: v1

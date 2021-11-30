@@ -66,12 +66,19 @@ type CustomImportFunctionDetails struct {
 	Function string
 }
 
-type BasePathReplacementDetails struct {
-	// BasePathReplacement replaces the config base path with the value returned
+type AppendToBasePathDetails struct {
+	// AppendToBasePath appends the given string onto the end of the config base path.
+	String string
+}
+
+type ReplaceInBasePathDetails struct {
+	// ReplaceInBasePath replaces the config base path with the value returned
 	// by the given string.
 	// For example, client.Config.BasePath + "v1" would append "v1" to the current
 	// base path.
-	String string
+	Present bool
+	Old     string
+	New     string
 }
 
 type CustomizeDiffDetails struct {
