@@ -2169,7 +2169,6 @@ func TestAccContainerCluster_withIPv4Error(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withDNSConfig(t *testing.T) {
 	t.Parallel()
 
@@ -2191,7 +2190,6 @@ func TestAccContainerCluster_withDNSConfig(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func testAccContainerCluster_masterAuthorizedNetworksDisabled(t *testing.T, resource_name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -4672,7 +4670,6 @@ resource "google_container_cluster" "with_invalid_location" {
 `, clusterName, location)
 }
 
-<% unless version == 'ga' -%>
 func testAccContainerCluster_withDNSConfig(clusterName string, clusterDns string, clusterDnsDomain string, clusterDnsScope string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_dns_config" {
@@ -4687,7 +4684,6 @@ resource "google_container_cluster" "with_dns_config" {
 }
 `, clusterName, clusterDns, clusterDnsDomain, clusterDnsScope)
 }
-<% end -%>
 
 func testAccContainerCluster_withLoggingConfigEnabled(name string) string {
 	return fmt.Sprintf(`
