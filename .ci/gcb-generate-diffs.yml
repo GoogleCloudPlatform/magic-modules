@@ -182,6 +182,45 @@ steps:
           - $PROJECT_ID
           - "20"  # Build step
 
+    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester'
+      id: tfv-test
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["tfv-head", "tfv-base"]
+      args:
+          - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - "20"  # Build step
+
+    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
+      id: tfv-test-integration-0.12.31
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["tfv-head", "tfv-base"]
+      env:
+        - TERRAFORM_VERSION=0.12.31
+        - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
+      args:
+          - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - "21"  # Build step
+
+    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
+      id: tfv-test-integration-0.13.7
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["tfv-head", "tfv-base"]
+      env:
+        - TERRAFORM_VERSION=0.13.7
+        - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
+      args:
+          - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - "22"  # Build step
+
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpgb-test
       secretEnv: ["GITHUB_TOKEN"]
@@ -193,7 +232,7 @@ steps:
           - $BUILD_ID
           - $PROJECT_ID
           - GoogleCloudPlatform/magic-modules
-          - "21"  # Build step
+          - "23"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpg-test
@@ -206,7 +245,7 @@ steps:
           - $BUILD_ID
           - $PROJECT_ID
           - GoogleCloudPlatform/magic-modules
-          - "22"  # Build step
+          - "24"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-vcr-tester'
       id: tpg-vcr-test
