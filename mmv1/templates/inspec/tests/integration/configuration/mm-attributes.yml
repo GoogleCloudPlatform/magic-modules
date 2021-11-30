@@ -459,3 +459,6 @@ interconnect_location:
   name: akl-zone1-1353
   facility_provider_facility_id: 'Auckland - Albany'
   facility_provider: Vocus
+
+license_code:
+  name: akl-zone1-1353
