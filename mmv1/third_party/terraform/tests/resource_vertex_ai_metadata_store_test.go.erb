@@ -3,10 +3,9 @@ package google
 <% unless version == 'ga' -%>
 
 import (
-	"context"
 	"fmt"
-	"regexp"
 	"testing"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -38,7 +37,6 @@ func TestAccVertexAIMetadataStore_vertexAiMetadataStoreExample(t *testing.T) {
 
 func testAccVertexAIMetadataStore_vertexAiMetadataStoreExample(name, kmsKey string) string {
 	return fmt.Sprintf(`
-
 resource "google_vertex_ai_metadata_store" "store" {
   name          = "%s"
   description   = "Magic"
@@ -47,7 +45,6 @@ resource "google_vertex_ai_metadata_store" "store" {
 	kms_key_name = "%s"
   }
 }
-
 `, name, kmsKey)
 }
 
