@@ -104,7 +104,7 @@ objects:
         name: 'nodeCount'
         description: |
           The number of nodes allocated to this instance. Exactly one of either node_count or processing_units
-          can be present in terraform.
+          must be present in terraform.
         exactly_one_of:
           - num_nodes
           - processing_units
@@ -112,7 +112,7 @@ objects:
         name: 'processingUnits'
         description: |
           The number of processing units allocated to this instance. Exactly one of processing_units 
-          or node_count can be present in terraform.
+          or node_count must be present in terraform.
         exactly_one_of:
           - num_nodes
           - processing_units
