@@ -35,9 +35,7 @@ TERRAFORM_BINARY=/terraform/$TERRAFORM_VERSION
 if test -f "$TERRAFORM_BINARY"; then
     echo "terraform binary $TERRAFORM_BINARY exists on container"
     echo setting terraform to version $TERRAFORM_VERSION
-    set x-
-    mv /terraform/$TERRAFORM_VERSION /bin/terraform
-    set x+
+    alias terraform /terraform/$TERRAFORM_VERSION
     terraform version
 else
     echo "terraform binary $TERRAFORM_BINARY does not exist."
