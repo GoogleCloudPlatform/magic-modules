@@ -1045,7 +1045,7 @@ func expandIpConfiguration(configured []interface{}) *sqladmin.IpConfiguration {
 		Ipv4Enabled:        _ipConfiguration["ipv4_enabled"].(bool),
 		RequireSsl:         _ipConfiguration["require_ssl"].(bool),
 		PrivateNetwork:     _ipConfiguration["private_network"].(string),
-		AllocatedIpRange:     _ipConfiguration["allocated_ip_range"].(string),
+		AllocatedIpRange:   _ipConfiguration["allocated_ip_range"].(string),
 		AuthorizedNetworks: expandAuthorizedNetworks(_ipConfiguration["authorized_networks"].(*schema.Set).List()),
 		ForceSendFields:    []string{"Ipv4Enabled", "RequireSsl"},
 	}
@@ -1428,10 +1428,10 @@ func flattenDatabaseFlags(databaseFlags []*sqladmin.DatabaseFlags) []map[string]
 
 func flattenIpConfiguration(ipConfiguration *sqladmin.IpConfiguration) interface{} {
 	data := map[string]interface{}{
-		"ipv4_enabled":    ipConfiguration.Ipv4Enabled,
-		"private_network": ipConfiguration.PrivateNetwork,
+		"ipv4_enabled":       ipConfiguration.Ipv4Enabled,
+		"private_network":    ipConfiguration.PrivateNetwork,
 		"allocated_ip_range": ipConfiguration.AllocatedIpRange,
-		"require_ssl":     ipConfiguration.RequireSsl,
+		"require_ssl":        ipConfiguration.RequireSsl,
 	}
 
 	if ipConfiguration.AuthorizedNetworks != nil {
