@@ -270,7 +270,7 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 	}
 	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
 	{{- if $.AppendToBasePath }}
-	client.Config.BasePath += {{$.AppendToBasePath}}
+	client.Config.BasePath += "{{$.AppendToBasePath}}"
 	{{- end }}
 	{{- if $.ReplaceInBasePath.Present }}
 	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
@@ -347,7 +347,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 	}
 	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
 	{{- if $.AppendToBasePath }}
-	client.Config.BasePath += {{$.AppendToBasePath}}
+	client.Config.BasePath += "{{$.AppendToBasePath}}"
 	{{- end }}
 	{{- if $.ReplaceInBasePath.Present }}
 	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
@@ -426,7 +426,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	}
 	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
 	{{- if $.AppendToBasePath }}
-	client.Config.BasePath += {{$.AppendToBasePath}}
+	client.Config.BasePath += "{{$.AppendToBasePath}}"
 	{{- end }}
 	{{- if $.ReplaceInBasePath.Present }}
 	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
@@ -508,7 +508,7 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 	}
 	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
 	{{- if $.AppendToBasePath }}
-	client.Config.BasePath += {{$.AppendToBasePath}}
+	client.Config.BasePath += "{{$.AppendToBasePath}}"
 	{{- end }}
 	{{- if $.ReplaceInBasePath.Present }}
 	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
