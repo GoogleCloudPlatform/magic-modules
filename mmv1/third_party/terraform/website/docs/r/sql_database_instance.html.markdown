@@ -147,8 +147,8 @@ resource "google_sql_database_instance" "instance" {
   settings {
     tier = "db-f1-micro"
     ip_configuration {
-      ipv4_enabled    = false
-      private_network = google_compute_network.private_network.id
+      ipv4_enabled       = false
+      private_network    = google_compute_network.private_network.id
     }
   }
 }
@@ -295,7 +295,7 @@ This setting can be updated, but it cannot be removed after it is set.
 
 * `require_ssl` - (Optional) Whether SSL connections over IP are enforced or not.
 
-* `allocated_ip_range` - (Optional) The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the instance ip will be created in the allocated range. The range name must comply with RFC 1035. Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?. Reserved for future use.
+* `allocated_ip_range` - (Optional) The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the instance ip will be created in the allocated range. The range name must comply with [RFC 1035](https://datatracker.ietf.org/doc/html/rfc1035). Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?. Reserved for future use.
 
 The optional `settings.ip_configuration.authorized_networks[]` sublist supports:
 
