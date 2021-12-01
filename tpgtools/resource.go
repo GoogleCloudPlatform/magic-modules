@@ -479,10 +479,20 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	}
 
 	// Resource Override: Append to Base Path
+	atbpd := AppendToBasePathDetails{}
+	atbpOk, err := overrides.ResourceOverrideWithDetails(AppendToBasePath, &atbpd, location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode append to base path details: %v", err)
+	}
+	if atbpOk {
+		res.AppendToBasePath = atbpd.String
+	}
+
+	// Resource Override: Replace in Base Path
 	ribpd := ReplaceInBasePathDetails{}
 	ribpOk, err := overrides.ResourceOverrideWithDetails(ReplaceInBasePath, &ribpd, location)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode append to base path details: %v", err)
+		return nil, fmt.Errorf("failed to decode replace in base path details: %v", err)
 	}
 	if ribpOk {
 		res.ReplaceInBasePath.Present = true
