@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,18 +27,19 @@ provider "google" {
   {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
 }
 
-resource "google_filestore_instance" "test" {
-  name = "test-instance"
-  location = "us-central1-b"
-  tier = "BASIC_SSD"
 
-  file_shares {
-    capacity_gb = 2660
-    name        = "share1"
-  }
+resource "google_spanner_instance" "main" {
+  config       = "regional-europe-west1"
+  display_name = "main-instance"
+  num_nodes    = 1
+}
 
-  networks {
-    network = "default"
-    modes   = ["MODE_IPV4"]
-  }
+resource "google_spanner_database" "database" {
+  instance = google_spanner_instance.main.name
+  name     = "my-database"
+  ddl = [
+    "CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+    "CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
+  ]
+  deletion_protection = false
 }

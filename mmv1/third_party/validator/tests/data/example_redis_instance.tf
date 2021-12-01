@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,19 +26,27 @@ terraform {
 provider "google" {
   {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
 }
+resource "google_compute_network" "redis-network" {
+  name = "redis-test-network"
+}
 
-resource "google_filestore_instance" "test" {
-  name = "test-instance"
-  location = "us-central1-b"
-  tier = "BASIC_SSD"
+resource "google_redis_instance" "cache" {
+  name           = "ha-memory-cache"
+  tier           = "STANDARD_HA"
+  memory_size_gb = 1
 
-  file_shares {
-    capacity_gb = 2660
-    name        = "share1"
-  }
+  region = "us-central1"
+  location_id             = "us-central1-a"
+  alternative_location_id = "us-central1-f"
 
-  networks {
-    network = "default"
-    modes   = ["MODE_IPV4"]
+  authorized_network = google_compute_network.redis-network.id
+
+  redis_version     = "REDIS_4_0"
+  display_name      = "Terraform Test Instance"
+  reserved_ip_range = "192.168.0.0/29"
+
+  labels = {
+    my_key    = "my_val"
+    other_key = "other_val"
   }
 }

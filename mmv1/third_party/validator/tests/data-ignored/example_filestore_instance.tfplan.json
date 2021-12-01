@@ -31,7 +31,7 @@
             ],
             "tier": "BASIC_SSD",
             "timeouts": null,
-            "zone": "us-central1-b"
+            "location": "us-central1-b"
           }
         }
       ]
@@ -69,7 +69,7 @@
           ],
           "tier": "BASIC_SSD",
           "timeouts": null,
-          "zone": "us-central1-b"
+          "location": "us-central1-b"
         },
         "after_unknown": {
           "create_time": true,
@@ -145,7 +145,7 @@
             "tier": {
               "constant_value": "BASIC_SSD"
             },
-            "zone": {
+            "location": {
               "constant_value": "us-central1-b"
             }
           },
