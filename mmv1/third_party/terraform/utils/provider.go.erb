@@ -184,6 +184,7 @@ func Provider() *schema.Provider {
 			GkeHubFeatureCustomEndpointEntryKey:             GkeHubFeatureCustomEndpointEntry,
 			OrgPolicyEndpointEntryKey:                       OrgPolicyEndpointEntry,
 			PrivatecaCertificateTemplateEndpointEntryKey:    PrivatecaCertificateTemplateCustomEndpointEntry,
+			RecaptchaEnterpriseEndpointEntryKey:             RecaptchaEnterpriseEndpointEntry,
 
 			<% if version == "private" -%>
 			VmwareEndpointEntryKey:                          VmwareEndpointEntry,
@@ -474,6 +475,7 @@ end     # products.each do
 				"google_vmware_cluster":                 resourceVmwareCluster(),
 				<% end -%>
 				"google_privateca_certificate_template":        resourcePrivatecaCertificateTemplate(),
+				"google_recaptcha_enterprise_key":              resourceRecaptchaEnterpriseKey(),
 			},
 			// ------------------------------------
 			map[string]*schema.Resource{
