@@ -16,6 +16,7 @@ description: A basic test of recaptcha enterprise key that can be used by iOS ap
 type: key
 versions:
 - ga
+- beta
 resource: samples/ios.key.json
 updates:
 - resource: samples/update_ios.key.json
