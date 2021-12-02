@@ -179,6 +179,13 @@ func {{ $res.PathType}}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{
 		}
 					{{- end }}
 	}
+				{{- else if eq $field.Type.String "TypeMap" }}
+		{{- /* TODO(magic-modules-eng): Implement maps with non-string values */}}
+		outputConfig += "{{ if not $field.Collapsed }}\t{{end}}{{$field.Name}} = {"
+		for k, v := range r.{{$field.PackageName}} {
+			outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+		}
+		outputConfig += "}\n"
 				{{- end}}
 			{{- end}}
 		{{- end}}
@@ -229,6 +236,13 @@ func convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$v.PackagePath}}T
 		}
 						{{- end }}
 	}
+					{{- else if eq $field.Type.String "TypeMap" }}
+		{{- /* TODO(magic-modules-eng): Implement maps with non-string values */}}
+		outputConfig += "{{ if not $v.Collapsed }}\t{{end}}{{$field.Name}} = {"
+		for k, v := range r.{{$field.PackageName}} {
+			outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+		}
+		outputConfig += "}\n"
 					{{- end}}
 				{{- end}}
 			{{- end}}

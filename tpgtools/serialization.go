@@ -39,6 +39,8 @@ import (
 	orgpolicyBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/orgpolicy/beta"
 	privateca "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/privateca"
 	privatecaBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/privateca/beta"
+	recaptchaenterprise "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/recaptchaenterprise"
+	recaptchaenterpriseBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/recaptchaenterprise/beta"
 	fmtcmd "github.com/hashicorp/hcl/hcl/fmtcmd"
 )
 
@@ -83,6 +85,8 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 			return "google_org_policy_policy", nil
 		case "PrivatecaCertificateTemplate":
 			return "google_privateca_certificate_template", nil
+		case "RecaptchaEnterpriseKey":
+			return "google_recaptcha_enterprise_key", nil
 		}
 	}
 	// If not found in sample version, fallthrough to GA
@@ -113,6 +117,8 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 		return "google_org_policy_policy", nil
 	case "PrivatecaCertificateTemplate":
 		return "google_privateca_certificate_template", nil
+	case "RecaptchaEnterpriseKey":
+		return "google_recaptcha_enterprise_key", nil
 	default:
 		return "", fmt.Errorf("Error retrieving Terraform name from DCL resource type: %s not found", resourceType)
 	}
@@ -148,6 +154,8 @@ func DCLToTerraformSampleName(service, resource string) (string, string, error) 
 		return "OrgPolicy", "Policy", nil
 	case "privatecacertificatetemplate":
 		return "Privateca", "CertificateTemplate", nil
+	case "recaptchaenterprisekey":
+		return "RecaptchaEnterprise", "Key", nil
 	default:
 		return "", "", fmt.Errorf("Error retrieving Terraform sample name from DCL resource type: %s.%s not found", service, resource)
 	}
@@ -258,6 +266,12 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 				return "", err
 			}
 			return PrivatecaCertificateTemplateBetaAsHCL(*r, hasGAEquivalent)
+		case "RecaptchaEnterpriseKey":
+			r := &recaptchaenterpriseBeta.Key{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return RecaptchaEnterpriseKeyBetaAsHCL(*r, hasGAEquivalent)
 		}
 	}
 	// If not found in sample version, fallthrough to GA
@@ -340,6 +354,12 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 			return "", err
 		}
 		return PrivatecaCertificateTemplateAsHCL(*r, hasGAEquivalent)
+	case "RecaptchaEnterpriseKey":
+		r := &recaptchaenterprise.Key{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return RecaptchaEnterpriseKeyAsHCL(*r, hasGAEquivalent)
 	default:
 		//return fmt.Sprintf("%s resource not supported in tpgtools", resourceType), nil
 		return "", fmt.Errorf("Error converting sample JSON to HCL: %s not found", resourceType)
@@ -373,6 +393,11 @@ func AssuredWorkloadsWorkloadBetaAsHCL(r assuredworkloadsBeta.Workload, hasGAEqu
 	if v := convertAssuredWorkloadsWorkloadBetaKmsSettingsToHCL(r.KmsSettings); v != "" {
 		outputConfig += fmt.Sprintf("\tkms_settings %s\n", v)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.ProvisionedResourcesParent != nil {
 		outputConfig += fmt.Sprintf("\tprovisioned_resources_parent = %#v\n", *r.ProvisionedResourcesParent)
 	}
@@ -441,6 +466,14 @@ func CloudbuildWorkerPoolBetaAsHCL(r cloudbuildBeta.WorkerPool, hasGAEquivalent 
 	}
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
 	}
 	if v := convertCloudbuildWorkerPoolBetaNetworkConfigToHCL(r.NetworkConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tnetwork_config %s\n", v)
@@ -526,6 +559,11 @@ func CloudResourceManagerProjectBetaAsHCL(r cloudresourcemanagerBeta.Project, ha
 	if r.DisplayName != nil {
 		outputConfig += fmt.Sprintf("\tdisplayname = %#v\n", *r.DisplayName)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
@@ -733,6 +771,11 @@ func ComputeForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule, hasGAEquivalen
 	if r.IsMirroringCollector != nil {
 		outputConfig += fmt.Sprintf("\tis_mirroring_collector = %#v\n", *r.IsMirroringCollector)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.LoadBalancingScheme != nil {
 		outputConfig += fmt.Sprintf("\tload_balancing_scheme = %#v\n", *r.LoadBalancingScheme)
 	}
@@ -804,6 +847,11 @@ func ComputeGlobalForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule, hasGAEqu
 	if r.IPVersion != nil {
 		outputConfig += fmt.Sprintf("\tip_version = %#v\n", *r.IPVersion)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.LoadBalancingScheme != nil {
 		outputConfig += fmt.Sprintf("\tload_balancing_scheme = %#v\n", *r.LoadBalancingScheme)
 	}
@@ -887,6 +935,11 @@ func DataprocWorkflowTemplateBetaAsHCL(r dataprocBeta.WorkflowTemplate, hasGAEqu
 	if r.DagTimeout != nil {
 		outputConfig += fmt.Sprintf("\tdag_timeout = %#v\n", *r.DagTimeout)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Parameters != nil {
 		for _, v := range r.Parameters {
 			outputConfig += fmt.Sprintf("\tparameters %s\n", convertDataprocWorkflowTemplateBetaParametersToHCL(&v))
@@ -923,6 +976,11 @@ func convertDataprocWorkflowTemplateBetaJobsToHCL(r *dataprocBeta.WorkflowTempla
 	if v := convertDataprocWorkflowTemplateBetaJobsHiveJobToHCL(r.HiveJob); v != "" {
 		outputConfig += fmt.Sprintf("\thive_job %s\n", v)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if v := convertDataprocWorkflowTemplateBetaJobsPigJobToHCL(r.PigJob); v != "" {
 		outputConfig += fmt.Sprintf("\tpig_job %s\n", v)
 	}
@@ -996,6 +1054,11 @@ func convertDataprocWorkflowTemplateBetaJobsHadoopJobToHCL(r *dataprocBeta.Workf
 	if r.MainJarFileUri != nil {
 		outputConfig += fmt.Sprintf("\tmain_jar_file_uri = %#v\n", *r.MainJarFileUri)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1004,6 +1067,11 @@ func convertDataprocWorkflowTemplateBetaJobsHadoopJobLoggingConfigToHCL(r *datap
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1022,12 +1090,22 @@ func convertDataprocWorkflowTemplateBetaJobsHiveJobToHCL(r *dataprocBeta.Workflo
 		}
 		outputConfig += "]\n"
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
 		outputConfig += fmt.Sprintf("\tquery_file_uri = %#v\n", *r.QueryFileUri)
 	}
 	if v := convertDataprocWorkflowTemplateBetaJobsHiveJobQueryListToHCL(r.QueryList); v != "" {
 		outputConfig += fmt.Sprintf("\tquery_list %s\n", v)
 	}
+	outputConfig += "\tscript_variables = {"
+	for k, v := range r.ScriptVariables {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1064,12 +1142,22 @@ func convertDataprocWorkflowTemplateBetaJobsPigJobToHCL(r *dataprocBeta.Workflow
 	if v := convertDataprocWorkflowTemplateBetaJobsPigJobLoggingConfigToHCL(r.LoggingConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
 		outputConfig += fmt.Sprintf("\tquery_file_uri = %#v\n", *r.QueryFileUri)
 	}
 	if v := convertDataprocWorkflowTemplateBetaJobsPigJobQueryListToHCL(r.QueryList); v != "" {
 		outputConfig += fmt.Sprintf("\tquery_list %s\n", v)
 	}
+	outputConfig += "\tscript_variables = {"
+	for k, v := range r.ScriptVariables {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1078,6 +1166,11 @@ func convertDataprocWorkflowTemplateBetaJobsPigJobLoggingConfigToHCL(r *dataproc
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1117,6 +1210,11 @@ func convertDataprocWorkflowTemplateBetaJobsPrestoJobToHCL(r *dataprocBeta.Workf
 	if r.OutputFormat != nil {
 		outputConfig += fmt.Sprintf("\toutput_format = %#v\n", *r.OutputFormat)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
 		outputConfig += fmt.Sprintf("\tquery_file_uri = %#v\n", *r.QueryFileUri)
 	}
@@ -1131,6 +1229,11 @@ func convertDataprocWorkflowTemplateBetaJobsPrestoJobLoggingConfigToHCL(r *datap
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1188,6 +1291,11 @@ func convertDataprocWorkflowTemplateBetaJobsPysparkJobToHCL(r *dataprocBeta.Work
 	if v := convertDataprocWorkflowTemplateBetaJobsPysparkJobLoggingConfigToHCL(r.LoggingConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.PythonFileUris != nil {
 		outputConfig += "\tpython_file_uris = ["
 		for _, v := range r.PythonFileUris {
@@ -1203,6 +1311,11 @@ func convertDataprocWorkflowTemplateBetaJobsPysparkJobLoggingConfigToHCL(r *data
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1262,6 +1375,11 @@ func convertDataprocWorkflowTemplateBetaJobsSparkJobToHCL(r *dataprocBeta.Workfl
 	if r.MainJarFileUri != nil {
 		outputConfig += fmt.Sprintf("\tmain_jar_file_uri = %#v\n", *r.MainJarFileUri)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1270,6 +1388,11 @@ func convertDataprocWorkflowTemplateBetaJobsSparkJobLoggingConfigToHCL(r *datapr
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1305,6 +1428,11 @@ func convertDataprocWorkflowTemplateBetaJobsSparkRJobToHCL(r *dataprocBeta.Workf
 	if v := convertDataprocWorkflowTemplateBetaJobsSparkRJobLoggingConfigToHCL(r.LoggingConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1313,6 +1441,11 @@ func convertDataprocWorkflowTemplateBetaJobsSparkRJobLoggingConfigToHCL(r *datap
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1331,12 +1464,22 @@ func convertDataprocWorkflowTemplateBetaJobsSparkSqlJobToHCL(r *dataprocBeta.Wor
 	if v := convertDataprocWorkflowTemplateBetaJobsSparkSqlJobLoggingConfigToHCL(r.LoggingConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
 		outputConfig += fmt.Sprintf("\tquery_file_uri = %#v\n", *r.QueryFileUri)
 	}
 	if v := convertDataprocWorkflowTemplateBetaJobsSparkSqlJobQueryListToHCL(r.QueryList); v != "" {
 		outputConfig += fmt.Sprintf("\tquery_list %s\n", v)
 	}
+	outputConfig += "\tscript_variables = {"
+	for k, v := range r.ScriptVariables {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1345,6 +1488,11 @@ func convertDataprocWorkflowTemplateBetaJobsSparkSqlJobLoggingConfigToHCL(r *dat
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1382,6 +1530,11 @@ func convertDataprocWorkflowTemplateBetaPlacementClusterSelectorToHCL(r *datapro
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tcluster_labels = {"
+	for k, v := range r.ClusterLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Zone != nil {
 		outputConfig += fmt.Sprintf("\tzone = %#v\n", *r.Zone)
 	}
@@ -1399,6 +1552,11 @@ func convertDataprocWorkflowTemplateBetaPlacementManagedClusterToHCL(r *dataproc
 	if v := convertDataprocWorkflowTemplateBetaClusterClusterConfigToHCL(r.Config); v != "" {
 		outputConfig += fmt.Sprintf("\tconfig %s\n", v)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1636,6 +1794,11 @@ func convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfigToHC
 	if r.InternalIPOnly != nil {
 		outputConfig += fmt.Sprintf("\tinternal_ip_only = %#v\n", *r.InternalIPOnly)
 	}
+	outputConfig += "\tmetadata = {"
+	for k, v := range r.Metadata {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Network != nil {
 		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
 	}
@@ -1852,6 +2015,11 @@ func convertDataprocWorkflowTemplateBetaClusterClusterConfigSoftwareConfigToHCL(
 		}
 		outputConfig += "]\n"
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1877,6 +2045,11 @@ func EventarcTriggerBetaAsHCL(r eventarcBeta.Trigger, hasGAEquivalent bool) (str
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
@@ -1975,6 +2148,11 @@ func GkeHubFeatureBetaAsHCL(r gkehubBeta.Feature, hasGAEquivalent bool) (string,
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
@@ -2359,6 +2537,11 @@ func PrivatecaCertificateTemplateBetaAsHCL(r privatecaBeta.CertificateTemplate, 
 	if v := convertPrivatecaCertificateTemplateBetaIdentityConstraintsToHCL(r.IdentityConstraints); v != "" {
 		outputConfig += fmt.Sprintf("\tidentity_constraints %s\n", v)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if v := convertPrivatecaCertificateTemplateBetaPassthroughExtensionsToHCL(r.PassthroughExtensions); v != "" {
 		outputConfig += fmt.Sprintf("\tpassthrough_extensions %s\n", v)
 	}
@@ -2638,6 +2821,125 @@ func convertPrivatecaCertificateTemplateBetaPredefinedValuesPolicyIdsToHCL(r *pr
 	return outputConfig + "}"
 }
 
+// RecaptchaEnterpriseKeyBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func RecaptchaEnterpriseKeyBetaAsHCL(r recaptchaenterpriseBeta.Key, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_recaptcha_enterprise_key\" \"output\" {\n"
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	if v := convertRecaptchaEnterpriseKeyBetaAndroidSettingsToHCL(r.AndroidSettings); v != "" {
+		outputConfig += fmt.Sprintf("\tandroid_settings %s\n", v)
+	}
+	if v := convertRecaptchaEnterpriseKeyBetaIosSettingsToHCL(r.IosSettings); v != "" {
+		outputConfig += fmt.Sprintf("\tios_settings %s\n", v)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if v := convertRecaptchaEnterpriseKeyBetaTestingOptionsToHCL(r.TestingOptions); v != "" {
+		outputConfig += fmt.Sprintf("\ttesting_options %s\n", v)
+	}
+	if v := convertRecaptchaEnterpriseKeyBetaWebSettingsToHCL(r.WebSettings); v != "" {
+		outputConfig += fmt.Sprintf("\tweb_settings %s\n", v)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertRecaptchaEnterpriseKeyBetaAndroidSettingsToHCL(r *recaptchaenterpriseBeta.KeyAndroidSettings) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowAllPackageNames != nil {
+		outputConfig += fmt.Sprintf("\tallow_all_package_names = %#v\n", *r.AllowAllPackageNames)
+	}
+	if r.AllowedPackageNames != nil {
+		outputConfig += "\tallowed_package_names = ["
+		for _, v := range r.AllowedPackageNames {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertRecaptchaEnterpriseKeyBetaIosSettingsToHCL(r *recaptchaenterpriseBeta.KeyIosSettings) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowAllBundleIds != nil {
+		outputConfig += fmt.Sprintf("\tallow_all_bundle_ids = %#v\n", *r.AllowAllBundleIds)
+	}
+	if r.AllowedBundleIds != nil {
+		outputConfig += "\tallowed_bundle_ids = ["
+		for _, v := range r.AllowedBundleIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertRecaptchaEnterpriseKeyBetaTestingOptionsToHCL(r *recaptchaenterpriseBeta.KeyTestingOptions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.TestingChallenge != nil {
+		outputConfig += fmt.Sprintf("\ttesting_challenge = %#v\n", *r.TestingChallenge)
+	}
+	if r.TestingScore != nil {
+		outputConfig += fmt.Sprintf("\ttesting_score = %#v\n", *r.TestingScore)
+	}
+	return outputConfig + "}"
+}
+
+func convertRecaptchaEnterpriseKeyBetaWebSettingsToHCL(r *recaptchaenterpriseBeta.KeyWebSettings) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.IntegrationType != nil {
+		outputConfig += fmt.Sprintf("\tintegration_type = %#v\n", *r.IntegrationType)
+	}
+	if r.AllowAllDomains != nil {
+		outputConfig += fmt.Sprintf("\tallow_all_domains = %#v\n", *r.AllowAllDomains)
+	}
+	if r.AllowAmpTraffic != nil {
+		outputConfig += fmt.Sprintf("\tallow_amp_traffic = %#v\n", *r.AllowAmpTraffic)
+	}
+	if r.AllowedDomains != nil {
+		outputConfig += "\tallowed_domains = ["
+		for _, v := range r.AllowedDomains {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.ChallengeSecurityPreference != nil {
+		outputConfig += fmt.Sprintf("\tchallenge_security_preference = %#v\n", *r.ChallengeSecurityPreference)
+	}
+	return outputConfig + "}"
+}
+
 // AssuredWorkloadsWorkloadAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -2664,6 +2966,11 @@ func AssuredWorkloadsWorkloadAsHCL(r assuredworkloads.Workload, hasGAEquivalent 
 	if v := convertAssuredWorkloadsWorkloadKmsSettingsToHCL(r.KmsSettings); v != "" {
 		outputConfig += fmt.Sprintf("\tkms_settings %s\n", v)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.ProvisionedResourcesParent != nil {
 		outputConfig += fmt.Sprintf("\tprovisioned_resources_parent = %#v\n", *r.ProvisionedResourcesParent)
 	}
@@ -2733,6 +3040,11 @@ func CloudbuildWorkerPoolAsHCL(r cloudbuild.WorkerPool, hasGAEquivalent bool) (s
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.DisplayName != nil {
 		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
 	}
@@ -2820,6 +3132,11 @@ func CloudResourceManagerProjectAsHCL(r cloudresourcemanager.Project, hasGAEquiv
 	if r.DisplayName != nil {
 		outputConfig += fmt.Sprintf("\tdisplayname = %#v\n", *r.DisplayName)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
@@ -3027,6 +3344,11 @@ func ComputeForwardingRuleAsHCL(r compute.ForwardingRule, hasGAEquivalent bool) 
 	if r.IsMirroringCollector != nil {
 		outputConfig += fmt.Sprintf("\tis_mirroring_collector = %#v\n", *r.IsMirroringCollector)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.LoadBalancingScheme != nil {
 		outputConfig += fmt.Sprintf("\tload_balancing_scheme = %#v\n", *r.LoadBalancingScheme)
 	}
@@ -3098,6 +3420,11 @@ func ComputeGlobalForwardingRuleAsHCL(r compute.ForwardingRule, hasGAEquivalent 
 	if r.IPVersion != nil {
 		outputConfig += fmt.Sprintf("\tip_version = %#v\n", *r.IPVersion)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.LoadBalancingScheme != nil {
 		outputConfig += fmt.Sprintf("\tload_balancing_scheme = %#v\n", *r.LoadBalancingScheme)
 	}
@@ -3181,6 +3508,11 @@ func DataprocWorkflowTemplateAsHCL(r dataproc.WorkflowTemplate, hasGAEquivalent 
 	if r.DagTimeout != nil {
 		outputConfig += fmt.Sprintf("\tdag_timeout = %#v\n", *r.DagTimeout)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Parameters != nil {
 		for _, v := range r.Parameters {
 			outputConfig += fmt.Sprintf("\tparameters %s\n", convertDataprocWorkflowTemplateParametersToHCL(&v))
@@ -3217,6 +3549,11 @@ func convertDataprocWorkflowTemplateJobsToHCL(r *dataproc.WorkflowTemplateJobs) 
 	if v := convertDataprocWorkflowTemplateJobsHiveJobToHCL(r.HiveJob); v != "" {
 		outputConfig += fmt.Sprintf("\thive_job %s\n", v)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if v := convertDataprocWorkflowTemplateJobsPigJobToHCL(r.PigJob); v != "" {
 		outputConfig += fmt.Sprintf("\tpig_job %s\n", v)
 	}
@@ -3290,6 +3627,11 @@ func convertDataprocWorkflowTemplateJobsHadoopJobToHCL(r *dataproc.WorkflowTempl
 	if r.MainJarFileUri != nil {
 		outputConfig += fmt.Sprintf("\tmain_jar_file_uri = %#v\n", *r.MainJarFileUri)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -3298,6 +3640,11 @@ func convertDataprocWorkflowTemplateJobsHadoopJobLoggingConfigToHCL(r *dataproc.
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -3316,12 +3663,22 @@ func convertDataprocWorkflowTemplateJobsHiveJobToHCL(r *dataproc.WorkflowTemplat
 		}
 		outputConfig += "]\n"
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
 		outputConfig += fmt.Sprintf("\tquery_file_uri = %#v\n", *r.QueryFileUri)
 	}
 	if v := convertDataprocWorkflowTemplateJobsHiveJobQueryListToHCL(r.QueryList); v != "" {
 		outputConfig += fmt.Sprintf("\tquery_list %s\n", v)
 	}
+	outputConfig += "\tscript_variables = {"
+	for k, v := range r.ScriptVariables {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -3358,12 +3715,22 @@ func convertDataprocWorkflowTemplateJobsPigJobToHCL(r *dataproc.WorkflowTemplate
 	if v := convertDataprocWorkflowTemplateJobsPigJobLoggingConfigToHCL(r.LoggingConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
 		outputConfig += fmt.Sprintf("\tquery_file_uri = %#v\n", *r.QueryFileUri)
 	}
 	if v := convertDataprocWorkflowTemplateJobsPigJobQueryListToHCL(r.QueryList); v != "" {
 		outputConfig += fmt.Sprintf("\tquery_list %s\n", v)
 	}
+	outputConfig += "\tscript_variables = {"
+	for k, v := range r.ScriptVariables {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -3372,6 +3739,11 @@ func convertDataprocWorkflowTemplateJobsPigJobLoggingConfigToHCL(r *dataproc.Wor
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -3411,6 +3783,11 @@ func convertDataprocWorkflowTemplateJobsPrestoJobToHCL(r *dataproc.WorkflowTempl
 	if r.OutputFormat != nil {
 		outputConfig += fmt.Sprintf("\toutput_format = %#v\n", *r.OutputFormat)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
 		outputConfig += fmt.Sprintf("\tquery_file_uri = %#v\n", *r.QueryFileUri)
 	}
@@ -3425,6 +3802,11 @@ func convertDataprocWorkflowTemplateJobsPrestoJobLoggingConfigToHCL(r *dataproc.
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -3482,6 +3864,11 @@ func convertDataprocWorkflowTemplateJobsPysparkJobToHCL(r *dataproc.WorkflowTemp
 	if v := convertDataprocWorkflowTemplateJobsPysparkJobLoggingConfigToHCL(r.LoggingConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.PythonFileUris != nil {
 		outputConfig += "\tpython_file_uris = ["
 		for _, v := range r.PythonFileUris {
@@ -3497,6 +3884,11 @@ func convertDataprocWorkflowTemplateJobsPysparkJobLoggingConfigToHCL(r *dataproc
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -3556,6 +3948,11 @@ func convertDataprocWorkflowTemplateJobsSparkJobToHCL(r *dataproc.WorkflowTempla
 	if r.MainJarFileUri != nil {
 		outputConfig += fmt.Sprintf("\tmain_jar_file_uri = %#v\n", *r.MainJarFileUri)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -3564,6 +3961,11 @@ func convertDataprocWorkflowTemplateJobsSparkJobLoggingConfigToHCL(r *dataproc.W
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -3599,6 +4001,11 @@ func convertDataprocWorkflowTemplateJobsSparkRJobToHCL(r *dataproc.WorkflowTempl
 	if v := convertDataprocWorkflowTemplateJobsSparkRJobLoggingConfigToHCL(r.LoggingConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -3607,6 +4014,11 @@ func convertDataprocWorkflowTemplateJobsSparkRJobLoggingConfigToHCL(r *dataproc.
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -3625,12 +4037,22 @@ func convertDataprocWorkflowTemplateJobsSparkSqlJobToHCL(r *dataproc.WorkflowTem
 	if v := convertDataprocWorkflowTemplateJobsSparkSqlJobLoggingConfigToHCL(r.LoggingConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
 		outputConfig += fmt.Sprintf("\tquery_file_uri = %#v\n", *r.QueryFileUri)
 	}
 	if v := convertDataprocWorkflowTemplateJobsSparkSqlJobQueryListToHCL(r.QueryList); v != "" {
 		outputConfig += fmt.Sprintf("\tquery_list %s\n", v)
 	}
+	outputConfig += "\tscript_variables = {"
+	for k, v := range r.ScriptVariables {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -3639,6 +4061,11 @@ func convertDataprocWorkflowTemplateJobsSparkSqlJobLoggingConfigToHCL(r *datapro
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -3676,6 +4103,11 @@ func convertDataprocWorkflowTemplatePlacementClusterSelectorToHCL(r *dataproc.Wo
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tcluster_labels = {"
+	for k, v := range r.ClusterLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Zone != nil {
 		outputConfig += fmt.Sprintf("\tzone = %#v\n", *r.Zone)
 	}
@@ -3693,6 +4125,11 @@ func convertDataprocWorkflowTemplatePlacementManagedClusterToHCL(r *dataproc.Wor
 	if v := convertDataprocWorkflowTemplateClusterClusterConfigToHCL(r.Config); v != "" {
 		outputConfig += fmt.Sprintf("\tconfig %s\n", v)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -3924,6 +4361,11 @@ func convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfigToHCL(r 
 	if r.InternalIPOnly != nil {
 		outputConfig += fmt.Sprintf("\tinternal_ip_only = %#v\n", *r.InternalIPOnly)
 	}
+	outputConfig += "\tmetadata = {"
+	for k, v := range r.Metadata {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Network != nil {
 		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
 	}
@@ -4104,6 +4546,11 @@ func convertDataprocWorkflowTemplateClusterClusterConfigSoftwareConfigToHCL(r *d
 		}
 		outputConfig += "]\n"
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -4129,6 +4576,11 @@ func EventarcTriggerAsHCL(r eventarc.Trigger, hasGAEquivalent bool) (string, err
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
@@ -4348,6 +4800,11 @@ func PrivatecaCertificateTemplateAsHCL(r privateca.CertificateTemplate, hasGAEqu
 	if v := convertPrivatecaCertificateTemplateIdentityConstraintsToHCL(r.IdentityConstraints); v != "" {
 		outputConfig += fmt.Sprintf("\tidentity_constraints %s\n", v)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if v := convertPrivatecaCertificateTemplatePassthroughExtensionsToHCL(r.PassthroughExtensions); v != "" {
 		outputConfig += fmt.Sprintf("\tpassthrough_extensions %s\n", v)
 	}
@@ -4623,6 +5080,125 @@ func convertPrivatecaCertificateTemplatePredefinedValuesPolicyIdsToHCL(r *privat
 			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
 		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+// RecaptchaEnterpriseKeyAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func RecaptchaEnterpriseKeyAsHCL(r recaptchaenterprise.Key, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_recaptcha_enterprise_key\" \"output\" {\n"
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	if v := convertRecaptchaEnterpriseKeyAndroidSettingsToHCL(r.AndroidSettings); v != "" {
+		outputConfig += fmt.Sprintf("\tandroid_settings %s\n", v)
+	}
+	if v := convertRecaptchaEnterpriseKeyIosSettingsToHCL(r.IosSettings); v != "" {
+		outputConfig += fmt.Sprintf("\tios_settings %s\n", v)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if v := convertRecaptchaEnterpriseKeyTestingOptionsToHCL(r.TestingOptions); v != "" {
+		outputConfig += fmt.Sprintf("\ttesting_options %s\n", v)
+	}
+	if v := convertRecaptchaEnterpriseKeyWebSettingsToHCL(r.WebSettings); v != "" {
+		outputConfig += fmt.Sprintf("\tweb_settings %s\n", v)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertRecaptchaEnterpriseKeyAndroidSettingsToHCL(r *recaptchaenterprise.KeyAndroidSettings) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowAllPackageNames != nil {
+		outputConfig += fmt.Sprintf("\tallow_all_package_names = %#v\n", *r.AllowAllPackageNames)
+	}
+	if r.AllowedPackageNames != nil {
+		outputConfig += "\tallowed_package_names = ["
+		for _, v := range r.AllowedPackageNames {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertRecaptchaEnterpriseKeyIosSettingsToHCL(r *recaptchaenterprise.KeyIosSettings) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowAllBundleIds != nil {
+		outputConfig += fmt.Sprintf("\tallow_all_bundle_ids = %#v\n", *r.AllowAllBundleIds)
+	}
+	if r.AllowedBundleIds != nil {
+		outputConfig += "\tallowed_bundle_ids = ["
+		for _, v := range r.AllowedBundleIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertRecaptchaEnterpriseKeyTestingOptionsToHCL(r *recaptchaenterprise.KeyTestingOptions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.TestingChallenge != nil {
+		outputConfig += fmt.Sprintf("\ttesting_challenge = %#v\n", *r.TestingChallenge)
+	}
+	if r.TestingScore != nil {
+		outputConfig += fmt.Sprintf("\ttesting_score = %#v\n", *r.TestingScore)
+	}
+	return outputConfig + "}"
+}
+
+func convertRecaptchaEnterpriseKeyWebSettingsToHCL(r *recaptchaenterprise.KeyWebSettings) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.IntegrationType != nil {
+		outputConfig += fmt.Sprintf("\tintegration_type = %#v\n", *r.IntegrationType)
+	}
+	if r.AllowAllDomains != nil {
+		outputConfig += fmt.Sprintf("\tallow_all_domains = %#v\n", *r.AllowAllDomains)
+	}
+	if r.AllowAmpTraffic != nil {
+		outputConfig += fmt.Sprintf("\tallow_amp_traffic = %#v\n", *r.AllowAmpTraffic)
+	}
+	if r.AllowedDomains != nil {
+		outputConfig += "\tallowed_domains = ["
+		for _, v := range r.AllowedDomains {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.ChallengeSecurityPreference != nil {
+		outputConfig += fmt.Sprintf("\tchallenge_security_preference = %#v\n", *r.ChallengeSecurityPreference)
 	}
 	return outputConfig + "}"
 }
@@ -6702,6 +7278,97 @@ func convertPrivatecaCertificateTemplateBetaPredefinedValuesPolicyIdsList(i inte
 	return out
 }
 
+func convertRecaptchaEnterpriseKeyBetaAndroidSettings(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowAllPackageNames": in["allow_all_package_names"],
+		"allowedPackageNames":  in["allowed_package_names"],
+	}
+}
+
+func convertRecaptchaEnterpriseKeyBetaAndroidSettingsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertRecaptchaEnterpriseKeyBetaAndroidSettings(v))
+	}
+	return out
+}
+
+func convertRecaptchaEnterpriseKeyBetaIosSettings(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowAllBundleIds": in["allow_all_bundle_ids"],
+		"allowedBundleIds":  in["allowed_bundle_ids"],
+	}
+}
+
+func convertRecaptchaEnterpriseKeyBetaIosSettingsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertRecaptchaEnterpriseKeyBetaIosSettings(v))
+	}
+	return out
+}
+
+func convertRecaptchaEnterpriseKeyBetaTestingOptions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"testingChallenge": in["testing_challenge"],
+		"testingScore":     in["testing_score"],
+	}
+}
+
+func convertRecaptchaEnterpriseKeyBetaTestingOptionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertRecaptchaEnterpriseKeyBetaTestingOptions(v))
+	}
+	return out
+}
+
+func convertRecaptchaEnterpriseKeyBetaWebSettings(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"integrationType":             in["integration_type"],
+		"allowAllDomains":             in["allow_all_domains"],
+		"allowAmpTraffic":             in["allow_amp_traffic"],
+		"allowedDomains":              in["allowed_domains"],
+		"challengeSecurityPreference": in["challenge_security_preference"],
+	}
+}
+
+func convertRecaptchaEnterpriseKeyBetaWebSettingsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertRecaptchaEnterpriseKeyBetaWebSettings(v))
+	}
+	return out
+}
+
 func convertAssuredWorkloadsWorkloadKmsSettings(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -8454,6 +9121,97 @@ func convertPrivatecaCertificateTemplatePredefinedValuesPolicyIdsList(i interfac
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertPrivatecaCertificateTemplatePredefinedValuesPolicyIds(v))
+	}
+	return out
+}
+
+func convertRecaptchaEnterpriseKeyAndroidSettings(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowAllPackageNames": in["allow_all_package_names"],
+		"allowedPackageNames":  in["allowed_package_names"],
+	}
+}
+
+func convertRecaptchaEnterpriseKeyAndroidSettingsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertRecaptchaEnterpriseKeyAndroidSettings(v))
+	}
+	return out
+}
+
+func convertRecaptchaEnterpriseKeyIosSettings(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowAllBundleIds": in["allow_all_bundle_ids"],
+		"allowedBundleIds":  in["allowed_bundle_ids"],
+	}
+}
+
+func convertRecaptchaEnterpriseKeyIosSettingsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertRecaptchaEnterpriseKeyIosSettings(v))
+	}
+	return out
+}
+
+func convertRecaptchaEnterpriseKeyTestingOptions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"testingChallenge": in["testing_challenge"],
+		"testingScore":     in["testing_score"],
+	}
+}
+
+func convertRecaptchaEnterpriseKeyTestingOptionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertRecaptchaEnterpriseKeyTestingOptions(v))
+	}
+	return out
+}
+
+func convertRecaptchaEnterpriseKeyWebSettings(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"integrationType":             in["integration_type"],
+		"allowAllDomains":             in["allow_all_domains"],
+		"allowAmpTraffic":             in["allow_amp_traffic"],
+		"allowedDomains":              in["allowed_domains"],
+		"challengeSecurityPreference": in["challenge_security_preference"],
+	}
+}
+
+func convertRecaptchaEnterpriseKeyWebSettingsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertRecaptchaEnterpriseKeyWebSettings(v))
 	}
 	return out
 }
