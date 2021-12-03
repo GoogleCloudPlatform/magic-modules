@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 dependencies:
-- samples/basic.cloudresourcemanager.folder.json
+- samples/basic.cloud_resource_manager.folder.json
 description: A test of an orgpolicy policy for a folder
 name: folder_policy
 resource: samples/folder.policy.json
 type: policy
 updates:
 - dependencies:
-  - samples/basic.cloudresourcemanager.folder.json
+  - samples/basic.cloud_resource_manager.folder.json
   resource: samples/update_folder.policy.json
 variables:
 - name: org_id

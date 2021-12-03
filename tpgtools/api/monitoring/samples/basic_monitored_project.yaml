@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 dependencies:
-- samples/basic.cloudresourcemanager.project.json
+- samples/basic.cloud_resource_manager.project.json
 description: A basic example of a monitoring monitored project
 name: basic_monitored_project
 resource: samples/basic.monitored_project.json

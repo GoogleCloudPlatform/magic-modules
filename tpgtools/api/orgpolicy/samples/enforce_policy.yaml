@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 dependencies:
-- samples/basic.cloudresourcemanager.project.json
+- samples/basic.cloud_resource_manager.project.json
 description: A test of an enforce orgpolicy policy for a project
 name: enforce_policy
 resource: samples/enforce.policy.json

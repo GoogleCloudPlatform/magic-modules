@@ -1,6 +1,6 @@
 {
-  "name": "projects/{{ref:basic.cloudresourcemanager.project.json:name}}/policies/gcp.resourceLocations",
-  "parent": "projects/{{ref:basic.cloudresourcemanager.project.json:name}}",
+  "name": "projects/{{ref:basic.cloud_resource_manager.project.json:name}}/policies/gcp.resourceLocations",
+  "parent": "projects/{{ref:basic.cloud_resource_manager.project.json:name}}",
   "spec": {
     "rules": [
       {

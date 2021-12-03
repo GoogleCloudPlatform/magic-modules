@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"bitbucket.org/creachadair/stringset"
-	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	"github.com/golang/glog"
 	"github.com/nasa9084/go-openapi"
 	"gopkg.in/yaml.v2"
@@ -59,17 +58,21 @@ type Resource struct {
 
 	// title is the name of the resource in snake_case. For example,
 	// "instance", "backend_service".
-	title string
+	title SnakeCaseTerraformResourceName
 
-	// dclTitle is the name of the resource in TitleCase. For example,
-	// "Instance", "BackendService".
+	// dclTitle is the name of the resource in TitleCase, as parsed from the relevant
+	// DCL YAML file. For example, "Instance", "BackendService".
 	// This is particularly useful for acronymizations that exist in
-	// resource names, like OSPolicy
-	dclTitle string
+	// resource names, like OSPolicy.  We store it separately from title
+	// because it can differ, especially in the case of split resources:
+	// "region_backend_service" vs "BackendService".  We use this to
+	// create the names of DCL functions - "Apply{{dclTitle}}".
+	dclTitle TitleCaseResourceName
 	// dclStructName is the name of the resource struct in the DCL.  In almost all cases
 	// this is == to dclTitle, but sometimes, due to (for instance) reserved words in the
-	// DCL conflicting with resource names, this differs.
-	dclStructName string
+	// DCL conflicting with resource names, this differs.  We use this to create DCL
+	// structs: `foo := compute.{{dclStructName}}{field1: "bar"}`.
+	dclStructName TitleCaseResourceName
 
 	// Description of the Terraform resource
 	Description string
@@ -151,7 +154,7 @@ type Resource struct {
 	CustomSerializer *string
 
 	// TerraformProductName is the Product name overriden from the DCL
-	TerraformProductName *string
+	TerraformProductName *SnakeCaseProductName
 
 	// The array of Samples associated with the resource
 	Samples []Sample
@@ -195,84 +198,60 @@ func (r *Resource) fillLinksFromExtensionsMap(m map[string]interface{}) {
 }
 
 // Name is the shortname of a resource. For example, "instance".
-func (r Resource) Name() string {
+func (r Resource) Name() SnakeCaseTerraformResourceName {
 	return r.title
 }
-
-func (r Resource) DCLName() string {
-	if r.dclTitle != "" {
-		return jsonToSnakeCase(r.dclTitle)
-	}
-	return r.title
+func (r Resource) TitleCaseFullName() TitleCaseFullName {
+	return TitleCaseFullName(snakeToTitleCase(concatenateSnakeCase(r.ProductName(), r.Name())).titlecase())
 }
 
-func (r Resource) DCLTitle() string {
+func (r Resource) DCLTitle() TitleCaseResourceName {
 	return r.dclTitle
 }
 
-func (r Resource) DCLStructName() string {
+func (r Resource) DCLStructName() TitleCaseResourceName {
 	if r.dclStructName != "" {
 		return r.dclStructName
 	}
 	return r.dclTitle
 }
 
-// Path is the provider name of a resource, product_name. For example,
-// "cloud_run_service".
-func (r Resource) Path() string {
-	return r.ProductName() + "_" + r.Name()
-}
-
 // TerraformName is the Terraform resource type used in HCL configuration.
 // For example, "google_compute_instance"
-func (r Resource) TerraformName() string {
+func (r Resource) TerraformName() SnakeCaseFullName {
+	googlePrefix := miscellaneousNameSnakeCase("google")
 	if r.TerraformProductName != nil {
-		if *r.TerraformProductName == "" {
-			return fmt.Sprintf("google_%s", r.Name())
+		if r.TerraformProductName.snakecase() == "" {
+			return SnakeCaseFullName(concatenateSnakeCase(googlePrefix, r.Name()))
 		}
-		return fmt.Sprintf("google_%s_%s", *r.TerraformProductName, r.Name())
+		return SnakeCaseFullName(concatenateSnakeCase(googlePrefix, *r.TerraformProductName, r.Name()))
 	}
-	return "google_" + r.Path()
+	return SnakeCaseFullName(concatenateSnakeCase(googlePrefix, r.ProductName(), r.Name()))
 }
 
 // PathType is the title-cased name of a resource preceded by its package,
 // often used to namespace functions. For example, "RedisInstance".
-func (r Resource) PathType() string {
-	return dcl.SnakeToTitleCase(r.Path())
-}
-
-// This is the string to match against in serialization.go - this is the string that will
-// be concocted from the sample file's product + resource name.  It is the name of
-// the actual go struct (e.g. "AzureClient"), prefixed by the title-cased name of
-// the service in question (e.g. "ContainerAzure").
-func (r Resource) SampleTypeName() string {
-	if r.location == "global" {
-		return snakeToTitleCase(r.ProductName() + "_global_" + r.DCLStructName())
-	}
-	return snakeToTitleCase(r.ProductName() + "_" + r.DCLStructName())
+func (r Resource) PathType() TitleCaseFullName {
+	return r.TitleCaseFullName()
 }
 
 // Package is the namespace of the package within the dcl
 // the Package is normally a lowercase variant of ProductName
-func (r Resource) Package() string {
+func (r Resource) Package() DCLPackageName {
 	return r.productMetadata.PackageName
 }
 
-// ProductType is the title-cased product name of a resource. For example,
-// "NetworkServices".
-func (r Resource) ProductType() string {
-	return r.productMetadata.ProductType()
+func (r Resource) TitleCasePackageName() RenderedString {
+	return RenderedString(snakeToTitleCase(r.ProductName()).titlecase())
 }
 
-// DocsSection is *usuallu* the title-cased product name of a resource. For example,
-// "NetworkServices" - but subject to overrides.
-func (r Resource) DocsSection() string {
+func (r Resource) DocsSection() miscellaneousNameTitleCase {
 	return r.productMetadata.DocsSection()
 }
 
-// ProductType is the snakecase product name of a resource. For example,
+// ProductName is the snakecase product name of a resource. For example,
 // "network_services".
-func (r Resource) ProductName() string {
+func (r Resource) ProductName() SnakeCaseProductName {
 	return r.productMetadata.ProductName
 }
 
@@ -284,8 +263,8 @@ func (r Resource) ProductMetadata() *ProductMetadata {
 // DCLPackage is the package name of the DCL client library to use for this
 // resource. For example, the Package "access_context_manager" would have a
 // DCLPackage of "accesscontextmanager"
-func (r Resource) DCLPackage() string {
-	return r.productMetadata.DCLPackage()
+func (r Resource) DCLPackage() DCLPackageName {
+	return r.productMetadata.PackageName
 }
 
 // IsAlternateLocation returns whether this resource is an additional version
@@ -295,13 +274,6 @@ func (r Resource) IsAlternateLocation() bool {
 	// For now, we consider non-regional resources to be alternate.
 	// Non-locational resources will have an empty string as their location.
 	return r.location != "" && r.location != "region"
-}
-
-// SidebarCurrent is the website sidebar identifier, for example
-// docs-google-compute-instance
-// TODO: is this still needed?
-func (r Resource) SidebarCurrent() string {
-	return "docs-" + strings.Replace(r.TerraformName(), "_", "-", -1)
 }
 
 // Updatable returns true if the resource should have an update method.
@@ -387,11 +359,6 @@ func (r Resource) HasServerGeneratedName() bool {
 	return false
 }
 
-// SweeperName returns the name of the Sweeper for this resource.
-func (r Resource) SweeperName() string {
-	return r.ProductType() + strings.Title(r.Name())
-}
-
 // SweeperFunctionArgs returns a list of arguments for calling a sweeper function.
 func (r Resource) SweeperFunctionArgs() string {
 	vals := make([]string, 0)
@@ -439,9 +406,9 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	resourceTitle := strings.Split(info.Title, "/")[1]
 
 	res := Resource{
-		title:                jsonToSnakeCase(resourceTitle),
-		dclStructName:        schema.Title,
-		dclTitle:             resourceTitle,
+		title:                SnakeCaseTerraformResourceName(jsonToSnakeCase(resourceTitle).snakecase()),
+		dclStructName:        TitleCaseResourceName(schema.Title),
+		dclTitle:             TitleCaseResourceName(resourceTitle),
 		productMetadata:      product,
 		versionMetadata:      version,
 		Description:          info.Description,
@@ -450,15 +417,6 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		UpdateTimeoutMinutes: 10,
 		DeleteTimeoutMinutes: 10,
 		UseDCLID:             overrides.ResourceOverride(UseDCLID, location),
-	}
-
-	// Attempt to construct the resource name using location. Other than
-	// zonal resources (which never include "zone"), there is no consistency
-	// for when to include the location in the resource name.
-	// A resource name override will often need to be used for on of the localized
-	// resource versions.
-	if location != "" && location != "zone" {
-		res.title = location + "_" + res.title
 	}
 
 	// Since the resource's "info" extension field can't be accessed, the relevant
@@ -484,7 +442,7 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	}
 
 	if crnameOk {
-		res.title = jsonToSnakeCase(crname.Title)
+		res.title = SnakeCaseTerraformResourceName(crname.Title)
 	}
 
 	id, err := findResourceId(schema, overrides, location)
@@ -685,7 +643,8 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		return nil, fmt.Errorf("failed to decode terraform product name function details: %v", err)
 	}
 	if terraformProductNameOk {
-		res.TerraformProductName = &terraformProductName.Product
+		scpn := SnakeCaseProductName(terraformProductName.Product)
+		res.TerraformProductName = &scpn
 	}
 
 	res.Samples = res.loadSamples()
@@ -747,11 +706,11 @@ func (r Resource) getSamples(docs bool) []Sample {
 	return out
 }
 
-func (r *Resource) getSampleAccessoryFolder() string {
-	resourceType := strings.ToLower(r.DCLTitle())
-	packageName := strings.ToLower(r.productMetadata.PackageName)
+func (r *Resource) getSampleAccessoryFolder() Filepath {
+	resourceType := strings.ToLower(r.DCLTitle().titlecase())
+	packageName := r.productMetadata.PackageName.lowercase()
 	sampleAccessoryFolder := path.Join(*tPath, packageName, "samples", resourceType)
-	return sampleAccessoryFolder
+	return Filepath(sampleAccessoryFolder)
 }
 
 func (r *Resource) loadSamples() []Sample {
@@ -765,14 +724,14 @@ func (r *Resource) loadSamples() []Sample {
 
 func (r *Resource) loadHandWrittenSamples() []Sample {
 	sampleAccessoryFolder := r.getSampleAccessoryFolder()
-	sampleFriendlyMetaPath := path.Join(sampleAccessoryFolder, "meta.yaml")
+	sampleFriendlyMetaPath := path.Join(string(sampleAccessoryFolder), "meta.yaml")
 	samples := []Sample{}
 
 	if !pathExists(sampleFriendlyMetaPath) {
 		return samples
 	}
 
-	files, err := ioutil.ReadDir(sampleAccessoryFolder)
+	files, err := ioutil.ReadDir(string(sampleAccessoryFolder))
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -784,7 +743,7 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 		}
 		sample := Sample{}
 		sampleName := strings.Split(file.Name(), ".")[0]
-		sampleDefinitionFile := path.Join(sampleAccessoryFolder, sampleName+".yaml")
+		sampleDefinitionFile := path.Join(string(sampleAccessoryFolder), sampleName+".yaml")
 		var tc []byte
 		if pathExists(sampleDefinitionFile) {
 			tc, err = mergeYaml(sampleDefinitionFile, sampleFriendlyMetaPath)
@@ -829,7 +788,7 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 			sampleName = strings.Split(sample.FileName, ".")[0]
 			sample.Name = &sampleName
 		}
-		sample.TestSlug = snakeToTitleCase(sampleName) + "HandWritten"
+		sample.TestSlug = RenderedString(snakeToTitleCase(miscellaneousNameSnakeCase(sampleName)).titlecase() + "HandWritten")
 		samples = append(samples, sample)
 	}
 
@@ -841,7 +800,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 	packagePath := r.productMetadata.PackagePath
 	version := r.versionMetadata.V
 	resourceType := r.DCLTitle()
-	sampleFriendlyMetaPath := path.Join(sampleAccessoryFolder, "meta.yaml")
+	sampleFriendlyMetaPath := path.Join(string(sampleAccessoryFolder), "meta.yaml")
 	samples := []Sample{}
 
 	if mode != nil && *mode == "serialization" {
@@ -849,9 +808,9 @@ func (r *Resource) loadDCLSamples() []Sample {
 	}
 
 	// Samples appear in the root product folder
-	packagePath = strings.Split(packagePath, "/")[0]
-	samplesPath := path.Join(*fPath, packagePath, "samples")
-	files, err := ioutil.ReadDir(samplesPath)
+	packagePath = Filepath(strings.Split(string(packagePath), "/")[0])
+	samplesPath := Filepath(path.Join(*fPath, string(packagePath), "samples"))
+	files, err := ioutil.ReadDir(string(samplesPath))
 	if err != nil {
 		// ignore the error if the file just doesn't exist
 		if !os.IsNotExist(err) {
@@ -863,13 +822,13 @@ func (r *Resource) loadDCLSamples() []Sample {
 			continue
 		}
 		sample := Sample{}
-		sampleOGFilePath := path.Join(samplesPath, file.Name())
+		sampleOGFilePath := path.Join(string(samplesPath), file.Name())
 		var tc []byte
 		if pathExists(sampleFriendlyMetaPath) {
 			tc, err = mergeYaml(sampleOGFilePath, sampleFriendlyMetaPath)
 		} else {
 			glog.Errorf("warning : sample meta does not exist for %v at %q", r.TerraformName(), sampleFriendlyMetaPath)
-			tc, err = ioutil.ReadFile(path.Join(samplesPath, file.Name()))
+			tc, err = ioutil.ReadFile(path.Join(string(samplesPath), file.Name()))
 		}
 		if err != nil {
 			glog.Exit(err)
@@ -892,12 +851,14 @@ func (r *Resource) loadDCLSamples() []Sample {
 		}
 
 		primaryResource := *sample.PrimaryResource
-		parts := strings.Split(primaryResource, ".")
+		var parts []miscellaneousNameSnakeCase
+		parts = assertSnakeArray(strings.Split(primaryResource, "."))
 		primaryResourceName := snakeToTitleCase(parts[len(parts)-2])
 
 		if !versionMatch {
 			continue
-		} else if !strings.EqualFold(primaryResourceName, resourceType) {
+		} else if !strings.EqualFold(primaryResourceName.titlecase(), resourceType.titlecase()) {
+			glog.Errorf("skipping %s since no match with %s.", primaryResourceName, resourceType)
 			continue
 		}
 
@@ -913,7 +874,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 			dependencies = append(dependencies, dependency)
 		}
 		sample.DependencyList = dependencies
-		sample.TestSlug = sampleNameToTitleCase(*sample.Name)
+		sample.TestSlug = RenderedString(sampleNameToTitleCase(*sample.Name).titlecase())
 		samples = append(samples, sample)
 	}
 

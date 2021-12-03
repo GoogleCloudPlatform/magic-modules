@@ -34,7 +34,7 @@ type Sample struct {
 	DependencyList []Dependency
 
 	// The name of the test
-	TestSlug string
+	TestSlug RenderedString
 
 	// The raw versions stated in the yaml
 	Versions []string
@@ -47,7 +47,7 @@ type Sample struct {
 	HasGAEquivalent bool
 
 	// SamplesPath is the path to the directory where the original sample data is stored
-	SamplesPath string
+	SamplesPath Filepath
 
 	// resourceReference is the resource the sample belongs to
 	resourceReference *Resource
@@ -95,9 +95,6 @@ type Dependency struct {
 	// HCLLocalName is the local name of the HCL block, e.g. "basic" or "default"
 	HCLLocalName string
 
-	// DCLResourceType is the type represented in the DCL, e.g. "ComputeInstance"
-	DCLResourceType string
-
 	// TerraformResourceType is the type represented in Terraform, e.g. "google_compute_instance"
 	TerraformResourceType string
 
@@ -114,19 +111,17 @@ type Update struct {
 }
 
 // BuildDependency produces a Dependency using a file and filename
-func BuildDependency(fileName, product, localname, version string, hasGAEquivalent bool, b []byte) (*Dependency, error) {
-	var resourceName string
+func BuildDependency(fileName string, product SnakeCaseProductName, localname, version string, hasGAEquivalent bool, b []byte) (*Dependency, error) {
+	// Miscellaneous name rather than "resource name" because this is the name in the sample json file - which might not match the TF name!
+	// we have to account for that.
+	var resourceName miscellaneousNameSnakeCase
 	fileParts := strings.Split(fileName, ".")
 	if len(fileParts) == 4 {
-		var err error
-		// TODO(magic-modules-eng): Allow for resources which are split in terraform but not in DCL
-		// (e.g. locational split) to find the right resource here.
-		product, resourceName, err = DCLToTerraformSampleName(fileParts[1], fileParts[2])
-		if err != nil {
-			return nil, err
-		}
+		p, rn := fileParts[1], fileParts[2]
+		product = SnakeCaseProductName(p)
+		resourceName = miscellaneousNameSnakeCase(rn)
 	} else if len(fileParts) == 3 {
-		resourceName = fileParts[1]
+		resourceName = miscellaneousNameSnakeCase(fileParts[1])
 	} else {
 		return nil, fmt.Errorf("Invalid sample dependency file name: %s", fileName)
 	}
@@ -134,25 +129,24 @@ func BuildDependency(fileName, product, localname, version string, hasGAEquivale
 	if localname == "" {
 		localname = fileParts[0]
 	}
-	dclResourceType := product + dcl.SnakeToTitleCase(resourceName)
-	terraformResourceType, err := DCLToTerraformReference(dclResourceType, version)
+	terraformResourceType, err := DCLToTerraformReference(product, resourceName, version)
 	if err != nil {
 		return nil, fmt.Errorf("Error generating sample dependency reference %s: %s", fileName, err)
 	}
 
-	block, err := ConvertSampleJSONToHCL(dclResourceType, version, hasGAEquivalent, b)
+	block, err := ConvertSampleJSONToHCL(product, resourceName, version, hasGAEquivalent, b)
 	if err != nil {
 		glog.Errorf("failed to convert %q", fileName)
 		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)
 	}
 
+	// Find all instances of `resource "foo" "bar"` and replace `bar` with localname.
 	re := regexp.MustCompile(`(resource "` + terraformResourceType + `" ")(\w*)`)
 	block = re.ReplaceAllString(block, "${1}"+localname)
 
 	d := &Dependency{
 		FileName:              fileName,
 		HCLLocalName:          localname,
-		DCLResourceType:       dclResourceType,
 		TerraformResourceType: terraformResourceType,
 		HCLBlock:              block,
 	}
@@ -166,9 +160,9 @@ func (s *Sample) generateSampleDependency(fileName string) Dependency {
 func (s *Sample) generateSampleDependencyWithName(fileName, localname string) Dependency {
 	dFileNameParts := strings.Split(fileName, "samples/")
 	fileName = dFileNameParts[len(dFileNameParts)-1]
-	dependencyBytes, err := ioutil.ReadFile(path.Join(s.SamplesPath, fileName))
+	dependencyBytes, err := ioutil.ReadFile(path.Join(string(s.SamplesPath), fileName))
 	version := s.resourceReference.versionMetadata.V
-	product := s.resourceReference.productMetadata.ProductType()
+	product := s.resourceReference.productMetadata.ProductName
 	d, err := BuildDependency(fileName, product, localname, version, s.HasGAEquivalent, dependencyBytes)
 	if err != nil {
 		glog.Exit(err)
@@ -180,7 +174,7 @@ func (s *Sample) GetCodeToInject() []string {
 	sampleAccessoryFolder := s.resourceReference.getSampleAccessoryFolder()
 	var out []string
 	for _, fileName := range s.CodeInject {
-		filePath := path.Join(sampleAccessoryFolder, fileName)
+		filePath := path.Join(string(sampleAccessoryFolder), fileName)
 		tc, err := ioutil.ReadFile(filePath)
 		if err != nil {
 			glog.Exit(err)
@@ -252,7 +246,7 @@ func (s Sample) GenerateHCL(isDocs bool) string {
 			glog.Exit(err)
 		}
 	} else {
-		tc, err := ioutil.ReadFile(path.Join(s.SamplesPath, *s.PrimaryResource))
+		tc, err := ioutil.ReadFile(path.Join(string(s.SamplesPath), *s.PrimaryResource))
 		if err != nil {
 			glog.Exit(err)
 		}
@@ -288,7 +282,7 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 			}
 			newSample.DependencyList = newDeps
 		}
-		newSample.TestSlug = fmt.Sprintf("%sUpdate%v", newSample.TestSlug, i)
+		newSample.TestSlug = RenderedString(fmt.Sprintf("%sUpdate%v", newSample.TestSlug, i))
 		newSample.Updates = nil
 		newSample.Variables = s.Variables
 		out = append(out, newSample)

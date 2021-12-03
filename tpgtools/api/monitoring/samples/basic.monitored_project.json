@@ -1,4 +1,4 @@
 {
-  "name": "{{ref:basic.cloudresourcemanager.project.json:name}}",
+  "name": "{{ref:basic.cloud_resource_manager.project.json:name}}",
   "metricsScope": "{{project}}"
 }
