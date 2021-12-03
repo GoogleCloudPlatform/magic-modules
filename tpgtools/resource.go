@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"bitbucket.org/creachadair/stringset"
+	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	"github.com/golang/glog"
 	"github.com/nasa9084/go-openapi"
 	"gopkg.in/yaml.v2"
@@ -51,6 +52,10 @@ type Resource struct {
 	// rarely needed in cases where the shared mm basepath does not include the version
 	// as in Montioring https://git.io/Jz4Wn
 	AppendToBasePath string
+
+	// ReplaceInBasePath contains a string replacement for the config base path,
+	// replacing one substring with another.
+	ReplaceInBasePath BasePathReplacement
 
 	// title is the name of the resource in snake_case. For example,
 	// "instance", "backend_service".
@@ -161,6 +166,12 @@ type Link struct {
 	url  string
 }
 
+type BasePathReplacement struct {
+	Present bool
+	Old     string
+	New     string
+}
+
 func (l Link) Markdown() string {
 	return fmt.Sprintf("[%s](%s)", l.text, l.url)
 }
@@ -216,7 +227,7 @@ func (r Resource) TerraformName() string {
 // PathType is the title-cased name of a resource preceded by its package,
 // often used to namespace functions. For example, "RedisInstance".
 func (r Resource) PathType() string {
-	return snakeToTitleCase(r.Path())
+	return dcl.SnakeToTitleCase(r.Path())
 }
 
 // Package is the namespace of the package within the dcl
@@ -475,6 +486,18 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	}
 	if atbpOk {
 		res.AppendToBasePath = atbpd.String
+	}
+
+	// Resource Override: Replace in Base Path
+	ribpd := ReplaceInBasePathDetails{}
+	ribpOk, err := overrides.ResourceOverrideWithDetails(ReplaceInBasePath, &ribpd, location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode replace in base path details: %v", err)
+	}
+	if ribpOk {
+		res.ReplaceInBasePath.Present = true
+		res.ReplaceInBasePath.Old = ribpd.Old
+		res.ReplaceInBasePath.New = ribpd.New
 	}
 
 	// Resource Override: Import formats
