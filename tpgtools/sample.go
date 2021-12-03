@@ -126,7 +126,7 @@ func BuildDependency(fileName, product, localname, version string, hasGAEquivale
 			return nil, err
 		}
 	} else if len(fileParts) == 3 {
-		resourceName = strings.Title(fileParts[1])
+		resourceName = fileParts[1]
 	} else {
 		return nil, fmt.Errorf("Invalid sample dependency file name: %s", fileName)
 	}
@@ -134,7 +134,7 @@ func BuildDependency(fileName, product, localname, version string, hasGAEquivale
 	if localname == "" {
 		localname = fileParts[0]
 	}
-	dclResourceType := product + snakeToTitleCase(resourceName)
+	dclResourceType := product + dcl.SnakeToTitleCase(resourceName)
 	terraformResourceType, err := DCLToTerraformReference(dclResourceType, version)
 	if err != nil {
 		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)

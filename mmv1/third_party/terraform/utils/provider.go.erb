@@ -469,8 +469,8 @@ end     # products.each do
 				"google_monitoring_monitored_project":          resourceMonitoringMonitoredProject(),
 				<% end -%>
 				"google_org_policy_policy":             resourceOrgPolicyPolicy(),
+				"google_os_config_os_policy_assignment": resourceOSConfigOSPolicyAssignment(),
 				<% if version == 'private' -%>
-				"google_os_config_os_policy_assignment": resourceOsConfigOsPolicyAssignment(),
 				"google_vmware_private_cloud":           resourceVmwarePrivateCloud(),
 				"google_vmware_cluster":                 resourceVmwareCluster(),
 				<% end -%>
