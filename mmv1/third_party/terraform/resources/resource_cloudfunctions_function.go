@@ -127,7 +127,7 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 			"source_repository": {
 				Type:          schema.TypeList,
 				Optional:      true,
-				MaxItems:      2,
+				MaxItems:      1,
 				Description:   `Represents parameters related to source repository where a function is hosted. Cannot be set alongside source_archive_bucket or source_archive_object.`,
 				ConflictsWith: []string{"source_archive_bucket", "source_archive_object"},
 				Elem: &schema.Resource{
