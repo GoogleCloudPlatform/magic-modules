@@ -27,16 +27,7 @@ provider "google" {
   {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
 }
 
-data "google_iam_policy" "admin" {
-  binding {
-    role = "roles/editor"
-    members = [
-      "user:jane@example.com",
-    ]
-  }
-}
-
 resource "google_pubsub_subscription_iam_policy" "editor" {
   subscription = "my-subscription-name"
-  policy_data  = data.google_iam_policy.admin.policy_data
+  policy_data = "{\"bindings\":[{\"members\":[\"user:jane@example.com\"],\"role\":\"roles/editor\"}]}"
 }
