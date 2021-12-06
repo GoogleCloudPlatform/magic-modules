@@ -9072,7 +9072,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Using Packet Mirroring': 'https://cloud.google.com/vpc/docs/using-packet-mirroring#creating'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/packetMirroring'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/packetMirrorings'
     description: |
       Packet Mirroring mirrors traffic to and from particular VM instances.
       You can use the collected traffic to help you detect security threats
@@ -14651,13 +14651,11 @@ objects:
         name: 'purpose'
         input: true
         description: |
-          The purpose of the resource. This field can be either PRIVATE
-          or INTERNAL_HTTPS_LOAD_BALANCER. A subnetwork with purpose set to
+          The purpose of the resource. A subnetwork with purpose set to
           INTERNAL_HTTPS_LOAD_BALANCER is a user-created subnetwork that is
-          reserved for Internal HTTP(S) Load Balancing. If unspecified, the
-          purpose defaults to PRIVATE.
+          reserved for Internal HTTP(S) Load Balancing. 
 
-          If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set `role`.
+          If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set the `role` field.
       - !ruby/object:Api::Type::Enum
         name: 'role'
         update_verb: :PATCH
