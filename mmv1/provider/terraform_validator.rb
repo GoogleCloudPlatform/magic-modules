@@ -271,7 +271,11 @@ module Provider
                        ['converters/google/resources/iam_spanner_database.go',
                         'third_party/terraform/utils/iam_spanner_database.go'],
                        ['converters/google/resources/spanner_database_iam.go',
-                        'third_party/validator/spanner_database_iam.go']
+                        'third_party/validator/spanner_database_iam.go'],
+                       ['converters/google/resources/iam_spanner_instance.go',
+                        'third_party/terraform/utils/iam_spanner_instance.go'],
+                       ['converters/google/resources/spanner_instance_iam.go',
+                        'third_party/validator/spanner_instance_iam.go']
                      ])
     end
 
