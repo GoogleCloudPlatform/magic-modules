@@ -42,8 +42,7 @@
       "roleSessionName": "{{byo_multicloud_prefix}}-1p-dev-session"
     },
     "tags": {
-      "owner": "{{test_service_account}}",
-      "googleinternal:serviceAccount": "{{test_service_account}}"
+      "owner": "{{test_service_account}}"
     },
     "proxyConfig": {
       "secretArn": "arn:aws:secretsmanager:us-west-2:126285863215:secret:proxy_config20210824150329476300000001-ABCDEF",

@@ -3,7 +3,7 @@
   "project": "{{project}}",
   "location": "us-west1",
   "cluster": "{{ref:minimal.cluster.json:name}}",
-  "version": "1.21-next",
+  "version": "1.21.3-gke.2001",
   "autoscaling": {
     "minNodeCount": 1,
     "maxNodeCount": 5

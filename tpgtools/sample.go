@@ -137,11 +137,12 @@ func BuildDependency(fileName, product, localname, version string, hasGAEquivale
 	dclResourceType := product + dcl.SnakeToTitleCase(resourceName)
 	terraformResourceType, err := DCLToTerraformReference(dclResourceType, version)
 	if err != nil {
-		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)
+		return nil, fmt.Errorf("Error generating sample dependency reference %s: %s", fileName, err)
 	}
 
 	block, err := ConvertSampleJSONToHCL(dclResourceType, version, hasGAEquivalent, b)
 	if err != nil {
+		glog.Errorf("failed to convert %q", fileName)
 		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)
 	}
 

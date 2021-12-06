@@ -11,7 +11,7 @@
   },
   "awsRegion": "{{aws_region}}",
   "controlPlane": {
-    "version": "1.21-next",
+    "version": "1.21.5-gke.2800",
     "instanceType": "t3.medium",
     "sshConfig": {
       "ec2KeyPair": "{{byo_multicloud_prefix}}-1p-dev-ssh"
@@ -42,8 +42,7 @@
       "roleSessionName": "{{byo_multicloud_prefix}}-1p-dev-session"
     },
     "tags": {
-      "owner": "{{test_service_account}}",
-      "googleinternal:serviceAccount": "{{test_service_account}}"
+      "owner": "{{test_service_account}}"
     },
     "proxyConfig": {
       "secretArn": "arn:aws:secretsmanager:us-west-2:126285863215:secret:proxy_config20210824150329476300000001-ABCDEF",

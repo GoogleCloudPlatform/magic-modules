@@ -28,9 +28,7 @@
       "keyId": "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-cluster/providers/Microsoft.KeyVault/vaults/{{byo_multicloud_prefix}}-dev-keyvault/keys/{{byo_multicloud_prefix}}-dev-key"
     },
     "tags": {
-      "owner": "mmv2",
-      "creation time": "2021-07-15T21:46:05Z",
-      "googleinternal:user": "mmv2"
+      "owner": "mmv2"
     },
     "proxyConfig": {
       "resourceGroupId": "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-cluster",

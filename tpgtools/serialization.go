@@ -29,6 +29,10 @@ import (
 	cloudresourcemanagerBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudresourcemanager/beta"
 	compute "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/compute"
 	computeBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/compute/beta"
+	containeraws "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containeraws"
+	containerawsBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containeraws/beta"
+	containerazure "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containerazure"
+	containerazureBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containerazure/beta"
 	dataproc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc"
 	dataprocBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc/beta"
 	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc"
@@ -48,7 +52,7 @@ import (
 
 // DCLToTerraformReference converts a DCL resource name to the final tpgtools name
 // after overrides are applied
-func DCLToTerraformReference(resourceType, version string) (string, error) {
+func DCLToTerraformReference(resourceType string, version string) (string, error) {
 	if version == "alpha" {
 		switch resourceType {
 		}
@@ -73,6 +77,16 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 			return "google_compute_forwarding_rule", nil
 		case "ComputeGlobalForwardingRule":
 			return "google_compute_global_forwarding_rule", nil
+		case "ContainerAwsCluster":
+			return "google_container_aws_cluster", nil
+		case "ContainerAwsNodePool":
+			return "google_container_aws_node_pool", nil
+		case "ContainerAzureClient":
+			return "google_container_azure_client", nil
+		case "ContainerAzureCluster":
+			return "google_container_azure_cluster", nil
+		case "ContainerAzureNodePool":
+			return "google_container_azure_node_pool", nil
 		case "DataprocWorkflowTemplate":
 			return "google_dataproc_workflow_template", nil
 		case "EventarcTrigger":
@@ -113,6 +127,16 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 		return "google_compute_forwarding_rule", nil
 	case "ComputeGlobalForwardingRule":
 		return "google_compute_global_forwarding_rule", nil
+	case "ContainerAwsCluster":
+		return "google_container_aws_cluster", nil
+	case "ContainerAwsNodePool":
+		return "google_container_aws_node_pool", nil
+	case "ContainerAzureAzureClient":
+		return "google_container_azure_client", nil
+	case "ContainerAzureCluster":
+		return "google_container_azure_cluster", nil
+	case "ContainerAzureNodePool":
+		return "google_container_azure_node_pool", nil
 	case "DataprocWorkflowTemplate":
 		return "google_dataproc_workflow_template", nil
 	case "EventarcTrigger":
@@ -152,6 +176,16 @@ func DCLToTerraformSampleName(service, resource string) (string, string, error) 
 		return "Compute", "FirewallPolicyRule", nil
 	case "computeforwardingrule":
 		return "Compute", "ForwardingRule", nil
+	case "containerawscluster":
+		return "ContainerAws", "Cluster", nil
+	case "containerawsnodepool":
+		return "ContainerAws", "NodePool", nil
+	case "containerazureclient":
+		return "ContainerAzure", "Client", nil
+	case "containerazurecluster":
+		return "ContainerAzure", "Cluster", nil
+	case "containerazurenodepool":
+		return "ContainerAzure", "NodePool", nil
 	case "dataprocworkflowtemplate":
 		return "Dataproc", "WorkflowTemplate", nil
 	case "eventarctrigger":
@@ -232,6 +266,36 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 				return "", err
 			}
 			return ComputeGlobalForwardingRuleBetaAsHCL(*r, hasGAEquivalent)
+		case "ContainerAwsCluster":
+			r := &containerawsBeta.Cluster{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ContainerAwsClusterBetaAsHCL(*r, hasGAEquivalent)
+		case "ContainerAwsNodePool":
+			r := &containerawsBeta.NodePool{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ContainerAwsNodePoolBetaAsHCL(*r, hasGAEquivalent)
+		case "ContainerAzureClient":
+			r := &containerazureBeta.AzureClient{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ContainerAzureClientBetaAsHCL(*r, hasGAEquivalent)
+		case "ContainerAzureCluster":
+			r := &containerazureBeta.Cluster{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ContainerAzureClusterBetaAsHCL(*r, hasGAEquivalent)
+		case "ContainerAzureNodePool":
+			r := &containerazureBeta.NodePool{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ContainerAzureNodePoolBetaAsHCL(*r, hasGAEquivalent)
 		case "DataprocWorkflowTemplate":
 			r := &dataprocBeta.WorkflowTemplate{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -344,6 +408,36 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 			return "", err
 		}
 		return ComputeGlobalForwardingRuleAsHCL(*r, hasGAEquivalent)
+	case "ContainerAwsCluster":
+		r := &containeraws.Cluster{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ContainerAwsClusterAsHCL(*r, hasGAEquivalent)
+	case "ContainerAwsNodePool":
+		r := &containeraws.NodePool{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ContainerAwsNodePoolAsHCL(*r, hasGAEquivalent)
+	case "ContainerAzureAzureClient":
+		r := &containerazure.AzureClient{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ContainerAzureClientAsHCL(*r, hasGAEquivalent)
+	case "ContainerAzureCluster":
+		r := &containerazure.Cluster{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ContainerAzureClusterAsHCL(*r, hasGAEquivalent)
+	case "ContainerAzureNodePool":
+		r := &containerazure.NodePool{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ContainerAzureNodePoolAsHCL(*r, hasGAEquivalent)
 	case "DataprocWorkflowTemplate":
 		r := &dataproc.WorkflowTemplate{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -926,6 +1020,859 @@ func convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelToHCL(r *com
 	}
 	if r.Value != nil {
 		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
+	}
+	return outputConfig + "}"
+}
+
+// ContainerAwsClusterBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAwsClusterBetaAsHCL(r containerawsBeta.Cluster, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_aws_cluster\" \"output\" {\n"
+	if v := convertContainerAwsClusterBetaAuthorizationToHCL(r.Authorization); v != "" {
+		outputConfig += fmt.Sprintf("\tauthorization %s\n", v)
+	}
+	if r.AwsRegion != nil {
+		outputConfig += fmt.Sprintf("\taws_region = %#v\n", *r.AwsRegion)
+	}
+	if v := convertContainerAwsClusterBetaControlPlaneToHCL(r.ControlPlane); v != "" {
+		outputConfig += fmt.Sprintf("\tcontrol_plane %s\n", v)
+	}
+	if v := convertContainerAwsClusterBetaFleetToHCL(r.Fleet); v != "" {
+		outputConfig += fmt.Sprintf("\tfleet %s\n", v)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if v := convertContainerAwsClusterBetaNetworkingToHCL(r.Networking); v != "" {
+		outputConfig += fmt.Sprintf("\tnetworking %s\n", v)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertContainerAwsClusterBetaAuthorizationToHCL(r *containerawsBeta.ClusterAuthorization) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AdminUsers != nil {
+		for _, v := range r.AdminUsers {
+			outputConfig += fmt.Sprintf("\tadmin_users %s\n", convertContainerAwsClusterBetaAuthorizationAdminUsersToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaAuthorizationAdminUsersToHCL(r *containerawsBeta.ClusterAuthorizationAdminUsers) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Username != nil {
+		outputConfig += fmt.Sprintf("\tusername = %#v\n", *r.Username)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaControlPlaneToHCL(r *containerawsBeta.ClusterControlPlane) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertContainerAwsClusterBetaControlPlaneAwsServicesAuthenticationToHCL(r.AwsServicesAuthentication); v != "" {
+		outputConfig += fmt.Sprintf("\taws_services_authentication %s\n", v)
+	}
+	if v := convertContainerAwsClusterBetaControlPlaneConfigEncryptionToHCL(r.ConfigEncryption); v != "" {
+		outputConfig += fmt.Sprintf("\tconfig_encryption %s\n", v)
+	}
+	if v := convertContainerAwsClusterBetaControlPlaneDatabaseEncryptionToHCL(r.DatabaseEncryption); v != "" {
+		outputConfig += fmt.Sprintf("\tdatabase_encryption %s\n", v)
+	}
+	if r.IamInstanceProfile != nil {
+		outputConfig += fmt.Sprintf("\tiam_instance_profile = %#v\n", *r.IamInstanceProfile)
+	}
+	if r.SubnetIds != nil {
+		outputConfig += "\tsubnet_ids = ["
+		for _, v := range r.SubnetIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Version != nil {
+		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
+	}
+	if r.InstanceType != nil {
+		outputConfig += fmt.Sprintf("\tinstance_type = %#v\n", *r.InstanceType)
+	}
+	if v := convertContainerAwsClusterBetaControlPlaneMainVolumeToHCL(r.MainVolume); v != "" {
+		outputConfig += fmt.Sprintf("\tmain_volume %s\n", v)
+	}
+	if v := convertContainerAwsClusterBetaControlPlaneProxyConfigToHCL(r.ProxyConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tproxy_config %s\n", v)
+	}
+	if v := convertContainerAwsClusterBetaControlPlaneRootVolumeToHCL(r.RootVolume); v != "" {
+		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
+	}
+	if r.SecurityGroupIds != nil {
+		outputConfig += "\tsecurity_group_ids = ["
+		for _, v := range r.SecurityGroupIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertContainerAwsClusterBetaControlPlaneSshConfigToHCL(r.SshConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
+	}
+	outputConfig += "\ttags = {"
+	for k, v := range r.Tags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaControlPlaneAwsServicesAuthenticationToHCL(r *containerawsBeta.ClusterControlPlaneAwsServicesAuthentication) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.RoleArn != nil {
+		outputConfig += fmt.Sprintf("\trole_arn = %#v\n", *r.RoleArn)
+	}
+	if r.RoleSessionName != nil {
+		outputConfig += fmt.Sprintf("\trole_session_name = %#v\n", *r.RoleSessionName)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaControlPlaneConfigEncryptionToHCL(r *containerawsBeta.ClusterControlPlaneConfigEncryption) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaControlPlaneDatabaseEncryptionToHCL(r *containerawsBeta.ClusterControlPlaneDatabaseEncryption) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaControlPlaneMainVolumeToHCL(r *containerawsBeta.ClusterControlPlaneMainVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Iops != nil {
+		outputConfig += fmt.Sprintf("\tiops = %#v\n", *r.Iops)
+	}
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	if r.VolumeType != nil {
+		outputConfig += fmt.Sprintf("\tvolume_type = %#v\n", *r.VolumeType)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaControlPlaneProxyConfigToHCL(r *containerawsBeta.ClusterControlPlaneProxyConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.SecretArn != nil {
+		outputConfig += fmt.Sprintf("\tsecret_arn = %#v\n", *r.SecretArn)
+	}
+	if r.SecretVersion != nil {
+		outputConfig += fmt.Sprintf("\tsecret_version = %#v\n", *r.SecretVersion)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaControlPlaneRootVolumeToHCL(r *containerawsBeta.ClusterControlPlaneRootVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Iops != nil {
+		outputConfig += fmt.Sprintf("\tiops = %#v\n", *r.Iops)
+	}
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	if r.VolumeType != nil {
+		outputConfig += fmt.Sprintf("\tvolume_type = %#v\n", *r.VolumeType)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaControlPlaneSshConfigToHCL(r *containerawsBeta.ClusterControlPlaneSshConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Ec2KeyPair != nil {
+		outputConfig += fmt.Sprintf("\tec2_key_pair = %#v\n", *r.Ec2KeyPair)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaFleetToHCL(r *containerawsBeta.ClusterFleet) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaNetworkingToHCL(r *containerawsBeta.ClusterNetworking) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.PodAddressCidrBlocks != nil {
+		outputConfig += "\tpod_address_cidr_blocks = ["
+		for _, v := range r.PodAddressCidrBlocks {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.ServiceAddressCidrBlocks != nil {
+		outputConfig += "\tservice_address_cidr_blocks = ["
+		for _, v := range r.ServiceAddressCidrBlocks {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.VPCId != nil {
+		outputConfig += fmt.Sprintf("\tvpc_id = %#v\n", *r.VPCId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaWorkloadIdentityConfigToHCL(r *containerawsBeta.ClusterWorkloadIdentityConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+// ContainerAwsNodePoolBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAwsNodePoolBetaAsHCL(r containerawsBeta.NodePool, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_aws_node_pool\" \"output\" {\n"
+	if v := convertContainerAwsNodePoolBetaAutoscalingToHCL(r.Autoscaling); v != "" {
+		outputConfig += fmt.Sprintf("\tautoscaling %s\n", v)
+	}
+	if r.Cluster != nil {
+		outputConfig += fmt.Sprintf("\tcluster = %#v\n", *r.Cluster)
+	}
+	if v := convertContainerAwsNodePoolBetaConfigToHCL(r.Config); v != "" {
+		outputConfig += fmt.Sprintf("\tconfig %s\n", v)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if v := convertContainerAwsNodePoolBetaMaxPodsConstraintToHCL(r.MaxPodsConstraint); v != "" {
+		outputConfig += fmt.Sprintf("\tmax_pods_constraint %s\n", v)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.SubnetId != nil {
+		outputConfig += fmt.Sprintf("\tsubnet_id = %#v\n", *r.SubnetId)
+	}
+	if r.Version != nil {
+		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertContainerAwsNodePoolBetaAutoscalingToHCL(r *containerawsBeta.NodePoolAutoscaling) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.MaxNodeCount != nil {
+		outputConfig += fmt.Sprintf("\tmax_node_count = %#v\n", *r.MaxNodeCount)
+	}
+	if r.MinNodeCount != nil {
+		outputConfig += fmt.Sprintf("\tmin_node_count = %#v\n", *r.MinNodeCount)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolBetaConfigToHCL(r *containerawsBeta.NodePoolConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertContainerAwsNodePoolBetaConfigConfigEncryptionToHCL(r.ConfigEncryption); v != "" {
+		outputConfig += fmt.Sprintf("\tconfig_encryption %s\n", v)
+	}
+	if r.IamInstanceProfile != nil {
+		outputConfig += fmt.Sprintf("\tiam_instance_profile = %#v\n", *r.IamInstanceProfile)
+	}
+	if r.InstanceType != nil {
+		outputConfig += fmt.Sprintf("\tinstance_type = %#v\n", *r.InstanceType)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if v := convertContainerAwsNodePoolBetaConfigRootVolumeToHCL(r.RootVolume); v != "" {
+		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
+	}
+	if r.SecurityGroupIds != nil {
+		outputConfig += "\tsecurity_group_ids = ["
+		for _, v := range r.SecurityGroupIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertContainerAwsNodePoolBetaConfigSshConfigToHCL(r.SshConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
+	}
+	outputConfig += "\ttags = {"
+	for k, v := range r.Tags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Taints != nil {
+		for _, v := range r.Taints {
+			outputConfig += fmt.Sprintf("\ttaints %s\n", convertContainerAwsNodePoolBetaConfigTaintsToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolBetaConfigConfigEncryptionToHCL(r *containerawsBeta.NodePoolConfigConfigEncryption) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolBetaConfigRootVolumeToHCL(r *containerawsBeta.NodePoolConfigRootVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Iops != nil {
+		outputConfig += fmt.Sprintf("\tiops = %#v\n", *r.Iops)
+	}
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	if r.VolumeType != nil {
+		outputConfig += fmt.Sprintf("\tvolume_type = %#v\n", *r.VolumeType)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolBetaConfigSshConfigToHCL(r *containerawsBeta.NodePoolConfigSshConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Ec2KeyPair != nil {
+		outputConfig += fmt.Sprintf("\tec2_key_pair = %#v\n", *r.Ec2KeyPair)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolBetaConfigTaintsToHCL(r *containerawsBeta.NodePoolConfigTaints) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Effect != nil {
+		outputConfig += fmt.Sprintf("\teffect = %#v\n", *r.Effect)
+	}
+	if r.Key != nil {
+		outputConfig += fmt.Sprintf("\tkey = %#v\n", *r.Key)
+	}
+	if r.Value != nil {
+		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolBetaMaxPodsConstraintToHCL(r *containerawsBeta.NodePoolMaxPodsConstraint) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.MaxPodsPerNode != nil {
+		outputConfig += fmt.Sprintf("\tmax_pods_per_node = %#v\n", *r.MaxPodsPerNode)
+	}
+	return outputConfig + "}"
+}
+
+// ContainerAzureClientBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAzureClientBetaAsHCL(r containerazureBeta.AzureClient, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_azure_client\" \"output\" {\n"
+	if r.ApplicationId != nil {
+		outputConfig += fmt.Sprintf("\tapplication_id = %#v\n", *r.ApplicationId)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.TenantId != nil {
+		outputConfig += fmt.Sprintf("\ttenant_id = %#v\n", *r.TenantId)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+// ContainerAzureClusterBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAzureClusterBetaAsHCL(r containerazureBeta.Cluster, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_azure_cluster\" \"output\" {\n"
+	if v := convertContainerAzureClusterBetaAuthorizationToHCL(r.Authorization); v != "" {
+		outputConfig += fmt.Sprintf("\tauthorization %s\n", v)
+	}
+	if r.AzureRegion != nil {
+		outputConfig += fmt.Sprintf("\tazure_region = %#v\n", *r.AzureRegion)
+	}
+	if r.Client != nil {
+		outputConfig += fmt.Sprintf("\tclient = %#v\n", *r.Client)
+	}
+	if v := convertContainerAzureClusterBetaControlPlaneToHCL(r.ControlPlane); v != "" {
+		outputConfig += fmt.Sprintf("\tcontrol_plane %s\n", v)
+	}
+	if v := convertContainerAzureClusterBetaFleetToHCL(r.Fleet); v != "" {
+		outputConfig += fmt.Sprintf("\tfleet %s\n", v)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if v := convertContainerAzureClusterBetaNetworkingToHCL(r.Networking); v != "" {
+		outputConfig += fmt.Sprintf("\tnetworking %s\n", v)
+	}
+	if r.ResourceGroupId != nil {
+		outputConfig += fmt.Sprintf("\tresource_group_id = %#v\n", *r.ResourceGroupId)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertContainerAzureClusterBetaAuthorizationToHCL(r *containerazureBeta.ClusterAuthorization) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AdminUsers != nil {
+		for _, v := range r.AdminUsers {
+			outputConfig += fmt.Sprintf("\tadmin_users %s\n", convertContainerAzureClusterBetaAuthorizationAdminUsersToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaAuthorizationAdminUsersToHCL(r *containerazureBeta.ClusterAuthorizationAdminUsers) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Username != nil {
+		outputConfig += fmt.Sprintf("\tusername = %#v\n", *r.Username)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaControlPlaneToHCL(r *containerazureBeta.ClusterControlPlane) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertContainerAzureClusterBetaControlPlaneSshConfigToHCL(r.SshConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
+	}
+	if r.SubnetId != nil {
+		outputConfig += fmt.Sprintf("\tsubnet_id = %#v\n", *r.SubnetId)
+	}
+	if r.Version != nil {
+		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
+	}
+	if v := convertContainerAzureClusterBetaControlPlaneDatabaseEncryptionToHCL(r.DatabaseEncryption); v != "" {
+		outputConfig += fmt.Sprintf("\tdatabase_encryption %s\n", v)
+	}
+	if v := convertContainerAzureClusterBetaControlPlaneMainVolumeToHCL(r.MainVolume); v != "" {
+		outputConfig += fmt.Sprintf("\tmain_volume %s\n", v)
+	}
+	if v := convertContainerAzureClusterBetaControlPlaneProxyConfigToHCL(r.ProxyConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tproxy_config %s\n", v)
+	}
+	if r.ReplicaPlacements != nil {
+		for _, v := range r.ReplicaPlacements {
+			outputConfig += fmt.Sprintf("\treplica_placements %s\n", convertContainerAzureClusterBetaControlPlaneReplicaPlacementsToHCL(&v))
+		}
+	}
+	if v := convertContainerAzureClusterBetaControlPlaneRootVolumeToHCL(r.RootVolume); v != "" {
+		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
+	}
+	outputConfig += "\ttags = {"
+	for k, v := range r.Tags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.VmSize != nil {
+		outputConfig += fmt.Sprintf("\tvm_size = %#v\n", *r.VmSize)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaControlPlaneSshConfigToHCL(r *containerazureBeta.ClusterControlPlaneSshConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AuthorizedKey != nil {
+		outputConfig += fmt.Sprintf("\tauthorized_key = %#v\n", *r.AuthorizedKey)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaControlPlaneDatabaseEncryptionToHCL(r *containerazureBeta.ClusterControlPlaneDatabaseEncryption) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.KeyId != nil {
+		outputConfig += fmt.Sprintf("\tkey_id = %#v\n", *r.KeyId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaControlPlaneMainVolumeToHCL(r *containerazureBeta.ClusterControlPlaneMainVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaControlPlaneProxyConfigToHCL(r *containerazureBeta.ClusterControlPlaneProxyConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ResourceGroupId != nil {
+		outputConfig += fmt.Sprintf("\tresource_group_id = %#v\n", *r.ResourceGroupId)
+	}
+	if r.SecretId != nil {
+		outputConfig += fmt.Sprintf("\tsecret_id = %#v\n", *r.SecretId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaControlPlaneReplicaPlacementsToHCL(r *containerazureBeta.ClusterControlPlaneReplicaPlacements) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AzureAvailabilityZone != nil {
+		outputConfig += fmt.Sprintf("\tazure_availability_zone = %#v\n", *r.AzureAvailabilityZone)
+	}
+	if r.SubnetId != nil {
+		outputConfig += fmt.Sprintf("\tsubnet_id = %#v\n", *r.SubnetId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaControlPlaneRootVolumeToHCL(r *containerazureBeta.ClusterControlPlaneRootVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaFleetToHCL(r *containerazureBeta.ClusterFleet) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaNetworkingToHCL(r *containerazureBeta.ClusterNetworking) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.PodAddressCidrBlocks != nil {
+		outputConfig += "\tpod_address_cidr_blocks = ["
+		for _, v := range r.PodAddressCidrBlocks {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.ServiceAddressCidrBlocks != nil {
+		outputConfig += "\tservice_address_cidr_blocks = ["
+		for _, v := range r.ServiceAddressCidrBlocks {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.VirtualNetworkId != nil {
+		outputConfig += fmt.Sprintf("\tvirtual_network_id = %#v\n", *r.VirtualNetworkId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaWorkloadIdentityConfigToHCL(r *containerazureBeta.ClusterWorkloadIdentityConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+// ContainerAzureNodePoolBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAzureNodePoolBetaAsHCL(r containerazureBeta.NodePool, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_azure_node_pool\" \"output\" {\n"
+	if v := convertContainerAzureNodePoolBetaAutoscalingToHCL(r.Autoscaling); v != "" {
+		outputConfig += fmt.Sprintf("\tautoscaling %s\n", v)
+	}
+	if r.Cluster != nil {
+		outputConfig += fmt.Sprintf("\tcluster = %#v\n", *r.Cluster)
+	}
+	if v := convertContainerAzureNodePoolBetaConfigToHCL(r.Config); v != "" {
+		outputConfig += fmt.Sprintf("\tconfig %s\n", v)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if v := convertContainerAzureNodePoolBetaMaxPodsConstraintToHCL(r.MaxPodsConstraint); v != "" {
+		outputConfig += fmt.Sprintf("\tmax_pods_constraint %s\n", v)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.SubnetId != nil {
+		outputConfig += fmt.Sprintf("\tsubnet_id = %#v\n", *r.SubnetId)
+	}
+	if r.Version != nil {
+		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.AzureAvailabilityZone != nil {
+		outputConfig += fmt.Sprintf("\tazure_availability_zone = %#v\n", *r.AzureAvailabilityZone)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertContainerAzureNodePoolBetaAutoscalingToHCL(r *containerazureBeta.NodePoolAutoscaling) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.MaxNodeCount != nil {
+		outputConfig += fmt.Sprintf("\tmax_node_count = %#v\n", *r.MaxNodeCount)
+	}
+	if r.MinNodeCount != nil {
+		outputConfig += fmt.Sprintf("\tmin_node_count = %#v\n", *r.MinNodeCount)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolBetaConfigToHCL(r *containerazureBeta.NodePoolConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertContainerAzureNodePoolBetaConfigSshConfigToHCL(r.SshConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
+	}
+	if v := convertContainerAzureNodePoolBetaConfigRootVolumeToHCL(r.RootVolume); v != "" {
+		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
+	}
+	outputConfig += "\ttags = {"
+	for k, v := range r.Tags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.VmSize != nil {
+		outputConfig += fmt.Sprintf("\tvm_size = %#v\n", *r.VmSize)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolBetaConfigSshConfigToHCL(r *containerazureBeta.NodePoolConfigSshConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AuthorizedKey != nil {
+		outputConfig += fmt.Sprintf("\tauthorized_key = %#v\n", *r.AuthorizedKey)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolBetaConfigRootVolumeToHCL(r *containerazureBeta.NodePoolConfigRootVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolBetaMaxPodsConstraintToHCL(r *containerazureBeta.NodePoolMaxPodsConstraint) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.MaxPodsPerNode != nil {
+		outputConfig += fmt.Sprintf("\tmax_pods_per_node = %#v\n", *r.MaxPodsPerNode)
 	}
 	return outputConfig + "}"
 }
@@ -4062,6 +5009,859 @@ func convertComputeGlobalForwardingRuleMetadataFilterFilterLabelToHCL(r *compute
 	return outputConfig + "}"
 }
 
+// ContainerAwsClusterAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAwsClusterAsHCL(r containeraws.Cluster, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_aws_cluster\" \"output\" {\n"
+	if v := convertContainerAwsClusterAuthorizationToHCL(r.Authorization); v != "" {
+		outputConfig += fmt.Sprintf("\tauthorization %s\n", v)
+	}
+	if r.AwsRegion != nil {
+		outputConfig += fmt.Sprintf("\taws_region = %#v\n", *r.AwsRegion)
+	}
+	if v := convertContainerAwsClusterControlPlaneToHCL(r.ControlPlane); v != "" {
+		outputConfig += fmt.Sprintf("\tcontrol_plane %s\n", v)
+	}
+	if v := convertContainerAwsClusterFleetToHCL(r.Fleet); v != "" {
+		outputConfig += fmt.Sprintf("\tfleet %s\n", v)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if v := convertContainerAwsClusterNetworkingToHCL(r.Networking); v != "" {
+		outputConfig += fmt.Sprintf("\tnetworking %s\n", v)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertContainerAwsClusterAuthorizationToHCL(r *containeraws.ClusterAuthorization) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AdminUsers != nil {
+		for _, v := range r.AdminUsers {
+			outputConfig += fmt.Sprintf("\tadmin_users %s\n", convertContainerAwsClusterAuthorizationAdminUsersToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterAuthorizationAdminUsersToHCL(r *containeraws.ClusterAuthorizationAdminUsers) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Username != nil {
+		outputConfig += fmt.Sprintf("\tusername = %#v\n", *r.Username)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterControlPlaneToHCL(r *containeraws.ClusterControlPlane) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertContainerAwsClusterControlPlaneAwsServicesAuthenticationToHCL(r.AwsServicesAuthentication); v != "" {
+		outputConfig += fmt.Sprintf("\taws_services_authentication %s\n", v)
+	}
+	if v := convertContainerAwsClusterControlPlaneConfigEncryptionToHCL(r.ConfigEncryption); v != "" {
+		outputConfig += fmt.Sprintf("\tconfig_encryption %s\n", v)
+	}
+	if v := convertContainerAwsClusterControlPlaneDatabaseEncryptionToHCL(r.DatabaseEncryption); v != "" {
+		outputConfig += fmt.Sprintf("\tdatabase_encryption %s\n", v)
+	}
+	if r.IamInstanceProfile != nil {
+		outputConfig += fmt.Sprintf("\tiam_instance_profile = %#v\n", *r.IamInstanceProfile)
+	}
+	if r.SubnetIds != nil {
+		outputConfig += "\tsubnet_ids = ["
+		for _, v := range r.SubnetIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Version != nil {
+		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
+	}
+	if r.InstanceType != nil {
+		outputConfig += fmt.Sprintf("\tinstance_type = %#v\n", *r.InstanceType)
+	}
+	if v := convertContainerAwsClusterControlPlaneMainVolumeToHCL(r.MainVolume); v != "" {
+		outputConfig += fmt.Sprintf("\tmain_volume %s\n", v)
+	}
+	if v := convertContainerAwsClusterControlPlaneProxyConfigToHCL(r.ProxyConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tproxy_config %s\n", v)
+	}
+	if v := convertContainerAwsClusterControlPlaneRootVolumeToHCL(r.RootVolume); v != "" {
+		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
+	}
+	if r.SecurityGroupIds != nil {
+		outputConfig += "\tsecurity_group_ids = ["
+		for _, v := range r.SecurityGroupIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertContainerAwsClusterControlPlaneSshConfigToHCL(r.SshConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
+	}
+	outputConfig += "\ttags = {"
+	for k, v := range r.Tags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterControlPlaneAwsServicesAuthenticationToHCL(r *containeraws.ClusterControlPlaneAwsServicesAuthentication) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.RoleArn != nil {
+		outputConfig += fmt.Sprintf("\trole_arn = %#v\n", *r.RoleArn)
+	}
+	if r.RoleSessionName != nil {
+		outputConfig += fmt.Sprintf("\trole_session_name = %#v\n", *r.RoleSessionName)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterControlPlaneConfigEncryptionToHCL(r *containeraws.ClusterControlPlaneConfigEncryption) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterControlPlaneDatabaseEncryptionToHCL(r *containeraws.ClusterControlPlaneDatabaseEncryption) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterControlPlaneMainVolumeToHCL(r *containeraws.ClusterControlPlaneMainVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Iops != nil {
+		outputConfig += fmt.Sprintf("\tiops = %#v\n", *r.Iops)
+	}
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	if r.VolumeType != nil {
+		outputConfig += fmt.Sprintf("\tvolume_type = %#v\n", *r.VolumeType)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterControlPlaneProxyConfigToHCL(r *containeraws.ClusterControlPlaneProxyConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.SecretArn != nil {
+		outputConfig += fmt.Sprintf("\tsecret_arn = %#v\n", *r.SecretArn)
+	}
+	if r.SecretVersion != nil {
+		outputConfig += fmt.Sprintf("\tsecret_version = %#v\n", *r.SecretVersion)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterControlPlaneRootVolumeToHCL(r *containeraws.ClusterControlPlaneRootVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Iops != nil {
+		outputConfig += fmt.Sprintf("\tiops = %#v\n", *r.Iops)
+	}
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	if r.VolumeType != nil {
+		outputConfig += fmt.Sprintf("\tvolume_type = %#v\n", *r.VolumeType)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterControlPlaneSshConfigToHCL(r *containeraws.ClusterControlPlaneSshConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Ec2KeyPair != nil {
+		outputConfig += fmt.Sprintf("\tec2_key_pair = %#v\n", *r.Ec2KeyPair)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterFleetToHCL(r *containeraws.ClusterFleet) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterNetworkingToHCL(r *containeraws.ClusterNetworking) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.PodAddressCidrBlocks != nil {
+		outputConfig += "\tpod_address_cidr_blocks = ["
+		for _, v := range r.PodAddressCidrBlocks {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.ServiceAddressCidrBlocks != nil {
+		outputConfig += "\tservice_address_cidr_blocks = ["
+		for _, v := range r.ServiceAddressCidrBlocks {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.VPCId != nil {
+		outputConfig += fmt.Sprintf("\tvpc_id = %#v\n", *r.VPCId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterWorkloadIdentityConfigToHCL(r *containeraws.ClusterWorkloadIdentityConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+// ContainerAwsNodePoolAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAwsNodePoolAsHCL(r containeraws.NodePool, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_aws_node_pool\" \"output\" {\n"
+	if v := convertContainerAwsNodePoolAutoscalingToHCL(r.Autoscaling); v != "" {
+		outputConfig += fmt.Sprintf("\tautoscaling %s\n", v)
+	}
+	if r.Cluster != nil {
+		outputConfig += fmt.Sprintf("\tcluster = %#v\n", *r.Cluster)
+	}
+	if v := convertContainerAwsNodePoolConfigToHCL(r.Config); v != "" {
+		outputConfig += fmt.Sprintf("\tconfig %s\n", v)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if v := convertContainerAwsNodePoolMaxPodsConstraintToHCL(r.MaxPodsConstraint); v != "" {
+		outputConfig += fmt.Sprintf("\tmax_pods_constraint %s\n", v)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.SubnetId != nil {
+		outputConfig += fmt.Sprintf("\tsubnet_id = %#v\n", *r.SubnetId)
+	}
+	if r.Version != nil {
+		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertContainerAwsNodePoolAutoscalingToHCL(r *containeraws.NodePoolAutoscaling) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.MaxNodeCount != nil {
+		outputConfig += fmt.Sprintf("\tmax_node_count = %#v\n", *r.MaxNodeCount)
+	}
+	if r.MinNodeCount != nil {
+		outputConfig += fmt.Sprintf("\tmin_node_count = %#v\n", *r.MinNodeCount)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolConfigToHCL(r *containeraws.NodePoolConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertContainerAwsNodePoolConfigConfigEncryptionToHCL(r.ConfigEncryption); v != "" {
+		outputConfig += fmt.Sprintf("\tconfig_encryption %s\n", v)
+	}
+	if r.IamInstanceProfile != nil {
+		outputConfig += fmt.Sprintf("\tiam_instance_profile = %#v\n", *r.IamInstanceProfile)
+	}
+	if r.InstanceType != nil {
+		outputConfig += fmt.Sprintf("\tinstance_type = %#v\n", *r.InstanceType)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if v := convertContainerAwsNodePoolConfigRootVolumeToHCL(r.RootVolume); v != "" {
+		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
+	}
+	if r.SecurityGroupIds != nil {
+		outputConfig += "\tsecurity_group_ids = ["
+		for _, v := range r.SecurityGroupIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertContainerAwsNodePoolConfigSshConfigToHCL(r.SshConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
+	}
+	outputConfig += "\ttags = {"
+	for k, v := range r.Tags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Taints != nil {
+		for _, v := range r.Taints {
+			outputConfig += fmt.Sprintf("\ttaints %s\n", convertContainerAwsNodePoolConfigTaintsToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolConfigConfigEncryptionToHCL(r *containeraws.NodePoolConfigConfigEncryption) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolConfigRootVolumeToHCL(r *containeraws.NodePoolConfigRootVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Iops != nil {
+		outputConfig += fmt.Sprintf("\tiops = %#v\n", *r.Iops)
+	}
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	if r.VolumeType != nil {
+		outputConfig += fmt.Sprintf("\tvolume_type = %#v\n", *r.VolumeType)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolConfigSshConfigToHCL(r *containeraws.NodePoolConfigSshConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Ec2KeyPair != nil {
+		outputConfig += fmt.Sprintf("\tec2_key_pair = %#v\n", *r.Ec2KeyPair)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolConfigTaintsToHCL(r *containeraws.NodePoolConfigTaints) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Effect != nil {
+		outputConfig += fmt.Sprintf("\teffect = %#v\n", *r.Effect)
+	}
+	if r.Key != nil {
+		outputConfig += fmt.Sprintf("\tkey = %#v\n", *r.Key)
+	}
+	if r.Value != nil {
+		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolMaxPodsConstraintToHCL(r *containeraws.NodePoolMaxPodsConstraint) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.MaxPodsPerNode != nil {
+		outputConfig += fmt.Sprintf("\tmax_pods_per_node = %#v\n", *r.MaxPodsPerNode)
+	}
+	return outputConfig + "}"
+}
+
+// ContainerAzureClientAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAzureClientAsHCL(r containerazure.AzureClient, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_azure_client\" \"output\" {\n"
+	if r.ApplicationId != nil {
+		outputConfig += fmt.Sprintf("\tapplication_id = %#v\n", *r.ApplicationId)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.TenantId != nil {
+		outputConfig += fmt.Sprintf("\ttenant_id = %#v\n", *r.TenantId)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+// ContainerAzureClusterAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAzureClusterAsHCL(r containerazure.Cluster, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_azure_cluster\" \"output\" {\n"
+	if v := convertContainerAzureClusterAuthorizationToHCL(r.Authorization); v != "" {
+		outputConfig += fmt.Sprintf("\tauthorization %s\n", v)
+	}
+	if r.AzureRegion != nil {
+		outputConfig += fmt.Sprintf("\tazure_region = %#v\n", *r.AzureRegion)
+	}
+	if r.Client != nil {
+		outputConfig += fmt.Sprintf("\tclient = %#v\n", *r.Client)
+	}
+	if v := convertContainerAzureClusterControlPlaneToHCL(r.ControlPlane); v != "" {
+		outputConfig += fmt.Sprintf("\tcontrol_plane %s\n", v)
+	}
+	if v := convertContainerAzureClusterFleetToHCL(r.Fleet); v != "" {
+		outputConfig += fmt.Sprintf("\tfleet %s\n", v)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if v := convertContainerAzureClusterNetworkingToHCL(r.Networking); v != "" {
+		outputConfig += fmt.Sprintf("\tnetworking %s\n", v)
+	}
+	if r.ResourceGroupId != nil {
+		outputConfig += fmt.Sprintf("\tresource_group_id = %#v\n", *r.ResourceGroupId)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertContainerAzureClusterAuthorizationToHCL(r *containerazure.ClusterAuthorization) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AdminUsers != nil {
+		for _, v := range r.AdminUsers {
+			outputConfig += fmt.Sprintf("\tadmin_users %s\n", convertContainerAzureClusterAuthorizationAdminUsersToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterAuthorizationAdminUsersToHCL(r *containerazure.ClusterAuthorizationAdminUsers) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Username != nil {
+		outputConfig += fmt.Sprintf("\tusername = %#v\n", *r.Username)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterControlPlaneToHCL(r *containerazure.ClusterControlPlane) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertContainerAzureClusterControlPlaneSshConfigToHCL(r.SshConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
+	}
+	if r.SubnetId != nil {
+		outputConfig += fmt.Sprintf("\tsubnet_id = %#v\n", *r.SubnetId)
+	}
+	if r.Version != nil {
+		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
+	}
+	if v := convertContainerAzureClusterControlPlaneDatabaseEncryptionToHCL(r.DatabaseEncryption); v != "" {
+		outputConfig += fmt.Sprintf("\tdatabase_encryption %s\n", v)
+	}
+	if v := convertContainerAzureClusterControlPlaneMainVolumeToHCL(r.MainVolume); v != "" {
+		outputConfig += fmt.Sprintf("\tmain_volume %s\n", v)
+	}
+	if v := convertContainerAzureClusterControlPlaneProxyConfigToHCL(r.ProxyConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tproxy_config %s\n", v)
+	}
+	if r.ReplicaPlacements != nil {
+		for _, v := range r.ReplicaPlacements {
+			outputConfig += fmt.Sprintf("\treplica_placements %s\n", convertContainerAzureClusterControlPlaneReplicaPlacementsToHCL(&v))
+		}
+	}
+	if v := convertContainerAzureClusterControlPlaneRootVolumeToHCL(r.RootVolume); v != "" {
+		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
+	}
+	outputConfig += "\ttags = {"
+	for k, v := range r.Tags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.VmSize != nil {
+		outputConfig += fmt.Sprintf("\tvm_size = %#v\n", *r.VmSize)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterControlPlaneSshConfigToHCL(r *containerazure.ClusterControlPlaneSshConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AuthorizedKey != nil {
+		outputConfig += fmt.Sprintf("\tauthorized_key = %#v\n", *r.AuthorizedKey)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterControlPlaneDatabaseEncryptionToHCL(r *containerazure.ClusterControlPlaneDatabaseEncryption) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.KeyId != nil {
+		outputConfig += fmt.Sprintf("\tkey_id = %#v\n", *r.KeyId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterControlPlaneMainVolumeToHCL(r *containerazure.ClusterControlPlaneMainVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterControlPlaneProxyConfigToHCL(r *containerazure.ClusterControlPlaneProxyConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ResourceGroupId != nil {
+		outputConfig += fmt.Sprintf("\tresource_group_id = %#v\n", *r.ResourceGroupId)
+	}
+	if r.SecretId != nil {
+		outputConfig += fmt.Sprintf("\tsecret_id = %#v\n", *r.SecretId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterControlPlaneReplicaPlacementsToHCL(r *containerazure.ClusterControlPlaneReplicaPlacements) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AzureAvailabilityZone != nil {
+		outputConfig += fmt.Sprintf("\tazure_availability_zone = %#v\n", *r.AzureAvailabilityZone)
+	}
+	if r.SubnetId != nil {
+		outputConfig += fmt.Sprintf("\tsubnet_id = %#v\n", *r.SubnetId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterControlPlaneRootVolumeToHCL(r *containerazure.ClusterControlPlaneRootVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterFleetToHCL(r *containerazure.ClusterFleet) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterNetworkingToHCL(r *containerazure.ClusterNetworking) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.PodAddressCidrBlocks != nil {
+		outputConfig += "\tpod_address_cidr_blocks = ["
+		for _, v := range r.PodAddressCidrBlocks {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.ServiceAddressCidrBlocks != nil {
+		outputConfig += "\tservice_address_cidr_blocks = ["
+		for _, v := range r.ServiceAddressCidrBlocks {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.VirtualNetworkId != nil {
+		outputConfig += fmt.Sprintf("\tvirtual_network_id = %#v\n", *r.VirtualNetworkId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterWorkloadIdentityConfigToHCL(r *containerazure.ClusterWorkloadIdentityConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+// ContainerAzureNodePoolAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAzureNodePoolAsHCL(r containerazure.NodePool, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_azure_node_pool\" \"output\" {\n"
+	if v := convertContainerAzureNodePoolAutoscalingToHCL(r.Autoscaling); v != "" {
+		outputConfig += fmt.Sprintf("\tautoscaling %s\n", v)
+	}
+	if r.Cluster != nil {
+		outputConfig += fmt.Sprintf("\tcluster = %#v\n", *r.Cluster)
+	}
+	if v := convertContainerAzureNodePoolConfigToHCL(r.Config); v != "" {
+		outputConfig += fmt.Sprintf("\tconfig %s\n", v)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if v := convertContainerAzureNodePoolMaxPodsConstraintToHCL(r.MaxPodsConstraint); v != "" {
+		outputConfig += fmt.Sprintf("\tmax_pods_constraint %s\n", v)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.SubnetId != nil {
+		outputConfig += fmt.Sprintf("\tsubnet_id = %#v\n", *r.SubnetId)
+	}
+	if r.Version != nil {
+		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.AzureAvailabilityZone != nil {
+		outputConfig += fmt.Sprintf("\tazure_availability_zone = %#v\n", *r.AzureAvailabilityZone)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertContainerAzureNodePoolAutoscalingToHCL(r *containerazure.NodePoolAutoscaling) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.MaxNodeCount != nil {
+		outputConfig += fmt.Sprintf("\tmax_node_count = %#v\n", *r.MaxNodeCount)
+	}
+	if r.MinNodeCount != nil {
+		outputConfig += fmt.Sprintf("\tmin_node_count = %#v\n", *r.MinNodeCount)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolConfigToHCL(r *containerazure.NodePoolConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertContainerAzureNodePoolConfigSshConfigToHCL(r.SshConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
+	}
+	if v := convertContainerAzureNodePoolConfigRootVolumeToHCL(r.RootVolume); v != "" {
+		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
+	}
+	outputConfig += "\ttags = {"
+	for k, v := range r.Tags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.VmSize != nil {
+		outputConfig += fmt.Sprintf("\tvm_size = %#v\n", *r.VmSize)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolConfigSshConfigToHCL(r *containerazure.NodePoolConfigSshConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AuthorizedKey != nil {
+		outputConfig += fmt.Sprintf("\tauthorized_key = %#v\n", *r.AuthorizedKey)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolConfigRootVolumeToHCL(r *containerazure.NodePoolConfigRootVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolMaxPodsConstraintToHCL(r *containerazure.NodePoolMaxPodsConstraint) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.MaxPodsPerNode != nil {
+		outputConfig += fmt.Sprintf("\tmax_pods_per_node = %#v\n", *r.MaxPodsPerNode)
+	}
+	return outputConfig + "}"
+}
+
 // DataprocWorkflowTemplateAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -6536,6 +8336,842 @@ func convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelList(i inter
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabel(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaAuthorization(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"adminUsers": in["admin_users"],
+	}
+}
+
+func convertContainerAwsClusterBetaAuthorizationList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaAuthorization(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaAuthorizationAdminUsers(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"username": in["username"],
+	}
+}
+
+func convertContainerAwsClusterBetaAuthorizationAdminUsersList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaAuthorizationAdminUsers(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaControlPlane(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"awsServicesAuthentication": convertContainerAwsClusterBetaControlPlaneAwsServicesAuthentication(in["aws_services_authentication"]),
+		"configEncryption":          convertContainerAwsClusterBetaControlPlaneConfigEncryption(in["config_encryption"]),
+		"databaseEncryption":        convertContainerAwsClusterBetaControlPlaneDatabaseEncryption(in["database_encryption"]),
+		"iamInstanceProfile":        in["iam_instance_profile"],
+		"subnetIds":                 in["subnet_ids"],
+		"version":                   in["version"],
+		"instanceType":              in["instance_type"],
+		"mainVolume":                convertContainerAwsClusterBetaControlPlaneMainVolume(in["main_volume"]),
+		"proxyConfig":               convertContainerAwsClusterBetaControlPlaneProxyConfig(in["proxy_config"]),
+		"rootVolume":                convertContainerAwsClusterBetaControlPlaneRootVolume(in["root_volume"]),
+		"securityGroupIds":          in["security_group_ids"],
+		"sshConfig":                 convertContainerAwsClusterBetaControlPlaneSshConfig(in["ssh_config"]),
+		"tags":                      in["tags"],
+	}
+}
+
+func convertContainerAwsClusterBetaControlPlaneList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaControlPlane(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaControlPlaneAwsServicesAuthentication(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"roleArn":         in["role_arn"],
+		"roleSessionName": in["role_session_name"],
+	}
+}
+
+func convertContainerAwsClusterBetaControlPlaneAwsServicesAuthenticationList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaControlPlaneAwsServicesAuthentication(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaControlPlaneConfigEncryption(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"kmsKeyArn": in["kms_key_arn"],
+	}
+}
+
+func convertContainerAwsClusterBetaControlPlaneConfigEncryptionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaControlPlaneConfigEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaControlPlaneDatabaseEncryption(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"kmsKeyArn": in["kms_key_arn"],
+	}
+}
+
+func convertContainerAwsClusterBetaControlPlaneDatabaseEncryptionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaControlPlaneDatabaseEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaControlPlaneMainVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iops":       in["iops"],
+		"kmsKeyArn":  in["kms_key_arn"],
+		"sizeGib":    in["size_gib"],
+		"volumeType": in["volume_type"],
+	}
+}
+
+func convertContainerAwsClusterBetaControlPlaneMainVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaControlPlaneMainVolume(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaControlPlaneProxyConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"secretArn":     in["secret_arn"],
+		"secretVersion": in["secret_version"],
+	}
+}
+
+func convertContainerAwsClusterBetaControlPlaneProxyConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaControlPlaneProxyConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaControlPlaneRootVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iops":       in["iops"],
+		"kmsKeyArn":  in["kms_key_arn"],
+		"sizeGib":    in["size_gib"],
+		"volumeType": in["volume_type"],
+	}
+}
+
+func convertContainerAwsClusterBetaControlPlaneRootVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaControlPlaneRootVolume(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaControlPlaneSshConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"ec2KeyPair": in["ec2_key_pair"],
+	}
+}
+
+func convertContainerAwsClusterBetaControlPlaneSshConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaControlPlaneSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaFleet(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"project":    in["project"],
+		"membership": in["membership"],
+	}
+}
+
+func convertContainerAwsClusterBetaFleetList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaFleet(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaNetworking(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"podAddressCidrBlocks":     in["pod_address_cidr_blocks"],
+		"serviceAddressCidrBlocks": in["service_address_cidr_blocks"],
+		"vPCId":                    in["vpc_id"],
+	}
+}
+
+func convertContainerAwsClusterBetaNetworkingList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaNetworking(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaWorkloadIdentityConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"identityProvider": in["identity_provider"],
+		"issuerUri":        in["issuer_uri"],
+		"workloadPool":     in["workload_pool"],
+	}
+}
+
+func convertContainerAwsClusterBetaWorkloadIdentityConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaWorkloadIdentityConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolBetaAutoscaling(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"maxNodeCount": in["max_node_count"],
+		"minNodeCount": in["min_node_count"],
+	}
+}
+
+func convertContainerAwsNodePoolBetaAutoscalingList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolBetaAutoscaling(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolBetaConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"configEncryption":   convertContainerAwsNodePoolBetaConfigConfigEncryption(in["config_encryption"]),
+		"iamInstanceProfile": in["iam_instance_profile"],
+		"instanceType":       in["instance_type"],
+		"labels":             in["labels"],
+		"rootVolume":         convertContainerAwsNodePoolBetaConfigRootVolume(in["root_volume"]),
+		"securityGroupIds":   in["security_group_ids"],
+		"sshConfig":          convertContainerAwsNodePoolBetaConfigSshConfig(in["ssh_config"]),
+		"tags":               in["tags"],
+		"taints":             in["taints"],
+	}
+}
+
+func convertContainerAwsNodePoolBetaConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolBetaConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolBetaConfigConfigEncryption(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"kmsKeyArn": in["kms_key_arn"],
+	}
+}
+
+func convertContainerAwsNodePoolBetaConfigConfigEncryptionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolBetaConfigConfigEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolBetaConfigRootVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iops":       in["iops"],
+		"kmsKeyArn":  in["kms_key_arn"],
+		"sizeGib":    in["size_gib"],
+		"volumeType": in["volume_type"],
+	}
+}
+
+func convertContainerAwsNodePoolBetaConfigRootVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolBetaConfigRootVolume(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolBetaConfigSshConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"ec2KeyPair": in["ec2_key_pair"],
+	}
+}
+
+func convertContainerAwsNodePoolBetaConfigSshConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolBetaConfigSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolBetaConfigTaints(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"effect": in["effect"],
+		"key":    in["key"],
+		"value":  in["value"],
+	}
+}
+
+func convertContainerAwsNodePoolBetaConfigTaintsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolBetaConfigTaints(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolBetaMaxPodsConstraint(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"maxPodsPerNode": in["max_pods_per_node"],
+	}
+}
+
+func convertContainerAwsNodePoolBetaMaxPodsConstraintList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolBetaMaxPodsConstraint(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaAuthorization(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"adminUsers": in["admin_users"],
+	}
+}
+
+func convertContainerAzureClusterBetaAuthorizationList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaAuthorization(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaAuthorizationAdminUsers(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"username": in["username"],
+	}
+}
+
+func convertContainerAzureClusterBetaAuthorizationAdminUsersList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaAuthorizationAdminUsers(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaControlPlane(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sshConfig":          convertContainerAzureClusterBetaControlPlaneSshConfig(in["ssh_config"]),
+		"subnetId":           in["subnet_id"],
+		"version":            in["version"],
+		"databaseEncryption": convertContainerAzureClusterBetaControlPlaneDatabaseEncryption(in["database_encryption"]),
+		"mainVolume":         convertContainerAzureClusterBetaControlPlaneMainVolume(in["main_volume"]),
+		"proxyConfig":        convertContainerAzureClusterBetaControlPlaneProxyConfig(in["proxy_config"]),
+		"replicaPlacements":  in["replica_placements"],
+		"rootVolume":         convertContainerAzureClusterBetaControlPlaneRootVolume(in["root_volume"]),
+		"tags":               in["tags"],
+		"vmSize":             in["vm_size"],
+	}
+}
+
+func convertContainerAzureClusterBetaControlPlaneList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaControlPlane(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaControlPlaneSshConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"authorizedKey": in["authorized_key"],
+	}
+}
+
+func convertContainerAzureClusterBetaControlPlaneSshConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaControlPlaneSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaControlPlaneDatabaseEncryption(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"keyId": in["key_id"],
+	}
+}
+
+func convertContainerAzureClusterBetaControlPlaneDatabaseEncryptionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaControlPlaneDatabaseEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaControlPlaneMainVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sizeGib": in["size_gib"],
+	}
+}
+
+func convertContainerAzureClusterBetaControlPlaneMainVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaControlPlaneMainVolume(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaControlPlaneProxyConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"resourceGroupId": in["resource_group_id"],
+		"secretId":        in["secret_id"],
+	}
+}
+
+func convertContainerAzureClusterBetaControlPlaneProxyConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaControlPlaneProxyConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaControlPlaneReplicaPlacements(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"azureAvailabilityZone": in["azure_availability_zone"],
+		"subnetId":              in["subnet_id"],
+	}
+}
+
+func convertContainerAzureClusterBetaControlPlaneReplicaPlacementsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaControlPlaneReplicaPlacements(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaControlPlaneRootVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sizeGib": in["size_gib"],
+	}
+}
+
+func convertContainerAzureClusterBetaControlPlaneRootVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaControlPlaneRootVolume(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaFleet(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"project":    in["project"],
+		"membership": in["membership"],
+	}
+}
+
+func convertContainerAzureClusterBetaFleetList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaFleet(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaNetworking(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"podAddressCidrBlocks":     in["pod_address_cidr_blocks"],
+		"serviceAddressCidrBlocks": in["service_address_cidr_blocks"],
+		"virtualNetworkId":         in["virtual_network_id"],
+	}
+}
+
+func convertContainerAzureClusterBetaNetworkingList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaNetworking(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaWorkloadIdentityConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"identityProvider": in["identity_provider"],
+		"issuerUri":        in["issuer_uri"],
+		"workloadPool":     in["workload_pool"],
+	}
+}
+
+func convertContainerAzureClusterBetaWorkloadIdentityConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaWorkloadIdentityConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolBetaAutoscaling(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"maxNodeCount": in["max_node_count"],
+		"minNodeCount": in["min_node_count"],
+	}
+}
+
+func convertContainerAzureNodePoolBetaAutoscalingList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolBetaAutoscaling(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolBetaConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sshConfig":  convertContainerAzureNodePoolBetaConfigSshConfig(in["ssh_config"]),
+		"rootVolume": convertContainerAzureNodePoolBetaConfigRootVolume(in["root_volume"]),
+		"tags":       in["tags"],
+		"vmSize":     in["vm_size"],
+	}
+}
+
+func convertContainerAzureNodePoolBetaConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolBetaConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolBetaConfigSshConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"authorizedKey": in["authorized_key"],
+	}
+}
+
+func convertContainerAzureNodePoolBetaConfigSshConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolBetaConfigSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolBetaConfigRootVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sizeGib": in["size_gib"],
+	}
+}
+
+func convertContainerAzureNodePoolBetaConfigRootVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolBetaConfigRootVolume(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolBetaMaxPodsConstraint(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"maxPodsPerNode": in["max_pods_per_node"],
+	}
+}
+
+func convertContainerAzureNodePoolBetaMaxPodsConstraintList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolBetaMaxPodsConstraint(v))
 	}
 	return out
 }
@@ -9366,6 +12002,842 @@ func convertComputeGlobalForwardingRuleMetadataFilterFilterLabelList(i interface
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertComputeGlobalForwardingRuleMetadataFilterFilterLabel(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterAuthorization(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"adminUsers": in["admin_users"],
+	}
+}
+
+func convertContainerAwsClusterAuthorizationList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterAuthorization(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterAuthorizationAdminUsers(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"username": in["username"],
+	}
+}
+
+func convertContainerAwsClusterAuthorizationAdminUsersList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterAuthorizationAdminUsers(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterControlPlane(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"awsServicesAuthentication": convertContainerAwsClusterControlPlaneAwsServicesAuthentication(in["aws_services_authentication"]),
+		"configEncryption":          convertContainerAwsClusterControlPlaneConfigEncryption(in["config_encryption"]),
+		"databaseEncryption":        convertContainerAwsClusterControlPlaneDatabaseEncryption(in["database_encryption"]),
+		"iamInstanceProfile":        in["iam_instance_profile"],
+		"subnetIds":                 in["subnet_ids"],
+		"version":                   in["version"],
+		"instanceType":              in["instance_type"],
+		"mainVolume":                convertContainerAwsClusterControlPlaneMainVolume(in["main_volume"]),
+		"proxyConfig":               convertContainerAwsClusterControlPlaneProxyConfig(in["proxy_config"]),
+		"rootVolume":                convertContainerAwsClusterControlPlaneRootVolume(in["root_volume"]),
+		"securityGroupIds":          in["security_group_ids"],
+		"sshConfig":                 convertContainerAwsClusterControlPlaneSshConfig(in["ssh_config"]),
+		"tags":                      in["tags"],
+	}
+}
+
+func convertContainerAwsClusterControlPlaneList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterControlPlane(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterControlPlaneAwsServicesAuthentication(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"roleArn":         in["role_arn"],
+		"roleSessionName": in["role_session_name"],
+	}
+}
+
+func convertContainerAwsClusterControlPlaneAwsServicesAuthenticationList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterControlPlaneAwsServicesAuthentication(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterControlPlaneConfigEncryption(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"kmsKeyArn": in["kms_key_arn"],
+	}
+}
+
+func convertContainerAwsClusterControlPlaneConfigEncryptionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterControlPlaneConfigEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterControlPlaneDatabaseEncryption(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"kmsKeyArn": in["kms_key_arn"],
+	}
+}
+
+func convertContainerAwsClusterControlPlaneDatabaseEncryptionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterControlPlaneDatabaseEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterControlPlaneMainVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iops":       in["iops"],
+		"kmsKeyArn":  in["kms_key_arn"],
+		"sizeGib":    in["size_gib"],
+		"volumeType": in["volume_type"],
+	}
+}
+
+func convertContainerAwsClusterControlPlaneMainVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterControlPlaneMainVolume(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterControlPlaneProxyConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"secretArn":     in["secret_arn"],
+		"secretVersion": in["secret_version"],
+	}
+}
+
+func convertContainerAwsClusterControlPlaneProxyConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterControlPlaneProxyConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterControlPlaneRootVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iops":       in["iops"],
+		"kmsKeyArn":  in["kms_key_arn"],
+		"sizeGib":    in["size_gib"],
+		"volumeType": in["volume_type"],
+	}
+}
+
+func convertContainerAwsClusterControlPlaneRootVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterControlPlaneRootVolume(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterControlPlaneSshConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"ec2KeyPair": in["ec2_key_pair"],
+	}
+}
+
+func convertContainerAwsClusterControlPlaneSshConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterControlPlaneSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterFleet(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"project":    in["project"],
+		"membership": in["membership"],
+	}
+}
+
+func convertContainerAwsClusterFleetList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterFleet(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterNetworking(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"podAddressCidrBlocks":     in["pod_address_cidr_blocks"],
+		"serviceAddressCidrBlocks": in["service_address_cidr_blocks"],
+		"vPCId":                    in["vpc_id"],
+	}
+}
+
+func convertContainerAwsClusterNetworkingList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterNetworking(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterWorkloadIdentityConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"identityProvider": in["identity_provider"],
+		"issuerUri":        in["issuer_uri"],
+		"workloadPool":     in["workload_pool"],
+	}
+}
+
+func convertContainerAwsClusterWorkloadIdentityConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterWorkloadIdentityConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolAutoscaling(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"maxNodeCount": in["max_node_count"],
+		"minNodeCount": in["min_node_count"],
+	}
+}
+
+func convertContainerAwsNodePoolAutoscalingList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolAutoscaling(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"configEncryption":   convertContainerAwsNodePoolConfigConfigEncryption(in["config_encryption"]),
+		"iamInstanceProfile": in["iam_instance_profile"],
+		"instanceType":       in["instance_type"],
+		"labels":             in["labels"],
+		"rootVolume":         convertContainerAwsNodePoolConfigRootVolume(in["root_volume"]),
+		"securityGroupIds":   in["security_group_ids"],
+		"sshConfig":          convertContainerAwsNodePoolConfigSshConfig(in["ssh_config"]),
+		"tags":               in["tags"],
+		"taints":             in["taints"],
+	}
+}
+
+func convertContainerAwsNodePoolConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolConfigConfigEncryption(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"kmsKeyArn": in["kms_key_arn"],
+	}
+}
+
+func convertContainerAwsNodePoolConfigConfigEncryptionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolConfigConfigEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolConfigRootVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iops":       in["iops"],
+		"kmsKeyArn":  in["kms_key_arn"],
+		"sizeGib":    in["size_gib"],
+		"volumeType": in["volume_type"],
+	}
+}
+
+func convertContainerAwsNodePoolConfigRootVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolConfigRootVolume(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolConfigSshConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"ec2KeyPair": in["ec2_key_pair"],
+	}
+}
+
+func convertContainerAwsNodePoolConfigSshConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolConfigSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolConfigTaints(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"effect": in["effect"],
+		"key":    in["key"],
+		"value":  in["value"],
+	}
+}
+
+func convertContainerAwsNodePoolConfigTaintsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolConfigTaints(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolMaxPodsConstraint(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"maxPodsPerNode": in["max_pods_per_node"],
+	}
+}
+
+func convertContainerAwsNodePoolMaxPodsConstraintList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolMaxPodsConstraint(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterAuthorization(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"adminUsers": in["admin_users"],
+	}
+}
+
+func convertContainerAzureClusterAuthorizationList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterAuthorization(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterAuthorizationAdminUsers(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"username": in["username"],
+	}
+}
+
+func convertContainerAzureClusterAuthorizationAdminUsersList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterAuthorizationAdminUsers(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterControlPlane(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sshConfig":          convertContainerAzureClusterControlPlaneSshConfig(in["ssh_config"]),
+		"subnetId":           in["subnet_id"],
+		"version":            in["version"],
+		"databaseEncryption": convertContainerAzureClusterControlPlaneDatabaseEncryption(in["database_encryption"]),
+		"mainVolume":         convertContainerAzureClusterControlPlaneMainVolume(in["main_volume"]),
+		"proxyConfig":        convertContainerAzureClusterControlPlaneProxyConfig(in["proxy_config"]),
+		"replicaPlacements":  in["replica_placements"],
+		"rootVolume":         convertContainerAzureClusterControlPlaneRootVolume(in["root_volume"]),
+		"tags":               in["tags"],
+		"vmSize":             in["vm_size"],
+	}
+}
+
+func convertContainerAzureClusterControlPlaneList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterControlPlane(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterControlPlaneSshConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"authorizedKey": in["authorized_key"],
+	}
+}
+
+func convertContainerAzureClusterControlPlaneSshConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterControlPlaneSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterControlPlaneDatabaseEncryption(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"keyId": in["key_id"],
+	}
+}
+
+func convertContainerAzureClusterControlPlaneDatabaseEncryptionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterControlPlaneDatabaseEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterControlPlaneMainVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sizeGib": in["size_gib"],
+	}
+}
+
+func convertContainerAzureClusterControlPlaneMainVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterControlPlaneMainVolume(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterControlPlaneProxyConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"resourceGroupId": in["resource_group_id"],
+		"secretId":        in["secret_id"],
+	}
+}
+
+func convertContainerAzureClusterControlPlaneProxyConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterControlPlaneProxyConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterControlPlaneReplicaPlacements(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"azureAvailabilityZone": in["azure_availability_zone"],
+		"subnetId":              in["subnet_id"],
+	}
+}
+
+func convertContainerAzureClusterControlPlaneReplicaPlacementsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterControlPlaneReplicaPlacements(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterControlPlaneRootVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sizeGib": in["size_gib"],
+	}
+}
+
+func convertContainerAzureClusterControlPlaneRootVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterControlPlaneRootVolume(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterFleet(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"project":    in["project"],
+		"membership": in["membership"],
+	}
+}
+
+func convertContainerAzureClusterFleetList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterFleet(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterNetworking(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"podAddressCidrBlocks":     in["pod_address_cidr_blocks"],
+		"serviceAddressCidrBlocks": in["service_address_cidr_blocks"],
+		"virtualNetworkId":         in["virtual_network_id"],
+	}
+}
+
+func convertContainerAzureClusterNetworkingList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterNetworking(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterWorkloadIdentityConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"identityProvider": in["identity_provider"],
+		"issuerUri":        in["issuer_uri"],
+		"workloadPool":     in["workload_pool"],
+	}
+}
+
+func convertContainerAzureClusterWorkloadIdentityConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterWorkloadIdentityConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolAutoscaling(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"maxNodeCount": in["max_node_count"],
+		"minNodeCount": in["min_node_count"],
+	}
+}
+
+func convertContainerAzureNodePoolAutoscalingList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolAutoscaling(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sshConfig":  convertContainerAzureNodePoolConfigSshConfig(in["ssh_config"]),
+		"rootVolume": convertContainerAzureNodePoolConfigRootVolume(in["root_volume"]),
+		"tags":       in["tags"],
+		"vmSize":     in["vm_size"],
+	}
+}
+
+func convertContainerAzureNodePoolConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolConfigSshConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"authorizedKey": in["authorized_key"],
+	}
+}
+
+func convertContainerAzureNodePoolConfigSshConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolConfigSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolConfigRootVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sizeGib": in["size_gib"],
+	}
+}
+
+func convertContainerAzureNodePoolConfigRootVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolConfigRootVolume(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolMaxPodsConstraint(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"maxPodsPerNode": in["max_pods_per_node"],
+	}
+}
+
+func convertContainerAzureNodePoolMaxPodsConstraintList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolMaxPodsConstraint(v))
 	}
 	return out
 }

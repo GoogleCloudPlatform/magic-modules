@@ -12,7 +12,7 @@
   },
   "resourceGroupId": "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-cluster",
   "controlPlane": {
-    "version": "1.21-next",
+    "version": "1.21.5-gke.2800",
     "subnetId": "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-byo/providers/Microsoft.Network/virtualNetworks/{{byo_multicloud_prefix}}-dev-vnet/subnets/default",
     "vmSize": "Standard_DS2_v2",
     "sshConfig": {
@@ -29,9 +29,7 @@
       "keyId": "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-cluster/providers/Microsoft.KeyVault/vaults/{{byo_multicloud_prefix}}-dev-keyvault/keys/{{byo_multicloud_prefix}}-dev-key"
     },
     "tags": {
-      "owner": "mmv2",
-      "creation time": "2021-07-15T21:46:05Z",
-      "googleinternal:user": "mmv2"
+      "owner": "mmv2"
     },
     "proxyConfig": {
       "resourceGroupId": "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-cluster",
