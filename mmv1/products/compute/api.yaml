@@ -9072,7 +9072,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Using Packet Mirroring': 'https://cloud.google.com/vpc/docs/using-packet-mirroring#creating'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/packetMirroring'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/packetMirrorings'
     description: |
       Packet Mirroring mirrors traffic to and from particular VM instances.
       You can use the collected traffic to help you detect security threats
