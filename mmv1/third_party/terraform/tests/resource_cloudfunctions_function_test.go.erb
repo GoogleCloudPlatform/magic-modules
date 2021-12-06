@@ -628,6 +628,7 @@ resource "google_cloudfunctions_function" "function" {
     TEST_ENV_VARIABLE = "test-build-env-variable-value"
   }
   max_instances = 10
+  min_instances = 3
 }
 `, bucketName, zipFilePath, functionName)
 }

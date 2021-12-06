@@ -656,7 +656,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if d.HasChange("min_instances") {
-		function.MaxInstances = int64(d.Get("min_instances").(int))
+		function.MinInstances = int64(d.Get("min_instances").(int))
 		updateMaskArr = append(updateMaskArr, "minInstances")
 	}
 
