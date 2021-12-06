@@ -343,7 +343,14 @@ func resourceStorageBucket() *schema.Resource {
 				Computed:    true,
 				Description: `Enables uniform bucket-level access on a bucket.`,
 			},
+<% unless version == "ga" -%>
+			"public_access_prevention": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `Prevents public access to a bucket.`,
+			},
 		},
+<% end -%>
 		UseJSONNumber: true,
 	}
 }
@@ -584,12 +591,11 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	if d.HasChange("uniform_bucket_level_access") {
+	if d.HasChange("uniform_bucket_level_access") <% unless version == "ga" -%> || d.HasChange("public_access_prevention") <% end -%> {
 		sb.IamConfiguration = expandIamConfiguration(d)
 	}
 
 	res, err := config.NewStorageClient(userAgent).Buckets.Patch(d.Get("name").(string), sb).Do()
-
 	if err != nil {
 		return err
 	}
@@ -1119,13 +1125,19 @@ func expandBucketWebsite(v interface{}) *storage.BucketWebsite {
 }
 
 func expandIamConfiguration(d *schema.ResourceData) *storage.BucketIamConfiguration {
-	return &storage.BucketIamConfiguration{
+	cfg := &storage.BucketIamConfiguration{
 		ForceSendFields: []string{"UniformBucketLevelAccess"},
 		UniformBucketLevelAccess: &storage.BucketIamConfigurationUniformBucketLevelAccess{
 			Enabled:         d.Get("uniform_bucket_level_access").(bool),
 			ForceSendFields: []string{"Enabled"},
 		},
 	}
+<% unless version == "ga" -%>
+	if v, ok := d.GetOk("public_access_prevention"); ok {
+		cfg.PublicAccessPrevention = v.(string)
+	}
+<% end -%>
+	return cfg
 }
 
 func expandStorageBucketLifecycle(v interface{}) (*storage.BucketLifecycle, error) {
