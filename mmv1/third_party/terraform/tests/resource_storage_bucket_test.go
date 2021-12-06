@@ -767,7 +767,6 @@ func TestAccStorageBucket_encryption(t *testing.T) {
 	})
 }
 
-<% unless version == "ga" -%>
 func TestAccStorageBucket_publicAccessPrevention(t *testing.T) {
 	t.Parallel()
 
@@ -789,7 +788,6 @@ func TestAccStorageBucket_publicAccessPrevention(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccStorageBucket_uniformBucketAccessOnly(t *testing.T) {
 	t.Parallel()
@@ -1489,7 +1487,6 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName, enabled)
 }
 
-<% unless version == 'ga' -%>
 func testAccStorageBucket_publicAccessPrevention(bucketName string, prevention string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
@@ -1501,7 +1498,6 @@ resource "google_storage_bucket" "bucket" {
 }
 `, bucketName, prevention)
 }
-<% end -%>
 
 func testAccStorageBucket_encryption(context map[string]interface{}) string {
 	return Nprintf(`
