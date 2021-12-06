@@ -1,0 +1,79 @@
+{
+  "format_version": "0.2",
+  "terraform_version": "1.0.10",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_spanner_instance_iam_policy.instance",
+          "mode": "managed",
+          "type": "google_spanner_instance_iam_policy",
+          "name": "instance",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "instance": "my-instance",
+            "policy_data": "{\"bindings\":[{\"members\":[\"user:jane@example.com\"],\"role\":\"roles/editor\"}]}"
+          },
+          "sensitive_values": {}
+        }
+      ]
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "google_spanner_instance_iam_policy.instance",
+      "mode": "managed",
+      "type": "google_spanner_instance_iam_policy",
+      "name": "instance",
+      "provider_name": "registry.terraform.io/hashicorp/google",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "instance": "my-instance",
+          "policy_data": "{\"bindings\":[{\"members\":[\"user:jane@example.com\"],\"role\":\"roles/editor\"}]}"
+        },
+        "after_unknown": {
+          "etag": true,
+          "id": true,
+          "project": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {}
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "google": {
+        "name": "google",
+        "expressions": {
+          "project": {
+            "constant_value": "{{.Provider.project}}"
+          }
+        }
+      }
+    },
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_spanner_instance_iam_policy.instance",
+          "mode": "managed",
+          "type": "google_spanner_instance_iam_policy",
+          "name": "instance",
+          "provider_config_key": "google",
+          "expressions": {
+            "instance": {
+              "constant_value": "my-instance"
+            },
+            "policy_data": {}
+          },
+          "schema_version": 0
+        }
+      ]
+    }
+  }
+}
