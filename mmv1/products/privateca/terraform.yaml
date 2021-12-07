@@ -144,6 +144,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       method_name_separator: ':'
       parent_resource_attribute: ca_pool
       example_config_body: 'templates/terraform/iam/example_config_body/privateca_ca_pool.tf.erb'
+      iam_conditions_request_type: :REQUEST_BODY
     autogen_async: true
     import_format: ["projects/{{project}}/locations/{{location}}/caPools/{{name}}"]
     examples:
