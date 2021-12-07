@@ -648,7 +648,7 @@ func flattenSecurityPolicyRules(rules []*compute.SecurityPolicyRule) []map[strin
 			"preview":     		rule.Preview,
 			"match":       		flattenMatch(rule.Match),
 		<% unless version == 'ga' -%>
-			"rateLimitOptions":	flattenSecurityPolicyRuleRateLimitOptions(rule.RateLimitOptions),
+			"rate_limit_options":	flattenSecurityPolicyRuleRateLimitOptions(rule.RateLimitOptions),
 		<% end -%>
 		}
 
