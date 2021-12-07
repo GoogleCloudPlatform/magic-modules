@@ -131,7 +131,7 @@ func DCLToTerraformReference(resourceType string, version string) (string, error
 		return "google_container_aws_cluster", nil
 	case "ContainerAwsNodePool":
 		return "google_container_aws_node_pool", nil
-	case "ContainerAzureAzureClient":
+	case "ContainerAzureClient":
 		return "google_container_azure_client", nil
 	case "ContainerAzureCluster":
 		return "google_container_azure_cluster", nil
@@ -144,6 +144,49 @@ func DCLToTerraformReference(resourceType string, version string) (string, error
 	case "OrgPolicyPolicy":
 		return "google_org_policy_policy", nil
 	case "OSConfigOSPolicyAssignment":
+		return "google_os_config_os_policy_assignment", nil
+	case "PrivatecaCertificateTemplate":
+		return "google_privateca_certificate_template", nil
+	case "RecaptchaEnterpriseKey":
+		return "google_recaptcha_enterprise_key", nil
+	}
+	// If still not found, try alternate names for resources.
+	switch resourceType {
+	case "AssuredWorkloadsWorkload":
+		return "google_assured_workloads_workload", nil
+	case "CloudbuildWorkerPool":
+		return "google_cloudbuild_worker_pool", nil
+	case "CloudResourceManagerFolder":
+		return "google_folder", nil
+	case "CloudResourceManagerProject":
+		return "google_project", nil
+	case "ComputeFirewallPolicy":
+		return "google_compute_firewall_policy", nil
+	case "ComputeFirewallPolicyAssociation":
+		return "google_compute_firewall_policy_association", nil
+	case "ComputeFirewallPolicyRule":
+		return "google_compute_firewall_policy_rule", nil
+	case "ComputeForwardingRule":
+		return "google_compute_forwarding_rule", nil
+	case "ComputeGlobalForwardingRule":
+		return "google_compute_global_forwarding_rule", nil
+	case "ContainerAwsCluster":
+		return "google_container_aws_cluster", nil
+	case "ContainerAwsNodePool":
+		return "google_container_aws_node_pool", nil
+	case "ContainerAzureAzureClient":
+		return "google_container_azure_client", nil
+	case "ContainerAzureCluster":
+		return "google_container_azure_cluster", nil
+	case "ContainerAzureNodePool":
+		return "google_container_azure_node_pool", nil
+	case "DataprocWorkflowTemplate":
+		return "google_dataproc_workflow_template", nil
+	case "EventarcTrigger":
+		return "google_eventarc_trigger", nil
+	case "OrgPolicyPolicy":
+		return "google_org_policy_policy", nil
+	case "OsConfigOSPolicyAssignment":
 		return "google_os_config_os_policy_assignment", nil
 	case "PrivatecaCertificateTemplate":
 		return "google_privateca_certificate_template", nil
@@ -420,7 +463,7 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 			return "", err
 		}
 		return ContainerAwsNodePoolAsHCL(*r, hasGAEquivalent)
-	case "ContainerAzureAzureClient":
+	case "ContainerAzureClient":
 		r := &containerazure.AzureClient{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
@@ -457,6 +500,130 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 		}
 		return OrgPolicyPolicyAsHCL(*r, hasGAEquivalent)
 	case "OSConfigOSPolicyAssignment":
+		r := &osconfig.OSPolicyAssignment{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return OSConfigOSPolicyAssignmentAsHCL(*r, hasGAEquivalent)
+	case "PrivatecaCertificateTemplate":
+		r := &privateca.CertificateTemplate{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return PrivatecaCertificateTemplateAsHCL(*r, hasGAEquivalent)
+	case "RecaptchaEnterpriseKey":
+		r := &recaptchaenterprise.Key{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return RecaptchaEnterpriseKeyAsHCL(*r, hasGAEquivalent)
+	}
+
+	// If still not found, try alternative resource names.
+	switch resourceType {
+	case "AssuredWorkloadsWorkload":
+		r := &assuredworkloads.Workload{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return AssuredWorkloadsWorkloadAsHCL(*r, hasGAEquivalent)
+	case "CloudbuildWorkerPool":
+		r := &cloudbuild.WorkerPool{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return CloudbuildWorkerPoolAsHCL(*r, hasGAEquivalent)
+	case "CloudResourceManagerFolder":
+		r := &cloudresourcemanager.Folder{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return CloudResourceManagerFolderAsHCL(*r, hasGAEquivalent)
+	case "CloudResourceManagerProject":
+		r := &cloudresourcemanager.Project{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return serializeGAProjectToHCL(*r, hasGAEquivalent)
+	case "ComputeFirewallPolicy":
+		r := &compute.FirewallPolicy{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeFirewallPolicyAsHCL(*r, hasGAEquivalent)
+	case "ComputeFirewallPolicyAssociation":
+		r := &compute.FirewallPolicyAssociation{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeFirewallPolicyAssociationAsHCL(*r, hasGAEquivalent)
+	case "ComputeFirewallPolicyRule":
+		r := &compute.FirewallPolicyRule{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeFirewallPolicyRuleAsHCL(*r, hasGAEquivalent)
+	case "ComputeForwardingRule":
+		r := &compute.ForwardingRule{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeForwardingRuleAsHCL(*r, hasGAEquivalent)
+	case "ComputeGlobalForwardingRule":
+		r := &compute.ForwardingRule{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeGlobalForwardingRuleAsHCL(*r, hasGAEquivalent)
+	case "ContainerAwsCluster":
+		r := &containeraws.Cluster{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ContainerAwsClusterAsHCL(*r, hasGAEquivalent)
+	case "ContainerAwsNodePool":
+		r := &containeraws.NodePool{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ContainerAwsNodePoolAsHCL(*r, hasGAEquivalent)
+	case "ContainerAzureAzureClient":
+		r := &containerazure.AzureClient{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ContainerAzureClientAsHCL(*r, hasGAEquivalent)
+	case "ContainerAzureCluster":
+		r := &containerazure.Cluster{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ContainerAzureClusterAsHCL(*r, hasGAEquivalent)
+	case "ContainerAzureNodePool":
+		r := &containerazure.NodePool{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ContainerAzureNodePoolAsHCL(*r, hasGAEquivalent)
+	case "DataprocWorkflowTemplate":
+		r := &dataproc.WorkflowTemplate{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return DataprocWorkflowTemplateAsHCL(*r, hasGAEquivalent)
+	case "EventarcTrigger":
+		r := &eventarc.Trigger{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return EventarcTriggerAsHCL(*r, hasGAEquivalent)
+	case "OrgPolicyPolicy":
+		r := &orgpolicy.Policy{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return OrgPolicyPolicyAsHCL(*r, hasGAEquivalent)
+	case "OsConfigOSPolicyAssignment":
 		r := &osconfig.OSPolicyAssignment{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err

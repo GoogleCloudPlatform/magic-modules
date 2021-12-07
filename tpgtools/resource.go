@@ -194,9 +194,6 @@ func (r *Resource) fillLinksFromExtensionsMap(m map[string]interface{}) {
 	}
 }
 
-// TODO: there are hundreds of lines of name munging here.  Surely it is not *all* required.
-// DO NOT SUBMIT.  MUST FIX.
-
 // Name is the shortname of a resource. For example, "instance".
 func (r Resource) Name() string {
 	return r.title

@@ -275,6 +275,12 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 	{{- if $.ReplaceInBasePath.Present }}
 	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
 	{{- end }}
+	if bp, err := replaceVars(d, config, client.Config.BasePath); err != nil {
+		d.SetId("")
+		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
+	} else {
+		client.Config.BasePath = bp
+	}
 	res, err := client.Apply{{$.DCLTitle}}(context.Background(), obj, createDirective...)
 
 	if _, ok := err.(dcl.DiffAfterApplyError); ok {
@@ -352,6 +358,12 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 	{{- if $.ReplaceInBasePath.Present }}
 	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
 	{{- end }}
+	if bp, err := replaceVars(d, config, client.Config.BasePath); err != nil {
+		d.SetId("")
+		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
+	} else {
+		client.Config.BasePath = bp
+	}
 	res, err := client.Get{{$.DCLTitle}}(context.Background(), obj)
 	if err != nil {
 		resourceName := fmt.Sprintf("{{$.PathType}} %q", d.Id())
@@ -431,6 +443,12 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	{{- if $.ReplaceInBasePath.Present }}
 	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
 	{{- end }}
+	if bp, err := replaceVars(d, config, client.Config.BasePath); err != nil {
+		d.SetId("")
+		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
+	} else {
+		client.Config.BasePath = bp
+	}
 	res, err := client.Apply{{$.DCLTitle}}(context.Background(), obj, directive...)
 
 	if _, ok := err.(dcl.DiffAfterApplyError); ok {
@@ -513,6 +531,12 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 	{{- if $.ReplaceInBasePath.Present }}
 	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
 	{{- end }}
+	if bp, err := replaceVars(d, config, client.Config.BasePath); err != nil {
+		d.SetId("")
+		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
+	} else {
+		client.Config.BasePath = bp
+	}
 	if err := client.Delete{{$.DCLTitle}}(context.Background(), obj); err != nil {
 		return fmt.Errorf("Error deleting {{$.DCLTitle}}: %s", err)
 	}
