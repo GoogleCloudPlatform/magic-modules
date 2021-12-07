@@ -1,0 +1,50 @@
+c, cdnPolicyOk := d.GetOk("cdn_policy")
+
+if !cdnPolicyOk {
+  return obj, nil
+}
+
+cdnPolicies := c.([]interface{})
+
+if len(cdnPolicies) == 0 {
+  return obj, nil
+}
+
+cdnPolicy := cdnPolicies[0].(map[string]interface{})
+
+cacheMode := cdnPolicy["cache_mode"].(string)
+_, defaultTTLOk := cdnPolicy["default_ttl"]
+_, maxTTLOk := cdnPolicy["max_ttl"]
+_, clientTTLOk := cdnPolicy["client_ttl"]
+
+if obj["cdnPolicy"] == nil {
+  obj["cdnPolicy"] = make(map[string]interface{})
+}
+
+encCDNPolicy := obj["cdnPolicy"].(map[string]interface{})
+
+switch cacheMode {
+case "USE_ORIGIN_HEADERS":
+case "FORCE_CACHE_ALL":
+  if _, ok := encCDNPolicy["defaultTtl"]; !ok && !defaultTTLOk {
+    encCDNPolicy["defaultTtl"] = 0
+  }
+
+  if _, ok := encCDNPolicy["clientTtl"]; !ok && !clientTTLOk {
+    encCDNPolicy["clientTtl"] = 0
+  }
+default:
+  if _, ok := encCDNPolicy["defaultTtl"]; !ok && !defaultTTLOk {
+    encCDNPolicy["defaultTtl"] = 0
+  }
+
+  if _, ok := encCDNPolicy["maxTtl"]; !ok && !maxTTLOk {
+    encCDNPolicy["maxTtl"] = 0
+  }
+
+  if _, ok := encCDNPolicy["clientTtl"]; !ok && !clientTTLOk {
+    encCDNPolicy["clientTtl"] = 0
+  }
+}
+
+return obj, nil

@@ -176,16 +176,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       cdnPolicy.clientTtl: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-        send_empty_value: true
       cdnPolicy.defaultTtl: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-        send_empty_value: true
       cdnPolicy.maxTtl: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       cdnPolicy.signedUrlCacheMaxAgeSec: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
       cdnPolicy.negativeCachingPolicy.ttl: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: 'templates/terraform/encoders/compute_backend_bucket.go.erb'
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_import: true
     exclude_validator: true
