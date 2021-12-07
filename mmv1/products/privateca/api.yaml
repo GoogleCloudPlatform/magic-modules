@@ -166,27 +166,28 @@ objects:
                   Describes values that are relevant in a CA certificate.
                 properties:
                   - !ruby/object:Api::Type::Boolean
-                    name: 'nonCa'
-                    url_param_only: true
-                    description: |
-                      Must be set to true when is_ca is set to false.
-                  - !ruby/object:Api::Type::Boolean
                     name: 'isCa'
                     required: true
                     description: |
-                      Refers to the "CA" X.509 extension, which is a boolean value. When this value is missing,
-                      the extension will be omitted from the CA certificate.
+                      When true, the "CA" in Basic Constraints extension will be set to true. 
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'nonCa'
+                    url_param_only: true
+                    description: |
+                      When true, the "CA" in Basic Constraints extension will be set to false. 
+                      If both `is_ca` and `non_ca` are unset, the extension will be omitted from the CA certificate.
+                  - !ruby/object:Api::Type::Integer
+                    name: 'maxIssuerPathLength'
+                    description: |
+                      Refers to the "path length constraint" in Basic Constraints extension. For a CA certificate, this value describes the depth of
+                      subordinate CA certificates that are allowed. If this value is less than 0, the request will fail.
                   - !ruby/object:Api::Type::Boolean
                     name: 'zeroMaxIssuerPathLength'
                     url_param_only: true
                     description: |
-                      Must be set to true when max_issuer_path_length is set to 0.
-                  - !ruby/object:Api::Type::Integer
-                    name: 'maxIssuerPathLength'
-                    description: |
-                      Refers to the path length restriction X.509 extension. For a CA certificate, this value describes the depth of
-                      subordinate CA certificates that are allowed. If this value is less than 0, the request will fail. If this
-                      value is missing, the max path length will be omitted from the CA certificate.
+                      When true, the "path length constraint" in Basic Constraints extension will be set to 0.
+                      if both `max_issuer_path_length` and `zero_max_issuer_path_length` are unset,
+                      the max path length will be omitted from the CA certificate.
               - !ruby/object:Api::Type::NestedObject
                 name: 'keyUsage'
                 required: true
@@ -993,26 +994,27 @@ objects:
                 Describes values that are relevant in a CA certificate.
               properties:
                 - !ruby/object:Api::Type::Boolean
+                  name: 'isCa'
+                  description: |
+                    When true, the "CA" in Basic Constraints extension will be set to true. 
+                - !ruby/object:Api::Type::Boolean
                   name: 'nonCa'
                   url_param_only: true
                   description: |
-                    Must be set to true when is_ca is set to false.
-                - !ruby/object:Api::Type::Boolean
-                  name: 'isCa'
+                    When true, the "CA" in Basic Constraints extension will be set to false. 
+                    If both `is_ca` and `non_ca` are unset, the extension will be omitted from the CA certificate.
+                - !ruby/object:Api::Type::Integer
+                  name: 'maxIssuerPathLength'
                   description: |
-                    Refers to the "CA" X.509 extension, which is a boolean value. When this value is missing,
-                    the extension will be omitted from the CA certificate.
+                    Refers to the "path length constraint" in Basic Constraints extension. For a CA certificate, this value describes the depth of
+                    subordinate CA certificates that are allowed. If this value is less than 0, the request will fail.
                 - !ruby/object:Api::Type::Boolean
                   name: 'zeroMaxIssuerPathLength'
                   url_param_only: true
                   description: |
-                    Must be set to true when max_issuer_path_length is set to 0.
-                - !ruby/object:Api::Type::Integer
-                  name: 'maxIssuerPathLength'
-                  description: |
-                    Refers to the path length restriction X.509 extension. For a CA certificate, this value describes the depth of
-                    subordinate CA certificates that are allowed. If this value is less than 0, the request will fail. If this
-                    value is missing, the max path length will be omitted from the CA certificate.
+                    When true, the "path length constraint" in Basic Constraints extension will be set to 0.
+                    if both `max_issuer_path_length` and `zero_max_issuer_path_length` are unset,
+                    the max path length will be omitted from the CA certificate.
             - !ruby/object:Api::Type::NestedObject
               name: 'keyUsage'
               required: true
@@ -1430,26 +1432,27 @@ objects:
                   Describes values that are relevant in a CA certificate.
                 properties:
                   - !ruby/object:Api::Type::Boolean
+                    name: 'isCa'
+                    description: |
+                      When true, the "CA" in Basic Constraints extension will be set to true. 
+                  - !ruby/object:Api::Type::Boolean
                     name: 'nonCa'
                     url_param_only: true
                     description: |
-                      Must be set to true when is_ca is set to false.
-                  - !ruby/object:Api::Type::Boolean
-                    name: 'isCa'
+                      When true, the "CA" in Basic Constraints extension will be set to false. 
+                      If both `is_ca` and `non_ca` are unset, the extension will be omitted from the CA certificate.
+                  - !ruby/object:Api::Type::Integer
+                    name: 'maxIssuerPathLength'
                     description: |
-                      Refers to the "CA" X.509 extension, which is a boolean value. When this value is missing,
-                      the extension will be omitted from the CA certificate.
+                      Refers to the "path length constraint" in Basic Constraints extension. For a CA certificate, this value describes the depth of
+                      subordinate CA certificates that are allowed. If this value is less than 0, the request will fail.
                   - !ruby/object:Api::Type::Boolean
                     name: 'zeroMaxIssuerPathLength'
                     url_param_only: true
                     description: |
-                      Must be set to true when max_issuer_path_length is set to 0.
-                  - !ruby/object:Api::Type::Integer
-                    name: 'maxIssuerPathLength'
-                    description: |
-                      Refers to the path length restriction X.509 extension. For a CA certificate, this value describes the depth of
-                      subordinate CA certificates that are allowed. If this value is less than 0, the request will fail. If this
-                      value is missing, the max path length will be omitted from the CA certificate.
+                      When true, the "path length constraint" in Basic Constraints extension will be set to 0.
+                      if both `max_issuer_path_length` and `zero_max_issuer_path_length` are unset,
+                      the max path length will be omitted from the CA certificate.
               - !ruby/object:Api::Type::NestedObject
                 name: 'keyUsage'
                 required: true
