@@ -350,8 +350,8 @@ func resourceStorageBucket() *schema.Resource {
 				Optional:    true,
 				Description: `Prevents public access to a bucket.`,
 			},
-		},
 <% end -%>
+		},
 		UseJSONNumber: true,
 	}
 }
@@ -592,7 +592,7 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	if d.HasChange("uniform_bucket_level_access") <% unless version == "ga" -%> || d.HasChange("public_access_prevention") <% end -%> {
+	if d.HasChange("uniform_bucket_level_access")<% unless version == "ga" -%> || d.HasChange("public_access_prevention")<% end -%> {
 		sb.IamConfiguration = expandIamConfiguration(d)
 	}
 
@@ -1134,10 +1134,12 @@ func expandIamConfiguration(d *schema.ResourceData) *storage.BucketIamConfigurat
 		},
 	}
 <% unless version == "ga" -%>
+
 	if v, ok := d.GetOk("public_access_prevention"); ok {
 		cfg.PublicAccessPrevention = v.(string)
 	}
 <% end -%>
+
 	return cfg
 }
 
