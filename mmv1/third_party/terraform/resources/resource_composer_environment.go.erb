@@ -65,6 +65,9 @@ var (
 		"config.0.workloads_config",
 		"config.0.environment_size",
 <% end -%>
+<% unless version == "ga" -%>
+		"config.0.master_authorized_networks_config",
+<% end -%>
 	}
 
 	composerPrivateEnvironmentConfig = []string{
@@ -103,6 +106,23 @@ var (
 		},
 	}
 
+<% end -%>
+
+<% unless version == "ga" -%>
+	cidrBlocks = &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"display_name": {
+				Type:     		schema.TypeString,
+				Required: 		true,
+				Description:  `display_name is a field for users to identify CIDR blocks.`,
+			},
+			"cidr_block": {
+				Type:     		schema.TypeString,
+				Required: 		true,
+				Description:  `cidr_block must be specified in CIDR notation.`,
+			},
+		},
+	}
 <% end -%>
 )
 
@@ -447,6 +467,7 @@ func resourceComposerEnvironment() *schema.Resource {
 							Type:        schema.TypeList,
 							Optional:    true,
 							Computed:    true,
+							AtLeastOneOf: composerConfigKeys,
 							MaxItems:    1,
 							Description: `The network-level access control policy for the Airflow web server. If unspecified, no network-level access restrictions will be applied. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
 							Elem: &schema.Resource{
@@ -683,6 +704,32 @@ func resourceComposerEnvironment() *schema.Resource {
               ValidateFunc: validation.StringInSlice([]string{"ENVIRONMENT_SIZE_SMALL", "ENVIRONMENT_SIZE_MEDIUM", "ENVIRONMENT_SIZE_LARGE"}, false),
               Description:  `The size of the Cloud Composer environment. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
             },
+<% end -%>
+<% unless version == "ga" -%>
+						"master_authorized_networks_config": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							AtLeastOneOf: composerConfigKeys,
+							MaxItems:    1,
+							Description: `Configuration options for the master authorized networks feature. Enabled master authorized networks will disallow all external traffic to access Kubernetes master through HTTPS except traffic from the given CIDR blocks, Google Compute Engine Public IPs and Google Prod IPs.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Whether or not master authorized networks is enabled.`,
+									},
+									"cidr_block": {
+										Type:        schema.TypeSet,
+										Computed:    true,
+										Optional:    true,
+										Elem:        cidrBlocks,
+										Description: `cidr_blocks define up to 50 external networks that could access Kubernetes master through HTTPS.`,
+									},
+								},
+							},
+						},
 <% end -%>
 						"airflow_uri": {
 							Type:        schema.TypeString,
@@ -1100,6 +1147,7 @@ func flattenComposerEnvironmentConfig(envCfg *composer.EnvironmentConfig) interf
 	transformed["maintenance_window"] = flattenComposerEnvironmentConfigMaintenanceWindow(envCfg.MaintenanceWindow)
 	transformed["workloads_config"] = flattenComposerEnvironmentConfigWorkloadsConfig(envCfg.WorkloadsConfig)
 	transformed["environment_size"] = envCfg.EnvironmentSize
+	transformed["master_authorized_networks_config"] = flattenComposerEnvironmentConfigMasterAuthorizedNetworksConfig(envCfg.MasterAuthorizedNetworksConfig)
 <% end -%>
 
 	return []interface{}{transformed}
@@ -1308,6 +1356,30 @@ func flattenComposerEnvironmentConfigSoftwareConfig(softwareCfg *composer.Softwa
 	transformed["scheduler_count"] = softwareCfg.SchedulerCount
 	return []interface{}{transformed}
 }
+
+<% unless version == "ga" -%>
+func flattenComposerEnvironmentConfigMasterAuthorizedNetworksConfig(masterAuthNetsCfg *composer.MasterAuthorizedNetworksConfig) interface{} {
+	if masterAuthNetsCfg == nil {
+		return nil
+	}
+
+	transformed := make([]interface{}, 0, len(masterAuthNetsCfg.CidrBlocks) + 1)
+	// TODO how make flatten/expand fo master authorized networks ie. what type should be transformed etc.
+	for _, ipRange := range accessControl.AllowedIpRanges {
+		data := map[string]interface{}{
+			"value":       ipRange.Value,
+			"description": ipRange.Description,
+		}
+		transformed = append(transformed, data)
+	}
+
+	webServerNetworkAccessControl := make(map[string]interface{})
+
+	webServerNetworkAccessControl["allowed_ip_range"] = schema.NewSet(schema.HashResource(allowedIpRangesConfig), transformed)
+
+	return []interface{}{webServerNetworkAccessControl}
+}
+<% end -%>
 
 func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, config *Config) (*composer.EnvironmentConfig, error) {
 	l := v.([]interface{})
