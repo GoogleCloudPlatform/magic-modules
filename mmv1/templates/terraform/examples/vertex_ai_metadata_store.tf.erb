@@ -1,5 +1,5 @@
 resource "google_vertex_ai_metadata_store" "store" {
   name          = "<%= ctx[:vars]['name'] %>"
-  description   = "test description"
+  description   = "Store to test the terraform module"
   region        = "us-central1"
 }
