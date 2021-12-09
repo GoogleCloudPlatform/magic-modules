@@ -1,5 +1,5 @@
-resource "google_vertex_ai_metadata_store" "dataset" {
+resource "google_vertex_ai_metadata_store" "store" {
   name          = "<%= ctx[:vars]['name'] %>"
-  description   = "magic"
+  description   = "test description"
   region        = "us-central1"
 }
