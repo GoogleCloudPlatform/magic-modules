@@ -1,0 +1,146 @@
+data "google_container_aws_versions" "versions" {
+  project = "{{project}}"
+  location = "us-west1"
+}
+
+resource "google_container_aws_cluster" "primary" {
+  authorization {
+    admin_users {
+      username = "{{test_service_account}}"
+    }
+  }
+
+  aws_region = "{{aws_region}}"
+
+  control_plane {
+    aws_services_authentication {
+      role_arn          = "arn:aws:iam::{{aws_account_id}}:role/{{byo_multicloud_prefix}}-1p-dev-oneplatform"
+      role_session_name = "{{byo_multicloud_prefix}}-1p-dev-session"
+    }
+
+    config_encryption {
+      kms_key_arn = "arn:aws:kms:{{aws_region}}:{{aws_account_id}}:key/{{aws_database_encryption_key}}"
+    }
+
+    database_encryption {
+      kms_key_arn = "arn:aws:kms:{{aws_region}}:{{aws_account_id}}:key/{{aws_database_encryption_key}}"
+    }
+
+    iam_instance_profile = "{{byo_multicloud_prefix}}-1p-dev-controlplane"
+    subnet_ids           = ["{{aws_subnet}}"]
+    version   = "${data.google_container_aws_versions.versions.valid_versions[0]}"
+    instance_type        = "t3.medium"
+
+    main_volume {
+      iops        = 3000
+      kms_key_arn = "arn:aws:kms:{{aws_region}}:{{aws_account_id}}:key/{{aws_volume_encryption_key}}"
+      size_gib    = 10
+      volume_type = "GP3"
+    }
+
+    proxy_config {
+      secret_arn     = "arn:aws:secretsmanager:us-west-2:126285863215:secret:proxy_config20210824150329476300000001-ABCDEF"
+      secret_version = "12345678-ABCD-EFGH-IJKL-987654321098"
+    }
+
+    root_volume {
+      iops        = 3000
+      kms_key_arn = "arn:aws:kms:{{aws_region}}:{{aws_account_id}}:key/{{aws_volume_encryption_key}}"
+      size_gib    = 10
+      volume_type = "GP3"
+    }
+
+    security_group_ids = ["{{aws_security_group}}"]
+
+    ssh_config {
+      ec2_key_pair = "{{byo_multicloud_prefix}}-1p-dev-ssh"
+    }
+
+    tags = {
+      owner = "{{test_service_account}}"
+    }
+  }
+
+  fleet {
+    project = "{{project_number}}"
+  }
+
+  location = "us-west1"
+  name     = "{{name}}"
+
+  networking {
+    pod_address_cidr_blocks     = ["10.2.0.0/16"]
+    service_address_cidr_blocks = ["10.1.0.0/16"]
+    vpc_id                      = "{{aws_vpc}}"
+  }
+
+  annotations = {
+    label-one = "value-one"
+  }
+
+  description = "A sample aws cluster"
+  project     = "{{project}}"
+}
+
+
+resource "google_container_aws_node_pool" "primary" {
+  autoscaling {
+    max_node_count = 5
+    min_node_count = 1
+  }
+
+  cluster = google_container_aws_cluster.primary.name
+
+  config {
+    config_encryption {
+      kms_key_arn = "arn:aws:kms:{{aws_region}}:{{aws_account_id}}:key/{{aws_database_encryption_key}}"
+    }
+
+    iam_instance_profile = "{{byo_multicloud_prefix}}-1p-dev-nodepool"
+    instance_type        = "t3.medium"
+
+    labels = {
+      label-one = "value-one"
+    }
+
+    root_volume {
+      iops        = 3000
+      kms_key_arn = "arn:aws:kms:{{aws_region}}:{{aws_account_id}}:key/{{aws_volume_encryption_key}}"
+      size_gib    = 10
+      volume_type = "GP3"
+    }
+
+    security_group_ids = ["{{aws_security_group}}"]
+
+    ssh_config {
+      ec2_key_pair = "{{byo_multicloud_prefix}}-1p-dev-ssh"
+    }
+
+    tags = {
+      tag-one = "value-one"
+    }
+
+    taints {
+      effect = "PREFER_NO_SCHEDULE"
+      key    = "taint-key"
+      value  = "taint-value"
+    }
+  }
+
+  location = "us-west1"
+
+  max_pods_constraint {
+    max_pods_per_node = 110
+  }
+
+  name      = "{{node-pool-name}}"
+  subnet_id = "{{aws_subnet}}"
+  version   = "1.21.3-gke.2001"
+
+  annotations = {
+    label-one = "value-one"
+  }
+
+  project = "{{project}}"
+}
+

@@ -817,6 +817,7 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 		}
 
 		if !versionMatch {
+			glog.Errorf("skipping %q due to no version match", file.Name())
 			continue
 		}
 
@@ -897,7 +898,6 @@ func (r *Resource) loadDCLSamples() []Sample {
 		if !versionMatch {
 			continue
 		} else if !strings.EqualFold(primaryResourceName, resourceType) {
-			glog.Errorf("skipping %s since no match with %s.", primaryResourceName, resourceType)
 			continue
 		}
 

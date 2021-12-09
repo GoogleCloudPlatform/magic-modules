@@ -1,7 +1,0 @@
-{
-  "name": "{{client}}",
-  "project": "{{project}}",
-  "location": "us-west1",
-  "tenantId": "{{azure_ad_tenant}}",
-  "applicationId": "{{azure_application}}"
-}
