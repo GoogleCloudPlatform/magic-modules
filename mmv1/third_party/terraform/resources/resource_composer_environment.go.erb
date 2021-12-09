@@ -677,6 +677,7 @@ func resourceComposerEnvironment() *schema.Resource {
 						"environment_size": {
               Type:         schema.TypeString,
               Optional:     true,
+							Computed:			true,
               ForceNew:     false,
               AtLeastOneOf: composerConfigKeys,
               ValidateFunc: validation.StringInSlice([]string{"ENVIRONMENT_SIZE_SMALL", "ENVIRONMENT_SIZE_MEDIUM", "ENVIRONMENT_SIZE_LARGE"}, false),

@@ -397,7 +397,7 @@ func TestAccComposerEnvironment_ComposerV2(t *testing.T) {
   })
 }
 
-func TestAccComposerEnvironment_ComposerV2PrivateServiceConnect(t *testing.T) {
+func TestAccComposerEnvironment_composerV2PrivateServiceConnect(t *testing.T) {
 	t.Parallel()
 
 	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
@@ -1112,7 +1112,6 @@ resource "google_composer_environment" "test" {
 
   		software_config {
   		  image_version = local.matching_images[0]
-				# image_version = "composer-2.0.0-preview.6-airflow-2.1.4"
   		}
   		private_environment_config {
 				cloud_composer_connection_subnetwork		= google_compute_subnetwork.test.self_link
