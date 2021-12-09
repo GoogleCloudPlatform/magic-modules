@@ -221,7 +221,6 @@ module Provider
                         'third_party/terraform/utils/common_operation.go'],
                        ['converters/google/resources/convert.go',
                         'third_party/terraform/utils/convert.go'],
-
                        ['converters/google/resources/service_scope.go',
                         'third_party/terraform/utils/service_scope.go'],
                        ['converters/google/resources/kms_utils.go',
@@ -252,6 +251,8 @@ module Provider
                         'third_party/terraform/utils/iam_folder.go'],
                        ['converters/google/resources/iam_project.go',
                         'third_party/terraform/utils/iam_project.go'],
+                       ['converters/google/resources/privateca_utils.go',
+                        'third_party/terraform/utils/privateca_utils.go'],
                        ['converters/google/resources/utils.go',
                         'third_party/terraform/utils/utils.go'],
                        ['converters/google/resources/iam_bigquery_dataset.go',
