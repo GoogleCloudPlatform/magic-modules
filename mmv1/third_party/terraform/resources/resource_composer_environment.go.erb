@@ -709,7 +709,6 @@ func resourceComposerEnvironment() *schema.Resource {
 						"master_authorized_networks_config": {
 							Type:        schema.TypeList,
 							Optional:    true,
-							Computed:    true,
 							AtLeastOneOf: composerConfigKeys,
 							MaxItems:    1,
 							Description: `Configuration options for the master authorized networks feature. Enabled master authorized networks will disallow all external traffic to access Kubernetes master through HTTPS except traffic from the given CIDR blocks, Google Compute Engine Public IPs and Google Prod IPs.`,
@@ -722,7 +721,6 @@ func resourceComposerEnvironment() *schema.Resource {
 									},
 									"cidr_block": {
 										Type:        schema.TypeSet,
-										Computed:    true,
 										Optional:    true,
 										Elem:        cidrBlocks,
 										Description: `cidr_blocks define up to 50 external networks that could access Kubernetes master through HTTPS.`,
