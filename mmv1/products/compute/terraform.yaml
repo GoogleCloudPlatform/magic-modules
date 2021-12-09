@@ -847,6 +847,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "port_range"
           - "target"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "forwarding_rule_regional_http_xlb"
+        min_version: 'beta'
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "website-forwarding-rule"
+          region_target_http_proxy_name: "website-proxy"
+          region_url_map_name: "website-map"
+          region_backend_service_name: "website-backend"
+          region_health_check_name: "website-hc"
+          rigm_name: "website-rigm"
+          network_name: "website-net"
+          fw_name: "website-fw"
+          ip_name: "website-ip"
+        ignore_read_extra:
+          - "port_range"
+          - "target"
+          - "ip_address"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
     properties:
