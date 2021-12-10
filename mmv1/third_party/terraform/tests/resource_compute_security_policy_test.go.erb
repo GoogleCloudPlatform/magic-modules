@@ -388,7 +388,8 @@ resource "google_compute_security_policy" "policy" {
   name        = "%s"
   description = "updated description"
   rate_limit_options {
-    exceed_action = "deny-429"
+    conform_action = "allow"
+    exceed_action = "allow"
     enforce_on_key = "IP"
     rate_limit_threshold {
       count = 100
