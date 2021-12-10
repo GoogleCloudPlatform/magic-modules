@@ -348,6 +348,7 @@ func resourceStorageBucket() *schema.Resource {
 			"public_access_prevention": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: `Prevents public access to a bucket.`,
 			},
 <% end -%>
