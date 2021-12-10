@@ -1361,21 +1361,20 @@ func flattenComposerEnvironmentConfigMasterAuthorizedNetworksConfig(masterAuthNe
 		return nil
 	}
 
-	transformed := make([]interface{}, 0, len(masterAuthNetsCfg.CidrBlocks) + 1)
-	// TODO how make flatten/expand fo master authorized networks ie. what type should be transformed etc.
-	for _, ipRange := range accessControl.AllowedIpRanges {
+	transformed := make([]interface{}, 0, len(masterAuthNetsCfg.CidrBlocks))
+	for _, cidrBlock := range masterAuthNetsCfg.CidrBlocks {
 		data := map[string]interface{}{
-			"value":       ipRange.Value,
-			"description": ipRange.Description,
+			"display_name": cidrBlock.DisplayName,
+			"cidr_block": cidrBlock.CidrBlock,
 		}
 		transformed = append(transformed, data)
 	}
 
-	webServerNetworkAccessControl := make(map[string]interface{})
+	masterAuthorizedNetworksConfig := make(map[string]interface{})
+	masterAuthorizedNetworksConfig["enabled"] = masterAuthNetsCfg.Enabled
+	masterAuthorizedNetworksConfig["cidr_block"] = schema.NewSet(schema.HashResource(cidrBlocks), transformed)
 
-	webServerNetworkAccessControl["allowed_ip_range"] = schema.NewSet(schema.HashResource(allowedIpRangesConfig), transformed)
-
-	return []interface{}{webServerNetworkAccessControl}
+	return []interface{}{masterAuthorizedNetworksConfig}
 }
 <% end -%>
 
@@ -1459,6 +1458,15 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
   	}
   	transformed.EnvironmentSize = transformedEnvironmentSize
 <% end -%>
+
+<% unless version == "ga" -%>
+	transformedMasterAuthorizedNetworksConfig, err := expandComposerEnvironmentConfigMasterAuthorizedNetworksConfig(original["master_authorized_networks_config"], d, config)
+	if err != nil {
+		return nil, err
+	}
+	transformed.MasterAuthorizedNetworksConfig = transformedMasterAuthorizedNetworksConfig
+
+<% end -%>
 	return transformed, nil
 }
 
@@ -1496,6 +1504,36 @@ func expandComposerEnvironmentConfigWebServerNetworkAccessControl(v interface{},
 	}
 
 	transformed.AllowedIpRanges = allowedIpRanges
+	return transformed, nil
+}
+
+<% end -%>
+
+<% unless version == "ga" -%>
+func expandComposerEnvironmentConfigMasterAuthorizedNetworksConfig(v interface{}, d *schema.ResourceData, config *Config) (*composer.MasterAuthorizedNetworksConfig, error) {
+	l := v.([]interface{})
+	if len(l) == 0 {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+
+	cidrBlocksRaw := original["cidr_block"].(*schema.Set).List()
+
+	transformed := &composer.ConfigMasterAuthorizedNetworksConfig{}
+	cidrBlocks := make([]*composer.cidrBlocks, 0, len(original))
+
+	for _, originalCidrBlock := range cidrBlocksRaw {
+		originalCidrBlockRaw := originalCidrBlock.(map[string]interface{})
+		transformedCidrBlock := &composer.cidrBlocks{Value: originalCidrBlockRaw["value"].(string)}
+		transformedCidrBlock := &composer.cidrBlocks{Value: originalCidrBlockRaw["value"].(string)}
+		if v, ok := originalCidrBlockRaw["description"]; ok {
+			transformedCidrBlock.Description = v.(string)
+		}
+		cidrBlocks = append(cidrBlocks, transformedCidrBlock)
+	}
+	transformed.Enabled = original["enabled"].(bool)
+	transformed.cidrBlocks = cidrBlocks
 	return transformed, nil
 }
 
