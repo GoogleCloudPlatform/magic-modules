@@ -97,7 +97,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_test: true
         primary_resource_id: "store"
         vars:
-          name: "tf-test-"
+          name: "test-store"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
