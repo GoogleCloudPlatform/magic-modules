@@ -1059,7 +1059,7 @@ locals {
 }
 resource "google_composer_environment" "test" {
 	name   = "%s"
-	region = "us-central1"
+	region = "us-east1"
 
 		config {
 			node_config {
@@ -1113,7 +1113,7 @@ resource "google_compute_network" "test" {
 resource "google_compute_subnetwork" "test" {
 	name          = "%s"
 	ip_cidr_range = "10.2.0.0/16"
-	region        = "us-central1"
+	region        = "us-east1"
  	network       = google_compute_network.test.self_link
 	private_ip_google_access = true
 }
@@ -1261,7 +1261,7 @@ locals {
 }
 resource "google_composer_environment" "test" {
 	name   = "%s"
-	region = "us-central1"
+	region = "us-east1"
 
 		config {
 			node_config {
@@ -1315,7 +1315,7 @@ resource "google_compute_network" "test" {
 resource "google_compute_subnetwork" "test" {
 	name          = "%s"
 	ip_cidr_range = "10.2.0.0/16"
-	region        = "us-central1"
+	region        = "us-east1"
  	network       = google_compute_network.test.self_link
 	private_ip_google_access = true
 }
