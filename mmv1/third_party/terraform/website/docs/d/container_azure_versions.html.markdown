@@ -1,5 +1,5 @@
 ---
-subcategory: "Container Azure"
+subcategory: "ContainerAzure"
 layout: "google"
 page_title: "Google: google_container_azure_versions"
 sidebar_current: "docs-google-datasource-container-azure-versions"
