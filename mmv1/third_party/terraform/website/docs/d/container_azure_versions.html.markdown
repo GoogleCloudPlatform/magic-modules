@@ -29,7 +29,7 @@ output "first_available_version" {
 
 The following arguments are supported:
 
-* `location` (Optional) - The location (region or zone) to list versions for.
+* `location` (Optional) - The location to list versions for.
 
 * `project` (Optional) - ID of the project to list available cluster versions for. Should match the project the cluster will be deployed to.
   Defaults to the project that the provider is authenticated with.
@@ -38,5 +38,5 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `valid_versions` - A list of versions available in the given zone for use with this project and location.
+* `valid_versions` - A list of versions available for use with this project and location.
 * `supported_regions` - A list of Azure regions that are available for use with this project and GCP location.

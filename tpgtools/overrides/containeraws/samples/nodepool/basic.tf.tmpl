@@ -135,7 +135,7 @@ resource "google_container_aws_node_pool" "primary" {
 
   name      = "{{node-pool-name}}"
   subnet_id = "{{aws_subnet}}"
-  version   = "1.21.3-gke.2001"
+  version   = "${data.google_container_aws_versions.versions.valid_versions[0]}"
 
   annotations = {
     label-one = "value-one"
