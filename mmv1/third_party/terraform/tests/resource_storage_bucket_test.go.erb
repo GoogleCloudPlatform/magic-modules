@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -590,6 +591,7 @@ func TestAccStorageBucket_forceDestroyObjectDeleteError(t *testing.T) {
 		},
 	})
 }
+
 func TestAccStorageBucket_versioning(t *testing.T) {
 	t.Parallel()
 
@@ -765,6 +767,30 @@ func TestAccStorageBucket_encryption(t *testing.T) {
 		},
 	})
 }
+
+<% unless version == "ga" -%>
+func TestAccStorageBucket_publicAccessPrevention(t *testing.T) {
+	t.Parallel()
+
+	bucketName := fmt.Sprintf("tf-test-acl-bucket-%d", randInt(t))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_publicAccessPrevention(bucketName, "enforced"),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+<% end -%>
 
 func TestAccStorageBucket_uniformBucketAccessOnly(t *testing.T) {
 	t.Parallel()
@@ -1463,6 +1489,20 @@ resource "google_storage_bucket" "bucket" {
 }
 `, bucketName, enabled)
 }
+
+<% unless version == "ga" -%>
+func testAccStorageBucket_publicAccessPrevention(bucketName string, prevention string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  provider                  = google-beta
+  name                      = "%s"
+  location                  = "US"
+  public_access_prevention  = "%s"
+  force_destroy             = true
+}
+`, bucketName, prevention)
+}
+<% end -%>
 
 func testAccStorageBucket_encryption(context map[string]interface{}) string {
 	return Nprintf(`

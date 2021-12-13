@@ -34,7 +34,11 @@
         },
         "name": "test-firewall1",
         "network": "projects/{{.Provider.project}}/global/networks/test-network",
-        "priority": 42
+        "priority": 42,
+        "sourceServiceAccounts": [
+          "test-source_service_account2",
+          "test-source_service_account1"
+        ]
       }
     }
   },

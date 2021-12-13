@@ -1,0 +1,17 @@
+[
+  {
+    "name": "//pubsub.googleapis.com/placeholder-BpLnfgDs",
+    "asset_type": "pubsub.googleapis.com/Subscription",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "iam_policy": {
+      "bindings": [
+        {
+          "role": "roles/editor",
+          "members": [
+            "user:jane@example.com"
+          ]
+        }
+      ]
+    }
+  }
+]
