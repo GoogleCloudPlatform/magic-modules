@@ -32,6 +32,7 @@ var (
 		"transfer_spec.0.aws_s3_data_source",
 		"transfer_spec.0.http_data_source",
 		"transfer_spec.0.azure_blob_storage_data_source",
+		"transfer_spec.0.posix_data_source",
 	}
 	awsS3AuthKeys = []string{
 		"transfer_spec.0.aws_s3_data_source.0.aws_access_key",
@@ -83,6 +84,13 @@ func resourceStorageTransferJob() *schema.Resource {
 							Elem:        gcsDataSchema(),
 							Description: `A Google Cloud Storage data sink.`,
 						},
+						"posix_data_sink": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Elem:        posixDataSchema(),
+							Description: `A POSIX filesystem data sink.`,
+						},
 						"gcs_data_source": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -106,6 +114,14 @@ func resourceStorageTransferJob() *schema.Resource {
 							Elem:         httpDataSchema(),
 							ExactlyOneOf: transferSpecDataSourceKeys,
 							Description:  `A HTTP URL data source.`,
+						},
+						"posix_data_source": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							MaxItems:     1,
+							Elem:         posixDataSchema(),
+							ExactlyOneOf: transferSpecDataSourceKeys,
+							Description:  `A POSIX filesystem data source.`,
 						},
 						"azure_blob_storage_data_source": {
 							Type:         schema.TypeList,
@@ -397,6 +413,18 @@ func httpDataSchema() *schema.Resource {
 	}
 }
 
+func posixDataSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"root_directory": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: `Root directory path to the filesystem.`,
+			},
+		},
+	}
+}
+
 func azureBlobStorageDataSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -499,7 +527,7 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Transfer Job %q", name))
 	}
-	log.Printf("[DEBUG] Read transfer job: %v in project: %v \n\n", res.Name, res.ProjectId)
+	log.Printf("[DEBUG] Read transfer job: %v in project: %v \n\n", res.Name, res.ProjectId) 
 
 	if err := d.Set("project", res.ProjectId); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
@@ -847,6 +875,25 @@ func flattenHttpData(httpData *storagetransfer.HttpData) []map[string]interface{
 	return []map[string]interface{}{data}
 }
 
+func expandPosixData(posixDatas []interface{}) *storagetransfer.PosixFilesystem {
+	if len(posixDatas) == 0 || posixDatas[0] == nil {
+		return nil
+	}
+
+	posixData := posixDatas[0].(map[string]interface{})
+	return &storagetransfer.PosixFilesystem{
+		RootDirectory: posixData["root_directory"].(string),
+	}
+}
+
+func flattenPosixData(posixData *storagetransfer.PosixFilesystem) []map[string]interface{} {
+	data := map[string]interface{}{
+		"root_directory": posixData.RootDirectory,
+	}
+
+	return []map[string]interface{}{data}
+}
+
 func expandAzureCredentials(azureCredentials []interface{}) *storagetransfer.AzureCredentials {
 	if len(azureCredentials) == 0 || azureCredentials[0] == nil {
 		return nil
@@ -953,6 +1000,7 @@ func expandTransferSpecs(transferSpecs []interface{}) *storagetransfer.TransferS
 		AwsS3DataSource:            expandAwsS3Data(transferSpec["aws_s3_data_source"].([]interface{})),
 		HttpDataSource:             expandHttpData(transferSpec["http_data_source"].([]interface{})),
 		AzureBlobStorageDataSource: expandAzureBlobStorageData(transferSpec["azure_blob_storage_data_source"].([]interface{})),
+		PosixDataSource:            expandPosixData(transferSpec["posix_data_source"].([]interface{})),
 	}
 }
 
@@ -976,7 +1024,11 @@ func flattenTransferSpec(transferSpec *storagetransfer.TransferSpec, d *schema.R
 		data["http_data_source"] = flattenHttpData(transferSpec.HttpDataSource)
 	} else if transferSpec.AzureBlobStorageDataSource != nil {
 		data["azure_blob_storage_data_source"] = flattenAzureBlobStorageData(transferSpec.AzureBlobStorageDataSource, d)
+	} else if transferSpec.PosixDataSource != nil {
+		data["posix_data_source"] = flattenPosixData(transferSpec.PosixDataSource)
 	}
+
+	log.Printf("[DEBUG] Read transfer spec: %#v \n\n", transferSpec)
 
 	return []map[string][]map[string]interface{}{data}
 }
