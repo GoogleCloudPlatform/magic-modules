@@ -194,6 +194,13 @@ exported:
 
 * `url` - The base URL of the bucket, in the format `gs://<bucket-name>`.
 
+## Timeouts
+
+This resource provides the following
+[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+
+- `read` - Default is 4 minutes.
+
 ## Import
 
 Storage buckets can be imported using the `name` or  `project/name`. If the project is not
