@@ -61,13 +61,17 @@ func dataSourceGoogleContainerAzureVersionsRead(d *schema.ResourceData, meta int
 	if err != nil {
 		return err
 	}
-	d.Set("supported_regions", res["supportedAzureRegions"])
+	if err := d.Set("supported_regions", res["supportedAzureRegions"]); err != nil {
+		return err
+	}
 	var validVersions []string
 	for _, v := range res["validVersions"].([]interface{}) {
 		vm := v.(map[string]interface{})
 		validVersions = append(validVersions, vm["version"].(string))
 	}
-	d.Set("valid_versions", validVersions)
+	if err := d.Set("valid_versions", validVersions); err != nil {
+		return err
+	}
 
 	d.SetId(time.Now().UTC().String())
 	return nil
