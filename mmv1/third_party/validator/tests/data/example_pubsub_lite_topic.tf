@@ -23,6 +23,10 @@ terraform {
   }
 }
 
+provider "google" {
+  {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
+}
+
 resource "google_pubsub_lite_topic" "example" {
   name = "example-topic"
   zone = "us-central1a"
