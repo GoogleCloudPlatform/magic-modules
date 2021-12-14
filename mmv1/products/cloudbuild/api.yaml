@@ -447,6 +447,30 @@ objects:
                     Secret environment variables must be unique across all of a build's secrets, 
                     and must be used by at least one build step. Values can be at most 64 KB in size. 
                     There can be at most 100 secret values across all of a build's secrets.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'availableSecrets'
+            description: |
+              Secrets and secret environment variables.
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'secretManager'
+                required: true
+                description: |
+                  Pairs a secret environment variable with a SecretVersion in Secret Manager.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'versionName'
+                      required: true
+                      description: |
+                        Resource name of the SecretVersion. In format: projects/*/secrets/*/versions/*
+                    - !ruby/object:Api::Type::String
+                      name: 'env'
+                      required: true
+                      description: |
+                        Environment variable name to associate with the secret. Secret environment
+                        variables must be unique across all of a build's secrets, and must be used
+                        by at least one build step.
           - !ruby/object:Api::Type::Array
             name: 'steps'
             required: true

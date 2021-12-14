@@ -25,6 +25,9 @@ module Api
       # boolean of if this binding should be generated
       attr_reader :exclude
 
+      # boolean of if this binding should be generated
+      attr_reader :exclude_validator
+
       # Character that separates resource identifier from method call in URL
       # For example, PubSub subscription uses {resource}:getIamPolicy
       # While Compute subnetwork uses {resource}/getIamPolicy
@@ -102,6 +105,7 @@ module Api
         super
 
         check :exclude, type: :boolean, default: false
+        check :exclude_validator, type: :boolean, default: false
         check :method_name_separator, type: String, default: '/'
         check :parent_resource_type, type: String
         check :fetch_iam_policy_verb, type: Symbol, default: :GET, allowed: %i[GET POST]

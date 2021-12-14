@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"bitbucket.org/creachadair/stringset"
+	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	"github.com/golang/glog"
 	"github.com/nasa9084/go-openapi"
 	"gopkg.in/yaml.v2"
@@ -51,6 +52,10 @@ type Resource struct {
 	// rarely needed in cases where the shared mm basepath does not include the version
 	// as in Montioring https://git.io/Jz4Wn
 	AppendToBasePath string
+
+	// ReplaceInBasePath contains a string replacement for the config base path,
+	// replacing one substring with another.
+	ReplaceInBasePath BasePathReplacement
 
 	// title is the name of the resource in snake_case. For example,
 	// "instance", "backend_service".
@@ -149,6 +154,40 @@ type Resource struct {
 
 	// Versions specific information about this resource
 	versionMetadata Version
+
+	// Reference points to the rest API
+	Reference *Link
+	// Guides point to non-rest useful context for the resource.
+	Guides []Link
+}
+
+type Link struct {
+	text string
+	url  string
+}
+
+type BasePathReplacement struct {
+	Present bool
+	Old     string
+	New     string
+}
+
+func (l Link) Markdown() string {
+	return fmt.Sprintf("[%s](%s)", l.text, l.url)
+}
+
+func (r *Resource) fillLinksFromExtensionsMap(m map[string]interface{}) {
+	ref, ok := m["x-dcl-ref"].(map[string]interface{})
+	if ok {
+		r.Reference = &Link{url: ref["url"].(string), text: ref["text"].(string)}
+	}
+	gs, ok := m["x-dcl-guides"].([]interface{})
+	if ok {
+		for _, g := range gs {
+			guide := g.(map[interface{}]interface{})
+			r.Guides = append(r.Guides, Link{url: guide["url"].(string), text: guide["text"].(string)})
+		}
+	}
 }
 
 // Name is the shortname of a resource. For example, "instance".
@@ -188,7 +227,7 @@ func (r Resource) TerraformName() string {
 // PathType is the title-cased name of a resource preceded by its package,
 // often used to namespace functions. For example, "RedisInstance".
 func (r Resource) PathType() string {
-	return snakeToTitleCase(r.Path())
+	return dcl.SnakeToTitleCase(r.Path())
 }
 
 // Package is the namespace of the package within the dcl
@@ -374,7 +413,7 @@ func (r Resource) RegisterReusedType(p Property) []Property {
 	return r.ReusedTypes
 }
 
-func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides Overrides, product *ProductMetadata, version Version, location string) (*Resource, error) {
+func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *TypeFetcher, overrides Overrides, product *ProductMetadata, version Version, location string) (*Resource, error) {
 	resourceTitle := schema.Title
 
 	// Attempt to construct the resource name using location. Other than
@@ -390,12 +429,27 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 		dclTitle:             schema.Title,
 		productMetadata:      product,
 		versionMetadata:      version,
-		Description:          schema.Description,
+		Description:          info.Description,
 		location:             location,
-		InsertTimeoutMinutes: 30,
-		UpdateTimeoutMinutes: 30,
-		DeleteTimeoutMinutes: 30,
+		InsertTimeoutMinutes: 10,
+		UpdateTimeoutMinutes: 10,
+		DeleteTimeoutMinutes: 10,
 		UseDCLID:             overrides.ResourceOverride(UseDCLID, location),
+	}
+	// Since the resource's "info" extension field can't be accessed, the relevant
+	// extensions have been copied into the schema objects.
+	res.fillLinksFromExtensionsMap(schema.Extension)
+
+	// Resource Override: Custom Timeout
+	ctd := CustomTimeoutDetails{}
+	ctdOk, err := overrides.ResourceOverrideWithDetails(CustomTimeout, &ctd, location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode custom timeout details: %v", err)
+	}
+	if ctdOk {
+		res.InsertTimeoutMinutes = ctd.TimeoutMinutes
+		res.UpdateTimeoutMinutes = ctd.TimeoutMinutes
+		res.DeleteTimeoutMinutes = ctd.TimeoutMinutes
 	}
 
 	crname := CustomResourceNameDetails{}
@@ -432,6 +486,18 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 	}
 	if atbpOk {
 		res.AppendToBasePath = atbpd.String
+	}
+
+	// Resource Override: Replace in Base Path
+	ribpd := ReplaceInBasePathDetails{}
+	ribpOk, err := overrides.ResourceOverrideWithDetails(ReplaceInBasePath, &ribpd, location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode replace in base path details: %v", err)
+	}
+	if ribpOk {
+		res.ReplaceInBasePath.Present = true
+		res.ReplaceInBasePath.Old = ribpd.Old
+		res.ReplaceInBasePath.New = ribpd.New
 	}
 
 	// Resource Override: Import formats

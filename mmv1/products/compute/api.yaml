@@ -2396,6 +2396,7 @@ objects:
         default_value: :INTERNAL
         values:
           - :EXTERNAL
+          - :EXTERNAL_MANAGED
           - :INTERNAL
           - :INTERNAL_MANAGED
       - !ruby/object:Api::Type::Enum
@@ -2698,7 +2699,7 @@ objects:
         description: |
           A named port on a backend instance group representing the port for
           communication to the backend VMs in that group. Required when the
-          loadBalancingScheme is EXTERNAL, INTERNAL_MANAGED, or INTERNAL_SELF_MANAGED
+          loadBalancingScheme is EXTERNAL, EXTERNAL_MANAGED, INTERNAL_MANAGED, or INTERNAL_SELF_MANAGED
           and the backends are instance groups. The named port must be defined on each
           backend instance group. This parameter has no meaning if the backends are NEGs. API sets a
           default of "http" if not given.
@@ -3835,14 +3836,16 @@ objects:
         name: 'loadBalancingScheme'
         description: |
           This signifies what the ForwardingRule will be used for and can be
-          EXTERNAL, INTERNAL, or INTERNAL_MANAGED. EXTERNAL is used for Classic
+          EXTERNAL, EXTERNAL_MANAGED, INTERNAL, or INTERNAL_MANAGED. EXTERNAL is used for Classic
           Cloud VPN gateways, protocol forwarding to VMs from an external IP address,
           and HTTP(S), SSL Proxy, TCP Proxy, and Network TCP/UDP load balancers.
           INTERNAL is used for protocol forwarding to VMs from an internal IP address,
           and internal TCP/UDP load balancers.
+          EXTERNAL_MANAGED is used for regional external HTTP(S) load balancers.
           INTERNAL_MANAGED is used for internal HTTP(S) load balancers.
         values:
           - :EXTERNAL
+          - :EXTERNAL_MANAGED
           - :INTERNAL
           - :INTERNAL_MANAGED
       - !ruby/object:Api::Type::String
@@ -9072,7 +9075,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Using Packet Mirroring': 'https://cloud.google.com/vpc/docs/using-packet-mirroring#creating'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/packetMirroring'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/packetMirrorings'
     description: |
       Packet Mirroring mirrors traffic to and from particular VM instances.
       You can use the collected traffic to help you detect security threats
@@ -14651,13 +14654,11 @@ objects:
         name: 'purpose'
         input: true
         description: |
-          The purpose of the resource. This field can be either PRIVATE
-          or INTERNAL_HTTPS_LOAD_BALANCER. A subnetwork with purpose set to
+          The purpose of the resource. A subnetwork with purpose set to
           INTERNAL_HTTPS_LOAD_BALANCER is a user-created subnetwork that is
-          reserved for Internal HTTP(S) Load Balancing. If unspecified, the
-          purpose defaults to PRIVATE.
+          reserved for Internal HTTP(S) Load Balancing. 
 
-          If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set `role`.
+          If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set the `role` field.
       - !ruby/object:Api::Type::Enum
         name: 'role'
         update_verb: :PATCH

@@ -55,6 +55,10 @@ type Property struct {
 	// ConflictsWith is the list of fields that this field conflicts with
 	ConflictsWith ConflictsWith
 
+	// ConflictsWith is the list of fields that this field conflicts with
+	// in JSONCase. For example, "machineType"
+	JSONCaseConflictsWith []string
+
 	// Default is the default for the field.
 	Default *string
 
@@ -392,23 +396,11 @@ func getSchemaExtensionMap(v interface{}) map[interface{}]interface{} {
 }
 
 func (p Property) DefaultDiffSuppress() *string {
-	if p.Computed {
-		return nil
-	}
 	switch p.Type.String() {
 	case SchemaTypeString:
+		// Field is reference to another resource
 		if _, ok := p.typ.Extension["x-dcl-references"]; ok {
-			// Field is reference to another resource.
 			dsf := "compareSelfLinkOrResourceName"
-			return &dsf
-		}
-	case SchemaTypeList:
-		if p.typ.Items == nil || len(p.typ.Items.Extension) == 0 {
-			return nil
-		}
-		if _, ok := p.typ.Items.Extension["x-dcl-references"]; ok {
-			// Field is reference to another resource.
-			dsf := "compareSelfLinkOrResourceNameList"
 			return &dsf
 		}
 	}
@@ -482,6 +474,10 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 	if parent == nil {
 		identityFields = idParts(resource.ID)
 	}
+
+	// Maps PackageJSONName back to property Name 
+	// for conflict fields
+	conflictsMap := make(map[string]string)
 
 	for k, v := range schema.Properties {
 		ref := ""
@@ -561,9 +557,16 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		}
 
 		if v, ok := v.Extension["x-dcl-conflicts"].([]interface{}); ok {
-			for _, ci := range v {
-				p.ConflictsWith = append(p.ConflictsWith, ci.(string))
+			// NOTE: DCL only label x-dcl-conflicts for top-level field currently 
+			// TODO(shuya): handle nested field when DCL apply the feature
+			if parent != nil {
+				return nil, fmt.Errorf("The conflict field is not top-level, need a fix in tpgtools")
 			}
+			for _, ci := range v {
+				p.JSONCaseConflictsWith = append(p.JSONCaseConflictsWith, ci.(string))
+			}
+
+			conflictsMap[p.PackageJSONName()] = p.Name()
 		}
 
 		// Do this before handling properties so we can check if the parent is readOnly
@@ -878,6 +881,21 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		}
 
 		props = append(props, p)
+	}
+
+	// handle conflict fields
+	for i, _ := range props {
+		p := &props[i]
+		if p.JSONCaseConflictsWith != nil {
+			for _, cf := range p.JSONCaseConflictsWith {
+				if val, ok := conflictsMap[cf]; ok {
+					p.ConflictsWith = append(p.ConflictsWith, val)
+				} else {
+					return nil, fmt.Errorf("Error generating conflict fields. %s is not labeled as a conflict field in DCL", cf)
+				}
+				
+			}
+		}
 	}
 
 	// sort the properties so they're in a nice order

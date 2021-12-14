@@ -23,7 +23,7 @@ resource "google_pubsub_topic" "foo" {
 }
 
 resource "google_cloud_run_service" "default" {
-	name     = "{{event_arc_service}}"
+	name     = "{{eventarc-service}}"
 	location = "europe-west1"
 
 	metadata {
@@ -47,7 +47,7 @@ resource "google_cloud_run_service" "default" {
 }
 
 resource "google_cloud_run_service" "default2" {
-	name     = "{{event_arc_service}}2"
+	name     = "{{eventarc-service}}2"
 	location = "europe-north1"
 
 	metadata {
