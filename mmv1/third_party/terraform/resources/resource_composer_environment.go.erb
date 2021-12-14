@@ -707,11 +707,11 @@ func resourceComposerEnvironment() *schema.Resource {
 <% end -%>
 <% unless version == "ga" -%>
 						"master_authorized_networks_config": {
-							Type:        schema.TypeList,
-							Optional:    true,
+							Type:        	schema.TypeList,
+							Optional:    	true,
 							AtLeastOneOf: composerConfigKeys,
-							MaxItems:    1,
-							Description: `Configuration options for the master authorized networks feature. Enabled master authorized networks will disallow all external traffic to access Kubernetes master through HTTPS except traffic from the given CIDR blocks, Google Compute Engine Public IPs and Google Prod IPs.`,
+							MaxItems:    	1,
+							Description: 	`Configuration options for the master authorized networks feature. Enabled master authorized networks will disallow all external traffic to access Kubernetes master through HTTPS except traffic from the given CIDR blocks, Google Compute Engine Public IPs and Google Prod IPs.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"enabled": {
@@ -1014,6 +1014,17 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				patchObj.Config.WorkloadsConfig = config.WorkloadsConfig
 			}
 			err = resourceComposerEnvironmentPatchField("config.WorkloadsConfig", userAgent, patchObj, d, tfConfig)
+			if err != nil {
+				return err
+			}
+		}
+
+		if d.HasChange("config.0.master_authorized_networks_config") {
+			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
+			if config != nil {
+				patchObj.Config.MasterAuthorizedNetworksConfig = config.MasterAuthorizedNetworksConfig
+			}
+			err = resourceComposerEnvironmentPatchField("config.MasterAuthorizedNetworksConfig", userAgent, patchObj, d, tfConfig)
 			if err != nil {
 				return err
 			}
@@ -1525,11 +1536,8 @@ func expandComposerEnvironmentConfigMasterAuthorizedNetworksConfig(v interface{}
 
 	for _, originalCidrBlock := range cidrBlocksRaw {
 		originalCidrBlockRaw := originalCidrBlock.(map[string]interface{})
-		transformedCidrBlock := &composer.cidrBlocks{Value: originalCidrBlockRaw["value"].(string)}
-		transformedCidrBlock := &composer.cidrBlocks{Value: originalCidrBlockRaw["value"].(string)}
-		if v, ok := originalCidrBlockRaw["description"]; ok {
-			transformedCidrBlock.Description = v.(string)
-		}
+		transformedCidrBlock.DisplayName = originalCidrBlockRaw["display_name"].(string)
+		transformedCidrBlock.CidrBlock = originalCidrBlockRaw["cidr_block"].(string)
 		cidrBlocks = append(cidrBlocks, transformedCidrBlock)
 	}
 	transformed.Enabled = original["enabled"].(bool)
