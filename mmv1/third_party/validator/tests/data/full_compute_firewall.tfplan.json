@@ -9,7 +9,7 @@
           "mode": "managed",
           "type": "google_compute_firewall",
           "name": "full_list_default_1",
-          "provider_name": "google",
+          "provider_name": "registry.terraform.io/hashicorp/google",
           "schema_version": 1,
           "values": {
             "allow": [
@@ -34,14 +34,43 @@
             ],
             "direction": "INGRESS",
             "disabled": true,
+            "log_config": [],
             "name": "test-firewall1",
             "network": "test-network",
             "priority": 42,
-            "source_service_accounts": null,
+            "source_ranges": null,
+            "source_service_accounts": [
+              "test-source_service_account1",
+              "test-source_service_account2"
+            ],
             "source_tags": null,
             "target_service_accounts": null,
             "target_tags": null,
             "timeouts": null
+          },
+          "sensitive_values": {
+            "allow": [
+              {
+                "ports": [
+                  false,
+                  false,
+                  false
+                ]
+              },
+              {
+                "ports": []
+              }
+            ],
+            "deny": [],
+            "destination_ranges": [
+              false,
+              false
+            ],
+            "log_config": [],
+            "source_service_accounts": [
+              false,
+              false
+            ]
           }
         },
         {
@@ -49,7 +78,7 @@
           "mode": "managed",
           "type": "google_compute_firewall",
           "name": "full_list_default_2",
-          "provider_name": "google",
+          "provider_name": "registry.terraform.io/hashicorp/google",
           "schema_version": 1,
           "values": {
             "allow": [],
@@ -69,6 +98,7 @@
             ],
             "description": null,
             "disabled": null,
+            "log_config": [],
             "name": "test-firewall2",
             "network": "test-network",
             "priority": 1000,
@@ -87,6 +117,35 @@
             ],
             "target_tags": null,
             "timeouts": null
+          },
+          "sensitive_values": {
+            "allow": [],
+            "deny": [
+              {
+                "ports": [
+                  false,
+                  false,
+                  false
+                ]
+              },
+              {
+                "ports": []
+              }
+            ],
+            "destination_ranges": [],
+            "log_config": [],
+            "source_ranges": [
+              false,
+              false
+            ],
+            "source_service_accounts": [
+              false,
+              false
+            ],
+            "target_service_accounts": [
+              false,
+              false
+            ]
           }
         },
         {
@@ -94,7 +153,7 @@
           "mode": "managed",
           "type": "google_compute_firewall",
           "name": "full_list_default_3",
-          "provider_name": "google",
+          "provider_name": "registry.terraform.io/hashicorp/google",
           "schema_version": 1,
           "values": {
             "allow": [],
@@ -106,9 +165,11 @@
             ],
             "description": null,
             "disabled": null,
+            "log_config": [],
             "name": "test-firewall3",
             "network": "test-network",
             "priority": 1000,
+            "source_ranges": null,
             "source_service_accounts": null,
             "source_tags": [
               "web"
@@ -119,6 +180,23 @@
               "test-target_tag2"
             ],
             "timeouts": null
+          },
+          "sensitive_values": {
+            "allow": [],
+            "deny": [
+              {
+                "ports": []
+              }
+            ],
+            "destination_ranges": [],
+            "log_config": [],
+            "source_tags": [
+              false
+            ],
+            "target_tags": [
+              false,
+              false
+            ]
           }
         },
         {
@@ -126,16 +204,16 @@
           "mode": "managed",
           "type": "google_compute_network",
           "name": "default",
-          "provider_name": "google",
+          "provider_name": "registry.terraform.io/hashicorp/google",
           "schema_version": 0,
           "values": {
             "auto_create_subnetworks": true,
             "delete_default_routes_on_create": false,
             "description": null,
-            "ipv4_range": null,
             "name": "test-network",
             "timeouts": null
-          }
+          },
+          "sensitive_values": {}
         }
       ]
     }
@@ -146,7 +224,7 @@
       "mode": "managed",
       "type": "google_compute_firewall",
       "name": "full_list_default_1",
-      "provider_name": "google",
+      "provider_name": "registry.terraform.io/hashicorp/google",
       "change": {
         "actions": [
           "create"
@@ -170,15 +248,20 @@
           "deny": [],
           "description": "test-description",
           "destination_ranges": [
-              "192.168.0.42/32",
-              "192.168.0.43/32"
+            "192.168.0.42/32",
+            "192.168.0.43/32"
           ],
           "direction": "INGRESS",
           "disabled": true,
+          "log_config": [],
           "name": "test-firewall1",
           "network": "test-network",
           "priority": 42,
-          "source_service_accounts": null,
+          "source_ranges": null,
+          "source_service_accounts": [
+            "test-source_service_account1",
+            "test-source_service_account2"
+          ],
           "source_tags": null,
           "target_service_accounts": null,
           "target_tags": null,
@@ -203,10 +286,40 @@
             false,
             false
           ],
+          "enable_logging": true,
           "id": true,
+          "log_config": [],
           "project": true,
           "self_link": true,
-          "source_ranges": true
+          "source_service_accounts": [
+            false,
+            false
+          ]
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "allow": [
+            {
+              "ports": [
+                false,
+                false,
+                false
+              ]
+            },
+            {
+              "ports": []
+            }
+          ],
+          "deny": [],
+          "destination_ranges": [
+            false,
+            false
+          ],
+          "log_config": [],
+          "source_service_accounts": [
+            false,
+            false
+          ]
         }
       }
     },
@@ -215,7 +328,7 @@
       "mode": "managed",
       "type": "google_compute_firewall",
       "name": "full_list_default_2",
-      "provider_name": "google",
+      "provider_name": "registry.terraform.io/hashicorp/google",
       "change": {
         "actions": [
           "create"
@@ -239,6 +352,7 @@
           ],
           "description": null,
           "disabled": null,
+          "log_config": [],
           "name": "test-firewall2",
           "network": "test-network",
           "priority": 1000,
@@ -275,9 +389,41 @@
           ],
           "destination_ranges": true,
           "direction": true,
+          "enable_logging": true,
           "id": true,
+          "log_config": [],
           "project": true,
           "self_link": true,
+          "source_ranges": [
+            false,
+            false
+          ],
+          "source_service_accounts": [
+            false,
+            false
+          ],
+          "target_service_accounts": [
+            false,
+            false
+          ]
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "allow": [],
+          "deny": [
+            {
+              "ports": [
+                false,
+                false,
+                false
+              ]
+            },
+            {
+              "ports": []
+            }
+          ],
+          "destination_ranges": [],
+          "log_config": [],
           "source_ranges": [
             false,
             false
@@ -298,7 +444,7 @@
       "mode": "managed",
       "type": "google_compute_firewall",
       "name": "full_list_default_3",
-      "provider_name": "google",
+      "provider_name": "registry.terraform.io/hashicorp/google",
       "change": {
         "actions": [
           "create"
@@ -314,9 +460,11 @@
           ],
           "description": null,
           "disabled": null,
+          "log_config": [],
           "name": "test-firewall3",
           "network": "test-network",
           "priority": 1000,
+          "source_ranges": null,
           "source_service_accounts": null,
           "source_tags": [
             "web"
@@ -338,10 +486,29 @@
           ],
           "destination_ranges": true,
           "direction": true,
+          "enable_logging": true,
           "id": true,
+          "log_config": [],
           "project": true,
           "self_link": true,
-          "source_ranges": true,
+          "source_tags": [
+            false
+          ],
+          "target_tags": [
+            false,
+            false
+          ]
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "allow": [],
+          "deny": [
+            {
+              "ports": []
+            }
+          ],
+          "destination_ranges": [],
+          "log_config": [],
           "source_tags": [
             false
           ],
@@ -357,7 +524,7 @@
       "mode": "managed",
       "type": "google_compute_network",
       "name": "default",
-      "provider_name": "google",
+      "provider_name": "registry.terraform.io/hashicorp/google",
       "change": {
         "actions": [
           "create"
@@ -367,31 +534,23 @@
           "auto_create_subnetworks": true,
           "delete_default_routes_on_create": false,
           "description": null,
-          "ipv4_range": null,
           "name": "test-network",
           "timeouts": null
         },
         "after_unknown": {
           "gateway_ipv4": true,
           "id": true,
+          "mtu": true,
           "project": true,
           "routing_mode": true,
           "self_link": true
-        }
+        },
+        "before_sensitive": false,
+        "after_sensitive": {}
       }
     }
   ],
   "configuration": {
-    "provider_config": {
-      "google": {
-        "name": "google",
-        "expressions": {
-          "project": {
-            "constant_value": "{{.Provider.project}}"
-          }
-        }
-      }
-    },
     "root_module": {
       "resources": [
         {
@@ -440,11 +599,18 @@
             },
             "network": {
               "references": [
+                "google_compute_network.default.name",
                 "google_compute_network.default"
               ]
             },
             "priority": {
               "constant_value": 42
+            },
+            "source_service_accounts": {
+              "constant_value": [
+                "test-source_service_account1",
+                "test-source_service_account2"
+              ]
             }
           },
           "schema_version": 1
@@ -480,6 +646,7 @@
             },
             "network": {
               "references": [
+                "google_compute_network.default.name",
                 "google_compute_network.default"
               ]
             },
@@ -523,6 +690,7 @@
             },
             "network": {
               "references": [
+                "google_compute_network.default.name",
                 "google_compute_network.default"
               ]
             },

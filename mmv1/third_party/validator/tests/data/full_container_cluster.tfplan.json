@@ -1,6 +1,6 @@
 {
-  "format_version": "0.1",
-  "terraform_version": "0.13.6",
+  "format_version": "0.2",
+  "terraform_version": "1.0.10",
   "planned_values": {
     "root_module": {
       "resources": [
@@ -37,6 +37,7 @@
             "enable_binary_authorization": false,
             "enable_kubernetes_alpha": true,
             "enable_legacy_abac": true,
+            "enable_shielded_nodes": true,
             "enable_tpu": null,
             "initial_node_count": 42,
             "ip_allocation_policy": [
@@ -64,9 +65,7 @@
                   {
                     "issue_client_certificate": true
                   }
-                ],
-                "password": "test-password",
-                "username": "test-username"
+                ]
               }
             ],
             "master_authorized_networks_config": [
@@ -97,13 +96,16 @@
               {
                 "disk_size_gb": 42,
                 "disk_type": "pd-standard",
+                "gcfs_config": [],
                 "guest_accelerator": [
                   {
                     "count": 1,
+                    "gpu_partition_size": null,
                     "type": "test-type1"
                   },
                   {
                     "count": 1,
+                    "gpu_partition_size": null,
                     "type": "test-type2"
                   }
                 ],
@@ -132,7 +134,6 @@
               "test-node_locations"
             ],
             "node_version": "test-node_version",
-            "pod_security_policy_config": [],
             "private_cluster_config": [
               {
                 "enable_private_endpoint": true,
@@ -148,6 +149,94 @@
             "subnetwork": "test-subnetwork",
             "timeouts": null,
             "vertical_pod_autoscaling": []
+          },
+          "sensitive_values": {
+            "addons_config": [
+              {
+                "cloudrun_config": [],
+                "horizontal_pod_autoscaling": [
+                  {}
+                ],
+                "http_load_balancing": [
+                  {}
+                ],
+                "network_policy_config": [
+                  {}
+                ]
+              }
+            ],
+            "authenticator_groups_config": [],
+            "cluster_autoscaling": [],
+            "confidential_nodes": [],
+            "database_encryption": [],
+            "default_snat_status": [],
+            "ip_allocation_policy": [
+              {}
+            ],
+            "logging_config": [],
+            "maintenance_policy": [
+              {
+                "daily_maintenance_window": [
+                  {}
+                ],
+                "maintenance_exclusion": [],
+                "recurring_window": []
+              }
+            ],
+            "master_auth": [
+              {
+                "client_certificate_config": [
+                  {}
+                ]
+              }
+            ],
+            "master_authorized_networks_config": [
+              {
+                "cidr_blocks": [
+                  {},
+                  {}
+                ]
+              }
+            ],
+            "monitoring_config": [],
+            "network_policy": [
+              {}
+            ],
+            "node_config": [
+              {
+                "gcfs_config": [],
+                "guest_accelerator": [
+                  {},
+                  {}
+                ],
+                "labels": {},
+                "metadata": {},
+                "oauth_scopes": [
+                  false,
+                  false
+                ],
+                "shielded_instance_config": [],
+                "tags": [
+                  false
+                ],
+                "taint": [],
+                "workload_metadata_config": []
+              }
+            ],
+            "node_locations": [
+              false
+            ],
+            "node_pool": [],
+            "private_cluster_config": [
+              {
+                "master_global_access_config": []
+              }
+            ],
+            "release_channel": [],
+            "resource_labels": {},
+            "resource_usage_export_config": [],
+            "vertical_pod_autoscaling": [],
+            "workload_identity_config": []
           }
         }
       ]
@@ -191,6 +280,7 @@
           "enable_binary_authorization": false,
           "enable_kubernetes_alpha": true,
           "enable_legacy_abac": true,
+          "enable_shielded_nodes": true,
           "enable_tpu": null,
           "initial_node_count": 42,
           "ip_allocation_policy": [
@@ -218,9 +308,7 @@
                 {
                   "issue_client_certificate": true
                 }
-              ],
-              "password": "test-password",
-              "username": "test-username"
+              ]
             }
           ],
           "master_authorized_networks_config": [
@@ -251,13 +339,16 @@
             {
               "disk_size_gb": 42,
               "disk_type": "pd-standard",
+              "gcfs_config": [],
               "guest_accelerator": [
                 {
                   "count": 1,
+                  "gpu_partition_size": null,
                   "type": "test-type1"
                 },
                 {
                   "count": 1,
+                  "gpu_partition_size": null,
                   "type": "test-type2"
                 }
               ],
@@ -286,7 +377,6 @@
             "test-node_locations"
           ],
           "node_version": "test-node_version",
-          "pod_security_policy_config": [],
           "private_cluster_config": [
             {
               "enable_private_endpoint": true,
@@ -321,14 +411,13 @@
           "authenticator_groups_config": true,
           "cluster_autoscaling": true,
           "cluster_ipv4_cidr": true,
+          "confidential_nodes": true,
           "database_encryption": true,
           "datapath_provider": true,
           "default_snat_status": true,
           "enable_intranode_visibility": true,
-          "enable_shielded_nodes": true,
           "endpoint": true,
           "id": true,
-          "instance_group_urls": true,
           "ip_allocation_policy": [
             {
               "cluster_ipv4_cidr_block": true,
@@ -336,6 +425,7 @@
             }
           ],
           "label_fingerprint": true,
+          "logging_config": true,
           "maintenance_policy": [
             {
               "daily_maintenance_window": [
@@ -366,12 +456,14 @@
             }
           ],
           "master_version": true,
+          "monitoring_config": true,
           "network_policy": [
             {}
           ],
           "networking_mode": true,
           "node_config": [
             {
+              "gcfs_config": [],
               "guest_accelerator": [
                 {},
                 {}
@@ -395,7 +487,6 @@
           ],
           "node_pool": true,
           "operation": true,
-          "pod_security_policy_config": [],
           "private_cluster_config": [
             {
               "master_global_access_config": true,
@@ -414,6 +505,96 @@
           "tpu_ipv4_cidr_block": true,
           "vertical_pod_autoscaling": [],
           "workload_identity_config": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "addons_config": [
+            {
+              "cloudrun_config": [],
+              "horizontal_pod_autoscaling": [
+                {}
+              ],
+              "http_load_balancing": [
+                {}
+              ],
+              "network_policy_config": [
+                {}
+              ]
+            }
+          ],
+          "authenticator_groups_config": [],
+          "cluster_autoscaling": [],
+          "confidential_nodes": [],
+          "database_encryption": [],
+          "default_snat_status": [],
+          "ip_allocation_policy": [
+            {}
+          ],
+          "logging_config": [],
+          "maintenance_policy": [
+            {
+              "daily_maintenance_window": [
+                {}
+              ],
+              "maintenance_exclusion": [],
+              "recurring_window": []
+            }
+          ],
+          "master_auth": [
+            {
+              "client_certificate_config": [
+                {}
+              ],
+              "client_key": true
+            }
+          ],
+          "master_authorized_networks_config": [
+            {
+              "cidr_blocks": [
+                {},
+                {}
+              ]
+            }
+          ],
+          "monitoring_config": [],
+          "network_policy": [
+            {}
+          ],
+          "node_config": [
+            {
+              "gcfs_config": [],
+              "guest_accelerator": [
+                {},
+                {}
+              ],
+              "labels": {},
+              "metadata": {},
+              "oauth_scopes": [
+                false,
+                false
+              ],
+              "shielded_instance_config": [],
+              "tags": [
+                false
+              ],
+              "taint": [],
+              "workload_metadata_config": []
+            }
+          ],
+          "node_locations": [
+            false
+          ],
+          "node_pool": [],
+          "private_cluster_config": [
+            {
+              "master_global_access_config": []
+            }
+          ],
+          "release_channel": [],
+          "resource_labels": {},
+          "resource_usage_export_config": [],
+          "vertical_pod_autoscaling": [],
+          "workload_identity_config": []
         }
       }
     }
@@ -503,13 +684,7 @@
                       "constant_value": true
                     }
                   }
-                ],
-                "password": {
-                  "constant_value": "test-password"
-                },
-                "username": {
-                  "constant_value": "test-username"
-                }
+                ]
               }
             ],
             "master_authorized_networks_config": [
