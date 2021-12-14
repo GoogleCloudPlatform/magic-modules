@@ -113,7 +113,7 @@ var (
 		Schema: map[string]*schema.Schema{
 			"display_name": {
 				Type:     		schema.TypeString,
-				Required: 		true,
+				Optional: 		true,
 				Description:  `display_name is a field for users to identify CIDR blocks.`,
 			},
 			"cidr_block": {
@@ -719,7 +719,7 @@ func resourceComposerEnvironment() *schema.Resource {
 										Required:    true,
 										Description: `Whether or not master authorized networks is enabled.`,
 									},
-									"cidr_block": {
+									"cidr_blocks": {
 										Type:        schema.TypeSet,
 										Optional:    true,
 										Elem:        cidrBlocks,
@@ -1383,7 +1383,7 @@ func flattenComposerEnvironmentConfigMasterAuthorizedNetworksConfig(masterAuthNe
 
 	masterAuthorizedNetworksConfig := make(map[string]interface{})
 	masterAuthorizedNetworksConfig["enabled"] = masterAuthNetsCfg.Enabled
-	masterAuthorizedNetworksConfig["cidr_block"] = schema.NewSet(schema.HashResource(cidrBlocks), transformed)
+	masterAuthorizedNetworksConfig["cidr_blocks"] = schema.NewSet(schema.HashResource(cidrBlocks), transformed)
 
 	return []interface{}{masterAuthorizedNetworksConfig}
 }
@@ -1529,19 +1529,22 @@ func expandComposerEnvironmentConfigMasterAuthorizedNetworksConfig(v interface{}
 	raw := l[0]
 	original := raw.(map[string]interface{})
 
-	cidrBlocksRaw := original["cidr_block"].(*schema.Set).List()
+	cidrBlocksRaw := original["cidr_blocks"].(*schema.Set).List()
 
-	transformed := &composer.ConfigMasterAuthorizedNetworksConfig{}
-	cidrBlocks := make([]*composer.cidrBlocks, 0, len(original))
+	transformed := &composer.MasterAuthorizedNetworksConfig{}
+	cidrBlocks := make([]*composer.CidrBlock, 0, len(original))
 
 	for _, originalCidrBlock := range cidrBlocksRaw {
 		originalCidrBlockRaw := originalCidrBlock.(map[string]interface{})
-		transformedCidrBlock.DisplayName = originalCidrBlockRaw["display_name"].(string)
+		transformedCidrBlock := &composer.CidrBlock{}
+		if v, ok := originalCidrBlockRaw["display_name"]; ok {
+			transformedCidrBlock.DisplayName = v.(string)
+		}
 		transformedCidrBlock.CidrBlock = originalCidrBlockRaw["cidr_block"].(string)
 		cidrBlocks = append(cidrBlocks, transformedCidrBlock)
 	}
 	transformed.Enabled = original["enabled"].(bool)
-	transformed.cidrBlocks = cidrBlocks
+	transformed.CidrBlocks = cidrBlocks
 	return transformed, nil
 }
 
