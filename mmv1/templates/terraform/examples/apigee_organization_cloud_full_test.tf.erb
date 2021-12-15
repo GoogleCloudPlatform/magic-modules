@@ -106,6 +106,16 @@ resource "google_apigee_organization" "<%= ctx[:primary_resource_id] %>" {
   project_id                           = google_project.project.project_id
   authorized_network                   = google_compute_network.apigee_network.id
   runtime_database_encryption_key_name = google_kms_crypto_key.apigee_key.id
+  properties {
+    property {
+      name = "features.hybrid.enabled"
+      value = "false"
+    }
+    property {
+      name = "features.mart.connect.enabled"
+      value = "false"
+    }
+  }
 
   depends_on = [
     google_service_networking_connection.apigee_vpc_connection,
