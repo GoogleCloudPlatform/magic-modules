@@ -90,6 +90,16 @@ func main() {
 		generateResourceFile(resource)
 		generateSweeperFile(resource)
 		generateResourceTestFile(resource)
+	}
+	// GA website files are always generated for the beta version.
+	websiteVersion := *version
+	if *version == GA_VERSION {
+		websiteVersion = BETA_VERSION
+	}
+	for _, resource := range resources[websiteVersion] {
+		if skipResource(resource) {
+			continue
+		}
 		generateResourceWebsiteFile(resource, resources, version)
 	}
 
@@ -176,6 +186,11 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 				if err != nil {
 					glog.Exit(err)
 				}
+				// TODO: the openapi library cannot handle extensions except in the Schema object.  If this is ever added,
+				// this workaround can be removed.
+				if err := addInfoExtensionsToSchemaObjects(document, b.Bytes()); err != nil {
+					glog.Exit(err)
+				}
 
 				overrides := loadOverrides(packagePath, resourceFile.Name())
 
@@ -195,6 +210,19 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 	return resources, products
 }
 
+func addInfoExtensionsToSchemaObjects(document *openapi.Document, b []byte) error {
+	var m map[string]interface{}
+	if err := yaml.Unmarshal(b, &m); err != nil {
+		return err
+	}
+	info := m["info"].(map[interface{}]interface{})
+	for _, s := range document.Components.Schemas {
+		s.Extension["x-dcl-ref"] = info["x-dcl-ref"]
+		s.Extension["x-dcl-guides"] = info["x-dcl-guides"]
+	}
+	return nil
+}
+
 func createResourcesFromDocumentAndOverrides(document *openapi.Document, overrides Overrides, packagePath string, version Version) (resources []*Resource) {
 	productMetadata := GetProductMetadataFromDocument(document, packagePath)
 	titleParts := strings.Split(document.Info.Title, "/")
@@ -203,7 +231,6 @@ func createResourcesFromDocumentAndOverrides(document *openapi.Document, overrid
 	for k, v := range document.Components.Schemas {
 		if k == titleParts[len(titleParts)-1] {
 			schema = v
-			schema.Title = k
 		}
 	}
 
@@ -237,7 +264,7 @@ func createResourcesFromDocumentAndOverrides(document *openapi.Document, overrid
 	}
 
 	for _, l := range locations {
-		res, err := createResource(schema, typeFetcher, overrides, productMetadata, version, l)
+		res, err := createResource(schema, document.Info, typeFetcher, overrides, productMetadata, version, l)
 		if err != nil {
 			glog.Exit(err)
 		}

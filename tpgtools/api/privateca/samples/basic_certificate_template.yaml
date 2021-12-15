@@ -11,18 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-description: An example of a basic privateca certificate template
 name: basic_certificate_template
+description: An example of a basic privateca certificate template
+type: certificate_template
+versions:
+- ga
+- beta
 resource: samples/basic.certificate_template.json
 updates:
 - resource: samples/update.certificate_template.json
+  dependencies: []
 variables:
+- name: region
+  type: region
 - name: template
   type: resource_name
 - name: project
   type: project
-- name: region
-  type: region
-versions:
-- ga
-- beta

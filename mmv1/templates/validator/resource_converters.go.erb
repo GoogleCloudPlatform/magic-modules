@@ -32,26 +32,54 @@ import (
 // N:1 = [ResourceConverter{Convert: convertAbc, merge: mergeAbc}] (len=1)
 func ResourceConverters() map[string][]ResourceConverter {
 	return map[string][]ResourceConverter{
+		"google_compute_address":                          {resourceConverterComputeAddress()},
 		"google_compute_firewall":                         {resourceConverterComputeFirewall()},
 		"google_compute_disk":                             {resourceConverterComputeDisk()},
 		"google_compute_forwarding_rule":                  {resourceConverterComputeForwardingRule()},
+    "google_compute_global_address":                   {resourceConverterComputeGlobalAddress()},
 		"google_compute_global_forwarding_rule":           {resourceConverterComputeGlobalForwardingRule()},
 		"google_compute_instance":                         {resourceConverterComputeInstance()},
 		"google_compute_network":                          {resourceConverterComputeNetwork()},
+		"google_compute_security_policy":                  {resourceConverterComputeSecurityPolicy()},
+		"google_compute_snapshot":                         {resourceConverterComputeSnapshot()},
 		"google_compute_subnetwork":                       {resourceConverterComputeSubnetwork()},
+    "google_compute_ssl_policy":                       {resourceConverterComputeSslPolicy()},
+		"google_dns_managed_zone":                         {resourceConverterDNSManagedZone()},
+		"google_dns_policy":                               {resourceConverterDNSPolicy()},
 		"google_storage_bucket":                           {resourceConverterStorageBucket()},
 		"google_sql_database_instance":                    {resourceConverterSQLDatabaseInstance()},
 		"google_container_cluster":                        {resourceConverterContainerCluster()},
 		"google_container_node_pool":                      {resourceConverterContainerNodePool()},
 		"google_bigquery_dataset":                         {resourceConverterBigQueryDataset()},
+		"google_bigquery_dataset_iam_policy":              {resourceConverterBigqueryDatasetIamPolicy()},
+		"google_bigquery_dataset_iam_binding":             {resourceConverterBigqueryDatasetIamBinding()},
+		"google_bigquery_dataset_iam_member":              {resourceConverterBigqueryDatasetIamMember()},
+		"google_bigquery_table":                           {resourceConverterBigQueryTable()},
+		"google_redis_instance":                           {resourceConverterRedisInstance()},
+		"google_spanner_database":                         {resourceConverterSpannerDatabase()},
+		"google_spanner_database_iam_policy":              {resourceConverterSpannerDatabaseIamPolicy()},
+		"google_spanner_database_iam_binding":             {resourceConverterSpannerDatabaseIamBinding()},
+		"google_spanner_database_iam_member":              {resourceConverterSpannerDatabaseIamMember()},
 		"google_spanner_instance":                         {resourceConverterSpannerInstance()},
+		"google_spanner_instance_iam_policy":              {resourceConverterSpannerInstanceIamPolicy()},
+		"google_spanner_instance_iam_binding":             {resourceConverterSpannerInstanceIamBinding()},
+		"google_spanner_instance_iam_member":              {resourceConverterSpannerInstanceIamMember()},
 		"google_project_service":                          {resourceConverterServiceUsage()},
+		"google_pubsub_lite_topic":                        {resourceConverterPubsubLiteTopic()},
+		"google_pubsub_schema":                            {resourceConverterPubsubSchema()},
 		"google_pubsub_subscription":                      {resourceConverterPubsubSubscription()},
+		"google_pubsub_subscription_iam_policy":           {resourceConverterPubsubSubscriptionIamPolicy()},
+		"google_pubsub_subscription_iam_binding":          {resourceConverterPubsubSubscriptionIamBinding()},
+		"google_pubsub_subscription_iam_member":           {resourceConverterPubsubSubscriptionIamMember()},
 		"google_pubsub_topic":                             {resourceConverterPubsubTopic()},
 		"google_kms_crypto_key":                           {resourceConverterKMSCryptoKey()},
 		"google_kms_key_ring":                             {resourceConverterKMSKeyRing()},
 		"google_filestore_instance":                       {resourceConverterFilestoreInstance()},
 		"google_access_context_manager_service_perimeter": {resourceConverterAccessContextManagerServicePerimeter()},
+		"google_cloud_run_service":                        {resourceConverterCloudRunService()},
+		"google_cloud_run_domain_mapping":                 {resourceConverterCloudRunDomainMapping()},
+		"google_monitoring_notification_channel":          {resourceConverterMonitoringNotificationChannel()},
+		"google_monitoring_alert_policy":                  {resourceConverterMonitoringAlertPolicy()},
         <% products.each do |product| -%>
             <% (product[:definitions].objects || []).each do |object| -%>
                 <% if object.min_version.name == "ga" -%>
@@ -59,7 +87,7 @@ func ResourceConverters() map[string][]ResourceConverter {
 						<% tf_product = (product[:overrides].legacy_name || object.__product.name).underscore -%>
 						<% terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}" -%>
                         <% cai_name =  object.__product.name + object.name -%>
-                        <% if (!object.iam_policy.nil?) && (!object.iam_policy.exclude) -%>
+                        <% if (!object.iam_policy.nil?) && (!object.iam_policy.exclude) && (!object.iam_policy.exclude_validator) -%>
                             "<%= terraform_name -%>_iam_policy": {resourceConverter<%= cai_name -%>IamPolicy()},
                             "<%= terraform_name -%>_iam_binding": {resourceConverter<%= cai_name -%>IamBinding()},
                             "<%= terraform_name -%>_iam_member": {resourceConverter<%= cai_name -%>IamMember()},
@@ -92,5 +120,7 @@ func ResourceConverters() map[string][]ResourceConverter {
 		"google_project_iam_policy": {resourceConverterProjectIamPolicy()},
 		"google_project_iam_binding": {resourceConverterProjectIamBinding()},
 		"google_project_iam_member": {resourceConverterProjectIamMember()},
+		"google_project_iam_custom_role": {resourceConverterProjectIAMCustomRole()},
+		"google_organization_iam_custom_role": {resourceConverterOrganizationIAMCustomRole()},
 	}
 }

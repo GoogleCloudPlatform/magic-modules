@@ -28,9 +28,6 @@ type Sample struct {
 	// PrimaryResource is the filename of the sample's primary resource
 	PrimaryResource *string `yaml:"resource"`
 
-	// Substitutions contains every substition in the sample
-	Substitutions []Substitution `yaml:"substitutions"`
-
 	IgnoreRead []string `yaml:"ignore_read"`
 
 	// DependencyList is a list of objects containing metadata for each sample resource
@@ -90,15 +87,6 @@ type Variable struct {
 	DocsValue string `yaml:"docs_value"`
 }
 
-// Substitution contains metadata that varies for the sample context
-type Substitution struct {
-	// Substitution is the text to be substituted, e.g. topic_name
-	Substitution *string
-
-	// Value is the value of the substituted text
-	Value *string `yaml:"value"`
-}
-
 // Dependency contains data that describes a single resource in a sample
 type Dependency struct {
 	// FileName is the name of the file as it appears in testcases.yaml
@@ -138,7 +126,7 @@ func BuildDependency(fileName, product, localname, version string, hasGAEquivale
 			return nil, err
 		}
 	} else if len(fileParts) == 3 {
-		resourceName = strings.Title(fileParts[1])
+		resourceName = fileParts[1]
 	} else {
 		return nil, fmt.Errorf("Invalid sample dependency file name: %s", fileName)
 	}
@@ -146,14 +134,15 @@ func BuildDependency(fileName, product, localname, version string, hasGAEquivale
 	if localname == "" {
 		localname = fileParts[0]
 	}
-	dclResourceType := product + snakeToTitleCase(resourceName)
+	dclResourceType := product + dcl.SnakeToTitleCase(resourceName)
 	terraformResourceType, err := DCLToTerraformReference(dclResourceType, version)
 	if err != nil {
-		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)
+		return nil, fmt.Errorf("Error generating sample dependency reference %s: %s", fileName, err)
 	}
 
 	block, err := ConvertSampleJSONToHCL(dclResourceType, version, hasGAEquivalent, b)
 	if err != nil {
+		glog.Errorf("failed to convert %q", fileName)
 		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)
 	}
 
@@ -269,8 +258,8 @@ func (s Sample) GenerateHCL(isDocs bool) string {
 		}
 		hcl = string(tc)
 	}
-	for _, sub := range s.Substitutions {
-		re := regexp.MustCompile(fmt.Sprintf(`{{%s}}`, *sub.Substitution))
+	for _, sub := range s.Variables {
+		re := regexp.MustCompile(fmt.Sprintf(`{{%s}}`, sub.Name))
 		hcl = re.ReplaceAllString(hcl, sub.translateValue(isDocs))
 	}
 	return hcl
@@ -301,6 +290,7 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 		}
 		newSample.TestSlug = fmt.Sprintf("%sUpdate%v", newSample.TestSlug, i)
 		newSample.Updates = nil
+		newSample.Variables = s.Variables
 		out = append(out, newSample)
 	}
 	return out
@@ -319,8 +309,8 @@ func basicResourceName(depFilename string) string {
 // ExpandContext expands the context model used in the generated tests
 func (s Sample) ExpandContext() map[string]string {
 	out := map[string]string{}
-	for _, sub := range s.Substitutions {
-		translation, hasTranslation := translationMap[*sub.Value]
+	for _, sub := range s.Variables {
+		translation, hasTranslation := translationMap[sub.Type]
 		if hasTranslation {
 			out[translation.contextKey] = translation.contextValue
 		}
@@ -335,81 +325,137 @@ type translationIndex struct {
 }
 
 var translationMap = map[string]translationIndex{
-	":ORG_ID": {
+	"org_id": {
 		docsValue:    "123456789",
 		contextKey:   "org_id",
 		contextValue: "getTestOrgFromEnv(t)",
 	},
-	":ORG_DOMAIN": {
+	"org_name": {
 		docsValue:    "example.com",
 		contextKey:   "org_domain",
 		contextValue: "getTestOrgDomainFromEnv(t)",
 	},
-	":CREDENTIALS": {
-		docsValue:    "my/credentials/filename.json",
-		contextKey:   "credentials",
-		contextValue: "getTestCredsFromEnv(t)",
-	},
-	":REGION": {
+	"region": {
 		docsValue:    "us-west1",
 		contextKey:   "region",
 		contextValue: "getTestRegionFromEnv()",
 	},
-	":ZONE": {
+	"zone": {
 		docsValue:    "us-west1-a",
 		contextKey:   "zone",
 		contextValue: "getTestZoneFromEnv()",
 	},
-	":ORG_TARGET": {
+	"org_target": {
 		docsValue:    "123456789",
 		contextKey:   "org_target",
 		contextValue: "getTestOrgTargetFromEnv(t)",
 	},
-	":BILLING_ACCT": {
+	"billing_account": {
 		docsValue:    "000000-0000000-0000000-000000",
 		contextKey:   "billing_acct",
 		contextValue: "getTestBillingAccountFromEnv(t)",
 	},
-	":SERVICE_ACCT": {
+	"test_service_account": {
 		docsValue:    "emailAddress:my@service-account.com",
 		contextKey:   "service_acct",
 		contextValue: "getTestServiceAccountFromEnv(t)",
 	},
-	":PROJECT": {
+	"project": {
 		docsValue:    "my-project-name",
 		contextKey:   "project_name",
 		contextValue: "getTestProjectFromEnv()",
 	},
-	":PROJECT_NAME": {
-		docsValue:    "my-project-name",
-		contextKey:   "project_name",
-		contextValue: "getTestProjectFromEnv()",
+	"project_number": {
+		docsValue:    "my-project-number",
+		contextKey:   "project_number",
+		contextValue: "getTestProjectNumberFromEnv()",
 	},
-	":FIRESTORE_PROJECT_NAME": {
-		docsValue:    "my-project-name",
-		contextKey:   "firestore_project_name",
-		contextValue: "getTestFirestoreProjectFromEnv(t)",
-	},
-	":CUST_ID": {
+	"customer_id": {
 		docsValue:    "A01b123xz",
 		contextKey:   "cust_id",
 		contextValue: "getTestCustIdFromEnv(t)",
 	},
-	":IDENTITY_USER": {
-		docsValue:    "cloud_identity_user",
-		contextKey:   "identity_user",
-		contextValue: "getTestIdentityUserFromEnv(t)",
+	// Begin a long list of multicloud-only values which are not going to see reuse.
+	// We can hardcode fake values because we are
+	// always going to use the no-provisioning mode for unit testing, of these resources
+	// where we don't have to actually have a real AWS account.
+
+	"aws_account_id": {
+		docsValue:    "012345678910",
+		contextKey:   "aws_acct_id",
+		contextValue: `"111111111111"`,
+	},
+	"aws_database_encryption_key": {
+		docsValue:    "12345678-1234-1234-1234-123456789111",
+		contextKey:   "aws_db_key",
+		contextValue: `"00000000-0000-0000-0000-17aad2f0f61f"`,
+	},
+	"aws_region": {
+		docsValue:    "my-aws-region",
+		contextKey:   "aws_region",
+		contextValue: `"us-west-2"`,
+	},
+	"aws_security_group": {
+		docsValue:    "sg-00000000000000000",
+		contextKey:   "aws_sg",
+		contextValue: `"sg-0b3f63cb91b247628"`,
+	},
+	"aws_volume_encryption_key": {
+		docsValue:    "12345678-1234-1234-1234-123456789111",
+		contextKey:   "aws_vol_key",
+		contextValue: `"00000000-0000-0000-0000-17aad2f0f61f"`,
+	},
+	"aws_vpc": {
+		docsValue:    "vpc-00000000000000000",
+		contextKey:   "aws_vpc",
+		contextValue: `"vpc-0b3f63cb91b247628"`,
+	},
+	"aws_subnet": {
+		docsValue:    "subnet-00000000000000000",
+		contextKey:   "aws_subnet",
+		contextValue: `"subnet-0b3f63cb91b247628"`,
+	},
+	"azure_application": {
+		docsValue:    "12345678-1234-1234-1234-123456789111",
+		contextKey:   "azure_app",
+		contextValue: `"00000000-0000-0000-0000-17aad2f0f61f"`,
+	},
+	"azure_subscription": {
+		docsValue:    "12345678-1234-1234-1234-123456789111",
+		contextKey:   "azure_sub",
+		contextValue: `"00000000-0000-0000-0000-17aad2f0f61f"`,
+	},
+	"azure_ad_tenant": {
+		docsValue:    "12345678-1234-1234-1234-123456789111",
+		contextKey:   "azure_tenant",
+		contextValue: `"00000000-0000-0000-0000-17aad2f0f61f"`,
+	},
+	"azure_proxy_config_secret_version": {
+		docsValue:    "0000000000000000000000000000000000",
+		contextKey:   "azure_config_secret",
+		contextValue: `"07d4b1f1a7cb4b1b91f070c30ae761a1"`,
+	},
+	"byo_multicloud_prefix": {
+		docsValue:    "my-",
+		contextKey:   "byo_prefix",
+		contextValue: `"mmv2"`,
 	},
 }
 
 // translateValue returns the value to embed in the hcl
-func (sub *Substitution) translateValue(isDocs bool) string {
-	value := *sub.Value
-	translation, hasTranslation := translationMap[value]
+func (sub *Variable) translateValue(isDocs bool) string {
+	value := sub.Name
+	translation, hasTranslation := translationMap[sub.Type]
 
 	if isDocs {
+		if sub.DocsValue != "" {
+			return sub.DocsValue
+		}
 		if hasTranslation {
 			return translation.docsValue
+		}
+		if sub.Type != "resource_name" {
+			glog.Exitf("Cannot generate docs for variable of type %q.", sub.Type)
 		}
 		return value
 	}
@@ -418,10 +464,15 @@ func (sub *Substitution) translateValue(isDocs bool) string {
 		return fmt.Sprintf("%%{%s}", translation.contextKey)
 	}
 
-	if strings.Contains(value, "-") {
-		value = fmt.Sprintf("tf-test-%s", value)
-	} else if strings.Contains(value, "_") {
+	if sub.Type != "resource_name" {
+		glog.Exitf("Cannot generate sample test with variable of type %q - please add to sample.go's translationMap.", sub.Type)
+	}
+
+	// Use '_' if already present, or '-' otherwise (some APIs require '-').
+	if strings.Contains(value, "_") {
 		value = fmt.Sprintf("tf_test_%s", value)
+	} else {
+		value = fmt.Sprintf("tf-test-%s", value)
 	}
 
 	// Random suffix is 10 characters and standard name length <= 64

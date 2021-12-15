@@ -1,0 +1,98 @@
+{
+  "format_version": "0.2",
+  "terraform_version": "1.0.10",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_pubsub_subscription_iam_binding.editor",
+          "mode": "managed",
+          "type": "google_pubsub_subscription_iam_binding",
+          "name": "editor",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "condition": [],
+            "members": [
+              "user:jane@example.com"
+            ],
+            "role": "roles/editor",
+            "subscription": "your-subscription-name"
+          },
+          "sensitive_values": {
+            "condition": [],
+            "members": [
+              false
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "google_pubsub_subscription_iam_binding.editor",
+      "mode": "managed",
+      "type": "google_pubsub_subscription_iam_binding",
+      "name": "editor",
+      "provider_name": "registry.terraform.io/hashicorp/google",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "condition": [],
+          "members": [
+            "user:jane@example.com"
+          ],
+          "role": "roles/editor",
+          "subscription": "your-subscription-name"
+        },
+        "after_unknown": {
+          "condition": [],
+          "etag": true,
+          "id": true,
+          "members": [
+            false
+          ],
+          "project": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "condition": [],
+          "members": [
+            false
+          ]
+        }
+      }
+    }
+  ],
+  "configuration": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_pubsub_subscription_iam_binding.editor",
+          "mode": "managed",
+          "type": "google_pubsub_subscription_iam_binding",
+          "name": "editor",
+          "provider_config_key": "google",
+          "expressions": {
+            "members": {
+              "constant_value": [
+                "user:jane@example.com"
+              ]
+            },
+            "role": {
+              "constant_value": "roles/editor"
+            },
+            "subscription": {
+              "constant_value": "your-subscription-name"
+            }
+          },
+          "schema_version": 0
+        }
+      ]
+    }
+  }
+}

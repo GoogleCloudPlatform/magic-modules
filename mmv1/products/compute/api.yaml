@@ -2396,6 +2396,7 @@ objects:
         default_value: :INTERNAL
         values:
           - :EXTERNAL
+          - :EXTERNAL_MANAGED
           - :INTERNAL
           - :INTERNAL_MANAGED
       - !ruby/object:Api::Type::Enum
@@ -2698,7 +2699,7 @@ objects:
         description: |
           A named port on a backend instance group representing the port for
           communication to the backend VMs in that group. Required when the
-          loadBalancingScheme is EXTERNAL, INTERNAL_MANAGED, or INTERNAL_SELF_MANAGED
+          loadBalancingScheme is EXTERNAL, EXTERNAL_MANAGED, INTERNAL_MANAGED, or INTERNAL_SELF_MANAGED
           and the backends are instance groups. The named port must be defined on each
           backend instance group. This parameter has no meaning if the backends are NEGs. API sets a
           default of "http" if not given.
@@ -3835,14 +3836,16 @@ objects:
         name: 'loadBalancingScheme'
         description: |
           This signifies what the ForwardingRule will be used for and can be
-          EXTERNAL, INTERNAL, or INTERNAL_MANAGED. EXTERNAL is used for Classic
+          EXTERNAL, EXTERNAL_MANAGED, INTERNAL, or INTERNAL_MANAGED. EXTERNAL is used for Classic
           Cloud VPN gateways, protocol forwarding to VMs from an external IP address,
           and HTTP(S), SSL Proxy, TCP Proxy, and Network TCP/UDP load balancers.
           INTERNAL is used for protocol forwarding to VMs from an internal IP address,
           and internal TCP/UDP load balancers.
+          EXTERNAL_MANAGED is used for regional external HTTP(S) load balancers.
           INTERNAL_MANAGED is used for internal HTTP(S) load balancers.
         values:
           - :EXTERNAL
+          - :EXTERNAL_MANAGED
           - :INTERNAL
           - :INTERNAL_MANAGED
       - !ruby/object:Api::Type::String
@@ -9072,7 +9075,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Using Packet Mirroring': 'https://cloud.google.com/vpc/docs/using-packet-mirroring#creating'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/packetMirroring'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/packetMirrorings'
     description: |
       Packet Mirroring mirrors traffic to and from particular VM instances.
       You can use the collected traffic to help you detect security threats
@@ -13535,14 +13538,57 @@ objects:
           PARTNER InterconnectAttachment is created, updated,
           or deleted.
         output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: bfd
+        description: |
+          BFD configuration for the BGP peering.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: sessionInitializationMode
+            description: |
+              The BFD session initialization mode for this BGP peer.
+              If set to `ACTIVE`, the Cloud Router will initiate the BFD session
+              for this BGP peer. If set to `PASSIVE`, the Cloud Router will wait
+              for the peer router to initiate the BFD session for this BGP peer.
+              If set to `DISABLED`, BFD is disabled for this BGP peer.
+            values:
+              - :ACTIVE
+              - :DISABLED
+              - :PASSIVE
+            required: true
+          - !ruby/object:Api::Type::Integer
+            name: minTransmitInterval
+            description: |
+              The minimum interval, in milliseconds, between BFD control packets
+              transmitted to the peer router. The actual value is negotiated
+              between the two routers and is equal to the greater of this value
+              and the corresponding receive interval of the other router. If set,
+              this value must be between 1000 and 30000.
+            default_value: 1000
+          - !ruby/object:Api::Type::Integer
+            name: minReceiveInterval
+            description: |
+              The minimum interval, in milliseconds, between BFD control packets
+              received from the peer router. The actual value is negotiated
+              between the two routers and is equal to the greater of this value
+              and the transmit interval of the other router. If set, this value
+              must be between 1000 and 30000.
+            default_value: 1000
+          - !ruby/object:Api::Type::Integer
+            name: multiplier
+            description: |
+              The number of consecutive BFD packets that must be missed before
+              BFD declares that a peer is unavailable. If set, the value must
+              be a value between 5 and 16.
+            default_value: 5
       - !ruby/object:Api::Type::Boolean
-         name: 'enable'
-         description: |
-           The status of the BGP peer connection. If set to false, any active session
-           with the peer is terminated and all associated routing information is removed.
-           If set to true, the peer connection can be established with routing information.
-           The default is true.
-         default_value: true
+        name: 'enable'
+        description: |
+          The status of the BGP peer connection. If set to false, any active session
+          with the peer is terminated and all associated routing information is removed.
+          If set to true, the peer connection can be established with routing information.
+          The default is true.
+        default_value: true
   - !ruby/object:Api::Resource
     name: 'SecurityPolicy'
     kind: 'compute#securityPolicy'
@@ -14608,13 +14654,11 @@ objects:
         name: 'purpose'
         input: true
         description: |
-          The purpose of the resource. This field can be either PRIVATE
-          or INTERNAL_HTTPS_LOAD_BALANCER. A subnetwork with purpose set to
+          The purpose of the resource. A subnetwork with purpose set to
           INTERNAL_HTTPS_LOAD_BALANCER is a user-created subnetwork that is
-          reserved for Internal HTTP(S) Load Balancing. If unspecified, the
-          purpose defaults to PRIVATE.
+          reserved for Internal HTTP(S) Load Balancing. 
 
-          If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set `role`.
+          If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set the `role` field.
       - !ruby/object:Api::Type::Enum
         name: 'role'
         update_verb: :PATCH

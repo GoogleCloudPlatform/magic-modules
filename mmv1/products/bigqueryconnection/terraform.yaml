@@ -44,6 +44,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         oics_vars_overrides:
           deletion_protection: "false"
+        ignore_read_extra:
+          - "cloud_sql.0.credential" # password removed
       - !ruby/object:Provider::Terraform::Examples
         min_version: beta
         name: "bigquery_connection_full"
@@ -60,6 +62,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         oics_vars_overrides:
           deletion_protection: "false"
+        ignore_read_extra:
+          - "cloud_sql.0.credential" # password removed
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

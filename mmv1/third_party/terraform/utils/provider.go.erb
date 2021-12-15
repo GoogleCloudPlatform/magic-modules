@@ -184,14 +184,15 @@ func Provider() *schema.Provider {
 			GkeHubFeatureCustomEndpointEntryKey:             GkeHubFeatureCustomEndpointEntry,
 			OrgPolicyEndpointEntryKey:                       OrgPolicyEndpointEntry,
 			PrivatecaCertificateTemplateEndpointEntryKey:    PrivatecaCertificateTemplateCustomEndpointEntry,
+			RecaptchaEnterpriseEndpointEntryKey:             RecaptchaEnterpriseEndpointEntry,
+			ContainerAwsCustomEndpointEntryKey:    ContainerAwsCustomEndpointEntry,
+			ContainerAzureCustomEndpointEntryKey:    ContainerAzureCustomEndpointEntry,
 
 			<% if version == "private" -%>
 			VmwareEndpointEntryKey:                          VmwareEndpointEntry,
 			<% end -%>
 
-			<% unless version == "ga" -%>
 			CloudBuildWorkerPoolEndpointEntryKey:               CloudBuildWorkerPoolEndpointEntry,
-			<% end -%>
 },
 
 		ProviderMetaSchema: map[string]*schema.Schema{
@@ -238,11 +239,14 @@ func Provider() *schema.Provider {
 			"google_compute_region_ssl_certificate":            dataSourceGoogleRegionComputeSslCertificate(),
 			"google_compute_resource_policy":                   dataSourceGoogleComputeResourcePolicy(),
 			"google_compute_router":                            dataSourceGoogleComputeRouter(),
+			"google_compute_router_status":                     dataSourceGoogleComputeRouterStatus(),
 			"google_compute_ssl_certificate":                   dataSourceGoogleComputeSslCertificate(),
 			"google_compute_ssl_policy":                        dataSourceGoogleComputeSslPolicy(),
 			"google_compute_subnetwork":                        dataSourceGoogleComputeSubnetwork(),
 			"google_compute_vpn_gateway":                       dataSourceGoogleComputeVpnGateway(),
 			"google_compute_zones":                             dataSourceGoogleComputeZones(),
+                        "google_container_azure_versions":                  dataSourceGoogleContainerAzureVersions(),
+                        "google_container_aws_versions":                  dataSourceGoogleContainerAwsVersions(),
 			"google_container_cluster":                         dataSourceGoogleContainerCluster(),
 			"google_container_engine_versions":                 dataSourceGoogleContainerEngineVersions(),
 			"google_container_registry_image":                  dataSourceGoogleContainerImage(),
@@ -269,6 +273,7 @@ func Provider() *schema.Provider {
 			"google_firebase_web_app_config":                   dataSourceGoogleFirebaseWebappConfig(),
 			<% end -%>
 			"google_folder":                                    dataSourceGoogleFolder(),
+			"google_folders":                                   dataSourceGoogleFolders(),
 			"google_folder_organization_policy":                dataSourceGoogleFolderOrganizationPolicy(),
 			"google_monitoring_notification_channel":           dataSourceMonitoringNotificationChannel(),
 			"google_monitoring_cluster_istio_service":          dataSourceMonitoringServiceClusterIstio(),
@@ -456,9 +461,7 @@ end     # products.each do
 			// resources implemented within tpgtools
 			map[string]*schema.Resource{
 				"google_assured_workloads_workload":            resourceAssuredWorkloadsWorkload(),
-				<% unless version == 'ga' -%>
 				"google_cloudbuild_worker_pool":                resourceCloudbuildWorkerPool(),
-				<% end -%>
 				"google_compute_firewall_policy_association":   resourceComputeFirewallPolicyAssociation(),
 				"google_compute_firewall_policy":               resourceComputeFirewallPolicy(),
 				"google_compute_firewall_policy_rule":          resourceComputeFirewallPolicyRule(),
@@ -470,12 +473,18 @@ end     # products.each do
 				"google_monitoring_monitored_project":          resourceMonitoringMonitoredProject(),
 				<% end -%>
 				"google_org_policy_policy":             resourceOrgPolicyPolicy(),
+				"google_os_config_os_policy_assignment": resourceOSConfigOSPolicyAssignment(),
 				<% if version == 'private' -%>
-				"google_os_config_os_policy_assignment": resourceOsConfigOsPolicyAssignment(),
 				"google_vmware_private_cloud":           resourceVmwarePrivateCloud(),
 				"google_vmware_cluster":                 resourceVmwareCluster(),
 				<% end -%>
 				"google_privateca_certificate_template":        resourcePrivatecaCertificateTemplate(),
+				"google_recaptcha_enterprise_key":              resourceRecaptchaEnterpriseKey(),
+                                "google_container_aws_cluster":  resourceContainerAwsCluster(),
+                                "google_container_aws_node_pool": resourceContainerAwsNodePool(),
+                                "google_container_azure_client": resourceContainerAzureClient(),
+                                "google_container_azure_cluster": resourceContainerAzureCluster(),
+                                "google_container_azure_node_pool": resourceContainerAzureNodePool(),
 			},
 			// ------------------------------------
 			map[string]*schema.Resource{
@@ -655,9 +664,9 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.GkeHubBasePath = d.Get(GkeHubFeatureCustomEndpointEntryKey).(string)
 	config.OrgPolicyBasePath = d.Get(OrgPolicyEndpointEntryKey).(string)
 	config.PrivatecaBasePath = d.Get(PrivatecaCertificateTemplateEndpointEntryKey).(string)
-	<% unless version == "ga" -%>
+        config.ContainerAwsBasePath = d.Get(ContainerAwsCustomEndpointEntryKey).(string)
+        config.ContainerAzureBasePath = d.Get(ContainerAzureCustomEndpointEntryKey).(string)
 	config.CloudBuildWorkerPoolBasePath = d.Get(CloudBuildWorkerPoolEndpointEntryKey).(string)
-	<% end -%>
 
 	stopCtx, ok := schema.StopContext(ctx)
 	if !ok {

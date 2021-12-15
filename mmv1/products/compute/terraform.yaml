@@ -182,7 +182,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         send_empty_value: true
       cdnPolicy.maxTtl: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-        send_empty_value: true
       cdnPolicy.signedUrlCacheMaxAgeSec: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
       cdnPolicy.negativeCachingPolicy.ttl: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -848,6 +847,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "port_range"
           - "target"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "forwarding_rule_regional_http_xlb"
+        min_version: 'beta'
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "website-forwarding-rule"
+          region_target_http_proxy_name: "website-proxy"
+          region_url_map_name: "website-map"
+          region_backend_service_name: "website-backend"
+          region_health_check_name: "website-hc"
+          rigm_name: "website-rigm"
+          network_name: "website-net"
+          fw_name: "website-fw"
+          ip_name: "website-ip"
+        ignore_read_extra:
+          - "port_range"
+          - "target"
+          - "ip_address"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
     properties:
@@ -920,7 +937,27 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   GlobalForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "external_tcp_proxy_lb_mig_backend_custom_header"
+        name: "external_ssl_proxy_lb_mig_backend"
+        primary_resource_id: "default"
+        skip_test: true
+        vars:
+          ssl_proxy_xlb_network: "ssl-proxy-xlb-network"
+          ssl_proxy_xlb_subnet: "ssl-proxy-xlb-subnet"
+          ssl_proxy_xlb_ip: "ssl-proxy-xlb-ip"
+          default_cert: "default-cert"
+          test_proxy: "test-proxy"
+          ssl_proxy_xlb_forwarding_rule: "ssl-proxy-xlb-forwarding-rule"
+          ssl_proxy_xlb_backend_service: "ssl-proxy-xlb-backend-service"
+          ssl_proxy_health_check: "ssl-proxy-health-check"
+          ssl_proxy_xlb_mig_template: "ssl-proxy-xlb-mig-template"
+          ssl_proxy_xlb_mig1: "ssl-proxy-xlb-mig1"
+          ssl_proxy_xlb_fw_allow_hc: "ssl-proxy-xlb-fw-allow-hc"
+        ignore_read_extra:
+          - "port_range"
+          - "target"
+          - "ip_address"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "external_tcp_proxy_lb_mig_backend"
         primary_resource_id: "default"
         vars:
           tcp_proxy_xlb_network: "tcp-proxy-xlb-network"
@@ -2058,6 +2095,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'portDiffSuppress'
       grpcHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
+      logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/health_check_log_config.go.erb'
   RegionUrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -2398,6 +2438,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           router_name: "my-router"
           peer_name: "my-router-peer"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "router_peer_bfd"
+        primary_resource_id: "peer"
+        skip_test: true
+        vars:
+          router_name: "my-router"
+          peer_name: "my-router-peer"
     properties:
       advertiseMode: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
@@ -2413,6 +2460,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           {{description}}
           If it is not provided, the provider region is used.
+      bfd: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       enable: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bool_to_upper_string.erb'
         custom_flatten: 'templates/terraform/custom_flatten/string_to_bool_default_true.erb'
@@ -2460,7 +2509,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       insert_minutes: 5
       update_minutes: 5
       delete_minutes: 5
-    create_url: projects/{{project}}/zones/{{zone}}/disks/{{source_disk}}/createSnapshot
+    create_url: PRE_CREATE_REPLACE_ME/createSnapshot
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "snapshot_basic"
@@ -2485,7 +2534,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       snapshotEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "kmsKeySelfLink"
       sourceDisk: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
       sourceDiskEncryptionKey: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       sourceDiskEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -2497,6 +2546,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: templates/terraform/decoders/snapshot.go.erb
+      pre_create: templates/terraform/pre_create/compute_snapshot_precreate_url.go.erb
   ManagedSslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6

@@ -32,6 +32,9 @@ import(
 	"context"
 	"fmt"
 	"log"
+{{- if $.ReplaceInBasePath.Present }}
+  "strings"
+{{- end }}
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -212,7 +215,7 @@ func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) erro
 	{{- end -}}
 {{ end }}
 
-	obj := &{{$.Package}}.{{$.DCLTitle}}{
+	obj := &{{$.Package}}.{{$.DCLStructName}}{
 {{- range $v := .Properties }}
 	{{- if and ($v.Settable) ($v.StateGetter) }}
 	{{$v.PackageName}}: {{$v.StateGetter}},
@@ -265,10 +268,19 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 	if bp, err := getBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject)
+	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
 	{{- if $.AppendToBasePath }}
 	client.Config.BasePath += "{{$.AppendToBasePath}}"
 	{{- end }}
+	{{- if $.ReplaceInBasePath.Present }}
+	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
+	{{- end }}
+	if bp, err := replaceVars(d, config, client.Config.BasePath); err != nil {
+		d.SetId("")
+		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
+	} else {
+		client.Config.BasePath = bp
+	}
 	res, err := client.Apply{{$.DCLTitle}}(context.Background(), obj, createDirective...)
 
 	if _, ok := err.(dcl.DiffAfterApplyError); ok {
@@ -318,7 +330,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 	{{- end -}}
 {{ end }}
 
-	obj := &{{$.Package}}.{{$.DCLTitle}}{
+	obj := &{{$.Package}}.{{$.DCLStructName}}{
 {{- range $v := .Properties }}
 	{{- if ($v.StateGetter) }}
 	{{$v.PackageName}}: {{$v.StateGetter}},
@@ -339,10 +351,19 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 	if bp, err := getBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject)
+	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
 	{{- if $.AppendToBasePath }}
 	client.Config.BasePath += "{{$.AppendToBasePath}}"
 	{{- end }}
+	{{- if $.ReplaceInBasePath.Present }}
+	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
+	{{- end }}
+	if bp, err := replaceVars(d, config, client.Config.BasePath); err != nil {
+		d.SetId("")
+		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
+	} else {
+		client.Config.BasePath = bp
+	}
 	res, err := client.Get{{$.DCLTitle}}(context.Background(), obj)
 	if err != nil {
 		resourceName := fmt.Sprintf("{{$.PathType}} %q", d.Id())
@@ -373,7 +394,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	{{- end -}}
 {{ end }}
 
-	obj := &{{$.Package}}.{{$.DCLTitle}}{
+	obj := &{{$.Package}}.{{$.DCLStructName}}{
 {{- range $v := .Properties }}
 	{{- if ($v.StateGetter) }}
 	{{$v.PackageName}}: {{$v.StateGetter}},
@@ -383,7 +404,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 
 {{- if $.StateHint }}
   // Construct state hint from old values
-  old := &{{$.Package}}.{{$.DCLTitle}}{
+  old := &{{$.Package}}.{{$.DCLStructName}}{
   {{- range $v := .Properties }}
     {{- if ($v.StateGetter) }}
     {{$v.PackageName}}: {{$v.ChangeStateGetter}},
@@ -415,10 +436,19 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	if bp, err := getBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject)
+	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
 	{{- if $.AppendToBasePath }}
 	client.Config.BasePath += "{{$.AppendToBasePath}}"
 	{{- end }}
+	{{- if $.ReplaceInBasePath.Present }}
+	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
+	{{- end }}
+	if bp, err := replaceVars(d, config, client.Config.BasePath); err != nil {
+		d.SetId("")
+		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
+	} else {
+		client.Config.BasePath = bp
+	}
 	res, err := client.Apply{{$.DCLTitle}}(context.Background(), obj, directive...)
 
 	if _, ok := err.(dcl.DiffAfterApplyError); ok {
@@ -447,7 +477,7 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 	{{- end -}}
 {{ end }}
 
-	obj := &{{$.Package}}.{{$.DCLTitle}}{
+	obj := &{{$.Package}}.{{$.DCLStructName}}{
 {{- range $v := .Properties }}
 	{{- if ($v.StateGetter) }}
 	{{$v.PackageName}}: {{$v.StateGetter}},
@@ -494,10 +524,19 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 	if bp, err := getBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject)
+	client := NewDCL{{$.ProductType}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
 	{{- if $.AppendToBasePath }}
 	client.Config.BasePath += "{{$.AppendToBasePath}}"
 	{{- end }}
+	{{- if $.ReplaceInBasePath.Present }}
+	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
+	{{- end }}
+	if bp, err := replaceVars(d, config, client.Config.BasePath); err != nil {
+		d.SetId("")
+		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
+	} else {
+		client.Config.BasePath = bp
+	}
 	if err := client.Delete{{$.DCLTitle}}(context.Background(), obj); err != nil {
 		return fmt.Errorf("Error deleting {{$.DCLTitle}}: %s", err)
 	}

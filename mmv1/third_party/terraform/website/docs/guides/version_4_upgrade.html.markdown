@@ -71,7 +71,7 @@ terraform {
   # ... other configuration ...
   required_providers {
     google = {
-      version = "~> 3.87.0"
+      version = "~> 3.90.0"
     }
   }
 }
@@ -172,6 +172,8 @@ Previously users could specify `trace-append` or `trace-ro` as scopes for a give
 However, to better align with [Google documentation](https://cloud.google.com/sdk/gcloud/reference/alpha/compute/instances/set-scopes#--scopes), `trace` will now be the only valid scope, as it's an alias for `trace.append` and
 `trace-ro` is no longer a documented option.
 
+## Datasources
+
 ## Datasource: `google_kms_key_ring`
 
 ### `id` now matches the `google_kms_key_ring` id format
@@ -179,6 +181,15 @@ However, to better align with [Google documentation](https://cloud.google.com/sd
 The format has changed to better match the resource's ID format.
 
 Interpolations based on the `id` of the datasource may require updates.
+
+## Resources
+
+## Resource: `google_app_engine_standard_app_version`
+
+### `entrypoint` is now required
+
+This resource would fail to deploy without this field defined. Specify the
+`entrypoint` block to fix any issues
 
 ## Resource: `google_bigquery_job`
 
@@ -229,6 +240,12 @@ The provider will now enforce at plan time that one of these fields be set.
 ### One of `source_tags`, `source_ranges` or `source_service_accounts` are required on INGRESS firewalls
 
 Previously, if all of these fields were left empty, the firewall defaulted to allowing traffic from 0.0.0.0/0, which is a suboptimal default.
+
+### `source_ranges` will track changes when unspecified in a config
+
+In `3.X`, `source_ranges` wouldn't cause a diff if it was undefined in
+config but was set on the firewall itself. With 4.0.0 Terraform will now
+track changes on the block when it is not specified in a user's config.
 
 ## Resource: `google_compute_instance`
 
@@ -336,13 +353,6 @@ This field was incorrectly included in the GA `google` provider in past releases
 In order to continue to use the feature, add `provider = google-beta` to your
 resource definition.
 
-## Resource: `google_app_engine_standard_app_version`
-
-### `entrypoint` is now required
-
-This resource would fail to deploy without this field defined. Specify the
-`entrypoint` block to fix any issues
-
 ## Resource: `google_compute_snapshot`
 
 ### `source_disk_link` is now removed
@@ -360,18 +370,6 @@ Substitute the following:
 ```
 "projects/${google_compute_snapshot.my_snapshot.project}/zones/${google_compute_snapshot.my_snapshot.zone}/disks/${google_compute_snapshot.my_snapshot.source_disk}"
 ```
-
-## Resource: `google_kms_crypto_key`
-
-### `self_link` is now removed
-
-Removed in favor of `id`.
-
-## Resource: `google_kms_key_ring`
-
-### `self_link` is now removed
-
-Removed in favor of `id`.
 
 ## Resource: `google_data_loss_prevention_trigger`
 
@@ -403,6 +401,18 @@ The provider will now enforce at plan time that one of these fields be set.
 
 ### At least one of `patch_config.0.post_step.0.linux_exec_step_config` or `patch_config.0.post_step.0.windows_exec_step_config` is required
 The provider will now enforce at plan time that one of these fields be set.
+
+## Resource: `google_kms_crypto_key`
+
+### `self_link` is now removed
+
+Removed in favor of `id`.
+
+## Resource: `google_kms_key_ring`
+
+### `self_link` is now removed
+
+Removed in favor of `id`.
 
 ## Resource: `google_project`
 
@@ -496,19 +506,19 @@ running `terraform plan`, amend your config to resolve them.
 
 The affected fields are:
 
-    * `activation_policy` will now default to `ALWAYS` at plan time, and detect
+  * `activation_policy` will now default to `ALWAYS` at plan time, and detect
 drift even when unset. Previously, Terraform only detected drift when the field
 had been set in config explicitly.
 
-    * `availability_type` will now default to `ZONAL` at plan time, and detect
+  * `availability_type` will now default to `ZONAL` at plan time, and detect
 drift even when unset. Previously, Terraform only detected drift when the field
 had been set in config explicitly.
 
-    * `disk_type` will now default to `PD_SSD` at plan time, and detect
+  * `disk_type` will now default to `PD_SSD` at plan time, and detect
 drift even when unset. Previously, Terraform only detected drift when the field
 had been set in config explicitly.
 
-    * `encryption_key_name` will now detect drift even when unset. Previously,
+  * `encryption_key_name` will now detect drift even when unset. Previously,
 Terraform only detected drift when the field had been set in config explicitly.
 
 ## Resource: `google_storage_bucket`

@@ -18,6 +18,7 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://{{region}}-pubsublite.googleapis.com/v1/admin/
+    cai_base_url: https://pubsublite.googleapis.com/v1/admin/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -129,7 +130,9 @@ objects:
             name: 'period'
             description: |
               How long a published message is retained. If unset, messages will be retained as
-              long as the bytes retained for each partition is below perPartitionBytes.
+              long as the bytes retained for each partition is below perPartitionBytes. A
+              duration in seconds with up to nine fractional digits, terminated by 's'.
+              Example: "3.5s".
       - !ruby/object:Api::Type::NestedObject
         name: 'reservationConfig'
         description: |
@@ -193,6 +196,6 @@ objects:
             description: |
               When this subscription should send messages to subscribers relative to messages persistence in storage.
             values:
-              - :DELIVER_IMMEDIATELY	
+              - :DELIVER_IMMEDIATELY
               - :DELIVER_AFTER_STORED
               - :DELIVERY_REQUIREMENT_UNSPECIFIED
