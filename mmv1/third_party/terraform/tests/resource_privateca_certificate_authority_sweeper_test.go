@@ -2,21 +2,23 @@ package google
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func init() {
-	resource.AddTestSweepers("StorageBucket", &resource.Sweeper{
-		Name: "StorageBucket",
-		F:    testSweepStorageBucket,
+	resource.AddTestSweepers("CertificateAuthority", &resource.Sweeper{
+		Name: "CertificateAuthority",
+		F:    testSweepCertificateAuthority,
 	})
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
-func testSweepStorageBucket(region string) error {
-	resourceName := "StorageBucket"
+func testSweepCertificateAuthority(region string) error {
+	resourceName := "CertificateAuthority"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
 	config, err := sharedConfigForRegion(region)
@@ -31,6 +33,14 @@ func testSweepStorageBucket(region string) error {
 		return err
 	}
 
+	// Setup variables to replace in list template
+	d := &ResourceDataMock{
+		FieldsInSchema: map[string]interface{}{
+			"project":  config.Project,
+			"location": region,
+		},
+	}
+
 	caPoolsUrl, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools")
 	if err != nil {
 		return err
@@ -42,7 +52,7 @@ func testSweepStorageBucket(region string) error {
 		return nil
 	}
 
-	resourceList, ok := res["items"]
+	resourceList, ok := res["caPools"]
 	if !ok {
 		log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
 		return nil
@@ -56,22 +66,57 @@ func testSweepStorageBucket(region string) error {
 	for _, ri := range rl {
 		obj := ri.(map[string]interface{})
 
-		log.Printf("%+v", obj)
+		poolName := obj["name"].(string)
 
-		// id := obj["name"].(string)
-		// // Increment count and skip if resource is not sweepable.
-		// if !isSweepableTestResource(id) {
-		// 	nonPrefixCount++
-		// 	continue
-		// }
+		caListUrl := config.PrivatecaBasePath + poolName + "/certificateAuthorities"
 
-		// deleteUrl := fmt.Sprintf("https://storage.googleapis.com/storage/v1/b/%s", id)
-		// _, err = sendRequest(config, "DELETE", config.Project, deleteUrl, config.userAgent, nil)
-		// if err != nil {
-		// 	log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", deleteUrl, err)
-		// } else {
-		// 	log.Printf("[INFO][SWEEPER_LOG] Deleted a %s resource: %s", resourceName, id)
-		// }
+		res, err := sendRequest(config, "GET", config.Project, caListUrl, config.userAgent, nil)
+		if err != nil {
+			log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", caPoolsUrl, err)
+			return nil
+		}
+
+		caResourceList, ok := res["certificateAuthorities"]
+		if !ok {
+			log.Printf("[INFO][SWEEPER_LOG] Nothing found in certificate authority list response.")
+			continue
+		}
+
+		carl := caResourceList.([]interface{})
+		for _, cai := range carl {
+			obj := cai.(map[string]interface{})
+			caName := obj["name"].(string)
+
+			// Increment count and skip if resource is not sweepable.
+			nameParts := strings.Split(caName, "/")
+			id := nameParts[len(nameParts)-1]
+			if !isSweepableTestResource(id) {
+				nonPrefixCount++
+				continue
+			}
+
+			if obj["state"] == "DELETED" {
+				continue
+			}
+
+			if obj["state"] == "ENABLED" {
+				disableUrl := fmt.Sprintf("%s%s:disable", config.PrivatecaBasePath, caName)
+				_, err = sendRequest(config, "POST", config.Project, disableUrl, config.userAgent, nil)
+				if err != nil {
+					log.Printf("[INFO][SWEEPER_LOG] Error disabling for url %s : %s", disableUrl, err)
+				} else {
+					log.Printf("[INFO][SWEEPER_LOG] Disabling %s resource: %s", resourceName, caName)
+				}
+			}
+
+			deleteUrl := config.PrivatecaBasePath + caName
+			_, err = sendRequest(config, "DELETE", config.Project, deleteUrl, config.userAgent, nil)
+			if err != nil {
+				log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", deleteUrl, err)
+			} else {
+				log.Printf("[INFO][SWEEPER_LOG] Deleted a %s resource: %s", resourceName, caName)
+			}
+		}
 	}
 
 	if nonPrefixCount > 0 {
