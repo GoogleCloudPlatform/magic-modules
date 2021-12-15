@@ -75,9 +75,9 @@ set -e
 
 if [ $exit_code -ne 0 ]; then
 	state="failure"
-  printf \nfailed running tests... uploading logs to gcs bucket at
-  printf \n gs://$TFV_LOGS_BUCKET\n
-  gsutil cp ./tfv-logs/$BUILD_ID.log gs://$TFV_LOGS_BUCKET
+	printf \nfailed running tests... uploading logs to gcs bucket at
+	printf \n gs://$TFV_LOGS_BUCKET/$BUILD_ID.log\n
+	gsutil cp ./tfv-logs/$BUILD_ID.log gs://$TFV_LOGS_BUCKET
 else
 	state="success"
 fi
