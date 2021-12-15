@@ -695,7 +695,6 @@ objects:
                             May not start with the string '..'.
                         - !ruby/object:Api::Type::Integer
                           name: mode
-                          required: false
                           description: |-
                             Mode bits to use on this file, must be a value between 0000 and 0777. If
                             not specified, the volume defaultMode will be used. This might be in
