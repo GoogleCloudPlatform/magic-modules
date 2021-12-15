@@ -20,7 +20,6 @@ resource "google_container_azure_cluster" "primary" {
 
     subnet_id = "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-byo/providers/Microsoft.Network/virtualNetworks/{{byo_multicloud_prefix}}-dev-vnet/subnets/default"
     version   = "${data.google_container_azure_versions.versions.valid_versions[0]}"
-    tags      = {}
   }
 
   fleet {
@@ -37,7 +36,6 @@ resource "google_container_azure_cluster" "primary" {
   }
 
   resource_group_id = "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-cluster"
-  annotations       = {}
   project           = "{{project}}"
 }
 
