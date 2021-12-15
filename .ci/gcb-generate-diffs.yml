@@ -187,8 +187,10 @@ steps:
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tfv-head", "tfv-base"]
       env:
+        - BUILD_ID=$BUILD_ID
         - TERRAFORM_VERSION=0.12.31
         - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
+        - TFV_LOGS_BUCKET=$_TFV_LOGS_BUCKET
       args:
           - $_PR_NUMBER
           - $COMMIT_SHA

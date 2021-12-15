@@ -67,13 +67,17 @@ curl \
 set +e
 
 make build
-make test-integration
+mkdir tfv-logs
+make test-integration > ./tfv-logs/$BUILD_ID.log
 exit_code=$?
 
 set -e
 
 if [ $exit_code -ne 0 ]; then
 	state="failure"
+  printf \nfailed running tests... uploading logs to gcs bucket at
+  printf \n gs://$TFV_LOGS_BUCKET\n
+  gsutil cp ./tfv-logs/$BUILD_ID.log gs://$TFV_LOGS_BUCKET
 else
 	state="success"
 fi
