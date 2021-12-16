@@ -152,6 +152,7 @@ describe Provider::Terraform do
         is_expected.to eq(
           [
             ['string_one', ['stringOne']],
+            ['string_renamed', ['stringRename']],
             ['object_one', ['objectOne']],
             ['object_two_string', ['overrideFoo', 'nested.overrideBar']],
             [
@@ -170,6 +171,24 @@ describe Provider::Terraform do
           'not_a_field',
           'object_one.0.not_a_field',
           'object_one.0.object_one_nested_object.0.not_a_field'
+        ]
+      end
+      subject do
+        test_paths.map do |test_path|
+          provider.get_property_schema_path(test_path, override_resource)
+        end
+      end
+
+      it do
+        is_expected.to eq([nil] * test_paths.size)
+      end
+    end
+
+    describe '#get_property_schema_path renamed' do
+      let(:test_paths) do
+        [
+          'stringRename',
+          'object_one.0.objectOneRename'
         ]
       end
       subject do

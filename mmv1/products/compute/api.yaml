@@ -137,6 +137,10 @@ objects:
             that are reserved for a VLAN attachment in an IPsec-encrypted Cloud
             Interconnect configuration. These addresses are regional resources.
 
+          * PRIVATE_SERVICE_CONNECT for a private network address that is used
+          to configure Private Service Connect. Only global internal addresses
+          can use this purpose.
+
           This should only be set when using an Internal address.
       - !ruby/object:Api::Type::Enum
         name: 'networkTier'
@@ -321,9 +325,6 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: 'scaleDownControl'
             min_version: beta
-            at_least_one_of:
-             - scale_down_control.0.max_scaled_down_replicas
-             - scale_down_control.0.time_window_sec
             description: |
               Defines scale down controls to reduce the risk of response latency
               and outages due to abrupt scale-in events
@@ -331,29 +332,35 @@ objects:
             - !ruby/object:Api::Type::NestedObject
               name: 'maxScaledDownReplicas'
               at_least_one_of:
-              - scale_down_control.0.max_scaled_down_replicas.0.fixed
-              - scale_down_control.0.max_scaled_down_replicas.0.percent
+                - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas
+                - autoscaling_policy.0.scale_down_control.0.time_window_sec
               properties:
               - !ruby/object:Api::Type::Integer
                 name: 'fixed'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.fixed
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.percent
                 description: |
                   Specifies a fixed number of VM instances. This must be a positive
                   integer.
               - !ruby/object:Api::Type::Integer
                 name: 'percent'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.fixed
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.percent
                 description: |
                   Specifies a percentage of instances between 0 to 100%, inclusive.
                   For example, specify 80 for 80%.
             - !ruby/object:Api::Type::Integer
               name: 'timeWindowSec'
+              at_least_one_of:
+                - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas
+                - autoscaling_policy.0.scale_down_control.0.time_window_sec
               description: |
                 How long back autoscaling should look when computing recommendations
                 to include directives regarding slower scale down, as described above.
           - !ruby/object:Api::Type::NestedObject
             name: 'scaleInControl'
-            at_least_one_of:
-             - scale_in_control.0.max_scaled_in_replicas
-             - scale_in_control.0.time_window_sec
             description: |
               Defines scale in controls to reduce the risk of response latency
               and outages due to abrupt scale-in events
@@ -361,21 +368,30 @@ objects:
             - !ruby/object:Api::Type::NestedObject
               name: 'maxScaledInReplicas'
               at_least_one_of:
-              - scale_in_control.0.max_scaled_in_replicas.0.fixed
-              - scale_in_control.0.max_scaled_in_replicas.0.percent
+                - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas
+                - autoscaling_policy.0.scale_in_control.0.time_window_sec
               properties:
               - !ruby/object:Api::Type::Integer
                 name: 'fixed'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.fixed
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.percent
                 description: |
                   Specifies a fixed number of VM instances. This must be a positive
                   integer.
               - !ruby/object:Api::Type::Integer
                 name: 'percent'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.fixed
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.percent
                 description: |
                   Specifies a percentage of instances between 0 to 100%, inclusive.
                   For example, specify 80 for 80%.
             - !ruby/object:Api::Type::Integer
               name: 'timeWindowSec'
+              at_least_one_of:
+                - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas
+                - autoscaling_policy.0.scale_in_control.0.time_window_sec
               description: |
                 How long back autoscaling should look when computing recommendations
                 to include directives regarding slower scale down, as described above.
@@ -2380,6 +2396,7 @@ objects:
         default_value: :INTERNAL
         values:
           - :EXTERNAL
+          - :EXTERNAL_MANAGED
           - :INTERNAL
           - :INTERNAL_MANAGED
       - !ruby/object:Api::Type::Enum
@@ -2682,7 +2699,7 @@ objects:
         description: |
           A named port on a backend instance group representing the port for
           communication to the backend VMs in that group. Required when the
-          loadBalancingScheme is EXTERNAL, INTERNAL_MANAGED, or INTERNAL_SELF_MANAGED
+          loadBalancingScheme is EXTERNAL, EXTERNAL_MANAGED, INTERNAL_MANAGED, or INTERNAL_SELF_MANAGED
           and the backends are instance groups. The named port must be defined on each
           backend instance group. This parameter has no meaning if the backends are NEGs. API sets a
           default of "http" if not given.
@@ -2721,6 +2738,7 @@ objects:
           - :CLIENT_IP_NO_DESTINATION
       - !ruby/object:Api::Type::NestedObject
         name: 'connectionTrackingPolicy'
+        min_version: 'beta'
         description: |
           Connection Tracking configuration for this BackendService.
           This is available only for Layer 4 Internal Load Balancing and
@@ -3561,7 +3579,8 @@ objects:
           Direction of traffic to which this firewall applies; default is
           INGRESS. Note: For INGRESS traffic, it is NOT supported to specify
           destinationRanges; For EGRESS traffic, it is NOT supported to specify
-          sourceRanges OR sourceTags.
+          `source_ranges` OR `source_tags`. For INGRESS traffic, one of `source_ranges`,
+          `source_tags` or `source_service_accounts` is required.
         values:
           - :INGRESS
           - :EGRESS
@@ -3817,14 +3836,16 @@ objects:
         name: 'loadBalancingScheme'
         description: |
           This signifies what the ForwardingRule will be used for and can be
-          EXTERNAL, INTERNAL, or INTERNAL_MANAGED. EXTERNAL is used for Classic
+          EXTERNAL, EXTERNAL_MANAGED, INTERNAL, or INTERNAL_MANAGED. EXTERNAL is used for Classic
           Cloud VPN gateways, protocol forwarding to VMs from an external IP address,
           and HTTP(S), SSL Proxy, TCP Proxy, and Network TCP/UDP load balancers.
           INTERNAL is used for protocol forwarding to VMs from an internal IP address,
           and internal TCP/UDP load balancers.
+          EXTERNAL_MANAGED is used for regional external HTTP(S) load balancers.
           INTERNAL_MANAGED is used for internal HTTP(S) load balancers.
         values:
           - :EXTERNAL
+          - :EXTERNAL_MANAGED
           - :INTERNAL
           - :INTERNAL_MANAGED
       - !ruby/object:Api::Type::String
@@ -9054,7 +9075,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Using Packet Mirroring': 'https://cloud.google.com/vpc/docs/using-packet-mirroring#creating'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/packetMirroring'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/packetMirrorings'
     description: |
       Packet Mirroring mirrors traffic to and from particular VM instances.
       You can use the collected traffic to help you detect security threats
@@ -9735,9 +9756,6 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: 'scaleDownControl'
             min_version: beta
-            at_least_one_of:
-             - scale_down_control.0.max_scaled_down_replicas
-             - scale_down_control.0.time_window_sec
             description: |
               Defines scale down controls to reduce the risk of response latency
               and outages due to abrupt scale-in events
@@ -9745,29 +9763,35 @@ objects:
             - !ruby/object:Api::Type::NestedObject
               name: 'maxScaledDownReplicas'
               at_least_one_of:
-              - scale_down_control.0.max_scaled_down_replicas.0.fixed
-              - scale_down_control.0.max_scaled_down_replicas.0.percent
+                - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas
+                - autoscaling_policy.0.scale_down_control.0.time_window_sec
               properties:
               - !ruby/object:Api::Type::Integer
                 name: 'fixed'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.fixed
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.percent
                 description: |
                   Specifies a fixed number of VM instances. This must be a positive
                   integer.
               - !ruby/object:Api::Type::Integer
                 name: 'percent'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.fixed
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.percent
                 description: |
                   Specifies a percentage of instances between 0 to 100%, inclusive.
                   For example, specify 80 for 80%.
             - !ruby/object:Api::Type::Integer
               name: 'timeWindowSec'
+              at_least_one_of:
+                - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas
+                - autoscaling_policy.0.scale_down_control.0.time_window_sec
               description: |
                 How long back autoscaling should look when computing recommendations
                 to include directives regarding slower scale down, as described above.
           - !ruby/object:Api::Type::NestedObject
             name: 'scaleInControl'
-            at_least_one_of:
-             - scale_in_control.0.max_scaled_in_replicas
-             - scale_in_control.0.time_window_sec
             description: |
               Defines scale in controls to reduce the risk of response latency
               and outages due to abrupt scale-in events
@@ -9775,21 +9799,30 @@ objects:
             - !ruby/object:Api::Type::NestedObject
               name: 'maxScaledInReplicas'
               at_least_one_of:
-              - scale_in_control.0.max_scaled_in_replicas.0.fixed
-              - scale_in_control.0.max_scaled_in_replicas.0.percent
+                - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas
+                - autoscaling_policy.0.scale_in_control.0.time_window_sec
               properties:
               - !ruby/object:Api::Type::Integer
                 name: 'fixed'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.fixed
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.percent
                 description: |
                   Specifies a fixed number of VM instances. This must be a positive
                   integer.
               - !ruby/object:Api::Type::Integer
                 name: 'percent'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.fixed
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.percent
                 description: |
                   Specifies a percentage of instances between 0 to 100%, inclusive.
                   For example, specify 80 for 80%.
             - !ruby/object:Api::Type::Integer
               name: 'timeWindowSec'
+              at_least_one_of:
+                - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas
+                - autoscaling_policy.0.scale_in_control.0.time_window_sec
               description: |
                 How long back autoscaling should look when computing recommendations
                 to include directives regarding slower scale down, as described above.
@@ -10425,10 +10458,12 @@ objects:
           properties:
             - !ruby/object:Api::Type::ResourceRef
               name: 'defaultService'
+              # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
+              # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # TODO: add defaultRouteAction.weightedBackendService here once they are supported.
-              exactly_one_of:
-                - path_matchers.0.default_service
-                - path_matchers.0.default_url_redirect
+              # exactly_one_of:
+              #   - path_matchers.0.default_service
+              #   - path_matchers.0.default_url_redirect
               resource: 'RegionBackendService'
               imports: 'selfLink'
               description: |
@@ -11570,10 +11605,12 @@ objects:
                           original URL is retained.
             - !ruby/object:Api::Type::NestedObject
               name: 'defaultUrlRedirect'
+              # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
+              # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # TODO: add defaultRouteAction.weightedBackendService here once they are supported.
-              exactly_one_of:
-                - path_matchers.0.default_service
-                - path_matchers.0.default_url_redirect
+              # exactly_one_of:
+              #   - path_matchers.0.default_service
+              #   - path_matchers.0.default_url_redirect
               description: |
                 When none of the specified hostRules match, the request is redirected to a URL specified
                 by defaultUrlRedirect. If defaultUrlRedirect is specified, defaultService or
@@ -13128,7 +13165,6 @@ objects:
           Interconnect Attachment (IPsec-encrypted Cloud Interconnect feature).
 
           Not currently available publicly.
-        min_version: beta
   - !ruby/object:Api::Resource
     name: 'RouterNat'
     base_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
@@ -13439,6 +13475,7 @@ objects:
           The priority of routes advertised to this BGP peer.
           Where there is more than one matching route of maximum
           length, the routes with the lowest priority value win.
+        send_empty_value: true
       - !ruby/object:Api::Type::Enum
         name: advertiseMode
         description: |
@@ -13501,14 +13538,57 @@ objects:
           PARTNER InterconnectAttachment is created, updated,
           or deleted.
         output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: bfd
+        description: |
+          BFD configuration for the BGP peering.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: sessionInitializationMode
+            description: |
+              The BFD session initialization mode for this BGP peer.
+              If set to `ACTIVE`, the Cloud Router will initiate the BFD session
+              for this BGP peer. If set to `PASSIVE`, the Cloud Router will wait
+              for the peer router to initiate the BFD session for this BGP peer.
+              If set to `DISABLED`, BFD is disabled for this BGP peer.
+            values:
+              - :ACTIVE
+              - :DISABLED
+              - :PASSIVE
+            required: true
+          - !ruby/object:Api::Type::Integer
+            name: minTransmitInterval
+            description: |
+              The minimum interval, in milliseconds, between BFD control packets
+              transmitted to the peer router. The actual value is negotiated
+              between the two routers and is equal to the greater of this value
+              and the corresponding receive interval of the other router. If set,
+              this value must be between 1000 and 30000.
+            default_value: 1000
+          - !ruby/object:Api::Type::Integer
+            name: minReceiveInterval
+            description: |
+              The minimum interval, in milliseconds, between BFD control packets
+              received from the peer router. The actual value is negotiated
+              between the two routers and is equal to the greater of this value
+              and the transmit interval of the other router. If set, this value
+              must be between 1000 and 30000.
+            default_value: 1000
+          - !ruby/object:Api::Type::Integer
+            name: multiplier
+            description: |
+              The number of consecutive BFD packets that must be missed before
+              BFD declares that a peer is unavailable. If set, the value must
+              be a value between 5 and 16.
+            default_value: 5
       - !ruby/object:Api::Type::Boolean
-         name: 'enable'
-         description: |
-           The status of the BGP peer connection. If set to false, any active session
-           with the peer is terminated and all associated routing information is removed.
-           If set to true, the peer connection can be established with routing information.
-           The default is true.
-         default_value: true
+        name: 'enable'
+        description: |
+          The status of the BGP peer connection. If set to false, any active session
+          with the peer is terminated and all associated routing information is removed.
+          If set to true, the peer connection can be established with routing information.
+          The default is true.
+        default_value: true
   - !ruby/object:Api::Resource
     name: 'SecurityPolicy'
     kind: 'compute#securityPolicy'
@@ -14574,13 +14654,11 @@ objects:
         name: 'purpose'
         input: true
         description: |
-          The purpose of the resource. This field can be either PRIVATE
-          or INTERNAL_HTTPS_LOAD_BALANCER. A subnetwork with purpose set to
+          The purpose of the resource. A subnetwork with purpose set to
           INTERNAL_HTTPS_LOAD_BALANCER is a user-created subnetwork that is
-          reserved for Internal HTTP(S) Load Balancing. If unspecified, the
-          purpose defaults to PRIVATE.
+          reserved for Internal HTTP(S) Load Balancing. 
 
-          If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set `role`.
+          If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set the `role` field.
       - !ruby/object:Api::Type::Enum
         name: 'role'
         update_verb: :PATCH
@@ -14728,6 +14806,35 @@ objects:
               https://cloud.google.com/vpc/docs/flow-logs#filtering for details on how to format this field.
               The default value is 'true', which evaluates to include everything.
             default_value: "true"
+      - !ruby/object:Api::Type::Enum
+        name: 'stackType'
+        update_verb: :PATCH
+        update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        fingerprint_name: 'fingerprint'
+        values:
+          - :IPV4_ONLY
+          - :IPV4_IPV6
+        description: |
+          The stack type for this subnet to identify whether the IPv6 feature is enabled or not.
+          If not specified IPV4_ONLY will be used.
+      - !ruby/object:Api::Type::Enum
+        name: 'ipv6AccessType'
+        values:
+          - :EXTERNAL
+        description: |
+          The access type of IPv6 address this subnet holds. It's immutable and can only be specified during creation
+          or the first time the subnet is updated into IPV4_IPV6 dual stack. If the ipv6_type is EXTERNAL then this subnet
+          cannot enable direct path.
+      - !ruby/object:Api::Type::String
+        name: 'ipv6CidrRange'
+        output: true
+        description: |
+          The range of internal IPv6 addresses that are owned by this subnetwork.
+      - !ruby/object:Api::Type::String
+        name: 'externalIpv6Prefix'
+        output: true
+        description: |
+          The range of external IPv6 addresses that are owned by this subnetwork.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Private Google Access':
@@ -18127,7 +18234,7 @@ objects:
                     description: |
                       Specifies the value of the fixed delay interval.
                     at_least_one_of:
-                      - default_route_action.0.fault_injection_policy.0.delay.0.delay
+                      - default_route_action.0.fault_injection_policy.0.delay.0.fixed_delay
                       - default_route_action.0.fault_injection_policy.0.delay.0.percentage
                     properties:
                       - !ruby/object:Api::Type::String
@@ -18152,7 +18259,7 @@ objects:
                       The percentage of traffic (connections/operations/requests) on which delay will be introduced as part of fault injection.
                       The value must be between 0.0 and 100.0 inclusive.
                     at_least_one_of:
-                      - default_route_action.0.fault_injection_policy.0.delay.0.delay
+                      - default_route_action.0.fault_injection_policy.0.delay.0.fixed_delay
                       - default_route_action.0.fault_injection_policy.0.delay.0.percentage
               - !ruby/object:Api::Type::NestedObject
                 name: 'abort'

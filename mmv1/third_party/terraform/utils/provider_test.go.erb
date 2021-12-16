@@ -4,6 +4,8 @@ package google
 import (
 	"bytes"
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -11,7 +13,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -37,6 +41,10 @@ var credsEnvVars = []string{
 	"GCLOUD_KEYFILE_JSON",
 	"GOOGLE_APPLICATION_CREDENTIALS",
 	"GOOGLE_USE_DEFAULT_CREDENTIALS",
+}
+
+var projectNumberEnvVars = []string{
+	"GOOGLE_PROJECT_NUMBER",
 }
 
 var projectEnvVars = []string{
@@ -813,12 +821,12 @@ resource "google_kms_key_ring" "project-2-keyring" {
 resource "google_kms_crypto_key" "project-2-key" {
 	provider = google.project-1-token
 	name     = "%s"
-	key_ring = google_kms_key_ring.project-2-keyring.self_link
+	key_ring = google_kms_key_ring.project-2-keyring.id
 }
 
 data "google_kms_secret_ciphertext" "project-2-ciphertext" {
 	provider   = google.project-1-token
-	crypto_key = google_kms_crypto_key.project-2-key.self_link
+	crypto_key = google_kms_crypto_key.project-2-key.id
 	plaintext  = "my-secret"
 }
 `, testAccProviderIndirectUserProjectOverride_step3(pid, name, org, billing, sa, override), pid, pid)
@@ -869,6 +877,11 @@ func getTestProject(is *terraform.InstanceState, config *Config) (string, error)
 		return config.Project, nil
 	}
 	return "", fmt.Errorf("%q: required field is not set", "project")
+}
+
+// testAccPreCheck ensures at least one of the project env variables is set.
+func getTestProjectNumberFromEnv() string {
+	return multiEnvSearch(projectNumberEnvVars)
 }
 
 // testAccPreCheck ensures at least one of the project env variables is set.

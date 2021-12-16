@@ -5,3 +5,10 @@ if isEmptyValue(reflect.ValueOf(d.Get("connection_id"))) {
 		return fmt.Errorf("Error reading Connection: %s", err)
 	}
 }
+
+// Reset id to make sure connection_id is not empty
+id2, err := replaceVars(d, config, "projects/{{project}}/locations/{{location}}/connections/{{connection_id}}")
+if err != nil {
+	return fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id2)

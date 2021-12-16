@@ -170,14 +170,11 @@ objects:
           subscriptions, the location must be a Compute Engine zone. For paid organization
           subscriptions, it should correspond to a Compute Engine region.
         required: true
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'peeringCidrRange'
         description: |
-          The size of the CIDR block range that will be reserved by the instance.
-        values:
-          - "SLASH_16"
-          - "SLASH_20"
-          - "SLASH_22"
+          The size of the CIDR block range that will be reserved by the instance. For valid values, 
+          see [CidrRange](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances#CidrRange) on the documentation.
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
@@ -231,6 +228,13 @@ objects:
         message: 'message'
     description: |
       An `Environment` in Apigee.
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      parent_resource_attribute: 'env_id'
+      import_format: ["{{%org_id}}/environments/{{name}}", "{{name}}"]
+      base_url: "{{org_id}}/environments/{{name}}"
+      self_link: "{{org_id}}/environments/{{name}}"
     parameters:
       - !ruby/object:Api::Type::String
         name: 'orgId'

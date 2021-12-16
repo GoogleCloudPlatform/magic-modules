@@ -1,0 +1,17 @@
+[
+  {
+    "name": "//spanner.googleapis.com/placeholder-BpLnfgDs",
+    "asset_type": "spanner.googleapis.com/Database",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "iam_policy": {
+      "bindings": [
+        {
+          "role": "roles/editor",
+          "members": [
+            "user:jane@example.com"
+          ]
+        }
+      ]
+    }
+  }
+]

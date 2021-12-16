@@ -25,13 +25,14 @@ import (
 	"strings"
 	"text/template"
 
+	directory "github.com/GoogleCloudPlatform/declarative-resource-client-library/services"
 	"github.com/golang/glog"
 
 	"github.com/nasa9084/go-openapi"
 	"gopkg.in/yaml.v2"
 )
 
-var fPath = flag.String("path", "", "path to the root service directory holding openapi schemas")
+var fPath = flag.String("path", "", "to be removed - path to the root service directory holding samples")
 var tPath = flag.String("overrides", "", "path to the root directory holding overrides files")
 var cPath = flag.String("handwritten", "handwritten", "path to the root directory holding handwritten files to copy")
 var oPath = flag.String("output", "", "path to output generated files to")
@@ -71,6 +72,8 @@ func main() {
 	}
 	if *version == GA_VERSION {
 		terraformResourceDirectory = "google"
+	} else if *version == ALPHA_VERSION {
+		terraformResourceDirectory = "google-private"
 	}
 
 	for _, resource := range resourcesForVersion {
@@ -87,6 +90,16 @@ func main() {
 		generateResourceFile(resource)
 		generateSweeperFile(resource)
 		generateResourceTestFile(resource)
+	}
+	// GA website files are always generated for the beta version.
+	websiteVersion := *version
+	if *version == GA_VERSION {
+		websiteVersion = BETA_VERSION
+	}
+	for _, resource := range resources[websiteVersion] {
+		if skipResource(resource) {
+			continue
+		}
 		generateResourceWebsiteFile(resource, resources, version)
 	}
 
@@ -125,11 +138,11 @@ func skipResource(r *Resource) bool {
 // main func.
 func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMetadata) {
 	flag.Parse()
-	if fPath == nil || *fPath == "" {
+	if tPath == nil || *tPath == "" {
 		glog.Exit("No path specified")
 	}
 
-	dirs, err := ioutil.ReadDir(*fPath)
+	dirs, err := ioutil.ReadDir(*tPath)
 	if err != nil {
 		glog.Fatal(err)
 	}
@@ -144,7 +157,7 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 				continue
 			}
 
-			var specs []os.FileInfo
+			var overrideFiles []os.FileInfo
 			var packagePath string
 			if version == GA_VERSION {
 				// GA has no separate directory
@@ -153,14 +166,43 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 				packagePath = path.Join(v.Name(), version.V)
 			}
 
-			specs, err = ioutil.ReadDir(path.Join(*fPath, packagePath))
-			newProduct := getProductInformation(packagePath, specs)
-			if newProduct == nil {
-				// No resource at this version for this product
+			overrideFiles, err = ioutil.ReadDir(path.Join(*tPath, packagePath))
+			var newResources []*Resource
+
+			// keep track of the last document in a service- we need one for the product later
+			var document *openapi.Document
+			for _, resourceFile := range overrideFiles {
+				if resourceFile.IsDir() || resourceFile.Name() == "tpgtools_product.yaml" {
+					continue
+				}
+
+				document = &openapi.Document{}
+				b := directory.Services().GetResource(version.V, v.Name(), stripExt(resourceFile.Name()))
+				if b == nil {
+					glog.Exit(fmt.Errorf("could not find resource in DCL directory: %q in %q at %q", stripExt(resourceFile.Name()), packagePath, version.V))
+				}
+
+				err = yaml.Unmarshal(b.Bytes(), document)
+				if err != nil {
+					glog.Exit(err)
+				}
+				// TODO: the openapi library cannot handle extensions except in the Schema object.  If this is ever added,
+				// this workaround can be removed.
+				if err := addInfoExtensionsToSchemaObjects(document, b.Bytes()); err != nil {
+					glog.Exit(err)
+				}
+
+				overrides := loadOverrides(packagePath, resourceFile.Name())
+
+				newResources = append(newResources, createResourcesFromDocumentAndOverrides(document, overrides, packagePath, version)...)
+			}
+
+			// if we found no resources, just keep going
+			if document == nil {
 				continue
 			}
-			products[version] = append(products[version], newProduct)
-			newResources := getResources(packagePath, specs, version)
+
+			products[version] = append(products[version], GetProductMetadataFromDocument(document, packagePath))
 			resources[version] = append(resources[version], newResources...)
 		}
 	}
@@ -168,97 +210,69 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 	return resources, products
 }
 
-func getProductInformation(packagePath string, specs []os.FileInfo) *ProductMetadata {
-	for _, f := range specs {
-		if f.IsDir() || !strings.HasSuffix(f.Name(), "yaml") {
-			continue
-		}
-
-		document := loadDocument(packagePath, &f)
-		productMetadata := GetProductMetadataFromDocument(document, packagePath)
-
-		return productMetadata
+func addInfoExtensionsToSchemaObjects(document *openapi.Document, b []byte) error {
+	var m map[string]interface{}
+	if err := yaml.Unmarshal(b, &m); err != nil {
+		return err
+	}
+	info := m["info"].(map[interface{}]interface{})
+	for _, s := range document.Components.Schemas {
+		s.Extension["x-dcl-ref"] = info["x-dcl-ref"]
+		s.Extension["x-dcl-guides"] = info["x-dcl-guides"]
 	}
 	return nil
 }
 
-func getResources(packagePath string, specs []os.FileInfo, version Version) []*Resource {
-	var resources []*Resource
-	for _, f := range specs {
-		if f.IsDir() || !strings.HasSuffix(f.Name(), "yaml") {
-			continue
+func createResourcesFromDocumentAndOverrides(document *openapi.Document, overrides Overrides, packagePath string, version Version) (resources []*Resource) {
+	productMetadata := GetProductMetadataFromDocument(document, packagePath)
+	titleParts := strings.Split(document.Info.Title, "/")
+
+	var schema *openapi.Schema
+	for k, v := range document.Components.Schemas {
+		if k == titleParts[len(titleParts)-1] {
+			schema = v
 		}
+	}
 
-		document := loadDocument(packagePath, &f)
-		productMetadata := GetProductMetadataFromDocument(document, packagePath)
-		titleParts := strings.Split(document.Info.Title, "/")
+	if schema == nil {
+		glog.Exit(fmt.Sprintf("Could not find document schema for %s", document.Info.Title))
+	}
 
-		var schema *openapi.Schema
-		for k, v := range document.Components.Schemas {
-			if k == titleParts[len(titleParts)-1] {
-				schema = v
-				schema.Title = k
-			}
+	if err := schema.Validate(); err != nil {
+		glog.Exit(err)
+	}
+
+	lRaw := schema.Extension["x-dcl-locations"]
+	var schemaLocations []interface{}
+	if lRaw == nil {
+		schemaLocations = make([]interface{}, 0)
+	} else {
+		schemaLocations = lRaw.([]interface{})
+	}
+
+	typeFetcher := NewTypeFetcher(document)
+	var locations []string
+	// If the schema cannot be split into two or more locations, we specify this
+	// by passing a single empty location string.
+	if len(schemaLocations) < 2 {
+		locations = make([]string, 1)
+	} else {
+		locations = make([]string, 0, len(schemaLocations))
+		for _, l := range schemaLocations {
+			locations = append(locations, l.(string))
 		}
+	}
 
-		overrides := loadOverrides(packagePath, f.Name())
-
-		if schema == nil {
-			glog.Exit(fmt.Sprintf("Could not find document schema for %s", document.Info.Title))
-		}
-
-		if err := schema.Validate(); err != nil {
+	for _, l := range locations {
+		res, err := createResource(schema, document.Info, typeFetcher, overrides, productMetadata, version, l)
+		if err != nil {
 			glog.Exit(err)
 		}
 
-		lRaw := schema.Extension["x-dcl-locations"]
-		var schemaLocations []interface{}
-		if lRaw == nil {
-			schemaLocations = make([]interface{}, 0)
-		} else {
-			schemaLocations = lRaw.([]interface{})
-		}
-
-		typeFetcher := NewTypeFetcher(document)
-		var locations []string
-		// If the schema cannot be split into two or more locations, we specify this
-		// by passing a single empty location string.
-		if len(schemaLocations) < 2 {
-			locations = make([]string, 1)
-		} else {
-			locations = make([]string, 0, len(schemaLocations))
-			for _, l := range schemaLocations {
-				locations = append(locations, l.(string))
-			}
-		}
-
-		for _, l := range locations {
-			res, err := createResource(schema, typeFetcher, overrides, productMetadata, version, l)
-			if err != nil {
-				glog.Exit(err)
-			}
-
-			resources = append(resources, res)
-		}
+		resources = append(resources, res)
 	}
 
 	return resources
-}
-
-func loadDocument(packagePath string, f *os.FileInfo) *openapi.Document {
-	// TODO: use yaml.UnmarshalStrict once apply / list paths are changed to
-	// specification extensions and we're using a datatype that supports them.
-	document := &openapi.Document{}
-	p := path.Join(*fPath, packagePath, (*f).Name())
-	b, err := ioutil.ReadFile(p)
-	if err != nil {
-		glog.Exit(err)
-	}
-	err = yaml.Unmarshal(b, document)
-	if err != nil {
-		glog.Exit(err)
-	}
-	return document
 }
 
 // SerializationInput contains an array of resources along with additional generation metadata.
@@ -281,10 +295,10 @@ func generateSerializationLogic(specs map[Version][]*Resource) {
 		for _, res := range resList {
 			var pkgName, pkgPath string
 			pkgName = res.Package() + v.SerializationSuffix
-			if v == BETA_VERSION {
-				pkgPath = path.Join(res.Package(), v.V)
-			} else {
+			if v == GA_VERSION {
 				pkgPath = res.Package()
+			} else {
+				pkgPath = path.Join(res.Package(), v.V)
 			}
 
 			if _, ok := packageMap[pkgPath]; !ok {

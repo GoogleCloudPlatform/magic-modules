@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"bitbucket.org/creachadair/stringset"
+	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	"github.com/golang/glog"
 	"github.com/nasa9084/go-openapi"
 	"gopkg.in/yaml.v2"
@@ -52,6 +53,10 @@ type Resource struct {
 	// as in Montioring https://git.io/Jz4Wn
 	AppendToBasePath string
 
+	// ReplaceInBasePath contains a string replacement for the config base path,
+	// replacing one substring with another.
+	ReplaceInBasePath BasePathReplacement
+
 	// title is the name of the resource in snake_case. For example,
 	// "instance", "backend_service".
 	title string
@@ -61,6 +66,10 @@ type Resource struct {
 	// This is particularly useful for acronymizations that exist in
 	// resource names, like OSPolicy
 	dclTitle string
+	// dclStructName is the name of the resource struct in the DCL.  In almost all cases
+	// this is == to dclTitle, but sometimes, due to (for instance) reserved words in the
+	// DCL conflicting with resource names, this differs.
+	dclStructName string
 
 	// Description of the Terraform resource
 	Description string
@@ -149,6 +158,40 @@ type Resource struct {
 
 	// Versions specific information about this resource
 	versionMetadata Version
+
+	// Reference points to the rest API
+	Reference *Link
+	// Guides point to non-rest useful context for the resource.
+	Guides []Link
+}
+
+type Link struct {
+	text string
+	url  string
+}
+
+type BasePathReplacement struct {
+	Present bool
+	Old     string
+	New     string
+}
+
+func (l Link) Markdown() string {
+	return fmt.Sprintf("[%s](%s)", l.text, l.url)
+}
+
+func (r *Resource) fillLinksFromExtensionsMap(m map[string]interface{}) {
+	ref, ok := m["x-dcl-ref"].(map[string]interface{})
+	if ok {
+		r.Reference = &Link{url: ref["url"].(string), text: ref["text"].(string)}
+	}
+	gs, ok := m["x-dcl-guides"].([]interface{})
+	if ok {
+		for _, g := range gs {
+			guide := g.(map[interface{}]interface{})
+			r.Guides = append(r.Guides, Link{url: guide["url"].(string), text: guide["text"].(string)})
+		}
+	}
 }
 
 // Name is the shortname of a resource. For example, "instance".
@@ -164,6 +207,13 @@ func (r Resource) DCLName() string {
 }
 
 func (r Resource) DCLTitle() string {
+	return r.dclTitle
+}
+
+func (r Resource) DCLStructName() string {
+	if r.dclStructName != "" {
+		return r.dclStructName
+	}
 	return r.dclTitle
 }
 
@@ -185,16 +235,21 @@ func (r Resource) TerraformName() string {
 	return "google_" + r.Path()
 }
 
-// Type is the title-cased name of a resource, for printing information about
-// the type". For example, "Instance".
-func (r Resource) Type() string {
-	return snakeToTitleCase(r.DCLName())
-}
-
 // PathType is the title-cased name of a resource preceded by its package,
 // often used to namespace functions. For example, "RedisInstance".
 func (r Resource) PathType() string {
-	return snakeToTitleCase(r.Path())
+	return dcl.SnakeToTitleCase(r.Path())
+}
+
+// This is the string to match against in serialization.go - this is the string that will
+// be concocted from the sample file's product + resource name.  It is the name of
+// the actual go struct (e.g. "AzureClient"), prefixed by the title-cased name of
+// the service in question (e.g. "ContainerAzure").
+func (r Resource) SampleTypeName() string {
+	if r.location == "global" {
+		return snakeToTitleCase(r.ProductName() + "_global_" + r.DCLStructName())
+	}
+	return snakeToTitleCase(r.ProductName() + "_" + r.DCLStructName())
 }
 
 // Package is the namespace of the package within the dcl
@@ -207,6 +262,12 @@ func (r Resource) Package() string {
 // "NetworkServices".
 func (r Resource) ProductType() string {
 	return r.productMetadata.ProductType()
+}
+
+// DocsSection is *usuallu* the title-cased product name of a resource. For example,
+// "NetworkServices" - but subject to overrides.
+func (r Resource) DocsSection() string {
+	return r.productMetadata.DocsSection()
 }
 
 // ProductType is the snakecase product name of a resource. For example,
@@ -374,28 +435,46 @@ func (r Resource) RegisterReusedType(p Property) []Property {
 	return r.ReusedTypes
 }
 
-func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides Overrides, product *ProductMetadata, version Version, location string) (*Resource, error) {
-	resourceTitle := schema.Title
+func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *TypeFetcher, overrides Overrides, product *ProductMetadata, version Version, location string) (*Resource, error) {
+	resourceTitle := strings.Split(info.Title, "/")[1]
+
+	res := Resource{
+		title:                jsonToSnakeCase(resourceTitle),
+		dclStructName:        schema.Title,
+		dclTitle:             resourceTitle,
+		productMetadata:      product,
+		versionMetadata:      version,
+		Description:          info.Description,
+		location:             location,
+		InsertTimeoutMinutes: 10,
+		UpdateTimeoutMinutes: 10,
+		DeleteTimeoutMinutes: 10,
+		UseDCLID:             overrides.ResourceOverride(UseDCLID, location),
+	}
 
 	// Attempt to construct the resource name using location. Other than
 	// zonal resources (which never include "zone"), there is no consistency
 	// for when to include the location in the resource name.
 	// A resource name override will often need to be used for on of the localized
 	// resource versions.
-	if location != "zone" {
-		resourceTitle = location + resourceTitle
+	if location != "" && location != "zone" {
+		res.title = location + "_" + res.title
 	}
-	res := Resource{
-		title:                jsonToSnakeCase(resourceTitle),
-		dclTitle:             schema.Title,
-		productMetadata:      product,
-		versionMetadata:      version,
-		Description:          schema.Description,
-		location:             location,
-		InsertTimeoutMinutes: 10,
-		UpdateTimeoutMinutes: 10,
-		DeleteTimeoutMinutes: 10,
-		UseDCLID:             overrides.ResourceOverride(UseDCLID, location),
+
+	// Since the resource's "info" extension field can't be accessed, the relevant
+	// extensions have been copied into the schema objects.
+	res.fillLinksFromExtensionsMap(schema.Extension)
+
+	// Resource Override: Custom Timeout
+	ctd := CustomTimeoutDetails{}
+	ctdOk, err := overrides.ResourceOverrideWithDetails(CustomTimeout, &ctd, location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode custom timeout details: %v", err)
+	}
+	if ctdOk {
+		res.InsertTimeoutMinutes = ctd.TimeoutMinutes
+		res.UpdateTimeoutMinutes = ctd.TimeoutMinutes
+		res.DeleteTimeoutMinutes = ctd.TimeoutMinutes
 	}
 
 	crname := CustomResourceNameDetails{}
@@ -432,6 +511,18 @@ func createResource(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides 
 	}
 	if atbpOk {
 		res.AppendToBasePath = atbpd.String
+	}
+
+	// Resource Override: Replace in Base Path
+	ribpd := ReplaceInBasePathDetails{}
+	ribpOk, err := overrides.ResourceOverrideWithDetails(ReplaceInBasePath, &ribpd, location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode replace in base path details: %v", err)
+	}
+	if ribpOk {
+		res.ReplaceInBasePath.Present = true
+		res.ReplaceInBasePath.Old = ribpd.Old
+		res.ReplaceInBasePath.New = ribpd.New
 	}
 
 	// Resource Override: Import formats
@@ -657,7 +748,7 @@ func (r Resource) getSamples(docs bool) []Sample {
 }
 
 func (r *Resource) getSampleAccessoryFolder() string {
-	resourceType := strings.ToLower(r.Type())
+	resourceType := strings.ToLower(r.DCLTitle())
 	packageName := strings.ToLower(r.productMetadata.PackageName)
 	sampleAccessoryFolder := path.Join(*tPath, packageName, "samples", resourceType)
 	return sampleAccessoryFolder
@@ -708,12 +799,11 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 			glog.Exit(err)
 		}
 
-		hasGA := false
 		versionMatch := false
 
 		// if no versions provided assume all versions
 		if len(sample.Versions) <= 0 {
-			hasGA = true
+			sample.HasGAEquivalent = true
 			versionMatch = true
 		} else {
 			for _, v := range sample.Versions {
@@ -721,12 +811,13 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 					versionMatch = true
 				}
 				if v == "ga" {
-					hasGA = true
+					sample.HasGAEquivalent = true
 				}
 			}
 		}
 
 		if !versionMatch {
+			glog.Errorf("skipping %q due to no version match", file.Name())
 			continue
 		}
 
@@ -739,7 +830,6 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 			sample.Name = &sampleName
 		}
 		sample.TestSlug = snakeToTitleCase(sampleName) + "HandWritten"
-		sample.HasGAEquivalent = hasGA
 		samples = append(samples, sample)
 	}
 
@@ -750,7 +840,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 	sampleAccessoryFolder := r.getSampleAccessoryFolder()
 	packagePath := r.productMetadata.PackagePath
 	version := r.versionMetadata.V
-	resourceType := r.Type()
+	resourceType := r.DCLTitle()
 	sampleFriendlyMetaPath := path.Join(sampleAccessoryFolder, "meta.yaml")
 	samples := []Sample{}
 
@@ -759,7 +849,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 	}
 
 	// Samples appear in the root product folder
-	packagePath = strings.Split(packagePath, "beta")[0]
+	packagePath = strings.Split(packagePath, "/")[0]
 	samplesPath := path.Join(*fPath, packagePath, "samples")
 	files, err := ioutil.ReadDir(samplesPath)
 	if err != nil {
@@ -791,13 +881,13 @@ func (r *Resource) loadDCLSamples() []Sample {
 		}
 
 		versionMatch := false
-		hasGA := false
 		for _, v := range sample.Versions {
 			if v == version {
 				versionMatch = true
 			}
 			if v == "ga" {
-				hasGA = true
+				sample.HasGAEquivalent = true
+				versionMatch = true
 			}
 		}
 
@@ -807,8 +897,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 
 		if !versionMatch {
 			continue
-		} else if primaryResourceName != resourceType {
-			glog.Errorf("skipping %s since no match with %s.", primaryResourceName, resourceType)
+		} else if !strings.EqualFold(primaryResourceName, resourceType) {
 			continue
 		}
 
@@ -825,7 +914,6 @@ func (r *Resource) loadDCLSamples() []Sample {
 		}
 		sample.DependencyList = dependencies
 		sample.TestSlug = sampleNameToTitleCase(*sample.Name)
-		sample.HasGAEquivalent = hasGA
 		samples = append(samples, sample)
 	}
 

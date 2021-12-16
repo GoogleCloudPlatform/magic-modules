@@ -29,6 +29,15 @@ ifneq ($(RESOURCE),)
   tpgtools_compile += --resource $(RESOURCE)
 endif
 
+ifneq ($(OVERRIDES),)
+  mmv1_compile += -r $(OVERRIDES)
+  tpgtools_compile += --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
+  serialize_compile = --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
+else
+  tpgtools_compile += --path "api" --overrides "overrides"
+  serialize_compile = --path "api" --overrides "overrides"
+endif
+
 UNAME := $(shell uname)
 
 # The inplace editing semantics are different between linux and osx.
@@ -53,7 +62,7 @@ mmv1:
 
 tpgtools:
 	cd tpgtools;\
-		go run . --path "api" --overrides "overrides" --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
+		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
 
 validator:
 	cd mmv1;\
@@ -62,7 +71,7 @@ validator:
 
 serialize:
 	cd tpgtools;\
-		go run . --path "api" --overrides "overrides" --mode "serialization" > temp.serial &&\
+		go run . $(serialize_compile) --mode "serialization" > temp.serial &&\
 		mv -f temp.serial serialization.go;\
 
 upgrade-dcl:
