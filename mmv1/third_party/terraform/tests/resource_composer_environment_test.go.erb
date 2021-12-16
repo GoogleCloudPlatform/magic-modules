@@ -1390,7 +1390,7 @@ locals {
 
 resource "google_composer_environment" "test" {
 	name   = "%s"
-	region = "us-east1"
+	region = "us-central1"
 
 	config {
 		node_count = 4
@@ -1618,7 +1618,7 @@ resource "google_compute_network" "test" {
 resource "google_compute_subnetwork" "test" {
 	name          = "%s"
 	ip_cidr_range = "10.2.0.0/16"
-	region        = "us-east1"
+	region        = "us-central1"
 	network       = google_compute_network.test.self_link
 }
 `, name, network, subnetwork)
