@@ -202,7 +202,6 @@ This resource provides the following
 - `create` - Default is 4 minutes.
 - `update` - Default is 4 minutes.
 - `read` - Default is 4 minutes.
-- `delete` - Default is 4 minutes.
 
 ## Import
 
