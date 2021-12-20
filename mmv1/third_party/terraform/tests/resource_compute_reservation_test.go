@@ -50,6 +50,9 @@ resource "google_compute_reservation" "reservation" {
       machine_type     = "n2-standard-2"
     }
   }
+  share_settings {
+    share_type = "LOCAL"
+  }
 }
 `, reservationName, count)
 }
