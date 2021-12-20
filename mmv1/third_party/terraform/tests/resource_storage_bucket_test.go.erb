@@ -1341,7 +1341,7 @@ resource "google_storage_bucket" "bucket" {
       type = "Delete"
     }
     condition {
-	  matches_storage_class = []
+      matches_storage_class = []
       age = 10
     }
   }
@@ -1359,8 +1359,8 @@ resource "google_storage_bucket" "bucket" {
       storage_class = "NEARLINE"
     }
     condition {
-	  created_before = "2019-01-01"
-	  days_since_custom_time = 3
+      created_before = "2019-01-01"
+      days_since_custom_time = 3
     }
   }
   lifecycle_rule {
@@ -1406,7 +1406,7 @@ resource "google_storage_bucket" "bucket" {
       type = "Delete"
     }
     condition {
-	  matches_storage_class = []
+      matches_storage_class = []
       age = 10
     }
   }
@@ -1424,8 +1424,8 @@ resource "google_storage_bucket" "bucket" {
       storage_class = "NEARLINE"
     }
     condition {
-	  created_before = "2019-01-01"
-	  days_since_custom_time = 5
+      created_before = "2019-01-01"
+      days_since_custom_time = 5
     }
   }
   lifecycle_rule {
