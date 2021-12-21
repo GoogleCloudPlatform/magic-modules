@@ -1,0 +1,2 @@
+gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute(pwd, 'gcp_project_id') -%>', description: 'The GCP project identifier.')
+image_family_views = attribute('image_family_views', default: <%= JSON.pretty_generate(grab_attributes(pwd)['image_family_views']) -%>, description: 'Returns the latest image that is part of an image family, is not deprecated and is rolled out in the specified zone.')

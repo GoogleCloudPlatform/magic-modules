@@ -460,5 +460,21 @@ interconnect_location:
   facility_provider_facility_id: 'Auckland - Albany'
   facility_provider: Vocus
 
+image_family_views:
+  zone: us-central1-c
+  name: image-1
+  source_type: RAW
+  status: READY
+  archive_size_bytes: 539099200
+  disk_size_gb: 3
+  family: test
+
 license_code:
   name: akl-zone1-1353
+
+region_instance_group:
+  name: instance-group-2
+  region: us-central1
+  size: 1
+  named_port_name: 'port'
+  named_port_port: 80
