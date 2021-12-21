@@ -19041,6 +19041,7 @@ objects:
         description: |
           Set to true if the resource satisfies the zone separation organization policy constraints and
           false otherwise. Defaults to false if the field is not present.'
+
   - !ruby/object:Api::Resource
     name: 'ImageFamilyView'
     kind: 'compute#imageFamilyView'
@@ -19363,3 +19364,49 @@ objects:
                       description: |
                         The file type of source file.
                       output: true
+  - !ruby/object:Api::Resource
+    name: 'LicenseCode'
+    kind: 'compute#licenseCode'
+    base_url: projects/{{project}}/global/licenseCodes
+    collection_url_key: 'items'
+    has_self_link: true
+    readonly: true
+    description: 'License codes are mirrored across all projects that have permissions to read the License Code.'
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.This field is deprecated.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional textual description of the resource.'
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the resource.'
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        exclude: true
+        description: 'Server-defined, fully qualified URL for this resource.'
+      - !ruby/object:Api::Type::Boolean
+        name: 'transferable'
+        description: 'If true, the license will remain attached when creating images or snapshots from disks.Otherwise, the license is not transferred.'
+      - !ruby/object:Api::Type::String
+        name: 'state'
+        description: 'Current state of this License Code.'
+      - !ruby/object:Api::Type::Array
+        name: 'licenseAlias'
+        description: 'URL and description aliases of Licenses with the same License Code.'
+        required: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+          - !ruby/object:Api::Type::String
+            name: 'selfLink'
+            description: 'Server-defined, fully qualified URL for this resource.'
+          - !ruby/object:Api::Type::String
+            name: 'description'
+            description: 'Description of this License Code.'

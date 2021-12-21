@@ -468,3 +468,7 @@ image_family_views:
   archive_size_bytes: 539099200
   disk_size_gb: 3
   family: test
+
+license_code:
+  name: akl-zone1-1353
+
