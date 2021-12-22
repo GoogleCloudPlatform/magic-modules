@@ -1390,7 +1390,7 @@ resource "google_compute_instance_group_manager" "igm-basic" {
   target_size        = 2
   stateful_disk {
     device_name = "my-stateful-disk"
-    delete_rule = "NEVER"
+    delete_rule = "ON_PERMANENT_INSTANCE_DELETION"
   }
 }
 
@@ -1462,7 +1462,7 @@ resource "google_compute_instance_group_manager" "igm-basic" {
   target_size        = 2
   stateful_disk {
     device_name = "my-stateful-disk"
-    delete_rule = "NEVER"
+    delete_rule = "ON_PERMANENT_INSTANCE_DELETION"
   }
 
   stateful_disk {
