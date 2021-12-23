@@ -1,3 +1,4 @@
+# [START cloud_sql_mysql_instance_80_db_n1_s2]
 resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   name             = "<%= ctx[:vars]['database_instance_name'] %>"
   region           = "us-central1"
@@ -6,3 +7,4 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
     tier = "db-n1-standard-2"
   }
 }
+# [START cloud_sql_mysql_instance_80_db_n1_s2]
