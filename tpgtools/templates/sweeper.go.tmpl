@@ -79,6 +79,6 @@ func testSweep{{$.SweeperName}}(region string) error {
 	return nil
 }
 
-func isDeletable{{$.SweeperName}}(r *{{$.Package}}.{{$.DCLTitle}}) bool {
+func isDeletable{{$.SweeperName}}(r *{{$.Package}}.{{$.DCLStructName}}) bool {
 	return isSweepableTestResource(*r.Name)
 }

@@ -122,7 +122,7 @@ func testAccCheck{{$.PathType}}DestroyProducer(t *testing.T) func(s *terraform.S
 				billingProject = config.BillingProject
 			}
 
-			obj := &{{$.Package}}.{{$.DCLTitle}}{
+			obj := &{{$.Package}}.{{$.DCLStructName}}{
 				{{- range $v := .Properties }}
 				{{- if $v.StateGetterForDestroyTest }}
 					{{$v.PackageName}}: {{ $v.StateGetterForDestroyTest }},

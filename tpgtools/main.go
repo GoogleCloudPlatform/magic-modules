@@ -231,7 +231,6 @@ func createResourcesFromDocumentAndOverrides(document *openapi.Document, overrid
 	for k, v := range document.Components.Schemas {
 		if k == titleParts[len(titleParts)-1] {
 			schema = v
-			schema.Title = k
 		}
 	}
 
