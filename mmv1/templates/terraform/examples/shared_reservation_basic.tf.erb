@@ -1,4 +1,35 @@
+resource "google_project" "owner_project" {
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
+  billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
+}
+
+
+resource "google_project_service" "compute" {
+  project = google_project.owner_project.project_id
+  service = "compute.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_project" "guest_project" {
+  project_id      = "tf-test-2%{random_suffix}"
+  name            = "tf-test-2%{random_suffix}"
+  org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
+}
+
+resource "google_organization_policy" "shared_reservation_org_policy" {
+  org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
+  constraint = "constraints/compute.sharedReservationsOwnerProjects"
+  list_policy {
+    allow {
+      values = ["projects/${google_project.owner_project.number}"]
+    }
+  }
+}
+
 resource "google_compute_reservation" "<%= ctx[:primary_resource_id] %>" {
+  project = google_project.owner_project.project_id
   name = "<%= ctx[:vars]['reservation_name'] %>"
   zone = "us-central1-a"
 
@@ -12,8 +43,9 @@ resource "google_compute_reservation" "<%= ctx[:primary_resource_id] %>" {
   share_settings {
     share_type = "SPECIFIC_PROJECTS"
     project_map {
-      id = "207342803284"
-      project_id = "207342803284"
+      id = google_project.guest_project.number
+      project_id = google_project.guest_project.number
     }
   }
+  depends_on = [google_organization_policy.shared_reservation_org_policy,google_project_service.compute]
 }
