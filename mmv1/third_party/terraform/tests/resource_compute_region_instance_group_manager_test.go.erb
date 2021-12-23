@@ -1422,7 +1422,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
   }
   stateful_disk {
     device_name = "stateful-disk2"
-    delete_rule = "NEVER"
+    delete_rule = "ON_PERMANENT_INSTANCE_DELETION"
   }
 }
 `, template, igm)
