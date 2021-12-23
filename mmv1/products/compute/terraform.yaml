@@ -954,7 +954,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "target"
           - "ip_address"
       - !ruby/object:Provider::Terraform::Examples
-        name: "external_ssl_proxy_lb_mig_backend_custom_header"
+        name: "external_ssl_proxy_lb_mig_backend"
         primary_resource_id: "default"
         skip_test: true
         vars:
@@ -974,7 +974,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "target"
           - "ip_address"
       - !ruby/object:Provider::Terraform::Examples
-        name: "external_tcp_proxy_lb_mig_backend_custom_header"
+        name: "external_tcp_proxy_lb_mig_backend"
         primary_resource_id: "default"
         vars:
           tcp_proxy_xlb_network: "tcp-proxy-xlb-network"

@@ -66,6 +66,10 @@ type Resource struct {
 	// This is particularly useful for acronymizations that exist in
 	// resource names, like OSPolicy
 	dclTitle string
+	// dclStructName is the name of the resource struct in the DCL.  In almost all cases
+	// this is == to dclTitle, but sometimes, due to (for instance) reserved words in the
+	// DCL conflicting with resource names, this differs.
+	dclStructName string
 
 	// Description of the Terraform resource
 	Description string
@@ -206,6 +210,13 @@ func (r Resource) DCLTitle() string {
 	return r.dclTitle
 }
 
+func (r Resource) DCLStructName() string {
+	if r.dclStructName != "" {
+		return r.dclStructName
+	}
+	return r.dclTitle
+}
+
 // Path is the provider name of a resource, product_name. For example,
 // "cloud_run_service".
 func (r Resource) Path() string {
@@ -228,6 +239,17 @@ func (r Resource) TerraformName() string {
 // often used to namespace functions. For example, "RedisInstance".
 func (r Resource) PathType() string {
 	return dcl.SnakeToTitleCase(r.Path())
+}
+
+// This is the string to match against in serialization.go - this is the string that will
+// be concocted from the sample file's product + resource name.  It is the name of
+// the actual go struct (e.g. "AzureClient"), prefixed by the title-cased name of
+// the service in question (e.g. "ContainerAzure").
+func (r Resource) SampleTypeName() string {
+	if r.location == "global" {
+		return snakeToTitleCase(r.ProductName() + "_global_" + r.DCLStructName())
+	}
+	return snakeToTitleCase(r.ProductName() + "_" + r.DCLStructName())
 }
 
 // Package is the namespace of the package within the dcl
@@ -414,19 +436,12 @@ func (r Resource) RegisterReusedType(p Property) []Property {
 }
 
 func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *TypeFetcher, overrides Overrides, product *ProductMetadata, version Version, location string) (*Resource, error) {
-	resourceTitle := schema.Title
+	resourceTitle := strings.Split(info.Title, "/")[1]
 
-	// Attempt to construct the resource name using location. Other than
-	// zonal resources (which never include "zone"), there is no consistency
-	// for when to include the location in the resource name.
-	// A resource name override will often need to be used for on of the localized
-	// resource versions.
-	if location != "zone" {
-		resourceTitle = location + resourceTitle
-	}
 	res := Resource{
 		title:                jsonToSnakeCase(resourceTitle),
-		dclTitle:             schema.Title,
+		dclStructName:        schema.Title,
+		dclTitle:             resourceTitle,
 		productMetadata:      product,
 		versionMetadata:      version,
 		Description:          info.Description,
@@ -436,6 +451,16 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		DeleteTimeoutMinutes: 10,
 		UseDCLID:             overrides.ResourceOverride(UseDCLID, location),
 	}
+
+	// Attempt to construct the resource name using location. Other than
+	// zonal resources (which never include "zone"), there is no consistency
+	// for when to include the location in the resource name.
+	// A resource name override will often need to be used for on of the localized
+	// resource versions.
+	if location != "" && location != "zone" {
+		res.title = location + "_" + res.title
+	}
+
 	// Since the resource's "info" extension field can't be accessed, the relevant
 	// extensions have been copied into the schema objects.
 	res.fillLinksFromExtensionsMap(schema.Extension)
@@ -792,6 +817,7 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 		}
 
 		if !versionMatch {
+			glog.Errorf("skipping %q due to no version match", file.Name())
 			continue
 		}
 
@@ -861,6 +887,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 			}
 			if v == "ga" {
 				sample.HasGAEquivalent = true
+				versionMatch = true
 			}
 		}
 
@@ -871,7 +898,6 @@ func (r *Resource) loadDCLSamples() []Sample {
 		if !versionMatch {
 			continue
 		} else if !strings.EqualFold(primaryResourceName, resourceType) {
-			glog.Errorf("skipping %s since no match with %s.", primaryResourceName, resourceType)
 			continue
 		}
 

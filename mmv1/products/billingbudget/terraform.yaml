@@ -81,6 +81,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         update_mask_fields:
           - "budgetFilter.projects"
+          - "budgetFilter.labels"
       budgetFilter.services: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       budgetFilter.subaccounts: !ruby/object:Overrides::Terraform::PropertyOverride

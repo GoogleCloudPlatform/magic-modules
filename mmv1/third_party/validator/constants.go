@@ -15,9 +15,10 @@ var ErrNoConversion = errors.New("no conversion")
 // due to the identity field of that resource returning empty.
 var ErrEmptyIdentityField = errors.New("empty identity field")
 
-// ErrLackingReadPermissions can be returned when fetching a resource is not possible
-// due to the user not having read permissions.
-var ErrLackingReadPermission = errors.New("lacking read permissions")
+// ErrResourceInaccessible can be returned when fetching an IAM resource
+// on a project that has not yet been created or if the service account
+// lacks sufficient permissions
+var ErrResourceInaccessible = errors.New("resource does not exist or service account is lacking suffient permissions")
 
 // Global MutexKV
 var mutexKV = NewMutexKV()
