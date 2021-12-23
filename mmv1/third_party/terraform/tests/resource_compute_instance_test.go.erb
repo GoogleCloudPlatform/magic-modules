@@ -5693,6 +5693,10 @@ resource "google_compute_reservation" "reservation" {
   }
 
   specific_reservation_required = true
+
+  share_settings {
+    share_type = "LOCAL"
+  }
 }
 
 resource "google_compute_instance" "foobar" {
