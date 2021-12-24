@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"bitbucket.org/creachadair/stringset"
+	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	"github.com/golang/glog"
 	"github.com/nasa9084/go-openapi"
 	"gopkg.in/yaml.v2"
@@ -52,6 +53,10 @@ type Resource struct {
 	// as in Montioring https://git.io/Jz4Wn
 	AppendToBasePath string
 
+	// ReplaceInBasePath contains a string replacement for the config base path,
+	// replacing one substring with another.
+	ReplaceInBasePath BasePathReplacement
+
 	// title is the name of the resource in snake_case. For example,
 	// "instance", "backend_service".
 	title string
@@ -61,6 +66,10 @@ type Resource struct {
 	// This is particularly useful for acronymizations that exist in
 	// resource names, like OSPolicy
 	dclTitle string
+	// dclStructName is the name of the resource struct in the DCL.  In almost all cases
+	// this is == to dclTitle, but sometimes, due to (for instance) reserved words in the
+	// DCL conflicting with resource names, this differs.
+	dclStructName string
 
 	// Description of the Terraform resource
 	Description string
@@ -161,6 +170,12 @@ type Link struct {
 	url  string
 }
 
+type BasePathReplacement struct {
+	Present bool
+	Old     string
+	New     string
+}
+
 func (l Link) Markdown() string {
 	return fmt.Sprintf("[%s](%s)", l.text, l.url)
 }
@@ -195,6 +210,13 @@ func (r Resource) DCLTitle() string {
 	return r.dclTitle
 }
 
+func (r Resource) DCLStructName() string {
+	if r.dclStructName != "" {
+		return r.dclStructName
+	}
+	return r.dclTitle
+}
+
 // Path is the provider name of a resource, product_name. For example,
 // "cloud_run_service".
 func (r Resource) Path() string {
@@ -216,7 +238,18 @@ func (r Resource) TerraformName() string {
 // PathType is the title-cased name of a resource preceded by its package,
 // often used to namespace functions. For example, "RedisInstance".
 func (r Resource) PathType() string {
-	return snakeToTitleCase(r.Path())
+	return dcl.SnakeToTitleCase(r.Path())
+}
+
+// This is the string to match against in serialization.go - this is the string that will
+// be concocted from the sample file's product + resource name.  It is the name of
+// the actual go struct (e.g. "AzureClient"), prefixed by the title-cased name of
+// the service in question (e.g. "ContainerAzure").
+func (r Resource) SampleTypeName() string {
+	if r.location == "global" {
+		return snakeToTitleCase(r.ProductName() + "_global_" + r.DCLStructName())
+	}
+	return snakeToTitleCase(r.ProductName() + "_" + r.DCLStructName())
 }
 
 // Package is the namespace of the package within the dcl
@@ -403,19 +436,12 @@ func (r Resource) RegisterReusedType(p Property) []Property {
 }
 
 func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *TypeFetcher, overrides Overrides, product *ProductMetadata, version Version, location string) (*Resource, error) {
-	resourceTitle := schema.Title
+	resourceTitle := strings.Split(info.Title, "/")[1]
 
-	// Attempt to construct the resource name using location. Other than
-	// zonal resources (which never include "zone"), there is no consistency
-	// for when to include the location in the resource name.
-	// A resource name override will often need to be used for on of the localized
-	// resource versions.
-	if location != "zone" {
-		resourceTitle = location + resourceTitle
-	}
 	res := Resource{
 		title:                jsonToSnakeCase(resourceTitle),
-		dclTitle:             schema.Title,
+		dclStructName:        schema.Title,
+		dclTitle:             resourceTitle,
 		productMetadata:      product,
 		versionMetadata:      version,
 		Description:          info.Description,
@@ -425,6 +451,16 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		DeleteTimeoutMinutes: 10,
 		UseDCLID:             overrides.ResourceOverride(UseDCLID, location),
 	}
+
+	// Attempt to construct the resource name using location. Other than
+	// zonal resources (which never include "zone"), there is no consistency
+	// for when to include the location in the resource name.
+	// A resource name override will often need to be used for on of the localized
+	// resource versions.
+	if location != "" && location != "zone" {
+		res.title = location + "_" + res.title
+	}
+
 	// Since the resource's "info" extension field can't be accessed, the relevant
 	// extensions have been copied into the schema objects.
 	res.fillLinksFromExtensionsMap(schema.Extension)
@@ -475,6 +511,18 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	}
 	if atbpOk {
 		res.AppendToBasePath = atbpd.String
+	}
+
+	// Resource Override: Replace in Base Path
+	ribpd := ReplaceInBasePathDetails{}
+	ribpOk, err := overrides.ResourceOverrideWithDetails(ReplaceInBasePath, &ribpd, location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode replace in base path details: %v", err)
+	}
+	if ribpOk {
+		res.ReplaceInBasePath.Present = true
+		res.ReplaceInBasePath.Old = ribpd.Old
+		res.ReplaceInBasePath.New = ribpd.New
 	}
 
 	// Resource Override: Import formats
@@ -769,6 +817,7 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 		}
 
 		if !versionMatch {
+			glog.Errorf("skipping %q due to no version match", file.Name())
 			continue
 		}
 
@@ -838,6 +887,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 			}
 			if v == "ga" {
 				sample.HasGAEquivalent = true
+				versionMatch = true
 			}
 		}
 
@@ -848,7 +898,6 @@ func (r *Resource) loadDCLSamples() []Sample {
 		if !versionMatch {
 			continue
 		} else if !strings.EqualFold(primaryResourceName, resourceType) {
-			glog.Errorf("skipping %s since no match with %s.", primaryResourceName, resourceType)
 			continue
 		}
 

@@ -847,6 +847,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "port_range"
           - "target"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "forwarding_rule_regional_http_xlb"
+        min_version: 'beta'
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "website-forwarding-rule"
+          region_target_http_proxy_name: "website-proxy"
+          region_url_map_name: "website-map"
+          region_backend_service_name: "website-backend"
+          region_health_check_name: "website-hc"
+          rigm_name: "website-rigm"
+          network_name: "website-net"
+          fw_name: "website-fw"
+          ip_name: "website-ip"
+        ignore_read_extra:
+          - "port_range"
+          - "target"
+          - "ip_address"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
     properties:
@@ -919,7 +937,27 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   GlobalForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "external_tcp_proxy_lb_mig_backend_custom_header"
+        name: "external_ssl_proxy_lb_mig_backend"
+        primary_resource_id: "default"
+        skip_test: true
+        vars:
+          ssl_proxy_xlb_network: "ssl-proxy-xlb-network"
+          ssl_proxy_xlb_subnet: "ssl-proxy-xlb-subnet"
+          ssl_proxy_xlb_ip: "ssl-proxy-xlb-ip"
+          default_cert: "default-cert"
+          test_proxy: "test-proxy"
+          ssl_proxy_xlb_forwarding_rule: "ssl-proxy-xlb-forwarding-rule"
+          ssl_proxy_xlb_backend_service: "ssl-proxy-xlb-backend-service"
+          ssl_proxy_health_check: "ssl-proxy-health-check"
+          ssl_proxy_xlb_mig_template: "ssl-proxy-xlb-mig-template"
+          ssl_proxy_xlb_mig1: "ssl-proxy-xlb-mig1"
+          ssl_proxy_xlb_fw_allow_hc: "ssl-proxy-xlb-fw-allow-hc"
+        ignore_read_extra:
+          - "port_range"
+          - "target"
+          - "ip_address"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "external_tcp_proxy_lb_mig_backend"
         primary_resource_id: "default"
         vars:
           tcp_proxy_xlb_network: "tcp-proxy-xlb-network"

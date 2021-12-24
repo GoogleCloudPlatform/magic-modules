@@ -14,6 +14,9 @@
         "project": "{{.Provider.project}}",
         "region": "us-central1",
         "settings": {
+          "activationPolicy": "ALWAYS",
+          "availabilityType": "ZONAL",
+          "dataDiskType": "PD_SSD",
           "pricingPlan": "PER_USE",
           "storageAutoResize": true,
           "tier": "db-f1-micro"

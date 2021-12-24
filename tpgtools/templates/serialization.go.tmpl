@@ -42,7 +42,7 @@ import (
 
 // DCLToTerraformReference converts a DCL resource name to the final tpgtools name
 // after overrides are applied
-func DCLToTerraformReference(resourceType, version string) (string, error) {
+func DCLToTerraformReference(resourceType string, version string) (string, error) {
 	{{- range $version, $resList := $.Resources   }}
 		{{- if not (eq $version.V "ga") }}
 	if version == "{{$version.V}}" {
@@ -51,13 +51,20 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 		case "{{$res.PathType}}":
 			return "{{$res.TerraformName}}", nil
 			{{- end }}
-		}	
+		}
 	}
 		{{- else }}
 	// If not found in sample version, fallthrough to GA
 	switch resourceType {
 	{{- range $res := $resList   }}
 	case "{{$res.PathType}}":
+		return "{{$res.TerraformName}}", nil
+	{{- end }}
+	}
+	// If still not found, try alternate names for resources.
+	switch resourceType {
+	{{- range $res := $resList   }}
+	case "{{$res.SampleTypeName}}":
 		return "{{$res.TerraformName}}", nil
 	{{- end }}
 	default:
@@ -95,7 +102,7 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 		switch resourceType {
 			{{- range $res := $resList   }}
 		case "{{$res.PathType}}":
-			r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLTitle}}{}
+			r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLStructName}}{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
@@ -112,7 +119,23 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 	switch resourceType {
 			{{- range $res := $resList   }}
 	case "{{$res.PathType}}":
-		r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLTitle}}{}
+		r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLStructName}}{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+				{{- if $res.CustomSerializer }}
+			return {{$res.CustomSerializer}}(*r, hasGAEquivalent)
+				{{- else }}
+			return {{$res.PathType}}{{$version.SerializationSuffix}}AsHCL(*r, hasGAEquivalent)
+				{{- end }}
+			{{- end }}
+	}
+
+	// If still not found, try alternative resource names.
+	switch resourceType {
+			{{- range $res := $resList   }}
+	case "{{$res.SampleTypeName}}":
+		r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLStructName}}{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
@@ -128,6 +151,7 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 	}
 		{{ end }}
 	{{- end }}
+
 }
 
 
@@ -139,7 +163,7 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func {{ $res.PathType}}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLTitle}}, hasGAEquivalent bool) (string, error) {
+func {{ $res.PathType}}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLStructName}}, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"{{$res.TerraformName}}\" \"output\" {\n"
 		{{- range $field := $res.Properties}}
 			{{- if $field.Settable }}
@@ -179,6 +203,13 @@ func {{ $res.PathType}}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{
 		}
 					{{- end }}
 	}
+				{{- else if eq $field.Type.String "TypeMap" }}
+		{{- /* TODO(magic-modules-eng): Implement maps with non-string values */}}
+		outputConfig += "{{ if not $field.Collapsed }}\t{{end}}{{$field.Name}} = {"
+		for k, v := range r.{{$field.PackageName}} {
+			outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+		}
+		outputConfig += "}\n"
 				{{- end}}
 			{{- end}}
 		{{- end}}
@@ -229,6 +260,13 @@ func convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$v.PackagePath}}T
 		}
 						{{- end }}
 	}
+					{{- else if eq $field.Type.String "TypeMap" }}
+		{{- /* TODO(magic-modules-eng): Implement maps with non-string values */}}
+		outputConfig += "{{ if not $v.Collapsed }}\t{{end}}{{$field.Name}} = {"
+		for k, v := range r.{{$field.PackageName}} {
+			outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+		}
+		outputConfig += "}\n"
 					{{- end}}
 				{{- end}}
 			{{- end}}

@@ -29,7 +29,7 @@ provider "google" {
 
 resource "google_filestore_instance" "test" {
   name = "test-instance"
-  zone = "us-central1-b"
+  location = "us-central1-b"
   tier = "BASIC_SSD"
 
   file_shares {

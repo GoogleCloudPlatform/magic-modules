@@ -85,8 +85,6 @@ resource "google_container_cluster" "full_list_default_1" {
     }
   }
   master_auth {
-    username = "test-username"
-    password = "test-password"
     client_certificate_config {
       issue_client_certificate = true
     }

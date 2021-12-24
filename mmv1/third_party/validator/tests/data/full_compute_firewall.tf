@@ -46,6 +46,7 @@ resource "google_compute_firewall" "full_list_default_1" {
   # Got: An argument named "enable_logging" is not expected here.
   # enable_logging = true
   priority = 42
+  source_service_accounts = ["test-source_service_account1", "test-source_service_account2"]
 }
 
 resource "google_compute_firewall" "full_list_default_2" {
