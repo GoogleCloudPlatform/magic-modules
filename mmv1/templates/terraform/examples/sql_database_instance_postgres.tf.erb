@@ -4,7 +4,7 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   region           = "us-central1"
   database_version = "POSTGRES_12"
   settings {
-    tier = "db-n1-standard-2"
+    tier = "db-custom-2-7680"
   }
 }
 # [START cloud_sql_postgres_instance_80_db_n1_s2]
