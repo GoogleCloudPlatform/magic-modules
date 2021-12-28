@@ -62,8 +62,11 @@ var (
 		"config.0.web_server_config",
 		"config.0.encryption_config",
 		"config.0.maintenance_window",
+<% end -%>
 		"config.0.workloads_config",
 		"config.0.environment_size",
+<% unless version == "ga" -%>
+		"config.0.master_authorized_networks_config",
 <% end -%>
 	}
 
@@ -72,8 +75,8 @@ var (
 		"config.0.private_environment_config.0.master_ipv4_cidr_block",
 		"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
 		"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
-<% unless version == "ga" -%>
 		"config.0.private_environment_config.0.cloud_composer_network_ipv4_cidr_block",
+<% unless version == "ga" -%>
 		"config.0.private_environment_config.0.enable_privately_used_public_ips",
 		"config.0.private_environment_config.0.cloud_composer_connection_subnetwork",
 <% end -%>
@@ -103,6 +106,23 @@ var (
 		},
 	}
 
+<% end -%>
+
+<% unless version == "ga" -%>
+	cidrBlocks = &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"display_name": {
+				Type:     		schema.TypeString,
+				Optional: 		true,
+				Description:  `display_name is a field for users to identify CIDR blocks.`,
+			},
+			"cidr_block": {
+				Type:     		schema.TypeString,
+				Required: 		true,
+				Description:  `cidr_block must be specified in CIDR notation.`,
+			},
+		},
+	}
 <% end -%>
 )
 
@@ -413,7 +433,6 @@ func resourceComposerEnvironment() *schema.Resource {
 										ForceNew:    true,
 										Description: `The CIDR block from which IP range in tenant project will be reserved for Cloud SQL. Needs to be disjoint from web_server_ipv4_cidr_block.`,
 									},
-<% unless version == "ga" -%>
 									"cloud_composer_network_ipv4_cidr_block": {
 										Type:     schema.TypeString,
 										Optional: true,
@@ -422,6 +441,7 @@ func resourceComposerEnvironment() *schema.Resource {
 										ForceNew: true,
 										Description: `The CIDR block from which IP range for Cloud Composer Network in tenant project will be reserved. Needs to be disjoint from private_cluster_config.master_ipv4_cidr_block and cloud_sql_ipv4_cidr_block. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
 									},
+<% unless version == "ga" -%>
 									"enable_privately_used_public_ips": {
 										Type:     schema.TypeBool,
 										Optional: true,
@@ -438,7 +458,7 @@ func resourceComposerEnvironment() *schema.Resource {
 										ForceNew: true,
 										Description: `When specified, the environment will use Private Service Connect instead of VPC peerings to connect to Cloud SQL in the Tenant Project, and the PSC endpoint in the Customer Project will use an IP address from this subnetwork. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
 									},
-									<% end -%>
+<% end -%>
 								},
 							},
 						},
@@ -447,6 +467,7 @@ func resourceComposerEnvironment() *schema.Resource {
 							Type:        schema.TypeList,
 							Optional:    true,
 							Computed:    true,
+							AtLeastOneOf: composerConfigKeys,
 							MaxItems:    1,
 							Description: `The network-level access control policy for the Airflow web server. If unspecified, no network-level access restrictions will be applied. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
 							Elem: &schema.Resource{
@@ -545,6 +566,8 @@ func resourceComposerEnvironment() *schema.Resource {
 								},
 							},
 						},
+<% end -%>
+
 						"workloads_config": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -683,6 +706,29 @@ func resourceComposerEnvironment() *schema.Resource {
               ValidateFunc: validation.StringInSlice([]string{"ENVIRONMENT_SIZE_SMALL", "ENVIRONMENT_SIZE_MEDIUM", "ENVIRONMENT_SIZE_LARGE"}, false),
               Description:  `The size of the Cloud Composer environment. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
             },
+<% unless version == "ga" -%>
+						"master_authorized_networks_config": {
+							Type:        	schema.TypeList,
+							Optional:    	true,
+							AtLeastOneOf: composerConfigKeys,
+							MaxItems:    	1,
+							Description: 	`Configuration options for the master authorized networks feature. Enabled master authorized networks will disallow all external traffic to access Kubernetes master through HTTPS except traffic from the given CIDR blocks, Google Compute Engine Public IPs and Google Prod IPs.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Whether or not master authorized networks is enabled.`,
+									},
+									"cidr_blocks": {
+										Type:        schema.TypeSet,
+										Optional:    true,
+										Elem:        cidrBlocks,
+										Description: `cidr_blocks define up to 50 external networks that could access Kubernetes master through HTTPS.`,
+									},
+								},
+							},
+						},
 <% end -%>
 						"airflow_uri": {
 							Type:        schema.TypeString,
@@ -962,13 +1008,34 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
 		}
-
+<% end -%>
 		if d.HasChange("config.0.workloads_config") {
 			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
 			if config != nil {
 				patchObj.Config.WorkloadsConfig = config.WorkloadsConfig
 			}
 			err = resourceComposerEnvironmentPatchField("config.WorkloadsConfig", userAgent, patchObj, d, tfConfig)
+			if err != nil {
+				return err
+			}
+		}
+    if d.HasChange("config.0.environment_size") {
+			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
+			if config != nil {
+				patchObj.Config.EnvironmentSize = config.EnvironmentSize
+			}
+			err = resourceComposerEnvironmentPatchField("config.EnvironmentSize", userAgent, patchObj, d, tfConfig)
+      if err != nil {
+				return err
+			}
+    }
+<% unless version == "ga" -%>
+		if d.HasChange("config.0.master_authorized_networks_config") {
+			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
+			if config != nil {
+				patchObj.Config.MasterAuthorizedNetworksConfig = config.MasterAuthorizedNetworksConfig
+			}
+			err = resourceComposerEnvironmentPatchField("config.MasterAuthorizedNetworksConfig", userAgent, patchObj, d, tfConfig)
 			if err != nil {
 				return err
 			}
@@ -1098,10 +1165,12 @@ func flattenComposerEnvironmentConfig(envCfg *composer.EnvironmentConfig) interf
 	transformed["web_server_config"] = flattenComposerEnvironmentConfigWebServerConfig(envCfg.WebServerConfig)
 	transformed["encryption_config"] = flattenComposerEnvironmentConfigEncryptionConfig(envCfg.EncryptionConfig)
 	transformed["maintenance_window"] = flattenComposerEnvironmentConfigMaintenanceWindow(envCfg.MaintenanceWindow)
+<% end -%>
 	transformed["workloads_config"] = flattenComposerEnvironmentConfigWorkloadsConfig(envCfg.WorkloadsConfig)
 	transformed["environment_size"] = envCfg.EnvironmentSize
+<% unless version == "ga" -%>
+	transformed["master_authorized_networks_config"] = flattenComposerEnvironmentConfigMasterAuthorizedNetworksConfig(envCfg.MasterAuthorizedNetworksConfig)
 <% end -%>
-
 	return []interface{}{transformed}
 }
 
@@ -1175,6 +1244,8 @@ func flattenComposerEnvironmentConfigMaintenanceWindow(maintenanceWindow *compos
 	return []interface{}{transformed}
 }
 
+<% end -%>
+
 func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.WorkloadsConfig) interface{} {
 	if workloadsConfig == nil {
 		return nil
@@ -1224,8 +1295,6 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 	return []interface{}{transformed}
 }
 
-<% end -%>
-
 func flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg *composer.PrivateEnvironmentConfig) interface{} {
 	if envCfg == nil {
 		return nil
@@ -1236,8 +1305,8 @@ func flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg *composer.P
 	transformed["master_ipv4_cidr_block"] = envCfg.PrivateClusterConfig.MasterIpv4CidrBlock
 	transformed["cloud_sql_ipv4_cidr_block"] = envCfg.CloudSqlIpv4CidrBlock
 	transformed["web_server_ipv4_cidr_block"] = envCfg.WebServerIpv4CidrBlock
-<% unless version == "ga" -%>
 	transformed["cloud_composer_network_ipv4_cidr_block"] = envCfg.CloudComposerNetworkIpv4CidrBlock
+<% unless version == "ga" -%>
 	transformed["enable_privately_used_public_ips"] = envCfg.EnablePrivatelyUsedPublicIps
 	transformed["cloud_composer_connection_subnetwork"] = envCfg.CloudComposerConnectionSubnetwork
 
@@ -1309,6 +1378,29 @@ func flattenComposerEnvironmentConfigSoftwareConfig(softwareCfg *composer.Softwa
 	return []interface{}{transformed}
 }
 
+<% unless version == "ga" -%>
+func flattenComposerEnvironmentConfigMasterAuthorizedNetworksConfig(masterAuthNetsCfg *composer.MasterAuthorizedNetworksConfig) interface{} {
+	if masterAuthNetsCfg == nil {
+		return nil
+	}
+
+	transformed := make([]interface{}, 0, len(masterAuthNetsCfg.CidrBlocks))
+	for _, cidrBlock := range masterAuthNetsCfg.CidrBlocks {
+		data := map[string]interface{}{
+			"display_name": cidrBlock.DisplayName,
+			"cidr_block": cidrBlock.CidrBlock,
+		}
+		transformed = append(transformed, data)
+	}
+
+	masterAuthorizedNetworksConfig := make(map[string]interface{})
+	masterAuthorizedNetworksConfig["enabled"] = masterAuthNetsCfg.Enabled
+	masterAuthorizedNetworksConfig["cidr_blocks"] = schema.NewSet(schema.HashResource(cidrBlocks), transformed)
+
+	return []interface{}{masterAuthorizedNetworksConfig}
+}
+<% end -%>
+
 func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, config *Config) (*composer.EnvironmentConfig, error) {
 	l := v.([]interface{})
 	if len(l) == 0 {
@@ -1376,7 +1468,7 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 		return nil, err
 	}
 	transformed.MaintenanceWindow = transformedMaintenanceWindow
-
+<% end -%>
 	transformedWorkloadsConfig, err := expandComposerEnvironmentConfigWorkloadsConfig(original["workloads_config"], d, config)
 	if err != nil {
 		return nil, err
@@ -1388,6 +1480,12 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
   		return nil, err
   	}
   	transformed.EnvironmentSize = transformedEnvironmentSize
+<% unless version == "ga" -%>
+	transformedMasterAuthorizedNetworksConfig, err := expandComposerEnvironmentConfigMasterAuthorizedNetworksConfig(original["master_authorized_networks_config"], d, config)
+	if err != nil {
+		return nil, err
+	}
+	transformed.MasterAuthorizedNetworksConfig = transformedMasterAuthorizedNetworksConfig
 <% end -%>
 	return transformed, nil
 }
@@ -1426,6 +1524,36 @@ func expandComposerEnvironmentConfigWebServerNetworkAccessControl(v interface{},
 	}
 
 	transformed.AllowedIpRanges = allowedIpRanges
+	return transformed, nil
+}
+
+<% end -%>
+
+<% unless version == "ga" -%>
+func expandComposerEnvironmentConfigMasterAuthorizedNetworksConfig(v interface{}, d *schema.ResourceData, config *Config) (*composer.MasterAuthorizedNetworksConfig, error) {
+	l := v.([]interface{})
+	if len(l) == 0 {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+
+	cidrBlocksRaw := original["cidr_blocks"].(*schema.Set).List()
+
+	transformed := &composer.MasterAuthorizedNetworksConfig{}
+	cidrBlocks := make([]*composer.CidrBlock, 0, len(original))
+
+	for _, originalCidrBlock := range cidrBlocksRaw {
+		originalCidrBlockRaw := originalCidrBlock.(map[string]interface{})
+		transformedCidrBlock := &composer.CidrBlock{}
+		if v, ok := originalCidrBlockRaw["display_name"]; ok {
+			transformedCidrBlock.DisplayName = v.(string)
+		}
+		transformedCidrBlock.CidrBlock = originalCidrBlockRaw["cidr_block"].(string)
+		cidrBlocks = append(cidrBlocks, transformedCidrBlock)
+	}
+	transformed.Enabled = original["enabled"].(bool)
+	transformed.CidrBlocks = cidrBlocks
 	return transformed, nil
 }
 
@@ -1501,6 +1629,8 @@ func expandComposerEnvironmentConfigMaintenanceWindow(v interface{}, d *schema.R
 	return transformed, nil
 }
 
+<% end -%>
+
 func expandComposerEnvironmentConfigWorkloadsConfig(v interface{}, d *schema.ResourceData, config *Config) (*composer.WorkloadsConfig, error) {
 	l := v.([]interface{})
 	if len(l) == 0 {
@@ -1555,7 +1685,6 @@ func expandComposerEnvironmentConfigEnvironmentSize(v interface{}, d *schema.Res
 	}
 	return v.(string), nil
 }
-<% end -%>
 
 func expandComposerEnvironmentConfigPrivateEnvironmentConfig(v interface{}, d *schema.ResourceData, config *Config) (*composer.PrivateEnvironmentConfig, error) {
 	l := v.([]interface{})
@@ -1585,11 +1714,11 @@ func expandComposerEnvironmentConfigPrivateEnvironmentConfig(v interface{}, d *s
 	if v, ok := original["web_server_ipv4_cidr_block"]; ok {
 		transformed.WebServerIpv4CidrBlock = v.(string)
 	}
-<% unless version == "ga" -%>
+
 	if v, ok := original["cloud_composer_network_ipv4_cidr_block"]; ok {
 		transformed.CloudComposerNetworkIpv4CidrBlock = v.(string)
 	}
-
+<% unless version == "ga" -%>
 	if v, ok := original["enable_privately_used_public_ips"]; ok {
 		transformed.EnablePrivatelyUsedPublicIps = v.(bool)
 	}

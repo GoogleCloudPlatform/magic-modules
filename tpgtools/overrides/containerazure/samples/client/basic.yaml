@@ -1,0 +1,12 @@
+description: A basic example of a containerazure azure client
+name: basic_azure_client
+type: client
+variables:
+- name: client-name
+  type: resource_name
+- name: project
+  type: project
+- name: azure_app
+  type: azure_application
+- name: azure_tenant
+  type: azure_ad_tenant
