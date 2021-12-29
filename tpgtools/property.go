@@ -751,7 +751,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 		if dsfOk {
 			p.DiffSuppressFunc = &dsf.DiffSuppressFunc
-		} else {
+		} else if !(p.Computed && !p.Optional) {
 			p.DiffSuppressFunc = p.DefaultDiffSuppress()
 		}
 

@@ -182,6 +182,7 @@ func Provider() *schema.Provider {
 			CloudResourceManagerEndpointEntryKey:            CloudResourceManagerEndpointEntry,
 			EventarcEndpointEntryKey:                        EventarcEndpointEntry,
 			GkeHubFeatureCustomEndpointEntryKey:             GkeHubFeatureCustomEndpointEntry,
+			NetworkConnectivityEndpointEntryKey:             NetworkConnectivityEndpointEntry,
 			OrgPolicyEndpointEntryKey:                       OrgPolicyEndpointEntry,
 			PrivatecaCertificateTemplateEndpointEntryKey:    PrivatecaCertificateTemplateCustomEndpointEntry,
 			RecaptchaEnterpriseEndpointEntryKey:             RecaptchaEnterpriseEndpointEntry,
@@ -472,6 +473,7 @@ end     # products.each do
 				"google_gke_hub_feature_membership":            resourceGkeHubFeatureMembership(),
 				"google_monitoring_monitored_project":          resourceMonitoringMonitoredProject(),
 				<% end -%>
+				"google_network_connectivity_hub":               resourceNetworkConnectivityHub(),
 				"google_org_policy_policy":             resourceOrgPolicyPolicy(),
 				"google_os_config_os_policy_assignment": resourceOSConfigOSPolicyAssignment(),
 				<% if version == 'private' -%>
@@ -662,6 +664,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.CloudResourceManagerBasePath = d.Get(CloudResourceManagerEndpointEntryKey).(string)
 	config.EventarcBasePath = d.Get(EventarcEndpointEntryKey).(string)
 	config.GkeHubBasePath = d.Get(GkeHubFeatureCustomEndpointEntryKey).(string)
+	config.NetworkConnectivityBasePath = d.Get(NetworkConnectivityEndpointEntryKey).(string)
 	config.OrgPolicyBasePath = d.Get(OrgPolicyEndpointEntryKey).(string)
 	config.PrivatecaBasePath = d.Get(PrivatecaCertificateTemplateEndpointEntryKey).(string)
         config.ContainerAwsBasePath = d.Get(ContainerAwsCustomEndpointEntryKey).(string)
