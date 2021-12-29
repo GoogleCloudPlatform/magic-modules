@@ -39,6 +39,8 @@ import (
 	eventarcBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc/beta"
 	gkehubBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub/beta"
 	monitoringBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/monitoring/beta"
+	networkconnectivity "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/networkconnectivity"
+	networkconnectivityBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/networkconnectivity/beta"
 	orgpolicy "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/orgpolicy"
 	orgpolicyBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/orgpolicy/beta"
 	osconfig "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/osconfig"
@@ -97,6 +99,8 @@ func DCLToTerraformReference(resourceType string, version string) (string, error
 			return "google_gke_hub_feature_membership", nil
 		case "MonitoringMonitoredProject":
 			return "google_monitoring_monitored_project", nil
+		case "NetworkConnectivityHub":
+			return "google_network_connectivity_hub", nil
 		case "OrgPolicyPolicy":
 			return "google_org_policy_policy", nil
 		case "OSConfigOSPolicyAssignment":
@@ -141,6 +145,8 @@ func DCLToTerraformReference(resourceType string, version string) (string, error
 		return "google_dataproc_workflow_template", nil
 	case "EventarcTrigger":
 		return "google_eventarc_trigger", nil
+	case "NetworkConnectivityHub":
+		return "google_network_connectivity_hub", nil
 	case "OrgPolicyPolicy":
 		return "google_org_policy_policy", nil
 	case "OSConfigOSPolicyAssignment":
@@ -184,6 +190,8 @@ func DCLToTerraformReference(resourceType string, version string) (string, error
 		return "google_dataproc_workflow_template", nil
 	case "EventarcTrigger":
 		return "google_eventarc_trigger", nil
+	case "NetworkConnectivityHub":
+		return "google_network_connectivity_hub", nil
 	case "OrgPolicyPolicy":
 		return "google_org_policy_policy", nil
 	case "OsConfigOSPolicyAssignment":
@@ -233,6 +241,8 @@ func DCLToTerraformSampleName(service, resource string) (string, string, error) 
 		return "Dataproc", "WorkflowTemplate", nil
 	case "eventarctrigger":
 		return "Eventarc", "Trigger", nil
+	case "networkconnectivityhub":
+		return "NetworkConnectivity", "Hub", nil
 	case "orgpolicypolicy":
 		return "OrgPolicy", "Policy", nil
 	case "osconfigospolicyassignment":
@@ -369,6 +379,12 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 				return "", err
 			}
 			return MonitoringMonitoredProjectBetaAsHCL(*r, hasGAEquivalent)
+		case "NetworkConnectivityHub":
+			r := &networkconnectivityBeta.Hub{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return NetworkConnectivityHubBetaAsHCL(*r, hasGAEquivalent)
 		case "OrgPolicyPolicy":
 			r := &orgpolicyBeta.Policy{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -493,6 +509,12 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 			return "", err
 		}
 		return EventarcTriggerAsHCL(*r, hasGAEquivalent)
+	case "NetworkConnectivityHub":
+		r := &networkconnectivity.Hub{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return NetworkConnectivityHubAsHCL(*r, hasGAEquivalent)
 	case "OrgPolicyPolicy":
 		r := &orgpolicy.Policy{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -617,6 +639,12 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 			return "", err
 		}
 		return EventarcTriggerAsHCL(*r, hasGAEquivalent)
+	case "NetworkConnectivityHub":
+		r := &networkconnectivity.Hub{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return NetworkConnectivityHubAsHCL(*r, hasGAEquivalent)
 	case "OrgPolicyPolicy":
 		r := &orgpolicy.Policy{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -3537,6 +3565,47 @@ func MonitoringMonitoredProjectBetaAsHCL(r monitoringBeta.MonitoredProject, hasG
 		return withProviderLine(formatted), nil
 	}
 	return formatted, nil
+}
+
+// NetworkConnectivityHubBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func NetworkConnectivityHubBetaAsHCL(r networkconnectivityBeta.Hub, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_network_connectivity_hub\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertNetworkConnectivityHubBetaRoutingVpcsToHCL(r *networkconnectivityBeta.HubRoutingVpcs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
 }
 
 // OrgPolicyPolicyBetaAsHCL returns a string representation of the specified resource in HCL.
@@ -7214,6 +7283,47 @@ func convertEventarcTriggerTransportPubsubToHCL(r *eventarc.TriggerTransportPubs
 	return outputConfig + "}"
 }
 
+// NetworkConnectivityHubAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func NetworkConnectivityHubAsHCL(r networkconnectivity.Hub, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_network_connectivity_hub\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertNetworkConnectivityHubRoutingVpcsToHCL(r *networkconnectivity.HubRoutingVpcs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
 // OrgPolicyPolicyAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -10822,6 +10932,27 @@ func convertGkeHubFeatureMembershipBetaConfigmanagementPolicyControllerList(i in
 	return out
 }
 
+func convertNetworkConnectivityHubBetaRoutingVpcs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uri": in["uri"],
+	}
+}
+
+func convertNetworkConnectivityHubBetaRoutingVpcsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertNetworkConnectivityHubBetaRoutingVpcs(v))
+	}
+	return out
+}
+
 func convertOrgPolicyPolicyBetaSpec(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -14165,6 +14296,27 @@ func convertEventarcTriggerTransportPubsubList(i interface{}) (out []map[string]
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertEventarcTriggerTransportPubsub(v))
+	}
+	return out
+}
+
+func convertNetworkConnectivityHubRoutingVpcs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uri": in["uri"],
+	}
+}
+
+func convertNetworkConnectivityHubRoutingVpcsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertNetworkConnectivityHubRoutingVpcs(v))
 	}
 	return out
 }
