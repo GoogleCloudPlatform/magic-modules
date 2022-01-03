@@ -154,7 +154,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RegionInstanceGroupManager: !ruby/object:Overrides::Inspec::ResourceOverride
     singular_extra_examples: third_party/inspec/documentation/google_compute_region_instance_group_manager.md
     plural_extra_examples: third_party/inspec/documentation/google_compute_region_instance_group_managers.md
-    additional_functions: third_party/inspec/custom_functions/google_compute_region_instance_group_manager.erb
+    additional_functions: third_party/inspec/custom_functions/google_compute_region_instance_group.erb
     properties:
       id: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: "instance_group_manager_id"

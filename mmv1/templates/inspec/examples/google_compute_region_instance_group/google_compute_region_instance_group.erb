@@ -1,0 +1,14 @@
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute(pwd, 'gcp_location', doc_generation)}" -%>
+<% region_instance_group = grab_attributes(pwd)['region_instance_group'] -%>
+describe google_compute_region_instance_group(project: <%= gcp_project_id -%>, region: <%= doc_generation ? "'#{region_instance_group['region']}'" : "region_instance_group['region']" -%>, name: <%= doc_generation ? "'#{region_instance_group['name']}'" : "region_instance_group['name']" -%>) do
+it { should exist }
+its('name') { should eq <%= doc_generation ? "'#{region_instance_group['name']}'" : "region_instance_group['name']" -%> }
+its('size') { should eq <%= doc_generation ? "'#{region_instance_group['size']}'" : "region_instance_group['size']" -%> }
+its('named_ports.first.name') { should eq <%= doc_generation ? "'#{region_instance_group['named_port_name']}'" : "region_instance_group['named_port_name']" -%> }
+its('named_ports.first.port') { should eq <%= doc_generation ? "'#{region_instance_group['named_port_port']}'" : "region_instance_group['named_port_port']" -%> }
+end
+
+describe google_compute_region_instance_group(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: 'nonexistent') do
+it { should_not exist }
+end
