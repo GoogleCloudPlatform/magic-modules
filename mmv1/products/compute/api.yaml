@@ -19410,3 +19410,142 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'description'
             description: 'Description of this License Code.'
+
+  - !ruby/object:Api::Resource
+    name: 'RegionInstanceGroup'
+    kind: 'compute#regionInstanceGroup'
+    base_url: projects/{{project}}/regions/{{region}}/instanceGroups
+    collection_url_key: 'items'
+    has_self_link: true
+    readonly: true
+    description: 'Retrieves the list of instance group resources contained within the specified region.'
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.This field is deprecated.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional textual description of the resource.'
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the resource.'
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        exclude: true
+        description: 'Server-defined, fully qualified URL for this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'fingerprint'
+        description: |
+          The fingerprint of the named ports. The system uses this fingerprint to detect conflicts when multiple users
+          change the named ports concurrently. base64-encoded string.
+      - !ruby/object:Api::Type::String
+        name: 'network'
+        description: |
+          The URL of the network to which all instances in the instance group belong.
+          If your instance has multiple network interfaces, then the network and subnetwork
+          fields only refer to the network and subnet used by your primary interface (nic0).
+      - !ruby/object:Api::Type::String
+        name: 'zone'
+        description: 'The URL of the zone where the instance group is located (for zonal resources).'
+      - !ruby/object:Api::Type::Integer
+        name: 'size'
+        description: 'The total number of instances in the instance group.'
+      - !ruby/object:Api::Type::String
+        name: 'region'
+        description: ' The URL of the region where the instance group is located (for regional resources).'
+      - !ruby/object:Api::Type::Array
+        name: 'namedPorts'
+        description: |
+          Assigns a name to a port number. For example: {name: "http", port: 80} This allows the system to
+          reference ports by the assigned name instead of a port number. Named ports can also contain multiple ports.
+          For example: [{name: "http", port: 80},{name: "http", port: 8080}] Named ports apply to all instances in this instance group.
+        required: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              description: 'The name for this named port. The name must be 1-63 characters long, and comply with RFC1035.'
+            - !ruby/object:Api::Type::Integer
+              name: 'port'
+              description: 'The port number, which can be a value between 1 and 65535.'
+  - !ruby/object:Api::Resource
+    name: 'RegionOperation'
+    kind: 'compute#regionOperation'
+    base_url: projects/{{project}}/regions/{{region}}/operations
+    collection_url_key: 'items'
+    has_self_link: true
+    readonly: true
+    description: 'Operation resources contained within the specified region'
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.This field is deprecated.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional textual description of the resource.'
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the resource.'
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        exclude: true
+        description: 'Server-defined, fully qualified URL for this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'clientOperationId'
+        exclude: true
+        description: 'The value of requestId if you provided it in the request. Not present otherwise.'
+      - !ruby/object:Api::Type::String
+        name: 'operationType'
+        exclude: true
+        description: 'The type of operation, such as insert, update, or delete, and so on.'
+      - !ruby/object:Api::Type::String
+        name: 'targetLink'
+        exclude: true
+        description: |
+          The URL of the resource that the operation modifies. For operations related to creating a snapshot,
+          this points to the persistent disk that the snapshot was created from.
+      - !ruby/object:Api::Type::String
+        name: 'targetId'
+        description: 'The unique target ID, which identifies a specific incarnation of the target resource.'
+      - !ruby/object:Api::Type::Enum
+        name: 'status'
+        output: true
+        description: |
+          The status of the operation, which can be one of the following: PENDING, RUNNING, or DONE.
+        values:
+          - :PENDING
+          - :RUNNING
+          - :DONE
+      - !ruby/object:Api::Type::String
+        name: 'user'
+        description: 'User who requested the operation, for example: user@example.com.'
+      - !ruby/object:Api::Type::String
+        name: 'insertTime'
+        description: 'The time that this operation was requested. This value is in RFC3339 text format.'
+      - !ruby/object:Api::Type::String
+        name: 'startTime'
+        description: 'The time that this operation was requested. This value is in RFC3339 text format.'
+      - !ruby/object:Api::Type::String
+        name: 'endTime'
+        description: 'The time that this operation was requested. This value is in RFC3339 text format.'
+      - !ruby/object:Api::Type::Integer
+        name: 'progress'
+        description: |
+          An optional progress indicator that ranges from 0 to 100. There is no requirement that this be linear or support
+          any granularity of operations. This should not be used to guess when the operation will be complete.
+          This number should monotonically increase as the operation progresses.
+      - !ruby/object:Api::Type::String
+        name: 'zone'
+        description: 'The URL of the zone where the instance group is located (for zonal resources).'
