@@ -331,14 +331,13 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 				},
-
+	<% end -%>
 				"boot_disk_kms_key": {
 					Type:       schema.TypeString,
 					Optional:   true,
 					ForceNew:   true,
 					Description: `The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool.`,
 				},
-	<% end -%>
 	<% unless version == 'ga' -%>
 				// Note that AtLeastOneOf can't be set because this schema is reused by
 				// two different resources.
@@ -548,12 +547,11 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 			SandboxType: conf["sandbox_type"].(string),
 		}
 	}
-
+<% end -%>
 	if v, ok := nodeConfig["boot_disk_kms_key"]; ok {
 		nc.BootDiskKmsKey = v.(string)
 	}
 
-<% end -%>
 <% unless version == 'ga' -%>
 	if v, ok := nodeConfig["kubelet_config"]; ok {
 		nc.KubeletConfig = expandKubeletConfig(v)
@@ -670,8 +668,8 @@ func flattenNodeConfig(c *container.NodeConfig) []map[string]interface{} {
 		"workload_metadata_config": flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
 <% unless version == 'ga' -%>
 		"sandbox_config": 			flattenSandboxConfig(c.SandboxConfig),
-		"boot_disk_kms_key": 		c.BootDiskKmsKey,
 <% end -%>
+		"boot_disk_kms_key": 		c.BootDiskKmsKey,
 <% unless version == 'ga' -%>
 		"kubelet_config":           flattenKubeletConfig(c.KubeletConfig),
 		"linux_node_config":        flattenLinuxNodeConfig(c.LinuxNodeConfig),
