@@ -36,7 +36,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/resource-manager/docs/managing-notification-contacts'
-      api: 'https://cloud.google.com/resource-manager/docs/reference/essentialcontacts/rest/v1beta1/projects.contacts'
+      api: 'https://cloud.google.com/resource-manager/docs/reference/essentialcontacts/rest/v1/projects.contacts'
     description: |
       A contact that will receive notifications from Google Cloud.
     parameters:
