@@ -9,7 +9,4 @@ resource "google_compute_reservation" "<%= ctx[:primary_resource_id] %>" {
       machine_type     = "n2-standard-2"
     }
   }
-  share_settings {
-    share_type = "LOCAL"
-  }
 }
