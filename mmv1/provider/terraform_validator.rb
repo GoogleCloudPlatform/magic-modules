@@ -282,11 +282,12 @@ module Provider
                        ['converters/google/resources/iam_spanner_instance.go',
                         'third_party/terraform/utils/iam_spanner_instance.go'],
                        ['converters/google/resources/spanner_instance_iam.go',
-                        'third_party/validator/spanner_instance_iam.go']
+                        'third_party/validator/spanner_instance_iam.go'],
+                        ['test/shared.go',
+                        'third_party/validator/tests/shared.go']
                      ])
     end
 
-    def generate_resource_tests(pwd, data) end
 
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
