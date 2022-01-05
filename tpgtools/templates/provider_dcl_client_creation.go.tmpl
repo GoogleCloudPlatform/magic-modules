@@ -32,7 +32,7 @@ import (
 	"time"
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	{{range $index, $pkg := .}}
-	{{$pkg.PackageName}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$pkg.DCLPackage}}"
+	{{$pkg.PackageName}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$pkg.PackageNameWithVersion}}"
   {{- end}}
 )
 

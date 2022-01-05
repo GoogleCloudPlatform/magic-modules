@@ -261,10 +261,10 @@ func (r Resource) ProductMetadata() *ProductMetadata {
 }
 
 // DCLPackage is the package name of the DCL client library to use for this
-// resource. For example, the Package "access_context_manager" would have a
-// DCLPackage of "accesscontextmanager"
-func (r Resource) DCLPackage() DCLPackageName {
-	return r.productMetadata.PackageName
+// resource. For example, the Package "access_context_manager" at version GA would have a
+// DCLPackage of "accesscontextmanager", and at beta would be "accesscontextmanager/beta".
+func (r Resource) DCLPackage() DCLPackageNameWithVersion {
+	return r.productMetadata.PackageNameWithVersion()
 }
 
 // IsAlternateLocation returns whether this resource is an additional version

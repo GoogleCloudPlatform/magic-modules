@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -121,4 +122,12 @@ func (pm *ProductMetadata) DocsSection() miscellaneousNameTitleCase {
 	}
 
 	return miscellaneousNameTitleCase(pm.ProductName.ToTitle())
+}
+
+func (pm *ProductMetadata) PackageNameWithVersion() DCLPackageNameWithVersion {
+	ss := strings.Split(string(pm.PackagePath), "/")
+	if len(ss) == 1 {
+		return DCLPackageNameWithVersion(pm.PackageName)
+	}
+	return DCLPackageNameWithVersion(fmt.Sprintf("%s/%s", pm.PackageName, ss[len(ss)-1]))
 }

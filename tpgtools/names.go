@@ -112,11 +112,12 @@ func (b BasePathOverrideNameSnakeCase) ToTitle() RenderedString {
 	return RenderedString(title)
 }
 
-// e.g. "ospolicy"
-// type DCLPackage string
-
 // A path on the filesystem, usually relative to the root of the tpgtools/ directory.
 type Filepath string
+
+// A package path, potentially including a version suffix.
+// e.g. "ospolicy/beta" or "ospolicy"
+type DCLPackageNameWithVersion string
 
 // A type for some string, not one of the things that have a specific type above, which is in
 // a particular case.  This is useful because we want to be able to write strings functions that take in
