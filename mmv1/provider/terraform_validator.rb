@@ -288,6 +288,7 @@ module Provider
                      ])
     end
 
+    def generate_resource_tests(pwd, data) end
 
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
