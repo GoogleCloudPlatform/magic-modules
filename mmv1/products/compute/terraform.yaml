@@ -2265,6 +2265,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       shareSettings.projectMap: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+
   Route: !ruby/object:Overrides::Terraform::ResourceOverride
     # Route cannot be added while a peering is on progress on the network
     mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
