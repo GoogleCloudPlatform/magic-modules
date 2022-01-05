@@ -283,7 +283,7 @@ module Provider
                         'third_party/terraform/utils/iam_spanner_instance.go'],
                        ['converters/google/resources/spanner_instance_iam.go',
                         'third_party/validator/spanner_instance_iam.go'],
-                        ['test/utils.go',
+                       ['test/utils.go',
                         'third_party/validator/tests/utils.go']
                      ])
     end
