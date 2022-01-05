@@ -7927,7 +7927,7 @@ objects:
           `10.128.0.0/9` address range.
 
           When set to `false`, the network is created in "custom subnet mode" so
-          the user can explicitly connect subnetwork resources.
+          the user can explicitly connect subnetwork resources. Defaults to `true`.
         input: true
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
