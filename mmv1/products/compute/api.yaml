@@ -1406,10 +1406,12 @@ objects:
                       build times and host selection times. For more information about
                       Maglev, refer to https://ai.google/research/pubs/pub44824
 
+
           This field is applicable to either:
 
           * A regional backend service with the serviceProtocol set to HTTP, HTTPS, or HTTP2, and loadBalancingScheme set to INTERNAL_MANAGED.
           * A global backend service with the loadBalancingScheme set to INTERNAL_SELF_MANAGED.
+
 
           If sessionAffinity is not NONE, and this field is not set to MAGLEV or RING_HASH, session affinity settings will not take effect.
 
@@ -2444,10 +2446,12 @@ objects:
                       build times and host selection times. For more information about
                       Maglev, refer to https://ai.google/research/pubs/pub44824
 
+
           This field is applicable to either:
 
           * A regional backend service with the serviceProtocol set to HTTP, HTTPS, or HTTP2, and loadBalancingScheme set to INTERNAL_MANAGED.
           * A global backend service with the loadBalancingScheme set to INTERNAL_SELF_MANAGED.
+
 
           If sessionAffinity is not NONE, and this field is not set to MAGLEV or RING_HASH, session affinity settings will not take effect.
 
