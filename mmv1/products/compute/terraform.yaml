@@ -15,42 +15,42 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Address: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "address_basic"
-        primary_resource_id: "ip_address"
-        vars:
-          address_name: "my-address"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "address_with_subnetwork"
-        primary_resource_id: "internal_with_subnet_and_address"
-        vars:
-          address_name: "my-internal-address"
-          network_name: "my-network"
-          subnetwork_name: "my-subnet"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "address_with_gce_endpoint"
-        primary_resource_id: "internal_with_gce_endpoint"
-        vars:
-          address_name: "my-internal-address-"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "address_with_shared_loadbalancer_vip"
-        primary_resource_id: "internal_with_shared_loadbalancer_vip"
-        vars:
-          address_name: "my-internal-address"
-        skip_docs: true  # It is almost identical to internal_with_gce_endpoint
-      # TODO(rileykarson): Remove this example when instance is supported
-      - !ruby/object:Provider::Terraform::Examples
-        name: "instance_with_ip"
-        primary_resource_id: "static"
-        vars:
-         address_name: "ipv4-address"
-         instance_name: "vm-instance"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "compute_address_ipsec_interconnect"
-        primary_resource_id: "ipsec-interconnect-address"
-        vars:
-          address_name: "test-address"
-          network_name: "test-network"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "address_basic"
+      primary_resource_id: "ip_address"
+      vars:
+        address_name: "my-address"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "address_with_subnetwork"
+      primary_resource_id: "internal_with_subnet_and_address"
+      vars:
+        address_name: "my-internal-address"
+        network_name: "my-network"
+        subnetwork_name: "my-subnet"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "address_with_gce_endpoint"
+      primary_resource_id: "internal_with_gce_endpoint"
+      vars:
+        address_name: "my-internal-address-"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "address_with_shared_loadbalancer_vip"
+      primary_resource_id: "internal_with_shared_loadbalancer_vip"
+      vars:
+        address_name: "my-internal-address"
+      skip_docs: true  # It is almost identical to internal_with_gce_endpoint
+    # TODO(rileykarson): Remove this example when instance is supported
+    - !ruby/object:Provider::Terraform::Examples
+      name: "instance_with_ip"
+      primary_resource_id: "static"
+      vars:
+        address_name: "ipv4-address"
+        instance_name: "vm-instance"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "compute_address_ipsec_interconnect"
+      primary_resource_id: "ipsec-interconnect-address"
+      vars:
+        address_name: "test-address"
+        network_name: "test-network"
     properties:
       address: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -82,23 +82,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_create: templates/terraform/post_create/labels.erb
   Autoscaler: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "autoscaler_single_instance"
-        primary_resource_id: "default"
-        min_version: 'beta'
-        vars:
-          autoscaler_name: "my-autoscaler"
-          instance_template_name: "my-instance-template"
-          target_pool_name: "my-target-pool"
-          igm_name: "my-igm"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "autoscaler_basic"
-        primary_resource_id: "foobar"
-        vars:
-          autoscaler_name: "my-autoscaler"
-          instance_template_name: "my-instance-template"
-          target_pool_name: "my-target-pool"
-          igm_name: "my-igm"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "autoscaler_single_instance"
+      primary_resource_id: "default"
+      min_version: 'beta'
+      vars:
+        autoscaler_name: "my-autoscaler"
+        instance_template_name: "my-instance-template"
+        target_pool_name: "my-target-pool"
+        igm_name: "my-igm"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "autoscaler_basic"
+      primary_resource_id: "foobar"
+      vars:
+        autoscaler_name: "my-autoscaler"
+        instance_template_name: "my-instance-template"
+        target_pool_name: "my-target-pool"
+        igm_name: "my-igm"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -147,19 +147,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
   BackendBucket: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "backend_bucket_basic"
-        primary_resource_id: "image_backend"
-        vars:
-          backend_bucket_name: "image-backend-bucket"
-          bucket_name: "image-store-bucket"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "backend_bucket_full"
-        primary_resource_id: "image_backend_full"
-        skip_docs: true
-        vars:
-          backend_bucket_name: "image-backend-bucket-full"
-          bucket_name: "image-store-bucket-full"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "backend_bucket_basic"
+      primary_resource_id: "image_backend"
+      vars:
+        backend_bucket_name: "image-backend-bucket"
+        bucket_name: "image-store-bucket"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "backend_bucket_full"
+      primary_resource_id: "image_backend_full"
+      skip_docs: true
+      vars:
+        backend_bucket_name: "image-backend-bucket-full"
+        bucket_name: "image-store-bucket-full"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -191,15 +191,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude_validator: true
     mutex: signedUrlKey/{{project}}/backendBuckets/{{backend_bucket}}/
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "backend_bucket_signed_url_key"
-        pull_external: true
-        primary_resource_id: "backend_key"
-        vars:
-          key_name: "test-key"
-          backend_name: "test-signed-backend-bucket"
-          bucket_name: "test-storage-bucket"
-        skip_test: true
+    - !ruby/object:Provider::Terraform::Examples
+      name: "backend_bucket_signed_url_key"
+      pull_external: true
+      primary_resource_id: "backend_key"
+      vars:
+        key_name: "test-key"
+        backend_name: "test-signed-backend-bucket"
+        bucket_name: "test-storage-bucket"
+      skip_test: true
     properties:
       backendBucket: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
@@ -211,45 +211,45 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
   BackendService: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "backend_service_basic"
-        primary_resource_id: "default"
-        vars:
-          backend_service_name: "backend-service"
-          http_health_check_name: "health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "backend_service_cache_simple"
-        primary_resource_id: "default"
-        vars:
-          backend_service_name: "backend-service"
-          http_health_check_name: "health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "backend_service_cache"
-        primary_resource_id: "default"
-        vars:
-          backend_service_name: "backend-service"
-          http_health_check_name: "health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "backend_service_traffic_director_round_robin"
-        min_version: beta
-        primary_resource_id: "default"
-        vars:
-          backend_service_name: "backend-service"
-          health_check_name: "health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "backend_service_traffic_director_ring_hash"
-        min_version: beta
-        primary_resource_id: "default"
-        vars:
-          backend_service_name: "backend-service"
-          health_check_name: "health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "backend_service_network_endpoint"
-        min_version: beta
-        primary_resource_id: "default"
-        vars:
-          backend_service_name: "backend-service"
-          neg_name: "network-endpoint"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "backend_service_basic"
+      primary_resource_id: "default"
+      vars:
+        backend_service_name: "backend-service"
+        http_health_check_name: "health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "backend_service_cache_simple"
+      primary_resource_id: "default"
+      vars:
+        backend_service_name: "backend-service"
+        http_health_check_name: "health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "backend_service_cache"
+      primary_resource_id: "default"
+      vars:
+        backend_service_name: "backend-service"
+        http_health_check_name: "health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "backend_service_traffic_director_round_robin"
+      min_version: beta
+      primary_resource_id: "default"
+      vars:
+        backend_service_name: "backend-service"
+        health_check_name: "health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "backend_service_traffic_director_ring_hash"
+      min_version: beta
+      primary_resource_id: "default"
+      vars:
+        backend_service_name: "backend-service"
+        health_check_name: "health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "backend_service_network_endpoint"
+      min_version: beta
+      primary_resource_id: "default"
+      vars:
+        backend_service_name: "backend-service"
+        neg_name: "network-endpoint"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/backend_service.go.erb'
       encoder: 'templates/terraform/encoders/backend_service.go.erb'
@@ -345,53 +345,53 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
   RegionBackendService: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_backend_service_basic"
-        primary_resource_id: "default"
-        vars:
-          region_backend_service_name: "region-service"
-          health_check_name: "rbs-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_backend_service_cache"
-        primary_resource_id: "default"
-        vars:
-          region_backend_service_name: "region-service"
-          health_check_name: "rbs-health-check"
-        min_version: beta
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_backend_service_ilb_round_robin"
-        primary_resource_id: "default"
-        vars:
-          region_backend_service_name: "region-service"
-          health_check_name: "rbs-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_backend_service_external"
-        primary_resource_id: "default"
-        vars:
-          region_backend_service_name: "region-service"
-          health_check_name: "rbs-health-check"
-        min_version: beta
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_backend_service_ilb_ring_hash"
-        primary_resource_id: "default"
-        vars:
-          region_backend_service_name: "region-service"
-          health_check_name: "rbs-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_backend_service_balancing_mode"
-        primary_resource_id: "default"
-        vars:
-          region_backend_service_name: "region-service"
-          rigm_name: "rbs-rigm"
-          region_health_check_name: "rbs-health-check"
-          network_name: "rbs-net"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_backend_service_connection_tracking"
-        min_version: 'beta'
-        primary_resource_id: "default"
-        vars:
-          region_backend_service_name: "region-service"
-          health_check_name: "rbs-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_backend_service_basic"
+      primary_resource_id: "default"
+      vars:
+        region_backend_service_name: "region-service"
+        health_check_name: "rbs-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_backend_service_cache"
+      primary_resource_id: "default"
+      vars:
+        region_backend_service_name: "region-service"
+        health_check_name: "rbs-health-check"
+      min_version: beta
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_backend_service_ilb_round_robin"
+      primary_resource_id: "default"
+      vars:
+        region_backend_service_name: "region-service"
+        health_check_name: "rbs-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_backend_service_external"
+      primary_resource_id: "default"
+      vars:
+        region_backend_service_name: "region-service"
+        health_check_name: "rbs-health-check"
+      min_version: beta
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_backend_service_ilb_ring_hash"
+      primary_resource_id: "default"
+      vars:
+        region_backend_service_name: "region-service"
+        health_check_name: "rbs-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_backend_service_balancing_mode"
+      primary_resource_id: "default"
+      vars:
+        region_backend_service_name: "region-service"
+        rigm_name: "rbs-rigm"
+        region_health_check_name: "rbs-health-check"
+        network_name: "rbs-net"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_backend_service_connection_tracking"
+      min_version: 'beta'
+      primary_resource_id: "default"
+      vars:
+        region_backend_service_name: "region-service"
+        health_check_name: "rbs-health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/region_backend_service.go.erb
       encoder: templates/terraform/encoders/region_backend_service.go.erb
@@ -483,15 +483,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude_validator: true
     mutex: signedUrlKey/{{project}}/backendServices/{{backend_service}}/
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "backend_service_signed_url_key"
-        pull_external: true
-        primary_resource_id: "backend_key"
-        vars:
-          key_name: "test-key"
-          backend_name: "my-backend-service"
-          igm_name: "my-webservers"
-        skip_test: true
+    - !ruby/object:Provider::Terraform::Examples
+      name: "backend_service_signed_url_key"
+      pull_external: true
+      primary_resource_id: "backend_key"
+      vars:
+        key_name: "test-key"
+        backend_name: "my-backend-service"
+        igm_name: "my-webservers"
+      skip_test: true
     properties:
       backendService: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
@@ -508,14 +508,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
 
       ~> **Note:** This resource does not support zonal disks (`google_compute_disk`). For zonal disks, please refer to [`google_compute_disk_resource_policy_attachment`](https://www.terraform.io/docs/providers/google/r/compute_disk_resource_policy_attachment.html)
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_disk_resource_policy_attachment_basic"
-        primary_resource_id: "attachment"
-        vars:
-          base_disk_name: "my-base-disk"
-          snapshot_name: "my-snapshot"
-          disk_name: "my-disk"
-          policy_name: "my-resource-policy"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_disk_resource_policy_attachment_basic"
+      primary_resource_id: "attachment"
+      vars:
+        base_disk_name: "my-base-disk"
+        snapshot_name: "my-snapshot"
+        disk_name: "my-disk"
+        policy_name: "my-resource-policy"
     id_format: "{{project}}/{{region}}/{{disk}}/{{name}}"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/compute_region_disk_resource_policies_attachment.go.erb
@@ -532,12 +532,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
 
       ~> **Note:** This resource does not support regional disks (`google_compute_region_disk`). For regional disks, please refer to [`google_compute_region_disk_resource_policy_attachment`](https://www.terraform.io/docs/providers/google/r/compute_region_disk_resource_policy_attachment.html)
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "disk_resource_policy_attachment_basic"
-        primary_resource_id: "attachment"
-        vars:
-          disk_name: "my-disk"
-          policy_name: "my-resource-policy"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "disk_resource_policy_attachment_basic"
+      primary_resource_id: "attachment"
+      vars:
+        disk_name: "my-disk"
+        policy_name: "my-resource-policy"
     id_format: "{{project}}/{{zone}}/{{disk}}/{{name}}"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/compute_disk_resource_policies_attachment.go.erb
@@ -652,17 +652,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: templates/terraform/decoders/disk.erb
       resource_definition: templates/terraform/resource_definition/disk.erb
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "disk_basic"
-        primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-test-disk%s\", context[\"random_suffix\"])"
-        vars:
-          disk_name: "test-disk"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "disk_basic"
+      primary_resource_id: "default"
+      primary_resource_name: "fmt.Sprintf(\"tf-test-test-disk%s\", context[\"random_suffix\"])"
+      vars:
+        disk_name: "test-disk"
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       method_name_separator: '/'
       fetch_iam_policy_verb: :GET
       parent_resource_attribute: 'name'
-      import_format: ["projects/{{project}}/zones/{{zone}}/disks/{{name}}", "{{name}}"]
+      import_format: [ "projects/{{project}}/zones/{{zone}}/disks/{{name}}", "{{name}}" ]
       base_url: projects/{{project}}/zones/{{zone}}/disks/{{name}}
   DiskType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
@@ -672,19 +672,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         * `enable_logging` - (Optional, Deprecated) This field denotes whether to enable logging for a particular firewall rule.
         If logging is enabled, logs will be exported to Stackdriver. Deprecated in favor of `log_config`
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "firewall_basic"
-        primary_resource_id: "default"
-        vars:
-          firewall_name: "test-firewall"
-          network_name: "test-network"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "firewall_with_target_tags"
-        primary_resource_id: "rules"
-        vars:
-          firewall_name: "my-firewall-rule"
-        test_env_vars:
-          project: :PROJECT_NAME
+    - !ruby/object:Provider::Terraform::Examples
+      name: "firewall_basic"
+      primary_resource_id: "default"
+      vars:
+        firewall_name: "test-firewall"
+        network_name: "test-network"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "firewall_with_target_tags"
+      primary_resource_id: "rules"
+      vars:
+        firewall_name: "my-firewall-rule"
+      test_env_vars:
+        project: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/firewall.erb
       resource_definition: templates/terraform/resource_definition/firewall.erb
@@ -750,121 +750,121 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
   ForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "internal_http_lb_with_mig_backend"
-        primary_resource_id: "google_compute_forwarding_rule"
-        vars:
-          ilb_network_name: "l7-ilb-network"
-          proxy_subnet_name: "l7-ilb-proxy-subnet"
-          backend_subnet_name: "l7-ilb-subnet"
-          forwarding_rule_name: "l7-ilb-forwarding-rule"
-          target_http_proxy_name: "l7-ilb-target-http-proxy"
-          regional_url_map_name: "l7-ilb-regional-url-map"
-          backend_service_name: "l7-ilb-backend-subnet"
-          mig_template_name: "l7-ilb-mig-template"
-          hc_name: "l7-ilb-hc"
-          mig_name: "l7-ilb-mig1"
-          fw_allow_iap_hc_name: "l7-ilb-fw-allow-iap-hc"
-          fw_allow_ilb_to_backends_name: "l7-ilb-fw-allow-ilb-to-backends"
-          vm_test_name: "l7-ilb-test-vm"
-        min_version: beta
-        ignore_read_extra:
-          - "port_range"
-          - "target"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "internal_tcp_udp_lb_with_mig_backend"
-        primary_resource_id: "google_compute_forwarding_rule"
-        vars:
-          ilb_network_name: "l4-ilb-network"
-          backend_subnet_name: "l4-ilb-subnet"
-          forwarding_rule_name: "l4-ilb-forwarding-rule"
-          backend_service_name: "l4-ilb-backend-subnet"
-          mig_template_name: "l4-ilb-mig-template"
-          hc_name: "l4-ilb-hc"
-          mig_name: "l4-ilb-mig1"
-          fw_allow_hc_name: "l4-ilb-fw-allow-hc"
-          fw_allow_ilb_to_backends_name: "l4-ilb-fw-allow-ilb-to-backends"
-          fw_allow_ilb_ssh_name: "l4-ilb-fw-ssh"
-          vm_test_name: "l4-ilb-test-vm"
-        min_version: beta
-      - !ruby/object:Provider::Terraform::Examples
-        name: "forwarding_rule_externallb"
-        primary_resource_id: "default"
-        vars:
-          forwarding_rule_name: "website-forwarding-rule"
-          backend_name: "website-backend"
-          network_name: "website-net"
-        min_version: beta
-        ignore_read_extra:
-          - "port_range"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "forwarding_rule_global_internallb"
-        primary_resource_id: "default"
-        vars:
-          forwarding_rule_name: "website-forwarding-rule"
-          backend_name: "website-backend"
-          network_name: "website-net"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "forwarding_rule_basic"
-        primary_resource_id: "default"
-        vars:
-          forwarding_rule_name: "website-forwarding-rule"
-          target_pool_name: "website-target-pool"
-        ignore_read_extra:
-          - "port_range"
-          - "target"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "forwarding_rule_l3_default"
-        primary_resource_id: "fwd_rule"
-        vars:
-          forwarding_rule_name: "l3-forwarding-rule"
-          service_name: "service"
-          health_check_name: "health-check"
-        min_version: beta
-      - !ruby/object:Provider::Terraform::Examples
-        name: "forwarding_rule_internallb"
-        primary_resource_id: "default"
-        vars:
-          forwarding_rule_name: "website-forwarding-rule"
-          backend_name: "website-backend"
-          network_name: "website-net"
-        ignore_read_extra:
-          - "port_range"
-          - "target"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "forwarding_rule_http_lb"
-        min_version: 'beta'
-        primary_resource_id: "default"
-        vars:
-          forwarding_rule_name: "website-forwarding-rule"
-          region_target_http_proxy_name: "website-proxy"
-          region_url_map_name: "website-map"
-          region_backend_service_name: "website-backend"
-          region_health_check_name: "website-hc"
-          rigm_name: "website-rigm"
-          network_name: "website-net"
-          fw_name: "website-fw"
-        ignore_read_extra:
-          - "port_range"
-          - "target"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "forwarding_rule_regional_http_xlb"
-        min_version: 'beta'
-        primary_resource_id: "default"
-        vars:
-          forwarding_rule_name: "website-forwarding-rule"
-          region_target_http_proxy_name: "website-proxy"
-          region_url_map_name: "website-map"
-          region_backend_service_name: "website-backend"
-          region_health_check_name: "website-hc"
-          rigm_name: "website-rigm"
-          network_name: "website-net"
-          fw_name: "website-fw"
-          ip_name: "website-ip"
-        ignore_read_extra:
-          - "port_range"
-          - "target"
-          - "ip_address"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "internal_http_lb_with_mig_backend"
+      primary_resource_id: "google_compute_forwarding_rule"
+      vars:
+        ilb_network_name: "l7-ilb-network"
+        proxy_subnet_name: "l7-ilb-proxy-subnet"
+        backend_subnet_name: "l7-ilb-subnet"
+        forwarding_rule_name: "l7-ilb-forwarding-rule"
+        target_http_proxy_name: "l7-ilb-target-http-proxy"
+        regional_url_map_name: "l7-ilb-regional-url-map"
+        backend_service_name: "l7-ilb-backend-subnet"
+        mig_template_name: "l7-ilb-mig-template"
+        hc_name: "l7-ilb-hc"
+        mig_name: "l7-ilb-mig1"
+        fw_allow_iap_hc_name: "l7-ilb-fw-allow-iap-hc"
+        fw_allow_ilb_to_backends_name: "l7-ilb-fw-allow-ilb-to-backends"
+        vm_test_name: "l7-ilb-test-vm"
+      min_version: beta
+      ignore_read_extra:
+      - "port_range"
+      - "target"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "internal_tcp_udp_lb_with_mig_backend"
+      primary_resource_id: "google_compute_forwarding_rule"
+      vars:
+        ilb_network_name: "l4-ilb-network"
+        backend_subnet_name: "l4-ilb-subnet"
+        forwarding_rule_name: "l4-ilb-forwarding-rule"
+        backend_service_name: "l4-ilb-backend-subnet"
+        mig_template_name: "l4-ilb-mig-template"
+        hc_name: "l4-ilb-hc"
+        mig_name: "l4-ilb-mig1"
+        fw_allow_hc_name: "l4-ilb-fw-allow-hc"
+        fw_allow_ilb_to_backends_name: "l4-ilb-fw-allow-ilb-to-backends"
+        fw_allow_ilb_ssh_name: "l4-ilb-fw-ssh"
+        vm_test_name: "l4-ilb-test-vm"
+      min_version: beta
+    - !ruby/object:Provider::Terraform::Examples
+      name: "forwarding_rule_externallb"
+      primary_resource_id: "default"
+      vars:
+        forwarding_rule_name: "website-forwarding-rule"
+        backend_name: "website-backend"
+        network_name: "website-net"
+      min_version: beta
+      ignore_read_extra:
+      - "port_range"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "forwarding_rule_global_internallb"
+      primary_resource_id: "default"
+      vars:
+        forwarding_rule_name: "website-forwarding-rule"
+        backend_name: "website-backend"
+        network_name: "website-net"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "forwarding_rule_basic"
+      primary_resource_id: "default"
+      vars:
+        forwarding_rule_name: "website-forwarding-rule"
+        target_pool_name: "website-target-pool"
+      ignore_read_extra:
+      - "port_range"
+      - "target"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "forwarding_rule_l3_default"
+      primary_resource_id: "fwd_rule"
+      vars:
+        forwarding_rule_name: "l3-forwarding-rule"
+        service_name: "service"
+        health_check_name: "health-check"
+      min_version: beta
+    - !ruby/object:Provider::Terraform::Examples
+      name: "forwarding_rule_internallb"
+      primary_resource_id: "default"
+      vars:
+        forwarding_rule_name: "website-forwarding-rule"
+        backend_name: "website-backend"
+        network_name: "website-net"
+      ignore_read_extra:
+      - "port_range"
+      - "target"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "forwarding_rule_http_lb"
+      min_version: 'beta'
+      primary_resource_id: "default"
+      vars:
+        forwarding_rule_name: "website-forwarding-rule"
+        region_target_http_proxy_name: "website-proxy"
+        region_url_map_name: "website-map"
+        region_backend_service_name: "website-backend"
+        region_health_check_name: "website-hc"
+        rigm_name: "website-rigm"
+        network_name: "website-net"
+        fw_name: "website-fw"
+      ignore_read_extra:
+      - "port_range"
+      - "target"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "forwarding_rule_regional_http_xlb"
+      min_version: 'beta'
+      primary_resource_id: "default"
+      vars:
+        forwarding_rule_name: "website-forwarding-rule"
+        region_target_http_proxy_name: "website-proxy"
+        region_url_map_name: "website-map"
+        region_backend_service_name: "website-backend"
+        region_health_check_name: "website-hc"
+        rigm_name: "website-rigm"
+        network_name: "website-net"
+        fw_name: "website-fw"
+        ip_name: "website-ip"
+      ignore_read_extra:
+      - "port_range"
+      - "target"
+      - "ip_address"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
     properties:
@@ -908,17 +908,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validateGCPName'
   GlobalAddress: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "global_address_basic"
-        primary_resource_id: "default"
-        vars:
-          global_address_name: "global-appserver-ip"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "global_address_private_services_connect"
-        min_version: beta
-        primary_resource_id: "default"
-        vars:
-          global_address_name: "global-psconnect-ip"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "global_address_basic"
+      primary_resource_id: "default"
+      vars:
+        global_address_name: "global-appserver-ip"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "global_address_private_services_connect"
+      min_version: beta
+      primary_resource_id: "default"
+      vars:
+        global_address_name: "global-psconnect-ip"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -936,100 +936,100 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_create: templates/terraform/post_create/labels.erb
   GlobalForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "external_ssl_proxy_lb_mig_backend_custom_header"
-        primary_resource_id: "default"
-        skip_test: true
-        vars:
-          ssl_proxy_xlb_network: "ssl-proxy-xlb-network"
-          ssl_proxy_xlb_subnet: "ssl-proxy-xlb-subnet"
-          ssl_proxy_xlb_ip: "ssl-proxy-xlb-ip"
-          default_cert: "default-cert"
-          test_proxy: "test-proxy"
-          ssl_proxy_xlb_forwarding_rule: "ssl-proxy-xlb-forwarding-rule"
-          ssl_proxy_xlb_backend_service: "ssl-proxy-xlb-backend-service"
-          ssl_proxy_health_check: "ssl-proxy-health-check"
-          ssl_proxy_xlb_mig_template: "ssl-proxy-xlb-mig-template"
-          ssl_proxy_xlb_mig1: "ssl-proxy-xlb-mig1"
-          ssl_proxy_xlb_fw_allow_hc: "ssl-proxy-xlb-fw-allow-hc"
-        ignore_read_extra:
-          - "port_range"
-          - "target"
-          - "ip_address"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "external_tcp_proxy_lb_mig_backend_custom_header"
-        primary_resource_id: "default"
-        vars:
-          tcp_proxy_xlb_network: "tcp-proxy-xlb-network"
-          tcp_proxy_xlb_subnet: "tcp-proxy-xlb-subnet"
-          tcp_proxy_xlb_ip: "tcp-proxy-xlb-ip"
-          tcp_proxy_xlb_forwarding_rule: "tcp-proxy-xlb-forwarding-rule"
-          test_proxy_health_check: "test-proxy-health-check"
-          tcp_proxy_xlb_backend_service: "tcp-proxy-xlb-backend-service"
-          tcp_proxy_health_check: "tcp-proxy-health-check"
-          tcp_proxy_xlb_mig_template: "tcp-proxy-xlb-mig-template"
-          tcp_proxy_xlb_mig1: "tcp-proxy-xlb-mig1"
-          tcp_proxy_xlb_fw_allow_hc: "tcp-proxy-xlb-fw-allow-hc"
-        min_version: beta
-        ignore_read_extra:
-          - "port_range"
-          - "target"
-          - "ip_address"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "external_http_lb_mig_backend_custom_header"
-        primary_resource_id: "default"
-        vars:
-          xlb_network_name: "l7-xlb-network"
-          backend_subnet_name: "l7-xlb-subnet"
-          address_name: "l7-xlb-static-ip"
-          forwarding_rule_name: "l7-xlb-forwarding-rule"
-          target_http_proxy_name: "l7-xlb-target-http-proxy"
-          url_map_name: "l7-xlb-url-map"
-          backend_service_name: "l7-xlb-backend-service"
-          mig_template_name: "l7-xlb-mig-template"
-          hc_name: "l7-xlb-hc"
-          mig_name: "l7-xlb-mig1"
-          fw_allow_hc_name: "l7-xlb-fw-allow-hc"
-        min_version: beta
-        ignore_read_extra:
-          - "port_range"
-          - "target"
-          - "ip_address"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "global_forwarding_rule_http"
-        primary_resource_id: "default"
-        vars:
-          forwarding_rule_name: "global-rule"
-          http_proxy_name: "target-proxy"
-          backend_service_name: "backend"
-        ignore_read_extra:
-          - "port_range"
-          - "target"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "global_forwarding_rule_internal"
-        min_version: beta
-        primary_resource_id: "default"
-        vars:
-          forwarding_rule_name: "global-rule"
-          http_proxy_name: "target-proxy"
-          backend_service_name: "backend"
-          igm_name: "igm-internal"
-        ignore_read_extra:
-          - "port_range"
-          - "target"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "private_service_connect_google_apis"
-        min_version: beta
-        primary_resource_id: "default"
-        vars:
-          network_name: "my-network"
-          subnetwork_name: "my-subnetwork"
-          global_address_name: "global-psconnect-ip"
-          forwarding_rule_name: "globalrule"
-        test_env_vars:
-          project: :PROJECT_NAME
-        ignore_read_extra:
-          - "ip_address"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "external_ssl_proxy_lb_mig_backend_custom_header"
+      primary_resource_id: "default"
+      skip_test: true
+      vars:
+        ssl_proxy_xlb_network: "ssl-proxy-xlb-network"
+        ssl_proxy_xlb_subnet: "ssl-proxy-xlb-subnet"
+        ssl_proxy_xlb_ip: "ssl-proxy-xlb-ip"
+        default_cert: "default-cert"
+        test_proxy: "test-proxy"
+        ssl_proxy_xlb_forwarding_rule: "ssl-proxy-xlb-forwarding-rule"
+        ssl_proxy_xlb_backend_service: "ssl-proxy-xlb-backend-service"
+        ssl_proxy_health_check: "ssl-proxy-health-check"
+        ssl_proxy_xlb_mig_template: "ssl-proxy-xlb-mig-template"
+        ssl_proxy_xlb_mig1: "ssl-proxy-xlb-mig1"
+        ssl_proxy_xlb_fw_allow_hc: "ssl-proxy-xlb-fw-allow-hc"
+      ignore_read_extra:
+      - "port_range"
+      - "target"
+      - "ip_address"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "external_tcp_proxy_lb_mig_backend_custom_header"
+      primary_resource_id: "default"
+      vars:
+        tcp_proxy_xlb_network: "tcp-proxy-xlb-network"
+        tcp_proxy_xlb_subnet: "tcp-proxy-xlb-subnet"
+        tcp_proxy_xlb_ip: "tcp-proxy-xlb-ip"
+        tcp_proxy_xlb_forwarding_rule: "tcp-proxy-xlb-forwarding-rule"
+        test_proxy_health_check: "test-proxy-health-check"
+        tcp_proxy_xlb_backend_service: "tcp-proxy-xlb-backend-service"
+        tcp_proxy_health_check: "tcp-proxy-health-check"
+        tcp_proxy_xlb_mig_template: "tcp-proxy-xlb-mig-template"
+        tcp_proxy_xlb_mig1: "tcp-proxy-xlb-mig1"
+        tcp_proxy_xlb_fw_allow_hc: "tcp-proxy-xlb-fw-allow-hc"
+      min_version: beta
+      ignore_read_extra:
+      - "port_range"
+      - "target"
+      - "ip_address"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "external_http_lb_mig_backend_custom_header"
+      primary_resource_id: "default"
+      vars:
+        xlb_network_name: "l7-xlb-network"
+        backend_subnet_name: "l7-xlb-subnet"
+        address_name: "l7-xlb-static-ip"
+        forwarding_rule_name: "l7-xlb-forwarding-rule"
+        target_http_proxy_name: "l7-xlb-target-http-proxy"
+        url_map_name: "l7-xlb-url-map"
+        backend_service_name: "l7-xlb-backend-service"
+        mig_template_name: "l7-xlb-mig-template"
+        hc_name: "l7-xlb-hc"
+        mig_name: "l7-xlb-mig1"
+        fw_allow_hc_name: "l7-xlb-fw-allow-hc"
+      min_version: beta
+      ignore_read_extra:
+      - "port_range"
+      - "target"
+      - "ip_address"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "global_forwarding_rule_http"
+      primary_resource_id: "default"
+      vars:
+        forwarding_rule_name: "global-rule"
+        http_proxy_name: "target-proxy"
+        backend_service_name: "backend"
+      ignore_read_extra:
+      - "port_range"
+      - "target"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "global_forwarding_rule_internal"
+      min_version: beta
+      primary_resource_id: "default"
+      vars:
+        forwarding_rule_name: "global-rule"
+        http_proxy_name: "target-proxy"
+        backend_service_name: "backend"
+        igm_name: "igm-internal"
+      ignore_read_extra:
+      - "port_range"
+      - "target"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "private_service_connect_google_apis"
+      min_version: beta
+      primary_resource_id: "default"
+      vars:
+        network_name: "my-network"
+        subnetwork_name: "my-subnetwork"
+        global_address_name: "global-psconnect-ip"
+        forwarding_rule_name: "globalrule"
+      test_env_vars:
+        project: :PROJECT_NAME
+      ignore_read_extra:
+      - "ip_address"
     properties:
       creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1060,11 +1060,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
       which still require the legacy version.
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "http_health_check_basic"
-        primary_resource_id: "default"
-        vars:
-          http_health_check_name: "authentication-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "http_health_check_basic"
+      primary_resource_id: "default"
+      vars:
+        http_health_check_name: "authentication-health-check"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1090,11 +1090,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
       which still require the legacy version.
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "https_health_check_basic"
-        primary_resource_id: "default"
-        vars:
-          https_health_check_name: "authentication-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "https_health_check_basic"
+      primary_resource_id: "default"
+      vars:
+        https_health_check_name: "authentication-health-check"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1112,72 +1112,72 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_value: 2
   HealthCheck: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "health_check_tcp"
-        primary_resource_id: "tcp-health-check"
-        vars:
-          health_check_name: "tcp-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "health_check_tcp_full"
-        primary_resource_id: "tcp-health-check"
-        vars:
-          health_check_name: "tcp-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "health_check_ssl"
-        primary_resource_id: "ssl-health-check"
-        vars:
-          health_check_name: "ssl-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "health_check_ssl_full"
-        primary_resource_id: "ssl-health-check"
-        vars:
-          health_check_name: "ssl-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "health_check_http"
-        primary_resource_id: "http-health-check"
-        vars:
-          health_check_name: "http-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "health_check_http_full"
-        primary_resource_id: "http-health-check"
-        vars:
-          health_check_name: "http-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "health_check_https"
-        primary_resource_id: "https-health-check"
-        vars:
-          health_check_name: "https-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "health_check_https_full"
-        primary_resource_id: "https-health-check"
-        vars:
-          health_check_name: "https-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "health_check_http2"
-        primary_resource_id: "http2-health-check"
-        vars:
-          health_check_name: "http2-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "health_check_http2_full"
-        primary_resource_id: "http2-health-check"
-        vars:
-          health_check_name: "http2-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "health_check_grpc"
-        primary_resource_id: "grpc-health-check"
-        vars:
-          health_check_name: "grpc-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "health_check_grpc_full"
-        primary_resource_id: "grpc-health-check"
-        vars:
-          health_check_name: "grpc-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "health_check_with_logging"
-        primary_resource_id: "health-check-with-logging"
-        min_version: beta
-        vars:
-          health_check_name: "tcp-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "health_check_tcp"
+      primary_resource_id: "tcp-health-check"
+      vars:
+        health_check_name: "tcp-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "health_check_tcp_full"
+      primary_resource_id: "tcp-health-check"
+      vars:
+        health_check_name: "tcp-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "health_check_ssl"
+      primary_resource_id: "ssl-health-check"
+      vars:
+        health_check_name: "ssl-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "health_check_ssl_full"
+      primary_resource_id: "ssl-health-check"
+      vars:
+        health_check_name: "ssl-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "health_check_http"
+      primary_resource_id: "http-health-check"
+      vars:
+        health_check_name: "http-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "health_check_http_full"
+      primary_resource_id: "http-health-check"
+      vars:
+        health_check_name: "http-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "health_check_https"
+      primary_resource_id: "https-health-check"
+      vars:
+        health_check_name: "https-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "health_check_https_full"
+      primary_resource_id: "https-health-check"
+      vars:
+        health_check_name: "https-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "health_check_http2"
+      primary_resource_id: "http2-health-check"
+      vars:
+        health_check_name: "http2-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "health_check_http2_full"
+      primary_resource_id: "http2-health-check"
+      vars:
+        health_check_name: "http2-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "health_check_grpc"
+      primary_resource_id: "grpc-health-check"
+      vars:
+        health_check_name: "grpc-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "health_check_grpc_full"
+      primary_resource_id: "grpc-health-check"
+      vars:
+        health_check_name: "grpc-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "health_check_with_logging"
+      primary_resource_id: "health-check-with-logging"
+      min_version: beta
+      vars:
+        health_check_name: "tcp-health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/health_check_type.erb
       constants: templates/terraform/constants/health_check.erb
@@ -1209,17 +1209,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       parent_resource_attribute: 'image'
       iam_conditions_request_type: :QUERY_PARAM
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "image_basic"
-        primary_resource_id: "example"
-        vars:
-          image_name: "example-image"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-example-image%s\", context[\"random_suffix\"])"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "image_guest_os"
-        primary_resource_id: "example"
-        vars:
-          image_name: "example-image"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "image_basic"
+      primary_resource_id: "example"
+      vars:
+        image_name: "example-image"
+      primary_resource_name: "fmt.Sprintf(\"tf-test-example-image%s\", context[\"random_suffix\"])"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "image_guest_os"
+      primary_resource_id: "example"
+      vars:
+        image_name: "example-image"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1259,30 +1259,30 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       iam_conditions_request_type: :QUERY_PARAM
     exclude_resource: true
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "instance_basic"
-        primary_resource_id: "default"
-        vars:
-          instance_name: "my-instance"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\", context[\"random_suffix\"])"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "instance_basic"
+      primary_resource_id: "default"
+      vars:
+        instance_name: "my-instance"
+      primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\", context[\"random_suffix\"])"
   InstanceGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   InstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   InstanceGroupNamedPort: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/{{port}}/{{name}}'
-    import_format: ['projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/{{port}}/{{name}}']
+    import_format: [ 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/{{port}}/{{name}}' ]
     mutex: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "instance_group_named_port_gke"
-        primary_resource_id: "my_port"
-        # Multiple fine-grained resources
-        skip_vcr: true
-        vars:
-          network_name: "container-network"
-          subnetwork_name: "container-subnetwork"
-          gke_cluster_name: "my-cluster"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "instance_group_named_port_gke"
+      primary_resource_id: "my_port"
+      # Multiple fine-grained resources
+      skip_vcr: true
+      vars:
+        network_name: "container-network"
+        subnetwork_name: "container-subnetwork"
+        gke_cluster_name: "my-cluster"
     properties:
       group: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareResourceNames'
@@ -1296,21 +1296,21 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   InterconnectAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "interconnect_attachment_basic"
-        primary_resource_id: "on_prem"
-        vars:
-          interconnect_attachment_name: "on-prem-attachment"
-          router_name: "router"
-          network_name: "network"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "compute_interconnect_attachment_ipsec_encryption"
-        primary_resource_id: "ipsec-encrypted-interconnect-attachment"
-        vars:
-          interconnect_attachment_name: "test-interconnect-attachment"
-          address_name: "test-address"
-          router_name: "test-router"
-          network_name: "test-network"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "interconnect_attachment_basic"
+      primary_resource_id: "on_prem"
+      vars:
+        interconnect_attachment_name: "on-prem-attachment"
+        router_name: "router"
+        network_name: "network"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "compute_interconnect_attachment_ipsec_encryption"
+      primary_resource_id: "ipsec-encrypted-interconnect-attachment"
+      vars:
+        interconnect_attachment_name: "test-interconnect-attachment"
+        address_name: "test-address"
+        router_name: "test-router"
+        network_name: "test-network"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1354,44 +1354,44 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       parent_resource_attribute: 'machine_image'
       iam_conditions_request_type: :QUERY_PARAM
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "machine_image_basic"
-        primary_resource_id: "image"
-        vars:
-          vm_name: "vm"
-          image_name: "image"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "compute_machine_image_kms"
-        primary_resource_id: "image"
-        vars:
-          vm_name: "vm"
-          image_name: "image"
-          key_name: "key"
-          keyring_name: "keyring"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "machine_image_basic"
+      primary_resource_id: "image"
+      vars:
+        vm_name: "vm"
+        image_name: "image"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "compute_machine_image_kms"
+      primary_resource_id: "image"
+      vars:
+        vm_name: "vm"
+        image_name: "image"
+        key_name: "key"
+        keyring_name: "keyring"
 
   MachineType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Network: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "network_basic"
-        primary_resource_id: "vpc_network"
-        vars:
-          network_name: "vpc-network"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "network_custom_mtu"
-        primary_resource_id: "vpc_network"
-        vars:
-          network_name: "vpc-network"
-        test_env_vars:
-          project: :PROJECT_NAME
+    - !ruby/object:Provider::Terraform::Examples
+      name: "network_basic"
+      primary_resource_id: "vpc_network"
+      vars:
+        network_name: "vpc-network"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "network_custom_mtu"
+      primary_resource_id: "vpc_network"
+      vars:
+        network_name: "vpc-network"
+      test_env_vars:
+        project: :PROJECT_NAME
     virtual_fields:
-      - !ruby/object:Api::Type::Boolean
-        name: 'delete_default_routes_on_create'
-        default_value: false
-        description: |
-          If set to `true`, default routes (`0.0.0.0/0`) will be deleted
-          immediately after network creation. Defaults to `false`.
+    - !ruby/object:Api::Type::Boolean
+      name: 'delete_default_routes_on_create'
+      default_value: false
+      description: |
+        If set to `true`, default routes (`0.0.0.0/0`) will be deleted
+        immediately after network creation. Defaults to `false`.
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1407,14 +1407,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_value: True
         send_empty_value: true
         # autoCreateSubnetworks defaults to true, so we need to disable it explicitly
-        conflicts: []
+        conflicts: [ ]
       routingConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
       routingConfig.routingMode: !ruby/object:Overrides::Terraform::PropertyOverride
         # flattened objects don't pass on the attributes of the parent to
         # the child so redefining this on the child field is necessary.
         update_verb: :PATCH
-        update_url:  projects/{{project}}/global/networks/{{name}}
+        update_url: projects/{{project}}/global/networks/{{name}}
         # while required inside routingConfig, routingMode is an optional convenience
         # field.
         required: false
@@ -1430,19 +1430,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # in Cloud Asset Inventory
     exclude_validator: true
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "network_endpoint"
-        primary_resource_id: "default-endpoint"
-        # Fine-grained resource need different autogenerated tests, as
-        # we need to check destroy during a test step where the parent resource
-        # still exists, rather than during CheckDestroy (when read returns
-        # nothing because the parent resource has then also been destroyed)
-        skip_test: true
-        vars:
-          neg_name: "my-lb-neg"
-          instance_name: "endpoint-instance"
-          network_name: "neg-network"
-          subnetwork_name: "neg-subnetwork"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "network_endpoint"
+      primary_resource_id: "default-endpoint"
+      # Fine-grained resource need different autogenerated tests, as
+      # we need to check destroy during a test step where the parent resource
+      # still exists, rather than during CheckDestroy (when read returns
+      # nothing because the parent resource has then also been destroyed)
+      skip_test: true
+      vars:
+        neg_name: "my-lb-neg"
+        instance_name: "endpoint-instance"
+        network_name: "neg-network"
+        subnetwork_name: "neg-subnetwork"
     properties:
       instance: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: "templates/terraform/custom_expand/resource_from_self_link.go.erb"
@@ -1461,13 +1461,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/compute_network_endpoint.go.erb
   NetworkEndpointGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "network_endpoint_group"
-        primary_resource_id: "neg"
-        vars:
-          neg_name: "my-lb-neg"
-          network_name: "neg-network"
-          subnetwork_name: "neg-subnetwork"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "network_endpoint_group"
+      primary_resource_id: "neg"
+      vars:
+        neg_name: "my-lb-neg"
+        network_name: "neg-network"
+        subnetwork_name: "neg-subnetwork"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1486,16 +1486,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # in Cloud Asset Inventory
     exclude_validator: true
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "global_network_endpoint"
-        primary_resource_id: "default-endpoint"
-        # Fine-grained resource need different autogenerated tests, as
-        # we need to check destroy during a test step where the parent resource
-        # still exists, rather than during CheckDestroy (when read returns
-        # nothing because the parent resource has then also been destroyed)
-        skip_test: true
-        vars:
-          neg_name: "my-lb-neg"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "global_network_endpoint"
+      primary_resource_id: "default-endpoint"
+      # Fine-grained resource need different autogenerated tests, as
+      # we need to check destroy during a test step where the parent resource
+      # still exists, rather than during CheckDestroy (when read returns
+      # nothing because the parent resource has then also been destroyed)
+      skip_test: true
+      vars:
+        neg_name: "my-lb-neg"
     properties:
       globalNetworkEndpointGroup: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
@@ -1509,16 +1509,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_import: templates/terraform/custom_import/compute_global_network_endpoint.go.erb
   GlobalNetworkEndpointGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "global_network_endpoint_group"
-        primary_resource_id: "neg"
-        vars:
-          neg_name: "my-lb-neg"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "global_network_endpoint_group_ip_address"
-        primary_resource_id: "neg"
-        vars:
-          neg_name: "my-lb-neg"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "global_network_endpoint_group"
+      primary_resource_id: "neg"
+      vars:
+        neg_name: "my-lb-neg"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "global_network_endpoint_group_ip_address"
+      primary_resource_id: "neg"
+      vars:
+        neg_name: "my-lb-neg"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1527,52 +1527,52 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validateGCPName'
   RegionNetworkEndpointGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_network_endpoint_group_functions"
-        primary_resource_id: "function_neg"
-        vars:
-          neg_name: "function-neg"
-          function_name: "function-neg"
-          bucket_name: "cloudfunctions-function-example-bucket"
-          zip_path: "path/to/index.zip"
-        test_vars_overrides:
-          zip_path: 'createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_network_endpoint_group_cloudrun"
-        primary_resource_id: "cloudrun_neg"
-        vars:
-          neg_name: "cloudrun-neg"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_network_endpoint_group_appengine"
-        primary_resource_id: "appengine_neg"
-        vars:
-          neg_name: "appengine-neg"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_network_endpoint_group_functions"
+      primary_resource_id: "function_neg"
+      vars:
+        neg_name: "function-neg"
+        function_name: "function-neg"
+        bucket_name: "cloudfunctions-function-example-bucket"
+        zip_path: "path/to/index.zip"
+      test_vars_overrides:
+        zip_path: 'createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_network_endpoint_group_cloudrun"
+      primary_resource_id: "cloudrun_neg"
+      vars:
+        neg_name: "cloudrun-neg"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_network_endpoint_group_appengine"
+      primary_resource_id: "appengine_neg"
+      vars:
+        neg_name: "appengine-neg"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
   NetworkPeeringRoutesConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"
-    import_format: ["projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"]
+    import_format: [ "projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}" ]
     # format from google_compute_network_peering
     mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
     skip_delete: true
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "network_peering_routes_config_basic"
-        primary_resource_id: "peering_primary_routes"
-        vars:
-          peering_primary_name: "primary-peering"
-          peering_secondary_name: "secondary-peering"
-          network_primary_name: "primary-network"
-          network_secondary_name: "secondary-network"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "network_peering_routes_config_gke"
-        primary_resource_id: "peering_gke_routes"
-        vars:
-          network_name: "container-network"
-          subnetwork_name: "container-subnetwork"
-          gke_cluster_name: "private-cluster"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "network_peering_routes_config_basic"
+      primary_resource_id: "peering_primary_routes"
+      vars:
+        peering_primary_name: "primary-peering"
+        peering_secondary_name: "secondary-peering"
+        network_primary_name: "primary-network"
+        network_secondary_name: "secondary-network"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "network_peering_routes_config_gke"
+      primary_resource_id: "peering_gke_routes"
+      vars:
+        network_name: "container-network"
+        subnetwork_name: "container-subnetwork"
+        gke_cluster_name: "private-cluster"
     properties:
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
@@ -1591,18 +1591,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         through Terraform config or through external changes will cause
         Terraform to delete and recreate the node group.
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "node_group_basic"
-        primary_resource_id: "nodes"
-        vars:
-          group_name: "soletenant-group"
-          template_name: "soletenant-tmpl"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "node_group_autoscaling_policy"
-        primary_resource_id: "nodes"
-        vars:
-          group_name: "soletenant-group"
-          template_name: "soletenant-tmpl"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "node_group_basic"
+      primary_resource_id: "nodes"
+      vars:
+        group_name: "soletenant-group"
+        template_name: "soletenant-tmpl"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "node_group_autoscaling_policy"
+      primary_resource_id: "nodes"
+      vars:
+        group_name: "soletenant-group"
+        template_name: "soletenant-tmpl"
     properties:
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
@@ -1611,10 +1611,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       size: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         description: |
-         The total number of nodes in the node group. One of `initial_size` or `size` must be specified.
+          The total number of nodes in the node group. One of `initial_size` or `size` must be specified.
         exactly_one_of:
-          - size
-          - initial_size
+        - size
+        - initial_size
       autoscalingPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       autoscalingPolicy.mode: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -1627,16 +1627,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pre_create: templates/terraform/pre_create/compute_node_group_url_replace.go.erb
   NodeTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "node_template_basic"
-        primary_resource_id: "template"
-        vars:
-          template_name: "soletenant-tmpl"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "node_template_server_binding"
-        primary_resource_id: "template"
-        vars:
-          template_name: "soletenant-with-licenses"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "node_template_basic"
+      primary_resource_id: "template"
+      vars:
+        template_name: "soletenant-tmpl"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "node_template_server_binding"
+      primary_resource_id: "template"
+      vars:
+        template_name: "soletenant-with-licenses"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
@@ -1650,14 +1650,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   OrganizationSecurityPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "locations/global/securityPolicies/{{policy_id}}"
     self_link: "locations/global/securityPolicies/{{policy_id}}"
-    import_format: ["locations/global/securityPolicies/{{policy_id}}"]
+    import_format: [ "locations/global/securityPolicies/{{policy_id}}" ]
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "organization_security_policy_basic"
-        primary_resource_id: "policy"
-        min_version: 'beta'
-        test_env_vars:
-          org_id: :ORG_ID
+    - !ruby/object:Provider::Terraform::Examples
+      name: "organization_security_policy_basic"
+      primary_resource_id: "policy"
+      min_version: 'beta'
+      test_env_vars:
+        org_id: :ORG_ID
     parameters:
       displayName: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
@@ -1673,19 +1673,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
   OrganizationSecurityPolicyAssociation: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{policy_id}}/association/{{name}}"
-    import_format: ["{{%policy_id}}/association/{{name}}"]
+    import_format: [ "{{%policy_id}}/association/{{name}}" ]
     base_url: '{{policy_id}}'
     self_link: '{{policy_id}}/getAssociation?name={{name}}'
     create_url: '{{policy_id}}/addAssociation'
     delete_url: '{{policy_id}}/removeAssociation?name={{name}}'
     read_error_transform: "transformSecurityPolicyAssociationReadError"
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "organization_security_policy_association_basic"
-        primary_resource_id: "policy"
-        min_version: 'beta'
-        test_env_vars:
-          org_id: :ORG_ID
+    - !ruby/object:Provider::Terraform::Examples
+      name: "organization_security_policy_association_basic"
+      primary_resource_id: "policy"
+      min_version: 'beta'
+      test_env_vars:
+        org_id: :ORG_ID
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/org_security_policy_association.go.erb
       post_delete: templates/terraform/post_create/org_security_policy_association.go.erb
@@ -1693,19 +1693,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
   OrganizationSecurityPolicyRule: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{policy_id}}/priority/{{priority}}"
-    import_format: ["{{%policy_id}}/priority/{{priority}}"]
+    import_format: [ "{{%policy_id}}/priority/{{priority}}" ]
     base_url: '{{policy_id}}'
     self_link: '{{policy_id}}/getRule?priority={{priority}}'
     create_url: '{{policy_id}}/addRule?priority={{priority}}'
     update_url: '{{policy_id}}/patchRule?priority={{priority}}'
     delete_url: '{{policy_id}}/removeRule?priority={{priority}}'
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "organization_security_policy_rule_basic"
-        primary_resource_id: "policy"
-        min_version: 'beta'
-        test_env_vars:
-          org_id: :ORG_ID
+    - !ruby/object:Provider::Terraform::Examples
+      name: "organization_security_policy_rule_basic"
+      primary_resource_id: "policy"
+      min_version: 'beta'
+      test_env_vars:
+        org_id: :ORG_ID
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/org_security_policy_rule.go.erb
       post_delete: templates/terraform/post_create/org_security_policy_rule.go.erb
@@ -1714,18 +1714,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
   PacketMirroring: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "compute_packet_mirroring_full"
-        primary_resource_id: "foobar"
-        vars:
-          instance_name: "my-instance"
-          subnetwork_name: "my-subnetwork"
-          service_name: "my-service"
-          hc_name: "my-healthcheck"
-          mirroring_name: "my-mirroring"
-          ilb_rule_name: "my-ilb"
-          network_name: "my-network"
-        cloud_docs_region_tag: compute_vm_packet_mirror
+    - !ruby/object:Provider::Terraform::Examples
+      name: "compute_packet_mirroring_full"
+      primary_resource_id: "foobar"
+      vars:
+        instance_name: "my-instance"
+        subnetwork_name: "my-subnetwork"
+        service_name: "my-service"
+        hc_name: "my-healthcheck"
+        mirroring_name: "my-mirroring"
+        ilb_rule_name: "my-ilb"
+        network_name: "my-network"
+      cloud_docs_region_tag: compute_vm_packet_mirror
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
@@ -1735,10 +1735,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       collectorIlb: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
-            The Forwarding Rule resource (of type load_balancing_scheme=INTERNAL)
-            that will be used as collector for mirrored traffic. The
-            specified forwarding rule must have is_mirroring_collector
-            set to true.
+          The Forwarding Rule resource (of type load_balancing_scheme=INTERNAL)
+          that will be used as collector for mirrored traffic. The
+          specified forwarding rule must have is_mirroring_collector
+          set to true.
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
@@ -1754,17 +1754,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # in Cloud Asset Inventory
     exclude_validator: true
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "stateful_igm"
-        primary_resource_id: "stateful-instance"
-        # Fine-grained resource need different autogenerated tests, as
-        # we need to check destroy during a test step where the parent resource
-        # still exists, rather than during CheckDestroy (when read returns
-        # nothing because the parent resource has then also been destroyed)
-        skip_test: true
-        vars:
-          template_name: "my-template"
-          igm_name: "my-igm"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "stateful_igm"
+      primary_resource_id: "stateful-instance"
+      # Fine-grained resource need different autogenerated tests, as
+      # we need to check destroy during a test step where the parent resource
+      # still exists, rather than during CheckDestroy (when read returns
+      # nothing because the parent resource has then also been destroyed)
+      skip_test: true
+      vars:
+        template_name: "my-template"
+        igm_name: "my-igm"
     properties:
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
@@ -1774,43 +1774,43 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: templates/terraform/custom_flatten/preserved_state_disks.go.erb
         custom_expand: templates/terraform/custom_expand/preserved_state_disks.go.erb
     virtual_fields:
-      - !ruby/object:Api::Type::Enum
-        name: 'minimal_action'
-        description: |
-          The minimal action to perform on the instance during an update.
-          Default is `NONE`. Possible values are:
-          * REPLACE
-          * RESTART
-          * REFRESH
-          * NONE
-        values:
-          - :REPLACE
-          - :RESTART
-          - :REFRESH
-          - :NONE
-        default_value: :NONE
-      - !ruby/object:Api::Type::Enum
-        name: 'most_disruptive_allowed_action'
-        description: |
-          The most disruptive action to perform on the instance during an update.
-          Default is `REPLACE`. Possible values are:
-          * REPLACE
-          * RESTART
-          * REFRESH
-          * NONE
-        values:
-          - :REPLACE
-          - :RESTART
-          - :REFRESH
-          - :NONE
-        default_value: :REPLACE
-      - !ruby/object:Api::Type::Boolean
-        name: 'remove_instance_state_on_destroy'
-        description: |
-          When true, deleting this config will immediately remove any specified state from the underlying instance.
-          When false, deleting this config will *not* immediately remove any state from the underlying instance.
-          State will be removed on the next instance recreation or update.
-        default_value: false
+    - !ruby/object:Api::Type::Enum
+      name: 'minimal_action'
+      description: |
+        The minimal action to perform on the instance during an update.
+        Default is `NONE`. Possible values are:
+        * REPLACE
+        * RESTART
+        * REFRESH
+        * NONE
+      values:
+      - :REPLACE
+      - :RESTART
+      - :REFRESH
+      - :NONE
+      default_value: :NONE
+    - !ruby/object:Api::Type::Enum
+      name: 'most_disruptive_allowed_action'
+      description: |
+        The most disruptive action to perform on the instance during an update.
+        Default is `REPLACE`. Possible values are:
+        * REPLACE
+        * RESTART
+        * REFRESH
+        * NONE
+      values:
+      - :REPLACE
+      - :RESTART
+      - :REFRESH
+      - :NONE
+      default_value: :REPLACE
+    - !ruby/object:Api::Type::Boolean
+      name: 'remove_instance_state_on_destroy'
+      description: |
+        When true, deleting this config will immediately remove any specified state from the underlying instance.
+        When false, deleting this config will *not* immediately remove any state from the underlying instance.
+        State will be removed on the next instance recreation or update.
+      default_value: false
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/compute_per_instance_config.go.erb
       update_encoder: templates/terraform/update_encoder/compute_per_instance_config.go.erb
@@ -1824,17 +1824,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # in Cloud Asset Inventory
     exclude_validator: true
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "stateful_rigm"
-        primary_resource_id: "stateful-instance"
-        # Fine-grained resource need different autogenerated tests, as
-        # we need to check destroy during a test step where the parent resource
-        # still exists, rather than during CheckDestroy (when read returns
-        # nothing because the parent resource has then also been destroyed)
-        skip_test: true
-        vars:
-          template_name: "my-template"
-          igm_name: "my-rigm"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "stateful_rigm"
+      primary_resource_id: "stateful-instance"
+      # Fine-grained resource need different autogenerated tests, as
+      # we need to check destroy during a test step where the parent resource
+      # still exists, rather than during CheckDestroy (when read returns
+      # nothing because the parent resource has then also been destroyed)
+      skip_test: true
+      vars:
+        template_name: "my-template"
+        igm_name: "my-rigm"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
@@ -1845,43 +1845,43 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: templates/terraform/custom_flatten/preserved_state_disks.go.erb
         custom_expand: templates/terraform/custom_expand/preserved_state_disks.go.erb
     virtual_fields:
-      - !ruby/object:Api::Type::Enum
-        name: 'minimal_action'
-        description: |
-          The minimal action to perform on the instance during an update.
-          Default is `NONE`. Possible values are:
-          * REPLACE
-          * RESTART
-          * REFRESH
-          * NONE
-        values:
-          - :REPLACE
-          - :RESTART
-          - :REFRESH
-          - :NONE
-        default_value: :NONE
-      - !ruby/object:Api::Type::Enum
-        name: 'most_disruptive_allowed_action'
-        description: |
-          The most disruptive action to perform on the instance during an update.
-          Default is `REPLACE`. Possible values are:
-          * REPLACE
-          * RESTART
-          * REFRESH
-          * NONE
-        values:
-          - :REPLACE
-          - :RESTART
-          - :REFRESH
-          - :NONE
-        default_value: :REPLACE
-      - !ruby/object:Api::Type::Boolean
-        name: 'remove_instance_state_on_destroy'
-        description: |
-          When true, deleting this config will immediately remove any specified state from the underlying instance.
-          When false, deleting this config will *not* immediately remove any state from the underlying instance.
-          State will be removed on the next instance recreation or update.
-        default_value: false
+    - !ruby/object:Api::Type::Enum
+      name: 'minimal_action'
+      description: |
+        The minimal action to perform on the instance during an update.
+        Default is `NONE`. Possible values are:
+        * REPLACE
+        * RESTART
+        * REFRESH
+        * NONE
+      values:
+      - :REPLACE
+      - :RESTART
+      - :REFRESH
+      - :NONE
+      default_value: :NONE
+    - !ruby/object:Api::Type::Enum
+      name: 'most_disruptive_allowed_action'
+      description: |
+        The most disruptive action to perform on the instance during an update.
+        Default is `REPLACE`. Possible values are:
+        * REPLACE
+        * RESTART
+        * REFRESH
+        * NONE
+      values:
+      - :REPLACE
+      - :RESTART
+      - :REFRESH
+      - :NONE
+      default_value: :REPLACE
+    - !ruby/object:Api::Type::Boolean
+      name: 'remove_instance_state_on_destroy'
+      description: |
+        When true, deleting this config will immediately remove any specified state from the underlying instance.
+        When false, deleting this config will *not* immediately remove any state from the underlying instance.
+        State will be removed on the next instance recreation or update.
+      default_value: false
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/compute_per_instance_config.go.erb
       update_encoder: templates/terraform/update_encoder/compute_per_instance_config.go.erb
@@ -1894,14 +1894,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionAutoscaler: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_autoscaler_basic"
-        primary_resource_id: "foobar"
-        vars:
-          region_autoscaler_name: "my-region-autoscaler"
-          instance_template_name: "my-instance-template"
-          target_pool_name: "my-target-pool"
-          rigm_name: "my-region-igm"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_autoscaler_basic"
+      primary_resource_id: "foobar"
+      vars:
+        region_autoscaler_name: "my-region-autoscaler"
+        instance_template_name: "my-instance-template"
+        target_pool_name: "my-target-pool"
+        rigm_name: "my-region-igm"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1983,90 +1983,90 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: templates/terraform/decoders/disk.erb
       resource_definition: templates/terraform/resource_definition/disk.erb
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_disk_basic"
-        primary_resource_id: "regiondisk"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-my-region-disk%s\", context[\"random_suffix\"])"
-        vars:
-          region_disk_name: "my-region-disk"
-          disk_name: "my-disk"
-          snapshot_name: "my-snapshot"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_disk_basic"
+      primary_resource_id: "regiondisk"
+      primary_resource_name: "fmt.Sprintf(\"tf-test-my-region-disk%s\", context[\"random_suffix\"])"
+      vars:
+        region_disk_name: "my-region-disk"
+        disk_name: "my-disk"
+        snapshot_name: "my-snapshot"
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       method_name_separator: '/'
       fetch_iam_policy_verb: :GET
       parent_resource_attribute: 'name'
-      import_format: ["projects/{{project}}/regions/{{region}}/disks/{{name}}", "{{name}}"]
+      import_format: [ "projects/{{project}}/regions/{{region}}/disks/{{name}}", "{{name}}" ]
       base_url: projects/{{project}}/regions/{{region}}/disks/{{name}}
   RegionDiskType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   RegionHealthCheck: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_health_check_tcp"
-        primary_resource_id: "tcp-region-health-check"
-        vars:
-          health_check_name: "tcp-region-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_health_check_tcp_full"
-        primary_resource_id: "tcp-region-health-check"
-        vars:
-          health_check_name: "tcp-region-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_health_check_ssl"
-        primary_resource_id: "ssl-region-health-check"
-        vars:
-          health_check_name: "ssl-region-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_health_check_ssl_full"
-        primary_resource_id: "ssl-region-health-check"
-        vars:
-          health_check_name: "ssl-region-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_health_check_http"
-        primary_resource_id: "http-region-health-check"
-        vars:
-          health_check_name: "http-region-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_health_check_http_logs"
-        primary_resource_id: "http-region-health-check"
-        min_version: beta
-        vars:
-          health_check_name: "http-region-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_health_check_http_full"
-        primary_resource_id: "http-region-health-check"
-        vars:
-          health_check_name: "http-region-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_health_check_https"
-        primary_resource_id: "https-region-health-check"
-        vars:
-          health_check_name: "https-region-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_health_check_https_full"
-        primary_resource_id: "https-region-health-check"
-        vars:
-          health_check_name: "https-region-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_health_check_http2"
-        primary_resource_id: "http2-region-health-check"
-        vars:
-          health_check_name: "http2-region-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_health_check_http2_full"
-        primary_resource_id: "http2-region-health-check"
-        vars:
-          health_check_name: "http2-region-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_health_check_grpc"
-        primary_resource_id: "grpc-region-health-check"
-        vars:
-          health_check_name: "grpc-region-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_health_check_grpc_full"
-        primary_resource_id: "grpc-region-health-check"
-        vars:
-          health_check_name: "grpc-region-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_health_check_tcp"
+      primary_resource_id: "tcp-region-health-check"
+      vars:
+        health_check_name: "tcp-region-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_health_check_tcp_full"
+      primary_resource_id: "tcp-region-health-check"
+      vars:
+        health_check_name: "tcp-region-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_health_check_ssl"
+      primary_resource_id: "ssl-region-health-check"
+      vars:
+        health_check_name: "ssl-region-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_health_check_ssl_full"
+      primary_resource_id: "ssl-region-health-check"
+      vars:
+        health_check_name: "ssl-region-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_health_check_http"
+      primary_resource_id: "http-region-health-check"
+      vars:
+        health_check_name: "http-region-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_health_check_http_logs"
+      primary_resource_id: "http-region-health-check"
+      min_version: beta
+      vars:
+        health_check_name: "http-region-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_health_check_http_full"
+      primary_resource_id: "http-region-health-check"
+      vars:
+        health_check_name: "http-region-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_health_check_https"
+      primary_resource_id: "https-region-health-check"
+      vars:
+        health_check_name: "https-region-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_health_check_https_full"
+      primary_resource_id: "https-region-health-check"
+      vars:
+        health_check_name: "https-region-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_health_check_http2"
+      primary_resource_id: "http2-region-health-check"
+      vars:
+        health_check_name: "http2-region-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_health_check_http2_full"
+      primary_resource_id: "http2-region-health-check"
+      vars:
+        health_check_name: "http2-region-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_health_check_grpc"
+      primary_resource_id: "grpc-region-health-check"
+      vars:
+        health_check_name: "grpc-region-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_health_check_grpc_full"
+      primary_resource_id: "grpc-region-health-check"
+      vars:
+        health_check_name: "grpc-region-health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/health_check_type.erb
       resource_definition: templates/terraform/resource_definition/health_check.erb
@@ -2100,68 +2100,68 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/health_check_log_config.go.erb'
   RegionUrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_url_map_basic"
-        primary_resource_id: "regionurlmap"
-        vars:
-          region_url_map_name: "regionurlmap"
-          login_region_backend_service_name: "login"
-          home_region_backend_service_name: "home"
-          region_health_check_name: "health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_url_map_l7_ilb_path"
-        primary_resource_id: "regionurlmap"
-        vars:
-          region_url_map_name: "regionurlmap"
-          home_region_backend_service_name: "home"
-          region_health_check_name: "health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_url_map_l7_ilb_path_partial"
-        primary_resource_id: "regionurlmap"
-        vars:
-          region_url_map_name: "regionurlmap"
-          home_region_backend_service_name: "home"
-          region_health_check_name: "health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_url_map_l7_ilb_route"
-        primary_resource_id: "regionurlmap"
-        vars:
-          region_url_map_name: "regionurlmap"
-          home_region_backend_service_name: "home"
-          region_health_check_name: "health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_url_map_l7_ilb_route_partial"
-        primary_resource_id: "regionurlmap"
-        vars:
-          region_url_map_name: "regionurlmap"
-          home_region_backend_service_name: "home"
-          region_health_check_name: "health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "int_https_lb_https_redirect"
-        primary_resource_id: "redirect"
-        skip_test: true
-        vars:
-          l7_ilb_network: "l7-ilb-network"
-          l7_ilb_proxy_subnet: "l7-ilb-proxy-subnet"
-          l7_ilb_subnet: "l7-ilb-subnet"
-          l7_ilb_ip: "l7-ilb-ip"
-          l7_ilb_forwarding_rule: "l7-ilb-forwarding-rule"
-          l7_ilb_target_https_proxy: "l7-ilb-target-https-proxy"
-          l7_ilb_regional_url_map: "l7-ilb-regional-url-map"
-          l7_ilb_backend_service: "l7-ilb-backend-service"
-          l7_ilb_mig_template: "l7-ilb-mig-template"
-          l7_ilb_hc: "l7-ilb-hc"
-          l7_ilb_mig1: "l7-ilb-mig1"
-          l7_ilb_fw_allow_hc: "l7-ilb-fw-allow-hc"
-          l7_ilb_fw_allow_ilb_to_backends: "l7-ilb-fw-allow-ilb-to-backends"
-          l7_ilb_test_vm: "l7-ilb-test-vm"
-          l7_ilb_redirect: "l7-ilb-redirect"
-          l7_ilb_target_http_proxy: "l7-ilb-target-http-proxy"
-          l7_ilb_redirect_url_map: "l7-ilb-redirect-url-map"
-        min_version: beta
-        ignore_read_extra:
-          - "target"
-          - "ip_address"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_url_map_basic"
+      primary_resource_id: "regionurlmap"
+      vars:
+        region_url_map_name: "regionurlmap"
+        login_region_backend_service_name: "login"
+        home_region_backend_service_name: "home"
+        region_health_check_name: "health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_url_map_l7_ilb_path"
+      primary_resource_id: "regionurlmap"
+      vars:
+        region_url_map_name: "regionurlmap"
+        home_region_backend_service_name: "home"
+        region_health_check_name: "health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_url_map_l7_ilb_path_partial"
+      primary_resource_id: "regionurlmap"
+      vars:
+        region_url_map_name: "regionurlmap"
+        home_region_backend_service_name: "home"
+        region_health_check_name: "health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_url_map_l7_ilb_route"
+      primary_resource_id: "regionurlmap"
+      vars:
+        region_url_map_name: "regionurlmap"
+        home_region_backend_service_name: "home"
+        region_health_check_name: "health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_url_map_l7_ilb_route_partial"
+      primary_resource_id: "regionurlmap"
+      vars:
+        region_url_map_name: "regionurlmap"
+        home_region_backend_service_name: "home"
+        region_health_check_name: "health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "int_https_lb_https_redirect"
+      primary_resource_id: "redirect"
+      skip_test: true
+      vars:
+        l7_ilb_network: "l7-ilb-network"
+        l7_ilb_proxy_subnet: "l7-ilb-proxy-subnet"
+        l7_ilb_subnet: "l7-ilb-subnet"
+        l7_ilb_ip: "l7-ilb-ip"
+        l7_ilb_forwarding_rule: "l7-ilb-forwarding-rule"
+        l7_ilb_target_https_proxy: "l7-ilb-target-https-proxy"
+        l7_ilb_regional_url_map: "l7-ilb-regional-url-map"
+        l7_ilb_backend_service: "l7-ilb-backend-service"
+        l7_ilb_mig_template: "l7-ilb-mig-template"
+        l7_ilb_hc: "l7-ilb-hc"
+        l7_ilb_mig1: "l7-ilb-mig1"
+        l7_ilb_fw_allow_hc: "l7-ilb-fw-allow-hc"
+        l7_ilb_fw_allow_ilb_to_backends: "l7-ilb-fw-allow-ilb-to-backends"
+        l7_ilb_test_vm: "l7-ilb-test-vm"
+        l7_ilb_redirect: "l7-ilb-redirect"
+        l7_ilb_target_http_proxy: "l7-ilb-target-http-proxy"
+        l7_ilb_redirect_url_map: "l7-ilb-redirect-url-map"
+      min_version: beta
+      ignore_read_extra:
+      - "target"
+      - "ip_address"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -2196,26 +2196,26 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
   ResourcePolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "resource_policy_basic"
-        primary_resource_id: "foo"
-        vars:
-          name: "policy"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "resource_policy_full"
-        primary_resource_id: "bar"
-        vars:
-          name: "policy"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "resource_policy_placement_policy"
-        primary_resource_id: "baz"
-        vars:
-          name: "policy"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "resource_policy_instance_schedule_policy"
-        primary_resource_id: "hourly"
-        vars:
-          name: "policy"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "resource_policy_basic"
+      primary_resource_id: "foo"
+      vars:
+        name: "policy"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "resource_policy_full"
+      primary_resource_id: "bar"
+      vars:
+        name: "policy"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "resource_policy_placement_policy"
+      primary_resource_id: "baz"
+      vars:
+        name: "policy"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "resource_policy_instance_schedule_policy"
+      primary_resource_id: "hourly"
+      vars:
+        name: "policy"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
@@ -2232,23 +2232,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
   Reservation: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "reservation_basic"
-        primary_resource_id: "gce_reservation"
-        vars:
-          reservation_name: "gce-reservation"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "shared_reservation_basic"
-        primary_resource_id: "gce_reservation"
-        test_env_vars:
-          project: :PROJECT_NAME
-          org_id: :ORG_ID
-          billing_account: :BILLING_ACCT
-        vars:
-          reservation_name: "gce-shared-reservation"
-        skip_docs: true
-        # Resource creation race
-        skip_vcr: true
+    - !ruby/object:Provider::Terraform::Examples
+      name: "reservation_basic"
+      primary_resource_id: "gce_reservation"
+      vars:
+        reservation_name: "gce-reservation"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "shared_reservation_basic"
+      primary_resource_id: "gce_reservation"
+      test_env_vars:
+        project: :PROJECT_NAME
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      vars:
+        reservation_name: "gce-shared-reservation"
+      skip_docs: true
+      # Resource creation race
+      skip_vcr: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       update_encoder: templates/terraform/update_encoder/reservation.go.erb
     properties:
@@ -2259,38 +2259,44 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       specificReservation.count: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntAtLeast(1)'
+      shareSettings: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      shareSettings.shareType: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      shareSettings.projectMap: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   Route: !ruby/object:Overrides::Terraform::ResourceOverride
     # Route cannot be added while a peering is on progress on the network
     mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
-    error_retry_predicates: ["isPeeringOperationInProgress"]
+    error_retry_predicates: [ "isPeeringOperationInProgress" ]
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "route_basic"
-        primary_resource_id: "default"
-        vars:
-          route_name: "network-route"
-          network_name: "compute-network"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "route_ilb"
-        primary_resource_id: "route-ilb"
-        vars:
-          network_name: "compute-network"
-          subnet_name: "compute-subnet"
-          forwarding_rule_name: "compute-forwarding-rule"
-          health_check_name: "proxy-health-check"
-          backend_name: "compute-backend"
-          route_name: "route-ilb"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "route_ilb_vip"
-        primary_resource_id: "route-ilb"
-        min_version: beta
-        vars:
-          producer_name: "producer"
-          consumer_name: "consumer"
-          forwarding_rule_name: "compute-forwarding-rule"
-          health_check_name: "proxy-health-check"
-          backend_name: "compute-backend"
-          route_name: "route-ilb"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "route_basic"
+      primary_resource_id: "default"
+      vars:
+        route_name: "network-route"
+        network_name: "compute-network"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "route_ilb"
+      primary_resource_id: "route-ilb"
+      vars:
+        network_name: "compute-network"
+        subnet_name: "compute-subnet"
+        forwarding_rule_name: "compute-forwarding-rule"
+        health_check_name: "proxy-health-check"
+        backend_name: "compute-backend"
+        route_name: "route-ilb"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "route_ilb_vip"
+      primary_resource_id: "route-ilb"
+      min_version: beta
+      vars:
+        producer_name: "producer"
+        consumer_name: "consumer"
+        forwarding_rule_name: "compute-forwarding-rule"
+        health_check_name: "proxy-health-check"
+        backend_name: "compute-backend"
+        route_name: "route-ilb"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
@@ -2332,25 +2338,25 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       extra_schema_entry: templates/terraform/extra_schema_entry/route.erb
     docs: !ruby/object:Provider::Terraform::Docs
       optional_properties: |+
-          * `next_hop_instance_zone` - (Optional when `next_hop_instance` is
-            specified)  The zone of the instance specified in
-            `next_hop_instance`.  Omit if `next_hop_instance` is specified as
-            a URL.
+        * `next_hop_instance_zone` - (Optional when `next_hop_instance` is
+          specified)  The zone of the instance specified in
+          `next_hop_instance`.  Omit if `next_hop_instance` is specified as
+          a URL.
   Router: !ruby/object:Overrides::Terraform::ResourceOverride
     mutex: router/{{region}}/{{name}}
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "router_basic"
-        primary_resource_id: "foobar"
-        vars:
-          router_name: "my-router"
-          network_name: "my-network"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "compute_router_encrypted_interconnect"
-        primary_resource_id: "encrypted-interconnect-router"
-        vars:
-          router_name: "test-router"
-          network_name: "test-network"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "router_basic"
+      primary_resource_id: "foobar"
+      vars:
+        router_name: "my-router"
+        network_name: "my-network"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "compute_router_encrypted_interconnect"
+      primary_resource_id: "encrypted-interconnect-router"
+      vars:
+        router_name: "test-router"
+        network_name: "test-network"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/router.go.erb
       resource_definition: templates/terraform/resource_definition/router.go.erb
@@ -2372,29 +2378,29 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "{{project}}/{{region}}/{{router}}/{{name}}"
     mutex: router/{{region}}/{{router}}
     examples:
-      # These examples are not used to autogenerate tests, as fine-grained
-      # resources do not fit the normal test flow - we need to test deletion
-      # in a test step while parent resource still exists vs in CheckDestroy
-      # when all resources have been deleted.
-      - !ruby/object:Provider::Terraform::Examples
-        name: "router_nat_basic"
-        primary_resource_id: "nat"
-        skip_test: true
-        vars:
-          router_name: "my-router"
-          nat_name: "my-router-nat"
-          network_name: "my-network"
-          subnet_name: "my-subnetwork"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "router_nat_manual_ips"
-        primary_resource_id: "nat_manual"
-        skip_test: true
-        vars:
-          router_name: "my-router"
-          nat_name: "my-router-nat"
-          network_name: "my-network"
-          subnet_name: "my-subnetwork"
-          address_name: "nat-manual-ip"
+    # These examples are not used to autogenerate tests, as fine-grained
+    # resources do not fit the normal test flow - we need to test deletion
+    # in a test step while parent resource still exists vs in CheckDestroy
+    # when all resources have been deleted.
+    - !ruby/object:Provider::Terraform::Examples
+      name: "router_nat_basic"
+      primary_resource_id: "nat"
+      skip_test: true
+      vars:
+        router_name: "my-router"
+        nat_name: "my-router-nat"
+        network_name: "my-network"
+        subnet_name: "my-subnetwork"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "router_nat_manual_ips"
+      primary_resource_id: "nat_manual"
+      skip_test: true
+      vars:
+        router_name: "my-router"
+        nat_name: "my-router-nat"
+        network_name: "my-network"
+        subnet_name: "my-subnetwork"
+        address_name: "nat-manual-ip"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
@@ -2432,31 +2438,31 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "projects/{{project}}/regions/{{region}}/routers/{{router}}/{{name}}"
     mutex: router/{{region}}/{{router}}
     examples:
-      # These examples are not used to autogenerate tests, as fine-grained
-      # resources do not fit the normal test flow - we need to test deletion
-      # in a test step while parent resource still exists vs in CheckDestroy
-      # when all resources have been deleted.
-      - !ruby/object:Provider::Terraform::Examples
-        name: "router_peer_basic"
-        primary_resource_id: "peer"
-        skip_test: true
-        vars:
-          router_name: "my-router"
-          peer_name: "my-router-peer"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "router_peer_disabled"
-        primary_resource_id: "peer"
-        skip_test: true
-        vars:
-          router_name: "my-router"
-          peer_name: "my-router-peer"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "router_peer_bfd"
-        primary_resource_id: "peer"
-        skip_test: true
-        vars:
-          router_name: "my-router"
-          peer_name: "my-router-peer"
+    # These examples are not used to autogenerate tests, as fine-grained
+    # resources do not fit the normal test flow - we need to test deletion
+    # in a test step while parent resource still exists vs in CheckDestroy
+    # when all resources have been deleted.
+    - !ruby/object:Provider::Terraform::Examples
+      name: "router_peer_basic"
+      primary_resource_id: "peer"
+      skip_test: true
+      vars:
+        router_name: "my-router"
+        peer_name: "my-router-peer"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "router_peer_disabled"
+      primary_resource_id: "peer"
+      skip_test: true
+      vars:
+        router_name: "my-router"
+        peer_name: "my-router-peer"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "router_peer_bfd"
+      primary_resource_id: "peer"
+      skip_test: true
+      vars:
+        router_name: "my-router"
+        peer_name: "my-router-peer"
     properties:
       advertiseMode: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
@@ -2484,32 +2490,32 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   ServiceAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "service_attachment_basic"
-        primary_resource_id: "psc_ilb_service_attachment"
-        vars:
-          service_attachment_name: "my-psc-ilb"
-          network_name: "psc-ilb-network"
-          nat_subnetwork_name: "psc-ilb-nat"
-          producer_subnetwork_name: "psc-ilb-producer-subnetwork"
-          producer_health_check_name: "producer-service-health-check"
-          producer_service_name: "producer-service"
-          producer_forwarding_rule_name: "producer-forwarding-rule"
-          consumer_address_name: "psc-ilb-consumer-address"
-          consumer_forwarding_rule_name: "psc-ilb-consumer-forwarding-rule"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "service_attachment_explicit_projects"
-        primary_resource_id: "psc_ilb_service_attachment"
-        vars:
-          service_attachment_name: "my-psc-ilb"
-          network_name: "psc-ilb-network"
-          nat_subnetwork_name: "psc-ilb-nat"
-          producer_subnetwork_name: "psc-ilb-producer-subnetwork"
-          producer_health_check_name: "producer-service-health-check"
-          producer_service_name: "producer-service"
-          producer_forwarding_rule_name: "producer-forwarding-rule"
-          consumer_address_name: "psc-ilb-consumer-address"
-          consumer_forwarding_rule_name: "psc-ilb-consumer-forwarding-rule"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "service_attachment_basic"
+      primary_resource_id: "psc_ilb_service_attachment"
+      vars:
+        service_attachment_name: "my-psc-ilb"
+        network_name: "psc-ilb-network"
+        nat_subnetwork_name: "psc-ilb-nat"
+        producer_subnetwork_name: "psc-ilb-producer-subnetwork"
+        producer_health_check_name: "producer-service-health-check"
+        producer_service_name: "producer-service"
+        producer_forwarding_rule_name: "producer-forwarding-rule"
+        consumer_address_name: "psc-ilb-consumer-address"
+        consumer_forwarding_rule_name: "psc-ilb-consumer-forwarding-rule"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "service_attachment_explicit_projects"
+      primary_resource_id: "psc_ilb_service_attachment"
+      vars:
+        service_attachment_name: "my-psc-ilb"
+        network_name: "psc-ilb-network"
+        nat_subnetwork_name: "psc-ilb-nat"
+        producer_subnetwork_name: "psc-ilb-producer-subnetwork"
+        producer_health_check_name: "producer-service-health-check"
+        producer_service_name: "producer-service"
+        producer_forwarding_rule_name: "producer-forwarding-rule"
+        consumer_address_name: "psc-ilb-consumer-address"
+        consumer_forwarding_rule_name: "psc-ilb-consumer-forwarding-rule"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
@@ -2523,12 +2529,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       delete_minutes: 5
     create_url: PRE_CREATE_REPLACE_ME/createSnapshot
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "snapshot_basic"
-        primary_resource_id: "snapshot"
-        vars:
-          snapshot_name: "my-snapshot"
-          disk_name: "debian-disk"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "snapshot_basic"
+      primary_resource_id: "snapshot"
+      vars:
+        snapshot_name: "my-snapshot"
+        disk_name: "debian-disk"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'snapshot_id'
@@ -2581,23 +2587,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
 
         In conclusion: Be extremely cautious.
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "managed_ssl_certificate_basic"
-        primary_resource_id: "default"
-        vars:
-          cert_name: "test-cert"
-          proxy_name: "test-proxy"
-          url_map_name: "url-map"
-          backend_service_name: "backend-service"
-          dns_zone_name: "dnszone"
-          forwarding_rule_name: "forwarding-rule"
-          http_health_check_name: "http-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "managed_ssl_certificate_recreation"
-        primary_resource_id: "cert"
-        pull_external: true
-        # Random provider
-        skip_vcr: true
+    - !ruby/object:Provider::Terraform::Examples
+      name: "managed_ssl_certificate_basic"
+      primary_resource_id: "default"
+      vars:
+        cert_name: "test-cert"
+        proxy_name: "test-proxy"
+        url_map_name: "url-map"
+        backend_service_name: "backend-service"
+        dns_zone_name: "dnszone"
+        forwarding_rule_name: "forwarding-rule"
+        http_health_check_name: "http-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "managed_ssl_certificate_recreation"
+      primary_resource_id: "cert"
+      pull_external: true
+      # Random provider
+      skip_vcr: true
     description: |
       {{description}}
       For a resource where you provide the key, see the
@@ -2619,31 +2625,31 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         * `name_prefix` - (Optional) Creates a unique name beginning with the
          specified prefix. Conflicts with `name`.
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "ssl_certificate_basic"
-        primary_resource_id: "default"
-        # Uses resource.UniqueId
-        skip_vcr: true
-        ignore_read_extra:
-          - "name_prefix"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "ssl_certificate_random_provider"
-        pull_external: true
-        primary_resource_id: "default"
-        # Uses resource.UniqueId
-        skip_vcr: true
-      - !ruby/object:Provider::Terraform::Examples
-        name: "ssl_certificate_target_https_proxies"
-        primary_resource_id: "default"
-        # Uses resource.UniqueId
-        skip_vcr: true
-        vars:
-          target_https_proxy_name: "test-proxy"
-          url_map_name: "url-map"
-          backend_service_name: "backend-service"
-          http_health_check_name: "http-health-check"
-        ignore_read_extra:
-          - "name_prefix"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "ssl_certificate_basic"
+      primary_resource_id: "default"
+      # Uses resource.UniqueId
+      skip_vcr: true
+      ignore_read_extra:
+      - "name_prefix"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "ssl_certificate_random_provider"
+      pull_external: true
+      primary_resource_id: "default"
+      # Uses resource.UniqueId
+      skip_vcr: true
+    - !ruby/object:Provider::Terraform::Examples
+      name: "ssl_certificate_target_https_proxies"
+      primary_resource_id: "default"
+      # Uses resource.UniqueId
+      skip_vcr: true
+      vars:
+        target_https_proxy_name: "test-proxy"
+        url_map_name: "url-map"
+        backend_service_name: "backend-service"
+        http_health_check_name: "http-health-check"
+      ignore_read_extra:
+      - "name_prefix"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       extra_schema_entry: templates/terraform/extra_schema_entry/ssl_certificate.erb
     properties:
@@ -2671,31 +2677,31 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         * `name_prefix` - (Optional) Creates a unique name beginning with the
          specified prefix. Conflicts with `name`.
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_ssl_certificate_basic"
-        primary_resource_id: "default"
-        # Uses resource.UniqueId
-        skip_vcr: true
-        ignore_read_extra:
-          - "name_prefix"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_ssl_certificate_random_provider"
-        pull_external: true
-        primary_resource_id: "default"
-        # Uses resource.UniqueId
-        skip_vcr: true
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_ssl_certificate_target_https_proxies"
-        primary_resource_id: "default"
-        # Uses resource.UniqueId
-        skip_vcr: true
-        vars:
-          region_target_https_proxy_name: "test-proxy"
-          region_url_map_name: "url-map"
-          region_backend_service_name: "backend-service"
-          region_health_check_name: "http-health-check"
-        ignore_read_extra:
-          - "name_prefix"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_ssl_certificate_basic"
+      primary_resource_id: "default"
+      # Uses resource.UniqueId
+      skip_vcr: true
+      ignore_read_extra:
+      - "name_prefix"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_ssl_certificate_random_provider"
+      pull_external: true
+      primary_resource_id: "default"
+      # Uses resource.UniqueId
+      skip_vcr: true
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_ssl_certificate_target_https_proxies"
+      primary_resource_id: "default"
+      # Uses resource.UniqueId
+      skip_vcr: true
+      vars:
+        region_target_https_proxy_name: "test-proxy"
+        region_url_map_name: "url-map"
+        region_backend_service_name: "backend-service"
+        region_health_check_name: "http-health-check"
+      ignore_read_extra:
+      - "name_prefix"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       extra_schema_entry: templates/terraform/extra_schema_entry/ssl_certificate.erb
     properties:
@@ -2726,15 +2732,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'sha256DiffSuppress'
   SslPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "ssl_policy_basic"
-        primary_resource_id: "prod-ssl-policy"
-        vars:
-          production_ssl_policy_name: "production-ssl-policy"
-          nonprod_ssl_policy_name: "nonprod-ssl-policy"
-          custom_ssl_policy_name: "custom-ssl-policy"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "ssl_policy_basic"
+      primary_resource_id: "prod-ssl-policy"
+      vars:
+        production_ssl_policy_name: "production-ssl-policy"
+        nonprod_ssl_policy_name: "nonprod-ssl-policy"
+        custom_ssl_policy_name: "custom-ssl-policy"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      constants:  'templates/terraform/constants/ssl_policy.erb'
+      constants: 'templates/terraform/constants/ssl_policy.erb'
       resource_definition: 'templates/terraform/resource_definition/ssl_policy.erb'
       update_encoder: 'templates/terraform/update_encoder/ssl_policy.erb'
     properties:
@@ -2831,48 +2837,48 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       resource_definition: templates/terraform/resource_definition/subnetwork.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/subnetwork.erb
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "subnetwork_basic"
-        primary_resource_id: "network-with-private-secondary-ip-ranges"
-        vars:
-          subnetwork_name: "test-subnetwork"
-          network_name: "test-network"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-test-subnetwork%s\", context[\"random_suffix\"])"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "subnetwork_logging_config"
-        primary_resource_id: "subnet-with-logging"
-        vars:
-          subnetwork_name: "log-test-subnetwork"
-          network_name: "log-test-network"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "subnetwork_internal_l7lb"
-        min_version: beta
-        primary_resource_id: "network-for-l7lb"
-        vars:
-          subnetwork_name: "l7lb-test-subnetwork"
-          network_name: "l7lb-test-network"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "subnetwork_ipv6"
-        primary_resource_id: "subnetwork-ipv6"
-        vars:
-          subnetwork_name: "ipv6-test-subnetwork"
-          network_name: "ipv6-test-network"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "subnetwork_basic"
+      primary_resource_id: "network-with-private-secondary-ip-ranges"
+      vars:
+        subnetwork_name: "test-subnetwork"
+        network_name: "test-network"
+      primary_resource_name: "fmt.Sprintf(\"tf-test-test-subnetwork%s\", context[\"random_suffix\"])"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "subnetwork_logging_config"
+      primary_resource_id: "subnet-with-logging"
+      vars:
+        subnetwork_name: "log-test-subnetwork"
+        network_name: "log-test-network"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "subnetwork_internal_l7lb"
+      min_version: beta
+      primary_resource_id: "network-for-l7lb"
+      vars:
+        subnetwork_name: "l7lb-test-subnetwork"
+        network_name: "l7lb-test-network"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "subnetwork_ipv6"
+      primary_resource_id: "subnetwork-ipv6"
+      vars:
+        subnetwork_name: "ipv6-test-subnetwork"
+        network_name: "ipv6-test-network"
   TargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "target_http_proxy_basic"
-        primary_resource_id: "default"
-        vars:
-          target_http_proxy_name: "test-proxy"
-          url_map_name: "url-map"
-          backend_service_name: "backend-service"
-          http_health_check_name: "http-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "target_http_proxy_https_redirect"
-        primary_resource_id: "default"
-        vars:
-          target_http_proxy_name: "test-https-redirect-proxy"
-          url_map_name: "url-map"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "target_http_proxy_basic"
+      primary_resource_id: "default"
+      vars:
+        target_http_proxy_name: "test-proxy"
+        url_map_name: "url-map"
+        backend_service_name: "backend-service"
+        http_health_check_name: "http-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "target_http_proxy_https_redirect"
+      primary_resource_id: "default"
+      vars:
+        target_http_proxy_name: "test-https-redirect-proxy"
+        url_map_name: "url-map"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
@@ -2880,15 +2886,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
   TargetHttpsProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "target_https_proxy_basic"
-        primary_resource_id: "default"
-        vars:
-          target_https_proxy_name: "test-proxy"
-          ssl_certificate_name: "my-certificate"
-          url_map_name: "url-map"
-          backend_service_name: "backend-service"
-          http_health_check_name: "http-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "target_https_proxy_basic"
+      primary_resource_id: "default"
+      vars:
+        target_https_proxy_name: "test-proxy"
+        ssl_certificate_name: "my-certificate"
+        url_map_name: "url-map"
+        backend_service_name: "backend-service"
+        http_health_check_name: "http-health-check"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
@@ -2899,20 +2905,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
   RegionTargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_target_http_proxy_basic"
-        primary_resource_id: "default"
-        vars:
-          region_target_http_proxy_name: "test-proxy"
-          region_url_map_name: "url-map"
-          region_backend_service_name: "backend-service"
-          region_health_check_name: "http-health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_target_http_proxy_https_redirect"
-        primary_resource_id: "default"
-        vars:
-          region_target_http_proxy_name: "test-https-redirect-proxy"
-          region_url_map_name: "url-map"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_target_http_proxy_basic"
+      primary_resource_id: "default"
+      vars:
+        region_target_http_proxy_name: "test-proxy"
+        region_url_map_name: "url-map"
+        region_backend_service_name: "backend-service"
+        region_health_check_name: "http-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_target_http_proxy_https_redirect"
+      primary_resource_id: "default"
+      vars:
+        region_target_http_proxy_name: "test-https-redirect-proxy"
+        region_url_map_name: "url-map"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -2925,15 +2931,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: proxyId
   RegionTargetHttpsProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "region_target_https_proxy_basic"
-        primary_resource_id: "default"
-        vars:
-          region_target_https_proxy_name: "test-proxy"
-          region_ssl_certificate_name: "my-certificate"
-          region_url_map_name: "url-map"
-          region_backend_service_name: "backend-service"
-          region_health_check_name: "http-health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "region_target_https_proxy_basic"
+      primary_resource_id: "default"
+      vars:
+        region_target_https_proxy_name: "test-proxy"
+        region_ssl_certificate_name: "my-certificate"
+        region_url_map_name: "url-map"
+        region_backend_service_name: "backend-service"
+        region_health_check_name: "http-health-check"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -2946,24 +2952,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: proxyId
   TargetInstance: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "target_instance_basic"
-        primary_resource_id: "default"
-        vars:
-          target_name: "target"
-          instance_name: "target-vm"
-      - !ruby/object:Provider::Terraform::Examples
-        min_version: beta
-        name: "target_instance_custom_network"
-        primary_resource_id: "custom_network"
-        vars:
-          target_name: "custom-network"
-          instance_name: "custom-network-target-vm"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "target_instance_basic"
+      primary_resource_id: "default"
+      vars:
+        target_name: "target"
+        instance_name: "target-vm"
+    - !ruby/object:Provider::Terraform::Examples
+      min_version: beta
+      name: "target_instance_custom_network"
+      primary_resource_id: "custom_network"
+      vars:
+        target_name: "custom-network"
+        instance_name: "custom-network-target-vm"
     properties:
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         required: false # the provider-default value will be used if not specified
-      instance:  !ruby/object:Overrides::Terraform::PropertyOverride
+      instance: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
         custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
         description: |
@@ -2986,14 +2992,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       #       Update methods are (add|remove)Instance, (add/remove)HealthCheck
   TargetSslProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "target_ssl_proxy_basic"
-        primary_resource_id: "default"
-        vars:
-          target_ssl_proxy_name: "test-proxy"
-          ssl_certificate_name: "default-cert"
-          backend_service_name: "backend-service"
-          health_check_name: "health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "target_ssl_proxy_basic"
+      primary_resource_id: "default"
+      vars:
+        target_ssl_proxy_name: "test-proxy"
+        ssl_certificate_name: "default-cert"
+        backend_service_name: "backend-service"
+        health_check_name: "health-check"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
@@ -3003,13 +3009,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: backendService
   TargetTcpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "target_tcp_proxy_basic"
-        primary_resource_id: "default"
-        vars:
-          target_tcp_proxy_name: "test-proxy"
-          backend_service_name: "backend-service"
-          health_check_name: "health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "target_tcp_proxy_basic"
+      primary_resource_id: "default"
+      vars:
+        target_tcp_proxy_name: "test-proxy"
+        backend_service_name: "backend-service"
+        health_check_name: "health-check"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
@@ -3026,18 +3032,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         Classic VPN is deprecating certain functionality on October 31, 2021. For more information,
         see the [Classic VPN partial deprecation page](https://cloud.google.com/network-connectivity/docs/vpn/deprecations/classic-vpn-deprecation).
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "target_vpn_gateway_basic"
-        primary_resource_id: "target_gateway"
-        vars:
-          target_vpn_gateway_name: "vpn1"
-          network_name: "network1"
-          address_name: "vpn-static-ip"
-          esp_forwarding_rule_name: "fr-esp"
-          udp500_forwarding_rule_name: "fr-udp500"
-          udp4500_forwarding_rule_name: "fr-udp4500"
-          vpn_tunnel_name: "tunnel1"
-          route_name: "route1"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "target_vpn_gateway_basic"
+      primary_resource_id: "target_gateway"
+      vars:
+        target_vpn_gateway_name: "vpn1"
+        network_name: "network1"
+        address_name: "vpn-static-ip"
+        esp_forwarding_rule_name: "fr-esp"
+        udp500_forwarding_rule_name: "fr-udp500"
+        udp4500_forwarding_rule_name: "fr-udp4500"
+        vpn_tunnel_name: "tunnel1"
+        route_name: "route1"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: gateway_id
@@ -3052,35 +3058,35 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   VpnGateway: !ruby/object:Overrides::Terraform::ResourceOverride
     name: 'HaVpnGateway'
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "ha_vpn_gateway_basic"
-        primary_resource_id: "ha_gateway1"
-        vars:
-          ha_vpn_gateway1_name: "ha-vpn-1"
-          network1_name: "network1"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "ha_vpn_gateway_gcp_to_gcp"
-        primary_resource_id: "ha_gateway1"
-        # Multiple fine-grained resources
-        skip_vcr: true
-        vars:
-          ha_vpn_gateway1_name: "ha-vpn-1"
-          network1_name: "network1"
-          router1_name: "ha-vpn-router1"
-          ha_vpn_gateway2_name: "ha-vpn-2"
-          network2_name: "network2"
-          router2_name: "ha-vpn-router2"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "compute_ha_vpn_gateway_encrypted_interconnect"
-        primary_resource_id: "vpn-gateway"
-        vars:
-          ha_vpn_gateway_name: "test-ha-vpngw"
-          interconnect_attachment1_name: "test-interconnect-attachment1"
-          interconnect_attachment2_name: "test-interconnect-attachment2"
-          address1_name: "test-address1"
-          address2_name: "test-address2"
-          router_name: "test-router"
-          network_name: "test-network"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "ha_vpn_gateway_basic"
+      primary_resource_id: "ha_gateway1"
+      vars:
+        ha_vpn_gateway1_name: "ha-vpn-1"
+        network1_name: "network1"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "ha_vpn_gateway_gcp_to_gcp"
+      primary_resource_id: "ha_gateway1"
+      # Multiple fine-grained resources
+      skip_vcr: true
+      vars:
+        ha_vpn_gateway1_name: "ha-vpn-1"
+        network1_name: "network1"
+        router1_name: "ha-vpn-router1"
+        ha_vpn_gateway2_name: "ha-vpn-2"
+        network2_name: "network2"
+        router2_name: "ha-vpn-router2"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "compute_ha_vpn_gateway_encrypted_interconnect"
+      primary_resource_id: "vpn-gateway"
+      vars:
+        ha_vpn_gateway_name: "test-ha-vpngw"
+        interconnect_attachment1_name: "test-interconnect-attachment1"
+        interconnect_attachment2_name: "test-interconnect-attachment2"
+        address1_name: "test-address1"
+        address2_name: "test-address2"
+        router_name: "test-router"
+        network_name: "test-network"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
@@ -3100,74 +3106,74 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       interfaces: !ruby/object:Overrides::Terraform::PropertyOverride
         name: interface
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "external_vpn_gateway"
-        primary_resource_id: "external_gateway"
-        # Multiple fine-grained resources
-        skip_vcr: true
-        vars:
-          ha_vpn_gateway_name: "ha-vpn"
-          network_name: "network"
-          external_gateway_name: "external-gateway"
-          global_address_name: "global-address"
-          router_name: "ha-vpn-router1"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "external_vpn_gateway"
+      primary_resource_id: "external_gateway"
+      # Multiple fine-grained resources
+      skip_vcr: true
+      vars:
+        ha_vpn_gateway_name: "ha-vpn"
+        network_name: "network"
+        external_gateway_name: "external-gateway"
+        global_address_name: "global-address"
+        router_name: "ha-vpn-router1"
   UrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "url_map_basic"
-        primary_resource_id: "urlmap"
-        vars:
-          url_map_name: "urlmap"
-          login_backend_service_name: "login"
-          http_health_check_name: "health-check"
-          backend_bucket_name: "static-asset-backend-bucket"
-          storage_bucket_name: "static-asset-bucket"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "url_map_traffic_director_route"
-        primary_resource_id: "urlmap"
-        vars:
-          url_map_name: "urlmap"
-          home_backend_service_name: "home"
-          health_check_name: "health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "url_map_traffic_director_route_partial"
-        primary_resource_id: "urlmap"
-        vars:
-          url_map_name: "urlmap"
-          home_backend_service_name: "home"
-          health_check_name: "health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "url_map_traffic_director_path"
-        primary_resource_id: "urlmap"
-        vars:
-          url_map_name: "urlmap"
-          home_backend_service_name: "home"
-          health_check_name: "health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "url_map_traffic_director_path_partial"
-        primary_resource_id: "urlmap"
-        vars:
-          url_map_name: "urlmap"
-          home_backend_service_name: "home"
-          health_check_name: "health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "url_map_header_based_routing"
-        primary_resource_id: "urlmap"
-        vars:
-          url_map_name: "urlmap"
-          default_backend_service_name: "default"
-          service_a_backend_service_name: "service-a"
-          service_b_backend_service_name: "service-b"
-          health_check_name: "health-check"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "url_map_parameter_based_routing"
-        primary_resource_id: "urlmap"
-        vars:
-          url_map_name: "urlmap"
-          default_backend_service_name: "default"
-          service_a_backend_service_name: "service-a"
-          service_b_backend_service_name: "service-b"
-          health_check_name: "health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "url_map_basic"
+      primary_resource_id: "urlmap"
+      vars:
+        url_map_name: "urlmap"
+        login_backend_service_name: "login"
+        http_health_check_name: "health-check"
+        backend_bucket_name: "static-asset-backend-bucket"
+        storage_bucket_name: "static-asset-bucket"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "url_map_traffic_director_route"
+      primary_resource_id: "urlmap"
+      vars:
+        url_map_name: "urlmap"
+        home_backend_service_name: "home"
+        health_check_name: "health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "url_map_traffic_director_route_partial"
+      primary_resource_id: "urlmap"
+      vars:
+        url_map_name: "urlmap"
+        home_backend_service_name: "home"
+        health_check_name: "health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "url_map_traffic_director_path"
+      primary_resource_id: "urlmap"
+      vars:
+        url_map_name: "urlmap"
+        home_backend_service_name: "home"
+        health_check_name: "health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "url_map_traffic_director_path_partial"
+      primary_resource_id: "urlmap"
+      vars:
+        url_map_name: "urlmap"
+        home_backend_service_name: "home"
+        health_check_name: "health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "url_map_header_based_routing"
+      primary_resource_id: "urlmap"
+      vars:
+        url_map_name: "urlmap"
+        default_backend_service_name: "default"
+        service_a_backend_service_name: "service-a"
+        service_b_backend_service_name: "service-b"
+        health_check_name: "health-check"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "url_map_parameter_based_routing"
+      primary_resource_id: "urlmap"
+      vars:
+        url_map_name: "urlmap"
+        default_backend_service_name: "default"
+        service_a_backend_service_name: "service-a"
+        service_b_backend_service_name: "service-b"
+        health_check_name: "health-check"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "map_id"
@@ -3265,31 +3271,31 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validation.FloatBetween(0, 100)'
   VpnTunnel: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "vpn_tunnel_basic"
-        primary_resource_id: "tunnel1"
-        vars:
-          vpn_tunnel_name: "tunnel1"
-          target_vpn_gateway_name: "vpn1"
-          network_name: "network1"
-          address_name: "vpn-static-ip"
-          esp_forwarding_rule_name: "fr-esp"
-          udp500_forwarding_rule_name: "fr-udp500"
-          udp4500_forwarding_rule_name: "fr-udp4500"
-          route_name: "route1"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "vpn_tunnel_beta"
-        primary_resource_id: "tunnel1"
-        min_version: beta
-        vars:
-          vpn_tunnel_name: "tunnel1"
-          target_vpn_gateway_name: "vpn1"
-          network_name: "network1"
-          address_name: "vpn-static-ip"
-          esp_forwarding_rule_name: "fr-esp"
-          udp500_forwarding_rule_name: "fr-udp500"
-          udp4500_forwarding_rule_name: "fr-udp4500"
-          route_name: "route1"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "vpn_tunnel_basic"
+      primary_resource_id: "tunnel1"
+      vars:
+        vpn_tunnel_name: "tunnel1"
+        target_vpn_gateway_name: "vpn1"
+        network_name: "network1"
+        address_name: "vpn-static-ip"
+        esp_forwarding_rule_name: "fr-esp"
+        udp500_forwarding_rule_name: "fr-udp500"
+        udp4500_forwarding_rule_name: "fr-udp4500"
+        route_name: "route1"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "vpn_tunnel_beta"
+      primary_resource_id: "tunnel1"
+      min_version: beta
+      vars:
+        vpn_tunnel_name: "tunnel1"
+        target_vpn_gateway_name: "vpn1"
+        network_name: "network1"
+        address_name: "vpn-static-ip"
+        esp_forwarding_rule_name: "fr-esp"
+        udp500_forwarding_rule_name: "fr-udp500"
+        udp4500_forwarding_rule_name: "fr-udp4500"
+        route_name: "route1"
     properties:
       targetVpnGateway: !ruby/object:Overrides::Terraform::PropertyOverride
         resource: 'VpnGateway'
@@ -3343,17 +3349,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       urlMap: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
     examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "target_grpc_proxy_basic"
-        primary_resource_id: "default"
-        vars:
-          proxy_name: "proxy"
-          urlmap_name: "urlmap"
-          backend_name: "backend"
-          healthcheck_name: "healthcheck"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "target_grpc_proxy_basic"
+      primary_resource_id: "default"
+      vars:
+        proxy_name: "proxy"
+        urlmap_name: "urlmap"
+        backend_name: "backend"
+        healthcheck_name: "healthcheck"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
   compile:
-<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>
+  <%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>
