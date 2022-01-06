@@ -7,8 +7,8 @@
   field: id
 - type: CUSTOM_RESOURCE_NAME
   details:
-    title: forwarding_rule
-  location: region
+    title: global_forwarding_rule
+  location: global
 - type: CUSTOM_SCHEMA_VALUES
   location: global
   field: target
