@@ -506,7 +506,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		}
 
 		p := Property{
-			title:       jsonToSnakeCase(v.Title),
+			title:       jsonToSnakeCase(v.Title).snakecase(),
 			Type:        Type{typ: v},
 			PackageName: packageName,
 			Description: v.Description,
@@ -695,11 +695,11 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 					return nil, fmt.Errorf("failed to decode custom identity getter details")
 				}
 
-				capitalizedPropertyName := p.PackageName
+				propertyName := p.title
 				if p.customName != "" {
-					capitalizedPropertyName = snakeToTitleCase(p.customName)
+					propertyName = p.customName
 				}
-				ig := fmt.Sprintf("get%s(d, config)", capitalizedPropertyName)
+				ig := fmt.Sprintf("get%s(d, config)", renderSnakeAsTitle(miscellaneousNameSnakeCase(propertyName)))
 				if cigOk {
 					ig = fmt.Sprintf("%s(d, config)", cig.Function)
 				}
