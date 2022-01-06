@@ -32,17 +32,17 @@ import (
 	"time"
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	{{range $index, $pkg := .}}
-	{{$pkg.PackageName}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$pkg.DCLPackage}}"
+	{{$pkg.PackageName}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$pkg.PackageNameWithVersion}}"
   {{- end}}
 )
 
 {{range $index, $pkg := .}}
-func NewDCL{{$pkg.ProductType}}Client(config *Config, userAgent, billingProject string, timeout time.Duration) *{{$pkg.PackageName}}.Client {
+func NewDCL{{$pkg.ProductName.ToTitle}}Client(config *Config, userAgent, billingProject string, timeout time.Duration) *{{$pkg.PackageName}}.Client {
 	configOptions := []dcl.ConfigOption{
 		dcl.WithHTTPClient(config.client),
 		dcl.WithUserAgent(userAgent),
 		dcl.WithLogger(dclLogger{}),
-		dcl.WithBasePath(config.{{$pkg.BasePathIdentifier}}BasePath),
+		dcl.WithBasePath(config.{{$pkg.BasePathIdentifier.ToTitle}}BasePath),
 	}
 
 	if (timeout != 0){
