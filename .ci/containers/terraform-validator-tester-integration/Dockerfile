@@ -6,7 +6,6 @@ RUN echo "UserKnownHostsFile /known_hosts" >> /etc/ssh/ssh_config
 
 RUN apt-get update
 RUN apt-get install -y git jq unzip
-RUN apt-get install google-cloud-sdk
 
 ADD test_terraform_validator_integration.sh /test_terraform_validator_integration.sh
 ENTRYPOINT ["/test_terraform_validator_integration.sh"]
