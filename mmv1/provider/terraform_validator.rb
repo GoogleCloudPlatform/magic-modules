@@ -62,11 +62,11 @@ module Provider
     def retrieve_list_of_manually_defined_tests
       m1 =
         retrieve_list_of_manually_defined_tests_from_file(
-          'third_party/validator/tests/manifest/cli_test.go.erb'
+          'third_party/validator/tests/source/cli_test.go.erb'
         )
       m2 =
         retrieve_list_of_manually_defined_tests_from_file(
-          'third_party/validator/tests/manifest/read_test.go.erb'
+          'third_party/validator/tests/source/read_test.go.erb'
         )
       m1 | m2 # union of manually defined tests
     end
@@ -106,6 +106,20 @@ module Provider
       non_defined_tests
     end
 
+    def retrieve_test_source_files(path, suffix)
+      files = Dir[path + '**' + suffix]
+      files = files.map { |file| file.split(path)[-1] }
+      files.sort
+    end
+
+    def retrieve_test_source_code_with_location(suffix)
+      path = 'third_party/validator/tests/source/'
+      files = retrieve_test_source_files(path, suffix)
+      files.map do |file|
+        ['test/' + file, path + file]
+      end
+    end
+
     def compile_common_files(output_folder, products, _common_compile_file)
       Google::LOGGER.info 'Compiling common files.'
       file_template = ProviderFileTemplate.new(
@@ -116,6 +130,13 @@ module Provider
       )
 
       @non_defined_tests = retrieve_full_manifest_of_non_defined_tests
+
+      compile_file_list(
+        output_folder,
+        retrieve_test_source_code_with_location('[b]'),
+        file_template
+      )
+
       compile_file_list(output_folder, [
                           ['converters/google/resources/compute_operation.go',
                            'third_party/terraform/utils/compute_operation.go.erb'],
@@ -140,11 +161,7 @@ module Provider
                           ['converters/google/resources/metadata.go',
                            'third_party/terraform/utils/metadata.go.erb'],
                           ['converters/google/resources/compute_instance.go',
-                           'third_party/validator/compute_instance.go.erb'],
-                          ['test/cli_test.go',
-                           'third_party/validator/tests/manifest/cli_test.go.erb'],
-                          ['test/read_test.go',
-                           'third_party/validator/tests/manifest/read_test.go.erb']
+                           'third_party/validator/compute_instance.go.erb']
                         ],
                         file_template)
     end
@@ -156,6 +173,11 @@ module Provider
       copy_file_list(
         output_folder,
         retrieve_full_list_of_test_files_with_location
+      )
+
+      copy_file_list(
+        output_folder,
+        retrieve_test_source_code_with_location('[^b]')
       )
 
       copy_file_list(output_folder, [
@@ -282,9 +304,7 @@ module Provider
                        ['converters/google/resources/iam_spanner_instance.go',
                         'third_party/terraform/utils/iam_spanner_instance.go'],
                        ['converters/google/resources/spanner_instance_iam.go',
-                        'third_party/validator/spanner_instance_iam.go'],
-                       ['test/utils.go',
-                        'third_party/validator/tests/utils.go']
+                        'third_party/validator/spanner_instance_iam.go']
                      ])
     end
 
