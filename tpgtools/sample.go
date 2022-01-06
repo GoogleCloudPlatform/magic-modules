@@ -110,18 +110,58 @@ type Update struct {
 	Resource string `yaml:"resource"`
 }
 
+func packageNameFromFilepath(fp Filepath, product SnakeCaseProductName) (DCLPackageName, error) {
+	pm := NewProductMetadata(fp, string(product))
+	return pm.PackageName, nil
+}
+
+func findDCLReferencePackage(product SnakeCaseProductName) (DCLPackageName, error) {
+	// Most packages are just the product name with all the underscores removed.
+	// Try that first.
+	// We can check if a package exists by checking the "productOverrides" map from product.go, which
+	// will be populated by this point.  That takes a "Filepath", because the reference is to the
+	// actual name of the directory that contains the overrides - by mandate, that's the same as the
+	// dcl package name, so this conversion happens to work out.
+	possibleFilepath := Filepath(strings.ReplaceAll(string(product), "_", ""))
+	if _, ok := productOverrides[possibleFilepath]; ok {
+		return packageNameFromFilepath(possibleFilepath, product)
+	}
+	baseFilepath := possibleFilepath
+	possibleFilepath = Filepath(string(baseFilepath) + "/beta")
+	if _, ok := productOverrides[possibleFilepath]; ok {
+		return packageNameFromFilepath(possibleFilepath, product)
+	}
+	possibleFilepath = Filepath(string(baseFilepath) + "/alpha")
+	if _, ok := productOverrides[possibleFilepath]; ok {
+		return packageNameFromFilepath(possibleFilepath, product)
+	}
+
+	// Otherwise, just return an error.
+	var productOverrideKeys []Filepath
+	for k, _ := range productOverrides {
+		productOverrideKeys = append(productOverrideKeys, k)
+	}
+	return DCLPackageName(""), fmt.Errorf("can't find %q in the overrides map, which contains %v", product, productOverrideKeys)
+}
+
 // BuildDependency produces a Dependency using a file and filename
 func BuildDependency(fileName string, product SnakeCaseProductName, localname, version string, hasGAEquivalent bool, b []byte) (*Dependency, error) {
 	// Miscellaneous name rather than "resource name" because this is the name in the sample json file - which might not match the TF name!
 	// we have to account for that.
 	var resourceName miscellaneousNameSnakeCase
+	var packageName DCLPackageName
 	fileParts := strings.Split(fileName, ".")
 	if len(fileParts) == 4 {
 		p, rn := fileParts[1], fileParts[2]
-		product = SnakeCaseProductName(p)
+		packageName = DCLPackageName(p)
 		resourceName = miscellaneousNameSnakeCase(rn)
 	} else if len(fileParts) == 3 {
 		resourceName = miscellaneousNameSnakeCase(fileParts[1])
+		var err error
+		packageName, err = findDCLReferencePackage(product)
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		return nil, fmt.Errorf("Invalid sample dependency file name: %s", fileName)
 	}
@@ -129,12 +169,12 @@ func BuildDependency(fileName string, product SnakeCaseProductName, localname, v
 	if localname == "" {
 		localname = fileParts[0]
 	}
-	terraformResourceType, err := DCLToTerraformReference(product, resourceName, version)
+	terraformResourceType, err := DCLToTerraformReference(packageName, resourceName, version)
 	if err != nil {
 		return nil, fmt.Errorf("Error generating sample dependency reference %s: %s", fileName, err)
 	}
 
-	block, err := ConvertSampleJSONToHCL(product, resourceName, version, hasGAEquivalent, b)
+	block, err := ConvertSampleJSONToHCL(packageName, resourceName, version, hasGAEquivalent, b)
 	if err != nil {
 		glog.Errorf("failed to convert %q", fileName)
 		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)

@@ -267,15 +267,6 @@ func (r Resource) DCLPackage() DCLPackageNameWithVersion {
 	return r.productMetadata.PackageNameWithVersion()
 }
 
-// IsAlternateLocation returns whether this resource is an additional version
-// of the DCL resource with a different location type. All references in samples
-// to a resource with an alternate location will point to the main version.
-func (r Resource) IsAlternateLocation() bool {
-	// For now, we consider non-regional resources to be alternate.
-	// Non-locational resources will have an empty string as their location.
-	return r.location != "" && r.location != "region"
-}
-
 // Updatable returns true if the resource should have an update method.
 // This will avoid the error message:
 // "All fields are ForceNew or Computed w/out Optional, Update is superfluous"

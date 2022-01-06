@@ -54,20 +54,20 @@ import (
 
 // DCLToTerraformReference converts a DCL resource name to the final tpgtools name
 // after overrides are applied
-func DCLToTerraformReference(product SnakeCaseProductName, resource miscellaneousNameSnakeCase, version string) (string, error) {
+func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameSnakeCase, version string) (string, error) {
 	if version == "alpha" {
 		switch fmt.Sprintf("%s/%s", product, resource) {
 		}
 	}
 	if version == "beta" {
 		switch fmt.Sprintf("%s/%s", product, resource) {
-		case "assured_workloads/workload":
+		case "assuredworkloads/workload":
 			return "google_assured_workloads_workload", nil
 		case "cloudbuild/worker_pool":
 			return "google_cloudbuild_worker_pool", nil
-		case "cloud_resource_manager/folder":
+		case "cloudresourcemanager/folder":
 			return "google_folder", nil
-		case "cloud_resource_manager/project":
+		case "cloudresourcemanager/project":
 			return "google_project", nil
 		case "compute/firewall_policy":
 			return "google_compute_firewall_policy", nil
@@ -79,47 +79,47 @@ func DCLToTerraformReference(product SnakeCaseProductName, resource miscellaneou
 			return "google_compute_forwarding_rule", nil
 		case "compute/global_forwarding_rule":
 			return "google_compute_global_forwarding_rule", nil
-		case "container_aws/cluster":
+		case "containeraws/cluster":
 			return "google_container_aws_cluster", nil
-		case "container_aws/node_pool":
+		case "containeraws/node_pool":
 			return "google_container_aws_node_pool", nil
-		case "container_azure/client":
+		case "containerazure/client":
 			return "google_container_azure_client", nil
-		case "container_azure/cluster":
+		case "containerazure/cluster":
 			return "google_container_azure_cluster", nil
-		case "container_azure/node_pool":
+		case "containerazure/node_pool":
 			return "google_container_azure_node_pool", nil
 		case "dataproc/workflow_template":
 			return "google_dataproc_workflow_template", nil
 		case "eventarc/trigger":
 			return "google_eventarc_trigger", nil
-		case "gke_hub/feature":
+		case "gkehub/feature":
 			return "google_gke_hub_feature", nil
-		case "gke_hub/feature_membership":
+		case "gkehub/feature_membership":
 			return "google_gke_hub_feature_membership", nil
 		case "monitoring/monitored_project":
 			return "google_monitoring_monitored_project", nil
-		case "network_connectivity/hub":
+		case "networkconnectivity/hub":
 			return "google_network_connectivity_hub", nil
-		case "org_policy/policy":
+		case "orgpolicy/policy":
 			return "google_org_policy_policy", nil
-		case "os_config/os_policy_assignment":
+		case "osconfig/os_policy_assignment":
 			return "google_os_config_os_policy_assignment", nil
 		case "privateca/certificate_template":
 			return "google_privateca_certificate_template", nil
-		case "recaptcha_enterprise/key":
+		case "recaptchaenterprise/key":
 			return "google_recaptcha_enterprise_key", nil
 		}
 	}
 	// If not found in sample version, fallthrough to GA
 	switch fmt.Sprintf("%s/%s", product, resource) {
-	case "assured_workloads/workload":
+	case "assuredworkloads/workload":
 		return "google_assured_workloads_workload", nil
 	case "cloudbuild/worker_pool":
 		return "google_cloudbuild_worker_pool", nil
-	case "cloud_resource_manager/folder":
+	case "cloudresourcemanager/folder":
 		return "google_folder", nil
-	case "cloud_resource_manager/project":
+	case "cloudresourcemanager/project":
 		return "google_project", nil
 	case "compute/firewall_policy":
 		return "google_compute_firewall_policy", nil
@@ -131,29 +131,29 @@ func DCLToTerraformReference(product SnakeCaseProductName, resource miscellaneou
 		return "google_compute_forwarding_rule", nil
 	case "compute/global_forwarding_rule":
 		return "google_compute_global_forwarding_rule", nil
-	case "container_aws/cluster":
+	case "containeraws/cluster":
 		return "google_container_aws_cluster", nil
-	case "container_aws/node_pool":
+	case "containeraws/node_pool":
 		return "google_container_aws_node_pool", nil
-	case "container_azure/client":
+	case "containerazure/client":
 		return "google_container_azure_client", nil
-	case "container_azure/cluster":
+	case "containerazure/cluster":
 		return "google_container_azure_cluster", nil
-	case "container_azure/node_pool":
+	case "containerazure/node_pool":
 		return "google_container_azure_node_pool", nil
 	case "dataproc/workflow_template":
 		return "google_dataproc_workflow_template", nil
 	case "eventarc/trigger":
 		return "google_eventarc_trigger", nil
-	case "network_connectivity/hub":
+	case "networkconnectivity/hub":
 		return "google_network_connectivity_hub", nil
-	case "org_policy/policy":
+	case "orgpolicy/policy":
 		return "google_org_policy_policy", nil
-	case "os_config/os_policy_assignment":
+	case "osconfig/os_policy_assignment":
 		return "google_os_config_os_policy_assignment", nil
 	case "privateca/certificate_template":
 		return "google_privateca_certificate_template", nil
-	case "recaptcha_enterprise/key":
+	case "recaptchaenterprise/key":
 		return "google_recaptcha_enterprise_key", nil
 	default:
 		return "", fmt.Errorf("Error retrieving Terraform name from DCL resource type: %s/%s not found", product, resource)
@@ -162,14 +162,14 @@ func DCLToTerraformReference(product SnakeCaseProductName, resource miscellaneou
 }
 
 // ConvertSampleJSONToHCL unmarshals json to an HCL string.
-func ConvertSampleJSONToHCL(product SnakeCaseProductName, resource miscellaneousNameSnakeCase, version string, hasGAEquivalent bool, b []byte) (string, error) {
+func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSnakeCase, version string, hasGAEquivalent bool, b []byte) (string, error) {
 	if version == "alpha" {
 		switch fmt.Sprintf("%s/%s", product, resource) {
 		}
 	}
 	if version == "beta" {
 		switch fmt.Sprintf("%s/%s", product, resource) {
-		case "assured_workloads/workload":
+		case "assuredworkloads/workload":
 			r := &assuredworkloadsBeta.Workload{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
@@ -181,13 +181,13 @@ func ConvertSampleJSONToHCL(product SnakeCaseProductName, resource miscellaneous
 				return "", err
 			}
 			return CloudbuildWorkerPoolBetaAsHCL(*r, hasGAEquivalent)
-		case "cloud_resource_manager/folder":
+		case "cloudresourcemanager/folder":
 			r := &cloudresourcemanagerBeta.Folder{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
 			return CloudResourceManagerFolderBetaAsHCL(*r, hasGAEquivalent)
-		case "cloud_resource_manager/project":
+		case "cloudresourcemanager/project":
 			r := &cloudresourcemanagerBeta.Project{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
@@ -223,31 +223,31 @@ func ConvertSampleJSONToHCL(product SnakeCaseProductName, resource miscellaneous
 				return "", err
 			}
 			return ComputeGlobalForwardingRuleBetaAsHCL(*r, hasGAEquivalent)
-		case "container_aws/cluster":
+		case "containeraws/cluster":
 			r := &containerawsBeta.Cluster{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
 			return ContainerAwsClusterBetaAsHCL(*r, hasGAEquivalent)
-		case "container_aws/node_pool":
+		case "containeraws/node_pool":
 			r := &containerawsBeta.NodePool{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
 			return ContainerAwsNodePoolBetaAsHCL(*r, hasGAEquivalent)
-		case "container_azure/client":
+		case "containerazure/client":
 			r := &containerazureBeta.AzureClient{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
 			return ContainerAzureClientBetaAsHCL(*r, hasGAEquivalent)
-		case "container_azure/cluster":
+		case "containerazure/cluster":
 			r := &containerazureBeta.Cluster{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
 			return ContainerAzureClusterBetaAsHCL(*r, hasGAEquivalent)
-		case "container_azure/node_pool":
+		case "containerazure/node_pool":
 			r := &containerazureBeta.NodePool{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
@@ -265,13 +265,13 @@ func ConvertSampleJSONToHCL(product SnakeCaseProductName, resource miscellaneous
 				return "", err
 			}
 			return EventarcTriggerBetaAsHCL(*r, hasGAEquivalent)
-		case "gke_hub/feature":
+		case "gkehub/feature":
 			r := &gkehubBeta.Feature{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
 			return GkeHubFeatureBetaAsHCL(*r, hasGAEquivalent)
-		case "gke_hub/feature_membership":
+		case "gkehub/feature_membership":
 			r := &gkehubBeta.FeatureMembership{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
@@ -283,19 +283,19 @@ func ConvertSampleJSONToHCL(product SnakeCaseProductName, resource miscellaneous
 				return "", err
 			}
 			return MonitoringMonitoredProjectBetaAsHCL(*r, hasGAEquivalent)
-		case "network_connectivity/hub":
+		case "networkconnectivity/hub":
 			r := &networkconnectivityBeta.Hub{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
 			return NetworkConnectivityHubBetaAsHCL(*r, hasGAEquivalent)
-		case "org_policy/policy":
+		case "orgpolicy/policy":
 			r := &orgpolicyBeta.Policy{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
 			return OrgPolicyPolicyBetaAsHCL(*r, hasGAEquivalent)
-		case "os_config/os_policy_assignment":
+		case "osconfig/os_policy_assignment":
 			r := &osconfigBeta.OSPolicyAssignment{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
@@ -307,7 +307,7 @@ func ConvertSampleJSONToHCL(product SnakeCaseProductName, resource miscellaneous
 				return "", err
 			}
 			return PrivatecaCertificateTemplateBetaAsHCL(*r, hasGAEquivalent)
-		case "recaptcha_enterprise/key":
+		case "recaptchaenterprise/key":
 			r := &recaptchaenterpriseBeta.Key{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
@@ -317,7 +317,7 @@ func ConvertSampleJSONToHCL(product SnakeCaseProductName, resource miscellaneous
 	}
 	// If not found in sample version, fallthrough to GA
 	switch fmt.Sprintf("%s/%s", product, resource) {
-	case "assured_workloads/workload":
+	case "assuredworkloads/workload":
 		r := &assuredworkloads.Workload{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
@@ -329,13 +329,13 @@ func ConvertSampleJSONToHCL(product SnakeCaseProductName, resource miscellaneous
 			return "", err
 		}
 		return CloudbuildWorkerPoolAsHCL(*r, hasGAEquivalent)
-	case "cloud_resource_manager/folder":
+	case "cloudresourcemanager/folder":
 		r := &cloudresourcemanager.Folder{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
 		return CloudResourceManagerFolderAsHCL(*r, hasGAEquivalent)
-	case "cloud_resource_manager/project":
+	case "cloudresourcemanager/project":
 		r := &cloudresourcemanager.Project{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
@@ -371,31 +371,31 @@ func ConvertSampleJSONToHCL(product SnakeCaseProductName, resource miscellaneous
 			return "", err
 		}
 		return ComputeGlobalForwardingRuleAsHCL(*r, hasGAEquivalent)
-	case "container_aws/cluster":
+	case "containeraws/cluster":
 		r := &containeraws.Cluster{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
 		return ContainerAwsClusterAsHCL(*r, hasGAEquivalent)
-	case "container_aws/node_pool":
+	case "containeraws/node_pool":
 		r := &containeraws.NodePool{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
 		return ContainerAwsNodePoolAsHCL(*r, hasGAEquivalent)
-	case "container_azure/client":
+	case "containerazure/client":
 		r := &containerazure.AzureClient{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
 		return ContainerAzureClientAsHCL(*r, hasGAEquivalent)
-	case "container_azure/cluster":
+	case "containerazure/cluster":
 		r := &containerazure.Cluster{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
 		return ContainerAzureClusterAsHCL(*r, hasGAEquivalent)
-	case "container_azure/node_pool":
+	case "containerazure/node_pool":
 		r := &containerazure.NodePool{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
@@ -413,19 +413,19 @@ func ConvertSampleJSONToHCL(product SnakeCaseProductName, resource miscellaneous
 			return "", err
 		}
 		return EventarcTriggerAsHCL(*r, hasGAEquivalent)
-	case "network_connectivity/hub":
+	case "networkconnectivity/hub":
 		r := &networkconnectivity.Hub{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
 		return NetworkConnectivityHubAsHCL(*r, hasGAEquivalent)
-	case "org_policy/policy":
+	case "orgpolicy/policy":
 		r := &orgpolicy.Policy{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
 		return OrgPolicyPolicyAsHCL(*r, hasGAEquivalent)
-	case "os_config/os_policy_assignment":
+	case "osconfig/os_policy_assignment":
 		r := &osconfig.OSPolicyAssignment{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
@@ -437,7 +437,7 @@ func ConvertSampleJSONToHCL(product SnakeCaseProductName, resource miscellaneous
 			return "", err
 		}
 		return PrivatecaCertificateTemplateAsHCL(*r, hasGAEquivalent)
-	case "recaptcha_enterprise/key":
+	case "recaptchaenterprise/key":
 		r := &recaptchaenterprise.Key{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
