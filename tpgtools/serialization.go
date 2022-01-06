@@ -101,6 +101,8 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 			return "google_monitoring_monitored_project", nil
 		case "networkconnectivity/hub":
 			return "google_network_connectivity_hub", nil
+		case "networkconnectivity/spoke":
+			return "google_network_connectivity_spoke", nil
 		case "orgpolicy/policy":
 			return "google_org_policy_policy", nil
 		case "osconfig/os_policy_assignment":
@@ -147,6 +149,8 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 		return "google_eventarc_trigger", nil
 	case "networkconnectivity/hub":
 		return "google_network_connectivity_hub", nil
+	case "networkconnectivity/spoke":
+		return "google_network_connectivity_spoke", nil
 	case "orgpolicy/policy":
 		return "google_org_policy_policy", nil
 	case "osconfig/os_policy_assignment":
@@ -289,6 +293,12 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 				return "", err
 			}
 			return NetworkConnectivityHubBetaAsHCL(*r, hasGAEquivalent)
+		case "networkconnectivity/spoke":
+			r := &networkconnectivityBeta.Spoke{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return NetworkConnectivitySpokeBetaAsHCL(*r, hasGAEquivalent)
 		case "orgpolicy/policy":
 			r := &orgpolicyBeta.Policy{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -419,6 +429,12 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 			return "", err
 		}
 		return NetworkConnectivityHubAsHCL(*r, hasGAEquivalent)
+	case "networkconnectivity/spoke":
+		r := &networkconnectivity.Spoke{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return NetworkConnectivitySpokeAsHCL(*r, hasGAEquivalent)
 	case "orgpolicy/policy":
 		r := &orgpolicy.Policy{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -3378,6 +3394,120 @@ func convertNetworkConnectivityHubBetaRoutingVpcsToHCL(r *networkconnectivityBet
 		return ""
 	}
 	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+// NetworkConnectivitySpokeBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func NetworkConnectivitySpokeBetaAsHCL(r networkconnectivityBeta.Spoke, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_network_connectivity_spoke\" \"output\" {\n"
+	if r.Hub != nil {
+		outputConfig += fmt.Sprintf("\thub = %#v\n", *r.Hub)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if v := convertNetworkConnectivitySpokeBetaLinkedInterconnectAttachmentsToHCL(r.LinkedInterconnectAttachments); v != "" {
+		outputConfig += fmt.Sprintf("\tlinked_interconnect_attachments %s\n", v)
+	}
+	if v := convertNetworkConnectivitySpokeBetaLinkedRouterApplianceInstancesToHCL(r.LinkedRouterApplianceInstances); v != "" {
+		outputConfig += fmt.Sprintf("\tlinked_router_appliance_instances %s\n", v)
+	}
+	if v := convertNetworkConnectivitySpokeBetaLinkedVpnTunnelsToHCL(r.LinkedVpnTunnels); v != "" {
+		outputConfig += fmt.Sprintf("\tlinked_vpn_tunnels %s\n", v)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertNetworkConnectivitySpokeBetaLinkedInterconnectAttachmentsToHCL(r *networkconnectivityBeta.SpokeLinkedInterconnectAttachments) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Uris != nil {
+		outputConfig += "\turis = ["
+		for _, v := range r.Uris {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.SiteToSiteDataTransfer != nil {
+		outputConfig += fmt.Sprintf("\tsite_to_site_data_transfer = %#v\n", *r.SiteToSiteDataTransfer)
+	}
+	return outputConfig + "}"
+}
+
+func convertNetworkConnectivitySpokeBetaLinkedRouterApplianceInstancesToHCL(r *networkconnectivityBeta.SpokeLinkedRouterApplianceInstances) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Instances != nil {
+		for _, v := range r.Instances {
+			outputConfig += fmt.Sprintf("\tinstances %s\n", convertNetworkConnectivitySpokeBetaLinkedRouterApplianceInstancesInstancesToHCL(&v))
+		}
+	}
+	if r.SiteToSiteDataTransfer != nil {
+		outputConfig += fmt.Sprintf("\tsite_to_site_data_transfer = %#v\n", *r.SiteToSiteDataTransfer)
+	}
+	return outputConfig + "}"
+}
+
+func convertNetworkConnectivitySpokeBetaLinkedRouterApplianceInstancesInstancesToHCL(r *networkconnectivityBeta.SpokeLinkedRouterApplianceInstancesInstances) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.IPAddress != nil {
+		outputConfig += fmt.Sprintf("\tip_address = %#v\n", *r.IPAddress)
+	}
+	if r.VirtualMachine != nil {
+		outputConfig += fmt.Sprintf("\tvirtual_machine = %#v\n", *r.VirtualMachine)
+	}
+	return outputConfig + "}"
+}
+
+func convertNetworkConnectivitySpokeBetaLinkedVpnTunnelsToHCL(r *networkconnectivityBeta.SpokeLinkedVpnTunnels) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Uris != nil {
+		outputConfig += "\turis = ["
+		for _, v := range r.Uris {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.SiteToSiteDataTransfer != nil {
+		outputConfig += fmt.Sprintf("\tsite_to_site_data_transfer = %#v\n", *r.SiteToSiteDataTransfer)
+	}
 	return outputConfig + "}"
 }
 
@@ -7097,6 +7227,120 @@ func convertNetworkConnectivityHubRoutingVpcsToHCL(r *networkconnectivity.HubRou
 	return outputConfig + "}"
 }
 
+// NetworkConnectivitySpokeAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func NetworkConnectivitySpokeAsHCL(r networkconnectivity.Spoke, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_network_connectivity_spoke\" \"output\" {\n"
+	if r.Hub != nil {
+		outputConfig += fmt.Sprintf("\thub = %#v\n", *r.Hub)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if v := convertNetworkConnectivitySpokeLinkedInterconnectAttachmentsToHCL(r.LinkedInterconnectAttachments); v != "" {
+		outputConfig += fmt.Sprintf("\tlinked_interconnect_attachments %s\n", v)
+	}
+	if v := convertNetworkConnectivitySpokeLinkedRouterApplianceInstancesToHCL(r.LinkedRouterApplianceInstances); v != "" {
+		outputConfig += fmt.Sprintf("\tlinked_router_appliance_instances %s\n", v)
+	}
+	if v := convertNetworkConnectivitySpokeLinkedVpnTunnelsToHCL(r.LinkedVpnTunnels); v != "" {
+		outputConfig += fmt.Sprintf("\tlinked_vpn_tunnels %s\n", v)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertNetworkConnectivitySpokeLinkedInterconnectAttachmentsToHCL(r *networkconnectivity.SpokeLinkedInterconnectAttachments) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Uris != nil {
+		outputConfig += "\turis = ["
+		for _, v := range r.Uris {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.SiteToSiteDataTransfer != nil {
+		outputConfig += fmt.Sprintf("\tsite_to_site_data_transfer = %#v\n", *r.SiteToSiteDataTransfer)
+	}
+	return outputConfig + "}"
+}
+
+func convertNetworkConnectivitySpokeLinkedRouterApplianceInstancesToHCL(r *networkconnectivity.SpokeLinkedRouterApplianceInstances) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Instances != nil {
+		for _, v := range r.Instances {
+			outputConfig += fmt.Sprintf("\tinstances %s\n", convertNetworkConnectivitySpokeLinkedRouterApplianceInstancesInstancesToHCL(&v))
+		}
+	}
+	if r.SiteToSiteDataTransfer != nil {
+		outputConfig += fmt.Sprintf("\tsite_to_site_data_transfer = %#v\n", *r.SiteToSiteDataTransfer)
+	}
+	return outputConfig + "}"
+}
+
+func convertNetworkConnectivitySpokeLinkedRouterApplianceInstancesInstancesToHCL(r *networkconnectivity.SpokeLinkedRouterApplianceInstancesInstances) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.IPAddress != nil {
+		outputConfig += fmt.Sprintf("\tip_address = %#v\n", *r.IPAddress)
+	}
+	if r.VirtualMachine != nil {
+		outputConfig += fmt.Sprintf("\tvirtual_machine = %#v\n", *r.VirtualMachine)
+	}
+	return outputConfig + "}"
+}
+
+func convertNetworkConnectivitySpokeLinkedVpnTunnelsToHCL(r *networkconnectivity.SpokeLinkedVpnTunnels) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Uris != nil {
+		outputConfig += "\turis = ["
+		for _, v := range r.Uris {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.SiteToSiteDataTransfer != nil {
+		outputConfig += fmt.Sprintf("\tsite_to_site_data_transfer = %#v\n", *r.SiteToSiteDataTransfer)
+	}
+	return outputConfig + "}"
+}
+
 // OrgPolicyPolicyAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -10726,6 +10970,94 @@ func convertNetworkConnectivityHubBetaRoutingVpcsList(i interface{}) (out []map[
 	return out
 }
 
+func convertNetworkConnectivitySpokeBetaLinkedInterconnectAttachments(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uris":                   in["uris"],
+		"siteToSiteDataTransfer": in["site_to_site_data_transfer"],
+	}
+}
+
+func convertNetworkConnectivitySpokeBetaLinkedInterconnectAttachmentsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertNetworkConnectivitySpokeBetaLinkedInterconnectAttachments(v))
+	}
+	return out
+}
+
+func convertNetworkConnectivitySpokeBetaLinkedRouterApplianceInstances(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"instances":              in["instances"],
+		"siteToSiteDataTransfer": in["site_to_site_data_transfer"],
+	}
+}
+
+func convertNetworkConnectivitySpokeBetaLinkedRouterApplianceInstancesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertNetworkConnectivitySpokeBetaLinkedRouterApplianceInstances(v))
+	}
+	return out
+}
+
+func convertNetworkConnectivitySpokeBetaLinkedRouterApplianceInstancesInstances(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iPAddress":      in["ip_address"],
+		"virtualMachine": in["virtual_machine"],
+	}
+}
+
+func convertNetworkConnectivitySpokeBetaLinkedRouterApplianceInstancesInstancesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertNetworkConnectivitySpokeBetaLinkedRouterApplianceInstancesInstances(v))
+	}
+	return out
+}
+
+func convertNetworkConnectivitySpokeBetaLinkedVpnTunnels(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uris":                   in["uris"],
+		"siteToSiteDataTransfer": in["site_to_site_data_transfer"],
+	}
+}
+
+func convertNetworkConnectivitySpokeBetaLinkedVpnTunnelsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertNetworkConnectivitySpokeBetaLinkedVpnTunnels(v))
+	}
+	return out
+}
+
 func convertOrgPolicyPolicyBetaSpec(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -14090,6 +14422,94 @@ func convertNetworkConnectivityHubRoutingVpcsList(i interface{}) (out []map[stri
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertNetworkConnectivityHubRoutingVpcs(v))
+	}
+	return out
+}
+
+func convertNetworkConnectivitySpokeLinkedInterconnectAttachments(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uris":                   in["uris"],
+		"siteToSiteDataTransfer": in["site_to_site_data_transfer"],
+	}
+}
+
+func convertNetworkConnectivitySpokeLinkedInterconnectAttachmentsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertNetworkConnectivitySpokeLinkedInterconnectAttachments(v))
+	}
+	return out
+}
+
+func convertNetworkConnectivitySpokeLinkedRouterApplianceInstances(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"instances":              in["instances"],
+		"siteToSiteDataTransfer": in["site_to_site_data_transfer"],
+	}
+}
+
+func convertNetworkConnectivitySpokeLinkedRouterApplianceInstancesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertNetworkConnectivitySpokeLinkedRouterApplianceInstances(v))
+	}
+	return out
+}
+
+func convertNetworkConnectivitySpokeLinkedRouterApplianceInstancesInstances(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iPAddress":      in["ip_address"],
+		"virtualMachine": in["virtual_machine"],
+	}
+}
+
+func convertNetworkConnectivitySpokeLinkedRouterApplianceInstancesInstancesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertNetworkConnectivitySpokeLinkedRouterApplianceInstancesInstances(v))
+	}
+	return out
+}
+
+func convertNetworkConnectivitySpokeLinkedVpnTunnels(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uris":                   in["uris"],
+		"siteToSiteDataTransfer": in["site_to_site_data_transfer"],
+	}
+}
+
+func convertNetworkConnectivitySpokeLinkedVpnTunnelsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertNetworkConnectivitySpokeLinkedVpnTunnels(v))
 	}
 	return out
 }
