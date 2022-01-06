@@ -2264,7 +2264,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       shareSettings.shareType: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       shareSettings.projectMap: !ruby/object:Overrides::Terraform::PropertyOverride
+        key_description: |
+          The project number which is deleting or adding to the project list. Only project number is acceptable.
         default_from_api: true
+      shareSettings.projectMap.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[0-9]+'
+        description: |
+          The project number, should be same as the key of this project config in the project map.
   Route: !ruby/object:Overrides::Terraform::ResourceOverride
     # Route cannot be added while a peering is on progress on the network
     mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
