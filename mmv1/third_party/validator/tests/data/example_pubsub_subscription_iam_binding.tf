@@ -27,8 +27,27 @@ provider "google" {
   {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
 }
 
+resource "google_pubsub_subscription" "example" {
+  name  = "example-subscription"
+  topic = "example-pubsub-topic"
+
+  ack_deadline_seconds = 20
+
+  labels = {
+    test-label1 = "test-value1"
+  }
+
+  push_config {
+    push_endpoint = "https://example.com/push"
+
+    attributes = {
+      x-goog-version = "v1"
+    }
+  }
+}
+
 resource "google_pubsub_subscription_iam_binding" "editor" {
-  subscription = "your-subscription-name"
+  subscription = google_pubsub_subscription.example.name
   role         = "roles/editor"
   members = [
     "user:jane@example.com",
