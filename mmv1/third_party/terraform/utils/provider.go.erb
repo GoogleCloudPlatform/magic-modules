@@ -194,6 +194,7 @@ func Provider() *schema.Provider {
 			<% end -%>
 
 			CloudBuildWorkerPoolEndpointEntryKey:               CloudBuildWorkerPoolEndpointEntry,
+      ApiKeysEndpointEntryKey:                         ApiKeysEndpointEntry,
 },
 
 		ProviderMetaSchema: map[string]*schema.Schema{
@@ -461,6 +462,7 @@ end     # products.each do
 			},
 			// resources implemented within tpgtools
 			map[string]*schema.Resource{
+        "google_api_keys_key":                          resourceApiKeysKey(),
 				"google_assured_workloads_workload":            resourceAssuredWorkloadsWorkload(),
 				"google_cloudbuild_worker_pool":                resourceCloudbuildWorkerPool(),
 				"google_compute_firewall_policy_association":   resourceComputeFirewallPolicyAssociation(),
@@ -670,6 +672,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
         config.ContainerAwsBasePath = d.Get(ContainerAwsCustomEndpointEntryKey).(string)
         config.ContainerAzureBasePath = d.Get(ContainerAzureCustomEndpointEntryKey).(string)
 	config.CloudBuildWorkerPoolBasePath = d.Get(CloudBuildWorkerPoolEndpointEntryKey).(string)
+  config.ApiKeysBasePath = d.Get(ApiKeysEndpointEntryKey).(string)
 
 	stopCtx, ok := schema.StopContext(ctx)
 	if !ok {
