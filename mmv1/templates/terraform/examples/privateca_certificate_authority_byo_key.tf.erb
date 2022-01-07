@@ -1,3 +1,4 @@
+# [START privateca_create_ca_byo_key]
 resource "google_project_service_identity" "privateca_sa" {
   service = "privateca.googleapis.com"
 }
@@ -60,3 +61,4 @@ resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id]
     google_kms_crypto_key_iam_binding.privateca_sa_keyuser_viewer,
   ]
 }
+# [END privateca_create_ca_byo_key]
