@@ -1,0 +1,52 @@
+[
+  {
+    "name": "//run.googleapis.com/cloudrun-srv",
+    "asset_type": "run.googleapis.com/Service",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "iam_policy": {
+      "bindings": [
+        {
+          "role": "roles/editor",
+          "members": [
+            "user:jane@example.com"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "//run.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/services/cloudrun-srv",
+    "asset_type": "run.googleapis.com/Service",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/run/v1/rest",
+      "discovery_name": "Service",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "apiVersion": "serving.knative.dev/v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "cloudrun-srv"
+        },
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": [
+                {
+                  "image": "us-docker.pkg.dev/cloudrun/container/hello"
+                }
+              ]
+            }
+          },
+          "traffic": [
+            {
+              "latestRevision": true,
+              "percent": 100
+            }
+          ]
+        }
+      }
+    }
+  }
+]
