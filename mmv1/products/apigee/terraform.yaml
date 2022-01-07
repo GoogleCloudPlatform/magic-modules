@@ -53,6 +53,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/apigee_organization.go.erb
       encoder: templates/terraform/encoders/apigee_organization.go.erb
+    properties:
+      properties: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     import_format: ["{{org_id}}/instances/{{name}}", "{{org_id}}/{{name}}"]
