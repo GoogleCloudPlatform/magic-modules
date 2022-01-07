@@ -27,8 +27,15 @@ provider "google" {
   {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
 }
 
+resource "google_spanner_instance" "spanner-instance" {
+  name         = "spanner-instance"
+  display_name = "spanner-instance"
+  config       = "regional-us-central1"
+  num_nodes    = 1
+}
+
 resource "google_spanner_instance_iam_member" "instance" {
-  instance = "my-instance"
+  instance = google_spanner_instance.spanner-instance.name
   role     = "roles/compute.networkUser"
   member   = "user:jane@example.com"
 }
