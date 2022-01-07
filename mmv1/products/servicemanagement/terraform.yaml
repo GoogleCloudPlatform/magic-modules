@@ -20,6 +20,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["services/{{serviceName}}"]
     exclude_resource: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude_validator: true
       parent_resource_attribute: 'service_name'
       method_name_separator: ':'
       fetch_iam_policy_verb: :POST
