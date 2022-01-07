@@ -131,9 +131,13 @@ module Provider
 
       @non_defined_tests = retrieve_full_manifest_of_non_defined_tests
 
+      test_source = retrieve_test_source_code_with_location('[b]').map do |location|
+        [location[0].sub('go.erb', 'go'), location[1]]
+      end
+
       compile_file_list(
         output_folder,
-        retrieve_test_source_code_with_location('[b]'),
+        test_source,
         file_template
       )
 
