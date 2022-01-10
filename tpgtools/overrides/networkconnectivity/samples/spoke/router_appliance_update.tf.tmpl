@@ -68,7 +68,7 @@ resource "google_network_connectivity_spoke" "primary" {
   labels = {
     label-two = "value-two"
   }
-  hub =  "projects/{{project}}/locations/global/hubs/${google_network_connectivity_hub.basic_hub.name}"
+  hub = google_network_connectivity_hub.basic_hub.id
   linked_router_appliance_instances {
     instances {
         virtual_machine = google_compute_instance.instance.self_link
