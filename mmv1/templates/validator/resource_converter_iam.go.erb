@@ -28,7 +28,7 @@
   if import_format.nil? || import_format.empty?
     asset_name_template = '//' + product_backend_name.downcase + '.googleapis.com/' + (object.cai_base_url || object.self_link || object.base_url) + '/{{' + object.name.downcase + '}}'
   else
-    asset_name_template = '//' + product_backend_name.downcase + '.googleapis.com/' + Google::StringUtils.underscore(import_format[0].gsub('{{name}}', "{{#{parent_resource_name}}}").gsub('%', ''))
+    asset_name_template = '//' + product_backend_name.downcase + '.googleapis.com/' + import_format[0].gsub('{{name}}', "{{#{parent_resource_name}}}").gsub('%', '')
   end
 -%>
 
