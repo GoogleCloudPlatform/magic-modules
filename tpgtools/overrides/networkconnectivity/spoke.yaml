@@ -1,4 +1,0 @@
-- type: CUSTOM_DESCRIPTION
-  field: name
-  details:
-    description: Immutable. The name of the spoke. Spoke names must be unique.
