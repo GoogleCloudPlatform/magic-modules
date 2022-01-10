@@ -848,7 +848,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *C
 	err := retryTimeDuration(func() (reqErr error) {
 		op, reqErr = rmService.Projects.Create(project).Do()
 		return reqErr
-	}, time.Duration(5*time.Minute))
+	}, 5*time.Minute)
 	if err != nil {
 		return "", err
 	}
@@ -859,7 +859,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *C
 		return "", err
 	}
 
-	waitErr := resourceManagerOperationWaitTime(config, opAsMap, "creating project", config.userAgent, time.Duration(5*time.Minute))
+	waitErr := resourceManagerOperationWaitTime(config, opAsMap, "creating project", config.userAgent, 5*time.Minute)
 	if waitErr != nil {
 		return "", waitErr
 	}
@@ -879,7 +879,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *C
 	err = retryTimeDuration(func() (reqErr error) {
 		op, reqErr = rmService.Projects.Create(project).Do()
 		return reqErr
-	}, time.Duration(5*time.Minute))
+	}, 5*time.Minute)
 	if err != nil {
 		return "", err
 	}
@@ -890,7 +890,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *C
 		return "", err
 	}
 
-	waitErr = resourceManagerOperationWaitTime(config, opAsMap, "creating project", config.userAgent, time.Duration(5*time.Minute))
+	waitErr = resourceManagerOperationWaitTime(config, opAsMap, "creating project", config.userAgent, 5*time.Minute)
 	if waitErr != nil {
 		return "", waitErr
 	}
@@ -947,6 +947,9 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *C
 			Policy:     p,
 			UpdateMask: "bindings,etag,auditConfigs",
 		}).Do()
+	if err != nil {
+		return "", err
+	}
 
 	// Create a service account for project-1
 	sa1, err := getOrCreateServiceAccount(config, pid)
@@ -996,6 +999,9 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *C
 			Policy:     p,
 			UpdateMask: "bindings,etag,auditConfigs",
 		}).Do()
+	if err != nil {
+		return "", err
+	}
 
 	// The token creator IAM API call returns success long before the policy is
 	// actually usable. Wait a solid 2 minutes to ensure we can use it.
