@@ -475,7 +475,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		identityFields = idParts(resource.ID)
 	}
 
-	// Maps PackageJSONName back to property Name 
+	// Maps PackageJSONName back to property Name
 	// for conflict fields
 	conflictsMap := make(map[string]string)
 
@@ -557,16 +557,16 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		}
 
 		if v, ok := v.Extension["x-dcl-conflicts"].([]interface{}); ok {
-			// NOTE: DCL only label x-dcl-conflicts for top-level field currently 
-			// TODO(shuya): handle nested field when DCL apply the feature
-			if parent != nil {
-				return nil, fmt.Errorf("The conflict field is not top-level, need a fix in tpgtools")
-			}
-			for _, ci := range v {
-				p.JSONCaseConflictsWith = append(p.JSONCaseConflictsWith, ci.(string))
-			}
+			// NOTE: DCL not label x-dcl-conflicts for reused types
+			// TODO(shuya): handle nested field when b/213503595 got fixed
 
-			conflictsMap[p.PackageJSONName()] = p.Name()
+			if parent == nil {
+				for _, ci := range v {
+					p.JSONCaseConflictsWith = append(p.JSONCaseConflictsWith, ci.(string))
+				}
+
+				conflictsMap[p.PackageJSONName()] = p.Name()
+			}
 		}
 
 		// Do this before handling properties so we can check if the parent is readOnly
@@ -893,7 +893,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				} else {
 					return nil, fmt.Errorf("Error generating conflict fields. %s is not labeled as a conflict field in DCL", cf)
 				}
-				
+
 			}
 		}
 	}
