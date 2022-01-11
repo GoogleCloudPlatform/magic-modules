@@ -111,11 +111,8 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     pushd $LOCAL_PATH
     # clear out the templates as they are copied during
     # generation from mmv1/third_party/validator/tests/data
-    rm -rf ./testdata/templates/
-    rm -rf ./testdata/generatedconvert/
-    rm -rf ./converters/google/provider
+    find ./testdata/templates/*.* -exec git rm {} \;
     find ./test/** -type f -exec git rm {} \;
-
     popd
     bundle exec compiler -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
     pushd $LOCAL_PATH
