@@ -19474,6 +19474,7 @@ objects:
             - !ruby/object:Api::Type::Integer
               name: 'port'
               description: 'The port number, which can be a value between 1 and 65535.'
+
   - !ruby/object:Api::Resource
     name: 'RegionOperation'
     kind: 'compute#regionOperation'
