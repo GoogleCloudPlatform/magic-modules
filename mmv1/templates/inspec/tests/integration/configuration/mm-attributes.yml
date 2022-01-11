@@ -478,3 +478,10 @@ region_instance_group:
   size: 1
   named_port_name: 'port'
   named_port_port: 80
+
+region_operation:
+  name: operation-1641188435323-5d4a6f5b26934-9281422c-dce238f5
+  region: us-central1
+  operation_type: "compute.instanceGroupManagers.insert"
+  status: DONE
+  progress: 100
