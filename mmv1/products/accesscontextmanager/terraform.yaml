@@ -239,6 +239,30 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           service_perimeter_name: "restrict_all"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_resource.go.erb
+  ServicePerimeterSpecResource: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        If you are using User ADCs (Application Default Credentials) with this resource,
+        you must specify a `billing_project` and set `user_project_override` to true
+        in the provider configuration. Otherwise the ACM API will return a 403 error.
+        Your account must have the `serviceusage.services.use` permission on the
+        `billing_project` you defined.
+    autogen_async: true
+    exclude_validator: true
+    # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
+    skip_sweeper: true
+    id_format: "{{perimeter_name}}/{{resource}}"
+    import_format: ["{{perimeter_name}}/{{resource}}"]
+    mutex: "{{perimeter_name}}"
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "access_context_manager_service_perimeter_spec_resource_basic"
+        skip_test: true
+        primary_resource_id: "service-perimeter-resource"
+        vars:
+          service_perimeter_name: "restrict_all"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_resource.go.erb      
   GcpUserAccessBinding: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]

@@ -46,5 +46,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   ServicePerimeterResource: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  ServicePerimeterSpecResource: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true    
   GcpUserAccessBinding: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
