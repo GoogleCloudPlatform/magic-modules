@@ -80,16 +80,17 @@ func testSweepAccessContextManagerPolicies(region string) error {
 func TestAccAccessContextManager(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		"access_policy":              testAccAccessContextManagerAccessPolicy_basicTest,
-		"service_perimeter":          testAccAccessContextManagerServicePerimeter_basicTest,
-		"service_perimeter_update":   testAccAccessContextManagerServicePerimeter_updateTest,
-		"service_perimeter_resource": testAccAccessContextManagerServicePerimeterResource_basicTest,
-		"access_level":               testAccAccessContextManagerAccessLevel_basicTest,
-		"access_level_full":          testAccAccessContextManagerAccessLevel_fullTest,
-		"access_level_custom":        testAccAccessContextManagerAccessLevel_customTest,
-		"access_levels":              testAccAccessContextManagerAccessLevels_basicTest,
-		"access_level_condition":     testAccAccessContextManagerAccessLevelCondition_basicTest,
-		"service_perimeters":         testAccAccessContextManagerServicePerimeters_basicTest,
-		"gcp_user_access_binding":    testAccAccessContextManagerGcpUserAccessBinding_basicTest,
+		"service_spec_perimeter":     testAccAccessContextManagerServiceSpecPerimeter_basicTest,
+		# "service_perimeter":          testAccAccessContextManagerServicePerimeter_basicTest,
+		# "service_perimeter_update":   testAccAccessContextManagerServicePerimeter_updateTest,
+		# "service_perimeter_resource": testAccAccessContextManagerServicePerimeterResource_basicTest,
+		# "access_level":               testAccAccessContextManagerAccessLevel_basicTest,
+		# "access_level_full":          testAccAccessContextManagerAccessLevel_fullTest,
+		# "access_level_custom":        testAccAccessContextManagerAccessLevel_customTest,
+		# "access_levels":              testAccAccessContextManagerAccessLevels_basicTest,
+		# "access_level_condition":     testAccAccessContextManagerAccessLevelCondition_basicTest,
+		# "service_perimeters":         testAccAccessContextManagerServicePerimeters_basicTest,
+		# "gcp_user_access_binding":    testAccAccessContextManagerGcpUserAccessBinding_basicTest,
 	}
 
 	for name, tc := range testCases {
