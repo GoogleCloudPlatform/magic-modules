@@ -283,11 +283,29 @@ module Provider
                         'third_party/terraform/utils/iam_spanner_instance.go'],
                        ['converters/google/resources/spanner_instance_iam.go',
                         'third_party/validator/spanner_instance_iam.go'],
-                        ['test/shared.go',
-                        'third_party/validator/tests/shared.go']
+                        ['test/utils_test.go',
+                        'third_party/validator/tests/utils_test.go']
                      ])
     end
 
+
+    def generate_resource_tests(pwd, data)
+      return if data.object.examples
+                    .reject(&:skip_test)
+                    .reject do |e|
+                  @api.version_obj_or_closest(data.version) \
+                < @api.version_obj_or_closest(e.min_version)
+                end
+                    .empty?
+
+      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+      data.generate(
+        pwd,
+        'templates/validator/examples/base_configs/test_file.go.erb',
+        "test/resource_#{full_resource_name(data)}_generated_test.go",
+        self
+      )
+    end
 
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself

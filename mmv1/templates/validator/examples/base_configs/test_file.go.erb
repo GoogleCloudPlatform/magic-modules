@@ -1,0 +1,91 @@
+<%= lines(autogen_notice(:go, pwd)) -%>
+
+package test
+
+import (
+  "fmt"
+  "testing"
+
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+)
+<%
+
+resource_name = product_ns + object.name
+tf_product = (@config.legacy_name || product_ns).underscore
+tf_resource = object.name.underscore
+terraform_name = object.legacy_name || "google_#{tf_product}_#{tf_resource}"
+-%>
+<%
+# @api.version_obj_or_closest(version) is slightly wrong; we want the _object_ version or the generation version.
+# Ultimately this won't matter though, since the API default should always be less than the object default.
+object.examples
+  .reject(&:skip_test)
+  .reject { |e| @api.version_obj_or_closest(version) < @api.version_obj_or_closest(e.min_version) }
+  .each do |example|
+
+	# {Compute}{Address}_{addressBasic}
+    test_slug = "#{resource_name}_#{example.name.camelize(:lower)}Example"
+
+    ignore_read = object.all_user_properties
+      .select{|p| p.url_param_only || p.ignore_read || p.is_a?(Api::Type::ResourceRef) }
+      .map { |p| p.name.underscore }
+      .concat(example.ignore_read_extra)
+
+    # Use explicit version for the example if given.
+    # Otherwise, use object version.
+    example_version = example.min_version || object.min_version.name
+-%>
+
+<%-
+["offline", "online"]
+		.each do |test_type|
+
+		is_offline = test_type == "offline" ? "true" : "false"
+
+-%>
+
+func TestAcc<%= test_slug -%>_<%= test_type -%>(t *testing.T) {
+  t.Parallel()
+
+	offline := <%= is_offline %>
+	testSlug := "<%= test_slug -%>"
+
+	context := map[string]interface{} {
+<%= lines(indent(compile(pwd + '/templates/terraform/env_var_context.go.erb'), 4)) -%>
+	<% unless example.test_vars_overrides.nil? -%>
+	<% example.test_vars_overrides.each do |var_name, override| -%>
+			"<%= var_name %>": <%= override %>,
+	<% end -%>
+	<% end -%>
+			"random_suffix": "meepmerp", // true randomization isn't needed for validator
+	}
+
+	terraformConfig := testAcc<%= test_slug -%>(context)
+
+	// Create a temporary directory for running terraform.
+	dir, err := ioutil.TempDir(tmpDir, "terraform")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+
+	// Write terraform config to directory
+	os.WriteFile("main.tf", []byte(terraformConfig), 0666)
+
+	// run terraform to generate plan file
+	terraformWorkflow(t, dir, testSlug)
+
+  // testConvertCommand(t, dir, c.name, offline, c.compareConvertOutput)
+
+	// run validation test
+	testValidateCommandGeneric(t, dir, testSlug, offline)
+
+}
+<%- end %>
+
+
+func testAcc<%= test_slug -%>(context map[string]interface{}) string {
+<%= example.config_test(pwd) -%>
+}
+<%- end %>
