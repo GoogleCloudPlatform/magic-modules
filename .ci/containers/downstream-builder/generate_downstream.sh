@@ -110,6 +110,7 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     # clear out the templates as they are copied during
     # generation from mmv1/third_party/validator/tests/data
     find ./testdata/templates/*.* -exec git rm {} \;
+    find ./test/** -type f -exec git rm {} \;
     popd
     bundle exec compiler -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
 elif [ "$REPO" == "tf-oics" ]; then
