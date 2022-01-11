@@ -122,11 +122,11 @@ func main() {
 
 func skipResource(r *Resource) bool {
 	// if a filter is specified, skip filtered services
-	if sFilter != nil && *sFilter != "" && *sFilter != r.ProductMetadata().PackageName {
+	if sFilter != nil && *sFilter != "" && DCLPackageName(*sFilter) != r.ProductMetadata().PackageName {
 		return true
 	}
 	// skip filtered resources
-	if rFilter != nil && *rFilter != "" && strings.ToLower(*rFilter) != snakeToLowercase(r.DCLName()) {
+	if rFilter != nil && *rFilter != "" && SnakeCaseTerraformResourceName(*rFilter) != r.Name() {
 		return true
 	}
 
@@ -158,15 +158,15 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 			}
 
 			var overrideFiles []os.FileInfo
-			var packagePath string
+			var packagePath Filepath
 			if version == GA_VERSION {
 				// GA has no separate directory
-				packagePath = v.Name()
+				packagePath = Filepath(v.Name())
 			} else {
-				packagePath = path.Join(v.Name(), version.V)
+				packagePath = Filepath(path.Join(v.Name(), version.V))
 			}
 
-			overrideFiles, err = ioutil.ReadDir(path.Join(*tPath, packagePath))
+			overrideFiles, err = ioutil.ReadDir(path.Join(*tPath, string(packagePath)))
 			var newResources []*Resource
 
 			// keep track of the last document in a service- we need one for the product later
@@ -223,7 +223,7 @@ func addInfoExtensionsToSchemaObjects(document *openapi.Document, b []byte) erro
 	return nil
 }
 
-func createResourcesFromDocumentAndOverrides(document *openapi.Document, overrides Overrides, packagePath string, version Version) (resources []*Resource) {
+func createResourcesFromDocumentAndOverrides(document *openapi.Document, overrides Overrides, packagePath Filepath, version Version) (resources []*Resource) {
 	productMetadata := GetProductMetadataFromDocument(document, packagePath)
 	titleParts := strings.Split(document.Info.Title, "/")
 
@@ -294,11 +294,11 @@ func generateSerializationLogic(specs map[Version][]*Resource) {
 	for v, resList := range specs {
 		for _, res := range resList {
 			var pkgName, pkgPath string
-			pkgName = res.Package() + v.SerializationSuffix
+			pkgName = res.Package().lowercase() + v.SerializationSuffix
 			if v == GA_VERSION {
-				pkgPath = res.Package()
+				pkgPath = res.Package().lowercase()
 			} else {
-				pkgPath = path.Join(res.Package(), v.V)
+				pkgPath = path.Join(res.Package().lowercase(), v.V)
 			}
 
 			if _, ok := packageMap[pkgPath]; !ok {
@@ -331,10 +331,10 @@ func generateSerializationLogic(specs map[Version][]*Resource) {
 	}
 }
 
-func loadOverrides(packagePath, fileName string) Overrides {
+func loadOverrides(packagePath Filepath, fileName string) Overrides {
 	overrides := Overrides{}
 	if !(tPath == nil) && !(*tPath == "") {
-		b, err := ioutil.ReadFile(path.Join(*tPath, packagePath, fileName))
+		b, err := ioutil.ReadFile(path.Join(*tPath, string(packagePath), fileName))
 		if err != nil {
 			// ignore the error if the file just doesn't exist
 			if !os.IsNotExist(err) {
@@ -374,7 +374,7 @@ func generateResourceFile(res *Resource) {
 
 	formatted, err := formatSource(&contents)
 	if err != nil {
-		glog.Error(fmt.Errorf("error formatting %v: %v - resource \n ", res.ProductName()+res.Name(), err))
+		glog.Error(fmt.Errorf("error formatting %v%v: %v - resource \n ", res.ProductName(), res.Name(), err))
 	}
 
 	if oPath == nil || *oPath == "" {
@@ -415,7 +415,7 @@ func generateSweeperFile(res *Resource) {
 
 	formatted, err := formatSource(&contents)
 	if err != nil {
-		glog.Error(fmt.Errorf("error formatting %v: %v - sweeper", res.ProductName()+res.Name(), err))
+		glog.Error(fmt.Errorf("error formatting %v%v: %v - sweeper", res.ProductName(), res.Name(), err))
 	}
 
 	if oPath == nil || *oPath == "" {
@@ -457,7 +457,7 @@ func generateResourceTestFile(res *Resource) {
 
 	formatted, err := formatSource(&contents)
 	if err != nil {
-		glog.Error(fmt.Errorf("error formatting %v: %v - test_file \n ", res.ProductName()+res.Name(), err))
+		glog.Error(fmt.Errorf("error formatting %v%v: %v - test_file \n ", res.ProductName(), res.Name(), err))
 	}
 
 	if oPath == nil || *oPath == "" {

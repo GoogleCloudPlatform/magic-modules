@@ -5,6 +5,24 @@
     "root_module": {
       "resources": [
         {
+          "address": "google_spanner_instance.spanner-instance",
+          "mode": "managed",
+          "type": "google_spanner_instance",
+          "name": "spanner-instance",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "config": "regional-us-central1",
+            "display_name": "spanner-instance",
+            "force_destroy": false,
+            "labels": null,
+            "name": "spanner-instance",
+            "num_nodes": 1,
+            "timeouts": null
+          },
+          "sensitive_values": {}
+        },
+        {
           "address": "google_spanner_instance_iam_policy.instance",
           "mode": "managed",
           "type": "google_spanner_instance_iam_policy",
@@ -12,7 +30,7 @@
           "provider_name": "registry.terraform.io/hashicorp/google",
           "schema_version": 0,
           "values": {
-            "instance": "my-instance",
+            "instance": "spanner-instance",
             "policy_data": "{\"bindings\":[{\"members\":[\"user:jane@example.com\"],\"role\":\"roles/editor\"}]}"
           },
           "sensitive_values": {}
@@ -21,6 +39,36 @@
     }
   },
   "resource_changes": [
+    {
+      "address": "google_spanner_instance.spanner-instance",
+      "mode": "managed",
+      "type": "google_spanner_instance",
+      "name": "spanner-instance",
+      "provider_name": "registry.terraform.io/hashicorp/google",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "config": "regional-us-central1",
+          "display_name": "spanner-instance",
+          "force_destroy": false,
+          "labels": null,
+          "name": "spanner-instance",
+          "num_nodes": 1,
+          "timeouts": null
+        },
+        "after_unknown": {
+          "id": true,
+          "processing_units": true,
+          "project": true,
+          "state": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {}
+      }
+    },
     {
       "address": "google_spanner_instance_iam_policy.instance",
       "mode": "managed",
@@ -33,7 +81,7 @@
         ],
         "before": null,
         "after": {
-          "instance": "my-instance",
+          "instance": "spanner-instance",
           "policy_data": "{\"bindings\":[{\"members\":[\"user:jane@example.com\"],\"role\":\"roles/editor\"}]}"
         },
         "after_unknown": {
@@ -47,18 +95,30 @@
     }
   ],
   "configuration": {
-    "provider_config": {
-      "google": {
-        "name": "google",
-        "expressions": {
-          "project": {
-            "constant_value": "{{.Provider.project}}"
-          }
-        }
-      }
-    },
     "root_module": {
       "resources": [
+        {
+          "address": "google_spanner_instance.spanner-instance",
+          "mode": "managed",
+          "type": "google_spanner_instance",
+          "name": "spanner-instance",
+          "provider_config_key": "google",
+          "expressions": {
+            "config": {
+              "constant_value": "regional-us-central1"
+            },
+            "display_name": {
+              "constant_value": "spanner-instance"
+            },
+            "name": {
+              "constant_value": "spanner-instance"
+            },
+            "num_nodes": {
+              "constant_value": 1
+            }
+          },
+          "schema_version": 0
+        },
         {
           "address": "google_spanner_instance_iam_policy.instance",
           "mode": "managed",
@@ -67,7 +127,10 @@
           "provider_config_key": "google",
           "expressions": {
             "instance": {
-              "constant_value": "my-instance"
+              "references": [
+                "google_spanner_instance.spanner-instance.name",
+                "google_spanner_instance.spanner-instance"
+              ]
             },
             "policy_data": {}
           },
