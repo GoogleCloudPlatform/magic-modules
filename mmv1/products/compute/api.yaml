@@ -1369,6 +1369,7 @@ objects:
         values:
           - :EXTERNAL
           - :INTERNAL_SELF_MANAGED
+          - :EXTERNAL_MANAGED
       - !ruby/object:Api::Type::Enum
         name: 'localityLbPolicy'
         values:
