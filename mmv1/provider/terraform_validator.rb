@@ -310,7 +310,7 @@ module Provider
                        ['converters/google/resources/spanner_instance_iam.go',
                         'third_party/validator/spanner_instance_iam.go'],
                        ['converters/google/resources/storage_bucket_iam.go',
-                        'third_party/validator/storage_bucket_iam.go'],
+                        'third_party/validator/storage_bucket_iam.go']
                      ])
     end
 
