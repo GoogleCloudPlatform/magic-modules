@@ -785,7 +785,7 @@ func TestAccStorageBucket_publicAccessPrevention(t *testing.T) {
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		Providers: testAccProvidersOiCS,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageBucket_publicAccessPrevention(bucketName, "enforced"),
