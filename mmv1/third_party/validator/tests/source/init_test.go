@@ -15,6 +15,15 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-validator/converters/google"
 )
 
+const (
+	samplePolicyPath       = "../testdata/sample_policies"
+	defaultAncestry        = "organization/12345/folder/67890"
+	defaultOrganization    = "12345"
+	defaultFolder          = "67890"
+	defaultProject         = "foobar"
+	defaultProviderVersion = "4.4.0"
+)
+
 var (
 	data      *testData
 	tfvBinary string
@@ -46,14 +55,30 @@ func init() {
 		log.Fatalf("cannot get current directory: %v", err)
 	}
 	tfvBinary = filepath.Join(cwd, "..", "bin", "terraform-validator")
-	credentials := getTestCredsFromEnv()
-	project := getTestProjectFromEnv()
-	org := getTestOrgFromEnv(nil)
-	billingAccount := getTestBillingAccountFromEnv(nil)
+	project, ok := os.LookupEnv("TEST_PROJECT")
+	if !ok {
+		log.Printf("Missing required env var TEST_PROJECT. Default (%s) will be used.", defaultProject)
+		project = defaultProject
+	}
+	org, ok := os.LookupEnv("TEST_ORG_ID")
+	if !ok {
+		log.Printf("Missing required env var TEST_ORG_ID. Default (%s) will be used.", defaultOrganization)
+		org = defaultOrganization
+	}
 	folder, ok := os.LookupEnv("TEST_FOLDER_ID")
 	if !ok {
 		log.Printf("Missing required env var TEST_FOLDER_ID. Default (%s) will be used.", defaultFolder)
 		folder = defaultFolder
+	}
+	credentials, ok := os.LookupEnv("TEST_CREDENTIALS")
+	if ok {
+		// Make credentials path relative to repo root rather than
+		// test/ dir if it is a relative path.
+		if !filepath.IsAbs(credentials) {
+			credentials = filepath.Join(cwd, "..", credentials)
+		}
+	} else {
+		log.Printf("missing env var TEST_CREDENTIALS, will try to use Application Default Credentials")
 	}
 	ancestry, ok := os.LookupEnv("TEST_ANCESTRY")
 	if !ok {
@@ -76,7 +101,7 @@ func init() {
 		Project: map[string]string{
 			"Name":               "My Project Name",
 			"ProjectId":          "my-project-id",
-			"BillingAccountName": billingAccount,
+			"BillingAccountName": "012345-567890-ABCDEF",
 			"Number":             "1234567890",
 		},
 		OrgID:    org,
