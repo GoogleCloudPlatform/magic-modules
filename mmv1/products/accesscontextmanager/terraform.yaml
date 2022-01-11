@@ -256,7 +256,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     mutex: "{{perimeter_name}}"
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "access_context_manager_service_perimeter_resource_basic"
+        name: "access_context_manager_service_perimeter_spec_resource_basic"
         skip_test: true
         primary_resource_id: "service-perimeter-resource"
         vars:

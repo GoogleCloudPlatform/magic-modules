@@ -39,13 +39,13 @@ func testAccAccessContextManagerServicePerimeterSpecResource_basicTest(t *testin
 			// Use a separate TestStep rather than a CheckDestroy because we need the service perimeter to still exist
 			{
 				Config: testAccAccessContextManagerServicePerimeterSpecResource_destroy(org, policyTitle, perimeterTitle),
-				Check:  testAccCheckAccessContextManagerServicePerimeterResourceDestroyProducer(t),
+				Check:  testAccCheckAccessContextManagerServicePerimeterSpecResourceDestroyProducer(t),
 			},
 		},
 	})
 }
 
-func testAccCheckAccessContextManagerServicePerimeterResourceDestroyProducer(t *testing.T) func(s *terraform.State) error {
+func testAccCheckAccessContextManagerServicePerimeterSpecResourceDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_access_context_manager_service_perimeter_spec_resource" {
