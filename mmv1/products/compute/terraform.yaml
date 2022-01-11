@@ -253,17 +253,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           neg_name: "network-endpoint"
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_external_managed"
+        min_version: beta
         primary_resource_id: "default"
         vars:
           backend_service_name: "backend-service"
           health_check_name: "health-check"
-    iam_policy: !ruby/object:Api::Resource::IamPolicy
-      method_name_separator: '/'
-      fetch_iam_policy_verb: :GET
-      min_version: beta
-      iam_conditions_request_type: :QUERY_PARAM
-      parent_resource_attribute: 'name'
-      allowed_iam_role: 'roles/compute.admin'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/backend_service.go.erb'
       encoder: 'templates/terraform/encoders/backend_service.go.erb'
