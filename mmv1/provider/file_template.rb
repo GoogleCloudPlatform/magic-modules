@@ -61,6 +61,7 @@ module Provider
       ctx.local_variable_set('pwd', pwd)
 
       Google::LOGGER.debug "Generating #{path}"
+      path = pwd + '/' +path
       File.open(path, 'w') { |f| f.puts compile_file(ctx, pwd + '/' + template) }
 
       # Files are often generated in parallel.

@@ -19474,3 +19474,159 @@ objects:
             - !ruby/object:Api::Type::Integer
               name: 'port'
               description: 'The port number, which can be a value between 1 and 65535.'
+
+  - !ruby/object:Api::Resource
+    name: 'RegionOperation'
+    kind: 'compute#regionOperation'
+    base_url: projects/{{project}}/regions/{{region}}/operations
+    collection_url_key: 'items'
+    has_self_link: true
+    readonly: true
+    description: 'Operation resources contained within the specified region'
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.This field is deprecated.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional textual description of the resource.'
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the resource.'
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        exclude: true
+        description: 'Server-defined, fully qualified URL for this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'clientOperationId'
+        exclude: true
+        description: 'The value of requestId if you provided it in the request. Not present otherwise.'
+      - !ruby/object:Api::Type::String
+        name: 'operationType'
+        exclude: true
+        description: 'The type of operation, such as insert, update, or delete, and so on.'
+      - !ruby/object:Api::Type::String
+        name: 'targetLink'
+        exclude: true
+        description: |
+          The URL of the resource that the operation modifies. For operations related to creating a snapshot,
+          this points to the persistent disk that the snapshot was created from.
+      - !ruby/object:Api::Type::String
+        name: 'targetId'
+        description: 'The unique target ID, which identifies a specific incarnation of the target resource.'
+      - !ruby/object:Api::Type::Enum
+        name: 'status'
+        output: true
+        description: |
+          The status of the operation, which can be one of the following: PENDING, RUNNING, or DONE.
+        values:
+          - :PENDING
+          - :RUNNING
+          - :DONE
+      - !ruby/object:Api::Type::String
+        name: 'user'
+        description: 'User who requested the operation, for example: user@example.com.'
+      - !ruby/object:Api::Type::String
+        name: 'insertTime'
+        description: 'The time that this operation was requested. This value is in RFC3339 text format.'
+      - !ruby/object:Api::Type::String
+        name: 'startTime'
+        description: 'The time that this operation was requested. This value is in RFC3339 text format.'
+      - !ruby/object:Api::Type::String
+        name: 'endTime'
+        description: 'The time that this operation was requested. This value is in RFC3339 text format.'
+      - !ruby/object:Api::Type::Integer
+        name: 'progress'
+        description: |
+          An optional progress indicator that ranges from 0 to 100. There is no requirement that this be linear or support
+          any granularity of operations. This should not be used to guess when the operation will be complete.
+          This number should monotonically increase as the operation progresses.
+      - !ruby/object:Api::Type::String
+        name: 'zone'
+        description: 'The URL of the zone where the instance group is located (for zonal resources).'
+
+  - !ruby/object:Api::Resource
+    name: 'ZoneOperation'
+    kind: 'compute#zoneOperation'
+    base_url: projects/{{project}}/zones/{{zone}}/operations
+    collection_url_key: 'items'
+    has_self_link: true
+    readonly: true
+    description: 'Operation resources contained within the specified zone'
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.This field is deprecated.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional textual description of the resource.'
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the resource.'
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        exclude: true
+        description: 'Server-defined, fully qualified URL for this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'clientOperationId'
+        exclude: true
+        description: 'The value of requestId if you provided it in the request. Not present otherwise.'
+      - !ruby/object:Api::Type::String
+        name: 'operationType'
+        exclude: true
+        description: 'The type of operation, such as insert, update, or delete, and so on.'
+      - !ruby/object:Api::Type::String
+        name: 'statusMessage'
+        description: An optional, human-readable explanation of the status.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'targetLink'
+        exclude: true
+        description: |
+          The URL of the resource that the operation modifies. For operations related to creating a snapshot,
+          this points to the persistent disk that the snapshot was created from.
+      - !ruby/object:Api::Type::String
+        name: 'targetId'
+        description: 'The unique target ID, which identifies a specific incarnation of the target resource.'
+      - !ruby/object:Api::Type::Enum
+        name: 'status'
+        output: true
+        description: |
+          The status of the operation, which can be one of the following: PENDING, RUNNING, or DONE.
+        values:
+          - :PENDING
+          - :RUNNING
+          - :DONE
+      - !ruby/object:Api::Type::String
+        name: 'user'
+        description: 'User who requested the operation, for example: user@example.com.'
+      - !ruby/object:Api::Type::String
+        name: 'insertTime'
+        description: 'The time that this operation was requested. This value is in RFC3339 text format.'
+      - !ruby/object:Api::Type::String
+        name: 'startTime'
+        description: 'The time that this operation was requested. This value is in RFC3339 text format.'
+      - !ruby/object:Api::Type::String
+        name: 'endTime'
+        description: 'The time that this operation was requested. This value is in RFC3339 text format.'
+      - !ruby/object:Api::Type::Integer
+        name: 'progress'
+        description: |
+          An optional progress indicator that ranges from 0 to 100. There is no requirement that this be linear or support
+          any granularity of operations. This should not be used to guess when the operation will be complete.
+          This number should monotonically increase as the operation progresses.
+      - !ruby/object:Api::Type::String
+        name: 'region'
+        description: 'The URL of the region where the operation resides. Only applicable when performing regional operations.'
