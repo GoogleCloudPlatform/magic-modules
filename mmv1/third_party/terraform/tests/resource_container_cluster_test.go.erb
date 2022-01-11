@@ -2180,7 +2180,7 @@ func TestAccContainerCluster_withDNSConfig(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withDNSConfig(clusterName, "CLOUD_DNS", domainName, "CLUSTER_SCOPE"),
+				Config: testAccContainerCluster_withDNSConfig(clusterName, "CLOUD_DNS", domainName, "VPC_SCOPE"),
 			},
 			{
 				ResourceName:      "google_container_cluster.with_dns_config",
