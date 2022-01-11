@@ -32,27 +32,6 @@ resource "google_compute_instance" "instance" {
   }
 }
 
-resource "google_compute_instance" "instance2" {
-  name         = "{{instance2}}"
-  machine_type = "e2-medium"
-  can_ip_forward = true
-  zone         = "{{zone}}"
-
-  boot_disk {
-    initialize_params {
-      image = "projects/debian-cloud/global/images/debian-10-buster-v20210817"
-    }
-  }
-
-  network_interface {
-    subnetwork = google_compute_subnetwork.subnetwork.name
-    network_ip = "10.0.0.3"
-    access_config {
-        network_tier = "PREMIUM"
-    }
-  }
-}
-
 resource "google_network_connectivity_hub" "basic_hub" {
   name        = "{{hub}}"
   description = "A sample hub"
@@ -73,11 +52,6 @@ resource "google_network_connectivity_spoke" "primary" {
     instances {
         virtual_machine = google_compute_instance.instance.self_link
         ip_address = "10.0.0.2"
-    }
-
-    instances {
-        virtual_machine = google_compute_instance.instance2.self_link
-        ip_address = "10.0.0.3"
     }
   }
 }
