@@ -73,7 +73,7 @@ func newBigqueryDatasetIamAsset(
 		return []Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
-	name, err := assetName(d, config, "//bigquery.googleapis.com/{{dataset_id}}")
+	name, err := assetName(d, config, "//bigquery.googleapis.com/projects/{{project}}/datasets/{{dataset_id}}")
 	if err != nil {
 		return []Asset{}, err
 	}
@@ -97,7 +97,7 @@ func FetchBigqueryDatasetIamPolicy(d TerraformResourceData, config *Config) (Ass
 		NewBigqueryDatasetIamUpdater,
 		d,
 		config,
-		"//bigquery.googleapis.com/{{dataset_id}}",
+		"//bigquery.googleapis.com/projects/{{project}}/datasets/{{dataset_id}}",
 		"bigquery.googleapis.com/Dataset",
 	)
 }

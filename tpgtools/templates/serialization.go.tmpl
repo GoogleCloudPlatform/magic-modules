@@ -42,66 +42,39 @@ import (
 
 // DCLToTerraformReference converts a DCL resource name to the final tpgtools name
 // after overrides are applied
-func DCLToTerraformReference(resourceType string, version string) (string, error) {
+func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameSnakeCase, version string) (string, error) {
 	{{- range $version, $resList := $.Resources   }}
 		{{- if not (eq $version.V "ga") }}
 	if version == "{{$version.V}}" {
-		switch resourceType {
+		switch fmt.Sprintf("%s/%s", product, resource) {
 			{{- range $res := $resList   }}
-		case "{{$res.PathType}}":
+		case "{{$res.Package}}/{{$res.Name}}":
 			return "{{$res.TerraformName}}", nil
 			{{- end }}
 		}
 	}
 		{{- else }}
 	// If not found in sample version, fallthrough to GA
-	switch resourceType {
+	switch fmt.Sprintf("%s/%s", product, resource) {
 	{{- range $res := $resList   }}
-	case "{{$res.PathType}}":
-		return "{{$res.TerraformName}}", nil
-	{{- end }}
-	}
-	// If still not found, try alternate names for resources.
-	switch resourceType {
-	{{- range $res := $resList   }}
-	case "{{$res.SampleTypeName}}":
+	case "{{$res.Package}}/{{$res.Name}}":
 		return "{{$res.TerraformName}}", nil
 	{{- end }}
 	default:
-		return "", fmt.Errorf("Error retrieving Terraform name from DCL resource type: %s not found", resourceType)
-	}
-		{{ end }}
-	{{- end }}
-}
-
-// DCLToTerraformSampleName converts a DCL resource name to the final tpgtools name
-// after overrides are applied.
-// e.g. cloudresourcemanager.project -> CloudResourceManagerProject
-func DCLToTerraformSampleName(service, resource string) (string, string, error) {
-	{{- range $version, $resList := $.Resources   }}
-		{{- if eq $version.V "ga" }}
-	switch service + resource {
-	{{- range $res := $resList   }}
-		{{- if not $res.IsAlternateLocation }}
-	case "{{$res.DCLPackage}}{{replace $res.DCLName "_" "" -1}}":
-		return "{{$res.ProductType }}", "{{ $res.DCLTitle }}", nil
-		{{- end }}
-	{{- end }}
-	default:
-		return "", "", fmt.Errorf("Error retrieving Terraform sample name from DCL resource type: %s.%s not found", service, resource)
+		return "", fmt.Errorf("Error retrieving Terraform name from DCL resource type: %s/%s not found", product, resource)
 	}
 		{{ end }}
 	{{- end }}
 }
 
 // ConvertSampleJSONToHCL unmarshals json to an HCL string.
-func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent bool, b []byte) (string, error) {
-	{{- range $version, $resList := $.Resources   }}
+func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSnakeCase, version string, hasGAEquivalent bool, b []byte) (string, error) {
+	{{- range $version, $resList := $.Resources }}
 		{{- if not (eq $version.V "ga") }}
 	if version == "{{$version.V}}" {
-		switch resourceType {
-			{{- range $res := $resList   }}
-		case "{{$res.PathType}}":
+		switch fmt.Sprintf("%s/%s", product, resource) {
+			{{- range $res := $resList }}
+		case "{{$res.Package}}/{{$res.Name}}":
 			r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLStructName}}{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
@@ -109,16 +82,16 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 				{{- if $res.CustomSerializer }}
 			return {{$res.CustomSerializer}}(*r, hasGAEquivalent)
 				{{- else }}
-			return {{$res.PathType}}{{$version.SerializationSuffix}}AsHCL(*r, hasGAEquivalent)
+			return {{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}AsHCL(*r, hasGAEquivalent)
 				{{- end }}
 			{{- end }}
 		}	
 	}
 		{{- else }}
 	// If not found in sample version, fallthrough to GA
-	switch resourceType {
+	switch fmt.Sprintf("%s/%s", product, resource) {
 			{{- range $res := $resList   }}
-	case "{{$res.PathType}}":
+	case "{{$res.Package}}/{{$res.Name}}":
 		r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLStructName}}{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
@@ -126,28 +99,11 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 				{{- if $res.CustomSerializer }}
 			return {{$res.CustomSerializer}}(*r, hasGAEquivalent)
 				{{- else }}
-			return {{$res.PathType}}{{$version.SerializationSuffix}}AsHCL(*r, hasGAEquivalent)
-				{{- end }}
-			{{- end }}
-	}
-
-	// If still not found, try alternative resource names.
-	switch resourceType {
-			{{- range $res := $resList   }}
-	case "{{$res.SampleTypeName}}":
-		r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLStructName}}{}
-		if err := json.Unmarshal(b, r); err != nil {
-			return "", err
-		}
-				{{- if $res.CustomSerializer }}
-			return {{$res.CustomSerializer}}(*r, hasGAEquivalent)
-				{{- else }}
-			return {{$res.PathType}}{{$version.SerializationSuffix}}AsHCL(*r, hasGAEquivalent)
+			return {{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}AsHCL(*r, hasGAEquivalent)
 				{{- end }}
 			{{- end }}
 	default:
-		//return fmt.Sprintf("%s resource not supported in tpgtools", resourceType), nil
-		return "", fmt.Errorf("Error converting sample JSON to HCL: %s not found", resourceType)
+		return "", fmt.Errorf("Error converting sample JSON to HCL: %s not found", product, resource)
 	}
 		{{ end }}
 	{{- end }}
@@ -157,13 +113,13 @@ func ConvertSampleJSONToHCL(resourceType string, version string, hasGAEquivalent
 
 {{- range $version, $resList := $.Resources   }}
 	{{- range $res  := $resList   }}
-// {{ $res.PathType }}{{$version.SerializationSuffix}}AsHCL returns a string representation of the specified resource in HCL.
+// {{ $res.TitleCaseFullName }}{{$version.SerializationSuffix}}AsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func {{ $res.PathType}}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLStructName}}, hasGAEquivalent bool) (string, error) {
+func {{ $res.TitleCaseFullName }}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLStructName}}, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"{{$res.TerraformName}}\" \"output\" {\n"
 		{{- range $field := $res.Properties}}
 			{{- if $field.Settable }}
@@ -182,7 +138,7 @@ func {{ $res.PathType}}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{
 	}
 					{{- end}}
 				{{- else if $field.Type.IsObject }}
-	if v := convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(r.{{$field.PackageName}}); v != "" {
+	if v := convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(r.{{$field.PackageName}}); v != "" {
 						{{- if $field.Collapsed }}
 		outputConfig += v
 						{{- else }}
@@ -199,7 +155,7 @@ func {{ $res.PathType}}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{
 		outputConfig += "]\n"
 					{{- else }}
 		for _, v := range r.{{$field.PackageName}} {
-			outputConfig += fmt.Sprintf("\t{{$field.Name}} %s\n", convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(&v))
+			outputConfig += fmt.Sprintf("\t{{$field.Name}} %s\n", convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(&v))
 		}
 					{{- end }}
 	}
@@ -225,7 +181,7 @@ func {{ $res.PathType}}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{
 }
 
 		{{ range $v := $res.Objects}}
-func convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$v.PackagePath}}ToHCL(r *{{$res.Package}}{{$version.SerializationSuffix}}.{{$v.ObjectType}}) string {
+func convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$v.PackagePath}}ToHCL(r *{{$res.Package}}{{$version.SerializationSuffix}}.{{$v.ObjectType}}) string {
 	if r == nil {
 		return ""
 	}
@@ -243,7 +199,7 @@ func convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$v.PackagePath}}T
 	}
 						{{- end }}
 					{{- else if $field.Type.IsObject }}
-	if v := convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(r.{{$field.PackageName}}); v != "" {
+	if v := convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(r.{{$field.PackageName}}); v != "" {
 		outputConfig += fmt.Sprintf("{{ if not $v.Collapsed }}\t{{end}}{{$field.Name}} %s\n", v)
 	}
 					{{- else if eq $field.Type.String "TypeList" "TypeSet" }}
@@ -256,7 +212,7 @@ func convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$v.PackagePath}}T
 		outputConfig += "]\n"
 						{{- else }}
 		for _, v := range r.{{$field.PackageName}} {
-			outputConfig += fmt.Sprintf("{{ if not $v.Collapsed }}\t{{end}}{{$field.Name}} %s\n", convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(&v))
+			outputConfig += fmt.Sprintf("{{ if not $v.Collapsed }}\t{{end}}{{$field.Name}} %s\n", convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(&v))
 		}
 						{{- end }}
 	}
@@ -279,7 +235,7 @@ func convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$v.PackagePath}}T
 {{- range $version, $resList := $.Resources   }}
 	{{- range $res := $resList  }}
 		{{- range $v := $res.Objects }}
-func convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$v.PackagePath}}(i interface{}) (map[string]interface{}) {
+func convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$v.PackagePath}}(i interface{}) (map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
@@ -287,7 +243,7 @@ func convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$v.PackagePath}}(
 	return map[string]interface{}{
 			{{- range $prop := $v.Properties }}
 				{{- if $prop.IsObject }}
-		"{{$prop.PackageJSONName}}": convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$prop.PackagePath}}(in["{{$prop.Name}}"]),
+		"{{$prop.PackageJSONName}}": convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$prop.PackagePath}}(in["{{$prop.Name}}"]),
 				{{- else }}
 		"{{$prop.PackageJSONName}}": in["{{$prop.Name}}"],
 				{{- end }}
@@ -296,13 +252,13 @@ func convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$v.PackagePath}}(
 }
 
 
-func convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$v.PackagePath}}List(i interface{}) (out []map[string]interface{}) {
+func convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$v.PackagePath}}List(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convert{{$res.PathType}}{{$version.SerializationSuffix}}{{$v.PackagePath}}(v))
+		out = append(out, convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$v.PackagePath}}(v))
 	}
 	return out
 }

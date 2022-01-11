@@ -1,20 +1,5 @@
 [
   {
-    "name": "//run.googleapis.com/cloudrun-srv",
-    "asset_type": "run.googleapis.com/Service",
-    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
-    "iam_policy": {
-      "bindings": [
-        {
-          "role": "roles/viewer",
-          "members": [
-            "user:jane@example.com"
-          ]
-        }
-      ]
-    }
-  },
-  {
     "name": "//run.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/services/cloudrun-srv",
     "asset_type": "run.googleapis.com/Service",
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
@@ -47,6 +32,16 @@
           ]
         }
       }
+    },
+    "iam_policy": {
+      "bindings": [
+        {
+          "role": "roles/viewer",
+          "members": [
+            "user:jane@example.com"
+          ]
+        }
+      ]
     }
   }
 ]

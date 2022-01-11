@@ -73,7 +73,7 @@ func newPubsubSubscriptionIamAsset(
 		return []Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
-	name, err := assetName(d, config, "//pubsub.googleapis.com/{{pubsubSubscriptionId}}")
+	name, err := assetName(d, config, "//pubsub.googleapis.com/projects/{{project}}/subscriptions/{{subscription}}")
 	if err != nil {
 		return []Asset{}, err
 	}
@@ -89,7 +89,7 @@ func newPubsubSubscriptionIamAsset(
 
 func FetchPubsubSubscriptionIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
 	// Check if the identity field returns a value
-	if _, ok := d.GetOk("{{pubsubSubscriptionId}}"); !ok {
+	if _, ok := d.GetOk("{{subscription}}"); !ok {
 		return Asset{}, ErrEmptyIdentityField
 	}
 
@@ -97,7 +97,7 @@ func FetchPubsubSubscriptionIamPolicy(d TerraformResourceData, config *Config) (
 		NewPubsubSubscriptionIamUpdater,
 		d,
 		config,
-		"//pubsub.googleapis.com/{{pubsubSubscriptionId}}",
+		"//pubsub.googleapis.com/projects/{{project}}/subscriptions/{{subscription}}",
 		"pubsub.googleapis.com/Subscription",
 	)
 }

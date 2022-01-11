@@ -73,7 +73,7 @@ func newSpannerDatabaseIamAsset(
 		return []Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
-	name, err := assetName(d, config, "//spanner.googleapis.com/{{spannerDatabaseId}}")
+	name, err := assetName(d, config, "//spanner.googleapis.com/projects/{{project}}/instances/{{instance}}/databases/{{database}}")
 	if err != nil {
 		return []Asset{}, err
 	}
@@ -89,7 +89,11 @@ func newSpannerDatabaseIamAsset(
 
 func FetchSpannerDatabaseIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
 	// Check if the identity field returns a value
-	if _, ok := d.GetOk("{{spannerDatabaseId}}"); !ok {
+	if _, ok := d.GetOk("{{instance}}"); !ok {
+		return Asset{}, ErrEmptyIdentityField
+	}
+
+	if _, ok := d.GetOk("{{database}}"); !ok {
 		return Asset{}, ErrEmptyIdentityField
 	}
 
@@ -97,7 +101,7 @@ func FetchSpannerDatabaseIamPolicy(d TerraformResourceData, config *Config) (Ass
 		NewSpannerDatabaseIamUpdater,
 		d,
 		config,
-		"//spanner.googleapis.com/{{spannerDatabaseId}}",
+		"//spanner.googleapis.com/projects/{{project}}/instances/{{instance}}/databases/{{database}}",
 		"spanner.googleapis.com/Database",
 	)
 }
