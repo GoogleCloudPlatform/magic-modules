@@ -1317,7 +1317,6 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% unless version == 'ga' -%>
 			"dns_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1348,7 +1347,6 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 		},
 	}
 }
@@ -1477,9 +1475,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			<% unless version == 'ga' -%>
 			EnableL4ilbSubsetting:     d.Get("enable_l4_ilb_subsetting").(bool),
 			<% end -%>
-			<% unless version == 'ga' -%>
 			DnsConfig:                 expandDnsConfig(d.Get("dns_config")),
-			<% end -%>
 	    },
 		MasterAuth:     expandMasterAuth(d.Get("master_auth")),
 <% unless version == 'ga' -%>
@@ -1935,12 +1931,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("resource_usage_export_config", flattenResourceUsageExportConfig(cluster.ResourceUsageExportConfig)); err != nil {
 		return err
 	}
-<% unless version == 'ga' -%>
 	if err := d.Set("dns_config", flattenDnsConfig(cluster.NetworkConfig.DnsConfig)); err != nil {
 		return err
 	}
-<% end -%>
-
 	if err := d.Set("logging_config", flattenContainerClusterLoggingConfig(cluster.LoggingConfig)); err != nil {
 		return err
 	}
@@ -3569,7 +3562,6 @@ func expandResourceUsageExportConfig(configured interface{}) *container.Resource
 	return result
 }
 
-<% unless version == 'ga' -%>
 func expandDnsConfig(configured interface{}) *container.DNSConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -3583,7 +3575,6 @@ func expandDnsConfig(configured interface{}) *container.DNSConfig {
 		ClusterDnsDomain: config["cluster_dns_domain"].(string),
 	}
 }
-<% end -%>
 
 func expandContainerClusterLoggingConfig(configured interface{}) *container.LoggingConfig {
 	l := configured.([]interface{})
@@ -4074,7 +4065,6 @@ func flattenDatabaseEncryption(c *container.DatabaseEncryption) []map[string]int
 	}
 }
 
-<% unless version == 'ga' -%>
 func flattenDnsConfig(c *container.DNSConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -4087,7 +4077,6 @@ func flattenDnsConfig(c *container.DNSConfig) []map[string]interface{} {
 		},
 	}
 }
-<% end -%>
 
 func flattenContainerClusterLoggingConfig(c *container.LoggingConfig) []map[string]interface{} {
 	if c == nil {
