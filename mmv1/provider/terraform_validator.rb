@@ -314,8 +314,12 @@ module Provider
                      ])
     end
 
-
     def generate_resource_tests(pwd, data)
+      product_whitelist = [
+        'cloudrun'
+      ]
+
+      return unless product_whitelist.include?(data.product.name.downcase)
       return if data.object.examples
                     .reject(&:skip_test)
                     .reject do |e|
