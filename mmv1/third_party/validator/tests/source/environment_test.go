@@ -32,8 +32,8 @@ func Nprintf(format string, params map[string]interface{}) string {
 
 // testAccPreCheck ensures at least one of the project env variables is set.
 func getTestProjectFromEnv() string {
-	project, ok := os.LookupEnv("TEST_PROJECT")
-	if !ok {
+	project := multiEnvSearch([]string{"TEST_PROJECT", "GOOGLE_PROJECT"})
+	if project == "" {
 		log.Printf("Missing required env var TEST_PROJECT. Default (%s) will be used.", defaultProject)
 		project = defaultProject
 	}
@@ -48,8 +48,8 @@ func getTestCredsFromEnv() string {
 		log.Fatalf("cannot get current directory: %v", err)
 	}
 
-	credentials, ok := os.LookupEnv("TEST_CREDENTIALS")
-	if ok {
+	credentials := multiEnvSearch([]string{"TEST_CREDENTIALS", "GOOGLE_APPLICATION_CREDENTIALS"})
+	if credentials != "" {
 		// Make credentials path relative to repo root rather than
 		// test/ dir if it is a relative path.
 		if !filepath.IsAbs(credentials) {
@@ -114,4 +114,9 @@ func multiEnvSearch(ks []string) string {
 		}
 	}
 	return ""
+}
+
+func shouldOutputGeneratedFiles() bool {
+	_, ok := os.LookupEnv("TFV_CREATE_GENERATED_FILES")
+	return ok
 }
