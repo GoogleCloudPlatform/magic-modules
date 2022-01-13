@@ -385,17 +385,29 @@ resource "google_compute_security_policy" "policy" {
 func testAccComputeSecurityPolicy_withRateLimitOptions(spName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_security_policy" "policy" {
-  name        = "%s"
-  description = "updated description"
-  rate_limit_options {
-    conform_action = "allow"
-    exceed_action = "allow"
-    enforce_on_key = "IP"
-    rate_limit_threshold {
-      count = 100
-      interval_sec = 60
-    }
-  }
+	name        = "%s"
+	description = "updated description"
+	rule {
+		action = "throttle"
+		priority = 100	  
+		match {
+			versioned_expr = "SRC_IPS_V1"
+			config {
+				src_ip_ranges = [
+					"0.0.0.0/32",
+				]
+			}
+		}
+		rate_limit_options {
+			conform_action = "allow"
+			exceed_action = "allow"
+			enforce_on_key = "IP"
+			rate_limit_threshold {
+				count = 100
+				interval_sec = 60
+			}
+		}
+	}
 }
 `, spName)
 }
