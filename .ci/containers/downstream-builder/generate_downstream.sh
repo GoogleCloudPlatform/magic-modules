@@ -112,34 +112,13 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     # clear out the templates as they are copied during
     # generation from mmv1/third_party/validator/tests/data
     find ./testdata/templates/*.* -exec git rm {} \;
+    find ./testdata/generatedconvert/*.* -exec git rm {} \;
     find ./test/** -type f -exec git rm {} \;
     popd
     bundle exec compiler -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
     pushd $LOCAL_PATH
-
-    if [ "$COMMAND" == "downstream" ]; then
-      go get -d github.com/hashicorp/terraform-provider-google@main
-    else
-      go mod edit -replace github.com/hashicorp/terraform-provider-google=github.com/$SCRATCH_OWNER/terraform-provider-google@$BRANCH
-    fi
-
-    go mod tidy
-
-    # the following build can fail which results in a subsequent failure to push to tfv repository.
-    # due to the uncertainty of tpg being able to build we will ignore errors here
-    # as these files are not critical to operation of tfv and not worth blocking the GA pipeline
-    if [ "$COMMAND" == "downstream" ]; then
-      set +e
-    fi
-
-    make build
-    export TFV_CREATE_GENERATED_FILES=true
+    TFV_CREATE_GENERATED_FILES=true
     go test ./test -run "TestAcc.*_generated_offline"
-
-    if [ "$COMMAND" == "downstream" ]; then
-      set -e
-    fi
-
     popd
 elif [ "$REPO" == "tf-oics" ]; then
     # use terraform generator with oics override
