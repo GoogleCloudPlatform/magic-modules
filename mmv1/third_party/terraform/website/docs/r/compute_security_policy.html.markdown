@@ -71,6 +71,8 @@ The following arguments are supported:
 * `action` - (Required) Action to take when `match` matches the request. Valid values:
   * "allow" : allow access to target
   * "deny(status)" : deny access to target, returns the  HTTP response code specified (valid values are 403, 404 and 502)
+  * "rate_based_ban" : limit client traffic to the configured threshold and ban the client if the traffic exceeds the threshold. Configure parameters for this action in RateLimitOptions. Requires rateLimitOptions to be set.
+  * "threshold" : limit client traffic to the configured threshold. Configure parameters for this action in rateLimitOptions. Requires rateLimitOptions to be set for this.
 
 * `priority` - (Required) An unique positive integer indicating the priority of evaluation for a rule.
     Rules are evaluated from highest priority (lowest numerically) to lowest priority (highest numerically) in order.
