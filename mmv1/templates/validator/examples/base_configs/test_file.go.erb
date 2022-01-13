@@ -3,11 +3,11 @@
 package test
 
 import (
-	"io/ioutil"
-	"log"
-	"os"
-	"path"
-	"testing"
+  "io/ioutil"
+  "log"
+  "os"
+  "path"
+  "testing"
 )
 <%
 
@@ -24,7 +24,7 @@ object.examples
   .reject { |e| @api.version_obj_or_closest(version) < @api.version_obj_or_closest(e.min_version) }
   .each do |example|
 
-	# {Compute}{Address}_{addressBasic}
+  # {Compute}{Address}_{addressBasic}
     test_slug = "#{resource_name}_#{example.name.camelize(:lower)}Example"
 
     ignore_read = object.all_user_properties
@@ -41,54 +41,59 @@ object.examples
 
 <%-
 ["offline", "online"]
-		.each do |test_type|
+    .each do |test_type|
 
-		is_offline = test_type == "offline" ? "true" : "false"
+    is_offline = test_type == "offline" ? "true" : "false"
 
 -%>
 
 func TestAcc<%= test_slug -%>_generated_<%= test_type -%>(t *testing.T) {
-	testSlug := "<%= test_slug -%>_<%= test_type -%>"
+  testSlug := "<%= test_slug -%>_<%= test_type -%>"
   offline := <%= is_offline %>
   testAcc<%= test_slug -%>_shared(t, testSlug, offline)
 }
 <%- end %>
 
 func testAcc<%= test_slug -%>_shared(t *testing.T, testSlug string, offline bool) {
-  t.Parallel()
-	context := map[string]interface{} {
-<%= lines(indent(compile(pwd + '/templates/terraform/env_var_context.go.erb'), 4)) -%>
-	<% unless example.test_vars_overrides.nil? -%>
-	<% example.test_vars_overrides.each do |var_name, override| -%>
-			"<%= var_name %>": <%= override %>,
-	<% end -%>
-	<% end -%>
-			"random_suffix": "meepmerp", // true randomization isn't needed for validator
-	}
+  if testing.Short() {
+    t.Skip("skipping integration test in short mode.")
+    return
+  }
 
-	terraformConfig := getTestPrefix() + testAcc<%= test_slug -%>(context)
-	dir, err := ioutil.TempDir(tmpDir, "terraform")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+  t.Parallel()
+  context := map[string]interface{} {
+<%= lines(indent(compile(pwd + '/templates/terraform/env_var_context.go.erb'), 4)) -%>
+  <% unless example.test_vars_overrides.nil? -%>
+  <% example.test_vars_overrides.each do |var_name, override| -%>
+      "<%= var_name %>": <%= override %>,
+  <% end -%>
+  <% end -%>
+      "random_suffix": "meepmerp", // true randomization isn't needed for validator
+  }
+
+  terraformConfig := getTestPrefix() + testAcc<%= test_slug -%>(context)
+  dir, err := ioutil.TempDir(tmpDir, "terraform")
+  if err != nil {
+    log.Fatal(err)
+  }
+  defer os.RemoveAll(dir)
 
   dstFile := path.Join(dir, "main.tf")
-	err = os.WriteFile(dstFile, []byte(terraformConfig), 0666)
+  err = os.WriteFile(dstFile, []byte(terraformConfig), 0666)
   if err != nil {
-		t.Fatalf("error while writing to file %s, error %v", dstFile, err)
-	}
+    t.Fatalf("error while writing to file %s, error %v", dstFile, err)
+  }
 
-	terraformWorkflow(t, dir, testSlug)
+  terraformWorkflow(t, dir, testSlug)
   if offline && shouldOutputGeneratedFiles() {
     generateTFVconvertedAsset(t, dir, testSlug)
     return
   }
 
   // need to have comparison.. perhaps test vs checked in code
-	// testConvertCommand(t, dir, c.name, offline, c.compareConvertOutput)
+  // testConvertCommand(t, dir, c.name, offline, c.compareConvertOutput)
 
-	testValidateCommandGeneric(t, dir, testSlug, offline)
+  testValidateCommandGeneric(t, dir, testSlug, offline)
 }
 
 func testAcc<%= test_slug -%>(context map[string]interface{}) string {
