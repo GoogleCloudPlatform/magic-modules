@@ -93,14 +93,14 @@ resource "google_privateca_ca_pool" "default" {
         critical = true
         value = "asdf"
         object_id {
-          object_id_path = [123, 899]
+          object_id_path = [1, 5]
         }
       }
       policy_ids {
-        object_id_path = [123, 888]
+        object_id_path = [1, 7]
       }
       policy_ids {
-        object_id_path = [2,5,29,25]
+        object_id_path = [1,5,7]
       }
       ca_options {
         is_ca = true
@@ -175,14 +175,14 @@ resource "google_privateca_ca_pool" "default" {
         critical = true
         value = "asdf"
         object_id {
-          object_id_path = [899, 123]
+          object_id_path = [1, 7]
         }
       }
       policy_ids {
-        object_id_path = [123, 999]
+        object_id_path = [1, 5]
       }
       policy_ids {
-        object_id_path = [456, 120, 789]
+        object_id_path = [1, 7]
       }
       ca_options {
         is_ca = true
@@ -257,7 +257,7 @@ resource "google_privateca_ca_pool" "default" {
         critical = false
         value = "asdf"
         object_id {
-          object_id_path = [123, 899]
+          object_id_path = [1, 6]
         }
       }
       ca_options {
@@ -269,6 +269,172 @@ resource "google_privateca_ca_pool" "default" {
         }
         extended_key_usage {
           server_auth = false
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func TestAccPrivatecaCaPool_privatecaCapoolEmptyPublishingOptions(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPrivatecaCaPoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPrivatecaCaPool_privatecaCapoolEmptyPublishingOptions(context),
+			},
+			{
+				ResourceName:            "google_privateca_ca_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location"},
+			},
+		},
+	})
+}
+
+func testAccPrivatecaCaPool_privatecaCapoolEmptyPublishingOptions(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_privateca_ca_pool" "default" {
+  name = "tf-test-my-capool%{random_suffix}"
+  location = "us-central1"
+  tier = "ENTERPRISE"
+  publishing_options {
+    publish_ca_cert = false
+    publish_crl = false
+  }
+  labels = {
+    foo = "bar"
+  }
+}
+`, context)
+}
+
+func TestAccPrivatecaCaPool_updateCaOption(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPrivatecaCaPoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPrivatecaCaPool_privatecaCapoolCaOptionIsCaIsTrueAndMaxPathIsPositive(context),
+			},
+			{
+				ResourceName:            "google_privateca_ca_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location"},
+			},
+			{
+				Config: testAccPrivatecaCaPool_privatecaCapoolCaOptionIsCaIsFalse(context),
+			},
+			{
+				ResourceName:            "google_privateca_ca_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location"},
+			},
+			{
+				Config: testAccPrivatecaCaPool_privatecaCapoolCaOptionMaxIssuerPathLenghIsZero(context),
+			},
+			{
+				ResourceName:            "google_privateca_ca_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location"},
+			},
+		},
+	})
+}
+
+func testAccPrivatecaCaPool_privatecaCapoolCaOptionIsCaIsTrueAndMaxPathIsPositive(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_privateca_ca_pool" "default" {
+  name = "tf-test-my-capool%{random_suffix}"
+  location = "us-central1"
+  tier = "ENTERPRISE"
+
+  issuance_policy {
+    baseline_values {
+      ca_options {
+        is_ca = true
+        max_issuer_path_length = 10
+      }
+      key_usage {
+        base_key_usage {
+          digital_signature = true
+        }
+        extended_key_usage {
+          server_auth = true
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccPrivatecaCaPool_privatecaCapoolCaOptionIsCaIsFalse(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_privateca_ca_pool" "default" {
+  name = "tf-test-my-capool%{random_suffix}"
+  location = "us-central1"
+  tier = "ENTERPRISE"
+
+  issuance_policy {
+    baseline_values {
+      ca_options {
+        non_ca = true
+        is_ca = false
+      }
+      key_usage {
+        base_key_usage {
+          digital_signature = true
+        }
+        extended_key_usage {
+          server_auth = true
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccPrivatecaCaPool_privatecaCapoolCaOptionMaxIssuerPathLenghIsZero(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_privateca_ca_pool" "default" {
+  name = "tf-test-my-capool%{random_suffix}"
+  location = "us-central1"
+  tier = "ENTERPRISE"
+
+  issuance_policy {
+    baseline_values {
+      ca_options {
+        zero_max_issuer_path_length = true
+        max_issuer_path_length = 0
+      }
+      key_usage {
+        base_key_usage {
+          digital_signature = true
+        }
+        extended_key_usage {
+          server_auth = true
         }
       }
     }

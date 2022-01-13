@@ -17,6 +17,15 @@ import (
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
+const SQLDatabaseInstanceAssetType string = "sqladmin.googleapis.com/Instance"
+
+func resourceConverterSQLDatabaseInstance() ResourceConverter {
+	return ResourceConverter{
+		AssetType: SQLDatabaseInstanceAssetType,
+		Convert:   GetSQLDatabaseInstanceCaiObject,
+	}
+}
+
 func GetSQLDatabaseInstanceCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}")
 	if err != nil {
@@ -25,7 +34,7 @@ func GetSQLDatabaseInstanceCaiObject(d TerraformResourceData, config *Config) ([
 	if obj, err := GetSQLDatabaseInstanceApiObject(d, config); err == nil {
 		return []Asset{{
 			Name: name,
-			Type: "sqladmin.googleapis.com/Instance",
+			Type: SQLDatabaseInstanceAssetType,
 			Resource: &AssetResource{
 				Version:              "v1beta4",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/sqladmin/v1beta4/rest",
@@ -93,15 +102,12 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, secondGen bool)
 		ForceSendFields:             []string{"StorageAutoResize"},
 		ActivationPolicy:            _settings["activation_policy"].(string),
 		AvailabilityType:            _settings["availability_type"].(string),
-		CrashSafeReplicationEnabled: _settings["crash_safe_replication"].(bool),
 		DataDiskSizeGb:              int64(_settings["disk_size"].(int)),
 		DataDiskType:                _settings["disk_type"].(string),
 		PricingPlan:                 _settings["pricing_plan"].(string),
-		ReplicationType:             _settings["replication_type"].(string),
 		UserLabels:                  convertStringMap(_settings["user_labels"].(map[string]interface{})),
 		BackupConfiguration:         expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
 		DatabaseFlags:               expandDatabaseFlags(_settings["database_flags"].([]interface{})),
-		AuthorizedGaeApplications:   expandAuthorizedGaeApplications(_settings["authorized_gae_applications"].([]interface{})),
 		IpConfiguration:             expandIpConfiguration(_settings["ip_configuration"].([]interface{})),
 		LocationPreference:          expandLocationPreference(_settings["location_preference"].([]interface{})),
 		MaintenanceWindow:           expandMaintenanceWindow(_settings["maintenance_window"].([]interface{})),
@@ -197,14 +203,6 @@ func expandAuthorizedNetworks(configured []interface{}) []*sqladmin.AclEntry {
 	}
 
 	return an
-}
-
-func expandAuthorizedGaeApplications(configured []interface{}) []string {
-	aga := make([]string, 0, len(configured))
-	for _, app := range configured {
-		aga = append(aga, app.(string))
-	}
-	return aga
 }
 
 func expandDatabaseFlags(configured []interface{}) []*sqladmin.DatabaseFlags {

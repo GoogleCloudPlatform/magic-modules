@@ -17,6 +17,8 @@ package main
 import (
 	"regexp"
 	"strings"
+
+	"github.com/golang/glog"
 )
 
 // Map from initialism -> TitleCase variant
@@ -32,27 +34,36 @@ var initialisms = map[string]string{
 	"vpc":    "VPC",
 }
 
-// snakeToTitleCase converts a snake_case string to a conjoined string
-func snakeToLowercase(s string) string {
-	return strings.Join(snakeToParts(s, false), "")
+func assertSnakeArray(ss []string) []miscellaneousNameSnakeCase {
+	var sc []miscellaneousNameSnakeCase
+	for _, s := range ss {
+		if strings.ToLower(s) != s {
+			glog.Exitf("assertion failed: snake case value not in snake case.  %q != %q (same string passed to ToLower).", s, strings.ToLower(s))
+		}
+		sc = append(sc, miscellaneousNameSnakeCase(s))
+	}
+	return sc
 }
 
-// snakeToTitleCase converts a snake_case string to TitleCase / Go struct case.
-func snakeToTitleCase(s string) string {
-	return strings.Join(snakeToParts(s, true), "")
+func concatenateSnakeCase(s ...snakeCaseName) miscellaneousNameSnakeCase {
+	var names []string
+	for _, n := range s {
+		names = append(names, n.snakecase())
+	}
+	return miscellaneousNameSnakeCase(strings.Join(names, "_"))
 }
 
-// snakeToTitleParts returns the parts of a snake_case string absent of '_'
+// snakeToParts returns the parts of a snake_case string absent of '_'
 // if titleCase is true these segents will have their first letter capitalized
-func snakeToParts(s string, titleCase bool) []string {
+func snakeToParts(s snakeCaseName, titleCase bool) []string {
 	parts := []string{}
-	segments := strings.Split(s, "_")
+	segments := strings.Split(s.snakecase(), "_")
 	for _, seg := range segments {
 		if v, ok := initialisms[seg]; ok {
 			parts = append(parts, v)
 		} else {
 			var newPart string = seg
-			if titleCase {
+			if titleCase && len(newPart) > 0 {
 				newPart = strings.ToUpper(newPart[0:1]) + newPart[1:]
 			}
 			parts = append(parts, newPart)
@@ -63,16 +74,16 @@ func snakeToParts(s string, titleCase bool) []string {
 }
 
 // jsonToSnakeCase converts a jsonCase string to snake_case.
-func jsonToSnakeCase(s string) string {
+func jsonToSnakeCase(s string) miscellaneousNameSnakeCase {
 	for _, v := range initialisms {
 		s = strings.ReplaceAll(s, v, v[0:1]+strings.ToLower(v[1:]))
 	}
 	result := regexp.MustCompile("(.)([A-Z][^A-Z]+)").ReplaceAllString(s, "${1}_${2}")
-	return strings.ToLower(regexp.MustCompile("([a-z0-9])([A-Z])").ReplaceAllString(result, "${1}_${2}"))
+	return miscellaneousNameSnakeCase(strings.ToLower(regexp.MustCompile("([a-z0-9])([A-Z])").ReplaceAllString(result, "${1}_${2}")))
 }
 
-func sampleNameToTitleCase(s string) string {
-	return strings.Join(sampleNameToTitleParts(s), "")
+func sampleNameToTitleCase(s string) miscellaneousNameTitleCase {
+	return miscellaneousNameTitleCase(strings.Join(sampleNameToTitleParts(s), ""))
 }
 
 func sampleNameToTitleParts(s string) []string {

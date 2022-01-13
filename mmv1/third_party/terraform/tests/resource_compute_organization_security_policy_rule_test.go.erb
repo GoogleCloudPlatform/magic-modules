@@ -3,12 +3,9 @@ package google
 <% unless version == 'ga' -%>
 
 import (
-	"log"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleUpdateExample(t *testing.T) {
@@ -46,13 +43,16 @@ func TestAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRule
 
 func testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRulePreUpdateExample(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_compute_organization_security_policy" "policy" {
-  display_name = "tf-test%{random_suffix}"
+resource "google_folder" "security_policy_target" {
+  display_name = "tf-test-secpol-%{random_suffix}"
   parent       = "organizations/%{org_id}"
 }
 
+resource "google_compute_organization_security_policy" "policy" {
+  display_name = "tf-test%{random_suffix}"
+  parent       = google_folder.security_policy_target.name
+}
 resource "google_compute_organization_security_policy_rule" "policy" {
-
   policy_id = google_compute_organization_security_policy.policy.id
   action = "allow"
 
@@ -77,13 +77,17 @@ resource "google_compute_organization_security_policy_rule" "policy" {
 
 func testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRulePostUpdateExample(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_compute_organization_security_policy" "policy" {
-  display_name = "tf-test%{random_suffix}"
+resource "google_folder" "security_policy_target" {
+  display_name = "tf-test-secpol-%{random_suffix}"
   parent       = "organizations/%{org_id}"
 }
 
-resource "google_compute_organization_security_policy_rule" "policy" {
+resource "google_compute_organization_security_policy" "policy" {
+  display_name = "tf-test%{random_suffix}"
+  parent       = google_folder.security_policy_target.name
+}
 
+resource "google_compute_organization_security_policy_rule" "policy" {
   policy_id = google_compute_organization_security_policy.policy.id
   action = "deny"
 

@@ -58,3 +58,61 @@ func resourceComputeFirewallEnableLoggingCustomizeDiff(_ context.Context, diff *
 
 	return nil
 }
+
+// Per https://github.com/hashicorp/terraform-provider-google/issues/2924
+// Make one of the source_ parameters Required in ingress google_compute_firewall
+func resourceComputeFirewallSourceFieldsCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
+	direction := diff.Get("direction").(string)
+
+	if direction != "EGRESS" {
+		_, tagsOk := diff.GetOk("source_tags")
+		_, rangesOk := diff.GetOk("source_ranges")
+		_, sasOk := diff.GetOk("source_service_accounts")
+
+		_, tagsExist := diff.GetOkExists("source_tags")
+		// ranges is computed, but this is what we're trying to avoid, so we're not going to check this
+		_, sasExist := diff.GetOkExists("source_service_accounts")
+
+		if !tagsOk && !rangesOk && !sasOk && !tagsExist && !sasExist {
+			return fmt.Errorf("one of source_tags, source_ranges, or source_service_accounts must be defined")
+		}
+	}
+
+	return nil
+}
+
+func diffSuppressSourceRanges(k, old, new string, d *schema.ResourceData) bool {
+	if k == "source_ranges.#" {
+		if old == "1" && new == "0" {
+			// Allow diffing on the individual element if we are going from 1 -> 0
+			// this allows for diff suppress on ["0.0.0.0/0"] -> []
+			return true
+		}
+		// For any other source_ranges.# diff, don't suppress
+		return false
+	}
+	kLength := "source_ranges.#"
+	oldLength, newLength := d.GetChange(kLength)
+	oldInt, ok := oldLength.(int)
+
+	if !ok {
+		return false
+	}
+
+	newInt, ok := newLength.(int)
+	if !ok {
+		return false
+	}
+
+	// Diff suppress only should suppress removing the default range
+	// This should probably be newInt == 0, but due to Terraform core internals
+	// (bug?) values found via GetChange may not have the correct new value
+	// in some circumstances
+	if oldInt == 1 && newInt == 1 {
+		if old == "0.0.0.0/0" && new == "" {
+			return true
+		}
+	}
+	// For any other source_ranges value diff, don't suppress
+	return false
+}

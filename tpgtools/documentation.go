@@ -38,13 +38,17 @@ func mergeResource(res *Resource, resources map[Version][]*Resource, version *Ve
 	}
 	ga, gaExists := resourceAcrossVersions[GA_VERSION]
 	beta, betaExists := resourceAcrossVersions[BETA_VERSION]
+	alpha, alphaExists := resourceAcrossVersions[ALPHA_VERSION]
+	if alphaExists {
+		return alpha
+	}
 	if gaExists {
 		if betaExists {
 			return mergeResources(ga, beta)
 		}
 		return ga
 	}
-	beta.Description = "Beta only"
+	beta.Description = fmt.Sprintf("Beta only: %s", beta.Description)
 	return beta
 }
 

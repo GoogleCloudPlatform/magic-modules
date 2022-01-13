@@ -1,0 +1,36 @@
+[
+  {
+    "name": "//bigtable.googleapis.com/projects/{{.Provider.project}}/instances/tf-instance",
+    "asset_type": "bigtableadmin.googleapis.com/Instance",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://bigtableadmin.googleapis.com/$discovery/rest",
+      "discovery_name": "Instance",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "labels": {
+          "test-name": "test-value"
+        },
+        "name": "projects/{{.Provider.project}}/instances/tf-instance"
+      }
+    }
+  },
+  {
+    "name": "//bigtable.googleapis.com/projects/{{.Provider.project}}/instances/tf-instance/clusters/placeholder-foobar",
+    "asset_type": "bigtableadmin.googleapis.com/Cluster",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v2",
+      "discovery_document_uri": "https://bigtableadmin.googleapis.com/$discovery/rest",
+      "discovery_name": "Cluster",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "defaultStorageType": "HDD",
+        "location": "australia-southeast1-a",
+        "name": "projects/{{.Provider.project}}/instances/tf-instance/clusters/tf-instance-cluster",
+        "serverNodes": 1
+      }
+    }
+  }
+]

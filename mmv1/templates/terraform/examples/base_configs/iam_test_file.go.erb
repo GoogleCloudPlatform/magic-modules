@@ -65,6 +65,12 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 		Providers:    testAccProvidersOiCS,
 <% else -%>
 		Providers:    testAccProviders,
+		<% if example.pull_external -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+			"time": {},
+		},
+		<% end -%>
 <% end -%>
 		Steps: []resource.TestStep{
 			{
@@ -106,6 +112,12 @@ func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 <% else -%>
 		Providers: testAccProviders,
 <% end -%>
+		<% if example.pull_external -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+			"time": {},
+		},
+		<% end -%>
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
@@ -142,6 +154,12 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 <% else -%>
 		Providers: testAccProviders,
 <% end -%>
+		<% if example.pull_external -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+			"time": {},
+		},
+		<% end -%>
 		Steps: []resource.TestStep{
 			{
 				Config: testAcc<%= resource_name -%>IamPolicy_basicGenerated(context),
@@ -182,6 +200,12 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T)
 <% else -%>
 		Providers: testAccProviders,
 <% end -%>
+		<% if example.pull_external -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+			"time": {},
+		},
+		<% end -%>
 		Steps: []resource.TestStep{
 			{
 				Config: testAcc<%= resource_name -%>IamBinding_withConditionGenerated(context),
@@ -212,6 +236,12 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *
 <% else -%>
 		Providers: testAccProviders,
 <% end -%>
+		<% if example.pull_external -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+			"time": {},
+		},
+		<% end -%>
 		Steps: []resource.TestStep{
 			{
 				Config: testAcc<%= resource_name -%>IamBinding_withAndWithoutConditionGenerated(context),
@@ -248,6 +278,12 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) 
 <% else -%>
 		Providers: testAccProviders,
 <% end -%>
+		<% if example.pull_external -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+			"time": {},
+		},
+		<% end -%>
 		Steps: []resource.TestStep{
 			{
 				Config: testAcc<%= resource_name -%>IamMember_withConditionGenerated(context),
@@ -278,6 +314,12 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *t
 <% else -%>
 		Providers: testAccProviders,
 <% end -%>
+		<% if example.pull_external -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+			"time": {},
+		},
+		<% end -%>
 		Steps: []resource.TestStep{
 			{
 				Config: testAcc<%= resource_name -%>IamMember_withAndWithoutConditionGenerated(context),
@@ -321,6 +363,12 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 <% else -%>
 		Providers: testAccProviders,
 <% end -%>
+		<% if example.pull_external -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+			"time": {},
+		},
+		<% end -%>
 		Steps: []resource.TestStep{
 			{
 				Config: testAcc<%= resource_name -%>IamPolicy_withConditionGenerated(context),
@@ -428,7 +476,7 @@ resource "<%= resource_ns_iam -%>_binding" "foo" {
 <% end -%>
 <%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "%{role}"
-  members = ["user:admin@hashicorptest.com", "user:paddy@hashicorp.com"]
+  members = ["user:admin@hashicorptest.com", "user:gterraformtest1@gmail.com"]
 }
 `, context)
 }

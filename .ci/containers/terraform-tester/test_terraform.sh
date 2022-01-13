@@ -7,7 +7,13 @@ pr_number=$2
 mm_commit_sha=$3
 build_id=$4
 project_id=$5
-build_step=$6
+repo_name=$6
+build_step=$7
+if [ -z "$7" ]; then
+  # an old run - any time after october 15 2021 this can be removed.
+  repo_name=GoogleCloudPlatform/magic-modules
+  build_step=$6
+fi
 github_username=modular-magician
 if [ "$version" == "ga" ]; then
     gh_repo=terraform-provider-google
@@ -47,7 +53,7 @@ curl \
   -X POST \
   -u "$github_username:$GITHUB_TOKEN" \
   -H "Accept: application/vnd.github.v3+json" \
-  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
+  "https://api.github.com/repos/$repo_name/statuses/$mm_commit_sha" \
   -d "$post_body"
 
 
@@ -61,7 +67,7 @@ curl \
   -X POST \
   -u "$github_username:$GITHUB_TOKEN" \
   -H "Accept: application/vnd.github.v3+json" \
-  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
+  "https://api.github.com/repos/$repo_name/statuses/$mm_commit_sha" \
   -d "$post_body"
 
 set +e
@@ -70,18 +76,19 @@ make
 lint_exit_code=$?
 test_exit_code=1
 
+make tools
+lint_exit_code=$(($lint_exit_code || $?))
+
 if [ $lint_exit_code -eq 0 ]; then
-    # only run lint & tests if the code compiled
+    # only run lint & tests if the code compiled and tools downloaded
     make lint
-    lint_exit_code=$lint_exit_code || $?
+    lint_exit_code=$(($lint_exit_code || $?))
     make test
     test_exit_code=$?
 fi
 
-make tools
-lint_exit_code=$lint_exit_code || $?
 make docscheck
-lint_exit_code=$lint_exit_code || $?
+lint_exit_code=$(($lint_exit_code || $?))
 
 set -e
 
@@ -107,7 +114,7 @@ curl \
   -X POST \
   -u "$github_username:$GITHUB_TOKEN" \
   -H "Accept: application/vnd.github.v3+json" \
-  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
+  "https://api.github.com/repos/$repo_name/statuses/$mm_commit_sha" \
   -d "$post_body"
 
 
@@ -121,5 +128,5 @@ curl \
   -X POST \
   -u "$github_username:$GITHUB_TOKEN" \
   -H "Accept: application/vnd.github.v3+json" \
-  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
+  "https://api.github.com/repos/$repo_name/statuses/$mm_commit_sha" \
   -d "$post_body"

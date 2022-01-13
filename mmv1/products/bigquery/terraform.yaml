@@ -63,6 +63,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       location: !ruby/object:Overrides::Terraform::PropertyOverride
         input: true
         custom_flatten: templates/terraform/custom_flatten/bigquery_dataset_location.go.erb
+        diff_suppress_func: 'caseDiffSuppress'
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -377,6 +378,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           dataset_id: "dataset_id"
           routine_id: "routine_id"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "big_query_routine_tvf"
+        primary_resource_id: "sproc"
+        primary_resource_name: "fmt.Sprintf(\"tf_test_dataset_id%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf_test_table_id%s\", context[\"random_suffix\"])"
+        vars:
+          dataset_id: "dataset_id"
+          routine_id: "routine_id"
     properties:
       routineReference: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bigquery_routine_ref.go.erb'
@@ -390,6 +398,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.StringIsJSON'
       returnType: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringIsJSON'
+      returnTableType: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
         custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
         state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'

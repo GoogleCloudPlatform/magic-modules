@@ -1,0 +1,16 @@
+[
+  {
+    "name": "//pubsublite.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/reservations/example-reservation",
+    "asset_type": "pubsublite.googleapis.com/Reservation",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "admin",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/pubsublite/admin/rest",
+      "discovery_name": "Reservation",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "throughputCapacity": 2
+      }
+    }
+  }
+]

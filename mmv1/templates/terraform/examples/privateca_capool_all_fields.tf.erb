@@ -1,3 +1,4 @@
+# [START privateca_create_ca_pool_all_fields]
 resource "google_privateca_ca_pool" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]["name"] %>"
   location = "us-central1"
@@ -40,14 +41,14 @@ resource "google_privateca_ca_pool" "<%= ctx[:primary_resource_id] %>" {
         critical = true
         value = "asdf"
         object_id {
-          object_id_path = [123, 899]
+          object_id_path = [1, 7]
         }
       }
       policy_ids {
-        object_id_path = [123, 888]
+        object_id_path = [1, 5]
       }
       policy_ids {
-        object_id_path = [456, 120]
+        object_id_path = [1, 5, 7]
       }
       ca_options {
         is_ca = true
@@ -75,3 +76,4 @@ resource "google_privateca_ca_pool" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 }
+# [END privateca_create_ca_pool_all_fields]

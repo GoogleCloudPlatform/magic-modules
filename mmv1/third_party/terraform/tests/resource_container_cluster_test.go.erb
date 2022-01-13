@@ -1,10 +1,11 @@
 <% autogen_exception -%>
-
 package google
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"log"
 	"testing"
 	"regexp"
 	"strconv"
@@ -96,6 +97,27 @@ func TestAccContainerCluster_basic(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_networkingModeRoutes(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
+		PreCheck:	  func() { testAccPreCheck(t) },
+		Providers:	  testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_networkingModeRoutes(clusterName),
+			},
+			{
+				ResourceName:	     "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_misc(t *testing.T) {
 	t.Parallel()
 
@@ -149,6 +171,7 @@ func TestAccContainerCluster_withAddons(t *testing.T) {
 				ResourceName:            "google_container_cluster.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
+				// TODO: clean up this list in `4.0.0`, remove both `workload_identity_config` fields (same for below)
 				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 			{
@@ -223,7 +246,6 @@ func TestAccContainerCluster_withNotificationConfig(t *testing.T) {
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 	t.Parallel()
 
@@ -262,7 +284,6 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
@@ -304,6 +325,31 @@ func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 	})
 }
 <% end -%>
+
+func TestAccContainerCluster_withMasterAuthConfig_NoCert(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withMasterAuthNoCert(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_master_auth_no_cert", "master_auth.0.client_certificate", ""),
+				),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_master_auth_no_cert",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
 
 func TestAccContainerCluster_withAuthenticatorGroupsConfig(t *testing.T) {
 	t.Parallel()
@@ -922,7 +968,7 @@ func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 				Config: testAccContainerCluster_withWorkloadMetadataConfig(clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_workload_metadata_config",
-						"node_config.0.workload_metadata_config.0.node_metadata", "SECURE"),
+						"node_config.0.workload_metadata_config.0.mode", "GCE_METADATA"),
 				),
 			},
 			{
@@ -990,13 +1036,13 @@ func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func TestAccContainerCluster_withBootDiskKmsKey(t *testing.T) {
-	// KMS key has calculated next rotation time
-	skipIfVcr(t)
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	kms := BootstrapKMSKeyInLocation(t, "us-central1")
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
@@ -1004,7 +1050,7 @@ func TestAccContainerCluster_withBootDiskKmsKey(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withBootDiskKmsKey(getTestProjectFromEnv(), clusterName),
+				Config: testAccContainerCluster_withBootDiskKmsKey(getTestProjectFromEnv(), clusterName, kms.CryptoKey.Name),
 			},
 			{
 				ResourceName:            "google_container_cluster.with_boot_disk_kms_key",
@@ -1015,7 +1061,6 @@ func TestAccContainerCluster_withBootDiskKmsKey(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerCluster_network(t *testing.T) {
 	t.Parallel()
@@ -1416,6 +1461,48 @@ func TestAccContainerCluster_withMaintenanceExclusionWindow(t *testing.T) {
 	})
 }
 
+
+func TestAccContainerCluster_deleteExclusionWindow(t *testing.T) {
+	t.Parallel()
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	resourceName := "google_container_cluster.with_maintenance_exclusion_window"
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withExclusion_DailyMaintenanceWindow(cluster, "2020-01-01T00:00:00Z", "2020-01-02T00:00:00Z"),
+			},
+			{
+				ResourceName:        resourceName,
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+			{
+				Config: testAccContainerCluster_withExclusion_RecurringMaintenanceWindow(cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z"),
+			},
+			{
+				ResourceName:        resourceName,
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+			{
+				Config: testAccContainerCluster_withExclusion_NoMaintenanceWindow(cluster, "2020-01-01T00:00:00Z", "2020-01-02T00:00:00Z"),
+			},
+			{
+				ResourceName:        resourceName,
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withIPAllocationPolicy_existingSecondaryRanges(t *testing.T) {
 	t.Parallel()
 
@@ -1596,7 +1683,7 @@ func TestAccContainerCluster_withAutopilot(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withAutopilot(containerNetName, clusterName, true),
+				Config: testAccContainerCluster_withAutopilot(containerNetName, clusterName, "us-central1", true),
 			},
 			{
 				ResourceName: "google_container_cluster.with_autopilot",
@@ -1611,6 +1698,7 @@ func TestAccContainerCluster_withAutopilot(t *testing.T) {
 func TestAccContainerCluster_errorAutopilotLocation(t *testing.T) {
 	t.Parallel()
 
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", randString(t, 10))
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
@@ -1619,13 +1707,12 @@ func TestAccContainerCluster_errorAutopilotLocation(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccContainerCluster_withInvalidAutopilotLocation(clusterName, "us-central1-a"),
+				Config:      testAccContainerCluster_withAutopilot(containerNetName, clusterName, "us-central1-a", true),
 				ExpectError: regexp.MustCompile(`Autopilot clusters must be regional clusters.`),
 			},
 		},
 	})
 }
-
 
 func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 	t.Parallel()
@@ -1667,7 +1754,119 @@ func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 			},
 		},
 	})
+}
 
+<% unless version == 'ga' -%>
+func TestAccContainerCluster_withIdentityServiceConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_basic(clusterName),
+			},
+			{
+				ResourceName:        "google_container_cluster.primary",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+			{
+				Config: testAccContainerCluster_withIdentityServiceConfigEnabled(clusterName),
+			},
+			{
+				ResourceName:        "google_container_cluster.primary",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+			{
+				Config: testAccContainerCluster_withIdentityServiceConfigUpdated(clusterName),
+			},
+			{
+				ResourceName:        "google_container_cluster.primary",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+			{
+				Config: testAccContainerCluster_basic(clusterName),
+			},
+			{
+				ResourceName:        "google_container_cluster.primary",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+		},
+	})
+}
+<% end -%>
+
+func TestAccContainerCluster_withLoggingConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_basic(clusterName),
+			},
+			{
+				ResourceName:        "google_container_cluster.primary",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+			{
+				Config: testAccContainerCluster_withLoggingConfigEnabled(clusterName),
+			},
+			{
+				ResourceName:        "google_container_cluster.primary",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+			{
+				Config: testAccContainerCluster_withLoggingConfigUpdated(clusterName),
+			},
+			{
+				ResourceName:        "google_container_cluster.primary",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+			{
+				Config: testAccContainerCluster_basic(clusterName),
+			},
+			{
+				ResourceName:        "google_container_cluster.primary",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+		},
+	})
+}
+
+func TestAccContainerCluster_withSoleTenantGroup(t *testing.T) {
+	t.Parallel()
+
+	resourceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withSoleTenantGroup(resourceName),
+			},
+			{
+				ResourceName:        "google_container_cluster.primary",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+		},
+	})
 }
 
 <% unless version == 'ga' -%>
@@ -2057,6 +2256,28 @@ func TestAccContainerCluster_withIPv4Error(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withDNSConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	domainName := fmt.Sprintf("tf-test-domain-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withDNSConfig(clusterName, "CLOUD_DNS", domainName, "VPC_SCOPE"),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_dns_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccContainerCluster_masterAuthorizedNetworksDisabled(t *testing.T, resource_name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resource_name]
@@ -2217,6 +2438,17 @@ resource "google_container_cluster" "primary" {
 `, name)
 }
 
+func testAccContainerCluster_networkingModeRoutes(name string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  networking_mode    = "ROUTES"
+}
+`, name)
+}
+
 func testAccContainerCluster_misc(name string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
@@ -2296,7 +2528,7 @@ resource "google_container_cluster" "primary" {
   min_master_version = "latest"
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
 
   addons_config {
@@ -2349,7 +2581,7 @@ resource "google_container_cluster" "primary" {
   min_master_version = "latest"
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
 
   addons_config {
@@ -2402,7 +2634,7 @@ resource "google_container_cluster" "primary" {
   min_master_version = "latest"
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
 
   addons_config {
@@ -2461,13 +2693,12 @@ resource "google_container_cluster" "notification_config" {
 `, clusterName)
 }
 <% end -%>
-<% unless version == 'ga' -%>
+
 func testAccContainerCluster_withConfidentialNodes(clusterName string, npName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
   location           = "us-central1-a"
-  enable_shielded_nodes = true
   release_channel {
     channel = "RAPID"
   }
@@ -2492,7 +2723,6 @@ func testAccContainerCluster_disableConfidentialNodes(clusterName string, npName
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
   location           = "us-central1-a"
-  enable_shielded_nodes = true
   release_channel {
     channel = "RAPID"
   }
@@ -2511,7 +2741,6 @@ resource "google_container_cluster" "confidential_nodes" {
 }
 `, clusterName, npName)
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func testAccContainerCluster_withILBSubSetting(clusterName string, npName string) string {
@@ -2519,7 +2748,6 @@ func testAccContainerCluster_withILBSubSetting(clusterName string, npName string
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
   location           = "us-central1-a"
-  enable_shielded_nodes = true
   release_channel {
     channel = "RAPID"
   }
@@ -2542,7 +2770,6 @@ func testAccContainerCluster_disableILBSubSetting(clusterName string, npName str
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
   location           = "us-central1-a"
-  enable_shielded_nodes = true
   release_channel {
     channel = "RAPID"
   }
@@ -2922,6 +3149,21 @@ resource "google_container_cluster" "with_version" {
 `, clusterName)
 }
 
+func testAccContainerCluster_withMasterAuthNoCert(clusterName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_master_auth_no_cert" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 3
+  master_auth {
+    client_certificate_config {
+      issue_client_certificate = false
+    }
+  }
+}
+`, clusterName)
+}
+
 func testAccContainerCluster_updateVersion(clusterName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -3111,7 +3353,7 @@ resource "google_container_cluster" "with_workload_metadata_config" {
     ]
 
     workload_metadata_config {
-      node_metadata = "SECURE"
+      mode = "GCE_METADATA"
     }
   }
 }
@@ -3197,13 +3439,10 @@ resource "google_container_cluster" "with_sandbox_config" {
 }
 `, clusterName)
 }
+<% end -%>
 
-func testAccContainerCluster_withBootDiskKmsKey(project, clusterName string) string {
+func testAccContainerCluster_withBootDiskKmsKey(project, clusterName, kmsKeyName string) string {
 	return fmt.Sprintf(`
-data "google_container_engine_versions" "central1a" {
-  location = "us-central1-a"
-}
-
 data "google_project" "project" {
   project_id = "%s"
 }
@@ -3214,37 +3453,25 @@ resource "google_project_iam_member" "kms-project-binding" {
   member  = "serviceAccount:service-${data.google_project.project.number}@compute-system.iam.gserviceaccount.com"
 }
 
-resource "google_kms_key_ring" "keyring" {
-  name     = "%s-kms-key-ring"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "example-key" {
-  name            = "%s-kms-key"
-  key_ring        = google_kms_key_ring.keyring.self_link
-  rotation_period = "100000s"
-}
-
 resource "google_container_cluster" "with_boot_disk_kms_key" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
-
+  release_channel {
+    channel = "RAPID"
+  }
   node_config {
     oauth_scopes = [
-      "https://www.googleapis.com/auth/logging.write",
-      "https://www.googleapis.com/auth/monitoring",
+      "https://www.googleapis.com/auth/cloud-platform",
     ]
 
     image_type = "COS_CONTAINERD"
 
-    boot_disk_kms_key = google_kms_crypto_key.example-key.self_link
+    boot_disk_kms_key = "%s"
   }
 }
-`, project, clusterName, clusterName, clusterName)
+`, project, clusterName, kmsKeyName)
 }
-<% end -%>
 
 func testAccContainerCluster_networkRef(cluster, network string) string {
 	return fmt.Sprintf(`
@@ -3279,7 +3506,7 @@ resource "google_compute_backend_service" "my-backend-service" {
   protocol  = "HTTP"
 
   backend {
-    group = element(google_container_cluster.primary.instance_group_urls, 1)
+    group = element(google_container_cluster.primary.node_pool[0].managed_instance_group_urls, 1)
   }
 
   health_checks = [google_compute_http_health_check.default.self_link]
@@ -3739,6 +3966,25 @@ resource "google_container_cluster" "with_maintenance_exclusion_window" {
 `, clusterName, w1startTime, w1endTime, w1startTime, w1endTime, w2startTime, w2endTime)
 }
 
+func testAccContainerCluster_withExclusion_NoMaintenanceWindow(clusterName string, w1startTime, w1endTime string) string {
+
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_maintenance_exclusion_window" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  maintenance_policy {
+	recurring_window {
+		start_time = "%s"
+		end_time = "%s"
+		recurrence = "FREQ=DAILY"
+	}
+ }
+}
+`, clusterName, w1startTime, w1endTime)
+}
+
 func testAccContainerCluster_withExclusion_DailyMaintenanceWindow(clusterName string, w1startTime, w1endTime string) string {
 
 	return fmt.Sprintf(`
@@ -4036,7 +4282,7 @@ resource "google_container_cluster" "with_workload_identity_config" {
   initial_node_count = 1
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
   remove_default_node_pool = true
 
@@ -4049,12 +4295,12 @@ func testAccContainerCluster_updateWorkloadIdentityConfig(projectID string, clus
 	if enable {
 		workloadIdentityConfig = `
 			workload_identity_config {
-			identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+		  workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
 		}`
         } else {
 		workloadIdentityConfig = `
 			workload_identity_config {
-			identity_namespace = ""
+			workload_pool = ""
 		}`
         }
 	return fmt.Sprintf(`
@@ -4071,7 +4317,6 @@ resource "google_container_cluster" "with_workload_identity_config" {
 }
 `, projectID, clusterName, workloadIdentityConfig)
 }
-
 
 
 <% unless version.nil? || version == 'ga' -%>
@@ -4443,7 +4688,7 @@ resource "google_container_cluster" "primary" {
 `, name)
 }
 
-func testAccContainerCluster_withAutopilot(containerNetName string, clusterName string, enabled bool) string {
+func testAccContainerCluster_withAutopilot(containerNetName string, clusterName string, location string, enabled bool) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
 	name                    = "%s"
@@ -4474,7 +4719,7 @@ data "google_container_engine_versions" "central1a" {
 
 resource "google_container_cluster" "with_autopilot" {
 	name               = "%s"
-	location           = "us-central1"
+	location           = "%s"
 	enable_autopilot   = %v
 	min_master_version = "latest"
 	release_channel {
@@ -4495,15 +4740,111 @@ resource "google_container_cluster" "with_autopilot" {
 		enabled = true
 	}
 }
-`, containerNetName, clusterName, enabled)
+`, containerNetName, clusterName, location, enabled)
 }
 
-func testAccContainerCluster_withInvalidAutopilotLocation(clusterName string, location string) string {
+func testAccContainerCluster_withDNSConfig(clusterName string, clusterDns string, clusterDnsDomain string, clusterDnsScope string) string {
 	return fmt.Sprintf(`
-resource "google_container_cluster" "with_invalid_location" {
-  name               = "%s"
-  location           = "%s"
-  enable_autopilot	 = true
+resource "google_container_cluster" "with_dns_config" {
+	name               = "%s"
+	location           = "us-central1-f"
+	initial_node_count = 1
+	dns_config {
+		cluster_dns 	   = "%s"
+		cluster_dns_domain = "%s"
+		cluster_dns_scope  = "%s"
+	}
 }
-`, clusterName, location)
+`, clusterName, clusterDns, clusterDnsDomain, clusterDnsScope)
+}
+
+<% unless version == 'ga' -%>
+func testAccContainerCluster_withIdentityServiceConfigEnabled(name string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  identity_service_config {
+	  enabled = true
+  }
+}
+`, name)
+}
+
+func testAccContainerCluster_withIdentityServiceConfigUpdated(name string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  identity_service_config {
+	  enabled = false
+  }
+}
+`, name)
+}
+<% end -%>
+
+func testAccContainerCluster_withLoggingConfigEnabled(name string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  logging_config {
+	  enable_components = [ "SYSTEM_COMPONENTS" ]
+  }
+  monitoring_config {
+      enable_components = [ "SYSTEM_COMPONENTS" ]
+  }
+}
+`, name)
+}
+
+func testAccContainerCluster_withLoggingConfigUpdated(name string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  logging_config {
+	  enable_components = [ "SYSTEM_COMPONENTS", "WORKLOADS" ]
+  }
+  monitoring_config {
+	  enable_components = [ "SYSTEM_COMPONENTS" ]
+  }
+}
+`, name)
+}
+
+func testAccContainerCluster_withSoleTenantGroup(name string) string {
+	return fmt.Sprintf(`
+resource "google_compute_node_template" "soletenant-tmpl" {
+  name      = "%s"
+  region    = "us-central1"
+  node_type = "n1-node-96-624"
+}
+
+resource "google_compute_node_group" "group" {
+  name        = "%s"
+  zone        = "us-central1-f"
+  description = "example google_compute_node_group for Terraform Google Provider"
+
+  size          = 1
+  node_template = google_compute_node_template.soletenant-tmpl.id
+}
+
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-f"
+  initial_node_count = 1
+  node_config {
+    machine_type    = "n1-standard-1"  // can't be e2 because of local-ssd
+    disk_size_gb    = 15
+    disk_type       = "pd-ssd"
+    node_group = google_compute_node_group.group.name
+  }
+}
+`, name, name, name)
 }

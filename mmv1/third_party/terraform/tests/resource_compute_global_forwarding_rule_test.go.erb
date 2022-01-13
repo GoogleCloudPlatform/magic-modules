@@ -3,10 +3,10 @@ package google
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccComputeGlobalForwardingRule_updateTarget(t *testing.T) {
@@ -35,6 +35,7 @@ func TestAccComputeGlobalForwardingRule_updateTarget(t *testing.T) {
 				ResourceName:      "google_compute_global_forwarding_rule.forwarding_rule",
 				ImportState:       true,
 				ImportStateVerify: true,
+                                ImportStateVerifyIgnore: []string{"port_range", "target"},
 			},
 			{
 				Config: testAccComputeGlobalForwardingRule_httpProxy(fr, "proxy2", proxy, proxyUpdated, backend, hc, urlmap),
@@ -47,6 +48,7 @@ func TestAccComputeGlobalForwardingRule_updateTarget(t *testing.T) {
 				ResourceName:      "google_compute_global_forwarding_rule.forwarding_rule",
 				ImportState:       true,
 				ImportStateVerify: true,
+                                ImportStateVerifyIgnore: []string{"port_range", "target"},
 			},
 		},
 	})
@@ -77,6 +79,7 @@ func TestAccComputeGlobalForwardingRule_ipv6(t *testing.T) {
 				ResourceName:      "google_compute_global_forwarding_rule.forwarding_rule",
 				ImportState:       true,
 				ImportStateVerify: true,
+                                ImportStateVerifyIgnore: []string{"port_range", "target"},
 			},
 		},
 	})
@@ -104,6 +107,7 @@ func TestAccComputeGlobalForwardingRule_labels(t *testing.T) {
 				ResourceName:      "google_compute_global_forwarding_rule.forwarding_rule",
 				ImportState:       true,
 				ImportStateVerify: true,
+                                ImportStateVerifyIgnore: []string{"port_range", "target"},
 			},
 			{
 				Config: testAccComputeGlobalForwardingRule_labelsUpdated(fr, proxy, backend, hc, urlmap),
@@ -112,6 +116,7 @@ func TestAccComputeGlobalForwardingRule_labels(t *testing.T) {
 				ResourceName:      "google_compute_global_forwarding_rule.forwarding_rule",
 				ImportState:       true,
 				ImportStateVerify: true,
+                                ImportStateVerifyIgnore: []string{"port_range", "target"},
 			},
 		},
 	})
@@ -142,6 +147,7 @@ func TestAccComputeGlobalForwardingRule_internalLoadBalancing(t *testing.T) {
 				ResourceName:      "google_compute_global_forwarding_rule.forwarding_rule",
 				ImportState:       true,
 				ImportStateVerify: true,
+                                ImportStateVerifyIgnore: []string{"port_range", "target"},
 			},
 			{
 				Config: testAccComputeGlobalForwardingRule_internalLoadBalancingUpdate(fr, proxy, backend, hc, urlmap, igm, it),
@@ -150,6 +156,7 @@ func TestAccComputeGlobalForwardingRule_internalLoadBalancing(t *testing.T) {
 				ResourceName:      "google_compute_global_forwarding_rule.forwarding_rule",
 				ImportState:       true,
 				ImportStateVerify: true,
+                                ImportStateVerifyIgnore: []string{"port_range", "target"},
 			},
 		},
 	})
@@ -464,7 +471,7 @@ resource "google_compute_instance_group_manager" "igm" {
     instance_template = google_compute_instance_template.instance_template.self_link
     name              = "primary"
   }
-  base_instance_name = "internal-igm"
+  base_instance_name = "tf-test-internal-igm"
   zone               = "us-central1-f"
   target_size        = 1
 }
@@ -583,7 +590,7 @@ resource "google_compute_instance_group_manager" "igm" {
     instance_template = google_compute_instance_template.instance_template.self_link
     name              = "primary"
   }
-  base_instance_name = "internal-igm"
+  base_instance_name = "tf-test-internal-igm"
   zone               = "us-central1-f"
   target_size        = 1
 }

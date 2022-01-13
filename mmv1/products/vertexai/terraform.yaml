@@ -44,7 +44,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "vertex_ai_featurestore"
-        primary_resource_id: "dataset"
+        primary_resource_id: "featurestore"
         vars:
           name: "terraform"
     properties:
@@ -62,7 +62,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: 'If set to true, any EntityTypes and Features for this Featurestore will also be deleted'
         default_value: false
   FeaturestoreEntitytype: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["{{featurestore}}/entityTypes/{{name}}"]
+    import_format: ["{{%featurestore}}/entityTypes/{{name}}"]
     autogen_async: false
     skip_sweeper: true
     timeouts: !ruby/object:Api::Timeouts
@@ -84,6 +84,26 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pre_create: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
       pre_update: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
       pre_delete: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
+  MetadataStore: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: false
+    id_format: '{{name}}'
+    skip_sweeper: true
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 15 # Inserts with KMS take 10+ minutes
+      delete_minutes: 15
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_metadata_store"
+        skip_test: true
+        primary_resource_id: "store"
+        vars:
+          name: "test-store"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

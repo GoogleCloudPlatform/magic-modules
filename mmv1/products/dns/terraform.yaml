@@ -191,23 +191,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pre_delete: templates/terraform/pre_delete/detach_network.erb
   ResourceRecordSet: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
-  ResourceDnsRecordSet: !ruby/object:Overrides::Terraform::ResourceOverride
-    legacy_name: "google_dns_record_set"
-    import_format: ["projects/{{project}}/managedZones/{{managed_zone}}/rrsets/{{name}}/{{type}}"]
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      constants: 'templates/terraform/constants/resource_dns_resource_record_set.go.erb'
-    examples:
-      - !ruby/object:Provider::Terraform::Examples
-        skip_test: true
-        name: "dns_record_set_basic"
-        primary_resource_id: "resource-recordset"
-        vars:
-          zone_name: "my-zone"
-    properties:
-      rrdatas: !ruby/object:Overrides::Terraform::PropertyOverride
-          diff_suppress_func: 'rrdatasDnsDiffSuppress'
-      managed_zone: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
   Project: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
 # This is for copying files over

@@ -66,6 +66,21 @@ type CustomImportFunctionDetails struct {
 	Function string
 }
 
+type AppendToBasePathDetails struct {
+	// AppendToBasePath appends the given string onto the end of the config base path.
+	String string
+}
+
+type ReplaceInBasePathDetails struct {
+	// ReplaceInBasePath replaces the config base path with the value returned
+	// by the given string.
+	// For example, client.Config.BasePath + "v1" would append "v1" to the current
+	// base path.
+	Present bool
+	Old     string
+	New     string
+}
+
 type CustomizeDiffDetails struct {
 	// Functions is a list of CustomizeDiffFunc to use with
 	// customdiff.All(...).
@@ -126,6 +141,21 @@ type CustomIdentityGetterDetails struct {
 	Function string
 }
 
+type CustomDefaultDetails struct {
+	Default string
+}
+
+type CustomListSizeConstraintDetails struct {
+	Min int64
+	Max int64
+}
+
+type CustomSchemaValuesDetails struct {
+	Required bool
+	Optional bool
+	Computed bool
+}
+
 type ImportFormatDetails struct {
 	// List of import format pattern strings
 	Formats []string
@@ -157,6 +187,11 @@ type CustomCreateDirectiveDetails struct {
 	Function string
 }
 
+type CustomSerializerDetails struct {
+	// The name of the function that will serialize this resource.
+	Function string
+}
+
 type SkipDeleteFunctionDetails struct {
 	// The name of the function that determines if we should skip delete.
 	Function string
@@ -179,4 +214,14 @@ type ProductBasePathDetails struct {
 type ProductTitleDetails struct {
 	// alternative name to be used for the product resources
 	Title string
+}
+
+type ProductDocsSectionDetails struct {
+	// alternative name to be used for the product resources in docs.
+	DocsSection string
+}
+
+type CustomTimeoutDetails struct {
+	// The overriding Timeouts in Terraform
+	TimeoutMinutes int
 }

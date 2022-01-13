@@ -26,24 +26,32 @@
 #     are required, please file an issue at https:#github.com/hashicorp/terraform-provider-google/issues/new/choose
 #
 # ----------------------------------------------------------------------------
-subcategory: "{{$.ProductType}}"
+subcategory: "{{$.DocsSection}}"
 layout: "google"
 page_title: "Google: {{$.TerraformName}}"
-sidebar_current: "{{$.SidebarCurrent}}"
 description: |-
 {{$.Description}}
 ---
 
-# {{ replace $.TerraformName "_" "\\_" -1 }}
+# {{ $.TerraformName }}
 
 {{$.Description}}
+{{if or $.Reference $.Guides}}
+For more information, see:
+{{- if $.Reference }}
+* {{$.Reference.Markdown}}
+{{- end }}
+{{- range $g := $.Guides }}
+* {{$g.Markdown}}
+{{- end }}
+{{- end }}
 
-{{- /* TODO version notice */}}
-{{- /* TODO references */}}
 {{- /* TODO warning */}}
 {{- range $s := $.DocSamples}}
 ## Example Usage - {{$s.Name}}
+{{- if $s.Description}}
 {{$s.Description}}
+{{- end }}
 ```hcl
 {{ $s.GenerateHCL true }}
 ```
@@ -135,7 +143,7 @@ This resource provides the following
 
 ## Import
 {{/* TODO excluded imports */}}
-{{$.Type}} can be imported using any of these accepted formats:
+{{$.DCLTitle}} can be imported using any of these accepted formats:
 
 ```
 {{- range $format := $.ImportFormats }}

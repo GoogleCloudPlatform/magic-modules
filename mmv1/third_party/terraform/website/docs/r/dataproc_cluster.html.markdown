@@ -137,9 +137,9 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
    which is the name of the cluster.
 
 * `cluster_config` - (Optional) Allows you to configure various aspects of the cluster.
-   Structure defined below.
+   Structure [defined below](#nested_cluster_config).
 
-* `graceful_decommission_timout` - (Optional) Allows graceful decomissioning when you change the number of worker nodes directly through a terraform apply.
+* `graceful_decommission_timeout` - (Optional) Allows graceful decomissioning when you change the number of worker nodes directly through a terraform apply.
       Does not affect auto scaling decomissioning from an autoscaling policy.
       Graceful decommissioning allows removing nodes from the cluster without interrupting jobs in progress.
       Timeout specifies how long to wait for jobs in progress to finish before forcefully removing nodes (and potentially interrupting jobs).
@@ -149,7 +149,7 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
       For more context see the [docs](https://cloud.google.com/dataproc/docs/reference/rest/v1/projects.regions.clusters/patch#query-parameters)
 - - -
 
-The `cluster_config` block supports:
+<a name="nested_cluster_config"></a>The `cluster_config` block supports:
 
 ```hcl
     cluster_config {
@@ -163,6 +163,7 @@ The `cluster_config` block supports:
         initialization_action     { ... }
         encryption_config         { ... }
         endpoint_config           { ... }
+        metastore_config          { ... }
     }
 ```
 
@@ -179,44 +180,47 @@ The `cluster_config` block supports:
    Note: If you don't explicitly specify a `temp_bucket` then GCP will auto create / assign one for you.
 
 * `gce_cluster_config` (Optional) Common config settings for resources of Google Compute Engine cluster
-   instances, applicable to all instances in the cluster. Structure defined below.
+   instances, applicable to all instances in the cluster. Structure [defined below](#nested_gce_cluster_config).
 
 * `master_config` (Optional) The Google Compute Engine config settings for the master instances
-   in a cluster.. Structure defined below.
+   in a cluster. Structure [defined below](#nested_master_config).
 
 * `worker_config` (Optional) The Google Compute Engine config settings for the worker instances
-   in a cluster.. Structure defined below.
+   in a cluster. Structure [defined below](#nested_worker_config).
 
 * `preemptible_worker_config` (Optional) The Google Compute Engine config settings for the additional
-   instances in a cluster. Structure defined below.
+   instances in a cluster. Structure [defined below](#nested_preemptible_worker_config).
   * **NOTE** : `preemptible_worker_config` is
-   an alias for the api's [secondaryWorkerConfig](https://cloud.google.com/dataproc/docs/reference/rest/v1/ClusterConfig#InstanceGroupConfig). The name doesn't neccasarily mean it is preemptible and is named as
+   an alias for the api's [secondaryWorkerConfig](https://cloud.google.com/dataproc/docs/reference/rest/v1/ClusterConfig#InstanceGroupConfig). The name doesn't necessarily mean it is preemptible and is named as
    such for legacy/compatibility reasons.
 
 * `software_config` (Optional) The config settings for software inside the cluster.
-   Structure defined below.
+   Structure [defined below](#nested_software_config).
 
-* `security_config` (Optional) Security related configuration. Structure defined below.
+* `security_config` (Optional) Security related configuration. Structure [defined below](#nested_security_config).
 
 * `autoscaling_config` (Optional)  The autoscaling policy config associated with the cluster.
    Note that once set, if `autoscaling_config` is the only field set in `cluster_config`, it can
    only be removed by setting `policy_uri = ""`, rather than removing the whole block.
-   Structure defined below.
+   Structure [defined below](#nested_autoscaling_config).
 
 * `initialization_action` (Optional) Commands to execute on each node after config is completed.
-   You can specify multiple versions of these. Structure defined below.
+   You can specify multiple versions of these. Structure [defined below](#nested_initialization_action).
 
 * `encryption_config` (Optional) The Customer managed encryption keys settings for the cluster.
-   Structure defined below.
+   Structure [defined below](#nested_encryption_config).
 
 * `lifecycle_config` (Optional, Beta) The settings for auto deletion cluster schedule.
-   Structure defined below.
+   Structure [defined below](#nested_lifecycle_config).
 
 * `endpoint_config` (Optional, Beta) The config settings for port access on the cluster.
-   Structure defined below.
+   Structure [defined below](#nested_endpoint_config).
+
+* `metastore_config` (Optional, Beta) The config setting for metastore service with the cluster.
+   Structure [defined below](#nested_metastore_config).
 - - -
 
-The `cluster_config.gce_cluster_config` block supports:
+<a name="nested_gce_cluster_config"></a>The `cluster_config.gce_cluster_config` block supports:
 
 ```hcl
   cluster_config {
@@ -295,7 +299,7 @@ cluster_config{
 
 - - -
 
-The `cluster_config.master_config` block supports:
+<a name="nested_master_config"></a>The `cluster_config.master_config` block supports:
 
 ```hcl
 cluster_config {
@@ -354,7 +358,7 @@ if you are trying to use accelerators in a given zone.
 
 - - -
 
-The `cluster_config.worker_config` block supports:
+<a name="nested_worker_config"></a>The `cluster_config.worker_config` block supports:
 
 ```hcl
 cluster_config {
@@ -417,7 +421,7 @@ if you are trying to use accelerators in a given zone.
 
 - - -
 
-The `cluster_config.preemptible_worker_config` block supports:
+<a name="nested_preemptible_worker_config"></a>The `cluster_config.preemptible_worker_config` block supports:
 
 ```hcl
 cluster_config {
@@ -454,7 +458,7 @@ will be set for you based on whatever was set for the `worker_config.machine_typ
 
 - - -
 
-The `cluster_config.software_config` block supports:
+<a name="nested_software_config"></a>The `cluster_config.software_config` block supports:
 
 ```hcl
 cluster_config {
@@ -484,6 +488,7 @@ cluster_config {
     Accepted values are:
     * ANACONDA
     * DRUID
+    * FLINK
     * HBASE
     * HIVE_WEBHCAT
     * JUPYTER
@@ -496,7 +501,7 @@ cluster_config {
 
 - - -
 
-The `cluster_config.security_config` block supports:
+<a name="nested_security_config"></a>The `cluster_config.security_config` block supports:
 
 ```hcl
 cluster_config {
@@ -560,7 +565,7 @@ cluster_config {
 
 - - -
 
-The `cluster_config.autoscaling_config` block supports:
+<a name="nested_autoscaling_config"></a>The `cluster_config.autoscaling_config` block supports:
 
 ```hcl
 cluster_config {
@@ -581,7 +586,7 @@ Note that the policy must be in the same project and Cloud Dataproc region.
 
 - - -
 
-The `initialization_action` block (Optional) can be specified multiple times and supports:
+<a name="nested_initialization_action"></a>The `initialization_action` block (Optional) can be specified multiple times and supports:
 
 ```hcl
 cluster_config {
@@ -602,7 +607,7 @@ cluster_config {
 
 - - -
 
-The `encryption_config` block supports:
+<a name="nested_encryption_config"></a>The `encryption_config` block supports:
 
 ```hcl
 cluster_config {
@@ -617,7 +622,7 @@ cluster_config {
 
 - - -
 
-The `lifecycle_config` block supports:
+<a name="nested_lifecycle_config"></a>The `lifecycle_config` block supports:
 
 ```hcl
 cluster_config {
@@ -637,7 +642,7 @@ cluster_config {
 
 - - -
 
-The `endpoint_config` block (Optional, Computed, Beta) supports:
+<a name="nested_endpoint_config"></a>The `endpoint_config` block (Optional, Computed, Beta) supports:
 
 ```hcl
 cluster_config {
@@ -649,6 +654,23 @@ cluster_config {
 
 * `enable_http_port_access` - (Optional) The flag to enable http access to specific ports
   on the cluster from external sources (aka Component Gateway). Defaults to false.
+
+
+<a name="nested_metastore_config"></a>The `metastore_config` block (Optional, Computed, Beta) supports:
+
+```hcl
+cluster_config {
+  metastore_config {
+    dataproc_metastore_service = "projects/projectId/locations/region/services/serviceName"
+  }
+}
+```
+
+* `dataproc_metastore_service` - (Required) Resource name of an existing Dataproc Metastore service.
+
+Only resource names including projectid and location (region) are valid. Examples:
+
+`projects/[projectId]/locations/[dataproc_region]/services/[service-name]`
 
 ## Attributes Reference
 

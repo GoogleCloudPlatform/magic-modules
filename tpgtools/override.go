@@ -27,8 +27,9 @@ type OverrideType string // enum
 
 // Product-level Overrides
 const (
-	ProductBasePath OverrideType = "PRODUCT_BASE_PATH"
-	ProductTitle    OverrideType = "PRODUCT_TITLE"
+	ProductBasePath    OverrideType = "PRODUCT_BASE_PATH"
+	ProductTitle       OverrideType = "PRODUCT_TITLE"
+	ProductDocsSection OverrideType = "PRODUCT_DOCS_SECTION"
 )
 
 // Resource-level Overrides
@@ -37,6 +38,8 @@ const (
 	CustomID                           = "CUSTOM_ID"
 	CustomizeDiff                      = "CUSTOMIZE_DIFF"
 	ImportFormat                       = "IMPORT_FORMAT"
+	AppendToBasePath                   = "APPEND_TO_BASE_PATH"
+	ReplaceInBasePath                  = "REPLACE_IN_BASE_PATH"
 	Mutex                              = "MUTEX"
 	PreCreate                          = "PRE_CREATE_FUNCTION"
 	PostCreate                         = "POST_CREATE_FUNCTION"
@@ -45,9 +48,12 @@ const (
 	NoSweeper                          = "NO_SWEEPER"
 	CustomImport                       = "CUSTOM_IMPORT_FUNCTION"
 	CustomCreateDirective              = "CUSTOM_CREATE_DIRECTIVE_FUNCTION"
-	SkipDelete                         = "SKIP_DELETE_FUNCTION"
+	SkipDeleteFunction                 = "SKIP_DELETE_FUNCTION"
 	SerializationOnly                  = "SERIALIZATION_ONLY"
+	CustomSerializer                   = "CUSTOM_SERIALIZER"
 	TerraformProductName               = "CUSTOM_TERRAFORM_PRODUCT_NAME"
+	UseDCLID                           = "USE_DCL_ID"
+	CustomTimeout                      = "CUSTOM_TIMEOUT"
 )
 
 // Field-level Overrides
@@ -61,6 +67,7 @@ const (
 	CustomValidation                  = "CUSTOM_VALIDATION"
 	Deprecated                        = "DEPRECATED"
 	DiffSuppressFunc                  = "DIFF_SUPPRESS_FUNC"
+	EnumBool                          = "ENUM_BOOL"
 	Exclude                           = "EXCLUDE"
 	CustomIdentityGetter              = "CUSTOM_IDENTITY_GETTER"
 	Removed                           = "REMOVED"
@@ -68,6 +75,9 @@ const (
 	CollapsedObject                   = "COLLAPSED_OBJECT"
 	IgnoreRead                        = "IGNORE_READ"
 	GenerateIfNotSet                  = "GENERATE_IF_NOT_SET"
+	CustomListSize                    = "CUSTOM_LIST_SIZE_CONSTRAINT"
+	CustomDefault                     = "CUSTOM_DEFAULT"
+	CustomSchemaValues                = "CUSTOM_SCHEMA_VALUES"
 )
 
 // Overrides represents the type a resource's override file can be marshalled

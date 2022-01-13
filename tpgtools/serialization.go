@@ -1,3 +1,18 @@
+// ----------------------------------------------------------------------------
+//
+//     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
+//
+// ----------------------------------------------------------------------------
+//
+//     This file is managed by Magic Modules (https://github.com/GoogleCloudPlatform/magic-modules)
+//     and is based on the DCL (https://github.com/GoogleCloudPlatform/declarative-resource-client-library).
+//     Changes will need to be made to the DCL or Magic Modules instead of here.
+//
+//     We are not currently able to accept contributions to this file. If changes
+//     are required, please file an issue at https://github.com/hashicorp/terraform-provider-google/issues/new/choose
+//
+// ----------------------------------------------------------------------------
+
 package main
 
 import (
@@ -8,122 +23,428 @@ import (
 
 	assuredworkloads "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads"
 	assuredworkloadsBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads/beta"
+	cloudbuild "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudbuild"
 	cloudbuildBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudbuild/beta"
+	cloudresourcemanager "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudresourcemanager"
+	cloudresourcemanagerBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudresourcemanager/beta"
+	compute "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/compute"
+	computeBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/compute/beta"
+	containeraws "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containeraws"
+	containerawsBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containeraws/beta"
+	containerazure "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containerazure"
+	containerazureBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containerazure/beta"
 	dataproc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc"
 	dataprocBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc/beta"
 	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc"
 	eventarcBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc/beta"
 	gkehubBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub/beta"
-	run "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/run"
+	monitoringBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/monitoring/beta"
+	networkconnectivity "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/networkconnectivity"
+	networkconnectivityBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/networkconnectivity/beta"
+	orgpolicy "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/orgpolicy"
+	orgpolicyBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/orgpolicy/beta"
+	osconfig "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/osconfig"
+	osconfigBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/osconfig/beta"
+	privateca "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/privateca"
+	privatecaBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/privateca/beta"
+	recaptchaenterprise "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/recaptchaenterprise"
+	recaptchaenterpriseBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/recaptchaenterprise/beta"
 	fmtcmd "github.com/hashicorp/hcl/hcl/fmtcmd"
 )
 
-// DCLToTerraformReferencce converts a DCL resource name to the final tpgtools name
+// DCLToTerraformReference converts a DCL resource name to the final tpgtools name
 // after overrides are applied
-func DCLToTerraformReference(resourceType, version string) (string, error) {
+func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameSnakeCase, version string) (string, error) {
+	if version == "alpha" {
+		switch fmt.Sprintf("%s/%s", product, resource) {
+		}
+	}
 	if version == "beta" {
-		switch resourceType {
-		case "AssuredWorkloadsWorkload":
+		switch fmt.Sprintf("%s/%s", product, resource) {
+		case "assuredworkloads/workload":
 			return "google_assured_workloads_workload", nil
-		case "CloudbuildWorkerPool":
+		case "cloudbuild/worker_pool":
 			return "google_cloudbuild_worker_pool", nil
-		case "DataprocWorkflowTemplate":
+		case "cloudresourcemanager/folder":
+			return "google_folder", nil
+		case "cloudresourcemanager/project":
+			return "google_project", nil
+		case "compute/firewall_policy":
+			return "google_compute_firewall_policy", nil
+		case "compute/firewall_policy_association":
+			return "google_compute_firewall_policy_association", nil
+		case "compute/firewall_policy_rule":
+			return "google_compute_firewall_policy_rule", nil
+		case "compute/forwarding_rule":
+			return "google_compute_forwarding_rule", nil
+		case "compute/global_forwarding_rule":
+			return "google_compute_global_forwarding_rule", nil
+		case "containeraws/cluster":
+			return "google_container_aws_cluster", nil
+		case "containeraws/node_pool":
+			return "google_container_aws_node_pool", nil
+		case "containerazure/client":
+			return "google_container_azure_client", nil
+		case "containerazure/cluster":
+			return "google_container_azure_cluster", nil
+		case "containerazure/node_pool":
+			return "google_container_azure_node_pool", nil
+		case "dataproc/workflow_template":
 			return "google_dataproc_workflow_template", nil
-		case "EventarcTrigger":
+		case "eventarc/trigger":
 			return "google_eventarc_trigger", nil
-		case "GkeHubFeature":
+		case "gkehub/feature":
 			return "google_gke_hub_feature", nil
-		case "GkeHubFeatureMembership":
+		case "gkehub/feature_membership":
 			return "google_gke_hub_feature_membership", nil
+		case "monitoring/monitored_project":
+			return "google_monitoring_monitored_project", nil
+		case "networkconnectivity/hub":
+			return "google_network_connectivity_hub", nil
+		case "orgpolicy/policy":
+			return "google_org_policy_policy", nil
+		case "osconfig/os_policy_assignment":
+			return "google_os_config_os_policy_assignment", nil
+		case "privateca/certificate_template":
+			return "google_privateca_certificate_template", nil
+		case "recaptchaenterprise/key":
+			return "google_recaptcha_enterprise_key", nil
 		}
 	}
 	// If not found in sample version, fallthrough to GA
-	switch resourceType {
-	case "AssuredWorkloadsWorkload":
+	switch fmt.Sprintf("%s/%s", product, resource) {
+	case "assuredworkloads/workload":
 		return "google_assured_workloads_workload", nil
-	case "DataprocWorkflowTemplate":
+	case "cloudbuild/worker_pool":
+		return "google_cloudbuild_worker_pool", nil
+	case "cloudresourcemanager/folder":
+		return "google_folder", nil
+	case "cloudresourcemanager/project":
+		return "google_project", nil
+	case "compute/firewall_policy":
+		return "google_compute_firewall_policy", nil
+	case "compute/firewall_policy_association":
+		return "google_compute_firewall_policy_association", nil
+	case "compute/firewall_policy_rule":
+		return "google_compute_firewall_policy_rule", nil
+	case "compute/forwarding_rule":
+		return "google_compute_forwarding_rule", nil
+	case "compute/global_forwarding_rule":
+		return "google_compute_global_forwarding_rule", nil
+	case "containeraws/cluster":
+		return "google_container_aws_cluster", nil
+	case "containeraws/node_pool":
+		return "google_container_aws_node_pool", nil
+	case "containerazure/client":
+		return "google_container_azure_client", nil
+	case "containerazure/cluster":
+		return "google_container_azure_cluster", nil
+	case "containerazure/node_pool":
+		return "google_container_azure_node_pool", nil
+	case "dataproc/workflow_template":
 		return "google_dataproc_workflow_template", nil
-	case "EventarcTrigger":
+	case "eventarc/trigger":
 		return "google_eventarc_trigger", nil
-	case "RunService":
-		return "google_cloud_run_service", nil
+	case "networkconnectivity/hub":
+		return "google_network_connectivity_hub", nil
+	case "orgpolicy/policy":
+		return "google_org_policy_policy", nil
+	case "osconfig/os_policy_assignment":
+		return "google_os_config_os_policy_assignment", nil
+	case "privateca/certificate_template":
+		return "google_privateca_certificate_template", nil
+	case "recaptchaenterprise/key":
+		return "google_recaptcha_enterprise_key", nil
 	default:
-		return "", fmt.Errorf("Error retrieving Terraform name from DCL resource type: %s not found", resourceType)
+		return "", fmt.Errorf("Error retrieving Terraform name from DCL resource type: %s/%s not found", product, resource)
 	}
 
 }
 
-// ConvertSampleJSONToDCLResource unmarshals json to a DCL resource specified by the resource type
-func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (string, error) {
+// ConvertSampleJSONToHCL unmarshals json to an HCL string.
+func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSnakeCase, version string, hasGAEquivalent bool, b []byte) (string, error) {
+	if version == "alpha" {
+		switch fmt.Sprintf("%s/%s", product, resource) {
+		}
+	}
 	if version == "beta" {
-		switch resourceType {
-		case "AssuredWorkloadsWorkload":
+		switch fmt.Sprintf("%s/%s", product, resource) {
+		case "assuredworkloads/workload":
 			r := &assuredworkloadsBeta.Workload{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return AssuredWorkloadsWorkloadBetaAsHCL(*r)
-		case "CloudbuildWorkerPool":
+			return AssuredWorkloadsWorkloadBetaAsHCL(*r, hasGAEquivalent)
+		case "cloudbuild/worker_pool":
 			r := &cloudbuildBeta.WorkerPool{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return CloudbuildWorkerPoolBetaAsHCL(*r)
-		case "DataprocWorkflowTemplate":
+			return CloudbuildWorkerPoolBetaAsHCL(*r, hasGAEquivalent)
+		case "cloudresourcemanager/folder":
+			r := &cloudresourcemanagerBeta.Folder{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return CloudResourceManagerFolderBetaAsHCL(*r, hasGAEquivalent)
+		case "cloudresourcemanager/project":
+			r := &cloudresourcemanagerBeta.Project{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return serializeBetaProjectToHCL(*r, hasGAEquivalent)
+		case "compute/firewall_policy":
+			r := &computeBeta.FirewallPolicy{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ComputeFirewallPolicyBetaAsHCL(*r, hasGAEquivalent)
+		case "compute/firewall_policy_association":
+			r := &computeBeta.FirewallPolicyAssociation{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ComputeFirewallPolicyAssociationBetaAsHCL(*r, hasGAEquivalent)
+		case "compute/firewall_policy_rule":
+			r := &computeBeta.FirewallPolicyRule{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ComputeFirewallPolicyRuleBetaAsHCL(*r, hasGAEquivalent)
+		case "compute/forwarding_rule":
+			r := &computeBeta.ForwardingRule{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ComputeForwardingRuleBetaAsHCL(*r, hasGAEquivalent)
+		case "compute/global_forwarding_rule":
+			r := &computeBeta.ForwardingRule{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ComputeGlobalForwardingRuleBetaAsHCL(*r, hasGAEquivalent)
+		case "containeraws/cluster":
+			r := &containerawsBeta.Cluster{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ContainerAwsClusterBetaAsHCL(*r, hasGAEquivalent)
+		case "containeraws/node_pool":
+			r := &containerawsBeta.NodePool{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ContainerAwsNodePoolBetaAsHCL(*r, hasGAEquivalent)
+		case "containerazure/client":
+			r := &containerazureBeta.AzureClient{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ContainerAzureClientBetaAsHCL(*r, hasGAEquivalent)
+		case "containerazure/cluster":
+			r := &containerazureBeta.Cluster{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ContainerAzureClusterBetaAsHCL(*r, hasGAEquivalent)
+		case "containerazure/node_pool":
+			r := &containerazureBeta.NodePool{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ContainerAzureNodePoolBetaAsHCL(*r, hasGAEquivalent)
+		case "dataproc/workflow_template":
 			r := &dataprocBeta.WorkflowTemplate{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return DataprocWorkflowTemplateBetaAsHCL(*r)
-		case "EventarcTrigger":
+			return DataprocWorkflowTemplateBetaAsHCL(*r, hasGAEquivalent)
+		case "eventarc/trigger":
 			r := &eventarcBeta.Trigger{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return EventarcTriggerBetaAsHCL(*r)
-		case "GkeHubFeature":
+			return EventarcTriggerBetaAsHCL(*r, hasGAEquivalent)
+		case "gkehub/feature":
 			r := &gkehubBeta.Feature{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return GkeHubFeatureBetaAsHCL(*r)
-		case "GkeHubFeatureMembership":
+			return GkeHubFeatureBetaAsHCL(*r, hasGAEquivalent)
+		case "gkehub/feature_membership":
 			r := &gkehubBeta.FeatureMembership{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return GkeHubFeatureMembershipBetaAsHCL(*r)
+			return GkeHubFeatureMembershipBetaAsHCL(*r, hasGAEquivalent)
+		case "monitoring/monitored_project":
+			r := &monitoringBeta.MonitoredProject{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return MonitoringMonitoredProjectBetaAsHCL(*r, hasGAEquivalent)
+		case "networkconnectivity/hub":
+			r := &networkconnectivityBeta.Hub{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return NetworkConnectivityHubBetaAsHCL(*r, hasGAEquivalent)
+		case "orgpolicy/policy":
+			r := &orgpolicyBeta.Policy{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return OrgPolicyPolicyBetaAsHCL(*r, hasGAEquivalent)
+		case "osconfig/os_policy_assignment":
+			r := &osconfigBeta.OSPolicyAssignment{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return OsConfigOsPolicyAssignmentBetaAsHCL(*r, hasGAEquivalent)
+		case "privateca/certificate_template":
+			r := &privatecaBeta.CertificateTemplate{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return PrivatecaCertificateTemplateBetaAsHCL(*r, hasGAEquivalent)
+		case "recaptchaenterprise/key":
+			r := &recaptchaenterpriseBeta.Key{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return RecaptchaEnterpriseKeyBetaAsHCL(*r, hasGAEquivalent)
 		}
 	}
 	// If not found in sample version, fallthrough to GA
-	switch resourceType {
-	case "AssuredWorkloadsWorkload":
+	switch fmt.Sprintf("%s/%s", product, resource) {
+	case "assuredworkloads/workload":
 		r := &assuredworkloads.Workload{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return AssuredWorkloadsWorkloadAsHCL(*r)
-	case "DataprocWorkflowTemplate":
+		return AssuredWorkloadsWorkloadAsHCL(*r, hasGAEquivalent)
+	case "cloudbuild/worker_pool":
+		r := &cloudbuild.WorkerPool{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return CloudbuildWorkerPoolAsHCL(*r, hasGAEquivalent)
+	case "cloudresourcemanager/folder":
+		r := &cloudresourcemanager.Folder{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return CloudResourceManagerFolderAsHCL(*r, hasGAEquivalent)
+	case "cloudresourcemanager/project":
+		r := &cloudresourcemanager.Project{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return serializeGAProjectToHCL(*r, hasGAEquivalent)
+	case "compute/firewall_policy":
+		r := &compute.FirewallPolicy{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeFirewallPolicyAsHCL(*r, hasGAEquivalent)
+	case "compute/firewall_policy_association":
+		r := &compute.FirewallPolicyAssociation{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeFirewallPolicyAssociationAsHCL(*r, hasGAEquivalent)
+	case "compute/firewall_policy_rule":
+		r := &compute.FirewallPolicyRule{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeFirewallPolicyRuleAsHCL(*r, hasGAEquivalent)
+	case "compute/forwarding_rule":
+		r := &compute.ForwardingRule{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeForwardingRuleAsHCL(*r, hasGAEquivalent)
+	case "compute/global_forwarding_rule":
+		r := &compute.ForwardingRule{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeGlobalForwardingRuleAsHCL(*r, hasGAEquivalent)
+	case "containeraws/cluster":
+		r := &containeraws.Cluster{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ContainerAwsClusterAsHCL(*r, hasGAEquivalent)
+	case "containeraws/node_pool":
+		r := &containeraws.NodePool{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ContainerAwsNodePoolAsHCL(*r, hasGAEquivalent)
+	case "containerazure/client":
+		r := &containerazure.AzureClient{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ContainerAzureClientAsHCL(*r, hasGAEquivalent)
+	case "containerazure/cluster":
+		r := &containerazure.Cluster{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ContainerAzureClusterAsHCL(*r, hasGAEquivalent)
+	case "containerazure/node_pool":
+		r := &containerazure.NodePool{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ContainerAzureNodePoolAsHCL(*r, hasGAEquivalent)
+	case "dataproc/workflow_template":
 		r := &dataproc.WorkflowTemplate{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return DataprocWorkflowTemplateAsHCL(*r)
-	case "EventarcTrigger":
+		return DataprocWorkflowTemplateAsHCL(*r, hasGAEquivalent)
+	case "eventarc/trigger":
 		r := &eventarc.Trigger{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return EventarcTriggerAsHCL(*r)
-	case "RunService":
-		r := &run.Service{}
+		return EventarcTriggerAsHCL(*r, hasGAEquivalent)
+	case "networkconnectivity/hub":
+		r := &networkconnectivity.Hub{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return RunServiceAsHCL(*r)
+		return NetworkConnectivityHubAsHCL(*r, hasGAEquivalent)
+	case "orgpolicy/policy":
+		r := &orgpolicy.Policy{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return OrgPolicyPolicyAsHCL(*r, hasGAEquivalent)
+	case "osconfig/os_policy_assignment":
+		r := &osconfig.OSPolicyAssignment{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return OsConfigOsPolicyAssignmentAsHCL(*r, hasGAEquivalent)
+	case "privateca/certificate_template":
+		r := &privateca.CertificateTemplate{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return PrivatecaCertificateTemplateAsHCL(*r, hasGAEquivalent)
+	case "recaptchaenterprise/key":
+		r := &recaptchaenterprise.Key{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return RecaptchaEnterpriseKeyAsHCL(*r, hasGAEquivalent)
 	default:
-		//return fmt.Sprintf("%s resource not supported in tpgtools", resourceType), nil
-		return "", fmt.Errorf("Error converting sample JSON to HCL: %s not found", resourceType)
+		return "", fmt.Errorf("Error converting sample JSON to HCL: %s not found", product, resource)
 	}
 
 }
@@ -134,7 +455,7 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func AssuredWorkloadsWorkloadBetaAsHCL(r assuredworkloadsBeta.Workload) (string, error) {
+func AssuredWorkloadsWorkloadBetaAsHCL(r assuredworkloadsBeta.Workload, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_assured_workloads_workload\" \"output\" {\n"
 	if r.BillingAccount != nil {
 		outputConfig += fmt.Sprintf("\tbilling_account = %#v\n", *r.BillingAccount)
@@ -154,6 +475,11 @@ func AssuredWorkloadsWorkloadBetaAsHCL(r assuredworkloadsBeta.Workload) (string,
 	if v := convertAssuredWorkloadsWorkloadBetaKmsSettingsToHCL(r.KmsSettings); v != "" {
 		outputConfig += fmt.Sprintf("\tkms_settings %s\n", v)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.ProvisionedResourcesParent != nil {
 		outputConfig += fmt.Sprintf("\tprovisioned_resources_parent = %#v\n", *r.ProvisionedResourcesParent)
 	}
@@ -162,7 +488,15 @@ func AssuredWorkloadsWorkloadBetaAsHCL(r assuredworkloadsBeta.Workload) (string,
 			outputConfig += fmt.Sprintf("\tresource_settings %s\n", convertAssuredWorkloadsWorkloadBetaResourceSettingsToHCL(&v))
 		}
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertAssuredWorkloadsWorkloadBetaKmsSettingsToHCL(r *assuredworkloadsBeta.WorkloadKmsSettings) string {
@@ -207,13 +541,21 @@ func convertAssuredWorkloadsWorkloadBetaResourcesToHCL(r *assuredworkloadsBeta.W
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func CloudbuildWorkerPoolBetaAsHCL(r cloudbuildBeta.WorkerPool) (string, error) {
+func CloudbuildWorkerPoolBetaAsHCL(r cloudbuildBeta.WorkerPool, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_cloudbuild_worker_pool\" \"output\" {\n"
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
 	}
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
 	}
 	if v := convertCloudbuildWorkerPoolBetaNetworkConfigToHCL(r.NetworkConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tnetwork_config %s\n", v)
@@ -224,7 +566,15 @@ func CloudbuildWorkerPoolBetaAsHCL(r cloudbuildBeta.WorkerPool) (string, error) 
 	if v := convertCloudbuildWorkerPoolBetaWorkerConfigToHCL(r.WorkerConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tworker_config %s\n", v)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertCloudbuildWorkerPoolBetaNetworkConfigToHCL(r *cloudbuildBeta.WorkerPoolNetworkConfig) string {
@@ -255,13 +605,1253 @@ func convertCloudbuildWorkerPoolBetaWorkerConfigToHCL(r *cloudbuildBeta.WorkerPo
 	return outputConfig + "}"
 }
 
+// CloudResourceManagerFolderBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func CloudResourceManagerFolderBetaAsHCL(r cloudresourcemanagerBeta.Folder, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_folder\" \"output\" {\n"
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+// CloudResourceManagerProjectBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func CloudResourceManagerProjectBetaAsHCL(r cloudresourcemanagerBeta.Project, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_project\" \"output\" {\n"
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplayname = %#v\n", *r.DisplayName)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+// ComputeFirewallPolicyBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeFirewallPolicyBetaAsHCL(r computeBeta.FirewallPolicy, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_compute_firewall_policy\" \"output\" {\n"
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	if r.ShortName != nil {
+		outputConfig += fmt.Sprintf("\tshort_name = %#v\n", *r.ShortName)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+// ComputeFirewallPolicyAssociationBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeFirewallPolicyAssociationBetaAsHCL(r computeBeta.FirewallPolicyAssociation, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_compute_firewall_policy_association\" \"output\" {\n"
+	if r.AttachmentTarget != nil {
+		outputConfig += fmt.Sprintf("\tattachment_target = %#v\n", *r.AttachmentTarget)
+	}
+	if r.FirewallPolicy != nil {
+		outputConfig += fmt.Sprintf("\tfirewall_policy = %#v\n", *r.FirewallPolicy)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+// ComputeFirewallPolicyRuleBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeFirewallPolicyRuleBetaAsHCL(r computeBeta.FirewallPolicyRule, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_compute_firewall_policy_rule\" \"output\" {\n"
+	if r.Action != nil {
+		outputConfig += fmt.Sprintf("\taction = %#v\n", *r.Action)
+	}
+	if r.Direction != nil {
+		outputConfig += fmt.Sprintf("\tdirection = %#v\n", *r.Direction)
+	}
+	if r.FirewallPolicy != nil {
+		outputConfig += fmt.Sprintf("\tfirewall_policy = %#v\n", *r.FirewallPolicy)
+	}
+	if v := convertComputeFirewallPolicyRuleBetaMatchToHCL(r.Match); v != "" {
+		outputConfig += fmt.Sprintf("\tmatch %s\n", v)
+	}
+	if r.Priority != nil {
+		outputConfig += fmt.Sprintf("\tpriority = %#v\n", *r.Priority)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Disabled != nil {
+		outputConfig += fmt.Sprintf("\tdisabled = %#v\n", *r.Disabled)
+	}
+	if r.EnableLogging != nil {
+		outputConfig += fmt.Sprintf("\tenable_logging = %#v\n", *r.EnableLogging)
+	}
+	if r.TargetResources != nil {
+		outputConfig += "\ttarget_resources = ["
+		for _, v := range r.TargetResources {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.TargetServiceAccounts != nil {
+		outputConfig += "\ttarget_service_accounts = ["
+		for _, v := range r.TargetServiceAccounts {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertComputeFirewallPolicyRuleBetaMatchToHCL(r *computeBeta.FirewallPolicyRuleMatch) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Layer4Configs != nil {
+		for _, v := range r.Layer4Configs {
+			outputConfig += fmt.Sprintf("\tlayer4_configs %s\n", convertComputeFirewallPolicyRuleBetaMatchLayer4ConfigsToHCL(&v))
+		}
+	}
+	if r.DestIPRanges != nil {
+		outputConfig += "\tdest_ip_ranges = ["
+		for _, v := range r.DestIPRanges {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.SrcIPRanges != nil {
+		outputConfig += "\tsrc_ip_ranges = ["
+		for _, v := range r.SrcIPRanges {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertComputeFirewallPolicyRuleBetaMatchLayer4ConfigsToHCL(r *computeBeta.FirewallPolicyRuleMatchLayer4Configs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.IPProtocol != nil {
+		outputConfig += fmt.Sprintf("\tip_protocol = %#v\n", *r.IPProtocol)
+	}
+	if r.Ports != nil {
+		outputConfig += "\tports = ["
+		for _, v := range r.Ports {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+// ComputeForwardingRuleBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_compute_forwarding_rule\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.AllPorts != nil {
+		outputConfig += fmt.Sprintf("\tall_ports = %#v\n", *r.AllPorts)
+	}
+	if r.AllowGlobalAccess != nil {
+		outputConfig += fmt.Sprintf("\tallow_global_access = %#v\n", *r.AllowGlobalAccess)
+	}
+	if r.BackendService != nil {
+		outputConfig += fmt.Sprintf("\tbackend_service = %#v\n", *r.BackendService)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.IPAddress != nil {
+		outputConfig += fmt.Sprintf("\tip_address = %#v\n", *r.IPAddress)
+	}
+	if r.IPProtocol != nil {
+		outputConfig += fmt.Sprintf("\tip_protocol = %#v\n", *r.IPProtocol)
+	}
+	if r.IsMirroringCollector != nil {
+		outputConfig += fmt.Sprintf("\tis_mirroring_collector = %#v\n", *r.IsMirroringCollector)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.LoadBalancingScheme != nil {
+		outputConfig += fmt.Sprintf("\tload_balancing_scheme = %#v\n", *r.LoadBalancingScheme)
+	}
+	if r.Network != nil {
+		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
+	}
+	if r.NetworkTier != nil {
+		outputConfig += fmt.Sprintf("\tnetwork_tier = %#v\n", *r.NetworkTier)
+	}
+	if r.PortRange != nil {
+		outputConfig += fmt.Sprintf("\tport_range = %#v\n", *r.PortRange)
+	}
+	if r.Ports != nil {
+		outputConfig += "\tports = ["
+		for _, v := range r.Ports {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tregion = %#v\n", *r.Location)
+	}
+	if r.ServiceLabel != nil {
+		outputConfig += fmt.Sprintf("\tservice_label = %#v\n", *r.ServiceLabel)
+	}
+	if r.Subnetwork != nil {
+		outputConfig += fmt.Sprintf("\tsubnetwork = %#v\n", *r.Subnetwork)
+	}
+	if r.Target != nil {
+		outputConfig += fmt.Sprintf("\ttarget = %#v\n", *r.Target)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+// ComputeGlobalForwardingRuleBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeGlobalForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_compute_global_forwarding_rule\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Target != nil {
+		outputConfig += fmt.Sprintf("\ttarget = %#v\n", *r.Target)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.IPAddress != nil {
+		outputConfig += fmt.Sprintf("\tip_address = %#v\n", *r.IPAddress)
+	}
+	if r.IPProtocol != nil {
+		outputConfig += fmt.Sprintf("\tip_protocol = %#v\n", *r.IPProtocol)
+	}
+	if r.IPVersion != nil {
+		outputConfig += fmt.Sprintf("\tip_version = %#v\n", *r.IPVersion)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.LoadBalancingScheme != nil {
+		outputConfig += fmt.Sprintf("\tload_balancing_scheme = %#v\n", *r.LoadBalancingScheme)
+	}
+	if r.MetadataFilter != nil {
+		for _, v := range r.MetadataFilter {
+			outputConfig += fmt.Sprintf("\tmetadata_filters %s\n", convertComputeGlobalForwardingRuleBetaMetadataFilterToHCL(&v))
+		}
+	}
+	if r.Network != nil {
+		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
+	}
+	if r.PortRange != nil {
+		outputConfig += fmt.Sprintf("\tport_range = %#v\n", *r.PortRange)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertComputeGlobalForwardingRuleBetaMetadataFilterToHCL(r *computeBeta.ForwardingRuleMetadataFilter) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.FilterLabel != nil {
+		for _, v := range r.FilterLabel {
+			outputConfig += fmt.Sprintf("\tfilter_labels %s\n", convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelToHCL(&v))
+		}
+	}
+	if r.FilterMatchCriteria != nil {
+		outputConfig += fmt.Sprintf("\tfilter_match_criteria = %#v\n", *r.FilterMatchCriteria)
+	}
+	return outputConfig + "}"
+}
+
+func convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelToHCL(r *computeBeta.ForwardingRuleMetadataFilterFilterLabel) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Value != nil {
+		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
+	}
+	return outputConfig + "}"
+}
+
+// ContainerAwsClusterBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAwsClusterBetaAsHCL(r containerawsBeta.Cluster, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_aws_cluster\" \"output\" {\n"
+	if v := convertContainerAwsClusterBetaAuthorizationToHCL(r.Authorization); v != "" {
+		outputConfig += fmt.Sprintf("\tauthorization %s\n", v)
+	}
+	if r.AwsRegion != nil {
+		outputConfig += fmt.Sprintf("\taws_region = %#v\n", *r.AwsRegion)
+	}
+	if v := convertContainerAwsClusterBetaControlPlaneToHCL(r.ControlPlane); v != "" {
+		outputConfig += fmt.Sprintf("\tcontrol_plane %s\n", v)
+	}
+	if v := convertContainerAwsClusterBetaFleetToHCL(r.Fleet); v != "" {
+		outputConfig += fmt.Sprintf("\tfleet %s\n", v)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if v := convertContainerAwsClusterBetaNetworkingToHCL(r.Networking); v != "" {
+		outputConfig += fmt.Sprintf("\tnetworking %s\n", v)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertContainerAwsClusterBetaAuthorizationToHCL(r *containerawsBeta.ClusterAuthorization) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AdminUsers != nil {
+		for _, v := range r.AdminUsers {
+			outputConfig += fmt.Sprintf("\tadmin_users %s\n", convertContainerAwsClusterBetaAuthorizationAdminUsersToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaAuthorizationAdminUsersToHCL(r *containerawsBeta.ClusterAuthorizationAdminUsers) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Username != nil {
+		outputConfig += fmt.Sprintf("\tusername = %#v\n", *r.Username)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaControlPlaneToHCL(r *containerawsBeta.ClusterControlPlane) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertContainerAwsClusterBetaControlPlaneAwsServicesAuthenticationToHCL(r.AwsServicesAuthentication); v != "" {
+		outputConfig += fmt.Sprintf("\taws_services_authentication %s\n", v)
+	}
+	if v := convertContainerAwsClusterBetaControlPlaneConfigEncryptionToHCL(r.ConfigEncryption); v != "" {
+		outputConfig += fmt.Sprintf("\tconfig_encryption %s\n", v)
+	}
+	if v := convertContainerAwsClusterBetaControlPlaneDatabaseEncryptionToHCL(r.DatabaseEncryption); v != "" {
+		outputConfig += fmt.Sprintf("\tdatabase_encryption %s\n", v)
+	}
+	if r.IamInstanceProfile != nil {
+		outputConfig += fmt.Sprintf("\tiam_instance_profile = %#v\n", *r.IamInstanceProfile)
+	}
+	if r.SubnetIds != nil {
+		outputConfig += "\tsubnet_ids = ["
+		for _, v := range r.SubnetIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Version != nil {
+		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
+	}
+	if r.InstanceType != nil {
+		outputConfig += fmt.Sprintf("\tinstance_type = %#v\n", *r.InstanceType)
+	}
+	if v := convertContainerAwsClusterBetaControlPlaneMainVolumeToHCL(r.MainVolume); v != "" {
+		outputConfig += fmt.Sprintf("\tmain_volume %s\n", v)
+	}
+	if v := convertContainerAwsClusterBetaControlPlaneProxyConfigToHCL(r.ProxyConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tproxy_config %s\n", v)
+	}
+	if v := convertContainerAwsClusterBetaControlPlaneRootVolumeToHCL(r.RootVolume); v != "" {
+		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
+	}
+	if r.SecurityGroupIds != nil {
+		outputConfig += "\tsecurity_group_ids = ["
+		for _, v := range r.SecurityGroupIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertContainerAwsClusterBetaControlPlaneSshConfigToHCL(r.SshConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
+	}
+	outputConfig += "\ttags = {"
+	for k, v := range r.Tags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaControlPlaneAwsServicesAuthenticationToHCL(r *containerawsBeta.ClusterControlPlaneAwsServicesAuthentication) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.RoleArn != nil {
+		outputConfig += fmt.Sprintf("\trole_arn = %#v\n", *r.RoleArn)
+	}
+	if r.RoleSessionName != nil {
+		outputConfig += fmt.Sprintf("\trole_session_name = %#v\n", *r.RoleSessionName)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaControlPlaneConfigEncryptionToHCL(r *containerawsBeta.ClusterControlPlaneConfigEncryption) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaControlPlaneDatabaseEncryptionToHCL(r *containerawsBeta.ClusterControlPlaneDatabaseEncryption) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaControlPlaneMainVolumeToHCL(r *containerawsBeta.ClusterControlPlaneMainVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Iops != nil {
+		outputConfig += fmt.Sprintf("\tiops = %#v\n", *r.Iops)
+	}
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	if r.VolumeType != nil {
+		outputConfig += fmt.Sprintf("\tvolume_type = %#v\n", *r.VolumeType)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaControlPlaneProxyConfigToHCL(r *containerawsBeta.ClusterControlPlaneProxyConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.SecretArn != nil {
+		outputConfig += fmt.Sprintf("\tsecret_arn = %#v\n", *r.SecretArn)
+	}
+	if r.SecretVersion != nil {
+		outputConfig += fmt.Sprintf("\tsecret_version = %#v\n", *r.SecretVersion)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaControlPlaneRootVolumeToHCL(r *containerawsBeta.ClusterControlPlaneRootVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Iops != nil {
+		outputConfig += fmt.Sprintf("\tiops = %#v\n", *r.Iops)
+	}
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	if r.VolumeType != nil {
+		outputConfig += fmt.Sprintf("\tvolume_type = %#v\n", *r.VolumeType)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaControlPlaneSshConfigToHCL(r *containerawsBeta.ClusterControlPlaneSshConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Ec2KeyPair != nil {
+		outputConfig += fmt.Sprintf("\tec2_key_pair = %#v\n", *r.Ec2KeyPair)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaFleetToHCL(r *containerawsBeta.ClusterFleet) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaNetworkingToHCL(r *containerawsBeta.ClusterNetworking) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.PodAddressCidrBlocks != nil {
+		outputConfig += "\tpod_address_cidr_blocks = ["
+		for _, v := range r.PodAddressCidrBlocks {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.ServiceAddressCidrBlocks != nil {
+		outputConfig += "\tservice_address_cidr_blocks = ["
+		for _, v := range r.ServiceAddressCidrBlocks {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.VPCId != nil {
+		outputConfig += fmt.Sprintf("\tvpc_id = %#v\n", *r.VPCId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaWorkloadIdentityConfigToHCL(r *containerawsBeta.ClusterWorkloadIdentityConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+// ContainerAwsNodePoolBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAwsNodePoolBetaAsHCL(r containerawsBeta.NodePool, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_aws_node_pool\" \"output\" {\n"
+	if v := convertContainerAwsNodePoolBetaAutoscalingToHCL(r.Autoscaling); v != "" {
+		outputConfig += fmt.Sprintf("\tautoscaling %s\n", v)
+	}
+	if r.Cluster != nil {
+		outputConfig += fmt.Sprintf("\tcluster = %#v\n", *r.Cluster)
+	}
+	if v := convertContainerAwsNodePoolBetaConfigToHCL(r.Config); v != "" {
+		outputConfig += fmt.Sprintf("\tconfig %s\n", v)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if v := convertContainerAwsNodePoolBetaMaxPodsConstraintToHCL(r.MaxPodsConstraint); v != "" {
+		outputConfig += fmt.Sprintf("\tmax_pods_constraint %s\n", v)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.SubnetId != nil {
+		outputConfig += fmt.Sprintf("\tsubnet_id = %#v\n", *r.SubnetId)
+	}
+	if r.Version != nil {
+		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertContainerAwsNodePoolBetaAutoscalingToHCL(r *containerawsBeta.NodePoolAutoscaling) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.MaxNodeCount != nil {
+		outputConfig += fmt.Sprintf("\tmax_node_count = %#v\n", *r.MaxNodeCount)
+	}
+	if r.MinNodeCount != nil {
+		outputConfig += fmt.Sprintf("\tmin_node_count = %#v\n", *r.MinNodeCount)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolBetaConfigToHCL(r *containerawsBeta.NodePoolConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertContainerAwsNodePoolBetaConfigConfigEncryptionToHCL(r.ConfigEncryption); v != "" {
+		outputConfig += fmt.Sprintf("\tconfig_encryption %s\n", v)
+	}
+	if r.IamInstanceProfile != nil {
+		outputConfig += fmt.Sprintf("\tiam_instance_profile = %#v\n", *r.IamInstanceProfile)
+	}
+	if r.InstanceType != nil {
+		outputConfig += fmt.Sprintf("\tinstance_type = %#v\n", *r.InstanceType)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if v := convertContainerAwsNodePoolBetaConfigRootVolumeToHCL(r.RootVolume); v != "" {
+		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
+	}
+	if r.SecurityGroupIds != nil {
+		outputConfig += "\tsecurity_group_ids = ["
+		for _, v := range r.SecurityGroupIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertContainerAwsNodePoolBetaConfigSshConfigToHCL(r.SshConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
+	}
+	outputConfig += "\ttags = {"
+	for k, v := range r.Tags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Taints != nil {
+		for _, v := range r.Taints {
+			outputConfig += fmt.Sprintf("\ttaints %s\n", convertContainerAwsNodePoolBetaConfigTaintsToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolBetaConfigConfigEncryptionToHCL(r *containerawsBeta.NodePoolConfigConfigEncryption) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolBetaConfigRootVolumeToHCL(r *containerawsBeta.NodePoolConfigRootVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Iops != nil {
+		outputConfig += fmt.Sprintf("\tiops = %#v\n", *r.Iops)
+	}
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	if r.VolumeType != nil {
+		outputConfig += fmt.Sprintf("\tvolume_type = %#v\n", *r.VolumeType)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolBetaConfigSshConfigToHCL(r *containerawsBeta.NodePoolConfigSshConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Ec2KeyPair != nil {
+		outputConfig += fmt.Sprintf("\tec2_key_pair = %#v\n", *r.Ec2KeyPair)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolBetaConfigTaintsToHCL(r *containerawsBeta.NodePoolConfigTaints) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Effect != nil {
+		outputConfig += fmt.Sprintf("\teffect = %#v\n", *r.Effect)
+	}
+	if r.Key != nil {
+		outputConfig += fmt.Sprintf("\tkey = %#v\n", *r.Key)
+	}
+	if r.Value != nil {
+		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolBetaMaxPodsConstraintToHCL(r *containerawsBeta.NodePoolMaxPodsConstraint) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.MaxPodsPerNode != nil {
+		outputConfig += fmt.Sprintf("\tmax_pods_per_node = %#v\n", *r.MaxPodsPerNode)
+	}
+	return outputConfig + "}"
+}
+
+// ContainerAzureClientBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAzureClientBetaAsHCL(r containerazureBeta.AzureClient, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_azure_client\" \"output\" {\n"
+	if r.ApplicationId != nil {
+		outputConfig += fmt.Sprintf("\tapplication_id = %#v\n", *r.ApplicationId)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.TenantId != nil {
+		outputConfig += fmt.Sprintf("\ttenant_id = %#v\n", *r.TenantId)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+// ContainerAzureClusterBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAzureClusterBetaAsHCL(r containerazureBeta.Cluster, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_azure_cluster\" \"output\" {\n"
+	if v := convertContainerAzureClusterBetaAuthorizationToHCL(r.Authorization); v != "" {
+		outputConfig += fmt.Sprintf("\tauthorization %s\n", v)
+	}
+	if r.AzureRegion != nil {
+		outputConfig += fmt.Sprintf("\tazure_region = %#v\n", *r.AzureRegion)
+	}
+	if r.Client != nil {
+		outputConfig += fmt.Sprintf("\tclient = %#v\n", *r.Client)
+	}
+	if v := convertContainerAzureClusterBetaControlPlaneToHCL(r.ControlPlane); v != "" {
+		outputConfig += fmt.Sprintf("\tcontrol_plane %s\n", v)
+	}
+	if v := convertContainerAzureClusterBetaFleetToHCL(r.Fleet); v != "" {
+		outputConfig += fmt.Sprintf("\tfleet %s\n", v)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if v := convertContainerAzureClusterBetaNetworkingToHCL(r.Networking); v != "" {
+		outputConfig += fmt.Sprintf("\tnetworking %s\n", v)
+	}
+	if r.ResourceGroupId != nil {
+		outputConfig += fmt.Sprintf("\tresource_group_id = %#v\n", *r.ResourceGroupId)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertContainerAzureClusterBetaAuthorizationToHCL(r *containerazureBeta.ClusterAuthorization) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AdminUsers != nil {
+		for _, v := range r.AdminUsers {
+			outputConfig += fmt.Sprintf("\tadmin_users %s\n", convertContainerAzureClusterBetaAuthorizationAdminUsersToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaAuthorizationAdminUsersToHCL(r *containerazureBeta.ClusterAuthorizationAdminUsers) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Username != nil {
+		outputConfig += fmt.Sprintf("\tusername = %#v\n", *r.Username)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaControlPlaneToHCL(r *containerazureBeta.ClusterControlPlane) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertContainerAzureClusterBetaControlPlaneSshConfigToHCL(r.SshConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
+	}
+	if r.SubnetId != nil {
+		outputConfig += fmt.Sprintf("\tsubnet_id = %#v\n", *r.SubnetId)
+	}
+	if r.Version != nil {
+		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
+	}
+	if v := convertContainerAzureClusterBetaControlPlaneDatabaseEncryptionToHCL(r.DatabaseEncryption); v != "" {
+		outputConfig += fmt.Sprintf("\tdatabase_encryption %s\n", v)
+	}
+	if v := convertContainerAzureClusterBetaControlPlaneMainVolumeToHCL(r.MainVolume); v != "" {
+		outputConfig += fmt.Sprintf("\tmain_volume %s\n", v)
+	}
+	if v := convertContainerAzureClusterBetaControlPlaneProxyConfigToHCL(r.ProxyConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tproxy_config %s\n", v)
+	}
+	if r.ReplicaPlacements != nil {
+		for _, v := range r.ReplicaPlacements {
+			outputConfig += fmt.Sprintf("\treplica_placements %s\n", convertContainerAzureClusterBetaControlPlaneReplicaPlacementsToHCL(&v))
+		}
+	}
+	if v := convertContainerAzureClusterBetaControlPlaneRootVolumeToHCL(r.RootVolume); v != "" {
+		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
+	}
+	outputConfig += "\ttags = {"
+	for k, v := range r.Tags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.VmSize != nil {
+		outputConfig += fmt.Sprintf("\tvm_size = %#v\n", *r.VmSize)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaControlPlaneSshConfigToHCL(r *containerazureBeta.ClusterControlPlaneSshConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AuthorizedKey != nil {
+		outputConfig += fmt.Sprintf("\tauthorized_key = %#v\n", *r.AuthorizedKey)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaControlPlaneDatabaseEncryptionToHCL(r *containerazureBeta.ClusterControlPlaneDatabaseEncryption) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.KeyId != nil {
+		outputConfig += fmt.Sprintf("\tkey_id = %#v\n", *r.KeyId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaControlPlaneMainVolumeToHCL(r *containerazureBeta.ClusterControlPlaneMainVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaControlPlaneProxyConfigToHCL(r *containerazureBeta.ClusterControlPlaneProxyConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ResourceGroupId != nil {
+		outputConfig += fmt.Sprintf("\tresource_group_id = %#v\n", *r.ResourceGroupId)
+	}
+	if r.SecretId != nil {
+		outputConfig += fmt.Sprintf("\tsecret_id = %#v\n", *r.SecretId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaControlPlaneReplicaPlacementsToHCL(r *containerazureBeta.ClusterControlPlaneReplicaPlacements) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AzureAvailabilityZone != nil {
+		outputConfig += fmt.Sprintf("\tazure_availability_zone = %#v\n", *r.AzureAvailabilityZone)
+	}
+	if r.SubnetId != nil {
+		outputConfig += fmt.Sprintf("\tsubnet_id = %#v\n", *r.SubnetId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaControlPlaneRootVolumeToHCL(r *containerazureBeta.ClusterControlPlaneRootVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaFleetToHCL(r *containerazureBeta.ClusterFleet) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaNetworkingToHCL(r *containerazureBeta.ClusterNetworking) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.PodAddressCidrBlocks != nil {
+		outputConfig += "\tpod_address_cidr_blocks = ["
+		for _, v := range r.PodAddressCidrBlocks {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.ServiceAddressCidrBlocks != nil {
+		outputConfig += "\tservice_address_cidr_blocks = ["
+		for _, v := range r.ServiceAddressCidrBlocks {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.VirtualNetworkId != nil {
+		outputConfig += fmt.Sprintf("\tvirtual_network_id = %#v\n", *r.VirtualNetworkId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaWorkloadIdentityConfigToHCL(r *containerazureBeta.ClusterWorkloadIdentityConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+// ContainerAzureNodePoolBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAzureNodePoolBetaAsHCL(r containerazureBeta.NodePool, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_azure_node_pool\" \"output\" {\n"
+	if v := convertContainerAzureNodePoolBetaAutoscalingToHCL(r.Autoscaling); v != "" {
+		outputConfig += fmt.Sprintf("\tautoscaling %s\n", v)
+	}
+	if r.Cluster != nil {
+		outputConfig += fmt.Sprintf("\tcluster = %#v\n", *r.Cluster)
+	}
+	if v := convertContainerAzureNodePoolBetaConfigToHCL(r.Config); v != "" {
+		outputConfig += fmt.Sprintf("\tconfig %s\n", v)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if v := convertContainerAzureNodePoolBetaMaxPodsConstraintToHCL(r.MaxPodsConstraint); v != "" {
+		outputConfig += fmt.Sprintf("\tmax_pods_constraint %s\n", v)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.SubnetId != nil {
+		outputConfig += fmt.Sprintf("\tsubnet_id = %#v\n", *r.SubnetId)
+	}
+	if r.Version != nil {
+		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.AzureAvailabilityZone != nil {
+		outputConfig += fmt.Sprintf("\tazure_availability_zone = %#v\n", *r.AzureAvailabilityZone)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertContainerAzureNodePoolBetaAutoscalingToHCL(r *containerazureBeta.NodePoolAutoscaling) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.MaxNodeCount != nil {
+		outputConfig += fmt.Sprintf("\tmax_node_count = %#v\n", *r.MaxNodeCount)
+	}
+	if r.MinNodeCount != nil {
+		outputConfig += fmt.Sprintf("\tmin_node_count = %#v\n", *r.MinNodeCount)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolBetaConfigToHCL(r *containerazureBeta.NodePoolConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertContainerAzureNodePoolBetaConfigSshConfigToHCL(r.SshConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
+	}
+	if v := convertContainerAzureNodePoolBetaConfigRootVolumeToHCL(r.RootVolume); v != "" {
+		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
+	}
+	outputConfig += "\ttags = {"
+	for k, v := range r.Tags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.VmSize != nil {
+		outputConfig += fmt.Sprintf("\tvm_size = %#v\n", *r.VmSize)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolBetaConfigSshConfigToHCL(r *containerazureBeta.NodePoolConfigSshConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AuthorizedKey != nil {
+		outputConfig += fmt.Sprintf("\tauthorized_key = %#v\n", *r.AuthorizedKey)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolBetaConfigRootVolumeToHCL(r *containerazureBeta.NodePoolConfigRootVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolBetaMaxPodsConstraintToHCL(r *containerazureBeta.NodePoolMaxPodsConstraint) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.MaxPodsPerNode != nil {
+		outputConfig += fmt.Sprintf("\tmax_pods_per_node = %#v\n", *r.MaxPodsPerNode)
+	}
+	return outputConfig + "}"
+}
+
 // DataprocWorkflowTemplateBetaAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func DataprocWorkflowTemplateBetaAsHCL(r dataprocBeta.WorkflowTemplate) (string, error) {
+func DataprocWorkflowTemplateBetaAsHCL(r dataprocBeta.WorkflowTemplate, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_dataproc_workflow_template\" \"output\" {\n"
 	if r.Jobs != nil {
 		for _, v := range r.Jobs {
@@ -280,6 +1870,11 @@ func DataprocWorkflowTemplateBetaAsHCL(r dataprocBeta.WorkflowTemplate) (string,
 	if r.DagTimeout != nil {
 		outputConfig += fmt.Sprintf("\tdag_timeout = %#v\n", *r.DagTimeout)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Parameters != nil {
 		for _, v := range r.Parameters {
 			outputConfig += fmt.Sprintf("\tparameters %s\n", convertDataprocWorkflowTemplateBetaParametersToHCL(&v))
@@ -291,7 +1886,15 @@ func DataprocWorkflowTemplateBetaAsHCL(r dataprocBeta.WorkflowTemplate) (string,
 	if r.Version != nil {
 		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertDataprocWorkflowTemplateBetaJobsToHCL(r *dataprocBeta.WorkflowTemplateJobs) string {
@@ -308,6 +1911,11 @@ func convertDataprocWorkflowTemplateBetaJobsToHCL(r *dataprocBeta.WorkflowTempla
 	if v := convertDataprocWorkflowTemplateBetaJobsHiveJobToHCL(r.HiveJob); v != "" {
 		outputConfig += fmt.Sprintf("\thive_job %s\n", v)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if v := convertDataprocWorkflowTemplateBetaJobsPigJobToHCL(r.PigJob); v != "" {
 		outputConfig += fmt.Sprintf("\tpig_job %s\n", v)
 	}
@@ -381,6 +1989,11 @@ func convertDataprocWorkflowTemplateBetaJobsHadoopJobToHCL(r *dataprocBeta.Workf
 	if r.MainJarFileUri != nil {
 		outputConfig += fmt.Sprintf("\tmain_jar_file_uri = %#v\n", *r.MainJarFileUri)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -389,6 +2002,11 @@ func convertDataprocWorkflowTemplateBetaJobsHadoopJobLoggingConfigToHCL(r *datap
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -407,12 +2025,22 @@ func convertDataprocWorkflowTemplateBetaJobsHiveJobToHCL(r *dataprocBeta.Workflo
 		}
 		outputConfig += "]\n"
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
 		outputConfig += fmt.Sprintf("\tquery_file_uri = %#v\n", *r.QueryFileUri)
 	}
 	if v := convertDataprocWorkflowTemplateBetaJobsHiveJobQueryListToHCL(r.QueryList); v != "" {
 		outputConfig += fmt.Sprintf("\tquery_list %s\n", v)
 	}
+	outputConfig += "\tscript_variables = {"
+	for k, v := range r.ScriptVariables {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -449,12 +2077,22 @@ func convertDataprocWorkflowTemplateBetaJobsPigJobToHCL(r *dataprocBeta.Workflow
 	if v := convertDataprocWorkflowTemplateBetaJobsPigJobLoggingConfigToHCL(r.LoggingConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
 		outputConfig += fmt.Sprintf("\tquery_file_uri = %#v\n", *r.QueryFileUri)
 	}
 	if v := convertDataprocWorkflowTemplateBetaJobsPigJobQueryListToHCL(r.QueryList); v != "" {
 		outputConfig += fmt.Sprintf("\tquery_list %s\n", v)
 	}
+	outputConfig += "\tscript_variables = {"
+	for k, v := range r.ScriptVariables {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -463,6 +2101,11 @@ func convertDataprocWorkflowTemplateBetaJobsPigJobLoggingConfigToHCL(r *dataproc
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -502,6 +2145,11 @@ func convertDataprocWorkflowTemplateBetaJobsPrestoJobToHCL(r *dataprocBeta.Workf
 	if r.OutputFormat != nil {
 		outputConfig += fmt.Sprintf("\toutput_format = %#v\n", *r.OutputFormat)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
 		outputConfig += fmt.Sprintf("\tquery_file_uri = %#v\n", *r.QueryFileUri)
 	}
@@ -516,6 +2164,11 @@ func convertDataprocWorkflowTemplateBetaJobsPrestoJobLoggingConfigToHCL(r *datap
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -573,6 +2226,11 @@ func convertDataprocWorkflowTemplateBetaJobsPysparkJobToHCL(r *dataprocBeta.Work
 	if v := convertDataprocWorkflowTemplateBetaJobsPysparkJobLoggingConfigToHCL(r.LoggingConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.PythonFileUris != nil {
 		outputConfig += "\tpython_file_uris = ["
 		for _, v := range r.PythonFileUris {
@@ -588,6 +2246,11 @@ func convertDataprocWorkflowTemplateBetaJobsPysparkJobLoggingConfigToHCL(r *data
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -647,6 +2310,11 @@ func convertDataprocWorkflowTemplateBetaJobsSparkJobToHCL(r *dataprocBeta.Workfl
 	if r.MainJarFileUri != nil {
 		outputConfig += fmt.Sprintf("\tmain_jar_file_uri = %#v\n", *r.MainJarFileUri)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -655,6 +2323,11 @@ func convertDataprocWorkflowTemplateBetaJobsSparkJobLoggingConfigToHCL(r *datapr
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -690,6 +2363,11 @@ func convertDataprocWorkflowTemplateBetaJobsSparkRJobToHCL(r *dataprocBeta.Workf
 	if v := convertDataprocWorkflowTemplateBetaJobsSparkRJobLoggingConfigToHCL(r.LoggingConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -698,6 +2376,11 @@ func convertDataprocWorkflowTemplateBetaJobsSparkRJobLoggingConfigToHCL(r *datap
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -716,12 +2399,22 @@ func convertDataprocWorkflowTemplateBetaJobsSparkSqlJobToHCL(r *dataprocBeta.Wor
 	if v := convertDataprocWorkflowTemplateBetaJobsSparkSqlJobLoggingConfigToHCL(r.LoggingConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
 		outputConfig += fmt.Sprintf("\tquery_file_uri = %#v\n", *r.QueryFileUri)
 	}
 	if v := convertDataprocWorkflowTemplateBetaJobsSparkSqlJobQueryListToHCL(r.QueryList); v != "" {
 		outputConfig += fmt.Sprintf("\tquery_list %s\n", v)
 	}
+	outputConfig += "\tscript_variables = {"
+	for k, v := range r.ScriptVariables {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -730,6 +2423,11 @@ func convertDataprocWorkflowTemplateBetaJobsSparkSqlJobLoggingConfigToHCL(r *dat
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -767,6 +2465,11 @@ func convertDataprocWorkflowTemplateBetaPlacementClusterSelectorToHCL(r *datapro
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tcluster_labels = {"
+	for k, v := range r.ClusterLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Zone != nil {
 		outputConfig += fmt.Sprintf("\tzone = %#v\n", *r.Zone)
 	}
@@ -784,6 +2487,11 @@ func convertDataprocWorkflowTemplateBetaPlacementManagedClusterToHCL(r *dataproc
 	if v := convertDataprocWorkflowTemplateBetaClusterClusterConfigToHCL(r.Config); v != "" {
 		outputConfig += fmt.Sprintf("\tconfig %s\n", v)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1021,6 +2729,11 @@ func convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfigToHC
 	if r.InternalIPOnly != nil {
 		outputConfig += fmt.Sprintf("\tinternal_ip_only = %#v\n", *r.InternalIPOnly)
 	}
+	outputConfig += "\tmetadata = {"
+	for k, v := range r.Metadata {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Network != nil {
 		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
 	}
@@ -1230,6 +2943,18 @@ func convertDataprocWorkflowTemplateBetaClusterClusterConfigSoftwareConfigToHCL(
 	if r.ImageVersion != nil {
 		outputConfig += fmt.Sprintf("\timage_version = %#v\n", *r.ImageVersion)
 	}
+	if r.OptionalComponents != nil {
+		outputConfig += "\toptional_components = ["
+		for _, v := range r.OptionalComponents {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1239,7 +2964,7 @@ func convertDataprocWorkflowTemplateBetaClusterClusterConfigSoftwareConfigToHCL(
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func EventarcTriggerBetaAsHCL(r eventarcBeta.Trigger) (string, error) {
+func EventarcTriggerBetaAsHCL(r eventarcBeta.Trigger, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_eventarc_trigger\" \"output\" {\n"
 	if v := convertEventarcTriggerBetaDestinationToHCL(r.Destination); v != "" {
 		outputConfig += fmt.Sprintf("\tdestination %s\n", v)
@@ -1255,6 +2980,11 @@ func EventarcTriggerBetaAsHCL(r eventarcBeta.Trigger) (string, error) {
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
@@ -1264,7 +2994,15 @@ func EventarcTriggerBetaAsHCL(r eventarcBeta.Trigger) (string, error) {
 	if v := convertEventarcTriggerBetaTransportToHCL(r.Transport); v != "" {
 		outputConfig += fmt.Sprintf("\ttransport %s\n", v)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertEventarcTriggerBetaDestinationToHCL(r *eventarcBeta.TriggerDestination) string {
@@ -1272,6 +3010,9 @@ func convertEventarcTriggerBetaDestinationToHCL(r *eventarcBeta.TriggerDestinati
 		return ""
 	}
 	outputConfig := "{\n"
+	if r.CloudFunction != nil {
+		outputConfig += fmt.Sprintf("\tcloud_function = %#v\n", *r.CloudFunction)
+	}
 	if v := convertEventarcTriggerBetaDestinationCloudRunServiceToHCL(r.CloudRunService); v != "" {
 		outputConfig += fmt.Sprintf("\tcloud_run_service %s\n", v)
 	}
@@ -1337,11 +3078,16 @@ func convertEventarcTriggerBetaTransportPubsubToHCL(r *eventarcBeta.TriggerTrans
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func GkeHubFeatureBetaAsHCL(r gkehubBeta.Feature) (string, error) {
+func GkeHubFeatureBetaAsHCL(r gkehubBeta.Feature, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_gke_hub_feature\" \"output\" {\n"
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
@@ -1351,7 +3097,15 @@ func GkeHubFeatureBetaAsHCL(r gkehubBeta.Feature) (string, error) {
 	if v := convertGkeHubFeatureBetaSpecToHCL(r.Spec); v != "" {
 		outputConfig += fmt.Sprintf("\tspec %s\n", v)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertGkeHubFeatureBetaSpecToHCL(r *gkehubBeta.FeatureSpec) string {
@@ -1376,13 +3130,37 @@ func convertGkeHubFeatureBetaSpecMulticlusteringressToHCL(r *gkehubBeta.FeatureS
 	return outputConfig + "}"
 }
 
+func convertGkeHubFeatureBetaResourceStateToHCL(r *gkehubBeta.FeatureResourceState) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertGkeHubFeatureBetaStateToHCL(r *gkehubBeta.FeatureState) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertGkeHubFeatureBetaStateStateToHCL(r *gkehubBeta.FeatureStateState) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
 // GkeHubFeatureMembershipBetaAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func GkeHubFeatureMembershipBetaAsHCL(r gkehubBeta.FeatureMembership) (string, error) {
+func GkeHubFeatureMembershipBetaAsHCL(r gkehubBeta.FeatureMembership, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_gke_hub_feature_membership\" \"output\" {\n"
 	if v := convertGkeHubFeatureMembershipBetaConfigmanagementToHCL(r.Configmanagement); v != "" {
 		outputConfig += fmt.Sprintf("\tconfigmanagement %s\n", v)
@@ -1399,7 +3177,15 @@ func GkeHubFeatureMembershipBetaAsHCL(r gkehubBeta.FeatureMembership) (string, e
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertGkeHubFeatureMembershipBetaConfigmanagementToHCL(r *gkehubBeta.FeatureMembershipConfigmanagement) string {
@@ -1455,6 +3241,9 @@ func convertGkeHubFeatureMembershipBetaConfigmanagementConfigSyncGitToHCL(r *gke
 		return ""
 	}
 	outputConfig := "{\n"
+	if r.GcpServiceAccountEmail != nil {
+		outputConfig += fmt.Sprintf("\tgcp_service_account_email = %#v\n", *r.GcpServiceAccountEmail)
+	}
 	if r.HttpsProxy != nil {
 		outputConfig += fmt.Sprintf("\thttps_proxy = %#v\n", *r.HttpsProxy)
 	}
@@ -1526,13 +3315,1173 @@ func convertGkeHubFeatureMembershipBetaConfigmanagementPolicyControllerToHCL(r *
 	return outputConfig + "}"
 }
 
+// MonitoringMonitoredProjectBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func MonitoringMonitoredProjectBetaAsHCL(r monitoringBeta.MonitoredProject, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_monitoring_monitored_project\" \"output\" {\n"
+	if r.MetricsScope != nil {
+		outputConfig += fmt.Sprintf("\tmetrics_scope = %#v\n", *r.MetricsScope)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+// NetworkConnectivityHubBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func NetworkConnectivityHubBetaAsHCL(r networkconnectivityBeta.Hub, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_network_connectivity_hub\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertNetworkConnectivityHubBetaRoutingVpcsToHCL(r *networkconnectivityBeta.HubRoutingVpcs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+// OrgPolicyPolicyBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func OrgPolicyPolicyBetaAsHCL(r orgpolicyBeta.Policy, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_org_policy_policy\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	if v := convertOrgPolicyPolicyBetaSpecToHCL(r.Spec); v != "" {
+		outputConfig += fmt.Sprintf("\tspec %s\n", v)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertOrgPolicyPolicyBetaSpecToHCL(r *orgpolicyBeta.PolicySpec) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.InheritFromParent != nil {
+		outputConfig += fmt.Sprintf("\tinherit_from_parent = %#v\n", *r.InheritFromParent)
+	}
+	if r.Reset != nil {
+		outputConfig += fmt.Sprintf("\treset = %#v\n", *r.Reset)
+	}
+	if r.Rules != nil {
+		for _, v := range r.Rules {
+			outputConfig += fmt.Sprintf("\trules %s\n", convertOrgPolicyPolicyBetaSpecRulesToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertOrgPolicyPolicyBetaSpecRulesToHCL(r *orgpolicyBeta.PolicySpecRules) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowAll != nil {
+		outputConfig += fmt.Sprintf("\tallow_all = %q\n", serializeEnumBool(r.AllowAll))
+	}
+	if v := convertOrgPolicyPolicyBetaSpecRulesConditionToHCL(r.Condition); v != "" {
+		outputConfig += fmt.Sprintf("\tcondition %s\n", v)
+	}
+	if r.DenyAll != nil {
+		outputConfig += fmt.Sprintf("\tdeny_all = %q\n", serializeEnumBool(r.DenyAll))
+	}
+	if r.Enforce != nil {
+		outputConfig += fmt.Sprintf("\tenforce = %q\n", serializeEnumBool(r.Enforce))
+	}
+	if v := convertOrgPolicyPolicyBetaSpecRulesValuesToHCL(r.Values); v != "" {
+		outputConfig += fmt.Sprintf("\tvalues %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOrgPolicyPolicyBetaSpecRulesConditionToHCL(r *orgpolicyBeta.PolicySpecRulesCondition) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Expression != nil {
+		outputConfig += fmt.Sprintf("\texpression = %#v\n", *r.Expression)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Title != nil {
+		outputConfig += fmt.Sprintf("\ttitle = %#v\n", *r.Title)
+	}
+	return outputConfig + "}"
+}
+
+func convertOrgPolicyPolicyBetaSpecRulesValuesToHCL(r *orgpolicyBeta.PolicySpecRulesValues) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedValues != nil {
+		outputConfig += "\tallowed_values = ["
+		for _, v := range r.AllowedValues {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.DeniedValues != nil {
+		outputConfig += "\tdenied_values = ["
+		for _, v := range r.DeniedValues {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+// OsConfigOsPolicyAssignmentBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func OsConfigOsPolicyAssignmentBetaAsHCL(r osconfigBeta.OSPolicyAssignment, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_os_config_os_policy_assignment\" \"output\" {\n"
+	if v := convertOsConfigOsPolicyAssignmentBetaInstanceFilterToHCL(r.InstanceFilter); v != "" {
+		outputConfig += fmt.Sprintf("\tinstance_filter %s\n", v)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.OSPolicies != nil {
+		for _, v := range r.OSPolicies {
+			outputConfig += fmt.Sprintf("\tos_policies %s\n", convertOsConfigOsPolicyAssignmentBetaOSPoliciesToHCL(&v))
+		}
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaRolloutToHCL(r.Rollout); v != "" {
+		outputConfig += fmt.Sprintf("\trollout %s\n", v)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertOsConfigOsPolicyAssignmentBetaInstanceFilterToHCL(r *osconfigBeta.OSPolicyAssignmentInstanceFilter) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.All != nil {
+		outputConfig += fmt.Sprintf("\tall = %#v\n", *r.All)
+	}
+	if r.ExclusionLabels != nil {
+		for _, v := range r.ExclusionLabels {
+			outputConfig += fmt.Sprintf("\texclusion_labels %s\n", convertOsConfigOsPolicyAssignmentBetaInstanceFilterExclusionLabelsToHCL(&v))
+		}
+	}
+	if r.InclusionLabels != nil {
+		for _, v := range r.InclusionLabels {
+			outputConfig += fmt.Sprintf("\tinclusion_labels %s\n", convertOsConfigOsPolicyAssignmentBetaInstanceFilterInclusionLabelsToHCL(&v))
+		}
+	}
+	if r.Inventories != nil {
+		for _, v := range r.Inventories {
+			outputConfig += fmt.Sprintf("\tinventories %s\n", convertOsConfigOsPolicyAssignmentBetaInstanceFilterInventoriesToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaInstanceFilterExclusionLabelsToHCL(r *osconfigBeta.OSPolicyAssignmentInstanceFilterExclusionLabels) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaInstanceFilterInclusionLabelsToHCL(r *osconfigBeta.OSPolicyAssignmentInstanceFilterInclusionLabels) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaInstanceFilterInventoriesToHCL(r *osconfigBeta.OSPolicyAssignmentInstanceFilterInventories) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.OSShortName != nil {
+		outputConfig += fmt.Sprintf("\tos_short_name = %#v\n", *r.OSShortName)
+	}
+	if r.OSVersion != nil {
+		outputConfig += fmt.Sprintf("\tos_version = %#v\n", *r.OSVersion)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesToHCL(r *osconfigBeta.OSPolicyAssignmentOSPolicies) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Id != nil {
+		outputConfig += fmt.Sprintf("\tid = %#v\n", *r.Id)
+	}
+	if r.Mode != nil {
+		outputConfig += fmt.Sprintf("\tmode = %#v\n", *r.Mode)
+	}
+	if r.ResourceGroups != nil {
+		for _, v := range r.ResourceGroups {
+			outputConfig += fmt.Sprintf("\tresource_groups %s\n", convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsToHCL(&v))
+		}
+	}
+	if r.AllowNoResourceGroupMatch != nil {
+		outputConfig += fmt.Sprintf("\tallow_no_resource_group_match = %#v\n", *r.AllowNoResourceGroupMatch)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroups) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Resources != nil {
+		for _, v := range r.Resources {
+			outputConfig += fmt.Sprintf("\tresources %s\n", convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesToHCL(&v))
+		}
+	}
+	if r.InventoryFilters != nil {
+		for _, v := range r.InventoryFilters {
+			outputConfig += fmt.Sprintf("\tinventory_filters %s\n", convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsInventoryFiltersToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResources) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Id != nil {
+		outputConfig += fmt.Sprintf("\tid = %#v\n", *r.Id)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecToHCL(r.Exec); v != "" {
+		outputConfig += fmt.Sprintf("\texec %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileToHCL(r.File); v != "" {
+		outputConfig += fmt.Sprintf("\tfile %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgToHCL(r.Pkg); v != "" {
+		outputConfig += fmt.Sprintf("\tpkg %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryToHCL(r.Repository); v != "" {
+		outputConfig += fmt.Sprintf("\trepository %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesExec) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentExecToHCL(r.Validate); v != "" {
+		outputConfig += fmt.Sprintf("\tvalidate %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentExecToHCL(r.Enforce); v != "" {
+		outputConfig += fmt.Sprintf("\tenforce %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesFile) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Path != nil {
+		outputConfig += fmt.Sprintf("\tpath = %#v\n", *r.Path)
+	}
+	if r.State != nil {
+		outputConfig += fmt.Sprintf("\tstate = %#v\n", *r.State)
+	}
+	if r.Content != nil {
+		outputConfig += fmt.Sprintf("\tcontent = %#v\n", *r.Content)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileToHCL(r.File); v != "" {
+		outputConfig += fmt.Sprintf("\tfile %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkg) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.DesiredState != nil {
+		outputConfig += fmt.Sprintf("\tdesired_state = %#v\n", *r.DesiredState)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgAptToHCL(r.Apt); v != "" {
+		outputConfig += fmt.Sprintf("\tapt %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebToHCL(r.Deb); v != "" {
+		outputConfig += fmt.Sprintf("\tdeb %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgGoogetToHCL(r.Googet); v != "" {
+		outputConfig += fmt.Sprintf("\tgooget %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiToHCL(r.Msi); v != "" {
+		outputConfig += fmt.Sprintf("\tmsi %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmToHCL(r.Rpm); v != "" {
+		outputConfig += fmt.Sprintf("\trpm %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgYumToHCL(r.Yum); v != "" {
+		outputConfig += fmt.Sprintf("\tyum %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgZypperToHCL(r.Zypper); v != "" {
+		outputConfig += fmt.Sprintf("\tzypper %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgAptToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgApt) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDeb) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileToHCL(r.Source); v != "" {
+		outputConfig += fmt.Sprintf("\tsource %s\n", v)
+	}
+	if r.PullDeps != nil {
+		outputConfig += fmt.Sprintf("\tpull_deps = %#v\n", *r.PullDeps)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgGoogetToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgGooget) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsi) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileToHCL(r.Source); v != "" {
+		outputConfig += fmt.Sprintf("\tsource %s\n", v)
+	}
+	if r.Properties != nil {
+		outputConfig += "\tproperties = ["
+		for _, v := range r.Properties {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpm) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileToHCL(r.Source); v != "" {
+		outputConfig += fmt.Sprintf("\tsource %s\n", v)
+	}
+	if r.PullDeps != nil {
+		outputConfig += fmt.Sprintf("\tpull_deps = %#v\n", *r.PullDeps)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgYumToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgYum) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgZypperToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgZypper) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesRepository) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryAptToHCL(r.Apt); v != "" {
+		outputConfig += fmt.Sprintf("\tapt %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryGooToHCL(r.Goo); v != "" {
+		outputConfig += fmt.Sprintf("\tgoo %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryYumToHCL(r.Yum); v != "" {
+		outputConfig += fmt.Sprintf("\tyum %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryZypperToHCL(r.Zypper); v != "" {
+		outputConfig += fmt.Sprintf("\tzypper %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryAptToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryApt) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ArchiveType != nil {
+		outputConfig += fmt.Sprintf("\tarchive_type = %#v\n", *r.ArchiveType)
+	}
+	if r.Components != nil {
+		outputConfig += "\tcomponents = ["
+		for _, v := range r.Components {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Distribution != nil {
+		outputConfig += fmt.Sprintf("\tdistribution = %#v\n", *r.Distribution)
+	}
+	if r.Uri != nil {
+		outputConfig += fmt.Sprintf("\turi = %#v\n", *r.Uri)
+	}
+	if r.GpgKey != nil {
+		outputConfig += fmt.Sprintf("\tgpg_key = %#v\n", *r.GpgKey)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryGooToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryGoo) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Url != nil {
+		outputConfig += fmt.Sprintf("\turl = %#v\n", *r.Url)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryYumToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryYum) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.BaseUrl != nil {
+		outputConfig += fmt.Sprintf("\tbase_url = %#v\n", *r.BaseUrl)
+	}
+	if r.Id != nil {
+		outputConfig += fmt.Sprintf("\tid = %#v\n", *r.Id)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	if r.GpgKeys != nil {
+		outputConfig += "\tgpg_keys = ["
+		for _, v := range r.GpgKeys {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryZypperToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryZypper) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.BaseUrl != nil {
+		outputConfig += fmt.Sprintf("\tbase_url = %#v\n", *r.BaseUrl)
+	}
+	if r.Id != nil {
+		outputConfig += fmt.Sprintf("\tid = %#v\n", *r.Id)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	if r.GpgKeys != nil {
+		outputConfig += "\tgpg_keys = ["
+		for _, v := range r.GpgKeys {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsInventoryFiltersToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsInventoryFilters) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.OSShortName != nil {
+		outputConfig += fmt.Sprintf("\tos_short_name = %#v\n", *r.OSShortName)
+	}
+	if r.OSVersion != nil {
+		outputConfig += fmt.Sprintf("\tos_version = %#v\n", *r.OSVersion)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaRolloutToHCL(r *osconfigBeta.OSPolicyAssignmentRollout) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertOsConfigOsPolicyAssignmentBetaRolloutDisruptionBudgetToHCL(r.DisruptionBudget); v != "" {
+		outputConfig += fmt.Sprintf("\tdisruption_budget %s\n", v)
+	}
+	if r.MinWaitDuration != nil {
+		outputConfig += fmt.Sprintf("\tmin_wait_duration = %#v\n", *r.MinWaitDuration)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaRolloutDisruptionBudgetToHCL(r *osconfigBeta.OSPolicyAssignmentRolloutDisruptionBudget) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Fixed != nil {
+		outputConfig += fmt.Sprintf("\tfixed = %#v\n", *r.Fixed)
+	}
+	if r.Percent != nil {
+		outputConfig += fmt.Sprintf("\tpercent = %#v\n", *r.Percent)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileToHCL(r *osconfigBeta.OSPolicyAssignmentFile) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowInsecure != nil {
+		outputConfig += fmt.Sprintf("\tallow_insecure = %#v\n", *r.AllowInsecure)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileGcsToHCL(r.Gcs); v != "" {
+		outputConfig += fmt.Sprintf("\tgcs %s\n", v)
+	}
+	if r.LocalPath != nil {
+		outputConfig += fmt.Sprintf("\tlocal_path = %#v\n", *r.LocalPath)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileRemoteToHCL(r.Remote); v != "" {
+		outputConfig += fmt.Sprintf("\tremote %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileGcsToHCL(r *osconfigBeta.OSPolicyAssignmentFileGcs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Bucket != nil {
+		outputConfig += fmt.Sprintf("\tbucket = %#v\n", *r.Bucket)
+	}
+	if r.Object != nil {
+		outputConfig += fmt.Sprintf("\tobject = %#v\n", *r.Object)
+	}
+	if r.Generation != nil {
+		outputConfig += fmt.Sprintf("\tgeneration = %#v\n", *r.Generation)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileRemoteToHCL(r *osconfigBeta.OSPolicyAssignmentFileRemote) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Uri != nil {
+		outputConfig += fmt.Sprintf("\turi = %#v\n", *r.Uri)
+	}
+	if r.Sha256Checksum != nil {
+		outputConfig += fmt.Sprintf("\tsha256_checksum = %#v\n", *r.Sha256Checksum)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentExecToHCL(r *osconfigBeta.OSPolicyAssignmentExec) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Interpreter != nil {
+		outputConfig += fmt.Sprintf("\tinterpreter = %#v\n", *r.Interpreter)
+	}
+	if r.Args != nil {
+		outputConfig += "\targs = ["
+		for _, v := range r.Args {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileToHCL(r.File); v != "" {
+		outputConfig += fmt.Sprintf("\tfile %s\n", v)
+	}
+	if r.OutputFilePath != nil {
+		outputConfig += fmt.Sprintf("\toutput_file_path = %#v\n", *r.OutputFilePath)
+	}
+	if r.Script != nil {
+		outputConfig += fmt.Sprintf("\tscript = %#v\n", *r.Script)
+	}
+	return outputConfig + "}"
+}
+
+// PrivatecaCertificateTemplateBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func PrivatecaCertificateTemplateBetaAsHCL(r privatecaBeta.CertificateTemplate, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_privateca_certificate_template\" \"output\" {\n"
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if v := convertPrivatecaCertificateTemplateBetaIdentityConstraintsToHCL(r.IdentityConstraints); v != "" {
+		outputConfig += fmt.Sprintf("\tidentity_constraints %s\n", v)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if v := convertPrivatecaCertificateTemplateBetaPassthroughExtensionsToHCL(r.PassthroughExtensions); v != "" {
+		outputConfig += fmt.Sprintf("\tpassthrough_extensions %s\n", v)
+	}
+	if v := convertPrivatecaCertificateTemplateBetaPredefinedValuesToHCL(r.PredefinedValues); v != "" {
+		outputConfig += fmt.Sprintf("\tpredefined_values %s\n", v)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertPrivatecaCertificateTemplateBetaIdentityConstraintsToHCL(r *privatecaBeta.CertificateTemplateIdentityConstraints) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowSubjectAltNamesPassthrough != nil {
+		outputConfig += fmt.Sprintf("\tallow_subject_alt_names_passthrough = %#v\n", *r.AllowSubjectAltNamesPassthrough)
+	}
+	if r.AllowSubjectPassthrough != nil {
+		outputConfig += fmt.Sprintf("\tallow_subject_passthrough = %#v\n", *r.AllowSubjectPassthrough)
+	}
+	if v := convertPrivatecaCertificateTemplateBetaIdentityConstraintsCelExpressionToHCL(r.CelExpression); v != "" {
+		outputConfig += fmt.Sprintf("\tcel_expression %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaIdentityConstraintsCelExpressionToHCL(r *privatecaBeta.CertificateTemplateIdentityConstraintsCelExpression) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Expression != nil {
+		outputConfig += fmt.Sprintf("\texpression = %#v\n", *r.Expression)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Title != nil {
+		outputConfig += fmt.Sprintf("\ttitle = %#v\n", *r.Title)
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPassthroughExtensionsToHCL(r *privatecaBeta.CertificateTemplatePassthroughExtensions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AdditionalExtensions != nil {
+		for _, v := range r.AdditionalExtensions {
+			outputConfig += fmt.Sprintf("\tadditional_extensions %s\n", convertPrivatecaCertificateTemplateBetaPassthroughExtensionsAdditionalExtensionsToHCL(&v))
+		}
+	}
+	if r.KnownExtensions != nil {
+		outputConfig += "\tknown_extensions = ["
+		for _, v := range r.KnownExtensions {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPassthroughExtensionsAdditionalExtensionsToHCL(r *privatecaBeta.CertificateTemplatePassthroughExtensionsAdditionalExtensions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ObjectIdPath != nil {
+		outputConfig += "\tobject_id_path = ["
+		for _, v := range r.ObjectIdPath {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesToHCL(r *privatecaBeta.CertificateTemplatePredefinedValues) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AdditionalExtensions != nil {
+		for _, v := range r.AdditionalExtensions {
+			outputConfig += fmt.Sprintf("\tadditional_extensions %s\n", convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensionsToHCL(&v))
+		}
+	}
+	if r.AiaOcspServers != nil {
+		outputConfig += "\taia_ocsp_servers = ["
+		for _, v := range r.AiaOcspServers {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertPrivatecaCertificateTemplateBetaPredefinedValuesCaOptionsToHCL(r.CaOptions); v != "" {
+		outputConfig += fmt.Sprintf("\tca_options %s\n", v)
+	}
+	if v := convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageToHCL(r.KeyUsage); v != "" {
+		outputConfig += fmt.Sprintf("\tkey_usage %s\n", v)
+	}
+	if r.PolicyIds != nil {
+		for _, v := range r.PolicyIds {
+			outputConfig += fmt.Sprintf("\tpolicy_ids %s\n", convertPrivatecaCertificateTemplateBetaPredefinedValuesPolicyIdsToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensionsToHCL(r *privatecaBeta.CertificateTemplatePredefinedValuesAdditionalExtensions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensionsObjectIdToHCL(r.ObjectId); v != "" {
+		outputConfig += fmt.Sprintf("\tobject_id %s\n", v)
+	}
+	if r.Value != nil {
+		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
+	}
+	if r.Critical != nil {
+		outputConfig += fmt.Sprintf("\tcritical = %#v\n", *r.Critical)
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensionsObjectIdToHCL(r *privatecaBeta.CertificateTemplatePredefinedValuesAdditionalExtensionsObjectId) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ObjectIdPath != nil {
+		outputConfig += "\tobject_id_path = ["
+		for _, v := range r.ObjectIdPath {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesCaOptionsToHCL(r *privatecaBeta.CertificateTemplatePredefinedValuesCaOptions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.IsCa != nil {
+		outputConfig += fmt.Sprintf("\tis_ca = %#v\n", *r.IsCa)
+	}
+	if r.MaxIssuerPathLength != nil {
+		outputConfig += fmt.Sprintf("\tmax_issuer_path_length = %#v\n", *r.MaxIssuerPathLength)
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageToHCL(r *privatecaBeta.CertificateTemplatePredefinedValuesKeyUsage) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageBaseKeyUsageToHCL(r.BaseKeyUsage); v != "" {
+		outputConfig += fmt.Sprintf("\tbase_key_usage %s\n", v)
+	}
+	if v := convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageExtendedKeyUsageToHCL(r.ExtendedKeyUsage); v != "" {
+		outputConfig += fmt.Sprintf("\textended_key_usage %s\n", v)
+	}
+	if r.UnknownExtendedKeyUsages != nil {
+		for _, v := range r.UnknownExtendedKeyUsages {
+			outputConfig += fmt.Sprintf("\tunknown_extended_key_usages %s\n", convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageUnknownExtendedKeyUsagesToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageBaseKeyUsageToHCL(r *privatecaBeta.CertificateTemplatePredefinedValuesKeyUsageBaseKeyUsage) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.CertSign != nil {
+		outputConfig += fmt.Sprintf("\tcert_sign = %#v\n", *r.CertSign)
+	}
+	if r.ContentCommitment != nil {
+		outputConfig += fmt.Sprintf("\tcontent_commitment = %#v\n", *r.ContentCommitment)
+	}
+	if r.CrlSign != nil {
+		outputConfig += fmt.Sprintf("\tcrl_sign = %#v\n", *r.CrlSign)
+	}
+	if r.DataEncipherment != nil {
+		outputConfig += fmt.Sprintf("\tdata_encipherment = %#v\n", *r.DataEncipherment)
+	}
+	if r.DecipherOnly != nil {
+		outputConfig += fmt.Sprintf("\tdecipher_only = %#v\n", *r.DecipherOnly)
+	}
+	if r.DigitalSignature != nil {
+		outputConfig += fmt.Sprintf("\tdigital_signature = %#v\n", *r.DigitalSignature)
+	}
+	if r.EncipherOnly != nil {
+		outputConfig += fmt.Sprintf("\tencipher_only = %#v\n", *r.EncipherOnly)
+	}
+	if r.KeyAgreement != nil {
+		outputConfig += fmt.Sprintf("\tkey_agreement = %#v\n", *r.KeyAgreement)
+	}
+	if r.KeyEncipherment != nil {
+		outputConfig += fmt.Sprintf("\tkey_encipherment = %#v\n", *r.KeyEncipherment)
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageExtendedKeyUsageToHCL(r *privatecaBeta.CertificateTemplatePredefinedValuesKeyUsageExtendedKeyUsage) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ClientAuth != nil {
+		outputConfig += fmt.Sprintf("\tclient_auth = %#v\n", *r.ClientAuth)
+	}
+	if r.CodeSigning != nil {
+		outputConfig += fmt.Sprintf("\tcode_signing = %#v\n", *r.CodeSigning)
+	}
+	if r.EmailProtection != nil {
+		outputConfig += fmt.Sprintf("\temail_protection = %#v\n", *r.EmailProtection)
+	}
+	if r.OcspSigning != nil {
+		outputConfig += fmt.Sprintf("\tocsp_signing = %#v\n", *r.OcspSigning)
+	}
+	if r.ServerAuth != nil {
+		outputConfig += fmt.Sprintf("\tserver_auth = %#v\n", *r.ServerAuth)
+	}
+	if r.TimeStamping != nil {
+		outputConfig += fmt.Sprintf("\ttime_stamping = %#v\n", *r.TimeStamping)
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageUnknownExtendedKeyUsagesToHCL(r *privatecaBeta.CertificateTemplatePredefinedValuesKeyUsageUnknownExtendedKeyUsages) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ObjectIdPath != nil {
+		outputConfig += "\tobject_id_path = ["
+		for _, v := range r.ObjectIdPath {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesPolicyIdsToHCL(r *privatecaBeta.CertificateTemplatePredefinedValuesPolicyIds) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ObjectIdPath != nil {
+		outputConfig += "\tobject_id_path = ["
+		for _, v := range r.ObjectIdPath {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+// RecaptchaEnterpriseKeyBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func RecaptchaEnterpriseKeyBetaAsHCL(r recaptchaenterpriseBeta.Key, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_recaptcha_enterprise_key\" \"output\" {\n"
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	if v := convertRecaptchaEnterpriseKeyBetaAndroidSettingsToHCL(r.AndroidSettings); v != "" {
+		outputConfig += fmt.Sprintf("\tandroid_settings %s\n", v)
+	}
+	if v := convertRecaptchaEnterpriseKeyBetaIosSettingsToHCL(r.IosSettings); v != "" {
+		outputConfig += fmt.Sprintf("\tios_settings %s\n", v)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if v := convertRecaptchaEnterpriseKeyBetaTestingOptionsToHCL(r.TestingOptions); v != "" {
+		outputConfig += fmt.Sprintf("\ttesting_options %s\n", v)
+	}
+	if v := convertRecaptchaEnterpriseKeyBetaWebSettingsToHCL(r.WebSettings); v != "" {
+		outputConfig += fmt.Sprintf("\tweb_settings %s\n", v)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertRecaptchaEnterpriseKeyBetaAndroidSettingsToHCL(r *recaptchaenterpriseBeta.KeyAndroidSettings) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowAllPackageNames != nil {
+		outputConfig += fmt.Sprintf("\tallow_all_package_names = %#v\n", *r.AllowAllPackageNames)
+	}
+	if r.AllowedPackageNames != nil {
+		outputConfig += "\tallowed_package_names = ["
+		for _, v := range r.AllowedPackageNames {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertRecaptchaEnterpriseKeyBetaIosSettingsToHCL(r *recaptchaenterpriseBeta.KeyIosSettings) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowAllBundleIds != nil {
+		outputConfig += fmt.Sprintf("\tallow_all_bundle_ids = %#v\n", *r.AllowAllBundleIds)
+	}
+	if r.AllowedBundleIds != nil {
+		outputConfig += "\tallowed_bundle_ids = ["
+		for _, v := range r.AllowedBundleIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertRecaptchaEnterpriseKeyBetaTestingOptionsToHCL(r *recaptchaenterpriseBeta.KeyTestingOptions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.TestingChallenge != nil {
+		outputConfig += fmt.Sprintf("\ttesting_challenge = %#v\n", *r.TestingChallenge)
+	}
+	if r.TestingScore != nil {
+		outputConfig += fmt.Sprintf("\ttesting_score = %#v\n", *r.TestingScore)
+	}
+	return outputConfig + "}"
+}
+
+func convertRecaptchaEnterpriseKeyBetaWebSettingsToHCL(r *recaptchaenterpriseBeta.KeyWebSettings) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.IntegrationType != nil {
+		outputConfig += fmt.Sprintf("\tintegration_type = %#v\n", *r.IntegrationType)
+	}
+	if r.AllowAllDomains != nil {
+		outputConfig += fmt.Sprintf("\tallow_all_domains = %#v\n", *r.AllowAllDomains)
+	}
+	if r.AllowAmpTraffic != nil {
+		outputConfig += fmt.Sprintf("\tallow_amp_traffic = %#v\n", *r.AllowAmpTraffic)
+	}
+	if r.AllowedDomains != nil {
+		outputConfig += "\tallowed_domains = ["
+		for _, v := range r.AllowedDomains {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.ChallengeSecurityPreference != nil {
+		outputConfig += fmt.Sprintf("\tchallenge_security_preference = %#v\n", *r.ChallengeSecurityPreference)
+	}
+	return outputConfig + "}"
+}
+
 // AssuredWorkloadsWorkloadAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func AssuredWorkloadsWorkloadAsHCL(r assuredworkloads.Workload) (string, error) {
+func AssuredWorkloadsWorkloadAsHCL(r assuredworkloads.Workload, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_assured_workloads_workload\" \"output\" {\n"
 	if r.BillingAccount != nil {
 		outputConfig += fmt.Sprintf("\tbilling_account = %#v\n", *r.BillingAccount)
@@ -1552,6 +4501,11 @@ func AssuredWorkloadsWorkloadAsHCL(r assuredworkloads.Workload) (string, error) 
 	if v := convertAssuredWorkloadsWorkloadKmsSettingsToHCL(r.KmsSettings); v != "" {
 		outputConfig += fmt.Sprintf("\tkms_settings %s\n", v)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.ProvisionedResourcesParent != nil {
 		outputConfig += fmt.Sprintf("\tprovisioned_resources_parent = %#v\n", *r.ProvisionedResourcesParent)
 	}
@@ -1560,7 +4514,15 @@ func AssuredWorkloadsWorkloadAsHCL(r assuredworkloads.Workload) (string, error) 
 			outputConfig += fmt.Sprintf("\tresource_settings %s\n", convertAssuredWorkloadsWorkloadResourceSettingsToHCL(&v))
 		}
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertAssuredWorkloadsWorkloadKmsSettingsToHCL(r *assuredworkloads.WorkloadKmsSettings) string {
@@ -1599,13 +4561,1323 @@ func convertAssuredWorkloadsWorkloadResourcesToHCL(r *assuredworkloads.WorkloadR
 	return outputConfig + "}"
 }
 
+// CloudbuildWorkerPoolAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func CloudbuildWorkerPoolAsHCL(r cloudbuild.WorkerPool, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_cloudbuild_worker_pool\" \"output\" {\n"
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	if v := convertCloudbuildWorkerPoolNetworkConfigToHCL(r.NetworkConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tnetwork_config %s\n", v)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if v := convertCloudbuildWorkerPoolWorkerConfigToHCL(r.WorkerConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tworker_config %s\n", v)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertCloudbuildWorkerPoolNetworkConfigToHCL(r *cloudbuild.WorkerPoolNetworkConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.PeeredNetwork != nil {
+		outputConfig += fmt.Sprintf("\tpeered_network = %#v\n", *r.PeeredNetwork)
+	}
+	return outputConfig + "}"
+}
+
+func convertCloudbuildWorkerPoolWorkerConfigToHCL(r *cloudbuild.WorkerPoolWorkerConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.DiskSizeGb != nil {
+		outputConfig += fmt.Sprintf("\tdisk_size_gb = %#v\n", *r.DiskSizeGb)
+	}
+	if r.MachineType != nil {
+		outputConfig += fmt.Sprintf("\tmachine_type = %#v\n", *r.MachineType)
+	}
+	if r.NoExternalIP != nil {
+		outputConfig += fmt.Sprintf("\tno_external_ip = %#v\n", *r.NoExternalIP)
+	}
+	return outputConfig + "}"
+}
+
+// CloudResourceManagerFolderAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func CloudResourceManagerFolderAsHCL(r cloudresourcemanager.Folder, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_folder\" \"output\" {\n"
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+// CloudResourceManagerProjectAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func CloudResourceManagerProjectAsHCL(r cloudresourcemanager.Project, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_project\" \"output\" {\n"
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplayname = %#v\n", *r.DisplayName)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+// ComputeFirewallPolicyAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeFirewallPolicyAsHCL(r compute.FirewallPolicy, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_compute_firewall_policy\" \"output\" {\n"
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	if r.ShortName != nil {
+		outputConfig += fmt.Sprintf("\tshort_name = %#v\n", *r.ShortName)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+// ComputeFirewallPolicyAssociationAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeFirewallPolicyAssociationAsHCL(r compute.FirewallPolicyAssociation, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_compute_firewall_policy_association\" \"output\" {\n"
+	if r.AttachmentTarget != nil {
+		outputConfig += fmt.Sprintf("\tattachment_target = %#v\n", *r.AttachmentTarget)
+	}
+	if r.FirewallPolicy != nil {
+		outputConfig += fmt.Sprintf("\tfirewall_policy = %#v\n", *r.FirewallPolicy)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+// ComputeFirewallPolicyRuleAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeFirewallPolicyRuleAsHCL(r compute.FirewallPolicyRule, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_compute_firewall_policy_rule\" \"output\" {\n"
+	if r.Action != nil {
+		outputConfig += fmt.Sprintf("\taction = %#v\n", *r.Action)
+	}
+	if r.Direction != nil {
+		outputConfig += fmt.Sprintf("\tdirection = %#v\n", *r.Direction)
+	}
+	if r.FirewallPolicy != nil {
+		outputConfig += fmt.Sprintf("\tfirewall_policy = %#v\n", *r.FirewallPolicy)
+	}
+	if v := convertComputeFirewallPolicyRuleMatchToHCL(r.Match); v != "" {
+		outputConfig += fmt.Sprintf("\tmatch %s\n", v)
+	}
+	if r.Priority != nil {
+		outputConfig += fmt.Sprintf("\tpriority = %#v\n", *r.Priority)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Disabled != nil {
+		outputConfig += fmt.Sprintf("\tdisabled = %#v\n", *r.Disabled)
+	}
+	if r.EnableLogging != nil {
+		outputConfig += fmt.Sprintf("\tenable_logging = %#v\n", *r.EnableLogging)
+	}
+	if r.TargetResources != nil {
+		outputConfig += "\ttarget_resources = ["
+		for _, v := range r.TargetResources {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.TargetServiceAccounts != nil {
+		outputConfig += "\ttarget_service_accounts = ["
+		for _, v := range r.TargetServiceAccounts {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertComputeFirewallPolicyRuleMatchToHCL(r *compute.FirewallPolicyRuleMatch) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Layer4Configs != nil {
+		for _, v := range r.Layer4Configs {
+			outputConfig += fmt.Sprintf("\tlayer4_configs %s\n", convertComputeFirewallPolicyRuleMatchLayer4ConfigsToHCL(&v))
+		}
+	}
+	if r.DestIPRanges != nil {
+		outputConfig += "\tdest_ip_ranges = ["
+		for _, v := range r.DestIPRanges {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.SrcIPRanges != nil {
+		outputConfig += "\tsrc_ip_ranges = ["
+		for _, v := range r.SrcIPRanges {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertComputeFirewallPolicyRuleMatchLayer4ConfigsToHCL(r *compute.FirewallPolicyRuleMatchLayer4Configs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.IPProtocol != nil {
+		outputConfig += fmt.Sprintf("\tip_protocol = %#v\n", *r.IPProtocol)
+	}
+	if r.Ports != nil {
+		outputConfig += "\tports = ["
+		for _, v := range r.Ports {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+// ComputeForwardingRuleAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeForwardingRuleAsHCL(r compute.ForwardingRule, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_compute_forwarding_rule\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.AllPorts != nil {
+		outputConfig += fmt.Sprintf("\tall_ports = %#v\n", *r.AllPorts)
+	}
+	if r.AllowGlobalAccess != nil {
+		outputConfig += fmt.Sprintf("\tallow_global_access = %#v\n", *r.AllowGlobalAccess)
+	}
+	if r.BackendService != nil {
+		outputConfig += fmt.Sprintf("\tbackend_service = %#v\n", *r.BackendService)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.IPAddress != nil {
+		outputConfig += fmt.Sprintf("\tip_address = %#v\n", *r.IPAddress)
+	}
+	if r.IPProtocol != nil {
+		outputConfig += fmt.Sprintf("\tip_protocol = %#v\n", *r.IPProtocol)
+	}
+	if r.IsMirroringCollector != nil {
+		outputConfig += fmt.Sprintf("\tis_mirroring_collector = %#v\n", *r.IsMirroringCollector)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.LoadBalancingScheme != nil {
+		outputConfig += fmt.Sprintf("\tload_balancing_scheme = %#v\n", *r.LoadBalancingScheme)
+	}
+	if r.Network != nil {
+		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
+	}
+	if r.NetworkTier != nil {
+		outputConfig += fmt.Sprintf("\tnetwork_tier = %#v\n", *r.NetworkTier)
+	}
+	if r.PortRange != nil {
+		outputConfig += fmt.Sprintf("\tport_range = %#v\n", *r.PortRange)
+	}
+	if r.Ports != nil {
+		outputConfig += "\tports = ["
+		for _, v := range r.Ports {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tregion = %#v\n", *r.Location)
+	}
+	if r.ServiceLabel != nil {
+		outputConfig += fmt.Sprintf("\tservice_label = %#v\n", *r.ServiceLabel)
+	}
+	if r.Subnetwork != nil {
+		outputConfig += fmt.Sprintf("\tsubnetwork = %#v\n", *r.Subnetwork)
+	}
+	if r.Target != nil {
+		outputConfig += fmt.Sprintf("\ttarget = %#v\n", *r.Target)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+// ComputeGlobalForwardingRuleAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeGlobalForwardingRuleAsHCL(r compute.ForwardingRule, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_compute_global_forwarding_rule\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Target != nil {
+		outputConfig += fmt.Sprintf("\ttarget = %#v\n", *r.Target)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.IPAddress != nil {
+		outputConfig += fmt.Sprintf("\tip_address = %#v\n", *r.IPAddress)
+	}
+	if r.IPProtocol != nil {
+		outputConfig += fmt.Sprintf("\tip_protocol = %#v\n", *r.IPProtocol)
+	}
+	if r.IPVersion != nil {
+		outputConfig += fmt.Sprintf("\tip_version = %#v\n", *r.IPVersion)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.LoadBalancingScheme != nil {
+		outputConfig += fmt.Sprintf("\tload_balancing_scheme = %#v\n", *r.LoadBalancingScheme)
+	}
+	if r.MetadataFilter != nil {
+		for _, v := range r.MetadataFilter {
+			outputConfig += fmt.Sprintf("\tmetadata_filters %s\n", convertComputeGlobalForwardingRuleMetadataFilterToHCL(&v))
+		}
+	}
+	if r.Network != nil {
+		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
+	}
+	if r.PortRange != nil {
+		outputConfig += fmt.Sprintf("\tport_range = %#v\n", *r.PortRange)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertComputeGlobalForwardingRuleMetadataFilterToHCL(r *compute.ForwardingRuleMetadataFilter) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.FilterLabel != nil {
+		for _, v := range r.FilterLabel {
+			outputConfig += fmt.Sprintf("\tfilter_labels %s\n", convertComputeGlobalForwardingRuleMetadataFilterFilterLabelToHCL(&v))
+		}
+	}
+	if r.FilterMatchCriteria != nil {
+		outputConfig += fmt.Sprintf("\tfilter_match_criteria = %#v\n", *r.FilterMatchCriteria)
+	}
+	return outputConfig + "}"
+}
+
+func convertComputeGlobalForwardingRuleMetadataFilterFilterLabelToHCL(r *compute.ForwardingRuleMetadataFilterFilterLabel) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Value != nil {
+		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
+	}
+	return outputConfig + "}"
+}
+
+// ContainerAwsClusterAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAwsClusterAsHCL(r containeraws.Cluster, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_aws_cluster\" \"output\" {\n"
+	if v := convertContainerAwsClusterAuthorizationToHCL(r.Authorization); v != "" {
+		outputConfig += fmt.Sprintf("\tauthorization %s\n", v)
+	}
+	if r.AwsRegion != nil {
+		outputConfig += fmt.Sprintf("\taws_region = %#v\n", *r.AwsRegion)
+	}
+	if v := convertContainerAwsClusterControlPlaneToHCL(r.ControlPlane); v != "" {
+		outputConfig += fmt.Sprintf("\tcontrol_plane %s\n", v)
+	}
+	if v := convertContainerAwsClusterFleetToHCL(r.Fleet); v != "" {
+		outputConfig += fmt.Sprintf("\tfleet %s\n", v)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if v := convertContainerAwsClusterNetworkingToHCL(r.Networking); v != "" {
+		outputConfig += fmt.Sprintf("\tnetworking %s\n", v)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertContainerAwsClusterAuthorizationToHCL(r *containeraws.ClusterAuthorization) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AdminUsers != nil {
+		for _, v := range r.AdminUsers {
+			outputConfig += fmt.Sprintf("\tadmin_users %s\n", convertContainerAwsClusterAuthorizationAdminUsersToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterAuthorizationAdminUsersToHCL(r *containeraws.ClusterAuthorizationAdminUsers) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Username != nil {
+		outputConfig += fmt.Sprintf("\tusername = %#v\n", *r.Username)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterControlPlaneToHCL(r *containeraws.ClusterControlPlane) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertContainerAwsClusterControlPlaneAwsServicesAuthenticationToHCL(r.AwsServicesAuthentication); v != "" {
+		outputConfig += fmt.Sprintf("\taws_services_authentication %s\n", v)
+	}
+	if v := convertContainerAwsClusterControlPlaneConfigEncryptionToHCL(r.ConfigEncryption); v != "" {
+		outputConfig += fmt.Sprintf("\tconfig_encryption %s\n", v)
+	}
+	if v := convertContainerAwsClusterControlPlaneDatabaseEncryptionToHCL(r.DatabaseEncryption); v != "" {
+		outputConfig += fmt.Sprintf("\tdatabase_encryption %s\n", v)
+	}
+	if r.IamInstanceProfile != nil {
+		outputConfig += fmt.Sprintf("\tiam_instance_profile = %#v\n", *r.IamInstanceProfile)
+	}
+	if r.SubnetIds != nil {
+		outputConfig += "\tsubnet_ids = ["
+		for _, v := range r.SubnetIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Version != nil {
+		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
+	}
+	if r.InstanceType != nil {
+		outputConfig += fmt.Sprintf("\tinstance_type = %#v\n", *r.InstanceType)
+	}
+	if v := convertContainerAwsClusterControlPlaneMainVolumeToHCL(r.MainVolume); v != "" {
+		outputConfig += fmt.Sprintf("\tmain_volume %s\n", v)
+	}
+	if v := convertContainerAwsClusterControlPlaneProxyConfigToHCL(r.ProxyConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tproxy_config %s\n", v)
+	}
+	if v := convertContainerAwsClusterControlPlaneRootVolumeToHCL(r.RootVolume); v != "" {
+		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
+	}
+	if r.SecurityGroupIds != nil {
+		outputConfig += "\tsecurity_group_ids = ["
+		for _, v := range r.SecurityGroupIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertContainerAwsClusterControlPlaneSshConfigToHCL(r.SshConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
+	}
+	outputConfig += "\ttags = {"
+	for k, v := range r.Tags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterControlPlaneAwsServicesAuthenticationToHCL(r *containeraws.ClusterControlPlaneAwsServicesAuthentication) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.RoleArn != nil {
+		outputConfig += fmt.Sprintf("\trole_arn = %#v\n", *r.RoleArn)
+	}
+	if r.RoleSessionName != nil {
+		outputConfig += fmt.Sprintf("\trole_session_name = %#v\n", *r.RoleSessionName)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterControlPlaneConfigEncryptionToHCL(r *containeraws.ClusterControlPlaneConfigEncryption) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterControlPlaneDatabaseEncryptionToHCL(r *containeraws.ClusterControlPlaneDatabaseEncryption) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterControlPlaneMainVolumeToHCL(r *containeraws.ClusterControlPlaneMainVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Iops != nil {
+		outputConfig += fmt.Sprintf("\tiops = %#v\n", *r.Iops)
+	}
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	if r.VolumeType != nil {
+		outputConfig += fmt.Sprintf("\tvolume_type = %#v\n", *r.VolumeType)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterControlPlaneProxyConfigToHCL(r *containeraws.ClusterControlPlaneProxyConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.SecretArn != nil {
+		outputConfig += fmt.Sprintf("\tsecret_arn = %#v\n", *r.SecretArn)
+	}
+	if r.SecretVersion != nil {
+		outputConfig += fmt.Sprintf("\tsecret_version = %#v\n", *r.SecretVersion)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterControlPlaneRootVolumeToHCL(r *containeraws.ClusterControlPlaneRootVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Iops != nil {
+		outputConfig += fmt.Sprintf("\tiops = %#v\n", *r.Iops)
+	}
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	if r.VolumeType != nil {
+		outputConfig += fmt.Sprintf("\tvolume_type = %#v\n", *r.VolumeType)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterControlPlaneSshConfigToHCL(r *containeraws.ClusterControlPlaneSshConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Ec2KeyPair != nil {
+		outputConfig += fmt.Sprintf("\tec2_key_pair = %#v\n", *r.Ec2KeyPair)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterFleetToHCL(r *containeraws.ClusterFleet) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterNetworkingToHCL(r *containeraws.ClusterNetworking) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.PodAddressCidrBlocks != nil {
+		outputConfig += "\tpod_address_cidr_blocks = ["
+		for _, v := range r.PodAddressCidrBlocks {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.ServiceAddressCidrBlocks != nil {
+		outputConfig += "\tservice_address_cidr_blocks = ["
+		for _, v := range r.ServiceAddressCidrBlocks {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.VPCId != nil {
+		outputConfig += fmt.Sprintf("\tvpc_id = %#v\n", *r.VPCId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterWorkloadIdentityConfigToHCL(r *containeraws.ClusterWorkloadIdentityConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+// ContainerAwsNodePoolAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAwsNodePoolAsHCL(r containeraws.NodePool, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_aws_node_pool\" \"output\" {\n"
+	if v := convertContainerAwsNodePoolAutoscalingToHCL(r.Autoscaling); v != "" {
+		outputConfig += fmt.Sprintf("\tautoscaling %s\n", v)
+	}
+	if r.Cluster != nil {
+		outputConfig += fmt.Sprintf("\tcluster = %#v\n", *r.Cluster)
+	}
+	if v := convertContainerAwsNodePoolConfigToHCL(r.Config); v != "" {
+		outputConfig += fmt.Sprintf("\tconfig %s\n", v)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if v := convertContainerAwsNodePoolMaxPodsConstraintToHCL(r.MaxPodsConstraint); v != "" {
+		outputConfig += fmt.Sprintf("\tmax_pods_constraint %s\n", v)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.SubnetId != nil {
+		outputConfig += fmt.Sprintf("\tsubnet_id = %#v\n", *r.SubnetId)
+	}
+	if r.Version != nil {
+		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertContainerAwsNodePoolAutoscalingToHCL(r *containeraws.NodePoolAutoscaling) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.MaxNodeCount != nil {
+		outputConfig += fmt.Sprintf("\tmax_node_count = %#v\n", *r.MaxNodeCount)
+	}
+	if r.MinNodeCount != nil {
+		outputConfig += fmt.Sprintf("\tmin_node_count = %#v\n", *r.MinNodeCount)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolConfigToHCL(r *containeraws.NodePoolConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertContainerAwsNodePoolConfigConfigEncryptionToHCL(r.ConfigEncryption); v != "" {
+		outputConfig += fmt.Sprintf("\tconfig_encryption %s\n", v)
+	}
+	if r.IamInstanceProfile != nil {
+		outputConfig += fmt.Sprintf("\tiam_instance_profile = %#v\n", *r.IamInstanceProfile)
+	}
+	if r.InstanceType != nil {
+		outputConfig += fmt.Sprintf("\tinstance_type = %#v\n", *r.InstanceType)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if v := convertContainerAwsNodePoolConfigRootVolumeToHCL(r.RootVolume); v != "" {
+		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
+	}
+	if r.SecurityGroupIds != nil {
+		outputConfig += "\tsecurity_group_ids = ["
+		for _, v := range r.SecurityGroupIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertContainerAwsNodePoolConfigSshConfigToHCL(r.SshConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
+	}
+	outputConfig += "\ttags = {"
+	for k, v := range r.Tags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Taints != nil {
+		for _, v := range r.Taints {
+			outputConfig += fmt.Sprintf("\ttaints %s\n", convertContainerAwsNodePoolConfigTaintsToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolConfigConfigEncryptionToHCL(r *containeraws.NodePoolConfigConfigEncryption) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolConfigRootVolumeToHCL(r *containeraws.NodePoolConfigRootVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Iops != nil {
+		outputConfig += fmt.Sprintf("\tiops = %#v\n", *r.Iops)
+	}
+	if r.KmsKeyArn != nil {
+		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	if r.VolumeType != nil {
+		outputConfig += fmt.Sprintf("\tvolume_type = %#v\n", *r.VolumeType)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolConfigSshConfigToHCL(r *containeraws.NodePoolConfigSshConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Ec2KeyPair != nil {
+		outputConfig += fmt.Sprintf("\tec2_key_pair = %#v\n", *r.Ec2KeyPair)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolConfigTaintsToHCL(r *containeraws.NodePoolConfigTaints) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Effect != nil {
+		outputConfig += fmt.Sprintf("\teffect = %#v\n", *r.Effect)
+	}
+	if r.Key != nil {
+		outputConfig += fmt.Sprintf("\tkey = %#v\n", *r.Key)
+	}
+	if r.Value != nil {
+		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolMaxPodsConstraintToHCL(r *containeraws.NodePoolMaxPodsConstraint) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.MaxPodsPerNode != nil {
+		outputConfig += fmt.Sprintf("\tmax_pods_per_node = %#v\n", *r.MaxPodsPerNode)
+	}
+	return outputConfig + "}"
+}
+
+// ContainerAzureClientAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAzureClientAsHCL(r containerazure.AzureClient, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_azure_client\" \"output\" {\n"
+	if r.ApplicationId != nil {
+		outputConfig += fmt.Sprintf("\tapplication_id = %#v\n", *r.ApplicationId)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.TenantId != nil {
+		outputConfig += fmt.Sprintf("\ttenant_id = %#v\n", *r.TenantId)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+// ContainerAzureClusterAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAzureClusterAsHCL(r containerazure.Cluster, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_azure_cluster\" \"output\" {\n"
+	if v := convertContainerAzureClusterAuthorizationToHCL(r.Authorization); v != "" {
+		outputConfig += fmt.Sprintf("\tauthorization %s\n", v)
+	}
+	if r.AzureRegion != nil {
+		outputConfig += fmt.Sprintf("\tazure_region = %#v\n", *r.AzureRegion)
+	}
+	if r.Client != nil {
+		outputConfig += fmt.Sprintf("\tclient = %#v\n", *r.Client)
+	}
+	if v := convertContainerAzureClusterControlPlaneToHCL(r.ControlPlane); v != "" {
+		outputConfig += fmt.Sprintf("\tcontrol_plane %s\n", v)
+	}
+	if v := convertContainerAzureClusterFleetToHCL(r.Fleet); v != "" {
+		outputConfig += fmt.Sprintf("\tfleet %s\n", v)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if v := convertContainerAzureClusterNetworkingToHCL(r.Networking); v != "" {
+		outputConfig += fmt.Sprintf("\tnetworking %s\n", v)
+	}
+	if r.ResourceGroupId != nil {
+		outputConfig += fmt.Sprintf("\tresource_group_id = %#v\n", *r.ResourceGroupId)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertContainerAzureClusterAuthorizationToHCL(r *containerazure.ClusterAuthorization) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AdminUsers != nil {
+		for _, v := range r.AdminUsers {
+			outputConfig += fmt.Sprintf("\tadmin_users %s\n", convertContainerAzureClusterAuthorizationAdminUsersToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterAuthorizationAdminUsersToHCL(r *containerazure.ClusterAuthorizationAdminUsers) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Username != nil {
+		outputConfig += fmt.Sprintf("\tusername = %#v\n", *r.Username)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterControlPlaneToHCL(r *containerazure.ClusterControlPlane) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertContainerAzureClusterControlPlaneSshConfigToHCL(r.SshConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
+	}
+	if r.SubnetId != nil {
+		outputConfig += fmt.Sprintf("\tsubnet_id = %#v\n", *r.SubnetId)
+	}
+	if r.Version != nil {
+		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
+	}
+	if v := convertContainerAzureClusterControlPlaneDatabaseEncryptionToHCL(r.DatabaseEncryption); v != "" {
+		outputConfig += fmt.Sprintf("\tdatabase_encryption %s\n", v)
+	}
+	if v := convertContainerAzureClusterControlPlaneMainVolumeToHCL(r.MainVolume); v != "" {
+		outputConfig += fmt.Sprintf("\tmain_volume %s\n", v)
+	}
+	if v := convertContainerAzureClusterControlPlaneProxyConfigToHCL(r.ProxyConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tproxy_config %s\n", v)
+	}
+	if r.ReplicaPlacements != nil {
+		for _, v := range r.ReplicaPlacements {
+			outputConfig += fmt.Sprintf("\treplica_placements %s\n", convertContainerAzureClusterControlPlaneReplicaPlacementsToHCL(&v))
+		}
+	}
+	if v := convertContainerAzureClusterControlPlaneRootVolumeToHCL(r.RootVolume); v != "" {
+		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
+	}
+	outputConfig += "\ttags = {"
+	for k, v := range r.Tags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.VmSize != nil {
+		outputConfig += fmt.Sprintf("\tvm_size = %#v\n", *r.VmSize)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterControlPlaneSshConfigToHCL(r *containerazure.ClusterControlPlaneSshConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AuthorizedKey != nil {
+		outputConfig += fmt.Sprintf("\tauthorized_key = %#v\n", *r.AuthorizedKey)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterControlPlaneDatabaseEncryptionToHCL(r *containerazure.ClusterControlPlaneDatabaseEncryption) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.KeyId != nil {
+		outputConfig += fmt.Sprintf("\tkey_id = %#v\n", *r.KeyId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterControlPlaneMainVolumeToHCL(r *containerazure.ClusterControlPlaneMainVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterControlPlaneProxyConfigToHCL(r *containerazure.ClusterControlPlaneProxyConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ResourceGroupId != nil {
+		outputConfig += fmt.Sprintf("\tresource_group_id = %#v\n", *r.ResourceGroupId)
+	}
+	if r.SecretId != nil {
+		outputConfig += fmt.Sprintf("\tsecret_id = %#v\n", *r.SecretId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterControlPlaneReplicaPlacementsToHCL(r *containerazure.ClusterControlPlaneReplicaPlacements) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AzureAvailabilityZone != nil {
+		outputConfig += fmt.Sprintf("\tazure_availability_zone = %#v\n", *r.AzureAvailabilityZone)
+	}
+	if r.SubnetId != nil {
+		outputConfig += fmt.Sprintf("\tsubnet_id = %#v\n", *r.SubnetId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterControlPlaneRootVolumeToHCL(r *containerazure.ClusterControlPlaneRootVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterFleetToHCL(r *containerazure.ClusterFleet) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterNetworkingToHCL(r *containerazure.ClusterNetworking) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.PodAddressCidrBlocks != nil {
+		outputConfig += "\tpod_address_cidr_blocks = ["
+		for _, v := range r.PodAddressCidrBlocks {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.ServiceAddressCidrBlocks != nil {
+		outputConfig += "\tservice_address_cidr_blocks = ["
+		for _, v := range r.ServiceAddressCidrBlocks {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.VirtualNetworkId != nil {
+		outputConfig += fmt.Sprintf("\tvirtual_network_id = %#v\n", *r.VirtualNetworkId)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterWorkloadIdentityConfigToHCL(r *containerazure.ClusterWorkloadIdentityConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+// ContainerAzureNodePoolAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ContainerAzureNodePoolAsHCL(r containerazure.NodePool, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_container_azure_node_pool\" \"output\" {\n"
+	if v := convertContainerAzureNodePoolAutoscalingToHCL(r.Autoscaling); v != "" {
+		outputConfig += fmt.Sprintf("\tautoscaling %s\n", v)
+	}
+	if r.Cluster != nil {
+		outputConfig += fmt.Sprintf("\tcluster = %#v\n", *r.Cluster)
+	}
+	if v := convertContainerAzureNodePoolConfigToHCL(r.Config); v != "" {
+		outputConfig += fmt.Sprintf("\tconfig %s\n", v)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if v := convertContainerAzureNodePoolMaxPodsConstraintToHCL(r.MaxPodsConstraint); v != "" {
+		outputConfig += fmt.Sprintf("\tmax_pods_constraint %s\n", v)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.SubnetId != nil {
+		outputConfig += fmt.Sprintf("\tsubnet_id = %#v\n", *r.SubnetId)
+	}
+	if r.Version != nil {
+		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
+	}
+	outputConfig += "\tannotations = {"
+	for k, v := range r.Annotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.AzureAvailabilityZone != nil {
+		outputConfig += fmt.Sprintf("\tazure_availability_zone = %#v\n", *r.AzureAvailabilityZone)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertContainerAzureNodePoolAutoscalingToHCL(r *containerazure.NodePoolAutoscaling) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.MaxNodeCount != nil {
+		outputConfig += fmt.Sprintf("\tmax_node_count = %#v\n", *r.MaxNodeCount)
+	}
+	if r.MinNodeCount != nil {
+		outputConfig += fmt.Sprintf("\tmin_node_count = %#v\n", *r.MinNodeCount)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolConfigToHCL(r *containerazure.NodePoolConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertContainerAzureNodePoolConfigSshConfigToHCL(r.SshConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
+	}
+	if v := convertContainerAzureNodePoolConfigRootVolumeToHCL(r.RootVolume); v != "" {
+		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
+	}
+	outputConfig += "\ttags = {"
+	for k, v := range r.Tags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.VmSize != nil {
+		outputConfig += fmt.Sprintf("\tvm_size = %#v\n", *r.VmSize)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolConfigSshConfigToHCL(r *containerazure.NodePoolConfigSshConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AuthorizedKey != nil {
+		outputConfig += fmt.Sprintf("\tauthorized_key = %#v\n", *r.AuthorizedKey)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolConfigRootVolumeToHCL(r *containerazure.NodePoolConfigRootVolume) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.SizeGib != nil {
+		outputConfig += fmt.Sprintf("\tsize_gib = %#v\n", *r.SizeGib)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolMaxPodsConstraintToHCL(r *containerazure.NodePoolMaxPodsConstraint) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.MaxPodsPerNode != nil {
+		outputConfig += fmt.Sprintf("\tmax_pods_per_node = %#v\n", *r.MaxPodsPerNode)
+	}
+	return outputConfig + "}"
+}
+
 // DataprocWorkflowTemplateAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func DataprocWorkflowTemplateAsHCL(r dataproc.WorkflowTemplate) (string, error) {
+func DataprocWorkflowTemplateAsHCL(r dataproc.WorkflowTemplate, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_dataproc_workflow_template\" \"output\" {\n"
 	if r.Jobs != nil {
 		for _, v := range r.Jobs {
@@ -1621,6 +5893,14 @@ func DataprocWorkflowTemplateAsHCL(r dataproc.WorkflowTemplate) (string, error) 
 	if v := convertDataprocWorkflowTemplatePlacementToHCL(r.Placement); v != "" {
 		outputConfig += fmt.Sprintf("\tplacement %s\n", v)
 	}
+	if r.DagTimeout != nil {
+		outputConfig += fmt.Sprintf("\tdag_timeout = %#v\n", *r.DagTimeout)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Parameters != nil {
 		for _, v := range r.Parameters {
 			outputConfig += fmt.Sprintf("\tparameters %s\n", convertDataprocWorkflowTemplateParametersToHCL(&v))
@@ -1632,7 +5912,15 @@ func DataprocWorkflowTemplateAsHCL(r dataproc.WorkflowTemplate) (string, error) 
 	if r.Version != nil {
 		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertDataprocWorkflowTemplateJobsToHCL(r *dataproc.WorkflowTemplateJobs) string {
@@ -1649,6 +5937,11 @@ func convertDataprocWorkflowTemplateJobsToHCL(r *dataproc.WorkflowTemplateJobs) 
 	if v := convertDataprocWorkflowTemplateJobsHiveJobToHCL(r.HiveJob); v != "" {
 		outputConfig += fmt.Sprintf("\thive_job %s\n", v)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if v := convertDataprocWorkflowTemplateJobsPigJobToHCL(r.PigJob); v != "" {
 		outputConfig += fmt.Sprintf("\tpig_job %s\n", v)
 	}
@@ -1722,6 +6015,11 @@ func convertDataprocWorkflowTemplateJobsHadoopJobToHCL(r *dataproc.WorkflowTempl
 	if r.MainJarFileUri != nil {
 		outputConfig += fmt.Sprintf("\tmain_jar_file_uri = %#v\n", *r.MainJarFileUri)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1730,6 +6028,11 @@ func convertDataprocWorkflowTemplateJobsHadoopJobLoggingConfigToHCL(r *dataproc.
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1748,12 +6051,22 @@ func convertDataprocWorkflowTemplateJobsHiveJobToHCL(r *dataproc.WorkflowTemplat
 		}
 		outputConfig += "]\n"
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
 		outputConfig += fmt.Sprintf("\tquery_file_uri = %#v\n", *r.QueryFileUri)
 	}
 	if v := convertDataprocWorkflowTemplateJobsHiveJobQueryListToHCL(r.QueryList); v != "" {
 		outputConfig += fmt.Sprintf("\tquery_list %s\n", v)
 	}
+	outputConfig += "\tscript_variables = {"
+	for k, v := range r.ScriptVariables {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1790,12 +6103,22 @@ func convertDataprocWorkflowTemplateJobsPigJobToHCL(r *dataproc.WorkflowTemplate
 	if v := convertDataprocWorkflowTemplateJobsPigJobLoggingConfigToHCL(r.LoggingConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
 		outputConfig += fmt.Sprintf("\tquery_file_uri = %#v\n", *r.QueryFileUri)
 	}
 	if v := convertDataprocWorkflowTemplateJobsPigJobQueryListToHCL(r.QueryList); v != "" {
 		outputConfig += fmt.Sprintf("\tquery_list %s\n", v)
 	}
+	outputConfig += "\tscript_variables = {"
+	for k, v := range r.ScriptVariables {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1804,6 +6127,11 @@ func convertDataprocWorkflowTemplateJobsPigJobLoggingConfigToHCL(r *dataproc.Wor
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1843,6 +6171,11 @@ func convertDataprocWorkflowTemplateJobsPrestoJobToHCL(r *dataproc.WorkflowTempl
 	if r.OutputFormat != nil {
 		outputConfig += fmt.Sprintf("\toutput_format = %#v\n", *r.OutputFormat)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
 		outputConfig += fmt.Sprintf("\tquery_file_uri = %#v\n", *r.QueryFileUri)
 	}
@@ -1857,6 +6190,11 @@ func convertDataprocWorkflowTemplateJobsPrestoJobLoggingConfigToHCL(r *dataproc.
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1914,6 +6252,11 @@ func convertDataprocWorkflowTemplateJobsPysparkJobToHCL(r *dataproc.WorkflowTemp
 	if v := convertDataprocWorkflowTemplateJobsPysparkJobLoggingConfigToHCL(r.LoggingConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.PythonFileUris != nil {
 		outputConfig += "\tpython_file_uris = ["
 		for _, v := range r.PythonFileUris {
@@ -1929,6 +6272,11 @@ func convertDataprocWorkflowTemplateJobsPysparkJobLoggingConfigToHCL(r *dataproc
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1988,6 +6336,11 @@ func convertDataprocWorkflowTemplateJobsSparkJobToHCL(r *dataproc.WorkflowTempla
 	if r.MainJarFileUri != nil {
 		outputConfig += fmt.Sprintf("\tmain_jar_file_uri = %#v\n", *r.MainJarFileUri)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -1996,6 +6349,11 @@ func convertDataprocWorkflowTemplateJobsSparkJobLoggingConfigToHCL(r *dataproc.W
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -2031,6 +6389,11 @@ func convertDataprocWorkflowTemplateJobsSparkRJobToHCL(r *dataproc.WorkflowTempl
 	if v := convertDataprocWorkflowTemplateJobsSparkRJobLoggingConfigToHCL(r.LoggingConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -2039,6 +6402,11 @@ func convertDataprocWorkflowTemplateJobsSparkRJobLoggingConfigToHCL(r *dataproc.
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -2057,12 +6425,22 @@ func convertDataprocWorkflowTemplateJobsSparkSqlJobToHCL(r *dataproc.WorkflowTem
 	if v := convertDataprocWorkflowTemplateJobsSparkSqlJobLoggingConfigToHCL(r.LoggingConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
 		outputConfig += fmt.Sprintf("\tquery_file_uri = %#v\n", *r.QueryFileUri)
 	}
 	if v := convertDataprocWorkflowTemplateJobsSparkSqlJobQueryListToHCL(r.QueryList); v != "" {
 		outputConfig += fmt.Sprintf("\tquery_list %s\n", v)
 	}
+	outputConfig += "\tscript_variables = {"
+	for k, v := range r.ScriptVariables {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -2071,6 +6449,11 @@ func convertDataprocWorkflowTemplateJobsSparkSqlJobLoggingConfigToHCL(r *datapro
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tdriver_log_levels = {"
+	for k, v := range r.DriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -2108,6 +6491,11 @@ func convertDataprocWorkflowTemplatePlacementClusterSelectorToHCL(r *dataproc.Wo
 		return ""
 	}
 	outputConfig := "{\n"
+	outputConfig += "\tcluster_labels = {"
+	for k, v := range r.ClusterLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Zone != nil {
 		outputConfig += fmt.Sprintf("\tzone = %#v\n", *r.Zone)
 	}
@@ -2125,6 +6513,11 @@ func convertDataprocWorkflowTemplatePlacementManagedClusterToHCL(r *dataproc.Wor
 	if v := convertDataprocWorkflowTemplateClusterClusterConfigToHCL(r.Config); v != "" {
 		outputConfig += fmt.Sprintf("\tconfig %s\n", v)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -2356,6 +6749,11 @@ func convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfigToHCL(r 
 	if r.InternalIPOnly != nil {
 		outputConfig += fmt.Sprintf("\tinternal_ip_only = %#v\n", *r.InternalIPOnly)
 	}
+	outputConfig += "\tmetadata = {"
+	for k, v := range r.Metadata {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Network != nil {
 		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
 	}
@@ -2529,6 +6927,18 @@ func convertDataprocWorkflowTemplateClusterClusterConfigSoftwareConfigToHCL(r *d
 	if r.ImageVersion != nil {
 		outputConfig += fmt.Sprintf("\timage_version = %#v\n", *r.ImageVersion)
 	}
+	if r.OptionalComponents != nil {
+		outputConfig += "\toptional_components = ["
+		for _, v := range r.OptionalComponents {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -2538,7 +6948,7 @@ func convertDataprocWorkflowTemplateClusterClusterConfigSoftwareConfigToHCL(r *d
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func EventarcTriggerAsHCL(r eventarc.Trigger) (string, error) {
+func EventarcTriggerAsHCL(r eventarc.Trigger, hasGAEquivalent bool) (string, error) {
 	outputConfig := "resource \"google_eventarc_trigger\" \"output\" {\n"
 	if v := convertEventarcTriggerDestinationToHCL(r.Destination); v != "" {
 		outputConfig += fmt.Sprintf("\tdestination %s\n", v)
@@ -2554,6 +6964,11 @@ func EventarcTriggerAsHCL(r eventarc.Trigger) (string, error) {
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
@@ -2563,7 +6978,15 @@ func EventarcTriggerAsHCL(r eventarc.Trigger) (string, error) {
 	if v := convertEventarcTriggerTransportToHCL(r.Transport); v != "" {
 		outputConfig += fmt.Sprintf("\ttransport %s\n", v)
 	}
-	return formatHCL(outputConfig + "}")
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 func convertEventarcTriggerDestinationToHCL(r *eventarc.TriggerDestination) string {
@@ -2633,245 +7056,699 @@ func convertEventarcTriggerTransportPubsubToHCL(r *eventarc.TriggerTransportPubs
 	return outputConfig + "}"
 }
 
-// RunServiceAsHCL returns a string representation of the specified resource in HCL.
+// NetworkConnectivityHubAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func RunServiceAsHCL(r run.Service) (string, error) {
-	outputConfig := "resource \"google_cloud_run_service\" \"output\" {\n"
+func NetworkConnectivityHubAsHCL(r networkconnectivity.Hub, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_network_connectivity_hub\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertNetworkConnectivityHubRoutingVpcsToHCL(r *networkconnectivity.HubRoutingVpcs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+// OrgPolicyPolicyAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func OrgPolicyPolicyAsHCL(r orgpolicy.Policy, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_org_policy_policy\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	if v := convertOrgPolicyPolicySpecToHCL(r.Spec); v != "" {
+		outputConfig += fmt.Sprintf("\tspec %s\n", v)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertOrgPolicyPolicySpecToHCL(r *orgpolicy.PolicySpec) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.InheritFromParent != nil {
+		outputConfig += fmt.Sprintf("\tinherit_from_parent = %#v\n", *r.InheritFromParent)
+	}
+	if r.Reset != nil {
+		outputConfig += fmt.Sprintf("\treset = %#v\n", *r.Reset)
+	}
+	if r.Rules != nil {
+		for _, v := range r.Rules {
+			outputConfig += fmt.Sprintf("\trules %s\n", convertOrgPolicyPolicySpecRulesToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertOrgPolicyPolicySpecRulesToHCL(r *orgpolicy.PolicySpecRules) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowAll != nil {
+		outputConfig += fmt.Sprintf("\tallow_all = %q\n", serializeEnumBool(r.AllowAll))
+	}
+	if v := convertOrgPolicyPolicySpecRulesConditionToHCL(r.Condition); v != "" {
+		outputConfig += fmt.Sprintf("\tcondition %s\n", v)
+	}
+	if r.DenyAll != nil {
+		outputConfig += fmt.Sprintf("\tdeny_all = %q\n", serializeEnumBool(r.DenyAll))
+	}
+	if r.Enforce != nil {
+		outputConfig += fmt.Sprintf("\tenforce = %q\n", serializeEnumBool(r.Enforce))
+	}
+	if v := convertOrgPolicyPolicySpecRulesValuesToHCL(r.Values); v != "" {
+		outputConfig += fmt.Sprintf("\tvalues %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOrgPolicyPolicySpecRulesConditionToHCL(r *orgpolicy.PolicySpecRulesCondition) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Expression != nil {
+		outputConfig += fmt.Sprintf("\texpression = %#v\n", *r.Expression)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Title != nil {
+		outputConfig += fmt.Sprintf("\ttitle = %#v\n", *r.Title)
+	}
+	return outputConfig + "}"
+}
+
+func convertOrgPolicyPolicySpecRulesValuesToHCL(r *orgpolicy.PolicySpecRulesValues) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedValues != nil {
+		outputConfig += "\tallowed_values = ["
+		for _, v := range r.AllowedValues {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.DeniedValues != nil {
+		outputConfig += "\tdenied_values = ["
+		for _, v := range r.DeniedValues {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+// OsConfigOsPolicyAssignmentAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func OsConfigOsPolicyAssignmentAsHCL(r osconfig.OSPolicyAssignment, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_os_config_os_policy_assignment\" \"output\" {\n"
+	if v := convertOsConfigOsPolicyAssignmentInstanceFilterToHCL(r.InstanceFilter); v != "" {
+		outputConfig += fmt.Sprintf("\tinstance_filter %s\n", v)
+	}
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
 	}
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
-	if r.ApiVersion != nil {
-		outputConfig += fmt.Sprintf("\tapi_version = %#v\n", *r.ApiVersion)
+	if r.OSPolicies != nil {
+		for _, v := range r.OSPolicies {
+			outputConfig += fmt.Sprintf("\tos_policies %s\n", convertOsConfigOsPolicyAssignmentOSPoliciesToHCL(&v))
+		}
 	}
-	if r.Kind != nil {
-		outputConfig += fmt.Sprintf("\tkind = %#v\n", *r.Kind)
+	if v := convertOsConfigOsPolicyAssignmentRolloutToHCL(r.Rollout); v != "" {
+		outputConfig += fmt.Sprintf("\trollout %s\n", v)
 	}
-	if v := convertRunServiceMetadataToHCL(r.Metadata); v != "" {
-		outputConfig += fmt.Sprintf("\tmetadata %s\n", v)
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
 	}
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
-	if v := convertRunServiceSpecToHCL(r.Spec); v != "" {
-		outputConfig += v
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
 	}
-	return formatHCL(outputConfig + "}")
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
-func convertRunServiceMetadataToHCL(r *run.ServiceMetadata) string {
+func convertOsConfigOsPolicyAssignmentInstanceFilterToHCL(r *osconfig.OSPolicyAssignmentInstanceFilter) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if r.ClusterName != nil {
-		outputConfig += fmt.Sprintf("\tcluster_name = %#v\n", *r.ClusterName)
+	if r.All != nil {
+		outputConfig += fmt.Sprintf("\tall = %#v\n", *r.All)
 	}
-	if r.Finalizers != nil {
-		outputConfig += "\tfinalizers = ["
-		for _, v := range r.Finalizers {
+	if r.ExclusionLabels != nil {
+		for _, v := range r.ExclusionLabels {
+			outputConfig += fmt.Sprintf("\texclusion_labels %s\n", convertOsConfigOsPolicyAssignmentInstanceFilterExclusionLabelsToHCL(&v))
+		}
+	}
+	if r.InclusionLabels != nil {
+		for _, v := range r.InclusionLabels {
+			outputConfig += fmt.Sprintf("\tinclusion_labels %s\n", convertOsConfigOsPolicyAssignmentInstanceFilterInclusionLabelsToHCL(&v))
+		}
+	}
+	if r.Inventories != nil {
+		for _, v := range r.Inventories {
+			outputConfig += fmt.Sprintf("\tinventories %s\n", convertOsConfigOsPolicyAssignmentInstanceFilterInventoriesToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentInstanceFilterExclusionLabelsToHCL(r *osconfig.OSPolicyAssignmentInstanceFilterExclusionLabels) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentInstanceFilterInclusionLabelsToHCL(r *osconfig.OSPolicyAssignmentInstanceFilterInclusionLabels) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentInstanceFilterInventoriesToHCL(r *osconfig.OSPolicyAssignmentInstanceFilterInventories) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.OSShortName != nil {
+		outputConfig += fmt.Sprintf("\tos_short_name = %#v\n", *r.OSShortName)
+	}
+	if r.OSVersion != nil {
+		outputConfig += fmt.Sprintf("\tos_version = %#v\n", *r.OSVersion)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesToHCL(r *osconfig.OSPolicyAssignmentOSPolicies) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Id != nil {
+		outputConfig += fmt.Sprintf("\tid = %#v\n", *r.Id)
+	}
+	if r.Mode != nil {
+		outputConfig += fmt.Sprintf("\tmode = %#v\n", *r.Mode)
+	}
+	if r.ResourceGroups != nil {
+		for _, v := range r.ResourceGroups {
+			outputConfig += fmt.Sprintf("\tresource_groups %s\n", convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsToHCL(&v))
+		}
+	}
+	if r.AllowNoResourceGroupMatch != nil {
+		outputConfig += fmt.Sprintf("\tallow_no_resource_group_match = %#v\n", *r.AllowNoResourceGroupMatch)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroups) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Resources != nil {
+		for _, v := range r.Resources {
+			outputConfig += fmt.Sprintf("\tresources %s\n", convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesToHCL(&v))
+		}
+	}
+	if r.InventoryFilters != nil {
+		for _, v := range r.InventoryFilters {
+			outputConfig += fmt.Sprintf("\tinventory_filters %s\n", convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsInventoryFiltersToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResources) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Id != nil {
+		outputConfig += fmt.Sprintf("\tid = %#v\n", *r.Id)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecToHCL(r.Exec); v != "" {
+		outputConfig += fmt.Sprintf("\texec %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileToHCL(r.File); v != "" {
+		outputConfig += fmt.Sprintf("\tfile %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgToHCL(r.Pkg); v != "" {
+		outputConfig += fmt.Sprintf("\tpkg %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryToHCL(r.Repository); v != "" {
+		outputConfig += fmt.Sprintf("\trepository %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesExec) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertOsConfigOsPolicyAssignmentOSPolicyAssignmentExecToHCL(r.Validate); v != "" {
+		outputConfig += fmt.Sprintf("\tvalidate %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPolicyAssignmentExecToHCL(r.Enforce); v != "" {
+		outputConfig += fmt.Sprintf("\tenforce %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesFile) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Path != nil {
+		outputConfig += fmt.Sprintf("\tpath = %#v\n", *r.Path)
+	}
+	if r.State != nil {
+		outputConfig += fmt.Sprintf("\tstate = %#v\n", *r.State)
+	}
+	if r.Content != nil {
+		outputConfig += fmt.Sprintf("\tcontent = %#v\n", *r.Content)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileToHCL(r.File); v != "" {
+		outputConfig += fmt.Sprintf("\tfile %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkg) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.DesiredState != nil {
+		outputConfig += fmt.Sprintf("\tdesired_state = %#v\n", *r.DesiredState)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgAptToHCL(r.Apt); v != "" {
+		outputConfig += fmt.Sprintf("\tapt %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebToHCL(r.Deb); v != "" {
+		outputConfig += fmt.Sprintf("\tdeb %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgGoogetToHCL(r.Googet); v != "" {
+		outputConfig += fmt.Sprintf("\tgooget %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiToHCL(r.Msi); v != "" {
+		outputConfig += fmt.Sprintf("\tmsi %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmToHCL(r.Rpm); v != "" {
+		outputConfig += fmt.Sprintf("\trpm %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgYumToHCL(r.Yum); v != "" {
+		outputConfig += fmt.Sprintf("\tyum %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgZypperToHCL(r.Zypper); v != "" {
+		outputConfig += fmt.Sprintf("\tzypper %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgAptToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgApt) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDeb) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileToHCL(r.Source); v != "" {
+		outputConfig += fmt.Sprintf("\tsource %s\n", v)
+	}
+	if r.PullDeps != nil {
+		outputConfig += fmt.Sprintf("\tpull_deps = %#v\n", *r.PullDeps)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgGoogetToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgGooget) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsi) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileToHCL(r.Source); v != "" {
+		outputConfig += fmt.Sprintf("\tsource %s\n", v)
+	}
+	if r.Properties != nil {
+		outputConfig += "\tproperties = ["
+		for _, v := range r.Properties {
 			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
 		outputConfig += "]\n"
 	}
-	if r.GenerateName != nil {
-		outputConfig += fmt.Sprintf("\tgenerate_name = %#v\n", *r.GenerateName)
-	}
-	if r.Namespace != nil {
-		outputConfig += fmt.Sprintf("\tnamespace = %#v\n", *r.Namespace)
-	}
-	if r.OwnerReferences != nil {
-		for _, v := range r.OwnerReferences {
-			outputConfig += fmt.Sprintf("\towner_references %s\n", convertRunServiceMetadataOwnerReferencesToHCL(&v))
-		}
-	}
 	return outputConfig + "}"
 }
 
-func convertRunServiceMetadataOwnerReferencesToHCL(r *run.ServiceMetadataOwnerReferences) string {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpm) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if r.ApiVersion != nil {
-		outputConfig += fmt.Sprintf("\tapi_version = %#v\n", *r.ApiVersion)
+	if v := convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileToHCL(r.Source); v != "" {
+		outputConfig += fmt.Sprintf("\tsource %s\n", v)
 	}
-	if r.BlockOwnerDeletion != nil {
-		outputConfig += fmt.Sprintf("\tblock_owner_deletion = %#v\n", *r.BlockOwnerDeletion)
+	if r.PullDeps != nil {
+		outputConfig += fmt.Sprintf("\tpull_deps = %#v\n", *r.PullDeps)
 	}
-	if r.Controller != nil {
-		outputConfig += fmt.Sprintf("\tcontroller = %#v\n", *r.Controller)
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgYumToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgYum) string {
+	if r == nil {
+		return ""
 	}
-	if r.Kind != nil {
-		outputConfig += fmt.Sprintf("\tkind = %#v\n", *r.Kind)
-	}
+	outputConfig := "{\n"
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
-	if r.Uid != nil {
-		outputConfig += fmt.Sprintf("\tuid = %#v\n", *r.Uid)
-	}
 	return outputConfig + "}"
 }
 
-func convertRunServiceMetadataCreateTimeToHCL(r *run.ServiceMetadataCreateTime) string {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgZypperToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgZypper) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertRunServiceMetadataDeleteTimeToHCL(r *run.ServiceMetadataDeleteTime) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecToHCL(r *run.ServiceSpec) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := ""
-	if v := convertRunServiceSpecTemplateToHCL(r.Template); v != "" {
-		outputConfig += fmt.Sprintf("template %s\n", v)
-	}
-	if r.Traffic != nil {
-		for _, v := range r.Traffic {
-			outputConfig += fmt.Sprintf("traffic %s\n", convertRunServiceSpecTrafficToHCL(&v))
-		}
-	}
-	return outputConfig
-}
-
-func convertRunServiceSpecTemplateToHCL(r *run.ServiceSpecTemplate) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertRunServiceSpecTemplateMetadataToHCL(r.Metadata); v != "" {
-		outputConfig += fmt.Sprintf("\tmetadata %s\n", v)
-	}
-	if v := convertRunServiceSpecTemplateSpecToHCL(r.Spec); v != "" {
-		outputConfig += fmt.Sprintf("\tspec %s\n", v)
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
 	return outputConfig + "}"
 }
 
-func convertRunServiceSpecTemplateMetadataToHCL(r *run.ServiceSpecTemplateMetadata) string {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesRepository) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if r.ClusterName != nil {
-		outputConfig += fmt.Sprintf("\tcluster_name = %#v\n", *r.ClusterName)
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryAptToHCL(r.Apt); v != "" {
+		outputConfig += fmt.Sprintf("\tapt %s\n", v)
 	}
-	if r.Finalizers != nil {
-		outputConfig += "\tfinalizers = ["
-		for _, v := range r.Finalizers {
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryGooToHCL(r.Goo); v != "" {
+		outputConfig += fmt.Sprintf("\tgoo %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryYumToHCL(r.Yum); v != "" {
+		outputConfig += fmt.Sprintf("\tyum %s\n", v)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryZypperToHCL(r.Zypper); v != "" {
+		outputConfig += fmt.Sprintf("\tzypper %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryAptToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryApt) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ArchiveType != nil {
+		outputConfig += fmt.Sprintf("\tarchive_type = %#v\n", *r.ArchiveType)
+	}
+	if r.Components != nil {
+		outputConfig += "\tcomponents = ["
+		for _, v := range r.Components {
 			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
 		outputConfig += "]\n"
 	}
-	if r.GenerateName != nil {
-		outputConfig += fmt.Sprintf("\tgenerate_name = %#v\n", *r.GenerateName)
+	if r.Distribution != nil {
+		outputConfig += fmt.Sprintf("\tdistribution = %#v\n", *r.Distribution)
 	}
+	if r.Uri != nil {
+		outputConfig += fmt.Sprintf("\turi = %#v\n", *r.Uri)
+	}
+	if r.GpgKey != nil {
+		outputConfig += fmt.Sprintf("\tgpg_key = %#v\n", *r.GpgKey)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryGooToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryGoo) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
-	if r.Namespace != nil {
-		outputConfig += fmt.Sprintf("\tnamespace = %#v\n", *r.Namespace)
+	if r.Url != nil {
+		outputConfig += fmt.Sprintf("\turl = %#v\n", *r.Url)
 	}
-	if r.OwnerReferences != nil {
-		for _, v := range r.OwnerReferences {
-			outputConfig += fmt.Sprintf("\towner_references %s\n", convertRunServiceSpecTemplateMetadataOwnerReferencesToHCL(&v))
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryYumToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryYum) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.BaseUrl != nil {
+		outputConfig += fmt.Sprintf("\tbase_url = %#v\n", *r.BaseUrl)
+	}
+	if r.Id != nil {
+		outputConfig += fmt.Sprintf("\tid = %#v\n", *r.Id)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	if r.GpgKeys != nil {
+		outputConfig += "\tgpg_keys = ["
+		for _, v := range r.GpgKeys {
+			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
+		outputConfig += "]\n"
 	}
 	return outputConfig + "}"
 }
 
-func convertRunServiceSpecTemplateMetadataOwnerReferencesToHCL(r *run.ServiceSpecTemplateMetadataOwnerReferences) string {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryZypperToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryZypper) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if r.ApiVersion != nil {
-		outputConfig += fmt.Sprintf("\tapi_version = %#v\n", *r.ApiVersion)
+	if r.BaseUrl != nil {
+		outputConfig += fmt.Sprintf("\tbase_url = %#v\n", *r.BaseUrl)
 	}
-	if r.BlockOwnerDeletion != nil {
-		outputConfig += fmt.Sprintf("\tblock_owner_deletion = %#v\n", *r.BlockOwnerDeletion)
+	if r.Id != nil {
+		outputConfig += fmt.Sprintf("\tid = %#v\n", *r.Id)
 	}
-	if r.Controller != nil {
-		outputConfig += fmt.Sprintf("\tcontroller = %#v\n", *r.Controller)
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
 	}
-	if r.Kind != nil {
-		outputConfig += fmt.Sprintf("\tkind = %#v\n", *r.Kind)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Uid != nil {
-		outputConfig += fmt.Sprintf("\tuid = %#v\n", *r.Uid)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateMetadataCreateTimeToHCL(r *run.ServiceSpecTemplateMetadataCreateTime) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateMetadataDeleteTimeToHCL(r *run.ServiceSpecTemplateMetadataDeleteTime) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecToHCL(r *run.ServiceSpecTemplateSpec) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.ContainerConcurrency != nil {
-		outputConfig += fmt.Sprintf("\tcontainer_concurrency = %#v\n", *r.ContainerConcurrency)
-	}
-	if r.Containers != nil {
-		for _, v := range r.Containers {
-			outputConfig += fmt.Sprintf("\tcontainers %s\n", convertRunServiceSpecTemplateSpecContainersToHCL(&v))
+	if r.GpgKeys != nil {
+		outputConfig += "\tgpg_keys = ["
+		for _, v := range r.GpgKeys {
+			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
-	}
-	if r.ServiceAccountName != nil {
-		outputConfig += fmt.Sprintf("\tservice_account_name = %#v\n", *r.ServiceAccountName)
-	}
-	if r.TimeoutSeconds != nil {
-		outputConfig += fmt.Sprintf("\ttimeout_seconds = %#v\n", *r.TimeoutSeconds)
-	}
-	if r.Volumes != nil {
-		for _, v := range r.Volumes {
-			outputConfig += fmt.Sprintf("\tvolumes %s\n", convertRunServiceSpecTemplateSpecVolumesToHCL(&v))
-		}
+		outputConfig += "]\n"
 	}
 	return outputConfig + "}"
 }
 
-func convertRunServiceSpecTemplateSpecContainersToHCL(r *run.ServiceSpecTemplateSpecContainers) string {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsInventoryFiltersToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsInventoryFilters) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
+	if r.OSShortName != nil {
+		outputConfig += fmt.Sprintf("\tos_short_name = %#v\n", *r.OSShortName)
+	}
+	if r.OSVersion != nil {
+		outputConfig += fmt.Sprintf("\tos_version = %#v\n", *r.OSVersion)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentRolloutToHCL(r *osconfig.OSPolicyAssignmentRollout) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertOsConfigOsPolicyAssignmentRolloutDisruptionBudgetToHCL(r.DisruptionBudget); v != "" {
+		outputConfig += fmt.Sprintf("\tdisruption_budget %s\n", v)
+	}
+	if r.MinWaitDuration != nil {
+		outputConfig += fmt.Sprintf("\tmin_wait_duration = %#v\n", *r.MinWaitDuration)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentRolloutDisruptionBudgetToHCL(r *osconfig.OSPolicyAssignmentRolloutDisruptionBudget) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Fixed != nil {
+		outputConfig += fmt.Sprintf("\tfixed = %#v\n", *r.Fixed)
+	}
+	if r.Percent != nil {
+		outputConfig += fmt.Sprintf("\tpercent = %#v\n", *r.Percent)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileToHCL(r *osconfig.OSPolicyAssignmentFile) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowInsecure != nil {
+		outputConfig += fmt.Sprintf("\tallow_insecure = %#v\n", *r.AllowInsecure)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileGcsToHCL(r.Gcs); v != "" {
+		outputConfig += fmt.Sprintf("\tgcs %s\n", v)
+	}
+	if r.LocalPath != nil {
+		outputConfig += fmt.Sprintf("\tlocal_path = %#v\n", *r.LocalPath)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileRemoteToHCL(r.Remote); v != "" {
+		outputConfig += fmt.Sprintf("\tremote %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileGcsToHCL(r *osconfig.OSPolicyAssignmentFileGcs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Bucket != nil {
+		outputConfig += fmt.Sprintf("\tbucket = %#v\n", *r.Bucket)
+	}
+	if r.Object != nil {
+		outputConfig += fmt.Sprintf("\tobject = %#v\n", *r.Object)
+	}
+	if r.Generation != nil {
+		outputConfig += fmt.Sprintf("\tgeneration = %#v\n", *r.Generation)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileRemoteToHCL(r *osconfig.OSPolicyAssignmentFileRemote) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Uri != nil {
+		outputConfig += fmt.Sprintf("\turi = %#v\n", *r.Uri)
+	}
+	if r.Sha256Checksum != nil {
+		outputConfig += fmt.Sprintf("\tsha256_checksum = %#v\n", *r.Sha256Checksum)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentExecToHCL(r *osconfig.OSPolicyAssignmentExec) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Interpreter != nil {
+		outputConfig += fmt.Sprintf("\tinterpreter = %#v\n", *r.Interpreter)
+	}
 	if r.Args != nil {
 		outputConfig += "\targs = ["
 		for _, v := range r.Args {
@@ -2879,629 +7756,438 @@ func convertRunServiceSpecTemplateSpecContainersToHCL(r *run.ServiceSpecTemplate
 		}
 		outputConfig += "]\n"
 	}
-	if r.Command != nil {
-		outputConfig += "\tcommand = ["
-		for _, v := range r.Command {
+	if v := convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileToHCL(r.File); v != "" {
+		outputConfig += fmt.Sprintf("\tfile %s\n", v)
+	}
+	if r.OutputFilePath != nil {
+		outputConfig += fmt.Sprintf("\toutput_file_path = %#v\n", *r.OutputFilePath)
+	}
+	if r.Script != nil {
+		outputConfig += fmt.Sprintf("\tscript = %#v\n", *r.Script)
+	}
+	return outputConfig + "}"
+}
+
+// PrivatecaCertificateTemplateAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func PrivatecaCertificateTemplateAsHCL(r privateca.CertificateTemplate, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_privateca_certificate_template\" \"output\" {\n"
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if v := convertPrivatecaCertificateTemplateIdentityConstraintsToHCL(r.IdentityConstraints); v != "" {
+		outputConfig += fmt.Sprintf("\tidentity_constraints %s\n", v)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if v := convertPrivatecaCertificateTemplatePassthroughExtensionsToHCL(r.PassthroughExtensions); v != "" {
+		outputConfig += fmt.Sprintf("\tpassthrough_extensions %s\n", v)
+	}
+	if v := convertPrivatecaCertificateTemplatePredefinedValuesToHCL(r.PredefinedValues); v != "" {
+		outputConfig += fmt.Sprintf("\tpredefined_values %s\n", v)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertPrivatecaCertificateTemplateIdentityConstraintsToHCL(r *privateca.CertificateTemplateIdentityConstraints) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowSubjectAltNamesPassthrough != nil {
+		outputConfig += fmt.Sprintf("\tallow_subject_alt_names_passthrough = %#v\n", *r.AllowSubjectAltNamesPassthrough)
+	}
+	if r.AllowSubjectPassthrough != nil {
+		outputConfig += fmt.Sprintf("\tallow_subject_passthrough = %#v\n", *r.AllowSubjectPassthrough)
+	}
+	if v := convertPrivatecaCertificateTemplateIdentityConstraintsCelExpressionToHCL(r.CelExpression); v != "" {
+		outputConfig += fmt.Sprintf("\tcel_expression %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplateIdentityConstraintsCelExpressionToHCL(r *privateca.CertificateTemplateIdentityConstraintsCelExpression) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Expression != nil {
+		outputConfig += fmt.Sprintf("\texpression = %#v\n", *r.Expression)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Title != nil {
+		outputConfig += fmt.Sprintf("\ttitle = %#v\n", *r.Title)
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplatePassthroughExtensionsToHCL(r *privateca.CertificateTemplatePassthroughExtensions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AdditionalExtensions != nil {
+		for _, v := range r.AdditionalExtensions {
+			outputConfig += fmt.Sprintf("\tadditional_extensions %s\n", convertPrivatecaCertificateTemplatePassthroughExtensionsAdditionalExtensionsToHCL(&v))
+		}
+	}
+	if r.KnownExtensions != nil {
+		outputConfig += "\tknown_extensions = ["
+		for _, v := range r.KnownExtensions {
 			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
 		outputConfig += "]\n"
 	}
-	if r.Env != nil {
-		for _, v := range r.Env {
-			outputConfig += fmt.Sprintf("\tenv %s\n", convertRunServiceSpecTemplateSpecContainersEnvToHCL(&v))
-		}
-	}
-	if r.EnvFrom != nil {
-		for _, v := range r.EnvFrom {
-			outputConfig += fmt.Sprintf("\tenv_from %s\n", convertRunServiceSpecTemplateSpecContainersEnvFromToHCL(&v))
-		}
-	}
-	if r.Image != nil {
-		outputConfig += fmt.Sprintf("\timage = %#v\n", *r.Image)
-	}
-	if r.ImagePullPolicy != nil {
-		outputConfig += fmt.Sprintf("\timage_pull_policy = %#v\n", *r.ImagePullPolicy)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersLivenessProbeToHCL(r.LivenessProbe); v != "" {
-		outputConfig += fmt.Sprintf("\tliveness_probe %s\n", v)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Ports != nil {
-		for _, v := range r.Ports {
-			outputConfig += fmt.Sprintf("\tports %s\n", convertRunServiceSpecTemplateSpecContainersPortsToHCL(&v))
-		}
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersReadinessProbeToHCL(r.ReadinessProbe); v != "" {
-		outputConfig += fmt.Sprintf("\treadiness_probe %s\n", v)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersResourcesToHCL(r.Resources); v != "" {
-		outputConfig += fmt.Sprintf("\tresources %s\n", v)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersSecurityContextToHCL(r.SecurityContext); v != "" {
-		outputConfig += fmt.Sprintf("\tsecurity_context %s\n", v)
-	}
-	if r.TerminationMessagePath != nil {
-		outputConfig += fmt.Sprintf("\ttermination_message_path = %#v\n", *r.TerminationMessagePath)
-	}
-	if r.TerminationMessagePolicy != nil {
-		outputConfig += fmt.Sprintf("\ttermination_message_policy = %#v\n", *r.TerminationMessagePolicy)
-	}
-	if r.VolumeMounts != nil {
-		for _, v := range r.VolumeMounts {
-			outputConfig += fmt.Sprintf("\tvolume_mounts %s\n", convertRunServiceSpecTemplateSpecContainersVolumeMountsToHCL(&v))
-		}
-	}
-	if r.WorkingDir != nil {
-		outputConfig += fmt.Sprintf("\tworking_dir = %#v\n", *r.WorkingDir)
-	}
 	return outputConfig + "}"
 }
 
-func convertRunServiceSpecTemplateSpecContainersEnvToHCL(r *run.ServiceSpecTemplateSpecContainersEnv) string {
+func convertPrivatecaCertificateTemplatePassthroughExtensionsAdditionalExtensionsToHCL(r *privateca.CertificateTemplatePassthroughExtensionsAdditionalExtensions) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	if r.ObjectIdPath != nil {
+		outputConfig += "\tobject_id_path = ["
+		for _, v := range r.ObjectIdPath {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesToHCL(r *privateca.CertificateTemplatePredefinedValues) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AdditionalExtensions != nil {
+		for _, v := range r.AdditionalExtensions {
+			outputConfig += fmt.Sprintf("\tadditional_extensions %s\n", convertPrivatecaCertificateTemplatePredefinedValuesAdditionalExtensionsToHCL(&v))
+		}
+	}
+	if r.AiaOcspServers != nil {
+		outputConfig += "\taia_ocsp_servers = ["
+		for _, v := range r.AiaOcspServers {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertPrivatecaCertificateTemplatePredefinedValuesCaOptionsToHCL(r.CaOptions); v != "" {
+		outputConfig += fmt.Sprintf("\tca_options %s\n", v)
+	}
+	if v := convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageToHCL(r.KeyUsage); v != "" {
+		outputConfig += fmt.Sprintf("\tkey_usage %s\n", v)
+	}
+	if r.PolicyIds != nil {
+		for _, v := range r.PolicyIds {
+			outputConfig += fmt.Sprintf("\tpolicy_ids %s\n", convertPrivatecaCertificateTemplatePredefinedValuesPolicyIdsToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesAdditionalExtensionsToHCL(r *privateca.CertificateTemplatePredefinedValuesAdditionalExtensions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertPrivatecaCertificateTemplatePredefinedValuesAdditionalExtensionsObjectIdToHCL(r.ObjectId); v != "" {
+		outputConfig += fmt.Sprintf("\tobject_id %s\n", v)
 	}
 	if r.Value != nil {
 		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
 	}
-	if v := convertRunServiceSpecTemplateSpecContainersEnvValueFromToHCL(r.ValueFrom); v != "" {
-		outputConfig += fmt.Sprintf("\tvalue_from %s\n", v)
+	if r.Critical != nil {
+		outputConfig += fmt.Sprintf("\tcritical = %#v\n", *r.Critical)
 	}
 	return outputConfig + "}"
 }
 
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromToHCL(r *run.ServiceSpecTemplateSpecContainersEnvValueFrom) string {
+func convertPrivatecaCertificateTemplatePredefinedValuesAdditionalExtensionsObjectIdToHCL(r *privateca.CertificateTemplatePredefinedValuesAdditionalExtensionsObjectId) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if v := convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefToHCL(r.ConfigMapKeyRef); v != "" {
-		outputConfig += fmt.Sprintf("\tconfig_map_key_ref %s\n", v)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefToHCL(r.SecretKeyRef); v != "" {
-		outputConfig += fmt.Sprintf("\tsecret_key_ref %s\n", v)
+	if r.ObjectIdPath != nil {
+		outputConfig += "\tobject_id_path = ["
+		for _, v := range r.ObjectIdPath {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
 	}
 	return outputConfig + "}"
 }
 
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefToHCL(r *run.ServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRef) string {
+func convertPrivatecaCertificateTemplatePredefinedValuesCaOptionsToHCL(r *privateca.CertificateTemplatePredefinedValuesCaOptions) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if r.Key != nil {
-		outputConfig += fmt.Sprintf("\tkey = %#v\n", *r.Key)
+	if r.IsCa != nil {
+		outputConfig += fmt.Sprintf("\tis_ca = %#v\n", *r.IsCa)
 	}
-	if v := convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefLocalObjectReferenceToHCL(r.LocalObjectReference); v != "" {
-		outputConfig += fmt.Sprintf("\tlocal_object_reference %s\n", v)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Optional != nil {
-		outputConfig += fmt.Sprintf("\toptional = %#v\n", *r.Optional)
+	if r.MaxIssuerPathLength != nil {
+		outputConfig += fmt.Sprintf("\tmax_issuer_path_length = %#v\n", *r.MaxIssuerPathLength)
 	}
 	return outputConfig + "}"
 }
 
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefLocalObjectReferenceToHCL(r *run.ServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefLocalObjectReference) string {
+func convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageToHCL(r *privateca.CertificateTemplatePredefinedValuesKeyUsage) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	if v := convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageBaseKeyUsageToHCL(r.BaseKeyUsage); v != "" {
+		outputConfig += fmt.Sprintf("\tbase_key_usage %s\n", v)
 	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefToHCL(r *run.ServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRef) string {
-	if r == nil {
-		return ""
+	if v := convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageExtendedKeyUsageToHCL(r.ExtendedKeyUsage); v != "" {
+		outputConfig += fmt.Sprintf("\textended_key_usage %s\n", v)
 	}
-	outputConfig := "{\n"
-	if r.Key != nil {
-		outputConfig += fmt.Sprintf("\tkey = %#v\n", *r.Key)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefLocalObjectReferenceToHCL(r.LocalObjectReference); v != "" {
-		outputConfig += fmt.Sprintf("\tlocal_object_reference %s\n", v)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Optional != nil {
-		outputConfig += fmt.Sprintf("\toptional = %#v\n", *r.Optional)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefLocalObjectReferenceToHCL(r *run.ServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefLocalObjectReference) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromToHCL(r *run.ServiceSpecTemplateSpecContainersEnvFrom) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRefToHCL(r.ConfigMapRef); v != "" {
-		outputConfig += fmt.Sprintf("\tconfig_map_ref %s\n", v)
-	}
-	if r.Prefix != nil {
-		outputConfig += fmt.Sprintf("\tprefix = %#v\n", *r.Prefix)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersEnvFromSecretRefToHCL(r.SecretRef); v != "" {
-		outputConfig += fmt.Sprintf("\tsecret_ref %s\n", v)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRefToHCL(r *run.ServiceSpecTemplateSpecContainersEnvFromConfigMapRef) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRefLocalObjectReferenceToHCL(r.LocalObjectReference); v != "" {
-		outputConfig += fmt.Sprintf("\tlocal_object_reference %s\n", v)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Optional != nil {
-		outputConfig += fmt.Sprintf("\toptional = %#v\n", *r.Optional)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRefLocalObjectReferenceToHCL(r *run.ServiceSpecTemplateSpecContainersEnvFromConfigMapRefLocalObjectReference) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromSecretRefToHCL(r *run.ServiceSpecTemplateSpecContainersEnvFromSecretRef) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertRunServiceSpecTemplateSpecContainersEnvFromSecretRefLocalObjectReferenceToHCL(r.LocalObjectReference); v != "" {
-		outputConfig += fmt.Sprintf("\tlocal_object_reference %s\n", v)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Optional != nil {
-		outputConfig += fmt.Sprintf("\toptional = %#v\n", *r.Optional)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromSecretRefLocalObjectReferenceToHCL(r *run.ServiceSpecTemplateSpecContainersEnvFromSecretRefLocalObjectReference) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeToHCL(r *run.ServiceSpecTemplateSpecContainersLivenessProbe) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertRunServiceSpecTemplateSpecContainersLivenessProbeExecToHCL(r.Exec); v != "" {
-		outputConfig += fmt.Sprintf("\texec %s\n", v)
-	}
-	if r.FailureThreshold != nil {
-		outputConfig += fmt.Sprintf("\tfailure_threshold = %#v\n", *r.FailureThreshold)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGetToHCL(r.HttpGet); v != "" {
-		outputConfig += fmt.Sprintf("\thttp_get %s\n", v)
-	}
-	if r.InitialDelaySeconds != nil {
-		outputConfig += fmt.Sprintf("\tinitial_delay_seconds = %#v\n", *r.InitialDelaySeconds)
-	}
-	if r.PeriodSeconds != nil {
-		outputConfig += fmt.Sprintf("\tperiod_seconds = %#v\n", *r.PeriodSeconds)
-	}
-	if r.SuccessThreshold != nil {
-		outputConfig += fmt.Sprintf("\tsuccess_threshold = %#v\n", *r.SuccessThreshold)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersLivenessProbeTcpSocketToHCL(r.TcpSocket); v != "" {
-		outputConfig += fmt.Sprintf("\ttcp_socket %s\n", v)
-	}
-	if r.TimeoutSeconds != nil {
-		outputConfig += fmt.Sprintf("\ttimeout_seconds = %#v\n", *r.TimeoutSeconds)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeExecToHCL(r *run.ServiceSpecTemplateSpecContainersLivenessProbeExec) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Command != nil {
-		outputConfig += fmt.Sprintf("\tcommand = %#v\n", *r.Command)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGetToHCL(r *run.ServiceSpecTemplateSpecContainersLivenessProbeHttpGet) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Host != nil {
-		outputConfig += fmt.Sprintf("\thost = %#v\n", *r.Host)
-	}
-	if r.HttpHeaders != nil {
-		for _, v := range r.HttpHeaders {
-			outputConfig += fmt.Sprintf("\thttp_headers %s\n", convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGetHttpHeadersToHCL(&v))
+	if r.UnknownExtendedKeyUsages != nil {
+		for _, v := range r.UnknownExtendedKeyUsages {
+			outputConfig += fmt.Sprintf("\tunknown_extended_key_usages %s\n", convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageUnknownExtendedKeyUsagesToHCL(&v))
 		}
 	}
-	if r.Path != nil {
-		outputConfig += fmt.Sprintf("\tpath = %#v\n", *r.Path)
-	}
-	if r.Scheme != nil {
-		outputConfig += fmt.Sprintf("\tscheme = %#v\n", *r.Scheme)
-	}
 	return outputConfig + "}"
 }
 
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGetHttpHeadersToHCL(r *run.ServiceSpecTemplateSpecContainersLivenessProbeHttpGetHttpHeaders) string {
+func convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageBaseKeyUsageToHCL(r *privateca.CertificateTemplatePredefinedValuesKeyUsageBaseKeyUsage) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	if r.CertSign != nil {
+		outputConfig += fmt.Sprintf("\tcert_sign = %#v\n", *r.CertSign)
 	}
-	if r.Value != nil {
-		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
+	if r.ContentCommitment != nil {
+		outputConfig += fmt.Sprintf("\tcontent_commitment = %#v\n", *r.ContentCommitment)
 	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeTcpSocketToHCL(r *run.ServiceSpecTemplateSpecContainersLivenessProbeTcpSocket) string {
-	if r == nil {
-		return ""
+	if r.CrlSign != nil {
+		outputConfig += fmt.Sprintf("\tcrl_sign = %#v\n", *r.CrlSign)
 	}
-	outputConfig := "{\n"
-	if r.Host != nil {
-		outputConfig += fmt.Sprintf("\thost = %#v\n", *r.Host)
+	if r.DataEncipherment != nil {
+		outputConfig += fmt.Sprintf("\tdata_encipherment = %#v\n", *r.DataEncipherment)
 	}
-	if r.Port != nil {
-		outputConfig += fmt.Sprintf("\tport = %#v\n", *r.Port)
+	if r.DecipherOnly != nil {
+		outputConfig += fmt.Sprintf("\tdecipher_only = %#v\n", *r.DecipherOnly)
 	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersPortsToHCL(r *run.ServiceSpecTemplateSpecContainersPorts) string {
-	if r == nil {
-		return ""
+	if r.DigitalSignature != nil {
+		outputConfig += fmt.Sprintf("\tdigital_signature = %#v\n", *r.DigitalSignature)
 	}
-	outputConfig := "{\n"
-	if r.ContainerPort != nil {
-		outputConfig += fmt.Sprintf("\tcontainer_port = %#v\n", *r.ContainerPort)
+	if r.EncipherOnly != nil {
+		outputConfig += fmt.Sprintf("\tencipher_only = %#v\n", *r.EncipherOnly)
 	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	if r.KeyAgreement != nil {
+		outputConfig += fmt.Sprintf("\tkey_agreement = %#v\n", *r.KeyAgreement)
 	}
-	if r.Protocol != nil {
-		outputConfig += fmt.Sprintf("\tprotocol = %#v\n", *r.Protocol)
+	if r.KeyEncipherment != nil {
+		outputConfig += fmt.Sprintf("\tkey_encipherment = %#v\n", *r.KeyEncipherment)
 	}
 	return outputConfig + "}"
 }
 
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeToHCL(r *run.ServiceSpecTemplateSpecContainersReadinessProbe) string {
+func convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageExtendedKeyUsageToHCL(r *privateca.CertificateTemplatePredefinedValuesKeyUsageExtendedKeyUsage) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if v := convertRunServiceSpecTemplateSpecContainersReadinessProbeExecToHCL(r.Exec); v != "" {
-		outputConfig += fmt.Sprintf("\texec %s\n", v)
+	if r.ClientAuth != nil {
+		outputConfig += fmt.Sprintf("\tclient_auth = %#v\n", *r.ClientAuth)
 	}
-	if r.FailureThreshold != nil {
-		outputConfig += fmt.Sprintf("\tfailure_threshold = %#v\n", *r.FailureThreshold)
+	if r.CodeSigning != nil {
+		outputConfig += fmt.Sprintf("\tcode_signing = %#v\n", *r.CodeSigning)
 	}
-	if v := convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGetToHCL(r.HttpGet); v != "" {
-		outputConfig += fmt.Sprintf("\thttp_get %s\n", v)
+	if r.EmailProtection != nil {
+		outputConfig += fmt.Sprintf("\temail_protection = %#v\n", *r.EmailProtection)
 	}
-	if r.InitialDelaySeconds != nil {
-		outputConfig += fmt.Sprintf("\tinitial_delay_seconds = %#v\n", *r.InitialDelaySeconds)
+	if r.OcspSigning != nil {
+		outputConfig += fmt.Sprintf("\tocsp_signing = %#v\n", *r.OcspSigning)
 	}
-	if r.PeriodSeconds != nil {
-		outputConfig += fmt.Sprintf("\tperiod_seconds = %#v\n", *r.PeriodSeconds)
+	if r.ServerAuth != nil {
+		outputConfig += fmt.Sprintf("\tserver_auth = %#v\n", *r.ServerAuth)
 	}
-	if r.SuccessThreshold != nil {
-		outputConfig += fmt.Sprintf("\tsuccess_threshold = %#v\n", *r.SuccessThreshold)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersReadinessProbeTcpSocketToHCL(r.TcpSocket); v != "" {
-		outputConfig += fmt.Sprintf("\ttcp_socket %s\n", v)
-	}
-	if r.TimeoutSeconds != nil {
-		outputConfig += fmt.Sprintf("\ttimeout_seconds = %#v\n", *r.TimeoutSeconds)
+	if r.TimeStamping != nil {
+		outputConfig += fmt.Sprintf("\ttime_stamping = %#v\n", *r.TimeStamping)
 	}
 	return outputConfig + "}"
 }
 
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeExecToHCL(r *run.ServiceSpecTemplateSpecContainersReadinessProbeExec) string {
+func convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageUnknownExtendedKeyUsagesToHCL(r *privateca.CertificateTemplatePredefinedValuesKeyUsageUnknownExtendedKeyUsages) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if r.Command != nil {
-		outputConfig += fmt.Sprintf("\tcommand = %#v\n", *r.Command)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGetToHCL(r *run.ServiceSpecTemplateSpecContainersReadinessProbeHttpGet) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Host != nil {
-		outputConfig += fmt.Sprintf("\thost = %#v\n", *r.Host)
-	}
-	if r.HttpHeaders != nil {
-		for _, v := range r.HttpHeaders {
-			outputConfig += fmt.Sprintf("\thttp_headers %s\n", convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGetHttpHeadersToHCL(&v))
+	if r.ObjectIdPath != nil {
+		outputConfig += "\tobject_id_path = ["
+		for _, v := range r.ObjectIdPath {
+			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
-	}
-	if r.Path != nil {
-		outputConfig += fmt.Sprintf("\tpath = %#v\n", *r.Path)
-	}
-	if r.Scheme != nil {
-		outputConfig += fmt.Sprintf("\tscheme = %#v\n", *r.Scheme)
+		outputConfig += "]\n"
 	}
 	return outputConfig + "}"
 }
 
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGetHttpHeadersToHCL(r *run.ServiceSpecTemplateSpecContainersReadinessProbeHttpGetHttpHeaders) string {
+func convertPrivatecaCertificateTemplatePredefinedValuesPolicyIdsToHCL(r *privateca.CertificateTemplatePredefinedValuesPolicyIds) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Value != nil {
-		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeTcpSocketToHCL(r *run.ServiceSpecTemplateSpecContainersReadinessProbeTcpSocket) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Host != nil {
-		outputConfig += fmt.Sprintf("\thost = %#v\n", *r.Host)
-	}
-	if r.Port != nil {
-		outputConfig += fmt.Sprintf("\tport = %#v\n", *r.Port)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersResourcesToHCL(r *run.ServiceSpecTemplateSpecContainersResources) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersSecurityContextToHCL(r *run.ServiceSpecTemplateSpecContainersSecurityContext) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.RunAsUser != nil {
-		outputConfig += fmt.Sprintf("\trun_as_user = %#v\n", *r.RunAsUser)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersVolumeMountsToHCL(r *run.ServiceSpecTemplateSpecContainersVolumeMounts) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.MountPath != nil {
-		outputConfig += fmt.Sprintf("\tmount_path = %#v\n", *r.MountPath)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.ReadOnly != nil {
-		outputConfig += fmt.Sprintf("\tread_only = %#v\n", *r.ReadOnly)
-	}
-	if r.SubPath != nil {
-		outputConfig += fmt.Sprintf("\tsub_path = %#v\n", *r.SubPath)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecVolumesToHCL(r *run.ServiceSpecTemplateSpecVolumes) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertRunServiceSpecTemplateSpecVolumesConfigMapToHCL(r.ConfigMap); v != "" {
-		outputConfig += fmt.Sprintf("\tconfig_map %s\n", v)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if v := convertRunServiceSpecTemplateSpecVolumesSecretToHCL(r.Secret); v != "" {
-		outputConfig += fmt.Sprintf("\tsecret %s\n", v)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecVolumesConfigMapToHCL(r *run.ServiceSpecTemplateSpecVolumesConfigMap) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.DefaultMode != nil {
-		outputConfig += fmt.Sprintf("\tdefault_mode = %#v\n", *r.DefaultMode)
-	}
-	if r.Items != nil {
-		for _, v := range r.Items {
-			outputConfig += fmt.Sprintf("\titems %s\n", convertRunServiceSpecTemplateSpecVolumesConfigMapItemsToHCL(&v))
+	if r.ObjectIdPath != nil {
+		outputConfig += "\tobject_id_path = ["
+		for _, v := range r.ObjectIdPath {
+			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Optional != nil {
-		outputConfig += fmt.Sprintf("\toptional = %#v\n", *r.Optional)
+		outputConfig += "]\n"
 	}
 	return outputConfig + "}"
 }
 
-func convertRunServiceSpecTemplateSpecVolumesConfigMapItemsToHCL(r *run.ServiceSpecTemplateSpecVolumesConfigMapItems) string {
-	if r == nil {
-		return ""
+// RecaptchaEnterpriseKeyAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func RecaptchaEnterpriseKeyAsHCL(r recaptchaenterprise.Key, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_recaptcha_enterprise_key\" \"output\" {\n"
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
 	}
-	outputConfig := "{\n"
-	if r.Key != nil {
-		outputConfig += fmt.Sprintf("\tkey = %#v\n", *r.Key)
+	if v := convertRecaptchaEnterpriseKeyAndroidSettingsToHCL(r.AndroidSettings); v != "" {
+		outputConfig += fmt.Sprintf("\tandroid_settings %s\n", v)
 	}
-	if r.Mode != nil {
-		outputConfig += fmt.Sprintf("\tmode = %#v\n", *r.Mode)
+	if v := convertRecaptchaEnterpriseKeyIosSettingsToHCL(r.IosSettings); v != "" {
+		outputConfig += fmt.Sprintf("\tios_settings %s\n", v)
 	}
-	if r.Path != nil {
-		outputConfig += fmt.Sprintf("\tpath = %#v\n", *r.Path)
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
 	}
-	return outputConfig + "}"
+	outputConfig += "}\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if v := convertRecaptchaEnterpriseKeyTestingOptionsToHCL(r.TestingOptions); v != "" {
+		outputConfig += fmt.Sprintf("\ttesting_options %s\n", v)
+	}
+	if v := convertRecaptchaEnterpriseKeyWebSettingsToHCL(r.WebSettings); v != "" {
+		outputConfig += fmt.Sprintf("\tweb_settings %s\n", v)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
-func convertRunServiceSpecTemplateSpecVolumesSecretToHCL(r *run.ServiceSpecTemplateSpecVolumesSecret) string {
+func convertRecaptchaEnterpriseKeyAndroidSettingsToHCL(r *recaptchaenterprise.KeyAndroidSettings) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if r.DefaultMode != nil {
-		outputConfig += fmt.Sprintf("\tdefault_mode = %#v\n", *r.DefaultMode)
+	if r.AllowAllPackageNames != nil {
+		outputConfig += fmt.Sprintf("\tallow_all_package_names = %#v\n", *r.AllowAllPackageNames)
 	}
-	if r.Items != nil {
-		for _, v := range r.Items {
-			outputConfig += fmt.Sprintf("\titems %s\n", convertRunServiceSpecTemplateSpecVolumesSecretItemsToHCL(&v))
+	if r.AllowedPackageNames != nil {
+		outputConfig += "\tallowed_package_names = ["
+		for _, v := range r.AllowedPackageNames {
+			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
-	}
-	if r.Optional != nil {
-		outputConfig += fmt.Sprintf("\toptional = %#v\n", *r.Optional)
-	}
-	if r.SecretName != nil {
-		outputConfig += fmt.Sprintf("\tsecret_name = %#v\n", *r.SecretName)
+		outputConfig += "]\n"
 	}
 	return outputConfig + "}"
 }
 
-func convertRunServiceSpecTemplateSpecVolumesSecretItemsToHCL(r *run.ServiceSpecTemplateSpecVolumesSecretItems) string {
+func convertRecaptchaEnterpriseKeyIosSettingsToHCL(r *recaptchaenterprise.KeyIosSettings) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if r.Key != nil {
-		outputConfig += fmt.Sprintf("\tkey = %#v\n", *r.Key)
+	if r.AllowAllBundleIds != nil {
+		outputConfig += fmt.Sprintf("\tallow_all_bundle_ids = %#v\n", *r.AllowAllBundleIds)
 	}
-	if r.Mode != nil {
-		outputConfig += fmt.Sprintf("\tmode = %#v\n", *r.Mode)
-	}
-	if r.Path != nil {
-		outputConfig += fmt.Sprintf("\tpath = %#v\n", *r.Path)
+	if r.AllowedBundleIds != nil {
+		outputConfig += "\tallowed_bundle_ids = ["
+		for _, v := range r.AllowedBundleIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
 	}
 	return outputConfig + "}"
 }
 
-func convertRunServiceSpecTrafficToHCL(r *run.ServiceSpecTraffic) string {
+func convertRecaptchaEnterpriseKeyTestingOptionsToHCL(r *recaptchaenterprise.KeyTestingOptions) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if r.ConfigurationName != nil {
-		outputConfig += fmt.Sprintf("\tconfiguration_name = %#v\n", *r.ConfigurationName)
+	if r.TestingChallenge != nil {
+		outputConfig += fmt.Sprintf("\ttesting_challenge = %#v\n", *r.TestingChallenge)
 	}
-	if r.LatestRevision != nil {
-		outputConfig += fmt.Sprintf("\tlatest_revision = %#v\n", *r.LatestRevision)
-	}
-	if r.Percent != nil {
-		outputConfig += fmt.Sprintf("\tpercent = %#v\n", *r.Percent)
-	}
-	if r.RevisionName != nil {
-		outputConfig += fmt.Sprintf("\trevision_name = %#v\n", *r.RevisionName)
-	}
-	if r.Tag != nil {
-		outputConfig += fmt.Sprintf("\ttag = %#v\n", *r.Tag)
+	if r.TestingScore != nil {
+		outputConfig += fmt.Sprintf("\ttesting_score = %#v\n", *r.TestingScore)
 	}
 	return outputConfig + "}"
 }
 
-func convertRunServiceStatusToHCL(r *run.ServiceStatus) string {
+func convertRecaptchaEnterpriseKeyWebSettingsToHCL(r *recaptchaenterprise.KeyWebSettings) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertRunServiceStatusAddressToHCL(r *run.ServiceStatusAddress) string {
-	if r == nil {
-		return ""
+	if r.IntegrationType != nil {
+		outputConfig += fmt.Sprintf("\tintegration_type = %#v\n", *r.IntegrationType)
 	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertRunServiceStatusConditionsToHCL(r *run.ServiceStatusConditions) string {
-	if r == nil {
-		return ""
+	if r.AllowAllDomains != nil {
+		outputConfig += fmt.Sprintf("\tallow_all_domains = %#v\n", *r.AllowAllDomains)
 	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertRunServiceStatusConditionsLastTransitionTimeToHCL(r *run.ServiceStatusConditionsLastTransitionTime) string {
-	if r == nil {
-		return ""
+	if r.AllowAmpTraffic != nil {
+		outputConfig += fmt.Sprintf("\tallow_amp_traffic = %#v\n", *r.AllowAmpTraffic)
 	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertRunServiceStatusTrafficToHCL(r *run.ServiceStatusTraffic) string {
-	if r == nil {
-		return ""
+	if r.AllowedDomains != nil {
+		outputConfig += "\tallowed_domains = ["
+		for _, v := range r.AllowedDomains {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
 	}
-	outputConfig := "{\n"
+	if r.ChallengeSecurityPreference != nil {
+		outputConfig += fmt.Sprintf("\tchallenge_security_preference = %#v\n", *r.ChallengeSecurityPreference)
+	}
 	return outputConfig + "}"
 }
 
@@ -3611,6 +8297,931 @@ func convertCloudbuildWorkerPoolBetaWorkerConfigList(i interface{}) (out []map[s
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertCloudbuildWorkerPoolBetaWorkerConfig(v))
+	}
+	return out
+}
+
+func convertComputeFirewallPolicyRuleBetaMatch(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"layer4Configs": in["layer4_configs"],
+		"destIPRanges":  in["dest_ip_ranges"],
+		"srcIPRanges":   in["src_ip_ranges"],
+	}
+}
+
+func convertComputeFirewallPolicyRuleBetaMatchList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeFirewallPolicyRuleBetaMatch(v))
+	}
+	return out
+}
+
+func convertComputeFirewallPolicyRuleBetaMatchLayer4Configs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iPProtocol": in["ip_protocol"],
+		"ports":      in["ports"],
+	}
+}
+
+func convertComputeFirewallPolicyRuleBetaMatchLayer4ConfigsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeFirewallPolicyRuleBetaMatchLayer4Configs(v))
+	}
+	return out
+}
+
+func convertComputeGlobalForwardingRuleBetaMetadataFilter(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"filterLabel":         in["filter_labels"],
+		"filterMatchCriteria": in["filter_match_criteria"],
+	}
+}
+
+func convertComputeGlobalForwardingRuleBetaMetadataFilterList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeGlobalForwardingRuleBetaMetadataFilter(v))
+	}
+	return out
+}
+
+func convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabel(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"name":  in["name"],
+		"value": in["value"],
+	}
+}
+
+func convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabel(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaAuthorization(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"adminUsers": in["admin_users"],
+	}
+}
+
+func convertContainerAwsClusterBetaAuthorizationList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaAuthorization(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaAuthorizationAdminUsers(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"username": in["username"],
+	}
+}
+
+func convertContainerAwsClusterBetaAuthorizationAdminUsersList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaAuthorizationAdminUsers(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaControlPlane(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"awsServicesAuthentication": convertContainerAwsClusterBetaControlPlaneAwsServicesAuthentication(in["aws_services_authentication"]),
+		"configEncryption":          convertContainerAwsClusterBetaControlPlaneConfigEncryption(in["config_encryption"]),
+		"databaseEncryption":        convertContainerAwsClusterBetaControlPlaneDatabaseEncryption(in["database_encryption"]),
+		"iamInstanceProfile":        in["iam_instance_profile"],
+		"subnetIds":                 in["subnet_ids"],
+		"version":                   in["version"],
+		"instanceType":              in["instance_type"],
+		"mainVolume":                convertContainerAwsClusterBetaControlPlaneMainVolume(in["main_volume"]),
+		"proxyConfig":               convertContainerAwsClusterBetaControlPlaneProxyConfig(in["proxy_config"]),
+		"rootVolume":                convertContainerAwsClusterBetaControlPlaneRootVolume(in["root_volume"]),
+		"securityGroupIds":          in["security_group_ids"],
+		"sshConfig":                 convertContainerAwsClusterBetaControlPlaneSshConfig(in["ssh_config"]),
+		"tags":                      in["tags"],
+	}
+}
+
+func convertContainerAwsClusterBetaControlPlaneList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaControlPlane(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaControlPlaneAwsServicesAuthentication(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"roleArn":         in["role_arn"],
+		"roleSessionName": in["role_session_name"],
+	}
+}
+
+func convertContainerAwsClusterBetaControlPlaneAwsServicesAuthenticationList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaControlPlaneAwsServicesAuthentication(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaControlPlaneConfigEncryption(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"kmsKeyArn": in["kms_key_arn"],
+	}
+}
+
+func convertContainerAwsClusterBetaControlPlaneConfigEncryptionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaControlPlaneConfigEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaControlPlaneDatabaseEncryption(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"kmsKeyArn": in["kms_key_arn"],
+	}
+}
+
+func convertContainerAwsClusterBetaControlPlaneDatabaseEncryptionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaControlPlaneDatabaseEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaControlPlaneMainVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iops":       in["iops"],
+		"kmsKeyArn":  in["kms_key_arn"],
+		"sizeGib":    in["size_gib"],
+		"volumeType": in["volume_type"],
+	}
+}
+
+func convertContainerAwsClusterBetaControlPlaneMainVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaControlPlaneMainVolume(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaControlPlaneProxyConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"secretArn":     in["secret_arn"],
+		"secretVersion": in["secret_version"],
+	}
+}
+
+func convertContainerAwsClusterBetaControlPlaneProxyConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaControlPlaneProxyConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaControlPlaneRootVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iops":       in["iops"],
+		"kmsKeyArn":  in["kms_key_arn"],
+		"sizeGib":    in["size_gib"],
+		"volumeType": in["volume_type"],
+	}
+}
+
+func convertContainerAwsClusterBetaControlPlaneRootVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaControlPlaneRootVolume(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaControlPlaneSshConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"ec2KeyPair": in["ec2_key_pair"],
+	}
+}
+
+func convertContainerAwsClusterBetaControlPlaneSshConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaControlPlaneSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaFleet(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"project":    in["project"],
+		"membership": in["membership"],
+	}
+}
+
+func convertContainerAwsClusterBetaFleetList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaFleet(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaNetworking(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"podAddressCidrBlocks":     in["pod_address_cidr_blocks"],
+		"serviceAddressCidrBlocks": in["service_address_cidr_blocks"],
+		"vPCId":                    in["vpc_id"],
+	}
+}
+
+func convertContainerAwsClusterBetaNetworkingList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaNetworking(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaWorkloadIdentityConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"identityProvider": in["identity_provider"],
+		"issuerUri":        in["issuer_uri"],
+		"workloadPool":     in["workload_pool"],
+	}
+}
+
+func convertContainerAwsClusterBetaWorkloadIdentityConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaWorkloadIdentityConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolBetaAutoscaling(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"maxNodeCount": in["max_node_count"],
+		"minNodeCount": in["min_node_count"],
+	}
+}
+
+func convertContainerAwsNodePoolBetaAutoscalingList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolBetaAutoscaling(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolBetaConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"configEncryption":   convertContainerAwsNodePoolBetaConfigConfigEncryption(in["config_encryption"]),
+		"iamInstanceProfile": in["iam_instance_profile"],
+		"instanceType":       in["instance_type"],
+		"labels":             in["labels"],
+		"rootVolume":         convertContainerAwsNodePoolBetaConfigRootVolume(in["root_volume"]),
+		"securityGroupIds":   in["security_group_ids"],
+		"sshConfig":          convertContainerAwsNodePoolBetaConfigSshConfig(in["ssh_config"]),
+		"tags":               in["tags"],
+		"taints":             in["taints"],
+	}
+}
+
+func convertContainerAwsNodePoolBetaConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolBetaConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolBetaConfigConfigEncryption(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"kmsKeyArn": in["kms_key_arn"],
+	}
+}
+
+func convertContainerAwsNodePoolBetaConfigConfigEncryptionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolBetaConfigConfigEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolBetaConfigRootVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iops":       in["iops"],
+		"kmsKeyArn":  in["kms_key_arn"],
+		"sizeGib":    in["size_gib"],
+		"volumeType": in["volume_type"],
+	}
+}
+
+func convertContainerAwsNodePoolBetaConfigRootVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolBetaConfigRootVolume(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolBetaConfigSshConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"ec2KeyPair": in["ec2_key_pair"],
+	}
+}
+
+func convertContainerAwsNodePoolBetaConfigSshConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolBetaConfigSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolBetaConfigTaints(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"effect": in["effect"],
+		"key":    in["key"],
+		"value":  in["value"],
+	}
+}
+
+func convertContainerAwsNodePoolBetaConfigTaintsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolBetaConfigTaints(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolBetaMaxPodsConstraint(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"maxPodsPerNode": in["max_pods_per_node"],
+	}
+}
+
+func convertContainerAwsNodePoolBetaMaxPodsConstraintList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolBetaMaxPodsConstraint(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaAuthorization(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"adminUsers": in["admin_users"],
+	}
+}
+
+func convertContainerAzureClusterBetaAuthorizationList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaAuthorization(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaAuthorizationAdminUsers(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"username": in["username"],
+	}
+}
+
+func convertContainerAzureClusterBetaAuthorizationAdminUsersList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaAuthorizationAdminUsers(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaControlPlane(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sshConfig":          convertContainerAzureClusterBetaControlPlaneSshConfig(in["ssh_config"]),
+		"subnetId":           in["subnet_id"],
+		"version":            in["version"],
+		"databaseEncryption": convertContainerAzureClusterBetaControlPlaneDatabaseEncryption(in["database_encryption"]),
+		"mainVolume":         convertContainerAzureClusterBetaControlPlaneMainVolume(in["main_volume"]),
+		"proxyConfig":        convertContainerAzureClusterBetaControlPlaneProxyConfig(in["proxy_config"]),
+		"replicaPlacements":  in["replica_placements"],
+		"rootVolume":         convertContainerAzureClusterBetaControlPlaneRootVolume(in["root_volume"]),
+		"tags":               in["tags"],
+		"vmSize":             in["vm_size"],
+	}
+}
+
+func convertContainerAzureClusterBetaControlPlaneList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaControlPlane(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaControlPlaneSshConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"authorizedKey": in["authorized_key"],
+	}
+}
+
+func convertContainerAzureClusterBetaControlPlaneSshConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaControlPlaneSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaControlPlaneDatabaseEncryption(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"keyId": in["key_id"],
+	}
+}
+
+func convertContainerAzureClusterBetaControlPlaneDatabaseEncryptionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaControlPlaneDatabaseEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaControlPlaneMainVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sizeGib": in["size_gib"],
+	}
+}
+
+func convertContainerAzureClusterBetaControlPlaneMainVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaControlPlaneMainVolume(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaControlPlaneProxyConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"resourceGroupId": in["resource_group_id"],
+		"secretId":        in["secret_id"],
+	}
+}
+
+func convertContainerAzureClusterBetaControlPlaneProxyConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaControlPlaneProxyConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaControlPlaneReplicaPlacements(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"azureAvailabilityZone": in["azure_availability_zone"],
+		"subnetId":              in["subnet_id"],
+	}
+}
+
+func convertContainerAzureClusterBetaControlPlaneReplicaPlacementsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaControlPlaneReplicaPlacements(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaControlPlaneRootVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sizeGib": in["size_gib"],
+	}
+}
+
+func convertContainerAzureClusterBetaControlPlaneRootVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaControlPlaneRootVolume(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaFleet(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"project":    in["project"],
+		"membership": in["membership"],
+	}
+}
+
+func convertContainerAzureClusterBetaFleetList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaFleet(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaNetworking(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"podAddressCidrBlocks":     in["pod_address_cidr_blocks"],
+		"serviceAddressCidrBlocks": in["service_address_cidr_blocks"],
+		"virtualNetworkId":         in["virtual_network_id"],
+	}
+}
+
+func convertContainerAzureClusterBetaNetworkingList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaNetworking(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaWorkloadIdentityConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"identityProvider": in["identity_provider"],
+		"issuerUri":        in["issuer_uri"],
+		"workloadPool":     in["workload_pool"],
+	}
+}
+
+func convertContainerAzureClusterBetaWorkloadIdentityConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaWorkloadIdentityConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolBetaAutoscaling(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"maxNodeCount": in["max_node_count"],
+		"minNodeCount": in["min_node_count"],
+	}
+}
+
+func convertContainerAzureNodePoolBetaAutoscalingList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolBetaAutoscaling(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolBetaConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sshConfig":  convertContainerAzureNodePoolBetaConfigSshConfig(in["ssh_config"]),
+		"rootVolume": convertContainerAzureNodePoolBetaConfigRootVolume(in["root_volume"]),
+		"tags":       in["tags"],
+		"vmSize":     in["vm_size"],
+	}
+}
+
+func convertContainerAzureNodePoolBetaConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolBetaConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolBetaConfigSshConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"authorizedKey": in["authorized_key"],
+	}
+}
+
+func convertContainerAzureNodePoolBetaConfigSshConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolBetaConfigSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolBetaConfigRootVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sizeGib": in["size_gib"],
+	}
+}
+
+func convertContainerAzureNodePoolBetaConfigRootVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolBetaConfigRootVolume(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolBetaMaxPodsConstraint(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"maxPodsPerNode": in["max_pods_per_node"],
+	}
+}
+
+func convertContainerAzureNodePoolBetaMaxPodsConstraintList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolBetaMaxPodsConstraint(v))
 	}
 	return out
 }
@@ -4714,8 +10325,9 @@ func convertDataprocWorkflowTemplateBetaClusterClusterConfigSoftwareConfig(i int
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"imageVersion": in["image_version"],
-		"properties":   in["properties"],
+		"imageVersion":       in["image_version"],
+		"optionalComponents": in["optional_components"],
+		"properties":         in["properties"],
 	}
 }
 
@@ -4736,6 +10348,7 @@ func convertEventarcTriggerBetaDestination(i interface{}) map[string]interface{}
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
+		"cloudFunction":   in["cloud_function"],
 		"cloudRunService": convertEventarcTriggerBetaDestinationCloudRunService(in["cloud_run_service"]),
 	}
 }
@@ -4881,6 +10494,72 @@ func convertGkeHubFeatureBetaSpecMulticlusteringressList(i interface{}) (out []m
 	return out
 }
 
+func convertGkeHubFeatureBetaResourceState(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"hasResources": in["has_resources"],
+		"state":        in["state"],
+	}
+}
+
+func convertGkeHubFeatureBetaResourceStateList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertGkeHubFeatureBetaResourceState(v))
+	}
+	return out
+}
+
+func convertGkeHubFeatureBetaState(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"state": convertGkeHubFeatureBetaStateState(in["state"]),
+	}
+}
+
+func convertGkeHubFeatureBetaStateList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertGkeHubFeatureBetaState(v))
+	}
+	return out
+}
+
+func convertGkeHubFeatureBetaStateState(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"code":        in["code"],
+		"description": in["description"],
+		"updateTime":  in["update_time"],
+	}
+}
+
+func convertGkeHubFeatureBetaStateStateList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertGkeHubFeatureBetaStateState(v))
+	}
+	return out
+}
+
 func convertGkeHubFeatureMembershipBetaConfigmanagement(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -4955,13 +10634,14 @@ func convertGkeHubFeatureMembershipBetaConfigmanagementConfigSyncGit(i interface
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"httpsProxy":   in["https_proxy"],
-		"policyDir":    in["policy_dir"],
-		"secretType":   in["secret_type"],
-		"syncBranch":   in["sync_branch"],
-		"syncRepo":     in["sync_repo"],
-		"syncRev":      in["sync_rev"],
-		"syncWaitSecs": in["sync_wait_secs"],
+		"gcpServiceAccountEmail": in["gcp_service_account_email"],
+		"httpsProxy":             in["https_proxy"],
+		"policyDir":              in["policy_dir"],
+		"secretType":             in["secret_type"],
+		"syncBranch":             in["sync_branch"],
+		"syncRepo":               in["sync_repo"],
+		"syncRev":                in["sync_rev"],
+		"syncWaitSecs":           in["sync_wait_secs"],
 	}
 }
 
@@ -5021,6 +10701,1179 @@ func convertGkeHubFeatureMembershipBetaConfigmanagementPolicyControllerList(i in
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertGkeHubFeatureMembershipBetaConfigmanagementPolicyController(v))
+	}
+	return out
+}
+
+func convertNetworkConnectivityHubBetaRoutingVpcs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uri": in["uri"],
+	}
+}
+
+func convertNetworkConnectivityHubBetaRoutingVpcsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertNetworkConnectivityHubBetaRoutingVpcs(v))
+	}
+	return out
+}
+
+func convertOrgPolicyPolicyBetaSpec(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"inheritFromParent": in["inherit_from_parent"],
+		"reset":             in["reset"],
+		"rules":             in["rules"],
+		"etag":              in["etag"],
+		"updateTime":        in["update_time"],
+	}
+}
+
+func convertOrgPolicyPolicyBetaSpecList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOrgPolicyPolicyBetaSpec(v))
+	}
+	return out
+}
+
+func convertOrgPolicyPolicyBetaSpecRules(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowAll":  in["allow_all"],
+		"condition": convertOrgPolicyPolicyBetaSpecRulesCondition(in["condition"]),
+		"denyAll":   in["deny_all"],
+		"enforce":   in["enforce"],
+		"values":    convertOrgPolicyPolicyBetaSpecRulesValues(in["values"]),
+	}
+}
+
+func convertOrgPolicyPolicyBetaSpecRulesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOrgPolicyPolicyBetaSpecRules(v))
+	}
+	return out
+}
+
+func convertOrgPolicyPolicyBetaSpecRulesCondition(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"description": in["description"],
+		"expression":  in["expression"],
+		"location":    in["location"],
+		"title":       in["title"],
+	}
+}
+
+func convertOrgPolicyPolicyBetaSpecRulesConditionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOrgPolicyPolicyBetaSpecRulesCondition(v))
+	}
+	return out
+}
+
+func convertOrgPolicyPolicyBetaSpecRulesValues(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedValues": in["allowed_values"],
+		"deniedValues":  in["denied_values"],
+	}
+}
+
+func convertOrgPolicyPolicyBetaSpecRulesValuesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOrgPolicyPolicyBetaSpecRulesValues(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaInstanceFilter(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"all":             in["all"],
+		"exclusionLabels": in["exclusion_labels"],
+		"inclusionLabels": in["inclusion_labels"],
+		"inventories":     in["inventories"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaInstanceFilterList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaInstanceFilter(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaInstanceFilterExclusionLabels(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"labels": in["labels"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaInstanceFilterExclusionLabelsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaInstanceFilterExclusionLabels(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaInstanceFilterInclusionLabels(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"labels": in["labels"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaInstanceFilterInclusionLabelsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaInstanceFilterInclusionLabels(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaInstanceFilterInventories(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"oSShortName": in["os_short_name"],
+		"oSVersion":   in["os_version"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaInstanceFilterInventoriesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaInstanceFilterInventories(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPolicies(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"id":                        in["id"],
+		"mode":                      in["mode"],
+		"resourceGroups":            in["resource_groups"],
+		"allowNoResourceGroupMatch": in["allow_no_resource_group_match"],
+		"description":               in["description"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPolicies(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroups(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"resources":        in["resources"],
+		"inventoryFilters": in["inventory_filters"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroups(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResources(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"id":         in["id"],
+		"exec":       convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExec(in["exec"]),
+		"file":       convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFile(in["file"]),
+		"pkg":        convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkg(in["pkg"]),
+		"repository": convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepository(in["repository"]),
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResources(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExec(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"validate": convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentExec(in["validate"]),
+		"enforce":  convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentExec(in["enforce"]),
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExec(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFile(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"path":        in["path"],
+		"state":       in["state"],
+		"content":     in["content"],
+		"file":        convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFile(in["file"]),
+		"permissions": in["permissions"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFile(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkg(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"desiredState": in["desired_state"],
+		"apt":          convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgApt(in["apt"]),
+		"deb":          convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDeb(in["deb"]),
+		"googet":       convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgGooget(in["googet"]),
+		"msi":          convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsi(in["msi"]),
+		"rpm":          convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpm(in["rpm"]),
+		"yum":          convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgYum(in["yum"]),
+		"zypper":       convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgZypper(in["zypper"]),
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkg(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgApt(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"name": in["name"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgAptList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgApt(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDeb(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"source":   convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFile(in["source"]),
+		"pullDeps": in["pull_deps"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDeb(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgGooget(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"name": in["name"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgGoogetList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgGooget(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsi(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"source":     convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFile(in["source"]),
+		"properties": in["properties"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsi(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpm(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"source":   convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFile(in["source"]),
+		"pullDeps": in["pull_deps"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpm(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgYum(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"name": in["name"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgYumList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgYum(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgZypper(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"name": in["name"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgZypperList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgZypper(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepository(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"apt":    convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryApt(in["apt"]),
+		"goo":    convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryGoo(in["goo"]),
+		"yum":    convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryYum(in["yum"]),
+		"zypper": convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryZypper(in["zypper"]),
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepository(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryApt(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"archiveType":  in["archive_type"],
+		"components":   in["components"],
+		"distribution": in["distribution"],
+		"uri":          in["uri"],
+		"gpgKey":       in["gpg_key"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryAptList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryApt(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryGoo(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"name": in["name"],
+		"url":  in["url"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryGooList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryGoo(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryYum(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"baseUrl":     in["base_url"],
+		"id":          in["id"],
+		"displayName": in["display_name"],
+		"gpgKeys":     in["gpg_keys"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryYumList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryYum(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryZypper(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"baseUrl":     in["base_url"],
+		"id":          in["id"],
+		"displayName": in["display_name"],
+		"gpgKeys":     in["gpg_keys"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryZypperList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesRepositoryZypper(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsInventoryFilters(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"oSShortName": in["os_short_name"],
+		"oSVersion":   in["os_version"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsInventoryFiltersList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsInventoryFilters(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaRollout(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"disruptionBudget": convertOsConfigOsPolicyAssignmentBetaRolloutDisruptionBudget(in["disruption_budget"]),
+		"minWaitDuration":  in["min_wait_duration"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaRolloutList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaRollout(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaRolloutDisruptionBudget(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"fixed":   in["fixed"],
+		"percent": in["percent"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaRolloutDisruptionBudgetList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaRolloutDisruptionBudget(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFile(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowInsecure": in["allow_insecure"],
+		"gcs":           convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileGcs(in["gcs"]),
+		"localPath":     in["local_path"],
+		"remote":        convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileRemote(in["remote"]),
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFile(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileGcs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bucket":     in["bucket"],
+		"object":     in["object"],
+		"generation": in["generation"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileGcsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileGcs(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileRemote(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uri":            in["uri"],
+		"sha256Checksum": in["sha256_checksum"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileRemoteList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileRemote(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentExec(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"interpreter":    in["interpreter"],
+		"args":           in["args"],
+		"file":           convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFile(in["file"]),
+		"outputFilePath": in["output_file_path"],
+		"script":         in["script"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentExecList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentExec(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaIdentityConstraints(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowSubjectAltNamesPassthrough": in["allow_subject_alt_names_passthrough"],
+		"allowSubjectPassthrough":         in["allow_subject_passthrough"],
+		"celExpression":                   convertPrivatecaCertificateTemplateBetaIdentityConstraintsCelExpression(in["cel_expression"]),
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaIdentityConstraintsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaIdentityConstraints(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaIdentityConstraintsCelExpression(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"description": in["description"],
+		"expression":  in["expression"],
+		"location":    in["location"],
+		"title":       in["title"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaIdentityConstraintsCelExpressionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaIdentityConstraintsCelExpression(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPassthroughExtensions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"additionalExtensions": in["additional_extensions"],
+		"knownExtensions":      in["known_extensions"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPassthroughExtensionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPassthroughExtensions(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPassthroughExtensionsAdditionalExtensions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"objectIdPath": in["object_id_path"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPassthroughExtensionsAdditionalExtensionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPassthroughExtensionsAdditionalExtensions(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValues(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"additionalExtensions": in["additional_extensions"],
+		"aiaOcspServers":       in["aia_ocsp_servers"],
+		"caOptions":            convertPrivatecaCertificateTemplateBetaPredefinedValuesCaOptions(in["ca_options"]),
+		"keyUsage":             convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsage(in["key_usage"]),
+		"policyIds":            in["policy_ids"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPredefinedValues(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"objectId": convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensionsObjectId(in["object_id"]),
+		"value":    in["value"],
+		"critical": in["critical"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensions(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensionsObjectId(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"objectIdPath": in["object_id_path"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensionsObjectIdList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPredefinedValuesAdditionalExtensionsObjectId(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesCaOptions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"isCa":                in["is_ca"],
+		"maxIssuerPathLength": in["max_issuer_path_length"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesCaOptionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPredefinedValuesCaOptions(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsage(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"baseKeyUsage":             convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageBaseKeyUsage(in["base_key_usage"]),
+		"extendedKeyUsage":         convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageExtendedKeyUsage(in["extended_key_usage"]),
+		"unknownExtendedKeyUsages": in["unknown_extended_key_usages"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsage(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageBaseKeyUsage(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"certSign":          in["cert_sign"],
+		"contentCommitment": in["content_commitment"],
+		"crlSign":           in["crl_sign"],
+		"dataEncipherment":  in["data_encipherment"],
+		"decipherOnly":      in["decipher_only"],
+		"digitalSignature":  in["digital_signature"],
+		"encipherOnly":      in["encipher_only"],
+		"keyAgreement":      in["key_agreement"],
+		"keyEncipherment":   in["key_encipherment"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageBaseKeyUsageList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageBaseKeyUsage(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageExtendedKeyUsage(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"clientAuth":      in["client_auth"],
+		"codeSigning":     in["code_signing"],
+		"emailProtection": in["email_protection"],
+		"ocspSigning":     in["ocsp_signing"],
+		"serverAuth":      in["server_auth"],
+		"timeStamping":    in["time_stamping"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageExtendedKeyUsageList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageExtendedKeyUsage(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageUnknownExtendedKeyUsages(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"objectIdPath": in["object_id_path"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageUnknownExtendedKeyUsagesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPredefinedValuesKeyUsageUnknownExtendedKeyUsages(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesPolicyIds(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"objectIdPath": in["object_id_path"],
+	}
+}
+
+func convertPrivatecaCertificateTemplateBetaPredefinedValuesPolicyIdsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplateBetaPredefinedValuesPolicyIds(v))
+	}
+	return out
+}
+
+func convertRecaptchaEnterpriseKeyBetaAndroidSettings(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowAllPackageNames": in["allow_all_package_names"],
+		"allowedPackageNames":  in["allowed_package_names"],
+	}
+}
+
+func convertRecaptchaEnterpriseKeyBetaAndroidSettingsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertRecaptchaEnterpriseKeyBetaAndroidSettings(v))
+	}
+	return out
+}
+
+func convertRecaptchaEnterpriseKeyBetaIosSettings(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowAllBundleIds": in["allow_all_bundle_ids"],
+		"allowedBundleIds":  in["allowed_bundle_ids"],
+	}
+}
+
+func convertRecaptchaEnterpriseKeyBetaIosSettingsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertRecaptchaEnterpriseKeyBetaIosSettings(v))
+	}
+	return out
+}
+
+func convertRecaptchaEnterpriseKeyBetaTestingOptions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"testingChallenge": in["testing_challenge"],
+		"testingScore":     in["testing_score"],
+	}
+}
+
+func convertRecaptchaEnterpriseKeyBetaTestingOptionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertRecaptchaEnterpriseKeyBetaTestingOptions(v))
+	}
+	return out
+}
+
+func convertRecaptchaEnterpriseKeyBetaWebSettings(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"integrationType":             in["integration_type"],
+		"allowAllDomains":             in["allow_all_domains"],
+		"allowAmpTraffic":             in["allow_amp_traffic"],
+		"allowedDomains":              in["allowed_domains"],
+		"challengeSecurityPreference": in["challenge_security_preference"],
+	}
+}
+
+func convertRecaptchaEnterpriseKeyBetaWebSettingsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertRecaptchaEnterpriseKeyBetaWebSettings(v))
 	}
 	return out
 }
@@ -5087,6 +11940,975 @@ func convertAssuredWorkloadsWorkloadResourcesList(i interface{}) (out []map[stri
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertAssuredWorkloadsWorkloadResources(v))
+	}
+	return out
+}
+
+func convertCloudbuildWorkerPoolNetworkConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"peeredNetwork": in["peered_network"],
+	}
+}
+
+func convertCloudbuildWorkerPoolNetworkConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertCloudbuildWorkerPoolNetworkConfig(v))
+	}
+	return out
+}
+
+func convertCloudbuildWorkerPoolWorkerConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"diskSizeGb":   in["disk_size_gb"],
+		"machineType":  in["machine_type"],
+		"noExternalIP": in["no_external_ip"],
+	}
+}
+
+func convertCloudbuildWorkerPoolWorkerConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertCloudbuildWorkerPoolWorkerConfig(v))
+	}
+	return out
+}
+
+func convertComputeFirewallPolicyRuleMatch(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"layer4Configs": in["layer4_configs"],
+		"destIPRanges":  in["dest_ip_ranges"],
+		"srcIPRanges":   in["src_ip_ranges"],
+	}
+}
+
+func convertComputeFirewallPolicyRuleMatchList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeFirewallPolicyRuleMatch(v))
+	}
+	return out
+}
+
+func convertComputeFirewallPolicyRuleMatchLayer4Configs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iPProtocol": in["ip_protocol"],
+		"ports":      in["ports"],
+	}
+}
+
+func convertComputeFirewallPolicyRuleMatchLayer4ConfigsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeFirewallPolicyRuleMatchLayer4Configs(v))
+	}
+	return out
+}
+
+func convertComputeGlobalForwardingRuleMetadataFilter(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"filterLabel":         in["filter_labels"],
+		"filterMatchCriteria": in["filter_match_criteria"],
+	}
+}
+
+func convertComputeGlobalForwardingRuleMetadataFilterList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeGlobalForwardingRuleMetadataFilter(v))
+	}
+	return out
+}
+
+func convertComputeGlobalForwardingRuleMetadataFilterFilterLabel(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"name":  in["name"],
+		"value": in["value"],
+	}
+}
+
+func convertComputeGlobalForwardingRuleMetadataFilterFilterLabelList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeGlobalForwardingRuleMetadataFilterFilterLabel(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterAuthorization(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"adminUsers": in["admin_users"],
+	}
+}
+
+func convertContainerAwsClusterAuthorizationList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterAuthorization(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterAuthorizationAdminUsers(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"username": in["username"],
+	}
+}
+
+func convertContainerAwsClusterAuthorizationAdminUsersList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterAuthorizationAdminUsers(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterControlPlane(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"awsServicesAuthentication": convertContainerAwsClusterControlPlaneAwsServicesAuthentication(in["aws_services_authentication"]),
+		"configEncryption":          convertContainerAwsClusterControlPlaneConfigEncryption(in["config_encryption"]),
+		"databaseEncryption":        convertContainerAwsClusterControlPlaneDatabaseEncryption(in["database_encryption"]),
+		"iamInstanceProfile":        in["iam_instance_profile"],
+		"subnetIds":                 in["subnet_ids"],
+		"version":                   in["version"],
+		"instanceType":              in["instance_type"],
+		"mainVolume":                convertContainerAwsClusterControlPlaneMainVolume(in["main_volume"]),
+		"proxyConfig":               convertContainerAwsClusterControlPlaneProxyConfig(in["proxy_config"]),
+		"rootVolume":                convertContainerAwsClusterControlPlaneRootVolume(in["root_volume"]),
+		"securityGroupIds":          in["security_group_ids"],
+		"sshConfig":                 convertContainerAwsClusterControlPlaneSshConfig(in["ssh_config"]),
+		"tags":                      in["tags"],
+	}
+}
+
+func convertContainerAwsClusterControlPlaneList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterControlPlane(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterControlPlaneAwsServicesAuthentication(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"roleArn":         in["role_arn"],
+		"roleSessionName": in["role_session_name"],
+	}
+}
+
+func convertContainerAwsClusterControlPlaneAwsServicesAuthenticationList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterControlPlaneAwsServicesAuthentication(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterControlPlaneConfigEncryption(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"kmsKeyArn": in["kms_key_arn"],
+	}
+}
+
+func convertContainerAwsClusterControlPlaneConfigEncryptionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterControlPlaneConfigEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterControlPlaneDatabaseEncryption(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"kmsKeyArn": in["kms_key_arn"],
+	}
+}
+
+func convertContainerAwsClusterControlPlaneDatabaseEncryptionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterControlPlaneDatabaseEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterControlPlaneMainVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iops":       in["iops"],
+		"kmsKeyArn":  in["kms_key_arn"],
+		"sizeGib":    in["size_gib"],
+		"volumeType": in["volume_type"],
+	}
+}
+
+func convertContainerAwsClusterControlPlaneMainVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterControlPlaneMainVolume(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterControlPlaneProxyConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"secretArn":     in["secret_arn"],
+		"secretVersion": in["secret_version"],
+	}
+}
+
+func convertContainerAwsClusterControlPlaneProxyConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterControlPlaneProxyConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterControlPlaneRootVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iops":       in["iops"],
+		"kmsKeyArn":  in["kms_key_arn"],
+		"sizeGib":    in["size_gib"],
+		"volumeType": in["volume_type"],
+	}
+}
+
+func convertContainerAwsClusterControlPlaneRootVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterControlPlaneRootVolume(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterControlPlaneSshConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"ec2KeyPair": in["ec2_key_pair"],
+	}
+}
+
+func convertContainerAwsClusterControlPlaneSshConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterControlPlaneSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterFleet(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"project":    in["project"],
+		"membership": in["membership"],
+	}
+}
+
+func convertContainerAwsClusterFleetList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterFleet(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterNetworking(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"podAddressCidrBlocks":     in["pod_address_cidr_blocks"],
+		"serviceAddressCidrBlocks": in["service_address_cidr_blocks"],
+		"vPCId":                    in["vpc_id"],
+	}
+}
+
+func convertContainerAwsClusterNetworkingList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterNetworking(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterWorkloadIdentityConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"identityProvider": in["identity_provider"],
+		"issuerUri":        in["issuer_uri"],
+		"workloadPool":     in["workload_pool"],
+	}
+}
+
+func convertContainerAwsClusterWorkloadIdentityConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterWorkloadIdentityConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolAutoscaling(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"maxNodeCount": in["max_node_count"],
+		"minNodeCount": in["min_node_count"],
+	}
+}
+
+func convertContainerAwsNodePoolAutoscalingList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolAutoscaling(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"configEncryption":   convertContainerAwsNodePoolConfigConfigEncryption(in["config_encryption"]),
+		"iamInstanceProfile": in["iam_instance_profile"],
+		"instanceType":       in["instance_type"],
+		"labels":             in["labels"],
+		"rootVolume":         convertContainerAwsNodePoolConfigRootVolume(in["root_volume"]),
+		"securityGroupIds":   in["security_group_ids"],
+		"sshConfig":          convertContainerAwsNodePoolConfigSshConfig(in["ssh_config"]),
+		"tags":               in["tags"],
+		"taints":             in["taints"],
+	}
+}
+
+func convertContainerAwsNodePoolConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolConfigConfigEncryption(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"kmsKeyArn": in["kms_key_arn"],
+	}
+}
+
+func convertContainerAwsNodePoolConfigConfigEncryptionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolConfigConfigEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolConfigRootVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iops":       in["iops"],
+		"kmsKeyArn":  in["kms_key_arn"],
+		"sizeGib":    in["size_gib"],
+		"volumeType": in["volume_type"],
+	}
+}
+
+func convertContainerAwsNodePoolConfigRootVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolConfigRootVolume(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolConfigSshConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"ec2KeyPair": in["ec2_key_pair"],
+	}
+}
+
+func convertContainerAwsNodePoolConfigSshConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolConfigSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolConfigTaints(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"effect": in["effect"],
+		"key":    in["key"],
+		"value":  in["value"],
+	}
+}
+
+func convertContainerAwsNodePoolConfigTaintsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolConfigTaints(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolMaxPodsConstraint(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"maxPodsPerNode": in["max_pods_per_node"],
+	}
+}
+
+func convertContainerAwsNodePoolMaxPodsConstraintList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolMaxPodsConstraint(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterAuthorization(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"adminUsers": in["admin_users"],
+	}
+}
+
+func convertContainerAzureClusterAuthorizationList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterAuthorization(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterAuthorizationAdminUsers(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"username": in["username"],
+	}
+}
+
+func convertContainerAzureClusterAuthorizationAdminUsersList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterAuthorizationAdminUsers(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterControlPlane(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sshConfig":          convertContainerAzureClusterControlPlaneSshConfig(in["ssh_config"]),
+		"subnetId":           in["subnet_id"],
+		"version":            in["version"],
+		"databaseEncryption": convertContainerAzureClusterControlPlaneDatabaseEncryption(in["database_encryption"]),
+		"mainVolume":         convertContainerAzureClusterControlPlaneMainVolume(in["main_volume"]),
+		"proxyConfig":        convertContainerAzureClusterControlPlaneProxyConfig(in["proxy_config"]),
+		"replicaPlacements":  in["replica_placements"],
+		"rootVolume":         convertContainerAzureClusterControlPlaneRootVolume(in["root_volume"]),
+		"tags":               in["tags"],
+		"vmSize":             in["vm_size"],
+	}
+}
+
+func convertContainerAzureClusterControlPlaneList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterControlPlane(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterControlPlaneSshConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"authorizedKey": in["authorized_key"],
+	}
+}
+
+func convertContainerAzureClusterControlPlaneSshConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterControlPlaneSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterControlPlaneDatabaseEncryption(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"keyId": in["key_id"],
+	}
+}
+
+func convertContainerAzureClusterControlPlaneDatabaseEncryptionList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterControlPlaneDatabaseEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterControlPlaneMainVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sizeGib": in["size_gib"],
+	}
+}
+
+func convertContainerAzureClusterControlPlaneMainVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterControlPlaneMainVolume(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterControlPlaneProxyConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"resourceGroupId": in["resource_group_id"],
+		"secretId":        in["secret_id"],
+	}
+}
+
+func convertContainerAzureClusterControlPlaneProxyConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterControlPlaneProxyConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterControlPlaneReplicaPlacements(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"azureAvailabilityZone": in["azure_availability_zone"],
+		"subnetId":              in["subnet_id"],
+	}
+}
+
+func convertContainerAzureClusterControlPlaneReplicaPlacementsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterControlPlaneReplicaPlacements(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterControlPlaneRootVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sizeGib": in["size_gib"],
+	}
+}
+
+func convertContainerAzureClusterControlPlaneRootVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterControlPlaneRootVolume(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterFleet(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"project":    in["project"],
+		"membership": in["membership"],
+	}
+}
+
+func convertContainerAzureClusterFleetList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterFleet(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterNetworking(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"podAddressCidrBlocks":     in["pod_address_cidr_blocks"],
+		"serviceAddressCidrBlocks": in["service_address_cidr_blocks"],
+		"virtualNetworkId":         in["virtual_network_id"],
+	}
+}
+
+func convertContainerAzureClusterNetworkingList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterNetworking(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterWorkloadIdentityConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"identityProvider": in["identity_provider"],
+		"issuerUri":        in["issuer_uri"],
+		"workloadPool":     in["workload_pool"],
+	}
+}
+
+func convertContainerAzureClusterWorkloadIdentityConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterWorkloadIdentityConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolAutoscaling(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"maxNodeCount": in["max_node_count"],
+		"minNodeCount": in["min_node_count"],
+	}
+}
+
+func convertContainerAzureNodePoolAutoscalingList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolAutoscaling(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sshConfig":  convertContainerAzureNodePoolConfigSshConfig(in["ssh_config"]),
+		"rootVolume": convertContainerAzureNodePoolConfigRootVolume(in["root_volume"]),
+		"tags":       in["tags"],
+		"vmSize":     in["vm_size"],
+	}
+}
+
+func convertContainerAzureNodePoolConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolConfigSshConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"authorizedKey": in["authorized_key"],
+	}
+}
+
+func convertContainerAzureNodePoolConfigSshConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolConfigSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolConfigRootVolume(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"sizeGib": in["size_gib"],
+	}
+}
+
+func convertContainerAzureNodePoolConfigRootVolumeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolConfigRootVolume(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolMaxPodsConstraint(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"maxPodsPerNode": in["max_pods_per_node"],
+	}
+}
+
+func convertContainerAzureNodePoolMaxPodsConstraintList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolMaxPodsConstraint(v))
 	}
 	return out
 }
@@ -6124,8 +13946,9 @@ func convertDataprocWorkflowTemplateClusterClusterConfigSoftwareConfig(i interfa
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"imageVersion": in["image_version"],
-		"properties":   in["properties"],
+		"imageVersion":       in["image_version"],
+		"optionalComponents": in["optional_components"],
+		"properties":         in["properties"],
 	}
 }
 
@@ -6250,1151 +14073,1175 @@ func convertEventarcTriggerTransportPubsubList(i interface{}) (out []map[string]
 	return out
 }
 
-func convertRunServiceMetadata(i interface{}) map[string]interface{} {
+func convertNetworkConnectivityHubRoutingVpcs(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"annotations":                in["annotations"],
-		"clusterName":                in["cluster_name"],
-		"finalizers":                 in["finalizers"],
-		"generateName":               in["generate_name"],
-		"labels":                     in["labels"],
-		"namespace":                  in["namespace"],
-		"ownerReferences":            in["owner_references"],
-		"createTime":                 convertRunServiceMetadataCreateTime(in["create_time"]),
-		"deleteTime":                 convertRunServiceMetadataDeleteTime(in["delete_time"]),
-		"deletionGracePeriodSeconds": in["deletion_grace_period_seconds"],
-		"generation":                 in["generation"],
-		"resourceVersion":            in["resource_version"],
-		"selfLink":                   in["self_link"],
-		"uid":                        in["uid"],
+		"uri": in["uri"],
 	}
 }
 
-func convertRunServiceMetadataList(i interface{}) (out []map[string]interface{}) {
+func convertNetworkConnectivityHubRoutingVpcsList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceMetadata(v))
+		out = append(out, convertNetworkConnectivityHubRoutingVpcs(v))
 	}
 	return out
 }
 
-func convertRunServiceMetadataOwnerReferences(i interface{}) map[string]interface{} {
+func convertOrgPolicyPolicySpec(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"apiVersion":         in["api_version"],
-		"blockOwnerDeletion": in["block_owner_deletion"],
-		"controller":         in["controller"],
-		"kind":               in["kind"],
-		"name":               in["name"],
-		"uid":                in["uid"],
+		"inheritFromParent": in["inherit_from_parent"],
+		"reset":             in["reset"],
+		"rules":             in["rules"],
+		"etag":              in["etag"],
+		"updateTime":        in["update_time"],
 	}
 }
 
-func convertRunServiceMetadataOwnerReferencesList(i interface{}) (out []map[string]interface{}) {
+func convertOrgPolicyPolicySpecList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceMetadataOwnerReferences(v))
+		out = append(out, convertOrgPolicyPolicySpec(v))
 	}
 	return out
 }
 
-func convertRunServiceMetadataCreateTime(i interface{}) map[string]interface{} {
+func convertOrgPolicyPolicySpecRules(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"nanos":   in["nanos"],
-		"seconds": in["seconds"],
+		"allowAll":  in["allow_all"],
+		"condition": convertOrgPolicyPolicySpecRulesCondition(in["condition"]),
+		"denyAll":   in["deny_all"],
+		"enforce":   in["enforce"],
+		"values":    convertOrgPolicyPolicySpecRulesValues(in["values"]),
 	}
 }
 
-func convertRunServiceMetadataCreateTimeList(i interface{}) (out []map[string]interface{}) {
+func convertOrgPolicyPolicySpecRulesList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceMetadataCreateTime(v))
+		out = append(out, convertOrgPolicyPolicySpecRules(v))
 	}
 	return out
 }
 
-func convertRunServiceMetadataDeleteTime(i interface{}) map[string]interface{} {
+func convertOrgPolicyPolicySpecRulesCondition(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"nanos":   in["nanos"],
-		"seconds": in["seconds"],
+		"description": in["description"],
+		"expression":  in["expression"],
+		"location":    in["location"],
+		"title":       in["title"],
 	}
 }
 
-func convertRunServiceMetadataDeleteTimeList(i interface{}) (out []map[string]interface{}) {
+func convertOrgPolicyPolicySpecRulesConditionList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceMetadataDeleteTime(v))
+		out = append(out, convertOrgPolicyPolicySpecRulesCondition(v))
 	}
 	return out
 }
 
-func convertRunServiceSpec(i interface{}) map[string]interface{} {
+func convertOrgPolicyPolicySpecRulesValues(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"template": convertRunServiceSpecTemplate(in["template"]),
-		"traffic":  in["traffic"],
+		"allowedValues": in["allowed_values"],
+		"deniedValues":  in["denied_values"],
 	}
 }
 
-func convertRunServiceSpecList(i interface{}) (out []map[string]interface{}) {
+func convertOrgPolicyPolicySpecRulesValuesList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpec(v))
+		out = append(out, convertOrgPolicyPolicySpecRulesValues(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplate(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentInstanceFilter(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"metadata": convertRunServiceSpecTemplateMetadata(in["metadata"]),
-		"spec":     convertRunServiceSpecTemplateSpec(in["spec"]),
+		"all":             in["all"],
+		"exclusionLabels": in["exclusion_labels"],
+		"inclusionLabels": in["inclusion_labels"],
+		"inventories":     in["inventories"],
 	}
 }
 
-func convertRunServiceSpecTemplateList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentInstanceFilterList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplate(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentInstanceFilter(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateMetadata(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentInstanceFilterExclusionLabels(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"annotations":                in["annotations"],
-		"clusterName":                in["cluster_name"],
-		"finalizers":                 in["finalizers"],
-		"generateName":               in["generate_name"],
-		"labels":                     in["labels"],
-		"name":                       in["name"],
-		"namespace":                  in["namespace"],
-		"ownerReferences":            in["owner_references"],
-		"createTime":                 convertRunServiceSpecTemplateMetadataCreateTime(in["create_time"]),
-		"deleteTime":                 convertRunServiceSpecTemplateMetadataDeleteTime(in["delete_time"]),
-		"deletionGracePeriodSeconds": in["deletion_grace_period_seconds"],
-		"generation":                 in["generation"],
-		"resourceVersion":            in["resource_version"],
-		"selfLink":                   in["self_link"],
-		"uid":                        in["uid"],
+		"labels": in["labels"],
 	}
 }
 
-func convertRunServiceSpecTemplateMetadataList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentInstanceFilterExclusionLabelsList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateMetadata(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentInstanceFilterExclusionLabels(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateMetadataOwnerReferences(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentInstanceFilterInclusionLabels(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"apiVersion":         in["api_version"],
-		"blockOwnerDeletion": in["block_owner_deletion"],
-		"controller":         in["controller"],
-		"kind":               in["kind"],
-		"name":               in["name"],
-		"uid":                in["uid"],
+		"labels": in["labels"],
 	}
 }
 
-func convertRunServiceSpecTemplateMetadataOwnerReferencesList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentInstanceFilterInclusionLabelsList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateMetadataOwnerReferences(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentInstanceFilterInclusionLabels(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateMetadataCreateTime(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentInstanceFilterInventories(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"nanos":   in["nanos"],
-		"seconds": in["seconds"],
+		"oSShortName": in["os_short_name"],
+		"oSVersion":   in["os_version"],
 	}
 }
 
-func convertRunServiceSpecTemplateMetadataCreateTimeList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentInstanceFilterInventoriesList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateMetadataCreateTime(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentInstanceFilterInventories(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateMetadataDeleteTime(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPolicies(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"nanos":   in["nanos"],
-		"seconds": in["seconds"],
+		"id":                        in["id"],
+		"mode":                      in["mode"],
+		"resourceGroups":            in["resource_groups"],
+		"allowNoResourceGroupMatch": in["allow_no_resource_group_match"],
+		"description":               in["description"],
 	}
 }
 
-func convertRunServiceSpecTemplateMetadataDeleteTimeList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateMetadataDeleteTime(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPolicies(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpec(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroups(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"containerConcurrency": in["container_concurrency"],
-		"containers":           in["containers"],
-		"serviceAccountName":   in["service_account_name"],
-		"timeoutSeconds":       in["timeout_seconds"],
-		"volumes":              in["volumes"],
+		"resources":        in["resources"],
+		"inventoryFilters": in["inventory_filters"],
 	}
 }
 
-func convertRunServiceSpecTemplateSpecList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpec(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroups(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecContainers(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResources(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"args":                     in["args"],
-		"command":                  in["command"],
-		"env":                      in["env"],
-		"envFrom":                  in["env_from"],
-		"image":                    in["image"],
-		"imagePullPolicy":          in["image_pull_policy"],
-		"livenessProbe":            convertRunServiceSpecTemplateSpecContainersLivenessProbe(in["liveness_probe"]),
-		"name":                     in["name"],
-		"ports":                    in["ports"],
-		"readinessProbe":           convertRunServiceSpecTemplateSpecContainersReadinessProbe(in["readiness_probe"]),
-		"resources":                convertRunServiceSpecTemplateSpecContainersResources(in["resources"]),
-		"securityContext":          convertRunServiceSpecTemplateSpecContainersSecurityContext(in["security_context"]),
-		"terminationMessagePath":   in["termination_message_path"],
-		"terminationMessagePolicy": in["termination_message_policy"],
-		"volumeMounts":             in["volume_mounts"],
-		"workingDir":               in["working_dir"],
+		"id":         in["id"],
+		"exec":       convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExec(in["exec"]),
+		"file":       convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFile(in["file"]),
+		"pkg":        convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkg(in["pkg"]),
+		"repository": convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepository(in["repository"]),
 	}
 }
 
-func convertRunServiceSpecTemplateSpecContainersList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainers(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResources(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecContainersEnv(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExec(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"name":      in["name"],
-		"value":     in["value"],
-		"valueFrom": convertRunServiceSpecTemplateSpecContainersEnvValueFrom(in["value_from"]),
+		"validate": convertOsConfigOsPolicyAssignmentOSPolicyAssignmentExec(in["validate"]),
+		"enforce":  convertOsConfigOsPolicyAssignmentOSPolicyAssignmentExec(in["enforce"]),
 	}
 }
 
-func convertRunServiceSpecTemplateSpecContainersEnvList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnv(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExec(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecContainersEnvValueFrom(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFile(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"configMapKeyRef": convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRef(in["config_map_key_ref"]),
-		"secretKeyRef":    convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRef(in["secret_key_ref"]),
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvValueFrom(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRef(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"key":                  in["key"],
-		"localObjectReference": convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefLocalObjectReference(in["local_object_reference"]),
-		"name":                 in["name"],
-		"optional":             in["optional"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRef(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefLocalObjectReference(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"name": in["name"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefLocalObjectReferenceList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefLocalObjectReference(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRef(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"key":                  in["key"],
-		"localObjectReference": convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefLocalObjectReference(in["local_object_reference"]),
-		"name":                 in["name"],
-		"optional":             in["optional"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRef(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefLocalObjectReference(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"name": in["name"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefLocalObjectReferenceList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefLocalObjectReference(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFrom(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"configMapRef": convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRef(in["config_map_ref"]),
-		"prefix":       in["prefix"],
-		"secretRef":    convertRunServiceSpecTemplateSpecContainersEnvFromSecretRef(in["secret_ref"]),
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvFrom(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRef(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"localObjectReference": convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRefLocalObjectReference(in["local_object_reference"]),
-		"name":                 in["name"],
-		"optional":             in["optional"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRefList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRef(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRefLocalObjectReference(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"name": in["name"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRefLocalObjectReferenceList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRefLocalObjectReference(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromSecretRef(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"localObjectReference": convertRunServiceSpecTemplateSpecContainersEnvFromSecretRefLocalObjectReference(in["local_object_reference"]),
-		"name":                 in["name"],
-		"optional":             in["optional"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromSecretRefList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvFromSecretRef(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromSecretRefLocalObjectReference(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"name": in["name"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromSecretRefLocalObjectReferenceList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvFromSecretRefLocalObjectReference(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbe(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"exec":                convertRunServiceSpecTemplateSpecContainersLivenessProbeExec(in["exec"]),
-		"failureThreshold":    in["failure_threshold"],
-		"httpGet":             convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGet(in["http_get"]),
-		"initialDelaySeconds": in["initial_delay_seconds"],
-		"periodSeconds":       in["period_seconds"],
-		"successThreshold":    in["success_threshold"],
-		"tcpSocket":           convertRunServiceSpecTemplateSpecContainersLivenessProbeTcpSocket(in["tcp_socket"]),
-		"timeoutSeconds":      in["timeout_seconds"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersLivenessProbe(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeExec(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"command": in["command"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeExecList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersLivenessProbeExec(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGet(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"host":        in["host"],
-		"httpHeaders": in["http_headers"],
 		"path":        in["path"],
-		"scheme":      in["scheme"],
+		"state":       in["state"],
+		"content":     in["content"],
+		"file":        convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFile(in["file"]),
+		"permissions": in["permissions"],
 	}
 }
 
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGetList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGet(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFile(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGetHttpHeaders(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkg(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"name":  in["name"],
-		"value": in["value"],
+		"desiredState": in["desired_state"],
+		"apt":          convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgApt(in["apt"]),
+		"deb":          convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDeb(in["deb"]),
+		"googet":       convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgGooget(in["googet"]),
+		"msi":          convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsi(in["msi"]),
+		"rpm":          convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpm(in["rpm"]),
+		"yum":          convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgYum(in["yum"]),
+		"zypper":       convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgZypper(in["zypper"]),
 	}
 }
 
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGetHttpHeadersList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGetHttpHeaders(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkg(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeTcpSocket(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgApt(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"host": in["host"],
-		"port": in["port"],
+		"name": in["name"],
 	}
 }
 
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeTcpSocketList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgAptList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersLivenessProbeTcpSocket(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgApt(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecContainersPorts(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDeb(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"containerPort": in["container_port"],
-		"name":          in["name"],
-		"protocol":      in["protocol"],
+		"source":   convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFile(in["source"]),
+		"pullDeps": in["pull_deps"],
 	}
 }
 
-func convertRunServiceSpecTemplateSpecContainersPortsList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersPorts(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDeb(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecContainersReadinessProbe(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgGooget(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"exec":                convertRunServiceSpecTemplateSpecContainersReadinessProbeExec(in["exec"]),
-		"failureThreshold":    in["failure_threshold"],
-		"httpGet":             convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGet(in["http_get"]),
-		"initialDelaySeconds": in["initial_delay_seconds"],
-		"periodSeconds":       in["period_seconds"],
-		"successThreshold":    in["success_threshold"],
-		"tcpSocket":           convertRunServiceSpecTemplateSpecContainersReadinessProbeTcpSocket(in["tcp_socket"]),
-		"timeoutSeconds":      in["timeout_seconds"],
+		"name": in["name"],
 	}
 }
 
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgGoogetList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersReadinessProbe(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgGooget(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeExec(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsi(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"command": in["command"],
+		"source":     convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFile(in["source"]),
+		"properties": in["properties"],
 	}
 }
 
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeExecList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersReadinessProbeExec(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsi(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGet(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpm(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"host":        in["host"],
-		"httpHeaders": in["http_headers"],
-		"path":        in["path"],
-		"scheme":      in["scheme"],
+		"source":   convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFile(in["source"]),
+		"pullDeps": in["pull_deps"],
 	}
 }
 
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGetList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGet(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpm(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGetHttpHeaders(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgYum(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"name":  in["name"],
-		"value": in["value"],
+		"name": in["name"],
 	}
 }
 
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGetHttpHeadersList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgYumList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGetHttpHeaders(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgYum(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeTcpSocket(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgZypper(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"host": in["host"],
-		"port": in["port"],
+		"name": in["name"],
 	}
 }
 
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeTcpSocketList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgZypperList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersReadinessProbeTcpSocket(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgZypper(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecContainersResources(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepository(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"limits":   in["limits"],
-		"requests": in["requests"],
+		"apt":    convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryApt(in["apt"]),
+		"goo":    convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryGoo(in["goo"]),
+		"yum":    convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryYum(in["yum"]),
+		"zypper": convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryZypper(in["zypper"]),
 	}
 }
 
-func convertRunServiceSpecTemplateSpecContainersResourcesList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersResources(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepository(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecContainersSecurityContext(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryApt(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"runAsUser": in["run_as_user"],
+		"archiveType":  in["archive_type"],
+		"components":   in["components"],
+		"distribution": in["distribution"],
+		"uri":          in["uri"],
+		"gpgKey":       in["gpg_key"],
 	}
 }
 
-func convertRunServiceSpecTemplateSpecContainersSecurityContextList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryAptList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersSecurityContext(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryApt(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecContainersVolumeMounts(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryGoo(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"mountPath": in["mount_path"],
-		"name":      in["name"],
-		"readOnly":  in["read_only"],
-		"subPath":   in["sub_path"],
+		"name": in["name"],
+		"url":  in["url"],
 	}
 }
 
-func convertRunServiceSpecTemplateSpecContainersVolumeMountsList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryGooList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersVolumeMounts(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryGoo(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecVolumes(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryYum(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"configMap": convertRunServiceSpecTemplateSpecVolumesConfigMap(in["config_map"]),
-		"name":      in["name"],
-		"secret":    convertRunServiceSpecTemplateSpecVolumesSecret(in["secret"]),
+		"baseUrl":     in["base_url"],
+		"id":          in["id"],
+		"displayName": in["display_name"],
+		"gpgKeys":     in["gpg_keys"],
 	}
 }
 
-func convertRunServiceSpecTemplateSpecVolumesList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryYumList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecVolumes(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryYum(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecVolumesConfigMap(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryZypper(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"defaultMode": in["default_mode"],
-		"items":       in["items"],
-		"name":        in["name"],
-		"optional":    in["optional"],
+		"baseUrl":     in["base_url"],
+		"id":          in["id"],
+		"displayName": in["display_name"],
+		"gpgKeys":     in["gpg_keys"],
 	}
 }
 
-func convertRunServiceSpecTemplateSpecVolumesConfigMapList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryZypperList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecVolumesConfigMap(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesRepositoryZypper(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecVolumesConfigMapItems(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsInventoryFilters(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"key":  in["key"],
-		"mode": in["mode"],
-		"path": in["path"],
+		"oSShortName": in["os_short_name"],
+		"oSVersion":   in["os_version"],
 	}
 }
 
-func convertRunServiceSpecTemplateSpecVolumesConfigMapItemsList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsInventoryFiltersList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecVolumesConfigMapItems(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsInventoryFilters(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecVolumesSecret(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentRollout(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"defaultMode": in["default_mode"],
-		"items":       in["items"],
-		"optional":    in["optional"],
-		"secretName":  in["secret_name"],
+		"disruptionBudget": convertOsConfigOsPolicyAssignmentRolloutDisruptionBudget(in["disruption_budget"]),
+		"minWaitDuration":  in["min_wait_duration"],
 	}
 }
 
-func convertRunServiceSpecTemplateSpecVolumesSecretList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentRolloutList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecVolumesSecret(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentRollout(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTemplateSpecVolumesSecretItems(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentRolloutDisruptionBudget(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"key":  in["key"],
-		"mode": in["mode"],
-		"path": in["path"],
+		"fixed":   in["fixed"],
+		"percent": in["percent"],
 	}
 }
 
-func convertRunServiceSpecTemplateSpecVolumesSecretItemsList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentRolloutDisruptionBudgetList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecVolumesSecretItems(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentRolloutDisruptionBudget(v))
 	}
 	return out
 }
 
-func convertRunServiceSpecTraffic(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFile(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"configurationName": in["configuration_name"],
-		"latestRevision":    in["latest_revision"],
-		"percent":           in["percent"],
-		"revisionName":      in["revision_name"],
-		"tag":               in["tag"],
-		"url":               in["url"],
+		"allowInsecure": in["allow_insecure"],
+		"gcs":           convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileGcs(in["gcs"]),
+		"localPath":     in["local_path"],
+		"remote":        convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileRemote(in["remote"]),
 	}
 }
 
-func convertRunServiceSpecTrafficList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTraffic(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFile(v))
 	}
 	return out
 }
 
-func convertRunServiceStatus(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileGcs(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"address":                   convertRunServiceStatusAddress(in["address"]),
-		"conditions":                in["conditions"],
-		"latestCreatedRevisionName": in["latest_created_revision_name"],
-		"latestReadyRevisionName":   in["latest_ready_revision_name"],
-		"observedGeneration":        in["observed_generation"],
-		"traffic":                   in["traffic"],
-		"url":                       in["url"],
+		"bucket":     in["bucket"],
+		"object":     in["object"],
+		"generation": in["generation"],
 	}
 }
 
-func convertRunServiceStatusList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileGcsList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceStatus(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileGcs(v))
 	}
 	return out
 }
 
-func convertRunServiceStatusAddress(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileRemote(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"url": in["url"],
+		"uri":            in["uri"],
+		"sha256Checksum": in["sha256_checksum"],
 	}
 }
 
-func convertRunServiceStatusAddressList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileRemoteList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceStatusAddress(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileRemote(v))
 	}
 	return out
 }
 
-func convertRunServiceStatusConditions(i interface{}) map[string]interface{} {
+func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentExec(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"lastTransitionTime": convertRunServiceStatusConditionsLastTransitionTime(in["last_transition_time"]),
-		"message":            in["message"],
-		"reason":             in["reason"],
-		"severity":           in["severity"],
-		"status":             in["status"],
-		"type":               in["type"],
+		"interpreter":    in["interpreter"],
+		"args":           in["args"],
+		"file":           convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFile(in["file"]),
+		"outputFilePath": in["output_file_path"],
+		"script":         in["script"],
 	}
 }
 
-func convertRunServiceStatusConditionsList(i interface{}) (out []map[string]interface{}) {
+func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentExecList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceStatusConditions(v))
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPolicyAssignmentExec(v))
 	}
 	return out
 }
 
-func convertRunServiceStatusConditionsLastTransitionTime(i interface{}) map[string]interface{} {
+func convertPrivatecaCertificateTemplateIdentityConstraints(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"nanos":   in["nanos"],
-		"seconds": in["seconds"],
+		"allowSubjectAltNamesPassthrough": in["allow_subject_alt_names_passthrough"],
+		"allowSubjectPassthrough":         in["allow_subject_passthrough"],
+		"celExpression":                   convertPrivatecaCertificateTemplateIdentityConstraintsCelExpression(in["cel_expression"]),
 	}
 }
 
-func convertRunServiceStatusConditionsLastTransitionTimeList(i interface{}) (out []map[string]interface{}) {
+func convertPrivatecaCertificateTemplateIdentityConstraintsList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceStatusConditionsLastTransitionTime(v))
+		out = append(out, convertPrivatecaCertificateTemplateIdentityConstraints(v))
 	}
 	return out
 }
 
-func convertRunServiceStatusTraffic(i interface{}) map[string]interface{} {
+func convertPrivatecaCertificateTemplateIdentityConstraintsCelExpression(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"configurationName": in["configuration_name"],
-		"latestRevision":    in["latest_revision"],
-		"percent":           in["percent"],
-		"revisionName":      in["revision_name"],
-		"tag":               in["tag"],
-		"url":               in["url"],
+		"description": in["description"],
+		"expression":  in["expression"],
+		"location":    in["location"],
+		"title":       in["title"],
 	}
 }
 
-func convertRunServiceStatusTrafficList(i interface{}) (out []map[string]interface{}) {
+func convertPrivatecaCertificateTemplateIdentityConstraintsCelExpressionList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceStatusTraffic(v))
+		out = append(out, convertPrivatecaCertificateTemplateIdentityConstraintsCelExpression(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplatePassthroughExtensions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"additionalExtensions": in["additional_extensions"],
+		"knownExtensions":      in["known_extensions"],
+	}
+}
+
+func convertPrivatecaCertificateTemplatePassthroughExtensionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplatePassthroughExtensions(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplatePassthroughExtensionsAdditionalExtensions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"objectIdPath": in["object_id_path"],
+	}
+}
+
+func convertPrivatecaCertificateTemplatePassthroughExtensionsAdditionalExtensionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplatePassthroughExtensionsAdditionalExtensions(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValues(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"additionalExtensions": in["additional_extensions"],
+		"aiaOcspServers":       in["aia_ocsp_servers"],
+		"caOptions":            convertPrivatecaCertificateTemplatePredefinedValuesCaOptions(in["ca_options"]),
+		"keyUsage":             convertPrivatecaCertificateTemplatePredefinedValuesKeyUsage(in["key_usage"]),
+		"policyIds":            in["policy_ids"],
+	}
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplatePredefinedValues(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesAdditionalExtensions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"objectId": convertPrivatecaCertificateTemplatePredefinedValuesAdditionalExtensionsObjectId(in["object_id"]),
+		"value":    in["value"],
+		"critical": in["critical"],
+	}
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesAdditionalExtensionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplatePredefinedValuesAdditionalExtensions(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesAdditionalExtensionsObjectId(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"objectIdPath": in["object_id_path"],
+	}
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesAdditionalExtensionsObjectIdList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplatePredefinedValuesAdditionalExtensionsObjectId(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesCaOptions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"isCa":                in["is_ca"],
+		"maxIssuerPathLength": in["max_issuer_path_length"],
+	}
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesCaOptionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplatePredefinedValuesCaOptions(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesKeyUsage(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"baseKeyUsage":             convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageBaseKeyUsage(in["base_key_usage"]),
+		"extendedKeyUsage":         convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageExtendedKeyUsage(in["extended_key_usage"]),
+		"unknownExtendedKeyUsages": in["unknown_extended_key_usages"],
+	}
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplatePredefinedValuesKeyUsage(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageBaseKeyUsage(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"certSign":          in["cert_sign"],
+		"contentCommitment": in["content_commitment"],
+		"crlSign":           in["crl_sign"],
+		"dataEncipherment":  in["data_encipherment"],
+		"decipherOnly":      in["decipher_only"],
+		"digitalSignature":  in["digital_signature"],
+		"encipherOnly":      in["encipher_only"],
+		"keyAgreement":      in["key_agreement"],
+		"keyEncipherment":   in["key_encipherment"],
+	}
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageBaseKeyUsageList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageBaseKeyUsage(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageExtendedKeyUsage(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"clientAuth":      in["client_auth"],
+		"codeSigning":     in["code_signing"],
+		"emailProtection": in["email_protection"],
+		"ocspSigning":     in["ocsp_signing"],
+		"serverAuth":      in["server_auth"],
+		"timeStamping":    in["time_stamping"],
+	}
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageExtendedKeyUsageList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageExtendedKeyUsage(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageUnknownExtendedKeyUsages(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"objectIdPath": in["object_id_path"],
+	}
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageUnknownExtendedKeyUsagesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplatePredefinedValuesKeyUsageUnknownExtendedKeyUsages(v))
+	}
+	return out
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesPolicyIds(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"objectIdPath": in["object_id_path"],
+	}
+}
+
+func convertPrivatecaCertificateTemplatePredefinedValuesPolicyIdsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertPrivatecaCertificateTemplatePredefinedValuesPolicyIds(v))
+	}
+	return out
+}
+
+func convertRecaptchaEnterpriseKeyAndroidSettings(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowAllPackageNames": in["allow_all_package_names"],
+		"allowedPackageNames":  in["allowed_package_names"],
+	}
+}
+
+func convertRecaptchaEnterpriseKeyAndroidSettingsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertRecaptchaEnterpriseKeyAndroidSettings(v))
+	}
+	return out
+}
+
+func convertRecaptchaEnterpriseKeyIosSettings(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowAllBundleIds": in["allow_all_bundle_ids"],
+		"allowedBundleIds":  in["allowed_bundle_ids"],
+	}
+}
+
+func convertRecaptchaEnterpriseKeyIosSettingsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertRecaptchaEnterpriseKeyIosSettings(v))
+	}
+	return out
+}
+
+func convertRecaptchaEnterpriseKeyTestingOptions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"testingChallenge": in["testing_challenge"],
+		"testingScore":     in["testing_score"],
+	}
+}
+
+func convertRecaptchaEnterpriseKeyTestingOptionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertRecaptchaEnterpriseKeyTestingOptions(v))
+	}
+	return out
+}
+
+func convertRecaptchaEnterpriseKeyWebSettings(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"integrationType":             in["integration_type"],
+		"allowAllDomains":             in["allow_all_domains"],
+		"allowAmpTraffic":             in["allow_amp_traffic"],
+		"allowedDomains":              in["allowed_domains"],
+		"challengeSecurityPreference": in["challenge_security_preference"],
+	}
+}
+
+func convertRecaptchaEnterpriseKeyWebSettingsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertRecaptchaEnterpriseKeyWebSettings(v))
 	}
 	return out
 }

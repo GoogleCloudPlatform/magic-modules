@@ -18,9 +18,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       optional_properties: |
         * `auth_string` - (Optional) AUTH String set on the instance. This field will only be populated if auth_enabled is true.
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 10
-      update_minutes: 10
-      delete_minutes: 10
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
     autogen_async: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/redis_location_id_for_fallback_zone.go.erb
@@ -53,6 +53,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           network_name: "redis-test-network"
         test_vars_overrides:
           network_name: 'BootstrapSharedTestNetwork(t, "redis-private")'
+      - !ruby/object:Provider::Terraform::Examples
+        name: "redis_instance_mrr"
+        primary_resource_id: "cache"
+        vars:
+          instance_name: "mrr-memory-cache"
+          network_name: "redis-test-network"
+        test_vars_overrides:
+          network_name: 'BootstrapSharedTestNetwork(t, "redis-mrr")'
+        min_version: beta
     properties:
       alternativeLocationId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -76,6 +85,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
       reservedIpRange: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      replicaCount: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
 
 # This is for copying files over
