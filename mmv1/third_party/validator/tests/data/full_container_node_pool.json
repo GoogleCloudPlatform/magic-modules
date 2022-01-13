@@ -1,0 +1,64 @@
+[
+  {
+    "name": "//container.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/clusters/test-cluster/nodePools/test-node-pool",
+    "asset_type": "container.googleapis.com/NodePool",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/container/v1/rest",
+      "discovery_name": "NodePool",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "autoscaling": {
+          "maxNodeCount": 1337,
+          "minNodeCount": 42
+        },
+        "cluster": "projects/{{.Provider.project}}/global/clusters/test-cluster",
+        "config": {
+          "accelerators": [
+            {
+              "acceleratorCount": 1,
+              "acceleratorType": "test-type1"
+            },
+            {
+              "acceleratorCount": 1,
+              "acceleratorType": "test-type2"
+            }
+          ],
+          "diskSizeGb": 42,
+          "diskType": "pd-standard",
+          "imageType": "test-image_type",
+          "labels": {
+            "test-label-key": "test-label-value"
+          },
+          "localSsdCount": 42,
+          "machineType": "test-machine_type",
+          "metadata": {
+            "test-metadata-key": "test-metadata-value"
+          },
+          "minCpuPlatform": "test-min_cpu_platform",
+          "oauthScopes": [
+            "https://www.googleapis.com/auth/devstorage.read_only",
+            "test-oauth_scopes"
+          ],
+          "preemptible": true,
+          "serviceAccount": "test-service_account",
+          "tags": [
+            "test-tags"
+          ]
+        },
+        "initialNodeCount": 42,
+        "location": "us-central1",
+        "management": {
+          "autoRepair": true,
+          "autoUpgrade": true
+        },
+        "maxPodsConstraint": {
+          "maxPodsPerNode": 42
+        },
+        "name": "test-node-pool",
+        "version": "test-version"
+      }
+    }
+  }
+]

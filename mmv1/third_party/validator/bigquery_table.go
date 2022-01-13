@@ -4,25 +4,34 @@ import (
 	"reflect"
 )
 
-func GetBigQueryTableCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+const BigQueryTableAssetType string = "bigquery.googleapis.com/Table"
+
+func resourceConverterBigQueryTable() ResourceConverter {
+	return ResourceConverter{
+		AssetType: BigQueryTableAssetType,
+		Convert:   GetBigQueryTableCaiObject,
+	}
+}
+
+func GetBigQueryTableCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//bigquery.googleapis.com/projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
 
 	if err != nil {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 	if obj, err := GetBigQueryTableApiObject(d, config); err == nil {
-		return Asset{
+		return []Asset{{
 			Name: name,
-			Type: "bigquery.googleapis.com/Table",
+			Type: BigQueryTableAssetType,
 			Resource: &AssetResource{
 				Version:              "v2",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/bigquery/v2/rest",
 				DiscoveryName:        "Table",
 				Data:                 obj,
 			},
-		}, nil
+		}}, nil
 	} else {
-		return Asset{}, err
+		return []Asset{}, err
 	}
 }
 
@@ -36,7 +45,7 @@ func GetBigQueryTableApiObject(d TerraformResourceData, config *Config) (map[str
 		obj["tableReference"] = tableReferenceProp
 	}
 
-    descriptionProp, err := expandBigQueryTableDescription(d.Get("description"), d, config)
+	descriptionProp, err := expandBigQueryTableDescription(d.Get("description"), d, config)
 	if err != nil {
 		return nil, err
 	} else if v, ok := d.GetOkExists("description"); !isEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
@@ -49,7 +58,7 @@ func GetBigQueryTableApiObject(d TerraformResourceData, config *Config) (map[str
 	} else if v, ok := d.GetOkExists("friendly_name"); !isEmptyValue(reflect.ValueOf(friendlyNameProp)) && (ok || !reflect.DeepEqual(v, friendlyNameProp)) {
 		obj["friendlyName"] = friendlyNameProp
 	}
-	
+
 	labelsProp, err := expandBigQueryTableLabels(d.Get("labels"), d, config)
 	if err != nil {
 		return nil, err
@@ -63,7 +72,7 @@ func GetBigQueryTableApiObject(d TerraformResourceData, config *Config) (map[str
 	} else if v, ok := d.GetOkExists("location"); !isEmptyValue(reflect.ValueOf(locationProp)) && (ok || !reflect.DeepEqual(v, locationProp)) {
 		obj["location"] = locationProp
 	}
-	
+
 	expirationTimeProp, err := expandBigQueryTableExpirationTime(nil, d, config)
 	if err != nil {
 		return nil, err
@@ -90,7 +99,7 @@ func GetBigQueryTableApiObject(d TerraformResourceData, config *Config) (map[str
 
 func expandBigQueryTableTableReference(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	transformed := make(map[string]interface{})
-	
+
 	transformedProjectId, err := expandBigQueryTableTableReferenceProjectId(d.Get("project"), d, config)
 	if err != nil {
 		return nil, err
@@ -109,7 +118,7 @@ func expandBigQueryTableTableReference(v interface{}, d TerraformResourceData, c
 	if err != nil {
 		return nil, err
 	} else if val := reflect.ValueOf(transformedTableId); val.IsValid() && !isEmptyValue(val) {
-		transformed["tableId"] = transformedDatasetId
+		transformed["tableId"] = transformedTableId
 	}
 
 	return transformed, nil
@@ -117,7 +126,7 @@ func expandBigQueryTableTableReference(v interface{}, d TerraformResourceData, c
 
 func expandBigQueryTableExpirationTime(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	transformed := make(map[string]interface{})
-	
+
 	transformedExpirationTimeValue, err := expandBigQueryTableExpirationTimeValue(d.Get("expiration_time"), d, config)
 
 	if err != nil {
@@ -139,7 +148,7 @@ func expandBigQueryTableEncyptionConfiguration(v interface{}, d TerraformResourc
 	transformed := make(map[string]interface{})
 
 	transformedKmsKeyName, err := expandBigQueryTableEncyptionConfigurationKmsKeyName(original["kms_key_name"], d, config)
-	
+
 	if err != nil {
 		return nil, err
 	} else if val := reflect.ValueOf(transformedKmsKeyName); val.IsValid() && !isEmptyValue(val) {
@@ -178,7 +187,7 @@ func expandBigQueryTableTimePartition(v interface{}, d TerraformResourceData, co
 	transformed := make(map[string]interface{})
 
 	transformedType, err := expandBigQueryTableTimePartitionType(original["type"], d, config)
-	
+
 	if err != nil {
 		return nil, err
 	} else if val := reflect.ValueOf(transformedType); val.IsValid() && !isEmptyValue(val) {
@@ -186,7 +195,7 @@ func expandBigQueryTableTimePartition(v interface{}, d TerraformResourceData, co
 	}
 
 	transformedExpirationMs, err := expandBigQueryTableTimePartitionExpirationMs(original["expiration_ms"], d, config)
-	
+
 	if err != nil {
 		return nil, err
 	} else if val := reflect.ValueOf(transformedExpirationMs); val.IsValid() && !isEmptyValue(val) {
@@ -194,15 +203,15 @@ func expandBigQueryTableTimePartition(v interface{}, d TerraformResourceData, co
 	}
 
 	transformedField, err := expandBigQueryTableTimeField(original["field"], d, config)
-	
+
 	if err != nil {
 		return nil, err
 	} else if val := reflect.ValueOf(transformedField); val.IsValid() && !isEmptyValue(val) {
 		transformed["field"] = transformedField
 	}
-	
+
 	transformedRequirePartitionFilter, err := expandBigQueryTableRequirePartitionFilter(original["require_partition_filter"], d, config)
-	
+
 	if err != nil {
 		return nil, err
 	} else if val := reflect.ValueOf(transformedRequirePartitionFilter); val.IsValid() && !isEmptyValue(val) {
@@ -221,7 +230,7 @@ func expandBigQueryTableTimePartitionExpirationMs(v interface{}, d TerraformReso
 
 func expandBigQueryTableTimeField(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	transformed := make(map[string]interface{})
-	
+
 	transformedValue, err := expandBigQueryTableTimeFieldValue(v, d, config)
 
 	if err != nil {

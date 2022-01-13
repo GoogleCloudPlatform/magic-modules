@@ -742,7 +742,6 @@ func resourceContainerCluster() *schema.Resource {
 			},
 <% end -%>
 
-<% unless version == 'ga' -%>
 			"confidential_nodes": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -761,7 +760,6 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 
 			"master_auth": {
 				Type:        schema.TypeList,
@@ -1144,6 +1142,25 @@ func resourceContainerCluster() *schema.Resource {
 				},
 			},
 
+<% unless version == 'ga' -%>
+			"identity_service_config": {
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Optional: true,
+				Computed: true,
+				Description: `Configuration for Identity Service which allows customers to use external identity providers with the K8S API.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Description: "Whether to enable the Identity Service component.",
+						},
+					},
+				},
+			},
+<% end -%>
+
       "database_encryption": {
         Type:        schema.TypeList,
         MaxItems:    1,
@@ -1300,7 +1317,6 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% unless version == 'ga' -%>
 			"dns_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1331,7 +1347,6 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 		},
 	}
 }
@@ -1460,17 +1475,13 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			<% unless version == 'ga' -%>
 			EnableL4ilbSubsetting:     d.Get("enable_l4_ilb_subsetting").(bool),
 			<% end -%>
-			<% unless version == 'ga' -%>
 			DnsConfig:                 expandDnsConfig(d.Get("dns_config")),
-			<% end -%>
 	    },
 		MasterAuth:     expandMasterAuth(d.Get("master_auth")),
 <% unless version == 'ga' -%>
 		NotificationConfig: expandNotificationConfig(d.Get("notification_config")),
 <% end -%>
-<% unless version == 'ga' -%>
 		ConfidentialNodes: expandConfidentialNodes(d.Get("confidential_nodes")),
-<% end -%>
 		ResourceLabels: expandStringMap(d, "resource_labels"),
 	}
 
@@ -1568,6 +1579,12 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.WorkloadIdentityConfig = expandWorkloadIdentityConfig(v)
 	}
 
+<% unless version == 'ga' -%>
+	if v, ok := d.GetOk("identity_service_config"); ok {
+		cluster.IdentityServiceConfig = expandIdentityServiceConfig(v)
+	}
+
+<% end -%>
 	if v, ok := d.GetOk("resource_usage_export_config"); ok {
 		cluster.ResourceUsageExportConfig = expandResourceUsageExportConfig(v)
 	}
@@ -1814,13 +1831,13 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("notification_config", flattenNotificationConfig(cluster.NotificationConfig)); err != nil {
 		return err
 	}
-	if err := d.Set("confidential_nodes", flattenConfidentialNodes(cluster.ConfidentialNodes)); err != nil {
-		return err
-	}
 	if err := d.Set("enable_l4_ilb_subsetting", cluster.NetworkConfig.EnableL4ilbSubsetting); err != nil {
 		return fmt.Errorf("Error setting enable_l4_ilb_subsetting: %s", err)
 	}
 <% end -%>
+	if err := d.Set("confidential_nodes", flattenConfidentialNodes(cluster.ConfidentialNodes)); err != nil {
+		return err
+	}
 	if err := d.Set("enable_tpu", cluster.EnableTpu); err != nil {
 		return fmt.Errorf("Error setting enable_tpu: %s", err)
 	}
@@ -1884,6 +1901,12 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
+<% unless version == 'ga' -%>
+	if err := d.Set("identity_service_config", flattenIdentityServiceConfig(cluster.IdentityServiceConfig, d, config)); err != nil {
+		return err
+	}
+<% end -%>
+
 	if err := d.Set("database_encryption", flattenDatabaseEncryption(cluster.DatabaseEncryption)); err != nil {
 		return err
 	}
@@ -1908,12 +1931,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("resource_usage_export_config", flattenResourceUsageExportConfig(cluster.ResourceUsageExportConfig)); err != nil {
 		return err
 	}
-<% unless version == 'ga' -%>
 	if err := d.Set("dns_config", flattenDnsConfig(cluster.NetworkConfig.DnsConfig)); err != nil {
 		return err
 	}
-<% end -%>
-
 	if err := d.Set("logging_config", flattenContainerClusterLoggingConfig(cluster.LoggingConfig)); err != nil {
 		return err
 	}
@@ -2649,6 +2669,31 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s workload identity config has been updated", d.Id())
 	}
 
+<% unless version == 'ga' -%>
+	if d.HasChange("identity_service_config") {
+		req := &container.UpdateClusterRequest{}
+		if v, ok := d.GetOk("identity_service_config"); !ok {
+			req.Update = &container.ClusterUpdate{
+				DesiredIdentityServiceConfig: &container.IdentityServiceConfig{
+					Enabled: false,
+				},
+			}
+		} else {
+			req.Update = &container.ClusterUpdate{
+				DesiredIdentityServiceConfig: expandIdentityServiceConfig(v),
+			}
+		}
+
+		updateF := updateFunc(req, "updating GKE cluster identity service config")
+		// Call update serially.
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s identity service config has been updated", d.Id())
+	}
+<% end -%>
+
 	if d.HasChange("logging_config") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -3047,6 +3092,7 @@ func expandIPAllocationPolicy(configured interface{}, networkingMode string) (*c
 		}
 		return &container.IPAllocationPolicy{
 			UseIpAliases:    false,
+			UseRoutes:       true,
 			ForceSendFields: []string{"UseIpAliases"},
 		}, nil
 	}
@@ -3271,7 +3317,6 @@ func expandNotificationConfig(configured interface{}) *container.NotificationCon
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func expandConfidentialNodes(configured interface{}) *container.ConfidentialNodes {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -3282,7 +3327,6 @@ func expandConfidentialNodes(configured interface{}) *container.ConfidentialNode
 		Enabled: config["enabled"].(bool),
 	}
 }
-<% end -%>
 
 func expandMasterAuth(configured interface{}) *container.MasterAuth {
 	l := configured.([]interface{})
@@ -3453,6 +3497,18 @@ func expandWorkloadIdentityConfig(configured interface{}) *container.WorkloadIde
 }
 
 <% unless version == 'ga' -%>
+func expandIdentityServiceConfig(configured interface{}) *container.IdentityServiceConfig {
+	l := configured.([]interface{})
+	v := &container.IdentityServiceConfig{}
+
+	config := l[0].(map[string]interface{})
+	v.Enabled = config["enabled"].(bool)
+
+	return v
+}
+<% end -%>
+
+<% unless version == 'ga' -%>
 func expandPodSecurityPolicyConfig(configured interface{}) *container.PodSecurityPolicyConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -3506,7 +3562,6 @@ func expandResourceUsageExportConfig(configured interface{}) *container.Resource
 	return result
 }
 
-<% unless version == 'ga' -%>
 func expandDnsConfig(configured interface{}) *container.DNSConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -3520,7 +3575,6 @@ func expandDnsConfig(configured interface{}) *container.DNSConfig {
 		ClusterDnsDomain: config["cluster_dns_domain"].(string),
 	}
 }
-<% end -%>
 
 func expandContainerClusterLoggingConfig(configured interface{}) *container.LoggingConfig {
 	l := configured.([]interface{})
@@ -3569,7 +3623,6 @@ func flattenNotificationConfig(c *container.NotificationConfig) []map[string]int
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func flattenConfidentialNodes(c *container.ConfidentialNodes) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
@@ -3579,7 +3632,6 @@ func flattenConfidentialNodes(c *container.ConfidentialNodes) []map[string]inter
 	}
 	return result
 }
-<% end -%>
 
 func flattenNetworkPolicy(c *container.NetworkPolicy) []map[string]interface{} {
 	result := []map[string]interface{}{}
@@ -3795,6 +3847,20 @@ func flattenWorkloadIdentityConfig(c *container.WorkloadIdentityConfig, d *schem
 	}
 }
 
+<% unless version == 'ga' -%>
+func flattenIdentityServiceConfig(c *container.IdentityServiceConfig, d *schema.ResourceData, config *Config) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+
+	return []map[string]interface{}{
+		{
+			"enabled": c.Enabled,
+		},
+	}
+}
+<% end -%>
+
 func flattenIPAllocationPolicy(c *container.Cluster, d *schema.ResourceData, config *Config) ([]map[string]interface{}, error) {
 	// If IP aliasing isn't enabled, none of the values in this block can be set.
 	if c == nil || c.IpAllocationPolicy == nil || !c.IpAllocationPolicy.UseIpAliases {
@@ -3999,7 +4065,6 @@ func flattenDatabaseEncryption(c *container.DatabaseEncryption) []map[string]int
 	}
 }
 
-<% unless version == 'ga' -%>
 func flattenDnsConfig(c *container.DNSConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -4012,7 +4077,6 @@ func flattenDnsConfig(c *container.DNSConfig) []map[string]interface{} {
 		},
 	}
 }
-<% end -%>
 
 func flattenContainerClusterLoggingConfig(c *container.LoggingConfig) []map[string]interface{} {
 	if c == nil {

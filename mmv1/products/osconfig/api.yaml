@@ -782,9 +782,6 @@ objects:
               A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
           - !ruby/object:Api::Type::NestedObject
             name: 'weekly'
-            exactly_one_of:
-              - recurring_schedule.0.weekly
-              - recurring_schedule.0.monthly
             description: |
               Schedule with weekly executions.
             properties:
@@ -803,9 +800,6 @@ objects:
                   - :SUNDAY
           - !ruby/object:Api::Type::NestedObject
             name: 'monthly'
-            exactly_one_of:
-              - recurring_schedule.0.weekly
-              - recurring_schedule.0.monthly
             description: |
               Schedule with monthly executions.
             properties:

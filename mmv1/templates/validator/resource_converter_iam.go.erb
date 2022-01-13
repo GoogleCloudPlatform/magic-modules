@@ -18,6 +18,18 @@
 <%
   resource_name = product_ns + object.name
   product_backend_name=@base_url.split('://')[1].split('.googleapis.com')[0]
+
+  resource_uri = object.iam_policy.base_url || object.self_link_uri
+  parent_resource_name = object.iam_policy.parent_resource_attribute || object.name.underscore
+  resource_params = extract_identifiers(resource_uri.gsub('{{name}}', "{{#{parent_resource_name}}}"))
+  resource_params.delete('project')
+
+  import_format = object.iam_policy.import_format || object.import_format
+  if import_format.nil? || import_format.empty?
+    asset_name_template = '//' + product_backend_name.downcase + '.googleapis.com/' + (object.cai_base_url || object.self_link || object.base_url) + '/{{' + object.name.downcase + '}}'
+  else
+    asset_name_template = '//' + product_backend_name.downcase + '.googleapis.com/' + import_format[0].gsub('{{name}}', "{{#{parent_resource_name}}}").gsub('%', '')
+  end
 -%>
 
 package google
@@ -98,7 +110,7 @@ func new<%= resource_name -%>IamAsset(
 		return []Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
-	name, err := assetName(d, config, "//<%= product_backend_name.downcase -%>.googleapis.com/{{<%= object.name.downcase -%>}}")
+	name, err := assetName(d, config, "<%= asset_name_template -%>")
 	if err != nil {
 		return []Asset{}, err
 	}
@@ -114,15 +126,18 @@ func new<%= resource_name -%>IamAsset(
 
 func Fetch<%= resource_name -%>IamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
 	// Check if the identity field returns a value
-	if _, ok := d.GetOk("{{<%= object.name.downcase -%>}}"); !ok {
-		return Asset{}, ErrEmptyIdentityField
-	}
+  <% resource_params.each do |param| -%>
+  if _, ok := d.GetOk("{{<%= param.underscore -%>}}"); !ok {
+    return Asset{}, ErrEmptyIdentityField
+  }
+  <% end # resource_params.each -%>
+
 
 	return fetchIamPolicy(
 		<%= resource_name -%>IamUpdaterProducer,
 		d,
 		config,
-		"//<%= product_backend_name.downcase  -%>.googleapis.com/{{<%= object.name.downcase -%>}}",
+		"<%= asset_name_template -%>",
 		<%= resource_name -%>IAMAssetType,
 	)
 }

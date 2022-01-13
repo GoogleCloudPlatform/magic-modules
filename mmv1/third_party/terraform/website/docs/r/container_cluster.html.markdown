@@ -180,7 +180,7 @@ VPC-native clusters. Adding this block enables [IP aliasing](https://cloud.googl
 making the cluster VPC-native instead of routes-based. Structure is [documented
 below](#nested_ip_allocation_policy).
 
-* `networking_mode` - (Optional, [Beta]) Determines whether alias IPs or routes will be used for pod IPs in the cluster.
+* `networking_mode` - (Optional) Determines whether alias IPs or routes will be used for pod IPs in the cluster.
 Options are `VPC_NATIVE` or `ROUTES`. `VPC_NATIVE` enables [IP aliasing](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-aliases),
 and requires the `ip_allocation_policy` block to be defined. By default when this field is unspecified, GKE will create a `ROUTES`-based cluster.
 
@@ -268,6 +268,8 @@ region are guaranteed to support the same version.
 
 * `notification_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the [cluster upgrade notifications](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-upgrade-notifications) feature. Structure is [documented below](#nested_notification_config).
 
+* `confidential_nodes` - Configuration for [Confidential Nodes](https://cloud.google.com/kubernetes-engine/docs/how-to/confidential-gke-nodes) feature. Structure is documented below [documented below](#nested_confidential_nodes).
+
 * `pod_security_policy_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
     [PodSecurityPolicy](https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies) feature.
     Structure is [documented below](#nested_pod_security_policy_config).
@@ -335,7 +337,7 @@ subnetwork in which the cluster's instances are launched.
 * `default_snat_status` - (Optional)
   [GKE SNAT](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-masquerade-agent#how_ipmasq_works) DefaultSnatStatus contains the desired state of whether default sNAT should be disabled on the cluster, [API doc](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#networkconfig). Structure is [documented below](#nested_default_snat_status)
 
-* `dns_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `dns_config` - (Optional)
   Configuration for [Using Cloud DNS for GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/cloud-dns). Structure is [documented below](#nested_dns_config).
 
 <a name="nested_default_snat_status"></a>The `default_snat_status` block supports
@@ -369,6 +371,8 @@ subnetwork in which the cluster's instances are launched.
 
 * `istio_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     Structure is [documented below](#nested_istio_config).
+
+* `identity_service_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)). Structure is [documented below](#nested_identity_service_config).
 
 * `dns_cache_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     The status of the NodeLocal DNSCache addon. It is disabled by default.
@@ -412,6 +416,10 @@ addons_config {
 
 * `load_balancer_type` - (Optional) The load balancer type of CloudRun ingress service. It is external load balancer by default.
     Set `load_balancer_type=LOAD_BALANCER_TYPE_INTERNAL` to configure it as internal load balancer.
+
+<a name="nested_identity_service_config"></a>The `identity_service_config` block supports:
+
+* `enabled` - (Optional) Whether to enable the Identity Service component. It is disabled by default. Set `enabled=true` to enable.
 
 <a name="nested_istio_config"></a>The `istio_config` block supports:
 
@@ -623,6 +631,19 @@ ephemeral_storage_config {
 }
 ```
 
+* `gcfs_config` - (Optional) Parameters for the Google Container Filesystem (GCFS).
+    If unspecified, GCFS will not be enabled on the node pool. When enabling this feature you must specify `image_type = "COS_CONTAINERD"` and `node_version` from GKE versions 1.19 or later to use it.
+    For GKE versions 1.19, 1.20, and 1.21, the recommended minimum `node_version` would be 1.19.15-gke.1300, 1.20.11-gke.1300, and 1.21.5-gke.1300 respectively.
+    A `machine_type` that has more than 16 GiB of memory is also recommended.
+    GCFS must be enabled in order to use [image streaming](https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming).
+    Structure is [documented below](#nested_gcfs_config).
+
+```hcl
+gcfs_config {
+  enabled = true
+}
+```
+
 * `guest_accelerator` - (Optional) List of the type and count of accelerator cards attached to the instance.
     Structure [documented below](#nested_guest_accelerator).
     To support removal of guest_accelerators in Terraform 0.12 this field is an
@@ -663,10 +684,14 @@ ephemeral_storage_config {
     are preemptible. See the [official documentation](https://cloud.google.com/container-engine/docs/preemptible-vm)
     for more information. Defaults to false.
 
+* `spot` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) A boolean 
+    that represents whether the underlying node VMs are spot. See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms)
+    for more information. Defaults to false.
+
 * `sandbox_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) [GKE Sandbox](https://cloud.google.com/kubernetes-engine/docs/how-to/sandbox-pods) configuration. When enabling this feature you must specify `image_type = "COS_CONTAINERD"` and `node_version = "1.12.7-gke.17"` or later to use it.
     Structure is [documented below](#nested_sandbox_config).
 
-* `boot_disk_kms_key` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool. This should be of the form projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]. For more information about protecting resources with Cloud KMS Keys please see: https://cloud.google.com/compute/docs/disks/customer-managed-encryption
+* `boot_disk_kms_key` - (Optional) The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool. This should be of the form projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]. For more information about protecting resources with Cloud KMS Keys please see: https://cloud.google.com/compute/docs/disks/customer-managed-encryption
 
 * `service_account` - (Optional) The service account to be used by the Node VMs.
     If not specified, the "default" service account is used.
@@ -714,6 +739,8 @@ linux_node_config {
 }
 ```
 
+* `node_group` - (Optional) Setting this field will assign instances of this pool to run on the specified node group. This is useful for running workloads on [sole tenant nodes](https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes).
+
 <a name="nested_network_config"></a>The `network_config` block supports:
 
 * `create_pod_range` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Whether to create a new range for pod IPs in this node pool. Defaults are provided for `pod_range` and `pod_ipv4_cidr_block` if they are not specified.
@@ -725,6 +752,10 @@ linux_node_config {
 <a name="nested_ephemeral_storage_config"></a>The `ephemeral_storage_config` block supports:
 
 * `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
+
+<a name="nested_gcfs_config"></a>The `gcfs_config` block supports:
+
+* `enabled` (Required) - Whether or not the Google Container Filesystem (GCFS) is enabled
 
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
@@ -762,6 +793,10 @@ notification_config {
   }
 }
 ```
+
+<a name="nested_confidential_nodes"></a> The `confidential_nodes` block supports:
+
+* `enabled` (Required) - Enable Confidential Nodes for this cluster.
 
 <a name="nested_pod_security_policy_config"></a>The `pod_security_policy_config` block supports:
 

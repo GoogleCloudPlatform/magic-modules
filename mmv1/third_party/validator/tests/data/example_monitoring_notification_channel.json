@@ -1,0 +1,21 @@
+[
+  {
+    "name": "//monitoring.googleapis.com/placeholder-foobar",
+    "asset_type": "monitoring.googleapis.com/NotificationChannel",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v3",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/monitoring/v3/rest",
+      "discovery_name": "NotificationChannel",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "displayName": "monitoring notification channel",
+        "enabled": true,
+        "labels": {
+          "email_address": "foo@bar.com"
+        },
+        "type": "email"
+      }
+    }
+  }
+]

@@ -106,7 +106,19 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
         # require a `google` folder to exist.
         mkdir -p $LOCAL_PATH/google
     fi
+    pushd $LOCAL_PATH
+    # clear out the templates as they are copied during
+    # generation from mmv1/third_party/validator/tests/data
+    rm -rf ./testdata/templates/
+    rm -rf ./testdata/generatedconvert/
+    git add ./testdata
+    find ./test/** -type f -exec git rm {} \;
+    popd
     bundle exec compiler -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
+    pushd $LOCAL_PATH
+    TFV_CREATE_GENERATED_FILES=true
+    go test ./test -run "TestAcc.*_generated_offline"
+    popd
 elif [ "$REPO" == "tf-oics" ]; then
     # use terraform generator with oics override
     bundle exec compiler -a -e terraform -f oics -o $LOCAL_PATH -v $VERSION

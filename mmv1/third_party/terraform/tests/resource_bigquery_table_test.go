@@ -680,6 +680,39 @@ func TestAccBigQueryTable_updateView(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryTable_WithViewAndSchema(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableWithViewAndSchema(datasetID, tableID, "table description1"),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccBigQueryTableWithViewAndSchema(datasetID, tableID, "table description2"),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccBigQueryTable_MaterializedView_DailyTimePartioning_Basic(t *testing.T) {
 	t.Parallel()
 
@@ -975,6 +1008,39 @@ func TestAccBigQueryTable_allowDestroy(t *testing.T) {
 			},
 			{
 				Config: testAccBigQueryTable_noAllowDestroyUpdated(datasetID, tableID),
+			},
+		},
+	})
+}
+
+func TestAccBigQueryTable_emptySchema(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTable_mimicCreateFromConsole(datasetID, tableID),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccBigQueryTable_emptySchema(datasetID, tableID),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -1468,6 +1534,51 @@ resource "google_bigquery_table" "test" {
   }
 }
 `, datasetID, tableID)
+}
+
+func testAccBigQueryTableWithViewAndSchema(datasetID, tableID, desc string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+
+  description = "%s"
+
+  time_partitioning {
+    type = "DAY"
+  }
+
+  schema = jsonencode(
+  [
+
+	{
+	"description":"desc1",
+	"mode":"NULLABLE",
+	"name":"col1",
+	"type":"STRING"
+	},
+	{
+	"description":"desc2",
+	"mode":"NULLABLE",
+	"name":"col2",
+	"type":"STRING"
+	}
+  ]
+  )
+
+  view {
+    query = <<SQL
+select "val1" as col1, "val2" as col2
+SQL
+    use_legacy_sql = false
+  }
+}
+`, datasetID, tableID, desc)
 }
 
 func testAccBigQueryTableWithNewSqlView(datasetID, tableID string) string {
@@ -2127,6 +2238,38 @@ resource "google_bigquery_table" "test" {
         type        = "TIMESTAMP"
       },
     ])
+}
+`, datasetID, tableID)
+}
+
+func testAccBigQueryTable_mimicCreateFromConsole(datasetID, tableID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+  schema = <<EOF
+  [
+  ]
+  EOF
+}
+`, datasetID, tableID)
+}
+
+func testAccBigQueryTable_emptySchema(datasetID, tableID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
 }
 `, datasetID, tableID)
 }
