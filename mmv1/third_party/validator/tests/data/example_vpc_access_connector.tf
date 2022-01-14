@@ -13,8 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+      version = "~> {{.Provider.version}}"
+    }
+  }
+}
 
-
+provider "google" {
+  {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
+}
 
 resource "google_vpc_access_connector" "connector" {
   name          = "vpc-con"
