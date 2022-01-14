@@ -250,6 +250,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           backend_service_name: "backend-service"
           neg_name: "network-endpoint"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_external_managed"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          backend_service_name: "backend-service"
+          health_check_name: "health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/backend_service.go.erb'
       encoder: 'templates/terraform/encoders/backend_service.go.erb'
@@ -2237,6 +2244,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "gce_reservation"
         vars:
           reservation_name: "gce-reservation"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "shared_reservation_basic"
+        primary_resource_id: "gce_reservation"
+        test_env_vars:
+          project: :PROJECT_NAME
+          org_id: :ORG_ID
+          billing_account: :BILLING_ACCT
+        vars:
+          reservation_name: "gce-shared-reservation"
+        skip_docs: true
+        # Resource creation race
+        skip_vcr: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       update_encoder: templates/terraform/update_encoder/reservation.go.erb
     properties:
@@ -2247,6 +2266,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       specificReservation.count: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntAtLeast(1)'
+      shareSettings: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        ignore_read: true
+      shareSettings.shareType: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      shareSettings.projectMap: !ruby/object:Overrides::Terraform::PropertyOverride
+        key_description: |
+          The project id/number which is deleting or adding to the project list.
+      shareSettings.projectMap.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          The project id/number, should be same as the key of this project config in the project map.
   Route: !ruby/object:Overrides::Terraform::ResourceOverride
     # Route cannot be added while a peering is on progress on the network
     mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
