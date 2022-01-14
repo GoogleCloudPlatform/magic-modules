@@ -3450,15 +3450,15 @@ func convertNetworkConnectivitySpokeBetaLinkedInterconnectAttachmentsToHCL(r *ne
 		return ""
 	}
 	outputConfig := "{\n"
+	if r.SiteToSiteDataTransfer != nil {
+		outputConfig += fmt.Sprintf("\tsite_to_site_data_transfer = %#v\n", *r.SiteToSiteDataTransfer)
+	}
 	if r.Uris != nil {
 		outputConfig += "\turis = ["
 		for _, v := range r.Uris {
 			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
 		outputConfig += "]\n"
-	}
-	if r.SiteToSiteDataTransfer != nil {
-		outputConfig += fmt.Sprintf("\tsite_to_site_data_transfer = %#v\n", *r.SiteToSiteDataTransfer)
 	}
 	return outputConfig + "}"
 }
@@ -3498,15 +3498,15 @@ func convertNetworkConnectivitySpokeBetaLinkedVpnTunnelsToHCL(r *networkconnecti
 		return ""
 	}
 	outputConfig := "{\n"
+	if r.SiteToSiteDataTransfer != nil {
+		outputConfig += fmt.Sprintf("\tsite_to_site_data_transfer = %#v\n", *r.SiteToSiteDataTransfer)
+	}
 	if r.Uris != nil {
 		outputConfig += "\turis = ["
 		for _, v := range r.Uris {
 			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
 		outputConfig += "]\n"
-	}
-	if r.SiteToSiteDataTransfer != nil {
-		outputConfig += fmt.Sprintf("\tsite_to_site_data_transfer = %#v\n", *r.SiteToSiteDataTransfer)
 	}
 	return outputConfig + "}"
 }
@@ -3802,11 +3802,167 @@ func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecT
 		return ""
 	}
 	outputConfig := "{\n"
-	if v := convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentExecToHCL(r.Validate); v != "" {
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateToHCL(r.Validate); v != "" {
 		outputConfig += fmt.Sprintf("\tvalidate %s\n", v)
 	}
-	if v := convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentExecToHCL(r.Enforce); v != "" {
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceToHCL(r.Enforce); v != "" {
 		outputConfig += fmt.Sprintf("\tenforce %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidate) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Interpreter != nil {
+		outputConfig += fmt.Sprintf("\tinterpreter = %#v\n", *r.Interpreter)
+	}
+	if r.Args != nil {
+		outputConfig += "\targs = ["
+		for _, v := range r.Args {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateFileToHCL(r.File); v != "" {
+		outputConfig += fmt.Sprintf("\tfile %s\n", v)
+	}
+	if r.OutputFilePath != nil {
+		outputConfig += fmt.Sprintf("\toutput_file_path = %#v\n", *r.OutputFilePath)
+	}
+	if r.Script != nil {
+		outputConfig += fmt.Sprintf("\tscript = %#v\n", *r.Script)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateFileToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFile) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowInsecure != nil {
+		outputConfig += fmt.Sprintf("\tallow_insecure = %#v\n", *r.AllowInsecure)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateFileGcsToHCL(r.Gcs); v != "" {
+		outputConfig += fmt.Sprintf("\tgcs %s\n", v)
+	}
+	if r.LocalPath != nil {
+		outputConfig += fmt.Sprintf("\tlocal_path = %#v\n", *r.LocalPath)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateFileRemoteToHCL(r.Remote); v != "" {
+		outputConfig += fmt.Sprintf("\tremote %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateFileGcsToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileGcs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Bucket != nil {
+		outputConfig += fmt.Sprintf("\tbucket = %#v\n", *r.Bucket)
+	}
+	if r.Object != nil {
+		outputConfig += fmt.Sprintf("\tobject = %#v\n", *r.Object)
+	}
+	if r.Generation != nil {
+		outputConfig += fmt.Sprintf("\tgeneration = %#v\n", *r.Generation)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateFileRemoteToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileRemote) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Uri != nil {
+		outputConfig += fmt.Sprintf("\turi = %#v\n", *r.Uri)
+	}
+	if r.Sha256Checksum != nil {
+		outputConfig += fmt.Sprintf("\tsha256_checksum = %#v\n", *r.Sha256Checksum)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforce) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Interpreter != nil {
+		outputConfig += fmt.Sprintf("\tinterpreter = %#v\n", *r.Interpreter)
+	}
+	if r.Args != nil {
+		outputConfig += "\targs = ["
+		for _, v := range r.Args {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceFileToHCL(r.File); v != "" {
+		outputConfig += fmt.Sprintf("\tfile %s\n", v)
+	}
+	if r.OutputFilePath != nil {
+		outputConfig += fmt.Sprintf("\toutput_file_path = %#v\n", *r.OutputFilePath)
+	}
+	if r.Script != nil {
+		outputConfig += fmt.Sprintf("\tscript = %#v\n", *r.Script)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceFileToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFile) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowInsecure != nil {
+		outputConfig += fmt.Sprintf("\tallow_insecure = %#v\n", *r.AllowInsecure)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceFileGcsToHCL(r.Gcs); v != "" {
+		outputConfig += fmt.Sprintf("\tgcs %s\n", v)
+	}
+	if r.LocalPath != nil {
+		outputConfig += fmt.Sprintf("\tlocal_path = %#v\n", *r.LocalPath)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceFileRemoteToHCL(r.Remote); v != "" {
+		outputConfig += fmt.Sprintf("\tremote %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceFileGcsToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileGcs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Bucket != nil {
+		outputConfig += fmt.Sprintf("\tbucket = %#v\n", *r.Bucket)
+	}
+	if r.Object != nil {
+		outputConfig += fmt.Sprintf("\tobject = %#v\n", *r.Object)
+	}
+	if r.Generation != nil {
+		outputConfig += fmt.Sprintf("\tgeneration = %#v\n", *r.Generation)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceFileRemoteToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileRemote) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Uri != nil {
+		outputConfig += fmt.Sprintf("\turi = %#v\n", *r.Uri)
+	}
+	if r.Sha256Checksum != nil {
+		outputConfig += fmt.Sprintf("\tsha256_checksum = %#v\n", *r.Sha256Checksum)
 	}
 	return outputConfig + "}"
 }
@@ -3825,8 +3981,59 @@ func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileT
 	if r.Content != nil {
 		outputConfig += fmt.Sprintf("\tcontent = %#v\n", *r.Content)
 	}
-	if v := convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileToHCL(r.File); v != "" {
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileFileToHCL(r.File); v != "" {
 		outputConfig += fmt.Sprintf("\tfile %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileFileToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFile) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowInsecure != nil {
+		outputConfig += fmt.Sprintf("\tallow_insecure = %#v\n", *r.AllowInsecure)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileFileGcsToHCL(r.Gcs); v != "" {
+		outputConfig += fmt.Sprintf("\tgcs %s\n", v)
+	}
+	if r.LocalPath != nil {
+		outputConfig += fmt.Sprintf("\tlocal_path = %#v\n", *r.LocalPath)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileFileRemoteToHCL(r.Remote); v != "" {
+		outputConfig += fmt.Sprintf("\tremote %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileFileGcsToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileGcs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Bucket != nil {
+		outputConfig += fmt.Sprintf("\tbucket = %#v\n", *r.Bucket)
+	}
+	if r.Object != nil {
+		outputConfig += fmt.Sprintf("\tobject = %#v\n", *r.Object)
+	}
+	if r.Generation != nil {
+		outputConfig += fmt.Sprintf("\tgeneration = %#v\n", *r.Generation)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileFileRemoteToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileRemote) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Uri != nil {
+		outputConfig += fmt.Sprintf("\turi = %#v\n", *r.Uri)
+	}
+	if r.Sha256Checksum != nil {
+		outputConfig += fmt.Sprintf("\tsha256_checksum = %#v\n", *r.Sha256Checksum)
 	}
 	return outputConfig + "}"
 }
@@ -3879,11 +4086,62 @@ func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDe
 		return ""
 	}
 	outputConfig := "{\n"
-	if v := convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileToHCL(r.Source); v != "" {
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebSourceToHCL(r.Source); v != "" {
 		outputConfig += fmt.Sprintf("\tsource %s\n", v)
 	}
 	if r.PullDeps != nil {
 		outputConfig += fmt.Sprintf("\tpull_deps = %#v\n", *r.PullDeps)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebSourceToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSource) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowInsecure != nil {
+		outputConfig += fmt.Sprintf("\tallow_insecure = %#v\n", *r.AllowInsecure)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebSourceGcsToHCL(r.Gcs); v != "" {
+		outputConfig += fmt.Sprintf("\tgcs %s\n", v)
+	}
+	if r.LocalPath != nil {
+		outputConfig += fmt.Sprintf("\tlocal_path = %#v\n", *r.LocalPath)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebSourceRemoteToHCL(r.Remote); v != "" {
+		outputConfig += fmt.Sprintf("\tremote %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebSourceGcsToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceGcs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Bucket != nil {
+		outputConfig += fmt.Sprintf("\tbucket = %#v\n", *r.Bucket)
+	}
+	if r.Object != nil {
+		outputConfig += fmt.Sprintf("\tobject = %#v\n", *r.Object)
+	}
+	if r.Generation != nil {
+		outputConfig += fmt.Sprintf("\tgeneration = %#v\n", *r.Generation)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebSourceRemoteToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceRemote) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Uri != nil {
+		outputConfig += fmt.Sprintf("\turi = %#v\n", *r.Uri)
+	}
+	if r.Sha256Checksum != nil {
+		outputConfig += fmt.Sprintf("\tsha256_checksum = %#v\n", *r.Sha256Checksum)
 	}
 	return outputConfig + "}"
 }
@@ -3904,7 +4162,7 @@ func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMs
 		return ""
 	}
 	outputConfig := "{\n"
-	if v := convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileToHCL(r.Source); v != "" {
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiSourceToHCL(r.Source); v != "" {
 		outputConfig += fmt.Sprintf("\tsource %s\n", v)
 	}
 	if r.Properties != nil {
@@ -3917,16 +4175,118 @@ func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMs
 	return outputConfig + "}"
 }
 
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiSourceToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSource) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowInsecure != nil {
+		outputConfig += fmt.Sprintf("\tallow_insecure = %#v\n", *r.AllowInsecure)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiSourceGcsToHCL(r.Gcs); v != "" {
+		outputConfig += fmt.Sprintf("\tgcs %s\n", v)
+	}
+	if r.LocalPath != nil {
+		outputConfig += fmt.Sprintf("\tlocal_path = %#v\n", *r.LocalPath)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiSourceRemoteToHCL(r.Remote); v != "" {
+		outputConfig += fmt.Sprintf("\tremote %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiSourceGcsToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceGcs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Bucket != nil {
+		outputConfig += fmt.Sprintf("\tbucket = %#v\n", *r.Bucket)
+	}
+	if r.Object != nil {
+		outputConfig += fmt.Sprintf("\tobject = %#v\n", *r.Object)
+	}
+	if r.Generation != nil {
+		outputConfig += fmt.Sprintf("\tgeneration = %#v\n", *r.Generation)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiSourceRemoteToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceRemote) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Uri != nil {
+		outputConfig += fmt.Sprintf("\turi = %#v\n", *r.Uri)
+	}
+	if r.Sha256Checksum != nil {
+		outputConfig += fmt.Sprintf("\tsha256_checksum = %#v\n", *r.Sha256Checksum)
+	}
+	return outputConfig + "}"
+}
+
 func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpm) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if v := convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileToHCL(r.Source); v != "" {
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmSourceToHCL(r.Source); v != "" {
 		outputConfig += fmt.Sprintf("\tsource %s\n", v)
 	}
 	if r.PullDeps != nil {
 		outputConfig += fmt.Sprintf("\tpull_deps = %#v\n", *r.PullDeps)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmSourceToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSource) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowInsecure != nil {
+		outputConfig += fmt.Sprintf("\tallow_insecure = %#v\n", *r.AllowInsecure)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmSourceGcsToHCL(r.Gcs); v != "" {
+		outputConfig += fmt.Sprintf("\tgcs %s\n", v)
+	}
+	if r.LocalPath != nil {
+		outputConfig += fmt.Sprintf("\tlocal_path = %#v\n", *r.LocalPath)
+	}
+	if v := convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmSourceRemoteToHCL(r.Remote); v != "" {
+		outputConfig += fmt.Sprintf("\tremote %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmSourceGcsToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceGcs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Bucket != nil {
+		outputConfig += fmt.Sprintf("\tbucket = %#v\n", *r.Bucket)
+	}
+	if r.Object != nil {
+		outputConfig += fmt.Sprintf("\tobject = %#v\n", *r.Object)
+	}
+	if r.Generation != nil {
+		outputConfig += fmt.Sprintf("\tgeneration = %#v\n", *r.Generation)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmSourceRemoteToHCL(r *osconfigBeta.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceRemote) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Uri != nil {
+		outputConfig += fmt.Sprintf("\turi = %#v\n", *r.Uri)
+	}
+	if r.Sha256Checksum != nil {
+		outputConfig += fmt.Sprintf("\tsha256_checksum = %#v\n", *r.Sha256Checksum)
 	}
 	return outputConfig + "}"
 }
@@ -4100,84 +4460,6 @@ func convertOsConfigOsPolicyAssignmentBetaRolloutDisruptionBudgetToHCL(r *osconf
 	}
 	if r.Percent != nil {
 		outputConfig += fmt.Sprintf("\tpercent = %#v\n", *r.Percent)
-	}
-	return outputConfig + "}"
-}
-
-func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileToHCL(r *osconfigBeta.OSPolicyAssignmentFile) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.AllowInsecure != nil {
-		outputConfig += fmt.Sprintf("\tallow_insecure = %#v\n", *r.AllowInsecure)
-	}
-	if v := convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileGcsToHCL(r.Gcs); v != "" {
-		outputConfig += fmt.Sprintf("\tgcs %s\n", v)
-	}
-	if r.LocalPath != nil {
-		outputConfig += fmt.Sprintf("\tlocal_path = %#v\n", *r.LocalPath)
-	}
-	if v := convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileRemoteToHCL(r.Remote); v != "" {
-		outputConfig += fmt.Sprintf("\tremote %s\n", v)
-	}
-	return outputConfig + "}"
-}
-
-func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileGcsToHCL(r *osconfigBeta.OSPolicyAssignmentFileGcs) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Bucket != nil {
-		outputConfig += fmt.Sprintf("\tbucket = %#v\n", *r.Bucket)
-	}
-	if r.Object != nil {
-		outputConfig += fmt.Sprintf("\tobject = %#v\n", *r.Object)
-	}
-	if r.Generation != nil {
-		outputConfig += fmt.Sprintf("\tgeneration = %#v\n", *r.Generation)
-	}
-	return outputConfig + "}"
-}
-
-func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileRemoteToHCL(r *osconfigBeta.OSPolicyAssignmentFileRemote) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Uri != nil {
-		outputConfig += fmt.Sprintf("\turi = %#v\n", *r.Uri)
-	}
-	if r.Sha256Checksum != nil {
-		outputConfig += fmt.Sprintf("\tsha256_checksum = %#v\n", *r.Sha256Checksum)
-	}
-	return outputConfig + "}"
-}
-
-func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentExecToHCL(r *osconfigBeta.OSPolicyAssignmentExec) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Interpreter != nil {
-		outputConfig += fmt.Sprintf("\tinterpreter = %#v\n", *r.Interpreter)
-	}
-	if r.Args != nil {
-		outputConfig += "\targs = ["
-		for _, v := range r.Args {
-			outputConfig += fmt.Sprintf("%#v, ", v)
-		}
-		outputConfig += "]\n"
-	}
-	if v := convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileToHCL(r.File); v != "" {
-		outputConfig += fmt.Sprintf("\tfile %s\n", v)
-	}
-	if r.OutputFilePath != nil {
-		outputConfig += fmt.Sprintf("\toutput_file_path = %#v\n", *r.OutputFilePath)
-	}
-	if r.Script != nil {
-		outputConfig += fmt.Sprintf("\tscript = %#v\n", *r.Script)
 	}
 	return outputConfig + "}"
 }
@@ -7280,15 +7562,15 @@ func convertNetworkConnectivitySpokeLinkedInterconnectAttachmentsToHCL(r *networ
 		return ""
 	}
 	outputConfig := "{\n"
+	if r.SiteToSiteDataTransfer != nil {
+		outputConfig += fmt.Sprintf("\tsite_to_site_data_transfer = %#v\n", *r.SiteToSiteDataTransfer)
+	}
 	if r.Uris != nil {
 		outputConfig += "\turis = ["
 		for _, v := range r.Uris {
 			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
 		outputConfig += "]\n"
-	}
-	if r.SiteToSiteDataTransfer != nil {
-		outputConfig += fmt.Sprintf("\tsite_to_site_data_transfer = %#v\n", *r.SiteToSiteDataTransfer)
 	}
 	return outputConfig + "}"
 }
@@ -7328,15 +7610,15 @@ func convertNetworkConnectivitySpokeLinkedVpnTunnelsToHCL(r *networkconnectivity
 		return ""
 	}
 	outputConfig := "{\n"
+	if r.SiteToSiteDataTransfer != nil {
+		outputConfig += fmt.Sprintf("\tsite_to_site_data_transfer = %#v\n", *r.SiteToSiteDataTransfer)
+	}
 	if r.Uris != nil {
 		outputConfig += "\turis = ["
 		for _, v := range r.Uris {
 			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
 		outputConfig += "]\n"
-	}
-	if r.SiteToSiteDataTransfer != nil {
-		outputConfig += fmt.Sprintf("\tsite_to_site_data_transfer = %#v\n", *r.SiteToSiteDataTransfer)
 	}
 	return outputConfig + "}"
 }
@@ -7632,11 +7914,167 @@ func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecToHCL
 		return ""
 	}
 	outputConfig := "{\n"
-	if v := convertOsConfigOsPolicyAssignmentOSPolicyAssignmentExecToHCL(r.Validate); v != "" {
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateToHCL(r.Validate); v != "" {
 		outputConfig += fmt.Sprintf("\tvalidate %s\n", v)
 	}
-	if v := convertOsConfigOsPolicyAssignmentOSPolicyAssignmentExecToHCL(r.Enforce); v != "" {
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceToHCL(r.Enforce); v != "" {
 		outputConfig += fmt.Sprintf("\tenforce %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidate) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Interpreter != nil {
+		outputConfig += fmt.Sprintf("\tinterpreter = %#v\n", *r.Interpreter)
+	}
+	if r.Args != nil {
+		outputConfig += "\targs = ["
+		for _, v := range r.Args {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileToHCL(r.File); v != "" {
+		outputConfig += fmt.Sprintf("\tfile %s\n", v)
+	}
+	if r.OutputFilePath != nil {
+		outputConfig += fmt.Sprintf("\toutput_file_path = %#v\n", *r.OutputFilePath)
+	}
+	if r.Script != nil {
+		outputConfig += fmt.Sprintf("\tscript = %#v\n", *r.Script)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFile) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowInsecure != nil {
+		outputConfig += fmt.Sprintf("\tallow_insecure = %#v\n", *r.AllowInsecure)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileGcsToHCL(r.Gcs); v != "" {
+		outputConfig += fmt.Sprintf("\tgcs %s\n", v)
+	}
+	if r.LocalPath != nil {
+		outputConfig += fmt.Sprintf("\tlocal_path = %#v\n", *r.LocalPath)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileRemoteToHCL(r.Remote); v != "" {
+		outputConfig += fmt.Sprintf("\tremote %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileGcsToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileGcs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Bucket != nil {
+		outputConfig += fmt.Sprintf("\tbucket = %#v\n", *r.Bucket)
+	}
+	if r.Object != nil {
+		outputConfig += fmt.Sprintf("\tobject = %#v\n", *r.Object)
+	}
+	if r.Generation != nil {
+		outputConfig += fmt.Sprintf("\tgeneration = %#v\n", *r.Generation)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileRemoteToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileRemote) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Uri != nil {
+		outputConfig += fmt.Sprintf("\turi = %#v\n", *r.Uri)
+	}
+	if r.Sha256Checksum != nil {
+		outputConfig += fmt.Sprintf("\tsha256_checksum = %#v\n", *r.Sha256Checksum)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforce) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Interpreter != nil {
+		outputConfig += fmt.Sprintf("\tinterpreter = %#v\n", *r.Interpreter)
+	}
+	if r.Args != nil {
+		outputConfig += "\targs = ["
+		for _, v := range r.Args {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileToHCL(r.File); v != "" {
+		outputConfig += fmt.Sprintf("\tfile %s\n", v)
+	}
+	if r.OutputFilePath != nil {
+		outputConfig += fmt.Sprintf("\toutput_file_path = %#v\n", *r.OutputFilePath)
+	}
+	if r.Script != nil {
+		outputConfig += fmt.Sprintf("\tscript = %#v\n", *r.Script)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFile) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowInsecure != nil {
+		outputConfig += fmt.Sprintf("\tallow_insecure = %#v\n", *r.AllowInsecure)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileGcsToHCL(r.Gcs); v != "" {
+		outputConfig += fmt.Sprintf("\tgcs %s\n", v)
+	}
+	if r.LocalPath != nil {
+		outputConfig += fmt.Sprintf("\tlocal_path = %#v\n", *r.LocalPath)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileRemoteToHCL(r.Remote); v != "" {
+		outputConfig += fmt.Sprintf("\tremote %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileGcsToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileGcs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Bucket != nil {
+		outputConfig += fmt.Sprintf("\tbucket = %#v\n", *r.Bucket)
+	}
+	if r.Object != nil {
+		outputConfig += fmt.Sprintf("\tobject = %#v\n", *r.Object)
+	}
+	if r.Generation != nil {
+		outputConfig += fmt.Sprintf("\tgeneration = %#v\n", *r.Generation)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileRemoteToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileRemote) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Uri != nil {
+		outputConfig += fmt.Sprintf("\turi = %#v\n", *r.Uri)
+	}
+	if r.Sha256Checksum != nil {
+		outputConfig += fmt.Sprintf("\tsha256_checksum = %#v\n", *r.Sha256Checksum)
 	}
 	return outputConfig + "}"
 }
@@ -7655,8 +8093,59 @@ func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileToHCL
 	if r.Content != nil {
 		outputConfig += fmt.Sprintf("\tcontent = %#v\n", *r.Content)
 	}
-	if v := convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileToHCL(r.File); v != "" {
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileToHCL(r.File); v != "" {
 		outputConfig += fmt.Sprintf("\tfile %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFile) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowInsecure != nil {
+		outputConfig += fmt.Sprintf("\tallow_insecure = %#v\n", *r.AllowInsecure)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileGcsToHCL(r.Gcs); v != "" {
+		outputConfig += fmt.Sprintf("\tgcs %s\n", v)
+	}
+	if r.LocalPath != nil {
+		outputConfig += fmt.Sprintf("\tlocal_path = %#v\n", *r.LocalPath)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileRemoteToHCL(r.Remote); v != "" {
+		outputConfig += fmt.Sprintf("\tremote %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileGcsToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileGcs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Bucket != nil {
+		outputConfig += fmt.Sprintf("\tbucket = %#v\n", *r.Bucket)
+	}
+	if r.Object != nil {
+		outputConfig += fmt.Sprintf("\tobject = %#v\n", *r.Object)
+	}
+	if r.Generation != nil {
+		outputConfig += fmt.Sprintf("\tgeneration = %#v\n", *r.Generation)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileRemoteToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileRemote) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Uri != nil {
+		outputConfig += fmt.Sprintf("\turi = %#v\n", *r.Uri)
+	}
+	if r.Sha256Checksum != nil {
+		outputConfig += fmt.Sprintf("\tsha256_checksum = %#v\n", *r.Sha256Checksum)
 	}
 	return outputConfig + "}"
 }
@@ -7709,11 +8198,62 @@ func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebToH
 		return ""
 	}
 	outputConfig := "{\n"
-	if v := convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileToHCL(r.Source); v != "" {
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceToHCL(r.Source); v != "" {
 		outputConfig += fmt.Sprintf("\tsource %s\n", v)
 	}
 	if r.PullDeps != nil {
 		outputConfig += fmt.Sprintf("\tpull_deps = %#v\n", *r.PullDeps)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSource) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowInsecure != nil {
+		outputConfig += fmt.Sprintf("\tallow_insecure = %#v\n", *r.AllowInsecure)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceGcsToHCL(r.Gcs); v != "" {
+		outputConfig += fmt.Sprintf("\tgcs %s\n", v)
+	}
+	if r.LocalPath != nil {
+		outputConfig += fmt.Sprintf("\tlocal_path = %#v\n", *r.LocalPath)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceRemoteToHCL(r.Remote); v != "" {
+		outputConfig += fmt.Sprintf("\tremote %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceGcsToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceGcs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Bucket != nil {
+		outputConfig += fmt.Sprintf("\tbucket = %#v\n", *r.Bucket)
+	}
+	if r.Object != nil {
+		outputConfig += fmt.Sprintf("\tobject = %#v\n", *r.Object)
+	}
+	if r.Generation != nil {
+		outputConfig += fmt.Sprintf("\tgeneration = %#v\n", *r.Generation)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceRemoteToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceRemote) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Uri != nil {
+		outputConfig += fmt.Sprintf("\turi = %#v\n", *r.Uri)
+	}
+	if r.Sha256Checksum != nil {
+		outputConfig += fmt.Sprintf("\tsha256_checksum = %#v\n", *r.Sha256Checksum)
 	}
 	return outputConfig + "}"
 }
@@ -7734,7 +8274,7 @@ func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiToH
 		return ""
 	}
 	outputConfig := "{\n"
-	if v := convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileToHCL(r.Source); v != "" {
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceToHCL(r.Source); v != "" {
 		outputConfig += fmt.Sprintf("\tsource %s\n", v)
 	}
 	if r.Properties != nil {
@@ -7747,16 +8287,118 @@ func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiToH
 	return outputConfig + "}"
 }
 
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSource) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowInsecure != nil {
+		outputConfig += fmt.Sprintf("\tallow_insecure = %#v\n", *r.AllowInsecure)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceGcsToHCL(r.Gcs); v != "" {
+		outputConfig += fmt.Sprintf("\tgcs %s\n", v)
+	}
+	if r.LocalPath != nil {
+		outputConfig += fmt.Sprintf("\tlocal_path = %#v\n", *r.LocalPath)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceRemoteToHCL(r.Remote); v != "" {
+		outputConfig += fmt.Sprintf("\tremote %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceGcsToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceGcs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Bucket != nil {
+		outputConfig += fmt.Sprintf("\tbucket = %#v\n", *r.Bucket)
+	}
+	if r.Object != nil {
+		outputConfig += fmt.Sprintf("\tobject = %#v\n", *r.Object)
+	}
+	if r.Generation != nil {
+		outputConfig += fmt.Sprintf("\tgeneration = %#v\n", *r.Generation)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceRemoteToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceRemote) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Uri != nil {
+		outputConfig += fmt.Sprintf("\turi = %#v\n", *r.Uri)
+	}
+	if r.Sha256Checksum != nil {
+		outputConfig += fmt.Sprintf("\tsha256_checksum = %#v\n", *r.Sha256Checksum)
+	}
+	return outputConfig + "}"
+}
+
 func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpm) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
-	if v := convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileToHCL(r.Source); v != "" {
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceToHCL(r.Source); v != "" {
 		outputConfig += fmt.Sprintf("\tsource %s\n", v)
 	}
 	if r.PullDeps != nil {
 		outputConfig += fmt.Sprintf("\tpull_deps = %#v\n", *r.PullDeps)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSource) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowInsecure != nil {
+		outputConfig += fmt.Sprintf("\tallow_insecure = %#v\n", *r.AllowInsecure)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceGcsToHCL(r.Gcs); v != "" {
+		outputConfig += fmt.Sprintf("\tgcs %s\n", v)
+	}
+	if r.LocalPath != nil {
+		outputConfig += fmt.Sprintf("\tlocal_path = %#v\n", *r.LocalPath)
+	}
+	if v := convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceRemoteToHCL(r.Remote); v != "" {
+		outputConfig += fmt.Sprintf("\tremote %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceGcsToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceGcs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Bucket != nil {
+		outputConfig += fmt.Sprintf("\tbucket = %#v\n", *r.Bucket)
+	}
+	if r.Object != nil {
+		outputConfig += fmt.Sprintf("\tobject = %#v\n", *r.Object)
+	}
+	if r.Generation != nil {
+		outputConfig += fmt.Sprintf("\tgeneration = %#v\n", *r.Generation)
+	}
+	return outputConfig + "}"
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceRemoteToHCL(r *osconfig.OSPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceRemote) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Uri != nil {
+		outputConfig += fmt.Sprintf("\turi = %#v\n", *r.Uri)
+	}
+	if r.Sha256Checksum != nil {
+		outputConfig += fmt.Sprintf("\tsha256_checksum = %#v\n", *r.Sha256Checksum)
 	}
 	return outputConfig + "}"
 }
@@ -7930,84 +8572,6 @@ func convertOsConfigOsPolicyAssignmentRolloutDisruptionBudgetToHCL(r *osconfig.O
 	}
 	if r.Percent != nil {
 		outputConfig += fmt.Sprintf("\tpercent = %#v\n", *r.Percent)
-	}
-	return outputConfig + "}"
-}
-
-func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileToHCL(r *osconfig.OSPolicyAssignmentFile) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.AllowInsecure != nil {
-		outputConfig += fmt.Sprintf("\tallow_insecure = %#v\n", *r.AllowInsecure)
-	}
-	if v := convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileGcsToHCL(r.Gcs); v != "" {
-		outputConfig += fmt.Sprintf("\tgcs %s\n", v)
-	}
-	if r.LocalPath != nil {
-		outputConfig += fmt.Sprintf("\tlocal_path = %#v\n", *r.LocalPath)
-	}
-	if v := convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileRemoteToHCL(r.Remote); v != "" {
-		outputConfig += fmt.Sprintf("\tremote %s\n", v)
-	}
-	return outputConfig + "}"
-}
-
-func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileGcsToHCL(r *osconfig.OSPolicyAssignmentFileGcs) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Bucket != nil {
-		outputConfig += fmt.Sprintf("\tbucket = %#v\n", *r.Bucket)
-	}
-	if r.Object != nil {
-		outputConfig += fmt.Sprintf("\tobject = %#v\n", *r.Object)
-	}
-	if r.Generation != nil {
-		outputConfig += fmt.Sprintf("\tgeneration = %#v\n", *r.Generation)
-	}
-	return outputConfig + "}"
-}
-
-func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileRemoteToHCL(r *osconfig.OSPolicyAssignmentFileRemote) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Uri != nil {
-		outputConfig += fmt.Sprintf("\turi = %#v\n", *r.Uri)
-	}
-	if r.Sha256Checksum != nil {
-		outputConfig += fmt.Sprintf("\tsha256_checksum = %#v\n", *r.Sha256Checksum)
-	}
-	return outputConfig + "}"
-}
-
-func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentExecToHCL(r *osconfig.OSPolicyAssignmentExec) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Interpreter != nil {
-		outputConfig += fmt.Sprintf("\tinterpreter = %#v\n", *r.Interpreter)
-	}
-	if r.Args != nil {
-		outputConfig += "\targs = ["
-		for _, v := range r.Args {
-			outputConfig += fmt.Sprintf("%#v, ", v)
-		}
-		outputConfig += "]\n"
-	}
-	if v := convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileToHCL(r.File); v != "" {
-		outputConfig += fmt.Sprintf("\tfile %s\n", v)
-	}
-	if r.OutputFilePath != nil {
-		outputConfig += fmt.Sprintf("\toutput_file_path = %#v\n", *r.OutputFilePath)
-	}
-	if r.Script != nil {
-		outputConfig += fmt.Sprintf("\tscript = %#v\n", *r.Script)
 	}
 	return outputConfig + "}"
 }
@@ -10976,8 +11540,8 @@ func convertNetworkConnectivitySpokeBetaLinkedInterconnectAttachments(i interfac
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"uris":                   in["uris"],
 		"siteToSiteDataTransfer": in["site_to_site_data_transfer"],
+		"uris":                   in["uris"],
 	}
 }
 
@@ -11042,8 +11606,8 @@ func convertNetworkConnectivitySpokeBetaLinkedVpnTunnels(i interface{}) map[stri
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"uris":                   in["uris"],
 		"siteToSiteDataTransfer": in["site_to_site_data_transfer"],
+		"uris":                   in["uris"],
 	}
 }
 
@@ -11320,8 +11884,8 @@ func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExec(
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"validate": convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentExec(in["validate"]),
-		"enforce":  convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentExec(in["enforce"]),
+		"validate": convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidate(in["validate"]),
+		"enforce":  convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforce(in["enforce"]),
 	}
 }
 
@@ -11336,6 +11900,194 @@ func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecL
 	return out
 }
 
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidate(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"interpreter":    in["interpreter"],
+		"args":           in["args"],
+		"file":           convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateFile(in["file"]),
+		"outputFilePath": in["output_file_path"],
+		"script":         in["script"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidate(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateFile(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowInsecure": in["allow_insecure"],
+		"gcs":           convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateFileGcs(in["gcs"]),
+		"localPath":     in["local_path"],
+		"remote":        convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateFileRemote(in["remote"]),
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateFileList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateFile(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateFileGcs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bucket":     in["bucket"],
+		"object":     in["object"],
+		"generation": in["generation"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateFileGcsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateFileGcs(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateFileRemote(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uri":            in["uri"],
+		"sha256Checksum": in["sha256_checksum"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateFileRemoteList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecValidateFileRemote(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforce(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"interpreter":    in["interpreter"],
+		"args":           in["args"],
+		"file":           convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceFile(in["file"]),
+		"outputFilePath": in["output_file_path"],
+		"script":         in["script"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforce(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceFile(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowInsecure": in["allow_insecure"],
+		"gcs":           convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceFileGcs(in["gcs"]),
+		"localPath":     in["local_path"],
+		"remote":        convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceFileRemote(in["remote"]),
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceFileList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceFile(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceFileGcs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bucket":     in["bucket"],
+		"object":     in["object"],
+		"generation": in["generation"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceFileGcsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceFileGcs(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceFileRemote(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uri":            in["uri"],
+		"sha256Checksum": in["sha256_checksum"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceFileRemoteList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesExecEnforceFileRemote(v))
+	}
+	return out
+}
+
 func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFile(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -11345,7 +12097,7 @@ func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFile(
 		"path":        in["path"],
 		"state":       in["state"],
 		"content":     in["content"],
-		"file":        convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFile(in["file"]),
+		"file":        convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileFile(in["file"]),
 		"permissions": in["permissions"],
 	}
 }
@@ -11357,6 +12109,75 @@ func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileL
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFile(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileFile(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowInsecure": in["allow_insecure"],
+		"gcs":           convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileFileGcs(in["gcs"]),
+		"localPath":     in["local_path"],
+		"remote":        convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileFileRemote(in["remote"]),
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileFileList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileFile(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileFileGcs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bucket":     in["bucket"],
+		"object":     in["object"],
+		"generation": in["generation"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileFileGcsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileFileGcs(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileFileRemote(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uri":            in["uri"],
+		"sha256Checksum": in["sha256_checksum"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileFileRemoteList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesFileFileRemote(v))
 	}
 	return out
 }
@@ -11416,7 +12237,7 @@ func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDe
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"source":   convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFile(in["source"]),
+		"source":   convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebSource(in["source"]),
 		"pullDeps": in["pull_deps"],
 	}
 }
@@ -11428,6 +12249,75 @@ func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDe
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDeb(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebSource(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowInsecure": in["allow_insecure"],
+		"gcs":           convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebSourceGcs(in["gcs"]),
+		"localPath":     in["local_path"],
+		"remote":        convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebSourceRemote(in["remote"]),
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebSourceList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebSource(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebSourceGcs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bucket":     in["bucket"],
+		"object":     in["object"],
+		"generation": in["generation"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebSourceGcsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebSourceGcs(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebSourceRemote(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uri":            in["uri"],
+		"sha256Checksum": in["sha256_checksum"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebSourceRemoteList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgDebSourceRemote(v))
 	}
 	return out
 }
@@ -11459,7 +12349,7 @@ func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMs
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"source":     convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFile(in["source"]),
+		"source":     convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiSource(in["source"]),
 		"properties": in["properties"],
 	}
 }
@@ -11475,13 +12365,82 @@ func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMs
 	return out
 }
 
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiSource(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowInsecure": in["allow_insecure"],
+		"gcs":           convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiSourceGcs(in["gcs"]),
+		"localPath":     in["local_path"],
+		"remote":        convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiSourceRemote(in["remote"]),
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiSourceList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiSource(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiSourceGcs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bucket":     in["bucket"],
+		"object":     in["object"],
+		"generation": in["generation"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiSourceGcsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiSourceGcs(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiSourceRemote(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uri":            in["uri"],
+		"sha256Checksum": in["sha256_checksum"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiSourceRemoteList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgMsiSourceRemote(v))
+	}
+	return out
+}
+
 func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpm(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"source":   convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFile(in["source"]),
+		"source":   convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmSource(in["source"]),
 		"pullDeps": in["pull_deps"],
 	}
 }
@@ -11493,6 +12452,75 @@ func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRp
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpm(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmSource(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowInsecure": in["allow_insecure"],
+		"gcs":           convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmSourceGcs(in["gcs"]),
+		"localPath":     in["local_path"],
+		"remote":        convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmSourceRemote(in["remote"]),
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmSourceList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmSource(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmSourceGcs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bucket":     in["bucket"],
+		"object":     in["object"],
+		"generation": in["generation"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmSourceGcsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmSourceGcs(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmSourceRemote(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uri":            in["uri"],
+		"sha256Checksum": in["sha256_checksum"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmSourceRemoteList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPoliciesResourceGroupsResourcesPkgRpmSourceRemote(v))
 	}
 	return out
 }
@@ -11720,100 +12748,6 @@ func convertOsConfigOsPolicyAssignmentBetaRolloutDisruptionBudgetList(i interfac
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertOsConfigOsPolicyAssignmentBetaRolloutDisruptionBudget(v))
-	}
-	return out
-}
-
-func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFile(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"allowInsecure": in["allow_insecure"],
-		"gcs":           convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileGcs(in["gcs"]),
-		"localPath":     in["local_path"],
-		"remote":        convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileRemote(in["remote"]),
-	}
-}
-
-func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFile(v))
-	}
-	return out
-}
-
-func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileGcs(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"bucket":     in["bucket"],
-		"object":     in["object"],
-		"generation": in["generation"],
-	}
-}
-
-func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileGcsList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileGcs(v))
-	}
-	return out
-}
-
-func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileRemote(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"uri":            in["uri"],
-		"sha256Checksum": in["sha256_checksum"],
-	}
-}
-
-func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileRemoteList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFileRemote(v))
-	}
-	return out
-}
-
-func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentExec(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"interpreter":    in["interpreter"],
-		"args":           in["args"],
-		"file":           convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentFile(in["file"]),
-		"outputFilePath": in["output_file_path"],
-		"script":         in["script"],
-	}
-}
-
-func convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentExecList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertOsConfigOsPolicyAssignmentBetaOSPolicyAssignmentExec(v))
 	}
 	return out
 }
@@ -14432,8 +15366,8 @@ func convertNetworkConnectivitySpokeLinkedInterconnectAttachments(i interface{})
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"uris":                   in["uris"],
 		"siteToSiteDataTransfer": in["site_to_site_data_transfer"],
+		"uris":                   in["uris"],
 	}
 }
 
@@ -14498,8 +15432,8 @@ func convertNetworkConnectivitySpokeLinkedVpnTunnels(i interface{}) map[string]i
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"uris":                   in["uris"],
 		"siteToSiteDataTransfer": in["site_to_site_data_transfer"],
+		"uris":                   in["uris"],
 	}
 }
 
@@ -14776,8 +15710,8 @@ func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExec(i in
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"validate": convertOsConfigOsPolicyAssignmentOSPolicyAssignmentExec(in["validate"]),
-		"enforce":  convertOsConfigOsPolicyAssignmentOSPolicyAssignmentExec(in["enforce"]),
+		"validate": convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidate(in["validate"]),
+		"enforce":  convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforce(in["enforce"]),
 	}
 }
 
@@ -14792,6 +15726,194 @@ func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecList(
 	return out
 }
 
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidate(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"interpreter":    in["interpreter"],
+		"args":           in["args"],
+		"file":           convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFile(in["file"]),
+		"outputFilePath": in["output_file_path"],
+		"script":         in["script"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidate(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFile(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowInsecure": in["allow_insecure"],
+		"gcs":           convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileGcs(in["gcs"]),
+		"localPath":     in["local_path"],
+		"remote":        convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileRemote(in["remote"]),
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFile(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileGcs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bucket":     in["bucket"],
+		"object":     in["object"],
+		"generation": in["generation"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileGcsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileGcs(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileRemote(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uri":            in["uri"],
+		"sha256Checksum": in["sha256_checksum"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileRemoteList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecValidateFileRemote(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforce(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"interpreter":    in["interpreter"],
+		"args":           in["args"],
+		"file":           convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFile(in["file"]),
+		"outputFilePath": in["output_file_path"],
+		"script":         in["script"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforce(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFile(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowInsecure": in["allow_insecure"],
+		"gcs":           convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileGcs(in["gcs"]),
+		"localPath":     in["local_path"],
+		"remote":        convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileRemote(in["remote"]),
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFile(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileGcs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bucket":     in["bucket"],
+		"object":     in["object"],
+		"generation": in["generation"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileGcsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileGcs(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileRemote(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uri":            in["uri"],
+		"sha256Checksum": in["sha256_checksum"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileRemoteList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesExecEnforceFileRemote(v))
+	}
+	return out
+}
+
 func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFile(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -14801,7 +15923,7 @@ func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFile(i in
 		"path":        in["path"],
 		"state":       in["state"],
 		"content":     in["content"],
-		"file":        convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFile(in["file"]),
+		"file":        convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFile(in["file"]),
 		"permissions": in["permissions"],
 	}
 }
@@ -14813,6 +15935,75 @@ func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileList(
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFile(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFile(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowInsecure": in["allow_insecure"],
+		"gcs":           convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileGcs(in["gcs"]),
+		"localPath":     in["local_path"],
+		"remote":        convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileRemote(in["remote"]),
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFile(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileGcs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bucket":     in["bucket"],
+		"object":     in["object"],
+		"generation": in["generation"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileGcsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileGcs(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileRemote(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uri":            in["uri"],
+		"sha256Checksum": in["sha256_checksum"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileRemoteList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesFileFileRemote(v))
 	}
 	return out
 }
@@ -14872,7 +16063,7 @@ func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDeb(i 
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"source":   convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFile(in["source"]),
+		"source":   convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSource(in["source"]),
 		"pullDeps": in["pull_deps"],
 	}
 }
@@ -14884,6 +16075,75 @@ func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebLis
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDeb(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSource(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowInsecure": in["allow_insecure"],
+		"gcs":           convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceGcs(in["gcs"]),
+		"localPath":     in["local_path"],
+		"remote":        convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceRemote(in["remote"]),
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSource(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceGcs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bucket":     in["bucket"],
+		"object":     in["object"],
+		"generation": in["generation"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceGcsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceGcs(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceRemote(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uri":            in["uri"],
+		"sha256Checksum": in["sha256_checksum"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceRemoteList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgDebSourceRemote(v))
 	}
 	return out
 }
@@ -14915,7 +16175,7 @@ func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsi(i 
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"source":     convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFile(in["source"]),
+		"source":     convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSource(in["source"]),
 		"properties": in["properties"],
 	}
 }
@@ -14931,13 +16191,82 @@ func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiLis
 	return out
 }
 
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSource(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowInsecure": in["allow_insecure"],
+		"gcs":           convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceGcs(in["gcs"]),
+		"localPath":     in["local_path"],
+		"remote":        convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceRemote(in["remote"]),
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSource(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceGcs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bucket":     in["bucket"],
+		"object":     in["object"],
+		"generation": in["generation"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceGcsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceGcs(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceRemote(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uri":            in["uri"],
+		"sha256Checksum": in["sha256_checksum"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceRemoteList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgMsiSourceRemote(v))
+	}
+	return out
+}
+
 func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpm(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"source":   convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFile(in["source"]),
+		"source":   convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSource(in["source"]),
 		"pullDeps": in["pull_deps"],
 	}
 }
@@ -14949,6 +16278,75 @@ func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmLis
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpm(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSource(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowInsecure": in["allow_insecure"],
+		"gcs":           convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceGcs(in["gcs"]),
+		"localPath":     in["local_path"],
+		"remote":        convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceRemote(in["remote"]),
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSource(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceGcs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bucket":     in["bucket"],
+		"object":     in["object"],
+		"generation": in["generation"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceGcsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceGcs(v))
+	}
+	return out
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceRemote(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"uri":            in["uri"],
+		"sha256Checksum": in["sha256_checksum"],
+	}
+}
+
+func convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceRemoteList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertOsConfigOsPolicyAssignmentOSPoliciesResourceGroupsResourcesPkgRpmSourceRemote(v))
 	}
 	return out
 }
@@ -15176,100 +16574,6 @@ func convertOsConfigOsPolicyAssignmentRolloutDisruptionBudgetList(i interface{})
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertOsConfigOsPolicyAssignmentRolloutDisruptionBudget(v))
-	}
-	return out
-}
-
-func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFile(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"allowInsecure": in["allow_insecure"],
-		"gcs":           convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileGcs(in["gcs"]),
-		"localPath":     in["local_path"],
-		"remote":        convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileRemote(in["remote"]),
-	}
-}
-
-func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFile(v))
-	}
-	return out
-}
-
-func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileGcs(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"bucket":     in["bucket"],
-		"object":     in["object"],
-		"generation": in["generation"],
-	}
-}
-
-func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileGcsList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileGcs(v))
-	}
-	return out
-}
-
-func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileRemote(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"uri":            in["uri"],
-		"sha256Checksum": in["sha256_checksum"],
-	}
-}
-
-func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileRemoteList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFileRemote(v))
-	}
-	return out
-}
-
-func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentExec(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"interpreter":    in["interpreter"],
-		"args":           in["args"],
-		"file":           convertOsConfigOsPolicyAssignmentOSPolicyAssignmentFile(in["file"]),
-		"outputFilePath": in["output_file_path"],
-		"script":         in["script"],
-	}
-}
-
-func convertOsConfigOsPolicyAssignmentOSPolicyAssignmentExecList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertOsConfigOsPolicyAssignmentOSPolicyAssignmentExec(v))
 	}
 	return out
 }
