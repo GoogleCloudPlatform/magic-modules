@@ -810,7 +810,7 @@ func flattenAwsS3Data(awsS3Data *storagetransfer.AwsS3Data, d *schema.ResourceDa
 		"bucket_name": awsS3Data.BucketName,
 		"role_arn":    awsS3Data.RoleArn,
 	}
-	if transferSpec.AwsS3DataSource != nil {
+	if awsS3Data.AwsAccessKey != nil {
 		data["aws_access_key"] = flattenAwsAccessKeys(d)
 	}
 
