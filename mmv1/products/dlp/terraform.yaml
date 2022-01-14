@@ -27,6 +27,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "basic"
         test_env_vars:
           project: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dlp_deidentify_template_skip_characters"
+        primary_resource_id: "basic"
+        test_env_vars:
+          project: :PROJECT_NAME
+        skip_docs: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/wrap_object.go.erb
       custom_import: templates/terraform/custom_import/dlp_import.go.erb
