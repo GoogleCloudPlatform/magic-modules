@@ -1,4 +1,4 @@
-# TODO(ndmckinley): This one should be upstreamed to the DCL.
+# TODO: This one should be upstreamed to the DCL.
 - type: CUSTOM_ID
   details:
     id: projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}
