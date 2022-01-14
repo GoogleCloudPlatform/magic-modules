@@ -80,11 +80,10 @@ module Provider
     # template is used to determine metadata about the file based on how it is
     # generated
     def format_output_file(path, template)
-      if path.end_with?('.go') && @env[:goformat_enabled]
-        run_formatter("gofmt -w -s #{path}")
+      return unless path.end_with?('.go') && @env[:goformat_enabled]
 
-        run_formatter("goimports -w #{path}") unless template.include?('third_party/terraform')
-      end
+      run_formatter("gofmt -w -s #{path}")
+      run_formatter("goimports -w #{path}") unless template.include?('third_party/terraform')
     end
 
     def run_formatter(command)
