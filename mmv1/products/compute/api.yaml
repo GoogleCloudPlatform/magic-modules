@@ -13123,7 +13123,7 @@ objects:
           A reference to the network to which this router belongs.
         required: true
         input: true
-      # TODO(danawillow): Figure out the story for interfaces/bgpPeers. Right
+      # TODO: Figure out the story for interfaces/bgpPeers. Right
       # now in Terraform we have three separate resources: router,
       # router_interface, and router_peer. Decide whether we want to keep that
       # pattern for the other providers, keep it unique for Terraform, or add
