@@ -48,6 +48,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      network: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.erb'
+        diff_suppress_func: 'compareResourceNames'
       minThroughput: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(200, 1000)'
@@ -62,6 +66,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: false
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      subnet.name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        custom_expand: 'templates/terraform/custom_expandn/resource_from_self_link.go.erb'
+        diff_suppress_func: 'compareResourceNames'
       subnet.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       selfLink: !ruby/object:Overrides::Terraform::PropertyOverride
