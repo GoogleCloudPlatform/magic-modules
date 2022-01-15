@@ -138,7 +138,8 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'name'
             description: |
-              Name or self_link of the Subnet.
+              Subnet name (relative, not fully qualified). E.g. if the full subnet selfLink is
+              https://compute.googleapis.com/compute/v1/projects/{project}/regions/{region}/subnetworks/{subnetName} the correct input for this field would be {subnetName}"
             exactly_one_of:
               - network
               - subnet.0.name
