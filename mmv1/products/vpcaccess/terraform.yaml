@@ -66,10 +66,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: false
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      subnet.name: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-        custom_expand: 'templates/terraform/custom_expandn/resource_from_self_link.go.erb'
-        diff_suppress_func: 'compareResourceNames'
       subnet.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       selfLink: !ruby/object:Overrides::Terraform::PropertyOverride
