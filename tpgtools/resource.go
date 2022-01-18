@@ -849,7 +849,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 		if !versionMatch {
 			continue
 		} else if !strings.EqualFold(primaryResourceName.titlecase(), resourceType.titlecase()) {
-			glog.Errorf("skipping %s since no match with %s.", primaryResourceName, resourceType)
+			// This scenario will occur for product folders with multiple resources
 			continue
 		}
 
