@@ -46,6 +46,7 @@ objects:
     description: The location of the cloud run instance. eg us-central1
     url_param_only: true
     required: true
+    input: true
   properties:
   - !ruby/object:Api::Type::String
     name: name
