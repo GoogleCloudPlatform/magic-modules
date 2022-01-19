@@ -13,7 +13,7 @@ ENV GO111MODULE "on"
 
 # Install Ruby from source.
 RUN apt-get update
-RUN apt-get install -y bzip2 libssl-dev libreadline-dev zlib1g-dev
+RUN apt-get install -y bzip2 libssl-dev libreadline-dev zlib1g-dev unzip
 RUN apt-get install -y rsync
 RUN git clone https://github.com/rbenv/rbenv.git /rbenv
 ENV PATH /rbenv/bin:/root/.rbenv/shims:$PATH
@@ -65,5 +65,10 @@ RUN git config --global user.name "Modular Magician"
 RUN git config --global user.email "magic-modules@google.com"
 
 ADD generate_downstream.sh /generate_downstream.sh
+
+
+RUN wget https://releases.hashicorp.com/terraform/0.13.7/terraform_0.13.7_linux_amd64.zip
+RUN unzip terraform_0.13.7_linux_amd64.zip && rm terraform_0.13.7_linux_amd64.zip
+RUN mv ./terraform /bin/terraform
 
 ENTRYPOINT ["/generate_downstream.sh"]
