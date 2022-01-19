@@ -476,7 +476,7 @@ resource "<%= resource_ns_iam -%>_binding" "foo" {
 <% end -%>
 <%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "%{role}"
-  members = ["user:admin@hashicorptest.com", "user:paddy@hashicorp.com"]
+  members = ["user:admin@hashicorptest.com", "user:gterraformtest1@gmail.com"]
 }
 `, context)
 }

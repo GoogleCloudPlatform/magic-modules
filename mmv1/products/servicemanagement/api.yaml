@@ -28,7 +28,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Service'
     base_url: services
-    self_link: services/{{serviceName}}
+    self_link: services/{{service_name}}
     description: |
       A service that is managed by Google Service Management
     properties:

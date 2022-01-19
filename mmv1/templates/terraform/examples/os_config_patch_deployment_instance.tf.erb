@@ -26,7 +26,7 @@ resource "google_compute_instance" "foobar" {
 }
 
 resource "google_os_config_patch_deployment" "<%= ctx[:primary_resource_id] %>" {
-  patch_deployment_id = "<%= ctx[:vars]['instance_name'] %>"
+  patch_deployment_id = "<%= ctx[:vars]['patch_deployment_id'] %>"
 
   instance_filter {
     instances = [google_compute_instance.foobar.id]

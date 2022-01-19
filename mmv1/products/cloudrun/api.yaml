@@ -18,9 +18,11 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://{{location}}-run.googleapis.com/
+    cai_base_url: https://run.googleapis.com/v1/
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://{{location}}-run.googleapis.com/
+    cai_base_url: https://run.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 objects:
@@ -29,6 +31,7 @@ objects:
   name: DomainMapping
   kind: DomainMapping
   base_url: apis/domains.cloudrun.com/v1/namespaces/{{project}}/domainmappings
+  cai_base_url: projects/{{project}}/locations/{{location}}/DomainMappings
   references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -224,6 +227,7 @@ objects:
   name: Service
   kind: Service
   base_url: apis/serving.knative.dev/v1/namespaces/{{project}}/services
+  cai_base_url: projects/{{project}}/locations/{{location}}/services
   references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -242,7 +246,7 @@ objects:
     and Route, reflecting their statuses and conditions as its own.
 
     See also:
-    https://github.com/knative/serving/blob/master/docs/spec/overview.md#service
+    https://github.com/knative/specs/blob/main/specs/serving/overview.md
   iam_policy: !ruby/object:Api::Resource::IamPolicy
     method_name_separator: ':'
     parent_resource_attribute: 'service'
@@ -520,7 +524,6 @@ objects:
                     Defaults to "".
                 - !ruby/object:Api::Type::NestedObject
                   name: valueFrom
-                  min_version: beta
                   description: |-
                     Source for the environment variable's value. Only supports secret_key_ref.
                   properties:
@@ -544,15 +547,15 @@ objects:
                             is assumed to be in the same project.
                             If the secret is in another project, you must define an alias.
                             You set the <alias> in this field, and create an annotation with the
-                            following structure 
+                            following structure
                             "run.googleapis.com/secrets" = "<alias>:projects/<project-id|project-number>/secrets/<secret-name>".
-                            If multiple alias definitions are needed, they must be separated by 
+                            If multiple alias definitions are needed, they must be separated by
                             commas in the annotation field.
             - !ruby/object:Api::Type::Array
               name: ports
               description: |-
                 List of open ports in the container.
-                More Info: 
+                More Info:
                 https://cloud.google.com/run/docs/reference/rest/v1/RevisionSpec#ContainerPort
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
@@ -589,7 +592,6 @@ objects:
                   https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
             - !ruby/object:Api::Type::Array
               name: volumeMounts
-              min_version: beta
               description: |-
                 Volume to mount into the container's filesystem.
                 Only supports SecretVolumeSources.
@@ -629,7 +631,6 @@ objects:
             will use the project's default service account.
         - !ruby/object:Api::Type::Array
           name: volumes
-          min_version: beta
           description: |-
             Volume represents a named volume in a container.
           item_type: !ruby/object:Api::Type::NestedObject

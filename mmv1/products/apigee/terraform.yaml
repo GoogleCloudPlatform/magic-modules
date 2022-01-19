@@ -72,6 +72,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       # Resource creation race
       skip_vcr: true
     - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_instance_cidr_range"
+      skip_test: true      
+    - !ruby/object:Provider::Terraform::Examples
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
+      name: "apigee_instance_cidr_range_test"
+      primary_resource_id: "apigee_instance"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_docs: true
+      # Resource creation race
+      skip_vcr: true
+    - !ruby/object:Provider::Terraform::Examples
       name: "apigee_instance_full"
       skip_test: true
     - !ruby/object:Provider::Terraform::Examples
@@ -103,6 +117,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       # the resources needed for the acceptance test.
       name: "apigee_environment_basic_test"
       primary_resource_id: "apigee_environment"
+      primary_resource_name: "fmt.Sprintf(\"organizations/tf-test%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"])"
       test_env_vars:
         org_id: :ORG_ID
         billing_account: :BILLING_ACCT
@@ -141,6 +156,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     import_format: ["{{instance_id}}/attachments/{{name}}", "{{instance_id}}/{{name}}"]
     delete_url: '{{instance_id}}/attachments/{{name}}'
+    mutex: "{{instance_id}}"
     examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "apigee_instance_attachment_basic"
@@ -185,7 +201,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       insert_minutes: 30
       delete_minutes: 30
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/apigee_environment_group_attachment.go.erb      
+      custom_import: templates/terraform/custom_import/apigee_environment_group_attachment.go.erb
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
