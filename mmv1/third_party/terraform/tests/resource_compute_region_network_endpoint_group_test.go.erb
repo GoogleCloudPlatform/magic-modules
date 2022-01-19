@@ -1,0 +1,57 @@
+<% autogen_exception -%>
+package google
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+)
+
+<% unless version == 'ga' -%>
+func TestAccComputeRegionNetworkEndpointGroup_negWithServerlessDeployment(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeRegionNetworkEndpointGroupDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionNetworkEndpointGroup_negWithServerlessDeployment(context),
+			},
+			{
+				ResourceName:            "google_compute_region_network_endpoint_group.neg",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"network", "subnetwork", "zone"},
+			},
+		},
+	})
+}
+<% end -%>
+
+<% unless version == 'ga' -%>
+func testAccComputeRegionNetworkEndpointGroup_negWithServerlessDeployment(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_compute_region_network_endpoint_group" "neg" {
+  name         			= "tf-test-my-app-engine-region-neg%{random_suffix}"
+  network_endpoint_type = "SERVERLESS"
+  region                = "us-central1"
+  serverless_deployment {
+    platform = "apigateway.googleapis.com"
+    resource = "api%{random_suffix}"
+	url_mask = "api%{random_suffix}"
+  }
+}
+
+resource "google_compute_network" "default" {
+  name                    = "tf-test-region-neg-serverless-deployment%{random_suffix}"
+  auto_create_subnetworks = true
+}
+`, context)
+}
+<% end -%>
