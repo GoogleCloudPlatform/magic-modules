@@ -331,7 +331,7 @@ objects:
         description: |
           Map of tag template field IDs to the settings for the field. This map is an exhaustive list of the allowed fields. This map must contain at least one field and at most 500 fields.
         required: true
-        input: true  # TODO(danawillow): update logic
+        input: true  # TODO: update logic
         key_name: field_id
         value_type: !ruby/object:Api::Type::NestedObject
           name: field
