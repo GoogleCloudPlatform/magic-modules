@@ -207,6 +207,8 @@ func generateTFVconvertedAsset(t *testing.T, testDir, testSlug string) {
 	if err != nil {
 		t.Fatalf("error while writing to file %s, error %v", dstFile, err)
 	}
+
+	fmt.Println("created file : " + dstFile)
 }
 
 func getTestPrefix() string {
