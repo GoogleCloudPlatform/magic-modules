@@ -116,7 +116,8 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     popd
     bundle exec compiler -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
     pushd $LOCAL_PATH
-    TFV_CREATE_GENERATED_FILES=true
+    make build
+    export TFV_CREATE_GENERATED_FILES=true
     go test ./test -run "TestAcc.*_generated_offline"
     popd
 elif [ "$REPO" == "tf-oics" ]; then
