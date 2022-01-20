@@ -154,7 +154,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 							Computed:    true,
 							Description: `When set to true, the action specified above is not enforced. Stackdriver logs for requests that trigger a preview action are annotated as such.`,
 						},
-
+						
 					<% unless version == 'ga' -%>
 						"rate_limit_options": {
 							Type:        schema.TypeList,
@@ -188,14 +188,14 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 									"conform_action": {
 										Type:         schema.TypeString,
 										Required:     true,
-										ValidateFunc: validation.StringInSlice([]string{"allow", "deny(403)", "deny(404)", "deny(429)", "deny(502)"}, false),
+										ValidateFunc: validation.StringInSlice([]string{"allow"}, false),
 										Description:  `When a request is denied, returns the HTTP response code specified. Valid options are "deny()" where valid values for status are 403, 404, 429, and 502.`,
 									},
 
 									"exceed_action": {
 										Type:         schema.TypeString,
 										Required:     true,
-										ValidateFunc: validation.StringInSlice([]string{"allow"}, false),
+										ValidateFunc: validation.StringInSlice([]string{"redirect", "deny(403)", "deny(404)", "deny(429)", "deny(502)"}, false),
 										Description:  `Action to take for requests that are under the configured rate limit threshold. Valid option is "allow" only.`,
 									},
 
@@ -239,6 +239,29 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 										Type:        schema.TypeInt,
 										Optional:    true,
 										Description: `Can only be specified if the action for the rule is "rate_based_ban". If specified, determines the time (in seconds) the traffic will continue to be banned by the rate limit after the rate falls below the threshold.`,
+									},
+
+									"exceed_redirect_options": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Description: `Parameters defining the redirect action that is used as the exceed action. Cannot be specified if the exceed action is not redirect.`,
+										MaxItems:    1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"type": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: `Type of the redirect action.`,
+													ValidateFunc: validation.StringInSlice([]string{"EXTERNAL_302", "GOOGLE_RECAPTCHA"}, false),
+												},
+
+												"target": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: `Target for the redirect action. This is required if the type is EXTERNAL_302 and cannot be specified for GOOGLE_RECAPTCHA.`,
+												},
+											},
+										},
 									},
 								},
 							},
