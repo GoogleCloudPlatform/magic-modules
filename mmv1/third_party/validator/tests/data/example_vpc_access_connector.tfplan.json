@@ -13,7 +13,7 @@
                     "schema_version": 0,
                     "values": {
                         "ip_cidr_range": "10.8.0.0/28",
-                        "max_throughput": 1000,
+                        "max_throughput": 300,
                         "min_throughput": 200,
                         "name": "vpc-con",
                         "network": "default",
@@ -38,7 +38,7 @@
                 "before": null,
                 "after": {
                     "ip_cidr_range": "10.8.0.0/28",
-                    "max_throughput": 1000,
+                    "max_throughput": 300,
                     "min_throughput": 200,
                     "name": "vpc-con",
                     "network": "default",
