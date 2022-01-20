@@ -197,6 +197,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       spec.template.spec.containers: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      spec.template.spec.serviceAccountName: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       spec.template.spec.containers.ports: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       spec.template.spec.containers.ports.name: !ruby/object:Overrides::Terraform::PropertyOverride
