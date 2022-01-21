@@ -8564,7 +8564,6 @@ objects:
               API Gateway: apigateway.googleapis.com
           - !ruby/object:Api::Type::String
             name: 'resource'
-            required: true
             description: |
               The user-defined name of the workload/instance. This value must be provided explicitly or in the urlMask.
               The resource identified by this value is platform-specific and is as follows: API Gateway: The gateway ID, App Engine: The service name,
