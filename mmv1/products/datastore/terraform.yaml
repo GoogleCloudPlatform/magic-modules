@@ -25,7 +25,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     skip_sweeper: true
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 20
-      delete_minutes: 10
+      delete_minutes: 20
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         This resource creates a Datastore Index on a project that has already

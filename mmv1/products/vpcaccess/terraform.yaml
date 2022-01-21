@@ -15,10 +15,6 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Connector: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
-      delete_minutes: 10
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "vpc_access_connector"
