@@ -1025,6 +1025,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "port_range"
           - "target"
       - !ruby/object:Provider::Terraform::Examples
+        name: "global_forwarding_rule_external_managed"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "global-rule"
+          http_proxy_name: "target-proxy"
+          backend_service_name: "backend"
+        ignore_read_extra:
+          - "port_range"
+          - "target"
+      - !ruby/object:Provider::Terraform::Examples
         name: "private_service_connect_google_apis"
         min_version: beta
         primary_resource_id: "default"

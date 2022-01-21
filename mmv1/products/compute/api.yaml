@@ -4274,13 +4274,15 @@ objects:
           The value of INTERNAL_SELF_MANAGED means that this will be used for
           Internal Global HTTP(S) LB. The value of EXTERNAL means that this
           will be used for External Global Load Balancing (HTTP(S) LB,
-          External TCP/UDP LB, SSL Proxy)
+          External TCP/UDP LB, SSL Proxy). The value of EXTERNAL_MANAGED means
+          that this will be used for Global external HTTP(S) load balancers.
 
           ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) only) Note: This field must be set "" if the global address is
           configured as a purpose of PRIVATE_SERVICE_CONNECT and addressType of INTERNAL.
         default_value: :EXTERNAL
         values:
           - :EXTERNAL
+          - :EXTERNAL_MANAGED
           - :INTERNAL_SELF_MANAGED
       - !ruby/object:Api::Type::Array
         name: 'metadataFilters'
