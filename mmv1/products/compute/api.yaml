@@ -3036,9 +3036,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 4
-          delete_minutes: 4
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -3098,9 +3095,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 4
-          delete_minutes: 4
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -3170,10 +3164,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        # Larger disks were timing out at creation. Bumping up to 5 minutes.
-        # https://github.com/hashicorp/terraform-provider-google/issues/703
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 5
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -5940,10 +5930,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -6241,12 +6227,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        # Users were experiencing timeouts. Bumping up to 6 minutes.
-        # https://github.com/hashicorp/terraform-provider-google/issues/852
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -7154,10 +7134,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -7421,9 +7397,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 10
-          delete_minutes: 10
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -7698,10 +7671,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -8060,10 +8029,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -8250,10 +8215,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -8687,10 +8648,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -9292,10 +9249,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 15
-          update_minutes: 6
-          delete_minutes: 15
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -9410,10 +9363,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 15
-          update_minutes: 6
-          delete_minutes: 15
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -10160,8 +10109,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 5
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -13224,10 +13171,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 10
-          update_minutes: 10
-          delete_minutes: 10
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -13430,10 +13373,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 10
-          update_minutes: 10
-          delete_minutes: 10
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -13755,10 +13694,6 @@ objects:
         path: 'name'
         full_url: 'selfLink'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 5
-          update_minutes: 5
-          delete_minutes: 5
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -14004,8 +13939,8 @@ objects:
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
         timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
+          insert_minutes: 30
+          update_minutes: 30
           # Deletes can take 20-30 minutes to complete, since they depend
           # on the provisioning process either succeeding or failing completely.
           delete_minutes: 30
@@ -14637,12 +14572,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        # Users were experiencing timeout. Bumping up to 6 minutes.
-        # https://github.com/hashicorp/terraform-provider-google/issues/718
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status

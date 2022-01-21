@@ -404,9 +404,9 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		versionMetadata:      version,
 		Description:          info.Description,
 		location:             location,
-		InsertTimeoutMinutes: 10,
-		UpdateTimeoutMinutes: 10,
-		DeleteTimeoutMinutes: 10,
+		InsertTimeoutMinutes: 20,
+		UpdateTimeoutMinutes: 20,
+		DeleteTimeoutMinutes: 20,
 		UseDCLID:             overrides.ResourceOverride(UseDCLID, location),
 	}
 
