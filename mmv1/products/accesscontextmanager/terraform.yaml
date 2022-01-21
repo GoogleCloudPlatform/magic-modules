@@ -21,10 +21,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         in the provider configuration. Otherwise the ACM API will return a 403 error.
         Your account must have the `serviceusage.services.use` permission on the
         `billing_project` you defined.
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
-      delete_minutes: 6
     autogen_async: true
     # Skipping the sweeper due to the non-standard base_url
     skip_sweeper: true
@@ -50,10 +46,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         in the provider configuration. Otherwise the ACM API will return a 403 error.
         Your account must have the `serviceusage.services.use` permission on the
         `billing_project` you defined.
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
-      delete_minutes: 6
     autogen_async: true
     # Skipping the sweeper due to the non-standard base_url
     skip_sweeper: true
@@ -75,10 +67,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
       custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
   AccessLevels: !ruby/object:Overrides::Terraform::ResourceOverride
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
-      delete_minutes: 6
     autogen_async: true
     # Skipping the sweeper due to the non-standard base_url
     skip_sweeper: true
@@ -113,9 +101,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckForExistence
       actions: ['create']
-      operation: !ruby/object:Api::Async::Operation
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 4
     autogen_async: true
     exclude_validator: true
     exclude_import: true # no unique way to specify
@@ -139,10 +124,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         in the provider configuration. Otherwise the ACM API will return a 403 error.
         Your account must have the `serviceusage.services.use` permission on the
         `billing_project` you defined.
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
-      delete_minutes: 6
     autogen_async: true
     # Skipping the sweeper due to the non-standard base_url
     skip_sweeper: true
@@ -183,10 +164,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
       custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
   ServicePerimeters: !ruby/object:Overrides::Terraform::ResourceOverride
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
-      delete_minutes: 6
     autogen_async: true
     # Skipping the sweeper due to the non-standard base_url
     skip_sweeper: true
