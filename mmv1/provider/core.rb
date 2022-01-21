@@ -46,23 +46,12 @@ module Provider
       # run already. Instead of storing all the modified files in state we'll
       # use the time the file was modified.
       @start_time = start_time
-      @py_format_enabled = check_pyformat
       @go_format_enabled = check_goformat
     end
 
     # This provides the ProductFileTemplate class with access to a provider.
     def provider_binding
       binding
-    end
-
-    def check_pyformat
-      if system('python3 -m black --help > /dev/null')
-        true
-      else
-        Google::LOGGER.warn 'Either python3 or black is not installed; python ' \
-          'code will be poorly formatted and may not pass linter checks.'
-        false
-      end
     end
 
     def check_goformat
@@ -295,7 +284,6 @@ module Provider
 
     def build_env
       {
-        pyformat_enabled: @py_format_enabled,
         goformat_enabled: @go_format_enabled,
         start_time: @start_time
       }
