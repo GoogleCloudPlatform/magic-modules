@@ -37,7 +37,6 @@ func TestAccComputeRegionNetworkEndpointGroup_negWithServerlessDeployment(t *tes
 <% unless version == 'ga' -%>
 func testAccComputeRegionNetworkEndpointGroup_negWithServerlessDeployment(context map[string]interface{}) string {
 	return Nprintf(`
-
 resource "google_api_gateway_api" "api_gw" {
 	api_id = "api-gw"
 }
@@ -69,7 +68,7 @@ resource "google_compute_region_network_endpoint_group" "test_neg" {
 	region                = "us-central1"
 	serverless_deployment {
 		platform = "apigateway.googleapis.com"
-		url_mask = "<gateway>-testurl123.uc.gateway.dev/hello"
+		url_mask = format("<gateway>%s/hello", trimprefix(google_api_gateway_gateway.api_gw.default_hostname, "api-gw-pt2"))
 	}
 }
 `, context)
