@@ -68,7 +68,7 @@ resource "google_compute_region_network_endpoint_group" "test_neg" {
 	region                = "us-central1"
 	serverless_deployment {
 		platform = "apigateway.googleapis.com"
-		url_mask = format("<gateway>%s/hello", trimprefix(google_api_gateway_gateway.api_gw.default_hostname, "api-gw-pt2"))
+		url_mask = format("<gateway>%s/hello", trimprefix(google_api_gateway_gateway.api_gw.default_hostname, "api-gw"))
 	}
 }
 `, context)
