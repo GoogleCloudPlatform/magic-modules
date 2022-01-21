@@ -20,7 +20,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckKnativeStatusFunc(res)
       actions: ['create', 'update']
-      operation: !ruby/object:Api::Async::Operation
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_domain_mapping_basic"
@@ -69,7 +68,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckKnativeStatusFunc(res)
       actions: ['create', 'update']
-      operation: !ruby/object:Api::Async::Operation
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_basic"

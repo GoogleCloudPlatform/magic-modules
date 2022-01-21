@@ -101,7 +101,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckForExistence
       actions: ['create']
-      operation: !ruby/object:Api::Async::Operation
     autogen_async: true
     exclude_validator: true
     exclude_import: true # no unique way to specify

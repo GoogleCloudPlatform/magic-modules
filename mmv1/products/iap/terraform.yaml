@@ -182,7 +182,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       check_response_func_existence: PollCheckForExistence
       target_occurrences: 5
       actions: ['create']
-      operation: !ruby/object:Api::Async::Operation
     description: |
       {{description}}
 
