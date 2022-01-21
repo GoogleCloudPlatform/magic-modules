@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"strings"
 
+	apikeys "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/apikeys"
+	apikeysBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/apikeys/beta"
 	assuredworkloads "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads"
 	assuredworkloadsBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads/beta"
 	cloudbuild "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudbuild"
@@ -61,6 +63,8 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 	}
 	if version == "beta" {
 		switch fmt.Sprintf("%s/%s", product, resource) {
+		case "apikeys/key":
+			return "google_apikeys_key", nil
 		case "assuredworkloads/workload":
 			return "google_assured_workloads_workload", nil
 		case "cloudbuild/worker_pool":
@@ -115,6 +119,8 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 	}
 	// If not found in sample version, fallthrough to GA
 	switch fmt.Sprintf("%s/%s", product, resource) {
+	case "apikeys/key":
+		return "google_apikeys_key", nil
 	case "assuredworkloads/workload":
 		return "google_assured_workloads_workload", nil
 	case "cloudbuild/worker_pool":
@@ -173,6 +179,12 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 	}
 	if version == "beta" {
 		switch fmt.Sprintf("%s/%s", product, resource) {
+		case "apikeys/key":
+			r := &apikeysBeta.Key{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ApikeysKeyBetaAsHCL(*r, hasGAEquivalent)
 		case "assuredworkloads/workload":
 			r := &assuredworkloadsBeta.Workload{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -327,6 +339,12 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 	}
 	// If not found in sample version, fallthrough to GA
 	switch fmt.Sprintf("%s/%s", product, resource) {
+	case "apikeys/key":
+		r := &apikeys.Key{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ApikeysKeyAsHCL(*r, hasGAEquivalent)
 	case "assuredworkloads/workload":
 		r := &assuredworkloads.Workload{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -463,6 +481,152 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 		return "", fmt.Errorf("Error converting sample JSON to HCL: %s not found", product, resource)
 	}
 
+}
+
+// ApikeysKeyBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ApikeysKeyBetaAsHCL(r apikeysBeta.Key, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_apikeys_key\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if v := convertApikeysKeyBetaRestrictionsToHCL(r.Restrictions); v != "" {
+		outputConfig += fmt.Sprintf("\trestrictions %s\n", v)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertApikeysKeyBetaRestrictionsToHCL(r *apikeysBeta.KeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertApikeysKeyBetaRestrictionsAndroidKeyRestrictionsToHCL(r.AndroidKeyRestrictions); v != "" {
+		outputConfig += fmt.Sprintf("\tandroid_key_restrictions %s\n", v)
+	}
+	if r.ApiTargets != nil {
+		for _, v := range r.ApiTargets {
+			outputConfig += fmt.Sprintf("\tapi_targets %s\n", convertApikeysKeyBetaRestrictionsApiTargetsToHCL(&v))
+		}
+	}
+	if v := convertApikeysKeyBetaRestrictionsBrowserKeyRestrictionsToHCL(r.BrowserKeyRestrictions); v != "" {
+		outputConfig += fmt.Sprintf("\tbrowser_key_restrictions %s\n", v)
+	}
+	if v := convertApikeysKeyBetaRestrictionsIosKeyRestrictionsToHCL(r.IosKeyRestrictions); v != "" {
+		outputConfig += fmt.Sprintf("\tios_key_restrictions %s\n", v)
+	}
+	if v := convertApikeysKeyBetaRestrictionsServerKeyRestrictionsToHCL(r.ServerKeyRestrictions); v != "" {
+		outputConfig += fmt.Sprintf("\tserver_key_restrictions %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyBetaRestrictionsAndroidKeyRestrictionsToHCL(r *apikeysBeta.KeyRestrictionsAndroidKeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedApplications != nil {
+		for _, v := range r.AllowedApplications {
+			outputConfig += fmt.Sprintf("\tallowed_applications %s\n", convertApikeysKeyBetaRestrictionsAndroidKeyRestrictionsAllowedApplicationsToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyBetaRestrictionsAndroidKeyRestrictionsAllowedApplicationsToHCL(r *apikeysBeta.KeyRestrictionsAndroidKeyRestrictionsAllowedApplications) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.PackageName != nil {
+		outputConfig += fmt.Sprintf("\tpackage_name = %#v\n", *r.PackageName)
+	}
+	if r.Sha1Fingerprint != nil {
+		outputConfig += fmt.Sprintf("\tsha1_fingerprint = %#v\n", *r.Sha1Fingerprint)
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyBetaRestrictionsApiTargetsToHCL(r *apikeysBeta.KeyRestrictionsApiTargets) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Methods != nil {
+		outputConfig += "\tmethods = ["
+		for _, v := range r.Methods {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyBetaRestrictionsBrowserKeyRestrictionsToHCL(r *apikeysBeta.KeyRestrictionsBrowserKeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedReferrers != nil {
+		outputConfig += "\tallowed_referrers = ["
+		for _, v := range r.AllowedReferrers {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyBetaRestrictionsIosKeyRestrictionsToHCL(r *apikeysBeta.KeyRestrictionsIosKeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedBundleIds != nil {
+		outputConfig += "\tallowed_bundle_ids = ["
+		for _, v := range r.AllowedBundleIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyBetaRestrictionsServerKeyRestrictionsToHCL(r *apikeysBeta.KeyRestrictionsServerKeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedIps != nil {
+		outputConfig += "\tallowed_ips = ["
+		for _, v := range r.AllowedIps {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
 }
 
 // AssuredWorkloadsWorkloadBetaAsHCL returns a string representation of the specified resource in HCL.
@@ -5027,6 +5191,152 @@ func convertRecaptchaEnterpriseKeyBetaWebSettingsToHCL(r *recaptchaenterpriseBet
 	return outputConfig + "}"
 }
 
+// ApikeysKeyAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ApikeysKeyAsHCL(r apikeys.Key, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_apikeys_key\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if v := convertApikeysKeyRestrictionsToHCL(r.Restrictions); v != "" {
+		outputConfig += fmt.Sprintf("\trestrictions %s\n", v)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertApikeysKeyRestrictionsToHCL(r *apikeys.KeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertApikeysKeyRestrictionsAndroidKeyRestrictionsToHCL(r.AndroidKeyRestrictions); v != "" {
+		outputConfig += fmt.Sprintf("\tandroid_key_restrictions %s\n", v)
+	}
+	if r.ApiTargets != nil {
+		for _, v := range r.ApiTargets {
+			outputConfig += fmt.Sprintf("\tapi_targets %s\n", convertApikeysKeyRestrictionsApiTargetsToHCL(&v))
+		}
+	}
+	if v := convertApikeysKeyRestrictionsBrowserKeyRestrictionsToHCL(r.BrowserKeyRestrictions); v != "" {
+		outputConfig += fmt.Sprintf("\tbrowser_key_restrictions %s\n", v)
+	}
+	if v := convertApikeysKeyRestrictionsIosKeyRestrictionsToHCL(r.IosKeyRestrictions); v != "" {
+		outputConfig += fmt.Sprintf("\tios_key_restrictions %s\n", v)
+	}
+	if v := convertApikeysKeyRestrictionsServerKeyRestrictionsToHCL(r.ServerKeyRestrictions); v != "" {
+		outputConfig += fmt.Sprintf("\tserver_key_restrictions %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyRestrictionsAndroidKeyRestrictionsToHCL(r *apikeys.KeyRestrictionsAndroidKeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedApplications != nil {
+		for _, v := range r.AllowedApplications {
+			outputConfig += fmt.Sprintf("\tallowed_applications %s\n", convertApikeysKeyRestrictionsAndroidKeyRestrictionsAllowedApplicationsToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyRestrictionsAndroidKeyRestrictionsAllowedApplicationsToHCL(r *apikeys.KeyRestrictionsAndroidKeyRestrictionsAllowedApplications) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.PackageName != nil {
+		outputConfig += fmt.Sprintf("\tpackage_name = %#v\n", *r.PackageName)
+	}
+	if r.Sha1Fingerprint != nil {
+		outputConfig += fmt.Sprintf("\tsha1_fingerprint = %#v\n", *r.Sha1Fingerprint)
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyRestrictionsApiTargetsToHCL(r *apikeys.KeyRestrictionsApiTargets) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Methods != nil {
+		outputConfig += "\tmethods = ["
+		for _, v := range r.Methods {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyRestrictionsBrowserKeyRestrictionsToHCL(r *apikeys.KeyRestrictionsBrowserKeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedReferrers != nil {
+		outputConfig += "\tallowed_referrers = ["
+		for _, v := range r.AllowedReferrers {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyRestrictionsIosKeyRestrictionsToHCL(r *apikeys.KeyRestrictionsIosKeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedBundleIds != nil {
+		outputConfig += "\tallowed_bundle_ids = ["
+		for _, v := range r.AllowedBundleIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyRestrictionsServerKeyRestrictionsToHCL(r *apikeys.KeyRestrictionsServerKeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedIps != nil {
+		outputConfig += "\tallowed_ips = ["
+		for _, v := range r.AllowedIps {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
 // AssuredWorkloadsWorkloadAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -9277,6 +9587,159 @@ func convertRecaptchaEnterpriseKeyWebSettingsToHCL(r *recaptchaenterprise.KeyWeb
 		outputConfig += fmt.Sprintf("\tchallenge_security_preference = %#v\n", *r.ChallengeSecurityPreference)
 	}
 	return outputConfig + "}"
+}
+
+func convertApikeysKeyBetaRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"androidKeyRestrictions": convertApikeysKeyBetaRestrictionsAndroidKeyRestrictions(in["android_key_restrictions"]),
+		"apiTargets":             in["api_targets"],
+		"browserKeyRestrictions": convertApikeysKeyBetaRestrictionsBrowserKeyRestrictions(in["browser_key_restrictions"]),
+		"iosKeyRestrictions":     convertApikeysKeyBetaRestrictionsIosKeyRestrictions(in["ios_key_restrictions"]),
+		"serverKeyRestrictions":  convertApikeysKeyBetaRestrictionsServerKeyRestrictions(in["server_key_restrictions"]),
+	}
+}
+
+func convertApikeysKeyBetaRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyBetaRestrictions(v))
+	}
+	return out
+}
+
+func convertApikeysKeyBetaRestrictionsAndroidKeyRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedApplications": in["allowed_applications"],
+	}
+}
+
+func convertApikeysKeyBetaRestrictionsAndroidKeyRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyBetaRestrictionsAndroidKeyRestrictions(v))
+	}
+	return out
+}
+
+func convertApikeysKeyBetaRestrictionsAndroidKeyRestrictionsAllowedApplications(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"packageName":     in["package_name"],
+		"sha1Fingerprint": in["sha1_fingerprint"],
+	}
+}
+
+func convertApikeysKeyBetaRestrictionsAndroidKeyRestrictionsAllowedApplicationsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyBetaRestrictionsAndroidKeyRestrictionsAllowedApplications(v))
+	}
+	return out
+}
+
+func convertApikeysKeyBetaRestrictionsApiTargets(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"methods": in["methods"],
+		"service": in["service"],
+	}
+}
+
+func convertApikeysKeyBetaRestrictionsApiTargetsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyBetaRestrictionsApiTargets(v))
+	}
+	return out
+}
+
+func convertApikeysKeyBetaRestrictionsBrowserKeyRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedReferrers": in["allowed_referrers"],
+	}
+}
+
+func convertApikeysKeyBetaRestrictionsBrowserKeyRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyBetaRestrictionsBrowserKeyRestrictions(v))
+	}
+	return out
+}
+
+func convertApikeysKeyBetaRestrictionsIosKeyRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedBundleIds": in["allowed_bundle_ids"],
+	}
+}
+
+func convertApikeysKeyBetaRestrictionsIosKeyRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyBetaRestrictionsIosKeyRestrictions(v))
+	}
+	return out
+}
+
+func convertApikeysKeyBetaRestrictionsServerKeyRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedIps": in["allowed_ips"],
+	}
+}
+
+func convertApikeysKeyBetaRestrictionsServerKeyRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyBetaRestrictionsServerKeyRestrictions(v))
+	}
+	return out
 }
 
 func convertAssuredWorkloadsWorkloadBetaKmsSettings(i interface{}) map[string]interface{} {
@@ -13614,6 +14077,159 @@ func convertRecaptchaEnterpriseKeyBetaWebSettingsList(i interface{}) (out []map[
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertRecaptchaEnterpriseKeyBetaWebSettings(v))
+	}
+	return out
+}
+
+func convertApikeysKeyRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"androidKeyRestrictions": convertApikeysKeyRestrictionsAndroidKeyRestrictions(in["android_key_restrictions"]),
+		"apiTargets":             in["api_targets"],
+		"browserKeyRestrictions": convertApikeysKeyRestrictionsBrowserKeyRestrictions(in["browser_key_restrictions"]),
+		"iosKeyRestrictions":     convertApikeysKeyRestrictionsIosKeyRestrictions(in["ios_key_restrictions"]),
+		"serverKeyRestrictions":  convertApikeysKeyRestrictionsServerKeyRestrictions(in["server_key_restrictions"]),
+	}
+}
+
+func convertApikeysKeyRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyRestrictions(v))
+	}
+	return out
+}
+
+func convertApikeysKeyRestrictionsAndroidKeyRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedApplications": in["allowed_applications"],
+	}
+}
+
+func convertApikeysKeyRestrictionsAndroidKeyRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyRestrictionsAndroidKeyRestrictions(v))
+	}
+	return out
+}
+
+func convertApikeysKeyRestrictionsAndroidKeyRestrictionsAllowedApplications(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"packageName":     in["package_name"],
+		"sha1Fingerprint": in["sha1_fingerprint"],
+	}
+}
+
+func convertApikeysKeyRestrictionsAndroidKeyRestrictionsAllowedApplicationsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyRestrictionsAndroidKeyRestrictionsAllowedApplications(v))
+	}
+	return out
+}
+
+func convertApikeysKeyRestrictionsApiTargets(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"methods": in["methods"],
+		"service": in["service"],
+	}
+}
+
+func convertApikeysKeyRestrictionsApiTargetsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyRestrictionsApiTargets(v))
+	}
+	return out
+}
+
+func convertApikeysKeyRestrictionsBrowserKeyRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedReferrers": in["allowed_referrers"],
+	}
+}
+
+func convertApikeysKeyRestrictionsBrowserKeyRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyRestrictionsBrowserKeyRestrictions(v))
+	}
+	return out
+}
+
+func convertApikeysKeyRestrictionsIosKeyRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedBundleIds": in["allowed_bundle_ids"],
+	}
+}
+
+func convertApikeysKeyRestrictionsIosKeyRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyRestrictionsIosKeyRestrictions(v))
+	}
+	return out
+}
+
+func convertApikeysKeyRestrictionsServerKeyRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedIps": in["allowed_ips"],
+	}
+}
+
+func convertApikeysKeyRestrictionsServerKeyRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyRestrictionsServerKeyRestrictions(v))
 	}
 	return out
 }
