@@ -18,9 +18,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       check_response_func_existence: PollCheckForExistenceWith403
       target_occurrences: 10
       actions: ['create']
-      operation: !ruby/object:Api::Async::Operation
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         If you are using User ADCs (Application Default Credentials) with this resource,
