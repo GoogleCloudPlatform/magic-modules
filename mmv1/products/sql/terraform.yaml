@@ -36,10 +36,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         oics_vars_overrides:
           deletion_protection: "false"
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 15
-      update_minutes: 10
-      delete_minutes: 10
     properties:
       collation: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
