@@ -2,6 +2,7 @@
 
 set -e
 
+
 function clone_repo() {
     SCRATCH_OWNER=modular-magician
     UPSTREAM_BRANCH=master
@@ -106,16 +107,25 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
         # require a `google` folder to exist.
         mkdir -p $LOCAL_PATH/google
     fi
+
     pushd $LOCAL_PATH
     # clear out the templates as they are copied during
     # generation from mmv1/third_party/validator/tests/data
     rm -rf ./testdata/templates/
     rm -rf ./testdata/generatedconvert/
-    git add ./testdata
     find ./test/** -type f -exec git rm {} \;
+
     popd
     bundle exec compiler -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
     pushd $LOCAL_PATH
+
+    git clone --depth=1 --branch=$BRANCH https://modular-magician:$GITHUB_TOKEN@github.com/$SCRATCH_OWNER/terraform-provider-google-beta tpgbtemp
+    cp -r ./tpgbtemp/google-beta ./google
+    cp ./tpgbtemp/go.mod ./go.mod
+    sed -i '' 's|github.com/hashicorp/terraform-provider-google-beta|github.com/GoogleCloudPlatform/terraform-validator|' ./go.mod
+    rm -rf ./tpgbtemp
+    go mod tidy
+
     make build
     export TFV_CREATE_GENERATED_FILES=true
     go test ./test -run "TestAcc.*_generated_offline"
