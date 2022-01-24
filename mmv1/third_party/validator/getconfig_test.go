@@ -19,6 +19,9 @@ func getAccessToken(cfg *Config) string {
 func getImpersonateServiceAccount(cfg *Config) string {
 	return cfg.ImpersonateServiceAccount
 }
+func getUserAgent(cfg *Config) string {
+	return cfg.UserAgent()
+}
 
 func TestGetConfigExtractsEnvVars(t *testing.T) {
 	ctx := context.Background()
@@ -27,37 +30,50 @@ func TestGetConfigExtractsEnvVars(t *testing.T) {
 		name           string
 		envKey         string
 		envValue       string
+		expected       string
 		getConfigValue configAttrGetter
 	}{
 		{
 			name:           "GOOGLE_CREDENTIALS",
 			envKey:         "GOOGLE_CREDENTIALS",
 			envValue:       "whatever",
+			expected:       "whatever",
 			getConfigValue: getCredentials,
 		},
 		{
 			name:           "GOOGLE_CLOUD_KEYFILE_JSON",
 			envKey:         "GOOGLE_CLOUD_KEYFILE_JSON",
 			envValue:       "whatever",
+			expected:       "whatever",
 			getConfigValue: getCredentials,
 		},
 		{
 			name:           "GCLOUD_KEYFILE_JSON",
 			envKey:         "GCLOUD_KEYFILE_JSON",
 			envValue:       "whatever",
+			expected:       "whatever",
 			getConfigValue: getCredentials,
 		},
 		{
 			name:           "GOOGLE_OAUTH_ACCESS_TOKEN",
 			envKey:         "GOOGLE_OAUTH_ACCESS_TOKEN",
 			envValue:       "whatever",
+			expected:       "whatever",
 			getConfigValue: getAccessToken,
 		},
 		{
 			name:           "GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
 			envKey:         "GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
 			envValue:       "whatever",
+			expected:       "whatever",
 			getConfigValue: getImpersonateServiceAccount,
+		},
+		{
+			name:           "GOOGLE_TERRAFORM_VALIDATOR_USERAGENT_EXTENSION",
+			envKey:         "GOOGLE_TERRAFORM_VALIDATOR_USERAGENT_EXTENSION",
+			envValue:       "whatever",
+			expected:       "config-validator-tf/dev whatever",
+			getConfigValue: getUserAgent,
 		},
 	}
 
@@ -74,7 +90,7 @@ func TestGetConfigExtractsEnvVars(t *testing.T) {
 				t.Fatalf("error building converter: %s", err)
 			}
 
-			assert.EqualValues(t, c.getConfigValue(cfg), c.envValue)
+			assert.Equal(t, c.expected, c.getConfigValue(cfg))
 
 			if isSet {
 				err = os.Setenv(c.envKey, originalValue)
