@@ -112,22 +112,16 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     # generation from mmv1/third_party/validator/tests/data
     rm -rf ./testdata/templates/
     rm -rf ./testdata/generatedconvert/
+    rm -rf ./tpg
     find ./test/** -type f -exec git rm {} \;
 
     popd
     bundle exec compiler -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
     pushd $LOCAL_PATH
 
-    git clone --depth=1 --branch=$BRANCH https://modular-magician:$GITHUB_TOKEN@github.com/$SCRATCH_OWNER/terraform-provider-google-beta tpgbtemp
-    cp -r ./tpgbtemp/google-beta ./google
-    cp ./tpgbtemp/go.mod ./go.mod
-    sed -i '' 's|github.com/hashicorp/terraform-provider-google-beta|github.com/GoogleCloudPlatform/terraform-validator|' ./go.mod
-    sed -i '' 's|version.ProviderVersion|"dev"|' ./go.mod
-    sed -i '' -n '/terraform-provider-google-beta\/version/!p' ./google/provider.go
-
-    version.ProviderVersion
-    rm -rf ./tpgbtemp
-    go mod tidy
+    git clone --depth=1 --branch=$BRANCH https://modular-magician:$GITHUB_TOKEN@github.com/$SCRATCH_OWNER/terraform-provider-google tpg
+    rm -rf ./tpg/.git
+    go mod edit -replace github.com/hashicorp/terraform-provider-google/v4@v4.4.1=./tpg
 
     make build
     export TFV_CREATE_GENERATED_FILES=true
