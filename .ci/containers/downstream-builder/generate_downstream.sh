@@ -2,7 +2,6 @@
 
 set -e
 
-
 function clone_repo() {
     SCRATCH_OWNER=modular-magician
     UPSTREAM_BRANCH=master
