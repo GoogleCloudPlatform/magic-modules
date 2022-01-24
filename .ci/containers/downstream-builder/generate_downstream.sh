@@ -122,6 +122,10 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     cp -r ./tpgbtemp/google-beta ./google
     cp ./tpgbtemp/go.mod ./go.mod
     sed -i '' 's|github.com/hashicorp/terraform-provider-google-beta|github.com/GoogleCloudPlatform/terraform-validator|' ./go.mod
+    sed -i '' 's|version.ProviderVersion|"dev"|' ./go.mod
+    sed -i '' -n '/terraform-provider-google-beta\/version/!p' ./google/provider.go
+
+    version.ProviderVersion
     rm -rf ./tpgbtemp
     go mod tidy
 
