@@ -469,7 +469,7 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 * `service_account` - (Optional) The Google Cloud Platform Service Account to be used by the node VMs.
 
-* `image_type` - (Optional) The default image type used by NAP once a new node pool is being created. Please note that according to the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning#default-image-type) the value must be one of the [cos_containerd, cos, ubuntu_containerd, ubuntu].
+* `image_type` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The default image type used by NAP once a new node pool is being created. Please note that according to the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning#default-image-type) the value must be one of the [cos_containerd, cos, ubuntu_containerd, ubuntu].
 
 <a name="nested_authenticator_groups_config"></a>The `authenticator_groups_config` block supports:
 

@@ -2037,6 +2037,7 @@ func TestAccContainerCluster_withFlexiblePodCIDR(t *testing.T) {
 }
 <% end -%>
 
+<% unless version == 'ga' -%>
 func TestAccContainerCluster_nodeAutoprovisioningDefaultsImageType(t *testing.T) {
 	t.Parallel()
 
@@ -2069,7 +2070,7 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaultsImageType(t *testing.T)
 		},
 	})
 }
-
+<% end -%>
 func TestAccContainerCluster_errorCleanDanglingCluster(t *testing.T) {
 	t.Parallel()
 
@@ -3806,6 +3807,7 @@ resource "google_container_cluster" "with_autoprovisioning" {
 }
 <% end -%>
 
+<% unless version == 'ga' -%>
 func testAccContainerCluster_autoprovisioningDefaultsImageType(cluster string, includeImageType bool) string {
 	imageTypeCfg := ""
 	if includeImageType {
@@ -3837,6 +3839,7 @@ resource "google_container_cluster" "with_autoprovisioning" {
   }
 }`, cluster, imageTypeCfg)
 }
+<% end -%>
 
 func testAccContainerCluster_withNodePoolAutoscaling(cluster, np string) string {
 	return fmt.Sprintf(`
