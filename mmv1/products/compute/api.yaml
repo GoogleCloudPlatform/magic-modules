@@ -14089,6 +14089,7 @@ objects:
         input: true
   - !ruby/object:Api::Resource
     name: 'Reservation'
+    
     base_url: projects/{{project}}/zones/{{zone}}/reservations
     collection_url_key: 'items'
     input: true
