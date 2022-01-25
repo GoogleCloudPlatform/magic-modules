@@ -445,13 +445,7 @@ func resourceContainerCluster() *schema.Resource {
 										Optional:    true,
 										Default:     "cos",
 										Description: `The default image type used by NAP once a new node pool is being created.`,
-										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-										   v := val.(string)
-										   if v != "cos_containerd" || v != "cos" || v != "ubuntu_containerd" || v != "ubuntu" {
-										     errs = append(errs, fmt.Errorf("%q must be one of the [cos_containerd, cos, ubuntu_containerd, ubuntu], got: %d", key, v))
-										   }
-										   return
-										 },
+										ValidateFunc: validation.StringInSlice([]string{"cos_containerd", "cos", "ubuntu_containerd", "ubuntu"}, false),
 									},
 									<% end -%>
 									<% unless version == 'ga' -%>
