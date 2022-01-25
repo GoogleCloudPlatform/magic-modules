@@ -14089,8 +14089,9 @@ objects:
         input: true
   - !ruby/object:Api::Resource
     name: 'Reservation'
-    
     base_url: projects/{{project}}/zones/{{zone}}/reservations
+    update_verb: :PATCH
+    update_url: projects/{project}/zones/{zone}/reservations/{{name}}
     collection_url_key: 'items'
     input: true
     has_self_link: true
@@ -14182,6 +14183,8 @@ objects:
           The status of the reservation.
       - !ruby/object:Api::Type::NestedObject
         name: 'shareSettings'
+        update_verb: :PATCH
+        update_url: projects/{project}/zones/{zone}/reservations/{{name}}
         description: |
           The share setting for reservations.
         properties:
@@ -14194,6 +14197,8 @@ objects:
               Type of sharing for this shared-reservation
           - !ruby/object:Api::Type::Map
             name: 'projectMap'
+            update_verb: :PATCH
+            update_url: projects/{project}/zones/{zone}/reservations/{{name}}
             description: |
               A map of project number and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
             key_name: id
