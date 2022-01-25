@@ -18,10 +18,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       optional_properties: |
         * `name_prefix` - (Optional) Creates a unique name beginning with the
          specified prefix. If this and name are unspecified, a random value is chosen for the name.
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
-      delete_minutes: 6
     autogen_async: true
     id_format: 'projects/{{project}}/locations/{{region}}/workflows/{{name}}'
     exclude_import: true

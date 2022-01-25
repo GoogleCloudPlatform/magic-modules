@@ -555,10 +555,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
   Disk: !ruby/object:Overrides::Terraform::ResourceOverride
-    # Larger disks were timing out at creation. Bumping up to 5 minutes.
-    # https://github.com/hashicorp/terraform-provider-google/issues/703
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 5
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -944,6 +940,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   GlobalForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        name: "external_cnd_lb_with_backend_bucket"
+        primary_resource_id: "default"
+        vars:
+          cdn_network: "cdn-network"
+          cdn_subnet: "cdn-subnet"
+          cdn_static_ip: "cdn-static-ip"
+          cdn_forwarding_rule: "cdn-forwarding-rule"
+          cdn_target_http_proxy: "cdn-target-http-proxy"
+          cdn_url_map: "cdn-url-map"
+          image_backend_bucket: "image-backend-bucket"
+          cdn_backend_storage_bucket: "cdn-backend-storage-bucket"
+        min_version: beta
+        ignore_read_extra:
+          - "port_range"
+          - "target"
+          - "ip_address"
+      - !ruby/object:Provider::Terraform::Examples
         name: "external_ssl_proxy_lb_mig_backend"
         primary_resource_id: "default"
         skip_test: true
@@ -1254,12 +1267,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       sourceType: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
-    # Users were experiencing timeouts. Bumping up to 6 minutes.
-    # https://github.com/hashicorp/terraform-provider-google/issues/852
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
-      delete_minutes: 6
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/compute.osLogin'
       parent_resource_attribute: 'instance_name'
@@ -1953,8 +1960,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
   RegionDisk: !ruby/object:Overrides::Terraform::ResourceOverride
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 5
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -2535,10 +2540,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       update_encoder: 'templates/terraform/update_encoder/compute_service_attachment.go.erb'
   Snapshot: !ruby/object:Overrides::Terraform::ResourceOverride
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 5
-      update_minutes: 5
-      delete_minutes: 5
     create_url: PRE_CREATE_REPLACE_ME/createSnapshot
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -2579,8 +2580,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pre_create: templates/terraform/pre_create/compute_snapshot_precreate_url.go.erb
   ManagedSslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
+      insert_minutes: 30
+      update_minutes: 30
       # Deletes can take 20-30 minutes to complete, since they depend
       # on the provisioning process either succeeding or failing completely.
       delete_minutes: 30
@@ -2788,12 +2789,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       warnings: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
   Subnetwork: !ruby/object:Overrides::Terraform::ResourceOverride
-    # Users were experiencing timeout. Bumping up to 6 minutes.
-    # https://github.com/hashicorp/terraform-provider-google/issues/718
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
-      delete_minutes: 6
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/compute.networkUser'
       parent_resource_attribute: 'subnetwork'

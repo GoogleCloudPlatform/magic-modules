@@ -191,6 +191,10 @@ module Provider
                         'third_party/validator/cai.go'],
                        ['converters/google/resources/cai_test.go',
                         'third_party/validator/cai_test.go'],
+                       ['converters/google/resources/getconfig.go',
+                        'third_party/validator/getconfig.go'],
+                       ['converters/google/resources/getconfig_test.go',
+                        'third_party/validator/getconfig_test.go'],
                        ['converters/google/resources/json_map.go',
                         'third_party/validator/json_map.go'],
                        ['converters/google/resources/project.go',
@@ -314,7 +318,28 @@ module Provider
                      ])
     end
 
-    def generate_resource_tests(pwd, data) end
+    def generate_resource_tests(pwd, data)
+      product_whitelist = [
+        'cloudrun'
+      ]
+
+      return unless product_whitelist.include?(data.product.name.downcase)
+      return if data.object.examples
+                    .reject(&:skip_test)
+                    .reject do |e|
+                  @api.version_obj_or_closest(data.version) \
+                < @api.version_obj_or_closest(e.min_version)
+                end
+                    .empty?
+
+      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+      data.generate(
+        pwd,
+        'templates/validator/examples/base_configs/test_file.go.erb',
+        "test/resource_#{full_resource_name(data)}_generated_test.go",
+        self
+      )
+    end
 
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
