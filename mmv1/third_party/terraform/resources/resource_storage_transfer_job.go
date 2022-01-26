@@ -527,7 +527,6 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Transfer Job %q", name))
 	}
-	log.Printf("[DEBUG] Read transfer job: %v in project: %v \n\n", res.Name, res.ProjectId) 
 
 	if err := d.Set("project", res.ProjectId); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
@@ -977,6 +976,9 @@ func expandTransferOptions(options []interface{}) *storagetransfer.TransferOptio
 }
 
 func flattenTransferOption(option *storagetransfer.TransferOptions) []map[string]interface{} {
+	if option.DeleteObjectsFromSourceAfterTransfer == false && option.DeleteObjectsUniqueInSink == false && option.OverwriteObjectsAlreadyExistingInSink == false {
+		return nil
+	}
 	data := map[string]interface{}{
 		"delete_objects_from_source_after_transfer":  option.DeleteObjectsFromSourceAfterTransfer,
 		"delete_objects_unique_in_sink":              option.DeleteObjectsUniqueInSink,
@@ -994,6 +996,7 @@ func expandTransferSpecs(transferSpecs []interface{}) *storagetransfer.TransferS
 	transferSpec := transferSpecs[0].(map[string]interface{})
 	return &storagetransfer.TransferSpec{
 		GcsDataSink:                expandGcsData(transferSpec["gcs_data_sink"].([]interface{})),
+		PosixDataSink:              expandPosixData(transferSpec["posix_data_sink"].([]interface{})),
 		ObjectConditions:           expandObjectConditions(transferSpec["object_conditions"].([]interface{})),
 		TransferOptions:            expandTransferOptions(transferSpec["transfer_options"].([]interface{})),
 		GcsDataSource:              expandGcsData(transferSpec["gcs_data_source"].([]interface{})),
@@ -1005,9 +1008,12 @@ func expandTransferSpecs(transferSpecs []interface{}) *storagetransfer.TransferS
 }
 
 func flattenTransferSpec(transferSpec *storagetransfer.TransferSpec, d *schema.ResourceData) []map[string][]map[string]interface{} {
-
-	data := map[string][]map[string]interface{}{
-		"gcs_data_sink": flattenGcsData(transferSpec.GcsDataSink),
+	data := map[string][]map[string]interface{}{}
+	if transferSpec.GcsDataSink != nil {
+		data["gcs_data_sink"] = flattenGcsData(transferSpec.GcsDataSink)
+	}
+	if transferSpec.PosixDataSink != nil {
+		data["posix_data_sink"] = flattenPosixData(transferSpec.PosixDataSink)
 	}
 
 	if transferSpec.ObjectConditions != nil {
@@ -1027,8 +1033,6 @@ func flattenTransferSpec(transferSpec *storagetransfer.TransferSpec, d *schema.R
 	} else if transferSpec.PosixDataSource != nil {
 		data["posix_data_source"] = flattenPosixData(transferSpec.PosixDataSource)
 	}
-
-	log.Printf("[DEBUG] Read transfer spec: %#v \n\n", transferSpec)
 
 	return []map[string][]map[string]interface{}{data}
 }
