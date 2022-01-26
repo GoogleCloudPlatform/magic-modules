@@ -189,14 +189,14 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 										Type:         schema.TypeString,
 										Required:     true,
 										ValidateFunc: validation.StringInSlice([]string{"allow"}, false),
-										Description:  `When a request is denied, returns the HTTP response code specified. Valid options are "deny()" where valid values for status are 403, 404, 429, and 502.`,
+										Description:  `Action to take for requests that are under the configured rate limit threshold. Valid option is "allow" only.`,
 									},
 
 									"exceed_action": {
 										Type:         schema.TypeString,
 										Required:     true,
 										ValidateFunc: validation.StringInSlice([]string{"redirect", "deny(403)", "deny(404)", "deny(429)", "deny(502)"}, false),
-										Description:  `Action to take for requests that are under the configured rate limit threshold. Valid option is "allow" only.`,
+										Description:  `Action to take for requests that are above the configured rate limit threshold, to either deny with a specified HTTP response code, or redirect to a different endpoint. Valid options are "deny()" where valid values for status are 403, 404, 429, and 502, and "redirect" where the redirect parameters come from exceedRedirectOptions below.`,
 									},
 
 									"enforce_on_key": {
