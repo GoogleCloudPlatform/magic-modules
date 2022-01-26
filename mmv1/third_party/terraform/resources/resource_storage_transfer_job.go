@@ -34,6 +34,10 @@ var (
 		"transfer_spec.0.azure_blob_storage_data_source",
 		"transfer_spec.0.posix_data_source",
 	}
+	transferSpecDataSinkKeys = []string{
+		"transfer_spec.0.gcs_data_sink",
+		"transfer_spec.0.posix_data_sink",
+	}
 	awsS3AuthKeys = []string{
 		"transfer_spec.0.aws_s3_data_source.0.aws_access_key",
 		"transfer_spec.0.aws_s3_data_source.0.role_arn",
@@ -78,18 +82,20 @@ func resourceStorageTransferJob() *schema.Resource {
 						"object_conditions": objectConditionsSchema(),
 						"transfer_options":  transferOptionsSchema(),
 						"gcs_data_sink": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
-							Elem:        gcsDataSchema(),
-							Description: `A Google Cloud Storage data sink.`,
+							Type:         schema.TypeList,
+							Optional:     true,
+							MaxItems:     1,
+							Elem:         gcsDataSchema(),
+							ExactlyOneOf: transferSpecDataSinkKeys,
+							Description:  `A Google Cloud Storage data sink.`,
 						},
 						"posix_data_sink": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
-							Elem:        posixDataSchema(),
-							Description: `A POSIX filesystem data sink.`,
+							Type:         schema.TypeList,
+							Optional:     true,
+							MaxItems:     1,
+							Elem:         posixDataSchema(),
+							ExactlyOneOf: transferSpecDataSinkKeys,
+							Description:  `A POSIX filesystem data sink.`,
 						},
 						"gcs_data_source": {
 							Type:         schema.TypeList,
