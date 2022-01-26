@@ -1031,26 +1031,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "target"
       - !ruby/object:Provider::Terraform::Examples
         name: "global_forwarding_rule_external_managed"
+        min_version: beta
         primary_resource_id: "default"
         vars:
           forwarding_rule_name: "global-rule"
           http_proxy_name: "target-proxy"
           backend_service_name: "backend"
-        ignore_read_extra:
-          - "port_range"
-          - "target"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "global_forwarding_rule_hybrid"
-        primary_resource_id: "default"
-        vars:
-          forwarding_rule_name: "global-rule"
-          http_proxy_name: "target-proxy"
-          network_name: "my-network"
-          default_backend_service_name: "backend-default"
-          hybrid_backend_service_name: "backend-hybrid"
-          default_neg_name: "default-neg"
-          hybrid_neg_name: "hybrid-neg"
-          health_check_name: "health-check"
         ignore_read_extra:
           - "port_range"
           - "target"
