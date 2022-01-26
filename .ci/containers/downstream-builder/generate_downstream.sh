@@ -121,7 +121,7 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
 
     git clone --depth=1 --branch=$BRANCH https://modular-magician:$GITHUB_TOKEN@github.com/$SCRATCH_OWNER/terraform-provider-google converters/google/provider
     rm -rf ./converters/google/provider/.git
-    go mod edit -replace github.com/hashicorp/terraform-provider-google/v4@v4.4.1=./converters/google/provider
+    go mod edit -replace github.com/hashicorp/terraform-provider-google@v0.0.0=./converters/google/provider
 
     make build
     export TFV_CREATE_GENERATED_FILES=true
