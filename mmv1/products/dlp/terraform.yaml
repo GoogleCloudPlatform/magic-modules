@@ -27,6 +27,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "basic"
         test_env_vars:
           project: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dlp_deidentify_template_skip_characters"
+        primary_resource_id: "basic"
+        test_env_vars:
+          project: :PROJECT_NAME
+        skip_docs: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/wrap_object.go.erb
       custom_import: templates/terraform/custom_import/dlp_import.go.erb
@@ -73,9 +79,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckForExistence
       actions: ['create']
-      operation: !ruby/object:Api::Async::Operation
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 4
     id_format: "{{parent}}/storedInfoTypes/{{name}}"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride

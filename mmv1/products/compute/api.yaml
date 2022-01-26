@@ -1360,7 +1360,8 @@ objects:
         description: |
           Indicates whether the backend service will be used with internal or
           external load balancing. A backend service created for one type of
-          load balancing cannot be used with the other.
+          load balancing cannot be used with the other. For more information, refer to
+          [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service).
         default_value: :EXTERNAL
         # If you're modifying this value, it probably means Global ILB is now
         # an option. If that's the case, all of the documentation is based on
@@ -1368,6 +1369,7 @@ objects:
         values:
           - :EXTERNAL
           - :INTERNAL_SELF_MANAGED
+          - :EXTERNAL_MANAGED
       - !ruby/object:Api::Type::Enum
         name: 'localityLbPolicy'
         values:
@@ -1379,34 +1381,46 @@ objects:
           - :MAGLEV
         description: |
           The load balancing algorithm used within the scope of the locality.
-          The possible values are -
+          The possible values are:
 
-          * ROUND_ROBIN - This is a simple policy in which each healthy backend
-                          is selected in round robin order.
+          * `ROUND_ROBIN`: This is a simple policy in which each healthy backend
+                           is selected in round robin order.
 
-          * LEAST_REQUEST - An O(1) algorithm which selects two random healthy
-                            hosts and picks the host which has fewer active requests.
+          * `LEAST_REQUEST`: An O(1) algorithm which selects two random healthy
+                             hosts and picks the host which has fewer active requests.
 
-          * RING_HASH - The ring/modulo hash load balancer implements consistent
-                        hashing to backends. The algorithm has the property that the
-                        addition/removal of a host from a set of N hosts only affects
-                        1/N of the requests.
+          * `RING_HASH`: The ring/modulo hash load balancer implements consistent
+                         hashing to backends. The algorithm has the property that the
+                         addition/removal of a host from a set of N hosts only affects
+                         1/N of the requests.
 
-          * RANDOM - The load balancer selects a random healthy host.
+          * `RANDOM`: The load balancer selects a random healthy host.
 
-          * ORIGINAL_DESTINATION - Backend host is selected based on the client
-                                   connection metadata, i.e., connections are opened
-                                   to the same address as the destination address of
-                                   the incoming connection before the connection
-                                   was redirected to the load balancer.
+          * `ORIGINAL_DESTINATION`: Backend host is selected based on the client
+                                    connection metadata, i.e., connections are opened
+                                    to the same address as the destination address of
+                                    the incoming connection before the connection
+                                    was redirected to the load balancer.
 
-          * MAGLEV - used as a drop in replacement for the ring hash load balancer.
-                     Maglev is not as stable as ring hash but has faster table lookup
-                     build times and host selection times. For more information about
-                     Maglev, refer to https://ai.google/research/pubs/pub44824
+          * `MAGLEV`: used as a drop in replacement for the ring hash load balancer.
+                      Maglev is not as stable as ring hash but has faster table lookup
+                      build times and host selection times. For more information about
+                      Maglev, refer to https://ai.google/research/pubs/pub44824
 
-          This field is applicable only when the load_balancing_scheme is set to
-          INTERNAL_SELF_MANAGED.
+
+          This field is applicable to either:
+
+          * A regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2,
+            and loadBalancingScheme set to INTERNAL_MANAGED.
+          * A global backend service with the load_balancing_scheme set to INTERNAL_SELF_MANAGED.
+
+
+          If session_affinity is not NONE, and this field is not set to MAGLEV or RING_HASH,
+          session affinity settings will not take effect.
+
+          Only ROUND_ROBIN and RING_HASH are supported when the backend service is referenced
+          by a URL map that is bound to target gRPC proxy that has validate_for_proxyless
+          field set to true.
       - !ruby/object:Api::Type::String
         name: 'name'
         required: true
@@ -2392,7 +2406,8 @@ objects:
         description: |
           Indicates what kind of load balancing this regional backend service
           will be used for. A backend service created for one type of load
-          balancing cannot be used with the other(s).
+          balancing cannot be used with the other(s). For more information, refer to
+          [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service).
         default_value: :INTERNAL
         values:
           - :EXTERNAL
@@ -2410,34 +2425,46 @@ objects:
           - :MAGLEV
         description: |
           The load balancing algorithm used within the scope of the locality.
-          The possible values are -
+          The possible values are:
 
-          * ROUND_ROBIN - This is a simple policy in which each healthy backend
-                          is selected in round robin order.
+          * `ROUND_ROBIN`: This is a simple policy in which each healthy backend
+                           is selected in round robin order.
 
-          * LEAST_REQUEST - An O(1) algorithm which selects two random healthy
-                            hosts and picks the host which has fewer active requests.
+          * `LEAST_REQUEST`: An O(1) algorithm which selects two random healthy
+                             hosts and picks the host which has fewer active requests.
 
-          * RING_HASH - The ring/modulo hash load balancer implements consistent
-                        hashing to backends. The algorithm has the property that the
-                        addition/removal of a host from a set of N hosts only affects
-                        1/N of the requests.
+          * `RING_HASH`: The ring/modulo hash load balancer implements consistent
+                         hashing to backends. The algorithm has the property that the
+                         addition/removal of a host from a set of N hosts only affects
+                         1/N of the requests.
 
-          * RANDOM - The load balancer selects a random healthy host.
+          * `RANDOM`: The load balancer selects a random healthy host.
 
-          * ORIGINAL_DESTINATION - Backend host is selected based on the client
-                                   connection metadata, i.e., connections are opened
-                                   to the same address as the destination address of
-                                   the incoming connection before the connection
-                                   was redirected to the load balancer.
+          * `ORIGINAL_DESTINATION`: Backend host is selected based on the client
+                                    connection metadata, i.e., connections are opened
+                                    to the same address as the destination address of
+                                    the incoming connection before the connection
+                                    was redirected to the load balancer.
 
-          * MAGLEV - used as a drop in replacement for the ring hash load balancer.
-                     Maglev is not as stable as ring hash but has faster table lookup
-                     build times and host selection times. For more information about
-                     Maglev, refer to https://ai.google/research/pubs/pub44824
+          * `MAGLEV`: used as a drop in replacement for the ring hash load balancer.
+                      Maglev is not as stable as ring hash but has faster table lookup
+                      build times and host selection times. For more information about
+                      Maglev, refer to https://ai.google/research/pubs/pub44824
 
-          This field is applicable only when the `load_balancing_scheme` is set to
-          INTERNAL_MANAGED and the `protocol` is set to HTTP, HTTPS, or HTTP2.
+
+          This field is applicable to either:
+
+          * A regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2,
+            and loadBalancingScheme set to INTERNAL_MANAGED.
+          * A global backend service with the load_balancing_scheme set to INTERNAL_SELF_MANAGED.
+
+
+          If session_affinity is not NONE, and this field is not set to MAGLEV or RING_HASH,
+          session affinity settings will not take effect.
+
+          Only ROUND_ROBIN and RING_HASH are supported when the backend service is referenced
+          by a URL map that is bound to target gRPC proxy that has validate_for_proxyless
+          field set to true.
       - !ruby/object:Api::Type::String
         name: 'name'
         required: true
@@ -2748,7 +2775,7 @@ objects:
             name: 'idleTimeoutSec'
             description: |
               Specifies how long to keep a Connection Tracking entry while there is
-              no matching traffic (in seconds). 
+              no matching traffic (in seconds).
 
               For L4 ILB the minimum(default) is 10 minutes and maximum is 16 hours.
 
@@ -2759,7 +2786,7 @@ objects:
               Specifies the key used for connection tracking. There are two options:
               `PER_CONNECTION`: The Connection Tracking is performed as per the
               Connection Key (default Hash Method) for the specific protocol.
-              
+
               `PER_SESSION`: The Connection Tracking is performed as per the
               configured Session Affinity. It matches the configured Session Affinity.
             default_value: :PER_CONNECTION
@@ -3009,9 +3036,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 4
-          delete_minutes: 4
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -3071,9 +3095,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 4
-          delete_minutes: 4
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -3143,10 +3164,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        # Larger disks were timing out at creation. Bumping up to 5 minutes.
-        # https://github.com/hashicorp/terraform-provider-google/issues/703
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 5
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -3666,7 +3683,8 @@ objects:
           apply to traffic that has source IP address within sourceRanges OR the
           source IP that belongs to a tag listed in the sourceTags property. The
           connection does not need to match both properties for the firewall to
-          apply. Only IPv4 is supported.
+          apply. Only IPv4 is supported. For INGRESS traffic, one of `source_ranges`,
+          `source_tags` or `source_service_accounts` is required.
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'sourceServiceAccounts'
@@ -3681,7 +3699,8 @@ objects:
           source IP belongs to an instance with service account listed in
           sourceServiceAccount. The connection does not need to match both
           properties for the firewall to apply. sourceServiceAccounts cannot be
-          used at the same time as sourceTags or targetTags.
+          used at the same time as sourceTags or targetTags. For INGRESS traffic,
+          one of `source_ranges`, `source_tags` or `source_service_accounts` is required.
         item_type: Api::Type::String
         max_size: 10
         conflicts:
@@ -3698,7 +3717,8 @@ objects:
           both properties are set, the firewall will apply to traffic that has
           source IP address within sourceRanges OR the source IP that belongs to
           a tag listed in the sourceTags property. The connection does not need
-          to match both properties for the firewall to apply.
+          to match both properties for the firewall to apply. For INGRESS traffic,
+          one of `source_ranges`, `source_tags` or `source_service_accounts` is required.
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'targetServiceAccounts'
@@ -4244,13 +4264,15 @@ objects:
           The value of INTERNAL_SELF_MANAGED means that this will be used for
           Internal Global HTTP(S) LB. The value of EXTERNAL means that this
           will be used for External Global Load Balancing (HTTP(S) LB,
-          External TCP/UDP LB, SSL Proxy)
+          External TCP/UDP LB, SSL Proxy). The value of EXTERNAL_MANAGED means
+          that this will be used for Global external HTTP(S) load balancers.
 
           ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) only) Note: This field must be set "" if the global address is
           configured as a purpose of PRIVATE_SERVICE_CONNECT and addressType of INTERNAL.
         default_value: :EXTERNAL
         values:
           - :EXTERNAL
+          - :EXTERNAL_MANAGED
           - :INTERNAL_SELF_MANAGED
       - !ruby/object:Api::Type::Array
         name: 'metadataFilters'
@@ -5910,10 +5932,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -6211,12 +6229,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        # Users were experiencing timeouts. Bumping up to 6 minutes.
-        # https://github.com/hashicorp/terraform-provider-google/issues/852
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -7124,10 +7136,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -7391,9 +7399,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 10
-          delete_minutes: 10
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -7668,10 +7673,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -8030,10 +8031,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -8220,10 +8217,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -8657,10 +8650,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -9262,10 +9251,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 15
-          update_minutes: 6
-          delete_minutes: 15
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -9380,10 +9365,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 15
-          update_minutes: 6
-          delete_minutes: 15
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -10130,8 +10111,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 5
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -13093,7 +13072,7 @@ objects:
           A reference to the network to which this router belongs.
         required: true
         input: true
-      # TODO(danawillow): Figure out the story for interfaces/bgpPeers. Right
+      # TODO: Figure out the story for interfaces/bgpPeers. Right
       # now in Terraform we have three separate resources: router,
       # router_interface, and router_peer. Decide whether we want to keep that
       # pattern for the other providers, keep it unique for Terraform, or add
@@ -13194,10 +13173,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 10
-          update_minutes: 10
-          delete_minutes: 10
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -13400,10 +13375,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 10
-          update_minutes: 10
-          delete_minutes: 10
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -13725,10 +13696,6 @@ objects:
         path: 'name'
         full_url: 'selfLink'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 5
-          update_minutes: 5
-          delete_minutes: 5
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -13974,8 +13941,8 @@ objects:
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
         timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
+          insert_minutes: 30
+          update_minutes: 30
           # Deletes can take 20-30 minutes to complete, since they depend
           # on the provisioning process either succeeding or failing completely.
           delete_minutes: 30
@@ -14214,6 +14181,32 @@ objects:
         output: true
         description: |
           The status of the reservation.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'shareSettings'
+        description: |
+          The share setting for reservations.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'shareType'
+            values:
+              - :LOCAL
+              - :SPECIFIC_PROJECTS
+            description: |
+              Type of sharing for this shared-reservation
+          - !ruby/object:Api::Type::Map
+            name: 'projectMap'
+            description: |
+              A map of project number and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
+            key_name: id
+            key_description: |
+              The project id/number which is deleting or adding to the project list. Only project number is acceptable.
+            value_type: !ruby/object:Api::Type::NestedObject
+              name: projectConfig
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'projectId'
+                  description: |
+                    The project id/number, should be same as the key of this project config in the project map.
       - !ruby/object:Api::Type::NestedObject
         name: 'specificReservation'
         required: true
@@ -14581,12 +14574,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        # Users were experiencing timeout. Bumping up to 6 minutes.
-        # https://github.com/hashicorp/terraform-provider-google/issues/718
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -14656,7 +14643,7 @@ objects:
         description: |
           The purpose of the resource. A subnetwork with purpose set to
           INTERNAL_HTTPS_LOAD_BALANCER is a user-created subnetwork that is
-          reserved for Internal HTTP(S) Load Balancing. 
+          reserved for Internal HTTP(S) Load Balancing.
 
           If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set the `role` field.
       - !ruby/object:Api::Type::Enum

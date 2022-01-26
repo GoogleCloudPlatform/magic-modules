@@ -42,6 +42,7 @@ objects:
 
       A bucket is always owned by the project team owners group.
     iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude_validator: true
       allowed_iam_role: 'roles/storage.objectViewer'
       admin_iam_role: 'roles/storage.admin'
       parent_resource_attribute: 'bucket'
@@ -388,7 +389,7 @@ objects:
           bucket are stored and determines the SLA and the cost of storage.
           Values include MULTI_REGIONAL, REGIONAL, STANDARD, NEARLINE,
           COLDLINE, ARCHIVE, and DURABLE_REDUCED_AVAILABILITY. If this value is
-          not specified when the bucket is created, it will default to 
+          not specified when the bucket is created, it will default to
           STANDARD. For more information, see storage classes.
         values:
           - :MULTI_REGIONAL

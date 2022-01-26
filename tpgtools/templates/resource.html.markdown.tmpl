@@ -29,12 +29,11 @@
 subcategory: "{{$.DocsSection}}"
 layout: "google"
 page_title: "Google: {{$.TerraformName}}"
-sidebar_current: "{{$.SidebarCurrent}}"
 description: |-
 {{$.Description}}
 ---
 
-# {{ replace $.TerraformName "_" "\\_" -1 }}
+# {{ $.TerraformName }}
 
 {{$.Description}}
 {{if or $.Reference $.Guides}}

@@ -30,5 +30,6 @@ resource "google_redis_instance" "<%= ctx[:primary_resource_id] %>" {
 // config, add an additional network resource or change
 // this from "data"to "resource"
 data "google_compute_network" "redis-network" {
+  provider = google-beta
   name = "<%= ctx[:vars]['network_name'] %>"
 }

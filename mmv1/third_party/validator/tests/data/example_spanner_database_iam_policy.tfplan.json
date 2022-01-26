@@ -5,6 +5,32 @@
     "root_module": {
       "resources": [
         {
+          "address": "google_spanner_database.database",
+          "mode": "managed",
+          "type": "google_spanner_database",
+          "name": "database",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "ddl": [
+              "CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+              "CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)"
+            ],
+            "deletion_protection": false,
+            "encryption_config": [],
+            "instance": "my-instance",
+            "name": "my-database",
+            "timeouts": null
+          },
+          "sensitive_values": {
+            "ddl": [
+              false,
+              false
+            ],
+            "encryption_config": []
+          }
+        },
+        {
           "address": "google_spanner_database_iam_policy.database",
           "mode": "managed",
           "type": "google_spanner_database_iam_policy",
@@ -17,11 +43,71 @@
             "policy_data": "{\"bindings\":[{\"members\":[\"user:jane@example.com\"],\"role\":\"roles/editor\"}]}"
           },
           "sensitive_values": {}
+        },
+        {
+          "address": "google_spanner_instance.main",
+          "mode": "managed",
+          "type": "google_spanner_instance",
+          "name": "main",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "config": "regional-europe-west1",
+            "display_name": "main-instance",
+            "force_destroy": false,
+            "labels": null,
+            "name": "my-instance",
+            "num_nodes": 1,
+            "timeouts": null
+          },
+          "sensitive_values": {}
         }
       ]
     }
   },
   "resource_changes": [
+    {
+      "address": "google_spanner_database.database",
+      "mode": "managed",
+      "type": "google_spanner_database",
+      "name": "database",
+      "provider_name": "registry.terraform.io/hashicorp/google",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "ddl": [
+            "CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+            "CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)"
+          ],
+          "deletion_protection": false,
+          "encryption_config": [],
+          "instance": "my-instance",
+          "name": "my-database",
+          "timeouts": null
+        },
+        "after_unknown": {
+          "ddl": [
+            false,
+            false
+          ],
+          "encryption_config": [],
+          "id": true,
+          "project": true,
+          "state": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "ddl": [
+            false,
+            false
+          ],
+          "encryption_config": []
+        }
+      }
+    },
     {
       "address": "google_spanner_database_iam_policy.database",
       "mode": "managed",
@@ -46,63 +132,69 @@
         "before_sensitive": false,
         "after_sensitive": {}
       }
+    },
+    {
+      "address": "google_spanner_instance.main",
+      "mode": "managed",
+      "type": "google_spanner_instance",
+      "name": "main",
+      "provider_name": "registry.terraform.io/hashicorp/google",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "config": "regional-europe-west1",
+          "display_name": "main-instance",
+          "force_destroy": false,
+          "labels": null,
+          "name": "my-instance",
+          "num_nodes": 1,
+          "timeouts": null
+        },
+        "after_unknown": {
+          "id": true,
+          "processing_units": true,
+          "project": true,
+          "state": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {}
+      }
     }
   ],
-  "prior_state": {
-    "format_version": "0.2",
-    "terraform_version": "1.0.10",
-    "values": {
-      "root_module": {
-        "resources": [
-          {
-            "address": "data.google_iam_policy.admin",
-            "mode": "data",
-            "type": "google_iam_policy",
-            "name": "admin",
-            "provider_name": "registry.terraform.io/hashicorp/google",
-            "schema_version": 0,
-            "values": {
-              "audit_config": null,
-              "binding": [
-                {
-                  "condition": [],
-                  "members": [
-                    "user:jane@example.com"
-                  ],
-                  "role": "roles/editor"
-                }
-              ],
-              "id": "1120114865",
-              "policy_data": "{\"bindings\":[{\"members\":[\"user:jane@example.com\"],\"role\":\"roles/editor\"}]}"
-            },
-            "sensitive_values": {
-              "binding": [
-                {
-                  "condition": [],
-                  "members": [
-                    false
-                  ]
-                }
-              ]
-            }
-          }
-        ]
-      }
-    }
-  },
   "configuration": {
-    "provider_config": {
-      "google": {
-        "name": "google",
-        "expressions": {
-          "project": {
-            "constant_value": "{{.Provider.project}}"
-          }
-        }
-      }
-    },
     "root_module": {
       "resources": [
+        {
+          "address": "google_spanner_database.database",
+          "mode": "managed",
+          "type": "google_spanner_database",
+          "name": "database",
+          "provider_config_key": "google",
+          "expressions": {
+            "ddl": {
+              "constant_value": [
+                "CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+                "CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)"
+              ]
+            },
+            "deletion_protection": {
+              "constant_value": false
+            },
+            "instance": {
+              "references": [
+                "google_spanner_instance.main.name",
+                "google_spanner_instance.main"
+              ]
+            },
+            "name": {
+              "constant_value": "my-database"
+            }
+          },
+          "schema_version": 0
+        },
         {
           "address": "google_spanner_database_iam_policy.database",
           "mode": "managed",
@@ -111,39 +203,40 @@
           "provider_config_key": "google",
           "expressions": {
             "database": {
-              "constant_value": "my-database"
+              "references": [
+                "google_spanner_database.database.name",
+                "google_spanner_database.database"
+              ]
             },
             "instance": {
-              "constant_value": "my-instance"
-            },
-            "policy_data": {
               "references": [
-                "data.google_iam_policy.admin.policy_data",
-                "data.google_iam_policy.admin"
+                "google_spanner_instance.main.name",
+                "google_spanner_instance.main"
               ]
-            }
+            },
+            "policy_data": {}
           },
           "schema_version": 0
         },
         {
-          "address": "data.google_iam_policy.admin",
-          "mode": "data",
-          "type": "google_iam_policy",
-          "name": "admin",
+          "address": "google_spanner_instance.main",
+          "mode": "managed",
+          "type": "google_spanner_instance",
+          "name": "main",
           "provider_config_key": "google",
           "expressions": {
-            "binding": [
-              {
-                "members": {
-                  "constant_value": [
-                    "user:jane@example.com"
-                  ]
-                },
-                "role": {
-                  "constant_value": "roles/editor"
-                }
-              }
-            ]
+            "config": {
+              "constant_value": "regional-europe-west1"
+            },
+            "display_name": {
+              "constant_value": "main-instance"
+            },
+            "name": {
+              "constant_value": "my-instance"
+            },
+            "num_nodes": {
+              "constant_value": 1
+            }
           },
           "schema_version": 0
         }

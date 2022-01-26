@@ -1,3 +1,4 @@
+# [START privateca_create_subordinateca]
 resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id] %>" {
   // This example assumes this pool already exists.
   // Pools cannot be deleted in normal test circumstances, so we depend on static pools
@@ -18,7 +19,6 @@ resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id]
       ca_options {
         is_ca = true
         # Force the sub CA to only issue leaf certs
-        zero_max_issuer_path_length = true
         max_issuer_path_length = 0
       }
       key_usage {
@@ -48,3 +48,4 @@ resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id]
   }
   type = "SUBORDINATE"
 }
+# [END privateca_create_subordinateca]
