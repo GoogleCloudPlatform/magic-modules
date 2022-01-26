@@ -114,6 +114,7 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     find ./testdata/templates/*.* -exec git rm {} \;
     find ./testdata/generatedconvert/*.* -exec git rm {} \;
     find ./test/** -type f -exec git rm {} \;
+
     popd
     bundle exec compiler -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
     pushd $LOCAL_PATH
