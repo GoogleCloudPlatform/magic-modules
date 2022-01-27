@@ -110,8 +110,8 @@ func TestGetConfigExtractsEnvVars(t *testing.T) {
 			getConfigValue: getRegion,
 		},
 		{
-			name:           "CLOUDSDK_COMPUTE_REGION"
-			envKey:         "CLOUDSDK_COMPUTE_REGION"
+			name:           "CLOUDSDK_COMPUTE_REGION",
+			envKey:         "CLOUDSDK_COMPUTE_REGION",
 			envValue:       "whatever",
 			expected:       "whatever",
 			getConfigValue: getRegion,
