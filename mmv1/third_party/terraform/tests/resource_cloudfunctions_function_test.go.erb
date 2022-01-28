@@ -426,13 +426,11 @@ func TestAccCloudFunctionsFunction_secretEnvVar(t *testing.T) {
 
     projectNumber := os.Getenv("GOOGLE_PROJECT_NUMBER")
     secretName := fmt.Sprintf("tf-test-secret-%s", randString(t, 10))
-    versionName1 := fmt.Sprintf("tf-test-version1-%s", randString())
-    versionName2 := fmt.Sprintf("tf-test-version2-%s", randString())
+    versionName1 := fmt.Sprintf("tf-test-version1-%s", randString(t, 10))
+    versionName2 := fmt.Sprintf("tf-test-version2-%s", randString(t, 10))
     bucketName := fmt.Sprintf("tf-test-bucket-%d", randInt(t))
     functionName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	funcResourceName := "google_cloudfunctions_function.function"
-
-	defer os.Remove(zipFilePath) // clean up
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -440,7 +438,7 @@ func TestAccCloudFunctionsFunction_secretEnvVar(t *testing.T) {
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName1, bucketName, functionName, "1"),
+				Config: testAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName1, bucketName, functionName, "1"),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -449,7 +447,7 @@ func TestAccCloudFunctionsFunction_secretEnvVar(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"build_environment_variables"},
 			},
 			{
-				Config: TestAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName2, bucketName +"-update", functionName, "2"),
+				Config: testAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName2, bucketName +"-update", functionName, "2"),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -466,13 +464,11 @@ func TestAccCloudFunctionsFunction_secretMount(t *testing.T) {
 
     projectNumber := os.Getenv("GOOGLE_PROJECT_NUMBER")
     secretName := fmt.Sprintf("tf-test-secret-%s", randString(t, 10))
-    versionName1 := fmt.Sprintf("tf-test-version1-%s", randString())
-    versionName2 := fmt.Sprintf("tf-test-version2-%s", randString())
+    versionName1 := fmt.Sprintf("tf-test-version1-%s", randString(t, 10))
+    versionName2 := fmt.Sprintf("tf-test-version2-%s", randString(t, 10))
     bucketName := fmt.Sprintf("tf-test-bucket-%d", randInt(t))
     functionName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	funcResourceName := "google_cloudfunctions_function.function"
-
-	defer os.Remove(zipFilePath) // clean up
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -480,7 +476,7 @@ func TestAccCloudFunctionsFunction_secretMount(t *testing.T) {
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName1, bucketName, functionName, "1"),
+				Config: testAccCloudFunctionsFunction_secretMount(projectNumber, secretName, versionName1, bucketName, functionName, "1"),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -489,7 +485,7 @@ func TestAccCloudFunctionsFunction_secretMount(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"build_environment_variables"},
 			},
 			{
-				Config: TestAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName2, bucketName, functionName, "2"),
+				Config: testAccCloudFunctionsFunction_secretMount(projectNumber, secretName, versionName2, bucketName, functionName, "2"),
 			},
 			{
 				ResourceName:            funcResourceName,
