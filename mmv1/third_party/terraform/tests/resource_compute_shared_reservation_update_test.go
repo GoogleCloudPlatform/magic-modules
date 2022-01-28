@@ -97,8 +97,8 @@ resource "google_compute_reservation" "gce_reservation" {
   share_settings {
     share_type = "SPECIFIC_PROJECTS"
     project_map {
-      id = google_project.guest_project.number
-      project_id = google_project.guest_project.number
+      id = google_project.guest_project.project_id
+      project_id = google_project.guest_project.project_id
     }
   }
   depends_on = [google_organization_policy.shared_reservation_org_policy,google_project_service.compute]
@@ -159,12 +159,12 @@ resource "google_compute_reservation" "gce_reservation" {
   share_settings {
     share_type = "SPECIFIC_PROJECTS"
     project_map {
-      id = google_project.guest_project.number
-      project_id = google_project.guest_project.number
+      id = google_project.guest_project.project_id
+      project_id = google_project.guest_project.project_id
     }
     project_map {
-      id = google_project.guest_project_second.number
-      project_id = google_project.guest_project_second.number
+      id = google_project.guest_project_second.project_id
+      project_id = google_project.guest_project_second.project_id
     }
   }
   depends_on = [google_organization_policy.shared_reservation_org_policy,google_project_service.compute]
