@@ -2404,6 +2404,7 @@ func testAccCheckComputeInstanceDestroyProducer(t *testing.T) func(s *terraform.
 	}
 }
 
+<% unless version == 'ga' -%>
 func TestAccComputeInstance_spotVM(t *testing.T) {
 	t.Parallel()
 
@@ -2426,6 +2427,7 @@ func TestAccComputeInstance_spotVM(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func testAccCheckComputeInstanceExists(t *testing.T, n string, instance interface{}) resource.TestCheckFunc {
 	if instance == nil {
@@ -6205,6 +6207,7 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
+<% unless version == 'ga' -%>
 func testAccComputeInstance_spotVM(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -6236,5 +6239,6 @@ resource "google_compute_instance" "foobar" {
 }
 `, instance)
 }
+<% end -%>
 
 
