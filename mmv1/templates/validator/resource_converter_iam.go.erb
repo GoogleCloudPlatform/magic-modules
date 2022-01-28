@@ -127,7 +127,7 @@ func new<%= resource_name -%>IamAsset(
 func Fetch<%= resource_name -%>IamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
 	// Check if the identity field returns a value
   <% resource_params.each do |param| -%>
-  if _, ok := d.GetOk("{{<%= param.underscore -%>}}"); !ok {
+  if _, ok := d.GetOk("<%= param.underscore -%>"); !ok {
     return Asset{}, ErrEmptyIdentityField
   }
   <% end # resource_params.each -%>
