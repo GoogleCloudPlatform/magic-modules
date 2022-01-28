@@ -1,6 +1,9 @@
 package google
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 func resourceConverterKmsCryptoKeyIamPolicy() ResourceConverter {
 	return ResourceConverter{
@@ -73,7 +76,8 @@ func newKmsCryptoKeyIamAsset(
 		return []Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
-	name, err := assetName(d, config, "//cloudkms.googleapis.com/{{crypto_key_id}}")
+	assetNameTemplate := constructAssetNameTemplate(d)
+	name, err := assetName(d, config, assetNameTemplate)
 	if err != nil {
 		return []Asset{}, err
 	}
@@ -93,12 +97,28 @@ func FetchKmsCryptoKeyIamPolicy(d TerraformResourceData, config *Config) (Asset,
 		return Asset{}, ErrEmptyIdentityField
 	}
 
+	assetNameTemplate := constructAssetNameTemplate(d)
+
 	// We use crypto_key_id in the asset name template to be consistent with newKmsCryptoKeyIamAsset.
 	return fetchIamPolicy(
 		NewKmsCryptoKeyIamUpdater,
 		d,
 		config,
-		"//cloudkms.googleapis.com/{{crypto_key_id}}", // asset name
-		"cloudkms.googleapis.com/CryptoKey",           // asset type
+		assetNameTemplate,                   // asset name
+		"cloudkms.googleapis.com/CryptoKey", // asset type
 	)
+}
+
+func constructAssetNameTemplate(d TerraformResourceData) string {
+	assetNameTemplate := "//cloudkms.googleapis.com/{{crypto_key_id}}"
+	if val, ok := d.GetOk("crypto_key_id"); ok {
+		cryptoKeyID := val.(string)
+		splits := strings.Split(cryptoKeyID, "/")
+		if len(splits) == 4 {
+			assetNameTemplate = fmt.Sprintf("//cloudkms.googleapis.com/projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", splits[0], splits[1], splits[2], splits[3])
+		} else if len(splits) == 3 {
+			assetNameTemplate = fmt.Sprintf("//cloudkms.googleapis.com/projects/{{project}}/locations/%s/keyRings/%s/cryptoKeys/%s", splits[0], splits[1], splits[2])
+		}
+	}
+	return assetNameTemplate
 }
