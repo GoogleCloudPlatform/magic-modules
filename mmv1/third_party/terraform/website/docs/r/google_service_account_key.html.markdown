@@ -15,8 +15,6 @@ Creates and manages service account keys, which allow the use of a service accou
 * How-to Guides
     * [Official Documentation](https://cloud.google.com/iam/docs/creating-managing-service-account-keys)
 
-~> **Warning:** If the `project` field in the google provider configuration is absent and the `service_account_id` field is not specified using the `{ACCOUNT}` syntax, then this resource will produce the following error: `Error: project: required field is not set`. Ensure the `service_account_id` is specified using the `{ACCOUNT}` syntax so that the project is inferred from the account.
-
 ## Example Usage, creating a new Key
 
 ```hcl
@@ -83,8 +81,8 @@ resource "kubernetes_secret" "google-application-credentials" {
 The following arguments are supported:
 
 * `service_account_id` - (Required) The Service account id of the Key. This can be a string in the format
-`{ACCOUNT}` or `projects/{PROJECT_ID}/serviceAccounts/{ACCOUNT}`, where `{ACCOUNT}` is the email address or
-unique id of the service account. If the `{ACCOUNT}` syntax is used, the project will be inferred from the account.
+`{ACCOUNT}` or `projects/{PROJECT_ID}/serviceAccounts/{ACCOUNT}`, where `{ACCOUNT}` is the **full** email address of the
+service account. If the `{ACCOUNT}` syntax is used, the project will be inferred from the account.
 
 * `key_algorithm` - (Optional) The algorithm used to generate the key. KEY_ALG_RSA_2048 is the default algorithm.
 Valid values are listed at
