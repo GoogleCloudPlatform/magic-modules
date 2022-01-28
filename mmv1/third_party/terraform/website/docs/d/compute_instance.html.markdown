@@ -191,6 +191,11 @@ The following arguments are supported:
 
 * `automatic_restart` - Specifies if the instance should be
     restarted if it was terminated by Compute Engine (not a user).
+    
+* `provisioning_model` - Describe the type of preemptible VM. If this
+    is set, `preemptible` should be `true` and `auto_restart` should be
+    `false`. One of `STANDARD_PROVISION` or `SPOT`. for more info about
+    `SPOT`, read [here](https://cloud.google.com/compute/docs/instances/spot)
 
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
