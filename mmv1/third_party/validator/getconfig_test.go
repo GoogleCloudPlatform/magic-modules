@@ -22,6 +22,12 @@ func getImpersonateServiceAccount(cfg *Config) string {
 func getUserAgent(cfg *Config) string {
 	return cfg.UserAgent()
 }
+func getZoneValue(cfg *Config) string {
+	return cfg.Zone
+}
+func getRegionValue(cfg *Config) string {
+	return cfg.Region
+}
 
 func TestGetConfigExtractsEnvVars(t *testing.T) {
 	ctx := context.Background()
@@ -67,6 +73,48 @@ func TestGetConfigExtractsEnvVars(t *testing.T) {
 			envValue:       "whatever",
 			expected:       "whatever",
 			getConfigValue: getImpersonateServiceAccount,
+		},
+		{
+			name:            "GOOGLE_ZONE",
+		        envKey:          "GOOGLE_ZONE",
+		        envValue:        "whatever",
+		        expected:        "whatever",
+		        getConfigValue:  getZoneValue,
+	        },
+		{
+			name:           "GCLOUD_ZONE",
+			envKey:         "GCLOUD_ZONE",
+			envValue:       "whatever",
+			expected:       "whatever",
+			getConfigValue: getZoneValue,
+		},
+		{
+			name:           "CLOUDSDK_COMPUTE_ZONE",
+			envKey:         "CLOUDSDK_COMPUTE_ZONE",
+			envValue:       "whatever",
+			expected:       "whatever",
+			getConfigValue: getZoneValue,
+		},
+		{
+			name:           "GOOGLE_REGION",
+			envKey:         "GOOGLE_REGION",
+			envValue:       "whatever",
+			expected:       "whatever",
+			getConfigValue: getRegionValue,
+		},
+		{
+			name:           "GCLOUD_REGION",
+			envKey:         "GCLOUD_REGION",
+			envValue:       "whatever",
+			expected:       "whatever",
+			getConfigValue: getRegionValue,
+		},
+		{
+			name:           "CLOUDSDK_COMPUTE_REGION",
+			envKey:         "CLOUDSDK_COMPUTE_REGION",
+			envValue:       "whatever",
+			expected:       "whatever",
+			getConfigValue: getRegionValue,
 		},
 		{
 			name:           "GOOGLE_TERRAFORM_VALIDATOR_USERAGENT_EXTENSION",
