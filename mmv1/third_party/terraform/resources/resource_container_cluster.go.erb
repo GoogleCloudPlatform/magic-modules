@@ -3053,6 +3053,14 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 			ForceSendFields: []string{"Disabled"},
 		}
 	}
+	
+	if v, ok := config["gcp_filestore_csi_driver_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.GcpFilestoreCsiDriverConfig = &container.GcpFilestoreCsiDriverConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
 
 	if v, ok := config["gcp_filestore_csi_driver_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
@@ -3708,6 +3716,14 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 		result["network_policy_config"] = []map[string]interface{}{
 			{
 				"disabled": c.NetworkPolicyConfig.Disabled,
+			},
+		}
+	}
+	
+	if c.GcpFilestoreCsiDriverConfig != nil {
+		result["gcp_filestore_csi_driver_config"] = []map[string]interface{}{
+			{
+				"enabled": c.GcpFilestoreCsiDriverConfig.Enabled,
 			},
 		}
 	}
