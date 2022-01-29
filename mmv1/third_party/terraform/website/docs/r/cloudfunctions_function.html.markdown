@@ -183,7 +183,7 @@ which to observe events. For example, `"myBucket"` or `"projects/my-project/topi
 
 * `key` - (Required) Name of the environment variable.
 
-* `project_id` - (Required) Project identifier (preferably project number but can also be the project ID) of the project that contains the secret. If not set, it will be populated with the function's project assuming that the secret exists in the same project as of the function.
+* `project_id` - (Optional) Project identifier (preferably project number but can also be the project ID) of the project that contains the secret. If not set, it will be populated with the function's project assuming that the secret exists in the same project as of the function.
 
 * `secret` - (Required) ID of the secret in secret manager (not the full resource name).
 
@@ -193,11 +193,11 @@ which to observe events. For example, `"myBucket"` or `"projects/my-project/topi
 
 * `mount_path` - (Required) The path within the container to mount the secret volume. For example, setting the mount_path as "/etc/secrets" would mount the secret value files under the "/etc/secrets" directory. This directory will also be completely shadowed and unavailable to mount any other secrets. Recommended mount paths: "/etc/secrets" Restricted mount paths: "/cloudsql", "/dev/log", "/pod", "/proc", "/var/log".
 
-* `project_id` - (Required) Project identifier (preferably project number but can also be the project ID) of the project that contains the secret. If not set, it will be populated with the function's project assuming that the secret exists in the same project as of the function.
+* `project_id` - (Optional) Project identifier (preferably project number but can also be the project ID) of the project that contains the secret. If not set, it will be populated with the function's project assuming that the secret exists in the same project as of the function.
 
 * `secret` - (Required) ID of the secret in secret manager (not the full resource name).
 
-* `versions` - (Required) List of secret versions to mount for this secret. If empty, the "latest" version of the secret will be made available in a file named after the secret under the mount point. Structure is [documented below](#nested_nested_versions).
+* `versions` - (Optional) List of secret versions to mount for this secret. If empty, the "latest" version of the secret will be made available in a file named after the secret under the mount point. Structure is [documented below](#nested_nested_versions).
 
 <a name="nested_versions"></a>The `versions` block supports:
 
