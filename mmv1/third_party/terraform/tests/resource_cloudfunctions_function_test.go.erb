@@ -427,11 +427,12 @@ func TestAccCloudFunctionsFunction_secretEnvVar(t *testing.T) {
 	t.Parallel()
 
     projectNumber := os.Getenv("GOOGLE_PROJECT_NUMBER")
-    secretName := fmt.Sprintf("tf-test-secret-%s", randString(t, 10))
-    versionName1 := fmt.Sprintf("tf-test-version1-%s", randString(t, 10))
-    versionName2 := fmt.Sprintf("tf-test-version2-%s", randString(t, 10))
+    randomSecretSuffix := randString(t, 10)
+    secretName := fmt.Sprintf("tf-test-secret-%s", randomSecretSuffix)
+    versionName1 := fmt.Sprintf("tf-test-version1-%s", randomSecretSuffix)
+    versionName2 := fmt.Sprintf("tf-test-version2-%s", randomSecretSuffix)
     bucketName := fmt.Sprintf("tf-test-bucket-%d", randInt(t))
-    functionName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+    functionName := fmt.Sprintf("tf-test-%s", randomSecretSuffix)
     zipFilePath := createZIPArchiveForCloudFunctionSource(t, testSecretEnvVarFunctionPath)
 	funcResourceName := "google_cloudfunctions_function.function"
     defer os.Remove(zipFilePath) // clean up
@@ -467,11 +468,12 @@ func TestAccCloudFunctionsFunction_secretMount(t *testing.T) {
 	t.Parallel()
 
     projectNumber := os.Getenv("GOOGLE_PROJECT_NUMBER")
-    secretName := fmt.Sprintf("tf-test-secret-%s", randString(t, 10))
-    versionName1 := fmt.Sprintf("tf-test-version1-%s", randString(t, 10))
-    versionName2 := fmt.Sprintf("tf-test-version2-%s", randString(t, 10))
+    randomSecretSuffix := randString(t, 10)
+    secretName := fmt.Sprintf("tf-test-secret-%s", randomSecretSuffix)
+    versionName1 := fmt.Sprintf("tf-test-version1-%s", randomSecretSuffix)
+    versionName2 := fmt.Sprintf("tf-test-version2-%s", randomSecretSuffix)
     bucketName := fmt.Sprintf("tf-test-bucket-%d", randInt(t))
-    functionName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+    functionName := fmt.Sprintf("tf-test-%s", randomSecretSuffix)
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testSecretVolumesMountFunctionPath)
     funcResourceName := "google_cloudfunctions_function.function"
     defer os.Remove(zipFilePath) // clean up
@@ -1029,9 +1031,6 @@ resource "google_secret_manager_secret" "test_secret" {
       }
     }
   }
-  depends_on = [
-    google_project_service.secret_manager
-  ]
 }
 
 resource "google_secret_manager_secret_version" "%s" {
@@ -1057,7 +1056,7 @@ resource "google_storage_bucket_object" "cloud_function_zip_object" {
   source = "%s"
 }
 
-resource "google_cloudfunctions_function" "secrets_test" {
+resource "google_cloudfunctions_function" "function" {
   name                  = "%s"
   runtime               = "nodejs14"
   service_account_email = google_service_account.cloud_function_runner.email
@@ -1069,11 +1068,12 @@ resource "google_cloudfunctions_function" "secrets_test" {
     key     = "MY_SECRET"
     secret  = google_secret_manager_secret.test_secret.secret_id
     version = "%s"
+    project_id = "%s"
   }
 
   depends_on = [google_project_iam_member.gcfadmin]
 }
-`, projectNumber, secretName, versionName, bucketName, zipFilePath, functionName, versionNumber)
+`, projectNumber, secretName, versionName, bucketName, zipFilePath, functionName, versionNumber, projectNumber)
 }
 
 func testAccCloudFunctionsFunction_secretMount(projectNumber, secretName, versionName, bucketName, functionName, versionNumber, zipFilePath string) string {
@@ -1104,13 +1104,10 @@ resource "google_secret_manager_secret" "test_secret" {
       }
     }
   }
-  depends_on = [
-    google_project_service.secret_manager
-  ]
 }
 
 resource "google_secret_manager_secret_version" "%s" {
-  secret      = google_secret_manager_secret.test_secret.secret_id
+  secret      = google_secret_manager_secret.test_secret.id
   secret_data = "This is my secret data."
 }
 
@@ -1132,7 +1129,7 @@ resource "google_storage_bucket_object" "cloud_function_zip_object" {
   source = "%s"
 }
 
-resource "google_cloudfunctions_function" "secrets_test" {
+resource "google_cloudfunctions_function" "function" {
   name                  = "%s"
   runtime               = "nodejs14"
   service_account_email = google_service_account.cloud_function_runner.email
@@ -1143,6 +1140,7 @@ resource "google_cloudfunctions_function" "secrets_test" {
   secret_volumes {
     secret     = google_secret_manager_secret.test_secret.secret_id
     mount_path = "/etc/secrets"
+    project_id = "%s"
     versions {
       version = "%s"
       path    = "/test-secret"
@@ -1151,5 +1149,5 @@ resource "google_cloudfunctions_function" "secrets_test" {
 
   depends_on = [google_project_iam_member.gcfadmin]
 }
-`, projectNumber, secretName, versionName, bucketName, zipFilePath, functionName, versionNumber)
+`, projectNumber, secretName, versionName, bucketName, zipFilePath, functionName, projectNumber, versionNumber)
 }
