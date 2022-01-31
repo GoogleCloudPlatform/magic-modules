@@ -1366,7 +1366,7 @@ func resourceContainerCluster() *schema.Resource {
 				},
 			},
 
-			"workload_certificates": {
+			"mesh_certificates": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
@@ -1384,7 +1384,6 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 		},
 	}
 }
@@ -1521,9 +1520,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 <% end -%>
 		ConfidentialNodes: expandConfidentialNodes(d.Get("confidential_nodes")),
 		ResourceLabels: expandStringMap(d, "resource_labels"),
-<% unless version == 'ga' -%>
-		WorkloadCertificates: expandWorkloadCertificates(d.Get("workload_certificates")),
-<% end -%>
+		MeshCertificates: expandMeshCertificates(d.Get("mesh_certificates")),
 	}
 
 	v:= d.Get("enable_shielded_nodes")
@@ -1875,10 +1872,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("enable_l4_ilb_subsetting", cluster.NetworkConfig.EnableL4ilbSubsetting); err != nil {
 		return fmt.Errorf("Error setting enable_l4_ilb_subsetting: %s", err)
 	}
-	if err := d.Set("workload_certificates", flattenWorkloadCertificates(cluster.WorkloadCertificates)); err != nil {
+<% end -%>
+	if err := d.Set("mesh_certificates", flattenMeshCertificates(cluster.MeshCertificates)); err != nil {
 		return err
 	}
-<% end -%>
 	if err := d.Set("confidential_nodes", flattenConfidentialNodes(cluster.ConfidentialNodes)); err != nil {
 		return err
 	}
@@ -3367,18 +3364,18 @@ func expandNotificationConfig(configured interface{}) *container.NotificationCon
 		},
 	}
 }
-func expandWorkloadCertificates(configured interface{}) *containerBeta.WorkloadCertificates {
+<% end -%>
+
+func expandMeshCertificates(configured interface{}) *container.MeshCertificates {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
 	config := l[0].(map[string]interface{})
-	return &containerBeta.WorkloadCertificates{
+	return &container.MeshCertificates{
 		EnableCertificates: config["enable_certificates"].(bool),
 	}
 }
-
-<% end -%>
 
 func expandConfidentialNodes(configured interface{}) *container.ConfidentialNodes {
 	l := configured.([]interface{})
@@ -3684,8 +3681,9 @@ func flattenNotificationConfig(c *container.NotificationConfig) []map[string]int
 		},
 	}
 }
+<% end -%>
 
-func flattenWorkloadCertificates(c *containerBeta.WorkloadCertificates) []map[string]interface{} {
+func flattenMeshCertificates(c *container.MeshCertificates) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
@@ -3694,7 +3692,6 @@ func flattenWorkloadCertificates(c *containerBeta.WorkloadCertificates) []map[st
 	}
 	return result
 }
-<% end -%>
 
 func flattenConfidentialNodes(c *container.ConfidentialNodes) []map[string]interface{} {
 	result := []map[string]interface{}{}

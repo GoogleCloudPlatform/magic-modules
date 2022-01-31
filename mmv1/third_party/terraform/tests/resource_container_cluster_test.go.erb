@@ -244,8 +244,9 @@ func TestAccContainerCluster_withNotificationConfig(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
-func TestAccContainerCluster_withWorkloadCertificates(t *testing.T) {
+func TestAccContainerCluster_withMeshCertificates(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
@@ -258,7 +259,7 @@ func TestAccContainerCluster_withWorkloadCertificates(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withWorkloadCertificates(pid, clusterName, npName),
+				Config: testAccContainerCluster_withMeshCertificates(pid, clusterName, npName),
 			},
 			{
 				ResourceName:            "google_container_cluster.cluster",
@@ -268,7 +269,6 @@ func TestAccContainerCluster_withWorkloadCertificates(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 	t.Parallel()
@@ -2722,8 +2722,9 @@ resource "google_container_cluster" "notification_config" {
 }
 `, clusterName)
 }
+<% end -%>
 
-func testAccContainerCluster_withWorkloadCertificates(pid string, clusterName string, npName string) string {
+func testAccContainerCluster_withMeshCertificates(pid string, clusterName string, npName string) string {
 	return fmt.Sprintf(`
 
 data "google_project" "project" {
@@ -2746,18 +2747,16 @@ resource "google_container_cluster" "cluster" {
   }
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
 
-  workload_certificates {
+  mesh_certificates {
 	enable_certificates = true
   }
 
 }
 `, pid, clusterName, npName)
 }
-
-<% end -%>
 
 func testAccContainerCluster_withConfidentialNodes(clusterName string, npName string) string {
 	return fmt.Sprintf(`
