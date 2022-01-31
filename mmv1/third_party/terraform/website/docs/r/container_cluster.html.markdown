@@ -270,7 +270,7 @@ region are guaranteed to support the same version.
 
 * `confidential_nodes` - Configuration for [Confidential Nodes](https://cloud.google.com/kubernetes-engine/docs/how-to/confidential-gke-nodes) feature. Structure is documented below [documented below](#nested_confidential_nodes).
 
-* `workload_certificates` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for [Workload Certificates](https://cloud.google.com/traffic-director/docs/security-envoy-setup) feature. Structure is documented below [documented below](#nested_workload_certificates).
+* `workload_certificates` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for [Workload Certificates](https://cloud.google.com/traffic-director/docs/security-envoy-setup) feature. Structure is [documented below](#nested_workload_certificates).
 
 * `pod_security_policy_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
     [PodSecurityPolicy](https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies) feature.
