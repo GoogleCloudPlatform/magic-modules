@@ -1365,24 +1365,6 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-			"mesh_certificates": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Computed:    true,
-				ForceNew:    true,
-				MaxItems:    1,
-				Description: `Configuration for issuance of mTLS keys and certificates to Kubernetes pods. Warning: This configuration can't be changed (or added/removed) after cluster creation without deleting and recreating the entire cluster.`,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"enable_certificates": {
-							Type:        schema.TypeBool,
-							Required:    true,
-							ForceNew:    true,
-							Description: `Whether Workload Certificates is enabled. If set, the GKE Workload Identity Certificates controller and node agent will be deployed in the cluster, which can then be configured by creating a WorkloadCertificateConfig Custom Resource.`,
-						},
-					},
-				},
-			},
 		},
 	}
 }
@@ -1519,7 +1501,6 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 <% end -%>
 		ConfidentialNodes: expandConfidentialNodes(d.Get("confidential_nodes")),
 		ResourceLabels: expandStringMap(d, "resource_labels"),
-		MeshCertificates: expandMeshCertificates(d.Get("mesh_certificates")),
 	}
 
 	v:= d.Get("enable_shielded_nodes")
@@ -1872,9 +1853,6 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error setting enable_l4_ilb_subsetting: %s", err)
 	}
 <% end -%>
-	if err := d.Set("mesh_certificates", flattenMeshCertificates(cluster.MeshCertificates)); err != nil {
-		return err
-	}
 	if err := d.Set("confidential_nodes", flattenConfidentialNodes(cluster.ConfidentialNodes)); err != nil {
 		return err
 	}
@@ -3365,17 +3343,6 @@ func expandNotificationConfig(configured interface{}) *container.NotificationCon
 }
 <% end -%>
 
-func expandMeshCertificates(configured interface{}) *container.MeshCertificates {
-	l := configured.([]interface{})
-	if len(l) == 0 || l[0] == nil {
-		return nil
-	}
-	config := l[0].(map[string]interface{})
-	return &container.MeshCertificates{
-		EnableCertificates: config["enable_certificates"].(bool),
-	}
-}
-
 func expandConfidentialNodes(configured interface{}) *container.ConfidentialNodes {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -3681,16 +3648,6 @@ func flattenNotificationConfig(c *container.NotificationConfig) []map[string]int
 	}
 }
 <% end -%>
-
-func flattenMeshCertificates(c *container.MeshCertificates) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"enable_certificates": c.EnableCertificates,
-		})
-	}
-	return result
-}
 
 func flattenConfidentialNodes(c *container.ConfidentialNodes) []map[string]interface{} {
 	result := []map[string]interface{}{}

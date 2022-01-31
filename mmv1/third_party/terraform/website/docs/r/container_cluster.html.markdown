@@ -270,8 +270,6 @@ region are guaranteed to support the same version.
 
 * `confidential_nodes` - Configuration for [Confidential Nodes](https://cloud.google.com/kubernetes-engine/docs/how-to/confidential-gke-nodes) feature. Structure is documented below [documented below](#nested_confidential_nodes).
 
-* `mesh_certificates` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for [Mesh Certificates](https://cloud.google.com/traffic-director/docs/security-envoy-setup) feature. Structure is [documented below](#nested_mesh_certificates).
-
 * `pod_security_policy_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
     [PodSecurityPolicy](https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies) feature.
     Structure is [documented below](#nested_pod_security_policy_config).
@@ -798,11 +796,6 @@ notification_config {
   }
 }
 ```
-
-<a name="nested_mesh_certificates"></a> The `mesh_certificates` block supports:
-
-* `enable_certificates` (Required) - Whether Mesh Certificates is enabled.
-    If set, the GKE Workload Identity Certificates controller and node agent will be deployed in the cluster, which can then be configured by creating a WorkloadCertificateConfig Custom Resource.
 
 <a name="nested_confidential_nodes"></a> The `confidential_nodes` block supports:
 
