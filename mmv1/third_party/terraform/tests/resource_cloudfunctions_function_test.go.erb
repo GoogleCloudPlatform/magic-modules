@@ -26,6 +26,8 @@ const testHTTPTriggerUpdatePath = "./test-fixtures/cloudfunctions/http_trigger_u
 const testPubSubTriggerPath = "./test-fixtures/cloudfunctions/pubsub_trigger.js"
 const testBucketTriggerPath = "./test-fixtures/cloudfunctions/bucket_trigger.js"
 const testFirestoreTriggerPath = "./test-fixtures/cloudfunctions/firestore_trigger.js"
+const testSecretEnvVarFunctionPath = "./test-fixtures/cloudfunctions/secret_environment_variables.js"
+const testSecretVolumesMountFunctionPath = "./test-fixtures/cloudfunctions/secret_volumes_mount.js"
 const testFunctionsSourceArchivePrefix = "cloudfunczip"
 
 func init() {
@@ -430,7 +432,9 @@ func TestAccCloudFunctionsFunction_secretEnvVar(t *testing.T) {
     versionName2 := fmt.Sprintf("tf-test-version2-%s", randString(t, 10))
     bucketName := fmt.Sprintf("tf-test-bucket-%d", randInt(t))
     functionName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+    zipFilePath := createZIPArchiveForCloudFunctionSource(t, testSecretEnvVarFunctionPath)
 	funcResourceName := "google_cloudfunctions_function.function"
+    defer os.Remove(zipFilePath) // clean up
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -438,7 +442,7 @@ func TestAccCloudFunctionsFunction_secretEnvVar(t *testing.T) {
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName1, bucketName, functionName, "1"),
+				Config: testAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName1, bucketName, functionName, "1", zipFilePath),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -447,7 +451,7 @@ func TestAccCloudFunctionsFunction_secretEnvVar(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"build_environment_variables"},
 			},
 			{
-				Config: testAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName2, bucketName +"-update", functionName, "2"),
+				Config: testAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName2, bucketName +"-update", functionName, "2", zipFilePath),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -468,7 +472,9 @@ func TestAccCloudFunctionsFunction_secretMount(t *testing.T) {
     versionName2 := fmt.Sprintf("tf-test-version2-%s", randString(t, 10))
     bucketName := fmt.Sprintf("tf-test-bucket-%d", randInt(t))
     functionName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	funcResourceName := "google_cloudfunctions_function.function"
+	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testSecretVolumesMountFunctionPath)
+    funcResourceName := "google_cloudfunctions_function.function"
+    defer os.Remove(zipFilePath) // clean up
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -476,7 +482,7 @@ func TestAccCloudFunctionsFunction_secretMount(t *testing.T) {
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudFunctionsFunction_secretMount(projectNumber, secretName, versionName1, bucketName, functionName, "1"),
+				Config: testAccCloudFunctionsFunction_secretMount(projectNumber, secretName, versionName1, bucketName, functionName, "1", zipFilePath),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -485,7 +491,7 @@ func TestAccCloudFunctionsFunction_secretMount(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"build_environment_variables"},
 			},
 			{
-				Config: testAccCloudFunctionsFunction_secretMount(projectNumber, secretName, versionName2, bucketName, functionName, "2"),
+				Config: testAccCloudFunctionsFunction_secretMount(projectNumber, secretName, versionName2, bucketName, functionName, "2", zipFilePath),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -995,7 +1001,7 @@ resource "google_cloudfunctions_function" "function" {
 `, projectNumber, networkName, vpcConnectorName, vpcConnectorName, vpcIp, bucketName, zipFilePath, functionName, vpcConnectorName)
 }
 
-func testAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName, bucketName, functionName, versionNumber string) string {
+func testAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName, bucketName, functionName, versionNumber, zipFilePath string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
@@ -1045,24 +1051,10 @@ resource "google_storage_bucket" "cloud_functions" {
   uniform_bucket_level_access = true
 }
 
-data "archive_file" "cloud_function_zip" {
-  type        = "zip"
-  output_path = "/tmp/cloud_function.zip"
-  source {
-    content  = <<-EOF
-    exports.echoSecret = (req, res) => {
-    let message = req.query.message || req.body.message || "Secret: "+process.env.MY_SECRET;
-    res.status(200).send(message);
-    };
-    EOF
-    filename = "index.js"
-  }
-}
-
 resource "google_storage_bucket_object" "cloud_function_zip_object" {
   name   = "cloud-function.zip"
-  bucket = google_storage_bucket.cloud_functions.id
-  source = data.archive_file.cloud_function_zip.output_path
+  bucket = google_storage_bucket.cloud_functions.name
+  source = "%s"
 }
 
 resource "google_cloudfunctions_function" "secrets_test" {
@@ -1081,10 +1073,10 @@ resource "google_cloudfunctions_function" "secrets_test" {
 
   depends_on = [google_project_iam_member.gcfadmin]
 }
-`, projectNumber, secretName, versionName, bucketName, functionName, versionNumber)
+`, projectNumber, secretName, versionName, bucketName, zipFilePath, functionName, versionNumber)
 }
 
-func testAccCloudFunctionsFunction_secretMount(projectNumber, secretName, versionName, bucketName, functionName, versionNumber string) string {
+func testAccCloudFunctionsFunction_secretMount(projectNumber, secretName, versionName, bucketName, functionName, versionNumber, zipFilePath string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
@@ -1134,35 +1126,10 @@ resource "google_storage_bucket" "cloud_functions" {
   uniform_bucket_level_access = true
 }
 
-data "archive_file" "cloud_function_zip" {
-  type        = "zip"
-  output_path = "/tmp/cloud_function_2.zip"
-  source {
-    content  = <<-EOF
-      const fs = require('fs')
-      exports.echoSecret = (req, res) => {
-        const path = '/etc/secrets/test-secret'
-        fs.access(path, fs.F_OK, (err) => {
-          if (err) {
-            console.error(err)
-            res.status(200).send(err)
-            return
-          }
-        fs.readFile(path, 'utf8', function(err,data) {
-          res.status(200).send("Secret: "+data)
-          return
-        });
-      })
-      };
-    EOF
-    filename = "index.js"
-  }
-}
-
 resource "google_storage_bucket_object" "cloud_function_zip_object" {
   name   = "cloud-function.zip"
-  bucket = google_storage_bucket.cloud_functions.id
-  source = data.archive_file.cloud_function_zip.output_path
+  bucket = google_storage_bucket.cloud_functions.name
+  source = "%s"
 }
 
 resource "google_cloudfunctions_function" "secrets_test" {
@@ -1184,5 +1151,5 @@ resource "google_cloudfunctions_function" "secrets_test" {
 
   depends_on = [google_project_iam_member.gcfadmin]
 }
-`, projectNumber, secretName, versionName, bucketName, functionName, versionNumber)
+`, projectNumber, secretName, versionName, bucketName, zipFilePath, functionName, versionNumber)
 }
