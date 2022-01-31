@@ -3809,7 +3809,7 @@ resource "google_container_cluster" "with_autoprovisioning" {
 func testAccContainerCluster_autoprovisioningDefaultsImageType(cluster string, includeImageType bool) string {
 	imageTypeCfg := ""
 	if includeImageType {
-		imageTypeCfg = `image_type = "cos_containerd"`
+		imageTypeCfg = `image_type = "COS_CONTAINERD"`
 	}
 
 	return fmt.Sprintf(`
