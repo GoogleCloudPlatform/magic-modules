@@ -414,6 +414,7 @@ func TestAccDataprocCluster_nonPreemptibleSecondary(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.non_preemptible", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.non_preemptible", "cluster_config.0.preemptible_worker_config.0.preemptibility", "NON_PREEMPTIBLE"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.non_preemptible", "cluster_config.0.preemptible_worker_config.0.is_preemptible", "false"),
 				),
 			},
 		},
