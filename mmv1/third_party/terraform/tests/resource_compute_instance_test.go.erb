@@ -14,8 +14,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	computeBeta "google.golang.org/api/compute/v0.beta"
+<% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
+<% else -%>
+	compute "google.golang.org/api/compute/v0.beta"
+<% end -%>
 )
 
 func init() {
@@ -77,8 +80,8 @@ func testSweepComputeInstance(region string) error {
 
 func computeInstanceImportStep(zone, instanceName string, additionalImportIgnores []string) resource.TestStep {
 	// metadata is only read into state if set in the config
-	// since importing doesn't know whether metadata.startup_script vs metadata_startup_script is set in the config,
-	// it guesses metadata_startup_script
+	// importing doesn't know whether metadata.startup_script vs metadata_startup_script is set in the config,
+	// it always takes metadata.startup-script
 	ignores := []string{"metadata.%", "metadata.startup-script", "metadata_startup_script"}
 
 	return resource.TestStep{
@@ -1072,7 +1075,7 @@ func TestAccComputeInstance_soleTenantNodeAffinities(t *testing.T) {
 func TestAccComputeInstance_reservationAffinities(t *testing.T) {
 	t.Parallel()
 
-	var instance computeBeta.Instance
+	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-resaffinity-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
@@ -1258,7 +1261,7 @@ func TestAccComputeInstance_private_image_family(t *testing.T) {
 func TestAccComputeInstance_networkPerformanceConfig(t *testing.T) {
 	t.Parallel()
 
-	var instance computeBeta.Instance
+	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var diskName = fmt.Sprintf("tf-testd-%s", randString(t, 10))
 	var imageName = fmt.Sprintf("tf-testf-%s", randString(t, 10))
@@ -1543,7 +1546,7 @@ func TestAccComputeInstance_secondaryAliasIpRange(t *testing.T) {
 func TestAccComputeInstance_hostname(t *testing.T) {
 	t.Parallel()
 
-	var instance computeBeta.Instance
+	var instance compute.Instance
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
@@ -1566,7 +1569,7 @@ func TestAccComputeInstance_hostname(t *testing.T) {
 func TestAccComputeInstance_shieldedVmConfig(t *testing.T) {
 	t.Parallel()
 
-	var instance computeBeta.Instance
+	var instance compute.Instance
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
@@ -1597,7 +1600,7 @@ func TestAccComputeInstance_shieldedVmConfig(t *testing.T) {
 func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 	t.Parallel()
 
-	var instance computeBeta.Instance
+	var instance compute.Instance
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
@@ -2197,6 +2200,23 @@ func TestAccComputeInstance_subnetworkUpdate(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstance_queueCount(t *testing.T) {
+	t.Parallel()
+	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_queueCountSet(instanceName),
+			},
+			computeInstanceImportStep("us-east1-d", instanceName, []string{"allow_stopping_for_update"}),
+		},
+	})
+}
+
 func TestComputeInstance_networkIPCustomizedDiff(t *testing.T) {
 	t.Parallel()
 
@@ -2389,14 +2409,7 @@ func testAccCheckComputeInstanceExists(t *testing.T, n string, instance interfac
 		panic("Attempted to check existence of Instance that was nil.")
 	}
 
-	switch instance.(type) {
-	case *compute.Instance:
-		return testAccCheckComputeInstanceExistsInProject(t, n, getTestProjectFromEnv(), instance.(*compute.Instance))
-	case *computeBeta.Instance:
-		return testAccCheckComputeBetaInstanceExistsInProject(t, n, getTestProjectFromEnv(), instance.(*computeBeta.Instance))
-	default:
-		panic("Attempted to check existence of an Instance of unknown type.")
-	}
+	return testAccCheckComputeInstanceExistsInProject(t, n, getTestProjectFromEnv(), instance.(*compute.Instance))
 }
 
 func testAccCheckComputeInstanceExistsInProject(t *testing.T, n, p string, instance *compute.Instance) resource.TestCheckFunc {
@@ -2413,35 +2426,6 @@ func testAccCheckComputeInstanceExistsInProject(t *testing.T, n, p string, insta
 		config := googleProviderConfig(t)
 
 		found, err := config.NewComputeClient(config.userAgent).Instances.Get(
-			p, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
-		if err != nil {
-			return err
-		}
-
-		if found.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("Instance not found")
-		}
-
-		*instance = *found
-
-		return nil
-	}
-}
-
-func testAccCheckComputeBetaInstanceExistsInProject(t *testing.T, n, p string, instance *computeBeta.Instance) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
-		}
-
-		config := googleProviderConfig(t)
-
-		found, err := config.NewComputeBetaClient(config.userAgent).Instances.Get(
 			p, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
 		if err != nil {
 			return err
@@ -2839,7 +2823,7 @@ func testAccCheckComputeInstanceHasNetworkIP(instance *compute.Instance, network
 }
 
 <% unless version == "ga" -%>
-func testAccCheckComputeInstanceHasNetworkPerformanceConfig(instance *computeBeta.Instance, bandwidthTier string) resource.TestCheckFunc {
+func testAccCheckComputeInstanceHasNetworkPerformanceConfig(instance *compute.Instance, bandwidthTier string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if instance.NetworkPerformanceConfig == nil {
 			return fmt.Errorf("Expected instance to have network performance config, but it was nil")
@@ -2949,7 +2933,7 @@ func testAccCheckComputeInstanceHasConfiguredDeletionProtection(instance *comput
 	}
 }
 
-func testAccCheckComputeInstanceHasReservationAffinity(instance *computeBeta.Instance, reservationType string, specificReservationNames ...string) resource.TestCheckFunc {
+func testAccCheckComputeInstanceHasReservationAffinity(instance *compute.Instance, reservationType string, specificReservationNames ...string) resource.TestCheckFunc {
 	if len(specificReservationNames) > 1 {
 		panic("too many specificReservationNames provided in test")
 	}
@@ -2977,25 +2961,25 @@ func testAccCheckComputeInstanceHasReservationAffinity(instance *computeBeta.Ins
 	}
 }
 
-func testAccCheckComputeInstanceHasShieldedVmConfig(instance *computeBeta.Instance, enableSecureBoot bool, enableVtpm bool, enableIntegrityMonitoring bool) resource.TestCheckFunc {
+func testAccCheckComputeInstanceHasShieldedVmConfig(instance *compute.Instance, enableSecureBoot bool, enableVtpm bool, enableIntegrityMonitoring bool) resource.TestCheckFunc {
 
 	return func(s *terraform.State) error {
-		if instance.ShieldedVmConfig.EnableSecureBoot != enableSecureBoot {
-			return fmt.Errorf("Wrong shieldedVmConfig enableSecureBoot: expected %t, got, %t", enableSecureBoot, instance.ShieldedVmConfig.EnableSecureBoot)
+		if instance.ShieldedInstanceConfig.EnableSecureBoot != enableSecureBoot {
+			return fmt.Errorf("Wrong shieldedVmConfig enableSecureBoot: expected %t, got, %t", enableSecureBoot, instance.ShieldedInstanceConfig.EnableSecureBoot)
 		}
 
-		if instance.ShieldedVmConfig.EnableVtpm != enableVtpm {
-			return fmt.Errorf("Wrong shieldedVmConfig enableVtpm: expected %t, got, %t", enableVtpm, instance.ShieldedVmConfig.EnableVtpm)
+		if instance.ShieldedInstanceConfig.EnableVtpm != enableVtpm {
+			return fmt.Errorf("Wrong shieldedVmConfig enableVtpm: expected %t, got, %t", enableVtpm, instance.ShieldedInstanceConfig.EnableVtpm)
 		}
 
-		if instance.ShieldedVmConfig.EnableIntegrityMonitoring != enableIntegrityMonitoring {
-			return fmt.Errorf("Wrong shieldedVmConfig enableIntegrityMonitoring: expected %t, got, %t", enableIntegrityMonitoring, instance.ShieldedVmConfig.EnableIntegrityMonitoring)
+		if instance.ShieldedInstanceConfig.EnableIntegrityMonitoring != enableIntegrityMonitoring {
+			return fmt.Errorf("Wrong shieldedVmConfig enableIntegrityMonitoring: expected %t, got, %t", enableIntegrityMonitoring, instance.ShieldedInstanceConfig.EnableIntegrityMonitoring)
 		}
 		return nil
 	}
 }
 
-func testAccCheckComputeInstanceHasConfidentialInstanceConfig(instance *computeBeta.Instance, EnableConfidentialCompute bool) resource.TestCheckFunc {
+func testAccCheckComputeInstanceHasConfidentialInstanceConfig(instance *compute.Instance, EnableConfidentialCompute bool) resource.TestCheckFunc {
 
 	return func(s *terraform.State) error {
 		if instance.ConfidentialInstanceConfig.EnableConfidentialCompute != EnableConfidentialCompute {
@@ -3006,9 +2990,9 @@ func testAccCheckComputeInstanceHasConfidentialInstanceConfig(instance *computeB
 	}
 }
 
-func testAccCheckComputeInstanceLacksShieldedVmConfig(instance *computeBeta.Instance) resource.TestCheckFunc {
+func testAccCheckComputeInstanceLacksShieldedVmConfig(instance *compute.Instance) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		if instance.ShieldedVmConfig != nil {
+		if instance.ShieldedInstanceConfig != nil {
 			return fmt.Errorf("Expected no shielded vm config")
 		}
 
@@ -3291,7 +3275,7 @@ resource "google_compute_instance" "foobar" {
   name           = "%s"
   machine_type   = "e2-medium"
   zone           = "us-central1-a"
-  can_ip_forward = false
+  can_ip_forward = true
   tags           = ["baz"]
 
   boot_disk {
@@ -5707,7 +5691,6 @@ resource "google_compute_reservation" "reservation" {
       machine_type = "n1-standard-1"
     }
   }
-
   specific_reservation_required = true
 }
 
@@ -6170,4 +6153,31 @@ func testAccComputeInstance_subnetworkUpdateTwo(suffix, instance string) string 
 		}
 	}
 `, suffix, suffix, suffix, suffix, instance)
+}
+
+func testAccComputeInstance_queueCountSet(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+	family  = "debian-9"
+	project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+	name         = "%s"
+	machine_type = "e2-medium"
+	zone         = "us-east1-d"
+	allow_stopping_for_update = true
+
+	boot_disk {
+		initialize_params {
+			image = data.google_compute_image.my_image.id
+		}
+	}
+
+  network_interface {
+    network = "default"
+    queue_count = 2
+  }
+}
+`, instance)
 }

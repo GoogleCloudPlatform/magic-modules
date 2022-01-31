@@ -4,4 +4,6 @@ resource "google_pubsub_topic" "<%= ctx[:primary_resource_id] %>" {
   labels = {
     foo = "bar"
   }
+
+  message_retention_duration = "86600s"
 }

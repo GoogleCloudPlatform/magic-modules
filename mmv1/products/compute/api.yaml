@@ -137,6 +137,10 @@ objects:
             that are reserved for a VLAN attachment in an IPsec-encrypted Cloud
             Interconnect configuration. These addresses are regional resources.
 
+          * PRIVATE_SERVICE_CONNECT for a private network address that is used
+          to configure Private Service Connect. Only global internal addresses
+          can use this purpose.
+
           This should only be set when using an Internal address.
       - !ruby/object:Api::Type::Enum
         name: 'networkTier'
@@ -321,9 +325,6 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: 'scaleDownControl'
             min_version: beta
-            at_least_one_of:
-             - scale_down_control.0.max_scaled_down_replicas
-             - scale_down_control.0.time_window_sec
             description: |
               Defines scale down controls to reduce the risk of response latency
               and outages due to abrupt scale-in events
@@ -331,29 +332,35 @@ objects:
             - !ruby/object:Api::Type::NestedObject
               name: 'maxScaledDownReplicas'
               at_least_one_of:
-              - scale_down_control.0.max_scaled_down_replicas.0.fixed
-              - scale_down_control.0.max_scaled_down_replicas.0.percent
+                - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas
+                - autoscaling_policy.0.scale_down_control.0.time_window_sec
               properties:
               - !ruby/object:Api::Type::Integer
                 name: 'fixed'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.fixed
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.percent
                 description: |
                   Specifies a fixed number of VM instances. This must be a positive
                   integer.
               - !ruby/object:Api::Type::Integer
                 name: 'percent'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.fixed
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.percent
                 description: |
                   Specifies a percentage of instances between 0 to 100%, inclusive.
                   For example, specify 80 for 80%.
             - !ruby/object:Api::Type::Integer
               name: 'timeWindowSec'
+              at_least_one_of:
+                - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas
+                - autoscaling_policy.0.scale_down_control.0.time_window_sec
               description: |
                 How long back autoscaling should look when computing recommendations
                 to include directives regarding slower scale down, as described above.
           - !ruby/object:Api::Type::NestedObject
             name: 'scaleInControl'
-            at_least_one_of:
-             - scale_in_control.0.max_scaled_in_replicas
-             - scale_in_control.0.time_window_sec
             description: |
               Defines scale in controls to reduce the risk of response latency
               and outages due to abrupt scale-in events
@@ -361,21 +368,30 @@ objects:
             - !ruby/object:Api::Type::NestedObject
               name: 'maxScaledInReplicas'
               at_least_one_of:
-              - scale_in_control.0.max_scaled_in_replicas.0.fixed
-              - scale_in_control.0.max_scaled_in_replicas.0.percent
+                - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas
+                - autoscaling_policy.0.scale_in_control.0.time_window_sec
               properties:
               - !ruby/object:Api::Type::Integer
                 name: 'fixed'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.fixed
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.percent
                 description: |
                   Specifies a fixed number of VM instances. This must be a positive
                   integer.
               - !ruby/object:Api::Type::Integer
                 name: 'percent'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.fixed
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.percent
                 description: |
                   Specifies a percentage of instances between 0 to 100%, inclusive.
                   For example, specify 80 for 80%.
             - !ruby/object:Api::Type::Integer
               name: 'timeWindowSec'
+              at_least_one_of:
+                - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas
+                - autoscaling_policy.0.scale_in_control.0.time_window_sec
               description: |
                 How long back autoscaling should look when computing recommendations
                 to include directives regarding slower scale down, as described above.
@@ -1344,7 +1360,8 @@ objects:
         description: |
           Indicates whether the backend service will be used with internal or
           external load balancing. A backend service created for one type of
-          load balancing cannot be used with the other.
+          load balancing cannot be used with the other. For more information, refer to
+          [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service).
         default_value: :EXTERNAL
         # If you're modifying this value, it probably means Global ILB is now
         # an option. If that's the case, all of the documentation is based on
@@ -1352,6 +1369,7 @@ objects:
         values:
           - :EXTERNAL
           - :INTERNAL_SELF_MANAGED
+          - :EXTERNAL_MANAGED
       - !ruby/object:Api::Type::Enum
         name: 'localityLbPolicy'
         values:
@@ -1363,34 +1381,46 @@ objects:
           - :MAGLEV
         description: |
           The load balancing algorithm used within the scope of the locality.
-          The possible values are -
+          The possible values are:
 
-          * ROUND_ROBIN - This is a simple policy in which each healthy backend
-                          is selected in round robin order.
+          * `ROUND_ROBIN`: This is a simple policy in which each healthy backend
+                           is selected in round robin order.
 
-          * LEAST_REQUEST - An O(1) algorithm which selects two random healthy
-                            hosts and picks the host which has fewer active requests.
+          * `LEAST_REQUEST`: An O(1) algorithm which selects two random healthy
+                             hosts and picks the host which has fewer active requests.
 
-          * RING_HASH - The ring/modulo hash load balancer implements consistent
-                        hashing to backends. The algorithm has the property that the
-                        addition/removal of a host from a set of N hosts only affects
-                        1/N of the requests.
+          * `RING_HASH`: The ring/modulo hash load balancer implements consistent
+                         hashing to backends. The algorithm has the property that the
+                         addition/removal of a host from a set of N hosts only affects
+                         1/N of the requests.
 
-          * RANDOM - The load balancer selects a random healthy host.
+          * `RANDOM`: The load balancer selects a random healthy host.
 
-          * ORIGINAL_DESTINATION - Backend host is selected based on the client
-                                   connection metadata, i.e., connections are opened
-                                   to the same address as the destination address of
-                                   the incoming connection before the connection
-                                   was redirected to the load balancer.
+          * `ORIGINAL_DESTINATION`: Backend host is selected based on the client
+                                    connection metadata, i.e., connections are opened
+                                    to the same address as the destination address of
+                                    the incoming connection before the connection
+                                    was redirected to the load balancer.
 
-          * MAGLEV - used as a drop in replacement for the ring hash load balancer.
-                     Maglev is not as stable as ring hash but has faster table lookup
-                     build times and host selection times. For more information about
-                     Maglev, refer to https://ai.google/research/pubs/pub44824
+          * `MAGLEV`: used as a drop in replacement for the ring hash load balancer.
+                      Maglev is not as stable as ring hash but has faster table lookup
+                      build times and host selection times. For more information about
+                      Maglev, refer to https://ai.google/research/pubs/pub44824
 
-          This field is applicable only when the load_balancing_scheme is set to
-          INTERNAL_SELF_MANAGED.
+
+          This field is applicable to either:
+
+          * A regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2,
+            and loadBalancingScheme set to INTERNAL_MANAGED.
+          * A global backend service with the load_balancing_scheme set to INTERNAL_SELF_MANAGED.
+
+
+          If session_affinity is not NONE, and this field is not set to MAGLEV or RING_HASH,
+          session affinity settings will not take effect.
+
+          Only ROUND_ROBIN and RING_HASH are supported when the backend service is referenced
+          by a URL map that is bound to target gRPC proxy that has validate_for_proxyless
+          field set to true.
       - !ruby/object:Api::Type::String
         name: 'name'
         required: true
@@ -2376,10 +2406,12 @@ objects:
         description: |
           Indicates what kind of load balancing this regional backend service
           will be used for. A backend service created for one type of load
-          balancing cannot be used with the other(s).
+          balancing cannot be used with the other(s). For more information, refer to
+          [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service).
         default_value: :INTERNAL
         values:
           - :EXTERNAL
+          - :EXTERNAL_MANAGED
           - :INTERNAL
           - :INTERNAL_MANAGED
       - !ruby/object:Api::Type::Enum
@@ -2393,34 +2425,46 @@ objects:
           - :MAGLEV
         description: |
           The load balancing algorithm used within the scope of the locality.
-          The possible values are -
+          The possible values are:
 
-          * ROUND_ROBIN - This is a simple policy in which each healthy backend
-                          is selected in round robin order.
+          * `ROUND_ROBIN`: This is a simple policy in which each healthy backend
+                           is selected in round robin order.
 
-          * LEAST_REQUEST - An O(1) algorithm which selects two random healthy
-                            hosts and picks the host which has fewer active requests.
+          * `LEAST_REQUEST`: An O(1) algorithm which selects two random healthy
+                             hosts and picks the host which has fewer active requests.
 
-          * RING_HASH - The ring/modulo hash load balancer implements consistent
-                        hashing to backends. The algorithm has the property that the
-                        addition/removal of a host from a set of N hosts only affects
-                        1/N of the requests.
+          * `RING_HASH`: The ring/modulo hash load balancer implements consistent
+                         hashing to backends. The algorithm has the property that the
+                         addition/removal of a host from a set of N hosts only affects
+                         1/N of the requests.
 
-          * RANDOM - The load balancer selects a random healthy host.
+          * `RANDOM`: The load balancer selects a random healthy host.
 
-          * ORIGINAL_DESTINATION - Backend host is selected based on the client
-                                   connection metadata, i.e., connections are opened
-                                   to the same address as the destination address of
-                                   the incoming connection before the connection
-                                   was redirected to the load balancer.
+          * `ORIGINAL_DESTINATION`: Backend host is selected based on the client
+                                    connection metadata, i.e., connections are opened
+                                    to the same address as the destination address of
+                                    the incoming connection before the connection
+                                    was redirected to the load balancer.
 
-          * MAGLEV - used as a drop in replacement for the ring hash load balancer.
-                     Maglev is not as stable as ring hash but has faster table lookup
-                     build times and host selection times. For more information about
-                     Maglev, refer to https://ai.google/research/pubs/pub44824
+          * `MAGLEV`: used as a drop in replacement for the ring hash load balancer.
+                      Maglev is not as stable as ring hash but has faster table lookup
+                      build times and host selection times. For more information about
+                      Maglev, refer to https://ai.google/research/pubs/pub44824
 
-          This field is applicable only when the `load_balancing_scheme` is set to
-          INTERNAL_MANAGED and the `protocol` is set to HTTP, HTTPS, or HTTP2.
+
+          This field is applicable to either:
+
+          * A regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2,
+            and loadBalancingScheme set to INTERNAL_MANAGED.
+          * A global backend service with the load_balancing_scheme set to INTERNAL_SELF_MANAGED.
+
+
+          If session_affinity is not NONE, and this field is not set to MAGLEV or RING_HASH,
+          session affinity settings will not take effect.
+
+          Only ROUND_ROBIN and RING_HASH are supported when the backend service is referenced
+          by a URL map that is bound to target gRPC proxy that has validate_for_proxyless
+          field set to true.
       - !ruby/object:Api::Type::String
         name: 'name'
         required: true
@@ -2682,7 +2726,7 @@ objects:
         description: |
           A named port on a backend instance group representing the port for
           communication to the backend VMs in that group. Required when the
-          loadBalancingScheme is EXTERNAL, INTERNAL_MANAGED, or INTERNAL_SELF_MANAGED
+          loadBalancingScheme is EXTERNAL, EXTERNAL_MANAGED, INTERNAL_MANAGED, or INTERNAL_SELF_MANAGED
           and the backends are instance groups. The named port must be defined on each
           backend instance group. This parameter has no meaning if the backends are NEGs. API sets a
           default of "http" if not given.
@@ -2731,7 +2775,7 @@ objects:
             name: 'idleTimeoutSec'
             description: |
               Specifies how long to keep a Connection Tracking entry while there is
-              no matching traffic (in seconds). 
+              no matching traffic (in seconds).
 
               For L4 ILB the minimum(default) is 10 minutes and maximum is 16 hours.
 
@@ -2742,7 +2786,7 @@ objects:
               Specifies the key used for connection tracking. There are two options:
               `PER_CONNECTION`: The Connection Tracking is performed as per the
               Connection Key (default Hash Method) for the specific protocol.
-              
+
               `PER_SESSION`: The Connection Tracking is performed as per the
               configured Session Affinity. It matches the configured Session Affinity.
             default_value: :PER_CONNECTION
@@ -2992,9 +3036,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 4
-          delete_minutes: 4
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -3054,9 +3095,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 4
-          delete_minutes: 4
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -3126,10 +3164,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        # Larger disks were timing out at creation. Bumping up to 5 minutes.
-        # https://github.com/hashicorp/terraform-provider-google/issues/703
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 5
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -3562,7 +3596,8 @@ objects:
           Direction of traffic to which this firewall applies; default is
           INGRESS. Note: For INGRESS traffic, it is NOT supported to specify
           destinationRanges; For EGRESS traffic, it is NOT supported to specify
-          sourceRanges OR sourceTags.
+          `source_ranges` OR `source_tags`. For INGRESS traffic, one of `source_ranges`,
+          `source_tags` or `source_service_accounts` is required.
         values:
           - :INGRESS
           - :EGRESS
@@ -3648,7 +3683,8 @@ objects:
           apply to traffic that has source IP address within sourceRanges OR the
           source IP that belongs to a tag listed in the sourceTags property. The
           connection does not need to match both properties for the firewall to
-          apply. Only IPv4 is supported.
+          apply. Only IPv4 is supported. For INGRESS traffic, one of `source_ranges`,
+          `source_tags` or `source_service_accounts` is required.
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'sourceServiceAccounts'
@@ -3663,7 +3699,8 @@ objects:
           source IP belongs to an instance with service account listed in
           sourceServiceAccount. The connection does not need to match both
           properties for the firewall to apply. sourceServiceAccounts cannot be
-          used at the same time as sourceTags or targetTags.
+          used at the same time as sourceTags or targetTags. For INGRESS traffic,
+          one of `source_ranges`, `source_tags` or `source_service_accounts` is required.
         item_type: Api::Type::String
         max_size: 10
         conflicts:
@@ -3680,7 +3717,8 @@ objects:
           both properties are set, the firewall will apply to traffic that has
           source IP address within sourceRanges OR the source IP that belongs to
           a tag listed in the sourceTags property. The connection does not need
-          to match both properties for the firewall to apply.
+          to match both properties for the firewall to apply. For INGRESS traffic,
+          one of `source_ranges`, `source_tags` or `source_service_accounts` is required.
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'targetServiceAccounts'
@@ -3818,14 +3856,16 @@ objects:
         name: 'loadBalancingScheme'
         description: |
           This signifies what the ForwardingRule will be used for and can be
-          EXTERNAL, INTERNAL, or INTERNAL_MANAGED. EXTERNAL is used for Classic
+          EXTERNAL, EXTERNAL_MANAGED, INTERNAL, or INTERNAL_MANAGED. EXTERNAL is used for Classic
           Cloud VPN gateways, protocol forwarding to VMs from an external IP address,
           and HTTP(S), SSL Proxy, TCP Proxy, and Network TCP/UDP load balancers.
           INTERNAL is used for protocol forwarding to VMs from an internal IP address,
           and internal TCP/UDP load balancers.
+          EXTERNAL_MANAGED is used for regional external HTTP(S) load balancers.
           INTERNAL_MANAGED is used for internal HTTP(S) load balancers.
         values:
           - :EXTERNAL
+          - :EXTERNAL_MANAGED
           - :INTERNAL
           - :INTERNAL_MANAGED
       - !ruby/object:Api::Type::String
@@ -4224,13 +4264,15 @@ objects:
           The value of INTERNAL_SELF_MANAGED means that this will be used for
           Internal Global HTTP(S) LB. The value of EXTERNAL means that this
           will be used for External Global Load Balancing (HTTP(S) LB,
-          External TCP/UDP LB, SSL Proxy)
+          External TCP/UDP LB, SSL Proxy). The value of EXTERNAL_MANAGED means
+          that this will be used for Global external HTTP(S) load balancers.
 
           ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) only) Note: This field must be set "" if the global address is
           configured as a purpose of PRIVATE_SERVICE_CONNECT and addressType of INTERNAL.
         default_value: :EXTERNAL
         values:
           - :EXTERNAL
+          - :EXTERNAL_MANAGED
           - :INTERNAL_SELF_MANAGED
       - !ruby/object:Api::Type::Array
         name: 'metadataFilters'
@@ -5890,10 +5932,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -6191,12 +6229,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        # Users were experiencing timeouts. Bumping up to 6 minutes.
-        # https://github.com/hashicorp/terraform-provider-google/issues/852
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -7104,10 +7136,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -7371,9 +7399,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 10
-          delete_minutes: 10
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -7648,10 +7673,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -8010,10 +8031,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -8200,10 +8217,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -8637,10 +8650,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -9055,7 +9064,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Using Packet Mirroring': 'https://cloud.google.com/vpc/docs/using-packet-mirroring#creating'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/packetMirroring'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/packetMirrorings'
     description: |
       Packet Mirroring mirrors traffic to and from particular VM instances.
       You can use the collected traffic to help you detect security threats
@@ -9242,10 +9251,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 15
-          update_minutes: 6
-          delete_minutes: 15
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -9360,10 +9365,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 15
-          update_minutes: 6
-          delete_minutes: 15
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -9736,9 +9737,6 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: 'scaleDownControl'
             min_version: beta
-            at_least_one_of:
-             - scale_down_control.0.max_scaled_down_replicas
-             - scale_down_control.0.time_window_sec
             description: |
               Defines scale down controls to reduce the risk of response latency
               and outages due to abrupt scale-in events
@@ -9746,29 +9744,35 @@ objects:
             - !ruby/object:Api::Type::NestedObject
               name: 'maxScaledDownReplicas'
               at_least_one_of:
-              - scale_down_control.0.max_scaled_down_replicas.0.fixed
-              - scale_down_control.0.max_scaled_down_replicas.0.percent
+                - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas
+                - autoscaling_policy.0.scale_down_control.0.time_window_sec
               properties:
               - !ruby/object:Api::Type::Integer
                 name: 'fixed'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.fixed
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.percent
                 description: |
                   Specifies a fixed number of VM instances. This must be a positive
                   integer.
               - !ruby/object:Api::Type::Integer
                 name: 'percent'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.fixed
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.percent
                 description: |
                   Specifies a percentage of instances between 0 to 100%, inclusive.
                   For example, specify 80 for 80%.
             - !ruby/object:Api::Type::Integer
               name: 'timeWindowSec'
+              at_least_one_of:
+                - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas
+                - autoscaling_policy.0.scale_down_control.0.time_window_sec
               description: |
                 How long back autoscaling should look when computing recommendations
                 to include directives regarding slower scale down, as described above.
           - !ruby/object:Api::Type::NestedObject
             name: 'scaleInControl'
-            at_least_one_of:
-             - scale_in_control.0.max_scaled_in_replicas
-             - scale_in_control.0.time_window_sec
             description: |
               Defines scale in controls to reduce the risk of response latency
               and outages due to abrupt scale-in events
@@ -9776,21 +9780,30 @@ objects:
             - !ruby/object:Api::Type::NestedObject
               name: 'maxScaledInReplicas'
               at_least_one_of:
-              - scale_in_control.0.max_scaled_in_replicas.0.fixed
-              - scale_in_control.0.max_scaled_in_replicas.0.percent
+                - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas
+                - autoscaling_policy.0.scale_in_control.0.time_window_sec
               properties:
               - !ruby/object:Api::Type::Integer
                 name: 'fixed'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.fixed
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.percent
                 description: |
                   Specifies a fixed number of VM instances. This must be a positive
                   integer.
               - !ruby/object:Api::Type::Integer
                 name: 'percent'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.fixed
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.percent
                 description: |
                   Specifies a percentage of instances between 0 to 100%, inclusive.
                   For example, specify 80 for 80%.
             - !ruby/object:Api::Type::Integer
               name: 'timeWindowSec'
+              at_least_one_of:
+                - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas
+                - autoscaling_policy.0.scale_in_control.0.time_window_sec
               description: |
                 How long back autoscaling should look when computing recommendations
                 to include directives regarding slower scale down, as described above.
@@ -10098,8 +10111,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 5
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -10426,10 +10437,12 @@ objects:
           properties:
             - !ruby/object:Api::Type::ResourceRef
               name: 'defaultService'
+              # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
+              # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # TODO: add defaultRouteAction.weightedBackendService here once they are supported.
-              exactly_one_of:
-                - path_matchers.0.default_service
-                - path_matchers.0.default_url_redirect
+              # exactly_one_of:
+              #   - path_matchers.0.default_service
+              #   - path_matchers.0.default_url_redirect
               resource: 'RegionBackendService'
               imports: 'selfLink'
               description: |
@@ -11571,10 +11584,12 @@ objects:
                           original URL is retained.
             - !ruby/object:Api::Type::NestedObject
               name: 'defaultUrlRedirect'
+              # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
+              # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # TODO: add defaultRouteAction.weightedBackendService here once they are supported.
-              exactly_one_of:
-                - path_matchers.0.default_service
-                - path_matchers.0.default_url_redirect
+              # exactly_one_of:
+              #   - path_matchers.0.default_service
+              #   - path_matchers.0.default_url_redirect
               description: |
                 When none of the specified hostRules match, the request is redirected to a URL specified
                 by defaultUrlRedirect. If defaultUrlRedirect is specified, defaultService or
@@ -13057,7 +13072,7 @@ objects:
           A reference to the network to which this router belongs.
         required: true
         input: true
-      # TODO(danawillow): Figure out the story for interfaces/bgpPeers. Right
+      # TODO: Figure out the story for interfaces/bgpPeers. Right
       # now in Terraform we have three separate resources: router,
       # router_interface, and router_peer. Decide whether we want to keep that
       # pattern for the other providers, keep it unique for Terraform, or add
@@ -13129,7 +13144,6 @@ objects:
           Interconnect Attachment (IPsec-encrypted Cloud Interconnect feature).
 
           Not currently available publicly.
-        min_version: beta
   - !ruby/object:Api::Resource
     name: 'RouterNat'
     base_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
@@ -13159,10 +13173,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 10
-          update_minutes: 10
-          delete_minutes: 10
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -13365,10 +13375,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 10
-          update_minutes: 10
-          delete_minutes: 10
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -13503,14 +13509,57 @@ objects:
           PARTNER InterconnectAttachment is created, updated,
           or deleted.
         output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: bfd
+        description: |
+          BFD configuration for the BGP peering.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: sessionInitializationMode
+            description: |
+              The BFD session initialization mode for this BGP peer.
+              If set to `ACTIVE`, the Cloud Router will initiate the BFD session
+              for this BGP peer. If set to `PASSIVE`, the Cloud Router will wait
+              for the peer router to initiate the BFD session for this BGP peer.
+              If set to `DISABLED`, BFD is disabled for this BGP peer.
+            values:
+              - :ACTIVE
+              - :DISABLED
+              - :PASSIVE
+            required: true
+          - !ruby/object:Api::Type::Integer
+            name: minTransmitInterval
+            description: |
+              The minimum interval, in milliseconds, between BFD control packets
+              transmitted to the peer router. The actual value is negotiated
+              between the two routers and is equal to the greater of this value
+              and the corresponding receive interval of the other router. If set,
+              this value must be between 1000 and 30000.
+            default_value: 1000
+          - !ruby/object:Api::Type::Integer
+            name: minReceiveInterval
+            description: |
+              The minimum interval, in milliseconds, between BFD control packets
+              received from the peer router. The actual value is negotiated
+              between the two routers and is equal to the greater of this value
+              and the transmit interval of the other router. If set, this value
+              must be between 1000 and 30000.
+            default_value: 1000
+          - !ruby/object:Api::Type::Integer
+            name: multiplier
+            description: |
+              The number of consecutive BFD packets that must be missed before
+              BFD declares that a peer is unavailable. If set, the value must
+              be a value between 5 and 16.
+            default_value: 5
       - !ruby/object:Api::Type::Boolean
-         name: 'enable'
-         description: |
-           The status of the BGP peer connection. If set to false, any active session
-           with the peer is terminated and all associated routing information is removed.
-           If set to true, the peer connection can be established with routing information.
-           The default is true.
-         default_value: true
+        name: 'enable'
+        description: |
+          The status of the BGP peer connection. If set to false, any active session
+          with the peer is terminated and all associated routing information is removed.
+          If set to true, the peer connection can be established with routing information.
+          The default is true.
+        default_value: true
   - !ruby/object:Api::Resource
     name: 'SecurityPolicy'
     kind: 'compute#securityPolicy'
@@ -13647,10 +13696,6 @@ objects:
         path: 'name'
         full_url: 'selfLink'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 5
-          update_minutes: 5
-          delete_minutes: 5
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -13896,8 +13941,8 @@ objects:
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
         timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
+          insert_minutes: 30
+          update_minutes: 30
           # Deletes can take 20-30 minutes to complete, since they depend
           # on the provisioning process either succeeding or failing completely.
           delete_minutes: 30
@@ -14136,6 +14181,32 @@ objects:
         output: true
         description: |
           The status of the reservation.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'shareSettings'
+        description: |
+          The share setting for reservations.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'shareType'
+            values:
+              - :LOCAL
+              - :SPECIFIC_PROJECTS
+            description: |
+              Type of sharing for this shared-reservation
+          - !ruby/object:Api::Type::Map
+            name: 'projectMap'
+            description: |
+              A map of project number and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
+            key_name: id
+            key_description: |
+              The project id/number which is deleting or adding to the project list. Only project number is acceptable.
+            value_type: !ruby/object:Api::Type::NestedObject
+              name: projectConfig
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'projectId'
+                  description: |
+                    The project id/number, should be same as the key of this project config in the project map.
       - !ruby/object:Api::Type::NestedObject
         name: 'specificReservation'
         required: true
@@ -14503,12 +14574,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        # Users were experiencing timeout. Bumping up to 6 minutes.
-        # https://github.com/hashicorp/terraform-provider-google/issues/718
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -14576,13 +14641,11 @@ objects:
         name: 'purpose'
         input: true
         description: |
-          The purpose of the resource. This field can be either PRIVATE
-          or INTERNAL_HTTPS_LOAD_BALANCER. A subnetwork with purpose set to
+          The purpose of the resource. A subnetwork with purpose set to
           INTERNAL_HTTPS_LOAD_BALANCER is a user-created subnetwork that is
-          reserved for Internal HTTP(S) Load Balancing. If unspecified, the
-          purpose defaults to PRIVATE.
+          reserved for Internal HTTP(S) Load Balancing.
 
-          If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set `role`.
+          If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set the `role` field.
       - !ruby/object:Api::Type::Enum
         name: 'role'
         update_verb: :PATCH
@@ -18158,7 +18221,7 @@ objects:
                     description: |
                       Specifies the value of the fixed delay interval.
                     at_least_one_of:
-                      - default_route_action.0.fault_injection_policy.0.delay.0.delay
+                      - default_route_action.0.fault_injection_policy.0.delay.0.fixed_delay
                       - default_route_action.0.fault_injection_policy.0.delay.0.percentage
                     properties:
                       - !ruby/object:Api::Type::String
@@ -18183,7 +18246,7 @@ objects:
                       The percentage of traffic (connections/operations/requests) on which delay will be introduced as part of fault injection.
                       The value must be between 0.0 and 100.0 inclusive.
                     at_least_one_of:
-                      - default_route_action.0.fault_injection_policy.0.delay.0.delay
+                      - default_route_action.0.fault_injection_policy.0.delay.0.fixed_delay
                       - default_route_action.0.fault_injection_policy.0.delay.0.percentage
               - !ruby/object:Api::Type::NestedObject
                 name: 'abort'

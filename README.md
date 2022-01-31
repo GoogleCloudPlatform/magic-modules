@@ -14,7 +14,6 @@ Magic Modules generates GCP support for:
 
 * Terraform
 * Ansible
-* InSpec
 
 In addition, Magic Modules generates support for several companion
 features/tools:
@@ -116,13 +115,13 @@ It's worth noting that Magic Modules will only generate new files when run
 locally. The "Magician"- the Magic Modules CI system- handles deletion of old
 files when creating PRs.
 
-#### Generating terraform-google-conversion
+#### Generating terraform-validator
 
-You can compile terraform-google-conversion by running the following command.
+You can compile terraform-validator by running the following command.
 If Magic Modules has been installed correctly, you'll get no errors.
 
 ```bash
-make validator OUTPUT_PATH="/path/to/your/terraform-google-conversion"
+make validator OUTPUT_PATH="/path/to/your/terraform-validator"
 ```
 
 ### Making changes to resources
@@ -194,7 +193,6 @@ tool;
 Tool             | Testing Guide
 -----------------|--------------
 ansible          | [instructions](https://docs.ansible.com/ansible/devel/dev_guide/testing.html)
-inspec           | [testing inspec-gcp](https://github.com/inspec/inspec-gcp/#test-inspec-gcp-resources)
 terraform        | [`google` provider testing guide](https://github.com/hashicorp/terraform-provider-google/blob/master/.github/CONTRIBUTING.md#tests)
 terraform (beta) | [`google-beta` provider testing guide](https://github.com/hashicorp/terraform-provider-google-beta/blob/master/.github/CONTRIBUTING.md#tests)
 

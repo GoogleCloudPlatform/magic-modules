@@ -25,6 +25,9 @@ module Api
       # boolean of if this binding should be generated
       attr_reader :exclude
 
+      # boolean of if this binding should be generated
+      attr_reader :exclude_validator
+
       # Character that separates resource identifier from method call in URL
       # For example, PubSub subscription uses {resource}:getIamPolicy
       # While Compute subnetwork uses {resource}/getIamPolicy
@@ -98,14 +101,11 @@ module Api
       # if set, it overrides the default iamPolicyVersion
       attr_reader :iam_policy_version
 
-      # [Optional] If true, this resource has been deprecated at GA only.
-      # This can probably be removed after `4.0.0`.
-      attr_reader :ga_deprecation
-
       def validate
         super
 
         check :exclude, type: :boolean, default: false
+        check :exclude_validator, type: :boolean, default: false
         check :method_name_separator, type: String, default: '/'
         check :parent_resource_type, type: String
         check :fetch_iam_policy_verb, type: Symbol, default: :GET, allowed: %i[GET POST]
@@ -126,7 +126,6 @@ module Api
           type: String, default: 'templates/terraform/iam/iam_attributes.tf.erb'
         )
         check :iam_policy_version, type: String
-        check :ga_deprecation, type: :boolean, default: false
       end
     end
   end

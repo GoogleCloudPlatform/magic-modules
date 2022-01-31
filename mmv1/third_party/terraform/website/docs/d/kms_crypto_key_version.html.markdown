@@ -30,7 +30,7 @@ data "google_kms_crypto_key" "my_crypto_key" {
 }
 
 data "google_kms_crypto_key_version" "my_crypto_key_version" {
-  crypto_key = data.google_kms_key.my_key.id
+  crypto_key = data.google_kms_crypto_key.my_key.id
 }
 ```
 
@@ -38,7 +38,7 @@ data "google_kms_crypto_key_version" "my_crypto_key_version" {
 
 The following arguments are supported:
 
-* `crypto_key` - (Required) The `self_link` of the Google Cloud Platform CryptoKey to which the key version belongs. This is also the `id` field of the 
+* `crypto_key` - (Required) The `id` of the Google Cloud Platform CryptoKey to which the key version belongs. This is also the `id` field of the 
 `google_kms_crypto_key` resource/datasource.
 
 * `version` - (Optional) The version number for this CryptoKeyVersion. Defaults to `1`.
@@ -58,9 +58,9 @@ exported:
 
 * `algorithm` - The CryptoKeyVersionAlgorithm that this CryptoKeyVersion supports. See the [algorithm reference](https://cloud.google.com/kms/docs/reference/rest/v1/CryptoKeyVersionAlgorithm) for possible outputs.
 
-* `public_key` -  If the enclosing CryptoKey has purpose `ASYMMETRIC_SIGN` or `ASYMMETRIC_DECRYPT`, this block contains details about the public key associated to this CryptoKeyVersion. Structure is documented below.
+* `public_key` -  If the enclosing CryptoKey has purpose `ASYMMETRIC_SIGN` or `ASYMMETRIC_DECRYPT`, this block contains details about the public key associated to this CryptoKeyVersion. Structure is [documented below](#nested_public_key).
 
-The `public_key` block, if present, contains:
+<a name="nested_public_key"></a>The `public_key` block, if present, contains:
 
 * `pem` - The public key, encoded in PEM format. For more information, see the RFC 7468 sections for General Considerations and Textual Encoding of Subject Public Key Info.
 

@@ -1,7 +1,6 @@
 <% autogen_exception -%>
 package google
 
-<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"strings"
@@ -128,7 +127,7 @@ resource "google_compute_network" "network" {
 }
 
 resource "google_compute_global_address" "worker_range" {
-  name          = "worker-pool-range"
+  name          = "tf-test-worker-pool-range%{random_suffix}"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
@@ -190,4 +189,3 @@ func funcAccTestCloudbuildWorkerPoolCheckDestroy(t *testing.T) func(s *terraform
 		return nil
 	}
 }
-<% end -%>

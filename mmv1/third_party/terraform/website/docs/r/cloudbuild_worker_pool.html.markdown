@@ -13,9 +13,6 @@ Definition of custom Cloud Build WorkerPools for running jobs with custom config
 
 -> This resource is not currently public, and requires allow-listing of projects prior to use.
 
-~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
-
 
 ## Example Usage
 
@@ -92,7 +89,7 @@ The following arguments are supported:
 
 * `network_config` -
   (Optional)
-  Network configuration for the `WorkerPool`.
+  Network configuration for the `WorkerPool`. Structure is [documented below](#nested_network_config).
   
 * `project` -
   (Optional)
@@ -100,17 +97,17 @@ The following arguments are supported:
   
 * `worker_config` -
   (Optional)
-  Configuration to be used for a creating workers in the `WorkerPool`.
+  Configuration to be used for a creating workers in the `WorkerPool`. Structure is [documented below](#nested_worker_config).
   
 
 
-The `network_config` block supports:
+<a name="nested_network_config"></a>The `network_config` block supports:
     
 * `peered_network` -
   (Required)
   Immutable. The network definition that the workers are peered to. If this section is left empty, the workers will be peered to `WorkerPool.project_id` on the service producer network. Must be in the format `projects/{project}/global/networks/{network}`, where `{project}` is a project number, such as `12345`, and `{network}` is the name of a VPC network in the project. See (https://cloud.google.com/cloud-build/docs/custom-workers/set-up-custom-worker-pool-environment#understanding_the_network_configuration_options)
     
-The `worker_config` block supports:
+<a name="nested_worker_config"></a>The `worker_config` block supports:
     
 * `disk_size_gb` -
   (Optional)
@@ -147,9 +144,9 @@ In addition to the arguments listed above, the following computed attributes are
 This resource provides the following
 [Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
 
-- `create` - Default is 10 minutes.
-- `update` - Default is 10 minutes.
-- `delete` - Default is 10 minutes.
+- `create` - Default is 20 minutes.
+- `update` - Default is 20 minutes.
+- `delete` - Default is 20 minutes.
 
 ## Import
 

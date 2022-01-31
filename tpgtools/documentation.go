@@ -48,7 +48,7 @@ func mergeResource(res *Resource, resources map[Version][]*Resource, version *Ve
 		}
 		return ga
 	}
-	beta.Description = "Beta only"
+	beta.Description = fmt.Sprintf("Beta only: %s", beta.Description)
 	return beta
 }
 

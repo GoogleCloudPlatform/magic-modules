@@ -1,5 +1,5 @@
 resource "google_compute_instance_group_named_port" "<%= ctx[:primary_resource_id] %>" {
-  group = google_container_cluster.my_cluster.instance_group_urls[0]
+  group = google_container_cluster.my_cluster.node_pool[0].instance_group_urls[0]
   zone = "us-central1-a"
 
   name = "http"
@@ -7,7 +7,7 @@ resource "google_compute_instance_group_named_port" "<%= ctx[:primary_resource_i
 }
 
 resource "google_compute_instance_group_named_port" "<%= ctx[:primary_resource_id] %>s" {
-  group = google_container_cluster.my_cluster.instance_group_urls[0]
+  group = google_container_cluster.my_cluster.node_pool[0].instance_group_urls[0]
   zone = "us-central1-a"
 
   name = "https"

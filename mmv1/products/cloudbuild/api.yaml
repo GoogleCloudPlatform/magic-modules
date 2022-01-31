@@ -199,7 +199,7 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: 'pullRequest'
             description: |
-                filter to match changes in pull requests.  Specify only one of pullRequest or push.
+                filter to match changes in pull requests. Specify only one of `pull_request` or `push`.
             exactly_one_of:
               - github.0.pull_request
               - github.0.push
@@ -224,7 +224,7 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: 'push'
             description: |
-                filter to match changes in refs, like branches or tags.  Specify only one of pullRequest or push.
+                filter to match changes in refs, like branches or tags. Specify only one of `pull_request` or `push`.
             exactly_one_of:
               - github.0.pull_request
               - github.0.push
@@ -370,9 +370,9 @@ objects:
                       The syntax of the regular expressions accepted is the syntax accepted by RE2 and 
                       described at https://github.com/google/re2/wiki/Syntax
                     exactly_one_of:
-                      - branch_name
-                      - commit_sha
-                      - tag_name
+                      - build.0.source.0.repo_source.0.branch_name
+                      - build.0.source.0.repo_source.0.commit_sha
+                      - build.0.source.0.repo_source.0.tag_name
                   - !ruby/object:Api::Type::String
                     name: 'tagName'
                     description: |
@@ -380,17 +380,17 @@ objects:
                       The syntax of the regular expressions accepted is the syntax accepted by RE2 and 
                       described at https://github.com/google/re2/wiki/Syntax
                     exactly_one_of:
-                      - branch_name
-                      - commit_sha
-                      - tag_name
+                      - build.0.source.0.repo_source.0.branch_name
+                      - build.0.source.0.repo_source.0.commit_sha
+                      - build.0.source.0.repo_source.0.tag_name
                   - !ruby/object:Api::Type::String
                     name: 'commitSha'
                     description: |
                       Explicit commit SHA to build. Exactly one a of branch name, tag, or commit SHA must be provided.
                     exactly_one_of:
-                      - branch_name
-                      - commit_sha
-                      - tag_name
+                      - build.0.source.0.repo_source.0.branch_name
+                      - build.0.source.0.repo_source.0.commit_sha
+                      - build.0.source.0.repo_source.0.tag_name
           - !ruby/object:Api::Type::Array
             name: 'tags'
             item_type: Api::Type::String
@@ -447,6 +447,30 @@ objects:
                     Secret environment variables must be unique across all of a build's secrets, 
                     and must be used by at least one build step. Values can be at most 64 KB in size. 
                     There can be at most 100 secret values across all of a build's secrets.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'availableSecrets'
+            description: |
+              Secrets and secret environment variables.
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'secretManager'
+                required: true
+                description: |
+                  Pairs a secret environment variable with a SecretVersion in Secret Manager.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'versionName'
+                      required: true
+                      description: |
+                        Resource name of the SecretVersion. In format: projects/*/secrets/*/versions/*
+                    - !ruby/object:Api::Type::String
+                      name: 'env'
+                      required: true
+                      description: |
+                        Environment variable name to associate with the secret. Secret environment
+                        variables must be unique across all of a build's secrets, and must be used
+                        by at least one build step.
           - !ruby/object:Api::Type::Array
             name: 'steps'
             required: true

@@ -90,6 +90,9 @@ end
 
 ```hcl
 data "google_iam_policy" "admin" {
+<% if object.min_version.name == 'beta' -%>
+  provider = google-beta
+<% end -%>
   binding {
     role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
     members = [
@@ -99,6 +102,9 @@ data "google_iam_policy" "admin" {
 }
 
 resource "<%= resource_ns_iam -%>_policy" "policy" {
+<% if object.min_version.name == 'beta' -%>
+  provider = google-beta
+<% end -%>
 <%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   policy_data = data.google_iam_policy.admin.policy_data
 }
@@ -109,6 +115,9 @@ With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_
 
 ```hcl
 data "google_iam_policy" "admin" {
+<% if object.min_version.name == 'beta' -%>
+  provider = google-beta
+<% end -%>
   binding {
     role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
     members = [
@@ -124,6 +133,9 @@ data "google_iam_policy" "admin" {
 }
 
 resource "<%= resource_ns_iam -%>_policy" "policy" {
+<% if object.min_version.name == 'beta' -%>
+  provider = google-beta
+<% end -%>
 <%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   policy_data = data.google_iam_policy.admin.policy_data
 }
@@ -133,6 +145,9 @@ resource "<%= resource_ns_iam -%>_policy" "policy" {
 
 ```hcl
 resource "<%= resource_ns_iam -%>_binding" "binding" {
+<% if object.min_version.name == 'beta' -%>
+  provider = google-beta
+<% end -%>
 <%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
   members = [
@@ -146,6 +161,9 @@ With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_
 
 ```hcl
 resource "<%= resource_ns_iam -%>_binding" "binding" {
+<% if object.min_version.name == 'beta' -%>
+  provider = google-beta
+<% end -%>
 <%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
   members = [
@@ -164,6 +182,9 @@ resource "<%= resource_ns_iam -%>_binding" "binding" {
 
 ```hcl
 resource "<%= resource_ns_iam -%>_member" "member" {
+<% if object.min_version.name == 'beta' -%>
+  provider = google-beta
+<% end -%>
 <%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
   member = "user:jane@example.com"
@@ -175,6 +196,9 @@ With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_
 
 ```hcl
 resource "<%= resource_ns_iam -%>_member" "member" {
+<% if object.min_version.name == 'beta' -%>
+  provider = google-beta
+<% end -%>
 <%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
   member = "user:jane@example.com"

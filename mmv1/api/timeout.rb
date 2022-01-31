@@ -16,11 +16,11 @@ require 'api/object'
 module  Api
   # Provides timeout information for the different operation types
   class Timeouts < Api::Object
-    # Default timeout for all operation types is 4 minutes. This can be
-    # overridden for each resource.
-    DEFAULT_INSERT_TIMEOUT_MINUTES = 4
-    DEFAULT_UPDATE_TIMEOUT_MINUTES = 4
-    DEFAULT_DELETE_TIMEOUT_MINUTES = 4
+    # Default timeout for all operation types is 20, the Terraform default (https://www.terraform.io/plugin/sdkv2/resources/retries-and-customizable-timeouts)
+    # minutes. This can be overridden for each resource.
+    DEFAULT_INSERT_TIMEOUT_MINUTES = 20
+    DEFAULT_UPDATE_TIMEOUT_MINUTES = 20
+    DEFAULT_DELETE_TIMEOUT_MINUTES = 20
 
     attr_reader :insert_minutes
     attr_reader :update_minutes
