@@ -322,6 +322,7 @@ func (t *testRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
 
 // Test that we don't fail if there's no owner for object
 func TestAccStorageObjectAcl_noOwner(t *testing.T) {
+	skipIfVcr(t)
 	t.Parallel()
 
 	bucketName := testBucketName(t)
