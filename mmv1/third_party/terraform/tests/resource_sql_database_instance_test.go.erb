@@ -716,7 +716,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(t *testi
 	})
 }
 
-func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange_replica(t *testing.T) {
+func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(t *testing.T) {
 	t.Parallel()
 
 	databaseName := "tf-test-" + randString(t, 10)
@@ -729,7 +729,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange_replica(
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange_replica(databaseName, networkName, addressName),
+				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(databaseName, networkName, addressName),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -747,7 +747,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange_replica(
 	})
 }
 
-func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange_clone(t *testing.T) {
+func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(t *testing.T) {
 	t.Parallel()
 
 	databaseName := "tf-test-" + randString(t, 10)
@@ -760,7 +760,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange_clone(t 
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange_clone(databaseName, networkName, addressName),
+				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(databaseName, networkName, addressName),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -1158,7 +1158,7 @@ resource "google_compute_global_address" "foobar" {
   name          = "%s"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
-  prefix_length = 24
+  prefix_length = 16
   network       = data.google_compute_network.servicenet.self_link
 }
 
@@ -1187,7 +1187,7 @@ resource "google_sql_database_instance" "instance" {
 }
 
 
-func testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange_replica(databaseName, networkName, addressRangeName string) string {
+func testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(databaseName, networkName, addressRangeName string) string {
 	return fmt.Sprintf(`
 data "google_compute_network" "servicenet" {
   name                    = "%s"
@@ -1197,7 +1197,7 @@ resource "google_compute_global_address" "foobar" {
   name          = "%s"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
-  prefix_length = 24
+  prefix_length = 16
   network       = data.google_compute_network.servicenet.self_link
 }
 
@@ -1255,7 +1255,7 @@ resource "google_sql_database_instance" "replica1" {
 `, networkName, addressRangeName, databaseName, databaseName)
 }
 
-func testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange_clone(databaseName, networkName, addressRangeName string) string {
+func testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(databaseName, networkName, addressRangeName string) string {
 	return fmt.Sprintf(`
 data "google_compute_network" "servicenet" {
   name                    = "%s"
@@ -1265,7 +1265,7 @@ resource "google_compute_global_address" "foobar" {
   name          = "%s"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
-  prefix_length = 24
+  prefix_length = 16
   network       = data.google_compute_network.servicenet.self_link
 }
 
