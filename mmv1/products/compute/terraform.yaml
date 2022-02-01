@@ -253,7 +253,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           neg_name: "network-endpoint"
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_external_managed"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           backend_service_name: "backend-service"
@@ -1046,7 +1045,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "target"
       - !ruby/object:Provider::Terraform::Examples
         name: "global_forwarding_rule_external_managed"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           forwarding_rule_name: "global-rule"
