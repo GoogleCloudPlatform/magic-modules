@@ -55,6 +55,10 @@ type Property struct {
 	// ConflictsWith is the list of fields that this field conflicts with
 	ConflictsWith ConflictsWith
 
+	// ConflictsWith is the list of fields that this field conflicts with
+	// in JSONCase. For example, "machineType"
+	JSONCaseConflictsWith []string
+
 	// Default is the default for the field.
 	Default *string
 
@@ -471,6 +475,10 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		identityFields = idParts(resource.ID)
 	}
 
+	// Maps PackageJSONName back to property Name
+	// for conflict fields
+	conflictsMap := make(map[string]string)
+
 	for k, v := range schema.Properties {
 		ref := ""
 		packageName := ""
@@ -498,7 +506,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		}
 
 		p := Property{
-			title:       jsonToSnakeCase(v.Title),
+			title:       jsonToSnakeCase(v.Title).snakecase(),
 			Type:        Type{typ: v},
 			PackageName: packageName,
 			Description: v.Description,
@@ -549,8 +557,15 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		}
 
 		if v, ok := v.Extension["x-dcl-conflicts"].([]interface{}); ok {
-			for _, ci := range v {
-				p.ConflictsWith = append(p.ConflictsWith, ci.(string))
+			// NOTE: DCL not label x-dcl-conflicts for reused types
+			// TODO(shuya): handle nested field when b/213503595 got fixed
+
+			if parent == nil {
+				for _, ci := range v {
+					p.JSONCaseConflictsWith = append(p.JSONCaseConflictsWith, ci.(string))
+				}
+
+				conflictsMap[p.PackageJSONName()] = p.Name()
 			}
 		}
 
@@ -680,11 +695,11 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 					return nil, fmt.Errorf("failed to decode custom identity getter details")
 				}
 
-				capitalizedPropertyName := p.PackageName
+				propertyName := p.title
 				if p.customName != "" {
-					capitalizedPropertyName = snakeToTitleCase(p.customName)
+					propertyName = p.customName
 				}
-				ig := fmt.Sprintf("get%s(d, config)", capitalizedPropertyName)
+				ig := fmt.Sprintf("get%s(d, config)", renderSnakeAsTitle(miscellaneousNameSnakeCase(propertyName)))
 				if cigOk {
 					ig = fmt.Sprintf("%s(d, config)", cig.Function)
 				}
@@ -736,7 +751,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 		if dsfOk {
 			p.DiffSuppressFunc = &dsf.DiffSuppressFunc
-		} else {
+		} else if !(p.Computed && !p.Optional) {
 			p.DiffSuppressFunc = p.DefaultDiffSuppress()
 		}
 
@@ -866,6 +881,21 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		}
 
 		props = append(props, p)
+	}
+
+	// handle conflict fields
+	for i, _ := range props {
+		p := &props[i]
+		if p.JSONCaseConflictsWith != nil {
+			for _, cf := range p.JSONCaseConflictsWith {
+				if val, ok := conflictsMap[cf]; ok {
+					p.ConflictsWith = append(p.ConflictsWith, val)
+				} else {
+					return nil, fmt.Errorf("Error generating conflict fields. %s is not labeled as a conflict field in DCL", cf)
+				}
+
+			}
+		}
 	}
 
 	// sort the properties so they're in a nice order

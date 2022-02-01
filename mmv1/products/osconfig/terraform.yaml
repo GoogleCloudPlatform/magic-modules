@@ -20,7 +20,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "os_config_patch_deployment_basic"
         primary_resource_id: "patch"
         vars:
-          instance_name: "patch-deploy-inst"
+          patch_deployment_id: "patch-deploy"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "os_config_patch_deployment_daily"
+        primary_resource_id: "patch"
+        vars:
           patch_deployment_id: "patch-deploy"
       - !ruby/object:Provider::Terraform::Examples
         name: "os_config_patch_deployment_instance"
@@ -32,7 +36,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "os_config_patch_deployment_full"
         primary_resource_id: "patch"
         vars:
-          instance_name: "patch-deploy-inst"
           patch_deployment_id: "patch-deploy"
     properties:
       patchDeploymentId: !ruby/object:Overrides::Terraform::PropertyOverride

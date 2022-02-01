@@ -203,7 +203,7 @@ func fetchIamPolicy(
 
 	iamPolicy, err := updater.GetResourceIamPolicy()
 	if isGoogleApiErrorWithCode(err, 403) {
-		return Asset{}, ErrLackingReadPermission
+		return Asset{}, ErrResourceInaccessible
 	}
 
 	if err != nil {

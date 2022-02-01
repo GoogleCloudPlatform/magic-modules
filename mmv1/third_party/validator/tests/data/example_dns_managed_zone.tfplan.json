@@ -95,7 +95,7 @@
 		"provider_config": {
 			"google": {
 				"name": "google",
-				"version_constraint": "~\u003e 3.84.0",
+				"version_constraint": "~\u003e 4.3.0",
 				"expressions": {
 					"project": {
 						"constant_value": "{{.Provider.project}}"

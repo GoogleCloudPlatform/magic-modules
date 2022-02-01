@@ -62,11 +62,11 @@ module Provider
     def retrieve_list_of_manually_defined_tests
       m1 =
         retrieve_list_of_manually_defined_tests_from_file(
-          'third_party/validator/tests/manifest/cli_test.go.erb'
+          'third_party/validator/tests/source/cli_test.go.erb'
         )
       m2 =
         retrieve_list_of_manually_defined_tests_from_file(
-          'third_party/validator/tests/manifest/read_test.go.erb'
+          'third_party/validator/tests/source/read_test.go.erb'
         )
       m1 | m2 # union of manually defined tests
     end
@@ -106,6 +106,20 @@ module Provider
       non_defined_tests
     end
 
+    def retrieve_test_source_files(path, suffix)
+      files = Dir[path + '**' + suffix]
+      files = files.map { |file| file.split(path)[-1] }
+      files.sort
+    end
+
+    def retrieve_test_source_code_with_location(suffix)
+      path = 'third_party/validator/tests/source/'
+      files = retrieve_test_source_files(path, suffix)
+      files.map do |file|
+        ['test/' + file, path + file]
+      end
+    end
+
     def compile_common_files(output_folder, products, _common_compile_file)
       Google::LOGGER.info 'Compiling common files.'
       file_template = ProviderFileTemplate.new(
@@ -116,6 +130,17 @@ module Provider
       )
 
       @non_defined_tests = retrieve_full_manifest_of_non_defined_tests
+
+      test_source = retrieve_test_source_code_with_location('[b]').map do |location|
+        [location[0].sub('go.erb', 'go'), location[1]]
+      end
+
+      compile_file_list(
+        output_folder,
+        test_source,
+        file_template
+      )
+
       compile_file_list(output_folder, [
                           ['converters/google/resources/compute_operation.go',
                            'third_party/terraform/utils/compute_operation.go.erb'],
@@ -140,11 +165,7 @@ module Provider
                           ['converters/google/resources/metadata.go',
                            'third_party/terraform/utils/metadata.go.erb'],
                           ['converters/google/resources/compute_instance.go',
-                           'third_party/validator/compute_instance.go.erb'],
-                          ['test/cli_test.go',
-                           'third_party/validator/tests/manifest/cli_test.go.erb'],
-                          ['test/read_test.go',
-                           'third_party/validator/tests/manifest/read_test.go.erb']
+                           'third_party/validator/compute_instance.go.erb']
                         ],
                         file_template)
     end
@@ -158,6 +179,11 @@ module Provider
         retrieve_full_list_of_test_files_with_location
       )
 
+      copy_file_list(
+        output_folder,
+        retrieve_test_source_code_with_location('[^b]')
+      )
+
       copy_file_list(output_folder, [
                        ['converters/google/resources/constants.go',
                         'third_party/validator/constants.go'],
@@ -165,6 +191,10 @@ module Provider
                         'third_party/validator/cai.go'],
                        ['converters/google/resources/cai_test.go',
                         'third_party/validator/cai_test.go'],
+                       ['converters/google/resources/getconfig.go',
+                        'third_party/validator/getconfig.go'],
+                       ['converters/google/resources/getconfig_test.go',
+                        'third_party/validator/getconfig_test.go'],
                        ['converters/google/resources/json_map.go',
                         'third_party/validator/json_map.go'],
                        ['converters/google/resources/project.go',
@@ -221,7 +251,6 @@ module Provider
                         'third_party/terraform/utils/common_operation.go'],
                        ['converters/google/resources/convert.go',
                         'third_party/terraform/utils/convert.go'],
-
                        ['converters/google/resources/service_scope.go',
                         'third_party/terraform/utils/service_scope.go'],
                        ['converters/google/resources/kms_utils.go',
@@ -252,6 +281,8 @@ module Provider
                         'third_party/terraform/utils/iam_folder.go'],
                        ['converters/google/resources/iam_project.go',
                         'third_party/terraform/utils/iam_project.go'],
+                       ['converters/google/resources/privateca_utils.go',
+                        'third_party/terraform/utils/privateca_utils.go'],
                        ['converters/google/resources/utils.go',
                         'third_party/terraform/utils/utils.go'],
                        ['converters/google/resources/iam_bigquery_dataset.go',
@@ -260,14 +291,55 @@ module Provider
                         '../tpgtools/handwritten/dcl_logger.go'],
                        ['converters/google/resources/bigquery_dataset_iam.go',
                         'third_party/validator/bigquery_dataset_iam.go'],
+                       ['converters/google/resources/compute_security_policy.go',
+                        'third_party/validator/compute_security_policy.go'],
                        ['converters/google/resources/kms_key_ring_iam.go',
                         'third_party/validator/kms_key_ring_iam.go'],
                        ['converters/google/resources/kms_crypto_key_iam.go',
-                        'third_party/validator/kms_crypto_key_iam.go']
+                        'third_party/validator/kms_crypto_key_iam.go'],
+                       ['converters/google/resources/project_iam_custom_role.go',
+                        'third_party/validator/project_iam_custom_role.go'],
+                       ['converters/google/resources/organization_iam_custom_role.go',
+                        'third_party/validator/organization_iam_custom_role.go'],
+                       ['converters/google/resources/iam_pubsub_subscription.go',
+                        'third_party/terraform/utils/iam_pubsub_subscription.go'],
+                       ['converters/google/resources/pubsub_subscription_iam.go',
+                        'third_party/validator/pubsub_subscription_iam.go'],
+                       ['converters/google/resources/iam_spanner_database.go',
+                        'third_party/terraform/utils/iam_spanner_database.go'],
+                       ['converters/google/resources/spanner_database_iam.go',
+                        'third_party/validator/spanner_database_iam.go'],
+                       ['converters/google/resources/iam_spanner_instance.go',
+                        'third_party/terraform/utils/iam_spanner_instance.go'],
+                       ['converters/google/resources/spanner_instance_iam.go',
+                        'third_party/validator/spanner_instance_iam.go'],
+                       ['converters/google/resources/storage_bucket_iam.go',
+                        'third_party/validator/storage_bucket_iam.go']
                      ])
     end
 
-    def generate_resource_tests(pwd, data) end
+    def generate_resource_tests(pwd, data)
+      product_whitelist = [
+        'cloudrun'
+      ]
+
+      return unless product_whitelist.include?(data.product.name.downcase)
+      return if data.object.examples
+                    .reject(&:skip_test)
+                    .reject do |e|
+                  @api.version_obj_or_closest(data.version) \
+                < @api.version_obj_or_closest(e.min_version)
+                end
+                    .empty?
+
+      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+      data.generate(
+        pwd,
+        'templates/validator/examples/base_configs/test_file.go.erb',
+        "test/resource_#{full_resource_name(data)}_generated_test.go",
+        self
+      )
+    end
 
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself

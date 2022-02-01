@@ -252,13 +252,13 @@ objects:
     parent_resource_attribute: 'service'
     base_url: v1/projects/{{project}}/locations/{{location}}/services/{{service}}
     import_format: ["projects/{{project}}/locations/{{location}}/services/{{service}}", "{{service}}"]
-    exclude_validator: true
   parameters:
   - !ruby/object:Api::Type::String
     name: location
     description: The location of the cloud run instance. eg us-central1
     url_param_only: true
     required: true
+    input: true
   properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -662,6 +662,13 @@ objects:
                       commas.
                       The alias definitions must be set on the run.googleapis.com/secrets
                       annotation.
+                  - !ruby/object:Api::Type::Integer
+                    name: defaultMode
+                    description: |-
+                      Mode bits to use on created files by default. Must be a value between 0000
+                      and 0777. Defaults to 0644. Directories within the path are not affected by
+                      this setting. This might be in conflict with other options that affect the
+                      file mode, like fsGroup, and the result can be other mode bits set.
                   - !ruby/object:Api::Type::Array
                     name: items
                     description: |-
@@ -686,6 +693,13 @@ objects:
                             May not be an absolute path.
                             May not contain the path element '..'.
                             May not start with the string '..'.
+                        - !ruby/object:Api::Type::Integer
+                          name: mode
+                          description: |-
+                            Mode bits to use on this file, must be a value between 0000 and 0777. If
+                            not specified, the volume defaultMode will be used. This might be in
+                            conflict with other options that affect the file mode, like fsGroup, and
+                            the result can be other mode bits set.
         - !ruby/object:Api::Type::Enum
           name: servingState
           deprecation_message: "Not supported by Cloud Run fully managed"

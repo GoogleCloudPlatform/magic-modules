@@ -18,10 +18,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: '{{name}}'
     exclude_import: true
     skip_sweeper: true
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
-      delete_minutes: 10
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "vertex_ai_dataset"
@@ -37,10 +33,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Featurestore: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: false
     skip_sweeper: true
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
-      delete_minutes: 10
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "vertex_ai_featurestore"
@@ -65,10 +57,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["{{%featurestore}}/entityTypes/{{name}}"]
     autogen_async: false
     skip_sweeper: true
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
-      delete_minutes: 10
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "vertex_ai_featurestore_entitytype"
@@ -84,6 +72,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pre_create: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
       pre_update: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
       pre_delete: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
+  MetadataStore: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: false
+    id_format: '{{name}}'
+    skip_sweeper: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_metadata_store"
+        skip_test: true
+        primary_resource_id: "store"
+        vars:
+          name: "test-store"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

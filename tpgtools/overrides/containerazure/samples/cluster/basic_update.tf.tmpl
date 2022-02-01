@@ -1,0 +1,79 @@
+resource "google_container_azure_cluster" "primary" {
+  authorization {
+    admin_users {
+      username = "mmv2@google.com"
+    }
+  }
+
+  azure_region = "westus2"
+  client       = "projects/{{project_number}}/locations/us-west1/azureClients/${google_container_azure_client.basic.name}"
+
+  control_plane {
+    ssh_config {
+      authorized_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC8yaayO6lnb2v+SedxUMa2c8vtIEzCzBjM3EJJsv8Vm9zUDWR7dXWKoNGARUb2mNGXASvI6mFIDXTIlkQ0poDEPpMaXR0g2cb5xT8jAAJq7fqXL3+0rcJhY/uigQ+MrT6s+ub0BFVbsmGHNrMQttXX9gtmwkeAEvj3mra9e5pkNf90qlKnZz6U0SVArxVsLx07vHPHDIYrl0OPG4zUREF52igbBPiNrHJFDQJT/4YlDMJmo/QT/A1D6n9ocemvZSzhRx15/Arjowhr+VVKSbaxzPtEfY0oIg2SrqJnnr/l3Du5qIefwh5VmCZe4xopPUaDDoOIEFriZ88sB+3zz8ib8sk8zJJQCgeP78tQvXCgS+4e5W3TUg9mxjB6KjXTyHIVhDZqhqde0OI3Fy1UuVzRUwnBaLjBnAwP5EoFQGRmDYk/rEYe7HTmovLeEBUDQocBQKT4Ripm/xJkkWY7B07K/tfo56dGUCkvyIVXKBInCh+dLK7gZapnd4UWkY0xBYcwo1geMLRq58iFTLA2j/JmpmHXp7m0l7jJii7d44uD3tTIFYThn7NlOnvhLim/YcBK07GMGIN7XwrrKZKmxXaspw6KBWVhzuw1UPxctxshYEaMLfFg/bwOw8HvMPr9VtrElpSB7oiOh91PDIPdPBgHCi7N2QgQ5l/ZDBHieSpNrQ== thomasrodgers"
+    }
+
+    subnet_id = "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-byo/providers/Microsoft.Network/virtualNetworks/{{byo_multicloud_prefix}}-dev-vnet/subnets/default"
+    version   = "1.21.5-gke.2800"
+
+    database_encryption {
+      key_id = "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-cluster/providers/Microsoft.KeyVault/vaults/{{byo_multicloud_prefix}}-dev-keyvault/keys/{{byo_multicloud_prefix}}-dev-key"
+    }
+
+    main_volume {
+      size_gib = 8
+    }
+
+    proxy_config {
+      resource_group_id = "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-cluster"
+      secret_id         = "https://{{byo_multicloud_prefix}}-dev-keyvault.vault.azure.net/secrets/{{byo_multicloud_prefix}}-dev-secret/{{azure_config_secret}}"
+    }
+
+    replica_placements {
+      azure_availability_zone = "1"
+      subnet_id               = "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-byo/providers/Microsoft.Network/virtualNetworks/{{byo_multicloud_prefix}}-dev-vnet/subnets/default"
+    }
+
+    root_volume {
+      size_gib = 32
+    }
+
+    tags = {
+      owner = "mmv2"
+    }
+
+    vm_size = "Standard_DS2_v2"
+  }
+
+  fleet {
+    project = "{{project_number}}"
+  }
+
+  location = "us-west1"
+  name     = "{{name}}"
+
+  networking {
+    pod_address_cidr_blocks     = ["10.200.0.0/16"]
+    service_address_cidr_blocks = ["10.32.0.0/24"]
+    virtual_network_id          = "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-byo/providers/Microsoft.Network/virtualNetworks/{{byo_multicloud_prefix}}-dev-vnet"
+  }
+
+  resource_group_id = "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-cluster"
+
+  annotations = {
+    annotation-one = "value-one"
+  }
+
+  description = "An updated sample azure cluster"
+  project     = "{{project}}"
+}
+
+resource "google_container_azure_client" "basic" {
+  application_id = "{{azure_app}}"
+  location       = "us-west1"
+  name           = "{{client-name}}"
+  tenant_id      = "{{azure_tenant}}"
+  project        = "{{project}}"
+}
+
+

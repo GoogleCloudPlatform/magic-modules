@@ -16,8 +16,8 @@ legacy_name: endpoints
 overrides: !ruby/object:Overrides::ResourceOverrides
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     legacy_name: google_endpoints_service
-    id_format: 'services/{{serviceName}}'
-    import_format: ["services/{{serviceName}}"]
+    id_format: 'services/{{service_name}}'
+    import_format: ["services/{{service_name}}"]
     exclude_resource: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       parent_resource_attribute: 'service_name'
