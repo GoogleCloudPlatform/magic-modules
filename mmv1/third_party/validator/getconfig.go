@@ -36,6 +36,18 @@ func GetConfig(ctx context.Context, project string, offline bool) (*Config, erro
 		"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
 	})
 
+	cfg.Zone = multiEnvSearch([]string{
+		"GOOGLE_ZONE",
+		"GCLOUD_ZONE",
+		"CLOUDSDK_COMPUTE_ZONE",
+	})
+
+	cfg.Region = multiEnvSearch([]string{
+		"GOOGLE_REGION",
+		"GCLOUD_REGION",
+		"CLOUDSDK_COMPUTE_REGION",
+	})
+
 	// opt in extension for adding to the User-Agent header
 	if ext := os.Getenv("GOOGLE_TERRAFORM_VALIDATOR_USERAGENT_EXTENSION"); ext != "" {
 		ua := cfg.userAgent
