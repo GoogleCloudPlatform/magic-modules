@@ -73,7 +73,7 @@ var (
 	}
 )
 
-const resourceDataprocGoogleProvidedLabelPrefix = "labels.goog-dataproc-cluster"
+const resourceDataprocGoogleProvidedLabelPrefix = "labels.goog-dataproc"
 
 func resourceDataprocLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	if strings.HasPrefix(k, resourceDataprocGoogleProvidedLabelPrefix) && new == "" {
