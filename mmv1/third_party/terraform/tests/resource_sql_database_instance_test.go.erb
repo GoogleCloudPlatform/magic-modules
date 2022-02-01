@@ -698,7 +698,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(t *testi
 	addressName := "tf-test-" + randString(t, 10)
 	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private-allocated-ip-range")
 	addressName_update := "tf-test-" + randString(t, 10) + "update"
-	networkName_update := BootstrapSharedTestNetwork(t, "sql-instance-private-update")
+	networkName_update := BootstrapSharedTestNetwork(t, "sql-instance-private-allocated-ip-range-update")
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
