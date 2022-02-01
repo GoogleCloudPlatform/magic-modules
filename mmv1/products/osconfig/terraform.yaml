@@ -14,6 +14,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   PatchDeployment: !ruby/object:Overrides::Terraform::ResourceOverride
+    ref_output: true
     id_format: "{{name}}"
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -73,6 +74,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: templates/terraform/decoders/os_config_patch_deployment.go.erb
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
   GuestPolicies: !ruby/object:Overrides::Terraform::ResourceOverride
+    ref_output: true
+    id_format: "{{name}}"
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "os_config_guest_policies_basic"

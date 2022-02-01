@@ -51,6 +51,9 @@ module Api
       # [Optional] If set to true, the object has a `self_link` field. This is
       # typical of older GCP APIs.
       attr_reader :has_self_link
+      # [Optional] If set to true, the object references another output field 
+      # for its id format.
+      attr_reader :ref_output
 
       # [Optional] The validator "relative URI" of a resource, relative to the product
       # base URL. Specific to defining the resource as a CAI asset.
@@ -171,6 +174,7 @@ module Api
       check :min_version, type: String
 
       check :has_self_link, type: :boolean, default: false
+      check :ref_output, type: :boolean, default: false
 
       set_variables(@parameters, :__resource)
       set_variables(@properties, :__resource)

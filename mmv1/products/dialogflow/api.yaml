@@ -148,7 +148,7 @@ objects:
         output: true
         description: |
           The unique identifier of this intent. 
-          Format: projects/<Project ID>/agent/intents/<Intent ID>.
+          Format: projects/{{project_id}}/agent/intents/{{intent_id}}.
       - !ruby/object:Api::Type::String
         name: 'displayName'
         required: true
@@ -186,7 +186,7 @@ objects:
         item_type: Api::Type::String
         description: |
          The list of context names required for this intent to be triggered.
-         Format: projects/<Project ID>/agent/sessions/-/contexts/<Context ID>.
+         Format: projects/{{project_id}}/agent/sessions/-/contexts/{{context_id}}.
       - !ruby/object:Api::Type::Array
         name: 'events'
         item_type: Api::Type::String
@@ -227,13 +227,13 @@ objects:
         description: |
           The unique identifier of the root intent in the chain of followup intents. It identifies the correct followup
           intents chain for this intent.
-          Format: projects/<Project ID>/agent/intents/<Intent ID>.
+          Format: projects/{{project_id}}/agent/intents/{{intent_id}}.
         output: true
       - !ruby/object:Api::Type::String
         name: 'parentFollowupIntentName'
         description: |
          The unique identifier of the parent intent in the chain of followup intents.
-         Format: projects/<Project ID>/agent/intents/<Intent ID>.
+         Format: projects/{{project_id}}/agent/intents/{{intent_id}}.
         input: true
       - !ruby/object:Api::Type::Array
         name: 'followupIntentInfo'
@@ -247,12 +247,12 @@ objects:
             name: 'followupIntentName'
             description: |
               The unique identifier of the followup intent.
-              Format: projects/<Project ID>/agent/intents/<Intent ID>.
+              Format: projects/{{project_id}}/agent/intents/{{intent_id}}.
           - !ruby/object:Api::Type::String
             name: 'parentFollowupIntentName'
             description: |
               The unique identifier of the followup intent's parent.
-              Format: projects/<Project ID>/agent/intents/<Intent ID>.
+              Format: projects/{{project_id}}/agent/intents/{{intent_id}}.
   - !ruby/object:Api::Resource
     name: 'EntityType'
     base_url: "projects/{{project}}/agent/entityTypes/"
@@ -271,7 +271,7 @@ objects:
         output: true
         description: |
           The unique identifier of the entity type. 
-          Format: projects/<Project ID>/agent/entityTypes/<Entity type ID>.
+          Format: projects/{{project_id}}/agent/entityTypes/{{entity_type_id}}
       - !ruby/object:Api::Type::String
         name: 'displayName'
         required: true
@@ -343,7 +343,7 @@ objects:
         output: true
         description: |
           The unique identifier of the fulfillment. 
-          Format: projects/<Project ID>/agent/fulfillment - projects/<Project ID>/locations/<Location ID>/agent/fulfillment
+          Format: projects/{{project_id}}/agent/fulfillment - projects/{{project_id}}/locations/{{location}}/agent/fulfillment
       - !ruby/object:Api::Type::String
         name: 'displayName'
         required: true

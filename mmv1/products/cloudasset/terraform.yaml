@@ -14,6 +14,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   ProjectFeed: !ruby/object:Overrides::Terraform::ResourceOverride
+    ref_output: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_create: templates/terraform/pre_create/cloud_asset_feed.go.erb
       post_create: templates/terraform/post_create/cloud_asset_feed.go.erb
@@ -28,6 +29,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project: :PROJECT_NAME
   FolderFeed: !ruby/object:Overrides::Terraform::ResourceOverride
+    ref_output: true
     supports_indirect_user_project_override: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_create: templates/terraform/pre_create/cloud_asset_feed.go.erb
@@ -45,6 +47,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project: :PROJECT_NAME
           org_id: :ORG_ID
   OrganizationFeed: !ruby/object:Overrides::Terraform::ResourceOverride
+    ref_output: true
     supports_indirect_user_project_override: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_create: templates/terraform/pre_create/cloud_asset_feed.go.erb

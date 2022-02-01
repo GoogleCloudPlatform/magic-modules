@@ -527,7 +527,7 @@ objects:
         url_param_only: true
         input: true
         description: |
-          Taxonomy location region.
+          The regional location of this taxonomy resource.
     properties:
       - !ruby/object:Api::Type::String
         name: "name"

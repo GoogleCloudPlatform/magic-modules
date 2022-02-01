@@ -28,6 +28,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Agent'
     base_url: "projects/{{project}}/locations/{{location}}/agents"
+    self_link: "{{name}}"
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -42,7 +43,7 @@ objects:
         name: 'name'
         output: true
         description: |
-          The unique identifier of the agent.
+          The unique identifier of the agent. Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}
       - !ruby/object:Api::Type::String
         name: 'location'
         description: |
@@ -98,11 +99,11 @@ objects:
         name: 'startFlow'
         output: true
         description: |
-         Name of the start flow in this agent. A start flow will be automatically created when the agent is created, and can only be deleted by deleting the agent. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
+         Name of the start flow in this agent. A start flow will be automatically created when the agent is created, and can only be deleted by deleting the agent. Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/flows/{{flow_id}}
       - !ruby/object:Api::Type::String
         name: 'securitySettings'
         description: |
-         Name of the SecuritySettings reference for the agent. Format: projects/<Project ID>/locations/<Location ID>/securitySettings/<Security Settings ID>.
+         Name of the SecuritySettings reference for the agent. Format: projects/{{project_id}}/locations/{{location}}/securitySettings/{{security_settings_id}}.
       - !ruby/object:Api::Type::Boolean
         name: 'enableStackdriverLogging'
         description: |
@@ -130,7 +131,7 @@ objects:
         input: true
         description: |
           The agent to create an intent for.
-          Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
+          Format: projects/{{project_id}}/locations/{{location}}/agent/{{agent_id}}.
       - !ruby/object:Api::Type::String
         name: 'languageCode'
         description: |
@@ -144,7 +145,7 @@ objects:
         output: true
         description: |
           The unique identifier of the intent.  
-          Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/intents/<Intent ID>.
+          Format: projects/{{project_id}}/locations/{{location}}/agent/{{agent_id}}/intents/{{intent_id}}.
       - !ruby/object:Api::Type::String
         name: 'displayName'
         required: true
@@ -203,7 +204,7 @@ objects:
               required: true
               description: |
                 The entity type of the parameter. 
-                Format: projects/-/locations/-/agents/-/entityTypes/<System Entity Type ID> for system entity types (for example, projects/-/locations/-/agents/-/entityTypes/sys.date), or projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/entityTypes/<Entity Type ID> for developer entity types.
+                Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/entityTypes/{{system_entity_type_id}} for system entity types (for example, projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/entityTypes/sys.date) or projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/entityTypes/{{entity_type_id}} for developer entity types.
             - !ruby/object:Api::Type::Boolean
               name: 'isList'
               description: |
@@ -253,7 +254,7 @@ objects:
         input: true
         description: |
           The agent to create a flow for. 
-          Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
+          Format: projects/{{project_id}}/locations/{{location}}/agent/{{agent_id}}.
       - !ruby/object:Api::Type::String
         name: 'languageCode'
         description: |
@@ -270,7 +271,7 @@ objects:
         output: true
         description: |
           The unique identifier of the flow. 
-          Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
+          Format: projects/{{project_id}}/locations/{{location}}/agent/{{agent_id}}/flows/{{flow_id}}.
       - !ruby/object:Api::Type::String
         name: 'displayName'
         required: true
@@ -302,7 +303,7 @@ objects:
               name: 'intent'
               description: |
                 The unique identifier of an Intent. 
-                Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/intents/<Intent ID>. Indicates that the transition can only happen when the given intent is matched. At least one of intent or condition must be specified. When both intent and condition are specified, the transition can only happen when both are fulfilled.
+                Format: projects/{{project_id}}/locations/{{location}}/agent/{{agent_id}}/intents/{{intent_id}}. Indicates that the transition can only happen when the given intent is matched. At least one of intent or condition must be specified. When both intent and condition are specified, the transition can only happen when both are fulfilled.
             - !ruby/object:Api::Type::String
               name: 'condition'
               description: |
@@ -337,7 +338,7 @@ objects:
                 - !ruby/object:Api::Type::String
                   name: 'webhook'
                   description: |
-                    The webhook to call. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/webhooks/<Webhook ID>.
+                    The webhook to call. Format: projects/{{project_id}}/locations/{{location}}/agent/{{agent_id}}/webhooks/{{webhook_id}}.
                 - !ruby/object:Api::Type::Boolean
                   name: 'returnPartialResponses'
                   description: |
@@ -350,12 +351,12 @@ objects:
               name: 'targetPage'
               description: |
                 The target page to transition to. 
-                Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
+                Format: projects/{{project_id}}/locations/{{location}}/agent/{{agent_id}}/flows/{{flow_id}}/pages/{{page_id}}.
             - !ruby/object:Api::Type::String
               name: 'targetFlow'
               description: |
                 The target flow to transition to. 
-                Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
+                Format: projects/{{project_id}}/locations/{{location}}/agent/{{agent_id}}/flows/{{flow_id}}.
       - !ruby/object:Api::Type::Array
         name: 'eventHandlers'
         description: |
@@ -403,7 +404,7 @@ objects:
                 - !ruby/object:Api::Type::String
                   name: 'webhook'
                   description: |
-                    The webhook to call. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/webhooks/<Webhook ID>.
+                    The webhook to call. Format: projects/{{project_id}}/locations/{{location}}/agent/{{agent_id}}/webhooks/{{webhook_id}}.
                 - !ruby/object:Api::Type::Boolean
                   name: 'returnPartialResponses'
                   description: |
@@ -416,19 +417,19 @@ objects:
               name: 'targetPage'
               description: |
                 The target page to transition to. 
-                Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
+                Format: projects/{{project_id}}/locations/{{location}}/agent/{{agent_id}}/flows/{{flow_id}}/pages/{{page_id}}.
             - !ruby/object:Api::Type::String
               name: 'targetFlow'
               description: |
                 The target flow to transition to. 
-                Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
+                Format: projects/{{project_id}}/locations/{{location}}/agent/{{agent_id}}/flows/{{flow_id}}.
       - !ruby/object:Api::Type::Array
         name: 'transitionRouteGroups'
         description: |
           A flow's transition route group serve two purposes:
           They are responsible for matching the user's first utterances in the flow.
           They are inherited by every page's [transition route groups][Page.transition_route_groups]. Transition route groups defined in the page have higher priority than those defined in the flow.
-          Format:projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/transitionRouteGroups/<TransitionRouteGroup ID>.
+          Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/flows/{{flow_id}}/transitionRouteGroups/{{transition_route_group_id}}.
         item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: 'nluSettings'
@@ -499,13 +500,13 @@ objects:
         input: true
         description: |
           The Flow to create an Version for. 
-          Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
+          Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/flows/{{flow_id}}
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
         output: true
         description: |
-          Format: projects//locations//agents//flows//versions/. Version ID is a self-increasing number generated by Dialogflow upon version creation.
+          Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/flows/{{flow_id}}/versions/{{version}}. Version is a self-increasing number generated by Dialogflow upon version creation.
       - !ruby/object:Api::Type::String
         name: 'displayName'
         required: true
@@ -579,7 +580,7 @@ objects:
         input: true
         description: |
           The flow to create a page for. 
-          Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
+          Format: projects/{{project_id}}/locations/{{location}}/agent/{{agent_id}}/flows/{{flow_id}}.
       - !ruby/object:Api::Type::String
         name: 'languageCode'
         description: |
@@ -603,7 +604,7 @@ objects:
         output: true
         description: |
           The unique identifier of the page. 
-          Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
+          Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/flows/{{flow_id}}/pages/{{page_id}}.
       - !ruby/object:Api::Type::String
         name: 'displayName'
         required: true
@@ -638,7 +639,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'webhook'
             description: |
-              The webhook to call. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/webhooks/<Webhook ID>.
+              The webhook to call. Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/webhooks/{{webhook_id}}.
           - !ruby/object:Api::Type::Boolean
             name: 'returnPartialResponses'
             description: |
@@ -671,7 +672,7 @@ objects:
                   name: 'entityType'
                   description: |
                     The entity type of the parameter. 
-                    Format: projects/-/locations/-/agents/-/entityTypes/<System Entity Type ID> for system entity types (for example, projects/-/locations/-/agents/-/entityTypes/sys.date), or projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/entityTypes/<Entity Type ID> for developer entity types.
+                    Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/entityTypes/{{system_entity_type_id}} for system entity types (for example, projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/entityTypes/sys.date) or projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/entityTypes/{{entity_type_id}} for developer entity types.
                 - !ruby/object:Api::Type::Boolean
                   name: 'isList'
                   description: |
@@ -710,7 +711,7 @@ objects:
                         - !ruby/object:Api::Type::String
                           name: 'webhook'
                           description: |
-                            The webhook to call. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/webhooks/<Webhook ID>.
+                            The webhook to call. Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/webhooks/{{webhook_id}}.
                         - !ruby/object:Api::Type::Boolean
                           name: 'returnPartialResponses'
                           description: |
@@ -730,7 +731,7 @@ objects:
           Ordered list of TransitionRouteGroups associated with the page. Transition route groups must be unique within a page.
           If multiple transition routes within a page scope refer to the same intent, then the precedence order is: page's transition route -> page's transition route group -> flow's transition routes.
           If multiple transition route groups within a page contain the same intent, then the first group in the ordered list takes precedence.
-          Format:projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/transitionRouteGroups/<TransitionRouteGroup ID>.
+          Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/flows/{{flow_id}}/transitionRouteGroups/{{transition_route_group_id}}.
         item_type: Api::Type::String      
       - !ruby/object:Api::Type::Array
         name: 'transitionRoutes'
@@ -754,7 +755,8 @@ objects:
               name: 'intent'
               description: |
                 The unique identifier of an Intent. 
-                Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/intents/<Intent ID>. Indicates that the transition can only happen when the given intent is matched. At least one of intent or condition must be specified. When both intent and condition are specified, the transition can only happen when both are fulfilled.
+                Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/intents/{{intent_id}}.
+                 Indicates that the transition can only happen when the given intent is matched. At least one of intent or condition must be specified. When both intent and condition are specified, the transition can only happen when both are fulfilled.
             - !ruby/object:Api::Type::String
               name: 'condition'
               description: |
@@ -789,7 +791,7 @@ objects:
                 - !ruby/object:Api::Type::String
                   name: 'webhook'
                   description: |
-                    The webhook to call. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/webhooks/<Webhook ID>.
+                    The webhook to call. Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/webhooks/{{webhook_id}}.
                 - !ruby/object:Api::Type::Boolean
                   name: 'returnPartialResponses'
                   description: |
@@ -802,12 +804,12 @@ objects:
               name: 'targetPage'
               description: |
                 The target page to transition to. 
-                Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
+                Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/flows/{{flow_id}}/pages/{{page_id}}.
             - !ruby/object:Api::Type::String
               name: 'targetFlow'
               description: |
                 The target flow to transition to. 
-                Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
+                Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/flows/{{flow_id}}.
       - !ruby/object:Api::Type::Array
         name: 'eventHandlers'
         description: |
@@ -852,7 +854,7 @@ objects:
                 - !ruby/object:Api::Type::String
                   name: 'webhook'
                   description: |
-                    The webhook to call. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/webhooks/<Webhook ID>.
+                    The webhook to call. Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/webhooks/{{webhook_id}}.
                 - !ruby/object:Api::Type::Boolean
                   name: 'returnPartialResponses'
                   description: |
@@ -865,12 +867,12 @@ objects:
               name: 'targetPage'
               description: |
                 The target page to transition to. 
-                Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
+                Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/flows/{{flow_id}}/pages/{{page_id}}.
             - !ruby/object:Api::Type::String
               name: 'targetFlow'
               description: |
                 The target flow to transition to. 
-                Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
+                Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/flows/{{flow_id}}.
   - !ruby/object:Api::Resource
     name: 'EntityType'
     base_url: "{{parent}}/entityTypes"
@@ -891,7 +893,7 @@ objects:
         input: true
         description: |
           The agent to create a entity type for. 
-          Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
+          Format: projects/{{project_id}}/locations/{{location}}/agent/{{agent_id}}.
       - !ruby/object:Api::Type::String
         name: 'languageCode'
         description: |
@@ -908,7 +910,7 @@ objects:
         output: true
         description: |
           The unique identifier of the entity type.
-          Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/entityTypes/<Entity Type ID>.
+          Format: projects/{{project_id}}/locations/{{location}}/agent/{{agent_id}}/entityTypes/{{entity_type_id}}
       - !ruby/object:Api::Type::String
         name: 'displayName'
         required: true
@@ -1014,7 +1016,7 @@ objects:
         input: true
         description: |
           The Agent to create an Environment for. 
-          Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
+          Format: projects/{{project_id}}/locations/{{location}}/agent/{{agent_id}}
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -1041,7 +1043,7 @@ objects:
             name: 'version'
             required: true
             description: |
-              Format: projects/{{project}}/locations/{{location}}/agents/{{agent}}/flows/{{flow}}/versions/{{version}}.
+              Format: projects/{{project_id}}/locations/{{location}}/agents/{{agent_id}}/flows/{{flow_id}}/versions/{{version}}.
       - !ruby/object:Api::Type::Time
         name: 'updateTime'
         output: true

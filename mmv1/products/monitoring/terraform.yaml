@@ -13,6 +13,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   AlertPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
+    ref_output: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: alertPolicy/{{project}}
@@ -30,6 +31,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_create: templates/terraform/post_create/set_computed_name.erb
 
   Group: !ruby/object:Overrides::Terraform::ResourceOverride
+    ref_output: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: stackdriver/groups/{{project}}
@@ -54,6 +56,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_create: templates/terraform/post_create/set_computed_name.erb
 
   NotificationChannel: !ruby/object:Overrides::Terraform::ResourceOverride
+    ref_output: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: stackdriver/notifications/{{project}}
@@ -106,6 +109,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           the sensitive_labels block, but cannot be configured in both places.
 
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
+    ref_output: true
     legacy_name: 'google_monitoring_custom_service'
     id_format: "{{name}}"
     import_format: ["{{name}}"]
@@ -129,6 +133,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/monitoring_service.go.erb
 
   Slo: !ruby/object:Overrides::Terraform::ResourceOverride
+    ref_output: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: monitoring/project/{{project}}/service/{{service}}
@@ -241,6 +246,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/monitoring_slo.go.erb
 
   UptimeCheckConfig: !ruby/object:Overrides::Terraform::ResourceOverride
+    ref_output: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     error_retry_predicates: ["isMonitoringConcurrentEditError"]

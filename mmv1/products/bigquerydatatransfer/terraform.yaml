@@ -14,6 +14,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Config: !ruby/object:Overrides::Terraform::ResourceOverride
+    ref_output: true
     import_format: ["{{name}}"]
     id_format: "{{name}}"
     error_retry_predicates: ["iamMemberMissing"]

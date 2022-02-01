@@ -157,7 +157,11 @@ The following arguments are supported:
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
+<% if object.ref_output -%>
+* `id` - an identifier for the resource with format `<%= id_format(object) %>`, see `<%= id_format(object) %>` below for details
+<% else %>
 * `id` - an identifier for the resource with format `<%= id_format(object) %>`
+<% end -%>
 <% object.root_properties.select(&:output).each do |prop| -%>
 <%= lines(build_property_documentation(prop, pwd)) -%>
 <% end -%>
