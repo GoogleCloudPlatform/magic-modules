@@ -1078,6 +1078,53 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		}
 
 <% unless version == 'ga' -%>
+		if d.HasChange(prefix + "node_config.0.tags") {
+			req := &container.UpdateNodePoolRequest{
+				NodePoolId: name,
+			}
+			if v, ok := d.GetOk(prefix + "node_config.0.tags"); ok {
+				tagsList := v.([]interface{})
+				tags := []string{}
+				for _, v := range tagsList {
+					if v != nil {
+						tags = append(tags, v.(string))
+					}
+				}
+				ntags := &container.NetworkTags{
+					Tags: tags,
+				}
+				req.Tags = ntags
+			}	
+			if req.Tags.Tags == nil {
+				req.Tags.ForceSendFields = []string{"Tags"}
+			}
+	
+			updateF := func() error {
+				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
+				if config.UserProjectOverride {
+					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
+				}
+				op, err := clusterNodePoolsUpdateCall.Do()
+				if err != nil {
+					return err
+				}
+
+				// Wait until it's updated
+				return containerOperationWait(config, op,
+					nodePoolInfo.project,
+					nodePoolInfo.location,
+					"updating GKE node pool tags", userAgent,
+					timeout)
+			}
+
+			// Call update serially.
+			if err := lockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] Updated tags for node pool %s", name)
+		}
+
 		if d.HasChange(prefix + "node_config.0.kubelet_config") {
 			req := &container.UpdateNodePoolRequest{
 				NodePoolId: name,
