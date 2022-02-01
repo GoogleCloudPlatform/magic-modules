@@ -103,8 +103,8 @@ func GetCloudFunctionsCloudFunctionApiObject(d TerraformResourceData, config *Co
 	httpsTriggerProp, err := expandCloudFunctionsCloudFunctionHttpsTriggerUrl(d.Get("https_trigger_url"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("https_trigger"); !isEmptyValue(reflect.ValueOf(httpsTriggerProp)) && (ok || !reflect.DeepEqual(v, httpsTriggerProp)) {
-		obj["httpsTrigger"] = httpsTriggerProp
+	} else if v, ok := d.GetOkExists("https_trigger_url"); !isEmptyValue(reflect.ValueOf(httpsTriggerProp)) && (ok || !reflect.DeepEqual(v, httpsTriggerProp)) {
+		obj["httpsTriggerUrl"] = httpsTriggerProp
 	}
 	eventTriggerProp, err := expandCloudFunctionsCloudFunctionEventTrigger(d.Get("event_trigger"), d, config)
 	if err != nil {
