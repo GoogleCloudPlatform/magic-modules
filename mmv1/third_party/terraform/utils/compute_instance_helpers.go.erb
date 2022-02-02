@@ -124,16 +124,16 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		scheduling.MinNodeCpus = int64(v.(int))
 	}
 <% unless version == 'ga' -%>
-        if v, ok := original["provisioning_model"]; ok {
-              scheduling.ProvisioningModel = v.(string)
-              scheduling.ForceSendFields = append(scheduling.ForceSendFields, "ProvisioningModel")
-              // SPOT VM need preemptible to be set as ture as well.
-              scheduling.Preemptible = true
-              scheduling.ForceSendFields = append(scheduling.ForceSendFields, "Preemptible")
-              scheduling.AutomaticRestart =  googleapi.Bool(false)
-              scheduling.ForceSendFields = append(scheduling.ForceSendFields, "AutomaticRestart")
+	if v, ok := original["provisioning_model"]; ok {
+		scheduling.ProvisioningModel = v.(string)
+		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "ProvisioningModel")
+		// SPOT VM need preemptible to be set as ture as well.
+		scheduling.Preemptible = true
+		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "Preemptible")
+		scheduling.AutomaticRestart =  googleapi.Bool(false)
+		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "AutomaticRestart")
 
-        }
+	}
 <% end -%>
 	return scheduling, nil
 }
@@ -142,9 +142,9 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	schedulingMap := map[string]interface{}{
 		"on_host_maintenance": resp.OnHostMaintenance,
 		"preemptible":         resp.Preemptible,
-                "min_node_cpus":       resp.MinNodeCpus,
+		"min_node_cpus":       resp.MinNodeCpus,
 <% unless version == 'ga' -%>
-                "provisioning_model":  resp.ProvisioningModel,
+		"provisioning_model":  resp.ProvisioningModel,
 <% end -%>
 	}
 

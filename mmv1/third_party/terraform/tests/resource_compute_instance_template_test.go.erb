@@ -1097,8 +1097,8 @@ func TestAccComputeInstanceTemplate_spot(t *testing.T) {
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeInstanceTemplateAutomaticRestart(&instanceTemplate, false),
-                                        testAccCheckComputeInstanceTemplatePreemptible(&instanceTemplate, true),
-                                        testAccCheckComputeInstanceTemplateProvisioningModel(&instanceTemplate, "SPOT"),
+					testAccCheckComputeInstanceTemplatePreemptible(&instanceTemplate, true),
+					testAccCheckComputeInstanceTemplateProvisioningModel(&instanceTemplate, "SPOT"),
 				),
 			},
 			{

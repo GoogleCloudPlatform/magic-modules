@@ -51,7 +51,7 @@ var (
 		"scheduling.0.node_affinities",
 		"scheduling.0.min_node_cpus",
 <% unless version == 'ga' -%>
-                "scheduling.0.provisioning_model",
+		"scheduling.0.provisioning_model",
 <% end -%>
 	}
 
@@ -631,7 +631,7 @@ func resourceComputeInstance() *schema.Resource {
 							AtLeastOneOf: schedulingKeys,
 						},
  <% unless version == 'ga' -%>
-                                                "provisioning_model": {
+						"provisioning_model": {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ForceNew:     true,
