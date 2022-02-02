@@ -8,7 +8,7 @@ description: |-
 
 # Google Provider Versions
 
-Starting with the `1.19.0` release, there are two versions of the Google Cloud
+Starting with the `1.19.0` release, there are two versions of the Google Cloud Platform
 provider:
 
 * `google`
@@ -23,7 +23,7 @@ You may see beta features referenced as Preview since Google simplified the [pro
 
 The `google-beta` provider is distinct from the `google` provider in that it
 supports GCP products and features that are in Preview, while `google` does not.
-Fields and resources that are only present in `google-beta` are marked clearly in the provider documentation.
+Fields and resources that are only present in `google-beta` are clearly marked in the provider documentation.
 
 Pre-GA products and features might have limited support, and changes to pre-GA products and features might not be compatible with other pre-GA versions. For more information, see the [launch stage descriptions](https://cloud.google.com/products#product-launch-stages).
 
