@@ -428,6 +428,7 @@ func TestAccCloudFunctionsFunction_secretEnvVar(t *testing.T) {
 
     projectNumber := os.Getenv("GOOGLE_PROJECT_NUMBER")
     randomSecretSuffix := randString(t, 10)
+    accountId := fmt.Sprintf("tf-test-account-%s", randomSecretSuffix)
     secretName := fmt.Sprintf("tf-test-secret-%s", randomSecretSuffix)
     versionName1 := fmt.Sprintf("tf-test-version1-%s", randomSecretSuffix)
     versionName2 := fmt.Sprintf("tf-test-version2-%s", randomSecretSuffix)
@@ -443,7 +444,7 @@ func TestAccCloudFunctionsFunction_secretEnvVar(t *testing.T) {
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName1, bucketName, functionName, "1", zipFilePath),
+				Config: testAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName1, bucketName, functionName, "1", zipFilePath, accountId),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -452,7 +453,7 @@ func TestAccCloudFunctionsFunction_secretEnvVar(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"build_environment_variables"},
 			},
 			{
-				Config: testAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName2, bucketName +"-update", functionName, "2", zipFilePath),
+				Config: testAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName2, bucketName +"-update", functionName, "2", zipFilePath, accountId),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -469,6 +470,7 @@ func TestAccCloudFunctionsFunction_secretMount(t *testing.T) {
 
     projectNumber := os.Getenv("GOOGLE_PROJECT_NUMBER")
     randomSecretSuffix := randString(t, 10)
+    accountId := fmt.Sprintf("tf-test-account-%s", randomSecretSuffix)
     secretName := fmt.Sprintf("tf-test-secret-%s", randomSecretSuffix)
     versionName1 := fmt.Sprintf("tf-test-version1-%s", randomSecretSuffix)
     versionName2 := fmt.Sprintf("tf-test-version2-%s", randomSecretSuffix)
@@ -484,7 +486,7 @@ func TestAccCloudFunctionsFunction_secretMount(t *testing.T) {
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudFunctionsFunction_secretMount(projectNumber, secretName, versionName1, bucketName, functionName, "1", zipFilePath),
+				Config: testAccCloudFunctionsFunction_secretMount(projectNumber, secretName, versionName1, bucketName, functionName, "1", zipFilePath, accountId),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -493,7 +495,7 @@ func TestAccCloudFunctionsFunction_secretMount(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"build_environment_variables"},
 			},
 			{
-				Config: testAccCloudFunctionsFunction_secretMount(projectNumber, secretName, versionName2, bucketName, functionName, "2", zipFilePath),
+				Config: testAccCloudFunctionsFunction_secretMount(projectNumber, secretName, versionName2, bucketName, functionName, "2", zipFilePath, accountId),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -1003,18 +1005,12 @@ resource "google_cloudfunctions_function" "function" {
 `, projectNumber, networkName, vpcConnectorName, vpcConnectorName, vpcIp, bucketName, zipFilePath, functionName, vpcConnectorName)
 }
 
-func testAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName, bucketName, functionName, versionNumber, zipFilePath string) string {
+func testAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName, bucketName, functionName, versionNumber, zipFilePath, accountId string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
-resource "google_project_iam_member" "gcfadmin" {
-  project = data.google_project.project.project_id
-  role     = "roles/editor"
-  member   = "serviceAccount:service-%s@gcf-admin-robot.iam.gserviceaccount.com"
-}
-
 resource "google_service_account" "cloud_function_runner" {
-  account_id   = "cloud-function-service"
+  account_id   = "%s"
   display_name = "Testing Cloud Function Secrets integration"
 }
 
@@ -1071,23 +1067,16 @@ resource "google_cloudfunctions_function" "function" {
     project_id = "%s"
   }
 
-  depends_on = [google_project_iam_member.gcfadmin]
 }
-`, projectNumber, secretName, versionName, bucketName, zipFilePath, functionName, versionNumber, projectNumber)
+`, accountId, secretName, versionName, bucketName, zipFilePath, functionName, versionNumber, projectNumber)
 }
 
-func testAccCloudFunctionsFunction_secretMount(projectNumber, secretName, versionName, bucketName, functionName, versionNumber, zipFilePath string) string {
+func testAccCloudFunctionsFunction_secretMount(projectNumber, secretName, versionName, bucketName, functionName, versionNumber, zipFilePath, accountId string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
-resource "google_project_iam_member" "gcfadmin" {
-  project = data.google_project.project.project_id
-  role     = "roles/editor"
-  member   = "serviceAccount:service-%s@gcf-admin-robot.iam.gserviceaccount.com"
-}
-
 resource "google_service_account" "cloud_function_runner" {
-  account_id   = "cloud-function-service"
+  account_id   = "%s"
   display_name = "Testing Cloud Function Secrets integration"
 }
 
@@ -1147,7 +1136,6 @@ resource "google_cloudfunctions_function" "function" {
     }
   }
 
-  depends_on = [google_project_iam_member.gcfadmin]
 }
-`, projectNumber, secretName, versionName, bucketName, zipFilePath, functionName, projectNumber, versionNumber)
+`, accountId, secretName, versionName, bucketName, zipFilePath, functionName, projectNumber, versionNumber)
 }
