@@ -124,15 +124,11 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		scheduling.MinNodeCpus = int64(v.(int))
 	}
 <% unless version == 'ga' -%>
+        // To enable SPOT, preemptible need to be set as true
+        // and automatic_restart need to be false
 	if v, ok := original["provisioning_model"]; ok {
 		scheduling.ProvisioningModel = v.(string)
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "ProvisioningModel")
-		// SPOT VM need preemptible to be set as ture as well.
-		scheduling.Preemptible = true
-		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "Preemptible")
-		scheduling.AutomaticRestart =  googleapi.Bool(false)
-		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "AutomaticRestart")
-
 	}
 <% end -%>
 	return scheduling, nil
@@ -489,6 +485,12 @@ func schedulingHasChangeWithoutReboot(d *schema.ResourceData) bool {
 	if oScheduling["min_node_cpus"] != newScheduling["min_node_cpus"] {
 		return true
 	}
+
+<% unless version == 'ga' -%>
+        if oScheduling["provisioning_model"] != newScheduling["provisioning_model"] {
+	        return true
+	}
+<% end -%>
 
 	return false
 }
