@@ -345,12 +345,6 @@ func resourceDataprocCluster() *schema.Resource {
 									// It always uses whatever is specified for the worker_config
 									// "machine_type": { ... }
 									// "min_cpu_platform": { ... }
-									"is_preemptible": {
-										Type:		 schema.TypeBool,
-										Computed:	 true,
-										Description: `Specifies that this instance group contains preemptible instances.`,
-									},
-
 									"preemptibility": {
 										Type:		 schema.TypeString,
 										Optional: 	 true,

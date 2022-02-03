@@ -324,11 +324,6 @@ objects:
                     name: 'numLocalSsds'
                     description: |
                       Number of attached SSDs, from 0 to 4.
-              - !ruby/object:Api::Type::Boolean
-                name: 'isPreemptible'
-                output: true
-                description: |
-                  Specifies if this instance group contains preemptible instances.
               - !ruby/object:Api::Type::Enum
                 name: 'preemptibility'
                 description: |
@@ -396,11 +391,6 @@ objects:
                     name: 'numLocalSsds'
                     description: |
                       Number of attached SSDs, from 0 to 4.
-              - !ruby/object:Api::Type::Boolean
-                name: 'isPreemptible'
-                output: true
-                description: |
-                  Specifies if this instance group contains preemptible instances.
               - !ruby/object:Api::Type::Enum
                 name: 'preemptibility'
                 description: |
@@ -468,11 +458,6 @@ objects:
                     name: 'numLocalSsds'
                     description: |
                       Number of attached SSDs, from 0 to 4.
-              - !ruby/object:Api::Type::Boolean
-                name: 'isPreemptible'
-                output: true
-                description: |
-                  Specifies if this instance group contains preemptible instances.
               - !ruby/object:Api::Type::Enum
                 name: 'preemptibility'
                 description: |
