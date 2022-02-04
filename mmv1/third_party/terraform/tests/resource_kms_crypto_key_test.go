@@ -696,7 +696,7 @@ resource "google_kms_crypto_key" "crypto_key" {
   name     = "%s"
   key_ring = google_kms_key_ring.key_ring.self_link
   purpose = "MAC"
-  version_template = {
+  version_template {
     protection_level = "HSM"
     algorithm = "HMAC_SHA256"
   }
