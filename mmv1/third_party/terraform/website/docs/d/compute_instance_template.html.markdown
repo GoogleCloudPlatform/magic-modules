@@ -263,10 +263,7 @@ The `disk_encryption_key` block supports:
    [here](https://cloud.google.com/compute/docs/nodes/create-nodes).
    Structure [documented below](#nested_node_affinities).
    
-* `provisioning_model`(Beta) - Describe the type of preemptible VM. If this
-   is set, `preemptible` should be `true` and `auto_restart` should be 
-   `false`. One of `STANDARD_PROVISION` or `SPOT`. for more info about
-   `SPOT`, read [here](https://cloud.google.com/compute/docs/instances/spot)
+* `provisioning_model`(Beta) - Describe the type of preemptible VM. 
 
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 

@@ -446,7 +446,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
    
 * `provisioning_model`(Optional, Beta) - Describe the type of preemptible VM. If this
     is set, `preemptible` should be `true` and `auto_restart` should be
-    `false`. One of `STANDARD_PROVISION` or `SPOT`. for more info about
+    `false`. One of `STANDARD_PROVISION` or `SPOT`, for more info about
     `SPOT`, read [here](https://cloud.google.com/compute/docs/instances/spot)
     
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
