@@ -42,10 +42,6 @@ var (
 		"transfer_spec.0.aws_s3_data_source.0.aws_access_key",
 		"transfer_spec.0.aws_s3_data_source.0.role_arn",
 	}
-	awsS3AuthKeys = []string{
-		"transfer_spec.0.aws_s3_data_source.0.aws_access_key",
-		"transfer_spec.0.aws_s3_data_source.0.role_arn",
-	}
 )
 
 func resourceStorageTransferJob() *schema.Resource {
