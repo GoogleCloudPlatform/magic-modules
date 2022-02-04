@@ -124,8 +124,6 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		scheduling.MinNodeCpus = int64(v.(int))
 	}
 <% unless version == 'ga' -%>
-        // To enable SPOT, preemptible need to be set as true
-        // and automatic_restart need to be false
 	if v, ok := original["provisioning_model"]; ok {
 		scheduling.ProvisioningModel = v.(string)
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "ProvisioningModel")
