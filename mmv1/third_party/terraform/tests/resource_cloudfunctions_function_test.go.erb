@@ -1005,7 +1005,7 @@ resource "google_cloudfunctions_function" "function" {
 `, projectNumber, networkName, vpcConnectorName, vpcConnectorName, vpcIp, bucketName, zipFilePath, functionName, vpcConnectorName)
 }
 
-func testAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName, bucketName, functionName, versionNumber, zipFilePath, accountId string) string {
+func testAccCloudFunctionsFunction_secretEnvVar(secretName, versionName, bucketName, functionName, versionNumber, zipFilePath, accountId string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
@@ -1067,7 +1067,7 @@ resource "google_cloudfunctions_function" "function" {
   }
 
 }
-`, accountId, secretName, versionName, bucketName, zipFilePath, functionName, versionNumber, projectNumber)
+`, accountId, secretName, versionName, bucketName, zipFilePath, functionName, versionNumber)
 }
 
 func testAccCloudFunctionsFunction_secretMount(projectNumber, secretName, versionName, bucketName, functionName, versionNumber, zipFilePath, accountId string) string {
