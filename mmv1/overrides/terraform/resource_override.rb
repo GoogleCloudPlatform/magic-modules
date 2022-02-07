@@ -87,7 +87,11 @@ module Overrides
           # Function to transform a read error so that handleNotFound recognises
           # it as a 404. This should be added as a handwritten fn that takes in
           # an error and returns one.
-          :read_error_transform
+          :read_error_transform,
+
+
+          # If true, only generate tests and cgc samples
+          :cgc_only
         ]
       end
 
@@ -122,6 +126,7 @@ module Overrides
         check :skip_delete, type: :boolean, default: false
         check :supports_indirect_user_project_override, type: :boolean, default: false
         check :read_error_transform, type: String
+        check :cgc_only, type: :boolean, default: false
       end
 
       def apply(resource)
