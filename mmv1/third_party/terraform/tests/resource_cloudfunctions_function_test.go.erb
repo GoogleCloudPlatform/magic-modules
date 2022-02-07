@@ -426,7 +426,6 @@ func TestAccCloudFunctionsFunction_vpcConnector(t *testing.T) {
 func TestAccCloudFunctionsFunction_secretEnvVar(t *testing.T) {
 	t.Parallel()
 
-    projectNumber := os.Getenv("GOOGLE_PROJECT_NUMBER")
     randomSecretSuffix := randString(t, 10)
     accountId := fmt.Sprintf("tf-test-account-%s", randomSecretSuffix)
     secretName := fmt.Sprintf("tf-test-secret-%s", randomSecretSuffix)
