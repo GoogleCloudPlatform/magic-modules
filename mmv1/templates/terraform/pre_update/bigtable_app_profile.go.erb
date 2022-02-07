@@ -1,5 +1,5 @@
 <%- # the license inside this block applies to this file
-	# Copyright 2018 Google Inc.
+	# Copyright 2022 Google Inc.
 	# Licensed under the Apache License, Version 2.0 (the "License");
 	# you may not use this file except in compliance with the License.
 	# You may obtain a copy of the License at
@@ -12,18 +12,13 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	if v == nil || !v.(bool) {
-		return nil, nil
-	}
 
-	obj := bigtableadmin.MultiClusterRoutingUseAny{}
-
-	clusterIds := d.Get("multi_cluster_routing_cluster_ids").([]interface{})
-
-	for _, id := range clusterIds {
-		obj.ClusterIds = append(obj.ClusterIds, id.(string))
-	}
-
-	return obj, nil
+if d.HasChange("multi_cluster_routing_cluster_ids") {
+	updateMask = append(updateMask, "multiClusterRoutingUseAny")
+}
+// updateMask is a URL parameter but not present in the schema, so replaceVars
+// won't set it
+url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+if err != nil {
+	return err
 }

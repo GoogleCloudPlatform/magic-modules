@@ -13,5 +13,13 @@
 	# limitations under the License.
 -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
-	return v != nil
+	if v == nil {
+		return false
+	}
+
+	if len(v.(map[string]interface{})["clusterIds"].([]interface{})) > 0 {
+		d.Set("multi_cluster_routing_cluster_ids", v.(map[string]interface{})["clusterIds"])
+	}
+
+	return true
 }
