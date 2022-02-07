@@ -54,7 +54,7 @@ The following arguments are supported:
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
-    peering - (Computed) The name of the created peering.
+* `peering` - (Computed) The name of the VPC Network Peering connection that was created by the service producer.
 
 
 ## Import
