@@ -1221,7 +1221,7 @@ resource "google_service_networking_connection" "foobar" {
 resource "google_sql_database_instance" "instance" {
   depends_on = [google_service_networking_connection.foobar]
   name                = "%s"
-  region              = "europe-west4"
+  region              = "us-central1"
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
@@ -1240,7 +1240,7 @@ resource "google_sql_database_instance" "instance" {
 resource "google_sql_database_instance" "replica1" {
   depends_on = [google_service_networking_connection.foobar]
   name                = "%s-replica1"
-  region              = "europe-west4"
+  region              = "us-central1"
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
@@ -1289,7 +1289,7 @@ resource "google_service_networking_connection" "foobar" {
 resource "google_sql_database_instance" "instance" {
   depends_on = [google_service_networking_connection.foobar]
   name                = "%s"
-  region              = "europe-west4"
+  region              = "us-central1"
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
@@ -1308,7 +1308,7 @@ resource "google_sql_database_instance" "instance" {
 
 resource "google_sql_database_instance" "clone1" {
   name                = "%s-clone1"
-  region              = "europe-west4"
+  region              = "us-central1"
   database_version    = "MYSQL_5_7"
   deletion_protection = false
 
