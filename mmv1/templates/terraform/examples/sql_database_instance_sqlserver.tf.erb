@@ -7,5 +7,6 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   settings {
     tier = "db-custom-2-7680"
   }
+  deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
 }
 # [END cloud_sql_sqlserver_instance_80_db_n1_s2]

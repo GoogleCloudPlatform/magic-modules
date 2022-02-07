@@ -19,17 +19,26 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # SQL
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_database_instance_sqlserver"
+        primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "instance"
         vars:
           database_instance_name: "sqlserver-instance"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_database_instance_my_sql"
+        primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "instance"
         vars:
           database_instance_name: "mysql-instance"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
     # Storage
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_new_bucket"
+        primary_resource_type: "google_storage_bucket"
         primary_resource_id: "static"
         vars:
           new_bucket: "new-bucket"
