@@ -444,7 +444,7 @@ func TestAccCloudFunctionsFunction_secretEnvVar(t *testing.T) {
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName1, bucketName, functionName, "1", zipFilePath, accountId),
+				Config: testAccCloudFunctionsFunction_secretEnvVar(secretName, versionName1, bucketName, functionName, "1", zipFilePath, accountId),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -453,7 +453,7 @@ func TestAccCloudFunctionsFunction_secretEnvVar(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"build_environment_variables"},
 			},
 			{
-				Config: testAccCloudFunctionsFunction_secretEnvVar(projectNumber, secretName, versionName2, bucketName +"-update", functionName, "2", zipFilePath, accountId),
+				Config: testAccCloudFunctionsFunction_secretEnvVar(secretName, versionName2, bucketName +"-update", functionName, "2", zipFilePath, accountId),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -1064,7 +1064,6 @@ resource "google_cloudfunctions_function" "function" {
     key     = "MY_SECRET"
     secret  = google_secret_manager_secret.test_secret.secret_id
     version = "%s"
-    project_id = "%s"
   }
 
 }
