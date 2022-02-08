@@ -89,7 +89,6 @@ module Overrides
           # an error and returns one.
           :read_error_transform,
 
-
           # If true, only generate tests and cgc samples
           :cgc_only
         ]
