@@ -199,7 +199,7 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: 'pullRequest'
             description: |
-                filter to match changes in pull requests.  Specify only one of pullRequest or push.
+                filter to match changes in pull requests. Specify only one of `pull_request` or `push`.
             exactly_one_of:
               - github.0.pull_request
               - github.0.push
@@ -224,7 +224,7 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: 'push'
             description: |
-                filter to match changes in refs, like branches or tags.  Specify only one of pullRequest or push.
+                filter to match changes in refs, like branches or tags. Specify only one of `pull_request` or `push`.
             exactly_one_of:
               - github.0.pull_request
               - github.0.push

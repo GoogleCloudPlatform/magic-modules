@@ -27,7 +27,38 @@ provider "google" {
   {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
 }
 
-resource "google_pubsub_subscription_iam_policy" "editor" {
-  subscription = "my-subscription-name"
-  policy_data = "{\"bindings\":[{\"members\":[\"user:jane@example.com\"],\"role\":\"roles/editor\"}]}"
+resource "google_pubsub_subscription" "example" {
+  name  = "example-subscription"
+  topic = "example-pubsub-topic"
+
+  ack_deadline_seconds = 20
+
+  labels = {
+    test-label1 = "test-value1"
+  }
+
+  push_config {
+    push_endpoint = "https://example.com/push"
+
+    attributes = {
+      x-goog-version = "v1"
+    }
+  }
 }
+
+resource "google_pubsub_subscription_iam_policy" "editor" {
+  subscription = google_pubsub_subscription.example.name
+  policy_data = jsonencode(
+    {
+      bindings = [
+        {
+          members = [
+            "user:jane@example.com",
+          ]
+          role = "roles/editor"
+        }
+      ]
+    }
+  )
+}
+
