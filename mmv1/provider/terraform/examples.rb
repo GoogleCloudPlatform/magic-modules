@@ -39,7 +39,7 @@ module Provider
       attr_reader :primary_resource_id
 
       # Optional resource type of the "primary" resource. Used in import tests.
-      # If set, this will override the default resource type implied from the 
+      # If set, this will override the default resource type implied from the
       # object parent
       attr_reader :primary_resource_type
 

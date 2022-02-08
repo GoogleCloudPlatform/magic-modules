@@ -200,6 +200,7 @@ module Provider
 
     def generate_documentation(pwd, data)
       return if data.object.cgc_only
+
       target_folder = data.output_folder
       target_folder = File.join(target_folder, 'website', 'docs', 'r')
       FileUtils.mkpath target_folder
