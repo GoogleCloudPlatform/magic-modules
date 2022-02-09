@@ -1,4 +1,4 @@
-# [START networkconnectivity_test_instances]
+# [START networkmanagement_test_instances]
 resource "google_network_management_connectivity_test" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]['primary_resource_name'] %>"
   source {
@@ -54,4 +54,4 @@ data "google_compute_image" "debian_9" {
   family  = "debian-9"
   project = "debian-cloud"
 }
-# [END networkconnectivity_test_instances]
+# [END networkmanagement_test_instances]
