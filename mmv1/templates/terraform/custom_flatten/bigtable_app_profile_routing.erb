@@ -17,6 +17,10 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 		return false
 	}
 
+    if v.(map[string]interface{})["clusterIds"] == nil {
+        return true
+    }
+
 	if len(v.(map[string]interface{})["clusterIds"].([]interface{})) > 0 {
 		d.Set("multi_cluster_routing_cluster_ids", v.(map[string]interface{})["clusterIds"])
 	}
