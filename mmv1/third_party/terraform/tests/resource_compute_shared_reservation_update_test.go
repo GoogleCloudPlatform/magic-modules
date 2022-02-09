@@ -29,7 +29,7 @@ func TestAccComputeSharedReservation_update(t *testing.T) {
 				ResourceName:            "google_compute_reservation.gce_reservation",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone"},
+				ImportStateVerifyIgnore: []string{"zone", "share_settings"},
 			},
 			{
 				Config: testAccComputeReservation_sharedReservation_update(context),
@@ -38,7 +38,16 @@ func TestAccComputeSharedReservation_update(t *testing.T) {
 				ResourceName:            "google_compute_reservation.gce_reservation",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone"},
+				ImportStateVerifyIgnore: []string{"zone", "share_settings"},
+			},
+			{
+				Config: testAccComputeReservation_sharedReservation_basic(context),
+			},
+			{
+				ResourceName:            "google_compute_reservation.gce_reservation",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone", "share_settings"},
 			},
 		},
 	})
@@ -64,12 +73,24 @@ resource "google_project" "guest_project" {
   project_id      = "tf-test-2%{random_suffix}"
   name            = "tf-test-2%{random_suffix}"
   org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
 }
 
 resource "google_project" "guest_project_second" {
   project_id      = "tf-test-3%{random_suffix}"
   name            = "tf-test-3%{random_suffix}"
   org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+}
+resource "google_project_service" "compute_second_project" {
+  project = google_project.guest_project.project_id
+  service = "compute.googleapis.com"
+  disable_on_destroy = false
+}
+resource "google_project_service" "compute_third_project" {
+  project = google_project.guest_project_second.project_id
+  service = "compute.googleapis.com"
+  disable_on_destroy = false
 }
 
 resource "google_organization_policy" "shared_reservation_org_policy" {
@@ -101,7 +122,7 @@ resource "google_compute_reservation" "gce_reservation" {
       project_id = google_project.guest_project.project_id
     }
   }
-  depends_on = [google_organization_policy.shared_reservation_org_policy,google_project_service.compute]
+  depends_on = [google_organization_policy.shared_reservation_org_policy,google_project_service.compute,google_project_service.compute_second_project,google_project_service.compute_third_project]
 }
 `, context)
 }
@@ -126,12 +147,24 @@ resource "google_project" "guest_project" {
   project_id      = "tf-test-2%{random_suffix}"
   name            = "tf-test-2%{random_suffix}"
   org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
 }
 
 resource "google_project" "guest_project_second" {
   project_id      = "tf-test-3%{random_suffix}"
   name            = "tf-test-3%{random_suffix}"
   org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+}
+resource "google_project_service" "compute_second_project" {
+  project = google_project.guest_project.project_id
+  service = "compute.googleapis.com"
+  disable_on_destroy = false
+}
+resource "google_project_service" "compute_third_project" {
+  project = google_project.guest_project_second.project_id
+  service = "compute.googleapis.com"
+  disable_on_destroy = false
 }
 
 resource "google_organization_policy" "shared_reservation_org_policy" {
@@ -167,7 +200,7 @@ resource "google_compute_reservation" "gce_reservation" {
       project_id = google_project.guest_project_second.project_id
     }
   }
-  depends_on = [google_organization_policy.shared_reservation_org_policy,google_project_service.compute]
+  depends_on = [google_organization_policy.shared_reservation_org_policy,google_project_service.compute,google_project_service.compute_second_project,google_project_service.compute_third_project]
 }
 `, context)
 }

@@ -1,0 +1,39 @@
+updateMask := []string{}
+if d.HasChange("share_settings") {
+  old, new := d.GetChange("share_settings")
+  oldMap := old.([]interface{})[0].(map[string]interface{})["project_map"]
+  newMap := new.([]interface{})[0].(map[string]interface{})["project_map"]
+  before := oldMap.(*schema.Set)
+  after := newMap.(*schema.Set)
+#    Add new projects in the list to updateMask.
+  for _, raw := range after.Difference(before).List() {
+    original := raw.(map[string]interface{})
+    maskId := fmt.Sprintf("%s%s", "shareSettings.projectMap.", original["project_id"])
+    updateMask = append(updateMask, maskId)
+  }
+#    Add removed project from list to the updateMask.
+  for _, raw := range before.Difference(after).List() {
+    original := raw.(map[string]interface{})
+    maskId := fmt.Sprintf("%s%s", "shareSettings.projectMap.", original["project_id"])
+#      To remove a project we need project number.
+    projectId := fmt.Sprintf("%s", original["project_id"])
+    _, err := strconv.Atoi(projectId)
+    if err != nil {
+      config := meta.(*Config)
+      project, err := config.NewResourceManagerClient(config.userAgent).Projects.Get(projectId).Do()
+      if err != nil {
+        return err
+      }
+
+      number := project.ProjectNumber
+      maskId = fmt.Sprintf("%s%d", "shareSettings.projectMap.", number)
+    }
+    updateMask = append(updateMask, maskId)
+  }
+# 	updateMask is a URL parameter but not present in the schema, so replaceVars
+# 	won't set it
+  url, err = addQueryParams(url, map[string]string{"paths": strings.Join(updateMask, ",")})
+  if err != nil {
+    return err
+  }
+}
