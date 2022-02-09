@@ -1,3 +1,4 @@
+[START networkmanagement_target_https_proxy_basic]
 resource "google_compute_target_https_proxy" "default" {
   name             = "<%= ctx[:vars]['target_https_proxy_name'] %>"
   url_map          = google_compute_url_map.default.id
@@ -47,3 +48,4 @@ resource "google_compute_http_health_check" "default" {
   check_interval_sec = 1
   timeout_sec        = 1
 }
+[END networkmanagement_target_https_proxy_basic]

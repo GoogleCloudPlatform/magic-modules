@@ -1,3 +1,4 @@
+[START networkmanagement_target_grpc_proxy_basic]
 resource "google_compute_target_grpc_proxy" "default" {
   name    = "<%= ctx[:vars]['proxy_name'] %>"
   url_map = google_compute_url_map.urlmap.id
@@ -85,3 +86,4 @@ resource "google_compute_health_check" "default" {
     grpc_service_name  = "testservice"
   }
 }
+[END networkmanagement_target_grpc_proxy_basic]
