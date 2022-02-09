@@ -8520,7 +8520,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'platform'
-            required: true
+            required: true            
             # Docs (https://cloud.google.com/compute/docs/reference/rest/beta/regionNetworkEndpointGroups) say support is offered for:
             # API Gateway: apigateway.googleapis.com, App Engine: appengine.googleapis.com,
             # Cloud Functions: cloudfunctions.googleapis.com, Cloud Run: run.googleapis.com
