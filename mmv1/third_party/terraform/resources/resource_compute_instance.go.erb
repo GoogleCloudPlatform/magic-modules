@@ -634,6 +634,7 @@ func resourceComputeInstance() *schema.Resource {
 						"provisioning_model": {
 							Type:         schema.TypeString,
 							Optional:     true,
+							Computed:     true,
 							ForceNew:     true,
 							AtLeastOneOf: schedulingKeys,
 							Description:  `Whether the instance is spot. If this is set as SPOT.`,
