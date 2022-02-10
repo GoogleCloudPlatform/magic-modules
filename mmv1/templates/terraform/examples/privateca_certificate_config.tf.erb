@@ -1,3 +1,4 @@
+# [START privateca_create_certificate_config]
 resource "google_privateca_certificate_authority" "test-ca" {
   certificate_authority_id = "<%= ctx[:vars]["certificate_authority_id"] %>"
   location = "us-central1"
@@ -58,7 +59,6 @@ resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
     }
     x509_config {
       ca_options {
-        non_ca = true
         is_ca = false
       }
       key_usage {
@@ -77,3 +77,4 @@ resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 }
+# [END privateca_create_certificate_config]

@@ -1,3 +1,4 @@
+# [START privateca_create_certificate]
 resource "google_privateca_certificate_authority" "authority" {
   // This example assumes this pool already exists.
   // Pools cannot be deleted in normal test circumstances, so we depend on static pools
@@ -57,7 +58,6 @@ resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
     }
     x509_config {
       ca_options {
-        non_ca = true
         is_ca = false
       }
       key_usage {
@@ -78,3 +78,4 @@ resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
   // need to be explicitly connected to it
   depends_on = [google_privateca_certificate_authority.authority]
 }
+# [END privateca_create_certificate]

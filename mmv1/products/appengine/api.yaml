@@ -238,6 +238,10 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 20
+          update_minutes: 20
+          delete_minutes: 20
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -283,7 +287,8 @@ objects:
         name: 'runtimeApiVersion'
         description: |
           The version of the API in the given runtime environment.
-          Please see the app.yaml reference for valid values at https://cloud.google.com/appengine/docs/standard//config/appref
+          Please see the app.yaml reference for valid values at `https://cloud.google.com/appengine/docs/standard/<language>/config/appref`\
+          Substitute `<language>` with `python`, `java`, `php`, `ruby`, `go` or `nodejs`.
       - !ruby/object:Api::Type::Array
         name: 'handlers'
         description: |
@@ -613,10 +618,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 10
-          update_minutes: 10
-          delete_minutes: 10
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -787,7 +788,8 @@ objects:
         name: 'runtimeApiVersion'
         description: |
           The version of the API in the given runtime environment.
-          Please see the app.yaml reference for valid values at https://cloud.google.com/appengine/docs/standard//config/appref
+          Please see the app.yaml reference for valid values at `https://cloud.google.com/appengine/docs/standard/<language>/config/appref`\
+          Substitute `<language>` with `python`, `java`, `php`, `ruby`, `go` or `nodejs`.
       - !ruby/object:Api::Type::Array
         name: 'handlers'
         description: |

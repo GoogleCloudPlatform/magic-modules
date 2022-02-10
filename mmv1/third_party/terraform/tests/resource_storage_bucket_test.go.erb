@@ -151,6 +151,15 @@ func TestAccStorageBucket_lifecycleRulesMultiple(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
+			{
+				Config: testAccStorageBucket_lifecycleRulesMultiple_update(bucketName),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
 		},
 	})
 }
@@ -776,7 +785,7 @@ func TestAccStorageBucket_publicAccessPrevention(t *testing.T) {
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		Providers: testAccProvidersOiCS,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageBucket_publicAccessPrevention(bucketName, "enforced"),
@@ -1332,7 +1341,7 @@ resource "google_storage_bucket" "bucket" {
       type = "Delete"
     }
     condition {
-	  matches_storage_class = []
+      matches_storage_class = []
       age = 10
     }
   }
@@ -1350,8 +1359,73 @@ resource "google_storage_bucket" "bucket" {
       storage_class = "NEARLINE"
     }
     condition {
-	  created_before = "2019-01-01"
-	  days_since_custom_time = 3
+      created_before = "2019-01-01"
+      days_since_custom_time = 3
+    }
+  }
+  lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+    condition {
+      num_newer_versions = 10
+    }
+  }
+  lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "ARCHIVE"
+    }
+    condition {
+      with_state = "ARCHIVED"
+    }
+  }
+}
+`, bucketName)
+}
+
+func testAccStorageBucket_lifecycleRulesMultiple_update(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+  lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+    condition {
+      matches_storage_class = ["COLDLINE"]
+      age                   = 2
+    }
+  }
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      matches_storage_class = []
+      age = 10
+    }
+  }
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      custom_time_before = "2019-01-01"
+    }
+  }
+  lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+    condition {
+      created_before = "2019-01-01"
+      days_since_custom_time = 5
     }
   }
   lifecycle_rule {
@@ -1507,8 +1581,8 @@ resource "google_storage_bucket" "bucket" {
 func testAccStorageBucket_encryption(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_project" "acceptance" {
-  name            = "terraform-%{random_suffix}"
-  project_id      = "terraform-%{random_suffix}"
+  name            = "tf-test-%{random_suffix}"
+  project_id      = "tf-test-%{random_suffix}"
   org_id          = "%{organization}"
   billing_account = "%{billing_account}"
 }

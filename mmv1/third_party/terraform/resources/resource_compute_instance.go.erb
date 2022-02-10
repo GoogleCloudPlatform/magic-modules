@@ -50,6 +50,9 @@ var (
 		"scheduling.0.preemptible",
 		"scheduling.0.node_affinities",
 		"scheduling.0.min_node_cpus",
+<% unless version == 'ga' -%>
+		"scheduling.0.provisioning_model",
+<% end -%>
 	}
 
 	shieldedInstanceConfigKeys = []string{
@@ -492,7 +495,6 @@ func resourceComputeInstance() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
-				ForceNew:    true,
 				Description: `Whether sending and receiving of packets with non-matching source or destination IPs is allowed.`,
 			},
 
@@ -628,6 +630,15 @@ func resourceComputeInstance() *schema.Resource {
 							Optional:     true,
 							AtLeastOneOf: schedulingKeys,
 						},
+ <% unless version == 'ga' -%>
+						"provisioning_model": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							AtLeastOneOf: schedulingKeys,
+							Description:  `Whether the instance is spot. If this is set as SPOT.`,
+						},
+<% end -%>
 					},
 				},
 			},
@@ -1825,6 +1836,36 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			return opErr
 		}
 	}
+
+	if d.HasChange("can_ip_forward") {
+		err = retry(
+			func() error {
+				instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, instance.Name).Do()
+				if err != nil {
+					return fmt.Errorf("Error retrieving instance: %s", err)
+				}
+
+				instance.CanIpForward = d.Get("can_ip_forward").(bool)
+
+				op, err := config.NewComputeClient(userAgent).Instances.Update(project, zone, instance.Name, instance).Do()
+				if err != nil {
+					return fmt.Errorf("Error updating instance: %s", err)
+				}
+
+				opErr := computeOperationWaitTime(config, op, project, "can_ip_forward, updating", userAgent, d.Timeout(schema.TimeoutUpdate))
+				if opErr != nil {
+					return opErr
+				}
+
+				return nil
+			},
+		)
+
+		if err != nil {
+			return err
+		}
+	}
+
 
 	needToStopInstanceBeforeUpdating := scopesChange || d.HasChange("service_account.0.email") || d.HasChange("machine_type") || d.HasChange("min_cpu_platform") || d.HasChange("enable_display") || d.HasChange("shielded_instance_config") || len(updatesToNIWhileStopped) > 0 || bootRequiredSchedulingChange || d.HasChange("advanced_machine_features")
 

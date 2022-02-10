@@ -27,9 +27,26 @@ provider "google" {
   {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
 }
 
+resource "google_spanner_instance" "main" {
+  config       = "regional-europe-west1"
+  display_name = "main-instance"
+  num_nodes    = 1
+  name = "my-instance"
+}
+
+resource "google_spanner_database" "database" {
+  instance = google_spanner_instance.main.name
+  name     = "my-database"
+  ddl = [
+    "CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+    "CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
+  ]
+  deletion_protection = false
+}
+
 resource "google_spanner_database_iam_policy" "database" {
-  instance    = "my-instance"
-  database    = "my-database"
+  instance = google_spanner_instance.main.name
+  database = google_spanner_database.database.name
   policy_data = jsonencode(
     {
       bindings = [
