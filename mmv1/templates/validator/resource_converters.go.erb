@@ -65,11 +65,17 @@ func ResourceConverters() map[string][]ResourceConverter {
 		"google_spanner_instance_iam_binding":             {resourceConverterSpannerInstanceIamBinding()},
 		"google_spanner_instance_iam_member":              {resourceConverterSpannerInstanceIamMember()},
 		"google_project_service":                          {resourceConverterServiceUsage()},
+		"google_pubsub_lite_reservation":                  {resourceConverterPubsubLiteReservation()},
+		"google_pubsub_lite_subscription":                 {resourceConverterPubsubLiteSubscription()},
+		"google_pubsub_lite_topic":                        {resourceConverterPubsubLiteTopic()},
 		"google_pubsub_schema":                            {resourceConverterPubsubSchema()},
 		"google_pubsub_subscription":                      {resourceConverterPubsubSubscription()},
 		"google_pubsub_subscription_iam_policy":           {resourceConverterPubsubSubscriptionIamPolicy()},
 		"google_pubsub_subscription_iam_binding":          {resourceConverterPubsubSubscriptionIamBinding()},
 		"google_pubsub_subscription_iam_member":           {resourceConverterPubsubSubscriptionIamMember()},
+		"google_storage_bucket_iam_policy":                {resourceConverterStorageBucketIamPolicy()},
+		"google_storage_bucket_iam_binding":               {resourceConverterStorageBucketIamBinding()},
+		"google_storage_bucket_iam_member":                {resourceConverterStorageBucketIamMember()},
 		"google_pubsub_topic":                             {resourceConverterPubsubTopic()},
 		"google_kms_crypto_key":                           {resourceConverterKMSCryptoKey()},
 		"google_kms_key_ring":                             {resourceConverterKMSKeyRing()},
@@ -77,6 +83,7 @@ func ResourceConverters() map[string][]ResourceConverter {
 		"google_access_context_manager_service_perimeter": {resourceConverterAccessContextManagerServicePerimeter()},
 		"google_cloud_run_service":                        {resourceConverterCloudRunService()},
 		"google_cloud_run_domain_mapping":                 {resourceConverterCloudRunDomainMapping()},
+		"google_cloudfunctions_function":                  {resourceConverterCloudFunctionsCloudFunction()},
 		"google_monitoring_notification_channel":          {resourceConverterMonitoringNotificationChannel()},
 		"google_monitoring_alert_policy":                  {resourceConverterMonitoringAlertPolicy()},
         <% products.each do |product| -%>
@@ -121,5 +128,6 @@ func ResourceConverters() map[string][]ResourceConverter {
 		"google_project_iam_member": {resourceConverterProjectIamMember()},
 		"google_project_iam_custom_role": {resourceConverterProjectIAMCustomRole()},
 		"google_organization_iam_custom_role": {resourceConverterOrganizationIAMCustomRole()},
+		"google_vpc_access_connector": {resourceConverterVPCAccessConnector()},
 	}
 }

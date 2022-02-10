@@ -352,6 +352,7 @@ objects:
           may be delivered in any order.
   - !ruby/object:Api::Resource
     name: 'Schema'
+    input: true
     description: |
       A schema is a format that messages must follow,
       creating a contract between publisher and subscriber that Pub/Sub will enforce.

@@ -36,6 +36,12 @@ func resourceStorageBucket() *schema.Resource {
 			customdiff.ForceNewIfChange("retention_policy.0.is_locked", isPolicyLocked),
 		),
 
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(4 * time.Minute),
+			Update: schema.DefaultTimeout(4 * time.Minute),
+			Read:   schema.DefaultTimeout(4 * time.Minute),
+		},
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,
@@ -315,6 +321,7 @@ func resourceStorageBucket() *schema.Resource {
 			"default_event_based_hold": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Description: `Whether or not to automatically apply an eventBasedHold to new objects added to the bucket.`,
 			},
 
 			"logging": {
@@ -659,7 +666,7 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 		var retryErr error
 		res, retryErr = config.NewStorageClient(userAgent).Buckets.Get(bucket).Do()
 		return retryErr
-	}, d.Timeout(schema.TimeoutCreate), isNotFoundRetryableError("bucket creation"))
+	}, d.Timeout(schema.TimeoutRead), isNotFoundRetryableError("bucket read"))
 
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Storage Bucket %q", d.Get("name").(string)))
@@ -743,11 +750,13 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+<% unless version == "ga" -%>
 	if res.IamConfiguration != nil && res.IamConfiguration.PublicAccessPrevention != "" {
 		if err := d.Set("public_access_prevention", res.IamConfiguration.PublicAccessPrevention); err != nil {
 			return fmt.Errorf("Error setting public_access_prevention: %s", err)
 		}
 	}
+<% end -%>
 
 	if res.Billing == nil {
 		if err := d.Set("requester_pays", nil); err != nil {
@@ -1140,8 +1149,8 @@ func expandIamConfiguration(d *schema.ResourceData) *storage.BucketIamConfigurat
 			ForceSendFields: []string{"Enabled"},
 		},
 	}
-<% unless version == "ga" -%>
 
+<% unless version == "ga" -%>
 	if v, ok := d.GetOk("public_access_prevention"); ok {
 		cfg.PublicAccessPrevention = v.(string)
 	}
@@ -1327,6 +1336,10 @@ func resourceGCSBucketLifecycleRuleConditionHash(v interface{}) int {
 	m := v.(map[string]interface{})
 
 	if v, ok := m["age"]; ok {
+		buf.WriteString(fmt.Sprintf("%d-", v.(int)))
+	}
+
+	if v, ok := m["days_since_custom_time"]; ok {
 		buf.WriteString(fmt.Sprintf("%d-", v.(int)))
 	}
 

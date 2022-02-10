@@ -18,14 +18,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     self_link: "projects/{{project}}/indexes/{{index_id}}"
     error_retry_predicates: ["datastoreIndex409Contention"]
     autogen_async: true
-    # TODO(ndmckinley): This resource doesn't have a name, so the current
+    # TODO: This resource doesn't have a name, so the current
     # sweeper won't ever sweep it - might as well not have one for now,
     # but we'll add it in when we change the sweeper to account for
     # identity.
     skip_sweeper: true
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 20
-      delete_minutes: 10
+      delete_minutes: 20
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         This resource creates a Datastore Index on a project that has already

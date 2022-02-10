@@ -1,3 +1,4 @@
+# [START privateca_create_certificate_template]
 resource "google_privateca_certificate_template" "template" {
   location    = "us-central1"
   name = "<%= ctx[:vars]["certificate_template_name"] %>"
@@ -36,8 +37,8 @@ resource "google_privateca_certificate_template" "template" {
     aia_ocsp_servers = ["string"]
 
     ca_options {
-      is_ca                          = false
-      max_issuer_path_length         = 6
+      is_ca                  = false
+      max_issuer_path_length = 6
     }
 
     key_usage {
@@ -119,3 +120,4 @@ resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
   pem_csr = file("test-fixtures/rsa_csr.pem")
   certificate_template = google_privateca_certificate_template.template.id
 }
+# [END privateca_create_certificate_template]

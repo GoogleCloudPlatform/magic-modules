@@ -58,7 +58,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       type: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           {{description}}
-          
+
           ~> **Note:** For `SUBORDINATE` Certificate Authorities, they need to
           be manually activated (via Cloud Console of `gcloud`) before they can
           issue certificates.
@@ -91,7 +91,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "privateca_certificate_config"
         primary_resource_id: "default"
         vars:
-          certificate_authority_id: "my-certificate-authority" 
+          certificate_authority_id: "my-certificate-authority"
           certificate_name: "my-certificate"
         test_env_vars:
           project: :PROJECT_NAME
@@ -157,4 +157,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           name: "my-pool"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "privateca_quickstart"
+        primary_resource_id: "default"
+        skip_test: true
+        vars:
+          my_ca_pool: "my-ca-pool"
+          my_certificate: "my-certificate"
 

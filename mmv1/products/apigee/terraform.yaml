@@ -47,9 +47,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       min_version: beta
       # Resource creation race
       skip_vcr: true
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 10
-      delete_minutes: 10
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/apigee_organization.go.erb
       encoder: templates/terraform/encoders/apigee_organization.go.erb
@@ -86,6 +83,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       # Resource creation race
       skip_vcr: true
     - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_instance_ip_range"
+      skip_test: true
+    - !ruby/object:Provider::Terraform::Examples
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
+      name: "apigee_instance_ip_range_test"
+      primary_resource_id: "apigee_instance"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_docs: true
+      # Resource creation race
+      skip_vcr: true
+    - !ruby/object:Provider::Terraform::Examples
       name: "apigee_instance_full"
       skip_test: true
     - !ruby/object:Provider::Terraform::Examples
@@ -103,6 +114,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 60
       delete_minutes: 60
+    properties:
+      peeringCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      ipRange: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/apigee_instance.go.erb
   Environment: !ruby/object:Overrides::Terraform::ResourceOverride

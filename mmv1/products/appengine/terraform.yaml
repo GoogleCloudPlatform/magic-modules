@@ -19,11 +19,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckForExistence
       actions: ['create']
-      operation: !ruby/object:Api::Async::Operation
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 4
-          update_minutes: 4
-          delete_minutes: 4
     # This resource is a child resource (requires app ID in the URL)
     skip_sweeper: true
     examples:

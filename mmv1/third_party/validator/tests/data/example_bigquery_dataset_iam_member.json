@@ -1,31 +1,33 @@
-[{
-	"name": "//bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/test-dataset",
-	"asset_type": "bigquery.googleapis.com/Dataset",
-	"ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
-	"resource": {
-		"version": "v2",
-		"discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/bigquery/v2/rest",
-		"discovery_name": "Dataset",
-		"parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
-		"data": {
-			"datasetReference": {
-				"datasetId": "test-dataset"
-			},
-			"defaultTableExpirationMs": 3600000,
-			"labels": {
-				"env": "dev"
-			},
-			"location": "EU"
-		}
-	}
-}, {
-	"name": "//bigquery.googleapis.com/test-dataset",
-	"asset_type": "bigquery.googleapis.com/Dataset",
-	"ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
-	"iam_policy": {
-		"bindings": [{
-			"role": "roles/bigquery.dataEditor",
-			"members": ["allAuthenticatedUsers"]
-		}]
-	}
-}]
+[
+  {
+    "name": "//bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/test-dataset",
+    "asset_type": "bigquery.googleapis.com/Dataset",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v2",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/bigquery/v2/rest",
+      "discovery_name": "Dataset",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "datasetReference": {
+          "datasetId": "test-dataset"
+        },
+        "defaultTableExpirationMs": 3600000,
+        "labels": {
+          "env": "dev"
+        },
+        "location": "EU"
+      }
+    },
+    "iam_policy": {
+      "bindings": [
+        {
+          "role": "roles/bigquery.dataEditor",
+          "members": [
+            "allAuthenticatedUsers"
+          ]
+        }
+      ]
+    }
+  }
+]
