@@ -727,6 +727,96 @@ objects:
               The externally accessible port for the source database server.
               Defaults to 3306.
 
+  - !ruby/object:Api::Resource
+    name: 'Connect'
+    kind: 'sql#connect'
+    description: |
+      Retrieves connect settings about a Cloud SQL instance.
+    base_url: projects/{{project}}/instances/{{instance}}/connectSettings
+    input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'region'
+        description: |
+          The region where you want your Cloud SQL replicas to reside.
+        required: true
+      - !ruby/object:Api::Type::Array
+        name: 'ipAddresses'
+        description: 'The assigned IP addresses for the instance.'
+        output: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'ipAddress'
+              description: 'The IP address assigned.'
+            - !ruby/object:Api::Type::Time
+              name: 'timeToRetire'
+              description: |
+                The due time for this IP to be retired in RFC 3339 format, for
+                example 2012-11-15T16:19:00.094Z. This field is only available
+                when the IP is scheduled to be retired.
+            - !ruby/object:Api::Type::Enum
+              name: 'type'
+              description: |
+                The type of this IP address. A PRIMARY address is an address
+                that can accept incoming connections. An OUTGOING address is the
+                source address of connections originating from the instance, if
+                supported.
+              values:
+                - :PRIMARY
+                - :OUTGOING
+      - !ruby/object:Api::Type::Enum
+        name: 'databaseVersion'
+        description: |
+          The MySQL version running on your source database server.
+        required: true
+        values:
+          - :MYSQL_5_5
+          - :MYSQL_5_6
+          - :MYSQL_5_7
+          - :MYSQL_8_0
+      - !ruby/object:Api::Type::Enum
+        name: 'backendType'
+        description: |
+          * FIRST_GEN: First Generation instance. MySQL only.
+          * SECOND_GEN: Second Generation instance or PostgreSQL instance.
+          * EXTERNAL: A database server that is not managed by Google.
+        values:
+          - :FIRST_GEN
+          - :SECOND_GEN
+          - :EXTERNAL
+      - !ruby/object:Api::Type::NestedObject
+        name: 'serverCaCert'
+        description: |
+          Configuration specific to on-premises instances.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'cert'
+            description: 'PEM representation of the X.509 certificate.'
+          - !ruby/object:Api::Type::String
+            name: 'certSerialNumber'
+            description: 'Serial number, as extracted from the certificate.'
+          - !ruby/object:Api::Type::String
+            name: 'commonName'
+            description: 'User supplied name. Constrained to [a-zA-Z.-_ ]+.'
+          - !ruby/object:Api::Type::String
+            name: 'sha1Fingerprint'
+            description: 'Sha1 Fingerprint.'
+          - !ruby/object:Api::Type::String
+            name: 'instance'
+            description: 'Name of the database instance.'
+          - !ruby/object:Api::Type::Time
+            name: 'createTime'
+            description: |
+              The time when the certificate was created in RFC 3339 format, for
+              example 2012-11-15T16:19:00.094Z.
+          - !ruby/object:Api::Type::Time
+            name: 'expirationTime'
+            description: |
+              The time when the certificate expires in RFC 3339 format, for example
+              2012-11-15T16:19:00.094Z.
+
   # 'Operation' is not idempotent and will not be covered.
   # (it is used internally to assert the state of operations being performed)
   # | - !ruby/object:Api::Resource
