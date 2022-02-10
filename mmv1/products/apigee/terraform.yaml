@@ -53,6 +53,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     import_format: ["{{org_id}}/instances/{{name}}", "{{org_id}}/{{name}}"]
+    mutex: "{{org_id}}"
     examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "apigee_instance_basic"
