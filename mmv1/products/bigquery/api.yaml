@@ -112,6 +112,39 @@ objects:
                     A-Z), numbers (0-9), or underscores (_). The maximum length
                     is 1,024 characters.
                   required: true
+            - !ruby/object:Api::Type::NestedObject
+              name: 'dataset'
+              description: |
+                A view from a different dataset to grant access to. Queries
+                executed against that view will have read access to tables in
+                this dataset. The role field is not required when this field is
+                set. If that view is updated by any user, access to the view
+                needs to be granted again via an update operation.
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'dataset'
+                  description: |
+                    A view from a different dataset to grant access to. Queries
+                    executed against that view will have read access to tables in
+                    this dataset. The role field is not required when this field is
+                    set. If that view is updated by any user, access to the view
+                    needs to be granted again via an update operation.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'datasetId'
+                      description: The ID of the dataset containing this table.
+                      required: true
+                    - !ruby/object:Api::Type::String
+                      name: 'projectId'
+                      description: The ID of the project containing this table.
+                      required: true
+                - !ruby/object:Api::Type::Array
+                  name: 'targetTypes'
+                  description: |
+                    Which resources in the dataset this entry applies to. Currently, only views are supported,
+                    but additional target types may be added in the future. Possible values: VIEWS
+                  item_type: Api::Type::String
+                  required: true
       - !ruby/object:Api::Type::Integer
         name: 'creationTime'
         output: true
