@@ -1,4 +1,4 @@
-[START networkmanagement_target_tcp_proxy_basic]
+[START cloudloadbalancing_target_tcp_proxy_basic]
 resource "google_compute_target_tcp_proxy" "default" {
   name            = "<%= ctx[:vars]['target_tcp_proxy_name'] %>"
   backend_service = google_compute_backend_service.default.id
@@ -21,4 +21,4 @@ resource "google_compute_health_check" "default" {
     port = "443"
   }
 }
-[END networkmanagement_target_tcp_proxy_basic]
+[END cloudloadbalancing_target_tcp_proxy_basic]
