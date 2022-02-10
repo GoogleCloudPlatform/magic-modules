@@ -35,11 +35,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           key_name: "example-key"
           keyring_name: "example-keyring"
       - !ruby/object:Provider::Terraform::Examples
-        name: "bigquery_dataset_authorized_view"
+        name: "bigquery_dataset_authorized_dataset"
         primary_resource_id: "dataset"
         vars:
-          dataset_id: "example_dataset"
-          grant_dataset_id: "grant_dataset"
+          dataset_id: "private"
+          grant_dataset_id: "public"
           account_name: "bqowner"
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
@@ -102,6 +102,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           dataset_id: "example_dataset"
           dataset_id2: "example_dataset2"
           table_id: "example_table"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_dataset_authorized_dataset"
+        skip_test: true  # not importable
+        primary_resource_id: "access"
+        vars:
+          dataset_id: "example_dataset"
+          dataset_id2: "example_dataset2"
     properties:
       datasetId: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
