@@ -16,3 +16,7 @@
   field: project
   details:
     function: getProjectField
+- type: USE_DCL_ID
+- type: CUSTOM_IMPORT_FUNCTION
+  details:
+    function: resourceBigqueryReservationAssignmentCustomImport
