@@ -119,6 +119,7 @@ objects:
               properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: 'dataset'
+                  required: true
                   description: |
                     The dataset this entry applies to
                   properties:
@@ -424,6 +425,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'dataset'
+            required: true
             description: |
               The dataset this entry applies to
             properties:
