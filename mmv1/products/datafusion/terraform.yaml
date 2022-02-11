@@ -22,13 +22,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "data_fusion_instance_basic"
-        min_version: 'beta'
         primary_resource_id: "basic_instance"
         vars:
           instance_name: "my-instance"
       - !ruby/object:Provider::Terraform::Examples
         name: "data_fusion_instance_full"
-        min_version: 'beta'
         primary_resource_id: "extended_instance"
         vars:
           instance_name: "my-instance"
