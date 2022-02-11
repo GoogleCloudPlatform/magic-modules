@@ -38,6 +38,11 @@ module Provider
       # }
       attr_reader :primary_resource_id
 
+      # Optional resource type of the "primary" resource. Used in import tests.
+      # If set, this will override the default resource type implied from the
+      # object parent
+      attr_reader :primary_resource_type
+
       # vars is a Hash from template variable names to output variable names.
       # It will use the provided value as a prefix for generated tests, and
       # insert it into the docs verbatim.
@@ -255,7 +260,8 @@ module Provider
                        {
                          vars: rand_vars.merge(overrides),
                          test_env_vars: test_env_vars.map { |k, _| [k, "%{#{k}}"] }.to_h,
-                         primary_resource_id: primary_resource_id
+                         primary_resource_id: primary_resource_id,
+                         primary_resource_type: primary_resource_type
                        },
                        pwd + '/' + config_path
                      ))
