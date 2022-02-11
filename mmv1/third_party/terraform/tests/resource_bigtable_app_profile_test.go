@@ -100,15 +100,72 @@ func TestAccBigtableAppProfile_multiClusterIds(t *testing.T) {
 	})
 }
 
+func TestAccBigtableAppProfile_updateSingleToMulti(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	skipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBigtableAppProfileDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigtableAppProfile_update1(instanceName),
+			},
+			{
+				ResourceName:            "google_bigtable_app_profile.ap",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ignore_warnings"},
+			},
+			{
+				Config: testAccBigtableAppProfile_updateMC2(instanceName),
+			},
+			{
+				ResourceName:            "google_bigtable_app_profile.ap",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ignore_warnings"},
+			},
+			{
+				Config: testAccBigtableAppProfile_update1(instanceName),
+			},
+			{
+				ResourceName:            "google_bigtable_app_profile.ap",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ignore_warnings"},
+			},
+		},
+	})
+}
+
 func testAccBigtableAppProfile_update1(instanceName string) string {
 	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
   name = "%s"
   cluster {
     cluster_id   = "%s"
-      zone         = "us-central1-b"
-      num_nodes    = 3
-      storage_type = "HDD"
+    zone         = "us-central1-b"
+    num_nodes    = 1
+    storage_type = "HDD"
+  }
+
+  cluster {
+    cluster_id   = "%s2"
+    zone         = "us-central1-a"
+    num_nodes    = 1
+    storage_type = "HDD"
+  }
+
+  cluster {
+    cluster_id   = "%s3"
+    zone         = "us-central1-c"
+    num_nodes    = 1
+    storage_type = "HDD"
   }
 
   deletion_protection = false
@@ -125,7 +182,7 @@ resource "google_bigtable_app_profile" "ap" {
 
   ignore_warnings               = true
 }
-`, instanceName, instanceName, instanceName)
+`, instanceName, instanceName, instanceName, instanceName, instanceName)
 }
 
 func testAccBigtableAppProfile_update2(instanceName string) string {
@@ -135,7 +192,21 @@ resource "google_bigtable_instance" "instance" {
   cluster {
     cluster_id   = "%s"
     zone         = "us-central1-b"
-    num_nodes    = 3
+    num_nodes    = 1
+    storage_type = "HDD"
+  }
+
+  cluster {
+    cluster_id   = "%s2"
+    zone         = "us-central1-a"
+    num_nodes    = 1
+    storage_type = "HDD"
+  }
+
+  cluster {
+    cluster_id   = "%s3"
+    zone         = "us-central1-c"
+    num_nodes    = 1
     storage_type = "HDD"
   }
 
@@ -154,7 +225,7 @@ resource "google_bigtable_app_profile" "ap" {
 
   ignore_warnings               = true
 }
-`, instanceName, instanceName, instanceName)
+`, instanceName, instanceName, instanceName, instanceName, instanceName)
 }
 
 func testAccBigtableAppProfile_warningsProduced(instanceName string) string {
@@ -225,16 +296,24 @@ func testAccBigtableAppProfile_updateMC1(instanceName string) string {
 	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
   name = "%s"
+
   cluster {
-    cluster_id   = "%s1"
-    zone         = "us-central1-a"
+    cluster_id   = "%s"
+    zone         = "us-central1-b"
     num_nodes    = 1
     storage_type = "HDD"
   }
 
   cluster {
     cluster_id   = "%s2"
-    zone         = "us-central1-b"
+    zone         = "us-central1-a"
+    num_nodes    = 1
+    storage_type = "HDD"
+  }
+
+  cluster {
+    cluster_id   = "%s3"
+    zone         = "us-central1-c"
     num_nodes    = 1
     storage_type = "HDD"
   }
@@ -247,27 +326,35 @@ resource "google_bigtable_app_profile" "ap" {
   app_profile_id = "test"
 
   multi_cluster_routing_use_any     = true
-  multi_cluster_routing_cluster_ids = ["%s1", "%s2"]
+  multi_cluster_routing_cluster_ids = ["%s", "%s2", "%s3"]
 
   ignore_warnings               = true
 }
-`, instanceName, instanceName, instanceName, instanceName, instanceName)
+`, instanceName, instanceName, instanceName, instanceName, instanceName, instanceName, instanceName)
 }
 
 func testAccBigtableAppProfile_updateMC2(instanceName string) string {
 	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
   name = "%s"
+
   cluster {
-    cluster_id   = "%s1"
-    zone         = "us-central1-a"
+    cluster_id   = "%s"
+    zone         = "us-central1-b"
     num_nodes    = 1
     storage_type = "HDD"
   }
 
   cluster {
     cluster_id   = "%s2"
-    zone         = "us-central1-b"
+    zone         = "us-central1-a"
+    num_nodes    = 1
+    storage_type = "HDD"
+  }
+
+  cluster {
+    cluster_id   = "%s3"
+    zone         = "us-central1-c"
     num_nodes    = 1
     storage_type = "HDD"
   }
@@ -281,9 +368,9 @@ resource "google_bigtable_app_profile" "ap" {
   description    = "add a description"
 
   multi_cluster_routing_use_any     = true
-  multi_cluster_routing_cluster_ids = ["%s1"]
+  multi_cluster_routing_cluster_ids = ["%s", "%s2"]
 
   ignore_warnings               = true
 }
-`, instanceName, instanceName, instanceName, instanceName)
+`, instanceName, instanceName, instanceName, instanceName, instanceName, instanceName)
 }

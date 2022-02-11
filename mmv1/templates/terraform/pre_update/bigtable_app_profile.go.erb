@@ -13,8 +13,24 @@
 	# limitations under the License.
 -%>
 
-if d.HasChange("multi_cluster_routing_cluster_ids") {
+if d.HasChange("multi_cluster_routing_cluster_ids") && !stringInSlice(updateMask, "multiClusterRoutingUseAny") {
 	updateMask = append(updateMask, "multiClusterRoutingUseAny")
+}
+
+// this api requires the body to define something for all values passed into
+// the update mask, however, multi-cluster routing and single-cluster routing
+// are conflicting, so we can't have them both in the update mask, despite
+// both of them registering as changing. thus, we need to remove whichever
+// one is not defined.
+newRouting, oldRouting := d.GetChange("multi_cluster_routing_use_any")
+if newRouting != oldRouting {
+	for i, val := range updateMask {
+		if val == "multiClusterRoutingUseAny" && newRouting.(bool) ||
+			val == "singleClusterRouting" && oldRouting.(bool) {
+			updateMask = append(updateMask[0:i], updateMask[i+1:]...)
+			break
+		}
+	}
 }
 // updateMask is a URL parameter but not present in the schema, so replaceVars
 // won't set it
