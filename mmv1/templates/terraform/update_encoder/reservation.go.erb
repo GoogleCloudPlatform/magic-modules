@@ -20,6 +20,10 @@
 -%>
 	newObj := make(map[string]interface{})
 	config := meta.(*Config)
+	maskId := ""
+	firstProject := true
+	urlUpdateMask := ""
+
 	if d.HasChange("share_settings") {
 		// Get name.
 		nameProp, err := expandComputeReservationName(d.Get("name"), d, config)
@@ -45,22 +49,63 @@
 		newMap := new.([]interface{})[0].(map[string]interface{})["project_map"]
 		before := oldMap.(*schema.Set)
 		after := newMap.(*schema.Set)
+
 		for _, raw := range after.Difference(before).List() {
 			original := raw.(map[string]interface{})
 			singleProject := make(map[string]interface{})
+			// set up project_map.
 			transformedProjectId := original["project_id"]
 			if val := reflect.ValueOf(transformedProjectId); val.IsValid() && !isEmptyValue(val) {
 				singleProject["projectId"] = transformedProjectId
 			}
 			transformedId, err := expandString(original["id"], d, config)
 			if err != nil {
-				return nil, err
+				return newObj, nil
 			}
 			projectMap[transformedId] = singleProject
+			// add added projects to updateMask
+			if firstProject != true {
+				maskId = fmt.Sprintf("%s%s", "&paths=shareSettings.projectMap.", original["project_id"])
+			} else {
+				maskId = fmt.Sprintf("%s%s", "?paths=shareSettings.projectMap.", original["project_id"])
+				firstProject = false
+			}
+			decodedPath, _ := url.QueryUnescape(maskId)
+			urlUpdateMask = urlUpdateMask + decodedPath
 		}
 		transformed["projectMap"] = projectMap
 		newObj["shareSettings"] = transformed
+
+		// add removed projects to updateMask
+		firstProject = true
+		for _, raw := range before.Difference(after).List() {
+			original := raw.(map[string]interface{})
+			// To remove a project we need project number.
+			projectId := fmt.Sprintf("%s", original["project_id"])
+			projectIdOrNum := projectId
+			_, err := strconv.Atoi(projectId)
+			// convert id to number.
+			if err != nil {
+				config := meta.(*Config)
+				project, err := config.NewResourceManagerClient(config.userAgent).Projects.Get(projectId).Do()
+				if err != nil {
+					return newObj, nil
+				}
+				projectNum := project.ProjectNumber
+				projectIdOrNum = fmt.Sprintf("%d", projectNum)
+			}
+			if firstProject != true {
+				maskId = fmt.Sprintf("%s%s", "&paths=shareSettings.projectMap.", projectIdOrNum)
+			} else {
+				maskId = fmt.Sprintf("%s%s", "?paths=shareSettings.projectMap.", projectIdOrNum)
+				firstProject = false
+			}
+			decodedPath, _ := url.QueryUnescape(maskId)
+			urlUpdateMask = urlUpdateMask + decodedPath
+		}
+		newObj["urlUpdateMask"] = urlUpdateMask
 	}
+
 	// Resize.
 	if obj["specificReservation"] != nil {
 		count := obj["specificReservation"].(map[string]interface{})["count"]

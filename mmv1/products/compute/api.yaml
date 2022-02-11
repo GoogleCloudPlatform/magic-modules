@@ -14093,9 +14093,9 @@ objects:
     name: 'Reservation'
     base_url: projects/{{project}}/zones/{{zone}}/reservations
     update_verb: :PATCH
+    update_url: projects/{{project}}/zones/{{zone}}/reservations/{{name}}
     update_mask: true
     collection_url_key: 'items'
-    input: true
     has_self_link: true
     description: |
       Represents a reservation resource. A reservation ensures that capacity is
@@ -14145,6 +14145,7 @@ objects:
           Creation timestamp in RFC3339 text format.
       - !ruby/object:Api::Type::String
         name: 'description'
+        input: true
         description: |
           An optional description of this resource.
       - !ruby/object:Api::Type::Integer
@@ -14155,6 +14156,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         required: true
+        input: true
         description: |
           Name of the resource. Provided by the client when the resource is
           created. The name must be 1-63 characters long, and comply with
@@ -14171,6 +14173,7 @@ objects:
           reservations that are tied to a commitment.
       - !ruby/object:Api::Type::Boolean
         name: 'specificReservationRequired'
+        input: true
         # Not a hard API default, but this should help avoid a unset/true/false
         # trinary.
         default_value: false
@@ -14185,8 +14188,8 @@ objects:
           The status of the reservation.
       - !ruby/object:Api::Type::NestedObject
         name: 'shareSettings'
-        update_verb: :PATCH
-        update_url: projects/{{project}}/zones/{{zone}}/reservations/{{name}}
+#        update_verb: :PATCH
+#        update_url: projects/{{project}}/zones/{{zone}}/reservations/{{name}}
         description: |
           The share setting for reservations.
         properties:
@@ -14199,8 +14202,6 @@ objects:
               Type of sharing for this shared-reservation
           - !ruby/object:Api::Type::Map
             name: 'projectMap'
-            update_verb: :PATCH
-            update_url: projects/{{project}}/zones/{{zone}}/reservations/{{name}}
             description: |
               A map of project number and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
             key_name: id
