@@ -1,0 +1,10 @@
+# [START cloud_sql_postgres_instance_80_db_n1_s2]
+resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
+  name             = "<%= ctx[:vars]['database_instance_name'] %>"
+  region           = "us-central1"
+  database_version = "POSTGRES_12"
+  settings {
+    tier = "db-custom-2-7680"
+  }
+}
+# [START cloud_sql_postgres_instance_80_db_n1_s2]

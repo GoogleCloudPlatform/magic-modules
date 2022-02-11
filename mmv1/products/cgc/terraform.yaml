@@ -30,6 +30,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "deletion_protection"
           - "root_password"
       - !ruby/object:Provider::Terraform::Examples
+        name: "sql_database_instance_postgres"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "instance"
+        vars:
+          database_instance_name: "postgres-instance"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+          - "root_password"
+      - !ruby/object:Provider::Terraform::Examples
         name: "sql_database_instance_my_sql"
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "instance"
