@@ -1,0 +1,23 @@
+resource "google_cloud_deploy_target" "<%= ctx[:primary_resource_id] %>" {
+  name          = "<%= ctx[:vars]['name'] %>"
+  description   = "Target Cluster"
+  annotations = {
+    generated-by = "magic-modules"
+  }
+  labels = {
+    env = "dev"
+  }
+  gke {
+    cluster = "${data.google_project.project.id}/locations/us-central1/clusters/dev"
+  }
+  execution_configs {
+    usages = ["RENDER", "DEPLOY"]
+    service_account = data.google_app_engine_default_service_account.default.email
+  }
+}
+
+data "google_project" "project" {
+}
+
+data "google_app_engine_default_service_account" "default" {
+}

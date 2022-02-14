@@ -1,0 +1,234 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: CloudDeploy
+display_name: Cloud Deploy
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://clouddeploy.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: True
+    allowed:
+      - True
+      - False
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+objects:
+  - !ruby/object:Api::Resource
+    name: 'DeliveryPipeline'
+    base_url: projects/{{project}}/locations/{{region}}/deliveryPipelines
+    self_link: 'projects/{{project}}/locations/{{region}}/deliveryPipelines/{{name}}'
+    create_url: projects/{{project}}/locations/{{region}}/deliveryPipelines?deliveryPipelineId={{name}}
+    input: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/deploy/docs'
+      api: 'https://cloud.google.com/deploy/docs/api/reference/rest/v1/projects.locations.deliveryPipelines'
+    description: |-
+      A DeliveryPipeline defines a pipeline through which a Skaffold configuration can progress.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        description: The region of the DeliveryPipeline Store. eg us-central1
+        url_param_only: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The name of the DeliveryPipeline. This value may be up to 60 characters, and valid characters are [a-z0-9_]. The first character cannot be a number.
+        input: true
+        url_param_only: true
+        pattern: projects/{{project}}/locations/{{region}}/deliveryPipelines/{{name}}
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: Description of the DeliveryPipeline.
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          The timestamp of when the DeliveryPipeline was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: |
+          The timestamp of when the DeliveryPipeline was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'etag'
+        output: true
+        description: |
+          This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          Resource labels to represent user-provided metadata.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'annotations'
+        description: |
+          User annotations. These attributes can only be set and used by the user, and not by Google Cloud Deploy.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'serialPipeline'
+        required: true
+        description: |
+          SerialPipeline defines a sequential set of stages for a DeliveryPipeline.
+        properties:
+          - !ruby/object:Api::Type::Array
+            required: true
+            name: 'stages'
+            description: |
+              Stage specifies a location to which to deploy.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'targetId'
+                  required: true
+                  input: true
+                  description: |
+                    The targetId to which this stage points. This field refers exclusively to the last segment of a target name.
+                    For example, this field would just be my-target (rather than projects/project/locations/location/targets/my-target).
+                    The location of the Target is inferred to be the same as the location of the DeliveryPipeline that contains this Stage.
+                - !ruby/object:Api::Type::Array
+                  name: 'profiles'
+                  item_type: Api::Type::String
+                  input: true
+                  description: |
+                    Skaffold profiles to use when rendering the manifest for this stage's Target.
+  - !ruby/object:Api::Resource
+    name: 'Target'
+    base_url: projects/{{project}}/locations/{{region}}/targets
+    self_link: 'projects/{{project}}/locations/{{region}}/targets/{{name}}'
+    create_url: projects/{{project}}/locations/{{region}}/targets?targetId={{name}}
+    input: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/deploy/docs'
+      api: 'https://cloud.google.com/deploy/docs/api/reference/rest/v1/projects.locations.targets'
+    description: |-
+      A Target defines a location to which a Skaffold configuration can be deployed.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        description: The region of the Target Store. eg us-central1
+        url_param_only: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The name of the Target. This value may be up to 60 characters, and valid characters are [a-z0-9_]. The first character cannot be a number.
+        input: true
+        url_param_only: true
+        pattern: projects/{{project}}/locations/{{region}}/targets/{{name}}
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: Description of the Target.
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          The timestamp of when the Target was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: |
+          The timestamp of when the Target was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'etag'
+        output: true
+        description: |
+          This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          Resource labels to represent user-provided metadata.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'annotations'
+        description: |
+          User annotations. These attributes can only be set and used by the user, and not by Google Cloud Deploy.
+      - !ruby/object:Api::Type::Boolean
+        name: 'requireApproval'
+        description: |
+          Whether or not the Target requires approval.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'gke'
+        description: |
+          Information specifying a GKE Cluster.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'cluster'
+            exactly_one_of:
+              - gke.0.cluster
+              - anthos_cluster.0.membership
+            description: |
+              Information specifying a GKE Cluster. Format is `projects/{projectId}/locations/{locationId}/clusters/{cluster_id}.
+          - !ruby/object:Api::Type::Boolean
+            name: 'internalIp'
+            description: |
+              If true, cluster is accessed using the private IP address of the control plane endpoint. Otherwise, the default IP address of the control plane endpoint is used.
+              The default IP address is the private IP address for clusters with private control-plane endpoints and the public IP address otherwise.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'anthosCluster'
+        description: |
+          Information specifying a GKE Cluster.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'membership'
+            exactly_one_of:
+              - gke.0.cluster
+              - anthos_cluster.0.membership
+            description: |
+              Membership of the GKE Hub-registered cluster to which to apply the Skaffold configuration. Format is projects/{project}/locations/{location}/memberships/{membership_name}.
+      - !ruby/object:Api::Type::Array
+        name: 'executionConfigs'
+        description: |
+          Configurations for all execution that relates to this Target. Each ExecutionEnvironmentUsage value may only be used in a single configuration;
+          using the same value multiple times is an error. When one or more configurations are specified, they must include the RENDER and DEPLOY ExecutionEnvironmentUsage values.
+          When no configurations are specified, execution will use the default specified in DefaultPool.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: 'usages'
+              required: true
+              item_type: Api::Type::String
+              input: true
+              description: |
+                Possible usages of this configuration.
+            - !ruby/object:Api::Type::String
+              name: 'serviceAccount'
+              description: |
+                Google service account to use for execution. If unspecified, the project execution service account (-compute@developer.gserviceaccount.com) will be used.
+            - !ruby/object:Api::Type::String
+              name: 'artifactStorage'
+              description: |
+                Cloud Storage location where execution outputs should be stored. This can either be a bucket ("gs://my-bucket") or a path within a bucket ("gs://my-bucket/my-dir").
+                If unspecified, a default bucket located in the same region will be used.
+            - !ruby/object:Api::Type::String
+              name: 'workerPool'
+              description: |
+                Resource name of the Cloud Build worker pool to use. The format is projects/{project}/locations/{location}/workerPools/{pool}.
