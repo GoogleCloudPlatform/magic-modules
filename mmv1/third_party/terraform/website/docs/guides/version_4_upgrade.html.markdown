@@ -529,3 +529,6 @@ Terraform only detected drift when the field had been set in config explicitly.
 
 Previously, the default value of `location` was `US`. In an attempt to avoid allowing invalid 
 conbination of `storageClass` value and default `location` value, `location` field is now required.
+
+
+testing
