@@ -243,6 +243,8 @@ steps:
       args:
           - $_PR_NUMBER
           - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
           - "25"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-vcr-tester'
