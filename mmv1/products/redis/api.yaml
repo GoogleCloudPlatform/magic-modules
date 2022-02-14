@@ -328,7 +328,7 @@ objects:
               name: 'cert'
               output: true
               description: |
-                Serial number, as extracted from the certificate.
+                The certificate data in PEM format.
             - !ruby/object:Api::Type::String
               name: 'createTime'
               output: true
