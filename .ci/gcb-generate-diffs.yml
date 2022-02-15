@@ -238,7 +238,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/gcb-terraform-vcr-tester'
       id: gcb-tpg-vcr-test
-      secretEnv: ["GITHUB_TOKEN"]
+      secretEnv: ["GITHUB_TOKEN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_ORG", "GOOGLE_ORG_DOMAIN", "GOOGLE_BILLING_ACCOUNT"]
       waitFor: ["diff"]
       args:
           - $_PR_NUMBER
@@ -268,3 +268,10 @@ secrets:
     - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/teamcity-token
       secretEnv:
           TEAMCITY_TOKEN: CiQAth83aSgKrb5ASI5XwE+yv62KbNtNG+O9gKXJzoflm65H7fESkwEASc1NF0oM3pHb5cUBAHcXZqFjEJrF4eGowPycUpKDmEncuQQSkm8v+dswSNXTXnX2C/reLpw9uGTw7G+K1kqA0sVrzYG3sTdDf/IcS//uloAerUff2wVIlV5rxV357PMkBl5dGyybnKMybgrXGl+CcW9PDLAwqfELWrr5zTSHy799dAhJZi1Wb5KbImmvvU5Z46g=
+    - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/environment-keyring/cryptoKeys/ci-project-key
+      secretEnv:
+          GOOGLE_PROJECT: CiQAis6xrDDU4Wcxn5s8Y790IMxTUEe2d3SaYEXUGScHfaLjOw8SPwDOc1nLe6Yz0zzA0mcYTsXaeGSFYu7uQ5+QCtTProJWRv2ITrNwCS3AF/kvMCrHvltx7O1CZnJveutlVpZH3w==
+          GOOGLE_PROJECT_NUMBER: CiQAis6xrI1acdU70fzEoGjhHjY8pkaxe70elqTta/DNunxU/WMSNgDOc1nLcMorWf2UmT286zagIsEBc2uliBqC/95aqG1gMpWY9FA74UY/F//4nf1uQS6CIpbymQ==
+          GOOGLE_ORG: CiQAis6xrHFon9Jttc+4n2yYzZ92kaX5vPnz80NJrctWOq9BN+USNQDOc1nLiPHtfp1feWj8fS/dg3X9gOKB9NrthAv2BfJq3ZTg2YGNMLKzoYbvnxFigd1TWMbS
+          GOOGLE_ORG_DOMAIN: CiQAis6xrGrkuYXv9D9yng1BQ5RIt2vm59GMjKgJd3NU5eQDf/4SSwDOc1nLZlvBClvdGK+BJ69RTnLxa8dgkIQBL2euwFscEcen3fNJGKnQSNldBEXjX7Gb6YfsMe2Hh7cLoHFZddz7TLnbSE/que9jGA==
+          GOOGLE_BILLING_ACCOUNT: CiQAis6xrGyvnmGipEEjCQVUzu3o1H4XRJSsp/B8A0IFqwRwnogSPQDOc1nLdG/+VCWpKtYtbEl12+luWkHmOYn/VtkDuMkz3bCj2DNbcuLw2fgvmkha1IjnouGPIah0qLkDmTU=
