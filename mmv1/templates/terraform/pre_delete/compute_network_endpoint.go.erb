@@ -3,7 +3,9 @@ instanceProp, err := expandNestedComputeNetworkEndpointInstance(d.Get("instance"
 if err != nil {
 	return err
 }
-toDelete["instance"] = instanceProp
+if instanceProp != "" {
+	toDelete["instance"] = instanceProp
+}
 
 portProp, err := expandNestedComputeNetworkEndpointPort(d.Get("port"), d, config)
 if err != nil {

@@ -13,6 +13,12 @@ resource "google_compute_network_endpoint_group" "default" {
   network_endpoint_type = "GCE_VM_IP_PORT"
 }
 
+resource "google_compute_network_endpoint" "default-endpoint" {
+  network_endpoint_group = google_compute_network_endpoint_group.default.name
+  port       = google_compute_network_endpoint_group.default.default_port
+  ip_address = "127.0.0.1"
+}
+
 // Hybrid connectivity NEG
 resource "google_compute_network_endpoint_group" "hybrid" {
   name                  = "<%= ctx[:vars]['hybrid_neg_name'] %>"
