@@ -671,6 +671,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       method_name_separator: '/'
       fetch_iam_policy_verb: :GET
       parent_resource_attribute: 'name'
+      min_version: beta
       import_format: ["projects/{{project}}/zones/{{zone}}/disks/{{name}}", "{{name}}"]
       base_url: projects/{{project}}/zones/{{zone}}/disks/{{name}}
   DiskType: !ruby/object:Overrides::Terraform::ResourceOverride
