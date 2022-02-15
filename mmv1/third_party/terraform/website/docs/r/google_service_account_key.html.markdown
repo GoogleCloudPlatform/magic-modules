@@ -82,10 +82,12 @@ resource "kubernetes_secret" "google-application-credentials" {
 The following arguments are supported:
 
 * `service_account_id` - (Required) The Service account id of the Key. This can be a string in the format
-`{ACCOUNT}` or `projects/{PROJECT_ID}/serviceAccounts/{ACCOUNT}`, where `{ACCOUNT}` is the **full** email address of the
-service account. If the `{ACCOUNT}` syntax is used, the project will be inferred from the account. Likewise,
-if the `projects/{PROJECT_ID}/serviceAccounts/{ACCOUNT}` syntax is used, substituting `-` as a wildcard for the
-`{PROJECT_ID}` will infer the project from the account.
+`{ACCOUNT}` or `projects/{PROJECT_ID}/serviceAccounts/{ACCOUNT}`. If the `{ACCOUNT}`-only syntax is used, either
+the **full** email address of the service account or its name can be specified as a value, in which case the project will
+automatically be inferred from the account. Otherwise, if the `projects/{PROJECT_ID}/serviceAccounts/{ACCOUNT}`
+syntax is used, the `{ACCOUNT}` specified can be the full email address of the service account, the service
+account's name, or the service account's unique id. Substituting `-` as a wildcard for the `{PROJECT_ID}` will infer the
+project from the account.
 
 * `key_algorithm` - (Optional) The algorithm used to generate the key. KEY_ALG_RSA_2048 is the default algorithm.
 Valid values are listed at
