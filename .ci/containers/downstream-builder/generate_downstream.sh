@@ -127,9 +127,9 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
 
     go mod tidy
 
-    # the downstream build can fail to build which results in a subsequent failure to push
+    # the following build can fail which results in a subsequent failure to push to tfv repository.
     # due to the uncertainty of tpg being able to build we will ignore errors here
-    # as these files are not critical to operation of tfv
+    # as these files are not critical to operation of tfv and not worth blocking the GA pipeline
     if [ "$COMMAND" == "downstream" ]; then
       set +e
     fi
