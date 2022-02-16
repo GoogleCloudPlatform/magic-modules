@@ -127,9 +127,16 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
 
     go mod tidy
 
-    make build
-    export TFV_CREATE_GENERATED_FILES=true
-    go test ./test -run "TestAcc.*_generated_offline"
+    # generate converted assets if we are not building the downstream
+    # this allows for a diff of the converted output to be presented to,
+    # and approved by, the developer
+    if [ "$COMMAND" != "downstream" ]; then
+      mkdir -p ./testdata/generatedconvert/
+      make build
+      export TFV_CREATE_GENERATED_FILES=true
+      go test ./test -run "TestAcc.*_generated_offline"
+    fi
+
     popd
 elif [ "$REPO" == "tf-oics" ]; then
     # use terraform generator with oics override
