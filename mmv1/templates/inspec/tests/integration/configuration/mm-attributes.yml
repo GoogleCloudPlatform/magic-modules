@@ -485,3 +485,15 @@ region_operation:
   operation_type: "compute.instanceGroupManagers.insert"
   status: DONE
   progress: 100
+
+sql_connect:
+  region: us-central1
+  database_version: POSTGRES_13
+  backend_type: SECOND_GEN
+  cert_serial_number: 0
+  common_name: "C=US,O=Google\\, Inc,CN=Google Cloud SQL Server CA,dnQualifier=68c79386-b63e-4998-8254-ba59729cdf78"
+  sha1_fingerprint: "80c5c611c0a591db967c7dda3467e23127288fed"
+  instance: test-pg
+
+public_delegated_prefix:
+  name: test

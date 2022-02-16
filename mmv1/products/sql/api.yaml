@@ -172,8 +172,8 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
-            Name of the Cloud SQL instance. This does not include the project
-            ID.
+          Name of the Cloud SQL instance. This does not include the project
+          ID.
         required: true
       # TODO(alexstephen): Investigate if worth to make this depend on compute's
       # region as a resource reference. (low priority, non launch blocker)
@@ -349,8 +349,8 @@ objects:
               - !ruby/object:Api::Type::Boolean
                 name: 'requireSsl'
                 description: |
-                    Whether the mysqld should default to 'REQUIRE X509' for
-                    users connecting over IP.
+                  Whether the mysqld should default to 'REQUIRE X509' for
+                  users connecting over IP.
           - !ruby/object:Api::Type::String
             name: 'tier'
             description: |
@@ -364,8 +364,8 @@ objects:
               The availabilityType define if your postgres instance is run zonal
               or regional.
             values:
-            - :ZONAL
-            - :REGIONAL
+              - :ZONAL
+              - :REGIONAL
           - !ruby/object:Api::Type::NestedObject
             name: 'backupConfiguration'
             description: |
@@ -555,6 +555,7 @@ objects:
       SSL certificate you must have the SSL Client Certificate and the
       associated SSL Client Key. The Client Key can be downloaded only when the
       SSL certificate is created with the insert method.
+    collection_url_key: 'items'
     identity:
       - sha1Fingerprint
     parameters:
@@ -692,7 +693,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
-            The name of the source representation instance. Use any valid Cloud SQL instance name.
+          The name of the source representation instance. Use any valid Cloud SQL instance name.
         required: true
       - !ruby/object:Api::Type::String
         name: 'region'
@@ -727,9 +728,170 @@ objects:
               The externally accessible port for the source database server.
               Defaults to 3306.
 
-  # 'Operation' is not idempotent and will not be covered.
-  # (it is used internally to assert the state of operations being performed)
-  # | - !ruby/object:Api::Resource
-  # |   name: 'Operation'
-  # |   kind: 'sql#operation'
-  # |   base_url: projects/{{project}}/operations
+  - !ruby/object:Api::Resource
+    name: 'Connect'
+    kind: 'sql#connect'
+    description: |
+      Retrieves connect settings about a Cloud SQL instance.
+    base_url: projects/{{project}}/instances/{{instance}}/connectSettings
+    input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'region'
+        description: |
+          The region where you want your Cloud SQL replicas to reside.
+        required: true
+      - !ruby/object:Api::Type::Array
+        name: 'ipAddresses'
+        description: 'The assigned IP addresses for the instance.'
+        output: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'ipAddress'
+              description: 'The IP address assigned.'
+            - !ruby/object:Api::Type::Time
+              name: 'timeToRetire'
+              description: |
+                The due time for this IP to be retired in RFC 3339 format, for
+                example 2012-11-15T16:19:00.094Z. This field is only available
+                when the IP is scheduled to be retired.
+            - !ruby/object:Api::Type::Enum
+              name: 'type'
+              description: |
+                The type of this IP address. A PRIMARY address is an address
+                that can accept incoming connections. An OUTGOING address is the
+                source address of connections originating from the instance, if
+                supported.
+              values:
+                - :PRIMARY
+                - :OUTGOING
+      - !ruby/object:Api::Type::Enum
+        name: 'databaseVersion'
+        description: |
+          The MySQL version running on your source database server.
+        required: true
+        values:
+          - :MYSQL_5_5
+          - :MYSQL_5_6
+          - :MYSQL_5_7
+          - :MYSQL_8_0
+      - !ruby/object:Api::Type::Enum
+        name: 'backendType'
+        description: |
+          * FIRST_GEN: First Generation instance. MySQL only.
+          * SECOND_GEN: Second Generation instance or PostgreSQL instance.
+          * EXTERNAL: A database server that is not managed by Google.
+        values:
+          - :FIRST_GEN
+          - :SECOND_GEN
+          - :EXTERNAL
+      - !ruby/object:Api::Type::NestedObject
+        name: 'serverCaCert'
+        description: |
+          Configuration specific to on-premises instances.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'cert'
+            description: 'PEM representation of the X.509 certificate.'
+          - !ruby/object:Api::Type::String
+            name: 'certSerialNumber'
+            description: 'Serial number, as extracted from the certificate.'
+          - !ruby/object:Api::Type::String
+            name: 'commonName'
+            description: 'User supplied name. Constrained to [a-zA-Z.-_ ]+.'
+          - !ruby/object:Api::Type::String
+            name: 'sha1Fingerprint'
+            description: 'Sha1 Fingerprint.'
+          - !ruby/object:Api::Type::String
+            name: 'instance'
+            description: 'Name of the database instance.'
+          - !ruby/object:Api::Type::Time
+            name: 'createTime'
+            description: |
+              The time when the certificate was created in RFC 3339 format, for
+              example 2012-11-15T16:19:00.094Z.
+          - !ruby/object:Api::Type::Time
+            name: 'expirationTime'
+            description: |
+              The time when the certificate expires in RFC 3339 format, for example
+              2012-11-15T16:19:00.094Z.
+
+  - !ruby/object:Api::Resource
+    name: 'Operation'
+    kind: 'sql#operation'
+    base_url: 'projects/{{project}}/operations?instance={{instance}}'
+    self_link: 'projects/{{project}}/operations/{{operation}}'
+    has_self_link: true
+    collection_url_key: 'items'
+    description: |
+      Represents a SQL database inside the Cloud SQL instance, hosted in
+      Google's cloud.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'instance'
+        description: |
+          The name of the Cloud SQL instance. This does not include the project
+          ID.
+        required: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'user'
+        description: |
+          The email address of the user who initiated this operation.
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        input: true
+        description: |
+          An identifier that uniquely identifies the operation. You can use this identifier to retrieve the Operations
+          resource that has information about the operation.
+      - !ruby/object:Api::Type::Enum
+        name: 'status'
+        description: |
+          An Operation resource. For successful operations that return an Operation resource, only the fields relevant to the operation are populated in the resource.
+        values:
+          - :PENDING
+          - :RUNNING
+          - :DONE
+          - :SQL_OPERATION_STATUS_UNSPECIFIED
+        default_value: :SQL_OPERATION_STATUS_UNSPECIFIED
+      - !ruby/object:Api::Type::Enum
+        name: 'operationType'
+        description: |
+          An Operation resource. For successful operations that return an Operation resource, only the fields relevant to the operation are populated in the resource.
+        values:
+          - :SQL_OPERATION_TYPE_UNSPECIFIED
+          - :IMPORT
+          - :EXPORT
+          - :CREATE
+          - :UPDATE
+          - :DELETE
+          - :RESTART
+          - :BACKUP_VOLUME
+          - :DELETE_VOLUME
+          - :RESTORE_VOLUME
+          - :INJECT_USER
+          - :CLONE
+          - :STOP_REPLICA
+          - :START_REPLICA
+          - :START_REPLICA
+          - :CREATE_REPLICA
+          - :CREATE_USER
+          - :DELETE_USER
+          - :UPDATE_USER
+          - :CREATE_DATABASE
+          - :DELETE_DATABASE
+          - :CREATE_REPLICA
+          - :UPDATE_DATABASE
+          - :FAILOVER
+          - :DELETE_BACKUP
+          - :RECREATE_REPLICA
+          - :TRUNCATE_LOG
+          - :DEMOTE_MASTER
+          - :MAINTENANCE
+          - :RESCHEDULE_MAINTENANCE
+          - :START_EXTERNAL_SYNC
+        default_value: :SQL_OPERATION_TYPE_UNSPECIFIED
