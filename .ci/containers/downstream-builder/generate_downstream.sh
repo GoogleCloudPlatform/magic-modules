@@ -127,14 +127,20 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
 
     go mod tidy
 
-    # generate converted assets if we are not building the downstream
-    # this allows for a diff of the converted output to be presented to,
-    # and approved by, the developer
-    if [ "$COMMAND" != "downstream" ]; then
-      mkdir -p ./testdata/generatedconvert/
-      make build
-      export TFV_CREATE_GENERATED_FILES=true
-      go test ./test -run "TestAcc.*_generated_offline"
+    # the downstream build can fail to build which results in a subsequent failure to push
+    # due to the uncertainty of tpg being able to build we will ignore errors here
+    # as these files are not critical to operation of tfv
+    if [ "$COMMAND" == "downstream" ]; then
+      set +e
+    fi
+
+    mkdir -p ./testdata/generatedconvert/
+    make build
+    export TFV_CREATE_GENERATED_FILES=true
+    go test ./test -run "TestAcc.*_generated_offline"
+
+    if [ "$COMMAND" == "downstream" ]; then
+      set -e
     fi
 
     popd
