@@ -134,7 +134,6 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
       set +e
     fi
 
-    mkdir -p ./testdata/generatedconvert/
     make build
     export TFV_CREATE_GENERATED_FILES=true
     go test ./test -run "TestAcc.*_generated_offline"
