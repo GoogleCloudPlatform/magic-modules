@@ -85,6 +85,10 @@ objects:
           - build
         description: |
           Path, from the source root, to a file whose contents is used for the template. Either a filename or build template must be provided.
+      - !ruby/object:Api::Type::String
+        name: 'filter'
+        description: |
+          A Common Expression Language string.
       - !ruby/object:Api::Type::Array
         name: 'ignoredFiles'
         item_type: Api::Type::String
