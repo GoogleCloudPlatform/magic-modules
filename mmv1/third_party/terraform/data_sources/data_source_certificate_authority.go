@@ -7,7 +7,6 @@ import (
 )
 
 func dataSourcePrivatecaCertificateAuthority() *schema.Resource {
-
 	dsSchema := datasourceSchemaFromResourceSchema(resourcePrivatecaCertificateAuthority().Schema)
 	addRequiredFieldsToSchema(dsSchema, "project")
 
