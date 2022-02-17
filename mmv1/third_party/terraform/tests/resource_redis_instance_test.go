@@ -40,6 +40,7 @@ func TestAccRedisInstance_update(t *testing.T) {
 	})
 }
 
+// Validate that read replica is enabled on the instance without having to recreate
 func TestAccRedisInstance_updateReadReplicasMode(t *testing.T) {
 	t.Parallel()
 
@@ -73,6 +74,8 @@ func TestAccRedisInstance_updateReadReplicasMode(t *testing.T) {
 	})
 }
 
+/* Validate that read replica is enabled on the instance without recreate
+ * and secondaryIp is auto provisioned when passed as 'auto' */
 func TestAccRedisInstance_updateReadReplicasModeWithAutoSecondaryIp(t *testing.T) {
 	t.Parallel()
 
@@ -156,7 +159,7 @@ resource "google_redis_instance" "test" {
 `, name, lifecycleBlock)
 }
 
-func testAccRedisInstanceReadReplicasEnabledWithAutoSecondaryIp(name string, preventDestroy bool) string {
+func testAccRedisInstanceReadReplicasEnabledWithAutoSecondaryIP(name string, preventDestroy bool) string {
 	lifecycleBlock := ""
 	if preventDestroy {
 		lifecycleBlock = `
