@@ -130,7 +130,7 @@ module Api
           type: String, default: 'templates/terraform/iam/iam_attributes.tf.erb'
         )
         check :iam_policy_version, type: String
-        check :min_version, type: String, default: 'ga'
+        check :min_version, type: String
       end
     end
   end
