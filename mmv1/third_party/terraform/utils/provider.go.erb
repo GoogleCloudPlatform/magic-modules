@@ -363,8 +363,8 @@ products.each do |product|
 <%  end -%>
 <%
 	iam_policy = object&.iam_policy
-	unless iam_policy.nil? || iam_policy.exclude 
-		|| (iam_policy.min_version && iam_policy.min_version < version)
+	unless iam_policy.nil? || iam_policy.exclude ||
+		(iam_policy.min_version && iam_policy.min_version < version)
 	  iam_class_name = product_definition.name + object.name
 -%>
 	"<%= terraform_name -%>_iam_binding":              ResourceIamBinding(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc),
