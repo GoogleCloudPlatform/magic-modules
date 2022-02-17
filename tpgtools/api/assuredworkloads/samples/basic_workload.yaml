@@ -16,6 +16,15 @@ name: basic_workload
 resource: samples/basic.workload.json
 updates:
 - resource: samples/update.workload.json
+variables:
+- name: region
+  type: region
+- name: ring
+  type: resource_name
+- name: org_id
+  type: org_id
+- name: billing_account
+  type: billing_account
 versions:
 - ga
 - beta

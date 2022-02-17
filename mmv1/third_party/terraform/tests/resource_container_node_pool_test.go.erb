@@ -3,6 +3,9 @@ package google
 
 import (
 	"fmt"
+<% unless version.nil? || version == 'ga' -%>
+	"regexp"
+<% end -%>
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -220,45 +223,6 @@ func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_node_pool.with_workload_metadata_config",
 						"node_config.0.workload_metadata_config.0.mode", "GKE_METADATA"),
-				),
-			},
-			{
-				ResourceName:      "google_container_node_pool.with_workload_metadata_config",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func TestAccContainerNodePool_withWorkloadIdentityConfigDeprecated(t *testing.T) {
-	t.Parallel()
-
-	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccContainerNodePool_withWorkloadMetadataConfigNodeMetadata(cluster, np),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_container_node_pool.with_workload_metadata_config",
-						"node_config.0.workload_metadata_config.0.node_metadata", "SECURE"),
-				),
-			},
-			{
-				ResourceName:      "google_container_node_pool.with_workload_metadata_config",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccContainerNodePool_withWorkloadMetadataConfig(cluster, np),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_container_node_pool.with_workload_metadata_config",
-						"node_config.0.workload_metadata_config.0.mode", "GCE_METADATA"),
 				),
 			},
 			{
@@ -505,25 +469,6 @@ func TestAccContainerNodePool_withUpgradeSettings(t *testing.T) {
 				ResourceName:      "google_container_node_pool.with_upgrade_settings",
 				ImportState:       true,
 				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func TestAccContainerNodePool_withInvalidUpgradeSettings(t *testing.T) {
-	t.Parallel()
-
-	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccContainerNodePool_withUpgradeSettings(cluster, np, 0, 0),
-				ExpectError: regexp.MustCompile(`.?Max_surge and max_unavailable must not be negative and at least one of them must be greater than zero.*`),
 			},
 		},
 	})
@@ -965,7 +910,6 @@ resource "google_container_cluster" "cluster" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = "1.18"
 }
 
 resource "google_container_node_pool" "np" {
@@ -984,6 +928,104 @@ resource "google_container_node_pool" "np" {
 `, cluster, np)
 }
 <% end %>
+
+func TestAccContainerNodePool_gcfsConfig(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccContainerNodePool_gcfsConfig(cluster, np),
+			},
+			resource.TestStep{
+				ResourceName:            "google_container_node_pool.np",
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
+		},
+	})
+}
+
+func testAccContainerNodePool_gcfsConfig(cluster, np string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = "1.19"
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+
+  node_config {
+    machine_type = "n1-standard-8"
+    image_type = "COS_CONTAINERD"
+    gcfs_config {
+      enabled = true
+    }
+  }
+}
+`, cluster, np)
+}
+
+<% unless version == 'ga' -%>
+func TestAccContainerNodePool_compactPlacement(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_compactPlacement(cluster, np, "COMPACT"),
+			},
+			{
+				ResourceName:      "google_container_cluster.cluster",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccContainerNodePool_compactPlacement(cluster, np, placementType string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 2
+
+  node_config {
+    machine_type = "c2-standard-4"
+  }
+  placement_policy {
+    type = "%s"
+  }
+}
+`, cluster, np, placementType)
+}
+<% end -%>
 
 func testAccCheckContainerNodePoolDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
@@ -1009,7 +1051,7 @@ func testAccCheckContainerNodePoolDestroyProducer(t *testing.T) func(s *terrafor
 					attributes["cluster"],
 					attributes["name"],
 				)
-				_, err = config.NewContainerBetaClient(config.userAgent).Projects.Locations.Clusters.NodePools.Get(name).Do()
+				_, err = config.NewContainerClient(config.userAgent).Projects.Locations.Clusters.NodePools.Get(name).Do()
 			}
 
 			if err == nil {
@@ -1468,6 +1510,9 @@ resource "google_container_node_pool" "with_workload_metadata_config" {
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
   node_config {
+<% unless  version == 'ga' -%>
+    spot         = true
+<% end -%>
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
       "https://www.googleapis.com/auth/monitoring",
@@ -1475,38 +1520,6 @@ resource "google_container_node_pool" "with_workload_metadata_config" {
 
     workload_metadata_config {
       mode = "GCE_METADATA"
-    }
-  }
-}
-`, cluster, np)
-}
-
-func testAccContainerNodePool_withWorkloadMetadataConfigNodeMetadata(cluster, np string) string {
-	return fmt.Sprintf(`
-data "google_container_engine_versions" "central1a" {
-  location = "us-central1-a"
-}
-
-resource "google_container_cluster" "cluster" {
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 1
-  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
-}
-
-resource "google_container_node_pool" "with_workload_metadata_config" {
-  name               = "%s"
-  location           = "us-central1-a"
-  cluster            = google_container_cluster.cluster.name
-  initial_node_count = 1
-  node_config {
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/logging.write",
-      "https://www.googleapis.com/auth/monitoring",
-    ]
-
-    workload_metadata_config {
-      node_metadata = "SECURE"
     }
   }
 }
@@ -1530,7 +1543,7 @@ resource "google_container_cluster" "cluster" {
   min_master_version = data.google_container_engine_versions.central1a.latest_master_version
 
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
 }
 
@@ -1848,7 +1861,7 @@ resource "google_kms_key_ring" "keyring" {
 
 resource "google_kms_crypto_key" "example-key" {
   name            = "%s-kms-key"
-  key_ring        = google_kms_key_ring.keyring.self_link
+  key_ring        = google_kms_key_ring.keyring.id
   rotation_period = "100000s"
 }
 
@@ -1867,7 +1880,7 @@ resource "google_container_node_pool" "with_boot_disk_kms_key" {
 
   node_config {
     image_type = "COS_CONTAINERD"
-    boot_disk_kms_key = google_kms_crypto_key.example-key.self_link
+    boot_disk_kms_key = google_kms_crypto_key.example-key.id
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
       "https://www.googleapis.com/auth/monitoring",
@@ -1925,7 +1938,7 @@ resource "google_container_node_pool" "np_with_gpu" {
   initial_node_count = 1
 
   node_config {
-    machine_type = "n1-standard-1"  // can't be e2 because of accelerator
+    machine_type = "a2-highgpu-1g"  // can't be e2 because of accelerator
     disk_size_gb = 32
 
     oauth_scopes = [
@@ -1942,7 +1955,8 @@ resource "google_container_node_pool" "np_with_gpu" {
     image_type      = "COS"
 
     guest_accelerator {
-      type  = "nvidia-tesla-k80"
+      type  = "nvidia-tesla-a100"
+      gpu_partition_size = "1g.5gb"
       count = 1
     }
   }

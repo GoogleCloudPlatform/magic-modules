@@ -110,22 +110,22 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
-      id: tgc-head
+      id: tfv-head
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged"]
+      waitFor: ["merged", "tpg-head"]
       args:
           - 'head'
-          - 'tf-conversion'
+          - 'terraform-validator'
           - 'ga'
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
-      id: tgc-base
+      id: tfv-base
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged"]
+      waitFor: ["merged", "tpg-base"]
       args:
           - 'base'
-          - 'tf-conversion'
+          - 'terraform-validator'
           - 'ga'
           - $_PR_NUMBER
 
@@ -171,16 +171,44 @@ steps:
       args:
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/terraform-google-conversion-tester'
-      id: tgc-test
+    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester'
+      id: tfv-test
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tgc-head", "tgc-base"]
+      waitFor: ["tfv-head", "tfv-base"]
+      args:
+          - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - "20"  # Build step
+
+    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
+      id: tfv-test-integration-0.12.31
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["tfv-head", "tfv-base"]
+      env:
+        - TERRAFORM_VERSION=0.12.31
+        - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
       args:
           - $_PR_NUMBER
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
           - "21"  # Build step
+
+    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
+      id: tfv-test-integration-0.13.7
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["tfv-head", "tfv-base"]
+      env:
+        - TERRAFORM_VERSION=0.13.7
+        - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
+      args:
+          - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - "22"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpgb-test
@@ -193,7 +221,7 @@ steps:
           - $BUILD_ID
           - $PROJECT_ID
           - GoogleCloudPlatform/magic-modules
-          - "22"  # Build step
+          - "23"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpg-test
@@ -206,7 +234,18 @@ steps:
           - $BUILD_ID
           - $PROJECT_ID
           - GoogleCloudPlatform/magic-modules
-          - "23"  # Build step
+          - "24"  # Build step
+
+    - name: 'gcr.io/graphite-docker-images/gcb-terraform-vcr-tester'
+      id: gcb-tpg-vcr-test
+      secretEnv: ["GITHUB_TOKEN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_ORG", "GOOGLE_ORG_DOMAIN", "GOOGLE_BILLING_ACCOUNT"]
+      waitFor: ["diff"]
+      args:
+          - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - "25"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-vcr-tester'
       id: tpg-vcr-test
@@ -229,3 +268,10 @@ secrets:
     - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/teamcity-token
       secretEnv:
           TEAMCITY_TOKEN: CiQAth83aSgKrb5ASI5XwE+yv62KbNtNG+O9gKXJzoflm65H7fESkwEASc1NF0oM3pHb5cUBAHcXZqFjEJrF4eGowPycUpKDmEncuQQSkm8v+dswSNXTXnX2C/reLpw9uGTw7G+K1kqA0sVrzYG3sTdDf/IcS//uloAerUff2wVIlV5rxV357PMkBl5dGyybnKMybgrXGl+CcW9PDLAwqfELWrr5zTSHy799dAhJZi1Wb5KbImmvvU5Z46g=
+    - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/environment-keyring/cryptoKeys/ci-project-key
+      secretEnv:
+          GOOGLE_PROJECT: CiQAis6xrDDU4Wcxn5s8Y790IMxTUEe2d3SaYEXUGScHfaLjOw8SPwDOc1nLe6Yz0zzA0mcYTsXaeGSFYu7uQ5+QCtTProJWRv2ITrNwCS3AF/kvMCrHvltx7O1CZnJveutlVpZH3w==
+          GOOGLE_PROJECT_NUMBER: CiQAis6xrI1acdU70fzEoGjhHjY8pkaxe70elqTta/DNunxU/WMSNgDOc1nLcMorWf2UmT286zagIsEBc2uliBqC/95aqG1gMpWY9FA74UY/F//4nf1uQS6CIpbymQ==
+          GOOGLE_ORG: CiQAis6xrHFon9Jttc+4n2yYzZ92kaX5vPnz80NJrctWOq9BN+USNQDOc1nLiPHtfp1feWj8fS/dg3X9gOKB9NrthAv2BfJq3ZTg2YGNMLKzoYbvnxFigd1TWMbS
+          GOOGLE_ORG_DOMAIN: CiQAis6xrGrkuYXv9D9yng1BQ5RIt2vm59GMjKgJd3NU5eQDf/4SSwDOc1nLZlvBClvdGK+BJ69RTnLxa8dgkIQBL2euwFscEcen3fNJGKnQSNldBEXjX7Gb6YfsMe2Hh7cLoHFZddz7TLnbSE/que9jGA==
+          GOOGLE_BILLING_ACCOUNT: CiQAis6xrGyvnmGipEEjCQVUzu3o1H4XRJSsp/B8A0IFqwRwnogSPQDOc1nLdG/+VCWpKtYtbEl12+luWkHmOYn/VtkDuMkz3bCj2DNbcuLw2fgvmkha1IjnouGPIah0qLkDmTU=

@@ -143,6 +143,121 @@ objects:
           The ID of the instance or a fully qualified identifier for the instance.
         required: true
         input: true
+      - !ruby/object:Api::Type::NestedObject
+        name: maintenancePolicy
+        description: Maintenance policy for an instance.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'createTime'
+            output: true
+            description: |
+              Output only. The time when the policy was created.
+              A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+              resolution and up to nine fractional digits.
+          - !ruby/object:Api::Type::String
+            name: 'updateTime'
+            output: true
+            description: |
+              Output only. The time when the policy was last updated.
+              A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+              resolution and up to nine fractional digits.
+          - !ruby/object:Api::Type::String
+            name: 'description'
+            description: |
+              Optional. Description of what this policy is for.
+              Create/Update methods return INVALID_ARGUMENT if the
+              length is greater than 512.
+          - !ruby/object:Api::Type::Array
+            name: 'weeklyMaintenanceWindow'
+            description: |
+              Optional. Maintenance window that is applied to resources covered by this policy.
+              Minimum 1. For the current version, the maximum number
+              of weekly_window is expected to be one.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: 'day'
+                  required: true
+                  description: |
+                    Required. The day of week that maintenance updates occur.
+
+                    - DAY_OF_WEEK_UNSPECIFIED: The day of the week is unspecified.
+                    - MONDAY: Monday
+                    - TUESDAY: Tuesday
+                    - WEDNESDAY: Wednesday
+                    - THURSDAY: Thursday
+                    - FRIDAY: Friday
+                    - SATURDAY: Saturday
+                    - SUNDAY: Sunday
+                  values:
+                    - :DAY_OF_WEEK_UNSPECIFIED
+                    - :MONDAY
+                    - :TUESDAY
+                    - :WEDNESDAY
+                    - :THURSDAY
+                    - :FRIDAY
+                    - :SATURDAY
+                    - :SUNDAY
+                - !ruby/object:Api::Type::String
+                  name: 'duration'
+                  output: true
+                  description: |
+                    Output only. Duration of the maintenance window.
+                    The current window is fixed at 1 hour.
+                    A duration in seconds with up to nine fractional digits,
+                    terminated by 's'. Example: "3.5s".
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'startTime'
+                  required: true
+                  allow_empty_object: true
+                  send_empty_value: true
+                  description: |
+                    Required. Start time of the window in UTC time.
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: 'hours'
+                      description: |
+                        Hours of day in 24 hour format. Should be from 0 to 23.
+                        An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                    - !ruby/object:Api::Type::Integer
+                      name: 'minutes'
+                      description: |
+                        Minutes of hour of day. Must be from 0 to 59.
+                    - !ruby/object:Api::Type::Integer
+                      name: 'seconds'
+                      description: |
+                        Seconds of minutes of the time. Must normally be from 0 to 59.
+                        An API may allow the value 60 if it allows leap-seconds.
+                    - !ruby/object:Api::Type::Integer
+                      name: 'nanos'
+                      description: |
+                        Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+      - !ruby/object:Api::Type::NestedObject
+        name: maintenanceSchedule
+        description: Upcoming maintenance schedule.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'startTime'
+            output: true
+            description: |
+              Output only. The start time of any upcoming scheduled maintenance for this instance.
+              A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+              resolution and up to nine fractional digits.
+          - !ruby/object:Api::Type::String
+            name: 'endTime'
+            output: true
+            description: |
+              Output only. The end time of any upcoming scheduled maintenance for this instance.
+              A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+              resolution and up to nine fractional digits.
+          - !ruby/object:Api::Type::String
+            name: 'scheduleDeadlineTime'
+            output: true
+            description: |
+              Output only. The deadline that the maintenance schedule start time
+              can not go beyond, including reschedule.
+              A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+              resolution and up to nine fractional digits.
       - !ruby/object:Api::Type::Integer
         name: memorySizeGb
         description: Redis memory size in GiB.
@@ -192,7 +307,7 @@ objects:
         description: |
           The TLS mode of the Redis instance, If not provided, TLS is disabled for the instance.
 
-          - SERVER_AUTHENTICATION: Client to Server traffic encryption enabled with server authentcation
+          - SERVER_AUTHENTICATION: Client to Server traffic encryption enabled with server authentication
         values:
           - :SERVER_AUTHENTICATION
           - :DISABLED
@@ -213,7 +328,7 @@ objects:
               name: 'cert'
               output: true
               description: |
-                Serial number, as extracted from the certificate.
+                The certificate data in PEM format.
             - !ruby/object:Api::Type::String
               name: 'createTime'
               output: true
@@ -229,3 +344,59 @@ objects:
               output: true
               description: |
                 Sha1 Fingerprint of the certificate.
+      - !ruby/object:Api::Type::Integer
+        name: replicaCount
+        description: |
+          Optional. The number of replica nodes. The valid range for the Standard Tier with 
+          read replicas enabled is [1-5] and defaults to 2. If read replicas are not enabled
+          for a Standard Tier instance, the only valid value is 1 and the default is 1. 
+          The valid value for basic tier is 0 and the default is also 0.
+        min_version: beta
+      - !ruby/object:Api::Type::Array
+        name: nodes
+        description: |
+          Output only. Info per node.
+        output: true
+        min_version: beta
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'id'
+              output: true
+              description: |
+                Node identifying string. e.g. 'node-0', 'node-1'
+            - !ruby/object:Api::Type::String
+              name: 'zone'
+              output: true
+              description: |
+                Location of the node.
+      - !ruby/object:Api::Type::String
+        name: readEndpoint
+        description: |
+          Output only. Hostname or IP address of the exposed readonly Redis endpoint. Standard tier only.
+          Targets all healthy replica nodes in instance. Replication is asynchronous and replica nodes
+          will exhibit some lag behind the primary. Write requests must target 'host'.
+        output: true
+        min_version: beta
+      - !ruby/object:Api::Type::Integer
+        name: readEndpointPort
+        description: |
+          Output only. The port number of the exposed readonly redis endpoint. Standard tier only. 
+          Write requests should target 'port'.
+        output: true
+        min_version: beta
+      - !ruby/object:Api::Type::Enum
+        name: readReplicasMode
+        description: |
+          Optional. Read replica mode. Can only be specified when trying to create the instance.
+          If not set, Memorystore Redis backend will default to READ_REPLICAS_DISABLED.
+          - READ_REPLICAS_DISABLED: If disabled, read endpoint will not be provided and the 
+          instance cannot scale up or down the number of replicas.
+          - READ_REPLICAS_ENABLED: If enabled, read endpoint will be provided and the instance 
+          can scale up and down the number of replicas.
+        values:
+          - :READ_REPLICAS_DISABLED
+          - :READ_REPLICAS_ENABLED
+        default_value: :READ_REPLICAS_DISABLED
+        min_version: beta
+        input: true

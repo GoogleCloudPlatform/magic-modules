@@ -123,8 +123,12 @@ module Provider
     # 'a_field', 'parent_field.0.child_name'). Returns nil if the property
     # is not included in the resource's properties and removes keys that have
     # been flattened
+    # FYI: Fields that have been renamed should use the new name, however, flattened
+    # fields still need to be included, ie:
+    # flattenedField > newParent > renameMe should be passed to this function as
+    # flattened_field.0.new_parent.0.im_renamed
     # TODO(emilymye): Change format of input for
-    # xactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
+    # exactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
     # convert to snake in this method
     def get_property_schema_path(schema_path, resource)
       nested_props = resource.properties
@@ -132,6 +136,8 @@ module Provider
       path_tkns = schema_path.split('.0.').map do |pname|
         camel_pname = pname.camelize(:lower)
         prop = nested_props.find { |p| p.name == camel_pname }
+        # if we couldn't find it, see if it was renamed at the top level
+        prop = nested_props.find { |p| p.name == schema_path } if prop.nil?
         return nil if prop.nil?
 
         nested_props = prop.nested_properties || []
@@ -179,7 +185,7 @@ module Provider
     # per resource. The resource.erb template forms the basis of a single
     # GCP Resource on Terraform.
     def generate_resource(pwd, data, generate_code, generate_docs)
-      if generate_code
+      if generate_code && !data.object.cgc_only
         FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
         data.generate(pwd,
                       '/templates/terraform/resource.erb',
@@ -193,6 +199,8 @@ module Provider
     end
 
     def generate_documentation(pwd, data)
+      return if data.object.cgc_only
+
       target_folder = data.output_folder
       target_folder = File.join(target_folder, 'website', 'docs', 'r')
       FileUtils.mkpath target_folder
@@ -223,7 +231,8 @@ module Provider
                 data.object.custom_code.custom_delete ||
                 data.object.custom_code.pre_delete ||
                 data.object.custom_code.post_delete ||
-                data.object.skip_delete
+                data.object.skip_delete ||
+                data.object.cgc_only
 
       file_name =
         "#{folder_name(data.version)}/resource_#{full_resource_name(data)}_sweeper_test.go"
@@ -241,6 +250,9 @@ module Provider
       data = build_object_data(pwd, @api.objects.first, output_folder, @target_version_name)
 
       data.object = @api.objects.select(&:autogen_async).first
+
+      return if data.object.cgc_only
+
       data.async = data.object.async
       FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
       data.generate(pwd,

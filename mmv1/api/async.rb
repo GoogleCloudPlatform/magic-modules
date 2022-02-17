@@ -26,7 +26,7 @@ module Api
     def validate
       super
 
-      check :operation, type: Operation, required: true
+      check :operation, type: Operation
       check :actions, default: %w[create delete update], type: ::Array, item_type: ::String
     end
 

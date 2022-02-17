@@ -39,6 +39,7 @@ const (
 	CustomizeDiff                      = "CUSTOMIZE_DIFF"
 	ImportFormat                       = "IMPORT_FORMAT"
 	AppendToBasePath                   = "APPEND_TO_BASE_PATH"
+	ReplaceInBasePath                  = "REPLACE_IN_BASE_PATH"
 	Mutex                              = "MUTEX"
 	PreCreate                          = "PRE_CREATE_FUNCTION"
 	PostCreate                         = "POST_CREATE_FUNCTION"
@@ -52,6 +53,7 @@ const (
 	CustomSerializer                   = "CUSTOM_SERIALIZER"
 	TerraformProductName               = "CUSTOM_TERRAFORM_PRODUCT_NAME"
 	UseDCLID                           = "USE_DCL_ID"
+	CustomTimeout                      = "CUSTOM_TIMEOUT"
 )
 
 // Field-level Overrides

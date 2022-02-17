@@ -61,7 +61,6 @@ func TestAccPubsubSubscription_update(t *testing.T) {
 
 	topic := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
 	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", randString(t, 10))
-	subscriptionLong := fmt.Sprintf("projects/%s/subscriptions/%s", getTestProjectFromEnv(), subscriptionShort)
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -79,9 +78,6 @@ func TestAccPubsubSubscription_update(t *testing.T) {
 			},
 			{
 				Config: testAccPubsubSubscription_basic(topic, subscriptionShort, "baz", 30),
-				Check: resource.TestCheckResourceAttr(
-					"google_pubsub_subscription.foo", "path", subscriptionLong,
-				),
 			},
 			{
 				ResourceName:      "google_pubsub_subscription.foo",

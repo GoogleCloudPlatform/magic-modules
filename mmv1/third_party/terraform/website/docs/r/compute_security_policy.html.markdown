@@ -62,32 +62,38 @@ The following arguments are supported:
 
 * `rule` - (Optional) The set of rules that belong to this policy. There must always be a default
     rule (rule with priority 2147483647 and match "\*"). If no rules are provided when creating a
-    security policy, a default rule with action "allow" will be added. Structure is documented below.
+    security policy, a default rule with action "allow" will be added. Structure is [documented below](#nested_rule).
 
-* `adaptive_protection_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for [Google Cloud Armor Adaptive Protection](https://cloud.google.com/armor/docs/adaptive-protection-overview?hl=en). Structure is documented below.
+* `adaptive_protection_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for [Google Cloud Armor Adaptive Protection](https://cloud.google.com/armor/docs/adaptive-protection-overview?hl=en). Structure is [documented below](#nested_adaptive_protection_config).
 
-The `rule` block supports:
+<a name="nested_rule"></a>The `rule` block supports:
 
 * `action` - (Required) Action to take when `match` matches the request. Valid values:
-  * "allow" : allow access to target
-  * "deny(status)" : deny access to target, returns the  HTTP response code specified (valid values are 403, 404 and 502)
+    * allow: allow access to target.
+    * deny(): deny access to target, returns the HTTP response code specified (valid values are 403, 404, and 502).
+    * rate_based_ban: limit client traffic to the configured threshold and ban the client if the traffic exceeds the threshold. Configure parameters for this action in RateLimitOptions. Requires rateLimitOptions to be set.
+    * redirect: redirect to a different target. This can either be an internal reCAPTCHA redirect, or an external URL-based redirect via a 302 response. Parameters for this action can be configured via redirectOptions.
+    * throttle: limit client traffic to the configured threshold. Configure parameters for this action in rateLimitOptions. Requires rateLimitOptions to be set for this.
 
 * `priority` - (Required) An unique positive integer indicating the priority of evaluation for a rule.
     Rules are evaluated from highest priority (lowest numerically) to lowest priority (highest numerically) in order.
 
 * `match` - (Required) A match condition that incoming traffic is evaluated against.
-    If it evaluates to true, the corresponding `action` is enforced. Structure is documented below.
+    If it evaluates to true, the corresponding `action` is enforced. Structure is [documented below](#nested_match).
 
 * `description` - (Optional) An optional description of this rule. Max size is 64.
 
 * `preview` - (Optional) When set to true, the `action` specified above is not enforced.
     Stackdriver logs for requests that trigger a preview action are annotated as such.
 
-The `match` block supports:
+* `rate_limit_options` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+    Must be specified if the `action` is "rate_based_bad" or "throttle". Cannot be specified for other actions. Structure is [documented below](#nested_rate_limit_options).
+
+<a name="nested_match"></a>The `match` block supports:
 
 * `config` - (Optional) The configuration options available when specifying `versioned_expr`.
     This field must be specified if `versioned_expr` is specified and cannot be specified if `versioned_expr` is not specified.
-    Structure is documented below.
+    Structure is [documented below](#nested_config).
 
 * `versioned_expr` - (Optional) Predefined rule expression. If this field is specified, `config` must also be specified.
     Available options:
@@ -95,24 +101,56 @@ The `match` block supports:
 
 * `expr` - (Optional) User defined CEVAL expression. A CEVAL expression is used to specify match criteria
     such as origin.ip, source.region_code and contents in the request header.
-    Structure is documented below.
+    Structure is [documented below](#nested_expr).
 
-The `config` block supports:
+<a name="nested_config"></a>The `config` block supports:
 
 * `src_ip_ranges` - (Required) Set of IP addresses or ranges (IPV4 or IPV6) in CIDR notation
     to match against inbound traffic. There is a limit of 10 IP ranges per rule. A value of '\*' matches all IPs
     (can be used to override the default behavior).
 
-The `expr` block supports:
+<a name="nested_expr"></a>The `expr` block supports:
 
 * `expression` - (Required) Textual representation of an expression in Common Expression Language syntax.
     The application context of the containing message determines which well-known feature set of CEL is supported.
 
-The `adaptive_protection_config` block supports:
+<a name="nested_rate_limit_options"></a>The `rate_limit_options` block supports:
 
-* `layer_7_ddos_defense_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for [Google Cloud Armor Adaptive Protection Layer 7 DDoS Defense](https://cloud.google.com/armor/docs/adaptive-protection-overview?hl=en). Structure is documented below.
+* `ban_duration_sec` - (Optional) Can only be specified if the `action` for the rule is "rate_based_ban".
+    If specified, determines the time (in seconds) the traffic will continue to be banned by the rate limit after the rate falls below the threshold.
 
-The `layer_7_ddos_defense_config` block supports:
+* `ban_threshold` - (Optional) Can only be specified if the `action` for the rule is "rate_based_ban".
+    If specified, the key will be banned for the configured 'ban_duration_sec' when the number of requests that exceed the 'rate_limit_threshold' also
+    exceed this 'ban_threshold'. Structure is [documented below](#nested_threshold).
+
+* `conform_action` - (Optional) Action to take for requests that are under the configured rate limit threshold. Valid option is "allow" only.
+
+* `enforce_on_key` - (Optional) Determines the key to enforce the rate_limit_threshold on. If not specified, defaults to "ALL".
+
+    * ALL: A single rate limit threshold is applied to all the requests matching this rule.
+    * IP: The source IP address of the request is the key. Each IP has this limit enforced separately.
+    * HTTP_HEADER: The value of the HTTP header whose name is configured under "enforceOnKeyName". The key value is truncated to the first 128 bytes of the header value. If no such header is present in the request, the key type defaults to ALL.
+    * XFF_IP: The first IP address (i.e. the originating client IP address) specified in the list of IPs under X-Forwarded-For HTTP header. If no such header is present or the value is not a valid IP, the key type defaults to ALL.
+    * HTTP_COOKIE: The value of the HTTP cookie whose name is configured under "enforceOnKeyName". The key value is truncated to the first 128 bytes of the cookie value. If no such cookie is present in the request, the key type defaults to ALL.
+
+* `enforce_on_key_name` - (Optional) Rate limit key name applicable only for the following key types: HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.
+
+* `exceed_action` - (Optional) When a request is denied, returns the HTTP response code specified.
+    Valid options are "deny()" where valid values for status are 403, 404, 429, and 502.
+
+* `rate_limit_threshold` - (Optional) Threshold at which to begin ratelimiting. Structure is [documented below](#nested_threshold).
+
+<a name="nested_threshold"></a>The `{ban/rate_limit}_threshold` block supports:
+
+* `count` - (Optional) Number of HTTP(S) requests for calculating the threshold.
+
+* `interval_sec` - (Optional) Interval over which the threshold is computed.
+
+<a name="nested_adaptive_protection_config"></a>The `adaptive_protection_config` block supports:
+
+* `layer_7_ddos_defense_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for [Google Cloud Armor Adaptive Protection Layer 7 DDoS Defense](https://cloud.google.com/armor/docs/adaptive-protection-overview?hl=en). Structure is [documented below](#nested_layer_7_ddos_defense_config).
+
+<a name="nested_layer_7_ddos_defense_config"></a>The `layer_7_ddos_defense_config` block supports:
 
 * `enable` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) If set to true, enables CAAP for L7 DDoS detection.
 

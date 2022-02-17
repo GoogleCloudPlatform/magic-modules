@@ -1,15 +1,6 @@
 # meta.yaml
 # this is a shared config file that all the tests merge with
 #
-substitutions:
-  - substitution: "name"
-    value: "workload"
-  - substitution: "region"
-    value: ":REGION"
-  - substitution: "org_id"
-    value: ":ORG_ID"
-  - substitution: "billing_account"
-    value: ":BILLING_ACCT"
 ignore_read:
   - "billing_account"
   - "kms_settings"
