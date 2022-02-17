@@ -43,7 +43,8 @@ var defaultErrorRetryPredicates = []RetryErrorPredicateFunc{
 
 	// As of February 2022 GCE seems to have added extra quota enforcement on
 	// reads, causing significant failure for our CI and for large customers.
-	// GCE returns the wrong error code, as this should be a 419.
+	// GCE returns the wrong error code, as this should be a 429, which we retry
+	// already.
 	is403ReadRequestsForMinuteError,
 }
 
