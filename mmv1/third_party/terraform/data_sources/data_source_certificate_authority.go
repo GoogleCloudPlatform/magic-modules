@@ -8,7 +8,10 @@ import (
 
 func dataSourcePrivatecaCertificateAuthority() *schema.Resource {
 	dsSchema := datasourceSchemaFromResourceSchema(resourcePrivatecaCertificateAuthority().Schema)
-	addRequiredFieldsToSchema(dsSchema, "project")
+	addOptionalFieldsToSchema(dsSchema, "project")
+	addOptionalFieldsToSchema(dsSchema, "location")
+	addOptionalFieldsToSchema(dsSchema, "pool")
+	addOptionalFieldsToSchema(dsSchema, "certificate_authority_id")
 
 	dsSchema["pem_csr"] = &schema.Schema{
 		Type:     schema.TypeString,
@@ -61,6 +64,6 @@ func dataSourcePrivatecaCertificateAuthorityRead(d *schema.ResourceData, meta in
 	if err := d.Set("pem_csr", res["pemCsr"]); err != nil {
 		return fmt.Errorf("Error fetching CertificateAuthority: %s", err)
 	}
-	
+
 	return nil
 }

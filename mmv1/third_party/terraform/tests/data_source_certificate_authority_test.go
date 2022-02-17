@@ -19,10 +19,10 @@ func TestAccDataSourcePrivatecaCertificateAuthority_privatecaCertificateAuthorit
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckPrivatecaCertificateAuthorityDestroyProducer(t),
-		Steps:        []resource.TestStep{
+		Steps: []resource.TestStep{
 			{
-				Config: testAccPrivatecaCertificateAuthority_privatecaCertificateAuthorityBasicExample(context),
-				Check:  resource.ComposeTestCheckFunc(
+				Config: testAccDataSourcePrivatecaCertificateAuthority_privatecaCertificateAuthorityBasicExample(context),
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.google_privateca_certificate_authority.default", "pem_csr"),
 				),
 			},
@@ -30,7 +30,7 @@ func TestAccDataSourcePrivatecaCertificateAuthority_privatecaCertificateAuthorit
 	})
 }
 
-func testAccPrivatecaCertificateAuthority_privatecaCertificateAuthorityBasicExample(context map[string]interface{}) string {
+func testAccDataSourcePrivatecaCertificateAuthority_privatecaCertificateAuthorityBasicExample(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_privateca_certificate_authority" "default" {
   // This example assumes this pool already exists.
