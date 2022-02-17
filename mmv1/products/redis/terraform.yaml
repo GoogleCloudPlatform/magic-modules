@@ -88,6 +88,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       replicaCount: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      secondaryIpRange: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
