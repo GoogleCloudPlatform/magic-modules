@@ -40,6 +40,148 @@ func TestAccRedisInstance_update(t *testing.T) {
 	})
 }
 
+func TestAccRedisInstance_updateReadReplicasMode(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", randInt(t))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckRedisInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRedisInstanceReadReplicasUnspecified(name, true),
+			},
+			{
+				ResourceName:      "google_redis_instance.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccRedisInstanceReadReplicasEnabled(name, true),
+			},
+			{
+				ResourceName:      "google_redis_instance.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccRedisInstanceReadReplicasUnspecified(name, false),
+			},
+		},
+	})
+}
+
+func TestAccRedisInstance_updateReadReplicasModeWithAutoSecondaryIp(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", randInt(t))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckRedisInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRedisInstanceReadReplicasUnspecified(name, true),
+			},
+			{
+				ResourceName:      "google_redis_instance.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccRedisInstanceReadReplicasEnabledWithAutoSecondaryIp(name, true),
+			},
+			{
+				ResourceName:      "google_redis_instance.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccRedisInstanceReadReplicasUnspecified(name, false),
+			},
+		},
+	})
+}
+
+func testAccRedisInstanceReadReplicasUnspecified(name string, preventDestroy bool) string {
+	lifecycleBlock := ""
+	if preventDestroy {
+		lifecycleBlock = `
+		lifecycle {
+			prevent_destroy = true
+		}`
+	}
+	return fmt.Sprintf(`
+resource "google_redis_instance" "test" {
+  name           = "%s"
+  display_name   = "redissss"
+  memory_size_gb = 5
+	tier = "STANDARD_HA"
+  region         = "us-central1"
+	%s
+  redis_configs = {
+    maxmemory-policy       = "allkeys-lru"
+    notify-keyspace-events = "KEA"
+  }
+}
+`, name, lifecycleBlock)
+}
+
+func testAccRedisInstanceReadReplicasEnabled(name string, preventDestroy bool) string {
+	lifecycleBlock := ""
+	if preventDestroy {
+		lifecycleBlock = `
+		lifecycle {
+			prevent_destroy = true
+		}`
+	}
+	return fmt.Sprintf(`
+resource "google_redis_instance" "test" {
+  name           = "%s"
+  display_name   = "redissss"
+  memory_size_gb = 5
+  tier = "STANDARD_HA"
+  region         = "us-central1"
+	%s
+  redis_configs = {
+    maxmemory-policy       = "allkeys-lru"
+    notify-keyspace-events = "KEA"
+  }
+  read_replicas_mode = "READ_REPLICAS_ENABLED"
+  secondary_ip_range = "10.79.0.0/28"
+	}
+`, name, lifecycleBlock)
+}
+
+func testAccRedisInstanceReadReplicasEnabledWithAutoSecondaryIp(name string, preventDestroy bool) string {
+	lifecycleBlock := ""
+	if preventDestroy {
+		lifecycleBlock = `
+		lifecycle {
+			prevent_destroy = true
+		}`
+	}
+	return fmt.Sprintf(`
+resource "google_redis_instance" "test" {
+  name           = "%s"
+  display_name   = "redissss"
+  memory_size_gb = 5
+  tier = "STANDARD_HA"
+  region         = "us-central1"
+	%s
+  redis_configs = {
+    maxmemory-policy       = "allkeys-lru"
+    notify-keyspace-events = "KEA"
+  }
+  read_replicas_mode = "READ_REPLICAS_ENABLED"
+  secondary_ip_range = "auto"
+}
+`, name, lifecycleBlock)
+}
+
 func TestAccRedisInstance_regionFromLocation(t *testing.T) {
 	t.Parallel()
 

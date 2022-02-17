@@ -101,6 +101,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       replicaCount: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      readReplicasMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      secondaryIpRange: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        diff_suppress_func: 'compareSelfOrAuto'
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
