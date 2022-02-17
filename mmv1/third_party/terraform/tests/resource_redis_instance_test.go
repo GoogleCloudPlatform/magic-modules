@@ -240,6 +240,8 @@ resource "google_redis_instance" "test" {
     notify-keyspace-events = ""
   }
   redis_version = "REDIS_5_0"
+	read_replicas_mode = "READ_REPLICAS_ENABLED"
+	secondary_ip_range = "10.1.0.0"
 }
 `, name, lifecycleBlock)
 }
