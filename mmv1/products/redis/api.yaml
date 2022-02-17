@@ -294,4 +294,5 @@ objects:
           add new ranges, once added ranges cannot be changed or deleted. Values in
           this list cannot overlap with the reserved_ip_range. Not supported during
           instance creation.
+        min_version: beta
         input: true
