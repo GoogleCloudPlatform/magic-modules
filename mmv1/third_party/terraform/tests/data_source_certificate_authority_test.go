@@ -38,6 +38,7 @@ resource "google_privateca_certificate_authority" "default" {
   pool = "%{pool_name}"
   certificate_authority_id = "tf-test-my-certificate-authority%{random_suffix}"
   location = "%{pool_location}"
+  type = "SUBORDINATE"
   config {
     subject_config {
       subject {
@@ -84,6 +85,10 @@ data "google_privateca_certificate_authority" "default" {
 	location = google_privateca_certificate_authority.default.location
 	pool = google_privateca_certificate_authority.default.pool
 	certificate_authority_id = google_privateca_certificate_authority.default.certificate_authority_id
+}
+
+output "csr" {
+	value = data.google_privateca_certificate_authority.default.pem_csr
 }
 `, context)
 }
