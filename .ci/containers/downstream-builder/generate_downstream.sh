@@ -127,9 +127,21 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
 
     go mod tidy
 
+    # the following build can fail which results in a subsequent failure to push to tfv repository.
+    # due to the uncertainty of tpg being able to build we will ignore errors here
+    # as these files are not critical to operation of tfv and not worth blocking the GA pipeline
+    if [ "$COMMAND" == "downstream" ]; then
+      set +e
+    fi
+
     make build
     export TFV_CREATE_GENERATED_FILES=true
     go test ./test -run "TestAcc.*_generated_offline"
+
+    if [ "$COMMAND" == "downstream" ]; then
+      set -e
+    fi
+
     popd
 elif [ "$REPO" == "tf-oics" ]; then
     # use terraform generator with oics override
