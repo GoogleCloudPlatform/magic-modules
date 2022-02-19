@@ -14213,7 +14213,7 @@ objects:
                 - !ruby/object:Api::Type::String
                   name: 'projectId'
                   description: |
-                    The project id/number, should be same as the key of this project config in the project map.
+                    The project id/number should be the same as the key of this project config in the project map.
       - !ruby/object:Api::Type::NestedObject
         name: 'specificReservation'
         required: true
