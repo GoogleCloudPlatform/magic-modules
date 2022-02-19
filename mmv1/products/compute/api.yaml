@@ -14206,7 +14206,7 @@ objects:
               A map of project number and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
             key_name: id
             key_description: |
-              The project id/number which is deleting or adding to the project list. Only project number is acceptable.
+              The project id/number which is deleting or adding to the project list.
             value_type: !ruby/object:Api::Type::NestedObject
               name: projectConfig
               properties:
