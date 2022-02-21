@@ -14,10 +14,6 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Index: !ruby/object:Overrides::Terraform::ResourceOverride
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 10
-      update_minutes: 10
-      delete_minutes: 10
     autogen_async: true
     # This resource is a child resource
     skip_sweeper: true

@@ -34,6 +34,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           dataset_id: "example_dataset"
           key_name: "example-key"
           keyring_name: "example-keyring"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_dataset_authorized_dataset"
+        primary_resource_id: "dataset"
+        vars:
+          private: "private"
+          public: "public"
+          account_name: "bqowner"
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'delete_contents_on_destroy'
@@ -95,6 +102,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           dataset_id: "example_dataset"
           dataset_id2: "example_dataset2"
           table_id: "example_table"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_dataset_access_authorized_dataset"
+        skip_test: true  # not importable
+        primary_resource_id: "access"
+        vars:
+          private: "private"
+          public: "public"
     properties:
       datasetId: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
@@ -135,9 +149,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckForExistence
       actions: ['create']
-      operation: !ruby/object:Api::Async::Operation
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 4
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_job_query"

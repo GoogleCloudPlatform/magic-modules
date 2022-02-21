@@ -1,3 +1,4 @@
+# [START privateca_quickstart]
 provider google{}
 provider tls{}
 
@@ -93,3 +94,4 @@ resource "google_privateca_certificate" "default" {
   name = "<%= ctx[:vars]['my_certificate'] %>"
   pem_csr = tls_cert_request.example.cert_request_pem
 }
+# [END privateca_quickstart]

@@ -1369,6 +1369,7 @@ objects:
         values:
           - :EXTERNAL
           - :INTERNAL_SELF_MANAGED
+          - :EXTERNAL_MANAGED
       - !ruby/object:Api::Type::Enum
         name: 'localityLbPolicy'
         values:
@@ -1703,7 +1704,6 @@ objects:
           The security policy associated with this backend service.
       - !ruby/object:Api::Type::NestedObject
         name: 'securitySettings'
-        min_version: beta
         description: |
           The security settings that apply to this backend service. This field is applicable to either
           a regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2, and
@@ -1714,7 +1714,6 @@ objects:
             name: 'clientTlsPolicy'
             resource: 'Region' # TODO: 'Region' is incorrect and should be 'ClientTlsPolicy'
             imports: 'name'
-            min_version: beta
             description: |
               ClientTlsPolicy is a resource that specifies how a client should authenticate
               connections to backends of a service. This resource itself does not affect
@@ -1722,7 +1721,6 @@ objects:
             required: true
           - !ruby/object:Api::Type::Array
             name: 'subjectAltNames'
-            min_version: beta
             description: |
               A list of alternate names to verify the subject identity in the certificate.
               If specified, the client will verify that the server certificate's subject
@@ -2774,7 +2772,7 @@ objects:
             name: 'idleTimeoutSec'
             description: |
               Specifies how long to keep a Connection Tracking entry while there is
-              no matching traffic (in seconds). 
+              no matching traffic (in seconds).
 
               For L4 ILB the minimum(default) is 10 minutes and maximum is 16 hours.
 
@@ -2785,7 +2783,7 @@ objects:
               Specifies the key used for connection tracking. There are two options:
               `PER_CONNECTION`: The Connection Tracking is performed as per the
               Connection Key (default Hash Method) for the specific protocol.
-              
+
               `PER_SESSION`: The Connection Tracking is performed as per the
               configured Session Affinity. It matches the configured Session Affinity.
             default_value: :PER_CONNECTION
@@ -3035,9 +3033,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 4
-          delete_minutes: 4
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -3097,9 +3092,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 4
-          delete_minutes: 4
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -3169,10 +3161,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        # Larger disks were timing out at creation. Bumping up to 5 minutes.
-        # https://github.com/hashicorp/terraform-provider-google/issues/703
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 5
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -4273,13 +4261,15 @@ objects:
           The value of INTERNAL_SELF_MANAGED means that this will be used for
           Internal Global HTTP(S) LB. The value of EXTERNAL means that this
           will be used for External Global Load Balancing (HTTP(S) LB,
-          External TCP/UDP LB, SSL Proxy)
+          External TCP/UDP LB, SSL Proxy). The value of EXTERNAL_MANAGED means
+          that this will be used for Global external HTTP(S) load balancers.
 
           ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) only) Note: This field must be set "" if the global address is
           configured as a purpose of PRIVATE_SERVICE_CONNECT and addressType of INTERNAL.
         default_value: :EXTERNAL
         values:
           - :EXTERNAL
+          - :EXTERNAL_MANAGED
           - :INTERNAL_SELF_MANAGED
       - !ruby/object:Api::Type::Array
         name: 'metadataFilters'
@@ -5939,10 +5929,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -6240,12 +6226,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        # Users were experiencing timeouts. Bumping up to 6 minutes.
-        # https://github.com/hashicorp/terraform-provider-google/issues/852
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -7153,10 +7133,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -7420,9 +7396,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 10
-          delete_minutes: 10
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -7697,10 +7670,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -8059,10 +8028,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -8249,10 +8214,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -8435,9 +8396,10 @@ objects:
           - cloudRun
           - cloudFunction
           - appEngine
+          - serverlessDeployment
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
-          Only one of cloud_run, app_engine or cloud_function may be set.
+          Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
         properties:
           - !ruby/object:Api::Type::String
             name: 'service'
@@ -8475,10 +8437,11 @@ objects:
           - appEngine
           - cloudFunction
           - cloudRun
+          - serverlessDeployment
         allow_empty_object: true
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
-          Only one of cloud_run, app_engine or cloud_function may be set.
+          Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
         properties:
           - !ruby/object:Api::Type::String
             name: 'service'
@@ -8509,9 +8472,10 @@ objects:
           - appEngine
           - cloudFunction
           - cloudRun
+          - serverlessDeployment
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
-          Only one of cloud_run, app_engine or cloud_function may be set.
+          Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
         properties:
           - !ruby/object:Api::Type::String
             name: 'function'
@@ -8535,6 +8499,48 @@ objects:
               For example, request URLs "mydomain.com/function1" and "mydomain.com/function2"
               can be backed by the same Serverless NEG with URL mask "/". The URL mask
               will parse them to { function = "function1" } and { function = "function2" } respectively.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'serverlessDeployment'
+        min_version: beta
+        exactly_one_of:
+          - appEngine
+          - cloudFunction
+          - cloudRun
+          - serverlessDeployment
+        allow_empty_object: true
+        description: |
+          Only valid when networkEndpointType is "SERVERLESS".
+          Only one of cloudRun, appEngine, cloudFunction or serverlessDeployment may be set.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'platform'
+            required: true            
+            # Docs (https://cloud.google.com/compute/docs/reference/rest/beta/regionNetworkEndpointGroups) say support is offered for:
+            # API Gateway: apigateway.googleapis.com, App Engine: appengine.googleapis.com,
+            # Cloud Functions: cloudfunctions.googleapis.com, Cloud Run: run.googleapis.com
+            # However, only API Gateway is currently supported
+            description: |
+              The platform of the NEG backend target(s). Possible values:
+              API Gateway: apigateway.googleapis.com
+          - !ruby/object:Api::Type::String
+            name: 'resource'
+            description: |
+              The user-defined name of the workload/instance. This value must be provided explicitly or in the urlMask.
+              The resource identified by this value is platform-specific and is as follows: API Gateway: The gateway ID, App Engine: The service name,
+              Cloud Functions: The function name, Cloud Run: The service name
+          - !ruby/object:Api::Type::String
+            name: 'version'
+            description: |
+              The optional resource version. The version identified by this value is platform-specific and is follows:
+              API Gateway: Unused, App Engine: The service version, Cloud Functions: Unused, Cloud Run: The service tag
+          - !ruby/object:Api::Type::String
+            name: 'urlMask'
+            required: true
+            description: |
+              A template to parse platform-specific fields from a request URL. URL mask allows for routing to multiple resources
+              on the same serverless platform without having to create multiple Network Endpoint Groups and backend resources.
+              The fields parsed by this template are platform-specific and are as follows: API Gateway: The gateway ID,
+              App Engine: The service and version, Cloud Functions: The function name, Cloud Run: The service and tag
   - !ruby/object:Api::Resource
     name: 'NodeGroup'
     kind: 'compute#NodeGroup'
@@ -8686,10 +8692,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -9291,10 +9293,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 15
-          update_minutes: 6
-          delete_minutes: 15
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -9409,10 +9407,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 15
-          update_minutes: 6
-          delete_minutes: 15
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -10159,8 +10153,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 5
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -13122,7 +13114,7 @@ objects:
           A reference to the network to which this router belongs.
         required: true
         input: true
-      # TODO(danawillow): Figure out the story for interfaces/bgpPeers. Right
+      # TODO: Figure out the story for interfaces/bgpPeers. Right
       # now in Terraform we have three separate resources: router,
       # router_interface, and router_peer. Decide whether we want to keep that
       # pattern for the other providers, keep it unique for Terraform, or add
@@ -13223,10 +13215,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 10
-          update_minutes: 10
-          delete_minutes: 10
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -13429,10 +13417,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 10
-          update_minutes: 10
-          delete_minutes: 10
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -13754,10 +13738,6 @@ objects:
         path: 'name'
         full_url: 'selfLink'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 5
-          update_minutes: 5
-          delete_minutes: 5
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -14003,8 +13983,8 @@ objects:
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
         timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
+          insert_minutes: 30
+          update_minutes: 30
           # Deletes can take 20-30 minutes to complete, since they depend
           # on the provisioning process either succeeding or failing completely.
           delete_minutes: 30
@@ -14243,6 +14223,32 @@ objects:
         output: true
         description: |
           The status of the reservation.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'shareSettings'
+        description: |
+          The share setting for reservations.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'shareType'
+            values:
+              - :LOCAL
+              - :SPECIFIC_PROJECTS
+            description: |
+              Type of sharing for this shared-reservation
+          - !ruby/object:Api::Type::Map
+            name: 'projectMap'
+            description: |
+              A map of project number and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
+            key_name: id
+            key_description: |
+              The project id/number which is deleting or adding to the project list. Only project number is acceptable.
+            value_type: !ruby/object:Api::Type::NestedObject
+              name: projectConfig
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'projectId'
+                  description: |
+                    The project id/number, should be same as the key of this project config in the project map.
       - !ruby/object:Api::Type::NestedObject
         name: 'specificReservation'
         required: true
@@ -14610,12 +14616,6 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-        # Users were experiencing timeout. Bumping up to 6 minutes.
-        # https://github.com/hashicorp/terraform-provider-google/issues/718
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 6
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
@@ -14685,7 +14685,7 @@ objects:
         description: |
           The purpose of the resource. A subnetwork with purpose set to
           INTERNAL_HTTPS_LOAD_BALANCER is a user-created subnetwork that is
-          reserved for Internal HTTP(S) Load Balancing. 
+          reserved for Internal HTTP(S) Load Balancing.
 
           If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set the `role` field.
       - !ruby/object:Api::Type::Enum

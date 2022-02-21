@@ -56,7 +56,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/bigtable_app_profile_routing.erb'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/bigtable_app_profile.go.erb
-
+      extra_schema_entry: templates/terraform/extra_schema_entry/bigtable_app_profile.go.erb
+      pre_update: templates/terraform/pre_update/bigtable_app_profile.go.erb
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

@@ -20,10 +20,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckKnativeStatusFunc(res)
       actions: ['create', 'update']
-      operation: !ruby/object:Api::Async::Operation
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_domain_mapping_basic"
@@ -72,10 +68,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckKnativeStatusFunc(res)
       actions: ['create', 'update']
-      operation: !ruby/object:Api::Async::Operation
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 15
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_basic"
@@ -194,6 +186,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       spec.template.spec.containerConcurrency: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       spec.template.spec.timeoutSeconds: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      spec.template.spec.serviceAccountName: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       spec.template.spec.containers: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true

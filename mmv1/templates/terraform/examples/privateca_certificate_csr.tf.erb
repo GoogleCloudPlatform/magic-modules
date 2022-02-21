@@ -1,3 +1,4 @@
+# [START privateca_create_certificate_csr]
 resource "google_privateca_certificate_authority" "test-ca" {
   pool = "<%= ctx[:vars]["pool"] %>"
   certificate_authority_id = "<%= ctx[:vars]["certificate_authority_id"] %>"
@@ -43,3 +44,4 @@ resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]["certificate_name"] %>"
   pem_csr = file("test-fixtures/rsa_csr.pem")
 }
+# [END privateca_create_certificate_csr]
