@@ -8066,7 +8066,6 @@ objects:
           The name for a specific VM instance that the IP address belongs to.
           This is required for network endpoints of type GCE_VM_IP_PORT.
           The instance must be in the same zone of network endpoint group.
-        required: true
       - !ruby/object:Api::Type::Integer
         name: 'port'
         description: |
@@ -8155,9 +8154,16 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'networkEndpointType'
         description: |
-          Type of network endpoints in this network endpoint group.
+          Type of network endpoints in this network endpoint group. 
+          NON_GCP_PRIVATE_IP_PORT is used for hybrid connectivity network 
+          endpoint groups (see https://cloud.google.com/load-balancing/docs/hybrid).
+          Note that NON_GCP_PRIVATE_IP_PORT can only be used with Backend Services
+          that 1) have the following load balancing schemes: EXTERNAL, EXTERNAL_MANAGED,
+          INTERNAL_MANAGED, and INTERNAL_SELF_MANAGED and 2) support the RATE or
+          CONNECTION balancing modes.
         values:
           - :GCE_VM_IP_PORT
+          - :NON_GCP_PRIVATE_IP_PORT
         default_value: :GCE_VM_IP_PORT
       - !ruby/object:Api::Type::Integer
         name: 'size'
