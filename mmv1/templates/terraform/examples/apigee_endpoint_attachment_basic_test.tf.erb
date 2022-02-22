@@ -48,6 +48,8 @@ resource "google_compute_address" "psc_ilb_consumer_address" {
 
   subnetwork   = "default"
   address_type = "INTERNAL"
+
+  project = google_project.project.project_id
 }
 
 resource "google_compute_forwarding_rule" "psc_ilb_consumer" {
@@ -58,6 +60,8 @@ resource "google_compute_forwarding_rule" "psc_ilb_consumer" {
   load_balancing_scheme = "" # need to override EXTERNAL default when target is a service attachment
   network               = "default"
   ip_address            = google_compute_address.psc_ilb_consumer_address.id
+
+  project = google_project.project.project_id
 }
 
 resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
@@ -69,6 +73,8 @@ resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
   all_ports             = true
   network               = google_compute_network.psc_ilb_network.name
   subnetwork            = google_compute_subnetwork.psc_ilb_producer_subnetwork.name
+
+  project = google_project.project.project_id
 }
 
 resource "google_compute_region_backend_service" "producer_service_backend" {
@@ -76,6 +82,8 @@ resource "google_compute_region_backend_service" "producer_service_backend" {
   region = "us-west2"
 
   health_checks = [google_compute_health_check.producer_service_health_check.id]
+
+  project = google_project.project.project_id
 }
 
 resource "google_compute_health_check" "producer_service_health_check" {
@@ -86,11 +94,15 @@ resource "google_compute_health_check" "producer_service_health_check" {
   tcp_health_check {
     port = "80"
   }
+
+  project = google_project.project.project_id
 }
 
 resource "google_compute_network" "psc_ilb_network" {
   name = "psc-ilb-network"
   auto_create_subnetworks = false
+
+  project = google_project.project.project_id
 }
 
 resource "google_compute_subnetwork" "psc_ilb_producer_subnetwork" {
@@ -99,6 +111,8 @@ resource "google_compute_subnetwork" "psc_ilb_producer_subnetwork" {
 
   network       = google_compute_network.psc_ilb_network.id
   ip_cidr_range = "10.0.0.0/16"
+
+  project = google_project.project.project_id
 }
 
 resource "google_compute_subnetwork" "psc_ilb_nat" {
@@ -108,6 +122,8 @@ resource "google_compute_subnetwork" "psc_ilb_nat" {
   network       = google_compute_network.psc_ilb_network.id
   purpose       =  "PRIVATE_SERVICE_CONNECT"
   ip_cidr_range = "10.1.0.0/16"
+
+  project = google_project.project.project_id
 }
 
 resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
@@ -119,6 +135,8 @@ resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
   connection_preference    = "ACCEPT_AUTOMATIC"
   nat_subnets              = [google_compute_subnetwork.psc_ilb_nat.id]
   target_service           = google_compute_forwarding_rule.psc_ilb_target_service.id
+
+  project = google_project.project.project_id
 }
 
 resource "google_apigee_organization" "apigee_org" {
