@@ -1,0 +1,5 @@
+variables:
+  - name: "project"
+    type: "project"
+  - name: "view"
+    type: "resource_name"

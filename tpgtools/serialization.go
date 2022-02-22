@@ -42,6 +42,8 @@ import (
 	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc"
 	eventarcBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc/beta"
 	gkehubBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub/beta"
+	logging "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/logging"
+	loggingBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/logging/beta"
 	monitoringBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/monitoring/beta"
 	networkconnectivity "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/networkconnectivity"
 	networkconnectivityBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/networkconnectivity/beta"
@@ -105,6 +107,8 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 			return "google_gke_hub_feature", nil
 		case "gkehub/feature_membership":
 			return "google_gke_hub_feature_membership", nil
+		case "logging/log_view":
+			return "google_logging_log_view", nil
 		case "monitoring/monitored_project":
 			return "google_monitoring_monitored_project", nil
 		case "networkconnectivity/hub":
@@ -159,6 +163,8 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 		return "google_dataproc_workflow_template", nil
 	case "eventarc/trigger":
 		return "google_eventarc_trigger", nil
+	case "logging/log_view":
+		return "google_logging_log_view", nil
 	case "networkconnectivity/hub":
 		return "google_network_connectivity_hub", nil
 	case "networkconnectivity/spoke":
@@ -305,6 +311,12 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 				return "", err
 			}
 			return GkeHubFeatureMembershipBetaAsHCL(*r, hasGAEquivalent)
+		case "logging/log_view":
+			r := &loggingBeta.LogView{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return LoggingLogViewBetaAsHCL(*r, hasGAEquivalent)
 		case "monitoring/monitored_project":
 			r := &monitoringBeta.MonitoredProject{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -459,6 +471,12 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 			return "", err
 		}
 		return EventarcTriggerAsHCL(*r, hasGAEquivalent)
+	case "logging/log_view":
+		r := &logging.LogView{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return LoggingLogViewAsHCL(*r, hasGAEquivalent)
 	case "networkconnectivity/hub":
 		r := &networkconnectivity.Hub{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -3685,6 +3703,43 @@ func convertGkeHubFeatureMembershipBetaConfigmanagementPolicyControllerToHCL(r *
 		outputConfig += fmt.Sprintf("\ttemplate_library_installed = %#v\n", *r.TemplateLibraryInstalled)
 	}
 	return outputConfig + "}"
+}
+
+// LoggingLogViewBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func LoggingLogViewBetaAsHCL(r loggingBeta.LogView, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_logging_log_view\" \"output\" {\n"
+	if r.Bucket != nil {
+		outputConfig += fmt.Sprintf("\tbucket = %#v\n", *r.Bucket)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Filter != nil {
+		outputConfig += fmt.Sprintf("\tfilter = %#v\n", *r.Filter)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 // MonitoringMonitoredProjectBetaAsHCL returns a string representation of the specified resource in HCL.
@@ -8142,6 +8197,43 @@ func convertEventarcTriggerTransportPubsubToHCL(r *eventarc.TriggerTransportPubs
 		outputConfig += fmt.Sprintf("\ttopic = %#v\n", *r.Topic)
 	}
 	return outputConfig + "}"
+}
+
+// LoggingLogViewAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func LoggingLogViewAsHCL(r logging.LogView, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_logging_log_view\" \"output\" {\n"
+	if r.Bucket != nil {
+		outputConfig += fmt.Sprintf("\tbucket = %#v\n", *r.Bucket)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Filter != nil {
+		outputConfig += fmt.Sprintf("\tfilter = %#v\n", *r.Filter)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 // NetworkConnectivityHubAsHCL returns a string representation of the specified resource in HCL.
