@@ -69,16 +69,6 @@ resource "google_project_service" "compute" {
   disable_on_destroy = false
 }
 
-resource "google_organization_policy" "shared_reservation_org_policy" {
-  org_id     = "%{org_id}"
-  constraint = "constraints/compute.sharedReservationsOwnerProjects"
-  list_policy {
-    allow {
-      values = ["projects/${google_project.owner_project.number}"]
-    }
-  }
-}
-
 resource "google_project" "guest_project" {
   project_id      = "tf-test-2%{random_suffix}"
   name            = "tf-test-2%{random_suffix}"
@@ -98,6 +88,16 @@ resource "google_project" "guest_project_third" {
   name            = "tf-test-4%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+}
+
+resource "google_organization_policy" "shared_reservation_org_policy" {
+  org_id     = "%{org_id}"
+  constraint = "constraints/compute.sharedReservationsOwnerProjects"
+  list_policy {
+    allow {
+      values = ["projects/${google_project.owner_project.number}"]
+    }
+  }
 }
 
 resource "google_project_service" "compute_second_project" {
@@ -157,16 +157,6 @@ resource "google_project_service" "compute" {
   disable_on_destroy = false
 }
 
-resource "google_organization_policy" "shared_reservation_org_policy" {
-  org_id     = "%{org_id}"
-  constraint = "constraints/compute.sharedReservationsOwnerProjects"
-  list_policy {
-    allow {
-      values = ["projects/${google_project.owner_project.number}"]
-    }
-  }
-}
-
 resource "google_project" "guest_project" {
   project_id      = "tf-test-2%{random_suffix}"
   name            = "tf-test-2%{random_suffix}"
@@ -186,6 +176,16 @@ resource "google_project" "guest_project_third" {
   name            = "tf-test-4%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+}
+
+resource "google_organization_policy" "shared_reservation_org_policy" {
+  org_id     = "%{org_id}"
+  constraint = "constraints/compute.sharedReservationsOwnerProjects"
+  list_policy {
+    allow {
+      values = ["projects/${google_project.owner_project.number}"]
+    }
+  }
 }
 
 resource "google_project_service" "compute_second_project" {
