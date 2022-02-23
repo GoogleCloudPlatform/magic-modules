@@ -49,7 +49,8 @@ resource "google_compute_address" "psc_ilb_consumer_address" {
   subnetwork   = "default"
   address_type = "INTERNAL"
 
-  project = google_project.project.project_id
+  project    = google_project.project.project_id
+  depends_on = [google_project_service.compute]
 }
 
 resource "google_compute_forwarding_rule" "psc_ilb_consumer" {
@@ -95,14 +96,16 @@ resource "google_compute_health_check" "producer_service_health_check" {
     port = "80"
   }
 
-  project = google_project.project.project_id
+  project    = google_project.project.project_id
+  depends_on = [google_project_service.compute]
 }
 
 resource "google_compute_network" "psc_ilb_network" {
   name = "psc-ilb-network"
   auto_create_subnetworks = false
 
-  project = google_project.project.project_id
+  project     = google_project.project.project_id
+  depends_on = [google_project_service.compute]
 }
 
 resource "google_compute_subnetwork" "psc_ilb_producer_subnetwork" {
