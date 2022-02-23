@@ -264,7 +264,9 @@ module Provider
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
     def generate_iam_policy(pwd, data, generate_code, generate_docs)
-      if generate_code
+      if generate_code \
+        && (!data.object.iam_policy.min_version \
+        || data.object.iam_policy.min_version >= data.version)
         FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
         data.generate(pwd,
                       'templates/terraform/iam_policy.go.erb',
