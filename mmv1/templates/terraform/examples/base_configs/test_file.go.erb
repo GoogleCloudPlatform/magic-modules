@@ -18,7 +18,7 @@ terraform_name = object.legacy_name || "google_#{tf_product}_#{tf_resource}"
 -%>
 <%
 # @api.version_obj_or_closest(version) is slightly wrong; we want the _object_ version or the generation version.
-# Ultimately this won't matter though, since the API default should always be less than the object default.
+# Ultimately this will not matter though, since the API default should always be less than the object default.
 object.examples
   .reject(&:skip_test)
   .reject { |e| @api.version_obj_or_closest(version) < @api.version_obj_or_closest(e.min_version) }
@@ -35,6 +35,9 @@ object.examples
     # Use explicit version for the example if given.
     # Otherwise, use object version.
     example_version = example.min_version || object.min_version.name
+
+	# Use explicit resource type if given
+	resource_type = example.primary_resource_type || terraform_name
 -%>
 
 func TestAcc<%= test_slug -%>(t *testing.T) {
@@ -67,7 +70,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 			"time": {},
 		},
 		<% end -%>
-		<% unless object.skip_delete -%>
+		<% unless object.skip_delete || object.cgc_only -%>
 		CheckDestroy: testAccCheck<%= "#{resource_name}" -%>DestroyProducer(t),
 		<% end -%>
 		Steps: []resource.TestStep{
@@ -76,7 +79,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 			},
 		<% unless example.skip_import_test -%>
 			{
-				ResourceName:      "<%= terraform_name -%>.<%= example.primary_resource_id -%>",
+				ResourceName:      "<%= resource_type -%>.<%= example.primary_resource_id -%>",
 				ImportState:       true,
 				ImportStateVerify: true,
 		<%- unless ignore_read.empty? -%>
@@ -93,7 +96,7 @@ func testAcc<%= test_slug -%>(context map[string]interface{}) string {
 }
 <%- end %>
 
-<% unless object.skip_delete -%>
+<% unless object.skip_delete || object.cgc_only -%>
 func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {

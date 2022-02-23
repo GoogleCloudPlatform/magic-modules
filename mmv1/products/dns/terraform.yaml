@@ -193,6 +193,35 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Project: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
+  ResponsePolicy: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dns_response_policy_basic"
+        primary_resource_id: "example-response-policy"
+        vars:
+          response_policy_name: "example-response-policy"
+          network_1_name: "network-1"
+          network_2_name: "network-2"
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      networks.networkUrl: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: templates/terraform/custom_expand/network_full_url.erb
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_delete: templates/terraform/pre_delete/response_policy_detach_network.erb
+  ResponsePolicyRule: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: 'projects/{{project}}/responsePolicies/{{response_policy}}/rules/{{rule_name}}'
+    import_format: ["projects/{{project}}/responsePolicies/{{response_policy}}/rules/{{rule_name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dns_response_policy_rule_basic"
+        primary_resource_id: "example-response-policy-rule"
+        vars:
+          response_policy_name: "example-response-policy"
+          network_1_name: "network-1"
+          network_2_name: "network-2"
+          response_policy_rule_name: "example-rule"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
