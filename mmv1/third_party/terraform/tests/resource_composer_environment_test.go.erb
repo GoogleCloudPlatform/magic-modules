@@ -326,7 +326,6 @@ func TestAccComposerEnvironment_withEncryptionConfig(t *testing.T) {
   })
 }
 
-<% unless version == "ga" -%>
 func TestAccComposerEnvironment_withMaintenanceWindow(t *testing.T) {
   t.Parallel()
 
@@ -360,7 +359,6 @@ func TestAccComposerEnvironment_withMaintenanceWindow(t *testing.T) {
     },
   })
 }
-<% end -%>
 
 func TestAccComposerEnvironment_ComposerV2(t *testing.T) {
   t.Parallel()
@@ -1143,7 +1141,7 @@ resource "google_compute_subnetwork" "test" {
 `, pid, kmsKey, name, kmsKey, network, subnetwork)
 }
 
-<% unless version == "ga" -%>
+
 func testAccComposerEnvironment_maintenanceWindow(pid, envName, network, subnetwork string) string {
 	return fmt.Sprintf(`
 resource "google_composer_environment" "test" {
@@ -1172,9 +1170,8 @@ resource "google_compute_subnetwork" "test" {
 
 `, envName, network, subnetwork)
 }
-<% end -%>
 
-func testAccComposerEnvironment_composerV2(envName, network, subnetwork string) string {
+func testAccComposerEnvironment_composerV2(pid, envName, network, subnetwork string) string {
 	return fmt.Sprintf(`
 data "google_composer_image_versions" "all" {
 }
