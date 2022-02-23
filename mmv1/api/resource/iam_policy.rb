@@ -101,6 +101,10 @@ module Api
       # if set, it overrides the default iamPolicyVersion
       attr_reader :iam_policy_version
 
+      # [Optional] Min version to make IAM resources available at
+      # If unset, defaults to 'ga'
+      attr_reader :min_version
+
       def validate
         super
 
@@ -126,6 +130,7 @@ module Api
           type: String, default: 'templates/terraform/iam/iam_attributes.tf.erb'
         )
         check :iam_policy_version, type: String
+        check :min_version, type: String
       end
     end
   end
