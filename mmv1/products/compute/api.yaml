@@ -14188,8 +14188,6 @@ objects:
           The status of the reservation.
       - !ruby/object:Api::Type::NestedObject
         name: 'shareSettings'
-#        update_verb: :PATCH
-#        update_url: projects/{{project}}/zones/{{zone}}/reservations/{{name}}
         description: |
           The share setting for reservations.
         properties:

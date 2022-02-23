@@ -7,7 +7,7 @@ import (
 )
 
 func TestAccComputeSharedReservation_update(t *testing.T) {
-	skipIfVcr(t)
+	skipIfVcr(t) // large number of parallel resources.
 	t.Parallel()
 
 	context := map[string]interface{}{
