@@ -32,6 +32,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudbuild_trigger_service_account"
         primary_resource_id: "service-account-trigger"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudbuild_trigger_webhook"
+        primary_resource_id: "webhook-trigger"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'trigger_id'
