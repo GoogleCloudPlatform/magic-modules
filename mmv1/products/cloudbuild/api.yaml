@@ -133,6 +133,12 @@ objects:
           This field is used only for those triggers that do not respond to SCM events. 
           Triggers that respond to such events build source at whatever commit caused the event. 
           This field is currently only used by Webhook, Pub/Sub, Manual, and Cron triggers.
+        at_least_one_of:
+          - trigger_template
+          - github
+          - pubsub_config
+          - webhook_config
+          - source_to_build
         properties:
           - !ruby/object:Api::Type::String
             name: 'uri'
@@ -190,9 +196,11 @@ objects:
           Branch and tag names in trigger templates are interpreted as regular
           expressions. Any branch or tag change that matches that regular
           expression will trigger a build.
-        exactly_one_of:
+        at_least_one_of:
           - trigger_template
           - github
+          - pubsub_config
+          - webhook_config
           - source_to_build
         properties:
           - !ruby/object:Api::Type::String
@@ -248,9 +256,11 @@ objects:
         name: 'github'
         description: |
             Describes the configuration of a trigger that creates a build whenever a GitHub event is received.
-        exactly_one_of:
+        at_least_one_of:
           - trigger_template
           - github
+          - pubsub_config
+          - webhook_config
           - source_to_build
         properties:
           - !ruby/object:Api::Type::String
@@ -319,6 +329,12 @@ objects:
         description: |
           PubsubConfig describes the configuration of a trigger that creates 
           a build whenever a Pub/Sub message is published.
+        at_least_one_of:
+          - trigger_template
+          - github
+          - pubsub_config
+          - webhook_config
+          - source_to_build
         properties:
           - !ruby/object:Api::Type::String
             name: 'subscription'
@@ -345,6 +361,12 @@ objects:
         description: |
           WebhookConfig describes the configuration of a trigger that creates 
           a build whenever a webhook is sent to a trigger's webhook URL.
+        at_least_one_of:
+          - trigger_template
+          - github
+          - pubsub_config
+          - webhook_config
+          - source_to_build
         properties:
           - !ruby/object:Api::Type::String
             name: 'secret'

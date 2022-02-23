@@ -1,13 +1,14 @@
 
-data "google_pubsub_topic" "mytopic" {
+resource "google_pubsub_topic" "mytopic" {
   name = "mytopic"
 }
 
 resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
   name        = "pubsub-trigger"
+  description = "acceptance test example pubsub build trigger"
 
   pubsub_config {
-    topic = data.google_pubsub_topic.mytopic.id
+    topic = google_pubsub_topic.mytopic.id
   }
 
   source_to_build {
@@ -22,4 +23,10 @@ resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
     revision  = "refs/heads/main"
     repo_type = "GITHUB"
   }
+
+  substitutions = {
+    _ACTION       = "$(body.message.data.action)"
+  }
+
+  filter = "_ACTION.matches('INSERT')"
 }

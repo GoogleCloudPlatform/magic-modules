@@ -23,7 +23,6 @@ resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
       _FOO = "bar"
       _BAZ = "qux"
     }
-    filter = "_FOO.matches('bar')"
     queue_ttl = "20s"
     logs_bucket = "gs://mybucket/logs"
     secret {
