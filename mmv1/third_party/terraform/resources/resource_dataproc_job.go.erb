@@ -1165,7 +1165,7 @@ var prestoSchema = &schema.Schema{
 				Type:        schema.TypeMap,
 				Optional:    true,
 				ForceNew:    true,
-				Description: `A mapping of property names to values, used to configure Spark SQL's SparkConf. Properties that conflict with values set by the Cloud Dataproc API may be overwritten.`,
+				Description: `A mapping of property names to values. Used to set Presto session properties Equivalent to using the --session flag in the Presto CLI.`,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"output_format": {
