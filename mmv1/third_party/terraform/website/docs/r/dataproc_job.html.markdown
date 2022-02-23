@@ -90,7 +90,7 @@ output "pyspark_status" {
        * [hive_config](#nested_hive_config)     - Submits a Hive job to the cluster
        * [hpig_config](#nested_hpig_config)     - Submits a Pig job to the cluster
        * [sparksql_config](#nested_sparksql_config) - Submits a Spark SQL job to the cluster
-       * [presto_config](#nested_presto_config) - Submits a Spark SQL job to the cluster
+       * [presto_config](#nested_presto_config) - Submits a Presto job to the cluster
 
 - - -
 
