@@ -727,8 +727,30 @@ resource "google_dataproc_job" "sparksql" {
 }
 
 func testAccDataprocJob_sparksql(rnd string) string {
-	return fmt.Sprintf(
-		singleNodeClusterConfig+`
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "basic" {
+  name   = "dproc-job-test-%s"
+  region = "us-central1"
+
+  cluster_config {
+    # Keep the costs down with smallest config we can get away with
+    software_config {
+      override_properties = {
+        "dataproc:dataproc.allow.zero.workers" = "true"
+      }
+	  optional_components = ["PRESTO"]
+    }
+
+    master_config {
+      num_instances = 1
+      machine_type  = "e2-standard-2"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+  }
+}
+
 resource "google_dataproc_job" "presto" {
   region       = google_dataproc_cluster.basic.region
   force_delete = true
