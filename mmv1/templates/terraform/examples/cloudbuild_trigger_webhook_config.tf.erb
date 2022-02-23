@@ -1,0 +1,25 @@
+
+data "google_secret_manager_secret_version" "github-webhook-secret" {
+  secret = "webhook-secret"
+}
+
+resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
+  name        = "webhook-trigger"
+ 
+ webhook_config {
+    secret = data.google_secret_manager_secret_version.github-webhook-secret.id
+  }
+
+  source_to_build {
+    uri       = "https://hashicorp/terraform-provider-google-beta"
+    ref       = "refs/heads/main"
+    repo_type = "GITHUB"
+  }
+
+  git_file_source {
+    path      = "cloudbuild.yaml"
+    uri       = "https://hashicorp/terraform-provider-google-beta"
+    revision  = "refs/heads/main"
+    repo_type = "GITHUB"
+  }
+}
