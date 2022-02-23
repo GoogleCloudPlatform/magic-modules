@@ -324,7 +324,7 @@ resource "google_dataproc_job" "sparksql" {
 <a name="nested_presto_config"></a>The `presto_config` block supports:
 
 ```hcl
-# Submit a spark SQL job to the cluster
+# Submit a Presto job to the cluster
 resource "google_dataproc_job" "presto" {
   ...
   presto_config {
