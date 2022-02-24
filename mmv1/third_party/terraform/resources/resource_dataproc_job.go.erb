@@ -16,7 +16,7 @@ import (
 <% end -%>
 )
 
-jobTypes := []string{"pyspark_config", "spark_config", "hadoop_config", "hive_config", "pig_config", "sparksql_config", "presto_config"}
+var jobTypes = []string{"pyspark_config", "spark_config", "hadoop_config", "hive_config", "pig_config", "sparksql_config", "presto_config"}
 
 func resourceDataprocJob() *schema.Resource {
 	return &schema.Resource{
