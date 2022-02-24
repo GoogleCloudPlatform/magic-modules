@@ -264,6 +264,11 @@ func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 		submitReq.Job.SparkSqlJob = expandSparkSqlJob(config)
 	}
 
+	if v, ok := d.GetOk("presto_config"); ok {
+		config := extractFirstMapConfig(v.([]interface{}))
+		submitReq.Job.PrestoJob = expandPrestoJob(config)
+	}
+
 	// Submit the job
 	job, err := config.NewDataprocClient(userAgent).Projects.Regions.Jobs.Submit(
 		project, region, submitReq).Do()
@@ -360,6 +365,12 @@ func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
 	if job.SparkSqlJob != nil {
 		if err := d.Set("sparksql_config", flattenSparkSqlJob(job.SparkSqlJob)); err != nil {
 			return fmt.Errorf("Error setting sparksql_config: %s", err)
+		}
+	}
+
+	if job.PrestoJob != nil {
+		if err := d.Set("presto_config", flattenPrestoJob(job.PrestoJob)); err != nil {
+			return fmt.Errorf("Error setting presto_config: %s", err)
 		}
 	}
 	return nil
