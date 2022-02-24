@@ -90,7 +90,7 @@ objects:
           The static external IP address represented by this resource. Only
           IPv4 is supported. An address may only be specified for INTERNAL
           address types. The IP address must be inside the specified subnetwork,
-          if any.
+          if any. Set by the API if undefined.
       - !ruby/object:Api::Type::Enum
         name: 'addressType'
         description: |
@@ -8154,8 +8154,8 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'networkEndpointType'
         description: |
-          Type of network endpoints in this network endpoint group. 
-          NON_GCP_PRIVATE_IP_PORT is used for hybrid connectivity network 
+          Type of network endpoints in this network endpoint group.
+          NON_GCP_PRIVATE_IP_PORT is used for hybrid connectivity network
           endpoint groups (see https://cloud.google.com/load-balancing/docs/hybrid).
           Note that NON_GCP_PRIVATE_IP_PORT can only be used with Backend Services
           that 1) have the following load balancing schemes: EXTERNAL, EXTERNAL_MANAGED,
@@ -8520,7 +8520,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'platform'
-            required: true            
+            required: true
             # Docs (https://cloud.google.com/compute/docs/reference/rest/beta/regionNetworkEndpointGroups) say support is offered for:
             # API Gateway: apigateway.googleapis.com, App Engine: appengine.googleapis.com,
             # Cloud Functions: cloudfunctions.googleapis.com, Cloud Run: run.googleapis.com
