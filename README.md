@@ -55,7 +55,6 @@ In the future we will add hybrid generation with multiple generators. All the in
 pertains only to the contents of the `mmv1` directory, and commands should be executed from
 that directory.
 
-
 To get started right away, use the bootstrap script with:
 
 ```bash
@@ -104,11 +103,11 @@ OUTPUT_PATH should be set to the location of your provider repository, which is
 recommended to be inside your GOPATH.
 
 ```bash
-make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google"
-make terraform VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
+make terraform build VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google"
+make terraform build VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
 
 # Only generate a specific product (plus all common files)
-make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=dataproc
+make terraform build VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=dataproc
 ```
 
 It's worth noting that Magic Modules will only generate new files when run
@@ -263,13 +262,13 @@ both generators are in use. To assist with generation we have a series of `make`
 targets that will run the compilers in tandem to generate the Terraform provider.
 
 Sample Usage to compile at beta:
-`make OUTPUT_PATH=/path/to/terraform-provider-google-beta VERSION=beta`
+`make terraform build OUTPUT_PATH=/path/to/terraform-provider-google-beta VERSION=beta`
 
 Target single product:
-`make OUTPUT_PATH=/path/to/terraform-provider-google VERSION=ga PRODUCT=compute`
+`make terraform build OUTPUT_PATH=/path/to/terraform-provider-google VERSION=ga PRODUCT=compute`
 
 Target single resource
-`make OUTPUT_PATH=/path/to/terraform-provider-google VERSION=ga PRODUCT=compute RESOURCE=image`
+`make terraform build OUTPUT_PATH=/path/to/terraform-provider-google VERSION=ga PRODUCT=compute RESOURCE=image`
 
 For more advanced usage of mmv1 compiler flags, please execute the compiler directly
 from within the mmv1 directory.
