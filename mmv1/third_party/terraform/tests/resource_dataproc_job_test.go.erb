@@ -726,7 +726,7 @@ resource "google_dataproc_job" "sparksql" {
 
 }
 
-func testAccDataprocJob_sparksql(rnd string) string {
+func testAccDataprocJob_presto(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "basic" {
   name   = "dproc-job-test-%s"
