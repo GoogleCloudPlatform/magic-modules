@@ -12,9 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- type: CUSTOM_IDENTITY_GETTER
-  field: project
-  details:
-    function: getProjectField
 - type: USE_DCL_ID
   
