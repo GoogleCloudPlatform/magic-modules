@@ -124,10 +124,6 @@ type Property struct {
 	// If this property allows forward slashes in its value (only important for
 	// properties sent in the URL)
 	forwardSlashAllowed bool
-
-	// If this property should be skipped during the verification step
-	// in import tests
-	importStateVerifyIgnore bool
 }
 
 // An IdentityGetter is a function to retrieve the value of an "identity" field
