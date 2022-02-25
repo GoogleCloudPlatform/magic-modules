@@ -14240,10 +14240,12 @@ objects:
               - !ruby/object:Api::Type::String
                 name: 'machineType'
                 required: true
+                input: true
                 description: |
                   The name of the machine type to reserve.
               - !ruby/object:Api::Type::String
                 name: 'minCpuPlatform'
+                input: true
                 description: |
                   The minimum CPU platform for the reservation. For example,
                   `"Intel Skylake"`. See
@@ -14253,11 +14255,13 @@ objects:
                 name: 'guestAccelerators'
                 description: |
                   Guest accelerator type and count.
+                input: true
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::String
                       name: 'acceleratorType'
                       required: true
+                      input: true
                       description: |
                         The full or partial URL of the accelerator type to
                         attach to this instance. For example:
@@ -14267,11 +14271,13 @@ objects:
                     - !ruby/object:Api::Type::Integer
                       name: 'acceleratorCount'
                       required: true
+                      input: true
                       description: |
                         The number of the guest accelerator cards exposed to
                         this instance.
               - !ruby/object:Api::Type::Array
                 name: 'localSsds'
+                input: true
                 description: |
                   The amount of local ssd to reserve with each instance. This
                   reserves disks of type `local-ssd`.
@@ -14279,6 +14285,7 @@ objects:
                   properties:
                     - !ruby/object:Api::Type::Enum
                       name: 'interface'
+                      input: true
                       default_value: :SCSI
                       values:
                         - :SCSI
@@ -14288,6 +14295,7 @@ objects:
                     - !ruby/object:Api::Type::Integer
                       name: 'diskSizeGb'
                       required: true
+                      input: true
                       description: |
                        The size of the disk in base-2 GB.
   - !ruby/object:Api::Resource
