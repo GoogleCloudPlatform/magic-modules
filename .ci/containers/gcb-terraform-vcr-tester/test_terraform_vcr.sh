@@ -55,33 +55,69 @@ curl \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
   -d "$post_body"
 
+now=$(date +"%T")
+echo "Current time : $now"
 
+set +e
 # cassette retrieval
-gsutil -m cp gs://vcr-$GOOGLE_PROJECT/beta/fixtures/* /fixtures/
-# # copy branch specific cassettes over master. This might fail but that's ok if the folder doesnt exist
+mkdir fixtures
+
+gsutil -m cp gs://vcr-$GOOGLE_PROJECT/beta/fixtures/* fixtures/
+# copy branch specific cassettes over master. This might fail but that's ok if the folder doesnt exist
 # gsutil -m cp gs://vcr-$GOOGLE_PROJECT/beta/%BRANCH_NAME%/fixtures/* fixtures/
 # mkdir -p $VCR_PATH
 # cp fixtures $VCR_PATH/../
 # ls $VCR_PATH
 
-export TF_LOG=DEBUG
+# echo "SA: $SA_KEY"
+
+echo $SA_KEY > sa_key.json
+gcloud auth activate-service-account $GOOGLE_SERVICE_ACCOUNT --key-file=$local_path/sa_key.json --project=$GOOGLE_PROJECT
+
+mkdir tflog
+
+# export TF_LOG=DEBUG
 export GOOGLE_REGION=us-central1
 export GOOGLE_ZONE=us-central1-a
-export GOOGLE_USE_DEFAULT_CREDENTIALS=TRUE
-export VCR_PATH=/fixtures
-export VCR_MODE=REPLAYING
+# export GOOGLE_USE_DEFAULT_CREDENTIALS=TRUE
+export VCR_PATH=$local_path/fixtures
+# export VCR_MODE=REPLAYING
+export ACCTEST_PARALLELISM=32
+export GOOGLE_APPLICATION_CREDENTIALS=$local_path/sa_key.json
+# export TF_LOG_PATH_MASK=$local_path/tflog/%s.log
 
-ls $VCR_PATH
+echo "cassette copied"
+echo "VCR_PATH: $VCR_PATH"
+echo "ACCTEST_PARALLELISM: $ACCTEST_PARALLELISM" 
+echo "GOOGLE_APPLICATION_CREDENTIALS: $GOOGLE_APPLICATION_CREDENTIALS"
 
-make testacc TEST=./google-beta TESTARGS='-run=TestAccComputeInstanceTemplate_basic'
+# make testacc TEST=./google-beta TESTARGS='-run=TestAcc'
+# failingtests=$(TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v '-run=TestAcc' -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google/version.ProviderVersion=acc" | grep FAIL)
+# TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/tflog/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v '-run=TestAccComputeFirewall' -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google/version.ProviderVersion=acc"
+
+failingtests=$(TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/tflog/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v '-run=TestAccComputeFirewall' -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google/version.ProviderVersion=acc" | grep FAIL)
+
+if [[ -n $failingtests ]] then
+
+fi
+
+# echo "Failing tests: $failingtests"
 
 test_exit_code=$?
+
+set -e
 
 if [ $test_exit_code -ne 0 ]; then
     test_state="failure"
 else
     test_state="success"
 fi
+
+echo "current folder:"
+ls
+
+echo "tflog folder:"
+ls $local_path/tflog
 
 post_body=$( jq -n \
     --arg context "VCR-test" \
@@ -96,6 +132,7 @@ curl \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
   -d "$post_body"
 
-
+now=$(date +"%T")
+echo "Current time : $now"
 
 
