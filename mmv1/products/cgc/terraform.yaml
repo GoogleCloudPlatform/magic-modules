@@ -51,6 +51,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_postgres_instance_authorized_network"
+        primary_resource_id: "instance"
+        vars:
+          postgres_instance_with_authorized_network: "postgres-instance-with-authorized-network"
+        ignore_read_extra:
+          - "deletion_protection"
     # Storage
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_new_bucket"
