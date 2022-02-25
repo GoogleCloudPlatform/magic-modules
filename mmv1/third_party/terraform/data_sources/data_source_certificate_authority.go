@@ -39,30 +39,34 @@ func dataSourcePrivatecaCertificateAuthorityRead(d *schema.ResourceData, meta in
 	if err != nil {
 		return err
 	}
-	url, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:fetch")
-	if err != nil {
-		return err
-	}
 
-	billingProject := ""
+	// pem_csr is only applicable for SUBORDINATE CertificateAuthorities
+	if d.Get("type") == "SUBORDINATE" {
+		url, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:fetch")
+		if err != nil {
+			return err
+		}
 
-	project, err := getProject(d, config)
-	if err != nil {
-		return fmt.Errorf("Error fetching project for CertificateAuthority: %s", err)
-	}
-	billingProject = project
+		billingProject := ""
 
-	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
-		billingProject = bp
-	}
+		project, err := getProject(d, config)
+		if err != nil {
+			return fmt.Errorf("Error fetching project for CertificateAuthority: %s", err)
+		}
+		billingProject = project
 
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
-	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("PrivatecaCertificateAuthority %q", d.Id()))
-	}
-	if err := d.Set("pem_csr", res["pemCsr"]); err != nil {
-		return fmt.Errorf("Error fetching CertificateAuthority: %s", err)
+		// err == nil indicates that the billing_project value was found
+		if bp, err := getBillingProject(d, config); err == nil {
+			billingProject = bp
+		}
+
+		res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+		if err != nil {
+			return handleNotFoundError(err, d, fmt.Sprintf("PrivatecaCertificateAuthority %q", d.Id()))
+		}
+		if err := d.Set("pem_csr", res["pemCsr"]); err != nil {
+			return fmt.Errorf("Error fetching CertificateAuthority: %s", err)
+		}
 	}
 
 	return nil
