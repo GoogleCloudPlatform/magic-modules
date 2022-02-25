@@ -27,6 +27,9 @@ func dataSourcePrivatecaCertificateAuthority() *schema.Resource {
 func dataSourcePrivatecaCertificateAuthorityRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return fmt.Errorf("Error generating user agent: %s", err)
+	}
 
 	id, err := replaceVars(d, config, "projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}")
 	if err != nil {
