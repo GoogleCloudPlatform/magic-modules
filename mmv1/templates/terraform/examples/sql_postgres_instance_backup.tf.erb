@@ -1,0 +1,25 @@
+provider "google" {
+ credentials = file("CREDENTIALS_FILE.json")
+ project     = "load-balancer-https"
+}
+# [START cloud_sql_postgres_instance_backup]
+resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
+  name             = "<%= ctx[:vars]['postgres_instance_backup'] %>"
+  region           = "us-central1"
+  database_version = "POSTGRES_12"
+  settings {
+    tier = "db-custom-2-7680"
+    backup_configuration {
+      enabled                        = true
+      start_time                     = "20:55"
+      location                       = null
+      transaction_log_retention_days = null
+      backup_retention_settings {
+        retained_backups               = 365
+        retention_unit                 = "COUNT"
+      }
+    }
+  }
+  deletion_protection =  "false"
+}
+# [END cloud_sql_postgres_instance_backup]
