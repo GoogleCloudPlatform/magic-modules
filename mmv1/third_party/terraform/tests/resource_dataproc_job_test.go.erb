@@ -760,9 +760,7 @@ resource "google_dataproc_job" "presto" {
 
   presto_config {
     query_list = [
-      "DROP TABLE IF EXISTS dprocjob_test",
-      "CREATE TABLE dprocjob_test(bar int)",
-      "SELECT * FROM dprocjob_test WHERE bar > 2",
+      "SELECT * FROM system.metadata.schema_properties"
     ]
   }
 }
