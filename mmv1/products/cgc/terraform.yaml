@@ -53,6 +53,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "deletion_protection"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_mysql_instance_authorized_network"
+        primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "instance"
         vars:
           mysql_instance_with_authorized_network: "mysql-instance-with-authorized-network"
