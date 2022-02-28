@@ -1,7 +1,3 @@
-provider "google" {
- credentials = file("CREDENTIALS_FILE.json")
- project     = "load-balancer-https"
-}
 # [START cloud_sql_postgres_instance_backup]
 resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   name             = "<%= ctx[:vars]['postgres_instance_backup'] %>"
