@@ -9,12 +9,6 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
       enabled                        = true
       binary_log_enabled             = true
       start_time                     = "20:55"
-      location                       = null
-      transaction_log_retention_days = null
-      backup_retention_settings {
-        retained_backups               = 365
-        retention_unit                 = "COUNT"
-      }
     }
   }
   deletion_protection  = "false"
