@@ -8,9 +8,8 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
     tier = "db-custom-2-7680"
     backup_configuration {
       enabled                        = true
-      binary_log_enabled             = true
       start_time                     = "20:55"
     }
   }
 }
-# [START cloud_sql_sqlserver_instance_backup]
+# [END cloud_sql_sqlserver_instance_backup]
