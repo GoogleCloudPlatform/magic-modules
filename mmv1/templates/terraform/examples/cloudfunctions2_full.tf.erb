@@ -1,20 +1,24 @@
 resource "google_pubsub_topic" "sub" {
+  provider = google-beta
   name = "pubsub"
 }
 
 resource "google_storage_bucket" "bucket" {
+  provider = google-beta
   name     = "<%= ctx[:vars]['bucket_name'] %>"
   location = "US"
   uniform_bucket_level_access = true
 }
  
 resource "google_storage_bucket_object" "object" {
+  provider = google-beta
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
   source = "<%= ctx[:vars]['zip_path'] %>"
 }
  
 resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
   name = "<%= ctx[:vars]['function'] %>"
   location = "us-central1"
   description = "a new function"
