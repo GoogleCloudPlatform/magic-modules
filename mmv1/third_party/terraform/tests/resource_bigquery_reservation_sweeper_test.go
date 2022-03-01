@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-// This will sweep GCE Disk resources
+// This will sweep BigqueryReservation Reservation and Assignment resources
 func init() {
 	resource.AddTestSweepers("BigqueryReservation", &resource.Sweeper{
 		Name: "BigqueryReservation",
