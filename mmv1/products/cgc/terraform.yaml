@@ -59,6 +59,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           myinstance: "myinstance"
         ignore_read_extra:
           - "deletion_protection"
+          - "root_password"
     # Storage
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_new_bucket"
