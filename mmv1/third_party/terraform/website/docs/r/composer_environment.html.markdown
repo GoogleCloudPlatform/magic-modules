@@ -60,7 +60,7 @@ resource "google_composer_environment" "test" {
  
  config {
     software_config {
-      image_version = "composer-2-airflow-2.2.3"
+      image_version = "composer-2.0.0-preview.3-airflow-2.1.2"
     }
   }
 }
