@@ -307,7 +307,55 @@ objects:
               project. service-PROJECT_NUMBER@gcp-sa-healthcare.iam.gserviceaccount.com must have publisher permissions on the given
               Cloud Pub/Sub topic. Not having adequate permissions will cause the calls that send notifications to fail.
             required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: validationConfig
+        description: |
+          Configuration for how to validate incoming FHIR resources against configured profiles.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: disableProfileValidation
+            description: |
+              Whether to disable profile validation for this FHIR store. Set this to true to disable checking incoming
+              resources for conformance against structure definitions in this FHIR store.
+          - !ruby/object:Api::Type::Boolean
+            name: disableRequiredFieldValidation
+            description: |
+              Whether to disable required fields validation for incoming resources. Set this to true to disable checking
+              incoming resources for conformance against required fields requirement defined in the FHIR specification.
+              This property only affects resource types that do not have profiles configured for them, any rules in enabled
+              implementation guides will still be enforced.
+          - !ruby/object:Api::Type::Boolean
+            name: disableReferenceTypeValidation
+            description: |
+              Whether to disable reference type validation for incoming resources. Set this to true to disable checking
+              incoming resources for conformance against reference type requirement defined in the FHIR specification.
+              This property only affects resource types that do not have profiles configured for them, any rules in enabled
+              implementation guides will still be enforced.
+          - !ruby/object:Api::Type::Boolean
+            name: disableFhirpathValidation
+            description: |
+              Whether to disable FHIRPath validation for incoming resources. Set this to true to disable checking incoming
+              resources for conformance against FHIRPath requirement defined in the FHIR specification. This property only
+              affects resource types that do not have profiles configured for them, any rules in enabled implementation
+              guides will still be enforced.
+          - !ruby/object:Api::Type::Array
+            name: enabledImplementationGuides
+            item_type: Api::Type::String
+            description: |-
+              A list of implementation guide URLs in this FHIR store that are used to configure the profiles to use for
+              validation. For example, to use the US Core profiles for validation, set enabledImplementationGuides to
+              ["http://hl7.org/fhir/us/core/ImplementationGuide/ig"]. If enabledImplementationGuides is empty or omitted,
+              then incoming resources are only required to conform to the base FHIR profiles. Otherwise, a resource must
+              conform to at least one profile listed in the global property of one of the enabled ImplementationGuides.
 
+              The Cloud Healthcare API does not currently enforce all of the rules in a StructureDefinition.
+              The following rules are supported:
+              * min/max
+              * minValue/maxValue
+              * type
+              * fixed[x]
+              * pattern[x] on simple types
+              * slicing, when using "value" as the discriminator type
       - !ruby/object:Api::Type::Time
         name: 'creationTime'
         description: |

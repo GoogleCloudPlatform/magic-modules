@@ -12,6 +12,16 @@ resource "google_healthcare_fhir_store" "default" {
     pubsub_topic = google_pubsub_topic.topic.id
   }
 
+  validation_config {
+    disable_profile_validation        = false
+    disable_required_field_validation = false
+    disable_reference_type_validation = false
+    disable_fhirpath_validation       = false
+    enabled_implementation_guides = [
+      "https://some.url/to-an-implementation-guide"
+    ]
+  }
+
   labels = {
     label1 = "labelvalue1"
   }
