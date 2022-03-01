@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package google
+<% unless version == 'ga' -%>
 
 import (
 	"testing"
@@ -125,3 +127,4 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
 }
 `, context)
 }
+<% end -%>
