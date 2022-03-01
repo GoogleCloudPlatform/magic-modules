@@ -18,7 +18,7 @@ func TestAccCloudFunctions2Function_update(t *testing.T) {
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    testAccProvidersOiCS,
 		CheckDestroy: testAccCheckCloudfunctions2functionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
