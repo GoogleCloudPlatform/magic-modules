@@ -69,8 +69,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           sqlserver_instance_backup: "sqlserver-instance-backup"
-         ignore_read_extra:
-           - "root_password"
+        ignore_read_extra:
+          - "root_password"
     # Storage
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_new_bucket"
