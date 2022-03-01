@@ -14,5 +14,6 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
       }
     }
   }
+  deletion_protection = false
 }
 # [END cloud_sql_sqlserver_instance_authorized_network]
