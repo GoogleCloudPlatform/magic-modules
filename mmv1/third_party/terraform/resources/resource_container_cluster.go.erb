@@ -4183,7 +4183,6 @@ func flattenAutoProvisioningDefaults(a *container.AutoprovisioningNodePoolDefaul
 	r["min_cpu_platform"] = a.MinCpuPlatform
 	r["disk_type"] = a.DiskType
 	r["disk_size_gb"] = a.DiskSizeGb
-	r["image_type"] = a.ImageType
 	r["boot_disk_kms_key"] = a.BootDiskKmsKey
 
 	if a.ShieldedInstanceConfig != nil && !reflect.DeepEqual(*a.ShieldedInstanceConfig, container.ShieldedInstanceConfig{}) {
