@@ -52,6 +52,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project_id: "quota"
         test_env_vars:
           org_id: :ORG_ID
+      - !ruby/object:Provider::Terraform::Examples
+        name: "consumer_quota_override_custom_dimension"
+        primary_resource_id: "override"
+        min_version: 'beta'
+        vars:
+          project_id: "quota"
+        test_env_vars:
+          org_id: :ORG_ID
     id_format: "projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}"
     import_format: [ "services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}", "projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}" ]
     skip_sweeper: true

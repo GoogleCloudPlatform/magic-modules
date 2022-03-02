@@ -36,7 +36,7 @@ objects:
     create_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/{{name}}?force={{force}}
     update_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/{{name}}
     update_verb: :PATCH
-    delete_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/{{name}}
+    delete_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/{{name}}?force={{force}}
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Getting Started': 'https://cloud.google.com/service-usage/docs/manage-quota#create_consumer_quota_override'
@@ -123,7 +123,7 @@ objects:
     create_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}?force={{force}}
     update_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}?force={{force}}
     update_verb: :PATCH
-    delete_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}
+    delete_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}?force={{force}}
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Getting Started': 'https://cloud.google.com/service-usage/docs/getting-started'
