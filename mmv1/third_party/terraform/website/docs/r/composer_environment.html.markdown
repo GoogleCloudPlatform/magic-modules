@@ -58,8 +58,10 @@ resource "google_composer_environment" "test" {
   name   = "example-composer-env"
   region = "us-central1"
  
-  software_config {
-    image_version = "composer-2.0.0-preview.3-airflow-2.1.2"
+ config {
+    software_config {
+      image_version = "composer-2.0.0-preview.3-airflow-2.1.2"
+    }
   }
 }
 ```
@@ -656,7 +658,7 @@ The `config` block supports:
   below.
 
 * `maintenance_window` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  (Optional)
   The configuration settings for Cloud Composer maintenance windows.
 
 * `workloads_config` -
