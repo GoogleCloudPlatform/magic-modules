@@ -1,0 +1,37 @@
+resource "google_storage_bucket" "bucket" {
+  provider = google-beta
+  name     = "<%= ctx[:vars]['bucket_name'] %>"
+  location = "US"
+  uniform_bucket_level_access = true
+}
+ 
+resource "google_storage_bucket_object" "object" {
+  provider = google-beta
+  name   = "function-source.zip"
+  bucket = google_storage_bucket.bucket.name
+  source = "<%= ctx[:vars]['zip_path'] %>"
+}
+ 
+resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+  name = "<%= ctx[:vars]['function'] %>"
+  location = "us-central1"
+  description = "a new function"
+ 
+  build_config {
+    runtime = "nodejs12"
+    entry_point = "helloHttp"
+    source {
+      storage_source {
+        bucket = google_storage_bucket.bucket.name
+        object = google_storage_bucket_object.object.name
+      }
+    }
+  }
+ 
+  service_config {
+    max_instance_count  = 1
+    available_memory    = "256M"
+    timeout_seconds     = 60
+  }
+}
