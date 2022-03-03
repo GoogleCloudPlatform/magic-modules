@@ -51,16 +51,16 @@
           }
         },
         {
-          "address": "google_sql_database_instance.master",
+          "address": "google_sql_database_instance.main",
           "mode": "managed",
           "type": "google_sql_database_instance",
-          "name": "master",
+          "name": "main",
           "provider_name": "google",
           "schema_version": 0,
           "values": {
             "database_version": "POSTGRES_9_6",
             "master_instance_name": "test-master_instance_name",
-            "name": "master-instance",
+            "name": "main-instance",
             "region": "us-central1",
             "replica_configuration": [
               {
@@ -233,10 +233,10 @@
       }
     },
     {
-      "address": "google_sql_database_instance.master",
+      "address": "google_sql_database_instance.main",
       "mode": "managed",
       "type": "google_sql_database_instance",
-      "name": "master",
+      "name": "main",
       "provider_name": "google",
       "change": {
         "actions": [
@@ -246,7 +246,7 @@
         "after": {
           "database_version": "POSTGRES_9_6",
           "master_instance_name": "test-master_instance_name",
-          "name": "master-instance",
+          "name": "main-instance",
           "region": "us-central1",
           "replica_configuration": [
             {
@@ -451,10 +451,10 @@
           "schema_version": 0
         },
         {
-          "address": "google_sql_database_instance.master",
+          "address": "google_sql_database_instance.main",
           "mode": "managed",
           "type": "google_sql_database_instance",
-          "name": "master",
+          "name": "main",
           "provider_config_key": "google",
           "expressions": {
             "database_version": {
@@ -464,7 +464,7 @@
               "constant_value": "test-master_instance_name"
             },
             "name": {
-              "constant_value": "master-instance"
+              "constant_value": "main-instance"
             },
             "region": {
               "constant_value": "us-central1"
