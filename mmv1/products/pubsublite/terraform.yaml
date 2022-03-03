@@ -21,6 +21,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       primary_resource_name: "fmt.Sprintf(\"tf-test-example-reservation%s\", context[\"random_suffix\"])"
       vars:
         reservation_name: "example-reservation"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "pubsub_lite_reservation_basic2"
+      primary_resource_id: "example"
+      primary_resource_name: "fmt.Sprintf(\"tf-test-example-reservation%s\", context[\"random_suffix\"])"
+      vars:
+        reservation_name: "example-reservation"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
