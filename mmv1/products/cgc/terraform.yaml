@@ -57,20 +57,34 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           sqlserver_instance_backup_location: "sqlserver-instance-backup-location"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
         ignore_read_extra:
            - "root_password"
+          - "deletion_protection"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_mysql_instance_backup_location"
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "default"
         vars:
           mysql_instance_backup_location: "mysql-instance-backup-location"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_postgres_instance_backup_location"
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "default"
         vars:
           postgres_instance_backup_location: "postgres-instance-backup-location"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
     # Storage
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_new_bucket"
