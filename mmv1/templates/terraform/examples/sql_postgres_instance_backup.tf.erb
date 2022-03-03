@@ -10,6 +10,6 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
       start_time                     = "20:55"
     }
   }
-  deletion_protection =  "false"
+  deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
 }
 # [END cloud_sql_postgres_instance_backup]
