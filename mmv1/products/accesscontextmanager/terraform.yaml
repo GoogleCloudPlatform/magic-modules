@@ -263,6 +263,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           service_perimeter_name: "restrict_all"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_resource.go.erb      
+      encoder: 'templates/terraform/encoders/access_context_manager_service_perimeter_resource.go.erb'    
+    properties:
+      # excluding useExplicitDryRunSpec from Terraform code because it need to be always True.
+      useExplicitDryRunSpec: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
   GcpUserAccessBinding: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]

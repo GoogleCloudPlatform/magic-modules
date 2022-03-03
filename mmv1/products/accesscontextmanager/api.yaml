@@ -2036,6 +2036,9 @@ objects:
               Format: projects/{project_number}
         required: true
         input: true
+      - !ruby/object:Api::Type::String
+        name: 'useExplicitDryRunSpec'
+        description: This is always set to True
   - !ruby/object:Api::Resource
     name: 'ServicePerimeterResource'
     create_url: "{{perimeter_name}}"
