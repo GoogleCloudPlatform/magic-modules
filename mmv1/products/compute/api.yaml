@@ -13398,6 +13398,13 @@ objects:
               - :TRANSLATIONS_ONLY
               - :ALL
       - !ruby/object:Api::Type::Boolean
+        name: enableDynamicPortAllocation
+        description: |
+          Using dynamic port allocation lets the NAT gateway allocate different numbers of ports to each VM based 
+          on usage. For more information see the [official documentation](https://cloud.google.com/nat/docs/overview#specs-rfcs).
+        default_value: false
+        send_empty_value: true
+      - !ruby/object:Api::Type::Boolean
         name: enableEndpointIndependentMapping
         description: |
           Specifies if endpoint independent mapping is enabled. This is enabled by default. For more information
