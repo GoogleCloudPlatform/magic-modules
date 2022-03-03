@@ -13,6 +13,6 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
       }
     }
   }
-  deletion_protection=false
+  deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
 }
 # [START cloud_sql_mysql_instance_backup_retention]
