@@ -29,6 +29,7 @@ function clone_repo() {
         GH_REPO=terraform-validator
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-validator
     elif [ "$REPO" == "tf-oics" ]; then
+        UPSTREAM_BRANCH=master
         UPSTREAM_OWNER=terraform-google-modules
         GH_REPO=docs-examples
         LOCAL_PATH=$GOPATH/src/github.com/terraform-google-modules/docs-examples
