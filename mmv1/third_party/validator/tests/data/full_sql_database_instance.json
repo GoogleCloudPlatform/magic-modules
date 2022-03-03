@@ -1,6 +1,6 @@
 [
   {
-    "name": "//cloudsql.googleapis.com/projects/{{.Provider.project}}/instances/master-instance",
+    "name": "//cloudsql.googleapis.com/projects/{{.Provider.project}}/instances/main-instance",
     "asset_type": "sqladmin.googleapis.com/Instance",
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "resource": {
@@ -11,7 +11,7 @@
       "data": {
         "databaseVersion": "POSTGRES_9_6",
         "masterInstanceName": "test-master_instance_name",
-        "name": "master-instance",
+        "name": "main-instance",
         "project": "{{.Provider.project}}",
         "region": "us-central1",
         "replicaConfiguration": {
