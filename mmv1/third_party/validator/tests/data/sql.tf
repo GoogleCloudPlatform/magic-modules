@@ -28,7 +28,7 @@ provider "google" {
 }
 
 resource "google_sql_database_instance" "my-test-sql" {
-  name = "master-instance"
+  name = "main-instance"
   database_version = "POSTGRES_9_6"
   region = "us-central1"
 
