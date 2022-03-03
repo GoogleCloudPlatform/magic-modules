@@ -10,6 +10,6 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
       location                       = "asia-northeast1"
     }
   }
-  deletion_protection  = "false"
+  deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
 }
 # [END cloud_sql_mysql_instance_backup_location]
