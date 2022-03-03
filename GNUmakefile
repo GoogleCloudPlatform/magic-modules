@@ -71,8 +71,9 @@ validator:
 
 serialize:
 	cd tpgtools;\
+		cp -f serialization.go.base serialization.go &&\
 		go run . $(serialize_compile) --mode "serialization" > temp.serial &&\
-		mv -f temp.serial serialization.go;\
+		mv -f temp.serial serialization.go
 
 upgrade-dcl:
 	cd tpgtools && \
