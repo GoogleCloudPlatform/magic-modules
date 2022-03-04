@@ -134,7 +134,7 @@ objects:
     - !ruby/object:Api::Type::NestedObject
       name: 'mavenConfig'
       description: |-
-        Maven Config defines maven related repository details.
+        MavenRepositoryConfig is maven related repository details.
         Provides additional configuration details for repositories of the maven
         format type.
       properties:
