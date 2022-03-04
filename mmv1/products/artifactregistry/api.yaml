@@ -145,7 +145,7 @@ objects:
             The repository with this flag will allow publishing the same
             snapshot versions.
         - !ruby/object:Api::Type::Enum
-          name: 'version_policy'
+          name: 'versionPolicy'
           description: |-
             Version policy defines the versions that the registry will accept.
           input: true
