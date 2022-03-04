@@ -80,6 +80,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           postgres_instance_backup_location: "postgres-instance-backup-location"
+        name: "sql_postgres_instance_authorized_network"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "instance"
+        vars:
+          postgres_instance_with_authorized_network: "postgres-instance-with-authorized-network"
           deletion_protection: "true"
         test_vars_overrides:
           deletion_protection: "false"
