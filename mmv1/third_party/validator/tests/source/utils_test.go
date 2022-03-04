@@ -3,9 +3,11 @@ package test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -183,4 +185,50 @@ func cmdToString(c *exec.Cmd) string {
 		b.WriteString(a)
 	}
 	return b.String()
+}
+
+func generateTFVconvertedAsset(t *testing.T, testDir, testSlug string) {
+	// Get converted assets
+	var conversionRaw []byte
+	fileNameToConvert := testSlug + ".tfplan.json"
+	conversionRaw = tfvConvert(t, testDir, fileNameToConvert, true)
+	dstDir := "../testdata/generatedconvert"
+	if _, err := os.Stat(dstDir); os.IsNotExist(err) {
+		os.MkdirAll(dstDir, 0700)
+	}
+
+	conversionPretty := &bytes.Buffer{}
+	if err := json.Indent(conversionPretty, conversionRaw, "", "  "); err != nil {
+		panic(err)
+	}
+
+	dstFile := path.Join(dstDir, testSlug+".json")
+	err := os.WriteFile(dstFile, conversionPretty.Bytes(), 0666)
+	if err != nil {
+		t.Fatalf("error while writing to file %s, error %v", dstFile, err)
+	}
+
+	fmt.Println("created file : " + dstFile)
+}
+
+func getTestPrefix() string {
+	credentials, ok := data.Provider["credentials"]
+	if ok {
+		credentials = "credentials = \"" + credentials + "\""
+	}
+
+	return fmt.Sprintf(`terraform {
+		required_providers {
+			google = {
+				source  = "hashicorp/google"
+				version = "~> %s"
+			}
+		}
+	}
+
+	provider "google" {
+		%s
+	}
+
+`, data.Provider["version"], credentials)
 }

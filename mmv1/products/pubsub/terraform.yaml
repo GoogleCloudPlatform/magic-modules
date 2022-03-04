@@ -27,11 +27,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckForExistence
       actions: ['create']
-      operation: !ruby/object:Api::Async::Operation
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 4
       suppress_error: true
     error_retry_predicates: ["pubsubTopicProjectNotReady"]
     iam_policy: !ruby/object:Api::Resource::IamPolicy
@@ -87,11 +82,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckForExistence
       actions: ['create']
-      operation: !ruby/object:Api::Async::Operation
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
-          delete_minutes: 4
       suppress_error: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -156,9 +146,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       check_response_func_absence: PollCheckForAbsence
       target_occurrences: 10
       actions: ['delete']
-      operation: !ruby/object:Api::Async::Operation
-        timeouts: !ruby/object:Api::Timeouts
-          delete_minutes: 6
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "pubsub_schema_basic"

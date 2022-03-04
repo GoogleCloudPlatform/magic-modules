@@ -14,10 +14,6 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Api: !ruby/object:Overrides::Terraform::ResourceOverride
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
-      delete_minutes: 6
     autogen_async: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/apigateway.viewer'
@@ -49,10 +45,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       optional_properties: |
         * `api_config_id_prefix` - (Optional) Creates a unique name beginning with the
          specified prefix. If this and api_config_id are unspecified, a random value is chosen for the name.
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
-      delete_minutes: 6
     autogen_async: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/apigateway.viewer'
@@ -90,10 +82,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       extra_schema_entry: templates/terraform/extra_schema_entry/api_config.erb
       encoder: 'templates/terraform/encoders/api_config.go.erb'
   Gateway: !ruby/object:Overrides::Terraform::ResourceOverride
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
-      delete_minutes: 6
     autogen_async: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/apigateway.viewer'

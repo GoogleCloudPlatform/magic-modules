@@ -76,6 +76,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^[a-z][a-z0-9-]{0,39}[a-z0-9]$'
+      maintenancePolicy.weeklyMaintenanceWindow.startTime.hours: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0,23)'
+      maintenancePolicy.weeklyMaintenanceWindow.startTime.minutes: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0,59)'
+      maintenancePolicy.weeklyMaintenanceWindow.startTime.seconds: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0,60)'
+      maintenancePolicy.weeklyMaintenanceWindow.startTime.nanos: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0,999999999)'
       redisVersion: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         update_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}:upgrade'

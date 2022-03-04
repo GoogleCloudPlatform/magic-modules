@@ -214,6 +214,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_basic"
         primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-backend-service%s\", context[\"random_suffix\"])"
         vars:
           backend_service_name: "backend-service"
           http_health_check_name: "health-check"
@@ -252,11 +253,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           neg_name: "network-endpoint"
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_external_managed"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           backend_service_name: "backend-service"
           health_check_name: "health-check"
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: '/'
+      fetch_iam_policy_verb: :GET
+      min_version: beta
+      iam_conditions_request_type: :QUERY_PARAM
+      parent_resource_attribute: 'name'
+      allowed_iam_role: 'roles/compute.admin'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/backend_service.go.erb'
       encoder: 'templates/terraform/encoders/backend_service.go.erb'
@@ -355,6 +362,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_basic"
         primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-region-service%s\", context[\"random_suffix\"])"
         vars:
           region_backend_service_name: "region-service"
           health_check_name: "rbs-health-check"
@@ -399,6 +407,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           region_backend_service_name: "region-service"
           health_check_name: "rbs-health-check"
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: '/'
+      fetch_iam_policy_verb: :GET
+      min_version: beta
+      iam_conditions_request_type: :QUERY_PARAM
+      parent_resource_attribute: 'name'
+      allowed_iam_role: 'roles/compute.admin'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/region_backend_service.go.erb
       encoder: templates/terraform/encoders/region_backend_service.go.erb
@@ -555,10 +570,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
   Disk: !ruby/object:Overrides::Terraform::ResourceOverride
-    # Larger disks were timing out at creation. Bumping up to 5 minutes.
-    # https://github.com/hashicorp/terraform-provider-google/issues/703
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 5
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1025,6 +1036,31 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "port_range"
           - "target"
       - !ruby/object:Provider::Terraform::Examples
+        name: "global_forwarding_rule_external_managed"
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "global-rule"
+          http_proxy_name: "target-proxy"
+          backend_service_name: "backend"
+        ignore_read_extra:
+          - "port_range"
+          - "target"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "global_forwarding_rule_hybrid"
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "global-rule"
+          http_proxy_name: "target-proxy"
+          network_name: "my-network"
+          default_backend_service_name: "backend-default"
+          hybrid_backend_service_name: "backend-hybrid"
+          default_neg_name: "default-neg"
+          hybrid_neg_name: "hybrid-neg"
+          health_check_name: "health-check"
+        ignore_read_extra:
+          - "port_range"
+          - "target"
+      - !ruby/object:Provider::Terraform::Examples
         name: "private_service_connect_google_apis"
         min_version: beta
         primary_resource_id: "default"
@@ -1254,12 +1290,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       sourceType: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
-    # Users were experiencing timeouts. Bumping up to 6 minutes.
-    # https://github.com/hashicorp/terraform-provider-google/issues/852
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
-      delete_minutes: 6
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/compute.osLogin'
       parent_resource_attribute: 'instance_name'
@@ -1464,6 +1494,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/compute_network_endpoint.go.erb
+      custom_import: templates/terraform/custom_import/compute_network_endpoint.go.erb
       decoder: templates/terraform/decoders/unwrap_resource.go.erb
       encoder: templates/terraform/encoders/compute_network_endpoint.go.erb
   NetworkEndpointGroup: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -1475,6 +1506,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           neg_name: "my-lb-neg"
           network_name: "neg-network"
           subnetwork_name: "neg-subnetwork"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "network_endpoint_group_non_gcp"
+        primary_resource_id: "neg"
+        vars:
+          neg_name: "my-lb-neg"
+          network_name: "neg-network"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1953,8 +1990,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
   RegionDisk: !ruby/object:Overrides::Terraform::ResourceOverride
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 5
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -2258,6 +2293,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_vcr: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       update_encoder: templates/terraform/update_encoder/reservation.go.erb
+      pre_update: templates/terraform/pre_update/shared_reservation_update.go.erb
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -2535,10 +2571,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       update_encoder: 'templates/terraform/update_encoder/compute_service_attachment.go.erb'
   Snapshot: !ruby/object:Overrides::Terraform::ResourceOverride
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 5
-      update_minutes: 5
-      delete_minutes: 5
     create_url: PRE_CREATE_REPLACE_ME/createSnapshot
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -2579,8 +2611,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pre_create: templates/terraform/pre_create/compute_snapshot_precreate_url.go.erb
   ManagedSslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
+      insert_minutes: 30
+      update_minutes: 30
       # Deletes can take 20-30 minutes to complete, since they depend
       # on the provisioning process either succeeding or failing completely.
       delete_minutes: 30
@@ -2788,12 +2820,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       warnings: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
   Subnetwork: !ruby/object:Overrides::Terraform::ResourceOverride
-    # Users were experiencing timeout. Bumping up to 6 minutes.
-    # https://github.com/hashicorp/terraform-provider-google/issues/718
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
-      delete_minutes: 6
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/compute.networkUser'
       parent_resource_attribute: 'subnetwork'

@@ -34,7 +34,7 @@
   // If it's a project ID
   var oldProjId int64
   var newProjId int64
-  if oldVal, err := strconv.ParseInt(old, 10, 64); err == nil {
+  if oldVal, err := stringToFixed64(old); err == nil {
     log.Printf("[DEBUG] The old value was a real number: %d", oldVal)
     oldProjId = oldVal
   } else {
@@ -44,7 +44,7 @@
     }
     oldProjId = pOld.ProjectNumber
   }
-  if newVal, err := strconv.ParseInt(new, 10, 64); err == nil {
+  if newVal, err := stringToFixed64(new); err == nil {
     log.Printf("[DEBUG] The new value was a real number: %d", newVal)
     newProjId = newVal
   } else {

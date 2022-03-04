@@ -15,10 +15,6 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Connector: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 6
-      update_minutes: 6
-      delete_minutes: 10
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "vpc_access_connector"
@@ -48,6 +44,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      network: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.erb'
+        diff_suppress_func: 'compareResourceNames'
       minThroughput: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(200, 1000)'

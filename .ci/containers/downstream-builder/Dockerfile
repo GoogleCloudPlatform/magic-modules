@@ -13,8 +13,7 @@ ENV GO111MODULE "on"
 
 # Install Ruby from source.
 RUN apt-get update
-RUN apt-get install -y bzip2 libssl-dev libreadline-dev zlib1g-dev unzip
-RUN apt-get install -y rsync
+RUN apt-get install -y bzip2 libssl-dev libreadline-dev zlib1g-dev unzip sed rsync
 RUN git clone https://github.com/rbenv/rbenv.git /rbenv
 ENV PATH /rbenv/bin:/root/.rbenv/shims:$PATH
 
@@ -55,8 +54,8 @@ RUN pip3 install black
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/master/mmv1/Gemfile" Gemfile
-ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/master/mmv1/Gemfile.lock" Gemfile.lock
+ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mmv1/Gemfile" Gemfile
+ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mmv1/Gemfile.lock" Gemfile.lock
 RUN bundle install
 RUN rbenv rehash
 RUN rm Gemfile Gemfile.lock

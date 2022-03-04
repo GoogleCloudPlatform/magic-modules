@@ -15,8 +15,6 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Project: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}", "{{project}}"]
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 10
     autogen_async: true
     skip_delete: true
     skip_sweeper: true
@@ -31,8 +29,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
   ProjectLocation: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ['projects/{{project}}', '{{project}}']
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 10
     skip_delete: true
     skip_sweeper: true
     examples:
@@ -44,9 +40,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
   WebApp: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ['{{project}} {{name}}']
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 10
-      update_minutes: 10
     autogen_async: true
     skip_delete: true #currently only able to delete a webapp through the Firebase Admin console
     skip_sweeper: true
