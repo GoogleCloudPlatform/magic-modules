@@ -140,7 +140,7 @@ objects:
       properties:
         # Maven properties.
         - !ruby/object:Api::Type::Boolean
-          name: 'allow_snapshot_overwrites'
+          name: 'allowSnapshotOverwrites'
           description: |-
             The repository with this flag will allow publishing the same
             snapshot versions.
