@@ -144,8 +144,7 @@ objects:
             name: 'uri'
             required: true
             description: |
-              The URI of the repo (optional). If unspecified, the repo from which 
-              the trigger invocation originated is assumed to be the repo from which to read the specified path.
+             The URI of the repo (required).
           - !ruby/object:Api::Type::String
             name: 'ref'
             required: true
