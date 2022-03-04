@@ -671,7 +671,10 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				p.ForceNew = true
 			}
 
-			if serverDefault, ok := v.Extension["x-dcl-server-default"].(bool); ok && serverDefault {
+			serverDefault, _ := v.Extension["x-dcl-server-default"].(bool)
+			extractIfEmpty, _ := v.Extension["x-dcl-extract-if-empty"].(bool)
+
+			if serverDefault || extractIfEmpty {
 				p.Computed = true
 			}
 

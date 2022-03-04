@@ -1,0 +1,64 @@
+# Copyright 2022 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+ 
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  function:  !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: 'projects/{{project}}/locations/{{location}}/functions/{{name}}'
+    base_url: projects/{{project}}/locations/{{location}}/functions
+    import_format: ["projects/{{project}}/locations/{{location}}/functions/{{name}}"]
+    autogen_async: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudfunctions2_basic"
+        min_version: beta
+        primary_resource_id: "terraform-test2"
+        primary_resource_name: "terraform-test2"
+        vars:
+          bucket_name: "cloudfunctions2-function-bucket"
+          function: "test-function"
+          zip_path: "path/to/index.zip"
+        test_vars_overrides:
+          zip_path: "\"./test-fixtures/cloudfunctions2/function-source.zip\""
+        # ignore these fields during import step
+        ignore_read_extra:
+          - "build_config.0.source.0.storage_source.0.object"
+          - "build_config.0.source.0.storage_source.0.bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudfunctions2_full"
+        min_version: beta
+        primary_resource_id: "terraform-test"
+        primary_resource_name: "terraform-test"
+        vars:
+          bucket_name: "cloudfunctions2-function-bucket"
+          function: "test-function"
+          zip_path: "path/to/index.zip"
+          router: "gcf2-router"
+        test_vars_overrides:
+          zip_path: "\"./test-fixtures/cloudfunctions2/function-source.zip\""
+        # ignore these fields during import step
+        ignore_read_extra:
+          - "build_config.0.source.0.storage_source.0.object"
+          - "build_config.0.source.0.storage_source.0.bucket"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+      buildConfig.source.storageSource.object: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/cloudfunctions2_function_source_object.go.erb'
+      buildConfig.source.storageSource.bucket: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/cloudfunctions2_function_source_bucket.go.erb'
+      buildConfig.environmentVariables: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      serviceConfig.service: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true

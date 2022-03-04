@@ -4,7 +4,7 @@ set -e
 
 function clone_repo() {
     SCRATCH_OWNER=modular-magician
-    UPSTREAM_BRANCH=master
+    UPSTREAM_BRANCH=main
     if [ "$REPO" == "terraform" ]; then
         if [ "$VERSION" == "ga" ]; then
             UPSTREAM_OWNER=hashicorp
@@ -29,6 +29,7 @@ function clone_repo() {
         GH_REPO=terraform-validator
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-validator
     elif [ "$REPO" == "tf-oics" ]; then
+        UPSTREAM_BRANCH=master
         UPSTREAM_OWNER=terraform-google-modules
         GH_REPO=docs-examples
         LOCAL_PATH=$GOPATH/src/github.com/terraform-google-modules/docs-examples
@@ -79,7 +80,7 @@ if [ "$COMMAND" == "head" ]; then
     COMMIT_MESSAGE="New generated code for MM PR $REFERENCE."
 elif [ "$COMMAND" == "base" ]; then
     # In this case, there is guaranteed to be a merge commit,
-    # and the *left* side of it is the old master branch.
+    # and the *left* side of it is the old main branch.
     # the *right* side of it is the code to be merged.
     git checkout HEAD~
     BRANCH=auto-pr-$REFERENCE-old
@@ -101,7 +102,7 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     # Check for tf-conversion is legacy and can be removed after Nov 15 2021
     if [ "$REPO" == "terraform-validator" ] && [ "$COMMAND" == "base" ] && [ ! -d "../.ci/containers/terraform-validator-tester" ]; then
         # Temporary shim to allow building a "base" version; only required until after
-        # initial merge. If we're building a base branch on an old mmv1 master (which
+        # initial merge. If we're building a base branch on an old mmv1 main (which
         # we can detect by the lack of files added in this PR) the base version will
         # require a `google` folder to exist.
         mkdir -p $LOCAL_PATH/google
@@ -120,7 +121,7 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     pushd $LOCAL_PATH
 
     if [ "$COMMAND" == "downstream" ]; then
-      go get -d github.com/hashicorp/terraform-provider-google@master
+      go get -d github.com/hashicorp/terraform-provider-google@main
     else
       go mod edit -replace github.com/hashicorp/terraform-provider-google=github.com/$SCRATCH_OWNER/terraform-provider-google@$BRANCH
     fi
@@ -202,7 +203,7 @@ if [ "$REPO" == "terraform" ]; then
 fi
 
 PR_NUMBER=$(curl -L -s -H "Authorization: token ${GITHUB_TOKEN}" \
-    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=closed&base=master&sort=updated&direction=desc" | \
+    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=closed&base=main&sort=updated&direction=desc" | \
     jq -r ".[] | if .merge_commit_sha == \"$REFERENCE\" then .number else empty end")
 if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ] && [ "$CHANGELOG" == "true" ]; then
     # Add the changelog entry!

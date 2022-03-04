@@ -82,6 +82,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "true"
         test_vars_overrides:
           deletion_protection: "false"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_sqlserver_instance_authorized_network"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "default"
+        vars:
+          myinstance: "myinstance"
         ignore_read_extra:
           - "deletion_protection"
           - "root_password"
