@@ -67,7 +67,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "static"
         vars:
           new_bucket: "new-bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "storage_upload_file_to_bucket"
+        primary_resource_id: "image"
+        vars:
+          two_dogs_jpg: "two-dogs-jpg"
+        min_version: beta
+        # ignore_read_extra:
+        #   - "port_range"
+        #   - "target"
+        #   - "ip_address"
     properties:
+    
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
