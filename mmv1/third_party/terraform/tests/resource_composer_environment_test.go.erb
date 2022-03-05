@@ -465,7 +465,6 @@ func TestAccComposerEnvironment_UpdateComposerV2(t *testing.T) {
 	})
 }
 
-<% unless version == "ga" -%>
 func TestAccComposerEnvironment_composerV2PrivateServiceConnect(t *testing.T) {
 	t.Parallel()
 
@@ -498,7 +497,7 @@ func TestAccComposerEnvironment_composerV2PrivateServiceConnect(t *testing.T) {
 	})
 }
 
-
+<% unless version == "ga" -%>
 func TestAccComposerEnvironment_composerV1MasterAuthNetworks(t *testing.T) {
 	t.Parallel()
 
@@ -1310,7 +1309,6 @@ resource "google_compute_subnetwork" "test" {
 `, envName, network, subnetwork)
 }
 
-<% unless version == "ga" -%>
 func testAccComposerEnvironment_composerV2PrivateServiceConnect(envName, network, subnetwork string) string {
 	return fmt.Sprintf(`
 data "google_composer_image_versions" "all" {
@@ -1358,6 +1356,7 @@ resource "google_compute_subnetwork" "test" {
 `, envName, network, subnetwork)
 }
 
+<% unless version == "ga" -%>
 func testAccComposerEnvironment_MasterAuthNetworks(compVersion, airflowVersion, envName, network, subnetwork string) string {
 	return fmt.Sprintf(`
 data "google_composer_image_versions" "all" {
