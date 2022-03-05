@@ -1,844 +1,267 @@
 package google
 
 import (
-	"context"
-	"fmt"
-	"log"
+	"reflect"
 
-	"time"
-
-	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	compute "google.golang.org/api/compute/v0.beta"
 )
 
-func resourceComputeSecurityPolicy() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceComputeSecurityPolicyCreate,
-		Read:   resourceComputeSecurityPolicyRead,
-		Update: resourceComputeSecurityPolicyUpdate,
-		Delete: resourceComputeSecurityPolicyDelete,
-		Importer: &schema.ResourceImporter{
-			State: resourceSecurityPolicyStateImporter,
-		},
-		CustomizeDiff: rulesCustomizeDiff,
+const ComputeSecurityPolicyAssetType string = "compute.googleapis.com/SecurityPolicy"
 
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(4 * time.Minute),
-			Update: schema.DefaultTimeout(4 * time.Minute),
-			Delete: schema.DefaultTimeout(4 * time.Minute),
-		},
+func resourceConverterComputeSecurityPolicy() ResourceConverter {
+	return ResourceConverter{
+		AssetType: ComputeSecurityPolicyAssetType,
+		Convert:   GetComputeSecurityPolicyCaiObject,
+	}
+}
 
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validateGCPName,
-				Description:  `The name of the security policy.`,
+func GetComputeSecurityPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+	name, err := assetName(d, config, "//compute.googleapis.com/projects/{{project}}/global/securityPolicies/{{name}}")
+	if err != nil {
+		return []Asset{}, err
+	}
+	if obj, err := GetComputeSecurityPolicyApiObject(d, config); err == nil {
+		return []Asset{{
+			Name: name,
+			Type: ComputeSecurityPolicyAssetType,
+			Resource: &AssetResource{
+				Version:              "v1",
+				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+				DiscoveryName:        "SecurityPolicy",
+				Data:                 obj,
 			},
-
-			"description": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: `An optional description of this security policy. Max size is 2048.`,
-			},
-
-			"project": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				ForceNew:    true,
-				Description: `The project in which the resource belongs. If it is not provided, the provider project is used.`,
-			},
-
-			"type": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: `The type indicates the intended use of the security policy. CLOUD_ARMOR - Cloud Armor backend security policies can be configured to filter incoming HTTP requests targeting backend services. They filter requests before they hit the origin servers. CLOUD_ARMOR_EDGE - Cloud Armor edge security policies can be configured to filter incoming HTTP requests targeting backend services (including Cloud CDN-enabled) as well as backend buckets (Cloud Storage). They filter requests before the request is served from Google's cache.`,
-			},
-
-			"rule": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Computed: true, // If no rules are set, a default rule is added
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"action": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: `Action to take when match matches the request.`,
-						},
-
-						"priority": {
-							Type:        schema.TypeInt,
-							Required:    true,
-							Description: `An unique positive integer indicating the priority of evaluation for a rule. Rules are evaluated from highest priority (lowest numerically) to lowest priority (highest numerically) in order.`,
-						},
-
-						"match": {
-							Type:     schema.TypeList,
-							Required: true,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"config": {
-										Type:     schema.TypeList,
-										Optional: true,
-										MaxItems: 1,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"src_ip_ranges": {
-													Type:        schema.TypeSet,
-													Required:    true,
-													MinItems:    1,
-													MaxItems:    10,
-													Elem:        &schema.Schema{Type: schema.TypeString},
-													Description: `Set of IP addresses or ranges (IPV4 or IPV6) in CIDR notation to match against inbound traffic. There is a limit of 10 IP ranges per rule. A value of '*' matches all IPs (can be used to override the default behavior).`,
-												},
-											},
-										},
-										Description: `The configuration options available when specifying versioned_expr. This field must be specified if versioned_expr is specified and cannot be specified if versioned_expr is not specified.`,
-									},
-
-									"versioned_expr": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										ValidateFunc: validation.StringInSlice([]string{"SRC_IPS_V1"}, false),
-										Description:  `Predefined rule expression. If this field is specified, config must also be specified. Available options:   SRC_IPS_V1: Must specify the corresponding src_ip_ranges field in config.`,
-									},
-
-									"expr": {
-										Type:     schema.TypeList,
-										Optional: true,
-										MaxItems: 1,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"expression": {
-													Type:        schema.TypeString,
-													Required:    true,
-													Description: `Textual representation of an expression in Common Expression Language syntax. The application context of the containing message determines which well-known feature set of CEL is supported.`,
-												},
-												// These fields are not yet supported (Issue hashicorp/terraform-provider-google#4497: mbang)
-												// "title": {
-												// 	Type:     schema.TypeString,
-												// 	Optional: true,
-												// },
-												// "description": {
-												// 	Type:     schema.TypeString,
-												// 	Optional: true,
-												// },
-												// "location": {
-												// 	Type:     schema.TypeString,
-												// 	Optional: true,
-												// },
-											},
-										},
-										Description: `User defined CEVAL expression. A CEVAL expression is used to specify match criteria such as origin.ip, source.region_code and contents in the request header.`,
-									},
-								},
-							},
-							Description: `A match condition that incoming traffic is evaluated against. If it evaluates to true, the corresponding action is enforced.`,
-						},
-
-						"description": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: `An optional description of this rule. Max size is 64.`,
-						},
-
-						"preview": {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Computed:    true,
-							Description: `When set to true, the action specified above is not enforced. Stackdriver logs for requests that trigger a preview action are annotated as such.`,
-						},
-
-						"rate_limit_options": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							Description: `Rate limit threshold for this security policy. Must be specified if the action is "rate_based_ban" or "throttle". Cannot be specified for any other actions.`,
-							MaxItems:    1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"rate_limit_threshold": {
-										Type:        schema.TypeList,
-										Required:    true,
-										Description: `Threshold at which to begin ratelimiting.`,
-										MaxItems:    1,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"count": {
-													Type:        schema.TypeInt,
-													Required:    true,
-													Description: `Number of HTTP(S) requests for calculating the threshold.`,
-												},
-
-												"interval_sec": {
-													Type:        schema.TypeInt,
-													Required:    true,
-													Description: `Interval over which the threshold is computed.`,
-												},
-											},
-										},
-									},
-
-									"conform_action": {
-										Type:         schema.TypeString,
-										Required:     true,
-										ValidateFunc: validation.StringInSlice([]string{"allow"}, false),
-										Description:  `Action to take for requests that are under the configured rate limit threshold. Valid option is "allow" only.`,
-									},
-
-									"exceed_action": {
-										Type:         schema.TypeString,
-										Required:     true,
-										ValidateFunc: validation.StringInSlice([]string{"redirect", "deny(403)", "deny(404)", "deny(429)", "deny(502)"}, false),
-										Description:  `Action to take for requests that are above the configured rate limit threshold, to either deny with a specified HTTP response code, or redirect to a different endpoint. Valid options are "deny()" where valid values for status are 403, 404, 429, and 502, and "redirect" where the redirect parameters come from exceedRedirectOptions below.`,
-									},
-
-									"enforce_on_key": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Default:     "ALL",
-										Description: `Determines the key to enforce the rateLimitThreshold on`,
-									},
-
-									"enforce_on_key_name": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: `Rate limit key name applicable only for the following key types: HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.`,
-									},
-
-									"ban_threshold": {
-										Type:        schema.TypeList,
-										Optional:    true,
-										Description: `Can only be specified if the action for the rule is "rate_based_ban". If specified, the key will be banned for the configured 'banDurationSec' when the number of requests that exceed the 'rateLimitThreshold' also exceed this 'banThreshold'.`,
-										MaxItems:    1,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"count": {
-													Type:        schema.TypeInt,
-													Required:    true,
-													Description: `Number of HTTP(S) requests for calculating the threshold.`,
-												},
-
-												"interval_sec": {
-													Type:        schema.TypeInt,
-													Required:    true,
-													Description: `Interval over which the threshold is computed.`,
-												},
-											},
-										},
-									},
-
-									"ban_duration_sec": {
-										Type:        schema.TypeInt,
-										Optional:    true,
-										Description: `Can only be specified if the action for the rule is "rate_based_ban". If specified, determines the time (in seconds) the traffic will continue to be banned by the rate limit after the rate falls below the threshold.`,
-									},
-
-									"exceed_redirect_options": {
-										Type:        schema.TypeList,
-										Optional:    true,
-										Description: `Parameters defining the redirect action that is used as the exceed action. Cannot be specified if the exceed action is not redirect.`,
-										MaxItems:    1,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"type": {
-													Type:         schema.TypeString,
-													Required:     true,
-													Description:  `Type of the redirect action.`,
-													ValidateFunc: validation.StringInSlice([]string{"EXTERNAL_302", "GOOGLE_RECAPTCHA"}, false),
-												},
-
-												"target": {
-													Type:        schema.TypeString,
-													Optional:    true,
-													Description: `Target for the redirect action. This is required if the type is EXTERNAL_302 and cannot be specified for GOOGLE_RECAPTCHA.`,
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-				Description: `The set of rules that belong to this policy. There must always be a default rule (rule with priority 2147483647 and match "*"). If no rules are provided when creating a security policy, a default rule with action "allow" will be added.`,
-			},
-
-			"fingerprint": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: `Fingerprint of this resource.`,
-			},
-
-			"self_link": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: `The URI of the created resource.`,
-			},
-
-			"adaptive_protection_config": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Description: `Adaptive Protection Config of this security policy.`,
-				MaxItems:    1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"layer_7_ddos_defense_config": {
-							Type:        schema.TypeList,
-							Description: `Layer 7 DDoS Defense Config of this security policy`,
-							Optional:    true,
-							MaxItems:    1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"enable": {
-										Type:        schema.TypeBool,
-										Optional:    true,
-										Description: `If set to true, enables CAAP for L7 DDoS detection.`,
-									},
-									"rule_visibility": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										Default:      "STANDARD",
-										ValidateFunc: validation.StringInSlice([]string{"STANDARD", "PREMIUM"}, false),
-										Description:  `Rule visibility. Supported values include: "STANDARD", "PREMIUM".`,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-
-		UseJSONNumber: true,
+		}}, nil
+	} else {
+		return []Asset{}, err
 	}
 }
 
-func rulesCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
-	_, n := diff.GetChange("rule")
-	nSet := n.(*schema.Set)
-
-	nPriorities := map[int64]bool{}
-	for _, rule := range nSet.List() {
-		priority := int64(rule.(map[string]interface{})["priority"].(int))
-		if nPriorities[priority] {
-			return fmt.Errorf("Two rules have the same priority, please update one of the priorities to be different.")
-		}
-		nPriorities[priority] = true
-	}
-
-	return nil
-}
-
-func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+func GetComputeSecurityPolicyApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
+	obj := make(map[string]interface{})
+	nameProp, err := expandComputeSecurityPolicyName(d.Get("name"), d, config)
 	if err != nil {
-		return err
-	}
-
-	project, err := getProject(d, config)
-	if err != nil {
-		return err
-	}
-
-	sp := d.Get("name").(string)
-	securityPolicy := &compute.SecurityPolicy{
-		Name:        sp,
-		Description: d.Get("description").(string),
-	}
-
-	if v, ok := d.GetOk("type"); ok {
-		securityPolicy.Type = v.(string)
-	}
-
-	if v, ok := d.GetOk("rule"); ok {
-		securityPolicy.Rules = expandSecurityPolicyRules(v.(*schema.Set).List())
-	}
-
-	if v, ok := d.GetOk("adaptive_protection_config"); ok {
-		securityPolicy.AdaptiveProtectionConfig = expandSecurityPolicyAdaptiveProtectionConfig(v.([]interface{}))
-	}
-
-	log.Printf("[DEBUG] SecurityPolicy insert request: %#v", securityPolicy)
-
-	client := config.NewComputeClient(userAgent)
-
-	op, err := client.SecurityPolicies.Insert(project, securityPolicy).Do()
-
-	if err != nil {
-		return errwrap.Wrapf("Error creating SecurityPolicy: {{err}}", err)
-	}
-
-	id, err := replaceVars(d, config, "projects/{{project}}/global/securityPolicies/{{name}}")
-	if err != nil {
-		return fmt.Errorf("Error constructing id: %s", err)
-	}
-	d.SetId(id)
-
-	err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Creating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutCreate))
-	if err != nil {
-		return err
-	}
-
-	return resourceComputeSecurityPolicyRead(d, meta)
-}
-
-func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
-	if err != nil {
-		return err
-	}
-
-	project, err := getProject(d, config)
-	if err != nil {
-		return err
-	}
-
-	sp := d.Get("name").(string)
-
-	client := config.NewComputeClient(userAgent)
-
-	securityPolicy, err := client.SecurityPolicies.Get(project, sp).Do()
-	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("SecurityPolicy %q", d.Id()))
-	}
-
-	if err := d.Set("name", securityPolicy.Name); err != nil {
-		return fmt.Errorf("Error setting name: %s", err)
-	}
-	if err := d.Set("description", securityPolicy.Description); err != nil {
-		return fmt.Errorf("Error setting description: %s", err)
-	}
-	if err := d.Set("type", securityPolicy.Type); err != nil {
-		return fmt.Errorf("Error setting type: %s", err)
-	}
-	if err := d.Set("rule", flattenSecurityPolicyRules(securityPolicy.Rules)); err != nil {
-		return err
-	}
-	if err := d.Set("fingerprint", securityPolicy.Fingerprint); err != nil {
-		return fmt.Errorf("Error setting fingerprint: %s", err)
-	}
-	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error setting project: %s", err)
-	}
-	if err := d.Set("self_link", ConvertSelfLinkToV1(securityPolicy.SelfLink)); err != nil {
-		return fmt.Errorf("Error setting self_link: %s", err)
-	}
-	if err := d.Set("adaptive_protection_config", flattenSecurityPolicyAdaptiveProtectionConfig(securityPolicy.AdaptiveProtectionConfig)); err != nil {
-		return fmt.Errorf("Error setting adaptive_protection_config: %s", err)
-	}
-
-	return nil
-}
-
-func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
-	if err != nil {
-		return err
-	}
-
-	project, err := getProject(d, config)
-	if err != nil {
-		return err
-	}
-
-	sp := d.Get("name").(string)
-
-	if d.HasChange("description") {
-		securityPolicy := &compute.SecurityPolicy{
-			Description:     d.Get("description").(string),
-			Fingerprint:     d.Get("fingerprint").(string),
-			ForceSendFields: []string{"Description"},
-		}
-
-		client := config.NewComputeClient(userAgent)
-
-		op, err := client.SecurityPolicies.Patch(project, sp, securityPolicy).Do()
-
-		if err != nil {
-			return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
-		}
-
-		err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
-		if err != nil {
-			return err
-		}
-	}
-
-	securityPolicy := &compute.SecurityPolicy{
-		Fingerprint: d.Get("fingerprint").(string),
-	}
-
-	if d.HasChange("type") {
-		securityPolicy.Type = d.Get("type").(string)
-		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, securityPolicy.Type)
-	}
-
-	if d.HasChange("description") {
-		securityPolicy.Type = d.Get("description").(string)
-		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, securityPolicy.Description)
-	}
-
-	if len(securityPolicy.ForceSendFields) > 0 {
-		client := config.NewComputeClient(userAgent)
-
-		op, err := client.SecurityPolicies.Patch(project, sp, securityPolicy).Do()
-
-		if err != nil {
-			return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
-		}
-
-		err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
-		if err != nil {
-			return err
-		}
-	}
-
-	if d.HasChange("rule") {
-		o, n := d.GetChange("rule")
-		oSet := o.(*schema.Set)
-		nSet := n.(*schema.Set)
-
-		oPriorities := map[int64]bool{}
-		nPriorities := map[int64]bool{}
-		for _, rule := range oSet.List() {
-			oPriorities[int64(rule.(map[string]interface{})["priority"].(int))] = true
-		}
-
-		for _, rule := range nSet.List() {
-			priority := int64(rule.(map[string]interface{})["priority"].(int))
-			nPriorities[priority] = true
-			if !oPriorities[priority] {
-				client := config.NewComputeClient(userAgent)
-
-				// If the rule is in new and its priority does not exist in old, then add it.
-				op, err := client.SecurityPolicies.AddRule(project, sp, expandSecurityPolicyRule(rule)).Do()
-
-				if err != nil {
-					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
-				}
-
-				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
-				if err != nil {
-					return err
-				}
-			} else if !oSet.Contains(rule) {
-				client := config.NewComputeClient(userAgent)
-
-				// If the rule is in new, and its priority is in old, but its hash is different than the one in old, update it.
-				op, err := client.SecurityPolicies.PatchRule(project, sp, expandSecurityPolicyRule(rule)).Priority(priority).Do()
-
-				if err != nil {
-					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
-				}
-
-				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
-				if err != nil {
-					return err
-				}
-			}
-		}
-
-		for _, rule := range oSet.List() {
-			priority := int64(rule.(map[string]interface{})["priority"].(int))
-			if !nPriorities[priority] {
-				client := config.NewComputeClient(userAgent)
-
-				// If the rule's priority is in old but not new, remove it.
-				op, err := client.SecurityPolicies.RemoveRule(project, sp).Priority(priority).Do()
-
-				if err != nil {
-					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
-				}
-
-				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
-
-	return resourceComputeSecurityPolicyRead(d, meta)
-}
-
-func resourceComputeSecurityPolicyDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
-	if err != nil {
-		return err
-	}
-
-	project, err := getProject(d, config)
-	if err != nil {
-		return err
-	}
-
-	client := config.NewComputeClient(userAgent)
-
-	// Delete the SecurityPolicy
-	op, err := client.SecurityPolicies.Delete(project, d.Get("name").(string)).Do()
-	if err != nil {
-		return errwrap.Wrapf("Error deleting SecurityPolicy: {{err}}", err)
-	}
-
-	err = computeOperationWaitTime(config, op, project, "Deleting SecurityPolicy", userAgent, d.Timeout(schema.TimeoutDelete))
-	if err != nil {
-		return err
-	}
-
-	d.SetId("")
-	return nil
-}
-
-func expandSecurityPolicyRules(configured []interface{}) []*compute.SecurityPolicyRule {
-	rules := make([]*compute.SecurityPolicyRule, 0, len(configured))
-	for _, raw := range configured {
-		rules = append(rules, expandSecurityPolicyRule(raw))
-	}
-	return rules
-}
-
-func expandSecurityPolicyRule(raw interface{}) *compute.SecurityPolicyRule {
-	data := raw.(map[string]interface{})
-	return &compute.SecurityPolicyRule{
-		Description:      data["description"].(string),
-		Priority:         int64(data["priority"].(int)),
-		Action:           data["action"].(string),
-		Preview:          data["preview"].(bool),
-		Match:            expandSecurityPolicyMatch(data["match"].([]interface{})),
-		RateLimitOptions: expandSecurityPolicyRuleRateLimitOptions(data["rate_limit_options"].([]interface{})),
-		ForceSendFields:  []string{"Description", "Preview"},
-	}
-}
-
-func expandSecurityPolicyMatch(configured []interface{}) *compute.SecurityPolicyRuleMatcher {
-	if len(configured) == 0 || configured[0] == nil {
-		return nil
-	}
-
-	data := configured[0].(map[string]interface{})
-	return &compute.SecurityPolicyRuleMatcher{
-		VersionedExpr: data["versioned_expr"].(string),
-		Config:        expandSecurityPolicyMatchConfig(data["config"].([]interface{})),
-		Expr:          expandSecurityPolicyMatchExpr(data["expr"].([]interface{})),
-	}
-}
-
-func expandSecurityPolicyMatchConfig(configured []interface{}) *compute.SecurityPolicyRuleMatcherConfig {
-	if len(configured) == 0 || configured[0] == nil {
-		return nil
-	}
-
-	data := configured[0].(map[string]interface{})
-	return &compute.SecurityPolicyRuleMatcherConfig{
-		SrcIpRanges: convertStringArr(data["src_ip_ranges"].(*schema.Set).List()),
-	}
-}
-
-func expandSecurityPolicyMatchExpr(expr []interface{}) *compute.Expr {
-	if len(expr) == 0 || expr[0] == nil {
-		return nil
-	}
-
-	data := expr[0].(map[string]interface{})
-	return &compute.Expr{
-		Expression: data["expression"].(string),
-		// These fields are not yet supported  (Issue hashicorp/terraform-provider-google#4497: mbang)
-		// Title:       data["title"].(string),
-		// Description: data["description"].(string),
-		// Location:    data["location"].(string),
-	}
-}
-
-func flattenSecurityPolicyRules(rules []*compute.SecurityPolicyRule) []map[string]interface{} {
-	rulesSchema := make([]map[string]interface{}, 0, len(rules))
-	for _, rule := range rules {
-		data := map[string]interface{}{
-			"description":        rule.Description,
-			"priority":           rule.Priority,
-			"action":             rule.Action,
-			"preview":            rule.Preview,
-			"match":              flattenMatch(rule.Match),
-			"rate_limit_options": flattenSecurityPolicyRuleRateLimitOptions(rule.RateLimitOptions),
-		}
-
-		rulesSchema = append(rulesSchema, data)
-	}
-	return rulesSchema
-}
-
-func flattenMatch(match *compute.SecurityPolicyRuleMatcher) []map[string]interface{} {
-	if match == nil {
-		return nil
-	}
-
-	data := map[string]interface{}{
-		"versioned_expr": match.VersionedExpr,
-		"config":         flattenMatchConfig(match.Config),
-		"expr":           flattenMatchExpr(match),
-	}
-
-	return []map[string]interface{}{data}
-}
-
-func flattenMatchConfig(conf *compute.SecurityPolicyRuleMatcherConfig) []map[string]interface{} {
-	if conf == nil {
-		return nil
-	}
-
-	data := map[string]interface{}{
-		"src_ip_ranges": schema.NewSet(schema.HashString, convertStringArrToInterface(conf.SrcIpRanges)),
-	}
-
-	return []map[string]interface{}{data}
-}
-
-func flattenMatchExpr(match *compute.SecurityPolicyRuleMatcher) []map[string]interface{} {
-	if match.Expr == nil {
-		return nil
-	}
-
-	data := map[string]interface{}{
-		"expression": match.Expr.Expression,
-		// These fields are not yet supported (Issue hashicorp/terraform-provider-google#4497: mbang)
-		// "title":       match.Expr.Title,
-		// "description": match.Expr.Description,
-		// "location":    match.Expr.Location,
-	}
-
-	return []map[string]interface{}{data}
-}
-
-func expandSecurityPolicyAdaptiveProtectionConfig(configured []interface{}) *compute.SecurityPolicyAdaptiveProtectionConfig {
-	if len(configured) == 0 || configured[0] == nil {
-		return nil
-	}
-
-	data := configured[0].(map[string]interface{})
-	return &compute.SecurityPolicyAdaptiveProtectionConfig{
-		Layer7DdosDefenseConfig: expandLayer7DdosDefenseConfig(data["layer_7_ddos_defense_config"].([]interface{})),
-	}
-}
-
-func expandLayer7DdosDefenseConfig(configured []interface{}) *compute.SecurityPolicyAdaptiveProtectionConfigLayer7DdosDefenseConfig {
-	if len(configured) == 0 || configured[0] == nil {
-		return nil
-	}
-
-	data := configured[0].(map[string]interface{})
-	return &compute.SecurityPolicyAdaptiveProtectionConfigLayer7DdosDefenseConfig{
-		Enable:         data["enable"].(bool),
-		RuleVisibility: data["rule_visibility"].(string),
-	}
-}
-
-func flattenSecurityPolicyAdaptiveProtectionConfig(conf *compute.SecurityPolicyAdaptiveProtectionConfig) []map[string]interface{} {
-	if conf == nil {
-		return nil
-	}
-
-	data := map[string]interface{}{
-		"layer_7_ddos_defense_config": flattenLayer7DdosDefenseConfig(conf.Layer7DdosDefenseConfig),
-	}
-
-	return []map[string]interface{}{data}
-}
-
-func flattenLayer7DdosDefenseConfig(conf *compute.SecurityPolicyAdaptiveProtectionConfigLayer7DdosDefenseConfig) []map[string]interface{} {
-	if conf == nil {
-		return nil
-	}
-
-	data := map[string]interface{}{
-		"enable":          conf.Enable,
-		"rule_visibility": conf.RuleVisibility,
-	}
-
-	return []map[string]interface{}{data}
-}
-
-func expandSecurityPolicyRuleRateLimitOptions(configured []interface{}) *compute.SecurityPolicyRuleRateLimitOptions {
-	if len(configured) == 0 || configured[0] == nil {
-		return nil
-	}
-
-	data := configured[0].(map[string]interface{})
-	return &compute.SecurityPolicyRuleRateLimitOptions{
-		BanThreshold:       expandThreshold(data["ban_threshold"].([]interface{})),
-		RateLimitThreshold: expandThreshold(data["rate_limit_threshold"].([]interface{})),
-		ExceedAction:       data["exceed_action"].(string),
-		ConformAction:      data["conform_action"].(string),
-		EnforceOnKey:       data["enforce_on_key"].(string),
-		EnforceOnKeyName:   data["enforce_on_key_name"].(string),
-		BanDurationSec:     int64(data["ban_duration_sec"].(int)),
-	}
-}
-
-func expandThreshold(configured []interface{}) *compute.SecurityPolicyRuleRateLimitOptionsThreshold {
-	if len(configured) == 0 || configured[0] == nil {
-		return nil
-	}
-
-	data := configured[0].(map[string]interface{})
-	return &compute.SecurityPolicyRuleRateLimitOptionsThreshold{
-		Count:       int64(data["count"].(int)),
-		IntervalSec: int64(data["interval_sec"].(int)),
-	}
-}
-
-func flattenSecurityPolicyRuleRateLimitOptions(conf *compute.SecurityPolicyRuleRateLimitOptions) []map[string]interface{} {
-	if conf == nil {
-		return nil
-	}
-
-	data := map[string]interface{}{
-		"ban_threshold":        flattenThreshold(conf.BanThreshold),
-		"rate_limit_threshold": flattenThreshold(conf.RateLimitThreshold),
-		"exceed_action":        conf.ExceedAction,
-		"conform_action":       conf.ConformAction,
-		"enforce_on_key":       conf.EnforceOnKey,
-		"enforce_on_key_name":  conf.EnforceOnKeyName,
-		"ban_duration_sec":     conf.BanDurationSec,
-	}
-
-	return []map[string]interface{}{data}
-}
-
-func flattenThreshold(conf *compute.SecurityPolicyRuleRateLimitOptionsThreshold) []map[string]interface{} {
-	if conf == nil {
-		return nil
-	}
-
-	data := map[string]interface{}{
-		"count":        conf.Count,
-		"interval_sec": conf.IntervalSec,
-	}
-
-	return []map[string]interface{}{data}
-}
-
-func resourceSecurityPolicyStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
-	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/global/securityPolicies/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
+	} else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
+		obj["name"] = nameProp
 	}
-
-	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/global/securityPolicies/{{name}}")
+	typeProp, err := expandComputeSecurityPolicyName(d.Get("type"), d, config)
 	if err != nil {
-		return nil, fmt.Errorf("Error constructing id: %s", err)
+		return nil, err
+	} else if v, ok := d.GetOkExists("type"); !isEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, typeProp)) {
+		obj["type"] = typeProp
 	}
-	d.SetId(id)
+	rulesProp, err := expandComputeSecurityPolicyRules(d.Get("rule"), d, config)
+	if err != nil {
+		return nil, err
+	} else if v, ok := d.GetOkExists("rule"); !isEmptyValue(reflect.ValueOf(rulesProp)) && (ok || !reflect.DeepEqual(v, rulesProp)) {
+		obj["rule"] = rulesProp
+	}
 
-	return []*schema.ResourceData{d}, nil
+	return obj, nil
+}
+
+func expandComputeSecurityPolicyName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandComputeSecurityPolicyRules(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	v = v.(*schema.Set).List()
+	l := v.([]interface{})
+	req := make([]interface{}, 0, len(l))
+	for _, raw := range l {
+		if raw == nil {
+			continue
+		}
+		original := raw.(map[string]interface{})
+		transformed := make(map[string]interface{})
+
+		transformedDescription, err := expandComputeSecurityPolicyRulesDescription(original["description"], d, config)
+		if err != nil {
+			return nil, err
+		} else if val := reflect.ValueOf(transformedDescription); val.IsValid() && !isEmptyValue(val) {
+			transformed["description"] = transformedDescription
+		}
+
+		transformedType, err := expandComputeSecurityPolicyRulesDescription(original["type"], d, config)
+		if err != nil {
+			return nil, err
+		} else if val := reflect.ValueOf(transformedType); val.IsValid() && !isEmptyValue(val) {
+			transformed["type"] = transformedType
+		}
+
+		transformedPriority, err := expandComputeSecurityPolicyRulesPriority(original["priority"], d, config)
+		if err != nil {
+			return nil, err
+		} else if val := reflect.ValueOf(transformedPriority); val.IsValid() && !isEmptyValue(val) {
+			transformed["priority"] = transformedPriority
+		}
+
+		transformedAction, err := expandComputeSecurityPolicyRulesAction(original["action"], d, config)
+		if err != nil {
+			return nil, err
+		} else if val := reflect.ValueOf(transformedAction); val.IsValid() && !isEmptyValue(val) {
+			transformed["action"] = transformedAction
+		}
+
+		transformedPreview, err := expandComputeSecurityPolicyRulesPreview(original["preview"], d, config)
+		if err != nil {
+			return nil, err
+		} else if val := reflect.ValueOf(transformedPreview); val.IsValid() && !isEmptyValue(val) {
+			transformed["preview"] = transformedPreview
+		}
+
+		transformedMatch, err := expandComputeSecurityPolicyRulesMatch(original["match"], d, config)
+		if err != nil {
+			return nil, err
+		} else if val := reflect.ValueOf(transformedMatch); val.IsValid() && !isEmptyValue(val) {
+			transformed["match"] = transformedMatch
+		}
+
+		req = append(req, transformed)
+	}
+	return req, nil
+}
+
+func expandComputeSecurityPolicyRulesDescription(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandComputeSecurityPolicyRulesPriority(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandComputeSecurityPolicyRulesAction(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandComputeSecurityPolicyRulesPreview(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandComputeSecurityPolicyRulesMatch(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	transformed := make(map[string]interface{})
+
+	transformedDescription, err := expandComputeSecurityPolicyRulesMatchDescription(original["description"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedDescription); val.IsValid() && !isEmptyValue(val) {
+		transformed["description"] = transformedDescription
+	}
+
+	transformedExpr, err := expandComputeSecurityPolicyRulesMatchExpr(original["expr"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedExpr); val.IsValid() && !isEmptyValue(val) {
+		transformed["expr"] = transformedExpr
+	}
+
+	transformedVersionedExpr, err := expandComputeSecurityPolicyRulesMatchVersionedExpr(original["versioned_expr"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedVersionedExpr); val.IsValid() && !isEmptyValue(val) {
+		transformed["versionedExpr"] = transformedVersionedExpr
+	}
+
+	transformedConfig, err := expandComputeSecurityPolicyRulesMatchConfig(original["config"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedConfig); val.IsValid() && !isEmptyValue(val) {
+		transformed["config"] = transformedConfig
+	}
+
+	return transformed, nil
+}
+
+func expandComputeSecurityPolicyRulesMatchDescription(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandComputeSecurityPolicyRulesMatchExpr(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	transformed := make(map[string]interface{})
+
+	transformedExpression, err := expandComputeSecurityPolicyRulesMatchExprExpression(original["expression"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedExpression); val.IsValid() && !isEmptyValue(val) {
+		transformed["expression"] = transformedExpression
+	}
+
+	transformedTitle, err := expandComputeSecurityPolicyRulesMatchExprTitle(original["title"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedTitle); val.IsValid() && !isEmptyValue(val) {
+		transformed["title"] = transformedTitle
+	}
+
+	transformedDescription, err := expandComputeSecurityPolicyRulesMatchExprDescription(original["description"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedDescription); val.IsValid() && !isEmptyValue(val) {
+		transformed["description"] = transformedDescription
+	}
+
+	transformedLocation, err := expandComputeSecurityPolicyRulesMatchExprLocation(original["location"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedLocation); val.IsValid() && !isEmptyValue(val) {
+		transformed["location"] = transformedLocation
+	}
+
+	return transformed, nil
+}
+
+func expandComputeSecurityPolicyRulesMatchExprExpression(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandComputeSecurityPolicyRulesMatchExprTitle(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandComputeSecurityPolicyRulesMatchExprDescription(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandComputeSecurityPolicyRulesMatchExprLocation(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandComputeSecurityPolicyRulesMatchVersionedExpr(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandComputeSecurityPolicyRulesMatchConfig(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	transformed := make(map[string]interface{})
+
+	transformedSrcIpRanges, err := expandComputeSecurityPolicyRulesMatchConfigSrcIpRanges(original["src_ip_ranges"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedSrcIpRanges); val.IsValid() && !isEmptyValue(val) {
+		transformed["srcIpRanges"] = transformedSrcIpRanges
+	}
+
+	return transformed, nil
+}
+
+func expandComputeSecurityPolicyRulesMatchConfigSrcIpRanges(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	v = v.(*schema.Set).List()
+	return v, nil
 }
