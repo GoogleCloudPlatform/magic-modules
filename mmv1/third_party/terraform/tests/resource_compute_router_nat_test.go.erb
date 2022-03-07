@@ -2,343 +2,343 @@
 package google
 
 import (
-	"fmt"
+  "fmt"
 <% unless version == "ga" -%>
-	"regexp"
+  "regexp"
 <% end -%>
-	"testing"
+  "testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccComputeRouterNat_basic(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	project := getTestProjectFromEnv()
-	region := getTestRegionFromEnv()
+  project := getTestProjectFromEnv()
+  region := getTestRegionFromEnv()
 
-	testId := randString(t, 10)
-	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
+  testId := randString(t, 10)
+  routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeRouterNatBasic(routerName),
-			},
-			{
-				// implicitly full ImportStateId
-				ResourceName: "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				ResourceName:      "google_compute_router_nat.foobar",
-				ImportStateId:     fmt.Sprintf("%s/%s/%s/%s", project, region, routerName, routerName),
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				ResourceName:      "google_compute_router_nat.foobar",
-				ImportStateId:     fmt.Sprintf("%s/%s/%s", region, routerName, routerName),
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				ResourceName:      "google_compute_router_nat.foobar",
-				ImportStateId:     fmt.Sprintf("%s/%s", routerName, routerName),
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeRouterNatKeepRouter(routerName),
-				Check: testAccCheckComputeRouterNatDelete(
-					t, "google_compute_router_nat.foobar"),
-			},
-		},
-	})
+  vcrTest(t, resource.TestCase{
+    PreCheck:     func() { testAccPreCheck(t) },
+    Providers:    testAccProviders,
+    CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccComputeRouterNatBasic(routerName),
+      },
+      {
+        // implicitly full ImportStateId
+        ResourceName:      "google_compute_router_nat.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        ResourceName:      "google_compute_router_nat.foobar",
+        ImportStateId:     fmt.Sprintf("%s/%s/%s/%s", project, region, routerName, routerName),
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        ResourceName:      "google_compute_router_nat.foobar",
+        ImportStateId:     fmt.Sprintf("%s/%s/%s", region, routerName, routerName),
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        ResourceName:      "google_compute_router_nat.foobar",
+        ImportStateId:     fmt.Sprintf("%s/%s", routerName, routerName),
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccComputeRouterNatKeepRouter(routerName),
+        Check: testAccCheckComputeRouterNatDelete(
+          t, "google_compute_router_nat.foobar"),
+      },
+    },
+  })
 }
 
 func TestAccComputeRouterNat_update(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	testId := randString(t, 10)
-	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
+  testId := randString(t, 10)
+  routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeRouterNatBasicBeforeUpdate(routerName),
-			},
-			{
-				ResourceName:      "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeRouterNatUpdated(routerName),
-			},
-			{
-				ResourceName:      "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeRouterNatUpdateToNatIPsId(routerName),
-			},
-			{
-				ResourceName:      "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeRouterNatUpdateToNatIPsName(routerName),
-			},
-			{
-				ResourceName:      "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeRouterNatBasicBeforeUpdate(routerName),
-			},
-			{
-				ResourceName:      "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
+  vcrTest(t, resource.TestCase{
+    PreCheck:     func() { testAccPreCheck(t) },
+    Providers:    testAccProviders,
+    CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccComputeRouterNatBasicBeforeUpdate(routerName),
+      },
+      {
+        ResourceName:      "google_compute_router_nat.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccComputeRouterNatUpdated(routerName),
+      },
+      {
+        ResourceName:      "google_compute_router_nat.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccComputeRouterNatUpdateToNatIPsId(routerName),
+      },
+      {
+        ResourceName:      "google_compute_router_nat.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccComputeRouterNatUpdateToNatIPsName(routerName),
+      },
+      {
+        ResourceName:      "google_compute_router_nat.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccComputeRouterNatBasicBeforeUpdate(routerName),
+      },
+      {
+        ResourceName:      "google_compute_router_nat.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
 }
 
 func TestAccComputeRouterNat_removeLogConfig(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	testId := randString(t, 10)
-	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
+  testId := randString(t, 10)
+  routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeRouterNatLogConfig(routerName),
-			},
-			{
-				ResourceName:      "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeRouterNatLogConfigRemoved(routerName),
-			},
-			{
-				ResourceName:      "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
+  vcrTest(t, resource.TestCase{
+    PreCheck:     func() { testAccPreCheck(t) },
+    Providers:    testAccProviders,
+    CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccComputeRouterNatLogConfig(routerName),
+      },
+      {
+        ResourceName:      "google_compute_router_nat.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccComputeRouterNatLogConfigRemoved(routerName),
+      },
+      {
+        ResourceName:      "google_compute_router_nat.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
 }
 
 func TestAccComputeRouterNat_withManualIpAndSubnetConfiguration(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	testId := randString(t, 10)
-	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
+  testId := randString(t, 10)
+  routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeRouterNatWithManualIpAndSubnetConfiguration(routerName),
-			},
-			{
-				ResourceName:      "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
+  vcrTest(t, resource.TestCase{
+    PreCheck:     func() { testAccPreCheck(t) },
+    Providers:    testAccProviders,
+    CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccComputeRouterNatWithManualIpAndSubnetConfiguration(routerName),
+      },
+      {
+        ResourceName:      "google_compute_router_nat.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
 }
 
 func TestAccComputeRouterNat_withDisabledIndependentEndpointMapping(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	testId := randString(t, 10)
-	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
+  testId := randString(t, 10)
+  routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeRouterNatWithDisabledIndependentEndpointMapping(routerName, true),
-			},
-			{
-				ResourceName:      "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeRouterNatWithDisabledIndependentEndpointMapping(routerName, false),
-			},
-			{
-				ResourceName:      "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeRouterNatWithDisabledIndependentEndpointMapping(routerName, true),
-			},
-			{
-				ResourceName:      "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
+  vcrTest(t, resource.TestCase{
+    PreCheck:     func() { testAccPreCheck(t) },
+    Providers:    testAccProviders,
+    CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccComputeRouterNatWithDisabledIndependentEndpointMapping(routerName, true),
+      },
+      {
+        ResourceName:      "google_compute_router_nat.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccComputeRouterNatWithDisabledIndependentEndpointMapping(routerName, false),
+      },
+      {
+        ResourceName:      "google_compute_router_nat.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccComputeRouterNatWithDisabledIndependentEndpointMapping(routerName, true),
+      },
+      {
+        ResourceName:      "google_compute_router_nat.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
 }
 
 <% unless version == 'ga' -%>
 func TestAccComputeRouterNat_withNatIpsAndDrainNatIps(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	testId := randString(t, 10)
-	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
+  testId := randString(t, 10)
+  routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
-		Steps: []resource.TestStep{
-			// (ERROR): Creation with drain nat IPs should fail
-			{
-				Config:      testAccComputeRouterNatWithOneDrainOneRemovedNatIps(routerName),
-				ExpectError: regexp.MustCompile("New RouterNat cannot have drain_nat_ips"),
-			},
-			// Create NAT with three nat IPs
-			{
-				Config: testAccComputeRouterNatWithNatIps(routerName),
-			},
-			{
-				ResourceName:      "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			// (ERROR) - Should not allow draining IPs still in natIps
-			{
-				Config:      testAccComputeRouterNatWithInvalidDrainNatIpsStillInNatIps(routerName),
-				ExpectError: regexp.MustCompile("cannot be drained if still set in nat_ips"),
-			},
-			// natIps #1, #2, #3--> natIp #2, drainNatIp #3
-			{
-				Config: testAccComputeRouterNatWithOneDrainOneRemovedNatIps(routerName),
-			},
-			{
-				ResourceName:      "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			// (ERROR): Should not be able to drain previously removed natIps (#1)
-			{
-				Config:      testAccComputeRouterNatWithInvalidDrainMissingNatIp(routerName),
-				ExpectError: regexp.MustCompile("was not previously set in nat_ips"),
-			},
-		},
-	})
+  vcrTest(t, resource.TestCase{
+    PreCheck:     func() { testAccPreCheck(t) },
+    Providers:    testAccProviders,
+    CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
+    Steps: []resource.TestStep{
+      // (ERROR): Creation with drain nat IPs should fail
+      {
+        Config:      testAccComputeRouterNatWithOneDrainOneRemovedNatIps(routerName),
+        ExpectError: regexp.MustCompile("New RouterNat cannot have drain_nat_ips"),
+      },
+      // Create NAT with three nat IPs
+      {
+        Config: testAccComputeRouterNatWithNatIps(routerName),
+      },
+      {
+        ResourceName:      "google_compute_router_nat.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      // (ERROR) - Should not allow draining IPs still in natIps
+      {
+        Config:      testAccComputeRouterNatWithInvalidDrainNatIpsStillInNatIps(routerName),
+        ExpectError: regexp.MustCompile("cannot be drained if still set in nat_ips"),
+      },
+      // natIps #1, #2, #3--> natIp #2, drainNatIp #3
+      {
+        Config: testAccComputeRouterNatWithOneDrainOneRemovedNatIps(routerName),
+      },
+      {
+        ResourceName:      "google_compute_router_nat.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      // (ERROR): Should not be able to drain previously removed natIps (#1)
+      {
+        Config:      testAccComputeRouterNatWithInvalidDrainMissingNatIp(routerName),
+        ExpectError: regexp.MustCompile("was not previously set in nat_ips"),
+      },
+    },
+  })
 }
 
 <% end -%>
 
 func testAccCheckComputeRouterNatDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+  return func(s *terraform.State) error {
+    config := googleProviderConfig(t)
 
-		routersService := config.NewComputeClient(config.userAgent).Routers
+    routersService := config.NewComputeClient(config.userAgent).Routers
 
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_compute_router" {
-				continue
-			}
+    for _, rs := range s.RootModule().Resources {
+      if rs.Type != "google_compute_router" {
+        continue
+      }
 
-			project, err := getTestProject(rs.Primary, config)
-			if err != nil {
-				return err
-			}
+      project, err := getTestProject(rs.Primary, config)
+      if err != nil {
+        return err
+      }
 
-			region, err := getTestRegion(rs.Primary, config)
-			if err != nil {
-				return err
-			}
+      region, err := getTestRegion(rs.Primary, config)
+      if err != nil {
+        return err
+      }
 
-			routerName := rs.Primary.Attributes["router"]
+      routerName := rs.Primary.Attributes["router"]
 
-			_, err = routersService.Get(project, region, routerName).Do()
+      _, err = routersService.Get(project, region, routerName).Do()
 
-			if err == nil {
-				return fmt.Errorf("Error, Router %s in region %s still exists", routerName, region)
-			}
-		}
+      if err == nil {
+        return fmt.Errorf("Error, Router %s in region %s still exists", routerName, region)
+      }
+    }
 
-		return nil
-	}
+    return nil
+  }
 }
 
 func testAccCheckComputeRouterNatDelete(t *testing.T, n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+  return func(s *terraform.State) error {
+    config := googleProviderConfig(t)
 
-		routersService := config.NewComputeClient(config.userAgent).Routers
+    routersService := config.NewComputeClient(config.userAgent).Routers
 
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_compute_router_nat" {
-				continue
-			}
+    for _, rs := range s.RootModule().Resources {
+      if rs.Type != "google_compute_router_nat" {
+        continue
+      }
 
-			project, err := getTestProject(rs.Primary, config)
-			if err != nil {
-				return err
-			}
+      project, err := getTestProject(rs.Primary, config)
+      if err != nil {
+        return err
+      }
 
-			region, err := getTestRegion(rs.Primary, config)
-			if err != nil {
-				return err
-			}
+      region, err := getTestRegion(rs.Primary, config)
+      if err != nil {
+        return err
+      }
 
-			name := rs.Primary.Attributes["name"]
-			routerName := rs.Primary.Attributes["router"]
+      name := rs.Primary.Attributes["name"]
+      routerName := rs.Primary.Attributes["router"]
 
-			router, err := routersService.Get(project, region, routerName).Do()
+      router, err := routersService.Get(project, region, routerName).Do()
 
-			if err != nil {
-				return fmt.Errorf("Error Reading Router %s: %s", routerName, err)
-			}
+      if err != nil {
+        return fmt.Errorf("Error Reading Router %s: %s", routerName, err)
+      }
 
-			nats := router.Nats
-			for _, nat := range nats {
-				if nat.Name == name {
-					return fmt.Errorf("Nat %s still exists on router %s/%s", name, region, router.Name)
-				}
-			}
-		}
+      nats := router.Nats
+      for _, nat := range nats {
+        if nat.Name == name {
+          return fmt.Errorf("Nat %s still exists on router %s/%s", name, region, router.Name)
+        }
+      }
+    }
 
-		return nil
-	}
+    return nil
+  }
 }
 
 func testAccComputeRouterNatBasic(routerName string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
   name = "%s-net"
 }
@@ -372,7 +372,7 @@ resource "google_compute_router_nat" "foobar" {
 
 // Like basic but with extra resources
 func testAccComputeRouterNatBasicBeforeUpdate(routerName string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_compute_router" "foobar" {
   name    = "%s"
   region  = google_compute_subnetwork.foobar.region
@@ -411,7 +411,7 @@ resource "google_compute_router_nat" "foobar" {
 }
 
 func testAccComputeRouterNatUpdated(routerName string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_compute_router" "foobar" {
   name    = "%s"
   region  = google_compute_subnetwork.foobar.region
@@ -463,7 +463,7 @@ resource "google_compute_router_nat" "foobar" {
 }
 
 func testAccComputeRouterNatUpdateToNatIPsId(routerName string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_compute_router" "foobar" {
 name    = "%s"
 region  = google_compute_subnetwork.foobar.region
@@ -514,7 +514,7 @@ resource "google_compute_router_nat" "foobar" {
 }
 
 func testAccComputeRouterNatUpdateToNatIPsName(routerName string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_compute_router" "foobar" {
 name    = "%s"
 region  = google_compute_subnetwork.foobar.region
@@ -565,7 +565,7 @@ resource "google_compute_router_nat" "foobar" {
 }
 
 func testAccComputeRouterNatWithManualIpAndSubnetConfiguration(routerName string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
   name                    = "%s-net"
   auto_create_subnetworks = "false"
@@ -608,7 +608,7 @@ resource "google_compute_router_nat" "foobar" {
 }
 
 func testAccComputeRouterNatWithDisabledIndependentEndpointMapping(routerName string, enabled bool) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
   name                    = "%s-net"
   auto_create_subnetworks = "false"
@@ -647,13 +647,14 @@ resource "google_compute_router_nat" "foobar" {
     source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
   }
   enable_endpoint_independent_mapping = %t
+  enable_dynamic_port_allocation      = %t
 }
 `, routerName, routerName, routerName, routerName, routerName, enabled)
 }
 
 <% unless version == 'ga' -%>
 func testAccComputeRouterNatBaseResourcesWithNatIps(routerName string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
   name                    = "%s-net"
   auto_create_subnetworks = "false"
@@ -690,7 +691,7 @@ resource "google_compute_router" "foobar" {
 }
 
 func testAccComputeRouterNatWithNatIps(routerName string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 %s
 
 resource "google_compute_router_nat" "foobar" {
@@ -715,7 +716,7 @@ resource "google_compute_router_nat" "foobar" {
 }
 
 func testAccComputeRouterNatWithOneDrainOneRemovedNatIps(routerName string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 %s
 
 resource "google_compute_router_nat" "foobar" {
@@ -742,7 +743,7 @@ resource "google_compute_router_nat" "foobar" {
 }
 
 func testAccComputeRouterNatWithInvalidDrainMissingNatIp(routerName string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 %s
 
 resource "google_compute_router_nat" "foobar" {
@@ -770,7 +771,7 @@ resource "google_compute_router_nat" "foobar" {
 }
 
 func testAccComputeRouterNatWithInvalidDrainNatIpsStillInNatIps(routerName string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 %s
 
 resource "google_compute_router_nat" "foobar" {
@@ -801,7 +802,7 @@ resource "google_compute_router_nat" "foobar" {
 <% end -%>
 
 func testAccComputeRouterNatKeepRouter(routerName string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
   name                    = "%s"
   auto_create_subnetworks = "false"
@@ -823,7 +824,7 @@ resource "google_compute_router" "foobar" {
 }
 
 func testAccComputeRouterNatLogConfig(routerName string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
   name = "%s-net"
 }
@@ -856,7 +857,7 @@ resource "google_compute_router_nat" "foobar" {
 }
 
 func testAccComputeRouterNatLogConfigRemoved(routerName string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
   name = "%s-net"
 }
