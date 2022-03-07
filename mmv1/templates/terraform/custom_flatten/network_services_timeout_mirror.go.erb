@@ -20,15 +20,18 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	}
 
 	in := v.(map[string]interface{})
-	for _, names := range []struct{ in, out string }{
-		{"connectTimeout", "connect_timeout"},
-		{"maxAttemptsTimeout", "max_attempts_timeout"},
-		{"responseTimeout", "response_timeout"},
-		{"readTimeout", "read_timeout"},
-	} {
-		if e, ok := in[names.in]; ok {
-			out[names.out] = e.(string)
-		}
+	if e, ok := in["connectTimeout"]; ok {
+		out["connect_timeout"] = e.(string)
 	}
+	if e, ok := in["maxAttemptsTimeout"]; ok {
+   out["max_attempts_timeout"] = e.(string)
+	}
+	if e, ok := in["responseTimeout"]; ok {
+		out["response_timeout"] = e.(string)
+	}
+	if e, ok := in["readTimeout"]; ok {
+		out["read_timeout"] = e.(string)
+	}
+
 	return []interface{}{out}
 }
