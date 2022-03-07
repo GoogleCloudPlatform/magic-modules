@@ -560,9 +560,10 @@ func resource{{$.PathType}}Import(d *schema.ResourceData, meta interface{}) ([]*
 		return nil, fmt.Errorf("error encountered in import: %v", err)
 	}
 {{ else -}}
+	{{$allowForwardSlash := shouldAllowForwardSlashInFormat $.ID $.Properties}}
 	if err := parseImportId([]string{
 	{{- range $format := $.ImportFormats }}
-	"{{patternToRegex $format}}",
+	"{{patternToRegex $format $allowForwardSlash}}",
 	{{- end }}
 	}, d, config); err != nil {
 		return nil, err

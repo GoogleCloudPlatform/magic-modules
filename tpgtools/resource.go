@@ -474,18 +474,6 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		res.ReplaceInBasePath.New = ribpd.New
 	}
 
-	// Resource Override: Import formats
-	ifd := ImportFormatDetails{}
-	ifdOk, err := overrides.ResourceOverrideWithDetails(ImportFormat, &ifd, location)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode import format details: %v", err)
-	}
-	if ifdOk {
-		res.ImportFormats = ifd.Formats
-	} else {
-		res.ImportFormats = defaultImportFormats(res.ID)
-	}
-
 	// Resource Override: Mutex
 	md := MutexDetails{}
 	mdOk, err := overrides.ResourceOverrideWithDetails(Mutex, &md, location)
@@ -502,6 +490,20 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	}
 
 	res.Properties = props
+
+	onlyLongFormFormat := shouldAllowForwardSlashInFormat(res.ID, res.Properties)
+        // Resource Override: Import formats
+        ifd := ImportFormatDetails{}
+        ifdOk, err := overrides.ResourceOverrideWithDetails(ImportFormat, &ifd, location)
+        if err != nil {
+                return nil, fmt.Errorf("failed to decode import format details: %v", err)
+        }
+        if ifdOk {
+                res.ImportFormats = ifd.Formats
+        } else {
+                res.ImportFormats = defaultImportFormats(res.ID, onlyLongFormFormat)
+        }
+
 	_, res.HasProject = schema.Properties["project"]
 
 	// Resource Override: Virtual field
