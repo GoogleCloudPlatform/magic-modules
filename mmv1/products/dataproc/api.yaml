@@ -326,8 +326,19 @@ objects:
                       Number of attached SSDs, from 0 to 4.
               - !ruby/object:Api::Type::Boolean
                 name: 'isPreemptible'
+                output: true
                 description: |
                   Specifies if this instance group contains preemptible instances.
+              - !ruby/object:Api::Type::Enum
+                name: 'preemptibility'
+                description: |
+                  Specifies the preemptibility of the instance group.
+                  The default value for master and worker groups is NON_PREEMPTIBLE. This default cannot be changed.
+                  The default value for secondary instances is PREEMPTIBLE.
+                values:
+                - :PREEMPTIBILITY_UNSPECIFIED
+                - :NON_PREEMPTIBLE
+                - :PREEMPTIBLE
               - !ruby/object:Api::Type::NestedObject
                 name: 'managedGroupConfig'
                 output: true
@@ -387,8 +398,19 @@ objects:
                       Number of attached SSDs, from 0 to 4.
               - !ruby/object:Api::Type::Boolean
                 name: 'isPreemptible'
+                output: true
                 description: |
                   Specifies if this instance group contains preemptible instances.
+              - !ruby/object:Api::Type::Enum
+                name: 'preemptibility'
+                description: |
+                  Specifies the preemptibility of the instance group.
+                  The default value for master and worker groups is NON_PREEMPTIBLE. This default cannot be changed.
+                  The default value for secondary instances is PREEMPTIBLE.
+                values:
+                - :PREEMPTIBILITY_UNSPECIFIED
+                - :NON_PREEMPTIBLE
+                - :PREEMPTIBLE
               - !ruby/object:Api::Type::NestedObject
                 name: 'managedGroupConfig'
                 output: true
@@ -448,8 +470,19 @@ objects:
                       Number of attached SSDs, from 0 to 4.
               - !ruby/object:Api::Type::Boolean
                 name: 'isPreemptible'
+                output: true
                 description: |
                   Specifies if this instance group contains preemptible instances.
+              - !ruby/object:Api::Type::Enum
+                name: 'preemptibility'
+                description: |
+                  Specifies the preemptibility of the instance group.
+                  The default value for master and worker groups is NON_PREEMPTIBLE. This default cannot be changed.
+                  The default value for secondary instances is PREEMPTIBLE.
+                values:
+                - :PREEMPTIBILITY_UNSPECIFIED
+                - :NON_PREEMPTIBLE
+                - :PREEMPTIBLE
               - !ruby/object:Api::Type::NestedObject
                 name: 'managedGroupConfig'
                 output: true
