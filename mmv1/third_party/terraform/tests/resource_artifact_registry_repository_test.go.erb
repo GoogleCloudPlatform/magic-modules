@@ -39,7 +39,7 @@ func TestAccArtifactRegistryRepository_update(t *testing.T) {
 	})
 }
 
-func TestArtifactRegistryRepository_create_mvn_snapshot(t *testing.T) {
+func TestAccArtifactRegistryRepository_create_mvn_snapshot(t *testing.T) {
 	t.Parallel()
 
 	repositoryID := fmt.Sprintf("tf-test-%d", randInt(t))
@@ -61,7 +61,7 @@ func TestArtifactRegistryRepository_create_mvn_snapshot(t *testing.T) {
 	})
 }
 
-func TestArtifactRegistryRepository_create_mvn_release(t *testing.T) {
+func TestAccArtifactRegistryRepository_create_mvn_release(t *testing.T) {
 	t.Parallel()
 
 	repositoryID := fmt.Sprintf("tf-test-%d", randInt(t))
