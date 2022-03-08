@@ -128,8 +128,8 @@ resource "google_artifact_registry_repository" "test" {
   location = "us-central1"
   description = "post-update"
   format = "MAVEN"
-  mavenConfig {
-    versionPolicy = "%s"
+  maven_config {
+    version_policy = "%s"
   }
 }
 `, repositoryID, versionPolicy)
