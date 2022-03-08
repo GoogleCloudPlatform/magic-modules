@@ -120,6 +120,29 @@ func TestAccBigtableGCPolicy_multiplePolicies(t *testing.T) {
 	})
 }
 
+func TestAccBigtableGCPolicy_gcRulesPolicy(t *testing.T) {
+	skipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	familyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck: func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: testAccCheckBigtableGCPolicyDestroyProducer(t),
+		Steps: []resource.TestStep {
+			{
+				Config: testAccBigtableGCPolicy_gcRules(instanceName, tableName, familyName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccBigtableGCPolicyExists(t, "google_bigtable_gc_policy.policy"),
+				),
+			},
+		},
+	})
+}
+
 func TestUnitBigtableGCPolicy_customizeDiff(t *testing.T) {
 	for _, tc := range testUnitBigtableGCPolicyCustomizeDiffTestcases {
 		tc.check(t)
@@ -436,4 +459,37 @@ resource "google_bigtable_gc_policy" "policyC" {
   mode        = "UNION"
 }
 `, instanceName, instanceName, tableName, family, family, family, family)
+}
+
+func testAccBigtableGCPolicy_gcRules(instanceName, tableName, family string) string {
+	return fmt.Sprintf(`
+	resource "google_bigtable_instance" "instance" {
+		name = "%s"
+
+		cluster {
+			cluster_id = "%s"
+			zone       = "us-central1-b"
+		}
+
+		instance_type = "DEVELOPMENT"
+		deletion_protection = false
+	}
+
+	resource "google_bigtable_table" "table" {
+		name          = "%s"
+		instance_name = google_bigtable_instance.instance.id
+
+		column_family {
+			family = "%s"
+		}
+	}
+
+	resource "google_bigtable_gc_policy" "policy" {
+		instance_name = google_bigtable_instance.instance.id
+		table         = google_bigtable_table.table.name
+		column_family = "%s"
+
+		gc_rules = "{"mode":"intersection", "rules":[{"max_age":"10h"},{"max_version":2}]}"
+	}
+`, instanceName, instanceName, tableName, family, family)
 }

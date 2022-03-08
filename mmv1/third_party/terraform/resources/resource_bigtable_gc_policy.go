@@ -2,12 +2,16 @@ package google
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
+	"reflect"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/bigtable"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
@@ -84,12 +88,34 @@ func resourceBigtableGCPolicy() *schema.Resource {
 				Description: `The name of the column family.`,
 			},
 
+			"gc_rules": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed: 		true,
+				Description:  `Serialized JSON string for garbage collection policy. Conflicts with "mode", "max_age" and "max_version".`,
+				ValidateFunc: validation.StringIsJSON,
+				StateFunc: func(v interface{}) string {
+					json, _ := structure.NormalizeJsonString(v)
+					return json
+				},
+				ConflictsWith: []string{"mode", "max_age", "max_version"},
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					var oldJSON map[string]interface{}
+					var newJSON map[string]interface{}
+
+					json.Unmarshal([]byte(old), &oldJSON)
+					json.Unmarshal([]byte(new), &newJSON)
+
+					return reflect.DeepEqual(oldJSON, newJSON)
+				},
+			},
 			"mode": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
 				Description:  `If multiple policies are set, you should choose between UNION OR INTERSECTION.`,
 				ValidateFunc: validation.StringInSlice([]string{GCPolicyModeIntersection, GCPolicyModeUnion}, false),
+				ConflictsWith: []string{"gc_rules"},
 			},
 
 			"max_age": {
@@ -120,6 +146,7 @@ func resourceBigtableGCPolicy() *schema.Resource {
 						},
 					},
 				},
+				ConflictsWith: []string{"gc_rules"},
 			},
 
 			"max_version": {
@@ -137,6 +164,7 @@ func resourceBigtableGCPolicy() *schema.Resource {
 						},
 					},
 				},
+				ConflictsWith: []string{"gc_rules"},
 			},
 
 			"project": {
@@ -288,13 +316,20 @@ func generateBigtableGCPolicy(d *schema.ResourceData) (bigtable.GCPolicy, error)
 	mode := d.Get("mode").(string)
 	ma, aok := d.GetOk("max_age")
 	mv, vok := d.GetOk("max_version")
+	gcRules := d.Get("gc_rules").(string)
 
-	if !aok && !vok {
+	if !aok && !vok && gcRules == "" {
 		return bigtable.NoGcPolicy(), nil
 	}
 
 	if mode == "" && aok && vok {
-		return nil, fmt.Errorf("If multiple policies are set, mode can't be empty")
+		return nil, fmt.Errorf("if multiple policies are set, mode can't be empty")
+	}
+
+	if gcRules != "" {
+		var parsedRules map[string]interface{}
+		json.Unmarshal([]byte(gcRules), &parsedRules)
+		return getGCPolicyFromJSON(parsedRules)
 	}
 
 	if aok {
@@ -322,6 +357,50 @@ func generateBigtableGCPolicy(d *schema.ResourceData) (bigtable.GCPolicy, error)
 	}
 
 	return policies[0], nil
+}
+
+func getGCPolicyFromJSON(p map[string]interface{}) (bigtable.GCPolicy, error) {
+	policies := []bigtable.GCPolicy{}
+	if p["rules"] == nil {
+		return bigtable.NoGcPolicy(), nil
+	}
+
+	for _, raw := range p["rules"].([]interface{}) {
+		r := raw.(map[string]interface{})
+		if r["max_age"] != nil {
+			maxAge := r["max_age"].(string)
+			duration, err := time.ParseDuration(maxAge)
+			if err != nil {
+				return nil, fmt.Errorf("invalid duration string: %v", maxAge)
+			}
+			policies = append(policies, bigtable.MaxAgePolicy(duration))
+		}
+
+		if r["max_version"] != nil {
+			version := r["max_version"].(float64)
+			policies = append(policies, bigtable.MaxVersionsPolicy(int(version)))
+		}
+
+		if r["mode"] != "" {
+			n, err := getGCPolicyFromJSON(r)
+			if err != nil {
+				return nil, err
+			}
+			policies = append(policies, n)
+		}
+	}
+
+	switch p["mode"] {
+	case strings.ToLower(GCPolicyModeUnion):
+		return bigtable.UnionPolicy(policies...), nil
+	case strings.ToLower(GCPolicyModeIntersection):
+		return bigtable.IntersectionPolicy(policies...), nil
+	default:
+		if len(policies) == 0 {
+			return bigtable.NoGcPolicy(), nil
+		}
+		return policies[0], nil
+	}
 }
 
 func getMaxAgeDuration(values map[string]interface{}) (time.Duration, error) {
