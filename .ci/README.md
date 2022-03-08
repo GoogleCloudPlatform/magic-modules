@@ -73,7 +73,7 @@ VERSION=beta
 git clone https://github.com/GoogleCloudPlatform/magic-modules fix-gcb-run
 pushd fix-gcb-run
 docker pull gcr.io/graphite-docker-images/downstream-builder;
-for commit in $(git log $SYNC_TAG..master --pretty=%H | tac); do 
+for commit in $(git log $SYNC_TAG..main --pretty=%H | tac); do 
   git checkout $commit && \
   docker run -v `pwd`:/workspace -w /workspace -e GITHUB_TOKEN=$MAGICIAN_GITHUB_TOKEN -it gcr.io/graphite-docker-images/downstream-builder downstream $REPO $VERSION $commit || \
   break;
@@ -94,11 +94,11 @@ Pausing the pipeline is done in the cloud console, by setting the downstream-bui
 If someone (often a bot) creates a PR which updates Gemfile or Gemfile.lock, they will not be able to generate diffs.  This is because bundler doesn't allow you to run a binary unless your installed gems exactly match the Gemfile.lock, and since we have to run generation before and after the change, there is no possible container that will satisfy all requirements.
 
 The best approach is
-* Build the `downstream-generator` container locally, with the new Gemfile and Gemfile.lock.  This will involve hand-modifying the Dockerfile to use the local Gemfile/Gemfile.lock instead of wget from this repo's `master` branch.  You don't need to check in those changes.
+* Build the `downstream-generator` container locally, with the new Gemfile and Gemfile.lock.  This will involve hand-modifying the Dockerfile to use the local Gemfile/Gemfile.lock instead of wget from this repo's `main` branch.  You don't need to check in those changes.
 * When that container is built, and while nothing else is running in GCB (wait, if you need to), push the container to GCR, and as soon as possible afterwards, merge the dependency-changing PR.
 
 ## Historical Note: Design choices & tradeoffs
 * The downstream push doesn't wait for checks on its PRs against downstreams.  This may inconvenience some existing workflows which rely on the downstream PR checks.  This ensures that merge conflicts never come into play, since the downstreams never have dangling PRs, but it requires some up-front work to get those checks into the differ.  If a new check is introduced into the downstream Travis, we will need to introduce it into the terraform-tester container.
-* The downstream push is disconnected from the output of the differ (but runs the same code).  This means that the diff which is approved isn't guaranteed to be applied *exactly*, if for instance magic modules' behavior changes on master between diff generation and downstream push.  This is also intended to avoid merge conflicts by, effectively, rebasing each commit on top of master before final generation is done.
+* The downstream push is disconnected from the output of the differ (but runs the same code).  This means that the diff which is approved isn't guaranteed to be applied *exactly*, if for instance magic modules' behavior changes on main between diff generation and downstream push.  This is also intended to avoid merge conflicts by, effectively, rebasing each commit on top of main before final generation is done.
     * Imagine the following situation: PR A and PR B are opened simultaneously. PR A changes the copyright date in each file to 2020. PR B adds a new resource. PR A is merged seconds before PR B, so they are picked up in the same push-downstream run.  The commit from PR B will produce a new file with the 2020 copyright date, even though the diff said 2019, since PR A was merged first.
 * We deleted the submodules.  They weren't useful to us and they were annoying to update - they're not in use anymore as far as we know - but it's possible there's some long-forgotten workflow that someone is using which will be damaged.  So far, we haven't seen any such issue.

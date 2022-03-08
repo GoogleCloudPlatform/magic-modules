@@ -254,6 +254,7 @@ func Provider() *schema.Provider {
 			"google_container_registry_repository":             dataSourceGoogleContainerRepo(),
 			"google_dns_keys":                                  dataSourceDNSKeys(),
 			"google_dns_managed_zone":                          dataSourceDnsManagedZone(),
+			"google_dns_record_set":                            dataSourceDnsRecordSet(),
 			"google_game_services_game_server_deployment_rollout":  dataSourceGameServicesGameServerDeploymentRollout(),
 			"google_iam_policy":                                dataSourceGoogleIamPolicy(),
 			"google_iam_role":                                  dataSourceGoogleIamRole(),
@@ -284,6 +285,7 @@ func Provider() *schema.Provider {
 			"google_monitoring_uptime_check_ips":               dataSourceGoogleMonitoringUptimeCheckIps(),
 			"google_netblock_ip_ranges":                        dataSourceGoogleNetblockIpRanges(),
 			"google_organization":                              dataSourceGoogleOrganization(),
+			"google_privateca_certificate_authority":           dataSourcePrivatecaCertificateAuthority(),
 			"google_project":                                   dataSourceGoogleProject(),
 			"google_projects":                                  dataSourceGoogleProjects(),
 			"google_project_organization_policy":               dataSourceGoogleProjectOrganizationPolicy(),
@@ -363,7 +365,8 @@ products.each do |product|
 <%  end -%>
 <%
 	iam_policy = object&.iam_policy
-	unless iam_policy.nil? || iam_policy.exclude
+	unless iam_policy.nil? || iam_policy.exclude ||
+		(iam_policy.min_version && iam_policy.min_version < version)
 	  iam_class_name = product_definition.name + object.name
 -%>
 	"<%= terraform_name -%>_iam_binding":              ResourceIamBinding(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc),
@@ -378,6 +381,7 @@ end     # products.each do
 			map[string]*schema.Resource{
 				"google_app_engine_application":                resourceAppEngineApplication(),
 				"google_bigquery_table":                        resourceBigQueryTable(),
+				"google_bigquery_reservation_assignment":       resourceBigqueryReservationAssignment(),
 				"google_bigtable_gc_policy":                    resourceBigtableGCPolicy(),
 				"google_bigtable_instance":                     resourceBigtableInstance(),
 				"google_bigtable_table":                        resourceBigtableTable(),

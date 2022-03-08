@@ -90,7 +90,7 @@ objects:
           The static external IP address represented by this resource. Only
           IPv4 is supported. An address may only be specified for INTERNAL
           address types. The IP address must be inside the specified subnetwork,
-          if any.
+          if any. Set by the API if undefined.
       - !ruby/object:Api::Type::Enum
         name: 'addressType'
         description: |
@@ -8066,7 +8066,6 @@ objects:
           The name for a specific VM instance that the IP address belongs to.
           This is required for network endpoints of type GCE_VM_IP_PORT.
           The instance must be in the same zone of network endpoint group.
-        required: true
       - !ruby/object:Api::Type::Integer
         name: 'port'
         description: |
@@ -8156,8 +8155,15 @@ objects:
         name: 'networkEndpointType'
         description: |
           Type of network endpoints in this network endpoint group.
+          NON_GCP_PRIVATE_IP_PORT is used for hybrid connectivity network
+          endpoint groups (see https://cloud.google.com/load-balancing/docs/hybrid).
+          Note that NON_GCP_PRIVATE_IP_PORT can only be used with Backend Services
+          that 1) have the following load balancing schemes: EXTERNAL, EXTERNAL_MANAGED,
+          INTERNAL_MANAGED, and INTERNAL_SELF_MANAGED and 2) support the RATE or
+          CONNECTION balancing modes.
         values:
           - :GCE_VM_IP_PORT
+          - :NON_GCP_PRIVATE_IP_PORT
         default_value: :GCE_VM_IP_PORT
       - !ruby/object:Api::Type::Integer
         name: 'size'
@@ -8514,7 +8520,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'platform'
-            required: true            
+            required: true
             # Docs (https://cloud.google.com/compute/docs/reference/rest/beta/regionNetworkEndpointGroups) say support is offered for:
             # API Gateway: apigateway.googleapis.com, App Engine: appengine.googleapis.com,
             # Cloud Functions: cloudfunctions.googleapis.com, Cloud Run: run.googleapis.com
@@ -13178,6 +13184,15 @@ objects:
                     description: |
                       User-specified description for the IP range.
                     send_empty_value: true
+          - !ruby/object:Api::Type::Integer
+            name: keepaliveInterval
+            description: |
+              The interval in seconds between BGP keepalive messages that are sent to the peer.
+              Hold time is three times the interval at which keepalive messages are sent, and the hold time is the
+              maximum number of seconds allowed to elapse between successive keepalive messages that BGP receives from a peer.
+              BGP will use the smaller of either the local hold time value or the peer's hold time value as the hold time for
+              the BGP connection between the two peers. If set, this value must be between 20 and 60. The default is 20.
+            default_value: 20
       - !ruby/object:Api::Type::Boolean
         name: encryptedInterconnectRouter
         input: true
@@ -14134,8 +14149,10 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Reservation'
     base_url: projects/{{project}}/zones/{{zone}}/reservations
+    update_verb: :PATCH
+    update_url: projects/{{project}}/zones/{{zone}}/reservations/{{name}}
+    update_mask: true
     collection_url_key: 'items'
-    input: true
     has_self_link: true
     description: |
       Represents a reservation resource. A reservation ensures that capacity is
@@ -14185,6 +14202,7 @@ objects:
           Creation timestamp in RFC3339 text format.
       - !ruby/object:Api::Type::String
         name: 'description'
+        input: true
         description: |
           An optional description of this resource.
       - !ruby/object:Api::Type::Integer
@@ -14195,6 +14213,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         required: true
+        input: true
         description: |
           Name of the resource. Provided by the client when the resource is
           created. The name must be 1-63 characters long, and comply with
@@ -14211,6 +14230,7 @@ objects:
           reservations that are tied to a commitment.
       - !ruby/object:Api::Type::Boolean
         name: 'specificReservationRequired'
+        input: true
         # Not a hard API default, but this should help avoid a unset/true/false
         # trinary.
         default_value: false
@@ -14241,14 +14261,14 @@ objects:
               A map of project number and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
             key_name: id
             key_description: |
-              The project id/number which is deleting or adding to the project list. Only project number is acceptable.
+              The project id/number which is deleting or adding to the project list.
             value_type: !ruby/object:Api::Type::NestedObject
               name: projectConfig
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'projectId'
                   description: |
-                    The project id/number, should be same as the key of this project config in the project map.
+                    The project id/number should be the same as the key of this project config in the project map.
       - !ruby/object:Api::Type::NestedObject
         name: 'specificReservation'
         required: true
@@ -14277,10 +14297,12 @@ objects:
               - !ruby/object:Api::Type::String
                 name: 'machineType'
                 required: true
+                input: true
                 description: |
                   The name of the machine type to reserve.
               - !ruby/object:Api::Type::String
                 name: 'minCpuPlatform'
+                input: true
                 description: |
                   The minimum CPU platform for the reservation. For example,
                   `"Intel Skylake"`. See
@@ -14290,11 +14312,13 @@ objects:
                 name: 'guestAccelerators'
                 description: |
                   Guest accelerator type and count.
+                input: true
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::String
                       name: 'acceleratorType'
                       required: true
+                      input: true
                       description: |
                         The full or partial URL of the accelerator type to
                         attach to this instance. For example:
@@ -14304,11 +14328,13 @@ objects:
                     - !ruby/object:Api::Type::Integer
                       name: 'acceleratorCount'
                       required: true
+                      input: true
                       description: |
                         The number of the guest accelerator cards exposed to
                         this instance.
               - !ruby/object:Api::Type::Array
                 name: 'localSsds'
+                input: true
                 description: |
                   The amount of local ssd to reserve with each instance. This
                   reserves disks of type `local-ssd`.
@@ -14316,6 +14342,7 @@ objects:
                   properties:
                     - !ruby/object:Api::Type::Enum
                       name: 'interface'
+                      input: true
                       default_value: :SCSI
                       values:
                         - :SCSI
@@ -14325,6 +14352,7 @@ objects:
                     - !ruby/object:Api::Type::Integer
                       name: 'diskSizeGb'
                       required: true
+                      input: true
                       description: |
                        The size of the disk in base-2 GB.
   - !ruby/object:Api::Resource
