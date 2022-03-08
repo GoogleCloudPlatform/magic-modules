@@ -76,8 +76,8 @@ var (
 		"config.0.private_environment_config.0.cloud_composer_network_ipv4_cidr_block",
 <% unless version == "ga" -%>
 		"config.0.private_environment_config.0.enable_privately_used_public_ips",
-		"config.0.private_environment_config.0.cloud_composer_connection_subnetwork",
 <% end -%>
+		"config.0.private_environment_config.0.cloud_composer_connection_subnetwork",
 	}
 
 	composerIpAllocationPolicyKeys = []string{
@@ -446,6 +446,7 @@ func resourceComposerEnvironment() *schema.Resource {
 										ForceNew: true,
 										Description: `When enabled, IPs from public (non-RFC1918) ranges can be used for ip_allocation_policy.cluster_ipv4_cidr_block and ip_allocation_policy.service_ipv4_cidr_block.`,
 									},
+<% end -%>
 									"cloud_composer_connection_subnetwork": {
 										Type:     schema.TypeString,
 										Optional: true,
@@ -454,7 +455,6 @@ func resourceComposerEnvironment() *schema.Resource {
 										ForceNew: true,
 										Description: `When specified, the environment will use Private Service Connect instead of VPC peerings to connect to Cloud SQL in the Tenant Project, and the PSC endpoint in the Customer Project will use an IP address from this subnetwork. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
 									},
-<% end -%>
 								},
 							},
 						},
@@ -1291,9 +1291,8 @@ func flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg *composer.P
 	transformed["cloud_composer_network_ipv4_cidr_block"] = envCfg.CloudComposerNetworkIpv4CidrBlock
 <% unless version == "ga" -%>
 	transformed["enable_privately_used_public_ips"] = envCfg.EnablePrivatelyUsedPublicIps
-	transformed["cloud_composer_connection_subnetwork"] = envCfg.CloudComposerConnectionSubnetwork
-
 <% end -%>
+	transformed["cloud_composer_connection_subnetwork"] = envCfg.CloudComposerConnectionSubnetwork
 
 	return []interface{}{transformed}
 }
@@ -1691,12 +1690,10 @@ func expandComposerEnvironmentConfigPrivateEnvironmentConfig(v interface{}, d *s
 	if v, ok := original["enable_privately_used_public_ips"]; ok {
 		transformed.EnablePrivatelyUsedPublicIps = v.(bool)
 	}
-
+<% end -%>
 	if v, ok := original["cloud_composer_connection_subnetwork"]; ok {
 		transformed.CloudComposerConnectionSubnetwork = v.(string)
 	}
-
-<% end -%>
 
 	transformed.PrivateClusterConfig = subBlock
 
