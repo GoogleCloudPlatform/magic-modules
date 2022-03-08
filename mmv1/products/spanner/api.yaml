@@ -209,3 +209,16 @@ objects:
             description: |
               Fully qualified name of the KMS key to use to encrypt this database. This key must exist
               in the same location as the Spanner Database.
+      - !ruby/object:Api::Type::Enum
+        name: 'databaseDialect'
+        description: |
+          The dialect of the Cloud Spanner Database.
+          If it is not provided, "DATABASE_DIALECT_UNSPECIFIED" will be used, 
+          which will create a Google Standard SQL database.
+          Note: Databases that are created with POSTGRESQL dialect do not support 
+          extra DDL statements in the `CreateDatabase` call. We must therefore re-apply 
+          terraform with ddl on the same database after creation.
+        values:
+          - :DATABASE_DIALECT_UNSPECIFIED
+          - :GOOGLE_STANDARD_SQL
+          - :POSTGRESQL
