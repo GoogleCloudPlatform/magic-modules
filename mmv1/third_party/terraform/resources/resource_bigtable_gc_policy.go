@@ -91,7 +91,7 @@ func resourceBigtableGCPolicy() *schema.Resource {
 			"gc_rules": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed: 		true,
+				Computed:     true,
 				Description:  `Serialized JSON string for garbage collection policy. Conflicts with "mode", "max_age" and "max_version".`,
 				ValidateFunc: validation.StringIsJSON,
 				StateFunc: func(v interface{}) string {
@@ -110,11 +110,11 @@ func resourceBigtableGCPolicy() *schema.Resource {
 				},
 			},
 			"mode": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Description:  `If multiple policies are set, you should choose between UNION OR INTERSECTION.`,
-				ValidateFunc: validation.StringInSlice([]string{GCPolicyModeIntersection, GCPolicyModeUnion}, false),
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				Description:   `If multiple policies are set, you should choose between UNION OR INTERSECTION.`,
+				ValidateFunc:  validation.StringInSlice([]string{GCPolicyModeIntersection, GCPolicyModeUnion}, false),
 				ConflictsWith: []string{"gc_rules"},
 			},
 

@@ -129,10 +129,10 @@ func TestAccBigtableGCPolicy_gcRulesPolicy(t *testing.T) {
 	familyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBigtableGCPolicyDestroyProducer(t),
-		Steps: []resource.TestStep {
+		Steps: []resource.TestStep{
 			{
 				Config: testAccBigtableGCPolicy_gcRules(instanceName, tableName, familyName),
 				Check: resource.ComposeTestCheckFunc(
