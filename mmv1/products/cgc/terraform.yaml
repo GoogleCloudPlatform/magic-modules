@@ -68,7 +68,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           new_bucket: "new-bucket"
       - !ruby/object:Provider::Terraform::Examples
-        name: "storage_upload_file_to_bucket"
+        name: "storage_upload_object"
         primary_resource_id: "image"
         vars:
           two_dogs_jpg: "two-dogs-jpg"
