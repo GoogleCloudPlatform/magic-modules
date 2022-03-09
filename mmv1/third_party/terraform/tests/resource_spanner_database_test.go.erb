@@ -36,6 +36,12 @@ func TestAccSpannerDatabase_basic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"ddl", "deletion_protection"},
 			},
 			{
+				ResourceName:            "google_spanner_database.basic_spangres",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ddl", "deletion_protection"},
+			},
+			{
 				Config: testAccSpannerDatabase_basicUpdate(instanceName, databaseName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_spanner_database.basic", "state"),
@@ -69,6 +75,33 @@ func TestAccSpannerDatabase_basic(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"ddl", "deletion_protection"},
 			},
+			{
+				ResourceName:            "google_spanner_database.basic_spangres",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ddl", "deletion_protection"},
+			},
+			{
+				ResourceName:            "google_spanner_database.basic_spangres",
+				ImportStateId:           fmt.Sprintf("projects/%s/instances/%s/databases/%s_spangres", project, instanceName, databaseName),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ddl", "deletion_protection"},
+			},
+			{
+				ResourceName:            "google_spanner_database.basic_spangres",
+				ImportStateId:           fmt.Sprintf("instances/%s/databases/%s_spangres", instanceName, databaseName),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ddl", "deletion_protection"},
+			},
+			{
+				ResourceName:            "google_spanner_database.basic_spangres",
+				ImportStateId:           fmt.Sprintf("%s/%s_spangres", instanceName, databaseName),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ddl", "deletion_protection"},
+			},
 		},
 	})
 }
@@ -92,7 +125,7 @@ resource "google_spanner_database" "basic" {
   deletion_protection = false
 }
 
-resource "google_spanner_database" "basic" {
+resource "google_spanner_database" "basic_spangres" {
 	instance = google_spanner_instance.basic.name
 	name     = "%s_spangres"
 	database_dialect = "POSTGRESQL"
@@ -122,7 +155,7 @@ resource "google_spanner_database" "basic" {
   deletion_protection = false
 }
 
-resource "google_spanner_database" "basic" {
+resource "google_spanner_database" "basic_spangres" {
 	instance = google_spanner_instance.basic.name
 	name     = "%s_spangres"
 	database_dialect = "POSTGRESQL"
