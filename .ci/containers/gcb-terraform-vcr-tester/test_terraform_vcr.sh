@@ -10,6 +10,7 @@ echo "PR number: ${pr_number}"
 echo "Commit SHA: ${mm_commit_sha}"
 github_username=modular-magician
 gh_repo=terraform-provider-google-beta
+NEWLINE=$'\n'
 
 # For testing only.
 echo "checking if this is the testing PR for vcr setup"
@@ -42,6 +43,12 @@ pushd $local_path
 #   echo "Running tests: Go files changed"
 # fi
 
+function add_comment {
+  curl -H "Authorization: token ${GITHUB_TOKEN}" \
+    -d "$(jq -r --arg comment "${1}" -n "{body: \$comment}")" \
+    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${2}/comments"
+}
+
 post_body=$( jq -n \
     --arg context "VCR-test" \
     --arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
@@ -55,57 +62,104 @@ curl \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
   -d "$post_body"
 
-now=$(date +"%T")
-echo "Current time : $now"
-
 set +e
 # cassette retrieval
 mkdir fixtures
-
 gsutil -m cp gs://vcr-$GOOGLE_PROJECT/beta/fixtures/* fixtures/
 # copy branch specific cassettes over master. This might fail but that's ok if the folder doesnt exist
-# gsutil -m cp gs://vcr-$GOOGLE_PROJECT/beta/%BRANCH_NAME%/fixtures/* fixtures/
-# mkdir -p $VCR_PATH
-# cp fixtures $VCR_PATH/../
-# ls $VCR_PATH
-
-# echo "SA: $SA_KEY"
+gsutil -m cp gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$pr_number/fixtures/* fixtures/
 
 echo $SA_KEY > sa_key.json
 gcloud auth activate-service-account $GOOGLE_SERVICE_ACCOUNT --key-file=$local_path/sa_key.json --project=$GOOGLE_PROJECT
 
-mkdir tflog
+mkdir testlog
+mkdir testlog/replaying
+mkdir testlog/recording
 
-# export TF_LOG=DEBUG
 export GOOGLE_REGION=us-central1
 export GOOGLE_ZONE=us-central1-a
-# export GOOGLE_USE_DEFAULT_CREDENTIALS=TRUE
 export VCR_PATH=$local_path/fixtures
-# export VCR_MODE=REPLAYING
+export VCR_MODE=REPLAYING
 export ACCTEST_PARALLELISM=32
 export GOOGLE_APPLICATION_CREDENTIALS=$local_path/sa_key.json
-# export TF_LOG_PATH_MASK=$local_path/tflog/%s.log
 
 echo "cassette copied"
 echo "VCR_PATH: $VCR_PATH"
 echo "ACCTEST_PARALLELISM: $ACCTEST_PARALLELISM" 
 echo "GOOGLE_APPLICATION_CREDENTIALS: $GOOGLE_APPLICATION_CREDENTIALS"
 
-# make testacc TEST=./google-beta TESTARGS='-run=TestAcc'
-# failingtests=$(TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v '-run=TestAcc' -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google/version.ProviderVersion=acc" | grep FAIL)
-# TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/tflog/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v '-run=TestAccComputeFirewall' -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google/version.ProviderVersion=acc"
+now=$(date +"%T")
+echo "Pre-replaying time: $now"
 
-failingtests=$(TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/tflog/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v '-run=TestAccComputeFirewall' -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google/version.ProviderVersion=acc" | grep FAIL)
-
-if [[ -n $failingtests ]] then
-
-fi
-
-# echo "Failing tests: $failingtests"
+TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v '-run=TestAcc' -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google/vers0ion.ProviderVersion=acc" > test.txt
 
 test_exit_code=$?
 
-set -e
+now=$(date +"%T")
+echo "Post-replaying time: $now"
+
+FAILED_TESTS=$(grep "FAIL:" test.txt)
+PASSED_TESTS=$(grep "PASS:" test.txt)
+SKIPPED_TESTS=$(grep "SKIP:" test.txt)
+
+FAILED_TESTS_COUNT=$(echo "$FAILED_TESTS" | wc -l)
+PASSED_TESTS_COUNT=$(echo "$PASSED_TESTS" | wc -l)
+SKIPPED_TESTS_COUNT=$(echo "$SKIPPED_TESTS" | wc -l)
+
+FAILED_TESTS_PATTERN=$(grep FAIL: test.txt | awk '{print $3}' | awk -v d="|" '{s=(NR==1?s:s d)$0}END{print s}')
+
+comment="Tests count: ${NEWLINE}"
+comment+="Total tests: $(($FAILED_TESTS_COUNT+$PASSED_TESTS_COUNT+$SKIPPED_TESTS_COUNT)) ${NEWLINE}"
+comment+="Passed tests $PASSED_TESTS_COUNT ${NEWLINE}"
+comment+="Skipped tests: $SKIPPED_TESTS_COUNT ${NEWLINE}"
+comment+="Failed tests: $FAILED_TESTS_COUNT"
+
+add_comment "${comment}" "${pr_number}"
+
+# store replaying build logs
+# gsutil -m cp $local_path/testlog/replaying/* gs://replaying/test/log/path/for/each/pr #modify to correct GCS path
+
+if [[ -n $FAILED_TESTS_PATTERN ]]; then
+  
+  comment="I have triggered VCR tests in RECORDING mode for the following tests that failed during VCR: $FAILED_TESTS_PATTERN"
+  add_comment "${comment}" "${pr_number}"
+
+  now=$(date +"%T")
+  echo "Pre-recording time: $now"
+
+  # RECORDING mode
+  export VCR_MODE=RECORDING
+  TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v '-run='$FAILED_TESTS_PATTERN -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google/version.ProviderVersion=acc" > recording_test.txt
+  test_exit_code=$?
+
+  now=$(date +"%T")
+  echo "Post-recording time: $now"
+
+  RECORDING_FAILED_TESTS=$(grep "FAIL:" recording_test.txt | awk '{print $3}')
+  RECORDING_PASSED_TESTS=$(grep "PASS:" recording_test.txt | awk '{print $3}')
+
+  comment=""  
+  if [[ -n $RECORDING_PASSED_TESTS ]]; then
+    comment="Tests passed during RECORDING mode:${NEWLINE} $RECORDING_PASSED_TESTS ${NEWLINE}${NEWLINE}"
+  fi
+
+  if [[ -n $RECORDING_FAILED_TESTS ]]; then
+    comment+="Tests failed during RECORDING mode:${NEWLINE} $RECORDING_FAILED_TESTS ${NEWLINE}"
+    comment+="Please fix these to complete your PR"
+  else
+    comment+="All tests passed"
+  fi
+
+  add_comment "${comment}" ${pr_number}
+
+  # store cassettes
+  gsutil -m cp fixtures/* gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$pr_number/fixtures/
+
+  # store recording build logs
+  # gsutil -m cp $local_path/testlog/recording/* gs://recording/test/log/path/for/each/pr #modify to correct GCS path
+
+fi
+
 
 if [ $test_exit_code -ne 0 ]; then
     test_state="failure"
@@ -113,11 +167,8 @@ else
     test_state="success"
 fi
 
-echo "current folder:"
-ls
 
-echo "tflog folder:"
-ls $local_path/tflog
+set -e
 
 post_body=$( jq -n \
     --arg context "VCR-test" \
