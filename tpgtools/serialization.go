@@ -641,15 +641,15 @@ func convertApikeysKeyBetaRestrictionsApiTargetsToHCL(r *apikeysBeta.KeyRestrict
 		return ""
 	}
 	outputConfig := "{\n"
-	if r.Service != nil {
-		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
-	}
 	if r.Methods != nil {
 		outputConfig += "\tmethods = ["
 		for _, v := range r.Methods {
 			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
 		outputConfig += "]\n"
+	}
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
 	}
 	return outputConfig + "}"
 }
@@ -5514,15 +5514,15 @@ func convertApikeysKeyRestrictionsApiTargetsToHCL(r *apikeys.KeyRestrictionsApiT
 		return ""
 	}
 	outputConfig := "{\n"
-	if r.Service != nil {
-		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
-	}
 	if r.Methods != nil {
 		outputConfig += "\tmethods = ["
 		for _, v := range r.Methods {
 			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
 		outputConfig += "]\n"
+	}
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
 	}
 	return outputConfig + "}"
 }
@@ -10063,8 +10063,8 @@ func convertApikeysKeyBetaRestrictionsApiTargets(i interface{}) map[string]inter
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"service": in["service"],
 		"methods": in["methods"],
+		"service": in["service"],
 	}
 }
 
@@ -14621,8 +14621,8 @@ func convertApikeysKeyRestrictionsApiTargets(i interface{}) map[string]interface
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"service": in["service"],
 		"methods": in["methods"],
+		"service": in["service"],
 	}
 }
 
