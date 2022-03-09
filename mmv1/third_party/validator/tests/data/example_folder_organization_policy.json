@@ -1,0 +1,38 @@
+[
+  {
+    "name": "//cloudresourcemanager.googleapis.com/folders/{{.FolderID}}",
+    "asset_type": "cloudresourcemanager.googleapis.com/Folder",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "org_policy": [
+      {
+        "constraint": "constraints/compute.disableSerialPortAccess",
+        "boolean_policy": {
+          "enforced": true
+        },
+        "update_time": "{{.Time.RFC3339Nano}}"
+      },
+      {
+        "constraint": "constraints/serviceuser.services",
+        "list_policy": {
+          "all_values": 1
+        },
+        "update_time": "{{.Time.RFC3339Nano}}"
+      },
+      {
+        "constraint": "constraints/serviceuser.services",
+        "list_policy": {
+          "denied_values": [
+            "cloudresourcemanager.googleapis.com"
+          ],
+          "suggested_value": "compute.googleapis.com"
+        },
+        "update_time": "{{.Time.RFC3339Nano}}"
+      },
+      {
+        "constraint": "constraints/serviceuser.services",
+        "restore_default": {},
+        "update_time": "{{.Time.RFC3339Nano}}"
+      }
+    ]
+  }
+]

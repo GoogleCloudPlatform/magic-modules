@@ -26,8 +26,8 @@ It is recommended to not set this field (or set it to true) until you're ready t
 ### SQL Second Generation Instance
 
 ```hcl
-resource "google_sql_database_instance" "master" {
-  name             = "master-instance"
+resource "google_sql_database_instance" "main" {
+  name             = "main-instance"
   database_version = "POSTGRES_11"
   region           = "us-central1"
 
@@ -233,7 +233,7 @@ The `settings` block supports:
 * `activation_policy` - (Optional) This specifies when the instance should be
     active. Can be either `ALWAYS`, `NEVER` or `ON_DEMAND`.
 
-* `availability_type` - (Optional) The availability type of the Cloud SQL
+* `availability_type` - (Optional, Default: `ZONAL`) The availability type of the Cloud SQL
 instance, high availability (`REGIONAL`) or single zone (`ZONAL`).' For MySQL
 instances, ensure that `settings.backup_configuration.enabled` and
 `settings.backup_configuration.binary_log_enabled` are both set to `true`.
@@ -379,6 +379,8 @@ The optional `clone` block supports:
 
     A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
 
+* `allocated_ip_range` -  (Optional) The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the cloned instance ip will be created in the allocated range. The range name must comply with [RFC 1035](https://tools.ietf.org/html/rfc1035). Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.
+
 The optional `restore_backup_context` block supports:
 **NOTE:** Restoring from a backup is an imperative action and not recommended via Terraform. Adding or modifying this
 block during resource creation/update will trigger the restore action after the resource is created/updated.
@@ -457,9 +459,9 @@ performing filtering in a Terraform config.
 Database instances can be imported using one of any of these accepted formats:
 
 ```
-$ terraform import google_sql_database_instance.master projects/{{project}}/instances/{{name}}
-$ terraform import google_sql_database_instance.master {{project}}/{{name}}
-$ terraform import google_sql_database_instance.master {{name}}
+$ terraform import google_sql_database_instance.main projects/{{project}}/instances/{{name}}
+$ terraform import google_sql_database_instance.main {{project}}/{{name}}
+$ terraform import google_sql_database_instance.main {{name}}
 
 ```
 

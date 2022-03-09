@@ -21,8 +21,12 @@ import (
 	"fmt"
 	"strings"
 
+	apikeys "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/apikeys"
+	apikeysBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/apikeys/beta"
 	assuredworkloads "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads"
 	assuredworkloadsBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads/beta"
+	bigqueryreservation "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/bigqueryreservation"
+	bigqueryreservationBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/bigqueryreservation/beta"
 	cloudbuild "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudbuild"
 	cloudbuildBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudbuild/beta"
 	cloudresourcemanager "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudresourcemanager"
@@ -61,8 +65,12 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 	}
 	if version == "beta" {
 		switch fmt.Sprintf("%s/%s", product, resource) {
+		case "apikeys/key":
+			return "google_apikeys_key", nil
 		case "assuredworkloads/workload":
 			return "google_assured_workloads_workload", nil
+		case "bigqueryreservation/assignment":
+			return "google_bigquery_reservation_assignment", nil
 		case "cloudbuild/worker_pool":
 			return "google_cloudbuild_worker_pool", nil
 		case "cloudresourcemanager/folder":
@@ -115,8 +123,12 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 	}
 	// If not found in sample version, fallthrough to GA
 	switch fmt.Sprintf("%s/%s", product, resource) {
+	case "apikeys/key":
+		return "google_apikeys_key", nil
 	case "assuredworkloads/workload":
 		return "google_assured_workloads_workload", nil
+	case "bigqueryreservation/assignment":
+		return "google_bigquery_reservation_assignment", nil
 	case "cloudbuild/worker_pool":
 		return "google_cloudbuild_worker_pool", nil
 	case "cloudresourcemanager/folder":
@@ -173,12 +185,24 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 	}
 	if version == "beta" {
 		switch fmt.Sprintf("%s/%s", product, resource) {
+		case "apikeys/key":
+			r := &apikeysBeta.Key{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ApikeysKeyBetaAsHCL(*r, hasGAEquivalent)
 		case "assuredworkloads/workload":
 			r := &assuredworkloadsBeta.Workload{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
 			return AssuredWorkloadsWorkloadBetaAsHCL(*r, hasGAEquivalent)
+		case "bigqueryreservation/assignment":
+			r := &bigqueryreservationBeta.Assignment{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return BigqueryReservationAssignmentBetaAsHCL(*r, hasGAEquivalent)
 		case "cloudbuild/worker_pool":
 			r := &cloudbuildBeta.WorkerPool{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -327,12 +351,24 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 	}
 	// If not found in sample version, fallthrough to GA
 	switch fmt.Sprintf("%s/%s", product, resource) {
+	case "apikeys/key":
+		r := &apikeys.Key{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ApikeysKeyAsHCL(*r, hasGAEquivalent)
 	case "assuredworkloads/workload":
 		r := &assuredworkloads.Workload{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
 		return AssuredWorkloadsWorkloadAsHCL(*r, hasGAEquivalent)
+	case "bigqueryreservation/assignment":
+		r := &bigqueryreservation.Assignment{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return BigqueryReservationAssignmentAsHCL(*r, hasGAEquivalent)
 	case "cloudbuild/worker_pool":
 		r := &cloudbuild.WorkerPool{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -465,6 +501,152 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 
 }
 
+// ApikeysKeyBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ApikeysKeyBetaAsHCL(r apikeysBeta.Key, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_apikeys_key\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if v := convertApikeysKeyBetaRestrictionsToHCL(r.Restrictions); v != "" {
+		outputConfig += fmt.Sprintf("\trestrictions %s\n", v)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertApikeysKeyBetaRestrictionsToHCL(r *apikeysBeta.KeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertApikeysKeyBetaRestrictionsAndroidKeyRestrictionsToHCL(r.AndroidKeyRestrictions); v != "" {
+		outputConfig += fmt.Sprintf("\tandroid_key_restrictions %s\n", v)
+	}
+	if r.ApiTargets != nil {
+		for _, v := range r.ApiTargets {
+			outputConfig += fmt.Sprintf("\tapi_targets %s\n", convertApikeysKeyBetaRestrictionsApiTargetsToHCL(&v))
+		}
+	}
+	if v := convertApikeysKeyBetaRestrictionsBrowserKeyRestrictionsToHCL(r.BrowserKeyRestrictions); v != "" {
+		outputConfig += fmt.Sprintf("\tbrowser_key_restrictions %s\n", v)
+	}
+	if v := convertApikeysKeyBetaRestrictionsIosKeyRestrictionsToHCL(r.IosKeyRestrictions); v != "" {
+		outputConfig += fmt.Sprintf("\tios_key_restrictions %s\n", v)
+	}
+	if v := convertApikeysKeyBetaRestrictionsServerKeyRestrictionsToHCL(r.ServerKeyRestrictions); v != "" {
+		outputConfig += fmt.Sprintf("\tserver_key_restrictions %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyBetaRestrictionsAndroidKeyRestrictionsToHCL(r *apikeysBeta.KeyRestrictionsAndroidKeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedApplications != nil {
+		for _, v := range r.AllowedApplications {
+			outputConfig += fmt.Sprintf("\tallowed_applications %s\n", convertApikeysKeyBetaRestrictionsAndroidKeyRestrictionsAllowedApplicationsToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyBetaRestrictionsAndroidKeyRestrictionsAllowedApplicationsToHCL(r *apikeysBeta.KeyRestrictionsAndroidKeyRestrictionsAllowedApplications) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.PackageName != nil {
+		outputConfig += fmt.Sprintf("\tpackage_name = %#v\n", *r.PackageName)
+	}
+	if r.Sha1Fingerprint != nil {
+		outputConfig += fmt.Sprintf("\tsha1_fingerprint = %#v\n", *r.Sha1Fingerprint)
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyBetaRestrictionsApiTargetsToHCL(r *apikeysBeta.KeyRestrictionsApiTargets) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Methods != nil {
+		outputConfig += "\tmethods = ["
+		for _, v := range r.Methods {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyBetaRestrictionsBrowserKeyRestrictionsToHCL(r *apikeysBeta.KeyRestrictionsBrowserKeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedReferrers != nil {
+		outputConfig += "\tallowed_referrers = ["
+		for _, v := range r.AllowedReferrers {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyBetaRestrictionsIosKeyRestrictionsToHCL(r *apikeysBeta.KeyRestrictionsIosKeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedBundleIds != nil {
+		outputConfig += "\tallowed_bundle_ids = ["
+		for _, v := range r.AllowedBundleIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyBetaRestrictionsServerKeyRestrictionsToHCL(r *apikeysBeta.KeyRestrictionsServerKeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedIps != nil {
+		outputConfig += "\tallowed_ips = ["
+		for _, v := range r.AllowedIps {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
 // AssuredWorkloadsWorkloadBetaAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -549,6 +731,40 @@ func convertAssuredWorkloadsWorkloadBetaResourcesToHCL(r *assuredworkloadsBeta.W
 	}
 	outputConfig := "{\n"
 	return outputConfig + "}"
+}
+
+// BigqueryReservationAssignmentBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func BigqueryReservationAssignmentBetaAsHCL(r bigqueryreservationBeta.Assignment, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_bigquery_reservation_assignment\" \"output\" {\n"
+	if r.Assignee != nil {
+		outputConfig += fmt.Sprintf("\tassignee = %#v\n", *r.Assignee)
+	}
+	if r.JobType != nil {
+		outputConfig += fmt.Sprintf("\tjob_type = %#v\n", *r.JobType)
+	}
+	if r.Reservation != nil {
+		outputConfig += fmt.Sprintf("\treservation = %#v\n", *r.Reservation)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 // CloudbuildWorkerPoolBetaAsHCL returns a string representation of the specified resource in HCL.
@@ -2500,7 +2716,7 @@ func convertDataprocWorkflowTemplateBetaPlacementManagedClusterToHCL(r *dataproc
 	if r.ClusterName != nil {
 		outputConfig += fmt.Sprintf("\tcluster_name = %#v\n", *r.ClusterName)
 	}
-	if v := convertDataprocWorkflowTemplateBetaClusterClusterConfigToHCL(r.Config); v != "" {
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigToHCL(r.Config); v != "" {
 		outputConfig += fmt.Sprintf("\tconfig %s\n", v)
 	}
 	outputConfig += "\tlabels = {"
@@ -2508,6 +2724,541 @@ func convertDataprocWorkflowTemplateBetaPlacementManagedClusterToHCL(r *dataproc
 		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
 	}
 	outputConfig += "}\n"
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigAutoscalingConfigToHCL(r.AutoscalingConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tautoscaling_config %s\n", v)
+	}
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigEncryptionConfigToHCL(r.EncryptionConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tencryption_config %s\n", v)
+	}
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigEndpointConfigToHCL(r.EndpointConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tendpoint_config %s\n", v)
+	}
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterConfigToHCL(r.GceClusterConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tgce_cluster_config %s\n", v)
+	}
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGkeClusterConfigToHCL(r.GkeClusterConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tgke_cluster_config %s\n", v)
+	}
+	if r.InitializationActions != nil {
+		for _, v := range r.InitializationActions {
+			outputConfig += fmt.Sprintf("\tinitialization_actions %s\n", convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigInitializationActionsToHCL(&v))
+		}
+	}
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigLifecycleConfigToHCL(r.LifecycleConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tlifecycle_config %s\n", v)
+	}
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigToHCL(r.MasterConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tmaster_config %s\n", v)
+	}
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMetastoreConfigToHCL(r.MetastoreConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tmetastore_config %s\n", v)
+	}
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigToHCL(r.SecondaryWorkerConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tsecondary_worker_config %s\n", v)
+	}
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecurityConfigToHCL(r.SecurityConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tsecurity_config %s\n", v)
+	}
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSoftwareConfigToHCL(r.SoftwareConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tsoftware_config %s\n", v)
+	}
+	if r.StagingBucket != nil {
+		outputConfig += fmt.Sprintf("\tstaging_bucket = %#v\n", *r.StagingBucket)
+	}
+	if r.TempBucket != nil {
+		outputConfig += fmt.Sprintf("\ttemp_bucket = %#v\n", *r.TempBucket)
+	}
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigToHCL(r.WorkerConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tworker_config %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigAutoscalingConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigAutoscalingConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Policy != nil {
+		outputConfig += fmt.Sprintf("\tpolicy = %#v\n", *r.Policy)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigEncryptionConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigEncryptionConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.GcePdKmsKeyName != nil {
+		outputConfig += fmt.Sprintf("\tgce_pd_kms_key_name = %#v\n", *r.GcePdKmsKeyName)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigEndpointConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigEndpointConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.EnableHttpPortAccess != nil {
+		outputConfig += fmt.Sprintf("\tenable_http_port_access = %#v\n", *r.EnableHttpPortAccess)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigGceClusterConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.InternalIPOnly != nil {
+		outputConfig += fmt.Sprintf("\tinternal_ip_only = %#v\n", *r.InternalIPOnly)
+	}
+	outputConfig += "\tmetadata = {"
+	for k, v := range r.Metadata {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Network != nil {
+		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
+	}
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterConfigNodeGroupAffinityToHCL(r.NodeGroupAffinity); v != "" {
+		outputConfig += fmt.Sprintf("\tnode_group_affinity %s\n", v)
+	}
+	if r.PrivateIPv6GoogleAccess != nil {
+		outputConfig += fmt.Sprintf("\tprivate_ipv6_google_access = %#v\n", *r.PrivateIPv6GoogleAccess)
+	}
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterConfigReservationAffinityToHCL(r.ReservationAffinity); v != "" {
+		outputConfig += fmt.Sprintf("\treservation_affinity %s\n", v)
+	}
+	if r.ServiceAccount != nil {
+		outputConfig += fmt.Sprintf("\tservice_account = %#v\n", *r.ServiceAccount)
+	}
+	if r.ServiceAccountScopes != nil {
+		outputConfig += "\tservice_account_scopes = ["
+		for _, v := range r.ServiceAccountScopes {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Subnetwork != nil {
+		outputConfig += fmt.Sprintf("\tsubnetwork = %#v\n", *r.Subnetwork)
+	}
+	if r.Tags != nil {
+		outputConfig += "\ttags = ["
+		for _, v := range r.Tags {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Zone != nil {
+		outputConfig += fmt.Sprintf("\tzone = %#v\n", *r.Zone)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterConfigNodeGroupAffinityToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.NodeGroup != nil {
+		outputConfig += fmt.Sprintf("\tnode_group = %#v\n", *r.NodeGroup)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterConfigReservationAffinityToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigReservationAffinity) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ConsumeReservationType != nil {
+		outputConfig += fmt.Sprintf("\tconsume_reservation_type = %#v\n", *r.ConsumeReservationType)
+	}
+	if r.Key != nil {
+		outputConfig += fmt.Sprintf("\tkey = %#v\n", *r.Key)
+	}
+	if r.Values != nil {
+		outputConfig += "\tvalues = ["
+		for _, v := range r.Values {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGkeClusterConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigGkeClusterConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGkeClusterConfigNamespacedGkeDeploymentTargetToHCL(r.NamespacedGkeDeploymentTarget); v != "" {
+		outputConfig += fmt.Sprintf("\tnamespaced_gke_deployment_target %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGkeClusterConfigNamespacedGkeDeploymentTargetToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigGkeClusterConfigNamespacedGkeDeploymentTarget) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ClusterNamespace != nil {
+		outputConfig += fmt.Sprintf("\tcluster_namespace = %#v\n", *r.ClusterNamespace)
+	}
+	if r.TargetGkeCluster != nil {
+		outputConfig += fmt.Sprintf("\ttarget_gke_cluster = %#v\n", *r.TargetGkeCluster)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigInitializationActionsToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigInitializationActions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ExecutableFile != nil {
+		outputConfig += fmt.Sprintf("\texecutable_file = %#v\n", *r.ExecutableFile)
+	}
+	if r.ExecutionTimeout != nil {
+		outputConfig += fmt.Sprintf("\texecution_timeout = %#v\n", *r.ExecutionTimeout)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigLifecycleConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigLifecycleConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AutoDeleteTime != nil {
+		outputConfig += fmt.Sprintf("\tauto_delete_time = %#v\n", *r.AutoDeleteTime)
+	}
+	if r.AutoDeleteTtl != nil {
+		outputConfig += fmt.Sprintf("\tauto_delete_ttl = %#v\n", *r.AutoDeleteTtl)
+	}
+	if r.IdleDeleteTtl != nil {
+		outputConfig += fmt.Sprintf("\tidle_delete_ttl = %#v\n", *r.IdleDeleteTtl)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigMasterConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Accelerators != nil {
+		for _, v := range r.Accelerators {
+			outputConfig += fmt.Sprintf("\taccelerators %s\n", convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigAcceleratorsToHCL(&v))
+		}
+	}
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigDiskConfigToHCL(r.DiskConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tdisk_config %s\n", v)
+	}
+	if r.Image != nil {
+		outputConfig += fmt.Sprintf("\timage = %#v\n", *r.Image)
+	}
+	if r.MachineType != nil {
+		outputConfig += fmt.Sprintf("\tmachine_type = %#v\n", *r.MachineType)
+	}
+	if r.MinCpuPlatform != nil {
+		outputConfig += fmt.Sprintf("\tmin_cpu_platform = %#v\n", *r.MinCpuPlatform)
+	}
+	if r.NumInstances != nil {
+		outputConfig += fmt.Sprintf("\tnum_instances = %#v\n", *r.NumInstances)
+	}
+	if r.Preemptibility != nil {
+		outputConfig += fmt.Sprintf("\tpreemptibility = %#v\n", *r.Preemptibility)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigAcceleratorsToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigMasterConfigAccelerators) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AcceleratorCount != nil {
+		outputConfig += fmt.Sprintf("\taccelerator_count = %#v\n", *r.AcceleratorCount)
+	}
+	if r.AcceleratorType != nil {
+		outputConfig += fmt.Sprintf("\taccelerator_type = %#v\n", *r.AcceleratorType)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigDiskConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.BootDiskSizeGb != nil {
+		outputConfig += fmt.Sprintf("\tboot_disk_size_gb = %#v\n", *r.BootDiskSizeGb)
+	}
+	if r.BootDiskType != nil {
+		outputConfig += fmt.Sprintf("\tboot_disk_type = %#v\n", *r.BootDiskType)
+	}
+	if r.NumLocalSsds != nil {
+		outputConfig += fmt.Sprintf("\tnum_local_ssds = %#v\n", *r.NumLocalSsds)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigManagedGroupConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigMasterConfigManagedGroupConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMetastoreConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigMetastoreConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.DataprocMetastoreService != nil {
+		outputConfig += fmt.Sprintf("\tdataproc_metastore_service = %#v\n", *r.DataprocMetastoreService)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Accelerators != nil {
+		for _, v := range r.Accelerators {
+			outputConfig += fmt.Sprintf("\taccelerators %s\n", convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigAcceleratorsToHCL(&v))
+		}
+	}
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigDiskConfigToHCL(r.DiskConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tdisk_config %s\n", v)
+	}
+	if r.Image != nil {
+		outputConfig += fmt.Sprintf("\timage = %#v\n", *r.Image)
+	}
+	if r.MachineType != nil {
+		outputConfig += fmt.Sprintf("\tmachine_type = %#v\n", *r.MachineType)
+	}
+	if r.MinCpuPlatform != nil {
+		outputConfig += fmt.Sprintf("\tmin_cpu_platform = %#v\n", *r.MinCpuPlatform)
+	}
+	if r.NumInstances != nil {
+		outputConfig += fmt.Sprintf("\tnum_instances = %#v\n", *r.NumInstances)
+	}
+	if r.Preemptibility != nil {
+		outputConfig += fmt.Sprintf("\tpreemptibility = %#v\n", *r.Preemptibility)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigAcceleratorsToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigAccelerators) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AcceleratorCount != nil {
+		outputConfig += fmt.Sprintf("\taccelerator_count = %#v\n", *r.AcceleratorCount)
+	}
+	if r.AcceleratorType != nil {
+		outputConfig += fmt.Sprintf("\taccelerator_type = %#v\n", *r.AcceleratorType)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigDiskConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDiskConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.BootDiskSizeGb != nil {
+		outputConfig += fmt.Sprintf("\tboot_disk_size_gb = %#v\n", *r.BootDiskSizeGb)
+	}
+	if r.BootDiskType != nil {
+		outputConfig += fmt.Sprintf("\tboot_disk_type = %#v\n", *r.BootDiskType)
+	}
+	if r.NumLocalSsds != nil {
+		outputConfig += fmt.Sprintf("\tnum_local_ssds = %#v\n", *r.NumLocalSsds)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigManagedGroupConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigManagedGroupConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecurityConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigSecurityConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecurityConfigKerberosConfigToHCL(r.KerberosConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tkerberos_config %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecurityConfigKerberosConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigSecurityConfigKerberosConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.CrossRealmTrustAdminServer != nil {
+		outputConfig += fmt.Sprintf("\tcross_realm_trust_admin_server = %#v\n", *r.CrossRealmTrustAdminServer)
+	}
+	if r.CrossRealmTrustKdc != nil {
+		outputConfig += fmt.Sprintf("\tcross_realm_trust_kdc = %#v\n", *r.CrossRealmTrustKdc)
+	}
+	if r.CrossRealmTrustRealm != nil {
+		outputConfig += fmt.Sprintf("\tcross_realm_trust_realm = %#v\n", *r.CrossRealmTrustRealm)
+	}
+	if r.CrossRealmTrustSharedPassword != nil {
+		outputConfig += fmt.Sprintf("\tcross_realm_trust_shared_password = %#v\n", *r.CrossRealmTrustSharedPassword)
+	}
+	if r.EnableKerberos != nil {
+		outputConfig += fmt.Sprintf("\tenable_kerberos = %#v\n", *r.EnableKerberos)
+	}
+	if r.KdcDbKey != nil {
+		outputConfig += fmt.Sprintf("\tkdc_db_key = %#v\n", *r.KdcDbKey)
+	}
+	if r.KeyPassword != nil {
+		outputConfig += fmt.Sprintf("\tkey_password = %#v\n", *r.KeyPassword)
+	}
+	if r.Keystore != nil {
+		outputConfig += fmt.Sprintf("\tkeystore = %#v\n", *r.Keystore)
+	}
+	if r.KeystorePassword != nil {
+		outputConfig += fmt.Sprintf("\tkeystore_password = %#v\n", *r.KeystorePassword)
+	}
+	if r.KmsKey != nil {
+		outputConfig += fmt.Sprintf("\tkms_key = %#v\n", *r.KmsKey)
+	}
+	if r.Realm != nil {
+		outputConfig += fmt.Sprintf("\trealm = %#v\n", *r.Realm)
+	}
+	if r.RootPrincipalPassword != nil {
+		outputConfig += fmt.Sprintf("\troot_principal_password = %#v\n", *r.RootPrincipalPassword)
+	}
+	if r.TgtLifetimeHours != nil {
+		outputConfig += fmt.Sprintf("\ttgt_lifetime_hours = %#v\n", *r.TgtLifetimeHours)
+	}
+	if r.Truststore != nil {
+		outputConfig += fmt.Sprintf("\ttruststore = %#v\n", *r.Truststore)
+	}
+	if r.TruststorePassword != nil {
+		outputConfig += fmt.Sprintf("\ttruststore_password = %#v\n", *r.TruststorePassword)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSoftwareConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigSoftwareConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ImageVersion != nil {
+		outputConfig += fmt.Sprintf("\timage_version = %#v\n", *r.ImageVersion)
+	}
+	if r.OptionalComponents != nil {
+		outputConfig += "\toptional_components = ["
+		for _, v := range r.OptionalComponents {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigWorkerConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Accelerators != nil {
+		for _, v := range r.Accelerators {
+			outputConfig += fmt.Sprintf("\taccelerators %s\n", convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigAcceleratorsToHCL(&v))
+		}
+	}
+	if v := convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigDiskConfigToHCL(r.DiskConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tdisk_config %s\n", v)
+	}
+	if r.Image != nil {
+		outputConfig += fmt.Sprintf("\timage = %#v\n", *r.Image)
+	}
+	if r.MachineType != nil {
+		outputConfig += fmt.Sprintf("\tmachine_type = %#v\n", *r.MachineType)
+	}
+	if r.MinCpuPlatform != nil {
+		outputConfig += fmt.Sprintf("\tmin_cpu_platform = %#v\n", *r.MinCpuPlatform)
+	}
+	if r.NumInstances != nil {
+		outputConfig += fmt.Sprintf("\tnum_instances = %#v\n", *r.NumInstances)
+	}
+	if r.Preemptibility != nil {
+		outputConfig += fmt.Sprintf("\tpreemptibility = %#v\n", *r.Preemptibility)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigAcceleratorsToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigWorkerConfigAccelerators) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AcceleratorCount != nil {
+		outputConfig += fmt.Sprintf("\taccelerator_count = %#v\n", *r.AcceleratorCount)
+	}
+	if r.AcceleratorType != nil {
+		outputConfig += fmt.Sprintf("\taccelerator_type = %#v\n", *r.AcceleratorType)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigDiskConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.BootDiskSizeGb != nil {
+		outputConfig += fmt.Sprintf("\tboot_disk_size_gb = %#v\n", *r.BootDiskSizeGb)
+	}
+	if r.BootDiskType != nil {
+		outputConfig += fmt.Sprintf("\tboot_disk_type = %#v\n", *r.BootDiskType)
+	}
+	if r.NumLocalSsds != nil {
+		outputConfig += fmt.Sprintf("\tnum_local_ssds = %#v\n", *r.NumLocalSsds)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigManagedGroupConfigToHCL(r *dataprocBeta.WorkflowTemplatePlacementManagedClusterConfigWorkerConfigManagedGroupConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
 	return outputConfig + "}"
 }
 
@@ -2576,401 +3327,6 @@ func convertDataprocWorkflowTemplateBetaParametersValidationValuesToHCL(r *datap
 		}
 		outputConfig += "]\n"
 	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigToHCL(r *dataprocBeta.ClusterInstanceGroupConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Accelerators != nil {
-		for _, v := range r.Accelerators {
-			outputConfig += fmt.Sprintf("\taccelerators %s\n", convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigAcceleratorsToHCL(&v))
-		}
-	}
-	if v := convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigDiskConfigToHCL(r.DiskConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tdisk_config %s\n", v)
-	}
-	if r.Image != nil {
-		outputConfig += fmt.Sprintf("\timage = %#v\n", *r.Image)
-	}
-	if r.MachineType != nil {
-		outputConfig += fmt.Sprintf("\tmachine_type = %#v\n", *r.MachineType)
-	}
-	if r.MinCpuPlatform != nil {
-		outputConfig += fmt.Sprintf("\tmin_cpu_platform = %#v\n", *r.MinCpuPlatform)
-	}
-	if r.NumInstances != nil {
-		outputConfig += fmt.Sprintf("\tnum_instances = %#v\n", *r.NumInstances)
-	}
-	if r.Preemptibility != nil {
-		outputConfig += fmt.Sprintf("\tpreemptibility = %#v\n", *r.Preemptibility)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigAcceleratorsToHCL(r *dataprocBeta.ClusterInstanceGroupConfigAccelerators) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.AcceleratorCount != nil {
-		outputConfig += fmt.Sprintf("\taccelerator_count = %#v\n", *r.AcceleratorCount)
-	}
-	if r.AcceleratorType != nil {
-		outputConfig += fmt.Sprintf("\taccelerator_type = %#v\n", *r.AcceleratorType)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigDiskConfigToHCL(r *dataprocBeta.ClusterInstanceGroupConfigDiskConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.BootDiskSizeGb != nil {
-		outputConfig += fmt.Sprintf("\tboot_disk_size_gb = %#v\n", *r.BootDiskSizeGb)
-	}
-	if r.BootDiskType != nil {
-		outputConfig += fmt.Sprintf("\tboot_disk_type = %#v\n", *r.BootDiskType)
-	}
-	if r.NumLocalSsds != nil {
-		outputConfig += fmt.Sprintf("\tnum_local_ssds = %#v\n", *r.NumLocalSsds)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigManagedGroupConfigToHCL(r *dataprocBeta.ClusterInstanceGroupConfigManagedGroupConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigToHCL(r *dataprocBeta.ClusterClusterConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertDataprocWorkflowTemplateBetaClusterClusterConfigAutoscalingConfigToHCL(r.AutoscalingConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tautoscaling_config %s\n", v)
-	}
-	if v := convertDataprocWorkflowTemplateBetaClusterClusterConfigEncryptionConfigToHCL(r.EncryptionConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tencryption_config %s\n", v)
-	}
-	if v := convertDataprocWorkflowTemplateBetaClusterClusterConfigEndpointConfigToHCL(r.EndpointConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tendpoint_config %s\n", v)
-	}
-	if v := convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfigToHCL(r.GceClusterConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tgce_cluster_config %s\n", v)
-	}
-	if v := convertDataprocWorkflowTemplateBetaClusterClusterConfigGkeClusterConfigToHCL(r.GkeClusterConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tgke_cluster_config %s\n", v)
-	}
-	if r.InitializationActions != nil {
-		for _, v := range r.InitializationActions {
-			outputConfig += fmt.Sprintf("\tinitialization_actions %s\n", convertDataprocWorkflowTemplateBetaClusterClusterConfigInitializationActionsToHCL(&v))
-		}
-	}
-	if v := convertDataprocWorkflowTemplateBetaClusterClusterConfigLifecycleConfigToHCL(r.LifecycleConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tlifecycle_config %s\n", v)
-	}
-	if v := convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigToHCL(r.MasterConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tmaster_config %s\n", v)
-	}
-	if v := convertDataprocWorkflowTemplateBetaClusterClusterConfigMetastoreConfigToHCL(r.MetastoreConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tmetastore_config %s\n", v)
-	}
-	if v := convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigToHCL(r.SecondaryWorkerConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tsecondary_worker_config %s\n", v)
-	}
-	if v := convertDataprocWorkflowTemplateBetaClusterClusterConfigSecurityConfigToHCL(r.SecurityConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tsecurity_config %s\n", v)
-	}
-	if v := convertDataprocWorkflowTemplateBetaClusterClusterConfigSoftwareConfigToHCL(r.SoftwareConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tsoftware_config %s\n", v)
-	}
-	if r.StagingBucket != nil {
-		outputConfig += fmt.Sprintf("\tstaging_bucket = %#v\n", *r.StagingBucket)
-	}
-	if r.TempBucket != nil {
-		outputConfig += fmt.Sprintf("\ttemp_bucket = %#v\n", *r.TempBucket)
-	}
-	if v := convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigToHCL(r.WorkerConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tworker_config %s\n", v)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigAutoscalingConfigToHCL(r *dataprocBeta.ClusterClusterConfigAutoscalingConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Policy != nil {
-		outputConfig += fmt.Sprintf("\tpolicy = %#v\n", *r.Policy)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigEncryptionConfigToHCL(r *dataprocBeta.ClusterClusterConfigEncryptionConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.GcePdKmsKeyName != nil {
-		outputConfig += fmt.Sprintf("\tgce_pd_kms_key_name = %#v\n", *r.GcePdKmsKeyName)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigEndpointConfigToHCL(r *dataprocBeta.ClusterClusterConfigEndpointConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.EnableHttpPortAccess != nil {
-		outputConfig += fmt.Sprintf("\tenable_http_port_access = %#v\n", *r.EnableHttpPortAccess)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfigToHCL(r *dataprocBeta.ClusterClusterConfigGceClusterConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.InternalIPOnly != nil {
-		outputConfig += fmt.Sprintf("\tinternal_ip_only = %#v\n", *r.InternalIPOnly)
-	}
-	outputConfig += "\tmetadata = {"
-	for k, v := range r.Metadata {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
-	}
-	outputConfig += "}\n"
-	if r.Network != nil {
-		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
-	}
-	if v := convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfigNodeGroupAffinityToHCL(r.NodeGroupAffinity); v != "" {
-		outputConfig += fmt.Sprintf("\tnode_group_affinity %s\n", v)
-	}
-	if r.PrivateIPv6GoogleAccess != nil {
-		outputConfig += fmt.Sprintf("\tprivate_ipv6_google_access = %#v\n", *r.PrivateIPv6GoogleAccess)
-	}
-	if v := convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfigReservationAffinityToHCL(r.ReservationAffinity); v != "" {
-		outputConfig += fmt.Sprintf("\treservation_affinity %s\n", v)
-	}
-	if r.ServiceAccount != nil {
-		outputConfig += fmt.Sprintf("\tservice_account = %#v\n", *r.ServiceAccount)
-	}
-	if r.ServiceAccountScopes != nil {
-		outputConfig += "\tservice_account_scopes = ["
-		for _, v := range r.ServiceAccountScopes {
-			outputConfig += fmt.Sprintf("%#v, ", v)
-		}
-		outputConfig += "]\n"
-	}
-	if r.Subnetwork != nil {
-		outputConfig += fmt.Sprintf("\tsubnetwork = %#v\n", *r.Subnetwork)
-	}
-	if r.Tags != nil {
-		outputConfig += "\ttags = ["
-		for _, v := range r.Tags {
-			outputConfig += fmt.Sprintf("%#v, ", v)
-		}
-		outputConfig += "]\n"
-	}
-	if r.Zone != nil {
-		outputConfig += fmt.Sprintf("\tzone = %#v\n", *r.Zone)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfigNodeGroupAffinityToHCL(r *dataprocBeta.ClusterClusterConfigGceClusterConfigNodeGroupAffinity) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.NodeGroup != nil {
-		outputConfig += fmt.Sprintf("\tnode_group = %#v\n", *r.NodeGroup)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfigReservationAffinityToHCL(r *dataprocBeta.ClusterClusterConfigGceClusterConfigReservationAffinity) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.ConsumeReservationType != nil {
-		outputConfig += fmt.Sprintf("\tconsume_reservation_type = %#v\n", *r.ConsumeReservationType)
-	}
-	if r.Key != nil {
-		outputConfig += fmt.Sprintf("\tkey = %#v\n", *r.Key)
-	}
-	if r.Values != nil {
-		outputConfig += "\tvalues = ["
-		for _, v := range r.Values {
-			outputConfig += fmt.Sprintf("%#v, ", v)
-		}
-		outputConfig += "]\n"
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigGkeClusterConfigToHCL(r *dataprocBeta.ClusterClusterConfigGkeClusterConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertDataprocWorkflowTemplateBetaClusterClusterConfigGkeClusterConfigNamespacedGkeDeploymentTargetToHCL(r.NamespacedGkeDeploymentTarget); v != "" {
-		outputConfig += fmt.Sprintf("\tnamespaced_gke_deployment_target %s\n", v)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigGkeClusterConfigNamespacedGkeDeploymentTargetToHCL(r *dataprocBeta.ClusterClusterConfigGkeClusterConfigNamespacedGkeDeploymentTarget) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.ClusterNamespace != nil {
-		outputConfig += fmt.Sprintf("\tcluster_namespace = %#v\n", *r.ClusterNamespace)
-	}
-	if r.TargetGkeCluster != nil {
-		outputConfig += fmt.Sprintf("\ttarget_gke_cluster = %#v\n", *r.TargetGkeCluster)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigInitializationActionsToHCL(r *dataprocBeta.ClusterClusterConfigInitializationActions) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.ExecutableFile != nil {
-		outputConfig += fmt.Sprintf("\texecutable_file = %#v\n", *r.ExecutableFile)
-	}
-	if r.ExecutionTimeout != nil {
-		outputConfig += fmt.Sprintf("\texecution_timeout = %#v\n", *r.ExecutionTimeout)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigLifecycleConfigToHCL(r *dataprocBeta.ClusterClusterConfigLifecycleConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.AutoDeleteTime != nil {
-		outputConfig += fmt.Sprintf("\tauto_delete_time = %#v\n", *r.AutoDeleteTime)
-	}
-	if r.AutoDeleteTtl != nil {
-		outputConfig += fmt.Sprintf("\tauto_delete_ttl = %#v\n", *r.AutoDeleteTtl)
-	}
-	if r.IdleDeleteTtl != nil {
-		outputConfig += fmt.Sprintf("\tidle_delete_ttl = %#v\n", *r.IdleDeleteTtl)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigMetastoreConfigToHCL(r *dataprocBeta.ClusterClusterConfigMetastoreConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.DataprocMetastoreService != nil {
-		outputConfig += fmt.Sprintf("\tdataproc_metastore_service = %#v\n", *r.DataprocMetastoreService)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigSecurityConfigToHCL(r *dataprocBeta.ClusterClusterConfigSecurityConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertDataprocWorkflowTemplateBetaClusterClusterConfigSecurityConfigKerberosConfigToHCL(r.KerberosConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tkerberos_config %s\n", v)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigSecurityConfigKerberosConfigToHCL(r *dataprocBeta.ClusterClusterConfigSecurityConfigKerberosConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.CrossRealmTrustAdminServer != nil {
-		outputConfig += fmt.Sprintf("\tcross_realm_trust_admin_server = %#v\n", *r.CrossRealmTrustAdminServer)
-	}
-	if r.CrossRealmTrustKdc != nil {
-		outputConfig += fmt.Sprintf("\tcross_realm_trust_kdc = %#v\n", *r.CrossRealmTrustKdc)
-	}
-	if r.CrossRealmTrustRealm != nil {
-		outputConfig += fmt.Sprintf("\tcross_realm_trust_realm = %#v\n", *r.CrossRealmTrustRealm)
-	}
-	if r.CrossRealmTrustSharedPassword != nil {
-		outputConfig += fmt.Sprintf("\tcross_realm_trust_shared_password = %#v\n", *r.CrossRealmTrustSharedPassword)
-	}
-	if r.EnableKerberos != nil {
-		outputConfig += fmt.Sprintf("\tenable_kerberos = %#v\n", *r.EnableKerberos)
-	}
-	if r.KdcDbKey != nil {
-		outputConfig += fmt.Sprintf("\tkdc_db_key = %#v\n", *r.KdcDbKey)
-	}
-	if r.KeyPassword != nil {
-		outputConfig += fmt.Sprintf("\tkey_password = %#v\n", *r.KeyPassword)
-	}
-	if r.Keystore != nil {
-		outputConfig += fmt.Sprintf("\tkeystore = %#v\n", *r.Keystore)
-	}
-	if r.KeystorePassword != nil {
-		outputConfig += fmt.Sprintf("\tkeystore_password = %#v\n", *r.KeystorePassword)
-	}
-	if r.KmsKey != nil {
-		outputConfig += fmt.Sprintf("\tkms_key = %#v\n", *r.KmsKey)
-	}
-	if r.Realm != nil {
-		outputConfig += fmt.Sprintf("\trealm = %#v\n", *r.Realm)
-	}
-	if r.RootPrincipalPassword != nil {
-		outputConfig += fmt.Sprintf("\troot_principal_password = %#v\n", *r.RootPrincipalPassword)
-	}
-	if r.TgtLifetimeHours != nil {
-		outputConfig += fmt.Sprintf("\ttgt_lifetime_hours = %#v\n", *r.TgtLifetimeHours)
-	}
-	if r.Truststore != nil {
-		outputConfig += fmt.Sprintf("\ttruststore = %#v\n", *r.Truststore)
-	}
-	if r.TruststorePassword != nil {
-		outputConfig += fmt.Sprintf("\ttruststore_password = %#v\n", *r.TruststorePassword)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigSoftwareConfigToHCL(r *dataprocBeta.ClusterClusterConfigSoftwareConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.ImageVersion != nil {
-		outputConfig += fmt.Sprintf("\timage_version = %#v\n", *r.ImageVersion)
-	}
-	if r.OptionalComponents != nil {
-		outputConfig += "\toptional_components = ["
-		for _, v := range r.OptionalComponents {
-			outputConfig += fmt.Sprintf("%#v, ", v)
-		}
-		outputConfig += "]\n"
-	}
-	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
-	}
-	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -4887,6 +5243,152 @@ func convertRecaptchaEnterpriseKeyBetaWebSettingsToHCL(r *recaptchaenterpriseBet
 	return outputConfig + "}"
 }
 
+// ApikeysKeyAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ApikeysKeyAsHCL(r apikeys.Key, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_apikeys_key\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if v := convertApikeysKeyRestrictionsToHCL(r.Restrictions); v != "" {
+		outputConfig += fmt.Sprintf("\trestrictions %s\n", v)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertApikeysKeyRestrictionsToHCL(r *apikeys.KeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertApikeysKeyRestrictionsAndroidKeyRestrictionsToHCL(r.AndroidKeyRestrictions); v != "" {
+		outputConfig += fmt.Sprintf("\tandroid_key_restrictions %s\n", v)
+	}
+	if r.ApiTargets != nil {
+		for _, v := range r.ApiTargets {
+			outputConfig += fmt.Sprintf("\tapi_targets %s\n", convertApikeysKeyRestrictionsApiTargetsToHCL(&v))
+		}
+	}
+	if v := convertApikeysKeyRestrictionsBrowserKeyRestrictionsToHCL(r.BrowserKeyRestrictions); v != "" {
+		outputConfig += fmt.Sprintf("\tbrowser_key_restrictions %s\n", v)
+	}
+	if v := convertApikeysKeyRestrictionsIosKeyRestrictionsToHCL(r.IosKeyRestrictions); v != "" {
+		outputConfig += fmt.Sprintf("\tios_key_restrictions %s\n", v)
+	}
+	if v := convertApikeysKeyRestrictionsServerKeyRestrictionsToHCL(r.ServerKeyRestrictions); v != "" {
+		outputConfig += fmt.Sprintf("\tserver_key_restrictions %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyRestrictionsAndroidKeyRestrictionsToHCL(r *apikeys.KeyRestrictionsAndroidKeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedApplications != nil {
+		for _, v := range r.AllowedApplications {
+			outputConfig += fmt.Sprintf("\tallowed_applications %s\n", convertApikeysKeyRestrictionsAndroidKeyRestrictionsAllowedApplicationsToHCL(&v))
+		}
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyRestrictionsAndroidKeyRestrictionsAllowedApplicationsToHCL(r *apikeys.KeyRestrictionsAndroidKeyRestrictionsAllowedApplications) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.PackageName != nil {
+		outputConfig += fmt.Sprintf("\tpackage_name = %#v\n", *r.PackageName)
+	}
+	if r.Sha1Fingerprint != nil {
+		outputConfig += fmt.Sprintf("\tsha1_fingerprint = %#v\n", *r.Sha1Fingerprint)
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyRestrictionsApiTargetsToHCL(r *apikeys.KeyRestrictionsApiTargets) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Methods != nil {
+		outputConfig += "\tmethods = ["
+		for _, v := range r.Methods {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyRestrictionsBrowserKeyRestrictionsToHCL(r *apikeys.KeyRestrictionsBrowserKeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedReferrers != nil {
+		outputConfig += "\tallowed_referrers = ["
+		for _, v := range r.AllowedReferrers {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyRestrictionsIosKeyRestrictionsToHCL(r *apikeys.KeyRestrictionsIosKeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedBundleIds != nil {
+		outputConfig += "\tallowed_bundle_ids = ["
+		for _, v := range r.AllowedBundleIds {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertApikeysKeyRestrictionsServerKeyRestrictionsToHCL(r *apikeys.KeyRestrictionsServerKeyRestrictions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AllowedIps != nil {
+		outputConfig += "\tallowed_ips = ["
+		for _, v := range r.AllowedIps {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
 // AssuredWorkloadsWorkloadAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -4971,6 +5473,40 @@ func convertAssuredWorkloadsWorkloadResourcesToHCL(r *assuredworkloads.WorkloadR
 	}
 	outputConfig := "{\n"
 	return outputConfig + "}"
+}
+
+// BigqueryReservationAssignmentAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func BigqueryReservationAssignmentAsHCL(r bigqueryreservation.Assignment, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_bigquery_reservation_assignment\" \"output\" {\n"
+	if r.Assignee != nil {
+		outputConfig += fmt.Sprintf("\tassignee = %#v\n", *r.Assignee)
+	}
+	if r.JobType != nil {
+		outputConfig += fmt.Sprintf("\tjob_type = %#v\n", *r.JobType)
+	}
+	if r.Reservation != nil {
+		outputConfig += fmt.Sprintf("\treservation = %#v\n", *r.Reservation)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
 }
 
 // CloudbuildWorkerPoolAsHCL returns a string representation of the specified resource in HCL.
@@ -6922,7 +7458,7 @@ func convertDataprocWorkflowTemplatePlacementManagedClusterToHCL(r *dataproc.Wor
 	if r.ClusterName != nil {
 		outputConfig += fmt.Sprintf("\tcluster_name = %#v\n", *r.ClusterName)
 	}
-	if v := convertDataprocWorkflowTemplateClusterClusterConfigToHCL(r.Config); v != "" {
+	if v := convertDataprocWorkflowTemplatePlacementManagedClusterConfigToHCL(r.Config); v != "" {
 		outputConfig += fmt.Sprintf("\tconfig %s\n", v)
 	}
 	outputConfig += "\tlabels = {"
@@ -6930,6 +7466,499 @@ func convertDataprocWorkflowTemplatePlacementManagedClusterToHCL(r *dataproc.Wor
 		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
 	}
 	outputConfig += "}\n"
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertDataprocWorkflowTemplatePlacementManagedClusterConfigAutoscalingConfigToHCL(r.AutoscalingConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tautoscaling_config %s\n", v)
+	}
+	if v := convertDataprocWorkflowTemplatePlacementManagedClusterConfigEncryptionConfigToHCL(r.EncryptionConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tencryption_config %s\n", v)
+	}
+	if v := convertDataprocWorkflowTemplatePlacementManagedClusterConfigEndpointConfigToHCL(r.EndpointConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tendpoint_config %s\n", v)
+	}
+	if v := convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigToHCL(r.GceClusterConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tgce_cluster_config %s\n", v)
+	}
+	if r.InitializationActions != nil {
+		for _, v := range r.InitializationActions {
+			outputConfig += fmt.Sprintf("\tinitialization_actions %s\n", convertDataprocWorkflowTemplatePlacementManagedClusterConfigInitializationActionsToHCL(&v))
+		}
+	}
+	if v := convertDataprocWorkflowTemplatePlacementManagedClusterConfigLifecycleConfigToHCL(r.LifecycleConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tlifecycle_config %s\n", v)
+	}
+	if v := convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigToHCL(r.MasterConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tmaster_config %s\n", v)
+	}
+	if v := convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigToHCL(r.SecondaryWorkerConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tsecondary_worker_config %s\n", v)
+	}
+	if v := convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecurityConfigToHCL(r.SecurityConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tsecurity_config %s\n", v)
+	}
+	if v := convertDataprocWorkflowTemplatePlacementManagedClusterConfigSoftwareConfigToHCL(r.SoftwareConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tsoftware_config %s\n", v)
+	}
+	if r.StagingBucket != nil {
+		outputConfig += fmt.Sprintf("\tstaging_bucket = %#v\n", *r.StagingBucket)
+	}
+	if r.TempBucket != nil {
+		outputConfig += fmt.Sprintf("\ttemp_bucket = %#v\n", *r.TempBucket)
+	}
+	if v := convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigToHCL(r.WorkerConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tworker_config %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigAutoscalingConfigToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigAutoscalingConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Policy != nil {
+		outputConfig += fmt.Sprintf("\tpolicy = %#v\n", *r.Policy)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigEncryptionConfigToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigEncryptionConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.GcePdKmsKeyName != nil {
+		outputConfig += fmt.Sprintf("\tgce_pd_kms_key_name = %#v\n", *r.GcePdKmsKeyName)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigEndpointConfigToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigEndpointConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.EnableHttpPortAccess != nil {
+		outputConfig += fmt.Sprintf("\tenable_http_port_access = %#v\n", *r.EnableHttpPortAccess)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigGceClusterConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.InternalIPOnly != nil {
+		outputConfig += fmt.Sprintf("\tinternal_ip_only = %#v\n", *r.InternalIPOnly)
+	}
+	outputConfig += "\tmetadata = {"
+	for k, v := range r.Metadata {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Network != nil {
+		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
+	}
+	if v := convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinityToHCL(r.NodeGroupAffinity); v != "" {
+		outputConfig += fmt.Sprintf("\tnode_group_affinity %s\n", v)
+	}
+	if r.PrivateIPv6GoogleAccess != nil {
+		outputConfig += fmt.Sprintf("\tprivate_ipv6_google_access = %#v\n", *r.PrivateIPv6GoogleAccess)
+	}
+	if v := convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigReservationAffinityToHCL(r.ReservationAffinity); v != "" {
+		outputConfig += fmt.Sprintf("\treservation_affinity %s\n", v)
+	}
+	if r.ServiceAccount != nil {
+		outputConfig += fmt.Sprintf("\tservice_account = %#v\n", *r.ServiceAccount)
+	}
+	if r.ServiceAccountScopes != nil {
+		outputConfig += "\tservice_account_scopes = ["
+		for _, v := range r.ServiceAccountScopes {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Subnetwork != nil {
+		outputConfig += fmt.Sprintf("\tsubnetwork = %#v\n", *r.Subnetwork)
+	}
+	if r.Tags != nil {
+		outputConfig += "\ttags = ["
+		for _, v := range r.Tags {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.Zone != nil {
+		outputConfig += fmt.Sprintf("\tzone = %#v\n", *r.Zone)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinityToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.NodeGroup != nil {
+		outputConfig += fmt.Sprintf("\tnode_group = %#v\n", *r.NodeGroup)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigReservationAffinityToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigReservationAffinity) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ConsumeReservationType != nil {
+		outputConfig += fmt.Sprintf("\tconsume_reservation_type = %#v\n", *r.ConsumeReservationType)
+	}
+	if r.Key != nil {
+		outputConfig += fmt.Sprintf("\tkey = %#v\n", *r.Key)
+	}
+	if r.Values != nil {
+		outputConfig += "\tvalues = ["
+		for _, v := range r.Values {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigInitializationActionsToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigInitializationActions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ExecutableFile != nil {
+		outputConfig += fmt.Sprintf("\texecutable_file = %#v\n", *r.ExecutableFile)
+	}
+	if r.ExecutionTimeout != nil {
+		outputConfig += fmt.Sprintf("\texecution_timeout = %#v\n", *r.ExecutionTimeout)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigLifecycleConfigToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigLifecycleConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AutoDeleteTime != nil {
+		outputConfig += fmt.Sprintf("\tauto_delete_time = %#v\n", *r.AutoDeleteTime)
+	}
+	if r.AutoDeleteTtl != nil {
+		outputConfig += fmt.Sprintf("\tauto_delete_ttl = %#v\n", *r.AutoDeleteTtl)
+	}
+	if r.IdleDeleteTtl != nil {
+		outputConfig += fmt.Sprintf("\tidle_delete_ttl = %#v\n", *r.IdleDeleteTtl)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigMasterConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Accelerators != nil {
+		for _, v := range r.Accelerators {
+			outputConfig += fmt.Sprintf("\taccelerators %s\n", convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigAcceleratorsToHCL(&v))
+		}
+	}
+	if v := convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfigToHCL(r.DiskConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tdisk_config %s\n", v)
+	}
+	if r.Image != nil {
+		outputConfig += fmt.Sprintf("\timage = %#v\n", *r.Image)
+	}
+	if r.MachineType != nil {
+		outputConfig += fmt.Sprintf("\tmachine_type = %#v\n", *r.MachineType)
+	}
+	if r.MinCpuPlatform != nil {
+		outputConfig += fmt.Sprintf("\tmin_cpu_platform = %#v\n", *r.MinCpuPlatform)
+	}
+	if r.NumInstances != nil {
+		outputConfig += fmt.Sprintf("\tnum_instances = %#v\n", *r.NumInstances)
+	}
+	if r.Preemptibility != nil {
+		outputConfig += fmt.Sprintf("\tpreemptibility = %#v\n", *r.Preemptibility)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigAcceleratorsToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigMasterConfigAccelerators) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AcceleratorCount != nil {
+		outputConfig += fmt.Sprintf("\taccelerator_count = %#v\n", *r.AcceleratorCount)
+	}
+	if r.AcceleratorType != nil {
+		outputConfig += fmt.Sprintf("\taccelerator_type = %#v\n", *r.AcceleratorType)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfigToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.BootDiskSizeGb != nil {
+		outputConfig += fmt.Sprintf("\tboot_disk_size_gb = %#v\n", *r.BootDiskSizeGb)
+	}
+	if r.BootDiskType != nil {
+		outputConfig += fmt.Sprintf("\tboot_disk_type = %#v\n", *r.BootDiskType)
+	}
+	if r.NumLocalSsds != nil {
+		outputConfig += fmt.Sprintf("\tnum_local_ssds = %#v\n", *r.NumLocalSsds)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigManagedGroupConfigToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigMasterConfigManagedGroupConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Accelerators != nil {
+		for _, v := range r.Accelerators {
+			outputConfig += fmt.Sprintf("\taccelerators %s\n", convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigAcceleratorsToHCL(&v))
+		}
+	}
+	if v := convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDiskConfigToHCL(r.DiskConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tdisk_config %s\n", v)
+	}
+	if r.Image != nil {
+		outputConfig += fmt.Sprintf("\timage = %#v\n", *r.Image)
+	}
+	if r.MachineType != nil {
+		outputConfig += fmt.Sprintf("\tmachine_type = %#v\n", *r.MachineType)
+	}
+	if r.MinCpuPlatform != nil {
+		outputConfig += fmt.Sprintf("\tmin_cpu_platform = %#v\n", *r.MinCpuPlatform)
+	}
+	if r.NumInstances != nil {
+		outputConfig += fmt.Sprintf("\tnum_instances = %#v\n", *r.NumInstances)
+	}
+	if r.Preemptibility != nil {
+		outputConfig += fmt.Sprintf("\tpreemptibility = %#v\n", *r.Preemptibility)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigAcceleratorsToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigAccelerators) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AcceleratorCount != nil {
+		outputConfig += fmt.Sprintf("\taccelerator_count = %#v\n", *r.AcceleratorCount)
+	}
+	if r.AcceleratorType != nil {
+		outputConfig += fmt.Sprintf("\taccelerator_type = %#v\n", *r.AcceleratorType)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDiskConfigToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDiskConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.BootDiskSizeGb != nil {
+		outputConfig += fmt.Sprintf("\tboot_disk_size_gb = %#v\n", *r.BootDiskSizeGb)
+	}
+	if r.BootDiskType != nil {
+		outputConfig += fmt.Sprintf("\tboot_disk_type = %#v\n", *r.BootDiskType)
+	}
+	if r.NumLocalSsds != nil {
+		outputConfig += fmt.Sprintf("\tnum_local_ssds = %#v\n", *r.NumLocalSsds)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigManagedGroupConfigToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigManagedGroupConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecurityConfigToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigSecurityConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecurityConfigKerberosConfigToHCL(r.KerberosConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tkerberos_config %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecurityConfigKerberosConfigToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigSecurityConfigKerberosConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.CrossRealmTrustAdminServer != nil {
+		outputConfig += fmt.Sprintf("\tcross_realm_trust_admin_server = %#v\n", *r.CrossRealmTrustAdminServer)
+	}
+	if r.CrossRealmTrustKdc != nil {
+		outputConfig += fmt.Sprintf("\tcross_realm_trust_kdc = %#v\n", *r.CrossRealmTrustKdc)
+	}
+	if r.CrossRealmTrustRealm != nil {
+		outputConfig += fmt.Sprintf("\tcross_realm_trust_realm = %#v\n", *r.CrossRealmTrustRealm)
+	}
+	if r.CrossRealmTrustSharedPassword != nil {
+		outputConfig += fmt.Sprintf("\tcross_realm_trust_shared_password = %#v\n", *r.CrossRealmTrustSharedPassword)
+	}
+	if r.EnableKerberos != nil {
+		outputConfig += fmt.Sprintf("\tenable_kerberos = %#v\n", *r.EnableKerberos)
+	}
+	if r.KdcDbKey != nil {
+		outputConfig += fmt.Sprintf("\tkdc_db_key = %#v\n", *r.KdcDbKey)
+	}
+	if r.KeyPassword != nil {
+		outputConfig += fmt.Sprintf("\tkey_password = %#v\n", *r.KeyPassword)
+	}
+	if r.Keystore != nil {
+		outputConfig += fmt.Sprintf("\tkeystore = %#v\n", *r.Keystore)
+	}
+	if r.KeystorePassword != nil {
+		outputConfig += fmt.Sprintf("\tkeystore_password = %#v\n", *r.KeystorePassword)
+	}
+	if r.KmsKey != nil {
+		outputConfig += fmt.Sprintf("\tkms_key = %#v\n", *r.KmsKey)
+	}
+	if r.Realm != nil {
+		outputConfig += fmt.Sprintf("\trealm = %#v\n", *r.Realm)
+	}
+	if r.RootPrincipalPassword != nil {
+		outputConfig += fmt.Sprintf("\troot_principal_password = %#v\n", *r.RootPrincipalPassword)
+	}
+	if r.TgtLifetimeHours != nil {
+		outputConfig += fmt.Sprintf("\ttgt_lifetime_hours = %#v\n", *r.TgtLifetimeHours)
+	}
+	if r.Truststore != nil {
+		outputConfig += fmt.Sprintf("\ttruststore = %#v\n", *r.Truststore)
+	}
+	if r.TruststorePassword != nil {
+		outputConfig += fmt.Sprintf("\ttruststore_password = %#v\n", *r.TruststorePassword)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSoftwareConfigToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigSoftwareConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ImageVersion != nil {
+		outputConfig += fmt.Sprintf("\timage_version = %#v\n", *r.ImageVersion)
+	}
+	if r.OptionalComponents != nil {
+		outputConfig += "\toptional_components = ["
+		for _, v := range r.OptionalComponents {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	outputConfig += "\tproperties = {"
+	for k, v := range r.Properties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigWorkerConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Accelerators != nil {
+		for _, v := range r.Accelerators {
+			outputConfig += fmt.Sprintf("\taccelerators %s\n", convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigAcceleratorsToHCL(&v))
+		}
+	}
+	if v := convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfigToHCL(r.DiskConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tdisk_config %s\n", v)
+	}
+	if r.Image != nil {
+		outputConfig += fmt.Sprintf("\timage = %#v\n", *r.Image)
+	}
+	if r.MachineType != nil {
+		outputConfig += fmt.Sprintf("\tmachine_type = %#v\n", *r.MachineType)
+	}
+	if r.MinCpuPlatform != nil {
+		outputConfig += fmt.Sprintf("\tmin_cpu_platform = %#v\n", *r.MinCpuPlatform)
+	}
+	if r.NumInstances != nil {
+		outputConfig += fmt.Sprintf("\tnum_instances = %#v\n", *r.NumInstances)
+	}
+	if r.Preemptibility != nil {
+		outputConfig += fmt.Sprintf("\tpreemptibility = %#v\n", *r.Preemptibility)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigAcceleratorsToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigWorkerConfigAccelerators) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.AcceleratorCount != nil {
+		outputConfig += fmt.Sprintf("\taccelerator_count = %#v\n", *r.AcceleratorCount)
+	}
+	if r.AcceleratorType != nil {
+		outputConfig += fmt.Sprintf("\taccelerator_type = %#v\n", *r.AcceleratorType)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfigToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.BootDiskSizeGb != nil {
+		outputConfig += fmt.Sprintf("\tboot_disk_size_gb = %#v\n", *r.BootDiskSizeGb)
+	}
+	if r.BootDiskType != nil {
+		outputConfig += fmt.Sprintf("\tboot_disk_type = %#v\n", *r.BootDiskType)
+	}
+	if r.NumLocalSsds != nil {
+		outputConfig += fmt.Sprintf("\tnum_local_ssds = %#v\n", *r.NumLocalSsds)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigManagedGroupConfigToHCL(r *dataproc.WorkflowTemplatePlacementManagedClusterConfigWorkerConfigManagedGroupConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
 	return outputConfig + "}"
 }
 
@@ -6998,359 +8027,6 @@ func convertDataprocWorkflowTemplateParametersValidationValuesToHCL(r *dataproc.
 		}
 		outputConfig += "]\n"
 	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateClusterInstanceGroupConfigToHCL(r *dataproc.ClusterInstanceGroupConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Accelerators != nil {
-		for _, v := range r.Accelerators {
-			outputConfig += fmt.Sprintf("\taccelerators %s\n", convertDataprocWorkflowTemplateClusterInstanceGroupConfigAcceleratorsToHCL(&v))
-		}
-	}
-	if v := convertDataprocWorkflowTemplateClusterInstanceGroupConfigDiskConfigToHCL(r.DiskConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tdisk_config %s\n", v)
-	}
-	if r.Image != nil {
-		outputConfig += fmt.Sprintf("\timage = %#v\n", *r.Image)
-	}
-	if r.MachineType != nil {
-		outputConfig += fmt.Sprintf("\tmachine_type = %#v\n", *r.MachineType)
-	}
-	if r.MinCpuPlatform != nil {
-		outputConfig += fmt.Sprintf("\tmin_cpu_platform = %#v\n", *r.MinCpuPlatform)
-	}
-	if r.NumInstances != nil {
-		outputConfig += fmt.Sprintf("\tnum_instances = %#v\n", *r.NumInstances)
-	}
-	if r.Preemptibility != nil {
-		outputConfig += fmt.Sprintf("\tpreemptibility = %#v\n", *r.Preemptibility)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateClusterInstanceGroupConfigAcceleratorsToHCL(r *dataproc.ClusterInstanceGroupConfigAccelerators) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.AcceleratorCount != nil {
-		outputConfig += fmt.Sprintf("\taccelerator_count = %#v\n", *r.AcceleratorCount)
-	}
-	if r.AcceleratorType != nil {
-		outputConfig += fmt.Sprintf("\taccelerator_type = %#v\n", *r.AcceleratorType)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateClusterInstanceGroupConfigDiskConfigToHCL(r *dataproc.ClusterInstanceGroupConfigDiskConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.BootDiskSizeGb != nil {
-		outputConfig += fmt.Sprintf("\tboot_disk_size_gb = %#v\n", *r.BootDiskSizeGb)
-	}
-	if r.BootDiskType != nil {
-		outputConfig += fmt.Sprintf("\tboot_disk_type = %#v\n", *r.BootDiskType)
-	}
-	if r.NumLocalSsds != nil {
-		outputConfig += fmt.Sprintf("\tnum_local_ssds = %#v\n", *r.NumLocalSsds)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateClusterInstanceGroupConfigManagedGroupConfigToHCL(r *dataproc.ClusterInstanceGroupConfigManagedGroupConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigToHCL(r *dataproc.ClusterClusterConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertDataprocWorkflowTemplateClusterClusterConfigAutoscalingConfigToHCL(r.AutoscalingConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tautoscaling_config %s\n", v)
-	}
-	if v := convertDataprocWorkflowTemplateClusterClusterConfigEncryptionConfigToHCL(r.EncryptionConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tencryption_config %s\n", v)
-	}
-	if v := convertDataprocWorkflowTemplateClusterClusterConfigEndpointConfigToHCL(r.EndpointConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tendpoint_config %s\n", v)
-	}
-	if v := convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfigToHCL(r.GceClusterConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tgce_cluster_config %s\n", v)
-	}
-	if r.InitializationActions != nil {
-		for _, v := range r.InitializationActions {
-			outputConfig += fmt.Sprintf("\tinitialization_actions %s\n", convertDataprocWorkflowTemplateClusterClusterConfigInitializationActionsToHCL(&v))
-		}
-	}
-	if v := convertDataprocWorkflowTemplateClusterClusterConfigLifecycleConfigToHCL(r.LifecycleConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tlifecycle_config %s\n", v)
-	}
-	if v := convertDataprocWorkflowTemplateClusterInstanceGroupConfigToHCL(r.MasterConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tmaster_config %s\n", v)
-	}
-	if v := convertDataprocWorkflowTemplateClusterInstanceGroupConfigToHCL(r.SecondaryWorkerConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tsecondary_worker_config %s\n", v)
-	}
-	if v := convertDataprocWorkflowTemplateClusterClusterConfigSecurityConfigToHCL(r.SecurityConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tsecurity_config %s\n", v)
-	}
-	if v := convertDataprocWorkflowTemplateClusterClusterConfigSoftwareConfigToHCL(r.SoftwareConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tsoftware_config %s\n", v)
-	}
-	if r.StagingBucket != nil {
-		outputConfig += fmt.Sprintf("\tstaging_bucket = %#v\n", *r.StagingBucket)
-	}
-	if r.TempBucket != nil {
-		outputConfig += fmt.Sprintf("\ttemp_bucket = %#v\n", *r.TempBucket)
-	}
-	if v := convertDataprocWorkflowTemplateClusterInstanceGroupConfigToHCL(r.WorkerConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tworker_config %s\n", v)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigAutoscalingConfigToHCL(r *dataproc.ClusterClusterConfigAutoscalingConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Policy != nil {
-		outputConfig += fmt.Sprintf("\tpolicy = %#v\n", *r.Policy)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigEncryptionConfigToHCL(r *dataproc.ClusterClusterConfigEncryptionConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.GcePdKmsKeyName != nil {
-		outputConfig += fmt.Sprintf("\tgce_pd_kms_key_name = %#v\n", *r.GcePdKmsKeyName)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigEndpointConfigToHCL(r *dataproc.ClusterClusterConfigEndpointConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.EnableHttpPortAccess != nil {
-		outputConfig += fmt.Sprintf("\tenable_http_port_access = %#v\n", *r.EnableHttpPortAccess)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfigToHCL(r *dataproc.ClusterClusterConfigGceClusterConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.InternalIPOnly != nil {
-		outputConfig += fmt.Sprintf("\tinternal_ip_only = %#v\n", *r.InternalIPOnly)
-	}
-	outputConfig += "\tmetadata = {"
-	for k, v := range r.Metadata {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
-	}
-	outputConfig += "}\n"
-	if r.Network != nil {
-		outputConfig += fmt.Sprintf("\tnetwork = %#v\n", *r.Network)
-	}
-	if v := convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfigNodeGroupAffinityToHCL(r.NodeGroupAffinity); v != "" {
-		outputConfig += fmt.Sprintf("\tnode_group_affinity %s\n", v)
-	}
-	if r.PrivateIPv6GoogleAccess != nil {
-		outputConfig += fmt.Sprintf("\tprivate_ipv6_google_access = %#v\n", *r.PrivateIPv6GoogleAccess)
-	}
-	if v := convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfigReservationAffinityToHCL(r.ReservationAffinity); v != "" {
-		outputConfig += fmt.Sprintf("\treservation_affinity %s\n", v)
-	}
-	if r.ServiceAccount != nil {
-		outputConfig += fmt.Sprintf("\tservice_account = %#v\n", *r.ServiceAccount)
-	}
-	if r.ServiceAccountScopes != nil {
-		outputConfig += "\tservice_account_scopes = ["
-		for _, v := range r.ServiceAccountScopes {
-			outputConfig += fmt.Sprintf("%#v, ", v)
-		}
-		outputConfig += "]\n"
-	}
-	if r.Subnetwork != nil {
-		outputConfig += fmt.Sprintf("\tsubnetwork = %#v\n", *r.Subnetwork)
-	}
-	if r.Tags != nil {
-		outputConfig += "\ttags = ["
-		for _, v := range r.Tags {
-			outputConfig += fmt.Sprintf("%#v, ", v)
-		}
-		outputConfig += "]\n"
-	}
-	if r.Zone != nil {
-		outputConfig += fmt.Sprintf("\tzone = %#v\n", *r.Zone)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfigNodeGroupAffinityToHCL(r *dataproc.ClusterClusterConfigGceClusterConfigNodeGroupAffinity) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.NodeGroup != nil {
-		outputConfig += fmt.Sprintf("\tnode_group = %#v\n", *r.NodeGroup)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfigReservationAffinityToHCL(r *dataproc.ClusterClusterConfigGceClusterConfigReservationAffinity) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.ConsumeReservationType != nil {
-		outputConfig += fmt.Sprintf("\tconsume_reservation_type = %#v\n", *r.ConsumeReservationType)
-	}
-	if r.Key != nil {
-		outputConfig += fmt.Sprintf("\tkey = %#v\n", *r.Key)
-	}
-	if r.Values != nil {
-		outputConfig += "\tvalues = ["
-		for _, v := range r.Values {
-			outputConfig += fmt.Sprintf("%#v, ", v)
-		}
-		outputConfig += "]\n"
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigInitializationActionsToHCL(r *dataproc.ClusterClusterConfigInitializationActions) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.ExecutableFile != nil {
-		outputConfig += fmt.Sprintf("\texecutable_file = %#v\n", *r.ExecutableFile)
-	}
-	if r.ExecutionTimeout != nil {
-		outputConfig += fmt.Sprintf("\texecution_timeout = %#v\n", *r.ExecutionTimeout)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigLifecycleConfigToHCL(r *dataproc.ClusterClusterConfigLifecycleConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.AutoDeleteTime != nil {
-		outputConfig += fmt.Sprintf("\tauto_delete_time = %#v\n", *r.AutoDeleteTime)
-	}
-	if r.AutoDeleteTtl != nil {
-		outputConfig += fmt.Sprintf("\tauto_delete_ttl = %#v\n", *r.AutoDeleteTtl)
-	}
-	if r.IdleDeleteTtl != nil {
-		outputConfig += fmt.Sprintf("\tidle_delete_ttl = %#v\n", *r.IdleDeleteTtl)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigSecurityConfigToHCL(r *dataproc.ClusterClusterConfigSecurityConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertDataprocWorkflowTemplateClusterClusterConfigSecurityConfigKerberosConfigToHCL(r.KerberosConfig); v != "" {
-		outputConfig += fmt.Sprintf("\tkerberos_config %s\n", v)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigSecurityConfigKerberosConfigToHCL(r *dataproc.ClusterClusterConfigSecurityConfigKerberosConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.CrossRealmTrustAdminServer != nil {
-		outputConfig += fmt.Sprintf("\tcross_realm_trust_admin_server = %#v\n", *r.CrossRealmTrustAdminServer)
-	}
-	if r.CrossRealmTrustKdc != nil {
-		outputConfig += fmt.Sprintf("\tcross_realm_trust_kdc = %#v\n", *r.CrossRealmTrustKdc)
-	}
-	if r.CrossRealmTrustRealm != nil {
-		outputConfig += fmt.Sprintf("\tcross_realm_trust_realm = %#v\n", *r.CrossRealmTrustRealm)
-	}
-	if r.CrossRealmTrustSharedPassword != nil {
-		outputConfig += fmt.Sprintf("\tcross_realm_trust_shared_password = %#v\n", *r.CrossRealmTrustSharedPassword)
-	}
-	if r.EnableKerberos != nil {
-		outputConfig += fmt.Sprintf("\tenable_kerberos = %#v\n", *r.EnableKerberos)
-	}
-	if r.KdcDbKey != nil {
-		outputConfig += fmt.Sprintf("\tkdc_db_key = %#v\n", *r.KdcDbKey)
-	}
-	if r.KeyPassword != nil {
-		outputConfig += fmt.Sprintf("\tkey_password = %#v\n", *r.KeyPassword)
-	}
-	if r.Keystore != nil {
-		outputConfig += fmt.Sprintf("\tkeystore = %#v\n", *r.Keystore)
-	}
-	if r.KeystorePassword != nil {
-		outputConfig += fmt.Sprintf("\tkeystore_password = %#v\n", *r.KeystorePassword)
-	}
-	if r.KmsKey != nil {
-		outputConfig += fmt.Sprintf("\tkms_key = %#v\n", *r.KmsKey)
-	}
-	if r.Realm != nil {
-		outputConfig += fmt.Sprintf("\trealm = %#v\n", *r.Realm)
-	}
-	if r.RootPrincipalPassword != nil {
-		outputConfig += fmt.Sprintf("\troot_principal_password = %#v\n", *r.RootPrincipalPassword)
-	}
-	if r.TgtLifetimeHours != nil {
-		outputConfig += fmt.Sprintf("\ttgt_lifetime_hours = %#v\n", *r.TgtLifetimeHours)
-	}
-	if r.Truststore != nil {
-		outputConfig += fmt.Sprintf("\ttruststore = %#v\n", *r.Truststore)
-	}
-	if r.TruststorePassword != nil {
-		outputConfig += fmt.Sprintf("\ttruststore_password = %#v\n", *r.TruststorePassword)
-	}
-	return outputConfig + "}"
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigSoftwareConfigToHCL(r *dataproc.ClusterClusterConfigSoftwareConfig) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.ImageVersion != nil {
-		outputConfig += fmt.Sprintf("\timage_version = %#v\n", *r.ImageVersion)
-	}
-	if r.OptionalComponents != nil {
-		outputConfig += "\toptional_components = ["
-		for _, v := range r.OptionalComponents {
-			outputConfig += fmt.Sprintf("%#v, ", v)
-		}
-		outputConfig += "]\n"
-	}
-	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
-	}
-	outputConfig += "}\n"
 	return outputConfig + "}"
 }
 
@@ -8999,6 +9675,159 @@ func convertRecaptchaEnterpriseKeyWebSettingsToHCL(r *recaptchaenterprise.KeyWeb
 	return outputConfig + "}"
 }
 
+func convertApikeysKeyBetaRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"androidKeyRestrictions": convertApikeysKeyBetaRestrictionsAndroidKeyRestrictions(in["android_key_restrictions"]),
+		"apiTargets":             in["api_targets"],
+		"browserKeyRestrictions": convertApikeysKeyBetaRestrictionsBrowserKeyRestrictions(in["browser_key_restrictions"]),
+		"iosKeyRestrictions":     convertApikeysKeyBetaRestrictionsIosKeyRestrictions(in["ios_key_restrictions"]),
+		"serverKeyRestrictions":  convertApikeysKeyBetaRestrictionsServerKeyRestrictions(in["server_key_restrictions"]),
+	}
+}
+
+func convertApikeysKeyBetaRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyBetaRestrictions(v))
+	}
+	return out
+}
+
+func convertApikeysKeyBetaRestrictionsAndroidKeyRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedApplications": in["allowed_applications"],
+	}
+}
+
+func convertApikeysKeyBetaRestrictionsAndroidKeyRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyBetaRestrictionsAndroidKeyRestrictions(v))
+	}
+	return out
+}
+
+func convertApikeysKeyBetaRestrictionsAndroidKeyRestrictionsAllowedApplications(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"packageName":     in["package_name"],
+		"sha1Fingerprint": in["sha1_fingerprint"],
+	}
+}
+
+func convertApikeysKeyBetaRestrictionsAndroidKeyRestrictionsAllowedApplicationsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyBetaRestrictionsAndroidKeyRestrictionsAllowedApplications(v))
+	}
+	return out
+}
+
+func convertApikeysKeyBetaRestrictionsApiTargets(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"methods": in["methods"],
+		"service": in["service"],
+	}
+}
+
+func convertApikeysKeyBetaRestrictionsApiTargetsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyBetaRestrictionsApiTargets(v))
+	}
+	return out
+}
+
+func convertApikeysKeyBetaRestrictionsBrowserKeyRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedReferrers": in["allowed_referrers"],
+	}
+}
+
+func convertApikeysKeyBetaRestrictionsBrowserKeyRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyBetaRestrictionsBrowserKeyRestrictions(v))
+	}
+	return out
+}
+
+func convertApikeysKeyBetaRestrictionsIosKeyRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedBundleIds": in["allowed_bundle_ids"],
+	}
+}
+
+func convertApikeysKeyBetaRestrictionsIosKeyRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyBetaRestrictionsIosKeyRestrictions(v))
+	}
+	return out
+}
+
+func convertApikeysKeyBetaRestrictionsServerKeyRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedIps": in["allowed_ips"],
+	}
+}
+
+func convertApikeysKeyBetaRestrictionsServerKeyRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyBetaRestrictionsServerKeyRestrictions(v))
+	}
+	return out
+}
+
 func convertAssuredWorkloadsWorkloadBetaKmsSettings(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -10586,7 +11415,7 @@ func convertDataprocWorkflowTemplateBetaPlacementManagedCluster(i interface{}) m
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
 		"clusterName": in["cluster_name"],
-		"config":      convertDataprocWorkflowTemplateBetaClusterClusterConfig(in["config"]),
+		"config":      convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfig(in["config"]),
 		"labels":      in["labels"],
 	}
 }
@@ -10598,6 +11427,660 @@ func convertDataprocWorkflowTemplateBetaPlacementManagedClusterList(i interface{
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedCluster(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"autoscalingConfig":     convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigAutoscalingConfig(in["autoscaling_config"]),
+		"encryptionConfig":      convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigEncryptionConfig(in["encryption_config"]),
+		"endpointConfig":        convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigEndpointConfig(in["endpoint_config"]),
+		"gceClusterConfig":      convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterConfig(in["gce_cluster_config"]),
+		"gkeClusterConfig":      convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGkeClusterConfig(in["gke_cluster_config"]),
+		"initializationActions": in["initialization_actions"],
+		"lifecycleConfig":       convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigLifecycleConfig(in["lifecycle_config"]),
+		"masterConfig":          convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfig(in["master_config"]),
+		"metastoreConfig":       convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMetastoreConfig(in["metastore_config"]),
+		"secondaryWorkerConfig": convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfig(in["secondary_worker_config"]),
+		"securityConfig":        convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecurityConfig(in["security_config"]),
+		"softwareConfig":        convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSoftwareConfig(in["software_config"]),
+		"stagingBucket":         in["staging_bucket"],
+		"tempBucket":            in["temp_bucket"],
+		"workerConfig":          convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfig(in["worker_config"]),
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigAutoscalingConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"policy": in["policy"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigAutoscalingConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigAutoscalingConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigEncryptionConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"gcePdKmsKeyName": in["gce_pd_kms_key_name"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigEncryptionConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigEncryptionConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigEndpointConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"enableHttpPortAccess": in["enable_http_port_access"],
+		"httpPorts":            in["http_ports"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigEndpointConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigEndpointConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"internalIPOnly":          in["internal_ip_only"],
+		"metadata":                in["metadata"],
+		"network":                 in["network"],
+		"nodeGroupAffinity":       convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity(in["node_group_affinity"]),
+		"privateIPv6GoogleAccess": in["private_ipv6_google_access"],
+		"reservationAffinity":     convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterConfigReservationAffinity(in["reservation_affinity"]),
+		"serviceAccount":          in["service_account"],
+		"serviceAccountScopes":    in["service_account_scopes"],
+		"subnetwork":              in["subnetwork"],
+		"tags":                    in["tags"],
+		"zone":                    in["zone"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"nodeGroup": in["node_group"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterConfigNodeGroupAffinityList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterConfigReservationAffinity(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"consumeReservationType": in["consume_reservation_type"],
+		"key":                    in["key"],
+		"values":                 in["values"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterConfigReservationAffinityList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterConfigReservationAffinity(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGkeClusterConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"namespacedGkeDeploymentTarget": convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGkeClusterConfigNamespacedGkeDeploymentTarget(in["namespaced_gke_deployment_target"]),
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGkeClusterConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGkeClusterConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGkeClusterConfigNamespacedGkeDeploymentTarget(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"clusterNamespace": in["cluster_namespace"],
+		"targetGkeCluster": in["target_gke_cluster"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGkeClusterConfigNamespacedGkeDeploymentTargetList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGkeClusterConfigNamespacedGkeDeploymentTarget(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigInitializationActions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"executableFile":   in["executable_file"],
+		"executionTimeout": in["execution_timeout"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigInitializationActionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigInitializationActions(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigLifecycleConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"autoDeleteTime": in["auto_delete_time"],
+		"autoDeleteTtl":  in["auto_delete_ttl"],
+		"idleDeleteTtl":  in["idle_delete_ttl"],
+		"idleStartTime":  in["idle_start_time"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigLifecycleConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigLifecycleConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"accelerators":       in["accelerators"],
+		"diskConfig":         convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigDiskConfig(in["disk_config"]),
+		"image":              in["image"],
+		"machineType":        in["machine_type"],
+		"minCpuPlatform":     in["min_cpu_platform"],
+		"numInstances":       in["num_instances"],
+		"preemptibility":     in["preemptibility"],
+		"instanceNames":      in["instance_names"],
+		"isPreemptible":      in["is_preemptible"],
+		"managedGroupConfig": convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigManagedGroupConfig(in["managed_group_config"]),
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigAccelerators(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"acceleratorCount": in["accelerator_count"],
+		"acceleratorType":  in["accelerator_type"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigAcceleratorsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigAccelerators(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigDiskConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bootDiskSizeGb": in["boot_disk_size_gb"],
+		"bootDiskType":   in["boot_disk_type"],
+		"numLocalSsds":   in["num_local_ssds"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigDiskConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigDiskConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigManagedGroupConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"instanceGroupManagerName": in["instance_group_manager_name"],
+		"instanceTemplateName":     in["instance_template_name"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigManagedGroupConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMasterConfigManagedGroupConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMetastoreConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"dataprocMetastoreService": in["dataproc_metastore_service"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMetastoreConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigMetastoreConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"accelerators":       in["accelerators"],
+		"diskConfig":         convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigDiskConfig(in["disk_config"]),
+		"image":              in["image"],
+		"machineType":        in["machine_type"],
+		"minCpuPlatform":     in["min_cpu_platform"],
+		"numInstances":       in["num_instances"],
+		"preemptibility":     in["preemptibility"],
+		"instanceNames":      in["instance_names"],
+		"isPreemptible":      in["is_preemptible"],
+		"managedGroupConfig": convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigManagedGroupConfig(in["managed_group_config"]),
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigAccelerators(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"acceleratorCount": in["accelerator_count"],
+		"acceleratorType":  in["accelerator_type"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigAcceleratorsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigAccelerators(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigDiskConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bootDiskSizeGb": in["boot_disk_size_gb"],
+		"bootDiskType":   in["boot_disk_type"],
+		"numLocalSsds":   in["num_local_ssds"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigDiskConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigDiskConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigManagedGroupConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"instanceGroupManagerName": in["instance_group_manager_name"],
+		"instanceTemplateName":     in["instance_template_name"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigManagedGroupConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecondaryWorkerConfigManagedGroupConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecurityConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"kerberosConfig": convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecurityConfigKerberosConfig(in["kerberos_config"]),
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecurityConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecurityConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecurityConfigKerberosConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"crossRealmTrustAdminServer":    in["cross_realm_trust_admin_server"],
+		"crossRealmTrustKdc":            in["cross_realm_trust_kdc"],
+		"crossRealmTrustRealm":          in["cross_realm_trust_realm"],
+		"crossRealmTrustSharedPassword": in["cross_realm_trust_shared_password"],
+		"enableKerberos":                in["enable_kerberos"],
+		"kdcDbKey":                      in["kdc_db_key"],
+		"keyPassword":                   in["key_password"],
+		"keystore":                      in["keystore"],
+		"keystorePassword":              in["keystore_password"],
+		"kmsKey":                        in["kms_key"],
+		"realm":                         in["realm"],
+		"rootPrincipalPassword":         in["root_principal_password"],
+		"tgtLifetimeHours":              in["tgt_lifetime_hours"],
+		"truststore":                    in["truststore"],
+		"truststorePassword":            in["truststore_password"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecurityConfigKerberosConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSecurityConfigKerberosConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSoftwareConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"imageVersion":       in["image_version"],
+		"optionalComponents": in["optional_components"],
+		"properties":         in["properties"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSoftwareConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSoftwareConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"accelerators":       in["accelerators"],
+		"diskConfig":         convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigDiskConfig(in["disk_config"]),
+		"image":              in["image"],
+		"machineType":        in["machine_type"],
+		"minCpuPlatform":     in["min_cpu_platform"],
+		"numInstances":       in["num_instances"],
+		"preemptibility":     in["preemptibility"],
+		"instanceNames":      in["instance_names"],
+		"isPreemptible":      in["is_preemptible"],
+		"managedGroupConfig": convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigManagedGroupConfig(in["managed_group_config"]),
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigAccelerators(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"acceleratorCount": in["accelerator_count"],
+		"acceleratorType":  in["accelerator_type"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigAcceleratorsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigAccelerators(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigDiskConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bootDiskSizeGb": in["boot_disk_size_gb"],
+		"bootDiskType":   in["boot_disk_type"],
+		"numLocalSsds":   in["num_local_ssds"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigDiskConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigDiskConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigManagedGroupConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"instanceGroupManagerName": in["instance_group_manager_name"],
+		"instanceTemplateName":     in["instance_template_name"],
+	}
+}
+
+func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigManagedGroupConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigWorkerConfigManagedGroupConfig(v))
 	}
 	return out
 }
@@ -10686,466 +12169,6 @@ func convertDataprocWorkflowTemplateBetaParametersValidationValuesList(i interfa
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertDataprocWorkflowTemplateBetaParametersValidationValues(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"accelerators":       in["accelerators"],
-		"diskConfig":         convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigDiskConfig(in["disk_config"]),
-		"image":              in["image"],
-		"machineType":        in["machine_type"],
-		"minCpuPlatform":     in["min_cpu_platform"],
-		"numInstances":       in["num_instances"],
-		"preemptibility":     in["preemptibility"],
-		"instanceNames":      in["instance_names"],
-		"isPreemptible":      in["is_preemptible"],
-		"managedGroupConfig": convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigManagedGroupConfig(in["managed_group_config"]),
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigAccelerators(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"acceleratorCount": in["accelerator_count"],
-		"acceleratorType":  in["accelerator_type"],
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigAcceleratorsList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigAccelerators(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigDiskConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"bootDiskSizeGb": in["boot_disk_size_gb"],
-		"bootDiskType":   in["boot_disk_type"],
-		"numLocalSsds":   in["num_local_ssds"],
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigDiskConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigDiskConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigManagedGroupConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"instanceGroupManagerName": in["instance_group_manager_name"],
-		"instanceTemplateName":     in["instance_template_name"],
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigManagedGroupConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfigManagedGroupConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"autoscalingConfig":     convertDataprocWorkflowTemplateBetaClusterClusterConfigAutoscalingConfig(in["autoscaling_config"]),
-		"encryptionConfig":      convertDataprocWorkflowTemplateBetaClusterClusterConfigEncryptionConfig(in["encryption_config"]),
-		"endpointConfig":        convertDataprocWorkflowTemplateBetaClusterClusterConfigEndpointConfig(in["endpoint_config"]),
-		"gceClusterConfig":      convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfig(in["gce_cluster_config"]),
-		"gkeClusterConfig":      convertDataprocWorkflowTemplateBetaClusterClusterConfigGkeClusterConfig(in["gke_cluster_config"]),
-		"initializationActions": in["initialization_actions"],
-		"lifecycleConfig":       convertDataprocWorkflowTemplateBetaClusterClusterConfigLifecycleConfig(in["lifecycle_config"]),
-		"masterConfig":          convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfig(in["master_config"]),
-		"metastoreConfig":       convertDataprocWorkflowTemplateBetaClusterClusterConfigMetastoreConfig(in["metastore_config"]),
-		"secondaryWorkerConfig": convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfig(in["secondary_worker_config"]),
-		"securityConfig":        convertDataprocWorkflowTemplateBetaClusterClusterConfigSecurityConfig(in["security_config"]),
-		"softwareConfig":        convertDataprocWorkflowTemplateBetaClusterClusterConfigSoftwareConfig(in["software_config"]),
-		"stagingBucket":         in["staging_bucket"],
-		"tempBucket":            in["temp_bucket"],
-		"workerConfig":          convertDataprocWorkflowTemplateBetaClusterInstanceGroupConfig(in["worker_config"]),
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterClusterConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigAutoscalingConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"policy": in["policy"],
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigAutoscalingConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterClusterConfigAutoscalingConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigEncryptionConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"gcePdKmsKeyName": in["gce_pd_kms_key_name"],
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigEncryptionConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterClusterConfigEncryptionConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigEndpointConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"enableHttpPortAccess": in["enable_http_port_access"],
-		"httpPorts":            in["http_ports"],
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigEndpointConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterClusterConfigEndpointConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"internalIPOnly":          in["internal_ip_only"],
-		"metadata":                in["metadata"],
-		"network":                 in["network"],
-		"nodeGroupAffinity":       convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfigNodeGroupAffinity(in["node_group_affinity"]),
-		"privateIPv6GoogleAccess": in["private_ipv6_google_access"],
-		"reservationAffinity":     convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfigReservationAffinity(in["reservation_affinity"]),
-		"serviceAccount":          in["service_account"],
-		"serviceAccountScopes":    in["service_account_scopes"],
-		"subnetwork":              in["subnetwork"],
-		"tags":                    in["tags"],
-		"zone":                    in["zone"],
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfigNodeGroupAffinity(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"nodeGroup": in["node_group"],
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfigNodeGroupAffinityList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfigNodeGroupAffinity(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfigReservationAffinity(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"consumeReservationType": in["consume_reservation_type"],
-		"key":                    in["key"],
-		"values":                 in["values"],
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfigReservationAffinityList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterClusterConfigGceClusterConfigReservationAffinity(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigGkeClusterConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"namespacedGkeDeploymentTarget": convertDataprocWorkflowTemplateBetaClusterClusterConfigGkeClusterConfigNamespacedGkeDeploymentTarget(in["namespaced_gke_deployment_target"]),
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigGkeClusterConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterClusterConfigGkeClusterConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigGkeClusterConfigNamespacedGkeDeploymentTarget(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"clusterNamespace": in["cluster_namespace"],
-		"targetGkeCluster": in["target_gke_cluster"],
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigGkeClusterConfigNamespacedGkeDeploymentTargetList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterClusterConfigGkeClusterConfigNamespacedGkeDeploymentTarget(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigInitializationActions(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"executableFile":   in["executable_file"],
-		"executionTimeout": in["execution_timeout"],
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigInitializationActionsList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterClusterConfigInitializationActions(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigLifecycleConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"autoDeleteTime": in["auto_delete_time"],
-		"autoDeleteTtl":  in["auto_delete_ttl"],
-		"idleDeleteTtl":  in["idle_delete_ttl"],
-		"idleStartTime":  in["idle_start_time"],
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigLifecycleConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterClusterConfigLifecycleConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigMetastoreConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"dataprocMetastoreService": in["dataproc_metastore_service"],
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigMetastoreConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterClusterConfigMetastoreConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigSecurityConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"kerberosConfig": convertDataprocWorkflowTemplateBetaClusterClusterConfigSecurityConfigKerberosConfig(in["kerberos_config"]),
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigSecurityConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterClusterConfigSecurityConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigSecurityConfigKerberosConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"crossRealmTrustAdminServer":    in["cross_realm_trust_admin_server"],
-		"crossRealmTrustKdc":            in["cross_realm_trust_kdc"],
-		"crossRealmTrustRealm":          in["cross_realm_trust_realm"],
-		"crossRealmTrustSharedPassword": in["cross_realm_trust_shared_password"],
-		"enableKerberos":                in["enable_kerberos"],
-		"kdcDbKey":                      in["kdc_db_key"],
-		"keyPassword":                   in["key_password"],
-		"keystore":                      in["keystore"],
-		"keystorePassword":              in["keystore_password"],
-		"kmsKey":                        in["kms_key"],
-		"realm":                         in["realm"],
-		"rootPrincipalPassword":         in["root_principal_password"],
-		"tgtLifetimeHours":              in["tgt_lifetime_hours"],
-		"truststore":                    in["truststore"],
-		"truststorePassword":            in["truststore_password"],
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigSecurityConfigKerberosConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterClusterConfigSecurityConfigKerberosConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigSoftwareConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"imageVersion":       in["image_version"],
-		"optionalComponents": in["optional_components"],
-		"properties":         in["properties"],
-	}
-}
-
-func convertDataprocWorkflowTemplateBetaClusterClusterConfigSoftwareConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateBetaClusterClusterConfigSoftwareConfig(v))
 	}
 	return out
 }
@@ -13144,6 +14167,159 @@ func convertRecaptchaEnterpriseKeyBetaWebSettingsList(i interface{}) (out []map[
 	return out
 }
 
+func convertApikeysKeyRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"androidKeyRestrictions": convertApikeysKeyRestrictionsAndroidKeyRestrictions(in["android_key_restrictions"]),
+		"apiTargets":             in["api_targets"],
+		"browserKeyRestrictions": convertApikeysKeyRestrictionsBrowserKeyRestrictions(in["browser_key_restrictions"]),
+		"iosKeyRestrictions":     convertApikeysKeyRestrictionsIosKeyRestrictions(in["ios_key_restrictions"]),
+		"serverKeyRestrictions":  convertApikeysKeyRestrictionsServerKeyRestrictions(in["server_key_restrictions"]),
+	}
+}
+
+func convertApikeysKeyRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyRestrictions(v))
+	}
+	return out
+}
+
+func convertApikeysKeyRestrictionsAndroidKeyRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedApplications": in["allowed_applications"],
+	}
+}
+
+func convertApikeysKeyRestrictionsAndroidKeyRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyRestrictionsAndroidKeyRestrictions(v))
+	}
+	return out
+}
+
+func convertApikeysKeyRestrictionsAndroidKeyRestrictionsAllowedApplications(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"packageName":     in["package_name"],
+		"sha1Fingerprint": in["sha1_fingerprint"],
+	}
+}
+
+func convertApikeysKeyRestrictionsAndroidKeyRestrictionsAllowedApplicationsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyRestrictionsAndroidKeyRestrictionsAllowedApplications(v))
+	}
+	return out
+}
+
+func convertApikeysKeyRestrictionsApiTargets(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"methods": in["methods"],
+		"service": in["service"],
+	}
+}
+
+func convertApikeysKeyRestrictionsApiTargetsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyRestrictionsApiTargets(v))
+	}
+	return out
+}
+
+func convertApikeysKeyRestrictionsBrowserKeyRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedReferrers": in["allowed_referrers"],
+	}
+}
+
+func convertApikeysKeyRestrictionsBrowserKeyRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyRestrictionsBrowserKeyRestrictions(v))
+	}
+	return out
+}
+
+func convertApikeysKeyRestrictionsIosKeyRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedBundleIds": in["allowed_bundle_ids"],
+	}
+}
+
+func convertApikeysKeyRestrictionsIosKeyRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyRestrictionsIosKeyRestrictions(v))
+	}
+	return out
+}
+
+func convertApikeysKeyRestrictionsServerKeyRestrictions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"allowedIps": in["allowed_ips"],
+	}
+}
+
+func convertApikeysKeyRestrictionsServerKeyRestrictionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertApikeysKeyRestrictionsServerKeyRestrictions(v))
+	}
+	return out
+}
+
 func convertAssuredWorkloadsWorkloadKmsSettings(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -14731,7 +15907,7 @@ func convertDataprocWorkflowTemplatePlacementManagedCluster(i interface{}) map[s
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
 		"clusterName": in["cluster_name"],
-		"config":      convertDataprocWorkflowTemplateClusterClusterConfig(in["config"]),
+		"config":      convertDataprocWorkflowTemplatePlacementManagedClusterConfig(in["config"]),
 		"labels":      in["labels"],
 	}
 }
@@ -14743,6 +15919,594 @@ func convertDataprocWorkflowTemplatePlacementManagedClusterList(i interface{}) (
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertDataprocWorkflowTemplatePlacementManagedCluster(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"autoscalingConfig":     convertDataprocWorkflowTemplatePlacementManagedClusterConfigAutoscalingConfig(in["autoscaling_config"]),
+		"encryptionConfig":      convertDataprocWorkflowTemplatePlacementManagedClusterConfigEncryptionConfig(in["encryption_config"]),
+		"endpointConfig":        convertDataprocWorkflowTemplatePlacementManagedClusterConfigEndpointConfig(in["endpoint_config"]),
+		"gceClusterConfig":      convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfig(in["gce_cluster_config"]),
+		"initializationActions": in["initialization_actions"],
+		"lifecycleConfig":       convertDataprocWorkflowTemplatePlacementManagedClusterConfigLifecycleConfig(in["lifecycle_config"]),
+		"masterConfig":          convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfig(in["master_config"]),
+		"secondaryWorkerConfig": convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfig(in["secondary_worker_config"]),
+		"securityConfig":        convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecurityConfig(in["security_config"]),
+		"softwareConfig":        convertDataprocWorkflowTemplatePlacementManagedClusterConfigSoftwareConfig(in["software_config"]),
+		"stagingBucket":         in["staging_bucket"],
+		"tempBucket":            in["temp_bucket"],
+		"workerConfig":          convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfig(in["worker_config"]),
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigAutoscalingConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"policy": in["policy"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigAutoscalingConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigAutoscalingConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigEncryptionConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"gcePdKmsKeyName": in["gce_pd_kms_key_name"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigEncryptionConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigEncryptionConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigEndpointConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"enableHttpPortAccess": in["enable_http_port_access"],
+		"httpPorts":            in["http_ports"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigEndpointConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigEndpointConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"internalIPOnly":          in["internal_ip_only"],
+		"metadata":                in["metadata"],
+		"network":                 in["network"],
+		"nodeGroupAffinity":       convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity(in["node_group_affinity"]),
+		"privateIPv6GoogleAccess": in["private_ipv6_google_access"],
+		"reservationAffinity":     convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigReservationAffinity(in["reservation_affinity"]),
+		"serviceAccount":          in["service_account"],
+		"serviceAccountScopes":    in["service_account_scopes"],
+		"subnetwork":              in["subnetwork"],
+		"tags":                    in["tags"],
+		"zone":                    in["zone"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"nodeGroup": in["node_group"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinityList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigReservationAffinity(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"consumeReservationType": in["consume_reservation_type"],
+		"key":                    in["key"],
+		"values":                 in["values"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigReservationAffinityList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigReservationAffinity(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigInitializationActions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"executableFile":   in["executable_file"],
+		"executionTimeout": in["execution_timeout"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigInitializationActionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigInitializationActions(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigLifecycleConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"autoDeleteTime": in["auto_delete_time"],
+		"autoDeleteTtl":  in["auto_delete_ttl"],
+		"idleDeleteTtl":  in["idle_delete_ttl"],
+		"idleStartTime":  in["idle_start_time"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigLifecycleConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigLifecycleConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"accelerators":       in["accelerators"],
+		"diskConfig":         convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfig(in["disk_config"]),
+		"image":              in["image"],
+		"machineType":        in["machine_type"],
+		"minCpuPlatform":     in["min_cpu_platform"],
+		"numInstances":       in["num_instances"],
+		"preemptibility":     in["preemptibility"],
+		"instanceNames":      in["instance_names"],
+		"isPreemptible":      in["is_preemptible"],
+		"managedGroupConfig": convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigManagedGroupConfig(in["managed_group_config"]),
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigAccelerators(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"acceleratorCount": in["accelerator_count"],
+		"acceleratorType":  in["accelerator_type"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigAcceleratorsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigAccelerators(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bootDiskSizeGb": in["boot_disk_size_gb"],
+		"bootDiskType":   in["boot_disk_type"],
+		"numLocalSsds":   in["num_local_ssds"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigManagedGroupConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"instanceGroupManagerName": in["instance_group_manager_name"],
+		"instanceTemplateName":     in["instance_template_name"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigManagedGroupConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigManagedGroupConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"accelerators":       in["accelerators"],
+		"diskConfig":         convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDiskConfig(in["disk_config"]),
+		"image":              in["image"],
+		"machineType":        in["machine_type"],
+		"minCpuPlatform":     in["min_cpu_platform"],
+		"numInstances":       in["num_instances"],
+		"preemptibility":     in["preemptibility"],
+		"instanceNames":      in["instance_names"],
+		"isPreemptible":      in["is_preemptible"],
+		"managedGroupConfig": convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigManagedGroupConfig(in["managed_group_config"]),
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigAccelerators(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"acceleratorCount": in["accelerator_count"],
+		"acceleratorType":  in["accelerator_type"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigAcceleratorsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigAccelerators(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDiskConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bootDiskSizeGb": in["boot_disk_size_gb"],
+		"bootDiskType":   in["boot_disk_type"],
+		"numLocalSsds":   in["num_local_ssds"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDiskConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDiskConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigManagedGroupConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"instanceGroupManagerName": in["instance_group_manager_name"],
+		"instanceTemplateName":     in["instance_template_name"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigManagedGroupConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigManagedGroupConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecurityConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"kerberosConfig": convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecurityConfigKerberosConfig(in["kerberos_config"]),
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecurityConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecurityConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecurityConfigKerberosConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"crossRealmTrustAdminServer":    in["cross_realm_trust_admin_server"],
+		"crossRealmTrustKdc":            in["cross_realm_trust_kdc"],
+		"crossRealmTrustRealm":          in["cross_realm_trust_realm"],
+		"crossRealmTrustSharedPassword": in["cross_realm_trust_shared_password"],
+		"enableKerberos":                in["enable_kerberos"],
+		"kdcDbKey":                      in["kdc_db_key"],
+		"keyPassword":                   in["key_password"],
+		"keystore":                      in["keystore"],
+		"keystorePassword":              in["keystore_password"],
+		"kmsKey":                        in["kms_key"],
+		"realm":                         in["realm"],
+		"rootPrincipalPassword":         in["root_principal_password"],
+		"tgtLifetimeHours":              in["tgt_lifetime_hours"],
+		"truststore":                    in["truststore"],
+		"truststorePassword":            in["truststore_password"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecurityConfigKerberosConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigSecurityConfigKerberosConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSoftwareConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"imageVersion":       in["image_version"],
+		"optionalComponents": in["optional_components"],
+		"properties":         in["properties"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSoftwareConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigSoftwareConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"accelerators":       in["accelerators"],
+		"diskConfig":         convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfig(in["disk_config"]),
+		"image":              in["image"],
+		"machineType":        in["machine_type"],
+		"minCpuPlatform":     in["min_cpu_platform"],
+		"numInstances":       in["num_instances"],
+		"preemptibility":     in["preemptibility"],
+		"instanceNames":      in["instance_names"],
+		"isPreemptible":      in["is_preemptible"],
+		"managedGroupConfig": convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigManagedGroupConfig(in["managed_group_config"]),
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigAccelerators(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"acceleratorCount": in["accelerator_count"],
+		"acceleratorType":  in["accelerator_type"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigAcceleratorsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigAccelerators(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"bootDiskSizeGb": in["boot_disk_size_gb"],
+		"bootDiskType":   in["boot_disk_type"],
+		"numLocalSsds":   in["num_local_ssds"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfig(v))
+	}
+	return out
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigManagedGroupConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"instanceGroupManagerName": in["instance_group_manager_name"],
+		"instanceTemplateName":     in["instance_template_name"],
+	}
+}
+
+func convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigManagedGroupConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigManagedGroupConfig(v))
 	}
 	return out
 }
@@ -14831,400 +16595,6 @@ func convertDataprocWorkflowTemplateParametersValidationValuesList(i interface{}
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertDataprocWorkflowTemplateParametersValidationValues(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateClusterInstanceGroupConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"accelerators":       in["accelerators"],
-		"diskConfig":         convertDataprocWorkflowTemplateClusterInstanceGroupConfigDiskConfig(in["disk_config"]),
-		"image":              in["image"],
-		"machineType":        in["machine_type"],
-		"minCpuPlatform":     in["min_cpu_platform"],
-		"numInstances":       in["num_instances"],
-		"preemptibility":     in["preemptibility"],
-		"instanceNames":      in["instance_names"],
-		"isPreemptible":      in["is_preemptible"],
-		"managedGroupConfig": convertDataprocWorkflowTemplateClusterInstanceGroupConfigManagedGroupConfig(in["managed_group_config"]),
-	}
-}
-
-func convertDataprocWorkflowTemplateClusterInstanceGroupConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateClusterInstanceGroupConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateClusterInstanceGroupConfigAccelerators(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"acceleratorCount": in["accelerator_count"],
-		"acceleratorType":  in["accelerator_type"],
-	}
-}
-
-func convertDataprocWorkflowTemplateClusterInstanceGroupConfigAcceleratorsList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateClusterInstanceGroupConfigAccelerators(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateClusterInstanceGroupConfigDiskConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"bootDiskSizeGb": in["boot_disk_size_gb"],
-		"bootDiskType":   in["boot_disk_type"],
-		"numLocalSsds":   in["num_local_ssds"],
-	}
-}
-
-func convertDataprocWorkflowTemplateClusterInstanceGroupConfigDiskConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateClusterInstanceGroupConfigDiskConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateClusterInstanceGroupConfigManagedGroupConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"instanceGroupManagerName": in["instance_group_manager_name"],
-		"instanceTemplateName":     in["instance_template_name"],
-	}
-}
-
-func convertDataprocWorkflowTemplateClusterInstanceGroupConfigManagedGroupConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateClusterInstanceGroupConfigManagedGroupConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"autoscalingConfig":     convertDataprocWorkflowTemplateClusterClusterConfigAutoscalingConfig(in["autoscaling_config"]),
-		"encryptionConfig":      convertDataprocWorkflowTemplateClusterClusterConfigEncryptionConfig(in["encryption_config"]),
-		"endpointConfig":        convertDataprocWorkflowTemplateClusterClusterConfigEndpointConfig(in["endpoint_config"]),
-		"gceClusterConfig":      convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfig(in["gce_cluster_config"]),
-		"initializationActions": in["initialization_actions"],
-		"lifecycleConfig":       convertDataprocWorkflowTemplateClusterClusterConfigLifecycleConfig(in["lifecycle_config"]),
-		"masterConfig":          convertDataprocWorkflowTemplateClusterInstanceGroupConfig(in["master_config"]),
-		"secondaryWorkerConfig": convertDataprocWorkflowTemplateClusterInstanceGroupConfig(in["secondary_worker_config"]),
-		"securityConfig":        convertDataprocWorkflowTemplateClusterClusterConfigSecurityConfig(in["security_config"]),
-		"softwareConfig":        convertDataprocWorkflowTemplateClusterClusterConfigSoftwareConfig(in["software_config"]),
-		"stagingBucket":         in["staging_bucket"],
-		"tempBucket":            in["temp_bucket"],
-		"workerConfig":          convertDataprocWorkflowTemplateClusterInstanceGroupConfig(in["worker_config"]),
-	}
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateClusterClusterConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigAutoscalingConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"policy": in["policy"],
-	}
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigAutoscalingConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateClusterClusterConfigAutoscalingConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigEncryptionConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"gcePdKmsKeyName": in["gce_pd_kms_key_name"],
-	}
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigEncryptionConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateClusterClusterConfigEncryptionConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigEndpointConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"enableHttpPortAccess": in["enable_http_port_access"],
-		"httpPorts":            in["http_ports"],
-	}
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigEndpointConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateClusterClusterConfigEndpointConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"internalIPOnly":          in["internal_ip_only"],
-		"metadata":                in["metadata"],
-		"network":                 in["network"],
-		"nodeGroupAffinity":       convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfigNodeGroupAffinity(in["node_group_affinity"]),
-		"privateIPv6GoogleAccess": in["private_ipv6_google_access"],
-		"reservationAffinity":     convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfigReservationAffinity(in["reservation_affinity"]),
-		"serviceAccount":          in["service_account"],
-		"serviceAccountScopes":    in["service_account_scopes"],
-		"subnetwork":              in["subnetwork"],
-		"tags":                    in["tags"],
-		"zone":                    in["zone"],
-	}
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfigNodeGroupAffinity(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"nodeGroup": in["node_group"],
-	}
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfigNodeGroupAffinityList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfigNodeGroupAffinity(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfigReservationAffinity(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"consumeReservationType": in["consume_reservation_type"],
-		"key":                    in["key"],
-		"values":                 in["values"],
-	}
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfigReservationAffinityList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateClusterClusterConfigGceClusterConfigReservationAffinity(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigInitializationActions(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"executableFile":   in["executable_file"],
-		"executionTimeout": in["execution_timeout"],
-	}
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigInitializationActionsList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateClusterClusterConfigInitializationActions(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigLifecycleConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"autoDeleteTime": in["auto_delete_time"],
-		"autoDeleteTtl":  in["auto_delete_ttl"],
-		"idleDeleteTtl":  in["idle_delete_ttl"],
-		"idleStartTime":  in["idle_start_time"],
-	}
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigLifecycleConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateClusterClusterConfigLifecycleConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigSecurityConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"kerberosConfig": convertDataprocWorkflowTemplateClusterClusterConfigSecurityConfigKerberosConfig(in["kerberos_config"]),
-	}
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigSecurityConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateClusterClusterConfigSecurityConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigSecurityConfigKerberosConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"crossRealmTrustAdminServer":    in["cross_realm_trust_admin_server"],
-		"crossRealmTrustKdc":            in["cross_realm_trust_kdc"],
-		"crossRealmTrustRealm":          in["cross_realm_trust_realm"],
-		"crossRealmTrustSharedPassword": in["cross_realm_trust_shared_password"],
-		"enableKerberos":                in["enable_kerberos"],
-		"kdcDbKey":                      in["kdc_db_key"],
-		"keyPassword":                   in["key_password"],
-		"keystore":                      in["keystore"],
-		"keystorePassword":              in["keystore_password"],
-		"kmsKey":                        in["kms_key"],
-		"realm":                         in["realm"],
-		"rootPrincipalPassword":         in["root_principal_password"],
-		"tgtLifetimeHours":              in["tgt_lifetime_hours"],
-		"truststore":                    in["truststore"],
-		"truststorePassword":            in["truststore_password"],
-	}
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigSecurityConfigKerberosConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateClusterClusterConfigSecurityConfigKerberosConfig(v))
-	}
-	return out
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigSoftwareConfig(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"imageVersion":       in["image_version"],
-		"optionalComponents": in["optional_components"],
-		"properties":         in["properties"],
-	}
-}
-
-func convertDataprocWorkflowTemplateClusterClusterConfigSoftwareConfigList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertDataprocWorkflowTemplateClusterClusterConfigSoftwareConfig(v))
 	}
 	return out
 }

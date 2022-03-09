@@ -5,17 +5,17 @@
     "root_module": {
       "resources": [
         {
-          "address": "google_sql_database_instance.master",
+          "address": "google_sql_database_instance.main",
           "mode": "managed",
           "type": "google_sql_database_instance",
-          "name": "master",
+          "name": "main",
           "provider_name": "registry.terraform.io/hashicorp/google",
           "schema_version": 0,
           "values": {
             "clone": [],
             "database_version": "POSTGRES_9_6",
             "deletion_protection": true,
-            "name": "master-instance",
+            "name": "main-instance",
             "region": "us-central1",
             "restore_backup_context": [],
             "root_password": null,
@@ -60,10 +60,10 @@
   },
   "resource_changes": [
     {
-      "address": "google_sql_database_instance.master",
+      "address": "google_sql_database_instance.main",
       "mode": "managed",
       "type": "google_sql_database_instance",
-      "name": "master",
+      "name": "main",
       "provider_name": "registry.terraform.io/hashicorp/google",
       "change": {
         "actions": [
@@ -74,7 +74,7 @@
           "clone": [],
           "database_version": "POSTGRES_9_6",
           "deletion_protection": true,
-          "name": "master-instance",
+          "name": "main-instance",
           "region": "us-central1",
           "restore_backup_context": [],
           "root_password": null,
@@ -151,17 +151,17 @@
     "root_module": {
       "resources": [
         {
-          "address": "google_sql_database_instance.master",
+          "address": "google_sql_database_instance.main",
           "mode": "managed",
           "type": "google_sql_database_instance",
-          "name": "master",
+          "name": "main",
           "provider_config_key": "google",
           "expressions": {
             "database_version": {
               "constant_value": "POSTGRES_9_6"
             },
             "name": {
-              "constant_value": "master-instance"
+              "constant_value": "main-instance"
             },
             "region": {
               "constant_value": "us-central1"

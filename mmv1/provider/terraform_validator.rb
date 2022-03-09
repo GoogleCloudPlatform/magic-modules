@@ -34,7 +34,7 @@ module Provider
     end
 
     def generate_object(object, output_folder, version_name, generate_code, generate_docs)
-      if object.exclude_validator
+      if object.exclude_validator || object.cgc_only
         Google::LOGGER.info "Skipping fine-grained resource #{object.name}"
         return
       end
@@ -205,6 +205,8 @@ module Provider
                         'third_party/validator/storage_bucket.go'],
                        ['converters/google/resources/cloudfunctions_function.go',
                         'third_party/validator/cloudfunctions_function.go'],
+                       ['converters/google/resources/cloudfunctions_cloud_function.go',
+                        'third_party/validator/cloudfunctions_cloud_function.go'],
                        ['converters/google/resources/bigquery_table.go',
                         'third_party/validator/bigquery_table.go'],
                        ['converters/google/resources/bigtable_cluster.go',
@@ -221,6 +223,8 @@ module Provider
                         'third_party/validator/project_iam.go'],
                        ['converters/google/resources/project_organization_policy.go',
                         'third_party/validator/project_organization_policy.go'],
+                       ['converters/google/resources/folder_organization_policy.go',
+                        'third_party/validator/folder_organization_policy.go'],
                        ['converters/google/resources/folder_iam.go',
                         'third_party/validator/folder_iam.go'],
                        ['converters/google/resources/container.go',
@@ -314,7 +318,9 @@ module Provider
                        ['converters/google/resources/spanner_instance_iam.go',
                         'third_party/validator/spanner_instance_iam.go'],
                        ['converters/google/resources/storage_bucket_iam.go',
-                        'third_party/validator/storage_bucket_iam.go']
+                        'third_party/validator/storage_bucket_iam.go'],
+                       ['converters/google/resources/organization_policy.go',
+                        'third_party/validator/organization_policy.go']
                      ])
     end
 

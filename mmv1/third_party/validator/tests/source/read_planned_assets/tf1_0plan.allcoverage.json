@@ -303,7 +303,7 @@
           "schema_version": 0,
           "values": {
             "database_version": "POSTGRES_9_6",
-            "name": "master-instance",
+            "name": "main-instance",
             "region": "us-central1",
             "settings": [
               {
@@ -1092,7 +1092,7 @@
         ],
         "before": {
           "database_version": "POSTGRES_9_6",
-          "name": "master-instance",
+          "name": "main-instance",
           "region": "us-central1",
           "settings": [
             {
@@ -1112,7 +1112,7 @@
         },
         "after": {
           "database_version": "POSTGRES_9_6",
-          "name": "master-instance",
+          "name": "main-instance",
           "region": "us-central1",
           "settings": [
             {
@@ -1669,7 +1669,7 @@
               "constant_value": "POSTGRES_9_6"
             },
             "name": {
-              "constant_value": "master-instance"
+              "constant_value": "main-instance"
             },
             "region": {
               "constant_value": "us-central1"
