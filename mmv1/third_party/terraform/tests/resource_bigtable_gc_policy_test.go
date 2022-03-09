@@ -175,47 +175,47 @@ func (testcase *testUnitBigtableGCPolicyCustomizeDiffTestcase) check(t *testing.
 }
 
 type testUnitBigtableGCPolicyJSONRules struct {
-	name string
-	gcJSONString string
-	want string
+	name          string
+	gcJSONString  string
+	want          string
 	errorExpected bool
 }
 
 var testUnitBigtableGCPolicyRulesTestCases = []testUnitBigtableGCPolicyJSONRules{
 	{
-		name: "Simple policy",
-		gcJSONString: "{\"rules\":[{\"max_age\":\"10h\"}]}",
-		want: "age() > 10h",
+		name:          "Simple policy",
+		gcJSONString:  "{\"rules\":[{\"max_age\":\"10h\"}]}",
+		want:          "age() > 10h",
 		errorExpected: false,
 	},
 	{
-		name: "Simple multiple policies",
-		gcJSONString: "{\"mode\":\"union\", \"rules\":[{\"max_age\":\"10h\"},{\"max_version\":2}]}",
-		want: "(age() > 10h || versions() > 2)",
+		name:          "Simple multiple policies",
+		gcJSONString:  "{\"mode\":\"union\", \"rules\":[{\"max_age\":\"10h\"},{\"max_version\":2}]}",
+		want:          "(age() > 10h || versions() > 2)",
 		errorExpected: false,
 	},
 	{
-		name: "Nested policy",
-		gcJSONString: "{\"mode\":\"union\", \"rules\":[{\"max_age\":\"10h\"},{\"mode\": \"intersection\", \"rules\":[{\"max_age\":\"2h\"}, {\"max_version\":2}]}]}",
-		want: "(age() > 10h || (age() > 2h && versions() > 2))",
+		name:          "Nested policy",
+		gcJSONString:  "{\"mode\":\"union\", \"rules\":[{\"max_age\":\"10h\"},{\"mode\": \"intersection\", \"rules\":[{\"max_age\":\"2h\"}, {\"max_version\":2}]}]}",
+		want:          "(age() > 10h || (age() > 2h && versions() > 2))",
 		errorExpected: false,
 	},
 	{
-		name: "JSON with no `rules`",
-		gcJSONString: "{\"mode\": \"union\"}",
-		want: "",
+		name:          "JSON with no `rules`",
+		gcJSONString:  "{\"mode\": \"union\"}",
+		want:          "",
 		errorExpected: false,
 	},
 	{
-		name: "empty JSON",
-		gcJSONString: "{}",
-		want: "",
+		name:          "empty JSON",
+		gcJSONString:  "{}",
+		want:          "",
 		errorExpected: false,
 	},
 	{
-		name: "Invalid duration string",
+		name:          "Invalid duration string",
 		errorExpected: true,
-		gcJSONString: "{\"mode\":\"union\",\"rules\":[{\"max_age\":\"12o\"},{\"max_version\":2}]}",
+		gcJSONString:  "{\"mode\":\"union\",\"rules\":[{\"max_age\":\"12o\"},{\"max_version\":2}]}",
 	},
 }
 
@@ -230,7 +230,7 @@ func TestUnitBigtableGCPolicy_getGCPolicyFromJSON(t *testing.T) {
 			got, err := getGCPolicyFromJSON(j)
 			if tc.errorExpected && err == nil {
 				t.Fatal("expect error, got nil")
-			} else if !tc.errorExpected && err != nil{
+			} else if !tc.errorExpected && err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			} else {
 				if got != nil && got.String() != tc.want {
