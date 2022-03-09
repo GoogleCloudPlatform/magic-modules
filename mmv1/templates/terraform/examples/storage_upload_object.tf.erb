@@ -1,4 +1,4 @@
-# [START storage_upload_file_to_bucket]
+# [START storage_upload_object_tf]
 # Upload files
 # Discussion about using tf to upload a large number of objects
 # https://stackoverflow.com/questions/68455132/terraform-copy-multiple-files-to-bucket-at-the-same-time-bucket-creation
@@ -10,4 +10,4 @@ resource "google_storage_bucket_object" "<%= ctx[:primary_resource_id] %>" {
   content_type = "image/jpeg"
   bucket       = "generic-bucket-name"
 }
-# [END storage_upload_file_to_bucket]
+# [END storage_upload_object_tf]
