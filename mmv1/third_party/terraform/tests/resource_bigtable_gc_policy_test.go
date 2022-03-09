@@ -2,6 +2,7 @@ package google
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -170,6 +171,73 @@ func (testcase *testUnitBigtableGCPolicyCustomizeDiffTestcase) check(t *testing.
 	var cleared bool = d.Cleared != nil && d.Cleared["max_age.0.duration"] == true && d.Cleared["max_age.0.days"] == true
 	if cleared != testcase.cleared {
 		t.Errorf("%s: expected diff clear to be %v, but was %v", testcase.testName, testcase.cleared, cleared)
+	}
+}
+
+type testUnitBigtableGCPolicyJSONRules struct {
+	name string
+	gcJSONString string
+	want string
+	errorExpected bool
+}
+
+var testUnitBigtableGCPolicyRulesTestCases = []testUnitBigtableGCPolicyJSONRules{
+	{
+		name: "Simple policy",
+		gcJSONString: "{\"rules\":[{\"max_age\":\"10h\"}]}",
+		want: "age() > 10h",
+		errorExpected: false,
+	},
+	{
+		name: "Simple multiple policies",
+		gcJSONString: "{\"mode\":\"union\", \"rules\":[{\"max_age\":\"10h\"},{\"max_version\":2}]}",
+		want: "(age() > 10h || versions() > 2)",
+		errorExpected: false,
+	},
+	{
+		name: "Nested policy",
+		gcJSONString: "{\"mode\":\"union\", \"rules\":[{\"max_age\":\"10h\"},{\"mode\": \"intersection\", \"rules\":[{\"max_age\":\"2h\"}, {\"max_version\":2}]}]}",
+		want: "(age() > 10h || (age() > 2h && versions() > 2))",
+		errorExpected: false,
+	},
+	{
+		name: "JSON with no `rules`",
+		gcJSONString: "{\"mode\": \"union\"}",
+		want: "",
+		errorExpected: false,
+	},
+	{
+		name: "empty JSON",
+		gcJSONString: "{}",
+		want: "",
+		errorExpected: false,
+	},
+	{
+		name: "Invalid duration string",
+		errorExpected: true,
+		gcJSONString: "{\"mode\":\"union\",\"rules\":[{\"max_age\":\"12o\"},{\"max_version\":2}]}",
+	},
+}
+
+func TestUnitBigtableGCPolicy_getGCPolicyFromJSON(t *testing.T) {
+	for _, tc := range testUnitBigtableGCPolicyRulesTestCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var j map[string]interface{}
+			err := json.Unmarshal([]byte(tc.gcJSONString), &j)
+			if err != nil {
+				t.Fatalf("error unmarshalling JSON string: %v", err)
+			}
+			got, err := getGCPolicyFromJSON(j)
+			if tc.errorExpected && err == nil {
+				t.Fatal("expect error, got nil")
+			} else if !tc.errorExpected && err != nil{
+				t.Fatalf("unexpected error: %v", err)
+			} else {
+				if got != nil && got.String() != tc.want {
+					t.Errorf("error getting policy from JSON, got: %v, want: %v", tc.want, got)
+				}
+			}
+		})
 	}
 }
 
