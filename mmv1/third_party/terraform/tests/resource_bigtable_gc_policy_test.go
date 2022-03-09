@@ -489,7 +489,7 @@ func testAccBigtableGCPolicy_gcRules(instanceName, tableName, family string) str
 		table         = google_bigtable_table.table.name
 		column_family = "%s"
 
-		gc_rules = "{"mode":"intersection", "rules":[{"max_age":"10h"},{"max_version":2}]}"
+		gc_rules = "{\"mode\":\"intersection\", \"rules\":[{\"max_age\":\"10h\"},{\"max_version\":2}]}"
 	}
 `, instanceName, instanceName, tableName, family, family)
 }

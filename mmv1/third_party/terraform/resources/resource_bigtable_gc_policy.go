@@ -362,7 +362,7 @@ func generateBigtableGCPolicy(d *schema.ResourceData) (bigtable.GCPolicy, error)
 func getGCPolicyFromJSON(p map[string]interface{}) (bigtable.GCPolicy, error) {
 	policies := []bigtable.GCPolicy{}
 	if p["rules"] == nil {
-		return bigtable.NoGcPolicy(), nil
+		return nil, nil
 	}
 
 	for _, raw := range p["rules"].([]interface{}) {
@@ -386,7 +386,9 @@ func getGCPolicyFromJSON(p map[string]interface{}) (bigtable.GCPolicy, error) {
 			if err != nil {
 				return nil, err
 			}
-			policies = append(policies, n)
+			if n != nil {
+				policies = append(policies, n)
+			}
 		}
 	}
 
