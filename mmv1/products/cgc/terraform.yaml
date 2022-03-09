@@ -93,6 +93,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           myinstance: "myinstance"
           sqlserver_instance_with_authorized_network: "sqlserver-instance-with-authorized-network"
           deletion_protection: "true"
+        skip_test: true
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
@@ -105,6 +106,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           postgres_instance_with_authorized_network: "postgres-instance-with-authorized-network"
           deletion_protection: "true"
+        skip_test: true
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
@@ -128,6 +130,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           mysql_instance_backup_location: "mysql-instance-backup-location"
           deletion_protection: "true"
+        skip_test: true
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
@@ -139,6 +142,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           postgres_instance_backup_location: "postgres-instance-backup-location"
           deletion_protection: "true"
+        skip_test: true
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
