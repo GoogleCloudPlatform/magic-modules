@@ -125,7 +125,7 @@ steps:
       args:
           - 'downstream'
           - 'tf-oics'
-          - 'ga'
+          - 'beta'
           - $COMMIT_SHA
 
     - name: 'gcr.io/cloud-builders/git'
@@ -153,7 +153,7 @@ steps:
       args:
           - 'downstream'
           - 'tf-cloud-docs'
-          - 'ga'
+          - 'beta'
           - $COMMIT_SHA
 
     - name: 'gcr.io/cloud-builders/git'
