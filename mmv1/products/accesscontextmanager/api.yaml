@@ -2036,7 +2036,7 @@ objects:
               Format: projects/{project_number}
         required: true
         input: true
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Boolean
         name: 'useExplicitDryRunSpec'
         description: This is always set to True
   - !ruby/object:Api::Resource
