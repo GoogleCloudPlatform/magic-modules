@@ -103,14 +103,8 @@ func resourceBigtableGCPolicy() *schema.Resource {
 					var oldJSON map[string]interface{}
 					var newJSON map[string]interface{}
 
-					err := json.Unmarshal([]byte(old), &oldJSON)
-					if err != nil {
-						return true
-					}
-					err = json.Unmarshal([]byte(new), &newJSON)
-					if err != nil {
-						return true
-					}
+					_ = json.Unmarshal([]byte(old), &oldJSON)
+					_ = json.Unmarshal([]byte(new), &newJSON)
 
 					return reflect.DeepEqual(oldJSON, newJSON)
 				},
@@ -337,12 +331,11 @@ func generateBigtableGCPolicy(d *schema.ResourceData) (bigtable.GCPolicy, error)
 	}
 
 	if gok {
-		var parsedRules map[string]interface{}
-		err := json.Unmarshal([]byte(gcRules.(string)), &parsedRules)
-		if err != nil {
+		var p map[string]interface{}
+		if err := json.Unmarshal([]byte(gcRules.(string)), &p); err != nil {
 			return nil, err
 		}
-		return getGCPolicyFromJSON(parsedRules)
+		return getGCPolicyFromJSON(p)
 	}
 
 	if aok {
