@@ -5,7 +5,7 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   database_version = "SQLSERVER_2017_STANDARD"
   root_password = "INSERT-PASSWORD-HERE"
   clone {
-    source_instance_name = "<%= ctx[:vars]['mysql_instance'] %>"
+    source_instance_name = "<%= ctx[:vars]['sqlserver_instance'] %>"
   }
   deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
 }
