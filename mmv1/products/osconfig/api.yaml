@@ -140,6 +140,10 @@ objects:
         description: |
           Patch configuration that is applied.
         properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'migInstancesAllowed'
+            description: |
+              Allows the patch job to run on Managed instance groups (MIGs).
           - !ruby/object:Api::Type::Enum
             name: 'rebootConfig'
             description: |
