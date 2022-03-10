@@ -88,15 +88,9 @@ echo "VCR_PATH: $VCR_PATH"
 echo "ACCTEST_PARALLELISM: $ACCTEST_PARALLELISM" 
 echo "GOOGLE_APPLICATION_CREDENTIALS: $GOOGLE_APPLICATION_CREDENTIALS"
 
-now=$(date +"%T")
-echo "Pre-replaying time: $now"
-
 TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v '-run=TestAcc' -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google/vers0ion.ProviderVersion=acc" > test.txt
 
 test_exit_code=$?
-
-now=$(date +"%T")
-echo "Post-replaying time: $now"
 
 FAILED_TESTS=$(grep "FAIL:" test.txt)
 PASSED_TESTS=$(grep "PASS:" test.txt)
@@ -123,17 +117,11 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   
   comment="I have triggered VCR tests in RECORDING mode for the following tests that failed during VCR: $FAILED_TESTS_PATTERN"
   add_comment "${comment}" "${pr_number}"
-
-  now=$(date +"%T")
-  echo "Pre-recording time: $now"
-
+  
   # RECORDING mode
   export VCR_MODE=RECORDING
   TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v '-run='$FAILED_TESTS_PATTERN -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google/version.ProviderVersion=acc" > recording_test.txt
   test_exit_code=$?
-
-  now=$(date +"%T")
-  echo "Post-recording time: $now"
 
   RECORDING_FAILED_TESTS=$(grep "FAIL:" recording_test.txt | awk '{print $3}')
   RECORDING_PASSED_TESTS=$(grep "PASS:" recording_test.txt | awk '{print $3}')
@@ -183,7 +171,5 @@ curl \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
   -d "$post_body"
 
-now=$(date +"%T")
-echo "Current time : $now"
 
 
