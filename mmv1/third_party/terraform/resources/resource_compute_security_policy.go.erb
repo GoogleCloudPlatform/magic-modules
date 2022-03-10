@@ -481,12 +481,12 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 
 	if d.HasChange("type") {
 		securityPolicy.Type = d.Get("type").(string)
-		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, securityPolicy.Type)
+		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "Type")
 	}
 
 	if d.HasChange("description") {
-		securityPolicy.Type = d.Get("description").(string)
-		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, securityPolicy.Description)
+		securityPolicy.Description = d.Get("description").(string)
+		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "Description")
 	}
 
 	if len(securityPolicy.ForceSendFields) > 0 {

@@ -110,7 +110,7 @@ func TestAccComputeBackendBucket_withSecurityPolicy(t *testing.T) {
 				Config: testAccComputeBackendBucket_withSecurityPolicy(bucketName, polName, "google_compute_security_policy.policy.self_link"),
 			},
 			{
-				ResourceName:      "google_compute_backend_service.foobar",
+				ResourceName:      "google_compute_backend_bucket.image_backend",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -118,7 +118,7 @@ func TestAccComputeBackendBucket_withSecurityPolicy(t *testing.T) {
 				Config: testAccComputeBackendBucket_withSecurityPolicy(bucketName, polName, "\"\""),
 			},
 			{
-				ResourceName:      "google_compute_backend_service.foobar",
+				ResourceName:      "google_compute_backend_bucket.image_backend",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -240,7 +240,7 @@ resource "google_compute_backend_bucket" "image_backend" {
   description = "Contains beautiful images"
   bucket_name = google_storage_bucket.image_bucket.name
   enable_cdn  = true
-  edge_security_policy = "%s"
+  edge_security_policy = %s
 }
 
 resource "google_storage_bucket" "image_bucket" {
@@ -254,5 +254,5 @@ resource "google_compute_security_policy" "policy" {
   description = "basic security policy"
 	type = "CLOUD_ARMOR_EDGE"
 }
-`, bucketName, bucketName, polLink, polName)
+`, bucketName, polLink, bucketName, polName)
 }
