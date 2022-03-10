@@ -96,12 +96,7 @@ resource "google_bigtable_gc_policy" "policy" {
   table         = google_bigtable_table.table.name
   column_family = "cf1"
 
-  gc_rules = "{\"mode\":\"union\", \"rules\":[{\"max_age\":\"10h\"},{\"mode\": \"intersection\", \"rules\":[{\"max_age\":\"2d\"}, {\"max_version\":\"2\"}]}]}"
-
-}
-```
-When deserialized, the `gc_rules` JSON object looks like:
-```json
+  gc_rules = <<EOF
 {
   "mode": "union",
   "rules": [
@@ -120,6 +115,9 @@ When deserialized, the `gc_rules` JSON object looks like:
       ]
     }
   ]
+}
+EOF
+
 }
 ```
 This is equivalent to running the following `cbt` command:

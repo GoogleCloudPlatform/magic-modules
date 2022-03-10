@@ -11,6 +11,7 @@ import (
 
 	"cloud.google.com/go/bigtable"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
@@ -94,6 +95,10 @@ func resourceBigtableGCPolicy() *schema.Resource {
 				Description:   `Serialized JSON string for garbage collection policy. Conflicts with "mode", "max_age" and "max_version".`,
 				ValidateFunc:  validation.StringIsJSON,
 				ConflictsWith: []string{"mode", "max_age", "max_version"},
+				StateFunc: func(v interface{}) string {
+					json, _ := structure.NormalizeJsonString(v)
+					return json
+				},
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					var oldJSON map[string]interface{}
 					var newJSON map[string]interface{}
@@ -236,43 +241,7 @@ func resourceBigtableGCPolicyCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceBigtableGCPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
-	if err != nil {
-		return err
-	}
-	ctx := context.Background()
-
-	project, err := getProject(d, config)
-	if err != nil {
-		return err
-	}
-
-	instanceName := GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
-	if err != nil {
-		return fmt.Errorf("Error starting admin client. %s", err)
-	}
-
-	defer c.Close()
-
-	gcPolicy, err := generateBigtableGCPolicy(d)
-	if err != nil {
-		return err
-	}
-
-	tableName := d.Get("table").(string)
-	columnFamily := d.Get("column_family").(string)
-
-	err = retryTimeDuration(func() error {
-		reqErr := c.SetGCPolicy(ctx, tableName, columnFamily, gcPolicy)
-		return reqErr
-	}, d.Timeout(schema.TimeoutCreate), isBigTableRetryableError)
-	if err != nil {
-		return err
-	}
-
-	return resourceBigtableGCPolicyRead(d, meta)
+	return resourceBigtableGCPolicyCreate(d, meta)
 }
 
 func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) error {
