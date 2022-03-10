@@ -65,9 +65,9 @@ curl \
 set +e
 # cassette retrieval
 mkdir fixtures
-gsutil -m cp gs://vcr-$GOOGLE_PROJECT/beta/fixtures/* fixtures/
+gsutil -m -q cp gs://vcr-$GOOGLE_PROJECT/beta/fixtures/* fixtures/
 # copy branch specific cassettes over master. This might fail but that's ok if the folder doesnt exist
-gsutil -m cp gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$pr_number/fixtures/* fixtures/
+gsutil -m -q cp gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$pr_number/fixtures/* fixtures/
 
 echo $SA_KEY > sa_key.json
 gcloud auth activate-service-account $GOOGLE_SERVICE_ACCOUNT --key-file=$local_path/sa_key.json --project=$GOOGLE_PROJECT
@@ -111,13 +111,13 @@ comment+="Failed tests: $FAILED_TESTS_COUNT"
 add_comment "${comment}" "${pr_number}"
 
 # store replaying build logs
-# gsutil -m cp $local_path/testlog/replaying/* gs://replaying/test/log/path/for/each/pr #modify to correct GCS path
+# gsutil -m -q cp $local_path/testlog/replaying/* gs://replaying/test/log/path/for/each/pr #modify to correct GCS path
 
 if [[ -n $FAILED_TESTS_PATTERN ]]; then
   
   comment="I have triggered VCR tests in RECORDING mode for the following tests that failed during VCR: $FAILED_TESTS_PATTERN"
   add_comment "${comment}" "${pr_number}"
-  
+
   # RECORDING mode
   export VCR_MODE=RECORDING
   TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v '-run='$FAILED_TESTS_PATTERN -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google/version.ProviderVersion=acc" > recording_test.txt
@@ -141,10 +141,10 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   add_comment "${comment}" ${pr_number}
 
   # store cassettes
-  gsutil -m cp fixtures/* gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$pr_number/fixtures/
+  gsutil -m -q cp fixtures/* gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$pr_number/fixtures/
 
   # store recording build logs
-  # gsutil -m cp $local_path/testlog/recording/* gs://recording/test/log/path/for/each/pr #modify to correct GCS path
+  # gsutil -m -q cp $local_path/testlog/recording/* gs://recording/test/log/path/for/each/pr #modify to correct GCS path
 
 fi
 
