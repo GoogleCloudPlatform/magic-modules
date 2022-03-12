@@ -743,11 +743,14 @@ func resourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"enable_components": {
 							Type:        schema.TypeList,
-							Required:    true,
 <% if version == "ga" -%>
+							Required:    true,
 							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS.`,
 <% end -%>
 <% if version == "beta" -%>
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
 							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS and WORKLOADS.`,
 <% end -%>
 							Elem: &schema.Schema{
@@ -760,6 +763,24 @@ func resourceContainerCluster() *schema.Resource {
 <% end -%>
 							},
 						},
+<% if version == "beta" -%>
+						"managed_prometheus": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: `Configuration for Google Cloud Managed Services for Prometheus.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Whether or not the managed collection is enabled.`,
+									},
+								},
+							},
+						},
+<% end -%>
 					},
 				},
 			},
@@ -3682,13 +3703,31 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
-
+<% if version == 'ga' -%>
 	config := l[0].(map[string]interface{})
 	return &container.MonitoringConfig{
 		ComponentConfig: &container.MonitoringComponentConfig{
 			EnableComponents: convertStringArr(config["enable_components"].([]interface{})),
 		},
 	}
+<% end -%>
+<% if version == 'beta' -%>
+	mc := &container.MonitoringConfig{}
+	config := l[0].(map[string]interface{})
+	if v, ok := config["enable_components"]; ok && len(v.([]interface{})) > 0 {
+		enable_components := v.([]interface{})[0].([]interface{})
+		mc.ComponentConfig = &container.MonitoringComponentConfig{
+			EnableComponents: convertStringArr(enable_components),
+		}
+	}
+	if v, ok := config["managed_prometheus"]; ok && len(v.([]interface{})) > 0 {
+		managed_prometheus := v.([]interface{})[0].(map[string]interface{})
+		mc.ManagedPrometheusConfig = &container.ManagedPrometheusConfig{
+			Enabled: managed_prometheus["enabled"].(bool),
+		}
+	}
+	return mc
+<% end -%>
 }
 
 <% unless version == 'ga' -%>
@@ -4216,6 +4255,11 @@ func flattenMonitoringConfig(c *container.MonitoringConfig) []map[string]interfa
 	return []map[string]interface{}{
 		{
 			"enable_components":        c.ComponentConfig.EnableComponents,
+<% if version == 'beta' -%>
+			"managed_prometheus": 		[]map[string]interface{}{
+				{"enabled": c.ManagedPrometheusConfig.Enabled},
+			},
+<% end -%>
 		},
 	}
 }
