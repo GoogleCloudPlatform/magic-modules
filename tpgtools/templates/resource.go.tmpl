@@ -648,7 +648,7 @@ func expand{{$.PathType}}{{$v.PackagePath}}(o interface{}) *{{$.Package}}.{{$v.O
 	}
 	{{ if $v.IsObject -}}
 	objArr := o.([]interface{})
-	if len(objArr) == 0 || objs[0] == nil {
+	if len(objArr) == 0 || objArr[0] == nil {
 	{{- if $v.Computed }}
 		return nil
 	{{- else }}
