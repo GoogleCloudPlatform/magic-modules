@@ -620,7 +620,7 @@ func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.
 			{{- end }}
 
 	objs := o.([]interface{})
-	if len(objs) == 0 {
+	if len(objs) == 0 || objs[0] == nil {
 	{{- if $v.Computed }}
 		return nil
 	{{- else }}
