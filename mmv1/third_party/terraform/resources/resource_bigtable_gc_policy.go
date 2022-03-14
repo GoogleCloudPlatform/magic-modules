@@ -331,11 +331,11 @@ func generateBigtableGCPolicy(d *schema.ResourceData) (bigtable.GCPolicy, error)
 	}
 
 	if gok {
-		var p map[string]interface{}
-		if err := json.Unmarshal([]byte(gcRules.(string)), &p); err != nil {
+		var j map[string]interface{}
+		if err := json.Unmarshal([]byte(gcRules.(string)), &j); err != nil {
 			return nil, err
 		}
-		return getGCPolicyFromJSON(p)
+		return getGCPolicyFromJSON(j)
 	}
 
 	if aok {
