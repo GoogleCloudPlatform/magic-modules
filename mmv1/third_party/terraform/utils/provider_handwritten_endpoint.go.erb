@@ -172,6 +172,16 @@ var ContainerAzureCustomEndpointEntry = &schema.Schema{
 	}, DefaultBasePaths[ContainerAzureBasePathKey]),
 }
 
+var ResourceSettingsCustomEndpointEntryKey = "resource_settings_custom_endpoint"
+var ResourceSettingsCustomEndpointEntry = &schema.Schema{
+	Type:         schema.TypeString,
+	Optional:     true,
+	ValidateFunc: validateCustomEndpoint,
+	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+		"GOOGLE_RESOURCESETTINGS_CUSTOM_ENDPOINT",
+	}, DefaultBasePaths[ResourceSettingsBasePathKey]),
+}
+
 func validateCustomEndpoint(v interface{}, k string) (ws []string, errors []error) {
 	re := `.*/[^/]+/$`
 	return validateRegexp(re)(v, k)
