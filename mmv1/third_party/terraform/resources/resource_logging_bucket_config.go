@@ -118,8 +118,6 @@ func resourceLoggingBucketConfigAcquireOrCreate(parentType string, iDFunc loggin
 			return err
 		}
 
-		d.SetId(id)
-
 		if parentType == "project" {
 			//logging bucket can be created only at the project level, in future api may allow for folder, org and other parent resources
 
@@ -135,6 +133,8 @@ func resourceLoggingBucketConfigAcquireOrCreate(parentType string, iDFunc loggin
 				return resourceLoggingBucketConfigCreate(d, meta)
 			}
 		}
+
+		d.SetId(id)
 
 		return resourceLoggingBucketConfigUpdate(d, meta)
 	}
