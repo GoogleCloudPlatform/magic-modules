@@ -169,10 +169,6 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 		return "google_dataproc_workflow_template", nil
 	case "eventarc/trigger":
 		return "google_eventarc_trigger", nil
-	case "firebaserules/release":
-		return "google_firebaserules_release", nil
-	case "firebaserules/ruleset":
-		return "google_firebaserules_ruleset", nil
 	case "logging/log_view":
 		return "google_logging_log_view", nil
 	case "networkconnectivity/hub":
@@ -493,18 +489,6 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 			return "", err
 		}
 		return EventarcTriggerAsHCL(*r, hasGAEquivalent)
-	case "firebaserules/release":
-		r := &firebaserules.Release{}
-		if err := json.Unmarshal(b, r); err != nil {
-			return "", err
-		}
-		return FirebaserulesReleaseAsHCL(*r, hasGAEquivalent)
-	case "firebaserules/ruleset":
-		r := &firebaserules.Ruleset{}
-		if err := json.Unmarshal(b, r); err != nil {
-			return "", err
-		}
-		return FirebaserulesRulesetAsHCL(*r, hasGAEquivalent)
 	case "logging/log_view":
 		r := &logging.LogView{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -641,15 +625,15 @@ func convertApikeysKeyBetaRestrictionsApiTargetsToHCL(r *apikeysBeta.KeyRestrict
 		return ""
 	}
 	outputConfig := "{\n"
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
+	}
 	if r.Methods != nil {
 		outputConfig += "\tmethods = ["
 		for _, v := range r.Methods {
 			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
 		outputConfig += "]\n"
-	}
-	if r.Service != nil {
-		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
 	}
 	return outputConfig + "}"
 }
@@ -5514,15 +5498,15 @@ func convertApikeysKeyRestrictionsApiTargetsToHCL(r *apikeys.KeyRestrictionsApiT
 		return ""
 	}
 	outputConfig := "{\n"
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
+	}
 	if r.Methods != nil {
 		outputConfig += "\tmethods = ["
 		for _, v := range r.Methods {
 			outputConfig += fmt.Sprintf("%#v, ", v)
 		}
 		outputConfig += "]\n"
-	}
-	if r.Service != nil {
-		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
 	}
 	return outputConfig + "}"
 }
@@ -8327,100 +8311,6 @@ func convertEventarcTriggerTransportPubsubToHCL(r *eventarc.TriggerTransportPubs
 	return outputConfig + "}"
 }
 
-// FirebaserulesReleaseAsHCL returns a string representation of the specified resource in HCL.
-// The generated HCL will include every settable field as a literal - that is, no
-// variables, no references.  This may not be the best possible representation, but
-// the crucial point is that `terraform import; terraform apply` will not produce
-// any changes.  We do not validate that the resource specified will pass terraform
-// validation unless is an object returned from the API after an Apply.
-func FirebaserulesReleaseAsHCL(r firebaserules.Release, hasGAEquivalent bool) (string, error) {
-	outputConfig := "resource \"google_firebaserules_release\" \"output\" {\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.RulesetName != nil {
-		outputConfig += fmt.Sprintf("\truleset_name = %#v\n", *r.RulesetName)
-	}
-	if r.Project != nil {
-		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
-	}
-	formatted, err := formatHCL(outputConfig + "}")
-	if err != nil {
-		return "", err
-	}
-	if !hasGAEquivalent {
-		// The formatter will not accept the google-beta symbol because it is injected during testing.
-		return withProviderLine(formatted), nil
-	}
-	return formatted, nil
-}
-
-// FirebaserulesRulesetAsHCL returns a string representation of the specified resource in HCL.
-// The generated HCL will include every settable field as a literal - that is, no
-// variables, no references.  This may not be the best possible representation, but
-// the crucial point is that `terraform import; terraform apply` will not produce
-// any changes.  We do not validate that the resource specified will pass terraform
-// validation unless is an object returned from the API after an Apply.
-func FirebaserulesRulesetAsHCL(r firebaserules.Ruleset, hasGAEquivalent bool) (string, error) {
-	outputConfig := "resource \"google_firebaserules_ruleset\" \"output\" {\n"
-	if v := convertFirebaserulesRulesetSourceToHCL(r.Source); v != "" {
-		outputConfig += fmt.Sprintf("\tsource %s\n", v)
-	}
-	if r.Project != nil {
-		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
-	}
-	formatted, err := formatHCL(outputConfig + "}")
-	if err != nil {
-		return "", err
-	}
-	if !hasGAEquivalent {
-		// The formatter will not accept the google-beta symbol because it is injected during testing.
-		return withProviderLine(formatted), nil
-	}
-	return formatted, nil
-}
-
-func convertFirebaserulesRulesetSourceToHCL(r *firebaserules.RulesetSource) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Files != nil {
-		for _, v := range r.Files {
-			outputConfig += fmt.Sprintf("\tfiles %s\n", convertFirebaserulesRulesetSourceFilesToHCL(&v))
-		}
-	}
-	if r.Language != nil {
-		outputConfig += fmt.Sprintf("\tlanguage = %#v\n", *r.Language)
-	}
-	return outputConfig + "}"
-}
-
-func convertFirebaserulesRulesetSourceFilesToHCL(r *firebaserules.RulesetSourceFiles) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Content != nil {
-		outputConfig += fmt.Sprintf("\tcontent = %#v\n", *r.Content)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Fingerprint != nil {
-		outputConfig += fmt.Sprintf("\tfingerprint = %#v\n", *r.Fingerprint)
-	}
-	return outputConfig + "}"
-}
-
-func convertFirebaserulesRulesetMetadataToHCL(r *firebaserules.RulesetMetadata) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
 // LoggingLogViewAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -10063,8 +9953,8 @@ func convertApikeysKeyBetaRestrictionsApiTargets(i interface{}) map[string]inter
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"methods": in["methods"],
 		"service": in["service"],
+		"methods": in["methods"],
 	}
 }
 
@@ -14621,8 +14511,8 @@ func convertApikeysKeyRestrictionsApiTargets(i interface{}) map[string]interface
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"methods": in["methods"],
 		"service": in["service"],
+		"methods": in["methods"],
 	}
 }
 

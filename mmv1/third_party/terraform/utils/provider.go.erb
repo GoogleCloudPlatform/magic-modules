@@ -490,14 +490,10 @@ end     # products.each do
 				<% unless version == 'ga' -%>
 				"google_monitoring_monitored_project":          resourceMonitoringMonitoredProject(),
 				<% end -%>
-				"google_network_connectivity_hub":               resourceNetworkConnectivityHub(),
-				"google_network_connectivity_spoke":             resourceNetworkConnectivitySpoke(),
-				"google_org_policy_policy":             resourceOrgPolicyPolicy(),
-				"google_os_config_os_policy_assignment": resourceOsConfigOsPolicyAssignment(),
-				<% if version == 'private' -%>
-				"google_vmware_private_cloud":           resourceVmwarePrivateCloud(),
-				"google_vmware_cluster":                 resourceVmwareCluster(),
-				<% end -%>
+				"google_network_connectivity_hub":              resourceNetworkConnectivityHub(),
+				"google_network_connectivity_spoke":            resourceNetworkConnectivitySpoke(),
+				"google_org_policy_policy":                     resourceOrgPolicyPolicy(),
+				"google_os_config_os_policy_assignment":        resourceOsConfigOsPolicyAssignment(),
 				"google_privateca_certificate_template":        resourcePrivatecaCertificateTemplate(),
 				"google_recaptcha_enterprise_key":              resourceRecaptchaEnterpriseKey(),
 				<% if version == 'private' -%>
