@@ -53,11 +53,13 @@ func resourceGoogleXResourceSetting(parentType string) *schema.Resource {
 				Type:        schema.TypeString,
 				Description: fmt.Sprintf(`The %s id the resource setting with be applied to.`, parentType),
 				Required:    true,
+				ForceNew:    true,
 			},
 			"setting_name": {
 				Type:        schema.TypeString,
 				Description: `The resource settings name. For example, "gcp-enableMyFeature".`,
 				Required:    true,
+				ForceNew:    true,
 			},
 			"local_value": {
 				Type:        schema.TypeList,
@@ -69,13 +71,13 @@ func resourceGoogleXResourceSetting(parentType string) *schema.Resource {
 						"boolean_value": {
 							Type:         schema.TypeBool,
 							Optional:     true,
-							Description:  `Holds the value for a tag field with boolean type.`,
+							Description:  `Holds the value for a local value field with boolean type.`,
 							AtLeastOneOf: localValueKeys,
 						},
 						"string_value": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							Description:  `Holds the value for a tag field with string type.`,
+							Description:  `Holds the value for a local value field with string type.`,
 							AtLeastOneOf: localValueKeys,
 						},
 						"enum_value": {
@@ -92,8 +94,11 @@ func resourceGoogleXResourceSetting(parentType string) *schema.Resource {
 A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".`,
 							AtLeastOneOf: localValueKeys,
 						},
-						// TODO: String set.
-						// TODO: String map
+						// TODO: Complex value types, once a setting supports it:
+						// https://cloud.google.com/resource-manager/docs/resource-settings/resource-settings
+						// Value Types:
+						// - String set
+						// - String map
 					},
 				},
 			},

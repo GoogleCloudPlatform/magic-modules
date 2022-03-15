@@ -52,14 +52,112 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "deletion_protection"
       - !ruby/object:Provider::Terraform::Examples
+        name: "sql_mysql_instance_backup"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "instance"
+        vars:
+          mysql_instance_backup: "mysql-instance-backup"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_postgres_instance_backup"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "instance"
+        vars:
+          postgres_instance_backup: "postgres-instance-backup"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_sqlserver_instance_backup"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "default"
+        vars:
+          sqlserver_instance_backup: "sqlserver-instance-backup"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+          - "root_password"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_mysql_instance_authorized_network"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "instance"
+        vars:
+          mysql_instance_with_authorized_network: "mysql-instance-with-authorized-network"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+      - !ruby/object:Provider::Terraform::Examples
         name: "sql_sqlserver_instance_authorized_network"
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "default"
         vars:
           myinstance: "myinstance"
+          sqlserver_instance_with_authorized_network: "sqlserver-instance-with-authorized-network"
+          deletion_protection: "true"
+        skip_test: true
+        test_vars_overrides:
+          deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
           - "root_password"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_postgres_instance_authorized_network"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "default"
+        vars:
+          postgres_instance_with_authorized_network: "postgres-instance-with-authorized-network"
+          deletion_protection: "true"
+        skip_test: true
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_sqlserver_instance_backup_location"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "default"
+        vars:
+          sqlserver_instance_backup_location: "sqlserver-instance-backup-location"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "root_password"
+          - "deletion_protection"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_mysql_instance_backup_location"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "default"
+        vars:
+          mysql_instance_backup_location: "mysql-instance-backup-location"
+          deletion_protection: "true"
+        skip_test: true
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_postgres_instance_backup_location"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "default"
+        vars:
+          postgres_instance_backup_location: "postgres-instance-backup-location"
+          deletion_protection: "true"
+        skip_test: true
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
     # Storage
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_new_bucket"
