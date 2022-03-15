@@ -10,12 +10,14 @@ resource "google_network_services_edge_cache_origin" "fallback" {
   retry_conditions = [
     "CONNECT_FAILURE",
     "NOT_FOUND",
-    "HTTP_5XX"
+    "HTTP_5XX",
+    "FORBIDDEN",
   ]
   timeout {
     connect_timeout = "10s"
-    max_attempts_timeout = "10s"
-    response_timeout = "10s"
+    max_attempts_timeout = "20s"
+    response_timeout = "60s"
+    read_timeout = "5s"
   }
 }
 
