@@ -27,9 +27,14 @@ provider "google" {
   {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
 }
 
+resource "random_string" "suffix" {
+  length  = 4
+  upper   = false
+  special = false
+}
 
-resource "google_project_iam_member" "project" {
-  project = ""
-  role    = "roles/editor"
-  member  = "user:jane@example.com"
+resource "google_project_iam_member" "test-valid-owner" {
+  project = "${random_string.suffix.result}"
+  role = "roles/owner"
+  member = "user:test-valid@domain.com"
 }
