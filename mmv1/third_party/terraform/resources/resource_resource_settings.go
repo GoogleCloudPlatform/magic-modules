@@ -94,11 +94,8 @@ func resourceGoogleXResourceSetting(parentType string) *schema.Resource {
 A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".`,
 							AtLeastOneOf: localValueKeys,
 						},
-						// TODO: Complex value types, once a setting supports it:
-						// https://cloud.google.com/resource-manager/docs/resource-settings/resource-settings
-						// Value Types:
-						// - String set
-						// - String map
+						// TODO: String set.
+						// TODO: String map
 					},
 				},
 			},
@@ -126,7 +123,7 @@ func resourceGoogleResourceSettingCreate(parentType string) func(d *schema.Resou
 		parentIdentifier := d.Get(resourceSettingParentKey(parentType)).(string)
 		id := resourceSettingFullName(parentType, parentIdentifier, settingName)
 
-		if err := patchResourceSetting(d, meta, false, id); err != nil {
+		if err := patchResourceSetting(d, meta, false, id, parentType); err != nil {
 			return fmt.Errorf("Error creating: %s", err)
 		}
 
@@ -144,20 +141,16 @@ func resourceGoogleResourceSettingRead(parentType string) func(d *schema.Resourc
 			return err
 		}
 
+		get := getResourceSettingFunc(config, userAgent, parentType)
+
 		// Fetch metadata about the setting.
-		settingBasic, err := config.NewResourceSettingsClient(userAgent).Organizations.Settings.
-			Get(d.Id()).
-			View("SETTING_VIEW_BASIC").
-			Do()
+		settingBasic, err := get(d.Id(), "SETTING_VIEW_BASIC")
 		if err != nil {
 			return handleNotFoundError(err, d, fmt.Sprintf("ResourceSetting Not Found : %s", d.Id()))
 		}
 
 		// Fetch the localValue field.
-		settingLocal, err := config.NewResourceSettingsClient(userAgent).Organizations.Settings.
-			Get(d.Id()).
-			View("SETTING_VIEW_LOCAL_VALUE").
-			Do()
+		settingLocal, err := get(d.Id(), "SETTING_VIEW_LOCAL_VALUE")
 		if err != nil {
 			return handleNotFoundError(err, d, fmt.Sprintf("ResourceSetting Not Found : %s", d.Id()))
 		}
@@ -199,7 +192,7 @@ func resourceGoogleResourceSettingRead(parentType string) func(d *schema.Resourc
 
 func resourceGoogleResourceSettingUpdate(parentType string) func(d *schema.ResourceData, meta interface{}) error {
 	return func(d *schema.ResourceData, meta interface{}) error {
-		if err := patchResourceSetting(d, meta, false, d.Id()); err != nil {
+		if err := patchResourceSetting(d, meta, false, d.Id(), parentType); err != nil {
 			return fmt.Errorf("Error updating: %s", err)
 		}
 
@@ -209,7 +202,7 @@ func resourceGoogleResourceSettingUpdate(parentType string) func(d *schema.Resou
 
 func resourceGoogleResourceSettingDelete(parentType string) func(d *schema.ResourceData, meta interface{}) error {
 	return func(d *schema.ResourceData, meta interface{}) error {
-		if err := patchResourceSetting(d, meta, true, d.Id()); err != nil {
+		if err := patchResourceSetting(d, meta, true, d.Id(), parentType); err != nil {
 			return fmt.Errorf("Error deleting: %s", err)
 		}
 
@@ -219,7 +212,7 @@ func resourceGoogleResourceSettingDelete(parentType string) func(d *schema.Resou
 
 // patchResourceSetting is used by Create/Update/Delete.
 // Delete is implemented by setting localValue to nil/null.
-func patchResourceSetting(d *schema.ResourceData, meta interface{}, unset bool, id string) error {
+func patchResourceSetting(d *schema.ResourceData, meta interface{}, unset bool, id, parentType string) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
@@ -240,12 +233,50 @@ func patchResourceSetting(d *schema.ResourceData, meta interface{}, unset bool, 
 		}
 	}
 
-	if _, err := config.NewResourceSettingsClient(userAgent).Organizations.Settings.Patch(id, &resourceSettingsV1.GoogleCloudResourcesettingsV1Setting{
+	if _, err := patchResourceSettingFunc(config, userAgent, parentType)(id, &resourceSettingsV1.GoogleCloudResourcesettingsV1Setting{
 		Name:       id,
 		LocalValue: localValue,
-	}).Do(); err != nil {
+	}); err != nil {
 		return fmt.Errorf("patching: %s", err)
 	}
 
 	return nil
+}
+
+func patchResourceSettingFunc(config *Config, userAgent, parentType string) func(id string, setting *resourceSettingsV1.GoogleCloudResourcesettingsV1Setting) (*resourceSettingsV1.GoogleCloudResourcesettingsV1Setting, error) {
+	switch parentType {
+	case "organization":
+		return func(id string, setting *resourceSettingsV1.GoogleCloudResourcesettingsV1Setting) (*resourceSettingsV1.GoogleCloudResourcesettingsV1Setting, error) {
+			return config.NewResourceSettingsClient(userAgent).Organizations.Settings.Patch(id, setting).Do()
+		}
+	case "folder":
+		return func(id string, setting *resourceSettingsV1.GoogleCloudResourcesettingsV1Setting) (*resourceSettingsV1.GoogleCloudResourcesettingsV1Setting, error) {
+			return config.NewResourceSettingsClient(userAgent).Folders.Settings.Patch(id, setting).Do()
+		}
+	case "project":
+		return func(id string, setting *resourceSettingsV1.GoogleCloudResourcesettingsV1Setting) (*resourceSettingsV1.GoogleCloudResourcesettingsV1Setting, error) {
+			return config.NewResourceSettingsClient(userAgent).Projects.Settings.Patch(id, setting).Do()
+		}
+	default:
+		panic("unknown parentType: " + parentType)
+	}
+}
+
+func getResourceSettingFunc(config *Config, userAgent, parentType string) func(id, view string) (*resourceSettingsV1.GoogleCloudResourcesettingsV1Setting, error) {
+	switch parentType {
+	case "organization":
+		return func(id, view string) (*resourceSettingsV1.GoogleCloudResourcesettingsV1Setting, error) {
+			return config.NewResourceSettingsClient(userAgent).Organizations.Settings.Get(id).View(view).Do()
+		}
+	case "folder":
+		return func(id, view string) (*resourceSettingsV1.GoogleCloudResourcesettingsV1Setting, error) {
+			return config.NewResourceSettingsClient(userAgent).Folders.Settings.Get(id).View(view).Do()
+		}
+	case "project":
+		return func(id, view string) (*resourceSettingsV1.GoogleCloudResourcesettingsV1Setting, error) {
+			return config.NewResourceSettingsClient(userAgent).Projects.Settings.Get(id).View(view).Do()
+		}
+	default:
+		panic("unknown parentType: " + parentType)
+	}
 }
