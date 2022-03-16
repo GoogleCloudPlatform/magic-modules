@@ -1,10 +1,10 @@
 # [START cloud_sql_mysql_instance_clone]
 resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
-  name             = "<%= ctx[:vars]['mysql_instance'] %>"
+  name             = "<%= ctx[:vars]['mysql_instance_clone'] %>"
   region           = "us-central1"
   database_version = "MYSQL_8_0"
   clone {
-    source_instance_name = "<%= ctx[:vars]['mysql_instance'] %>"
+    source_instance_name = "<%= ctx[:vars]['mysql_instance_clone_source'] %>"
   }
   deletion_protection =  "true"
 }

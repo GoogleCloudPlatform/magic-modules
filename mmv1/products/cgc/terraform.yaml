@@ -152,6 +152,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "default"
         vars:
+          sqlserver_instance_clone: "sqlserver-instance-clone"
+          sqlserver_instance_clone_source: "sqlserver-instance-clone-source"
           deletion_protection: "true"
         test_vars_overrides:
           deletion_protection: "false"
@@ -163,6 +165,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "default"
         vars:
+          mysql_instance_clone: "mysql-instance-clone"
+          mysql_instance_clone_source: "mysql-instance-clone-source"
           deletion_protection: "true"
         skip_test: true
         test_vars_overrides:
@@ -174,6 +178,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "default"
         vars:
+          postgres_instance_clone: " postgres-instance-clone"
+           postgres_instance_clone_source: "postgres-instance-clone-source"
           deletion_protection: "true"
         skip_test: true
         test_vars_overrides:
