@@ -12,12 +12,17 @@ import (
 func resourceGoogleOrganizationResourceSetting() *schema.Resource {
 	return resourceGoogleXResourceSetting("organization")
 }
+
+/*
+// TODO: Release once testable.
 func resourceGoogleFolderResourceSetting() *schema.Resource {
 	return resourceGoogleXResourceSetting("folder")
 }
+
 func resourceGoogleProjectResourceSetting() *schema.Resource {
 	return resourceGoogleXResourceSetting("project")
 }
+*/
 
 const (
 	resourceSettingKeyBooleanValue  = "local_value.0.boolean_value"
