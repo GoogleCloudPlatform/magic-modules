@@ -121,15 +121,15 @@ func resourceLoggingBucketConfigAcquireOrCreate(parentType string, iDFunc loggin
 		if parentType == "project" {
 			//logging bucket can be created only at the project level, in future api may allow for folder, org and other parent resources
 
-			log.Printf("[DEBUG] Fetching logging bucket config: %#v", d.Id())
-			url, err := replaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", d.Id()))
+			log.Printf("[DEBUG] Fetching logging bucket config: %#v", id)
+			url, err := replaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", id))
 			if err != nil {
 				return err
 			}
 
 			res, _ := sendRequest(config, "GET", "", url, userAgent, nil)
 			if res == nil {
-				log.Printf("[DEGUG] Loggin Bucket not exist %s", d.Id())
+				log.Printf("[DEGUG] Loggin Bucket not exist %s", id)
 				return resourceLoggingBucketConfigCreate(d, meta)
 			}
 		}
