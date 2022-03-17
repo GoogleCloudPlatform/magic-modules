@@ -10,3 +10,12 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
 }
 # [END cloud_sql_sqlserver_instance_80_db_n1_s2]
+
+# [START cloud_sql_sqlserver_instance_user]
+resource "google_sql_user" "default" {
+  name     = "<%= ctx[:vars]['users_name'] %>"
+  instance = google_sql_database_instance.instance.name
+  host     = "example.com"
+  password = "changeme"
+}
+# [END cloud_sql_sqlserver_instance_user]

@@ -23,6 +23,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "instance"
         vars:
           database_instance_name: "sqlserver-instance"
+          users_name: "users-name"
           deletion_protection: "true"
         test_vars_overrides:
           deletion_protection: "false"
@@ -35,6 +36,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "instance"
         vars:
           database_instance_name: "postgres-instance"
+          users_name: "users-name"
           deletion_protection: "true"
         test_vars_overrides:
           deletion_protection: "false"
@@ -46,6 +48,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "instance"
         vars:
           database_instance_name: "mysql-instance"
+          users_name: "users-name"
           deletion_protection: "true"
         test_vars_overrides:
           deletion_protection: "false"
