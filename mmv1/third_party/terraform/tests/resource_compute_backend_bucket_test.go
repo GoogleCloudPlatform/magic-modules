@@ -252,7 +252,7 @@ resource "google_storage_bucket" "image_bucket" {
 resource "google_compute_security_policy" "policy" {
   name        = "%s"
   description = "basic security policy"
-	type = "CLOUD_ARMOR_EDGE"
+  type = "CLOUD_ARMOR_EDGE"
 }
 `, bucketName, polLink, bucketName, polName)
 }
