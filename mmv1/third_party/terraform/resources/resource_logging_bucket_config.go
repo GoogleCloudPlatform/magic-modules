@@ -130,7 +130,9 @@ func resourceLoggingBucketConfigAcquireOrCreate(parentType string, iDFunc loggin
 			res, _ := sendRequest(config, "GET", "", url, userAgent, nil)
 			if res == nil {
 				log.Printf("[DEGUG] Loggin Bucket not exist %s", id)
-				return resourceLoggingBucketConfigCreate(d, meta)
+				// we need to pass the id in here because we don't want to set it in state
+				// until we know there won't be any errors on create
+				return resourceLoggingBucketConfigCreate(d, meta, id)
 			}
 		}
 
@@ -140,7 +142,7 @@ func resourceLoggingBucketConfigAcquireOrCreate(parentType string, iDFunc loggin
 	}
 }
 
-func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{}, id string) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
@@ -176,6 +178,8 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return fmt.Errorf("Error creating Bucket: %s", err)
 	}
+
+	d.SetId(id)
 
 	log.Printf("[DEBUG] Finished creating Bucket %q: %#v", d.Id(), res)
 
