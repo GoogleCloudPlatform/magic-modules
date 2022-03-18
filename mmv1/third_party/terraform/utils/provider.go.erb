@@ -186,15 +186,15 @@ func Provider() *schema.Provider {
 			OrgPolicyEndpointEntryKey:                       OrgPolicyEndpointEntry,
 			PrivatecaCertificateTemplateEndpointEntryKey:    PrivatecaCertificateTemplateCustomEndpointEntry,
 			RecaptchaEnterpriseEndpointEntryKey:             RecaptchaEnterpriseEndpointEntry,
-			ContainerAwsCustomEndpointEntryKey:    ContainerAwsCustomEndpointEntry,
-			ContainerAzureCustomEndpointEntryKey:    ContainerAzureCustomEndpointEntry,
+			ContainerAwsCustomEndpointEntryKey:              ContainerAwsCustomEndpointEntry,
+			ContainerAzureCustomEndpointEntryKey:            ContainerAzureCustomEndpointEntry,
 
 			<% if version == "private" -%>
 			VmwareEndpointEntryKey:                          VmwareEndpointEntry,
 			RunEndpointEntryKey:                             RunEndpointEntry,
 			<% end -%>
 
-			CloudBuildWorkerPoolEndpointEntryKey:               CloudBuildWorkerPoolEndpointEntry,
+			CloudBuildWorkerPoolEndpointEntryKey:            CloudBuildWorkerPoolEndpointEntry,
 },
 
 		ProviderMetaSchema: map[string]*schema.Schema{
