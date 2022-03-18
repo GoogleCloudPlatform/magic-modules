@@ -181,6 +181,7 @@ func Provider() *schema.Provider {
 			AssuredWorkloadsEndpointEntryKey:                AssuredWorkloadsEndpointEntry,
 			CloudResourceManagerEndpointEntryKey:            CloudResourceManagerEndpointEntry,
 			EventarcEndpointEntryKey:                        EventarcEndpointEntry,
+			FirebaserulesEndpointEntryKey:                   FirebaserulesEndpointEntry,
 			GkeHubFeatureCustomEndpointEntryKey:             GkeHubFeatureCustomEndpointEntry,
 			NetworkConnectivityEndpointEntryKey:             NetworkConnectivityEndpointEntry,
 			OrgPolicyEndpointEntryKey:                       OrgPolicyEndpointEntry,
@@ -188,6 +189,7 @@ func Provider() *schema.Provider {
 			RecaptchaEnterpriseEndpointEntryKey:             RecaptchaEnterpriseEndpointEntry,
 			ContainerAwsCustomEndpointEntryKey:              ContainerAwsCustomEndpointEntry,
 			ContainerAzureCustomEndpointEntryKey:            ContainerAzureCustomEndpointEntry,
+			ApikeysEndpointEntryKey:                         ApikeysEndpointEntry,
 
 			<% if version == "private" -%>
 			VmwareEndpointEntryKey:                          VmwareEndpointEntry,
@@ -466,34 +468,40 @@ end     # products.each do
 			},
 			// resources implemented within tpgtools
 			map[string]*schema.Resource{
+				"google_apikeys_key":                           resourceApikeysKey(),
 				"google_assured_workloads_workload":            resourceAssuredWorkloadsWorkload(),
 				"google_cloudbuild_worker_pool":                resourceCloudbuildWorkerPool(),
 				"google_compute_firewall_policy_association":   resourceComputeFirewallPolicyAssociation(),
 				"google_compute_firewall_policy":               resourceComputeFirewallPolicy(),
 				"google_compute_firewall_policy_rule":          resourceComputeFirewallPolicyRule(),
+				"google_container_aws_cluster":                 resourceContainerAwsCluster(),
+				"google_container_aws_node_pool":               resourceContainerAwsNodePool(),
+				"google_container_azure_client":                resourceContainerAzureClient(),
+				"google_container_azure_cluster":               resourceContainerAzureCluster(),
+				"google_container_azure_node_pool":             resourceContainerAzureNodePool(),
 				"google_dataproc_workflow_template":            resourceDataprocWorkflowTemplate(),
 				"google_eventarc_trigger":                      resourceEventarcTrigger(),
+				"google_firebaserules_release":                 resourceFirebaserulesRelease(),
+				"google_firebaserules_ruleset":                 resourceFirebaserulesRuleset(),
 				<% unless version == 'ga' -%>
 				"google_gke_hub_feature":                       resourceGkeHubFeature(),
 				"google_gke_hub_feature_membership":            resourceGkeHubFeatureMembership(),
+				<% end -%>
+				"google_logging_log_view":                      resourceLoggingLogView(),
+				<% unless version == 'ga' -%>
 				"google_monitoring_monitored_project":          resourceMonitoringMonitoredProject(),
 				<% end -%>
-				"google_network_connectivity_hub":               resourceNetworkConnectivityHub(),
-				"google_network_connectivity_spoke":             resourceNetworkConnectivitySpoke(),
-				"google_org_policy_policy":             resourceOrgPolicyPolicy(),
-				"google_os_config_os_policy_assignment": resourceOsConfigOsPolicyAssignment(),
-				<% if version == 'private' -%>
-				"google_vmware_private_cloud":           resourceVmwarePrivateCloud(),
-				"google_vmware_cluster":                 resourceVmwareCluster(),
-				"google_cloud_run_job":                  resourceRunJob(),
-				<% end -%>
+				"google_network_connectivity_hub":              resourceNetworkConnectivityHub(),
+				"google_network_connectivity_spoke":            resourceNetworkConnectivitySpoke(),
+				"google_org_policy_policy":                     resourceOrgPolicyPolicy(),
+				"google_os_config_os_policy_assignment":        resourceOsConfigOsPolicyAssignment(),
 				"google_privateca_certificate_template":        resourcePrivatecaCertificateTemplate(),
 				"google_recaptcha_enterprise_key":              resourceRecaptchaEnterpriseKey(),
-                                "google_container_aws_cluster":  resourceContainerAwsCluster(),
-                                "google_container_aws_node_pool": resourceContainerAwsNodePool(),
-                                "google_container_azure_client": resourceContainerAzureClient(),
-                                "google_container_azure_cluster": resourceContainerAzureCluster(),
-                                "google_container_azure_node_pool": resourceContainerAzureNodePool(),
+				<% if version == 'private' -%>
+				"google_vmware_private_cloud":                  resourceVmwarePrivateCloud(),
+				"google_vmware_cluster":                        resourceVmwareCluster(),
+				"google_cloud_run_job":                         resourceRunJob(),
+				<% end -%>
 			},
 			// ------------------------------------
 			map[string]*schema.Resource{
@@ -667,9 +675,11 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.BigtableAdminBasePath = d.Get(BigtableAdminCustomEndpointEntryKey).(string)
 
 	// dcl
+	config.ApikeysBasePath = d.Get(ApikeysEndpointEntryKey).(string)
 	config.AssuredWorkloadsBasePath = d.Get(AssuredWorkloadsEndpointEntryKey).(string)
 	config.CloudResourceManagerBasePath = d.Get(CloudResourceManagerEndpointEntryKey).(string)
 	config.EventarcBasePath = d.Get(EventarcEndpointEntryKey).(string)
+	config.FirebaserulesBasePath = d.Get(FirebaserulesEndpointEntryKey).(string)
 	config.GkeHubBasePath = d.Get(GkeHubFeatureCustomEndpointEntryKey).(string)
 	config.NetworkConnectivityBasePath = d.Get(NetworkConnectivityEndpointEntryKey).(string)
 	config.OrgPolicyBasePath = d.Get(OrgPolicyEndpointEntryKey).(string)
