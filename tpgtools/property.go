@@ -716,7 +716,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		ss := p.DefaultStateSetter()
 		p.StateSetter = &ss
 
-		if p.Sensitive {
+		if p.Sensitive && p.Settable {
 			p.StateSetter = nil
 		}
 
