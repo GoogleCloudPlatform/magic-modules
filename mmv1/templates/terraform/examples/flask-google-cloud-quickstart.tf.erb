@@ -35,10 +35,8 @@ resource "google_compute_firewall" "ssh" {
     protocol = "tcp"
   }
   direction     = "INGRESS"
-  name          = "<%= ctx[:vars]['allow_ssh'] %>"
-  network       = "https://www.googleapis.com/compute/v1/projects/load-balancer-https/global/networks/default"
+  network       = "default"
   priority      = 1000
-  project       = "load-balancer-https"
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["ssh"]
 }
