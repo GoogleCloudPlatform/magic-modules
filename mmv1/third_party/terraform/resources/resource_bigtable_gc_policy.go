@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"reflect"
 	"strings"
 	"time"
 
@@ -60,10 +59,10 @@ func resourceBigtableGCPolicyCustomizeDiff(_ context.Context, d *schema.Resource
 
 func resourceBigtableGCPolicy() *schema.Resource {
 	return &schema.Resource{
-		Create:        resourceBigtableGCPolicyCreate,
+		Create:        resourceBigtableGCPolicyUpsert,
 		Read:          resourceBigtableGCPolicyRead,
 		Delete:        resourceBigtableGCPolicyDestroy,
-		Update:        resourceBigtableGCPolicyUpdate,
+		Update:        resourceBigtableGCPolicyUpsert,
 		CustomizeDiff: resourceBigtableGCPolicyCustomizeDiff,
 
 		Schema: map[string]*schema.Schema{
@@ -98,15 +97,6 @@ func resourceBigtableGCPolicy() *schema.Resource {
 				StateFunc: func(v interface{}) string {
 					json, _ := structure.NormalizeJsonString(v)
 					return json
-				},
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					var oldJSON map[string]interface{}
-					var newJSON map[string]interface{}
-
-					_ = json.Unmarshal([]byte(old), &oldJSON)
-					_ = json.Unmarshal([]byte(new), &newJSON)
-
-					return reflect.DeepEqual(oldJSON, newJSON)
 				},
 			},
 			"mode": {
@@ -179,7 +169,7 @@ func resourceBigtableGCPolicy() *schema.Resource {
 	}
 }
 
-func resourceBigtableGCPolicyCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
@@ -232,10 +222,6 @@ func resourceBigtableGCPolicyCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	return resourceBigtableGCPolicyRead(d, meta)
-}
-
-func resourceBigtableGCPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
-	return resourceBigtableGCPolicyCreate(d, meta)
 }
 
 func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) error {
@@ -366,25 +352,33 @@ func generateBigtableGCPolicy(d *schema.ResourceData) (bigtable.GCPolicy, error)
 }
 
 func getGCPolicyFromJSON(p map[string]interface{}) (bigtable.GCPolicy, error) {
-	policies := []bigtable.GCPolicy{}
+	policy := []bigtable.GCPolicy{}
 	if p["rules"] == nil {
-		return bigtable.NoGcPolicy(), nil
+		return nil, fmt.Errorf("missing `rules` from gc_rules")
 	}
 
-	for _, raw := range p["rules"].([]interface{}) {
-		r := raw.(map[string]interface{})
+	if p["mode"] == nil && len(p["rules"].([]interface{})) != 1 {
+		return nil, fmt.Errorf("`rules` needs only 1 member if `mode` is not specified")
+	}
+
+	if p["mode"] != nil && len(p["rules"].([]interface{})) < 2 {
+		return nil, fmt.Errorf("need at least 2 member in `rules` when `mode` is specified")
+	}
+
+	for _, rule := range p["rules"].([]interface{}) {
+		r := rule.(map[string]interface{})
 		if r["max_age"] != nil {
 			maxAge := r["max_age"].(string)
 			duration, err := time.ParseDuration(maxAge)
 			if err != nil {
 				return nil, fmt.Errorf("invalid duration string: %v", maxAge)
 			}
-			policies = append(policies, bigtable.MaxAgePolicy(duration))
+			policy = append(policy, bigtable.MaxAgePolicy(duration))
 		}
 
 		if r["max_version"] != nil {
 			version := r["max_version"].(float64)
-			policies = append(policies, bigtable.MaxVersionsPolicy(int(version)))
+			policy = append(policy, bigtable.MaxVersionsPolicy(int(version)))
 		}
 
 		if r["mode"] != nil {
@@ -392,23 +386,17 @@ func getGCPolicyFromJSON(p map[string]interface{}) (bigtable.GCPolicy, error) {
 			if err != nil {
 				return nil, err
 			}
-			// Don't combine NoGcPolicy with other types of policy
-			if n != nil && n != bigtable.NoGcPolicy() {
-				policies = append(policies, n)
-			}
+			policy = append(policy, n)
 		}
 	}
 
 	switch p["mode"] {
 	case strings.ToLower(GCPolicyModeUnion):
-		return bigtable.UnionPolicy(policies...), nil
+		return bigtable.UnionPolicy(policy...), nil
 	case strings.ToLower(GCPolicyModeIntersection):
-		return bigtable.IntersectionPolicy(policies...), nil
+		return bigtable.IntersectionPolicy(policy...), nil
 	default:
-		if len(policies) == 0 {
-			return bigtable.NoGcPolicy(), nil
-		}
-		return policies[0], nil
+		return policy[0], nil
 	}
 }
 

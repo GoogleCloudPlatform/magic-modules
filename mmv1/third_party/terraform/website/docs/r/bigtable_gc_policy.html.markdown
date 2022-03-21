@@ -143,7 +143,7 @@ The following arguments are supported:
 
 * `max_version` - (Optional) GC policy that applies to all versions of a cell except for the most recent.
 
-* `gc_rules` - (Optional) Serialized JSON object to represent a more complex GC policy. Conflicts with `mode`, `max_age` and `max_version`.
+* `gc_rules` - (Optional) Serialized JSON object to represent a more complex GC policy. Conflicts with `mode`, `max_age` and `max_version`. Conflicts with `mode`, `max_age` and `max_version`.
 
 -----
 
@@ -158,6 +158,12 @@ The following arguments are supported:
 `max_version` supports the following arguments:
 
 * `number` - (Required) Number of version before applying the GC policy.
+
+-----
+`gc_rules` include 2 fields:
+- `mode`: optional, either `intersection` or `union`.
+- `rules`: an array of GC policy rule, can be specified as JSON object: `{"max_age": "16h"}` or `{"max_version": 2}`
+- If `mode` is not specified, `rules` can only contains one GC policy. If `mode` is specified, `rules` must have at least 2 policies.
 
 ## Attributes Reference
 
