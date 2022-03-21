@@ -1,0 +1,59 @@
+# [START compute_flask_quickstart_vm]
+// A single Compute Engine instance
+resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
+  name         = "<%= ctx[:vars]['flask_vm'] %>"
+  machine_type = "f1-micro"
+  zone         = "us-west1-a"
+  tags = ["ssh"]
+  metadata = {
+    ssh-keys = "${file("~/.ssh/id_ed25519.pub")}"
+  }
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-9"
+    }
+  }
+
+  // Make sure flask is installed on all new instances for later steps
+  metadata_startup_script = "sudo apt-get update; sudo apt-get install -yq build-essential python-pip rsync; pip install flask"
+
+  network_interface {
+    network = "default"
+
+    access_config {
+      // Include this section to give the VM an external ip address
+    }
+  }
+}
+# [END compute_flask_quickstart_vm]
+
+# [START vpc_flask_quickstart_ssh_fw]
+resource "google_compute_firewall" "ssh" {
+  name          = "<%= ctx[:vars]['allow_ssh'] %>"
+  allow {
+    ports    = ["22"]
+    protocol = "tcp"
+  }
+  direction     = "INGRESS"
+  name          = "<%= ctx[:vars]['allow_ssh'] %>"
+  network       = "https://www.googleapis.com/compute/v1/projects/load-balancer-https/global/networks/default"
+  priority      = 1000
+  project       = "load-balancer-https"
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["ssh"]
+}
+# [END vpc_flask_quickstart_ssh_fw]
+
+
+# [START vpc_flask_quickstart_5000_fw]
+resource "google_compute_firewall" "flask" {
+  name    = "<%= ctx[:vars]['flask_app_firewall'] %>"
+  network = "default"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["5000"]
+  }
+  source_ranges = ["0.0.0.0/0"]
+}
+# [END vpc_flask_quickstart_5000_fw]
