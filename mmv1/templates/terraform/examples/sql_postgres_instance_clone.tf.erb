@@ -4,8 +4,8 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   region           = "us-central1"
   database_version = "POSTGRES_12"
   clone {
-    source_instance_name = "<%= ctx[:vars]['postgres_instance_clone_source'] %>"
+    source_instance_name = "postgres-instance-clone-source"
   }
-  deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection =  "deletion-protection"
 }
 # [END cloud_sql_postgres_instance_clone]
