@@ -127,7 +127,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "default"
         vars:
-          sqlserver_instance_backup_location: "sqlserver-instance-backup-location"
+          sqlserver_instance_backup_location: "sqlserver-instance-with-backup-location"
           deletion_protection: "true"
         test_vars_overrides:
           deletion_protection: "false"
@@ -139,7 +139,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "default"
         vars:
-          mysql_instance_backup_location: "mysql-instance-backup-location"
+          mysql_instance_backup_location: "mysql-instance-with-backup-location"
           deletion_protection: "true"
         skip_test: true
         test_vars_overrides:
@@ -151,7 +151,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "default"
         vars:
-          postgres_instance_backup_location: "postgres-instance-backup-location"
+          postgres_instance_backup_location: "postgres-instance-with-backup-location"
           deletion_protection: "true"
         skip_test: true
         test_vars_overrides:
