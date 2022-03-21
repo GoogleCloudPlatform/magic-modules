@@ -1,0 +1,35 @@
+resource "google_iam_deny_policy" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+  parent   = urlencode("cloudresourcemanager.googleapis.com/projects/<%= ctx[:test_env_vars]["project"] %>")
+  name     = "<%= ctx[:vars]["policy_name"] %>"
+  display_name = "A deny rule"
+  rules {
+    description = "First rule"
+    deny_rule {
+      denied_principals = ["principalSet://goog/public:all"]
+      denial_condition {
+        title = "Some expr"
+        expression = "!resource.matchTag('12345678/env', 'test')"
+      }
+      denied_permissions = ["cloudresourcemanager.googleapis.com/projects.delete"]
+    }
+  }
+  rules {
+    description = "Second rule"
+    deny_rule {
+      denied_principals = ["principalSet://goog/public:all"]
+      denial_condition {
+        title = "Some expr"
+        expression = "!resource.matchTag('12345678/env', 'test')"
+      }
+      denied_permissions = ["cloudresourcemanager.googleapis.com/projects.delete"]
+      exception_principals = ["principal://iam.googleapis.com/projects/<%= ctx[:test_env_vars]["project"] %>/serviceAccounts/${google_service_account.test-account.account_id}@iam.gserviceaccount.com"]
+    }
+  }
+}
+
+resource "google_service_account" "test-account" {
+  provider = google-beta
+  account_id   = "<%= ctx[:vars]['account_id'] %>"
+  display_name = "Test Service Account"
+}
