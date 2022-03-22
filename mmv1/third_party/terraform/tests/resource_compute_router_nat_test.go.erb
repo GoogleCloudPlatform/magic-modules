@@ -222,7 +222,7 @@ func TestAccComputeRouterNat_withDisabledDynamicPortAllocation(t *testing.T) {
     CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
     Steps: []resource.TestStep{
       {
-        Config: testAccComputeRouterNatWithDisabledDynamicPortAllocation(routerName, true),
+        Config: testAccComputeRouterNatWithDisabledDynamicPortAllocation(routerName, false, true),
       },
       {
         ResourceName:      "google_compute_router_nat.foobar",
@@ -670,12 +670,11 @@ resource "google_compute_router_nat" "foobar" {
     source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
   }
   enable_endpoint_independent_mapping = %t
-  enable_dynamic_port_allocation      = %t
 }
 `, routerName, routerName, routerName, routerName, routerName, enabled)
 }
 
-func testAccComputeRouterNatWithDisabledDynamicPortAllocation(routerName string, enabled bool) string {
+func testAccComputeRouterNatWithDisabledDynamicPortAllocation(routerName string, disabled bool, enabled bool) string {
   return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
   name                    = "%s-net"
@@ -714,9 +713,10 @@ resource "google_compute_router_nat" "foobar" {
     name                    = google_compute_subnetwork.foobar.name
     source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
   }
+  enable_endpoint_independent_mapping = %t
   enable_dynamic_port_allocation      = %t
 }
-`, routerName, routerName, routerName, routerName, routerName, enabled)
+`, routerName, routerName, routerName, routerName, routerName, disabled, enabled)
 }
 
 <% unless version == 'ga' -%>
