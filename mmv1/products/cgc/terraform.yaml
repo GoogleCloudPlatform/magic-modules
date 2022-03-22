@@ -19,6 +19,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # Compute
       - !ruby/object:Provider::Terraform::Examples
         name: "flask-google-cloud-quickstart"
+        primary_resource_type: "google_compute_instance"
         primary_resource_id: "default"
         vars:
           flask_vm: "flask-vm"
