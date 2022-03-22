@@ -13408,6 +13408,7 @@ objects:
           a minimum of 32 ports will be allocated to a VM from this NAT config. 
           For more information see the [official documentation](https://cloud.google.com/nat/docs/overview#specs-rfcs).
         default_value: false
+        input: true
       - !ruby/object:Api::Type::Boolean
         name: enableEndpointIndependentMapping
         description: |
