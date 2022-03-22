@@ -83,24 +83,21 @@ export VCR_MODE=REPLAYING
 export ACCTEST_PARALLELISM=32
 export GOOGLE_APPLICATION_CREDENTIALS=$local_path/sa_key.json
 
-echo "cassette copied"
-echo "VCR_PATH: $VCR_PATH"
-echo "ACCTEST_PARALLELISM: $ACCTEST_PARALLELISM" 
 
-
-TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v '-run=TestAcc' -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google/vers0ion.ProviderVersion=acc" > test.log
+TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v '-run=TestAcc' -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > replaying_test.log
 
 test_exit_code=$?
 
-FAILED_TESTS=$(grep "FAIL: TestAcc" test.log)
-PASSED_TESTS=$(grep "PASS: TestAcc" test.log)
-SKIPPED_TESTS=$(grep "SKIP: TestAcc" test.log)
+
+FAILED_TESTS=$(grep "^--- FAIL: TestAcc" replaying_test.log)
+PASSED_TESTS=$(grep "^--- PASS: TestAcc" replaying_test.log)
+SKIPPED_TESTS=$(grep "^--- SKIP: TestAcc" replaying_test.log)
 
 FAILED_TESTS_COUNT=$(echo "$FAILED_TESTS" | wc -l)
 PASSED_TESTS_COUNT=$(echo "$PASSED_TESTS" | wc -l)
 SKIPPED_TESTS_COUNT=$(echo "$SKIPPED_TESTS" | wc -l)
 
-FAILED_TESTS_PATTERN=$(grep "FAIL: TestAcc" test.log | awk '{print $3}' | awk -v d="|" '{s=(NR==1?s:s d)$0}END{print s}')
+FAILED_TESTS_PATTERN=$(grep "FAIL: TestAcc" replaying_test.log | awk '{print $3}' | awk -v d="|" '{s=(NR==1?s:s d)$0}END{print s}')
 
 comment="Tests count: ${NEWLINE}"
 comment+="Total tests: $(($FAILED_TESTS_COUNT+$PASSED_TESTS_COUNT+$SKIPPED_TESTS_COUNT)) ${NEWLINE}"
@@ -110,23 +107,24 @@ comment+="Failed tests: $FAILED_TESTS_COUNT"
 
 add_comment "${comment}" "${pr_number}"
 
-# store replaying build logs
-# gsutil -m -q cp $local_path/testlog/replaying/* gs://replaying/test/log/path/for/each/pr #modify to correct GCS path
+# store replaying build log
+gsutil -q cp replaying_test.log gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
+
+# store replaying test logs
+gsutil -m -q cp testlog/replaying/* gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/replaying/ #modify to correct GCS path
 
 if [[ -n $FAILED_TESTS_PATTERN ]]; then
   
   comment="I have triggered VCR tests in RECORDING mode for the following tests that failed during VCR: $FAILED_TESTS_PATTERN"
   add_comment "${comment}" "${pr_number}"
 
-
   # RECORDING mode
   export VCR_MODE=RECORDING
-  TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v '-run='$FAILED_TESTS_PATTERN -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google/version.ProviderVersion=acc" > recording_test.log
+  TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v '-run='$FAILED_TESTS_PATTERN -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > recording_test.log
   test_exit_code=$?
 
-
-  RECORDING_FAILED_TESTS=$(grep "FAIL: TestAcc" recording_test.log | awk '{print $3}')
-  RECORDING_PASSED_TESTS=$(grep "PASS: TestAcc" recording_test.log | awk '{print $3}')
+  RECORDING_FAILED_TESTS=$(grep "^--- FAIL: TestAcc" recording_test.log | awk '{print $3}')
+  RECORDING_PASSED_TESTS=$(grep "^--- PASS: TestAcc" recording_test.log | awk '{print $3}')
 
   comment=""  
   if [[ -n $RECORDING_PASSED_TESTS ]]; then
@@ -145,8 +143,11 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   # store cassettes
   gsutil -m -q cp fixtures/* gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$pr_number/fixtures/
 
-  # store recording build logs
-  # gsutil -m -q cp $local_path/testlog/recording/* gs://recording/test/log/path/for/each/pr #modify to correct GCS path
+  # store recording build log
+  gsutil -q cp recording_test.log gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
+
+  # store recording test logs
+  gsutil -m -q cp testlog/recording/* gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording/ #modify to correct GCS path
 
 fi
 
