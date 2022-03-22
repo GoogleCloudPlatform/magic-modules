@@ -13356,6 +13356,10 @@ objects:
         description: |
           Minimum number of ports allocated to a VM from this NAT.
       - !ruby/object:Api::Type::Integer
+        name: maxPortsPerVm
+        description: |
+          Maximum number of ports allocated to a VM from this NAT.
+      - !ruby/object:Api::Type::Integer
         name: udpIdleTimeoutSec
         description: |
           Timeout (in seconds) for UDP connections. Defaults to 30s if not set.
