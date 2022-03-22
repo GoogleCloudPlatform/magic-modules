@@ -229,22 +229,6 @@ func TestAccComputeRouterNat_withDisabledDynamicPortAllocation(t *testing.T) {
         ImportState:       true,
         ImportStateVerify: true,
       },
-      {
-        Config: testAccComputeRouterNatWithDisabledDynamicPortAllocation(routerName, false),
-      },
-      {
-        ResourceName:      "google_compute_router_nat.foobar",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccComputeRouterNatWithDisabledDynamicPortAllocation(routerName, true),
-      },
-      {
-        ResourceName:      "google_compute_router_nat.foobar",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
     },
   })
 }
