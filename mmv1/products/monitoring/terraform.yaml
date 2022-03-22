@@ -267,6 +267,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           display_name: "tcp-uptime-check"
           group_display_name: "uptime-check-group"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/monitoring_uptime_check_config.go.erb
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
     properties:
@@ -276,6 +277,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       httpCheck.authInfo.password: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
         custom_flatten: "templates/terraform/custom_flatten/uptime_check_http_password.erb"
+      httpCheck.path: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: resourceMonitoringUptimeCheckConfigHttpCheckPathDiffSuppress
       httpCheck.port: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       httpCheck.headers: !ruby/object:Overrides::Terraform::PropertyOverride
