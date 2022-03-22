@@ -7,6 +7,6 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   clone {
     source_instance_name = "sqlserver_instance_clone_source"
   }
-  deletion_protection =  "deletion-protection"
+  deletion_protection =  "true"
 }
 # [END cloud_sql_sqlserver_instance_clone]
