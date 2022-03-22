@@ -61,7 +61,7 @@ resource "google_compute_firewall" "flask" {
 # with versioning enabled
 
 # [START storage_bucket_tf_with_versioning]
-resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
+resource "google_storage_bucket" "default" {
   name                     = "<%= ctx[:vars]['bucket_tfstate'] %>"
   force_destroy            = false
   location                 = "US"
