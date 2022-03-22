@@ -249,8 +249,8 @@ func Provider() *schema.Provider {
 			"google_compute_subnetwork":                        dataSourceGoogleComputeSubnetwork(),
 			"google_compute_vpn_gateway":                       dataSourceGoogleComputeVpnGateway(),
 			"google_compute_zones":                             dataSourceGoogleComputeZones(),
-                        "google_container_azure_versions":                  dataSourceGoogleContainerAzureVersions(),
-                        "google_container_aws_versions":                  dataSourceGoogleContainerAwsVersions(),
+			"google_container_azure_versions":                  dataSourceGoogleContainerAzureVersions(),
+			"google_container_aws_versions":                    dataSourceGoogleContainerAwsVersions(),
 			"google_container_cluster":                         dataSourceGoogleContainerCluster(),
 			"google_container_engine_versions":                 dataSourceGoogleContainerEngineVersions(),
 			"google_container_registry_image":                  dataSourceGoogleContainerImage(),
@@ -381,6 +381,7 @@ products.each do |product|
 end     # products.each do
 -%>
 			},
+			// ####### START handwritten resources ###########
 			map[string]*schema.Resource{
 				"google_app_engine_application":                resourceAppEngineApplication(),
 				"google_bigquery_table":                        resourceBigQueryTable(),
@@ -466,6 +467,7 @@ end     # products.each do
 				"google_storage_notification":                  resourceStorageNotification(),
 				"google_storage_transfer_job":                  resourceStorageTransferJob(),
 			},
+			// ####### END handwritten resources ###########
 			// resources implemented within tpgtools
 			map[string]*schema.Resource{
 				"google_apikeys_key":                           resourceApikeysKey(),
