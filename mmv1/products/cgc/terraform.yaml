@@ -212,7 +212,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "clone"
         primary_resource_type: "google_sql_database_instance"
         vars:
-          postgres_instance_clone: "postgres-instance-clone"
+          postgres_instance_source_name: "postgres-instance-source-name"
+          postgres_instance_clone_name: "postgres-instance-clone-name"
           deletion_protection: "true"
         skip_test: true
         test_vars_overrides:
