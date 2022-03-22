@@ -670,9 +670,8 @@ resource "google_compute_router_nat" "foobar" {
     source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
   }
   enable_endpoint_independent_mapping = %t
-  enable_dynamic_port_allocation      = %t
 }
-`, routerName, routerName, routerName, routerName, routerName, enabled, enabled)
+`, routerName, routerName, routerName, routerName, routerName, enabled)
 }
 
 func testAccComputeRouterNatWithDisabledDynamicPortAllocation(routerName string, enabled bool) string {
@@ -714,10 +713,9 @@ resource "google_compute_router_nat" "foobar" {
     name                    = google_compute_subnetwork.foobar.name
     source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
   }
-  enable_endpoint_independent_mapping = %t
   enable_dynamic_port_allocation      = %t
 }
-`, routerName, routerName, routerName, routerName, routerName, enabled, enabled)
+`, routerName, routerName, routerName, routerName, routerName, enabled)
 }
 
 <% unless version == 'ga' -%>
