@@ -641,7 +641,6 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		}
 
 		if !p.Computed {
-			glog.Infof("Looking for %q in %v.", v.Title, schema.Required)
 			if stringInSlice(v.Title, schema.Required) {
 				p.Required = true
 			} else {
@@ -717,7 +716,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		ss := p.DefaultStateSetter()
 		p.StateSetter = &ss
 
-		if p.Sensitive {
+		if p.Sensitive && p.Settable {
 			p.StateSetter = nil
 		}
 

@@ -13400,10 +13400,15 @@ objects:
       - !ruby/object:Api::Type::Boolean
         name: enableDynamicPortAllocation
         description: |
-          Using dynamic port allocation lets the NAT gateway allocate different numbers of ports to each VM based 
-          on usage. For more information see the [official documentation](https://cloud.google.com/nat/docs/overview#specs-rfcs).
+          If not specified, it is disabled by default. If set to true, 
+          Dynamic Port Allocation will be enabled on this NAT config. 
+          enableEndpointIndependentMapping cannot be set to true.
+          If minPorts is set, minPortsPerVm must be set to a power of 
+          two greater than or equal to 32. If minPortsPerVm is not set, 
+          a minimum of 32 ports will be allocated to a VM from this NAT config. 
+          For more information see the [official documentation](https://cloud.google.com/nat/docs/overview#specs-rfcs).
         default_value: false
-        send_empty_value: true
+        input: true
       - !ruby/object:Api::Type::Boolean
         name: enableEndpointIndependentMapping
         description: |

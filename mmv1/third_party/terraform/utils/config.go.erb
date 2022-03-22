@@ -207,15 +207,18 @@ type Config struct {
 	// dataprocBasePath is implemented in mm
 	AssuredWorkloadsBasePath string
 	CloudResourceManagerBasePath string
-	EventarcBasePath string
-	GkeHubBasePath string
- 	ContainerAzureBasePath string
 	ContainerAwsBasePath string
+	ContainerAzureBasePath string
+	EventarcBasePath string
+	FirebaserulesBasePath string
+	GkeHubBasePath string
 	NetworkConnectivityBasePath string
 	OrgPolicyBasePath string
 	RecaptchaEnterpriseBasePath string
+	ApikeysBasePath string
 	<% if version == 'private' -%>
 	VmwareBasePath string
+	RunBasePath string
 	<% end -%>
 	// CloudBuild WorkerPool uses a different endpoint (v1beta1) than any other CloudBuild resources
 	CloudBuildWorkerPoolBasePath string
