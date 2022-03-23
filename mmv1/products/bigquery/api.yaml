@@ -1214,6 +1214,10 @@ objects:
         name: 'view'
         description: The view definition.
         properties:
+          - !ruby/object:Api::Type::String
+            name: 'query'
+            description: |
+              The SQL query defining this view.
           - !ruby/object:Api::Type::Boolean
             name: 'useLegacySql'
             description: |
