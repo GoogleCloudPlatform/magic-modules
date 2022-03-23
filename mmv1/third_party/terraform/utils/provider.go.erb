@@ -206,6 +206,7 @@ func Provider() *schema.Provider {
 			},
 		},
 
+		// ####### START datasources ###########
 		DataSourcesMap: map[string]*schema.Resource{
 			"google_active_folder":                             dataSourceGoogleActiveFolder(),
 			"google_app_engine_default_service_account":        dataSourceGoogleAppEngineDefaultServiceAccount(),
@@ -318,7 +319,7 @@ func Provider() *schema.Provider {
 			"google_tpu_tensorflow_versions":                   dataSourceTpuTensorflowVersions(),
 			"google_redis_instance":                            dataSourceGoogleRedisInstance(),
 		},
-
+		// ####### END datasources ###########
 		ResourcesMap: ResourceMap(),
 	}
 
@@ -468,7 +469,7 @@ end     # products.each do
 				"google_storage_transfer_job":                  resourceStorageTransferJob(),
 			},
 			// ####### END handwritten resources ###########
-			// resources implemented within tpgtools
+			// ####### START tpgtools resources ###########
 			map[string]*schema.Resource{
 				"google_apikeys_key":                           resourceApikeysKey(),
 				"google_assured_workloads_workload":            resourceAssuredWorkloadsWorkload(),
@@ -505,7 +506,8 @@ end     # products.each do
 				"google_cloud_run_job":                         resourceRunJob(),
 				<% end -%>
 			},
-			// ------------------------------------
+			// ####### END tpgtools resources ###########
+			// ####### START non-generated IAM resources ###########
 			map[string]*schema.Resource{
 				"google_bigtable_instance_iam_binding":         ResourceIamBinding(IamBigtableInstanceSchema, NewBigtableInstanceUpdater, BigtableInstanceIdParseFunc),
 				"google_bigtable_instance_iam_member":          ResourceIamMember(IamBigtableInstanceSchema, NewBigtableInstanceUpdater, BigtableInstanceIdParseFunc),
@@ -568,6 +570,7 @@ end     # products.each do
 				"google_service_account_iam_member":            ResourceIamMember(IamServiceAccountSchema, NewServiceAccountIamUpdater, ServiceAccountIdParseFunc),
 				"google_service_account_iam_policy":            ResourceIamPolicy(IamServiceAccountSchema, NewServiceAccountIamUpdater, ServiceAccountIdParseFunc),
 			},
+			// ####### END non-generated IAM resources ###########
 		)
 }
 
