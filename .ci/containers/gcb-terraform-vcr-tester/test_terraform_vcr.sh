@@ -81,37 +81,54 @@ export GOOGLE_ZONE=us-central1-a
 export VCR_PATH=$local_path/fixtures
 export VCR_MODE=REPLAYING
 export ACCTEST_PARALLELISM=32
+export GOOGLE_CREDENTIALS=$SA_KEY
 export GOOGLE_APPLICATION_CREDENTIALS=$local_path/sa_key.json
-
+ 
 
 TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v '-run=TestAcc' -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > replaying_test.log
 
 test_exit_code=$?
 
-
 FAILED_TESTS=$(grep "^--- FAIL: TestAcc" replaying_test.log)
 PASSED_TESTS=$(grep "^--- PASS: TestAcc" replaying_test.log)
 SKIPPED_TESTS=$(grep "^--- SKIP: TestAcc" replaying_test.log)
 
-FAILED_TESTS_COUNT=$(echo "$FAILED_TESTS" | wc -l)
-PASSED_TESTS_COUNT=$(echo "$PASSED_TESTS" | wc -l)
-SKIPPED_TESTS_COUNT=$(echo "$SKIPPED_TESTS" | wc -l)
+if [[ -n $FAILED_TESTS ]]; then
+  FAILED_TESTS_COUNT=$(echo "$FAILED_TESTS" | wc -l)
+else
+  FAILED_TESTS_COUNT=0
+fi
+
+if [[ -n $PASSED_TESTS ]]; then
+  PASSED_TESTS_COUNT=$(echo "$PASSED_TESTS" | wc -l)
+else
+  PASSED_TESTS_COUNT=0
+fi
+
+if [[ -n $SKIPPED_TESTS ]]; then
+  SKIPPED_TESTS_COUNT=$(echo "$SKIPPED_TESTS" | wc -l)
+else
+  SKIPPED_TESTS_COUNT=0
+fi
 
 FAILED_TESTS_PATTERN=$(grep "FAIL: TestAcc" replaying_test.log | awk '{print $3}' | awk -v d="|" '{s=(NR==1?s:s d)$0}END{print s}')
+
+# store replaying build log
+gsutil -q cp replaying_test.log gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
+
+# store replaying test logs
+gsutil -m -q cp testlog/replaying/* gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/replaying/ #modify to correct GCS path
+
 
 comment="Tests count: ${NEWLINE}"
 comment+="Total tests: $(($FAILED_TESTS_COUNT+$PASSED_TESTS_COUNT+$SKIPPED_TESTS_COUNT)) ${NEWLINE}"
 comment+="Passed tests $PASSED_TESTS_COUNT ${NEWLINE}"
 comment+="Skipped tests: $SKIPPED_TESTS_COUNT ${NEWLINE}"
-comment+="Failed tests: $FAILED_TESTS_COUNT"
+comment+="Failed tests: $FAILED_TESTS_COUNT ${NEWLINE}${NEWLINE}"
+comment+="You can view the result here: https://console.cloud.google.com/storage/browser/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id"
 
 add_comment "${comment}" "${pr_number}"
 
-# store replaying build log
-gsutil -q cp replaying_test.log gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
-
-# store replaying test logs
-gsutil -m -q cp testlog/replaying/* gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/replaying/ #modify to correct GCS path
 
 if [[ -n $FAILED_TESTS_PATTERN ]]; then
   
@@ -132,30 +149,34 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   fi
 
   if [[ -n $RECORDING_FAILED_TESTS ]]; then
-    comment+="Tests failed during RECORDING mode:${NEWLINE} $RECORDING_FAILED_TESTS ${NEWLINE}"
-    comment+="Please fix these to complete your PR"
+    comment+="Tests failed during RECORDING mode:${NEWLINE} $RECORDING_FAILED_TESTS ${NEWLINE}${NEWLINE}"
+    comment+="Please fix these to complete your PR${NEWLINE}"
+    comment+="You can view the result here: https://console.cloud.google.com/storage/browser/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id"
   else
     comment+="All tests passed"
   fi
-
-  add_comment "${comment}" ${pr_number}
 
   # store cassettes
   gsutil -m -q cp fixtures/* gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$pr_number/fixtures/
 
   # store recording build log
-  gsutil -q cp recording_test.log gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
+  gsutil -q cp recording_test.log gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
 
   # store recording test logs
-  gsutil -m -q cp testlog/recording/* gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording/ #modify to correct GCS path
+  gsutil -m -q cp testlog/recording/* gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording/ #modify to correct GCS path
 
+  add_comment "${comment}" ${pr_number}
+
+else
+  comment="All tests passed in REPLAYING mode"
+  add_comment "${comment}" ${pr_number}
 fi
 
 
 if [ $test_exit_code -ne 0 ]; then
-    test_state="failure"
+  test_state="failure"
 else
-    test_state="success"
+  test_state="success"
 fi
 
 
@@ -173,6 +194,3 @@ curl \
   -H "Accept: application/vnd.github.v3+json" \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
   -d "$post_body"
-
-
-
