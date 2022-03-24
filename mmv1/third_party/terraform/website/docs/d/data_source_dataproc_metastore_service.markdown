@@ -28,7 +28,7 @@ data "google_dataproc_metastore_service" "foo" {
 The following arguments are supported:
 
 * `service_id` - (Required) The ID of the metastore service.
-* `location` - (Required) The location where the autoscaling policy should reside.
+* `location` - (Required) The location where the metastore service resides.
 
 - - -
 
