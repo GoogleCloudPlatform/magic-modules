@@ -42,6 +42,7 @@ resource "google_dataproc_metastore_service" "my_metastore" {
 
 data "google_dataproc_metastore_service" "my_metastore" {
 	service_id = google_dataproc_metastore_service.my_metastore.service_id
+	location = google_dataproc_metastore_service.my_metastore.location
 }
 `, name, tier)
 }

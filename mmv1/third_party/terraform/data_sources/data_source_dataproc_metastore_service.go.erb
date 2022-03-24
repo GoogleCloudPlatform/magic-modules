@@ -13,8 +13,8 @@ func dataSourceDataprocMetastoreService() *schema.Resource {
 
 	dsSchema := datasourceSchemaFromResourceSchema(resourceDataprocMetastoreService().Schema)
 	addRequiredFieldsToSchema(dsSchema, "service_id")
+	addRequiredFieldsToSchema(dsSchema, "location")
 	addOptionalFieldsToSchema(dsSchema, "project")
-	addOptionalFieldsToSchema(dsSchema, "location")
 
 	return &schema.Resource{
 		Read:   dataSourceDataprocMetastoreServiceRead,
