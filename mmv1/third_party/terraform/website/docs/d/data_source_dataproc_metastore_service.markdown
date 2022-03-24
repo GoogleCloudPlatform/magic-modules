@@ -19,6 +19,7 @@ See [Provider Versions](https://terraform.io/docs/providers/google/guides/provid
 ```tf
 data "google_dataproc_metastore_service" "foo" {
   service_id = "foo-bar"
+  location   = "global"  
 }
 ```
 
