@@ -63,6 +63,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       state: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: false
+      databaseDialect: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/spanner_database.go.erb'
       encoder: templates/terraform/encoders/spanner_database.go.erb
