@@ -125,9 +125,9 @@ func TestAccBigtableGCPolicy_gcRulesPolicy(t *testing.T) {
 	skipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	familyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	instanceName := fmt.Sprintf("tf-instance-%s", randString(t, 10))
+	tableName := fmt.Sprintf("tf-table-%s", randString(t, 10))
+	familyName := fmt.Sprintf("tf-family-%s", randString(t, 10))
 
 	gcRulesOriginal := "{\"mode\":\"intersection\",\"rules\":[{\"max_age\":\"10h\"},{\"max_version\":2}]}"
 	gcRulesUpdate := "{\"mode\":\"intersection\",\"rules\":[{\"max_age\":\"16h\"},{\"max_version\":1}]}"
@@ -138,13 +138,14 @@ func TestAccBigtableGCPolicy_gcRulesPolicy(t *testing.T) {
 		CheckDestroy: testAccCheckBigtableGCPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigtableGCPolicy_gcRulesOriginal(instanceName, tableName, familyName),
+				Config: testAccBigtableGCPolicy_gcRulesCreate(instanceName, tableName, familyName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccBigtableGCPolicyExists(t, "google_bigtable_gc_policy.policy"),
 					resource.TestCheckResourceAttr("google_bigtable_gc_policy.policy", "gc_rules", gcRulesOriginal),
 				),
 			},
 			// Testing gc_rules update
+			// TODO: Add test to verify no data loss
 			{
 				Config: testAccBigtableGCPolicy_gcRulesUpdate(instanceName, tableName, familyName),
 				Check: resource.ComposeTestCheckFunc(
@@ -196,25 +197,25 @@ type testUnitBigtableGCPolicyJSONRules struct {
 var testUnitBigtableGCPolicyRulesTestCases = []testUnitBigtableGCPolicyJSONRules{
 	{
 		name:          "Simple policy",
-		gcJSONString:  "{\"rules\":[{\"max_age\":\"10h\"}]}",
+		gcJSONString:  `{"rules":[{"max_age":"10h"}]}`,
 		want:          "age() > 10h",
 		errorExpected: false,
 	},
 	{
 		name:          "Simple multiple policies",
-		gcJSONString:  "{\"mode\":\"union\", \"rules\":[{\"max_age\":\"10h\"},{\"max_version\":2}]}",
+		gcJSONString:  `{"mode":"union", "rules":[{"max_age":"10h"},{"max_version":2}]}`,
 		want:          "(age() > 10h || versions() > 2)",
 		errorExpected: false,
 	},
 	{
 		name:          "Nested policy",
-		gcJSONString:  "{\"mode\":\"union\", \"rules\":[{\"max_age\":\"10h\"},{\"mode\": \"intersection\", \"rules\":[{\"max_age\":\"2h\"}, {\"max_version\":2}]}]}",
+		gcJSONString:  `{"mode":"union", "rules":[{"max_age":"10h"},{"mode": "intersection", "rules":[{"max_age":"2h"}, {"max_version":2}]}]}`,
 		want:          "(age() > 10h || (age() > 2h && versions() > 2))",
 		errorExpected: false,
 	},
 	{
 		name:          "JSON with no `rules`",
-		gcJSONString:  "{\"mode\": \"union\"}",
+		gcJSONString:  `{"mode": "union"}`,
 		errorExpected: true,
 	},
 	{
@@ -225,16 +226,16 @@ var testUnitBigtableGCPolicyRulesTestCases = []testUnitBigtableGCPolicyJSONRules
 	{
 		name:          "Invalid duration string",
 		errorExpected: true,
-		gcJSONString:  "{\"mode\":\"union\",\"rules\":[{\"max_age\":\"12o\"},{\"max_version\":2}]}",
+		gcJSONString:  `{"mode":"union","rules":[{"max_age":"12o"},{"max_version":2}]}`,
 	},
 	{
 		name:          "Empty mode policy with more than 1 rules",
-		gcJSONString:  "{\"rules\":[{\"max_age\":\"10h\"}, {\"max_version\":2}]}",
+		gcJSONString:  `{"rules":[{"max_age":"10h"}, {"max_version":2}]}`,
 		errorExpected: true,
 	},
 	{
 		name:          "Less than 2 rules with mode specified",
-		gcJSONString:  "{\"mode\":\"union\", \"rules\":[{\"max_version\":2}]}",
+		gcJSONString:  `{"mode":"union", "rules":[{"max_version":2}]}`,
 		errorExpected: true,
 	},
 }
@@ -549,7 +550,7 @@ resource "google_bigtable_gc_policy" "policyC" {
 `, instanceName, instanceName, tableName, family, family, family, family)
 }
 
-func testAccBigtableGCPolicy_gcRulesOriginal(instanceName, tableName, family string) string {
+func testAccBigtableGCPolicy_gcRulesCreate(instanceName, tableName, family string) string {
 	return fmt.Sprintf(`
 	resource "google_bigtable_instance" "instance" {
 		name = "%s"

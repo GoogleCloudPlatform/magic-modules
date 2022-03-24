@@ -93,6 +93,7 @@ func resourceBigtableGCPolicy() *schema.Resource {
 				Optional:      true,
 				Description:   `Serialized JSON string for garbage collection policy. Conflicts with "mode", "max_age" and "max_version".`,
 				ValidateFunc:  validation.StringIsJSON,
+				ForceNew:      false,
 				ConflictsWith: []string{"mode", "max_age", "max_version"},
 				StateFunc: func(v interface{}) string {
 					json, _ := structure.NormalizeJsonString(v)
@@ -358,7 +359,7 @@ func getGCPolicyFromJSON(p map[string]interface{}) (bigtable.GCPolicy, error) {
 	}
 
 	if p["mode"] == nil && len(p["rules"].([]interface{})) != 1 {
-		return nil, fmt.Errorf("`rules` needs only 1 member if `mode` is not specified")
+		return nil, fmt.Errorf("`rules` needs exactly 1 member if `mode` is not specified")
 	}
 
 	if p["mode"] != nil && len(p["rules"].([]interface{})) < 2 {
