@@ -93,7 +93,6 @@ func resourceBigtableGCPolicy() *schema.Resource {
 				Optional:      true,
 				Description:   `Serialized JSON string for garbage collection policy. Conflicts with "mode", "max_age" and "max_version".`,
 				ValidateFunc:  validation.StringIsJSON,
-				ForceNew:      false,
 				ConflictsWith: []string{"mode", "max_age", "max_version"},
 				StateFunc: func(v interface{}) string {
 					json, _ := structure.NormalizeJsonString(v)
