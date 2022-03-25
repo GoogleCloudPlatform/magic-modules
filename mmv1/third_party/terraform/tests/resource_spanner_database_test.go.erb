@@ -133,7 +133,7 @@ func TestAccSpannerPGDatabase_basic(t *testing.T) {
 			{
 				Config: testAccSpannerPGDatabase_basic(instanceName, databaseName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_spanner_database.basic", "state"),
+					resource.TestCheckResourceAttrSet("google_spanner_database.basic_spangres", "state"),
 				),
 			},
 			{
@@ -146,7 +146,7 @@ func TestAccSpannerPGDatabase_basic(t *testing.T) {
 			{
 				Config: testAccSpannerPGDatabase_basicUpdate(instanceName, databaseName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_spanner_database.basic", "state"),
+					resource.TestCheckResourceAttrSet("google_spanner_database.basic_spangres", "state"),
 				),
 			},
 			{
