@@ -115,7 +115,8 @@ objects:
             name: 'repoType'
             required: true
             description: |
-              The type of the repo, since it may not be explicit from the repo field (e.g from a URL).
+              The type of the repo, since it may not be explicit from the repo field (e.g from a URL). 
+              Values can be UNKNOWN, CLOUD_SOURCE_REPOSITORIES, GITHUB
             values:
                   - :UNKNOWN
                   - :CLOUD_SOURCE_REPOSITORIES
@@ -155,6 +156,7 @@ objects:
             required: true
             description: |
               The type of the repo, since it may not be explicit from the repo field (e.g from a URL).
+              Values can be UNKNOWN, CLOUD_SOURCE_REPOSITORIES, GITHUB
             values:
                   - :UNKNOWN
                   - :CLOUD_SOURCE_REPOSITORIES
@@ -380,7 +382,6 @@ objects:
               Only populated on get requests.
       - !ruby/object:Api::Type::NestedObject
         name: 'approvalConfig'
-        allow_empty_object: true
         description: |
           Configuration for manual approval to start a build invocation of this BuildTrigger. 
           Builds created by this trigger will require approval before they execute. 
