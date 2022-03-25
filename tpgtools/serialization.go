@@ -41,6 +41,8 @@ import (
 	dataprocBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc/beta"
 	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc"
 	eventarcBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc/beta"
+	firebaserules "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/firebaserules"
+	firebaserulesBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/firebaserules/beta"
 	gkehubBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub/beta"
 	logging "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/logging"
 	loggingBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/logging/beta"
@@ -103,6 +105,10 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 			return "google_dataproc_workflow_template", nil
 		case "eventarc/trigger":
 			return "google_eventarc_trigger", nil
+		case "firebaserules/release":
+			return "google_firebaserules_release", nil
+		case "firebaserules/ruleset":
+			return "google_firebaserules_ruleset", nil
 		case "gkehub/feature":
 			return "google_gke_hub_feature", nil
 		case "gkehub/feature_membership":
@@ -163,6 +169,10 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 		return "google_dataproc_workflow_template", nil
 	case "eventarc/trigger":
 		return "google_eventarc_trigger", nil
+	case "firebaserules/release":
+		return "google_firebaserules_release", nil
+	case "firebaserules/ruleset":
+		return "google_firebaserules_ruleset", nil
 	case "logging/log_view":
 		return "google_logging_log_view", nil
 	case "networkconnectivity/hub":
@@ -299,6 +309,18 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 				return "", err
 			}
 			return EventarcTriggerBetaAsHCL(*r, hasGAEquivalent)
+		case "firebaserules/release":
+			r := &firebaserulesBeta.Release{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return FirebaserulesReleaseBetaAsHCL(*r, hasGAEquivalent)
+		case "firebaserules/ruleset":
+			r := &firebaserulesBeta.Ruleset{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return FirebaserulesRulesetBetaAsHCL(*r, hasGAEquivalent)
 		case "gkehub/feature":
 			r := &gkehubBeta.Feature{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -471,6 +493,18 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 			return "", err
 		}
 		return EventarcTriggerAsHCL(*r, hasGAEquivalent)
+	case "firebaserules/release":
+		r := &firebaserules.Release{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return FirebaserulesReleaseAsHCL(*r, hasGAEquivalent)
+	case "firebaserules/ruleset":
+		r := &firebaserules.Ruleset{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return FirebaserulesRulesetAsHCL(*r, hasGAEquivalent)
 	case "logging/log_view":
 		r := &logging.LogView{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -3406,6 +3440,12 @@ func convertEventarcTriggerBetaDestinationToHCL(r *eventarcBeta.TriggerDestinati
 	if v := convertEventarcTriggerBetaDestinationCloudRunServiceToHCL(r.CloudRunService); v != "" {
 		outputConfig += fmt.Sprintf("\tcloud_run_service %s\n", v)
 	}
+	if v := convertEventarcTriggerBetaDestinationGkeToHCL(r.Gke); v != "" {
+		outputConfig += fmt.Sprintf("\tgke %s\n", v)
+	}
+	if r.Workflow != nil {
+		outputConfig += fmt.Sprintf("\tworkflow = %#v\n", *r.Workflow)
+	}
 	return outputConfig + "}"
 }
 
@@ -3426,6 +3466,29 @@ func convertEventarcTriggerBetaDestinationCloudRunServiceToHCL(r *eventarcBeta.T
 	return outputConfig + "}"
 }
 
+func convertEventarcTriggerBetaDestinationGkeToHCL(r *eventarcBeta.TriggerDestinationGke) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Cluster != nil {
+		outputConfig += fmt.Sprintf("\tcluster = %#v\n", *r.Cluster)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Namespace != nil {
+		outputConfig += fmt.Sprintf("\tnamespace = %#v\n", *r.Namespace)
+	}
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
+	}
+	if r.Path != nil {
+		outputConfig += fmt.Sprintf("\tpath = %#v\n", *r.Path)
+	}
+	return outputConfig + "}"
+}
+
 func convertEventarcTriggerBetaMatchingCriteriaToHCL(r *eventarcBeta.TriggerMatchingCriteria) string {
 	if r == nil {
 		return ""
@@ -3436,6 +3499,9 @@ func convertEventarcTriggerBetaMatchingCriteriaToHCL(r *eventarcBeta.TriggerMatc
 	}
 	if r.Value != nil {
 		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
+	}
+	if r.Operator != nil {
+		outputConfig += fmt.Sprintf("\toperator = %#v\n", *r.Operator)
 	}
 	return outputConfig + "}"
 }
@@ -3459,6 +3525,100 @@ func convertEventarcTriggerBetaTransportPubsubToHCL(r *eventarcBeta.TriggerTrans
 	if r.Topic != nil {
 		outputConfig += fmt.Sprintf("\ttopic = %#v\n", *r.Topic)
 	}
+	return outputConfig + "}"
+}
+
+// FirebaserulesReleaseBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func FirebaserulesReleaseBetaAsHCL(r firebaserulesBeta.Release, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_firebaserules_release\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.RulesetName != nil {
+		outputConfig += fmt.Sprintf("\truleset_name = %#v\n", *r.RulesetName)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+// FirebaserulesRulesetBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func FirebaserulesRulesetBetaAsHCL(r firebaserulesBeta.Ruleset, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_firebaserules_ruleset\" \"output\" {\n"
+	if v := convertFirebaserulesRulesetBetaSourceToHCL(r.Source); v != "" {
+		outputConfig += fmt.Sprintf("\tsource %s\n", v)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertFirebaserulesRulesetBetaSourceToHCL(r *firebaserulesBeta.RulesetSource) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Files != nil {
+		for _, v := range r.Files {
+			outputConfig += fmt.Sprintf("\tfiles %s\n", convertFirebaserulesRulesetBetaSourceFilesToHCL(&v))
+		}
+	}
+	if r.Language != nil {
+		outputConfig += fmt.Sprintf("\tlanguage = %#v\n", *r.Language)
+	}
+	return outputConfig + "}"
+}
+
+func convertFirebaserulesRulesetBetaSourceFilesToHCL(r *firebaserulesBeta.RulesetSourceFiles) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Content != nil {
+		outputConfig += fmt.Sprintf("\tcontent = %#v\n", *r.Content)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Fingerprint != nil {
+		outputConfig += fmt.Sprintf("\tfingerprint = %#v\n", *r.Fingerprint)
+	}
+	return outputConfig + "}"
+}
+
+func convertFirebaserulesRulesetBetaMetadataToHCL(r *firebaserulesBeta.RulesetMetadata) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
 	return outputConfig + "}"
 }
 
@@ -8143,6 +8303,12 @@ func convertEventarcTriggerDestinationToHCL(r *eventarc.TriggerDestination) stri
 	if v := convertEventarcTriggerDestinationCloudRunServiceToHCL(r.CloudRunService); v != "" {
 		outputConfig += fmt.Sprintf("\tcloud_run_service %s\n", v)
 	}
+	if v := convertEventarcTriggerDestinationGkeToHCL(r.Gke); v != "" {
+		outputConfig += fmt.Sprintf("\tgke %s\n", v)
+	}
+	if r.Workflow != nil {
+		outputConfig += fmt.Sprintf("\tworkflow = %#v\n", *r.Workflow)
+	}
 	return outputConfig + "}"
 }
 
@@ -8163,6 +8329,29 @@ func convertEventarcTriggerDestinationCloudRunServiceToHCL(r *eventarc.TriggerDe
 	return outputConfig + "}"
 }
 
+func convertEventarcTriggerDestinationGkeToHCL(r *eventarc.TriggerDestinationGke) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Cluster != nil {
+		outputConfig += fmt.Sprintf("\tcluster = %#v\n", *r.Cluster)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Namespace != nil {
+		outputConfig += fmt.Sprintf("\tnamespace = %#v\n", *r.Namespace)
+	}
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
+	}
+	if r.Path != nil {
+		outputConfig += fmt.Sprintf("\tpath = %#v\n", *r.Path)
+	}
+	return outputConfig + "}"
+}
+
 func convertEventarcTriggerMatchingCriteriaToHCL(r *eventarc.TriggerMatchingCriteria) string {
 	if r == nil {
 		return ""
@@ -8173,6 +8362,9 @@ func convertEventarcTriggerMatchingCriteriaToHCL(r *eventarc.TriggerMatchingCrit
 	}
 	if r.Value != nil {
 		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
+	}
+	if r.Operator != nil {
+		outputConfig += fmt.Sprintf("\toperator = %#v\n", *r.Operator)
 	}
 	return outputConfig + "}"
 }
@@ -8196,6 +8388,100 @@ func convertEventarcTriggerTransportPubsubToHCL(r *eventarc.TriggerTransportPubs
 	if r.Topic != nil {
 		outputConfig += fmt.Sprintf("\ttopic = %#v\n", *r.Topic)
 	}
+	return outputConfig + "}"
+}
+
+// FirebaserulesReleaseAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func FirebaserulesReleaseAsHCL(r firebaserules.Release, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_firebaserules_release\" \"output\" {\n"
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.RulesetName != nil {
+		outputConfig += fmt.Sprintf("\truleset_name = %#v\n", *r.RulesetName)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+// FirebaserulesRulesetAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func FirebaserulesRulesetAsHCL(r firebaserules.Ruleset, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_firebaserules_ruleset\" \"output\" {\n"
+	if v := convertFirebaserulesRulesetSourceToHCL(r.Source); v != "" {
+		outputConfig += fmt.Sprintf("\tsource %s\n", v)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertFirebaserulesRulesetSourceToHCL(r *firebaserules.RulesetSource) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Files != nil {
+		for _, v := range r.Files {
+			outputConfig += fmt.Sprintf("\tfiles %s\n", convertFirebaserulesRulesetSourceFilesToHCL(&v))
+		}
+	}
+	if r.Language != nil {
+		outputConfig += fmt.Sprintf("\tlanguage = %#v\n", *r.Language)
+	}
+	return outputConfig + "}"
+}
+
+func convertFirebaserulesRulesetSourceFilesToHCL(r *firebaserules.RulesetSourceFiles) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Content != nil {
+		outputConfig += fmt.Sprintf("\tcontent = %#v\n", *r.Content)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Fingerprint != nil {
+		outputConfig += fmt.Sprintf("\tfingerprint = %#v\n", *r.Fingerprint)
+	}
+	return outputConfig + "}"
+}
+
+func convertFirebaserulesRulesetMetadataToHCL(r *firebaserules.RulesetMetadata) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
 	return outputConfig + "}"
 }
 
@@ -12273,6 +12559,8 @@ func convertEventarcTriggerBetaDestination(i interface{}) map[string]interface{}
 	return map[string]interface{}{
 		"cloudFunction":   in["cloud_function"],
 		"cloudRunService": convertEventarcTriggerBetaDestinationCloudRunService(in["cloud_run_service"]),
+		"gke":             convertEventarcTriggerBetaDestinationGke(in["gke"]),
+		"workflow":        in["workflow"],
 	}
 }
 
@@ -12310,6 +12598,31 @@ func convertEventarcTriggerBetaDestinationCloudRunServiceList(i interface{}) (ou
 	return out
 }
 
+func convertEventarcTriggerBetaDestinationGke(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"cluster":   in["cluster"],
+		"location":  in["location"],
+		"namespace": in["namespace"],
+		"service":   in["service"],
+		"path":      in["path"],
+	}
+}
+
+func convertEventarcTriggerBetaDestinationGkeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertEventarcTriggerBetaDestinationGke(v))
+	}
+	return out
+}
+
 func convertEventarcTriggerBetaMatchingCriteria(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -12318,6 +12631,7 @@ func convertEventarcTriggerBetaMatchingCriteria(i interface{}) map[string]interf
 	return map[string]interface{}{
 		"attribute": in["attribute"],
 		"value":     in["value"],
+		"operator":  in["operator"],
 	}
 }
 
@@ -12371,6 +12685,72 @@ func convertEventarcTriggerBetaTransportPubsubList(i interface{}) (out []map[str
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertEventarcTriggerBetaTransportPubsub(v))
+	}
+	return out
+}
+
+func convertFirebaserulesRulesetBetaSource(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"files":    in["files"],
+		"language": in["language"],
+	}
+}
+
+func convertFirebaserulesRulesetBetaSourceList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertFirebaserulesRulesetBetaSource(v))
+	}
+	return out
+}
+
+func convertFirebaserulesRulesetBetaSourceFiles(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"content":     in["content"],
+		"name":        in["name"],
+		"fingerprint": in["fingerprint"],
+	}
+}
+
+func convertFirebaserulesRulesetBetaSourceFilesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertFirebaserulesRulesetBetaSourceFiles(v))
+	}
+	return out
+}
+
+func convertFirebaserulesRulesetBetaMetadata(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"services": in["services"],
+	}
+}
+
+func convertFirebaserulesRulesetBetaMetadataList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertFirebaserulesRulesetBetaMetadata(v))
 	}
 	return out
 }
@@ -16699,6 +17079,8 @@ func convertEventarcTriggerDestination(i interface{}) map[string]interface{} {
 	return map[string]interface{}{
 		"cloudFunction":   in["cloud_function"],
 		"cloudRunService": convertEventarcTriggerDestinationCloudRunService(in["cloud_run_service"]),
+		"gke":             convertEventarcTriggerDestinationGke(in["gke"]),
+		"workflow":        in["workflow"],
 	}
 }
 
@@ -16736,6 +17118,31 @@ func convertEventarcTriggerDestinationCloudRunServiceList(i interface{}) (out []
 	return out
 }
 
+func convertEventarcTriggerDestinationGke(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"cluster":   in["cluster"],
+		"location":  in["location"],
+		"namespace": in["namespace"],
+		"service":   in["service"],
+		"path":      in["path"],
+	}
+}
+
+func convertEventarcTriggerDestinationGkeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertEventarcTriggerDestinationGke(v))
+	}
+	return out
+}
+
 func convertEventarcTriggerMatchingCriteria(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -16744,6 +17151,7 @@ func convertEventarcTriggerMatchingCriteria(i interface{}) map[string]interface{
 	return map[string]interface{}{
 		"attribute": in["attribute"],
 		"value":     in["value"],
+		"operator":  in["operator"],
 	}
 }
 
@@ -16797,6 +17205,72 @@ func convertEventarcTriggerTransportPubsubList(i interface{}) (out []map[string]
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertEventarcTriggerTransportPubsub(v))
+	}
+	return out
+}
+
+func convertFirebaserulesRulesetSource(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"files":    in["files"],
+		"language": in["language"],
+	}
+}
+
+func convertFirebaserulesRulesetSourceList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertFirebaserulesRulesetSource(v))
+	}
+	return out
+}
+
+func convertFirebaserulesRulesetSourceFiles(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"content":     in["content"],
+		"name":        in["name"],
+		"fingerprint": in["fingerprint"],
+	}
+}
+
+func convertFirebaserulesRulesetSourceFilesList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertFirebaserulesRulesetSourceFiles(v))
+	}
+	return out
+}
+
+func convertFirebaserulesRulesetMetadata(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"services": in["services"],
+	}
+}
+
+func convertFirebaserulesRulesetMetadataList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertFirebaserulesRulesetMetadata(v))
 	}
 	return out
 }
