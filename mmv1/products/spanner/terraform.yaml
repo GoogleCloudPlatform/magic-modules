@@ -33,7 +33,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         for more information on lifecycle parameters.
         
         Note: Databases that are created with POSTGRESQL dialect do not support 
-        extra DDL statements in the `CreateDatabase` call. We must therefore re-apply 
+        extra DDL statements in the `CreateDatabase` call. You must therefore re-apply 
         terraform with ddl on the same database after creation.
 
     examples:
