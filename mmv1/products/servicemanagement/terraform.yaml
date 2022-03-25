@@ -44,7 +44,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       parent_resource_attribute: 'consumer_project'
       allowed_iam_role: 'roles/servicemanagement.serviceController'
       fetch_iam_policy_verb: :POST
-      exclude: false
       example_config_body: 'templates/terraform/iam/example_config_body/service_management_consumer.tf.erb'
     examples:
       - !ruby/object:Provider::Terraform::Examples
