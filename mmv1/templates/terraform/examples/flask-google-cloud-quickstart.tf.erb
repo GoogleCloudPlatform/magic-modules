@@ -1,11 +1,10 @@
-# [START compute_flask_quickstart_vm]
 
 # Create a single Compute Engine instance
 resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
   name         = "<%= ctx[:vars]['flask_vm'] %>"
   machine_type = "f1-micro"
   zone         = "us-west1-a"
-  tags = ["ssh"]
+  tags         = ["ssh"]
 
   # Uncomment and enter valid path to file
   # metadata = {
@@ -32,7 +31,7 @@ resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
 
 # [START vpc_flask_quickstart_ssh_fw]
 resource "google_compute_firewall" "ssh" {
-  name          = "<%= ctx[:vars]['allow_ssh'] %>"
+  name = "<%= ctx[:vars]['allow_ssh'] %>"
   allow {
     ports    = ["22"]
     protocol = "tcp"
@@ -64,10 +63,10 @@ resource "google_compute_firewall" "flask" {
 
 # [START storage_bucket_tf_with_versioning]
 resource "google_storage_bucket" "default" {
-  name                     = "<%= ctx[:vars]['bucket_tfstate'] %>"
-  force_destroy            = false
-  location                 = "US"
-  storage_class            = "STANDARD"
+  name          = "<%= ctx[:vars]['bucket_tfstate'] %>"
+  force_destroy = false
+  location      = "US"
+  storage_class = "STANDARD"
   versioning {
     enabled = true
   }
