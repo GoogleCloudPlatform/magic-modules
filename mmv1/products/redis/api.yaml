@@ -351,13 +351,11 @@ objects:
           read replicas enabled is [1-5] and defaults to 2. If read replicas are not enabled
           for a Standard Tier instance, the only valid value is 1 and the default is 1. 
           The valid value for basic tier is 0 and the default is also 0.
-        min_version: beta
       - !ruby/object:Api::Type::Array
         name: nodes
         description: |
           Output only. Info per node.
         output: true
-        min_version: beta
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
@@ -377,14 +375,12 @@ objects:
           Targets all healthy replica nodes in instance. Replication is asynchronous and replica nodes
           will exhibit some lag behind the primary. Write requests must target 'host'.
         output: true
-        min_version: beta
       - !ruby/object:Api::Type::Integer
         name: readEndpointPort
         description: |
           Output only. The port number of the exposed readonly redis endpoint. Standard tier only. 
           Write requests should target 'port'.
         output: true
-        min_version: beta
       - !ruby/object:Api::Type::Enum
         name: readReplicasMode
         description: |
@@ -398,5 +394,4 @@ objects:
           - :READ_REPLICAS_DISABLED
           - :READ_REPLICAS_ENABLED
         default_value: :READ_REPLICAS_DISABLED
-        min_version: beta
         input: true

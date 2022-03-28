@@ -13,9 +13,25 @@
 	# limitations under the License.
 -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
-	out := make(map[string]interface{})
-	out["connect_timeout"] = d.Get("timeout.0.connect_timeout")
-	out["max_attempts_timeout"] = d.Get("timeout.0.max_attempts_timeout")
-	out["responseTimeout"] = d.Get("timeout.0.responseTimeout")
+	out := make(map[string]string)
+
+	if v == nil {
+		return nil
+	}
+
+	in := v.(map[string]interface{})
+	if e, ok := in["connectTimeout"]; ok {
+		out["connect_timeout"] = e.(string)
+	}
+	if e, ok := in["maxAttemptsTimeout"]; ok {
+   out["max_attempts_timeout"] = e.(string)
+	}
+	if e, ok := in["responseTimeout"]; ok {
+		out["response_timeout"] = e.(string)
+	}
+	if e, ok := in["readTimeout"]; ok {
+		out["read_timeout"] = e.(string)
+	}
+
 	return []interface{}{out}
 }

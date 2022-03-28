@@ -641,10 +641,6 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		}
 
 		if !p.Computed {
-			if v.Title == "allowedApplications" {
-				glog.Errorf("Looking for %#v.", schema)
-			}
-			glog.Errorf("Looking for %q in %v.", v.Title, schema.Required)
 			if stringInSlice(v.Title, schema.Required) {
 				p.Required = true
 			} else {
@@ -720,7 +716,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		ss := p.DefaultStateSetter()
 		p.StateSetter = &ss
 
-		if p.Sensitive {
+		if p.Sensitive && p.Settable {
 			p.StateSetter = nil
 		}
 
