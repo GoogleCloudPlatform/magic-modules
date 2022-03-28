@@ -18,7 +18,6 @@ In addition, Magic Modules generates support for several companion
 features/tools:
 
 * Terraform Validator
-* Terraform Google Inventory Mapper
 * Terraform in Cloud Shell
 
 Importantly, Magic Modules *isn't* full code generation. Every change is made
