@@ -238,6 +238,31 @@ var testUnitBigtableGCPolicyRulesTestCases = []testUnitBigtableGCPolicyJSONRules
 		gcJSONString:  `{"mode":"union", "rules":[{"max_version":2}]}`,
 		errorExpected: true,
 	},
+	{
+		name:          "Invalid GC rule object",
+		gcJSONString:  `{"mode": "union", "rules": [{"mode": "intersection"}]}`,
+		errorExpected: true,
+	},
+	{
+		name:          "Invalid GC rule field: not max_version or max_age",
+		gcJSONString:  `{"mode": "union", "rules": [{"max_versions": 2}]}`,
+		errorExpected: true,
+	},
+	{
+		name:          "Invalid GC rule field: additional fields",
+		gcJSONString:  `{"mode": "union", "rules": [{"max_age": "10h", "something_else": 100}]}`,
+		errorExpected: true,
+	},
+	{
+		name:          "Invalid GC rule field: more than 2 fields in a gc rule object",
+		gcJSONString:  `{"mode": "union", "rules": [{"max_age": "10h", "max_version": 10, "something": 100}]}`,
+		errorExpected: true,
+	},
+	{
+		name:          "Invalid GC rule: wrong data type for child gc_rule",
+		gcJSONString:  `{"rules": {"max_version": "456"}}`,
+		errorExpected: true,
+	},
 }
 
 func TestUnitBigtableGCPolicy_getGCPolicyFromJSON(t *testing.T) {

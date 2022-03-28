@@ -353,20 +353,17 @@ func generateBigtableGCPolicy(d *schema.ResourceData) (bigtable.GCPolicy, error)
 
 func getGCPolicyFromJSON(p map[string]interface{}) (bigtable.GCPolicy, error) {
 	policy := []bigtable.GCPolicy{}
-	if p["rules"] == nil {
-		return nil, fmt.Errorf("missing `rules` from gc_rules")
-	}
 
-	if p["mode"] == nil && len(p["rules"].([]interface{})) != 1 {
-		return nil, fmt.Errorf("`rules` needs exactly 1 member if `mode` is not specified")
-	}
-
-	if p["mode"] != nil && len(p["rules"].([]interface{})) < 2 {
-		return nil, fmt.Errorf("need at least 2 member in `rules` when `mode` is specified")
+	if err := validateGCRuleObject(p, true); err != nil {
+		return nil, err
 	}
 
 	for _, rule := range p["rules"].([]interface{}) {
 		r := rule.(map[string]interface{})
+		if err := validateGCRuleObject(r, false); err != nil {
+			return nil, err
+		}
+
 		if r["max_age"] != nil {
 			maxAge := r["max_age"].(string)
 			duration, err := time.ParseDuration(maxAge)
@@ -398,6 +395,54 @@ func getGCPolicyFromJSON(p map[string]interface{}) (bigtable.GCPolicy, error) {
 	default:
 		return policy[0], nil
 	}
+}
+
+func validateGCRuleObject(r map[string]interface{}, topLevel bool) error {
+	if len(r) > 2 {
+		return fmt.Errorf("rules has more than 2 fields")
+	}
+	maxVersion, maxVersionOk := r["max_version"]
+	maxAge, maxAgeOk := r["max_age"]
+	rulesObj, rulesOk := r["rules"]
+
+	_, modeOk := r["mode"]
+	rules, arrOk := rulesObj.([]interface{})
+	_, vCastOk := maxVersion.(float64)
+	_, aCastOk := maxAge.(string)
+
+	if rulesOk && !arrOk {
+		return fmt.Errorf("`rules` must be array")
+	}
+
+	if modeOk && len(rules) < 2 {
+		return fmt.Errorf("`rules` need at least 2 GC rule when mode is specified")
+	}
+
+	if topLevel && !rulesOk {
+		return fmt.Errorf("invalid nested policy, need `rules`")
+	}
+
+	if topLevel && !modeOk && len(rules) != 1 {
+		return fmt.Errorf("when `mode` is not specified, `rules` can only have 1 child rule")
+	}
+
+	if !topLevel && len(r) == 2 && (!modeOk || !rulesOk) {
+		return fmt.Errorf("need `mode` and `rules` for child nested policies")
+	}
+
+	if !topLevel && len(r) == 1 && !maxVersionOk && !maxAgeOk {
+		return fmt.Errorf("need `max_version` or `max_age` for the rule")
+	}
+
+	if maxVersionOk && !vCastOk {
+		return fmt.Errorf("`max_version` must be a number")
+	}
+
+	if maxAgeOk && !aCastOk {
+		return fmt.Errorf("`max_age must be a string")
+	}
+
+	return nil
 }
 
 func getMaxAgeDuration(values map[string]interface{}) (time.Duration, error) {
