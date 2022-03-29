@@ -66,6 +66,7 @@ resource "google_folder" "my_folder" {
   parent       = "organizations/%{org_id}"
 }
 
+# Wait after folder creation to limit eventual consistency errors.
 resource "time_sleep" "wait_120_seconds" {
   depends_on = [google_folder.my_folder]
 
@@ -92,6 +93,7 @@ resource "google_folder" "my_folder" {
   parent       = "organizations/%{org_id}"
 }
 
+# Wait after folder creation to limit eventual consistency errors.
 resource "time_sleep" "wait_120_seconds" {
   depends_on = [google_folder.my_folder]
 
@@ -118,6 +120,7 @@ resource "google_folder" "my_folder" {
   parent       = "organizations/%{org_id}"
 }
 
+# Wait after folder creation to limit eventual consistency errors.
 resource "time_sleep" "wait_120_seconds" {
   depends_on = [google_folder.my_folder]
 
