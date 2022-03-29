@@ -16,5 +16,6 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
     }
     tier = "db-custom-4-26624"
   }
+  deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
 }
 # [END cloud_sql_mysql_instance_public_ip]
