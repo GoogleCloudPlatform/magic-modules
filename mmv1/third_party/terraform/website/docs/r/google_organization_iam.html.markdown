@@ -208,7 +208,7 @@ will not be inferred from the provider.
 
 ~> **Warning:** Terraform considers the `role` and condition contents (`title`+`description`+`expression`) as the
   identifier for the binding. This means that if any part of the condition is changed out-of-band, Terraform will
-  consider it to be an entirely different resource and will treat it as such.
+  consider it a different resource and mark it for recreation.
 
 ## Attributes Reference
 
@@ -220,16 +220,16 @@ exported:
 
 ## Import
 
-IAM member imports use space-delimited identifiers; the resource in question, the role, and the account.  This member resource can be imported using the `org_id`, role, and member e.g.
+IAM member imports use space-delimited identifiers; the resource in question, the role, and the account.  This member resource can be imported using the `org_id`, role, member and condition title e.g.
 
 ```
-$ terraform import google_organization_iam_member.my_organization "your-orgid roles/viewer user:foo@example.com"
+$ terraform import google_organization_iam_member.my_organization "your-orgid roles/viewer user:foo@example.com ConditionTitle"
 ```
 
-IAM binding imports use space-delimited identifiers; the resource in question and the role.  This binding resource can be imported using the `org_id` and role, e.g.
+IAM binding imports use space-delimited identifiers; the resource in question and the role.  This binding resource can be imported using the `org_id`, role and condition title, e.g.
 
 ```
-terraform import google_organization_iam_binding.my_organization "your-org-id roles/viewer"
+terraform import google_organization_iam_binding.my_organization "your-org-id roles/viewer ConditionTitle"
 ```
 
 IAM policy imports use the identifier of the resource in question.  This policy resource can be imported using the `org_id`.
