@@ -26,6 +26,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           allow_ssh: "allow-ssh"
           flask_app_firewall: "flask-app-firewall"
           bucket_tfstate: "bucket-tfstate"
+        ignore_read_extra:
+          - "metadata"
+          - "metadata_startup_script"
     # SQL
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_database_instance_sqlserver"
