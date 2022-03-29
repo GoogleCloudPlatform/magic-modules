@@ -31,6 +31,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         On older versions, it is strongly recommended to set `lifecycle { prevent_destroy = true }`
         on databases in order to prevent accidental data loss. See [Terraform docs](https://www.terraform.io/docs/configuration/resources.html#prevent_destroy)
         for more information on lifecycle parameters.
+        
+        Note: Databases that are created with POSTGRESQL dialect do not support 
+        extra DDL statements in the `CreateDatabase` call. You must therefore re-apply 
+        terraform with ddl on the same database after creation.
+
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "spanner_database_basic"
@@ -58,6 +63,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       state: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: false
+      databaseDialect: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/spanner_database.go.erb'
       encoder: templates/terraform/encoders/spanner_database.go.erb
