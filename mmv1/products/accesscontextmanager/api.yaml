@@ -67,6 +67,13 @@ objects:
         required: true
         description: |
           Human readable title. Does not affect behavior.
+      - !ruby/object:Api::Type::Array
+        name: scopes
+        description: |
+          Folder or project on which this policy is applicable.
+          Format: folders/{{folder_id}} or projects/{{project_id}}
+        item_type: Api::Type::String
+        max_size: 1
     properties:
       - !ruby/object:Api::Type::String
         name: name
