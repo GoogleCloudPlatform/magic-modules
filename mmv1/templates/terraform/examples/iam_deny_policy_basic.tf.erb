@@ -23,7 +23,7 @@ resource "google_iam_deny_policy" "<%= ctx[:primary_resource_id] %>" {
         expression = "!resource.matchTag('12345678/env', 'test')"
       }
       denied_permissions = ["cloudresourcemanager.googleapis.com/projects.delete"]
-      exception_principals = ["principal://iam.googleapis.com/projects/<%= ctx[:test_env_vars]["project"] %>/serviceAccounts/${google_service_account.test-account.account_id}@iam.gserviceaccount.com"]
+      exception_principals = ["principal://iam.googleapis.com/projects/-/serviceAccounts/${google_service_account.test-account.email}"]
     }
   }
 }
