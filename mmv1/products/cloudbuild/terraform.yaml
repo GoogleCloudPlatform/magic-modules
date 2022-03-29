@@ -78,7 +78,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       triggerTemplate.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       approvalConfig: !ruby/object:Overrides::Terraform::PropertyOverride
-        flatten_object: true
+        default_from_api: true
         custom_flatten: templates/terraform/custom_flatten/cloudbuild_approval_required.go.erb
       approvalConfig.approvalRequired: !ruby/object:Overrides::Terraform::PropertyOverride
         name: approval_required
