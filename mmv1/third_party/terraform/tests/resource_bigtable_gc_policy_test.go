@@ -308,7 +308,7 @@ func testAccBigtableCanWriteData(t *testing.T, n string, numberOfRows int) resou
 		}
 		for _, rowErr := range rowErrs {
 			return fmt.Errorf("could not write element to bigtable: %v", rowErr)
-                }
+		}
 		return nil
 	}
 }
