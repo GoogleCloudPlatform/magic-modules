@@ -194,6 +194,11 @@ func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresource
 	if err != nil {
 		return nil, err
 	}
+<% elsif object.iam_policy.iam_conditions_request_type == :QUERY_PARAM_NESTED -%>
+	url, err = addQueryParams(url, map[string]string{"options.requestedPolicyVersion": fmt.Sprintf("%d", <% if object.iam_policy.iam_policy_version -%> <%= object.iam_policy.iam_policy_version -%> <% else -%> iamPolicyVersion <% end -%>)})
+	if err != nil {
+		return nil, err
+	}
 <% elsif object.iam_policy.iam_conditions_request_type == :REQUEST_BODY -%>
 	obj = map[string]interface{}{
 		"options": map[string]interface{}{
