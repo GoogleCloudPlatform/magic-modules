@@ -767,6 +767,21 @@ objects:
                                       Note that specifying several headers, and/or headers that have a large range of values (e.g. per-user) will dramatically impact the cache hit rate, and may result in a higher eviction rate and reduced performance.
                                     max_size: 5
                                     item_type: Api::Type::String
+                                  - !ruby/object:Api::Type::Array
+                                    name: includedCookieNames
+                                    description: |
+                                      Names of Cookies to include in cache keys.  The cookie name and cookie value of each cookie named will be used as part of the cache key.
+
+                                      Cookie names:
+                                        - must be valid RFC 6265 "cookie-name" tokens
+                                        - are case sensitive
+                                        - cannot start with "Edge-Cache-" (case insensitive)
+
+                                        Note that specifying several cookies, and/or cookies that have a large range of values (e.g., per-user) will dramatically impact the cache hit rate, and may result in a higher eviction rate and reduced performance.
+
+                                        You may specify up to three cookie names.
+                                    max_size: 3
+                                    item_type: Api::Type::String
                               - !ruby/object:Api::Type::Boolean
                                 name: 'negativeCaching'
                                 description: |
