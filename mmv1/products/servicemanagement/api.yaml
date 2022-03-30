@@ -49,5 +49,5 @@ objects:
         required: true
       - !ruby/object:Api::Type::String
         name: 'consumerProject'
-        description: Service consumer level permissions require that the request to the Service Control API must contain at least one valid service consumer project ID.
+        description: The service consumer project ID which you are granting permission to
         required: true
