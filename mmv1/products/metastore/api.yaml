@@ -227,17 +227,6 @@ objects:
         values:
           - :CANARY
           - :STABLE
-      - !ruby/object:Api::Type::NestedObject
-        name: 'encryptionConfig'
-        description: |
-          Information used to configure the Dataproc Metastore service to encrypt customer data at rest.
-        properties:
-          - !ruby/object:Api::Type::String
-            name: 'kmsKey'
-            description: |
-              The fully qualified customer provided Cloud KMS key name to use for customer data encryption, in the following form:
-
-              projects/{projectNumber}/locations/{locationId}/keyRings/{key_ring_id}/cryptoKeys/{crypto_key_id}.
       - !ruby/object:Api::Type::String
         name: 'uid'
         output: true
