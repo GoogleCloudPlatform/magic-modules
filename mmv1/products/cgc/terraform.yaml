@@ -195,13 +195,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "deletion_protection"
       - !ruby/object:Provider::Terraform::Examples
-
         name: "sql_mysql_instance_public_ip"
         primary_resource_id: "mysql_public_ip_instance_name"
         primary_resource_type: "google_sql_database_instance"
         vars:
           mysql_public_ip_instance_name: "mysql-public-ip-instance-name"
           deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_postgres_instance_public_ip"
+        primary_resource_id: "postgres_public_ip_instance_name"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          postgres_public_ip_instance_name: "postgres-public-ip-instance-name"
+          deletion_protection: "true"
+          skip_test: true
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
