@@ -138,10 +138,11 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   if [[ -n $RECORDING_FAILED_TESTS ]]; then
     comment+="Tests failed during RECORDING mode:${NEWLINE} $RECORDING_FAILED_TESTS ${NEWLINE}${NEWLINE}"
     comment+="Please fix these to complete your PR${NEWLINE}"
-    comment+="You can view the build log here: https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/recording_test.log and the debug log for each test here: https://console.cloud.google.com/storage/browser/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording"
   else
-    comment+="All tests passed"
+    comment+="All tests passed${NEWLINE}"
   fi
+
+  comment+="You can view the build log here: https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/recording_test.log and the debug log for each test here: https://console.cloud.google.com/storage/browser/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording"
 
   # store cassettes
   gsutil -m -q cp fixtures/* gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$pr_number/fixtures/
@@ -150,12 +151,13 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   gsutil -q cp recording_test.log gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
 
   # store recording test logs
-  gsutil -m -q cp testlog/recording/* gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording/ #modify to correct GCS path
+  gsutil -m -q cp testlog/recording/* gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording/ 
 
   add_comment "${comment}" ${pr_number}
 
 else
-  comment="All tests passed in REPLAYING mode"
+  comment="All tests passed in REPLAYING mode${NEWLINE}"
+  comment+="You can view the build log here: https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/replaying_test.log"
   add_comment "${comment}" ${pr_number}
 fi
 
@@ -181,5 +183,3 @@ curl \
   -H "Accept: application/vnd.github.v3+json" \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
   -d "$post_body"
-
-
