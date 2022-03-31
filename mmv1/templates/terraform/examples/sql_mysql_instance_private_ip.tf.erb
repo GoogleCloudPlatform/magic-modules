@@ -1,3 +1,5 @@
+# [START cloud_sql_mysql_instance_private_ip]
+
 resource "google_compute_network" "private_network" {
   name                    = "<%= ctx[:vars]['private_network'] %>"
   auto_create_subnetworks = "false"
@@ -33,3 +35,4 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   }
   deletion_protection = "false"
 }
+# [END cloud_sql_mysql_instance_private_ip]
