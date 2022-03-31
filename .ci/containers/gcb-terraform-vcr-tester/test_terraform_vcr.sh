@@ -34,21 +34,25 @@ fi
 function add_comment {
   curl -H "Authorization: token ${GITHUB_TOKEN}" \
     -d "$(jq -r --arg comment "${1}" -n "{body: \$comment}")" \
-    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${2}/comments"
+    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${pr_number}/comments"
 }
 
-post_body=$( jq -n \
+function update_status {
+  post_body=$( jq -n \
     --arg context "VCR-test" \
     --arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
-    --arg state "pending" \
+    --arg state "${1}" \
     '{context: $context, target_url: $target_url, state: $state}')
 
-curl \
-  -X POST \
-  -u "$github_username:$GITHUB_TOKEN" \
-  -H "Accept: application/vnd.github.v3+json" \
-  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
-  -d "$post_body"
+  curl \
+    -X POST \
+    -u "$github_username:$GITHUB_TOKEN" \
+    -H "Accept: application/vnd.github.v3+json" \
+    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
+    -d "$post_body"
+}
+
+update_status "pending"
 
 set +e
 # cassette retrieval
@@ -77,9 +81,37 @@ TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_S
 
 test_exit_code=$?
 
-FAILED_TESTS=$(grep "^--- FAIL: TestAcc" replaying_test.log)
-PASSED_TESTS=$(grep "^--- PASS: TestAcc" replaying_test.log)
-SKIPPED_TESTS=$(grep "^--- SKIP: TestAcc" replaying_test.log)
+TESTS_TERMINATED=$(grep "^cannot run Terraform provider tests" replaying_test.log)
+
+counter=1
+test_suffix=""
+
+while [[ -n $TESTS_TERMINATED ]]; do
+  if [[ $TESTS_RUN_COUNT -gt 3 ]]; then
+    comment="Failed to run VCR tests"
+    add_comment "${comment}"
+    update_status "failure"
+    exit 0
+  fi
+
+  comment="Tests rerun"
+  add_comment "${comment}"
+
+  # store the previous replaying build log
+  gsutil -q cp replaying_test$test_suffix.log gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
+
+  test_suffix="$counter"
+
+  # rerun the test
+  TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v -run=TestAcc -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > replaying_test$test_suffix.log
+  test_exit_code=$?
+  TESTS_TERMINATED=$(grep "^cannot run Terraform provider tests" replaying_test$test_suffix.log)
+  counter=$((counter + 1))
+done
+
+FAILED_TESTS=$(grep "^--- FAIL: TestAcc" replaying_test$test_suffix.log)
+PASSED_TESTS=$(grep "^--- PASS: TestAcc" replaying_test$test_suffix.log)
+SKIPPED_TESTS=$(grep "^--- SKIP: TestAcc" replaying_test$test_suffix.log)
 
 if [[ -n $FAILED_TESTS ]]; then
   FAILED_TESTS_COUNT=$(echo "$FAILED_TESTS" | wc -l)
@@ -99,14 +131,13 @@ else
   SKIPPED_TESTS_COUNT=0
 fi
 
-FAILED_TESTS_PATTERN=$(grep "FAIL: TestAcc" replaying_test.log | awk '{print $3}' | awk -v d="|" '{s=(NR==1?s:s d)$0}END{print s}')
+FAILED_TESTS_PATTERN=$(grep "FAIL: TestAcc" replaying_test$test_suffix.log | awk '{print $3}' | awk -v d="|" '{s=(NR==1?s:s d)$0}END{print s}')
 
 # store replaying build log
-gsutil -q cp replaying_test.log gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
+gsutil -q cp replaying_test$test_suffix.log gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
 
 # store replaying test logs
-gsutil -m -q cp testlog/replaying/* gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/replaying/ #modify to correct GCS path
-
+gsutil -m -q cp testlog/replaying/* gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/replaying/ 
 
 comment="Tests count: ${NEWLINE}"
 comment+="Total tests: $(($FAILED_TESTS_COUNT+$PASSED_TESTS_COUNT+$SKIPPED_TESTS_COUNT)) ${NEWLINE}"
@@ -114,13 +145,13 @@ comment+="Passed tests $PASSED_TESTS_COUNT ${NEWLINE}"
 comment+="Skipped tests: $SKIPPED_TESTS_COUNT ${NEWLINE}"
 comment+="Failed tests: $FAILED_TESTS_COUNT ${NEWLINE}${NEWLINE}"
 
-add_comment "${comment}" "${pr_number}"
+add_comment "${comment}"
 
 
 if [[ -n $FAILED_TESTS_PATTERN ]]; then
   
   comment="I have triggered VCR tests in RECORDING mode for the following tests that failed during VCR: $FAILED_TESTS_PATTERN"
-  add_comment "${comment}" "${pr_number}"
+  add_comment "${comment}"
 
   # RECORDING mode
   export VCR_MODE=RECORDING
@@ -153,14 +184,13 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   # store recording test logs
   gsutil -m -q cp testlog/recording/* gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording/ 
 
-  add_comment "${comment}" ${pr_number}
+  add_comment "${comment}"
 
 else
   comment="All tests passed in REPLAYING mode${NEWLINE}"
-  comment+="You can view the build log here: https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/replaying_test.log"
-  add_comment "${comment}" ${pr_number}
+  comment+="You can view the build log here: https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/replaying_test$test_suffix.log"
+  add_comment "${comment}"
 fi
-
 
 if [ $test_exit_code -ne 0 ]; then
   test_state="failure"
@@ -168,18 +198,6 @@ else
   test_state="success"
 fi
 
-
 set -e
 
-post_body=$( jq -n \
-    --arg context "VCR-test" \
-    --arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
-    --arg state "${test_state}" \
-    '{context: $context, target_url: $target_url, state: $state}')
-
-curl \
-  -X POST \
-  -u "$github_username:$GITHUB_TOKEN" \
-  -H "Accept: application/vnd.github.v3+json" \
-  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
-  -d "$post_body"
+update_status ${test_state}
