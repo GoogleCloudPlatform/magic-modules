@@ -351,21 +351,21 @@ func generateBigtableGCPolicy(d *schema.ResourceData) (bigtable.GCPolicy, error)
 	return policies[0], nil
 }
 
-func getGCPolicyFromJSON(p map[string]interface{}) (bigtable.GCPolicy, error) {
+func getGCPolicyFromJSON(topLevelPolicy map[string]interface{}) (bigtable.GCPolicy, error) {
 	policy := []bigtable.GCPolicy{}
 
-	if err := validateGCRuleObject(p, true); err != nil {
+	if err := validateNestedPolicy(topLevelPolicy, true); err != nil {
 		return nil, err
 	}
 
-	for _, rule := range p["rules"].([]interface{}) {
-		r := rule.(map[string]interface{})
-		if err := validateGCRuleObject(r, false); err != nil {
+	for _, p := range topLevelPolicy["rules"].([]interface{}) {
+		childPolicy := p.(map[string]interface{})
+		if err := validateNestedPolicy(childPolicy, false); err != nil {
 			return nil, err
 		}
 
-		if r["max_age"] != nil {
-			maxAge := r["max_age"].(string)
+		if childPolicy["max_age"] != nil {
+			maxAge := childPolicy["max_age"].(string)
 			duration, err := time.ParseDuration(maxAge)
 			if err != nil {
 				return nil, fmt.Errorf("invalid duration string: %v", maxAge)
@@ -373,13 +373,13 @@ func getGCPolicyFromJSON(p map[string]interface{}) (bigtable.GCPolicy, error) {
 			policy = append(policy, bigtable.MaxAgePolicy(duration))
 		}
 
-		if r["max_version"] != nil {
-			version := r["max_version"].(float64)
+		if childPolicy["max_version"] != nil {
+			version := childPolicy["max_version"].(float64)
 			policy = append(policy, bigtable.MaxVersionsPolicy(int(version)))
 		}
 
-		if r["mode"] != nil {
-			n, err := getGCPolicyFromJSON(r)
+		if childPolicy["mode"] != nil {
+			n, err := getGCPolicyFromJSON(childPolicy)
 			if err != nil {
 				return nil, err
 			}
@@ -387,7 +387,7 @@ func getGCPolicyFromJSON(p map[string]interface{}) (bigtable.GCPolicy, error) {
 		}
 	}
 
-	switch p["mode"] {
+	switch topLevelPolicy["mode"] {
 	case strings.ToLower(GCPolicyModeUnion):
 		return bigtable.UnionPolicy(policy...), nil
 	case strings.ToLower(GCPolicyModeIntersection):
@@ -397,15 +397,15 @@ func getGCPolicyFromJSON(p map[string]interface{}) (bigtable.GCPolicy, error) {
 	}
 }
 
-func validateGCRuleObject(r map[string]interface{}, topLevel bool) error {
-	if len(r) > 2 {
+func validateNestedPolicy(p map[string]interface{}, topLevel bool) error {
+	if len(p) > 2 {
 		return fmt.Errorf("rules has more than 2 fields")
 	}
-	maxVersion, maxVersionOk := r["max_version"]
-	maxAge, maxAgeOk := r["max_age"]
-	rulesObj, rulesOk := r["rules"]
+	maxVersion, maxVersionOk := p["max_version"]
+	maxAge, maxAgeOk := p["max_age"]
+	rulesObj, rulesOk := p["rules"]
 
-	_, modeOk := r["mode"]
+	_, modeOk := p["mode"]
 	rules, arrOk := rulesObj.([]interface{})
 	_, vCastOk := maxVersion.(float64)
 	_, aCastOk := maxAge.(string)
@@ -426,11 +426,11 @@ func validateGCRuleObject(r map[string]interface{}, topLevel bool) error {
 		return fmt.Errorf("when `mode` is not specified, `rules` can only have 1 child rule")
 	}
 
-	if !topLevel && len(r) == 2 && (!modeOk || !rulesOk) {
+	if !topLevel && len(p) == 2 && (!modeOk || !rulesOk) {
 		return fmt.Errorf("need `mode` and `rules` for child nested policies")
 	}
 
-	if !topLevel && len(r) == 1 && !maxVersionOk && !maxAgeOk {
+	if !topLevel && len(p) == 1 && !maxVersionOk && !maxAgeOk {
 		return fmt.Errorf("need `max_version` or `max_age` for the rule")
 	}
 
