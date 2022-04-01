@@ -144,7 +144,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "autogenerate_revision_name"
       - !ruby/object:Provider::Terraform::Examples
-        name: "eventarc-basic-tf"
+        name: "eventarc_basic_tf"
         primary_resource_id: "default"
         vars:
           cloudrun_hello_tf: "cloudrun-hello-tf"
