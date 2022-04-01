@@ -4,6 +4,7 @@ set -e
 
 function clone_repo() {
     SCRATCH_OWNER=modular-magician
+    UPSTREAM_BRANCH=main
     if [ "$REPO" == "terraform" ]; then
         if [ "$VERSION" == "ga" ]; then
             UPSTREAM_OWNER=hashicorp
@@ -18,10 +19,17 @@ function clone_repo() {
             exit 1
         fi
     elif [ "$REPO" == "tf-conversion" ]; then
+        # This is here for backwards compatibility and can be removed after Nov 15 2021
         UPSTREAM_OWNER=GoogleCloudPlatform
         GH_REPO=terraform-google-conversion
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
+    elif [ "$REPO" == "terraform-validator" ]; then
+        UPSTREAM_OWNER=GoogleCloudPlatform
+        UPSTREAM_BRANCH=main
+        GH_REPO=terraform-validator
+        LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-validator
     elif [ "$REPO" == "tf-oics" ]; then
+        UPSTREAM_BRANCH=master
         UPSTREAM_OWNER=terraform-google-modules
         GH_REPO=docs-examples
         LOCAL_PATH=$GOPATH/src/github.com/terraform-google-modules/docs-examples
@@ -41,7 +49,7 @@ function clone_repo() {
 }
 
 if [ $# -lt 4 ]; then
-    echo "Usage: $0 (build|diff|downstream) (terraform|tf-conversion) (ga|beta) (pr number|sha)"
+    echo "Usage: $0 (build|diff|downstream) (terraform|terraform-validator) (ga|beta) (pr number|sha)"
     exit 1
 fi
 if [ -z "$GITHUB_TOKEN" ]; then
@@ -72,7 +80,7 @@ if [ "$COMMAND" == "head" ]; then
     COMMIT_MESSAGE="New generated code for MM PR $REFERENCE."
 elif [ "$COMMAND" == "base" ]; then
     # In this case, there is guaranteed to be a merge commit,
-    # and the *left* side of it is the old master branch.
+    # and the *left* side of it is the old main branch.
     # the *right* side of it is the code to be merged.
     git checkout HEAD~
     BRANCH=auto-pr-$REFERENCE-old
@@ -89,9 +97,53 @@ if [ "$REPO" == "terraform" ]; then
     popd
 fi
 
-if [ "$REPO" == "tf-conversion" ]; then
+if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     # use terraform generator with validator overrides.
+    # Check for tf-conversion is legacy and can be removed after Nov 15 2021
+    if [ "$REPO" == "terraform-validator" ] && [ "$COMMAND" == "base" ] && [ ! -d "../.ci/containers/terraform-validator-tester" ]; then
+        # Temporary shim to allow building a "base" version; only required until after
+        # initial merge. If we're building a base branch on an old mmv1 main (which
+        # we can detect by the lack of files added in this PR) the base version will
+        # require a `google` folder to exist.
+        mkdir -p $LOCAL_PATH/google
+    fi
+
+    pushd $LOCAL_PATH
+    # clear out the templates as they are copied during
+    # generation from mmv1/third_party/validator/tests/data
+    rm -rf ./testdata/templates/
+    rm -rf ./testdata/generatedconvert/
+    rm -rf ./converters/google/provider
+    find ./test/** -type f -exec git rm {} \;
+
+    popd
     bundle exec compiler -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
+    pushd $LOCAL_PATH
+
+    if [ "$COMMAND" == "downstream" ]; then
+      go get -d github.com/hashicorp/terraform-provider-google@main
+    else
+      go mod edit -replace github.com/hashicorp/terraform-provider-google=github.com/$SCRATCH_OWNER/terraform-provider-google@$BRANCH
+    fi
+
+    go mod tidy
+
+    # the following build can fail which results in a subsequent failure to push to tfv repository.
+    # due to the uncertainty of tpg being able to build we will ignore errors here
+    # as these files are not critical to operation of tfv and not worth blocking the GA pipeline
+    if [ "$COMMAND" == "downstream" ]; then
+      set +e
+    fi
+
+    make build
+    export TFV_CREATE_GENERATED_FILES=true
+    go test ./test -run "TestAcc.*_generated_offline"
+
+    if [ "$COMMAND" == "downstream" ]; then
+      set -e
+    fi
+
+    popd
 elif [ "$REPO" == "tf-oics" ]; then
     # use terraform generator with oics override
     bundle exec compiler -a -e terraform -f oics -o $LOCAL_PATH -v $VERSION
@@ -151,7 +203,7 @@ if [ "$REPO" == "terraform" ]; then
 fi
 
 PR_NUMBER=$(curl -L -s -H "Authorization: token ${GITHUB_TOKEN}" \
-    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=closed&base=master&sort=updated&direction=desc" | \
+    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=closed&base=main&sort=updated&direction=desc" | \
     jq -r ".[] | if .merge_commit_sha == \"$REFERENCE\" then .number else empty end")
 if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ] && [ "$CHANGELOG" == "true" ]; then
     # Add the changelog entry!
@@ -178,14 +230,18 @@ if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ]; then
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/$PR_NUMBER" | \
         jq -r .html_url)
 
-    NEW_PR_URL=$(hub pull-request -b $UPSTREAM_OWNER:master -h $SCRATCH_OWNER:$BRANCH -m "$PR_TITLE" -m "$PR_BODY" -m "Derived from $MM_PR_URL")
+    echo "Base: $UPSTREAM_OWNER:$UPSTREAM_BRANCH"
+    echo "Head: $SCRATCH_OWNER:$BRANCH"
+    NEW_PR_URL=$(hub pull-request -b $UPSTREAM_OWNER:$UPSTREAM_BRANCH -h $SCRATCH_OWNER:$BRANCH -m "$PR_TITLE" -m "$PR_BODY" -m "Derived from $MM_PR_URL")
     if [ $? != 0 ]; then
         exit $?
     fi
+    echo "Created PR $NEW_PR_URL"
     NEW_PR_NUMBER=$(echo $NEW_PR_URL | awk -F '/' '{print $NF}')
 
     # Wait a few seconds, then merge the PR.
     sleep 5
+    echo "Merging PR $NEW_PR_URL"
     curl -L -H "Authorization: token ${GITHUB_TOKEN}" \
         -X PUT \
         -d '{"merge_method": "squash"}' \

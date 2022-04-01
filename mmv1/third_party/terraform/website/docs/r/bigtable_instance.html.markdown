@@ -52,7 +52,7 @@ The following arguments are supported:
 * `name` - (Required) The name (also called Instance Id in the Cloud Console) of the Cloud Bigtable instance.
 
 * `cluster` - (Required) A block of cluster configuration options. This can be specified at least once, and up to 4 times.
-See structure below.
+See [structure below](#nested_cluster).
 
 -----
 
@@ -75,7 +75,7 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 -----
 
-The `cluster` block supports the following arguments:
+<a name="nested_cluster"></a>The `cluster` block supports the following arguments:
 
 * `cluster_id` - (Required) The ID of the Cloud Bigtable cluster.
 
@@ -86,6 +86,14 @@ Bigtable instances are noted on the [Cloud Bigtable locations page](https://clou
 * `num_nodes` - (Optional) The number of nodes in your Cloud Bigtable cluster.
 Required, with a minimum of `1` for a `PRODUCTION` instance. Must be left unset
 for a `DEVELOPMENT` instance.
+
+* `autoscaling_config` - (Optional) Autoscaling config for the cluster, contains the following arguments:
+
+  * `min_nodes` - (Required) The minimum number of nodes for autoscaling.
+  * `max_nodes` - (Required) The maximum number of nodes for autoscaling.
+  * `cpu_target` - (Required) The CPU utilization target in percentage. Must be between 10 and 80.
+
+!> **Warning**: Only one of `autoscaling_config` or `num_nodes` should be set for a cluster. If both are set, `num_nodes` is ignored. If none is set, autoscaling will be disabled and sized to the current node count.
 
 * `storage_type` - (Optional) The storage type to use. One of `"SSD"` or
 `"HDD"`. Defaults to `"SSD"`.

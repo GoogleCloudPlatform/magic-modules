@@ -5,8 +5,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -664,9 +666,7 @@ func TestAccSqlDatabaseInstance_basic_with_user_labels(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
-<%# This test does not work in GA yet because service networking is still in beta -%>
-func TestAccSqlDatabaseInstance_withPrivateNetwork(t *testing.T) {
+func TestAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(t *testing.T) {
 	t.Parallel()
 
 	databaseName := "tf-test-" + randString(t, 10)
@@ -679,7 +679,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork(t *testing.T) {
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSqlDatabaseInstance_withPrivateNetwork(databaseName, networkName, addressName),
+				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName, addressName),
 			},
 			{
 				ResourceName:      "google_sql_database_instance.instance",
@@ -690,7 +690,104 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+
+func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-" + randString(t, 10)
+	addressName := "tf-test-" + randString(t, 10)
+	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private-allocated-ip-range")
+	addressName_update := "tf-test-" + randString(t, 10) + "update"
+	networkName_update := BootstrapSharedTestNetwork(t, "sql-instance-private-allocated-ip-range-update")
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(databaseName, networkName, addressName),
+			},
+			{
+				ResourceName:      "google_sql_database_instance.instance",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(databaseName, networkName_update, addressName_update),
+			},
+			{
+				ResourceName:      "google_sql_database_instance.instance",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-" + randString(t, 10)
+	addressName := "tf-test-" + randString(t, 10)
+	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private-replica")
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(databaseName, networkName, addressName),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.replica1",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: ignoredReplicaConfigurationFields,
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-" + randString(t, 10)
+	addressName := "tf-test-" + randString(t, 10)
+	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private-clone")
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(databaseName, networkName, addressName),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.clone1",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "clone"},
+			},
+		},
+	})
+}
 
 func TestAccSqlDatabaseInstance_createFromBackup(t *testing.T) {
 	// Sqladmin client
@@ -933,7 +1030,8 @@ func TestAccSqlDatabaseInstance_insights(t *testing.T) {
 
 var testGoogleSqlDatabaseInstance_basic2 = `
 resource "google_sql_database_instance" "instance" {
-  region = "us-central1"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
     tier = "db-f1-micro"
@@ -943,8 +1041,9 @@ resource "google_sql_database_instance" "instance" {
 
 var testGoogleSqlDatabaseInstance_basic3 = `
 resource "google_sql_database_instance" "instance" {
-  name   = "%s"
-  region = "us-central1"
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
     tier = "db-f1-micro"
@@ -954,9 +1053,9 @@ resource "google_sql_database_instance" "instance" {
 
 var testGoogleSqlDatabaseInstance_basic_mssql = `
 resource "google_sql_database_instance" "instance" {
-  name             = "%s"
-  database_version = "SQLSERVER_2017_STANDARD"
-  root_password    = "%s"
+  name                = "%s"
+  database_version    = "SQLSERVER_2019_STANDARD"
+  root_password       = "%s"
   deletion_protection = false
   settings {
     tier = "db-custom-1-3840"
@@ -968,9 +1067,9 @@ resource "google_sql_database_instance" "instance" {
 func testGoogleSqlDatabaseInstanceConfig_withoutReplica(instanceName string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
-  name             = "%s"
-  region           = "us-central1"
-  database_version = "MYSQL_5_7"
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
   deletion_protection = false
 
   settings {
@@ -989,9 +1088,9 @@ resource "google_sql_database_instance" "instance" {
 func testGoogleSqlDatabaseInstanceConfig_withReplica(instanceName, failoverName string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
-  name             = "%s"
-  region           = "us-central1"
-  database_version = "MYSQL_5_7"
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
   deletion_protection = false
 
   settings {
@@ -1010,7 +1109,7 @@ resource "google_sql_database_instance" "instance-failover" {
   region               = "us-central1"
   database_version     = "MYSQL_5_7"
   master_instance_name = google_sql_database_instance.instance.name
-  deletion_protection = false
+  deletion_protection  = false
 
   replica_configuration {
     failover_target = "true"
@@ -1023,9 +1122,7 @@ resource "google_sql_database_instance" "instance-failover" {
 `, instanceName, failoverName)
 }
 
-<% unless version == 'ga' -%>
-<%# This test does not work in GA yet because service networking is still in beta -%>
-func testAccSqlDatabaseInstance_withPrivateNetwork(databaseName, networkName, addressRangeName string) string {
+func testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName, addressRangeName string) string {
 	return fmt.Sprintf(`
 data "google_compute_network" "servicenet" {
   name                    = "%s"
@@ -1047,25 +1144,188 @@ resource "google_service_networking_connection" "foobar" {
 
 resource "google_sql_database_instance" "instance" {
   depends_on = [google_service_networking_connection.foobar]
-  name       = "%s"
-  region     = "us-central1"
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
     tier = "db-f1-micro"
     ip_configuration {
-      ipv4_enabled    = "false"
-      private_network = data.google_compute_network.servicenet.self_link
+      ipv4_enabled       = "false"
+      private_network    = data.google_compute_network.servicenet.self_link
     }
   }
 }
 `, networkName, addressRangeName, databaseName)
 }
-<% end -%>
+
+func testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(databaseName, networkName, addressRangeName string) string {
+	return fmt.Sprintf(`
+data "google_compute_network" "servicenet" {
+  name                    = "%s"
+}
+
+resource "google_compute_global_address" "foobar" {
+  name          = "%s"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = data.google_compute_network.servicenet.self_link
+}
+
+resource "google_service_networking_connection" "foobar" {
+  network                 = data.google_compute_network.servicenet.self_link
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.foobar.name]
+}
+
+resource "google_sql_database_instance" "instance" {
+  depends_on = [google_service_networking_connection.foobar]
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+      ipv4_enabled       = "false"
+      private_network    = data.google_compute_network.servicenet.self_link
+      allocated_ip_range = google_compute_global_address.foobar.name
+    }
+  }
+}
+`, networkName, addressRangeName, databaseName)
+}
+
+
+func testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(databaseName, networkName, addressRangeName string) string {
+	return fmt.Sprintf(`
+data "google_compute_network" "servicenet" {
+  name                    = "%s"
+}
+
+resource "google_compute_global_address" "foobar" {
+  name          = "%s"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = data.google_compute_network.servicenet.self_link
+}
+
+resource "google_service_networking_connection" "foobar" {
+  network                 = data.google_compute_network.servicenet.self_link
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.foobar.name]
+}
+
+resource "google_sql_database_instance" "instance" {
+  depends_on = [google_service_networking_connection.foobar]
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+      ipv4_enabled       = "false"
+      private_network    = data.google_compute_network.servicenet.self_link
+    }
+    backup_configuration {
+      enabled            = true
+      start_time         = "00:00"
+      binary_log_enabled = true
+    }
+  }
+}
+resource "google_sql_database_instance" "replica1" {
+  depends_on = [google_service_networking_connection.foobar]
+  name                = "%s-replica1"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+      ipv4_enabled       = "false"
+      private_network    = data.google_compute_network.servicenet.self_link
+      allocated_ip_range = google_compute_global_address.foobar.name
+    }
+  }
+
+  master_instance_name = google_sql_database_instance.instance.name
+
+  replica_configuration {
+    connect_retry_interval    = 100
+    master_heartbeat_period   = 10000
+    password                  = "password"
+    username                  = "username"
+    ssl_cipher                = "ALL"
+    verify_server_certificate = false
+  }
+}
+`, networkName, addressRangeName, databaseName, databaseName)
+}
+
+func testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(databaseName, networkName, addressRangeName string) string {
+	return fmt.Sprintf(`
+data "google_compute_network" "servicenet" {
+  name                    = "%s"
+}
+
+resource "google_compute_global_address" "foobar" {
+  name          = "%s"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = data.google_compute_network.servicenet.self_link
+}
+
+resource "google_service_networking_connection" "foobar" {
+  network                 = data.google_compute_network.servicenet.self_link
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.foobar.name]
+}
+
+resource "google_sql_database_instance" "instance" {
+  depends_on = [google_service_networking_connection.foobar]
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+      ipv4_enabled       = "false"
+      private_network    = data.google_compute_network.servicenet.self_link
+    }
+    backup_configuration {
+      enabled            = true
+      start_time         = "00:00"
+      binary_log_enabled = true
+    }
+  }
+}
+
+resource "google_sql_database_instance" "clone1" {
+  name                = "%s-clone1"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+
+  clone {
+    source_instance_name = google_sql_database_instance.instance.name
+    allocated_ip_range   = google_compute_global_address.foobar.name
+  }
+
+}
+`, networkName, addressRangeName, databaseName, databaseName)
+}
 
 var testGoogleSqlDatabaseInstance_settings = `
 resource "google_sql_database_instance" "instance" {
-  name   = "%s"
-  region = "us-central1"
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
     tier                   = "db-f1-micro"
@@ -1093,8 +1353,9 @@ resource "google_sql_database_instance" "instance" {
 `
 var testGoogleSqlDatabaseInstance_settings_deletionProtection = `
 resource "google_sql_database_instance" "instance" {
-  name   = "%s"
-  region = "us-central1"
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
   deletion_protection = %s
   settings {
     tier                   = "db-f1-micro"
@@ -1127,8 +1388,9 @@ resource "google_compute_network" "servicenet" {
 }
 
 resource "google_sql_database_instance" "instance" {
-  name       = "%s"
-  region     = "us-central1"
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
     tier = "db-f1-micro"
@@ -1142,9 +1404,9 @@ resource "google_sql_database_instance" "instance" {
 
 var testGoogleSqlDatabaseInstance_replica = `
 resource "google_sql_database_instance" "instance_master" {
-  name             = "tf-lw-%d"
-  database_version = "MYSQL_5_7"
-  region           = "us-central1"
+  name                = "tf-lw-%d"
+  database_version    = "MYSQL_5_7"
+  region              = "us-central1"
   deletion_protection = false
 
   settings {
@@ -1159,9 +1421,9 @@ resource "google_sql_database_instance" "instance_master" {
 }
 
 resource "google_sql_database_instance" "replica1" {
-  name             = "tf-lw-%d-1"
-  database_version = "MYSQL_5_7"
-  region           = "us-central1"
+  name                = "tf-lw-%d-1"
+  database_version    = "MYSQL_5_7"
+  region              = "us-central1"
   deletion_protection = false
 
   settings {
@@ -1184,9 +1446,9 @@ resource "google_sql_database_instance" "replica1" {
 }
 
 resource "google_sql_database_instance" "replica2" {
-  name             = "tf-lw-%d-2"
-  database_version = "MYSQL_5_7"
-  region           = "us-central1"
+  name                = "tf-lw-%d-2"
+  database_version    = "MYSQL_5_7"
+  region              = "us-central1"
   deletion_protection = false
 
   settings {
@@ -1208,8 +1470,9 @@ resource "google_sql_database_instance" "replica2" {
 
 var testGoogleSqlDatabaseInstance_slave = `
 resource "google_sql_database_instance" "instance_master" {
-  name   = "tf-lw-%d"
-  region = "us-central1"
+  name                = "tf-lw-%d"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
   deletion_protection = false
 
   settings {
@@ -1223,8 +1486,9 @@ resource "google_sql_database_instance" "instance_master" {
 }
 
 resource "google_sql_database_instance" "instance_slave" {
-  name   = "tf-lw-%d"
-  region = "us-central1"
+  name                = "tf-lw-%d"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
   deletion_protection = false
 
   master_instance_name = google_sql_database_instance.instance_master.name
@@ -1237,9 +1501,9 @@ resource "google_sql_database_instance" "instance_slave" {
 
 var testGoogleSqlDatabaseInstance_highAvailability = `
 resource "google_sql_database_instance" "instance" {
-  name             = "tf-lw-%d"
-  region           = "us-central1"
-  database_version = "POSTGRES_9_6"
+  name                = "tf-lw-%d"
+  region              = "us-central1"
+  database_version    = "POSTGRES_9_6"
   deletion_protection = false
 
   settings {
@@ -1257,8 +1521,9 @@ resource "google_sql_database_instance" "instance" {
 
 var testGoogleSqlDatabaseInstance_diskspecs = `
 resource "google_sql_database_instance" "instance" {
-  name   = "tf-lw-%d"
-  region = "us-central1"
+  name                = "tf-lw-%d"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
   deletion_protection = false
 
   settings {
@@ -1273,8 +1538,9 @@ resource "google_sql_database_instance" "instance" {
 
 var testGoogleSqlDatabaseInstance_maintenance = `
 resource "google_sql_database_instance" "instance" {
-  name   = "tf-lw-%d"
-  region = "us-central1"
+  name                = "tf-lw-%d"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
   deletion_protection = false
 
   settings {
@@ -1291,8 +1557,9 @@ resource "google_sql_database_instance" "instance" {
 
 var testGoogleSqlDatabaseInstance_authNets_step1 = `
 resource "google_sql_database_instance" "instance" {
-  name   = "tf-lw-%d"
-  region = "us-central1"
+  name                = "tf-lw-%d"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
     tier                   = "db-f1-micro"
@@ -1310,8 +1577,9 @@ resource "google_sql_database_instance" "instance" {
 
 var testGoogleSqlDatabaseInstance_authNets_step2 = `
 resource "google_sql_database_instance" "instance" {
-  name   = "tf-lw-%d"
-  region = "us-central1"
+  name                = "tf-lw-%d"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
     tier                   = "db-f1-micro"
@@ -1325,8 +1593,9 @@ resource "google_sql_database_instance" "instance" {
 
 var testGoogleSqlDatabaseInstance_multipleOperations = `
 resource "google_sql_database_instance" "instance" {
-  name   = "tf-test-%s"
-  region = "us-central1"
+  name                = "tf-test-%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
     tier                   = "db-f1-micro"
@@ -1348,8 +1617,9 @@ resource "google_sql_user" "user" {
 
 var testGoogleSqlDatabaseInstance_basic_with_user_labels = `
 resource "google_sql_database_instance" "instance" {
-  name   = "%s"
-  region = "us-central1"
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
     tier = "db-f1-micro"
@@ -1362,8 +1632,9 @@ resource "google_sql_database_instance" "instance" {
 `
 var testGoogleSqlDatabaseInstance_basic_with_user_labels_update = `
 resource "google_sql_database_instance" "instance" {
-  name   = "%s"
-  region = "us-central1"
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
     tier = "db-f1-micro"
@@ -1376,9 +1647,9 @@ resource "google_sql_database_instance" "instance" {
 
 var testGoogleSqlDatabaseInstance_insights = `
 resource "google_sql_database_instance" "instance" {
-  name   = "tf-test-%d"
-  region = "us-central1"
-  database_version = "POSTGRES_9_6"
+  name                = "tf-test-%d"
+  region              = "us-central1"
+  database_version    = "POSTGRES_9_6"
   deletion_protection = false
 
   settings {
@@ -1397,9 +1668,9 @@ resource "google_sql_database_instance" "instance" {
 func testGoogleSqlDatabaseInstance_PointInTimeRecoveryEnabled(masterID int, pointInTimeRecoveryEnabled bool) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
-  name             = "tf-test-%d"
-  region           = "us-central1"
-  database_version = "POSTGRES_9_6"
+  name                = "tf-test-%d"
+  region              = "us-central1"
+  database_version    = "POSTGRES_9_6"
   deletion_protection = false
   settings {
     tier = "db-f1-micro"
@@ -1416,9 +1687,9 @@ resource "google_sql_database_instance" "instance" {
 func testGoogleSqlDatabaseInstance_BackupRetention(masterID int) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
-  name             = "tf-test-%d"
-  region           = "us-central1"
-  database_version = "MYSQL_8_0"
+  name                = "tf-test-%d"
+  region              = "us-central1"
+  database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
     tier = "db-f1-micro"

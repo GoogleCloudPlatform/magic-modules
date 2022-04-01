@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	roleEntityBasic1        = "OWNER:user-paddy@hashicorp.com"
-	roleEntityBasic1_reader = "READER:user-paddy@hashicorp.com"
-	roleEntityBasic2        = "READER:user-paddy@carvers.co"
+	roleEntityBasic1        = "OWNER:user-gterraformtest1@gmail.com"
+	roleEntityBasic1_reader = "READER:user-gterraformtest1@gmail.com"
+	roleEntityBasic2        = "READER:user-gterraformtest2@gmail.com"
 	roleEntityBasic3_owner  = "OWNER:user-paddy@paddy.io"
 	roleEntityBasic3_reader = "READER:user-foran.paddy@gmail.com"
 
@@ -266,7 +266,8 @@ func testAccStorageBucketAclDestroyProducer(t *testing.T) func(s *terraform.Stat
 func testGoogleStorageBucketsAclBasic1_reader(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name     = "%s"
+  location = "US"
 }
 
 resource "google_storage_bucket_acl" "acl" {
@@ -279,7 +280,8 @@ resource "google_storage_bucket_acl" "acl" {
 func testGoogleStorageBucketsAclBasic1(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name     = "%s"
+  location = "US"
 }
 
 resource "google_storage_bucket_acl" "acl" {
@@ -292,7 +294,8 @@ resource "google_storage_bucket_acl" "acl" {
 func testGoogleStorageBucketsAclBasic2(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name     = "%s"
+  location = "US"
 }
 
 resource "google_storage_bucket_acl" "acl" {
@@ -305,7 +308,8 @@ resource "google_storage_bucket_acl" "acl" {
 func testGoogleStorageBucketsAclBasicDelete(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name     = "%s"
+  location = "US"
 }
 
 resource "google_storage_bucket_acl" "acl" {
@@ -318,7 +322,8 @@ resource "google_storage_bucket_acl" "acl" {
 func testGoogleStorageBucketsAclBasic3(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name     = "%s"
+  location = "US"
 }
 
 resource "google_storage_bucket_acl" "acl" {
@@ -331,7 +336,8 @@ resource "google_storage_bucket_acl" "acl" {
 func testGoogleStorageBucketsAclUnordered(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name     = "%s"
+  location = "US"
 }
 
 resource "google_storage_bucket_acl" "acl" {
@@ -344,7 +350,8 @@ resource "google_storage_bucket_acl" "acl" {
 func testGoogleStorageBucketsAclPredefined(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name     = "%s"
+  location = "US"
 }
 
 resource "google_storage_bucket_acl" "acl" {
@@ -358,13 +365,14 @@ resource "google_storage_bucket_acl" "acl" {
 func testGoogleStorageBucketsAclRemoveOwner(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name = "%s"
+  name     = "%s"
+  location = "US"
 }
 
 resource "google_storage_bucket_acl" "acl" {
   bucket         = google_storage_bucket.bucket.name
   role_entity = [
-	"READER:user-paddy@carvers.co"
+	"READER:user-gterraformtest2@gmail.com"
   ]
 }
 `, bucketName)

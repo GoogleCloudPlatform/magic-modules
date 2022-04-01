@@ -26,7 +26,8 @@ for Cloud Functions.
 
 ```hcl
 resource "google_storage_bucket" "bucket" {
-  name = "test-bucket"
+  name     = "test-bucket"
+  location = "US"
 }
 
 resource "google_storage_bucket_object" "archive" {
@@ -62,7 +63,8 @@ resource "google_cloudfunctions_function_iam_member" "invoker" {
 
 ```hcl
 resource "google_storage_bucket" "bucket" {
-  name = "test-bucket"
+  name     = "test-bucket"
+  location = "US"
 }
 
 resource "google_storage_bucket_object" "archive" {
@@ -121,7 +123,7 @@ Eg. `"nodejs10"`, `"nodejs12"`, `"nodejs14"`, `"python37"`, `"python38"`, `"pyth
 
 * `entry_point` - (Optional) Name of the function that will be executed when the Google Cloud Function is triggered.
 
-* `event_trigger` - (Optional) A source that fires events in response to a condition in another service. Structure is documented below. Cannot be used with `trigger_http`.
+* `event_trigger` - (Optional) A source that fires events in response to a condition in another service. Structure is [documented below](#nested_event_trigger). Cannot be used with `trigger_http`.
 
 * `trigger_http` - (Optional) Boolean variable. Any HTTP request (of a supported type) to the endpoint will trigger function execution. Supported HTTP request types are: POST, PUT, GET, DELETE, and OPTIONS. Endpoint is returned as `https_trigger_url`. Cannot be used with `event_trigger`.
 
@@ -144,11 +146,17 @@ Eg. `"nodejs10"`, `"nodejs12"`, `"nodejs14"`, `"python37"`, `"python38"`, `"pyth
 * `source_archive_object` - (Optional) The source archive object (file) in archive bucket.
 
 * `source_repository` - (Optional) Represents parameters related to source repository where a function is hosted.
-  Cannot be set alongside `source_archive_bucket` or `source_archive_object`. Structure is documented below.
+  Cannot be set alongside `source_archive_bucket` or `source_archive_object`. Structure is [documented below](#nested_source_repository).
 
 * `max_instances` - (Optional) The limit on the maximum number of function instances that may coexist at a given time.
 
-The `event_trigger` block supports:
+* `min_instances` - (Optional) The limit on the minimum number of function instances that may coexist at a given time.
+
+* `secret_environment_variables` - (Optional) Secret environment variables configuration. Structure is [documented below](#nested_secret_environment_variables).
+
+* `secret_volumes` - (Optional) Secret volumes configuration. Structure is [documented below](#nested_secret_volumes).
+
+<a name="nested_event_trigger"></a>The `event_trigger` block supports:
 
 * `event_type` - (Required) The type of event to observe. For example: `"google.storage.object.finalize"`.
 See the documentation on [calling Cloud Functions](https://cloud.google.com/functions/docs/calling/) for a
@@ -157,19 +165,45 @@ full reference of accepted triggers.
 * `resource` - (Required) Required. The name or partial URI of the resource from
 which to observe events. For example, `"myBucket"` or `"projects/my-project/topics/my-topic"`
 
-* `failure_policy` - (Optional) Specifies policy for failed executions. Structure is documented below.
+* `failure_policy` - (Optional) Specifies policy for failed executions. Structure is [documented below](#nested_failure_policy).
 
-The `failure_policy` block supports:
+<a name="nested_failure_policy"></a>The `failure_policy` block supports:
 
 * `retry` - (Required) Whether the function should be retried on failure. Defaults to `false`.
 
-The `source_repository` block supports:
+<a name="nested_source_repository"></a>The `source_repository` block supports:
 
 * `url` - (Required) The URL pointing to the hosted repository where the function is defined. There are supported Cloud Source Repository URLs in the following formats:
 
     * To refer to a specific commit: `https://source.developers.google.com/projects/*/repos/*/revisions/*/paths/*`
     * To refer to a moveable alias (branch): `https://source.developers.google.com/projects/*/repos/*/moveable-aliases/*/paths/*`. To refer to HEAD, use the `master` moveable alias.
     * To refer to a specific fixed alias (tag): `https://source.developers.google.com/projects/*/repos/*/fixed-aliases/*/paths/*`
+
+<a name="nested_secret_environment_variables"></a>The `secret_environment_variables` block supports:
+
+* `key` - (Required) Name of the environment variable.
+
+* `project_id` - (Optional) Project identifier (due to a known limitation, only project number is supported by this field) of the project that contains the secret. If not set, it will be populated with the function's project, assuming that the secret exists in the same project as of the function.
+
+* `secret` - (Required) ID of the secret in secret manager (not the full resource name).
+
+* `version` - (Required) Version of the secret (version number or the string "latest"). It is recommended to use a numeric version for secret environment variables as any updates to the secret value is not reflected until new clones start.
+
+<a name="nested_secret_volumes"></a>The `secret_volumes` block supports:
+
+* `mount_path` - (Required) The path within the container to mount the secret volume. For example, setting the mount_path as "/etc/secrets" would mount the secret value files under the "/etc/secrets" directory. This directory will also be completely shadowed and unavailable to mount any other secrets. Recommended mount paths: "/etc/secrets" Restricted mount paths: "/cloudsql", "/dev/log", "/pod", "/proc", "/var/log".
+
+* `project_id` - (Optional) Project identifier (due to a known limitation, only project number is supported by this field) of the project that contains the secret. If not set, it will be populated with the function's project, assuming that the secret exists in the same project as of the function.
+
+* `secret` - (Required) ID of the secret in secret manager (not the full resource name).
+
+* `versions` - (Optional) List of secret versions to mount for this secret. If empty, the "latest" version of the secret will be made available in a file named after the secret under the mount point. Structure is [documented below](#nested_nested_versions).
+
+<a name="nested_versions"></a>The `versions` block supports:
+
+* `path` - (Required) Relative path of the file under the mount path where the secret value for this version will be fetched and made available. For example, setting the mount_path as "/etc/secrets" and path as "/secret_foo" would mount the secret value file at "/etc/secrets/secret_foo".
+
+* `version` - (Required) Version of the secret (version number or the string "latest"). It is preferable to use "latest" version with secret volumes as secret value changes are reflected immediately.
 
 ## Attributes Reference
 

@@ -142,6 +142,7 @@ objects:
     parameters:
       - !ruby/object:Api::Type::String
         name: 'service'
+        input: true
         description: |
           The resource name of the service that this endpoint provides.
         required: true
@@ -177,4 +178,8 @@ objects:
           by service clients. The entire metadata dictionary may contain
           up to 512 characters, spread across all key-value pairs.
           Metadata that goes beyond any these limits will be rejected.
+      - !ruby/object:Api::Type::String
+        name: 'network'
+        description: |
+          The URL to the network, such as projects/PROJECT_NUMBER/locations/global/networks/NETWORK_NAME.          
 

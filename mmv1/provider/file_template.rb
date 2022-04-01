@@ -71,18 +71,19 @@ module Provider
       old_file_chmod_mode = File.stat(pwd + '/' + template).mode
       FileUtils.chmod(old_file_chmod_mode, path)
 
-      format_output_file(path)
+      format_output_file(path, template)
     end
 
     private
 
-    def format_output_file(path)
-      if path.end_with?('.py') && @env[:pyformat_enabled]
-        run_formatter("python3 -m black --line-length 160 -S #{path}")
-      elsif path.end_with?('.go') && @env[:goformat_enabled]
-        run_formatter("gofmt -w -s #{path}")
-        run_formatter("goimports -w #{path}")
-      end
+    # path is the output name of the file
+    # template is used to determine metadata about the file based on how it is
+    # generated
+    def format_output_file(path, template)
+      return unless path.end_with?('.go') && @env[:goformat_enabled]
+
+      run_formatter("gofmt -w -s #{path}")
+      run_formatter("goimports -w #{path}") unless template.include?('third_party/terraform')
     end
 
     def run_formatter(command)

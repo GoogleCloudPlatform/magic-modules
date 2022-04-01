@@ -67,9 +67,18 @@ type CustomImportFunctionDetails struct {
 }
 
 type AppendToBasePathDetails struct {
-	// Append to base path appends this string to the end of the resource's
-	// base path.
+	// AppendToBasePath appends the given string onto the end of the config base path.
 	String string
+}
+
+type ReplaceInBasePathDetails struct {
+	// ReplaceInBasePath replaces the config base path with the value returned
+	// by the given string.
+	// For example, client.Config.BasePath + "v1" would append "v1" to the current
+	// base path.
+	Present bool
+	Old     string
+	New     string
 }
 
 type CustomizeDiffDetails struct {
@@ -205,4 +214,14 @@ type ProductBasePathDetails struct {
 type ProductTitleDetails struct {
 	// alternative name to be used for the product resources
 	Title string
+}
+
+type ProductDocsSectionDetails struct {
+	// alternative name to be used for the product resources in docs.
+	DocsSection string
+}
+
+type CustomTimeoutDetails struct {
+	// The overriding Timeouts in Terraform
+	TimeoutMinutes int
 }

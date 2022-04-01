@@ -245,7 +245,11 @@ func subtractFromBindings(bindings []*cloudresourcemanager.Binding, toRemove ...
 }
 
 func iamMemberIsCaseSensitive(member string) bool {
-	return strings.HasPrefix(member, "principalSet:") || strings.HasPrefix(member, "principal:") || strings.HasPrefix(member, "principalHierarchy:")
+	// allAuthenticatedUsers and allUsers are special identifiers that are case sensitive. See:
+	// https://cloud.google.com/iam/docs/overview#all-authenticated-users
+	return strings.Contains(member, "allAuthenticatedUsers") || strings.Contains(member, "allUsers") ||
+		strings.HasPrefix(member, "principalSet:") || strings.HasPrefix(member, "principal:") ||
+		strings.HasPrefix(member, "principalHierarchy:")
 }
 
 // normalizeIamMemberCasing returns the case adjusted value of an iamMember
@@ -448,4 +452,22 @@ func compareAuditConfigs(a, b []*cloudresourcemanager.AuditConfig) bool {
 	aMap := createIamAuditConfigsMap(a)
 	bMap := createIamAuditConfigsMap(b)
 	return reflect.DeepEqual(aMap, bMap)
+}
+
+type IamSettings struct {
+	DeprecationMessage string
+}
+
+func IamWithDeprecationMessage(message string) func(s *IamSettings) {
+	return func(s *IamSettings) {
+		s.DeprecationMessage = message
+	}
+}
+
+func IamWithGAResourceDeprecation() func (s *IamSettings) {
+	<% if version == 'ga' -%>
+	return IamWithDeprecationMessage("This resource has been deprecated in the google (GA) provider, and will only be available in the google-beta provider in a future release.")
+	<% else -%>
+	return IamWithDeprecationMessage("")
+	<% end -%>
 }

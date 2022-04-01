@@ -153,9 +153,9 @@ objects:
         description: |
           A fully qualified domain name (FQDN) or IP address reachable over the public Internet, or the address of a Google Cloud Storage bucket.
 
-          This address will be used as the origin for cache requests - e.g. FQDN: media-backend.example.com IPv4:35.218.1.1 IPv6:[2607:f8b0:4012:809::200e] Cloud Storage: gs://bucketname
+          This address will be used as the origin for cache requests - e.g. FQDN: media-backend.example.com, IPv4: 35.218.1.1, IPv6: 2607:f8b0:4012:809::200e, Cloud Storage: gs://bucketname
 
-          When providing an FQDN (hostname), it must be publicly resolvable (e.g. via Google public DNS) and IP addresses must be publicly routable.
+          When providing an FQDN (hostname), it must be publicly resolvable (e.g. via Google public DNS) and IP addresses must be publicly routable.  It must not contain a protocol (e.g., https://) and it must not contain any slashes.
           If a Cloud Storage bucket is provided, it must be in the canonical "gs://bucketname" format. Other forms, such as "storage.googleapis.com", will be rejected.
       - !ruby/object:Api::Type::Enum
         name: 'protocol' # default http2 from api
@@ -183,8 +183,8 @@ objects:
           The total number of allowed attempts to cache fill across this and failover origins is limited to four.
           The total time allowed for cache fill attempts across this and failover origins can be controlled with maxAttemptsTimeout.
 
-          The last valid response from an origin will be returned to the client.
-          If no origin returns a valid response, an HTTP 503 will be returned to the client.
+          The last valid, non-retried response from all origins will be returned to the client.
+          If no origin returns a valid response, an HTTP 502 will be returned to the client.
 
           Defaults to 1. Must be a value greater than 0 and less than 4.
       - !ruby/object:Api::Type::String
@@ -215,6 +215,7 @@ objects:
           - GATEWAY_ERROR: Similar to 5xx, but only applies to response codes 502, 503 or 504.
           - RETRIABLE_4XX: Retry for retriable 4xx response codes, which include HTTP 409 (Conflict) and HTTP 429 (Too Many Requests)
           - NOT_FOUND: Retry if the origin returns a HTTP 404 (Not Found). This can be useful when generating video content, and the segment is not available yet.
+          - FORBIDDEN: Retry if the origin returns a HTTP 403 (Forbidden).
         item_type: !ruby/object:Api::Type::Enum
           name: 'undefined'
           description: |
@@ -226,6 +227,7 @@ objects:
             - :GATEWAY_ERROR
             - :RETRIABLE_4XX
             - :NOT_FOUND
+            - :FORBIDDEN
       - !ruby/object:Api::Type::NestedObject
         name: 'timeout'
         description: |
@@ -234,33 +236,62 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'connectTimeout'
             description: |
-              The maximum duration to wait for the origin connection to be established, including DNS lookup, TLS handshake and TCP/QUIC connection establishment.
+              The maximum duration to wait for a single origin connection to be established, including DNS lookup, TLS handshake and TCP/QUIC connection establishment.
 
               Defaults to 5 seconds. The timeout must be a value between 1s and 15s.
+
+              The connectTimeout capped by the deadline set by the request's maxAttemptsTimeout.  The last connection attempt may have a smaller connectTimeout in order to adhere to the overall maxAttemptsTimeout.
+
             at_least_one_of:
               - timeout.0.connect_timeout
               - timeout.0.max_attempts_timeout
               - timeout.0.response_timeout
+              - timeout.0.read_timeout
           - !ruby/object:Api::Type::String
             name: 'maxAttemptsTimeout'
             description: |
-              The maximum time across all connection attempts to the origin, including failover origins, before returning an error to the client. A HTTP 503 will be returned if the timeout is reached before a response is returned.
+              The maximum time across all connection attempts to the origin, including failover origins, before returning an error to the client. A HTTP 504 will be returned if the timeout is reached before a response is returned.
 
-              Defaults to 5 seconds. The timeout must be a value between 1s and 15s.
+              Defaults to 15 seconds. The timeout must be a value between 1s and 30s.
+
+              If a failoverOrigin is specified, the maxAttemptsTimeout of the first configured origin sets the deadline for all connection attempts across all failoverOrigins.
             at_least_one_of:
               - timeout.0.connect_timeout
               - timeout.0.max_attempts_timeout
               - timeout.0.response_timeout
+              - timeout.0.read_timeout
           - !ruby/object:Api::Type::String
             name: 'responseTimeout'
             description: |
-              The maximum duration to wait for data to arrive when reading from the HTTP connection/stream.
+              The maximum duration to wait for the last byte of a response to arrive when reading from the HTTP connection/stream.
 
-              Defaults to 5 seconds. The timeout must be a value between 1s and 30s.
+              Defaults to 30 seconds. The timeout must be a value between 1s and 120s.
+
+              The responseTimeout starts after the connection has been established.
+
+              This also applies to HTTP Chunked Transfer Encoding responses, and/or when an open-ended Range request is made to the origin. Origins that take longer to write additional bytes to the response than the configured responseTimeout will result in an error being returned to the client.
+
+              If the response headers have already been written to the connection, the response will be truncated and logged.
             at_least_one_of:
               - timeout.0.connect_timeout
               - timeout.0.max_attempts_timeout
               - timeout.0.response_timeout
+              - timeout.0.read_timeout
+          - !ruby/object:Api::Type::String
+            name: 'readTimeout'
+            description: |
+              The maximum duration to wait between reads of a single HTTP connection/stream.
+
+              Defaults to 15 seconds.  The timeout must be a value between 1s and 30s.
+
+              The readTimeout is capped by the responseTimeout.  All reads of the HTTP connection/stream must be completed by the deadline set by the responseTimeout.
+
+              If the response headers have already been written to the connection, the response will be truncated and logged.
+            at_least_one_of:
+              - timeout.0.connect_timeout
+              - timeout.0.max_attempts_timeout
+              - timeout.0.response_timeout
+              - timeout.0.read_timeout
   - !ruby/object:Api::Resource
     name: 'EdgeCacheService'
     base_url: 'projects/{{project}}/locations/global/edgeCacheServices'
@@ -312,6 +343,14 @@ objects:
         name: disableQuic # default from api
         description: |
           HTTP/3 (IETF QUIC) and Google QUIC are enabled by default.
+      - !ruby/object:Api::Type::Boolean
+        name: disableHttp2 # default from api
+        description: |
+          Disables HTTP/2.
+
+          HTTP/2 (h2) is enabled by default and recommended for performance. HTTP/2 improves connection re-use and reduces connection setup overhead by sending multiple streams over the same connection.
+
+          Some legacy HTTP clients may have issues with HTTP/2 connections due to broken HTTP/2 implementations. Setting this to true will prevent HTTP/2 from being advertised and negotiated.
       - !ruby/object:Api::Type::Boolean
         name: requireTls # default from api
         description: |
@@ -371,11 +410,23 @@ objects:
                   max_size: 10
                   description: |
                     The list of host patterns to match.
+  
+                    Host patterns must be valid hostnames. Ports are not allowed. Wildcard hosts are supported in the suffix or prefix form. * matches any string of ([a-z0-9-.]*). It does not match the empty string.
+  
+                    When multiple hosts are specified, hosts are matched in the following priority:
+  
+                      1. Exact domain names: ``www.foo.com``.
+                      2. Suffix domain wildcards: ``*.foo.com`` or ``*-bar.foo.com``.
+                      3. Prefix domain wildcards: ``foo.*`` or ``foo-*``.
+                      4. Special wildcard ``*`` matching any domain.
+  
+                      Notes:
+  
+                        The wildcard will not match the empty string. e.g. ``*-bar.foo.com`` will match ``baz-bar.foo.com`` but not ``-bar.foo.com``. The longest wildcards match first. Only a single host in the entire service can match on ``*``. A domain must be unique across all configured hosts within a service.
 
-                    Host patterns must be valid hostnames with optional port numbers in the format host:port. * matches any string of ([a-z0-9-.]*).
-                    The only accepted ports are :80 and :443.
-
-                    Hosts are matched against the HTTP Host header, or for HTTP/2 and HTTP/3, the ":authority" header, from the incoming request.
+                        Hosts are matched against the HTTP Host header, or for HTTP/2 and HTTP/3, the ":authority" header, from the incoming request.
+  
+                        You may specify up to 10 hosts.
                   item_type: Api::Type::String
                 - !ruby/object:Api::Type::String
                   name: pathMatcher
@@ -623,10 +674,11 @@ objects:
                                   - The TTL must be > 0 and <= 86400s (1 day)
                                   - The clientTtl cannot be larger than the defaultTtl (if set)
                                   - Fractions of a second are not allowed.
-                                  - Omit this field to use the defaultTtl, or the max-age set by the origin, as the client-facing TTL.
+
+                                  Omit this field to use the defaultTtl, or the max-age set by the origin, as the client-facing TTL.
 
                                   When the cache mode is set to "USE_ORIGIN_HEADERS" or "BYPASS_CACHE", you must omit this field.
-                                  A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+                                  A duration in seconds terminated by 's'. Example: "3s".
                               - !ruby/object:Api::Type::String
                                 name: 'defaultTtl' # defalt from api
                                 description: |
@@ -634,7 +686,7 @@ objects:
 
                                   Defaults to 3600s (1 hour).
 
-                                  - The TTL must be >= 0 and <= 2592000s (1 month)
+                                  - The TTL must be >= 0 and <= 31,536,000 seconds (1 year)
                                   - Setting a TTL of "0" means "always revalidate" (equivalent to must-revalidate)
                                   - The value of defaultTTL cannot be set to a value greater than that of maxTTL.
                                   - Fractions of a second are not allowed.
@@ -644,7 +696,7 @@ objects:
 
                                   When the cache mode is set to "USE_ORIGIN_HEADERS" or "BYPASS_CACHE", you must omit this field.
 
-                                  A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+                                  A duration in seconds terminated by 's'. Example: "3s".
                               - !ruby/object:Api::Type::String
                                 name: 'maxTtl' # defalt from api
                                 description: |
@@ -654,13 +706,14 @@ objects:
 
                                   Cache directives that attempt to set a max-age or s-maxage higher than this, or an Expires header more than maxTtl seconds in the future will be capped at the value of maxTTL, as if it were the value of an s-maxage Cache-Control directive.
 
-                                  - The TTL must be >= 0 and <= 2592000s (1 month)
+                                  - The TTL must be >= 0 and <= 31,536,000 seconds (1 year)
                                   - Setting a TTL of "0" means "always revalidate"
                                   - The value of maxTtl must be equal to or greater than defaultTtl.
                                   - Fractions of a second are not allowed.
-                                  - When the cache mode is set to "USE_ORIGIN_HEADERS", "FORCE_CACHE_ALL", or "BYPASS_CACHE", you must omit this field.
 
-                                  A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+                                  When the cache mode is set to "USE_ORIGIN_HEADERS", "FORCE_CACHE_ALL", or "BYPASS_CACHE", you must omit this field.
+
+                                  A duration in seconds terminated by 's'. Example: "3s".
                               - !ruby/object:Api::Type::NestedObject
                                 name: 'cacheKeyPolicy'
                                 description: |
@@ -685,7 +738,7 @@ objects:
                                     description: |
                                       If true, requests to different hosts will be cached separately.
 
-                                      Note: this should only be enabled if hosts share the same origin and content Removing the host from the cache key may inadvertently result in different objects being cached than intended, depending on which route the first user matched.
+                                      Note: this should only be enabled if hosts share the same origin and content. Removing the host from the cache key may inadvertently result in different objects being cached than intended, depending on which route the first user matched.
                                   - !ruby/object:Api::Type::Array
                                     name: includedQueryParameters
                                     description: |
@@ -713,6 +766,21 @@ objects:
 
                                       Note that specifying several headers, and/or headers that have a large range of values (e.g. per-user) will dramatically impact the cache hit rate, and may result in a higher eviction rate and reduced performance.
                                     max_size: 5
+                                    item_type: Api::Type::String
+                                  - !ruby/object:Api::Type::Array
+                                    name: includedCookieNames
+                                    description: |
+                                      Names of Cookies to include in cache keys.  The cookie name and cookie value of each cookie named will be used as part of the cache key.
+
+                                      Cookie names:
+                                        - must be valid RFC 6265 "cookie-name" tokens
+                                        - are case sensitive
+                                        - cannot start with "Edge-Cache-" (case insensitive)
+
+                                        Note that specifying several cookies, and/or cookies that have a large range of values (e.g., per-user) will dramatically impact the cache hit rate, and may result in a higher eviction rate and reduced performance.
+
+                                        You may specify up to three cookie names.
+                                    max_size: 3
                                     item_type: Api::Type::String
                               - !ruby/object:Api::Type::Boolean
                                 name: 'negativeCaching'
