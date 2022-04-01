@@ -214,6 +214,8 @@ objects:
               - :GRPC                  
       - !ruby/object:Api::Type::Enum
         name: 'databaseType'
+        input: true
+        default_value: :MYSQL
         description: |
           The database type that the Metastore service stores its data.
         values:
@@ -221,6 +223,7 @@ objects:
           - :SPANNER
       - !ruby/object:Api::Type::Enum
         name: 'releaseChannel'
+        input: true
         default_value: :STABLE
         description: |
           The release channel of the service. If unspecified, defaults to `STABLE`.
