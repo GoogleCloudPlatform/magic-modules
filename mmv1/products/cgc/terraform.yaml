@@ -16,6 +16,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Snippet: !ruby/object:Overrides::Terraform::ResourceOverride
     cgc_only: true
     examples:
+    # Compute
+      - !ruby/object:Provider::Terraform::Examples
+        name: "flask_google_cloud_quickstart"
+        primary_resource_type: "google_compute_instance"
+        primary_resource_id: "default"
+        vars:
+          flask_vm: "flask-vm"
+          allow_ssh: "allow-ssh"
+          flask_app_firewall: "flask-app-firewall"
+          bucket_tfstate: "bucket-tfstate"
+        ignore_read_extra:
+          - "metadata"
+          - "metadata_startup_script"
     # SQL
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_database_instance_sqlserver"
