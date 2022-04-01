@@ -87,7 +87,7 @@ counter=1
 test_suffix=""
 
 while [[ -n $TESTS_TERMINATED ]]; do
-  if [[ $TESTS_RUN_COUNT -gt 3 ]]; then
+  if [[ $counter -gt 3 ]]; then
     comment="Failed to run VCR tests"
     add_comment "${comment}"
     update_status "failure"
