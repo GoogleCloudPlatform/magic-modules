@@ -234,6 +234,7 @@ objects:
           The globally unique resource identifier of the metastore service.
       - !ruby/object:Api::Type::NestedObject
         name: 'networkConfig'
+        min_version: beta
         description: |
           The configuration specifying the network settings for the Dataproc Metastore service.
         properties:
