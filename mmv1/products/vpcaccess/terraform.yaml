@@ -48,6 +48,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
         custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.erb'
         diff_suppress_func: 'compareResourceNames'
+        default_from_api: true
       minThroughput: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(200, 1000)'
