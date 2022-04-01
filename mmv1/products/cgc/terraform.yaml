@@ -195,12 +195,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "deletion_protection"
       - !ruby/object:Provider::Terraform::Examples
-        name: "sql_sqlserver_instance_clone"
-        primary_resource_id: "clone"
+        name: "sql_postgres_instance_public_ip"
+        primary_resource_id: "postgres_public_ip_instance_name"
         primary_resource_type: "google_sql_database_instance"
         vars:
-          sqlserver_instance_source_name: "sqlserver-instance-source-name"
-          sqlserver_instance_clone_name: "sqlserver-instance-clone-name"
+          postgres_public_ip_instance_name: "postgres-public-ip-instance-name"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_mysql_instance_replica"
         primary_resource_type: "google_sql_database_instance"
@@ -214,6 +218,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "deletion_protection"
           - "root_password"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_sqlserver_instance_clone"
+        primary_resource_id: "clone"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          sqlserver_instance_source_name: "sqlserver-instance-source-name"
+          sqlserver_instance_clone_name: "sqlserver-instance-clone-name"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_postgres_instance_clone"
         primary_resource_id: "clone"
