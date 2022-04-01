@@ -26,7 +26,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           policy_name: "my-deny-policy"
           account_id: "svc-acc"
         test_env_vars:
-          project: :PROJECT_NAME
+          org_id: :ORG_ID
+          billing_account: :BILLING_ACCT
         min_version: beta
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       update_encoder: templates/terraform/update_encoder/iam_deny_policy.go.erb
