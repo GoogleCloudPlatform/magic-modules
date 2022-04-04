@@ -2054,6 +2054,23 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			// Back to basic settings to test setting Prometheus on its own
+			{
+				Config: testAccContainerCluster_basic(clusterName),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerCluster_withMonitoringConfigPrometheusOnly(clusterName),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 <% end -%>
 			{
 				Config: testAccContainerCluster_basic(clusterName),
@@ -5250,6 +5267,21 @@ resource "google_container_cluster" "primary" {
   initial_node_count = 1
   monitoring_config {
          enable_components = [ "SYSTEM_COMPONENTS", "WORKLOADS" ]
+         managed_prometheus {
+                 enabled = true
+         }
+  }
+}
+`, name)
+}
+
+func testAccContainerCluster_withMonitoringConfigPrometheusOnly(name string) string {
+       return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  monitoring_config {
          managed_prometheus {
                  enabled = true
          }
