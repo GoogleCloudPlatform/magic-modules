@@ -22,6 +22,10 @@ type lowercaseName interface {
 	lowercase() string
 }
 
+type kebabCaseName interface {
+	kebabcase() string
+}
+
 // e.g. `google_compute_instance` or `google_orgpolicy_policy`.
 type SnakeCaseTerraformResourceName string
 
@@ -72,6 +76,18 @@ func snakeToLowercase(s snakeCaseName) ConjoinedString {
 // snakeToTitleCase converts a snake_case string to TitleCase / Go struct case.
 func snakeToTitleCase(s snakeCaseName) miscellaneousNameTitleCase {
 	return miscellaneousNameTitleCase(strings.Join(snakeToParts(s, true), ""))
+}
+
+// e.g. `google-compute-instance` or `google-orgpolicy-policy`.
+type KebabCaseTerraformResourceName string
+
+// snakeToKebabCase converts a snake_case string to kebab case.
+func snakeToKebabCase(s snakeCaseName) miscellaneousNameKebabCase {
+	return miscellaneousNameKebabCase(strings.Join(snakeToParts(s, false), "-"))
+}
+
+func (s SnakeCaseFullName) ToKebab() RenderedString {
+	return RenderedString(snakeToKebabCase(s).kebabcase())
 }
 
 // A type for a string that is not meant for further conversion.  Some functions return a
@@ -141,5 +157,11 @@ func (m miscellaneousNameTitleCase) titlecase() string {
 type miscellaneousNameLowercase string
 
 func (m miscellaneousNameLowercase) lowercase() string {
+	return string(m)
+}
+
+type miscellaneousNameKebabCase string
+
+func (m miscellaneousNameKebabCase) kebabcase() string {
 	return string(m)
 }
