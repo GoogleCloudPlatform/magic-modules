@@ -208,7 +208,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   else
     if [[ $test_exit_code -ne 0 ]]; then
       # check for any uncaught errors in RECORDING mode
-      comment+="Errors occured during RECORDING mode. Please fix them to complete your PR${NEWLINE}"
+      comment+="Errors occurred during RECORDING mode. Please fix them to complete your PR${NEWLINE}"
     else
       comment+="All tests passed${NEWLINE}"
     fi
@@ -220,7 +220,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
 else
   if [[ $test_exit_code -ne 0 ]]; then
     # check for any uncaught errors errors in REPLAYING mode
-    comment+="Errors occured during REPLAYING mode. Please fix them to complete your PR${NEWLINE}"
+    comment+="Errors occurred during REPLAYING mode. Please fix them to complete your PR${NEWLINE}"
   else
     comment="All tests passed in REPLAYING mode${NEWLINE}"
   fi
