@@ -105,6 +105,11 @@ objects:
           Valid values include trial (free, limited, and for evaluation purposes only) or paid (full subscription has been purchased).
         output: true
       - !ruby/object:Api::Type::String
+        name: 'billingType'
+        description: |
+          Billing type of the Apigee organization. See [Apigee pricing](https://cloud.google.com/apigee/pricing).
+        input: true
+      - !ruby/object:Api::Type::String
         name: 'caCertificate'
         description: |
           Output only. Base64-encoded public certificate for the root CA of the Apigee organization.

@@ -77,6 +77,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           One of `trigger_template`, `github`, `pubsub_config` `webhook_config` or `source_to_build` must be provided.
       triggerTemplate.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      approvalConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        custom_flatten: templates/terraform/custom_flatten/cloudbuild_approval_required.go.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/cloudbuild_trigger_id.go.erb
       pre_update: templates/terraform/pre_update/cloudbuild_trigger.go.erb

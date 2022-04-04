@@ -44,6 +44,12 @@ func GetComputeSecurityPolicyApiObject(d TerraformResourceData, config *Config) 
 	} else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
 		obj["name"] = nameProp
 	}
+	typeProp, err := expandComputeSecurityPolicyName(d.Get("type"), d, config)
+	if err != nil {
+		return nil, err
+	} else if v, ok := d.GetOkExists("type"); !isEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, typeProp)) {
+		obj["type"] = typeProp
+	}
 	rulesProp, err := expandComputeSecurityPolicyRules(d.Get("rule"), d, config)
 	if err != nil {
 		return nil, err
@@ -74,6 +80,13 @@ func expandComputeSecurityPolicyRules(v interface{}, d TerraformResourceData, co
 			return nil, err
 		} else if val := reflect.ValueOf(transformedDescription); val.IsValid() && !isEmptyValue(val) {
 			transformed["description"] = transformedDescription
+		}
+
+		transformedType, err := expandComputeSecurityPolicyRulesDescription(original["type"], d, config)
+		if err != nil {
+			return nil, err
+		} else if val := reflect.ValueOf(transformedType); val.IsValid() && !isEmptyValue(val) {
+			transformed["type"] = transformedType
 		}
 
 		transformedPriority, err := expandComputeSecurityPolicyRulesPriority(original["priority"], d, config)
