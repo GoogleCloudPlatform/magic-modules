@@ -3703,31 +3703,24 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
-<% if version == 'ga' -%>
-	config := l[0].(map[string]interface{})
-	return &container.MonitoringConfig{
-		ComponentConfig: &container.MonitoringComponentConfig{
-			EnableComponents: convertStringArr(config["enable_components"].([]interface{})),
-		},
-	}
-<% end -%>
-<% if version == 'beta' -%>
 	mc := &container.MonitoringConfig{}
 	config := l[0].(map[string]interface{})
+	// In version == 'ga' enable_components will always be specified
 	if v, ok := config["enable_components"]; ok && len(v.([]interface{})) > 0 {
 		enable_components := v.([]interface{})[0].([]interface{})
 		mc.ComponentConfig = &container.MonitoringComponentConfig{
 			EnableComponents: convertStringArr(enable_components),
 		}
 	}
+<% if version == 'beta' -%>
 	if v, ok := config["managed_prometheus"]; ok && len(v.([]interface{})) > 0 {
 		managed_prometheus := v.([]interface{})[0].(map[string]interface{})
 		mc.ManagedPrometheusConfig = &container.ManagedPrometheusConfig{
 			Enabled: managed_prometheus["enabled"].(bool),
 		}
 	}
-	return mc
 <% end -%>
+	return mc
 }
 
 <% unless version == 'ga' -%>
