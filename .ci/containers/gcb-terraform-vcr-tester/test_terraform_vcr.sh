@@ -214,7 +214,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
     fi
   fi
 
-  comment+="View the [build log](https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/recording_test.log) and the [debug log](https://console.cloud.google.com/storage/browser/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording) for each test"
+  comment+="View the [build log](https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/recording_test.log) or the [debug log](https://console.cloud.google.com/storage/browser/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording) for each test"
   add_comment "${comment}"
 
 else
