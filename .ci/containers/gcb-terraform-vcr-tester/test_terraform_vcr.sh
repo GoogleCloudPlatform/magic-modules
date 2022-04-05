@@ -198,6 +198,10 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   RECORDING_PASSED_TESTS=$(grep "^--- PASS: TestAcc" recording_test.log | awk '{print "`"$3"`"}')
 
   comment=""
+    if [[ -n $RECORDING_PASSED_TESTS ]]; then
+    comment+="Tests passed during RECORDING mode:${NEWLINE} $RECORDING_PASSED_TESTS ${NEWLINE}${NEWLINE}"
+  fi
+
   if [[ -n $RECORDING_FAILED_TESTS ]]; then
     comment+="Tests failed during RECORDING mode:${NEWLINE} $RECORDING_FAILED_TESTS ${NEWLINE}${NEWLINE}"
     comment+="Please fix these to complete your PR${NEWLINE}"
