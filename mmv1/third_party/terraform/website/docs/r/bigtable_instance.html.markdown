@@ -60,10 +60,6 @@ resource "google_bigtable_instance" "production-instance" {
       cpu_target = 65
     }
   }
-
-  labels = {
-    my-label = "prod-label"
-  }
 }
 ```
 
