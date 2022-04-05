@@ -201,6 +201,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           mysql_public_ip_instance_name: "mysql-public-ip-instance-name"
           deletion_protection: "true"
+        skip_test: true
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
@@ -212,7 +213,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           postgres_public_ip_instance_name: "postgres-public-ip-instance-name"
           deletion_protection: "true"
-          skip_test: true
+        skip_test: true
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
