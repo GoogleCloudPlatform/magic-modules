@@ -162,12 +162,7 @@ comment+="Failed tests: \`$FAILED_TESTS_COUNT\` ${NEWLINE}${NEWLINE}"
 if [[ -n $FAILED_TESTS_PATTERN ]]; then
   comment+="#### Action taken ${NEWLINE}"
   comment+="Triggering VCR tests in RECORDING mode for the following tests that failed during VCR: $FAILED_TESTS_PATTERN"
-fi
-
-add_comment "${comment}"
-
-
-if [[ -n $FAILED_TESTS_PATTERN ]]; then
+  add_comment "${comment}"
   # RECORDING mode
   export VCR_MODE=RECORDING
   TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run=$FAILED_TESTS_PATTERN -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > recording_test.log
