@@ -231,6 +231,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "deletion_protection"
       - !ruby/object:Provider::Terraform::Examples
+        name: "sql_postgres_instance_private_ip"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "default"
+        vars:
+          private_network: "private-network"
+          private_ip_address: "private-ip-address"
+          private_ip_sql_instance: "private-ip-sql-instance"
+        skip_test: true
+      - !ruby/object:Provider::Terraform::Examples
         name: "sql_mysql_instance_private_ip"
         primary_resource_id: "instance"
         primary_resource_type: "google_sql_database_instance"
