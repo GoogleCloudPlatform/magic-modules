@@ -160,7 +160,8 @@ comment+="Skipped tests: \`$SKIPPED_TESTS_COUNT\` ${NEWLINE}"
 comment+="Failed tests: \`$FAILED_TESTS_COUNT\` ${NEWLINE}${NEWLINE}"
 
 if [[ -n $FAILED_TESTS_PATTERN ]]; then
-  comment+="${NEWLINE}Triggering VCR tests in RECORDING mode for the following tests that failed during VCR: $FAILED_TESTS_PATTERN"
+  comment+="#### Action taken ${NEWLINE}"
+  comment+="Triggering VCR tests in RECORDING mode for the following tests that failed during VCR: $FAILED_TESTS_PATTERN"
 fi
 
 add_comment "${comment}"
