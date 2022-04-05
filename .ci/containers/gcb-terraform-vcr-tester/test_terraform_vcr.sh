@@ -154,7 +154,7 @@ fi
 FAILED_TESTS_PATTERN=$(grep "^--- FAIL: TestAcc" replaying_test$test_suffix.log | awk '{print $3}' | awk -v d="|" '{s=(NR==1?s:s d)$0}END{print s}')
 
 comment="#### Tests analytics ${NEWLINE}"
-comment+="Total tests: \`$(($FAILED_TESTS_COUNT+$PASSED_TESTS_COUNT+$SKIPPED_TESTS_COUNT)) ${NEWLINE}"
+comment+="Total tests: \`$(($FAILED_TESTS_COUNT+$PASSED_TESTS_COUNT+$SKIPPED_TESTS_COUNT))\` ${NEWLINE}"
 comment+="Passed tests \`$PASSED_TESTS_COUNT\` ${NEWLINE}"
 comment+="Skipped tests: \`$SKIPPED_TESTS_COUNT\` ${NEWLINE}"
 comment+="Failed tests: \`$FAILED_TESTS_COUNT\` ${NEWLINE}${NEWLINE}"
