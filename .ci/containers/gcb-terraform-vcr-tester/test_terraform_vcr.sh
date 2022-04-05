@@ -223,7 +223,7 @@ else
     # check for any uncaught errors errors in REPLAYING mode
     comment+="Errors occurred during REPLAYING mode. Please fix them to complete your PR${NEWLINE}"
   else
-    comment="All tests passed in REPLAYING mode${NEWLINE}"
+    comment+="All tests passed in REPLAYING mode${NEWLINE}"
   fi
   comment+="View the [build log](https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/replaying_test$test_suffix.log)"
   add_comment "${comment}"
