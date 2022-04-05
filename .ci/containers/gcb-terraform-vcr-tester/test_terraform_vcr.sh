@@ -151,7 +151,7 @@ else
   SKIPPED_TESTS_COUNT=0
 fi
 
-FAILED_TESTS_PATTERN=$(grep "FAIL: TestAcc" replaying_test$test_suffix.log | awk '{print $3}' | awk -v d="|" '{s=(NR==1?s:s d)$0}END{print s}')
+FAILED_TESTS_PATTERN=$(grep "^--- FAIL: TestAcc" replaying_test$test_suffix.log | awk '{print $3}' | awk -v d="|" '{s=(NR==1?s:s d)$0}END{print s}')
 
 comment="Tests count: ${NEWLINE}"
 comment+="Total tests: $(($FAILED_TESTS_COUNT+$PASSED_TESTS_COUNT+$SKIPPED_TESTS_COUNT)) ${NEWLINE}"
