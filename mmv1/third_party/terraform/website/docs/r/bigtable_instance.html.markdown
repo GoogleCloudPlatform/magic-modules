@@ -44,6 +44,29 @@ resource "google_bigtable_instance" "production-instance" {
 }
 ```
 
+## Example Usage - Cluster Autoscaling
+
+```hcl
+resource "google_bigtable_instance" "production-instance" {
+  name = "tf-instance"
+
+  cluster {
+    cluster_id   = "tf-instance-cluster"
+    storage_type = "HDD"
+    # num_nodes = 1   # If set, will be ignored
+    autoscaling_config {
+      min_nodes  = 1
+      max_nodes  = 3
+      cpu_target = 65
+    }
+  }
+
+  labels = {
+    my-label = "prod-label"
+  }
+}
+```
+
 
 ## Argument Reference
 
