@@ -268,7 +268,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "static"
         vars:
           new_bucket: "new-bucket"
+          new_object: "new-object"
     properties:
+    
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
