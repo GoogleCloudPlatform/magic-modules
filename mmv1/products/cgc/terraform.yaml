@@ -230,7 +230,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
-     - !ruby/object:Provider::Terraform::Examples
+      - !ruby/object:Provider::Terraform::Examples
         name: "sql_sqlserver_instance_private_ip"
         primary_resource_id: "instance"
         primary_resource_type: "google_sql_database_instance"
