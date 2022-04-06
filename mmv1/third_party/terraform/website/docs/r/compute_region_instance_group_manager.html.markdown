@@ -161,12 +161,12 @@ update_policy {
   type                           = "PROACTIVE"
   instance_redistribution_type   = "PROACTIVE"
   minimal_action                 = "REPLACE"
-  <% if version == "beta" -%>
   most_disruptive_allowed_action = "REPLACE"
-  <% end -%>
   max_surge_percent              = 20
   max_unavailable_fixed          = 2
+  <% unless version == "ga" -%>
   min_ready_sec                  = 50
+  <% end -%>
   replacement_method             = "RECREATE"
 }
 ```
