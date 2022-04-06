@@ -1130,10 +1130,11 @@ resource "google_compute_region_instance_group_manager" "igm-rolling-update-poli
   distribution_policy_zones = ["us-central1-a", "us-central1-f"]
 
   update_policy {
-    type                  = "PROACTIVE"
-    minimal_action        = "REPLACE"
-    max_surge_fixed       = 2
-    max_unavailable_fixed = 2
+    type                           = "PROACTIVE"
+    minimal_action                 = "REPLACE"
+    most_disruptive_allowed_action = "REPLACE"
+    max_surge_fixed                = 2
+    max_unavailable_fixed          = 2
   }
 
   named_port {
@@ -1188,11 +1189,12 @@ resource "google_compute_region_instance_group_manager" "igm-rolling-update-poli
   distribution_policy_zones = ["us-central1-a", "us-central1-f"]
 
   update_policy {
-    type                         = "PROACTIVE"
-    instance_redistribution_type = "PROACTIVE"
-    minimal_action               = "REPLACE"
-    max_surge_fixed              = 2
-    max_unavailable_fixed        = 2
+    type                           = "PROACTIVE"
+    instance_redistribution_type   = "PROACTIVE"
+    minimal_action                 = "REPLACE"
+    most_disruptive_allowed_action = "REPLACE"
+    max_surge_fixed                = 2
+    max_unavailable_fixed          = 2
   }
 
   named_port {
@@ -1242,11 +1244,12 @@ resource "google_compute_region_instance_group_manager" "igm-rolling-update-poli
   distribution_policy_zones = ["us-central1-a", "us-central1-f"]
   target_size               = 3
   update_policy {
-    type                         = "PROACTIVE"
-    instance_redistribution_type = "NONE"
-    minimal_action               = "REPLACE"
-    max_surge_fixed              = 2
-    max_unavailable_fixed        = 0
+    type                           = "PROACTIVE"
+    instance_redistribution_type   = "NONE"
+    minimal_action                 = "REPLACE"
+    most_disruptive_allowed_action = "REPLACE"
+    max_surge_fixed                = 2
+    max_unavailable_fixed          = 0
   }
   named_port {
     name = "customhttp"
@@ -1295,15 +1298,16 @@ resource "google_compute_region_instance_group_manager" "igm-rolling-update-poli
   distribution_policy_zones = ["us-central1-a", "us-central1-f"]
   target_size               = 3
   update_policy {
-    type                         = "PROACTIVE"
-    instance_redistribution_type = "NONE"
-    minimal_action               = "REPLACE"
-    max_surge_fixed              = 0
-    max_unavailable_fixed        = 2
+    type                           = "PROACTIVE"
+    instance_redistribution_type   = "NONE"
+    minimal_action                 = "REPLACE"
+    most_disruptive_allowed_action = "REPLACE"
+    max_surge_fixed                = 0
+    max_unavailable_fixed          = 2
 <% unless version == "ga" -%>
     min_ready_sec                = 10
 <% end -%>
-    replacement_method           = "RECREATE"
+    replacement_method             = "RECREATE"
   }
   named_port {
     name = "customhttp"
@@ -1354,11 +1358,12 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
   region                    = "us-central1"
   target_size               = 2
   update_policy {
-    instance_redistribution_type = "NONE"
-    type                         = "OPPORTUNISTIC"
-    minimal_action               = "REPLACE"
-    max_surge_fixed              = 0
-    max_unavailable_fixed        = 6
+    instance_redistribution_type   = "NONE"
+    type                           = "OPPORTUNISTIC"
+    minimal_action                 = "REPLACE"
+    most_disruptive_allowed_action = "REPLACE"
+    max_surge_fixed                = 0
+    max_unavailable_fixed          = 6
   }
   stateful_disk {
     device_name = "stateful-disk"
@@ -1410,11 +1415,12 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
   target_size               = 2
 
   update_policy {
-    instance_redistribution_type = "NONE"
-    type                         = "OPPORTUNISTIC"
-    minimal_action               = "REPLACE"
-    max_surge_fixed              = 0
-    max_unavailable_fixed        = 6
+    instance_redistribution_type   = "NONE"
+    type                           = "OPPORTUNISTIC"
+    minimal_action                 = "REPLACE"
+    most_disruptive_allowed_action = "REPLACE"
+    max_surge_fixed                = 0
+    max_unavailable_fixed          = 6
   }
   stateful_disk {
     device_name = "stateful-disk"
