@@ -29,8 +29,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
           billing_account: :BILLING_ACCT
         min_version: beta
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      update_encoder: templates/terraform/update_encoder/iam_deny_policy.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

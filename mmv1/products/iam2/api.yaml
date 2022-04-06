@@ -57,7 +57,7 @@ objects:
       - !ruby/object:Api::Type::String
          name: 'name'
          description: |
-           The attachment point is identified by its URL-encoded full resource name.
+           The name of the policy.
          required: true
          input: true
          url_param_only: true
@@ -72,11 +72,10 @@ objects:
          name: 'displayName'
          description: |
            The display name of the rule.
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Fingerprint
          name: 'etag'
-         output: true
          description: |
-           The hash of the resource.
+           The hash of the resource. Used internally during updates.
       - !ruby/object:Api::Type::Array
         name: 'rules'
         required: true
@@ -131,17 +130,17 @@ objects:
                     - !ruby/object:Api::Type::String
                       name: 'title'
                       description: |
-                        Optional. Title for the expression, i.e. a short string describing its purpose.
+                        Title for the expression, i.e. a short string describing its purpose.
                         This can be used e.g. in UIs which allow to enter the expression.
                     - !ruby/object:Api::Type::String
                       name: 'description'
                       description: |
-                        Optional. Description of the expression. This is a longer text which describes the expression,
+                        Description of the expression. This is a longer text which describes the expression,
                         e.g. when hovered over it in a UI.
                     - !ruby/object:Api::Type::String
                       name: 'location'
                       description: |
-                        Optional. String indicating the location of the expression for error reporting,
+                        String indicating the location of the expression for error reporting,
                         e.g. a file name and a position in the file.
 
 

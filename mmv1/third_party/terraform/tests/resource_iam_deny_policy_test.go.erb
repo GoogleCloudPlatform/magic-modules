@@ -149,8 +149,10 @@ resource "google_iam_deny_policy" "example" {
     deny_rule {
       denied_principals = ["principalSet://goog/public:all"]
       denial_condition {
-        title = "Some expr"
-        expression = "!resource.matchTag('12345678/env', 'test')"
+        title = "Some other expr"
+        expression = "!resource.matchTag('87654321/env', 'test')"
+        location = "/some/file"
+        description = "A denial condition"
       }
       denied_permissions = ["cloudresourcemanager.googleapis.com/projects.delete"]
     }
@@ -187,7 +189,7 @@ resource "google_iam_deny_policy" "example" {
 }
 
 resource "google_folder" "folder" {
-	provider = google-beta
+  provider = google-beta
   display_name = "tf-test-%{random_suffix}"
   parent       = "organizations/%{org_id}"
 }
