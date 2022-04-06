@@ -393,5 +393,4 @@ objects:
         values:
           - :READ_REPLICAS_DISABLED
           - :READ_REPLICAS_ENABLED
-        default_value: :READ_REPLICAS_DISABLED
         input: true
