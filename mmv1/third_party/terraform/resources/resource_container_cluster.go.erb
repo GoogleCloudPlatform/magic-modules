@@ -4170,16 +4170,16 @@ func flattenMonitoringConfig(c *container.MonitoringConfig) []map[string]interfa
 		return nil
 	}
 
-	result := []map[string]interface{}{}
+	result := make(map[string]interface{})
 	if c.ComponentConfig != nil {
 		result["enable_components"] = c.ComponentConfig.EnableComponents
 	}
 <% if version == 'beta' -%>
-	if c.ManagedPrometheus != nil {
+	if c.ManagedPrometheusConfig != nil {
 		result["managed_prometheus"] = flattenManagedPrometheusConfig(c.ManagedPrometheusConfig)
 	}
 <% end -%>
-	return result
+	return []map[string]interface{}{result}
 }
 
 <% if version == 'beta' -%>
