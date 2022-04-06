@@ -3440,6 +3440,12 @@ func convertEventarcTriggerBetaDestinationToHCL(r *eventarcBeta.TriggerDestinati
 	if v := convertEventarcTriggerBetaDestinationCloudRunServiceToHCL(r.CloudRunService); v != "" {
 		outputConfig += fmt.Sprintf("\tcloud_run_service %s\n", v)
 	}
+	if v := convertEventarcTriggerBetaDestinationGkeToHCL(r.Gke); v != "" {
+		outputConfig += fmt.Sprintf("\tgke %s\n", v)
+	}
+	if r.Workflow != nil {
+		outputConfig += fmt.Sprintf("\tworkflow = %#v\n", *r.Workflow)
+	}
 	return outputConfig + "}"
 }
 
@@ -3460,6 +3466,29 @@ func convertEventarcTriggerBetaDestinationCloudRunServiceToHCL(r *eventarcBeta.T
 	return outputConfig + "}"
 }
 
+func convertEventarcTriggerBetaDestinationGkeToHCL(r *eventarcBeta.TriggerDestinationGke) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Cluster != nil {
+		outputConfig += fmt.Sprintf("\tcluster = %#v\n", *r.Cluster)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Namespace != nil {
+		outputConfig += fmt.Sprintf("\tnamespace = %#v\n", *r.Namespace)
+	}
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
+	}
+	if r.Path != nil {
+		outputConfig += fmt.Sprintf("\tpath = %#v\n", *r.Path)
+	}
+	return outputConfig + "}"
+}
+
 func convertEventarcTriggerBetaMatchingCriteriaToHCL(r *eventarcBeta.TriggerMatchingCriteria) string {
 	if r == nil {
 		return ""
@@ -3470,6 +3499,9 @@ func convertEventarcTriggerBetaMatchingCriteriaToHCL(r *eventarcBeta.TriggerMatc
 	}
 	if r.Value != nil {
 		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
+	}
+	if r.Operator != nil {
+		outputConfig += fmt.Sprintf("\toperator = %#v\n", *r.Operator)
 	}
 	return outputConfig + "}"
 }
@@ -8271,6 +8303,12 @@ func convertEventarcTriggerDestinationToHCL(r *eventarc.TriggerDestination) stri
 	if v := convertEventarcTriggerDestinationCloudRunServiceToHCL(r.CloudRunService); v != "" {
 		outputConfig += fmt.Sprintf("\tcloud_run_service %s\n", v)
 	}
+	if v := convertEventarcTriggerDestinationGkeToHCL(r.Gke); v != "" {
+		outputConfig += fmt.Sprintf("\tgke %s\n", v)
+	}
+	if r.Workflow != nil {
+		outputConfig += fmt.Sprintf("\tworkflow = %#v\n", *r.Workflow)
+	}
 	return outputConfig + "}"
 }
 
@@ -8291,6 +8329,29 @@ func convertEventarcTriggerDestinationCloudRunServiceToHCL(r *eventarc.TriggerDe
 	return outputConfig + "}"
 }
 
+func convertEventarcTriggerDestinationGkeToHCL(r *eventarc.TriggerDestinationGke) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Cluster != nil {
+		outputConfig += fmt.Sprintf("\tcluster = %#v\n", *r.Cluster)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Namespace != nil {
+		outputConfig += fmt.Sprintf("\tnamespace = %#v\n", *r.Namespace)
+	}
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
+	}
+	if r.Path != nil {
+		outputConfig += fmt.Sprintf("\tpath = %#v\n", *r.Path)
+	}
+	return outputConfig + "}"
+}
+
 func convertEventarcTriggerMatchingCriteriaToHCL(r *eventarc.TriggerMatchingCriteria) string {
 	if r == nil {
 		return ""
@@ -8301,6 +8362,9 @@ func convertEventarcTriggerMatchingCriteriaToHCL(r *eventarc.TriggerMatchingCrit
 	}
 	if r.Value != nil {
 		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
+	}
+	if r.Operator != nil {
+		outputConfig += fmt.Sprintf("\toperator = %#v\n", *r.Operator)
 	}
 	return outputConfig + "}"
 }
@@ -12495,6 +12559,8 @@ func convertEventarcTriggerBetaDestination(i interface{}) map[string]interface{}
 	return map[string]interface{}{
 		"cloudFunction":   in["cloud_function"],
 		"cloudRunService": convertEventarcTriggerBetaDestinationCloudRunService(in["cloud_run_service"]),
+		"gke":             convertEventarcTriggerBetaDestinationGke(in["gke"]),
+		"workflow":        in["workflow"],
 	}
 }
 
@@ -12532,6 +12598,31 @@ func convertEventarcTriggerBetaDestinationCloudRunServiceList(i interface{}) (ou
 	return out
 }
 
+func convertEventarcTriggerBetaDestinationGke(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"cluster":   in["cluster"],
+		"location":  in["location"],
+		"namespace": in["namespace"],
+		"service":   in["service"],
+		"path":      in["path"],
+	}
+}
+
+func convertEventarcTriggerBetaDestinationGkeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertEventarcTriggerBetaDestinationGke(v))
+	}
+	return out
+}
+
 func convertEventarcTriggerBetaMatchingCriteria(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -12540,6 +12631,7 @@ func convertEventarcTriggerBetaMatchingCriteria(i interface{}) map[string]interf
 	return map[string]interface{}{
 		"attribute": in["attribute"],
 		"value":     in["value"],
+		"operator":  in["operator"],
 	}
 }
 
@@ -16987,6 +17079,8 @@ func convertEventarcTriggerDestination(i interface{}) map[string]interface{} {
 	return map[string]interface{}{
 		"cloudFunction":   in["cloud_function"],
 		"cloudRunService": convertEventarcTriggerDestinationCloudRunService(in["cloud_run_service"]),
+		"gke":             convertEventarcTriggerDestinationGke(in["gke"]),
+		"workflow":        in["workflow"],
 	}
 }
 
@@ -17024,6 +17118,31 @@ func convertEventarcTriggerDestinationCloudRunServiceList(i interface{}) (out []
 	return out
 }
 
+func convertEventarcTriggerDestinationGke(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"cluster":   in["cluster"],
+		"location":  in["location"],
+		"namespace": in["namespace"],
+		"service":   in["service"],
+		"path":      in["path"],
+	}
+}
+
+func convertEventarcTriggerDestinationGkeList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertEventarcTriggerDestinationGke(v))
+	}
+	return out
+}
+
 func convertEventarcTriggerMatchingCriteria(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -17032,6 +17151,7 @@ func convertEventarcTriggerMatchingCriteria(i interface{}) map[string]interface{
 	return map[string]interface{}{
 		"attribute": in["attribute"],
 		"value":     in["value"],
+		"operator":  in["operator"],
 	}
 }
 

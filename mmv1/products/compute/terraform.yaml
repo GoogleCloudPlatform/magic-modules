@@ -160,6 +160,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           backend_bucket_name: "image-backend-bucket-full"
           bucket_name: "image-store-bucket-full"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_bucket_security_policy"
+        primary_resource_id: "image_backend"
+        vars:
+          backend_bucket_name: "image-backend-bucket"
+          bucket_name: "image-store-bucket"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
+      post_update: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -186,6 +195,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         send_empty_value: true
       cdnPolicy.negativeCachingPolicy.ttl: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
+      edgeSecurityPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_import: true
     exclude_validator: true

@@ -16,6 +16,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Snippet: !ruby/object:Overrides::Terraform::ResourceOverride
     cgc_only: true
     examples:
+    # Compute
+      - !ruby/object:Provider::Terraform::Examples
+        name: "flask_google_cloud_quickstart"
+        primary_resource_type: "google_compute_instance"
+        primary_resource_id: "default"
+        vars:
+          flask_vm: "flask-vm"
+          allow_ssh: "allow-ssh"
+          flask_app_firewall: "flask-app-firewall"
+          bucket_tfstate: "bucket-tfstate"
+        ignore_read_extra:
+          - "metadata"
+          - "metadata_startup_script"
     # SQL
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_database_instance_sqlserver"
@@ -127,7 +140,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "default"
         vars:
-          sqlserver_instance_backup_location: "sqlserver-instance-backup-location"
+          sqlserver_instance_backup_location: "sqlserver-instance-with-backup-location"
           deletion_protection: "true"
         test_vars_overrides:
           deletion_protection: "false"
@@ -139,7 +152,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "default"
         vars:
-          mysql_instance_backup_location: "mysql-instance-backup-location"
+          mysql_instance_backup_location: "mysql-instance-with-backup-location"
           deletion_protection: "true"
         skip_test: true
         test_vars_overrides:
@@ -151,7 +164,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "default"
         vars:
-          postgres_instance_backup_location: "postgres-instance-backup-location"
+          postgres_instance_backup_location: "postgres-instance-with-backup-location"
           deletion_protection: "true"
         skip_test: true
         test_vars_overrides:
@@ -194,6 +207,47 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_postgres_instance_public_ip"
+        primary_resource_id: "postgres_public_ip_instance_name"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          postgres_public_ip_instance_name: "postgres-public-ip-instance-name"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_mysql_instance_replica"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "read_replica"
+        vars:
+          mysql_primary_instance_name: "mysql-primary-instance-name"
+          mysql_replica_instance_name: "mysql-replica-instance-name"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_postgres_instance_private_ip"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "default"
+        vars:
+          private_network: "private-network"
+          private_ip_address: "private-ip-address"
+          private_ip_sql_instance: "private-ip-sql-instance"
+        skip_test: true
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_mysql_instance_private_ip"
+        primary_resource_id: "instance"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          private_network: "private-network"
+          private_ip_address: "private-ip-address"
+          private_ip_sql_instance: "private-ip-sql-instance"
+        skip_test: true
     # Storage
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_new_bucket"

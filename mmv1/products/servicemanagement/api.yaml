@@ -36,3 +36,18 @@ objects:
         name: 'serviceName'
         description: The name of the service.
         required: true
+  - !ruby/object:Api::Resource
+    name: 'ServiceConsumers'
+    base_url: services/{{service_name}}/consumers/{{consumer_project}}
+    self_link: services/{{service_name}}/consumers/{{consumer_project}}
+    description: |
+      A service that is managed by Google Service Management
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'serviceName'
+        description: The name of the service.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'consumerProject'
+        description: The service consumer project ID which you are granting permission to
+        required: true

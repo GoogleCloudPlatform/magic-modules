@@ -124,7 +124,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         All arguments including the `secret` value will be stored in the raw
-        state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
+        state as plain-text. [Read more about sensitive data in state](/language/state/sensitive-data.html).
         On import, the `secret` value will not be retrieved.
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride

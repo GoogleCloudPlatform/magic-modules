@@ -247,15 +247,6 @@ steps:
           - $PROJECT_ID
           - "25"  # Build step
 
-    - name: 'gcr.io/graphite-docker-images/terraform-vcr-tester'
-      id: tpg-vcr-test
-      secretEnv: ["TEAMCITY_TOKEN", "GITHUB_TOKEN"]
-      waitFor: ["diff"]
-      timeout: 12000s
-      args:
-          - $_PR_NUMBER
-          - $COMMIT_SHA
-
 # Long timeout to enable waiting on VCR test
 timeout: 20000s
 options:

@@ -561,7 +561,6 @@ func resourceContainerCluster() *schema.Resource {
 				ForceNew:    true,
 				MaxItems:    1,
 				Description: `Configuration for the Google Groups for GKE feature.`,
-				ConflictsWith: []string{"enable_autopilot"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"security_group": {

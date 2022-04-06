@@ -1,6 +1,6 @@
 # [START cloud_sql_mysql_instance_backup_location]
 resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
-  name             = "<%= ctx[:vars]['mysql_instance_backup'] %>"
+  name             = "<%= ctx[:vars]['mysql_instance_backup_location'] %>"
   region           = "asia-northeast1"
   database_version = "MYSQL_5_7"
   settings {
