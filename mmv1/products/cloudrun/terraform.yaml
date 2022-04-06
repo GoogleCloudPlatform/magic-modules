@@ -143,6 +143,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project: :PROJECT_NAME
         ignore_read_extra:
           - "autogenerate_revision_name"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "eventarc_basic_tf"
+        primary_resource_id: "default"
+        vars:
+          cloudrun_hello_tf: "cloudrun-hello-tf"
+          trigger_pubsub_tf: "trigger-pubsub-tf"
+          trigger_auditlog_tf: "trigger-auditlog-tf"
+        min_version: beta
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'autogenerate_revision_name'
