@@ -280,6 +280,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_sqlserver_instance_private_ip"
+        primary_resource_id: "instance"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          private_network: "private-network"
+          private_ip_address: "private-ip-address"
+          private_ip_sql_instance: "private-ip-sql-instance"
+        ignore_read_extra:
+          - "root_password"
           - "deletion_protection"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_postgres_instance_private_ip"
