@@ -121,7 +121,8 @@ module Api
         check :admin_iam_role, type: String
         check :parent_resource_attribute, type: String, default: 'id'
         check :test_project_name, type: String
-        check :iam_conditions_request_type, type: Symbol, allowed: %i[REQUEST_BODY QUERY_PARAM]
+        check :iam_conditions_request_type, type: Symbol, allowed: %i[REQUEST_BODY QUERY_PARAM
+                                                                      QUERY_PARAM_NESTED]
         check :base_url, type: String
         check :self_link, type: String
         check :import_format, type: Array, item_type: String

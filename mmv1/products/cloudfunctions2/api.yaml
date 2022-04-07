@@ -33,7 +33,7 @@ objects:
     self_link: projects/{{project}}/locations/{{location}}/functions/{{name}}
     create_verb: :POST
     references: !ruby/object:Api::Resource::ReferenceLinks
-      api: 'https://cloud.google.com/functions/docs/reference/rest/v2beta'
+      api: 'https://cloud.google.com/functions/docs/reference/rest/v2beta/projects.locations.functions'
     description: |
       A Cloud Function that contains user computation executed in response to an event.
     collection_url_key: 'functions'
