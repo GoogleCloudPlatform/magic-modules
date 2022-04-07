@@ -361,12 +361,16 @@ objects:
                     - !ruby/object:Api::Type::Enum
                       name: schemaType
                       description: |
-                        Specifies the output schema type. Only ANALYTICS is supported at this time.
+                        Specifies the output schema type.
                          * ANALYTICS: Analytics schema defined by the FHIR community.
                           See https://github.com/FHIR/sql-on-fhir/blob/master/sql-on-fhir.md.
+                         * ANALYTICS_V2: Analytics V2, similar to schema defined by the FHIR community, with added support for extensions with one or more occurrences and contained resources in stringified JSON.
+                         * LOSSLESS: A data-driven schema generated from the fields present in the FHIR data being exported, with no additional simplification.
                       default_value: :ANALYTICS
                       values:
                         - :ANALYTICS
+                        - :ANALYTICS_V2
+                        - :LOSSLESS
                     - !ruby/object:Api::Type::Integer
                       name: recursiveStructureDepth
                       required: true
@@ -451,6 +455,7 @@ objects:
             values:
               - :V1
               - :V2
+              - :V3
       - !ruby/object:Api::Type::KeyValuePairs
         name: labels
         required: false

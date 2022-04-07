@@ -28,7 +28,7 @@
 
     describe google_container_cluster(project: 'chef-inspec-gcp', location: 'europe-west2-a', name: 'inspec-gcp-kube-cluster') do
       its('node_config.disk_size_gb'){should eq 100}
-      its('node_config.image_type'){should eq "COS"}
+      its('node_config.image_type'){should eq "COS_CONTAINERD"}
       its('node_config.machine_type'){should eq "n1-standard-1"}
       its('node_ipv4_cidr_size'){should eq 24}
       its('node_pools.count'){should eq 1}

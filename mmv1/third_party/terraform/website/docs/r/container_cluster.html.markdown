@@ -21,7 +21,7 @@ and [the API reference](https://cloud.google.com/kubernetes-engine/docs/referenc
 
 ~> **Note:** All arguments and attributes, including basic auth username and
 passwords as well as certificate outputs will be stored in the raw state as
-plaintext. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
+plaintext. [Read more about sensitive data in state](/language/state/sensitive-data.html).
 
 ## Example Usage - with a separately managed node pool (recommended)
 
@@ -473,7 +473,7 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 * `service_account` - (Optional) The Google Cloud Platform Service Account to be used by the node VMs.
 
-* `image_type` - (Optional) The default image type used by NAP once a new node pool is being created. Please note that according to the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning#default-image-type) the value must be one of the [COS_CONTAINERD, COS, UBUNTU_CONTAINERD, UBUNTU].
+* `image_type` - (Optional) The default image type used by NAP once a new node pool is being created. Please note that according to the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning#default-image-type) the value must be one of the [COS_CONTAINERD, COS, UBUNTU_CONTAINERD, UBUNTU]. __NOTE__ : COS AND UBUNTU are deprecated as of `GKE 1.24`
 
 <a name="nested_authenticator_groups_config"></a>The `authenticator_groups_config` block supports:
 
