@@ -115,7 +115,7 @@ done
 gsutil -q cp replaying_test$test_suffix.log gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
 
 # store replaying test logs
-gsutil -m -q cp testlog/replaying/* gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/replaying/ 
+gsutil -m -q cp testlog/replaying/* gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/replaying/
 
 # handle provider crash
 TESTS_PANIC=$(grep "^panic: " replaying_test$test_suffix.log)
@@ -153,22 +153,20 @@ fi
 
 FAILED_TESTS_PATTERN=$(grep "^--- FAIL: TestAcc" replaying_test$test_suffix.log | awk '{print $3}' | awk -v d="|" '{s=(NR==1?s:s d)$0}END{print s}')
 
-comment="Tests count: ${NEWLINE}"
-comment+="Total tests: $(($FAILED_TESTS_COUNT+$PASSED_TESTS_COUNT+$SKIPPED_TESTS_COUNT)) ${NEWLINE}"
-comment+="Passed tests $PASSED_TESTS_COUNT ${NEWLINE}"
-comment+="Skipped tests: $SKIPPED_TESTS_COUNT ${NEWLINE}"
-comment+="Failed tests: $FAILED_TESTS_COUNT ${NEWLINE}${NEWLINE}"
-
-add_comment "${comment}"
-
+comment="#### Tests analytics ${NEWLINE}"
+comment+="Total tests: \`$(($FAILED_TESTS_COUNT+$PASSED_TESTS_COUNT+$SKIPPED_TESTS_COUNT))\` ${NEWLINE}"
+comment+="Passed tests \`$PASSED_TESTS_COUNT\` ${NEWLINE}"
+comment+="Skipped tests: \`$SKIPPED_TESTS_COUNT\` ${NEWLINE}"
+comment+="Failed tests: \`$FAILED_TESTS_COUNT\` ${NEWLINE}${NEWLINE}"
 
 if [[ -n $FAILED_TESTS_PATTERN ]]; then
-  
-  comment="I have triggered VCR tests in RECORDING mode for the following tests that failed during VCR: $FAILED_TESTS_PATTERN"
+  comment+="#### Action taken ${NEWLINE}"
+  comment+="Triggering VCR tests in RECORDING mode for the following tests that failed during VCR: $FAILED_TESTS_PATTERN"
   add_comment "${comment}"
-
   # RECORDING mode
   export VCR_MODE=RECORDING
+  # Clear fixtures folder
+  rm $VCR_PATH/*
   TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run=$FAILED_TESTS_PATTERN -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > recording_test.log
   test_exit_code=$?
 
@@ -179,7 +177,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   gsutil -q cp recording_test.log gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
 
   # store recording test logs
-  gsutil -m -q cp testlog/recording/* gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording/ 
+  gsutil -m -q cp testlog/recording/* gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording/
 
   # handle provider crash
   RECORDING_TESTS_PANIC=$(grep "^panic: " recording_test.log)
@@ -194,10 +192,10 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   fi
 
 
-  RECORDING_FAILED_TESTS=$(grep "^--- FAIL: TestAcc" recording_test.log | awk '{print $3}')
-  RECORDING_PASSED_TESTS=$(grep "^--- PASS: TestAcc" recording_test.log | awk '{print $3}')
+  RECORDING_FAILED_TESTS=$(grep "^--- FAIL: TestAcc" recording_test.log | awk '{print "`"$3"`"}')
+  RECORDING_PASSED_TESTS=$(grep "^--- PASS: TestAcc" recording_test.log | awk '{print "`"$3"`"}')
 
-  comment=""  
+  comment=""
   if [[ -n $RECORDING_PASSED_TESTS ]]; then
     comment+="Tests passed during RECORDING mode:${NEWLINE} $RECORDING_PASSED_TESTS ${NEWLINE}${NEWLINE}"
   fi
@@ -214,7 +212,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
     fi
   fi
 
-  comment+="You can view the build log here: https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/recording_test.log and the debug log for each test here: https://console.cloud.google.com/storage/browser/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording"
+  comment+="View the [build log](https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/recording_test.log) or the [debug log](https://console.cloud.google.com/storage/browser/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording) for each test"
   add_comment "${comment}"
 
 else
@@ -222,11 +220,12 @@ else
     # check for any uncaught errors errors in REPLAYING mode
     comment+="Errors occurred during REPLAYING mode. Please fix them to complete your PR${NEWLINE}"
   else
-    comment="All tests passed in REPLAYING mode${NEWLINE}"
+    comment+="All tests passed in REPLAYING mode${NEWLINE}"
   fi
-  comment+="You can view the build log here: https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/replaying_test$test_suffix.log"
+  comment+="View the [build log](https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/replaying_test$test_suffix.log)"
   add_comment "${comment}"
 fi
+
 
 if [[ $test_exit_code -ne 0 ]]; then
   test_state="failure"
