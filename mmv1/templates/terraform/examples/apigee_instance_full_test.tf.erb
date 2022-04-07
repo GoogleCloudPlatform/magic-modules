@@ -117,7 +117,7 @@ resource "google_apigee_instance" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
 
   name                     = "tf-test%{random_suffix}"
-  location                 = "us-central1-b"
+  location                 = "us-central1"
   description              = "Terraform-managed Apigee Instance"
   display_name             = "tf-test%{random_suffix}"
   org_id                   = google_apigee_organization.apigee_org.id
