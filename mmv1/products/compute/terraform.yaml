@@ -1386,6 +1386,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       machineImageEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: compareCryptoKeyVersions
+      storageLocations: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/compute.admin'
       parent_resource_attribute: 'machine_image'
