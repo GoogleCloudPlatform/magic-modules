@@ -3965,9 +3965,16 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 				"exclusion_name": wName,
 			}
 			if window.MaintenanceExclusionOptions != nil {
+				// When the scope is set to NO_UPGRADES which is the default value,
+				// the maintenance exclusion returned by GCP will be empty.
+				// This seems like a bug. To workaround this, assign NO_UPGRADES to the scope explicitly
+				scope := "NO_UPGRADES"
+				if window.MaintenanceExclusionOptions.Scope != "" {
+					scope = window.MaintenanceExclusionOptions.Scope
+				}
 				exclusion["exclusion_options"] = []map[string]interface{}{
 					{
-						"scope": window.MaintenanceExclusionOptions.Scope,
+						"scope": scope,
 					},
 				}
 			}

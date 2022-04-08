@@ -1503,10 +1503,10 @@ func TestAccContainerCluster_deleteMaintenanceExclusionOptions(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withExclusionOptions_RecurringMaintenanceWindow(
-					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", "NO_MINOR_UPGRADES", "NO_MINOR_OR_NODE_UPGRADES"),
+					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", "NO_UPGRADES", "NO_MINOR_OR_NODE_UPGRADES"),
 				Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_MINOR_UPGRADES"),
+							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_UPGRADES"),
 						resource.TestCheckResourceAttr(resourceName,
 							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope", "NO_MINOR_OR_NODE_UPGRADES"),
 				),
@@ -1542,9 +1542,9 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions(t *testing.T) {
 	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_exclusion_options"
 
-	// step1: create a new cluster and initialize a maintenancePolicy without exclusion options,
-	// step2: add exclusion options to the maintenancePolicy,
-	// step3: update the exclusion options(scope) with new values
+	// step1: create a new cluster and initialize the maintenceExclusion without exclusion scopes,
+	// step2: add exclusion scopes to the maintenancePolicy,
+	// step3: update the maintenceExclusion with new scopes
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
