@@ -3212,8 +3212,8 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 		for _, me := range maintenanceExclusions.(*schema.Set).List() {
 			exclusion := me.(map[string]interface{})
 			exclusions[exclusion["exclusion_name"].(string)] = container.TimeWindow{
-				StartTime:                   exclusion["start_time"].(string),
-				EndTime:                     exclusion["end_time"].(string),
+				StartTime: exclusion["start_time"].(string),
+				EndTime:   exclusion["end_time"].(string),
 			}
 			if exclusionOptions, ok := exclusion["exclusion_options"]; ok && len(exclusionOptions.([]interface{})) > 0 {
 				meo := exclusionOptions.([]interface{})[0].(map[string]interface{})
