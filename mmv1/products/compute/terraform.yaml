@@ -3118,6 +3118,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "ha_gateway1"
         # Multiple fine-grained resources
         skip_vcr: true
+        skip_test: true
+        skip_docs: true
         vars:
           ha_vpn_gateway1_name: "ha-vpn-1"
           network1_name: "network1"
