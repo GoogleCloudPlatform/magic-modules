@@ -564,7 +564,7 @@ maintenance_policy {
     start_time = "2019-01-01T00:00:00Z"
     end_time = "2019-01-02T00:00:00Z"
     exclusion_options {
-		  scope = "NO_UPGRADES"
+      scope = "NO_UPGRADES"
     }
   }
   maintenance_exclusion{
@@ -572,7 +572,7 @@ maintenance_policy {
     start_time = "2019-05-01T00:00:00Z"
     end_time = "2019-05-02T00:00:00Z"
     exclusion_options {
-		  scope = "NO_MINOR_UPGRADES"
+      scope = "NO_MINOR_UPGRADES"
     }
   }
 }
