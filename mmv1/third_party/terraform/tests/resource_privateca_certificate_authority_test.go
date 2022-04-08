@@ -100,9 +100,6 @@ resource "google_privateca_certificate_authority" "default" {
 	key_spec {
 		algorithm = "RSA_PKCS1_4096_SHA256"
 	}
-	labels = {
-		foo = "bar-1"
-	}
 }
 `, context)
 }
@@ -156,8 +153,7 @@ resource "google_privateca_certificate_authority" "default" {
 		algorithm = "RSA_PKCS1_4096_SHA256"
 	}
 	labels = {
-		foo = "bar-1"
-		foo-2 = "bar-2"
+		foo = "bar"
 	}
 }
 `, context)
