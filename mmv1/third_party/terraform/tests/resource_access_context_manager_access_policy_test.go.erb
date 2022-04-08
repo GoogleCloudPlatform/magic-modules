@@ -193,7 +193,7 @@ data "google_project" "project" {
 resource "google_access_context_manager_access_policy" "test-access" {
   parent = "organizations/%s"
   title  = "%s"
-  scopes = ["projects/${google_project.project.number}"]
+  scopes = ["projects/${data.google_project.project.number}"]
 }
 `, org, title)
 }
