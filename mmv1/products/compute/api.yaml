@@ -7700,6 +7700,7 @@ objects:
         name: 'storageLocations'
         description: |
           The regional or multi-regional Cloud Storage bucket location where the machine image is stored.
+        default_from_api: true
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Boolean
         name: guestFlush
