@@ -966,23 +966,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   GlobalForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "external_cdn_lb_with_backend_bucket"
-        primary_resource_id: "default"
-        vars:
-          cdn_network: "cdn-network"
-          cdn_subnet: "cdn-subnet"
-          cdn_static_ip: "cdn-static-ip"
-          cdn_forwarding_rule: "cdn-forwarding-rule"
-          cdn_target_http_proxy: "cdn-target-http-proxy"
-          cdn_url_map: "cdn-url-map"
-          image_backend_bucket: "image-backend-bucket"
-          cdn_backend_storage_bucket: "cdn-backend-storage-bucket"
-        min_version: beta
-        ignore_read_extra:
-          - "port_range"
-          - "target"
-          - "ip_address"
-      - !ruby/object:Provider::Terraform::Examples
         name: "external_ssl_proxy_lb_mig_backend"
         primary_resource_id: "default"
         skip_test: true
