@@ -68,10 +68,8 @@ objects:
         name: 'location'
         url_param_only: true
         input: true
-        default_value: global
         description: |
-          The  location where the autoscaling policy should reside.
-          The default value is `global`.
+          The  location where the metastore service should reside.
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -153,6 +151,7 @@ objects:
             name: 'version'
             input: true
             required: true
+            default_value: "3.1.2"
             description: |
               The Hive metastore schema version.
           - !ruby/object:Api::Type::KeyValuePairs
