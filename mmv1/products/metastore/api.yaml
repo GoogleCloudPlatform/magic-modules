@@ -145,6 +145,21 @@ objects:
               - :SATURDAY
               - :SUNDAY
       - !ruby/object:Api::Type::NestedObject
+        name: 'encryptionConfig'
+        min_version: beta
+        description: |
+          Information used to configure the Dataproc Metastore service to encrypt
+          customer data at rest.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'kmsKey'
+            min_version: beta
+            description: |
+              The fully qualified customer provided Cloud KMS key name to use for customer data encryption.
+              Use the following format: `projects/([^/]+)/locations/([^/]+)/keyRings/([^/]+)/cryptoKeys/([^/]+)`
+            required: true
+            input: true
+      - !ruby/object:Api::Type::NestedObject
         name: 'hiveMetastoreConfig'
         description: |
          Configuration information specific to running Hive metastore software as the metastore service.
