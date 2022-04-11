@@ -191,7 +191,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     import_format: ["{{instance_id}}/attachments/{{name}}", "{{instance_id}}/{{name}}"]
     delete_url: '{{instance_id}}/attachments/{{name}}'
-    mutex: "{{instance_id}}"
+    # Creating a global lock on instance attachments.
+    mutex: "apigeeInstanceAttachments"
     examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "apigee_instance_attachment_basic"
