@@ -26,7 +26,11 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
     return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
   }
   // Returns the proper get.
+  <% if async.operation&.full_url -%>
+  url := fmt.Sprintf("<%= async.operation.full_url.gsub('{{op_id}}', '%s') -%>", w.CommonOperationWaiter.Op.Name)
+  <% else -%>
   url := fmt.Sprintf("%s<%= [async.operation.base_url].flatten.join.gsub('{{op_id}}', '%s')-%>", w.Config.<%= product_name -%>BasePath, w.CommonOperationWaiter.Op.Name)
+  <% end -%>
 
   return sendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, w.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 }
