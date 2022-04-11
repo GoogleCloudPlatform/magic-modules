@@ -846,7 +846,7 @@ func flattenRegionUpdatePolicy(updatePolicy *compute.InstanceGroupManagerUpdateP
 		up["min_ready_sec"] = updatePolicy.MinReadySec
 <% end -%>
 		up["minimal_action"] = updatePolicy.MinimalAction
-		up["mostDisruptiveAllowedAction"] = updatePolicy.MostDisruptiveAllowedAction
+		up["most_disruptive_allowed_action"] = updatePolicy.MostDisruptiveAllowedAction
 		up["type"] = updatePolicy.Type
 		up["instance_redistribution_type"] = updatePolicy.InstanceRedistributionType
 		up["replacement_method"] = updatePolicy.ReplacementMethod
