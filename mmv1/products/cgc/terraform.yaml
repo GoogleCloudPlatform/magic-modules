@@ -168,7 +168,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "default"
         vars:
-          myinstance: "myinstance"
           sqlserver_instance_with_authorized_network: "sqlserver-instance-with-authorized-network"
           deletion_protection: "true"
         test_vars_overrides:
