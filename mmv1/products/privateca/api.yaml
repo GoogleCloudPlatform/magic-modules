@@ -418,6 +418,7 @@ objects:
           - :STATE_UNSPECIFIED
           - :ENABLED
           - :DISABLED
+          - :STAGED
           - :PENDING_ACTIVATION
           - :PENDING_DELETION
       - !ruby/object:Api::Type::Array

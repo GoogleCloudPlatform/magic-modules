@@ -1,0 +1,28 @@
+
+if d.HasChange("is_staged") {
+	if d.Get("is_staged").(bool) {
+		return fmt.Errorf("Field `is_staged` can only be set to true when creating a new CertificateAuthority")
+	}
+	if d.Get("state").(string) == "STAGED" {
+		// Enable a CA which currently in STAGED state.
+		enableUrl, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:enable")
+		if err != nil {
+			return err
+		}
+
+		log.Printf("[DEBUG] Enabling CertificateAuthority: %#v", obj)
+
+		res, err := sendRequest(config, "POST", billingProject, enableUrl, userAgent, nil)
+		if err != nil {
+			return fmt.Errorf("Error enabling CertificateAuthority: %s", err)
+		}
+
+		var opRes map[string]interface{}
+		err = privatecaOperationWaitTimeWithResponse(
+			config, res, &opRes, project, "Enabling CertificateAuthority", userAgent,
+			d.Timeout(schema.TimeoutCreate))
+		if err != nil {
+			return fmt.Errorf("Error waiting to enable CertificateAuthority: %s", err)
+		}
+	}
+}

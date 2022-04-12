@@ -54,6 +54,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           kms_key_name: 'BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN", "us-central1").CryptoKey.Name'
           pool_name: 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
           pool_location: "\"us-central1\""
+    virtual_fields:
+      - !ruby/object:Api::Type::Boolean
+        name: 'is_staged'
+        default_value: false
+        description: |
+          By default, a CA will be enabled after its creation. Set this field
+          to `true` to create a CA in `STAGED` state.
     properties:
       type: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
@@ -67,6 +74,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: 'templates/terraform/custom_expand/privateca_certificate_509_config.go.erb'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
+      pre_update: templates/terraform/pre_update/privateca_authority_update.go.erb
       post_create: templates/terraform/post_create/privateca_authority_enable.go.erb
       pre_delete: templates/terraform/pre_delete/privateca_authority_disable.go.erb
       post_import: templates/terraform/post_import/privateca_import.go.erb

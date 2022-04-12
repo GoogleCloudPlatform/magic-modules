@@ -1,4 +1,4 @@
-if d.Get("type").(string) != "SUBORDINATE" {
+if !d.Get("is_staged").(bool) && d.Get("type").(string) != "SUBORDINATE" {
 	url, err = replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:enable")
 	if err != nil {
 		return err
