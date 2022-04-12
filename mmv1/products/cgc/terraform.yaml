@@ -284,7 +284,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
-          - "root-password"
+          - "root_password"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_postgres_instance_replica"
         primary_resource_type: "google_sql_database_instance"
