@@ -78,11 +78,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           sqlserver_instance_source_name: "sqlserver-instance-source-name"
           sqlserver_instance_clone_name: "sqlserver-instance-clone-name"
+          deletion_protection: "true"
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
           - "root_password"
+          - "clone"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_postgres_instance_clone"
         primary_resource_id: "clone"
@@ -96,6 +98,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
+          - "clone"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_mysql_instance_clone"
         primary_resource_id: "clone"
@@ -109,6 +112,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
+          - "clone"
     ### Enable backups ###
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_mysql_instance_backup"
