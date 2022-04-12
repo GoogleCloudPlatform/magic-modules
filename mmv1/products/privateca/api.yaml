@@ -458,7 +458,8 @@ objects:
           - :STATE_UNSPECIFIED
           - :ENABLED
           - :DISABLED
-          - :PENDING_ACTIVATION
+          - :STAGED
+          - :AWAITING_USER_ACTIVATION
           - :PENDING_DELETION
       - !ruby/object:Api::Type::Array
         name: 'pemCaCertificates'
