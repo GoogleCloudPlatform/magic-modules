@@ -107,10 +107,10 @@ resource "google_bigtable_gc_policy" "policy" {
       "mode": "intersection",
       "rules": [
         {
-          "max_age": "2d"
+          "max_age": "2h"
         },
         {
-          "max_version": "2"
+          "max_version": 2
         }
       ]
     }

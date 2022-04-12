@@ -125,9 +125,9 @@ func TestAccBigtableGCPolicy_gcRulesPolicy(t *testing.T) {
 	skipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-instance-%s", randString(t, 10))
-	tableName := fmt.Sprintf("tf-table-%s", randString(t, 10))
-	familyName := fmt.Sprintf("tf-family-%s", randString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	familyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
 	gcRulesOriginal := "{\"mode\":\"intersection\",\"rules\":[{\"max_age\":\"10h\"},{\"max_version\":2}]}"
 	gcRulesUpdate := "{\"mode\":\"intersection\",\"rules\":[{\"max_age\":\"16h\"},{\"max_version\":1}]}"
@@ -256,6 +256,11 @@ var testUnitBigtableGCPolicyRulesTestCases = []testUnitBigtableGCPolicyJSONRules
 	{
 		name:          "Invalid GC rule field: more than 2 fields in a gc rule object",
 		gcJSONString:  `{"mode": "union", "rules": [{"max_age": "10h", "max_version": 10, "something": 100}]}`,
+		errorExpected: true,
+	},
+	{
+		name:          "Invalid GC rule field: max_version or max_age is in the wrong type",
+		gcJSONString:  `{"mode": "union", "rules": [{"max_age": "10d", "max_version": 2}]}`,
 		errorExpected: true,
 	},
 	{
