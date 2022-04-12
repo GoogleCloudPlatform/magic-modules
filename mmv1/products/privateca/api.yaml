@@ -35,7 +35,8 @@ objects:
     create_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities?certificateAuthorityId={{certificate_authority_id}}
     self_link: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}
     delete_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}?ignoreActiveCertificates={{ignore_active_certificates_on_deletion}}
-    input: true
+    update_verb: :PATCH
+    update_mask: true
     async: !ruby/object:Api::OpAsync
         operation: !ruby/object:Api::OpAsync::Operation
           base_url: '{{op_id}}'
@@ -488,7 +489,8 @@ objects:
     create_url: 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificates?certificateId={{name}}'
     delete_url: 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificates/{{name}}:revoke'
     delete_verb: :POST
-    input: true
+    update_verb: :PATCH
+    update_mask: true
     description: |
       A Certificate corresponds to a signed X.509 certificate issued by a Certificate.
     parameters:    
