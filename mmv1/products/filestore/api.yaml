@@ -250,5 +250,6 @@ objects:
         output: true
       - !ruby/object:Api::Type::String
         name: 'kmsKeyName'
+        input: true
         description: |
           KMS key name used for data encryption.
