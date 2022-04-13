@@ -1,4 +1,4 @@
-# Copyright 2020 Google Inc.
+# Copyright 2022 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -68,21 +68,6 @@ objects:
         name: 'description'
         description: Description of the DeliveryPipeline.
         input: true
-      - !ruby/object:Api::Type::String
-        name: 'createTime'
-        output: true
-        description: |
-          The timestamp of when the DeliveryPipeline was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-      - !ruby/object:Api::Type::String
-        name: 'updateTime'
-        output: true
-        description: |
-          The timestamp of when the DeliveryPipeline was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-      - !ruby/object:Api::Type::String
-        name: 'etag'
-        output: true
-        description: |
-          This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
