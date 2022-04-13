@@ -23,8 +23,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: "dev"
     properties:
-      name: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   Target: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -39,8 +37,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project: :PROJECT_NAME
     properties:
-      name: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
 
