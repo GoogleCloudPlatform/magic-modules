@@ -108,7 +108,8 @@ objects:
     base_url: projects/{{project}}/locations/{{region}}/targets
     self_link: 'projects/{{project}}/locations/{{region}}/targets/{{name}}'
     create_url: projects/{{project}}/locations/{{region}}/targets?targetId={{name}}
-    input: true
+    update_verb: :PATCH
+    update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -132,7 +133,6 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: Description of the Target.
-        input: true
       - !ruby/object:Api::Type::String
         name: 'createTime'
         output: true
@@ -201,7 +201,6 @@ objects:
               name: 'usages'
               required: true
               item_type: Api::Type::String
-              input: true
               description: |
                 Possible usages of this configuration.
             - !ruby/object:Api::Type::String

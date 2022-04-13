@@ -4,20 +4,16 @@ resource "google_cloud_deploy_target" "<%= ctx[:primary_resource_id] %>" {
   annotations = {
     generated-by = "magic-modules"
   }
+
+  require_approval = true
   labels = {
     env = "dev"
   }
   gke {
-    cluster = "${data.google_project.project.id}/locations/us-central1/clusters/dev"
+    cluster = "projects/<%= ctx[:test_env_vars]['project'] %>/locations/us-central1/clusters/dev"
   }
   execution_configs {
     usages = ["RENDER", "DEPLOY"]
-    service_account = data.google_app_engine_default_service_account.default.email
+    service_account = "<%= ctx[:test_env_vars]['project'] %>@appspot.gserviceaccount.com"
   }
-}
-
-data "google_project" "project" {
-}
-
-data "google_app_engine_default_service_account" "default" {
 }

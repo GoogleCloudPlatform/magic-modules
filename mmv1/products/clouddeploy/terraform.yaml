@@ -18,7 +18,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: '{{name}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "deploy_delivery_pipeline"
+        name: "cloud_deploy_delivery_pipeline"
         primary_resource_id: "pipeline"
         vars:
           name: "dev"
@@ -32,10 +32,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: '{{name}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "deploy_target"
+        name: "cloud_deploy_target"
         primary_resource_id: "pipeline"
         vars:
           name: "tf-test"
+        test_env_vars:
+          project: :PROJECT_NAME
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb

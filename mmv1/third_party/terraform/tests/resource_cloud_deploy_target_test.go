@@ -10,6 +10,7 @@ func TestAccCloudDeployTarget_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"project":       getTestProjectFromEnv(),
 		"random_suffix": randString(t, 10),
 	}
 
@@ -19,7 +20,7 @@ func TestAccCloudDeployTarget_update(t *testing.T) {
 		CheckDestroy: testAccCheckDataCatalogEntryGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudDeployTarget_deployTargetExample(context),
+				Config: testAccCloudDeployTarget_cloudDeployTargetExample(context),
 			},
 			{
 				ResourceName:            "google_cloud_deploy_target.pipeline",
@@ -28,7 +29,7 @@ func TestAccCloudDeployTarget_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"name", "region"},
 			},
 			{
-				Config: testAccCloudDeployTarget_deployTargetExample_update(context),
+				Config: testAccCloudDeployTarget_cloudDeployTargetExample_update(context),
 			},
 			{
 				ResourceName:            "google_cloud_deploy_target.pipeline",
@@ -40,30 +41,34 @@ func TestAccCloudDeployTarget_update(t *testing.T) {
 	})
 }
 
-func testAccCloudDeployTarget_deployTargetExample(context map[string]interface{}) string {
+func testAccCloudDeployTarget_cloudDeployTargetExample_update(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_cloud_deploy_target" "pipeline" {
   name          = "tf-test-tf-test%{random_suffix}"
-  description   = "Target Cluster"
+  description   = "Target Prod Cluster"
   annotations = {
     generated-by = "magic-modules"
+	another = "one"
   }
   labels = {
-    env = "dev"
+    env = "prod"
   }
   gke {
-    cluster = "${data.google_project.project.id}/locations/us-central1/clusters/prod"
+    cluster = "projects/%{project}/locations/us-central1/clusters/prod"
   }
   execution_configs {
-    usages = ["RENDER", "DEPLOY"]
-    service_account = data.google_app_engine_default_service_account.default.email
+    usages = ["RENDER"]
+    service_account = data.google_compute_default_service_account.default.email
   }
+
+  execution_configs {
+    usages = ["DEPLOY"]
+    service_account = "%{project}@appspot.gserviceaccount.com"
+  }
+
 }
 
-data "google_project" "project" {
-}
-
-data "google_app_engine_default_service_account" "default" {
+data "google_compute_default_service_account" "default" {
 }
 `, context)
 }
