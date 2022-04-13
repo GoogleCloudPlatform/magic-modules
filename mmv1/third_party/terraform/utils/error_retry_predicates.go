@@ -46,7 +46,7 @@ var defaultErrorRetryPredicates = []RetryErrorPredicateFunc{
 	// reads, causing significant failure for our CI and for large customers.
 	// GCE returns the wrong error code, as this should be a 429, which we retry
 	// already.
-	isGCE403QuotaExceededPerMinuteError,
+	is403QuotaExceededPerMinuteError,
 }
 
 /** END GLOBAL ERROR RETRY PREDICATES HERE **/
@@ -126,16 +126,14 @@ func isSubnetworkUnreadyError(err error) (bool, string) {
 	return false, ""
 }
 
-var QuotaRegex = regexp.MustCompile(`Quota exceeded for quota metric '(?P<Metric>.*)' and limit '(?P<Limit>.* per minute)' of service 'compute.googleapis.com'`)
-
 // GCE (and possibly other APIs) incorrectly return a 403 rather than a 429 on
 // rate limits.
-func isGCE403QuotaExceededPerMinuteError(err error) (bool, string) {
+func is403QuotaExceededPerMinuteError(err error) (bool, string) {
 	gerr, ok := err.(*googleapi.Error)
 	if !ok {
 		return false, ""
 	}
-
+	var QuotaRegex = regexp.MustCompile(`Quota exceeded for quota metric '(?P<Metric>.*)' and limit '(?P<Limit>.* per minute)' of service`)
 	if gerr.Code == 403 && QuotaRegex.MatchString(gerr.Body) {
 		matches := QuotaRegex.FindStringSubmatch(gerr.Body)
 		metric := matches[QuotaRegex.SubexpIndex("Metric")]
