@@ -21,7 +21,7 @@ resource "google_service_networking_connection" "private_vpc_connection" {
 resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   name             = "<%= ctx[:vars]['private_ip_sql_instance'] %>"
   region           = "us-central1"
-  database_version = "POSTGRES_12"
+  database_version = "POSTGRES_14"
 
   depends_on = [google_service_networking_connection.private_vpc_connection]
 
