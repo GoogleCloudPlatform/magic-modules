@@ -41,9 +41,13 @@ if d.Get("load_balancing_scheme").(string) == "EXTERNAL_MANAGED" || d.Get("load_
 // isn't specified, we set the value to NONE to make this use case work.
 _, ok := obj["subsetting"]
 if !ok {
-	data := map[string]interface{}{}
-	data["policy"] = "NONE"
-	obj["subsetting"] = data
+	loadBalancingScheme, ok := obj["loadBalancingScheme"]
+	// External load balancing scheme does not support subsetting
+	if !ok || loadBalancingScheme.(string) != "EXTERNAL" {
+		data := map[string]interface{}{}
+		data["policy"] = "NONE"
+		obj["subsetting"] = data
+	}
 }
 <% end -%>
 
