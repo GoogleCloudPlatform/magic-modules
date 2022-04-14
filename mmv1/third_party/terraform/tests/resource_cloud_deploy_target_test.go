@@ -20,7 +20,7 @@ func TestAccCloudDeployTarget_update(t *testing.T) {
 		CheckDestroy: testAccCheckDataCatalogEntryGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudDeployTarget_cloudDeployTargetExample(context),
+				Config: testAccCloudDeployTarget_cloudDeployTargetFullExample(context),
 			},
 			{
 				ResourceName:            "google_cloud_deploy_target.pipeline",
@@ -29,7 +29,7 @@ func TestAccCloudDeployTarget_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"name", "region"},
 			},
 			{
-				Config: testAccCloudDeployTarget_cloudDeployTargetExample_update(context),
+				Config: testAccCloudDeployTarget_cloudDeployTargetFullExample_update(context),
 			},
 			{
 				ResourceName:            "google_cloud_deploy_target.pipeline",
@@ -41,7 +41,7 @@ func TestAccCloudDeployTarget_update(t *testing.T) {
 	})
 }
 
-func testAccCloudDeployTarget_cloudDeployTargetExample_update(context map[string]interface{}) string {
+func testAccCloudDeployTarget_cloudDeployTargetFullExample_update(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_cloud_deploy_target" "pipeline" {
   name          = "tf-test-tf-test%{random_suffix}"

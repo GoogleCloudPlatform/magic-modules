@@ -15,7 +15,7 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   DeliveryPipeline: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
-    id_format: '{{name}}'
+    id_format: 'projects/{{project}}/locations/{{region}}/deliveryPipelines/{{name}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_deploy_delivery_pipeline"
@@ -27,10 +27,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
   Target: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
-    id_format: '{{name}}'
+    id_format: 'projects/{{project}}/locations/{{region}}/targets/{{name}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_deploy_target"
+        primary_resource_id: "pipeline"
+        vars:
+          name: "tf-test"
+        test_env_vars:
+          project: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_deploy_target_full"
         primary_resource_id: "pipeline"
         vars:
           name: "tf-test"

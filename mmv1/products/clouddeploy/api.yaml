@@ -133,21 +133,6 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: Description of the Target.
-      - !ruby/object:Api::Type::String
-        name: 'createTime'
-        output: true
-        description: |
-          The timestamp of when the Target was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-      - !ruby/object:Api::Type::String
-        name: 'updateTime'
-        output: true
-        description: |
-          The timestamp of when the Target was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-      - !ruby/object:Api::Type::String
-        name: 'etag'
-        output: true
-        description: |
-          This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
