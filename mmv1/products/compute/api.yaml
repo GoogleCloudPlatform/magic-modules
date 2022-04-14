@@ -2854,7 +2854,6 @@ objects:
           This field can only be specified when the load balancing scheme is set to INTERNAL.
       - !ruby/object:Api::Type::NestedObject
         name: 'subsetting'
-        default_value: 
         description: |
           Subsetting configuration for this BackendService. Currently this is applicable only for Internal TCP/UDP load balancing and Internal HTTP(S) load balancing.
         properties:
