@@ -36,8 +36,6 @@ objects:
       The Resource Settings API allows users to control and modify the behavior of their GCP resources (e.g., VM, firewall, Project, etc.) across the Cloud Resource Hierarchy.
 
       The OrganizationSetting resource manages settings at the organization level.
-
-      NOTE: Deletion is not supported.
     update_mask: false
     parameters:
       - !ruby/object:Api::Type::String

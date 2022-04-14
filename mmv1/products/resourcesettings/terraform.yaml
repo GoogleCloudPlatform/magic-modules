@@ -14,7 +14,9 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   OrganizationSetting: !ruby/object:Overrides::Terraform::ResourceOverride
-    # Settings can only be updated and read.
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        Resource Settings do not support deletion. Deleting the terraform resource will not delete or change the GCP Resource Setting.
     skip_delete: true
     examples:
     - !ruby/object:Provider::Terraform::Examples
