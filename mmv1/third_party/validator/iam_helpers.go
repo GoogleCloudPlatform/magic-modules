@@ -12,13 +12,17 @@ import (
 // expandIamPolicyBindings is used in google_<type>_iam_policy resources.
 func expandIamPolicyBindings(d TerraformResourceData) ([]IAMBinding, error) {
 	ps := d.Get("policy_data").(string)
+	var bindings []IAMBinding
+	// policy_data is (known after apply) in terraform plan, hence an empty string
+	if ps == "" {
+		return bindings, nil
+	}
 	// The policy string is just a marshaled cloudresourcemanager.Policy.
 	policy := &cloudresourcemanager.Policy{}
 	if err := json.Unmarshal([]byte(ps), policy); err != nil {
-		return nil, fmt.Errorf("Could not unmarshal %s:\n: %v", ps, err)
+		return nil, fmt.Errorf("Could not unmarshal %s: %v", ps, err)
 	}
 
-	var bindings []IAMBinding
 	for _, b := range policy.Bindings {
 		bindings = append(bindings, IAMBinding{
 			Role:    b.Role,
@@ -134,7 +138,7 @@ func mergeDeleteAdditiveBindings(existing, incoming []IAMBinding) []IAMBinding {
 		}
 		if newMembers != nil {
 			newExisting = append(newExisting, IAMBinding{
-				Role: binding.Role,
+				Role:    binding.Role,
 				Members: newMembers,
 			})
 		}

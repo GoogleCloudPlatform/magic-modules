@@ -838,6 +838,7 @@ objects:
                   - :LEGACY
                   - :GCS_ONLY
                   - :STACKDRIVER_ONLY
+                  - :CLOUD_LOGGING_ONLY
                   - :NONE
               - !ruby/object:Api::Type::Array
                 name: 'env'
