@@ -1,0 +1,7 @@
+resource "google_cloud_deploy_target" "<%= ctx[:primary_resource_id] %>" {
+  name          = "<%= ctx[:vars]['name'] %>"
+  description   = "Target Cluster"
+  gke {
+    cluster = "projects/<%= ctx[:test_env_vars]['project'] %>/locations/us-central1/clusters/dev"
+  }
+}
