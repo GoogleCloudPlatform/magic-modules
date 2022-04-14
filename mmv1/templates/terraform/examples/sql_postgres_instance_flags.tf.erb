@@ -22,7 +22,7 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
 resource "google_sql_user" "user" {
   name     = "<%= ctx[:vars]['username'] %>"
   host     = "%"
-  instance = google_sql_database_instance.mysql_instance.id
+  instance = google_sql_database_instance.instance.id
   password = "changeme"
 }
 # [END cloud_sql_postgres_instance_user]
