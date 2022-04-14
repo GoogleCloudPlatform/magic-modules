@@ -1,0 +1,33 @@
+# [START cloud_sql_sqlserver_instance_flags]
+resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
+  name             = "<%= ctx[:vars]['sqlserver_instance'] %>"
+  region           = "us-central1"
+  database_version = "SQLSERVER_2019_STANDARD"
+  root_password = "INSERT-PASSWORD-HERE"
+  settings {
+    database_flags {
+      name  = "general_log"
+      value = "on"
+    }
+    database_flags {
+      name  = "skip_show_database"
+      value = "on"
+    }
+    database_flags {
+      name  = "wait_timeout"
+      value = "200000"
+    }
+    tier = "db-custom-2-7680"
+  }
+  deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
+}
+# [END cloud_sql_sqlserver_instance_flags]
+
+# [START cloud_sql_sqlserver_instance_user]
+resource "google_sql_user" "user" {
+  name     = "<%= ctx[:vars]['username'] %>"
+  host     = "%"
+  instance = google_sql_database_instance.mysql_instance.name
+  password = "changeme"
+}
+# [END cloud_sql_sqlserver_instance_user]
