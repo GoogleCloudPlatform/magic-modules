@@ -6,16 +6,16 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   root_password = "INSERT-PASSWORD-HERE"
   settings {
     database_flags {
-      name  = "general_log"
+      name  = "1204"
       value = "on"
     }
     database_flags {
-      name  = "skip_show_database"
+      name  = "remote access"
       value = "on"
     }
     database_flags {
-      name  = "wait_timeout"
-      value = "200000"
+      name  = "remote query timeout (s)"
+      value = "300"
     }
     tier = "db-custom-2-7680"
   }
