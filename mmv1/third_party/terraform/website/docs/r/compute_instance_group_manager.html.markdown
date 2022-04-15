@@ -154,9 +154,7 @@ update_policy {
   most_disruptive_allowed_action = "REPLACE"
   max_surge_percent              = 20
   max_unavailable_fixed          = 2
-  <% unless version == "ga" -%>
   min_ready_sec                  = 50
-  <% end -%>  
   replacement_method             = "RECREATE"
 }
 ```

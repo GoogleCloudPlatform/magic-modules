@@ -884,7 +884,6 @@ resource "google_compute_instance_group_manager" "igm-rolling-update-policy" {
   update_policy {
     type                           = "PROACTIVE"
     minimal_action                 = "REPLACE"
-    most_disruptive_allowed_action = "REPLACE"
     max_surge_percent              = 50
     max_unavailable_percent        = 50
   }
@@ -985,7 +984,6 @@ resource "google_compute_instance_group_manager" "igm-rolling-update-policy" {
   update_policy {
     type                           = "PROACTIVE"
     minimal_action                 = "REPLACE"
-    most_disruptive_allowed_action = "REPLACE"
     max_surge_fixed                = 0
     max_unavailable_fixed          = 2
 <% unless version == "ga" -%>
@@ -1037,7 +1035,6 @@ resource "google_compute_instance_group_manager" "igm-rolling-update-policy" {
   update_policy {
     type                           = "PROACTIVE"
     minimal_action                 = "REPLACE"
-    most_disruptive_allowed_action = "REPLACE"
     max_surge_fixed                = 2
     max_unavailable_fixed          = 0
   }
@@ -1086,7 +1083,6 @@ resource "google_compute_instance_group_manager" "igm-rolling-update-policy" {
   update_policy {
     type                           = "PROACTIVE"
     minimal_action                 = "REPLACE"
-    most_disruptive_allowed_action = "REPLACE"
     max_surge_fixed                = 0
     max_unavailable_fixed          = 2
     replacement_method             = "RECREATE"
