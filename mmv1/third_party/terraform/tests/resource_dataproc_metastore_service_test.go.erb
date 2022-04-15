@@ -90,7 +90,7 @@ resource "google_compute_network" "test" {
 }
 
 resource "google_compute_subnetwork" "test" {
-	name                     = ""%[1]s"
+	name                     = "%[1]s"
 	ip_cidr_range            = "10.2.0.0/16"
 	region                   = "us-central1"
 	network                  = google_compute_network.test.self_link
