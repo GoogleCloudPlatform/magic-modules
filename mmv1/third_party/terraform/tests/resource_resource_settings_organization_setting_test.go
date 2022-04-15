@@ -10,7 +10,7 @@ func TestAccResourceSettingsOrganizationSetting_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id": getTestOrgFromEnv(t),
+		"org_id": getTestOrgTargetFromEnv(t),
 	}
 
 	vcrTest(t, resource.TestCase{

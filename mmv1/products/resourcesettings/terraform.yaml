@@ -22,8 +22,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     - !ruby/object:Provider::Terraform::Examples
       name: "resource_settings_organization_setting_basic"
       primary_resource_id: "sa-key-expiry"
-      test_env_vars:
-        org_id: :ORG_ID
+      skip_test: true
     properties: {}
 
 # This is for copying files over
