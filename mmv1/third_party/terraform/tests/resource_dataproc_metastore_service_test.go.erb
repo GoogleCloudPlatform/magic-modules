@@ -108,7 +108,7 @@ resource "google_dataproc_metastore_service" "my_metastore" {
 
 	network_config {
       consumers {
-        subnetwork = google_compute_subnetwork.test.self_link
+        subnetwork = google_compute_subnetwork.test.id
 	  }
 	}
 }
