@@ -53,7 +53,7 @@ func TestAccDataprocMetastoreService_networking(t *testing.T) {
 		CheckDestroy: testAccCheckBigqueryReservationReservationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocMetastoreService_updateAndImport(name, "DEVELOPER"),
+				Config: testAccDataprocMetastoreService_networking(name, "DEVELOPER"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "network_config.0.consumers.0.endpoint_uri"),
 				),
