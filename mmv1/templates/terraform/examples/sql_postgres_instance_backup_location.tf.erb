@@ -1,6 +1,6 @@
 # [START cloud_sql_postgres_instance_backup_location]
 resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
-  name             = "<%= ctx[:vars]['postgres_instance_backup'] %>"
+  name             = "<%= ctx[:vars]['postgres_instance_backup_location'] %>"
   region           = "us-central1"
   database_version = "POSTGRES_12"
   settings {

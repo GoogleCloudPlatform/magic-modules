@@ -13,12 +13,11 @@ generates.
 Magic Modules generates GCP support for:
 
 * Terraform
-* Ansible
 
 In addition, Magic Modules generates support for several companion
 features/tools:
 
-* Terraform Google Inventory Mapper
+* Terraform Validator
 * Terraform in Cloud Shell
 
 Importantly, Magic Modules *isn't* full code generation. Every change is made
@@ -156,7 +155,7 @@ While most small changes won't require fiddling with overrides, each tool has
 often minor differences- the naming of a field, or whether it's required or not.
 
 You can find them under the folder for a product, with the name `{{tool}}.yaml`.
-For example, Ansible's overrides for Cloud SQL are present at `products/sql/ansible.yaml`
+For example, Terraform's overrides for Cloud SQL are present at `products/sql/terraform.yaml`
 
 You can find a full reference for each tool under `overrides/{{tool}}/resource_override.rb`
 and `overrides/{{tool}}/property_override.rb`, as well as some other tool-specific
@@ -192,7 +191,6 @@ tool;
 
 Tool             | Testing Guide
 -----------------|--------------
-ansible          | [instructions](https://docs.ansible.com/ansible/devel/dev_guide/testing.html)
 terraform        | [`google` provider testing guide](https://github.com/hashicorp/terraform-provider-google/blob/main/.github/CONTRIBUTING.md#tests)
 terraform (beta) | [`google-beta` provider testing guide](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/.github/CONTRIBUTING.md#tests)
 

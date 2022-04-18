@@ -20,7 +20,7 @@ fi
 gsutil ls gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$PR_NUMBER/fixtures/
 if [ $? -eq 0 ]; then
   # We have recorded new cassettes for this branch
-  gsutil -m cp gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$PR_NUMBER/fixtures/* gs://vcr-$GOOGLE_PROJECT/fixtures/
+  gsutil -m cp gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$PR_NUMBER/fixtures/* gs://vcr-$GOOGLE_PROJECT/beta/fixtures/
   gsutil -m rm -r gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$PR_NUMBER/
 fi
 

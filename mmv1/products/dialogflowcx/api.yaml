@@ -17,7 +17,7 @@ display_name: Dialogflow CX
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://dialogflow.googleapis.com/v3/
+    base_url: https://{{location}}-dialogflow.googleapis.com/v3/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -474,7 +474,7 @@ objects:
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
-        base_url: '{{op_id}}'
+        full_url: 'https://dialogflow.googleapis.com/v3/{{op_id}}'
         wait_ms: 1000
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 60
@@ -990,6 +990,7 @@ objects:
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
+        full_url: 'https://{{location}}-dialogflow.googleapis.com/v3/{{op_id}}'
         wait_ms: 1000
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 60

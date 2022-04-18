@@ -1,5 +1,4 @@
 resource "google_filestore_instance" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
   name = "<%= ctx[:vars]["instance_name"] %>"
   location = "us-central1-b"
   tier = "BASIC_SSD"

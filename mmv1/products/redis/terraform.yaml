@@ -61,7 +61,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           network_name: "redis-test-network"
         test_vars_overrides:
           network_name: 'BootstrapSharedTestNetwork(t, "redis-mrr")'
-        min_version: beta
     properties:
       alternativeLocationId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -88,6 +87,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       maintenancePolicy.weeklyMaintenanceWindow.startTime.nanos: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(0,999999999)'
+      readReplicasMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       redisVersion: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         update_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}:upgrade'

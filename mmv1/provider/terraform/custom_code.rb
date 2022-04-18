@@ -89,6 +89,9 @@ module Provider
       # should be used for resources that don't have normal creation
       # semantics that cannot be supported well by other MM features.
       attr_reader :custom_create
+      # This code is run before the Read call happens.  It's placed
+      # in the Read function.
+      attr_reader :pre_read
       # This code is run before the Update call happens.  It's placed
       # in the Update function, just after the encoder call, before
       # the Update call.  Just like the encoder, it is only used if
@@ -134,6 +137,7 @@ module Provider
         check :pre_create, type: String
         check :post_create, type: String
         check :custom_create, type: String
+        check :pre_read, type: String
         check :pre_update, type: String
         check :post_update, type: String
         check :pre_delete, type: String

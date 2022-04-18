@@ -394,6 +394,9 @@ subnetwork in which the cluster's instances are launched.
 *  `config_connector_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     The status of the ConfigConnector addon. It is disabled by default; Set `enabled = true` to enable.
 
+*  `gke_backup_agent_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+    The status of the Backup for GKE agent addon. It is disabled by default; Set `enabled = true` to enable.
+
 This example `addons_config` disables two addons:
 
 ```hcl
@@ -473,7 +476,7 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 * `service_account` - (Optional) The Google Cloud Platform Service Account to be used by the node VMs.
 
-* `image_type` - (Optional) The default image type used by NAP once a new node pool is being created. Please note that according to the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning#default-image-type) the value must be one of the [COS_CONTAINERD, COS, UBUNTU_CONTAINERD, UBUNTU].
+* `image_type` - (Optional) The default image type used by NAP once a new node pool is being created. Please note that according to the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning#default-image-type) the value must be one of the [COS_CONTAINERD, COS, UBUNTU_CONTAINERD, UBUNTU]. __NOTE__ : COS AND UBUNTU are deprecated as of `GKE 1.24`
 
 <a name="nested_authenticator_groups_config"></a>The `authenticator_groups_config` block supports:
 

@@ -25,6 +25,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           folder_name: 'my-folder'
         test_env_vars:
           org_id: :ORG_ID
+      - !ruby/object:Provider::Terraform::Examples
+        skip_test: true
+        name: 'folder_access_approval_active_key_version'
+        primary_resource_id: 'folder_access_approval'
+        vars:
+          folder_name: 'my-folder'
+        test_env_vars:
+          org_id: :ORG_ID
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/clear_folder_access_approval_settings.go.erb
       pre_create: templates/terraform/update_mask.erb
@@ -47,6 +55,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project: :PROJECT_NAME
           org_id: :ORG_ID
+      - !ruby/object:Provider::Terraform::Examples
+        skip_test: true
+        name: 'project_access_approval_active_key_version'
+        primary_resource_id: 'project_access_approval'
+        test_env_vars:
+          project: :PROJECT_NAME
+          org_id: :ORG_ID
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/clear_project_access_approval_settings.go.erb
       pre_create: templates/terraform/update_mask.erb
@@ -64,6 +79,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         skip_test: true
         name: 'organization_access_approval_full'
+        primary_resource_id: 'organization_access_approval'
+        test_env_vars:
+          org_id: :ORG_ID
+      - !ruby/object:Provider::Terraform::Examples
+        skip_test: true
+        name: 'organization_access_approval_active_key_version'
         primary_resource_id: 'organization_access_approval'
         test_env_vars:
           org_id: :ORG_ID
