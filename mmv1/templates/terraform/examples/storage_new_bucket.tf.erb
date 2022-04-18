@@ -29,7 +29,7 @@ resource "google_storage_bucket_object" "default" {
 # [START storage_get_object_metadata_tf]
 # Get object metadata
 data "google_storage_bucket_object" "default" {
-  name         = "<%= ctx[:vars]['new_object'] %>"
+  name         = google_storage_bucket_object.default.name
   bucket       = google_storage_bucket.static.id
 }
 
