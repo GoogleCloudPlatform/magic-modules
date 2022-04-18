@@ -29,6 +29,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "metadata"
           - "metadata_startup_script"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "spot_instance_basic"
+        primary_resource_type: "google_compute_instance"
+        primary_resource_id: "spot_vm_instance"
+        vars:
+          spot_instance_name: "spot-instance-name"
+        min_version: beta
+        # ignore_read_extra:
+        #   - "port_range"
+        #   - "target"
+        #   - "ip_address"
     # SQL
     ### When including separate samples for each DB type, add `skip_test: true`
     ### for Postgres and MySQL, but not for SQL Server
