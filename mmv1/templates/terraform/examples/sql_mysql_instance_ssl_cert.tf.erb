@@ -1,0 +1,21 @@
+# [START cloud_sql_mysql_instance_require_ssl]
+resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
+  name             = "<%= ctx[:vars]['mysql_instance'] %>"
+  region           = "asia-northeast1"
+  database_version = "MYSQL_8_0"
+  settings {
+    tier              = "db-f1-micro"
+    ip_configuration {
+      require_ssl = "true"
+    }
+  }
+  deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
+}
+# [END cloud_sql_mysql_instance_require_ssl]
+
+# [START cloud_sql_mysql_instance_ssl_cert]
+resource "google_sql_ssl_cert" "client_cert" {
+  common_name = "<%= ctx[:vars]['common_name'] %>"
+  instance    = google_sql_database_instance.default.name
+}
+# [END cloud_sql_mysql_instance_ssl_cert]
