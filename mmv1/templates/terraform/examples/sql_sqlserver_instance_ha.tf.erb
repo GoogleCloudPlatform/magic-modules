@@ -1,4 +1,4 @@
-# [START cloud_sql_sqlserver_instance_backup]
+# [START cloud_sql_sqlserver_instance_ha]
 resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   name             = "<%= ctx[:vars]['sqlserver_instance_ha'] %>"
   region           = "us-central1"
@@ -15,4 +15,4 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   }
   deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
 }
-# [END cloud_sql_sqlserver_instance_backup]
+# [END cloud_sql_sqlserver_instance_ha]
