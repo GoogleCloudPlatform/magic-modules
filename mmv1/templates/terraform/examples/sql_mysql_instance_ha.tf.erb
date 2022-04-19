@@ -15,9 +15,3 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
 }
 # [END cloud_sql_mysql_instance_ha]
-
-
-gcloud beta sql ssl server-ca-certs list \
---format="value(cert)" \
---instance=hullabalooloo > \
-./sample.pem
