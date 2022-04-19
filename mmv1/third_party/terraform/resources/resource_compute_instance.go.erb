@@ -325,7 +325,6 @@ func resourceComputeInstance() *schema.Resource {
 										Type:         schema.TypeString,
 										Optional:     true,
 										Computed:     true,
-										ValidateFunc: validation.StringInSlice([]string{"PREMIUM", "STANDARD"}, false),
 										Description:  `The networking tier used for configuring this instance. One of PREMIUM or STANDARD.`,
 									},
 
@@ -382,7 +381,6 @@ func resourceComputeInstance() *schema.Resource {
 									"network_tier": {
 										Type:         schema.TypeString,
 										Required:     true,
-										ValidateFunc: validation.StringInSlice([]string{"PREMIUM"}, false),
 										Description:  `The service-level to be provided for IPv6 traffic when the subnet has an external subnet. Only PREMIUM tier is valid for IPv6`,
 									},
 									"public_ptr_domain_name": {
