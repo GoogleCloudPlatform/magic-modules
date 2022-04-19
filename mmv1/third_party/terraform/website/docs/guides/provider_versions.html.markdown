@@ -34,7 +34,7 @@ features.
 -> In short, using `google-beta` over `google` is similar to using `gcloud beta`
 over `gcloud`. Features that are exclusively available in `google-beta` are GCP
 features that are not yet GA, and they will be made available in `google` after
-they are in General Availability.
+they go to GA.
 
 ## Using the `google-beta` provider
 
