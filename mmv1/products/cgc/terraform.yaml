@@ -451,7 +451,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         primary_resource_type: "google_sql_database_instance"
         vars:
-          mysql_instance: "mysql-instance"
+          mysql_instance: "sql_mysql_instance_ssl_cert"
           deletion_protection: "true"
           common_name: "client-name"
         skip_test: true
@@ -460,7 +460,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "deletion_protection"
       - !ruby/object:Provider::Terraform::Examples
-        name: "sql_postres_instance_ssl_cert"
+        name: "sql_postgres_instance_ssl_cert"
         primary_resource_id: "default"
         primary_resource_type: "google_sql_database_instance"
         vars:
