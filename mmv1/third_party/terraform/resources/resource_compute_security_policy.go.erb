@@ -824,13 +824,14 @@ func expandSecurityPolicyRuleRateLimitOptions(configured []interface{}) *compute
 
 	data := configured[0].(map[string]interface{})
 	return &compute.SecurityPolicyRuleRateLimitOptions{
-		BanThreshold:       expandThreshold(data["ban_threshold"].([]interface{})),
-		RateLimitThreshold: expandThreshold(data["rate_limit_threshold"].([]interface{})),
-		ExceedAction:       data["exceed_action"].(string),
-		ConformAction:      data["conform_action"].(string),
-		EnforceOnKey:       data["enforce_on_key"].(string),
-		EnforceOnKeyName:   data["enforce_on_key_name"].(string),
-		BanDurationSec:     int64(data["ban_duration_sec"].(int)),
+		BanThreshold:          expandThreshold(data["ban_threshold"].([]interface{})),
+		RateLimitThreshold:    expandThreshold(data["rate_limit_threshold"].([]interface{})),
+		ExceedAction:          data["exceed_action"].(string),
+		ConformAction:         data["conform_action"].(string),
+		EnforceOnKey:          data["enforce_on_key"].(string),
+		EnforceOnKeyName:      data["enforce_on_key_name"].(string),
+		BanDurationSec:        int64(data["ban_duration_sec"].(int)),
+		ExceedRedirectOptions: expandSecurityPolicyRuleRedirectOptions(data["exceed_redirect_options"].([]interface{})),
 	}
 }
 
@@ -852,13 +853,14 @@ func flattenSecurityPolicyRuleRateLimitOptions(conf *compute.SecurityPolicyRuleR
 	}
 
 	data := map[string]interface{}{
-		"ban_threshold":        flattenThreshold(conf.BanThreshold),
-		"rate_limit_threshold": flattenThreshold(conf.RateLimitThreshold),
-		"exceed_action":        conf.ExceedAction,
-		"conform_action":       conf.ConformAction,
-		"enforce_on_key":       conf.EnforceOnKey,
-		"enforce_on_key_name":  conf.EnforceOnKeyName,
-		"ban_duration_sec":     conf.BanDurationSec,
+		"ban_threshold":           flattenThreshold(conf.BanThreshold),
+		"rate_limit_threshold":    flattenThreshold(conf.RateLimitThreshold),
+		"exceed_action":           conf.ExceedAction,
+		"conform_action":          conf.ConformAction,
+		"enforce_on_key":          conf.EnforceOnKey,
+		"enforce_on_key_name":     conf.EnforceOnKeyName,
+		"ban_duration_sec":        conf.BanDurationSec,
+		"exceed_redirect_options": flattenSecurityPolicyRedirectOptions(conf.ExceedRedirectOptions),
 	}
 
 	return []map[string]interface{}{data}
