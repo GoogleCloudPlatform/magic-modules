@@ -107,9 +107,9 @@ resource "google_dataproc_metastore_service" "my_metastore" {
 	}
 
 	network_config {
-      consumers {
-        subnetwork = google_compute_subnetwork.test.id
-	  }
+		consumers {
+			subnetwork = google_compute_subnetwork.test.id
+		}
 	}
 }
 `, name, tier)
