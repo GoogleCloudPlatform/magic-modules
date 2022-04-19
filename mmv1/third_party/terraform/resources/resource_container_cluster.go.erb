@@ -718,7 +718,6 @@ func resourceContainerCluster() *schema.Resource {
 <% if version == "beta" -%>
 							Optional:    true,
 							Computed:    true,
-							MaxItems:    1,
 							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS and WORKLOADS.`,
 <% end -%>
 							Elem: &schema.Schema{
