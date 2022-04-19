@@ -241,7 +241,7 @@ objects:
         description: |
           The configuration specifying the network settings for the Dataproc Metastore service.
         properties:
-      - !ruby/object:Api::Type::Array
+          - !ruby/object:Api::Type::Array
             name: 'consumers'
             item_type: !ruby/object:Api::Type::NestedObject
             required: true
