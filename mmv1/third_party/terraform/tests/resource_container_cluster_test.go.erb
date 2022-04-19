@@ -2669,6 +2669,9 @@ resource "google_container_cluster" "primary" {
 	config_connector_config {
 	  enabled = false
 	}
+    gke_backup_agent_config {
+	  enabled = false
+	}
 <% end -%>
   }
 }
@@ -2723,6 +2726,9 @@ resource "google_container_cluster" "primary" {
 	  enabled = true
 	}
 	config_connector_config {
+	  enabled = true
+	}
+	gke_backup_agent_config {
 	  enabled = true
 	}
 <% end -%>

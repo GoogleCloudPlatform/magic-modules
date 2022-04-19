@@ -187,15 +187,16 @@ func Provider() *schema.Provider {
 			OrgPolicyEndpointEntryKey:                       OrgPolicyEndpointEntry,
 			PrivatecaCertificateTemplateEndpointEntryKey:    PrivatecaCertificateTemplateCustomEndpointEntry,
 			RecaptchaEnterpriseEndpointEntryKey:             RecaptchaEnterpriseEndpointEntry,
-			ContainerAwsCustomEndpointEntryKey:    ContainerAwsCustomEndpointEntry,
-			ContainerAzureCustomEndpointEntryKey:    ContainerAzureCustomEndpointEntry,
-			ApikeysEndpointEntryKey:               ApikeysEndpointEntry,
+			ContainerAwsCustomEndpointEntryKey:              ContainerAwsCustomEndpointEntry,
+			ContainerAzureCustomEndpointEntryKey:            ContainerAzureCustomEndpointEntry,
+			ApikeysEndpointEntryKey:                         ApikeysEndpointEntry,
 
 			<% if version == "private" -%>
 			VmwareEndpointEntryKey:                          VmwareEndpointEntry,
+			RunEndpointEntryKey:                             RunEndpointEntry,
 			<% end -%>
 
-			CloudBuildWorkerPoolEndpointEntryKey:               CloudBuildWorkerPoolEndpointEntry,
+			CloudBuildWorkerPoolEndpointEntryKey:            CloudBuildWorkerPoolEndpointEntry,
 },
 
 		ProviderMetaSchema: map[string]*schema.Schema{
@@ -207,6 +208,9 @@ func Provider() *schema.Provider {
 
 		DataSourcesMap: map[string]*schema.Resource{
 			// ####### START datasources ###########
+			"google_access_approval_folder_service_account":    dataSourceAccessApprovalFolderServiceAccount(),
+			"google_access_approval_organization_service_account": dataSourceAccessApprovalOrganizationServiceAccount(),
+			"google_access_approval_project_service_account":   dataSourceAccessApprovalProjectServiceAccount(),
 			"google_active_folder":                             dataSourceGoogleActiveFolder(),
 			"google_app_engine_default_service_account":        dataSourceGoogleAppEngineDefaultServiceAccount(),
 			"google_billing_account":                           dataSourceGoogleBillingAccount(),
@@ -505,6 +509,7 @@ end     # products.each do
 				<% if version == 'private' -%>
 				"google_vmware_private_cloud":                  resourceVmwarePrivateCloud(),
 				"google_vmware_cluster":                        resourceVmwareCluster(),
+				"google_cloud_run_job":                         resourceRunJob(),
 				<% end -%>
 				// ####### END tpgtools resources ###########
 			},

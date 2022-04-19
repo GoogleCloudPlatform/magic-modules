@@ -71,6 +71,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     id_format: "tagBindings/{{name}}"
     import_format: ["tagBindings/{{name}}", "{{name}}"]
+    mutex: tagBindings/{{parent}}
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/tags_tag_binding_name.erb'
