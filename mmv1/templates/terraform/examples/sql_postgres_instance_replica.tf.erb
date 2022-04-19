@@ -2,7 +2,7 @@
 resource "google_sql_database_instance" "primary" {
   name             = "<%= ctx[:vars]['postgres_primary_instance_name'] %>"
   region           = "europe-west4"
-  database_version = "POSTGRES_12"
+  database_version = "POSTGRES_14"
   settings {
     tier               = "db-custom-2-7680"
     backup_configuration {
@@ -18,7 +18,7 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   name                 = "<%= ctx[:vars]['postgres_replica_instance_name'] %>"
   master_instance_name = google_sql_database_instance.primary.name
   region               = "europe-west4"
-  database_version     = "POSTGRES_12"
+  database_version     = "POSTGRES_14"
 
   replica_configuration {
     failover_target = false
