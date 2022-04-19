@@ -464,7 +464,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         primary_resource_type: "google_sql_database_instance"
         vars:
-          postres_instance: "postres-instance"
+          postgres_instance: "postgres-instance"
           deletion_protection: "true"
           common_name: "client-name"
         skip_test: true
