@@ -449,6 +449,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_mysql_instance_ssl_cert"
         primary_resource_id: "default"
+        primary_resource_type: "google_sql_database_instance"
         vars:
           mysql_instance: "mysql-instance"
           deletion_protection: "true"
@@ -461,6 +462,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_postres_instance_ssl_cert"
         primary_resource_id: "default"
+        primary_resource_type: "google_sql_database_instance"
         vars:
           postres_instance: "postres-instance"
           deletion_protection: "true"
@@ -473,6 +475,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_sqlserver_instance_ssl_cert"
         primary_resource_id: "default"
+        primary_resource_type: "google_sql_database_instance"
         vars:
           sqlserver_instance: "sqlserver-instance"
           deletion_protection: "true"
