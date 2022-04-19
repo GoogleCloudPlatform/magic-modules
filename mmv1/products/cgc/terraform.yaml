@@ -387,6 +387,46 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           private_ip_address: "private-ip-address"
           private_ip_sql_instance: "private-ip-sql-instance"
         skip_test: true
+    ### Flags and User ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_mysql_instance_flags"
+        primary_resource_id: "instance"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          mysql_instance: "mysql-instance"
+          username: "username"
+          deletion_protection: "true"
+        skip_test: true
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_postgres_instance_flags"
+        primary_resource_id: "instance"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          postgres_instance: "postgres-instance"
+          username: "username"
+          deletion_protection: "true"
+        skip_test: true
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_sqlserver_instance_flags"
+        primary_resource_id: "instance"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          sqlserver_instance: "sqlserver-instance"
+          username: "username"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+          - "root_password"
     # Storage
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_new_bucket"
@@ -396,7 +436,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           new_bucket: "new-bucket"
           new_object: "new-object"
     properties:
-    
+
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
