@@ -29,9 +29,7 @@ var (
 		"scheduling.0.preemptible",
 		"scheduling.0.node_affinities",
 		"scheduling.0.min_node_cpus",
-<% unless version == 'ga' -%>
 		"scheduling.0.provisioning_model",
- <% end -%>
 	}
 
 	shieldedInstanceTemplateConfigKeys = []string{
@@ -539,7 +537,6 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							AtLeastOneOf: schedulingInstTemplateKeys,
 							Description:  `Minimum number of cpus for the instance.`,
 						},
-<% unless version == 'ga' -%>
 						"provisioning_model": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -548,7 +545,6 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							AtLeastOneOf: schedulingInstTemplateKeys,
 							Description:  `Whether the instance is spot. If this is set as SPOT.`,
 						},
-<% end -%>
 					},
 				},
 			},

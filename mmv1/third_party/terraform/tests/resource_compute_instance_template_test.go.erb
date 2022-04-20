@@ -1080,7 +1080,6 @@ func TestAccComputeInstanceTemplate_queueCount(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeInstanceTemplate_spot(t *testing.T) {
 	t.Parallel()
 
@@ -1109,7 +1108,6 @@ func TestAccComputeInstanceTemplate_spot(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func testAccCheckComputeInstanceTemplateDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
@@ -1258,7 +1256,6 @@ func testAccCheckComputeInstanceTemplatePreemptible(instanceTemplate *compute.In
 	}
 }
 
-<% unless version == 'ga' -%>
 func testAccCheckComputeInstanceTemplateProvisioningModel(instanceTemplate *compute.InstanceTemplate, provisioning_model string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if instanceTemplate.Properties.Scheduling.ProvisioningModel != provisioning_model {
@@ -1267,7 +1264,6 @@ func testAccCheckComputeInstanceTemplateProvisioningModel(instanceTemplate *comp
 		return nil
 	}
 }
-<% end -%>
 
 
 func testAccCheckComputeInstanceTemplateAutomaticRestart(instanceTemplate *compute.InstanceTemplate, automaticRestart bool) resource.TestCheckFunc {
@@ -2731,7 +2727,6 @@ resource "google_compute_instance_template" "foobar" {
 `, instanceTemplateName)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeInstanceTemplate_spot(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -2771,6 +2766,4 @@ resource "google_compute_instance_template" "foobar" {
 }
 `, suffix)
 }
-<% end -%>
-
 
