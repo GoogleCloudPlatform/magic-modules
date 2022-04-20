@@ -43,11 +43,18 @@ ASSIGNEE=$(shuf -n 1 <(printf "rileykarson\nslevenick\nc2thorn\nscottsuarez\nmel
 comment=$(cat << EOF
 Hello!  I am a robot who works on Magic Modules PRs.
 
-I have detected that you are a community contributor, so your PR will be assigned to someone with a commit-bit on this repo for initial review.
+I've detected that you're a community contributor. @$ASSIGNEE, a repository maintainer, has been assigned to assist you and help review your changes. 
 
-Thanks for your contribution!  A human will be with you soon.
+<details>
+  <summary>:question: First time contributing? Click here for more details</summary>
+  
+Your assigned reviewer will help review your code by ensuring it's backwards compatible, covers common eror cases, etc., and summarizing the change into a user-facing changelog note. They'll also run tests against your changes whether automatically through "VCR", a set of presubmit tests, or with manual test runs.
 
-@$ASSIGNEE, please review this PR or find an appropriate assignee.
+You can help make sure that review is quick by running local tests and ensuring they're passing in between each push you make to your PR's branch. Also, try to leave a comment with each push you make, as pushes generally don't generate notifications for maintainers.
+
+If your reviewer doesn't get back to you within a week of your most recent change or comment, please feel free to leave a comment on the issue asking them to take a look! In the absence of a dedicated review dashboard most maintainers manage their pending reviews through email, and those will sometimes get lost in their inbox.
+</details>
+
 EOF
 )
 
