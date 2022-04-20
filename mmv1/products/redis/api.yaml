@@ -400,3 +400,53 @@ objects:
           an existing instance. For DIRECT_PEERING mode value must be a CIDR range of size /28, or
           "auto". For PRIVATE_SERVICE_ACCESS mode value must be the name of an allocated address 
           range associated with the private service access connection, or "auto".
+        input: true
+      - !ruby/object:Api::Type::NestedObject
+        name: persistenceConfig
+        description: Configuration of the persistence functionality.
+        min_version: beta
+        allow_empty_object: true
+        send_empty_value: true
+        properties:
+        - !ruby/object:Api::Type::Enum
+          name: persistenceMode
+          description: |
+            Optional. Controls whether Persistence features are enabled. 
+            If not provided, the existing value will be used.
+            - PERSISTENCE_MODE_UNSPECIFIED: Not set.
+            - DISABLED: Persistence is disabled for the instance, and any existing snapshots are deleted.
+            - RDB: RDB based Persistence is enabled.
+          values:
+            - :PERSISTENCE_MODE_UNSPECIFIED
+            - :DISABLED
+            - :RDB
+          input: true
+        - !ruby/object:Api::Type::Enum
+          name: rdbSnapshotPeriod
+          description: |
+            Optional. 
+            Period between RDB snapshots. Snapshots will be attempted every period starting from the provided snapshot start time.
+            - SNAPSHOT_PERIOD_UNSPECIFIED: Not set.
+            - ONE_HOUR: every 1 hour.
+            - SIX_HOURS	every 6 hours.
+            - TWELVE_HOURS: every 12 hours.
+            - TWENTY_FOUR_HOURS: every 24 horus
+          values:
+            - :SNAPSHOT_PERIOD_UNSPECIFIED
+            - :ONE_HOUR
+            - :SIX_HOURS
+            - :TWELVE_HOURS
+            - :TWENTY_FOUR_HOURS
+          input: true
+        - !ruby/object:Api::Type::Time
+          name: rdbNextSnapshotTime
+          description: |
+            Output only. 
+            The next time that a snapshot attempt is scheduled to occur in the RFC3339 UTC "Zulu" format.
+        - !ruby/object:Api::Type::Time
+          name: rdbSnapshotStartTime
+          description: |
+            Optional. 
+            Date and time in the RFC3339 UTC "Zulu" format at which the first snapshot was/will be attempted, 
+            and to which future snapshots will be aligned. If not provided, the current time will be used.
+          input: true
