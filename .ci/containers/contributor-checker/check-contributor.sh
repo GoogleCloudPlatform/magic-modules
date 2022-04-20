@@ -51,7 +51,7 @@ I've detected that you're a community contributor. @$ASSIGNEE, a repository main
 ---
 
 Your assigned reviewer will help review your code by: 
-* Ensuring it's backwards compatible, covers common eror cases, etc.
+* Ensuring it's backwards compatible, covers common error cases, etc.
 * Summarizing the change into a user-facing changelog note.
 * Passes tests, either our "VCR" suite, a set of presubmit tests, or with manual test runs.
 
