@@ -131,3 +131,27 @@ objects:
       name: updateTime
       description: The time when the repository was last updated.
       output: true
+    - !ruby/object:Api::Type::NestedObject
+      name: 'mavenConfig'
+      description: |-
+        MavenRepositoryConfig is maven related repository details.
+        Provides additional configuration details for repositories of the maven
+        format type.
+      properties:
+        # Maven properties.
+        - !ruby/object:Api::Type::Boolean
+          name: 'allowSnapshotOverwrites'
+          description: |-
+            The repository with this flag will allow publishing the same
+            snapshot versions.
+          input: true
+        - !ruby/object:Api::Type::Enum
+          name: 'versionPolicy'
+          description: |-
+            Version policy defines the versions that the registry will accept.
+          input: true
+          values:
+          - :VERSION_POLICY_UNSPECIFIED
+          - :RELEASE
+          - :SNAPSHOT
+          default_value: :VERSION_POLICY_UNSPECIFIED

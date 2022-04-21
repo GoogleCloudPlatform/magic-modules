@@ -13,12 +13,11 @@ generates.
 Magic Modules generates GCP support for:
 
 * Terraform
-* Ansible
 
 In addition, Magic Modules generates support for several companion
 features/tools:
 
-* Terraform Google Inventory Mapper
+* Terraform Validator
 * Terraform in Cloud Shell
 
 Importantly, Magic Modules *isn't* full code generation. Every change is made
@@ -77,7 +76,7 @@ git clone https://github.com/hashicorp/terraform-provider-google-beta.git $GOPAT
 
 Magic Modules won't work with old versions of the Terraform provider repos. If
 you're encountering issues with vendoring and paths, make sure both MM and the
-Terraform provider are running on up to date copies of `master`.
+Terraform provider are running on up to date copies of `main`.
 
 Once you've prepared the target folders for the tools, run the following to
 finish getting Magic Modules set up by installing the Ruby gems it needs to run:
@@ -130,8 +129,8 @@ Once again, see the Open in Cloud Shell example above for an interactive example
 of making a Magic Modules change; this section will serve as a reference more
 than a specific example.
 
-Magic Modules mirrors the GCP REST API; there are [products](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/mmv1/api/product.rb)
-such as Compute or Container (GKE) that contains [resources](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/mmv1/api/resource.rb),
+Magic Modules mirrors the GCP REST API; there are [products](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/product.rb)
+such as Compute or Container (GKE) that contains [resources](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource.rb),
 [GCP resources](https://cloud.google.com/docs/overview/#gcp_resources) such as
 Compute VM Instances or GKE Clusters.
 
@@ -140,9 +139,9 @@ file named `api.yaml` that contains the resources that make up the API
 definition.
 
 Resources are made up of some metadata like their `"name"` in the API such as
-Address or Instance, some additional metadata (see the fields in [resource.rb](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/mmv1/api/resource.rb)),
+Address or Instance, some additional metadata (see the fields in [resource.rb](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource.rb)),
 and the meat of a resource, its fields. They're represented by `properties` in
-Magic Modules, an array of [types](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/mmv1/api/type.rb).
+Magic Modules, an array of [types](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/type.rb).
 
 Adding a new field to a resource in Magic Modules is often as easy as adding a
 `type` to the `properties` array for the resource. See [this example](https://github.com/GoogleCloudPlatform/magic-modules/pull/1126/files#diff-fb4f76e7d870258668a3beac48bf164c)
@@ -156,7 +155,7 @@ While most small changes won't require fiddling with overrides, each tool has
 often minor differences- the naming of a field, or whether it's required or not.
 
 You can find them under the folder for a product, with the name `{{tool}}.yaml`.
-For example, Ansible's overrides for Cloud SQL are present at `products/sql/ansible.yaml`
+For example, Terraform's overrides for Cloud SQL are present at `products/sql/terraform.yaml`
 
 You can find a full reference for each tool under `overrides/{{tool}}/resource_override.rb`
 and `overrides/{{tool}}/property_override.rb`, as well as some other tool-specific
@@ -192,9 +191,8 @@ tool;
 
 Tool             | Testing Guide
 -----------------|--------------
-ansible          | [instructions](https://docs.ansible.com/ansible/devel/dev_guide/testing.html)
-terraform        | [`google` provider testing guide](https://github.com/hashicorp/terraform-provider-google/blob/master/.github/CONTRIBUTING.md#tests)
-terraform (beta) | [`google-beta` provider testing guide](https://github.com/hashicorp/terraform-provider-google-beta/blob/master/.github/CONTRIBUTING.md#tests)
+terraform        | [`google` provider testing guide](https://github.com/hashicorp/terraform-provider-google/blob/main/.github/CONTRIBUTING.md#tests)
+terraform (beta) | [`google-beta` provider testing guide](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/.github/CONTRIBUTING.md#tests)
 
 Don't worry about testing every tool, only the primary tool you're making
 changes against. The Magic Modules maintainers will ensure your changes work

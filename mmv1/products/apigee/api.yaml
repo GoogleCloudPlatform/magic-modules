@@ -105,6 +105,11 @@ objects:
           Valid values include trial (free, limited, and for evaluation purposes only) or paid (full subscription has been purchased).
         output: true
       - !ruby/object:Api::Type::String
+        name: 'billingType'
+        description: |
+          Billing type of the Apigee organization. See [Apigee pricing](https://cloud.google.com/apigee/pricing).
+        input: true
+      - !ruby/object:Api::Type::String
         name: 'caCertificate'
         description: |
           Output only. Base64-encoded public certificate for the root CA of the Apigee organization.
@@ -166,9 +171,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'location'
         description: |
-          Compute Engine location where the instance resides. For trial organization
-          subscriptions, the location must be a Compute Engine zone. For paid organization
-          subscriptions, it should correspond to a Compute Engine region.
+          Required. Compute Engine location where the instance resides.
         required: true
       - !ruby/object:Api::Type::String
         name: 'peeringCidrRange'
@@ -271,6 +274,31 @@ objects:
         description: |
           Description of the environment.
         required: false
+        input: true
+      - !ruby/object:Api::Type::Enum
+        name: 'deploymentType'
+        description: |
+          Optional. Deployment type supported by the environment. The deployment type can be
+          set when creating the environment and cannot be changed. When you enable archive
+          deployment, you will be prevented from performing a subset of actions within the
+          environment, including:
+          Managing the deployment of API proxy or shared flow revisions;
+          Creating, updating, or deleting resource files;
+          Creating, updating, or deleting target servers.
+        values:
+          - "DEPLOYMENT_TYPE_UNSPECIFIED"
+          - "PROXY"
+          - "ARCHIVE"
+        input: true
+      - !ruby/object:Api::Type::Enum
+        name: 'apiProxyType'
+        description: |
+          Optional. API Proxy type supported by the environment. The type can be set when creating
+          the Environment and cannot be changed.
+        values:
+          - "API_PROXY_TYPE_UNSPECIFIED"
+          - "PROGRAMMABLE"
+          - "CONFIGURABLE"
         input: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:

@@ -73,7 +73,7 @@ resource "google_dataproc_cluster" "mycluster" {
 
     # Override or set some custom properties
     software_config {
-      image_version = "1.3.7-deb9"
+      image_version = "2.0.35-debian10"
       override_properties = {
         "dataproc:dataproc.allow.zero.workers" = "true"
       }
@@ -443,6 +443,12 @@ will be set for you based on whatever was set for the `worker_config.machine_typ
 * `num_instances`- (Optional) Specifies the number of preemptible nodes to create.
    Defaults to 0.
 
+* `preemptibility`- (Optional) Specifies the preemptibility of the secondary workers. The default value is `PREEMPTIBLE`
+  Accepted values are:
+  * PREEMPTIBILITY_UNSPECIFIED
+  * NON_PREEMPTIBLE
+  * PREEMPTIBLE
+
 * `disk_config` (Optional) Disk Config
 
     * `boot_disk_type` - (Optional) The disk type of the primary disk attached to each preemptible worker node.
@@ -464,7 +470,7 @@ will be set for you based on whatever was set for the `worker_config.machine_typ
 cluster_config {
   # Override or set some custom properties
   software_config {
-    image_version = "1.3.7-deb9"
+    image_version = "2.0.35-debian10"
 
     override_properties = {
       "dataproc:dataproc.allow.zero.workers" = "true"

@@ -515,6 +515,7 @@ var TemplateFunctions = template.FuncMap{
 	"replace":           strings.Replace,
 	"isLastIndex":       isLastIndex,
 	"escapeDescription": escapeDescription,
+	"shouldAllowForwardSlashInFormat": shouldAllowForwardSlashInFormat,
 }
 
 // TypeFetcher fetches reused types, as marked by the $ref field being marked on an OpenAPI schema.

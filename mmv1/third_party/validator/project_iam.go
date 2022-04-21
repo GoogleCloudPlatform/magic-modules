@@ -90,6 +90,10 @@ func newProjectIamAsset(
 }
 
 func FetchProjectIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+	if _, ok := d.GetOk("project"); !ok {
+		return Asset{}, ErrEmptyIdentityField
+	}
+
 	// We use project_id in the asset name template to be consistent with newProjectIamAsset.
 	return fetchIamPolicy(
 		NewProjectIamUpdater,

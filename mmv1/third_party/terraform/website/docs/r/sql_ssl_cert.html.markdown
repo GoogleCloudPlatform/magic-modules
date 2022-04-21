@@ -12,7 +12,7 @@ description: |-
 Creates a new Google SQL SSL Cert on a Google SQL Instance. For more information, see the [official documentation](https://cloud.google.com/sql/), or the [JSON API](https://cloud.google.com/sql/docs/mysql/admin-api/v1beta4/sslCerts).
 
 ~> **Note:** All arguments including the private key will be stored in the raw state as plain-text.
-[Read more about sensitive data in state](/docs/state/sensitive-data.html).
+[Read more about sensitive data in state](/language/state/sensitive-data.html).
 
 ## Example Usage
 
@@ -23,8 +23,8 @@ resource "random_id" "db_name_suffix" {
   byte_length = 4
 }
 
-resource "google_sql_database_instance" "master" {
-  name             = "master-instance-${random_id.db_name_suffix.hex}"
+resource "google_sql_database_instance" "main" {
+  name             = "main-instance-${random_id.db_name_suffix.hex}"
   database_version = "MYSQL_5_7"
   settings {
     tier = "db-f1-micro"
@@ -33,7 +33,7 @@ resource "google_sql_database_instance" "master" {
 
 resource "google_sql_ssl_cert" "client_cert" {
   common_name = "client-name"
-  instance    = google_sql_database_instance.master.name
+  instance    = google_sql_database_instance.main.name
 }
 ```
 

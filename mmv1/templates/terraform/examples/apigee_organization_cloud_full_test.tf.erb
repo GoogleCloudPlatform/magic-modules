@@ -105,6 +105,7 @@ resource "google_apigee_organization" "<%= ctx[:primary_resource_id] %>" {
   analytics_region                     = "us-central1"
   project_id                           = google_project.project.project_id
   authorized_network                   = google_compute_network.apigee_network.id
+  billing_type                         = "EVALUATION"
   runtime_database_encryption_key_name = google_kms_crypto_key.apigee_key.id
 
   depends_on = [

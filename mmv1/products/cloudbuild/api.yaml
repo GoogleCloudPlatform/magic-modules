@@ -83,8 +83,84 @@ objects:
         exactly_one_of:
           - filename
           - build
+          - git_file_source
         description: |
-          Path, from the source root, to a file whose contents is used for the template. Either a filename or build template must be provided.
+          Path, from the source root, to a file whose contents is used for the template. 
+          Either a filename or build template must be provided. Set this only when using trigger_template or github.
+          When using Pub/Sub, Webhook or Manual set the file name using git_file_source instead.
+      - !ruby/object:Api::Type::String
+        name: 'filter'
+        description: |
+          A Common Expression Language string. Used only with Pub/Sub and Webhook.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'gitFileSource'
+        exactly_one_of:
+          - filename
+          - git_file_source
+          - build
+        description: |
+          The file source describing the local or remote Build template.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'path'
+            required: true
+            description: |
+              The path of the file, with the repo root as the root of the path.
+          - !ruby/object:Api::Type::String
+            name: 'uri'
+            description: |
+              The URI of the repo (optional). If unspecified, the repo from which the trigger 
+              invocation originated is assumed to be the repo from which to read the specified path.
+          - !ruby/object:Api::Type::Enum
+            name: 'repoType'
+            required: true
+            description: |
+              The type of the repo, since it may not be explicit from the repo field (e.g from a URL). 
+              Values can be UNKNOWN, CLOUD_SOURCE_REPOSITORIES, GITHUB
+            values:
+                  - :UNKNOWN
+                  - :CLOUD_SOURCE_REPOSITORIES
+                  - :GITHUB
+          - !ruby/object:Api::Type::String
+            name: 'revision'
+            description: |
+              The branch, tag, arbitrary ref, or SHA version of the repo to use when resolving the 
+              filename (optional). This field respects the same syntax/resolution as described here: https://git-scm.com/docs/gitrevisions 
+              If unspecified, the revision from which the trigger invocation originated is assumed to be the revision from which to read the specified path.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'sourceToBuild'
+        description: |
+          The repo and ref of the repository from which to build. 
+          This field is used only for those triggers that do not respond to SCM events. 
+          Triggers that respond to such events build source at whatever commit caused the event. 
+          This field is currently only used by Webhook, Pub/Sub, Manual, and Cron triggers.
+        at_least_one_of:
+          - trigger_template
+          - github
+          - pubsub_config
+          - webhook_config
+          - source_to_build
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'uri'
+            required: true
+            description: |
+             The URI of the repo (required).
+          - !ruby/object:Api::Type::String
+            name: 'ref'
+            required: true
+            description: |
+              The branch or tag to use. Must start with "refs/" (required).
+          - !ruby/object:Api::Type::Enum
+            name: 'repoType'
+            required: true
+            description: |
+              The type of the repo, since it may not be explicit from the repo field (e.g from a URL).
+              Values can be UNKNOWN, CLOUD_SOURCE_REPOSITORIES, GITHUB
+            values:
+                  - :UNKNOWN
+                  - :CLOUD_SOURCE_REPOSITORIES
+                  - :GITHUB
       - !ruby/object:Api::Type::Array
         name: 'ignoredFiles'
         item_type: Api::Type::String
@@ -121,11 +197,12 @@ objects:
           Branch and tag names in trigger templates are interpreted as regular
           expressions. Any branch or tag change that matches that regular
           expression will trigger a build.
-        exactly_one_of:
+        at_least_one_of:
           - trigger_template
           - github
           - pubsub_config
           - webhook_config
+          - source_to_build
         properties:
           - !ruby/object:Api::Type::String
             name: 'projectId'
@@ -180,11 +257,12 @@ objects:
         name: 'github'
         description: |
             Describes the configuration of a trigger that creates a build whenever a GitHub event is received.
-        exactly_one_of:
+        at_least_one_of:
           - trigger_template
           - github
           - pubsub_config
           - webhook_config
+          - source_to_build
         properties:
           - !ruby/object:Api::Type::String
             name: 'owner'
@@ -252,11 +330,12 @@ objects:
         description: |
           PubsubConfig describes the configuration of a trigger that creates 
           a build whenever a Pub/Sub message is published.
-        exactly_one_of:
+        at_least_one_of:
           - trigger_template
           - github
           - pubsub_config
           - webhook_config
+          - source_to_build
         properties:
           - !ruby/object:Api::Type::String
             name: 'subscription'
@@ -283,11 +362,12 @@ objects:
         description: |
           WebhookConfig describes the configuration of a trigger that creates 
           a build whenever a webhook is sent to a trigger's webhook URL.
-        exactly_one_of:
+        at_least_one_of:
           - trigger_template
           - github
           - pubsub_config
           - webhook_config
+          - source_to_build
         properties:
           - !ruby/object:Api::Type::String
             name: 'secret'
@@ -301,10 +381,24 @@ objects:
               Potential issues with the underlying Pub/Sub subscription configuration.
               Only populated on get requests.
       - !ruby/object:Api::Type::NestedObject
+        name: 'approvalConfig'
+        description: |
+          Configuration for manual approval to start a build invocation of this BuildTrigger. 
+          Builds created by this trigger will require approval before they execute. 
+          Any user with a Cloud Build Approver role for the project can approve a build.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'approvalRequired'
+            default_value: false
+            description: |
+              Whether or not approval is needed. If this is set on a build, it will become pending when run, 
+              and will need to be explicitly approved to start.
+      - !ruby/object:Api::Type::NestedObject
         name: 'build'
         exactly_one_of:
           - filename
           - build
+          - git_file_source
         description: |
           Contents of the build template. Either a filename or build template must be provided.
         properties:
@@ -744,6 +838,7 @@ objects:
                   - :LEGACY
                   - :GCS_ONLY
                   - :STACKDRIVER_ONLY
+                  - :CLOUD_LOGGING_ONLY
                   - :NONE
               - !ruby/object:Api::Type::Array
                 name: 'env'

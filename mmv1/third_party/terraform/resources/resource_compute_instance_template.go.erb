@@ -29,9 +29,7 @@ var (
 		"scheduling.0.preemptible",
 		"scheduling.0.node_affinities",
 		"scheduling.0.min_node_cpus",
-<% unless version == 'ga' -%>
 		"scheduling.0.provisioning_model",
- <% end -%>
 	}
 
 	shieldedInstanceTemplateConfigKeys = []string{
@@ -381,8 +379,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 										Optional:     true,
 										Computed:     true,
 										ForceNew:     true,
-										Description:  `The networking tier used for configuring this instance template. This field can take the following values: PREMIUM or STANDARD. If this field is not specified, it is assumed to be PREMIUM.`,
-										ValidateFunc: validation.StringInSlice([]string{"PREMIUM", "STANDARD"}, false),
+										Description:  `The networking tier used for configuring this instance template. This field can take the following values: PREMIUM, STANDARD, FIXED_STANDARD. If this field is not specified, it is assumed to be PREMIUM.`,
 									},
 									// Possibly configurable- this was added so we don't break if it's inadvertently set
 									"public_ptr_domain_name": {
@@ -441,7 +438,6 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 									"network_tier": {
 										Type:         schema.TypeString,
 										Required:     true,
-										ValidateFunc: validation.StringInSlice([]string{"PREMIUM"}, false),
 										Description:  `The service-level to be provided for IPv6 traffic when the subnet has an external subnet. Only PREMIUM tier is valid for IPv6`,
 									},
 									// Possibly configurable- this was added so we don't break if it's inadvertently set
@@ -541,7 +537,6 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							AtLeastOneOf: schedulingInstTemplateKeys,
 							Description:  `Minimum number of cpus for the instance.`,
 						},
-<% unless version == 'ga' -%>
 						"provisioning_model": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -550,7 +545,6 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							AtLeastOneOf: schedulingInstTemplateKeys,
 							Description:  `Whether the instance is spot. If this is set as SPOT.`,
 						},
-<% end -%>
 					},
 				},
 			},

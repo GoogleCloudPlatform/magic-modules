@@ -641,7 +641,6 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		}
 
 		if !p.Computed {
-			glog.Infof("Looking for %q in %v.", v.Title, schema.Required)
 			if stringInSlice(v.Title, schema.Required) {
 				p.Required = true
 			} else {
@@ -671,7 +670,10 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				p.ForceNew = true
 			}
 
-			if serverDefault, ok := v.Extension["x-dcl-server-default"].(bool); ok && serverDefault {
+			serverDefault, _ := v.Extension["x-dcl-server-default"].(bool)
+			extractIfEmpty, _ := v.Extension["x-dcl-extract-if-empty"].(bool)
+
+			if serverDefault || extractIfEmpty {
 				p.Computed = true
 			}
 
@@ -714,7 +716,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		ss := p.DefaultStateSetter()
 		p.StateSetter = &ss
 
-		if p.Sensitive {
+		if p.Sensitive && p.Settable {
 			p.StateSetter = nil
 		}
 

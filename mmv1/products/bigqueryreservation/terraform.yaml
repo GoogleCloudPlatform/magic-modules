@@ -15,6 +15,8 @@
 legacy_name: bigquery
 overrides: !ruby/object:Overrides::ResourceOverrides
   Reservation: !ruby/object:Overrides::Terraform::ResourceOverride
+    #Handwritten sweeper to delete child resources
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_reservation_basic"

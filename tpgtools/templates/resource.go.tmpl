@@ -291,23 +291,31 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 		return fmt.Errorf("Error creating {{$.DCLTitle}}: %s", err)
 	}
 
-	log.Printf("[DEBUG] Finished creating {{$.DCLTitle}} %q: %#v", d.Id(), res)
-
-{{ if $.HasServerGeneratedName }}
-  {{ range $v := .Properties -}}
-	  {{- if ($v.IsServerGeneratedName) }}
+{{ if $.HasServerGeneratedName}}
+  {{ if $.UseDCLID }}
+  id, err = obj.ID()
+  if err != nil {
+    return fmt.Errorf("error constructing id: %s", err)
+  }
+  d.SetId(id)
+  {{ else }}
+    {{ range $v := .Properties -}}
+	    {{- if ($v.IsServerGeneratedName) }}
 	if err = {{$v.StateSetter}}; err != nil {
 		return fmt.Errorf("error setting {{$v.Name}} in state: %s", err)
 	}
-	  {{- end -}}
-  {{- end }}
+	    {{- end -}}
+    {{- end }}
   // Id has a server-generated value, set again after creation
 	id, err = {{ $.IdFunction }}(d, config, "{{$.ID}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
+  {{ end}}
 {{ end }}
+
+	log.Printf("[DEBUG] Finished creating {{$.DCLTitle}} %q: %#v", d.Id(), res)
 
 {{ if $.PostCreateFunction }}
 	if err := {{$.PostCreateFunction}}(d, config, res); err != nil {
@@ -552,9 +560,10 @@ func resource{{$.PathType}}Import(d *schema.ResourceData, meta interface{}) ([]*
 		return nil, fmt.Errorf("error encountered in import: %v", err)
 	}
 {{ else -}}
+	{{$allowForwardSlash := shouldAllowForwardSlashInFormat $.ID $.Properties}}
 	if err := parseImportId([]string{
 	{{- range $format := $.ImportFormats }}
-	"{{patternToRegex $format}}",
+	"{{patternToRegex $format $allowForwardSlash}}",
 	{{- end }}
 	}, d, config); err != nil {
 		return nil, err
@@ -611,7 +620,7 @@ func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.
 			{{- end }}
 
 	objs := o.([]interface{})
-	if len(objs) == 0 {
+	if len(objs) == 0 || objs[0] == nil {
 	{{- if $v.Computed }}
 		return nil
 	{{- else }}
@@ -639,7 +648,7 @@ func expand{{$.PathType}}{{$v.PackagePath}}(o interface{}) *{{$.Package}}.{{$v.O
 	}
 	{{ if $v.IsObject -}}
 	objArr := o.([]interface{})
-	if len(objArr) == 0 {
+	if len(objArr) == 0 || objArr[0] == nil {
 	{{- if $v.Computed }}
 		return nil
 	{{- else }}

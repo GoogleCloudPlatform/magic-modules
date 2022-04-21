@@ -54,8 +54,8 @@ RUN pip3 install black
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/master/mmv1/Gemfile" Gemfile
-ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/master/mmv1/Gemfile.lock" Gemfile.lock
+ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mmv1/Gemfile" Gemfile
+ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mmv1/Gemfile.lock" Gemfile.lock
 RUN bundle install
 RUN rbenv rehash
 RUN rm Gemfile Gemfile.lock

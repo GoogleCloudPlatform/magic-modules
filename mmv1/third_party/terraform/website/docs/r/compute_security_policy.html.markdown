@@ -66,6 +66,13 @@ The following arguments are supported:
 
 * `adaptive_protection_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for [Google Cloud Armor Adaptive Protection](https://cloud.google.com/armor/docs/adaptive-protection-overview?hl=en). Structure is [documented below](#nested_adaptive_protection_config).
 
+* `type` - The type indicates the intended use of the security policy.
+  * CLOUD_ARMOR - Cloud Armor backend security policies can be configured to filter incoming HTTP requests targeting backend services.
+    They filter requests before they hit the origin servers.
+  * CLOUD_ARMOR_EDGE - Cloud Armor edge security policies can be configured to filter incoming HTTP requests targeting backend services
+    (including Cloud CDN-enabled) as well as backend buckets (Cloud Storage).
+    They filter requests before the request is served from Google's cache.
+
 <a name="nested_rule"></a>The `rule` block supports:
 
 * `action` - (Required) Action to take when `match` matches the request. Valid values:
@@ -88,6 +95,9 @@ The following arguments are supported:
 
 * `rate_limit_options` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
     Must be specified if the `action` is "rate_based_bad" or "throttle". Cannot be specified for other actions. Structure is [documented below](#nested_rate_limit_options).
+
+* `redirect_options` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+    Can be specified if the `action` is "redirect". Cannot be specified for other actions. Structure is [documented below](#nested_redirect_options).
 
 <a name="nested_match"></a>The `match` block supports:
 
@@ -145,6 +155,15 @@ The following arguments are supported:
 * `count` - (Optional) Number of HTTP(S) requests for calculating the threshold.
 
 * `interval_sec` - (Optional) Interval over which the threshold is computed.
+
+<a name="nested_redirect_options"></a>The `redirect_options` block supports:
+
+* `type` - (Required) Type of redirect action.
+
+    * EXTERNAL_302: Redirect to an external address, configured in 'target'.
+    * GOOGLE_RECAPTCHA: Redirect to Google reCAPTCHA.
+
+* `target` - (Optional) External redirection target when "EXTERNAL_302" is set in 'type'.
 
 <a name="nested_adaptive_protection_config"></a>The `adaptive_protection_config` block supports:
 

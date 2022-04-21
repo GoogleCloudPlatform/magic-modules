@@ -229,6 +229,12 @@ func (r Resource) TerraformName() SnakeCaseFullName {
 	return SnakeCaseFullName(concatenateSnakeCase(googlePrefix, r.ProductName(), r.Name()))
 }
 
+// TerraformName is the Terraform resource type used for the sidebar_current field in documentation.
+// For example, "google-compute-instance"
+func (r Resource) SidebarCurrentName() KebabCaseTerraformResourceName {
+	return KebabCaseTerraformResourceName(r.TerraformName().ToKebab())
+}
+
 // PathType is the title-cased name of a resource preceded by its package,
 // often used to namespace functions. For example, "RedisInstance".
 func (r Resource) PathType() TitleCaseFullName {
@@ -474,18 +480,6 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		res.ReplaceInBasePath.New = ribpd.New
 	}
 
-	// Resource Override: Import formats
-	ifd := ImportFormatDetails{}
-	ifdOk, err := overrides.ResourceOverrideWithDetails(ImportFormat, &ifd, location)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode import format details: %v", err)
-	}
-	if ifdOk {
-		res.ImportFormats = ifd.Formats
-	} else {
-		res.ImportFormats = defaultImportFormats(res.ID)
-	}
-
 	// Resource Override: Mutex
 	md := MutexDetails{}
 	mdOk, err := overrides.ResourceOverrideWithDetails(Mutex, &md, location)
@@ -502,6 +496,20 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	}
 
 	res.Properties = props
+
+	onlyLongFormFormat := shouldAllowForwardSlashInFormat(res.ID, res.Properties)
+	// Resource Override: Import formats
+	ifd := ImportFormatDetails{}
+	ifdOk, err := overrides.ResourceOverrideWithDetails(ImportFormat, &ifd, location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode import format details: %v", err)
+	}
+	if ifdOk {
+		res.ImportFormats = ifd.Formats
+	} else {
+		res.ImportFormats = defaultImportFormats(res.ID, onlyLongFormFormat)
+	}
+
 	_, res.HasProject = schema.Properties["project"]
 
 	// Resource Override: Virtual field

@@ -26,8 +26,8 @@ It is recommended to not set this field (or set it to true) until you're ready t
 ### SQL Second Generation Instance
 
 ```hcl
-resource "google_sql_database_instance" "master" {
-  name             = "master-instance"
+resource "google_sql_database_instance" "main" {
+  name             = "main-instance"
   database_version = "POSTGRES_11"
   region           = "us-central1"
 
@@ -163,12 +163,8 @@ provider "google-beta" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region the instance will sit in. Note, Cloud SQL is not
-    available in all regions - choose from one of the options listed [here](https://cloud.google.com/sql/docs/mysql/instance-locations).
-    A valid region must be provided to use this resource. If a region is not provided in the resource definition,
-    the provider region will be used instead, but this will be an apply-time error for instances if the provider
-    region is not supported with Cloud SQL. If you choose not to provide the `region` argument for this resource,
-    make sure you understand this.
+* `region` - (Optional) The region the instance will sit in. If a region is not provided in the resource definition,
+    the provider region will be used instead.
 
 - - -
 
@@ -234,9 +230,10 @@ The `settings` block supports:
     active. Can be either `ALWAYS`, `NEVER` or `ON_DEMAND`.
 
 * `availability_type` - (Optional, Default: `ZONAL`) The availability type of the Cloud SQL
-instance, high availability (`REGIONAL`) or single zone (`ZONAL`).' For MySQL
-instances, ensure that `settings.backup_configuration.enabled` and
-`settings.backup_configuration.binary_log_enabled` are both set to `true`.
+  instance, high availability (`REGIONAL`) or single zone (`ZONAL`).' For MySQL and SQL Server instances,
+  ensure that `settings.backup_configuration.enabled` and `settings.backup_configuration.binary_log_enabled`
+  are both set to `true`. For Postgres instances, ensure that `settings.backup_configuration.enabled`
+  and `settings.backup_configuration.point_in_time_recovery_enabled` are both set to `true`.
 
 * `collation` - (Optional) The name of server instance collation.
 
@@ -459,9 +456,9 @@ performing filtering in a Terraform config.
 Database instances can be imported using one of any of these accepted formats:
 
 ```
-$ terraform import google_sql_database_instance.master projects/{{project}}/instances/{{name}}
-$ terraform import google_sql_database_instance.master {{project}}/{{name}}
-$ terraform import google_sql_database_instance.master {{name}}
+$ terraform import google_sql_database_instance.main projects/{{project}}/instances/{{name}}
+$ terraform import google_sql_database_instance.main {{project}}/{{name}}
+$ terraform import google_sql_database_instance.main {{name}}
 
 ```
 

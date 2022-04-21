@@ -51,7 +51,7 @@ Each resource contains a list of
 </walkthrough-editor-select-regex>
 on the resource that a user might set when creating the resource, or access when reading it.
 
-See the [property type fields](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/mmv1/api/resource.rb#L22)
+See the [property type fields](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource.rb#L22)
 for more information about the values that can be set on properties.
 
 All of this information comes from the PubSub Subscription [REST API docs](https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.subscriptions)

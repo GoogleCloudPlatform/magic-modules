@@ -39,8 +39,11 @@ func idParts(id string) (parts []string) {
 }
 
 // PatternToRegex formats a pattern string into a Python-compatible regex.
-func PatternToRegex(s string) string {
+func PatternToRegex(s string, allowForwardSlash bool) string {
 	re := regexp.MustCompile(PatternPart)
+	if allowForwardSlash {
+		return re.ReplaceAllString(s, "(?P<$1>.+)")
+	}
 	return re.ReplaceAllString(s, "(?P<$1>[^/]+)")
 }
 
@@ -74,7 +77,10 @@ func findResourceId(schema *openapi.Schema, overrides Overrides, location string
 
 // Finds all import formats for a given id. This can include short forms and
 // partial forms with inferred project/region/etc
-func defaultImportFormats(id string) (formats []string) {
+func defaultImportFormats(id string, onlyLongFormFormat bool) (formats []string) {
+	if onlyLongFormFormat {
+                return []string{id}
+        }
 	uniqueFormats := stringset.New()
 
 	uniqueFormats.Add(id)
@@ -116,4 +122,17 @@ func defaultImportFormats(id string) (formats []string) {
 	// formats must be ordered most to least specific
 	sort.SliceStable(formats, formatComparator(formats))
 	return formats
+}
+
+func shouldAllowForwardSlashInFormat(id string, props []Property) bool {
+	parts := idParts(id)
+	for _, v := range parts {
+		for _, prop := range props {
+			propSnakeCaseName := jsonToSnakeCase(prop.PackageName).snakecase()
+			if v == propSnakeCaseName && prop.forwardSlashAllowed {
+				return true
+			}
+		}
+	}
+	return false
 }

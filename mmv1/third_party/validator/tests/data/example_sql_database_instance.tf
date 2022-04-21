@@ -27,8 +27,8 @@ provider "google" {
   {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
 }
 
-resource "google_sql_database_instance" "master" {
-  name = "master-instance"
+resource "google_sql_database_instance" "main" {
+  name = "main-instance"
   database_version = "POSTGRES_9_6"
   region = "us-central1"
 
