@@ -181,7 +181,7 @@ are both set to true.`,
 										Type:         schema.TypeBool,
 										Optional:     true,
 										AtLeastOneOf: backupConfigurationKeys,
-										Description:  `True if binary logging is enabled. If settings.backup_configuration.enabled is false, this must be as well. Cannot be used with Postgres.`,
+										Description:  `True if binary logging is enabled. If settings.backup_configuration.enabled is false, this must be as well. Can only be used with MySQL.`,
 									},
 									"enabled": {
 										Type:         schema.TypeBool,
