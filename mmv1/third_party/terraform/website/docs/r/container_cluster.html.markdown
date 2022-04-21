@@ -19,9 +19,9 @@ Manages a Google Kubernetes Engine (GKE) cluster. For more information see
 [the official documentation](https://cloud.google.com/container-engine/docs/clusters)
 and [the API reference](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters).
 
-~> **Note:** All arguments and attributes, including basic auth username and
+~> **Warning:** All arguments and attributes, including basic auth username and
 passwords as well as certificate outputs will be stored in the raw state as
-plaintext. [Read more about sensitive data in state](/language/state/sensitive-data.html).
+plaintext. [Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
 
 ## Example Usage - with a separately managed node pool (recommended)
 
@@ -393,6 +393,9 @@ subnetwork in which the cluster's instances are launched.
 
 *  `config_connector_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     The status of the ConfigConnector addon. It is disabled by default; Set `enabled = true` to enable.
+
+*  `gke_backup_agent_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+    The status of the Backup for GKE agent addon. It is disabled by default; Set `enabled = true` to enable.
 
 This example `addons_config` disables two addons:
 
@@ -996,7 +999,7 @@ exported:
     to authenticate to the cluster endpoint.
 
 * `master_auth.0.cluster_ca_certificate` - Base64 encoded public certificate
-    that is the root of trust for the cluster.
+    that is the root certificate of the cluster.
 
 * `master_version` - The current version of the master in the cluster. This may
     be different than the `min_master_version` set in the config if the master
