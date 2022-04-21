@@ -2852,6 +2852,19 @@ objects:
         description: |
           The URL of the network to which this backend service belongs.
           This field can only be specified when the load balancing scheme is set to INTERNAL.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'subsetting'
+        min_version: beta
+        description: |
+          Subsetting configuration for this BackendService. Currently this is applicable only for Internal TCP/UDP load balancing and Internal HTTP(S) load balancing.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'policy'
+            values:
+              - :CONSISTENT_HASH_SUBSETTING
+            required: true
+            description: |
+              The algorithm used for subsetting.
   - !ruby/object:Api::Resource
     name: 'BackendServiceSignedUrlKey'
     kind: 'compute#BackendServiceSignedUrlKey'
