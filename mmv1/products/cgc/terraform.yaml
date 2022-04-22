@@ -17,6 +17,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     cgc_only: true
     examples:
     # Compute
+    ### Flask quickstart ###
       - !ruby/object:Provider::Terraform::Examples
         name: "flask_google_cloud_quickstart"
         primary_resource_type: "google_compute_instance"
@@ -29,6 +30,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "metadata"
           - "metadata_startup_script"
+    ### SQL Server VM ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_sqlserver_vm_instance"
+        primary_resource_id: "sqlserver_vm"
+        primary_resource_type: "google_compute_instance"
+        vars:
+          sqlserver_vm: "sqlserver-vm"
+          sql_server_1433: "sql-server-1433"
     # SQL
     ### When including separate samples for each DB type, add `skip_test: true`
     ### for Postgres and MySQL, but not for SQL Server
@@ -408,6 +417,79 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "deletion_protection"
           - "root_password"
+    ### HA ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_instance_ha"
+        primary_resource_id: "sqlserver_instance_ha"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          mysql_instance_ha: "mysql-instance-ha"
+          postgres_instance_ha: "postgres-instance-ha"
+          sqlserver_instance_ha: "sqlserver-instance-ha"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+          - "root_password"
+    ### CMEK ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_instance_cmek"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "sqlserver_instance"
+        vars:
+          keyring_name: "keyring-name"
+          crypto_key_name: "crypto-key-name"
+          mysql_instance_1: "mysql-instance-1"
+          postgres_instance_1: "postgres-instance-1"
+          sqlserver_instance_1: "sqlserver-instance-1"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+          - "root_password"
+    ### IAM Conditions ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_instance_iam_condition"
+        primary_resource_id: "default"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          mysql_instance: "mysql-instance"
+          deletion_protection: "true"
+        min_version: beta
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+    ### Labels ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_instance_labels"
+        primary_resource_id: "sqlserver_instance"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          mysql_instance: "mysql-instance"
+          postgres_instance: "postgres-instance"
+          sqlserver_instance: "sqlserver-instance"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+          - "root_password"
+    ### PITR ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_instance_pitr"
+        primary_resource_id: "mysql_instance"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          mysql_instance_with_pitr: "mysql-instance-with-pitr"
+          postgres_instance_with_pitr: "postgres-instance-with-pitr"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
     # Storage
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_new_bucket"
