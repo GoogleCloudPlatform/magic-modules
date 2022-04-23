@@ -33,7 +33,7 @@ resource "google_kms_crypto_key_iam_binding" "crypto_key" {
 
 # [START cloud_sql_mysql_instance_cmek]
 resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
-  name                = "<%= ctx[:vars]['mysql_instance'] %>"
+  name                = "<%= ctx[:vars]['mysql_instance_cmek'] %>"
   provider            = google-beta
   region              = "us-central1"
   database_version    = "MYSQL_8_0"
@@ -46,8 +46,8 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
 # [END cloud_sql_mysql_instance_cmek]
 
 # [START cloud_sql_postgres_instance_cmek]
-resource "google_sql_database_instance" "postgres_instance" {
-  name                = "<%= ctx[:vars]['postgres_instance'] %>"
+resource "google_sql_database_instance" "postgres_instance_cmek" {
+  name                = "<%= ctx[:vars]['postgres_instance_cmek'] %>"
   provider            = google-beta
   region              = "us-central1"
   database_version    = "POSTGRES_14"
@@ -60,8 +60,8 @@ resource "google_sql_database_instance" "postgres_instance" {
 # [END cloud_sql_postgres_instance_cmek]
 
 # [START cloud_sql_sqlserver_instance_cmek]
-resource "google_sql_database_instance" "sqlserver_instance" {
-  name                = "<%= ctx[:vars]['sqlserver_instance'] %>"
+resource "google_sql_database_instance" "sqlserver_instance_cmek" {
+  name                = "<%= ctx[:vars]['sqlserver_instance_cmek'] %>"
   provider            = google-beta
   region              = "us-central1"
   database_version    = "SQLSERVER_2019_STANDARD"

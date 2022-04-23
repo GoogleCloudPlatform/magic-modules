@@ -9,7 +9,7 @@ resource "google_sql_database_instance" "mysql_instance_ha" {
     backup_configuration {
       enabled            = true
       binary_log_enabled = true
-      start_time.        = "20:55"
+      start_time         = "20:55"
     }
   }
   deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"

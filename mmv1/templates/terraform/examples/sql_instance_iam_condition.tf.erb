@@ -28,7 +28,7 @@ resource "google_project_iam_policy" "project" {
 # [END cloud_sql_instance_iam_conditions]
 
 resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
-  name             = "<%= ctx[:vars]['mysql_instance'] %>"
+  name             = "<%= ctx[:vars]['mysql_instance_iam_condition'] %>"
   provider         = google-beta
   region           = "us-central1"
   database_version = "MYSQL_8_0"

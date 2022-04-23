@@ -1,6 +1,6 @@
 # [START cloud_sql_mysql_instance_pitr]
 resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
-  name             = "<%= ctx[:vars]['mysql_instance_with_pitr'] %>"
+  name             = "<%= ctx[:vars]['mysql_instance_pitr'] %>"
   region           = "asia-northeast1"
   database_version = "MYSQL_8_0"
   settings {
@@ -17,8 +17,8 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
 # [END cloud_sql_mysql_instance_pitr]
 
 # [START cloud_sql_postgres_instance_pitr]
-resource "google_sql_database_instance" "postgres_instance" {
-  name             = "<%= ctx[:vars]['postgres_instance_with_pitr'] %>"
+resource "google_sql_database_instance" "postgres_instance_pitr" {
+  name             = "<%= ctx[:vars]['postgres_instance__pitr'] %>"
   region           = "us-central1"
   database_version = "POSTGRES_14"
   settings {

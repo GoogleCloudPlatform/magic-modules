@@ -436,13 +436,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_instance_cmek"
         primary_resource_type: "google_sql_database_instance"
-        primary_resource_id: "sqlserver_instance"
+        primary_resource_id: "sqlserver_instance_cmek"
         vars:
           keyring_name: "keyring-name"
           crypto_key_name: "crypto-key-name"
-          mysql_instance_1: "mysql-instance-1"
-          postgres_instance_1: "postgres-instance-1"
-          sqlserver_instance_1: "sqlserver-instance-1"
+          mysql_instance_cmek: "mysql-instance-cmek"
+          postgres_instance_cmek: "postgres-instance-cmek"
+          sqlserver_instance_cmek: "sqlserver-instance-cmek"
           deletion_protection: "true"
         test_vars_overrides:
           deletion_protection: "false"
@@ -452,10 +452,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     ### IAM Conditions ###
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_instance_iam_condition"
-        primary_resource_id: "default"
+        primary_resource_id: "sqlserver_instance_iam_condition"
         primary_resource_type: "google_sql_database_instance"
         vars:
-          mysql_instance: "mysql-instance"
+          mysql_instance_iam_condition: "mysql-instance-iam-condition"
           deletion_protection: "true"
         min_version: beta
         test_vars_overrides:
@@ -465,12 +465,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     ### Labels ###
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_instance_labels"
-        primary_resource_id: "sqlserver_instance"
+        primary_resource_id: "sqlserver_instance_labels"
         primary_resource_type: "google_sql_database_instance"
         vars:
-          mysql_instance: "mysql-instance"
-          postgres_instance: "postgres-instance"
-          sqlserver_instance: "sqlserver-instance"
+          mysql_instance_labels: "mysql-instance-labels"
+          postgres_instance_labels: "postgres-instance-labels"
+          sqlserver_instance_labels: "sqlserver-instance-labels"
           deletion_protection: "true"
         test_vars_overrides:
           deletion_protection: "false"
@@ -480,11 +480,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     ### PITR ###
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_instance_pitr"
-        primary_resource_id: "mysql_instance"
+        primary_resource_id: "mysql_instance_pitr"
         primary_resource_type: "google_sql_database_instance"
         vars:
-          mysql_instance_with_pitr: "mysql-instance-with-pitr"
-          postgres_instance_with_pitr: "postgres-instance-with-pitr"
+          mysql_instance_pitr: "mysql-instance-pitr"
+          postgres_instance_pitr: "postgres-instance-pitr"
           deletion_protection: "true"
         test_vars_overrides:
           deletion_protection: "false"

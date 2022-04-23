@@ -1,6 +1,6 @@
-# [START cloud_sql_mysql_instance_flags]
-resource "google_sql_database_instance" "mysql_instance" {
-  name             = "<%= ctx[:vars]['mysql_instance'] %>"
+# [START cloud_sql_mysql_instance_labels]
+resource "google_sql_database_instance" "mysql_instance_labels" {
+  name             = "<%= ctx[:vars]['mysql_instance_labels'] %>"
   region           = "us-central1"
   database_version = "MYSQL_8_0"
   settings {
@@ -12,11 +12,11 @@ resource "google_sql_database_instance" "mysql_instance" {
   }
   deletion_protection = "false"
 }
-# [END cloud_sql_mysql_instance_flags]
+# [END cloud_sql_mysql_instance_labels]
 
-# [START cloud_sql_postgres_instance_flags]
-resource "google_sql_database_instance" "postgres_instance" {
-  name             = "<%= ctx[:vars]['postgres_instance'] %>"
+# [START cloud_sql_postgres_instance_labels]
+resource "google_sql_database_instance" "postgres_instance_labels" {
+  name             = "<%= ctx[:vars]['postgres_instance_labels'] %>"
   region           = "us-central1"
   database_version = "POSTGRES_14"
   settings {
@@ -28,11 +28,11 @@ resource "google_sql_database_instance" "postgres_instance" {
   }
   deletion_protection = "false"
 }
-# [END cloud_sql_postgres_instance_flags]
+# [END cloud_sql_postgres_instance_labels]
 
-# [START cloud_sql_sqlserver_instance_flags]
+# [START cloud_sql_sqlserver_instance_labels]
 resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
-  name             = "<%= ctx[:vars]['sqlserver_instance'] %>"
+  name             = "<%= ctx[:vars]['sqlserver_instance_labels'] %>"
   region           = "us-central1"
   database_version = "SQLSERVER_2019_STANDARD"
   root_password    = "INSERT-PASSWORD-HERE"
@@ -45,4 +45,4 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   }
   deletion_protection = "false"
 }
-# [END cloud_sql_sqlserver_instance_flags]
+# [END cloud_sql_sqlserver_instance_labels]
