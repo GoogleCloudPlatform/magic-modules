@@ -1106,7 +1106,6 @@ func TestAccComputeInstanceTemplate_managedEnvoy(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeInstanceTemplate_spot(t *testing.T) {
 	t.Parallel()
 
@@ -2834,7 +2833,6 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeInstanceTemplate_spot(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
