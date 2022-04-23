@@ -33,7 +33,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     ### SQL Server VM ###
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_sqlserver_vm_instance"
-        primary_resource_id: "sqlserver_vm"
+        primary_resource_id: "default"
         primary_resource_type: "google_compute_instance"
         vars:
           sqlserver_vm: "sqlserver-vm"
@@ -420,7 +420,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     ### HA ###
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_instance_ha"
-        primary_resource_id: "sqlserver_instance_ha"
+        primary_resource_id: "default"
         primary_resource_type: "google_sql_database_instance"
         vars:
           mysql_instance_ha: "mysql-instance-ha"
@@ -436,7 +436,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_instance_cmek"
         primary_resource_type: "google_sql_database_instance"
-        primary_resource_id: "sqlserver_instance_cmek"
+        primary_resource_id: "default"
         vars:
           keyring_name: "keyring-name"
           crypto_key_name: "crypto-key-name"
@@ -452,7 +452,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     ### IAM Conditions ###
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_instance_iam_condition"
-        primary_resource_id: "sqlserver_instance_iam_condition"
+        primary_resource_id: "default"
         primary_resource_type: "google_sql_database_instance"
         vars:
           mysql_instance_iam_condition: "mysql-instance-iam-condition"
@@ -465,7 +465,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     ### Labels ###
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_instance_labels"
-        primary_resource_id: "sqlserver_instance_labels"
+        primary_resource_id: "default"
         primary_resource_type: "google_sql_database_instance"
         vars:
           mysql_instance_labels: "mysql-instance-labels"
@@ -480,7 +480,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     ### PITR ###
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_instance_pitr"
-        primary_resource_id: "mysql_instance_pitr"
+        primary_resource_id: "default"
         primary_resource_type: "google_sql_database_instance"
         vars:
           mysql_instance_pitr: "mysql-instance-pitr"

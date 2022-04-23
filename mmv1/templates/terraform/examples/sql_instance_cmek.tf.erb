@@ -32,7 +32,7 @@ resource "google_kms_crypto_key_iam_binding" "crypto_key" {
 # [END cloud_sql_instance_crypto_key]
 
 # [START cloud_sql_mysql_instance_cmek]
-resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
+resource "google_sql_database_instance" "mysql_instance_with_cmek" {
   name                = "<%= ctx[:vars]['mysql_instance_cmek'] %>"
   provider            = google-beta
   region              = "us-central1"
@@ -46,7 +46,7 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
 # [END cloud_sql_mysql_instance_cmek]
 
 # [START cloud_sql_postgres_instance_cmek]
-resource "google_sql_database_instance" "postgres_instance_cmek" {
+resource "google_sql_database_instance" "postgres_instance_with_cmek" {
   name                = "<%= ctx[:vars]['postgres_instance_cmek'] %>"
   provider            = google-beta
   region              = "us-central1"
@@ -60,7 +60,7 @@ resource "google_sql_database_instance" "postgres_instance_cmek" {
 # [END cloud_sql_postgres_instance_cmek]
 
 # [START cloud_sql_sqlserver_instance_cmek]
-resource "google_sql_database_instance" "sqlserver_instance_cmek" {
+resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   name                = "<%= ctx[:vars]['sqlserver_instance_cmek'] %>"
   provider            = google-beta
   region              = "us-central1"
