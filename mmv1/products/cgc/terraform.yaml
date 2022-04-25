@@ -497,6 +497,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     ### SSL cert ###
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_instance_ssl_cert"
+        primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "sqlserver_instance"
         vars:
           mysql_instance: "mysql-instance"
