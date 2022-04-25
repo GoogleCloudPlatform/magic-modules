@@ -927,11 +927,12 @@ func expandUpdatePolicy(configured []interface{}) *compute.InstanceGroupManagerU
 
 		updatePolicy.MinimalAction = data["minimal_action"].(string)
 		updatePolicy.MostDisruptiveAllowedAction = data["most_disruptive_allowed_action"].(string)
+		updatePolicy.ForceSendFields = []string{"MinimalAction", "MostDisruptiveAllowedAction"}
 		updatePolicy.Type = data["type"].(string)
 		updatePolicy.ReplacementMethod = data["replacement_method"].(string)
 <% unless version == "ga" -%>
 		updatePolicy.MinReadySec = int64(data["min_ready_sec"].(int))
-		updatePolicy.ForceSendFields = []string{"MinReadySec"}
+		updatePolicy.ForceSendFields = append(updatePolicy.ForceSendFields, "MinReadySec")
 <% end -%>
 
 		// percent and fixed values are conflicting
