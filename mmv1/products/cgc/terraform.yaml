@@ -40,6 +40,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         #   - "port_range"
         #   - "target"
         #   - "ip_address"
+#    ### SQL Server VM ###
+#      - !ruby/object:Provider::Terraform::Examples
+#        name: "sql_sqlserver_vm_instance"
+#        primary_resource_id: "default"
+#        primary_resource_type: "google_compute_instance"
+#        vars:
+#          sqlserver_vm: "sqlserver-vm"
+#          sql_server_1433: "sql-server-1433"
     # SQL
     ### When including separate samples for each DB type, add `skip_test: true`
     ### for Postgres and MySQL, but not for SQL Server
