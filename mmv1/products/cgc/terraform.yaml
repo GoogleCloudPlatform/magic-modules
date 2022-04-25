@@ -17,6 +17,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     cgc_only: true
     examples:
     # Compute
+    ### Flask quickstart ###
       - !ruby/object:Provider::Terraform::Examples
         name: "flask_google_cloud_quickstart"
         primary_resource_type: "google_compute_instance"
@@ -29,6 +30,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "metadata"
           - "metadata_startup_script"
+#    ### SQL Server VM ###
+#      - !ruby/object:Provider::Terraform::Examples
+#        name: "sql_sqlserver_vm_instance"
+#        primary_resource_id: "default"
+#        primary_resource_type: "google_compute_instance"
+#        vars:
+#          sqlserver_vm: "sqlserver-vm"
+#          sql_server_1433: "sql-server-1433"
     # SQL
     ### When including separate samples for each DB type, add `skip_test: true`
     ### for Postgres and MySQL, but not for SQL Server
@@ -408,6 +417,79 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "deletion_protection"
           - "root_password"
+    ### HA ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_instance_ha"
+        primary_resource_id: "default"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          mysql_instance_ha: "mysql-instance-ha"
+          postgres_instance_ha: "postgres-instance-ha"
+          sqlserver_instance_ha: "sqlserver-instance-ha"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+          - "root_password"
+    ### CMEK ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_instance_cmek"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "default"
+        vars:
+          keyring_name: "keyring-name"
+          crypto_key_name: "crypto-key-name"
+          mysql_instance_cmek: "mysql-instance-cmek"
+          postgres_instance_cmek: "postgres-instance-cmek"
+          sqlserver_instance_cmek: "sqlserver-instance-cmek"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+          - "root_password"
+    ### IAM Conditions ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_instance_iam_condition"
+        primary_resource_id: "default"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          mysql_instance_iam_condition: "mysql-instance-iam-condition"
+          deletion_protection: "true"
+        min_version: beta
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+    ### Labels ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_instance_labels"
+        primary_resource_id: "default"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          mysql_instance_labels: "mysql-instance-labels"
+          postgres_instance_labels: "postgres-instance-labels"
+          sqlserver_instance_labels: "sqlserver-instance-labels"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+          - "root_password"
+    ### PITR ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_instance_pitr"
+        primary_resource_id: "default"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          mysql_instance_pitr: "mysql-instance-pitr"
+          postgres_instance_pitr: "postgres-instance-pitr"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
     # Storage
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_new_bucket"
