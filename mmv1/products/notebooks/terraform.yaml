@@ -160,8 +160,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # API returns empty value.
         default_from_api: true
       virtualMachine.virtualMachineConfig.containerImages: !ruby/object:Overrides::Terraform::PropertyOverride
-        # API does not return this value. ignore_read does not work here.
-        diff_suppress_func: NotReturnedByAPIDiffSuppress
+        default_from_api: true
       softwareConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         # API returns default idleShutdown (true) and default idleShutdownTimeout (180).
         default_from_api: true

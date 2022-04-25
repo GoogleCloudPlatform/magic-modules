@@ -5,6 +5,7 @@ resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id]
   pool = "<%= ctx[:vars]["pool_name"] %>"
   certificate_authority_id = "<%= ctx[:vars]["certificate_authority_id"] %>"
   location = "<%= ctx[:vars]["pool_location"] %>"
+  deletion_protection = "<%= ctx[:vars]["deletion_protection"] %>"
   config {
     subject_config {
       subject {
