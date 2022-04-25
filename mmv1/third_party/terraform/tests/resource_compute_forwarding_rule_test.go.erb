@@ -2,154 +2,154 @@
 package google
 
 import (
-	"fmt"
-	"testing"
+  "fmt"
+  "testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccComputeForwardingRule_update(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	poolName := fmt.Sprintf("tf-%s", randString(t, 10))
-	ruleName := fmt.Sprintf("tf-%s", randString(t, 10))
+  poolName := fmt.Sprintf("tf-%s", "")) //randString(t, 10))
+  ruleName := fmt.Sprintf("tf-%s", "") //randString(t, 10))
 
-	<% unless version == 'ga' %>
-	svcDirNamespace := fmt.Sprintf("svcdirns-%s", randString(t, 10))
-	serviceName := fmt.Sprintf("svcdirservice-%s", randString(t, 10))
-	<% end %>
+  <% unless version == 'ga' %>
+  svcDirNamespace := fmt.Sprintf("svcdirns-%s", randString(t, 10))
+  serviceName := fmt.Sprintf("svcdirservice-%s", randString(t, 10))
+  <% end %>
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeForwardingRuleDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeForwardingRule_basic(poolName, ruleName<% unless version == 'ga' %>, svcDirNamespace, serviceName<% end %>),
-			},
-			{
-				ResourceName:      "google_compute_forwarding_rule.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeForwardingRule_update(poolName, ruleName<% unless version == 'ga' %>, svcDirNamespace, serviceName<% end %>),
-			},
-			{
-				ResourceName:      "google_compute_forwarding_rule.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
+  vcrTest(t, resource.TestCase{
+    PreCheck:     func() { testAccPreCheck(t) },
+    Providers:    testAccProviders,
+    CheckDestroy: testAccCheckComputeForwardingRuleDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccComputeForwardingRule_basic(poolName, ruleName<% unless version == 'ga' %>, svcDirNamespace, serviceName<% end %>),
+      },
+      {
+        ResourceName:      "google_compute_forwarding_rule.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccComputeForwardingRule_update(poolName, ruleName),
+      },
+      {
+        ResourceName:      "google_compute_forwarding_rule.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
 }
 
 func TestAccComputeForwardingRule_ip(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	addrName := fmt.Sprintf("tf-%s", randString(t, 10))
-	poolName := fmt.Sprintf("tf-%s", randString(t, 10))
-	ruleName := fmt.Sprintf("tf-%s", randString(t, 10))
-	addressRefFieldRaw := "address"
-	addressRefFieldID := "id"
+  addrName := fmt.Sprintf("tf-%s", randString(t, 10))
+  poolName := fmt.Sprintf("tf-%s", randString(t, 10))
+  ruleName := fmt.Sprintf("tf-%s", randString(t, 10))
+  addressRefFieldRaw := "address"
+  addressRefFieldID := "id"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeForwardingRuleDestroyProducer(t),
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeForwardingRule_ip(addrName, poolName, ruleName, addressRefFieldID),
-			},
-			resource.TestStep{
-				ResourceName:            "google_compute_forwarding_rule.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ip_address"}, // ignore ip_address because we've specified it by ID
-			},
-			resource.TestStep{
-				Config: testAccComputeForwardingRule_ip(addrName, poolName, ruleName, addressRefFieldRaw),
-			},
-			resource.TestStep{
-				ResourceName:      "google_compute_forwarding_rule.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
+  vcrTest(t, resource.TestCase{
+    PreCheck:     func() { testAccPreCheck(t) },
+    Providers:    testAccProviders,
+    CheckDestroy: testAccCheckComputeForwardingRuleDestroyProducer(t),
+    Steps: []resource.TestStep{
+      resource.TestStep{
+        Config: testAccComputeForwardingRule_ip(addrName, poolName, ruleName, addressRefFieldID),
+      },
+      resource.TestStep{
+        ResourceName:            "google_compute_forwarding_rule.foobar",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"ip_address"}, // ignore ip_address because we've specified it by ID
+      },
+      resource.TestStep{
+        Config: testAccComputeForwardingRule_ip(addrName, poolName, ruleName, addressRefFieldRaw),
+      },
+      resource.TestStep{
+        ResourceName:      "google_compute_forwarding_rule.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
 }
 
 func TestAccComputeForwardingRule_networkTier(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	poolName := fmt.Sprintf("tf-%s", randString(t, 10))
-	ruleName := fmt.Sprintf("tf-%s", randString(t, 10))
+  poolName := fmt.Sprintf("tf-%s", randString(t, 10))
+  ruleName := fmt.Sprintf("tf-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeForwardingRuleDestroyProducer(t),
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeForwardingRule_networkTier(poolName, ruleName),
-			},
+  vcrTest(t, resource.TestCase{
+    PreCheck:     func() { testAccPreCheck(t) },
+    Providers:    testAccProviders,
+    CheckDestroy: testAccCheckComputeForwardingRuleDestroyProducer(t),
+    Steps: []resource.TestStep{
+      resource.TestStep{
+        Config: testAccComputeForwardingRule_networkTier(poolName, ruleName),
+      },
 
-			resource.TestStep{
-				ResourceName:      "google_compute_forwarding_rule.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
+      resource.TestStep{
+        ResourceName:      "google_compute_forwarding_rule.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
 }
 
-	func testAccComputeForwardingRule_basic(poolName, ruleName<% unless version == 'ga' %>, svcDirNamespace, serviceName<% end %> string) string {
-	return fmt.Sprintf(`
-	resource "google_compute_target_pool" "foo-tp" {
-		description = "Resource created for Terraform acceptance testing"
-		instances   = ["us-central1-a/foo", "us-central1-b/bar"]
-		name        = "foo-%s"
-	}
+  func testAccComputeForwardingRule_basic(poolName, ruleName<% unless version == 'ga' %>, svcDirNamespace, serviceName<% end %> string) string {
+  return fmt.Sprintf(`
+  resource "google_compute_target_pool" "foo-tp" {
+    description = "Resource created for Terraform acceptance testing"
+    instances   = ["us-central1-a/foo", "us-central1-b/bar"]
+    name        = "foo-%s"
+  }
 
-	resource "google_compute_forwarding_rule" "foobar" {
-		description = "Resource created for Terraform acceptance testing"
-		ip_protocol = "UDP"
-		name        = "%s"
-		port_range  = "80-81"
-		target      = google_compute_target_pool.foo-tp.self_link
-		<% unless version == 'ga' %>
-		labels = {
-			"foo" = "bar"
-		}
-		service_directory_registrations {
-			namespace = google_service_directory_namespace.examplens.namespace_id
-			service = google_service_directory_service.examplesvc.service_id
-		}
-		<% end %>
-	}
+  resource "google_compute_forwarding_rule" "foobar" {
+    description = "Resource created for Terraform acceptance testing"
+    ip_protocol = "UDP"
+    name        = "%s"
+    port_range  = "80-81"
+    target      = google_compute_target_pool.foo-tp.self_link
+    <% unless version == 'ga' %>
+    labels = {
+      "foo" = "bar"
+    }
+    service_directory_registrations {
+      namespace = google_service_directory_namespace.examplens.namespace_id
+      service = google_service_directory_service.examplesvc.service_id
+    }
+    <% end %>
+  }
 
-	<% unless version == 'ga' %>
-	resource "google_service_directory_namespace" "examplens" {
-		namespace_id = "%s"
-		location     = "us-central1"
-	}
+  <% unless version == 'ga' %>
+  resource "google_service_directory_namespace" "examplens" {
+    namespace_id = "%s"
+    location     = "us-central1"
+  }
 
-	resource "google_service_directory_service" "examplesvc" {
-		service_id = "%s"
-		namespace  = google_service_directory_namespace.examplens.id
+  resource "google_service_directory_service" "examplesvc" {
+    service_id = "%s"
+    namespace  = google_service_directory_namespace.examplens.id
 
-		metadata = {
-			stage  = "prod"
-			region = "us-central1"
-		}
-	}
-	<% end %>
+    metadata = {
+      stage  = "prod"
+      region = "us-central1"
+    }
+  }
+  <% end %>
 `, poolName, ruleName<% unless version == 'ga' %>, svcDirNamespace, serviceName<% end %>)
 }
 
 
-func testAccComputeForwardingRule_update(poolName, ruleName<% unless version == 'ga' %>, svcDirNamespace, serviceName<% end %> string) string {
-	return fmt.Sprintf(`
+func testAccComputeForwardingRule_update(poolName, ruleName string) string {
+  return fmt.Sprintf(`
 resource "google_compute_target_pool" "foo-tp" {
   description = "Resource created for Terraform acceptance testing"
   instances   = ["us-central1-a/foo", "us-central1-b/bar"]
@@ -169,39 +169,18 @@ resource "google_compute_forwarding_rule" "foobar" {
   port_range  = "80-81"
   target      = google_compute_target_pool.bar-tp.self_link
 
-	<% unless version == 'ga' %>
-		labels = {
-			baz = "qux"
-		}
-		service_directory_registrations {
-			namespace = google_service_directory_namespace.examplens.namespace_id
-			service = google_service_directory_service.examplesvc.service_id
-		}
-		<% end %>
+  <% unless version == 'ga' %>
+    labels = {
+      baz = "qux"
+    }
+    <% end %>
 }
 
-<% unless version == 'ga' %>
-resource "google_service_directory_namespace" "examplens" {
-  namespace_id = "%s"
-  location     = "us-central1"
-}
-
-resource "google_service_directory_service" "examplesvc" {
-  service_id = "%s"
-  namespace  = google_service_directory_namespace.examplens.id
-
-  metadata = {
-    stage  = "prod"
-    region = "us-central1"
-  }
-}
-<% end %>
-
-`, poolName, poolName, ruleName<% unless version == 'ga' %>, svcDirNamespace, serviceName<% end %>)
+`, poolName, poolName, ruleName)
 }
 
 func testAccComputeForwardingRule_ip(addrName, poolName, ruleName, addressRefFieldValue string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_compute_address" "foo" {
   name = "%s"
 }
@@ -224,7 +203,7 @@ resource "google_compute_forwarding_rule" "foobar" {
 }
 
 func testAccComputeForwardingRule_networkTier(poolName, ruleName string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_compute_target_pool" "foobar-tp" {
   description = "Resource created for Terraform acceptance testing"
   instances   = ["us-central1-a/foo", "us-central1-b/bar"]
