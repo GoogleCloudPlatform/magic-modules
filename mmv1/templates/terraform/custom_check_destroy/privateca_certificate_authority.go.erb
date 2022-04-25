@@ -1,0 +1,15 @@
+config := googleProviderConfig(t)
+
+url, err := replaceVarsForTest(config, rs, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}")
+if err != nil {
+	return err
+}
+
+res, err := sendRequest(config, "GET", "", url, config.userAgent, nil)
+if err != nil {
+	return nil
+}
+
+if s := res["state"]; s != "DELETED" {
+	return fmt.Errorf("CertificateAuthority %s got %s, want DELETED", url, s)
+}

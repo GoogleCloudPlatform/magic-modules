@@ -1,0 +1,13 @@
+# optional test level config -- needed for updates basic.tf.tmpl def
+updates:
+- resource: ./basic_update.tf.tmpl
+variables:
+  - name: "name"
+    type: "resource_name"
+  - name: "region"
+    type: "region"
+  - name: "org_id"
+    type: "org_id"
+  - name: "billing_account"
+    type: "billing_account"
+

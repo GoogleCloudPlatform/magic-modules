@@ -1,0 +1,33 @@
+obj := make(map[string]interface{})
+obj["notificationEmails"] = []string{}
+obj["enrolledServices"] = []string{}
+obj["activeKeyVersion"] = ""
+
+url, err := replaceVars(d, config, "{{AccessApprovalBasePath}}projects/{{project_id}}/accessApprovalSettings")
+if err != nil {
+	return err
+}
+
+log.Printf("[DEBUG] Emptying ProjectSettings %q: %#v", d.Id(), obj)
+updateMask := []string{}
+
+updateMask = append(updateMask, "notificationEmails")
+updateMask = append(updateMask, "enrolledServices")
+updateMask = append(updateMask, "activeKeyVersion")
+
+// updateMask is a URL parameter but not present in the schema, so replaceVars
+// won't set it
+url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+if err != nil {
+	return err
+}
+
+res, err := sendRequestWithTimeout(config, "PATCH", "", url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+
+if err != nil {
+	return fmt.Errorf("Error emptying ProjectSettings %q: %s", d.Id(), err)
+} else {
+	log.Printf("[DEBUG] Finished emptying ProjectSettings %q: %#v", d.Id(), res)
+}
+
+return nil

@@ -1,0 +1,6 @@
+- type: DIFF_SUPPRESS_FUNC
+  field: network_config.peered_network
+  details:
+    diffsuppressfunc: compareResourceNames
+- type: EXCLUDE
+  field: etag

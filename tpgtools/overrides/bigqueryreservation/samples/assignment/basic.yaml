@@ -1,0 +1,7 @@
+updates:
+variables:
+  - name: "project"
+    type: "project"
+  - name: "reservation"
+    type: "resource_name"
+

@@ -1,8 +1,8 @@
-from golang:1.13-stretch as resource
+from golang:1.16.3-stretch as resource
 
 SHELL ["/bin/bash", "-c"]
 
-RUN go get golang.org/x/tools/cmd/goimports
+RUN go get golang.org/x/tools/cmd/goimports@d088b475e3360caabc032aaee1dc66351d4e729a
 RUN go get github.com/github/hub
 
 # Set up Github SSH cloning.
@@ -13,7 +13,7 @@ ENV GO111MODULE "on"
 
 # Install Ruby from source.
 RUN apt-get update
-RUN apt-get install -y bzip2 libssl-dev libreadline-dev zlib1g-dev
+RUN apt-get install -y bzip2 libssl-dev libreadline-dev zlib1g-dev unzip sed rsync
 RUN git clone https://github.com/rbenv/rbenv.git /rbenv
 ENV PATH /rbenv/bin:/root/.rbenv/shims:$PATH
 
@@ -54,8 +54,8 @@ RUN pip3 install black
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/master/Gemfile" Gemfile
-ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/master/Gemfile.lock" Gemfile.lock
+ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mmv1/Gemfile" Gemfile
+ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mmv1/Gemfile.lock" Gemfile.lock
 RUN bundle install
 RUN rbenv rehash
 RUN rm Gemfile Gemfile.lock
@@ -64,5 +64,10 @@ RUN git config --global user.name "Modular Magician"
 RUN git config --global user.email "magic-modules@google.com"
 
 ADD generate_downstream.sh /generate_downstream.sh
+
+
+RUN wget https://releases.hashicorp.com/terraform/0.13.7/terraform_0.13.7_linux_amd64.zip
+RUN unzip terraform_0.13.7_linux_amd64.zip && rm terraform_0.13.7_linux_amd64.zip
+RUN mv ./terraform /bin/terraform
 
 ENTRYPOINT ["/generate_downstream.sh"]

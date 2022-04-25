@@ -1,0 +1,6 @@
+updates:
+variables:
+  - name: "project"
+    type: "project"
+  - name: "hub"
+    type: "resource_name"

@@ -1,0 +1,15 @@
+resource "google_dns_managed_zone" "parent-zone" {
+  provider = "google-beta"
+  name        = "<%= ctx[:vars]['zone_name'] %>"
+  dns_name    = "<%= ctx[:vars]['zone_name'] %>.hashicorptest.com."
+  description = "Test Description"
+}
+
+resource "google_dns_record_set" "<%= ctx[:primary_resource_id] %>" {
+  provider = "google-beta"
+  managed_zone = google_dns_managed_zone.parent-zone.name
+  name         = "test-record.<%= ctx[:vars]['zone_name'] %>.hashicorptest.com."
+  type         = "A"
+  rrdatas      = ["10.0.0.1", "10.1.0.1"]
+  ttl          = 86400
+}

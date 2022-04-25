@@ -1,0 +1,17 @@
+---
+steps:
+- name: 'hashicorpdev/go-changelog'
+  id: check-changelog
+  entrypoint: /go-changelog/changelog-pr-body-check
+  secretEnv: ["GITHUB_TOKEN"]
+  dir: mmv1
+  env:
+    - GITHUB_REPO=magic-modules
+    - GITHUB_OWNER=GoogleCloudPlatform
+  args:
+    - $_PR_NUMBER
+
+secrets:
+    - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/github-token
+      secretEnv:
+          GITHUB_TOKEN: CiQADkR4Nt6nHLI52Kc1W55OwpLdc4vjBfVR0SGQNzm6VSVj9lUSUQBfF82vVhn43A1jNYOv8ScoWgrZONwNrUabHfGjkvl+IZxcii0JlOVUawbscs4OJga0eitNNlagAOruLs6C926X20ZZPqWtH97ui6CKNvxgkQ==

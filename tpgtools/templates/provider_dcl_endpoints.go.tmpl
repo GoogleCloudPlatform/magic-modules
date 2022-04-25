@@ -1,0 +1,70 @@
+{{/* Copyright 2021 Google LLC. All Rights Reserved.
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+			http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License. */}}
+// ----------------------------------------------------------------------------
+//
+//     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
+//
+// ----------------------------------------------------------------------------
+//
+//     This file is managed by Magic Modules (https://github.com/GoogleCloudPlatform/magic-modules)
+//     and is based on the DCL (https://github.com/GoogleCloudPlatform/declarative-resource-client-library).
+//     Changes will need to be made to the DCL or Magic Modules instead of here.
+//
+//     We are not currently able to accept contributions to this file. If changes
+//     are required, please file an issue at https://github.com/hashicorp/terraform-provider-google/issues/new/choose
+//
+// ----------------------------------------------------------------------------
+
+package google
+
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
+// empty string is passed for dcl default since dcl
+// [hardcodes the values](https://github.com/GoogleCloudPlatform/declarative-resource-client-library/blob/main/services/google/eventarc/beta/trigger_internal.go#L96-L103)
+{{range $index, $pkg := .}}
+{{- if $pkg.ShouldWriteProductBasePath }}
+var {{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey = "{{$pkg.BasePathIdentifier}}_custom_endpoint"
+var {{$pkg.BasePathIdentifier.ToTitle}}EndpointEntry = &schema.Schema{
+	Type:         schema.TypeString,
+	Optional:     true,
+	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+		"GOOGLE_{{$pkg.BasePathIdentifier.ToUpper}}_CUSTOM_ENDPOINT",
+	}, ""),
+}
+{{- end}}
+{{end}}
+
+//Add new values to config.go.erb config object declaration
+{{- range $index, $pkg := . }}
+{{- if $pkg.ShouldWriteProductBasePath }}
+//{{$pkg.BasePathIdentifier.ToTitle}}BasePath string
+{{- end}}
+{{- end}}
+
+//Add new values to provider.go.erb schema initialization
+{{- range $index, $pkg := . }}
+{{- if $pkg.ShouldWriteProductBasePath }}
+// {{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey:               {{$pkg.BasePathIdentifier.ToTitle}}EndpointEntry,
+{{- end}}
+{{- end}}
+
+//Add new values to provider.go.erb - provider block read
+{{- range $index, $pkg := . }}
+{{- if $pkg.ShouldWriteProductBasePath }}
+// config.{{$pkg.BasePathIdentifier.ToTitle}}BasePath = d.Get({{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey).(string)
+{{- end}}
+{{- end}}
+

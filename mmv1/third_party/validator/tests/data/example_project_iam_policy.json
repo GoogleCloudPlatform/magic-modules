@@ -1,0 +1,17 @@
+[
+  {
+    "name": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+    "asset_type": "cloudresourcemanager.googleapis.com/Project",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "iam_policy": {
+      "bindings": [
+        {
+          "role": "roles/editor",
+          "members": [
+            "user:jane@example.com"
+          ]
+        }
+      ]
+    }
+  }
+]

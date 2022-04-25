@@ -1,0 +1,351 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: VertexAI
+display_name: Vertex AI
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://{{region}}-aiplatform.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://{{region}}-aiplatform.googleapis.com/v1beta1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+objects:
+# Vertex AI Datasets
+  - !ruby/object:Api::Resource
+    name: Dataset
+    base_url: projects/{{project}}/locations/{{region}}/datasets
+    self_link: '{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/vertex-ai/docs'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.datasets'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    description: |-
+      A collection of DataItems and Annotations on them.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        description: The region of the dataset. eg us-central1
+        url_param_only: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The resource name of the Dataset. This value is set by Google.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        required: true
+        description: |
+          The user-defined name of the Dataset. The name can be up to 128 characters long and can be consist of any UTF-8 characters.
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          The timestamp of when the dataset was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: |
+          The timestamp of when the dataset was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          A set of key/value label pairs to assign to this Workflow.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'encryptionSpec'
+        input: true
+        description: |
+          Customer-managed encryption key spec for a Dataset. If set, this Dataset and all sub-resources of this Dataset will be secured by this key.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyName'
+            description: |
+              Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource. 
+              Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
+            input: true
+      - !ruby/object:Api::Type::String
+        name: 'metadataSchemaUri'
+        required: true
+        input: true 
+        description: |
+          Points to a YAML file stored on Google Cloud Storage describing additional information about the Dataset. The schema is defined as an OpenAPI 3.0.2 Schema Object. The schema files that can be used here are found in gs://google-cloud-aiplatform/schema/dataset/metadata/.
+# Vertex AI Featurestores
+  - !ruby/object:Api::Resource
+    name: Featurestore
+    base_url: projects/{{project}}/locations/{{region}}/featurestores
+    create_url: projects/{{project}}/locations/{{region}}/featurestores?featurestoreId={{name}}
+    self_link: 'projects/{{project}}/locations/{{region}}/featurestores/{{name}}'
+    min_version: beta
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/vertex-ai/docs'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featurestores'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    description: |-
+      A collection of DataItems and Annotations on them.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        description: The region of the dataset. eg us-central1
+        url_param_only: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The name of the Featurestore. This value may be up to 60 characters, and valid characters are [a-z0-9_]. The first character cannot be a number.
+        input: true
+        url_param_only: true
+        pattern: projects/{{project}}/locations/{{region}}/featurestores/{{name}}
+      - !ruby/object:Api::Type::String
+        name: 'etag'
+        description: Used to perform consistent read-modify-write updates. 
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          The timestamp of when the featurestore was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: |
+          The timestamp of when the featurestore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          A set of key/value label pairs to assign to this Featurestore.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'onlineServingConfig'
+        description: |
+           Config for online serving resources.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'fixedNodeCount'
+            required: true
+            description: |
+              The number of nodes for each cluster. The number of nodes will not scale automatically but can be scaled manually by providing different values when updating.
+# Vertex AI Featurestore Entity Type
+  - !ruby/object:Api::Resource
+    name: FeaturestoreEntitytype
+    base_url: '{{featurestore}}/entityTypes'
+    create_url: '{{featurestore}}/entityTypes?entityTypeId={{name}}'
+    self_link: '{{featurestore}}/entityTypes/{{name}}'
+    min_version: beta
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/vertex-ai/docs'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featurestores.entityTypes'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+      include_project: true
+    description: |-
+      An entity type is a type of object in a system that needs to be modeled and have stored information about. For example, driver is an entity type, and driver0 is an instance of an entity type driver.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: featurestore
+        description: The name of the Featurestore to use, in the format projects/{project}/locations/{location}/featurestores/{featurestore}.
+        url_param_only: true
+        input: true
+        required: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The name of the EntityType. This value may be up to 60 characters, and valid characters are [a-z0-9_]. The first character cannot be a number.
+        input: true
+        url_param_only: true
+        pattern: '{featurestore}}/entityTypes/{{name}}'
+      - !ruby/object:Api::Type::String
+        name: 'etag'
+        description: Used to perform consistent read-modify-write updates. 
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          The timestamp of when the featurestore was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: |
+          The timestamp of when the featurestore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          A set of key/value label pairs to assign to this EntityType.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'monitoringConfig'
+        description: |
+          The default monitoring configuration for all Features under this EntityType.
+
+          If this is populated with [FeaturestoreMonitoringConfig.monitoring_interval] specified, snapshot analysis monitoring is enabled. Otherwise, snapshot analysis monitoring is disabled.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'snapshotAnalysis'
+            description: |
+              Configuration of how features in Featurestore are monitored.
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'disabled'
+                default_value: false
+                description: |
+                  The monitoring schedule for snapshot analysis. For EntityType-level config: unset / disabled = true indicates disabled by default for Features under it; otherwise by default enable snapshot analysis monitoring with monitoringInterval for Features under it.
+              - !ruby/object:Api::Type::String
+                name: 'monitoringInterval'
+                description: |
+                  Configuration of the snapshot analysis based monitoring pipeline running interval. The value is rolled up to full day.
+
+                  A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+# Vertex ML Metadata
+  - !ruby/object:Api::Resource
+    name: MetadataStore
+    base_url: projects/{{project}}/locations/{{region}}/metadataStores
+    self_link: 'projects/{{project}}/locations/{{region}}/metadataStores/{{name}}'
+    create_url: projects/{{project}}/locations/{{region}}/metadataStores?metadataStoreId={{name}}
+    min_version: beta
+    input: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/vertex-ai/docs'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.metadataStores'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    description: |-
+      Instance of a metadata store. Contains a set of metadata that can be queried.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        description: The region of the Metadata Store. eg us-central1
+        url_param_only: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The name of the MetadataStore. This value may be up to 60 characters, and valid characters are [a-z0-9_]. The first character cannot be a number.
+        input: true
+        url_param_only: true
+        pattern: projects/{{project}}/locations/{{region}}/metadataStores/{{name}}
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: Description of the MetadataStore.
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          The timestamp of when the MetadataStore was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: |
+          The timestamp of when the MetadataStore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'encryptionSpec'
+        input: true
+        description: |
+          Customer-managed encryption key spec for a MetadataStore. If set, this MetadataStore and all sub-resources of this MetadataStore will be secured by this key.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyName'
+            description: |
+              Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource. 
+              Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
+            input: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'state'
+        output: true
+        description: |
+          State information of the MetadataStore.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'diskUtilizationBytes'
+            description: |
+              The disk utilization of the MetadataStore in bytes.
+            output: true
+

@@ -1,0 +1,23 @@
+[
+  {
+    "name": "//iam.googleapis.com/organizations/{{.OrgID}}/roles/myCustomRole",
+    "asset_type": "iam.googleapis.com/Role",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://iam.googleapis.com/$discovery/rest?version=v1",
+      "discovery_name": "Role",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "description": "A description",
+        "includedPermissions": [
+          "iam.roles.delete",
+          "iam.roles.list",
+          "iam.roles.create"
+        ],
+        "stage": "GA",
+        "title": "My Custom Role"
+      }
+    }
+  }
+]

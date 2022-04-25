@@ -1,0 +1,7 @@
+
+if v, ok := d.GetOk("force_destroy"); ok {
+    url, err = addQueryParams(url, map[string]string{"force": v.(string)})
+    if err != nil {
+        return err
+    }
+}

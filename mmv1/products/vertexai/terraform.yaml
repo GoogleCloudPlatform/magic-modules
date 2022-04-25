@@ -1,0 +1,97 @@
+# Copyright 2021 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Dataset: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: false
+    id_format: '{{name}}'
+    exclude_import: true
+    skip_sweeper: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_dataset"
+        skip_import_test: true
+        primary_resource_id: "dataset"
+        vars:
+          display_name: "terraform"
+    properties:
+      labels: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+  Featurestore: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: false
+    skip_sweeper: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_featurestore"
+        primary_resource_id: "featurestore"
+        vars:
+          name: "terraform"
+    properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      etag: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_delete: templates/terraform/pre_delete/vertex_ai_force_delete.go.erb
+    virtual_fields:
+      - !ruby/object:Api::Type::Boolean
+        name: 'force_destroy'
+        description: 'If set to true, any EntityTypes and Features for this Featurestore will also be deleted'
+        default_value: false
+  FeaturestoreEntitytype: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["{{%featurestore}}/entityTypes/{{name}}"]
+    autogen_async: false
+    skip_sweeper: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_featurestore_entitytype"
+        primary_resource_id: "entity"
+        vars:
+          name: "terraform"
+    properties:
+      etag: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_create: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
+      pre_update: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
+      pre_delete: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
+  MetadataStore: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: false
+    id_format: '{{name}}'
+    skip_sweeper: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_metadata_store"
+        skip_test: true
+        primary_resource_id: "store"
+        vars:
+          name: "test-store"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>

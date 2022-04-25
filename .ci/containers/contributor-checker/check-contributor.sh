@@ -13,13 +13,13 @@ set -x
 
 ASSIGNEE=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/requested_reviewers" | jq .users[0].login)
-  
-if [[ "$ASSIGNEE" == "null" || -z "$ASSIGNEE" ]] ; then 
+
+if [[ "$ASSIGNEE" == "null" || -z "$ASSIGNEE" ]] ; then
   ASSIGNEE=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
     "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/reviews" | jq .[0].user.login)
 fi
 
-if [[ "$ASSIGNEE" == "null"  || -z "$ASSIGNEE" ]] ; then 
+if [[ "$ASSIGNEE" == "null"  || -z "$ASSIGNEE" ]] ; then
   echo "Issue is not assigned."
 else
   echo "Issue is assigned, not assigning."
@@ -31,23 +31,38 @@ USER=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
 
 # This is where you add users who do not need to have an assignee chosen for
 # them.
-if $(echo $USER | fgrep -wq -e ndmckinley -e danawillow -e megan07 -e paddycarver -e rambleraptor -e SirGitsalot -e slevenick -e c2thorn -e rileykarson -e melinath -e scottsuarez); then
+if $(echo $USER | fgrep -wq -e megan07 -e rambleraptor -e SirGitsalot -e slevenick -e c2thorn -e rileykarson -e melinath -e ScottSuarez -e shuyama1); then
   echo "User is on the list, not assigning."
   exit 0
 fi
 
 # This is where you add people to the random-assignee rotation.  This list
 # might not equal the list above.
-ASSIGNEE=$(shuf -n 1 <(printf "rileykarson\nslevenick\nc2thorn\nndmckinley\nscottsuarez\nmelinath"))
+ASSIGNEE=$(shuf -n 1 <(printf "rileykarson\nslevenick\nc2thorn\nscottsuarez\nmelinath\nshuyama1\nmegan07"))
 
 comment=$(cat << EOF
 Hello!  I am a robot who works on Magic Modules PRs.
 
-I have detected that you are a community contributor, so your PR will be assigned to someone with a commit-bit on this repo for initial review.
+I've detected that you're a community contributor. @$ASSIGNEE, a repository maintainer, has been assigned to assist you and help review your changes. 
 
-Thanks for your contribution!  A human will be with you soon.
+<details>
+  <summary>:question: First time contributing? Click here for more details</summary>
 
-@$ASSIGNEE, please review this PR or find an appropriate assignee.
+---
+
+Your assigned reviewer will help review your code by: 
+* Ensuring it's backwards compatible, covers common error cases, etc.
+* Summarizing the change into a user-facing changelog note.
+* Passes tests, either our "VCR" suite, a set of presubmit tests, or with manual test runs.
+
+You can help make sure that review is quick by running local tests and ensuring they're passing in between each push you make to your PR's branch. Also, try to leave a comment with each push you make, as pushes generally don't generate emails.
+
+If your reviewer doesn't get back to you within a week after your most recent change, please feel free to leave a comment on the issue asking them to take a look! In the absence of a dedicated review dashboard most maintainers manage their pending reviews through email, and those will sometimes get lost in their inbox.
+
+---
+
+</details>
+
 EOF
 )
 

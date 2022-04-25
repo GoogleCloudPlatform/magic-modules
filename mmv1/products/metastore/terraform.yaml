@@ -1,0 +1,53 @@
+# Copyright 2021 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Service: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    import_format: ["projects/{{project}}/locations/{{location}}/services/{{service_id}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dataproc_metastore_service_basic"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          metastore_service_name: "metastore-srv"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dataproc_metastore_service_cmek_test"
+        min_version: beta
+        skip_docs: true
+        primary_resource_id: "default"
+        vars:
+          metastore_service_name: "example-service"
+          key_name: "example-key"
+          keyring_name: "example-keyring"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dataproc_metastore_service_cmek_example"
+        min_version: beta
+        skip_test: true
+        primary_resource_id: "default"
+        vars:
+          metastore_service_name: "example-service"
+          key_name: "example-key"
+          keyring_name: "example-keyring"
+    properties:
+      network: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      port: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      tier: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      hiveMetastoreConfig.configOverrides: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        diff_suppress_func: 'dataprocMetastoreServiceOverrideSuppress'

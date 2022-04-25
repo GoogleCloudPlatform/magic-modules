@@ -18,14 +18,16 @@ TPG_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magic
 TPG_LOCAL_PATH=$PWD/../tpg
 TPGB_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/terraform-provider-google-beta
 TPGB_LOCAL_PATH=$PWD/../tpgb
-TFC_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/terraform-google-conversion
-TFC_LOCAL_PATH=$PWD/../tfc
+TFV_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/terraform-validator
+TFV_LOCAL_PATH=$PWD/../tfv
 TFOICS_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/docs-examples
 TFOICS_LOCAL_PATH=$PWD/../tfoics
-ANSIBLE_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/google.cloud
-ANSIBLE_LOCAL_PATH=$PWD/../ansible
-INSPEC_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/inspec-gcp
-INSPEC_LOCAL_PATH=$PWD/../inspec
+TFCD_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/terraform-docs-samples
+TFCD_LOCAL_PATH=$PWD/../tfcd
+
+# For backwards compatibility until at least Nov 15 2021
+TFC_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/terraform-google-conversion
+TFC_LOCAL_PATH=$PWD/../tfc
 
 DIFFS=""
 NEWLINE=$'\n'
@@ -52,27 +54,31 @@ if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
 fi
 popd
 
-# Ansible
-mkdir -p $ANSIBLE_LOCAL_PATH
-git clone -b $NEW_BRANCH $ANSIBLE_SCRATCH_PATH $ANSIBLE_LOCAL_PATH
-pushd $ANSIBLE_LOCAL_PATH
-git fetch origin $OLD_BRANCH
-if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
-    SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
-    DIFFS="${DIFFS}${NEWLINE}Ansible: [Diff](https://github.com/modular-magician/google.cloud/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
-fi
-popd
-
-# TF Conversion
+# TF Conversion - for compatibility until at least Nov 15 2021
 mkdir -p $TFC_LOCAL_PATH
-git clone -b $NEW_BRANCH $TFC_SCRATCH_PATH $TFC_LOCAL_PATH
-pushd $TFC_LOCAL_PATH
-git fetch origin $OLD_BRANCH
-if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
-    SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
-    DIFFS="${DIFFS}${NEWLINE}TF Conversion: [Diff](https://github.com/modular-magician/terraform-google-conversion/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
+# allow this to fail for compatibility during tfv/tgc transition phase
+if git clone -b $NEW_BRANCH $TFC_SCRATCH_PATH $TFC_LOCAL_PATH; then
+    pushd $TFC_LOCAL_PATH
+    git fetch origin $OLD_BRANCH
+    if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
+        SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
+        DIFFS="${DIFFS}${NEWLINE}TF Conversion: [Diff](https://github.com/modular-magician/terraform-google-conversion/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
+    fi
+    popd
 fi
-popd
+
+# TF Validator
+mkdir -p $TFV_LOCAL_PATH
+# allow this to fail for compatibility during tfv/tgc transition phase
+if git clone -b $NEW_BRANCH $TFV_SCRATCH_PATH $TFV_LOCAL_PATH; then
+    pushd $TFV_LOCAL_PATH
+    git fetch origin $OLD_BRANCH
+    if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
+        SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
+        DIFFS="${DIFFS}${NEWLINE}TF Validator: [Diff](https://github.com/modular-magician/terraform-validator/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
+    fi
+    popd
+fi
 
 # TF OICS
 mkdir -p $TFOICS_LOCAL_PATH
@@ -85,14 +91,14 @@ if ! git diff --exit-code --quiet origin/$OLD_BRANCH origin/$NEW_BRANCH; then
 fi
 popd
 
-# Inspec
-mkdir -p $INSPEC_LOCAL_PATH
-git clone -b $NEW_BRANCH $INSPEC_SCRATCH_PATH $INSPEC_LOCAL_PATH
-pushd $INSPEC_LOCAL_PATH
+# TF Cloud Docs
+mkdir -p $TFCD_LOCAL_PATH
+git clone -b $NEW_BRANCH $TFCD_SCRATCH_PATH $TFCD_LOCAL_PATH
+pushd $TFCD_LOCAL_PATH
 git fetch origin $OLD_BRANCH
-if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
-    SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
-    DIFFS="${DIFFS}${NEWLINE}Inspec: [Diff](https://github.com/modular-magician/inspec-gcp/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
+if ! git diff --exit-code --quiet origin/$OLD_BRANCH origin/$NEW_BRANCH; then
+    SUMMARY="$(git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat)"
+    DIFFS="${DIFFS}${NEWLINE}TF Cloud Doc Samples: [Diff](https://github.com/modular-magician/terraform-docs-samples/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
 fi
 popd
 

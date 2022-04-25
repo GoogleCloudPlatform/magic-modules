@@ -1,0 +1,2 @@
+ignore_read:
+  - predefined_values.0.key_usage.0.extended_key_usage

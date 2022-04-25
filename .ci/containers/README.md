@@ -8,17 +8,12 @@ The images are named with the languages they contain and the images are versione
 If there are multiple images with the same language version but different libraries (gems), a `v#` is appended to differentiate. eg: `1.11.5-2.6.0-2.7-v6`
 
 ## Updating a docker image
-The Dockerfile should be updated, then the image rebuilt and pushed to the container registry stored at the `magic-modules` GCP project. To update any of the images:
+The Dockerfile should be updated, then the image rebuilt and pushed to the container registry stored at the `graphite-docker-images` GCP project. To update any of the images:
 
 1. Make changes to the Dockerfile
-2. Configure docker to use gcloud auth:
-    ```gcloud auth configure-docker```
-3. Build the image: `docker build . --tag gcr.io/magic-modules/go-ruby-python`
+2. Configure docker to use gcloud auth: `gcloud auth configure-docker`
+3. Build the image: `docker build . --tag gcr.io/graphite-docker-images/go-ruby-python`
 4. Find the new image's id: `docker images`
-5. Add the appropriate tag `docker tag ac37c0af8ce7 gcr.io/magic-modules/go-ruby-python:1.11.5-2.6.0-2.7-v6`
-6. Push the image: `docker push gcr.io/magic-modules/go-ruby-python:1.11.5-2.6.0-2.7-v6
+5. Add the appropriate tag `docker tag ac37c0af8ce7 gcr.io/graphite-docker-images/go-ruby-python:1.11.5-2.6.0-2.7-v6`
+6. Push the image: `docker push gcr.io/graphite-docker-images/go-ruby-python:1.11.5-2.6.0-2.7-v6`
 7. Check the UI and ensure the new version is available and tagged at `latest`. It must be tagged `latest` for the Kokoro builds to get the correct version.
-`
-
-## go-ruby && go-ruby-python
-The `go-ruby` image is used by inspect tests. It is also a dependency of the `go-ruby-python` build and both should be updated in tandem.
