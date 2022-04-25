@@ -72,7 +72,7 @@ resource "google_cloud_run_service" "gcr_service" {
         # Use the VPC Connector
         "run.googleapis.com/vpc-access-connector" = google_vpc_access_connector.connector.name
         # all egress from the service should go through the VPC Connector
-        "run.googleapis.com/vpc-access-egress" = "all"
+        "run.googleapis.com/vpc-access-egress" = "all-traffic"
       }
     }
   }
