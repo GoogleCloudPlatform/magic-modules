@@ -3,7 +3,6 @@
 resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
   name         = "<%= ctx[:vars]['spot_instance_name'] %>"
   machine_type = "f1-micro"
-  provider = google-beta
 
   boot_disk {
     initialize_params {
