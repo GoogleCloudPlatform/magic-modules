@@ -148,7 +148,7 @@ func TestAccCloudFunctionsFunction_basic(t *testing.T) {
 						"available_memory_mb", "128"),
 					resource.TestCheckResourceAttr(funcResourceName,
 						"max_instances", "10"),
-          resource.TestCheckResourceAttr(funcResourceName,
+					resource.TestCheckResourceAttr(funcResourceName,
 						"min_instances", "3"),
 					resource.TestCheckResourceAttr(funcResourceName,
 						"ingress_settings", "ALLOW_INTERNAL_ONLY"),
@@ -220,7 +220,7 @@ func TestAccCloudFunctionsFunction_update(t *testing.T) {
 						"timeout", "91"),
 					resource.TestCheckResourceAttr(funcResourceName,
 						"max_instances", "15"),
-          resource.TestCheckResourceAttr(funcResourceName,
+					resource.TestCheckResourceAttr(funcResourceName,
 						"min_instances", "5"),
 					resource.TestCheckResourceAttr(funcResourceName,
 						"ingress_settings", "ALLOW_ALL"),
@@ -306,6 +306,34 @@ func TestAccCloudFunctionsFunction_bucket(t *testing.T) {
 	})
 }
 
+<% unless version == "ga" -%>
+func TestAccCloudFunctionsFunction_dockerRepository(t *testing.T) {
+	t.Parallel()
+	funcResourceName := "google_cloudfunctions_function.function"
+	arRepoName := fmt.Sprintf("tf-cmek-test-docker-repository-%s", randString(t, 10))
+	functionName := fmt.Sprintf("tf-cmek-test-%s", randString(t, 10))
+	bucketName := fmt.Sprintf("tf-cmek-test-bucket-%d", randInt(t))
+	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
+	defer os.Remove(zipFilePath) // clean up
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudFunctionsFunction_artifact_registry_repository(arRepoName, functionName, bucketName, zipFilePath),
+			},
+			{
+				ResourceName:            funcResourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"build_environment_variables"},
+			},
+		},
+	})
+}
+<% end -%>
 func TestAccCloudFunctionsFunction_firestore(t *testing.T) {
 	t.Parallel()
 	funcResourceName := "google_cloudfunctions_function.function"
@@ -391,7 +419,7 @@ func TestAccCloudFunctionsFunction_vpcConnector(t *testing.T) {
 	functionName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", randInt(t))
 	networkName := fmt.Sprintf("tf-test-net-%d", randInt(t))
-	vpcConnectorName := fmt.Sprintf("tf-test-conn-%s",  randString(t, 5))
+	vpcConnectorName := fmt.Sprintf("tf-test-conn-%s", randString(t, 5))
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	projectNumber := os.Getenv("GOOGLE_PROJECT_NUMBER")
 	defer os.Remove(zipFilePath) // clean up
@@ -426,16 +454,16 @@ func TestAccCloudFunctionsFunction_vpcConnector(t *testing.T) {
 func TestAccCloudFunctionsFunction_secretEnvVar(t *testing.T) {
 	t.Parallel()
 
-    randomSecretSuffix := randString(t, 10)
-    accountId := fmt.Sprintf("tf-test-account-%s", randomSecretSuffix)
-    secretName := fmt.Sprintf("tf-test-secret-%s", randomSecretSuffix)
-    versionName1 := fmt.Sprintf("tf-test-version1-%s", randomSecretSuffix)
-    versionName2 := fmt.Sprintf("tf-test-version2-%s", randomSecretSuffix)
-    bucketName := fmt.Sprintf("tf-test-bucket-%d", randInt(t))
-    functionName := fmt.Sprintf("tf-test-%s", randomSecretSuffix)
-    zipFilePath := createZIPArchiveForCloudFunctionSource(t, testSecretEnvVarFunctionPath)
+	randomSecretSuffix := randString(t, 10)
+	accountId := fmt.Sprintf("tf-test-account-%s", randomSecretSuffix)
+	secretName := fmt.Sprintf("tf-test-secret-%s", randomSecretSuffix)
+	versionName1 := fmt.Sprintf("tf-test-version1-%s", randomSecretSuffix)
+	versionName2 := fmt.Sprintf("tf-test-version2-%s", randomSecretSuffix)
+	bucketName := fmt.Sprintf("tf-test-bucket-%d", randInt(t))
+	functionName := fmt.Sprintf("tf-test-%s", randomSecretSuffix)
+	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testSecretEnvVarFunctionPath)
 	funcResourceName := "google_cloudfunctions_function.function"
-    defer os.Remove(zipFilePath) // clean up
+	defer os.Remove(zipFilePath) // clean up
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -452,7 +480,7 @@ func TestAccCloudFunctionsFunction_secretEnvVar(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"build_environment_variables"},
 			},
 			{
-				Config: testAccCloudFunctionsFunction_secretEnvVar(secretName, versionName2, bucketName +"-update", functionName, "2", zipFilePath, accountId),
+				Config: testAccCloudFunctionsFunction_secretEnvVar(secretName, versionName2, bucketName+"-update", functionName, "2", zipFilePath, accountId),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -467,17 +495,17 @@ func TestAccCloudFunctionsFunction_secretEnvVar(t *testing.T) {
 func TestAccCloudFunctionsFunction_secretMount(t *testing.T) {
 	t.Parallel()
 
-    projectNumber := os.Getenv("GOOGLE_PROJECT_NUMBER")
-    randomSecretSuffix := randString(t, 10)
-    accountId := fmt.Sprintf("tf-test-account-%s", randomSecretSuffix)
-    secretName := fmt.Sprintf("tf-test-secret-%s", randomSecretSuffix)
-    versionName1 := fmt.Sprintf("tf-test-version1-%s", randomSecretSuffix)
-    versionName2 := fmt.Sprintf("tf-test-version2-%s", randomSecretSuffix)
-    bucketName := fmt.Sprintf("tf-test-bucket-%d", randInt(t))
-    functionName := fmt.Sprintf("tf-test-%s", randomSecretSuffix)
+	projectNumber := os.Getenv("GOOGLE_PROJECT_NUMBER")
+	randomSecretSuffix := randString(t, 10)
+	accountId := fmt.Sprintf("tf-test-account-%s", randomSecretSuffix)
+	secretName := fmt.Sprintf("tf-test-secret-%s", randomSecretSuffix)
+	versionName1 := fmt.Sprintf("tf-test-version1-%s", randomSecretSuffix)
+	versionName2 := fmt.Sprintf("tf-test-version2-%s", randomSecretSuffix)
+	bucketName := fmt.Sprintf("tf-test-bucket-%d", randInt(t))
+	functionName := fmt.Sprintf("tf-test-%s", randomSecretSuffix)
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testSecretVolumesMountFunctionPath)
-    funcResourceName := "google_cloudfunctions_function.function"
-    defer os.Remove(zipFilePath) // clean up
+	funcResourceName := "google_cloudfunctions_function.function"
+	defer os.Remove(zipFilePath) // clean up
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -660,7 +688,7 @@ func createZIPArchiveForCloudFunctionSource(t *testing.T, sourcePath string) str
 func sweepCloudFunctionSourceZipArchives(_ string) error {
 	files, err := ioutil.ReadDir(os.TempDir())
 	if err != nil {
-		log.Printf("Error reading files: %s",err)
+		log.Printf("Error reading files: %s", err)
 		return nil
 	}
 	for _, f := range files {
@@ -670,7 +698,7 @@ func sweepCloudFunctionSourceZipArchives(_ string) error {
 		if strings.HasPrefix(f.Name(), testFunctionsSourceArchivePrefix) {
 			filepath := fmt.Sprintf("%s/%s", os.TempDir(), f.Name())
 			if err := os.Remove(filepath); err != nil {
-				log.Printf("Error removing files: %s",err)
+				log.Printf("Error removing files: %s", err)
 				return nil
 			}
 			log.Printf("[INFO] cloud functions sweeper removed old file %s", filepath)
@@ -1004,6 +1032,53 @@ resource "google_cloudfunctions_function" "function" {
 `, projectNumber, networkName, vpcConnectorName, vpcConnectorName, vpcIp, bucketName, zipFilePath, functionName, vpcConnectorName)
 }
 
+<% unless version == "ga" -%>
+func testAccCloudFunctionsFunction_artifact_registry_repository(arRepoName, functionName, bucketName, zipFilePath string) string {
+	return fmt.Sprintf(`
+resource "google_kms_key_ring" "gcf_cmek_key_ring" {
+  name     = "gcf-cmek-key-ring"
+  location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "gcf_cmek_crypto_key" {
+  name     = "gcf-cmek-crypto-key"
+  key_ring = google_kms_key_ring.gcf_cmek_key_ring.id
+}
+
+resource "google_artifact_registry_repository" "test-ar-repo" {
+  repository_id = "%s"
+  kms_key_name = google_kms_crypto_key.gcf_cmek_crypto_key.id
+  location = "us-central1"
+  format = "DOCKER"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "US"
+}
+
+resource "google_storage_bucket_object" "archive" {
+  name   = "index.zip"
+  bucket = google_storage_bucket.bucket.name
+  source = "%s"
+}
+
+resource "google_cloudfunctions_function" "function" {
+  name                  = "%s"
+  description           = "CMEK test function"
+  runtime               = "nodejs10"
+  available_memory_mb   = 128
+  source_archive_bucket = google_storage_bucket.bucket.name
+  source_archive_object = google_storage_bucket_object.archive.name
+  docker_repository     = google_artifact_registry_repository.test-ar-repo.id
+  kms_key_name          = google_kms_crypto_key.gcf_cmek_crypto_key.id
+  trigger_http          = true
+  timeout               = 61
+  entry_point           = "helloGET"
+}
+`, arRepoName, bucketName, zipFilePath, functionName)
+}
+<% end -%>
 func testAccCloudFunctionsFunction_secretEnvVar(secretName, versionName, bucketName, functionName, versionNumber, zipFilePath, accountId string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
