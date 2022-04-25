@@ -171,9 +171,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'location'
         description: |
-          Compute Engine location where the instance resides. For trial organization
-          subscriptions, the location must be a Compute Engine zone. For paid organization
-          subscriptions, it should correspond to a Compute Engine region.
+          Required. Compute Engine location where the instance resides.
         required: true
       - !ruby/object:Api::Type::String
         name: 'peeringCidrRange'
