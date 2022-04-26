@@ -15,7 +15,6 @@ resource "google_compute_subnetwork" "default" {
 # [START cloud_sql_sqlserver_vm_instance]
 resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]['sqlserver_vm'] %>"
-  allow_stopping_for_update = true
   boot_disk {
     auto_delete = true
     device_name = "persistent-disk-0"
@@ -40,14 +39,14 @@ resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
 # [END cloud_sql_sqlserver_vm_instance]
 
 # [START cloud_sql_sqlserver_vm_firewall_rule]
-resource "google_compute_firewall" "sql_server_fw_rule" {
+resource "google_compute_firewall" "sql_server_1433" {
+  name          = "<%= ctx[:vars]['sql_server_1433_3'] %>"
   allow {
     ports    = ["1433"]
     protocol = "tcp"
   }
   description   = "Allow SQL Server access from all sources on port 1433."
   direction     = "INGRESS"
-  name          = "<%= ctx[:vars]['sql_server_1433'] %>"
   network       = google_compute_network.default.id
   priority      = 1000
   source_ranges = ["0.0.0.0/0"]
