@@ -418,6 +418,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           new_object: "new-object"
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_make_data_public"
+        primary_resource_type: "google_storage_bucket"
         primary_resource_id: "default"
         vars:
           example_bucket_name: "example-bucket-name"
