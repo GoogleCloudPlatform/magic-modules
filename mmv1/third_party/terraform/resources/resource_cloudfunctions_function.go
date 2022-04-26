@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -147,7 +146,6 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 				},
 			},
 
-<% unless version == 'ga' -%>
 			"docker_repository": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -159,7 +157,6 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 				Optional:    true,
 				Description: `Resource name of a KMS crypto key (managed by the user) used to encrypt/decrypt function resources.`,
 			},
-<% end -%>
 
 			"description": {
 				Type:        schema.TypeString,
@@ -513,7 +510,6 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 		function.VpcConnectorEgressSettings = v.(string)
 	}
 
-<% unless version == 'ga' -%>
 	if v, ok := d.GetOk("docker_repository"); ok {
 		function.DockerRepository = v.(string)
 	}
@@ -521,7 +517,6 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 	if v, ok := d.GetOk("kms_key_name"); ok {
 		function.KmsKeyName = v.(string)
 	}
-<% end -%>
 
 	if v, ok := d.GetOk("max_instances"); ok {
 		function.MaxInstances = int64(v.(int))
@@ -654,14 +649,12 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 	if err := d.Set("event_trigger", flattenEventTrigger(function.EventTrigger)); err != nil {
 		return fmt.Errorf("Error setting event_trigger: %s", err)
 	}
-<% unless version == 'ga' -%>
 	if err := d.Set("docker_repository", function.DockerRepository); err != nil {
 		return fmt.Errorf("Error setting docker_repository: %s", err)
 	}
 	if err := d.Set("kms_key_name", function.KmsKeyName); err != nil {
 		return fmt.Errorf("Error setting kms_key_name: %s", err)
 	}
-<% end -%>
 	if err := d.Set("max_instances", function.MaxInstances); err != nil {
 		return fmt.Errorf("Error setting max_instances: %s", err)
 	}
@@ -787,7 +780,6 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 		updateMaskArr = append(updateMaskArr, "eventTrigger", "eventTrigger.failurePolicy.retry")
 	}
 
-<% unless version == 'ga' -%>
 	if d.HasChange("docker_repository") {
 		function.Runtime = d.Get("docker_repository").(string)
 		updateMaskArr = append(updateMaskArr, "dockerRepository")
@@ -797,7 +789,6 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 		function.Runtime = d.Get("docker_repository").(string)
 		updateMaskArr = append(updateMaskArr, "kmsKeyName")
 	}
-<% end -%>
 
 	if d.HasChange("max_instances") {
 		function.MaxInstances = int64(d.Get("max_instances").(int))
