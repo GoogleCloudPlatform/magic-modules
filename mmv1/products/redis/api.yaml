@@ -403,8 +403,10 @@ objects:
         properties:
         - !ruby/object:Api::Type::Enum
           name: persistenceMode
+          min_version: beta
           description: |
-            Optional. Controls whether Persistence features are enabled. 
+            Optional. 
+            Controls whether Persistence features are enabled. 
             If not provided, the existing value will be used.
             - PERSISTENCE_MODE_UNSPECIFIED: Not set.
             - DISABLED: Persistence is disabled for the instance, and any existing snapshots are deleted.
@@ -415,6 +417,7 @@ objects:
             - :RDB
           input: true
         - !ruby/object:Api::Type::Enum
+          min_version: beta
           name: rdbSnapshotPeriod
           description: |
             Optional. 
@@ -432,12 +435,14 @@ objects:
             - :TWENTY_FOUR_HOURS
           input: true
         - !ruby/object:Api::Type::Time
+          min_version: beta
           name: rdbNextSnapshotTime
           description: |
             Output only. 
             The next time that a snapshot attempt is scheduled to occur in the RFC3339 UTC "Zulu" format.
         - !ruby/object:Api::Type::Time
           name: rdbSnapshotStartTime
+          min_version: beta
           description: |
             Optional. 
             Date and time in the RFC3339 UTC "Zulu" format at which the first snapshot was/will be attempted, 
