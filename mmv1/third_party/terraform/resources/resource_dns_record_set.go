@@ -133,13 +133,13 @@ func resourceDnsRecordSet() *schema.Resource {
 						"geo": {
 							Type:        schema.TypeList,
 							Optional:    true,
-							Description: `The configuration for Geolocation based routing policy.`,
+							Description: `The configuration for Geo location based routing policy.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"region": {
+									"location": {
 										Type:        schema.TypeString,
 										Required:    true,
-										Description: `The region name defined in Google Cloud.`,
+										Description: `The location name defined in Google Cloud.`,
 									},
 									"rrdatas": {
 										Type:     schema.TypeList,
@@ -560,7 +560,7 @@ func convertRoutingPolicy(ps []interface{}) *dns.RRSetRoutingPolicy {
 					return nil
 				}
 			}
-			location, ok := gi["region"].(string)
+			location, ok := gi["location"].(string)
 			if !ok {
 				return nil
 			}
@@ -610,7 +610,7 @@ func flattenDnsRecordSetRoutingPolicyGEO(geo *dns.RRSetRoutingPolicyGeoPolicy) [
 	ris := make([]interface{}, 0, len(geo.Items))
 	for _, item := range geo.Items {
 		ri := make(map[string]interface{})
-		ri["region"] = item.Location
+		ri["location"] = item.Location
 		ri["rrdatas"] = item.Rrdatas
 		ris = append(ris, ri)
 	}

@@ -168,13 +168,13 @@ resource "google_dns_record_set" "geo" {
 
   routing_policy {
     geo {
-      region  = "asia-east1"
-      rrdatas =  ["10.128.1.1"]
+      location = "asia-east1"
+      rrdatas  =  ["10.128.1.1"]
     }
 
     geo {
-      region  = "us-central1"
-      rrdatas =  ["10.130.1.1"]
+      location = "us-central1"
+      rrdatas  =  ["10.130.1.1"]
     }
   }
 }
@@ -221,7 +221,7 @@ The following arguments are supported:
 
 <a name="nested_geo"></a>The `geo` block supports:
 
-* `region` - (Required) The region name defined in Google Cloud.
+* `location` - (Required) The location name defined in Google Cloud.
 
 * `rrdatas` - (Required) Same as `rrdatas` above.
 

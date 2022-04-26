@@ -435,7 +435,7 @@ resource "google_dns_record_set" "foobar" {
 `, zoneName, zoneName, zoneName, ttl, weight, addr2)
 }
 
-func testAccDnsRecordSet_routingPolicyGEO(zoneName, addr2  string, ttl int, region string) string {
+func testAccDnsRecordSet_routingPolicyGEO(zoneName, addr2  string, ttl int, location string) string {
 	return fmt.Sprintf(`
 resource "google_dns_managed_zone" "parent-zone" {
   name        = "%s"
@@ -451,15 +451,15 @@ resource "google_dns_record_set" "foobar" {
 
   routing_policy {
     geo {
-      region       = "asia-east1"
-      rrdatas      = ["127.0.0.1"]
+      location = "asia-east1"
+      rrdatas  = ["127.0.0.1"]
     }
     geo {
-      region       = "%s"
-      rrdatas      = ["%s"]
+      location = "%s"
+      rrdatas  = ["%s"]
     }
   }
 }
-`, zoneName, zoneName, zoneName, ttl, region, addr2)
+`, zoneName, zoneName, zoneName, ttl, location, addr2)
 }
 
