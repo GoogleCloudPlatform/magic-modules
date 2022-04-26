@@ -6,7 +6,7 @@ resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
     auto_delete = true
     device_name = "persistent-disk-0"
     initialize_params {
-      image = "projects/windows-sql-cloud/global/images/sql-2019-standard-windows-2022-dc-v20220314"
+      image = "windows-sql-cloud/sql-std-2019-win-2022"
       size  = 50
       type  = "pd-balanced"
     }
