@@ -1066,6 +1066,9 @@ resource "google_cloudfunctions_function" "function" {
 <% unless version == "ga" -%>
 func testAccCloudFunctionsFunction_docker_repository(arRepoName, functionName, bucketName, zipFilePath string) string {
 	return fmt.Sprintf(`
+data "google_project" "project" {
+}
+
 resource "google_artifact_registry_repository" "test-ar-repo" {
   repository_id = "%s"
   location = "us-central1"
@@ -1130,6 +1133,15 @@ resource "google_artifact_registry_repository" "unencoded-ar-repo" {
   format = "DOCKER"
 }
 
+resource "google_artifact_registry_repository_iam_binding" "binding" {
+  location = google_artifact_registry_repository.encoded-ar-repo.location
+  repository = google_artifact_registry_repository.encoded-ar-repo.name
+  role = "roles/artifactregistry.admin"
+  members = [
+    "serviceAccount:service-${data.google_project.project.number}@gcf-admin-robot.iam.gserviceaccount.com",
+  ]
+}
+
 resource "google_kms_crypto_key_iam_binding" "gcf_cmek_keyuser" {
   crypto_key_id = google_kms_crypto_key.gcf_cmek_crypto_key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
@@ -1148,15 +1160,6 @@ resource "google_artifact_registry_repository" "encoded-ar-repo" {
   format = "DOCKER"
 }
 
-resource "google_artifact_registry_repository_iam_binding" "binding" {
-  location = google_artifact_registry_repository.encoded-ar-repo.location
-  repository = google_artifact_registry_repository.encoded-ar-repo.name
-  role = "roles/artifactregistry.admin"
-  members = [
-    "serviceAccount:service-${data.google_project.project.number}@gcf-admin-robot.iam.gserviceaccount.com",
-  ]
-}
-
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
@@ -1167,7 +1170,6 @@ resource "google_storage_bucket_object" "archive" {
   bucket = google_storage_bucket.bucket.name
   source = "%s"
 }
-
 
 resource "google_cloudfunctions_function" "function" {
   name                  = "%s"
