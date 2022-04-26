@@ -1,7 +1,7 @@
 data "google_project" "project" {
 }
 
-resource "google_project_service_identity" "gcp-sa-cloud-sql" {
+resource "google_project_service_identity" "gcp_sa_cloud_sql" {
   provider = google-beta
   service  = "sqladmin.googleapis.com"
 }
@@ -9,14 +9,14 @@ resource "google_project_service_identity" "gcp-sa-cloud-sql" {
 # [START cloud_sql_instance_iam_conditions]
 data "google_iam_policy" "sql_iam_policy" {
   binding {
-    role = "roles/secretmanager.secretAccessor"
+    role = "roles/cloudsql.client"
     members = [
-      "serviceAccount:${google_project_service_identity.gcp-sa-cloud-sql.email}",
+      "serviceAccount:${google_project_service_identity.gcp_sa_cloud_sql.email}",
     ]
     condition {
       expression  = "resource.name == 'google_sql_database_instance.default.id' && resource.type == 'sqladmin.googleapis.com/Instance'"
       title       = "created"
-      description = "Send notifications on creation events"
+      description = "Cloud SQL instance creation"
     }
   }
 }
