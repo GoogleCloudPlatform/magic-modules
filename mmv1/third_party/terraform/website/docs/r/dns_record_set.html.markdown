@@ -213,7 +213,7 @@ The following arguments are supported:
 * `geo` - (Optional) The configuration for Geolocation based routing policy.
     Structure is [document below](#nested_geo).
 
-<a name="nested_wee"></a>The `wrr` block supports:
+<a name="nested_wrr"></a>The `wrr` block supports:
 
 * `weight`  - (Required) The ratio of traffic routed to the target.
 
