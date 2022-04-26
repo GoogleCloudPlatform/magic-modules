@@ -36,9 +36,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         primary_resource_type: "google_compute_instance"
         vars:
+          vpc_network: "vpc-network"
+          vpc_subnet: "vpc-subnet"
           sqlserver_vm: "sqlserver-vm"
           sql_server_1433: "sql-server-1433"
-    ### Spot VM ###          
+    ### Spot VM ###
       - !ruby/object:Provider::Terraform::Examples
         name: "spot_instance_basic"
         primary_resource_type: "google_compute_instance"
