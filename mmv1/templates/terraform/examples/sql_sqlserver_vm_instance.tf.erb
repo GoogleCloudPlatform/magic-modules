@@ -48,7 +48,7 @@ resource "google_compute_firewall" "sql_server_fw_rule" {
   description   = "Allow SQL Server access from all sources on port 1433."
   direction     = "INGRESS"
   name          = "<%= ctx[:vars]['sql_server_1433'] %>"
-  network       = "global/networks/default"
+  network       = google_compute_network.default.id
   priority      = 1000
   source_ranges = ["0.0.0.0/0"]
 }
