@@ -633,6 +633,9 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err = d.Set("status", flattenStatus(manager.Status)); err != nil {
 		return fmt.Errorf("Error setting status in state: %s", err.Error())
 	}
+	if err = d.Set("instance_template", manager.InstanceTemplate); err != nil {
+		return fmt.Errorf("Error setting instance_template: %s", err.Error())
+	}
 
 	// If unset in state set to default value
 	if d.Get("wait_for_instances_status").(string) == "" {
