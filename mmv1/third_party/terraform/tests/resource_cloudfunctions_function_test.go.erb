@@ -310,9 +310,9 @@ func TestAccCloudFunctionsFunction_bucket(t *testing.T) {
 func TestAccCloudFunctionsFunction_dockerRepository(t *testing.T) {
 	t.Parallel()
 	funcResourceName := "google_cloudfunctions_function.function"
-	arRepoName := fmt.Sprintf("tf-cmek-test-docker-repository-%s", randString(t, 10))
-	functionName := fmt.Sprintf("tf-cmek-test-%s", randString(t, 10))
-	bucketName := fmt.Sprintf("tf-cmek-test-bucket-%d", randInt(t))
+	arRepoName := fmt.Sprintf("tf-ar-test-docker-repository-%s", randString(t, 10))
+	functionName := fmt.Sprintf("tf-ar-test-%s", randString(t, 10))
+	bucketName := fmt.Sprintf("tf-ar-test-bucket-%d", randInt(t))
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
 
@@ -338,6 +338,7 @@ func TestAccCloudFunctionsFunction_dockerRepository(t *testing.T) {
 <% unless version == "ga" -%>
 func TestAccCloudFunctionsFunction_cmek(t *testing.T) {
 	t.Parallel()
+	kmsSuffix := randString(t, 10)
 	funcResourceName := "google_cloudfunctions_function.function"
 	arRepoName := fmt.Sprintf("tf-cmek-test-docker-repository-%s", randString(t, 10))
 	functionName := fmt.Sprintf("tf-cmek-test-%s", randString(t, 10))
@@ -351,7 +352,7 @@ func TestAccCloudFunctionsFunction_cmek(t *testing.T) {
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudFunctionsFunction_cmek(arRepoName, functionName, bucketName, zipFilePath),
+				Config: testAccCloudFunctionsFunction_cmek(kmsSuffix, arRepoName, functionName, bucketName, zipFilePath),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -363,6 +364,7 @@ func TestAccCloudFunctionsFunction_cmek(t *testing.T) {
 	})
 }
 <% end -%>
+
 func TestAccCloudFunctionsFunction_firestore(t *testing.T) {
 	t.Parallel()
 	funcResourceName := "google_cloudfunctions_function.function"
@@ -1064,7 +1066,6 @@ resource "google_cloudfunctions_function" "function" {
 <% unless version == "ga" -%>
 func testAccCloudFunctionsFunction_docker_repository(arRepoName, functionName, bucketName, zipFilePath string) string {
 	return fmt.Sprintf(`
-
 resource "google_artifact_registry_repository" "test-ar-repo" {
   repository_id = "%s"
   location = "us-central1"
@@ -1099,15 +1100,18 @@ resource "google_cloudfunctions_function" "function" {
 <% end -%>
 
 <% unless version == "ga" -%>
-func testAccCloudFunctionsFunction_cmek(arRepoName, functionName, bucketName, zipFilePath string) string {
+func testAccCloudFunctionsFunction_cmek(kmsSuffix, arRepoName, functionName, bucketName, zipFilePath string) string {
 	return fmt.Sprintf(`
+data "google_project" "project" {
+}
+
 resource "google_kms_key_ring" "gcf_cmek_key_ring" {
-  name     = "gcf-cmek-key-ring"
+  name     = "gcf-cmek-key-ring-%s"
   location = "us-central1"
 }
 
 resource "google_kms_crypto_key" "gcf_cmek_crypto_key" {
-  name     = "gcf-cmek-crypto-key"
+  name     = "gcf-cmek-crypto-key-%s"
   key_ring = google_kms_key_ring.gcf_cmek_key_ring.id
 }
 
@@ -1129,12 +1133,14 @@ resource "google_storage_bucket_object" "archive" {
   source = "%s"
 }
 
-resource "google_kms_crypto_key_iam_binding" "apigee_sa_keyuser" {
-  crypto_key_id = google_kms_crypto_key.apigee_key.id
+resource "google_kms_crypto_key_iam_binding" "gcf_cmek_keyuser" {
+  crypto_key_id = google_kms_crypto_key.gcf_cmek_crypto_key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
   members = [
-    "serviceAccount:service-${google_project.project.project_id}@gcf-admin-robot.iam.gserviceaccount.com",
+    "serviceAccount:service-${data.google_project.project.number}@gcf-admin-robot.iam.gserviceaccount.com",
+	"serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com",
+	"serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com",
   ]
 }
 
@@ -1151,9 +1157,10 @@ resource "google_cloudfunctions_function" "function" {
   timeout               = 61
   entry_point           = "helloGET"
 }
-`, arRepoName, bucketName, zipFilePath, functionName)
+`, kmsSuffix, kmsSuffix, arRepoName, bucketName, zipFilePath, functionName)
 }
 <% end -%>
+
 func testAccCloudFunctionsFunction_secretEnvVar(secretName, versionName, bucketName, functionName, versionNumber, zipFilePath, accountId string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
