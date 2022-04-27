@@ -259,7 +259,7 @@ func getFolderIamPolicyByParentAndDisplayName(parent, displayName string, config
 	token := ""
 
 	for paginate := true; paginate; {
-		resp, err := config.NewResourceManagerV2Client(config.userAgent).Folders.List().Parent(parent).PageToken(token).Do()
+		resp, err := config.NewResourceManagerV2Client(config.userAgent).Folders.List().Parent(parent).PageSize(300).PageToken(token).Do()
 		if err != nil {
 			return nil, fmt.Errorf("Error reading folder list: %s", err)
 		}

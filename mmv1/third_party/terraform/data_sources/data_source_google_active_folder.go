@@ -41,7 +41,7 @@ func dataSourceGoogleActiveFolderRead(d *schema.ResourceData, meta interface{}) 
 	token := ""
 
 	for paginate := true; paginate; {
-		resp, err := config.NewResourceManagerV2Client(userAgent).Folders.List().Parent(parent).PageToken(token).Do()
+		resp, err := config.NewResourceManagerV2Client(userAgent).Folders.List().Parent(parent).PageSize(300).PageToken(token).Do()
 		if err != nil {
 			return fmt.Errorf("error reading folder list: %s", err)
 		}
