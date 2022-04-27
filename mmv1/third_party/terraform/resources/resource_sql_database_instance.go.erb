@@ -196,13 +196,13 @@ func resourceSqlDatabaseInstance() *schema.Resource {
                   },
                   "retentionInterval": {
                     Type:         schema.TypeString,
-                    Required:     true,
+                    Optional:     true,
                     AtLeastOneOf: sqlServerAuditConfigKeys,
                     Description:  `How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by the letter s (e.g., 3.5s).`,
                   },
                   "uploadInterval": {
                     Type:         schema.TypeString,
-                    Required:     true,
+                    Optional:     true,
                     AtLeastOneOf: sqlServerAuditConfigKeys,
                     Description:  `How often to upload generated audit files. A duration in seconds with up to nine fractional digits, terminated by the letter s (e.g., 3.5s).`,
                   },
