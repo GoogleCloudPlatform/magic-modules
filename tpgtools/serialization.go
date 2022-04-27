@@ -1710,6 +1710,9 @@ func convertContainerAwsNodePoolBetaConfigToHCL(r *containerawsBeta.NodePoolConf
 	if r.IamInstanceProfile != nil {
 		outputConfig += fmt.Sprintf("\tiam_instance_profile = %#v\n", *r.IamInstanceProfile)
 	}
+	if r.ImageType != nil {
+		outputConfig += fmt.Sprintf("\timage_type = %#v\n", *r.ImageType)
+	}
 	if v := convertContainerAwsNodePoolBetaConfigInstancePlacementToHCL(r.InstancePlacement); v != "" {
 		outputConfig += fmt.Sprintf("\tinstance_placement %s\n", v)
 	}
@@ -2206,6 +2209,12 @@ func convertContainerAzureNodePoolBetaConfigToHCL(r *containerazureBeta.NodePool
 	if v := convertContainerAzureNodePoolBetaConfigSshConfigToHCL(r.SshConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
 	}
+	if r.ImageType != nil {
+		outputConfig += fmt.Sprintf("\timage_type = %#v\n", *r.ImageType)
+	}
+	if v := convertContainerAzureNodePoolBetaConfigProxyConfigToHCL(r.ProxyConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tproxy_config %s\n", v)
+	}
 	if v := convertContainerAzureNodePoolBetaConfigRootVolumeToHCL(r.RootVolume); v != "" {
 		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
 	}
@@ -2227,6 +2236,20 @@ func convertContainerAzureNodePoolBetaConfigSshConfigToHCL(r *containerazureBeta
 	outputConfig := "{\n"
 	if r.AuthorizedKey != nil {
 		outputConfig += fmt.Sprintf("\tauthorized_key = %#v\n", *r.AuthorizedKey)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolBetaConfigProxyConfigToHCL(r *containerazureBeta.NodePoolConfigProxyConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ResourceGroupId != nil {
+		outputConfig += fmt.Sprintf("\tresource_group_id = %#v\n", *r.ResourceGroupId)
+	}
+	if r.SecretId != nil {
+		outputConfig += fmt.Sprintf("\tsecret_id = %#v\n", *r.SecretId)
 	}
 	return outputConfig + "}"
 }
@@ -7166,6 +7189,9 @@ func convertContainerAzureNodePoolConfigToHCL(r *containerazure.NodePoolConfig) 
 	if v := convertContainerAzureNodePoolConfigSshConfigToHCL(r.SshConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
 	}
+	if v := convertContainerAzureNodePoolConfigProxyConfigToHCL(r.ProxyConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tproxy_config %s\n", v)
+	}
 	if v := convertContainerAzureNodePoolConfigRootVolumeToHCL(r.RootVolume); v != "" {
 		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
 	}
@@ -7187,6 +7213,20 @@ func convertContainerAzureNodePoolConfigSshConfigToHCL(r *containerazure.NodePoo
 	outputConfig := "{\n"
 	if r.AuthorizedKey != nil {
 		outputConfig += fmt.Sprintf("\tauthorized_key = %#v\n", *r.AuthorizedKey)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolConfigProxyConfigToHCL(r *containerazure.NodePoolConfigProxyConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ResourceGroupId != nil {
+		outputConfig += fmt.Sprintf("\tresource_group_id = %#v\n", *r.ResourceGroupId)
+	}
+	if r.SecretId != nil {
+		outputConfig += fmt.Sprintf("\tsecret_id = %#v\n", *r.SecretId)
 	}
 	return outputConfig + "}"
 }
@@ -11020,6 +11060,7 @@ func convertContainerAwsNodePoolBetaConfig(i interface{}) map[string]interface{}
 	return map[string]interface{}{
 		"configEncryption":   convertContainerAwsNodePoolBetaConfigConfigEncryption(in["config_encryption"]),
 		"iamInstanceProfile": in["iam_instance_profile"],
+		"imageType":          in["image_type"],
 		"instancePlacement":  convertContainerAwsNodePoolBetaConfigInstancePlacement(in["instance_placement"]),
 		"instanceType":       in["instance_type"],
 		"labels":             in["labels"],
@@ -11511,10 +11552,12 @@ func convertContainerAzureNodePoolBetaConfig(i interface{}) map[string]interface
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"sshConfig":  convertContainerAzureNodePoolBetaConfigSshConfig(in["ssh_config"]),
-		"rootVolume": convertContainerAzureNodePoolBetaConfigRootVolume(in["root_volume"]),
-		"tags":       in["tags"],
-		"vmSize":     in["vm_size"],
+		"sshConfig":   convertContainerAzureNodePoolBetaConfigSshConfig(in["ssh_config"]),
+		"imageType":   in["image_type"],
+		"proxyConfig": convertContainerAzureNodePoolBetaConfigProxyConfig(in["proxy_config"]),
+		"rootVolume":  convertContainerAzureNodePoolBetaConfigRootVolume(in["root_volume"]),
+		"tags":        in["tags"],
+		"vmSize":      in["vm_size"],
 	}
 }
 
@@ -11546,6 +11589,28 @@ func convertContainerAzureNodePoolBetaConfigSshConfigList(i interface{}) (out []
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertContainerAzureNodePoolBetaConfigSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolBetaConfigProxyConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"resourceGroupId": in["resource_group_id"],
+		"secretId":        in["secret_id"],
+	}
+}
+
+func convertContainerAzureNodePoolBetaConfigProxyConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolBetaConfigProxyConfig(v))
 	}
 	return out
 }
@@ -16164,10 +16229,11 @@ func convertContainerAzureNodePoolConfig(i interface{}) map[string]interface{} {
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"sshConfig":  convertContainerAzureNodePoolConfigSshConfig(in["ssh_config"]),
-		"rootVolume": convertContainerAzureNodePoolConfigRootVolume(in["root_volume"]),
-		"tags":       in["tags"],
-		"vmSize":     in["vm_size"],
+		"sshConfig":   convertContainerAzureNodePoolConfigSshConfig(in["ssh_config"]),
+		"proxyConfig": convertContainerAzureNodePoolConfigProxyConfig(in["proxy_config"]),
+		"rootVolume":  convertContainerAzureNodePoolConfigRootVolume(in["root_volume"]),
+		"tags":        in["tags"],
+		"vmSize":      in["vm_size"],
 	}
 }
 
@@ -16199,6 +16265,28 @@ func convertContainerAzureNodePoolConfigSshConfigList(i interface{}) (out []map[
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertContainerAzureNodePoolConfigSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolConfigProxyConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"resourceGroupId": in["resource_group_id"],
+		"secretId":        in["secret_id"],
+	}
+}
+
+func convertContainerAzureNodePoolConfigProxyConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolConfigProxyConfig(v))
 	}
 	return out
 }
