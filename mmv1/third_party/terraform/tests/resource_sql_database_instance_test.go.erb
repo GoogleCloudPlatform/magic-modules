@@ -1838,8 +1838,8 @@ resource "google_sql_database_instance" "instance-with-audit" {
     tier = "db-custom-2-7680"
     sql_server_audit_config {
       bucket = "gs://mybucket"
-      retention_interval = 3.5s
-      upload_interval = 3.5s
+      retention_interval = "3.5s"
+      upload_interval = "3.5s"
     }
   }
 }
