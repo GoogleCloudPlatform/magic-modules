@@ -37,8 +37,6 @@ to help you get it set up.
 
 ## Preparing your environment
 
-### Requirements
-
 To get started, you'll need:
 
 * Go
