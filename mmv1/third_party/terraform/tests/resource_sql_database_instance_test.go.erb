@@ -1047,7 +1047,7 @@ func TestAccSqlDatabaseInstance_encryptionKey(t *testing.T) {
 					testGoogleSqlDatabaseInstance_encryptionKey, context),
 			},
 			resource.TestStep{
-				ResourceName:      "google_sql_database_instance.instance",
+				ResourceName:      "google_sql_database_instance.replica",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
