@@ -63,12 +63,10 @@ var (
 	}
 
   activeDirectoryConfigKeys = []string {
-    "settings.0.active_directory_config.0.kind",
     "settings.0.active_directory_config.0.domain",
   }
 
   sqlServerAuditConfigKeys = []string {
-    "settings.0.sql_server_audit_config.0.kind",
     "settings.0.sql_server_audit_config.0.bucket",
     "settings.0.sql_server_audit_config.0.retention_interval",
     "settings.0.sql_server_audit_config.0.upload_interval",
@@ -175,12 +173,6 @@ func resourceSqlDatabaseInstance() *schema.Resource {
               MaxItems: 1,
 							Elem: &schema.Resource{
                 Schema: map[string]*schema.Schema{
-                  "kind": {
-                    Type:         schema.TypeString,
-                    Required:     true,
-                    AtLeastOneOf: activeDirectoryConfigKeys,
-                    Description:  `This is always sql#activeDirectoryConfig.`,
-                  },
                   "domain": {
                     Type:         schema.TypeString,
                     Required:     true,
@@ -196,12 +188,6 @@ func resourceSqlDatabaseInstance() *schema.Resource {
               MaxItems: 1,
 							Elem: &schema.Resource{
                 Schema: map[string]*schema.Schema{
-                  "kind": {
-                    Type:         schema.TypeString,
-                    Required:     true,
-                    AtLeastOneOf: sqlServerAuditConfigKeys,
-                    Description:  `This is always sql#sqlServerAuditConfig.`,
-                  },
                   "bucket": {
                     Type:         schema.TypeString,
                     Required:     true,
@@ -212,13 +198,13 @@ func resourceSqlDatabaseInstance() *schema.Resource {
                     Type:         schema.TypeString,
                     Required:     true,
                     AtLeastOneOf: sqlServerAuditConfigKeys,
-                    Description:  `How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s"..`,
+                    Description:  `How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by the letter s (e.g., 3.5s).`,
                   },
                   "uploadInterval": {
                     Type:         schema.TypeString,
                     Required:     true,
                     AtLeastOneOf: sqlServerAuditConfigKeys,
-                    Description:  `How often to upload generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".`,
+                    Description:  `How often to upload generated audit files. A duration in seconds with up to nine fractional digits, terminated by the letter s (e.g., 3.5s).`,
                   },
                 },
               },
@@ -1207,7 +1193,6 @@ func expandActiveDirectoryConfig(configured interface{}) *sqladmin.SqlActiveDire
 
   config := l[0].(map[string]interface{})
 	return &sqladmin.SqlActiveDirectoryConfig{
-    Kind: config["kind"].(string),
 		Domain: config["domain"].(string),
 	}
 }
@@ -1220,7 +1205,6 @@ func expandSqlServerAuditConfig(configured interface{}) *sqladmin.SqlServerAudit
 
   config := l[0].(map[string]interface{})
 	return &sqladmin.SqlServerAuditConfig{
-    Kind: config["kind"].(string),
 		Bucket: config["bucket"].(string),
     RetentionInterval: config["retention_interval"].(string),
     UploadInterval: config["upload_interval"].(string),
@@ -1544,7 +1528,6 @@ func flattenActiveDirectoryConfig(sqlActiveDirectoryConfig *sqladmin.SqlActiveDi
 	}
 	return []map[string]interface{}{
 		{
-      "Kind": sqlActiveDirectoryConfig.Kind,
 			"Domain": sqlActiveDirectoryConfig.Domain,
 		},
 	}
@@ -1556,7 +1539,6 @@ func flattenSqlServerAuditConfig(sqlServerAuditConfig *sqladmin.SqlServerAuditCo
 	}
 	return []map[string]interface{}{
 		{
-      "Kind": sqlServerAuditConfig.Kind,
 			"Bucket": sqlServerAuditConfig.Bucket,
       "RetentionInterval": sqlServerAuditConfig.RetentionInterval,
 			"UploadInterval": sqlServerAuditConfig.UploadInterval,
