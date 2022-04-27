@@ -35,7 +35,7 @@ to help you get it set up.
 
 [![Open in Cloud Shell](http://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/magic-modules&tutorial=mmv1/TUTORIAL.md)
 
-## Preparing your environment
+### Preparing your environment
 
 To get started, you'll need:
 
