@@ -8,7 +8,7 @@ resource "google_project_service_identity" "gcp_sa_cloud_sql" {
 # [START cloud_sql_instance_keyring]
 resource "google_kms_key_ring" "keyring" {
   name     = "<%= ctx[:vars]['keyring_name'] %>"
-  location = "europe-north1"
+  location = "us-central1"
 }
 # [END cloud_sql_instance_keyring]
 
