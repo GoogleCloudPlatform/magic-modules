@@ -1052,6 +1052,12 @@ func TestAccSqlDatabaseInstance_encryptionKey(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
+			{
+				ResourceName:            "google_sql_database_instance.master",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
 		},
 	})
 }
