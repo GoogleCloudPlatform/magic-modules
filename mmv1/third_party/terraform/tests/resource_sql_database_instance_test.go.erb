@@ -1086,6 +1086,28 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_SqlServerAuditConfig(t *testing.T) {
+	t.Parallel()
+
+	masterID := randInt(t)
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_SqlServerAuditConfig(masterID),
+			},
+			{
+				ResourceName:      "google_sql_database_instance.instance",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
 
 var testGoogleSqlDatabaseInstance_basic2 = `
 resource "google_sql_database_instance" "instance" {
@@ -1790,7 +1812,7 @@ resource "google_sql_database_instance" "replica" {
 `
 <% end -%>
 
-func testGoogleSqlDatabaseInstance_ActiveDirectory(masterID int) string {
+func testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(masterID int) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance-with-ad" {
   name             = "tf-test-%d"
@@ -1799,7 +1821,27 @@ resource "google_sql_database_instance" "instance-with-ad" {
   settings {
     tier = "db-custom-2-7680"
     active_directory_config {
+      kind = "sql#activeDirectoryConfig"
       domain = "ad.domain.com"
+    }
+  }
+}
+`, masterID)
+}
+
+func testGoogleSqlDatabaseInstance_SqlServerAuditConfig(masterID int) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance-with-audit" {
+  name             = "tf-test-%d"
+  region           = "us-central1"
+  database_version = "SQLSERVER_2017_STANDARD"
+  settings {
+    tier = "db-custom-2-7680"
+    sql_server_audit_config {
+      kind = "sql#sqlServerAuditConfig"
+      bucket = "gs://mybucket"
+      retention_interval = 3.5s
+      upload_interval = 3.5s
     }
   }
 }

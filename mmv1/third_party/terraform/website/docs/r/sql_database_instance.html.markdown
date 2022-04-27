@@ -254,7 +254,7 @@ The optional `settings.database_flags` sublist supports:
 
 * `value` - (Required) Value of the flag.
 
-The optional `settings.active_directory_config` subblock supports:
+The optional `settings.sql_active_directory_config` subblock supports:
 
 * `domain` - (Required) The domain name for the active directory.
     Can only be used with SQL Server.

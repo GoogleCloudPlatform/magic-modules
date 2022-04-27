@@ -63,7 +63,15 @@ var (
 	}
 
   activeDirectoryConfigKeys = []string {
+    "settings.0.active_directory_config.0.kind",
     "settings.0.active_directory_config.0.domain",
+  }
+
+  sqlServerAuditConfigKeys = []string {
+    "settings.0.sql_server_audit_config.0.kind",
+    "settings.0.sql_server_audit_config.0.bucket",
+    "settings.0.sql_server_audit_config.0.retention_interval",
+    "settings.0.sql_server_audit_config.0.upload_interval",
   }
 
 	replicaConfigurationKeys = []string{
@@ -167,11 +175,50 @@ func resourceSqlDatabaseInstance() *schema.Resource {
               MaxItems: 1,
 							Elem: &schema.Resource{
                 Schema: map[string]*schema.Schema{
+                  "kind": {
+                    Type:         schema.TypeString,
+                    Required:     true,
+                    AtLeastOneOf: activeDirectoryConfigKeys,
+                    Description:  `This is always sql#activeDirectoryConfig.`,
+                  },
                   "domain": {
                     Type:         schema.TypeString,
                     Required:     true,
                     AtLeastOneOf: activeDirectoryConfigKeys,
-                    Description:  `Domain name of the Active Directory for SQL Server.`,
+                    Description:  `Domain name of the Active Directory for SQL Server (e.g., mydomain.com).`,
+                  },
+                },
+              },
+            },
+            "sql_server_audit_config": {
+							Type:     schema.TypeList,
+							Optional: true,
+              MaxItems: 1,
+							Elem: &schema.Resource{
+                Schema: map[string]*schema.Schema{
+                  "kind": {
+                    Type:         schema.TypeString,
+                    Required:     true,
+                    AtLeastOneOf: sqlServerAuditConfigKeys,
+                    Description:  `This is always sql#sqlServerAuditConfig.`,
+                  },
+                  "bucket": {
+                    Type:         schema.TypeString,
+                    Required:     true,
+                    AtLeastOneOf: sqlServerAuditConfigKeys,
+                    Description:  `The name of the destination bucket (e.g., gs://mybucket).`,
+                  },
+                  "retentionInterval": {
+                    Type:         schema.TypeString,
+                    Required:     true,
+                    AtLeastOneOf: sqlServerAuditConfigKeys,
+                    Description:  `How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s"..`,
+                  },
+                  "uploadInterval": {
+                    Type:         schema.TypeString,
+                    Required:     true,
+                    AtLeastOneOf: sqlServerAuditConfigKeys,
+                    Description:  `How often to upload generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".`,
                   },
                 },
               },
@@ -989,6 +1036,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}) *sqladmin.Setti
 		ForceSendFields:             []string{"StorageAutoResize"},
 		ActivationPolicy:            _settings["activation_policy"].(string),
     ActiveDirectoryConfig:       expandActiveDirectoryConfig(_settings["active_directory_config"].([]interface{})),
+    SqlServerAuditConfig:        expandSqlServerAuditConfig(_settings["sql_server_audit_config"].([]interface{})),
 		AvailabilityType:            _settings["availability_type"].(string),
 		Collation:                   _settings["collation"].(string),
 		DataDiskSizeGb:              int64(_settings["disk_size"].(int)),
@@ -1151,14 +1199,31 @@ func expandBackupRetentionSettings(configured interface{}) *sqladmin.BackupReten
 	}
 }
 
-func expandActiveDirectoryConfig(configured interface{}) *sqladmin.ActiveDirectoryConfig {
-	if len(configured) == 0 || configured[0] == nil {
+func expandActiveDirectoryConfig(configured interface{}) *sqladmin.SqlActiveDirectoryConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 {
 		return nil
 	}
 
-	_activeDirectoryConfig := configured[0].(map[string]interface{})
-	return &sqladmin.ActiveDirectoryConfig{
-		Domain: _activeDirectoryConfig["domain"].(string),
+  config := l[0].(map[string]interface{})
+	return &sqladmin.SqlActiveDirectoryConfig{
+    Kind: config["kind"].(string),
+		Domain: config["domain"].(string),
+	}
+}
+
+func expandSqlServerAuditConfig(configured interface{}) *sqladmin.SqlServerAuditConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 {
+		return nil
+	}
+
+  config := l[0].(map[string]interface{})
+	return &sqladmin.SqlServerAuditConfig{
+    Kind: config["kind"].(string),
+		Bucket: config["bucket"].(string),
+    RetentionInterval: config["retention_interval"].(string),
+    UploadInterval: config["upload_interval"].(string),
 	}
 }
 
@@ -1409,6 +1474,10 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 		data["active_directory_config"] = flattenActiveDirectoryConfig(settings.ActiveDirectoryConfig)
 	}
 
+  if settings.SqlServerAuditConfig != nil {
+		data["sql_server_audit_config"] = flattenSqlServerAuditConfig(settings.SqlServerAuditConfig)
+	}
+
 	if settings.BackupConfiguration != nil {
 		data["backup_configuration"] = flattenBackupConfiguration(settings.BackupConfiguration)
 	}
@@ -1469,16 +1538,32 @@ func flattenBackupRetentionSettings(b *sqladmin.BackupRetentionSettings) []map[s
 	}
 }
 
-func flattenActiveDirectoryConfig(b *sqladmin.ActiveDirectoryConfig) []map[string]interface{} {
-	if b == nil {
+func flattenActiveDirectoryConfig(sqlActiveDirectoryConfig *sqladmin.SqlActiveDirectoryConfig) []map[string]interface{} {
+	if sqlActiveDirectoryConfig == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"Domain": b.domain,
+      "Kind": sqlActiveDirectoryConfig.Kind,
+			"Domain": sqlActiveDirectoryConfig.Domain,
 		},
 	}
 }
+
+func flattenSqlServerAuditConfig(sqlServerAuditConfig *sqladmin.SqlServerAuditConfig) []map[string]interface{} {
+	if sqlServerAuditConfig == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+      "Kind": sqlServerAuditConfig.Kind,
+			"Bucket": sqlServerAuditConfig.Bucket,
+      "RetentionInterval": sqlServerAuditConfig.RetentionInterval,
+			"UploadInterval": sqlServerAuditConfig.UploadInterval,
+		},
+	}
+}
+
 
 
 func flattenDatabaseFlags(databaseFlags []*sqladmin.DatabaseFlags) []map[string]interface{} {
