@@ -795,13 +795,12 @@ func expandRegionUpdatePolicy(configured []interface{}) *compute.InstanceGroupMa
 		} else {
 			updatePolicy.NullFields = append(updatePolicy.NullFields, "MostDisruptiveAllowedAction")
 		}
-		updatePolicy.ForceSendFields = []string{"MinimalAction", "MostDisruptiveAllowedAction"}
 		updatePolicy.Type = data["type"].(string)
 		updatePolicy.InstanceRedistributionType = data["instance_redistribution_type"].(string)
 		updatePolicy.ReplacementMethod = data["replacement_method"].(string)
 <% unless version == "ga" -%>
 		updatePolicy.MinReadySec = int64(data["min_ready_sec"].(int))
-		updatePolicy.ForceSendFields = append(updatePolicy.ForceSendFields, "MinReadySec")
+		updatePolicy.ForceSendFields = []string{"MinReadySec"}
 <% end -%>
 
 		// percent and fixed values are conflicting
