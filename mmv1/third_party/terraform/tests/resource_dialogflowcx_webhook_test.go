@@ -101,9 +101,6 @@ func testAccDialogflowCXWebhook_full(context map[string]interface{}) string {
 		disabled     = false
 		generic_web_service {
 			uri = "https://example.com"
-			request_headers = {
-				"Authorization": "Bearer {{access_token}}"
-			} 
 		}
 	} 
 	`, context)
