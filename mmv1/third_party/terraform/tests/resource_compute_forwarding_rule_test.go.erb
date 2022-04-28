@@ -9,34 +9,34 @@ import (
 )
 
 func TestAccComputeForwardingRule_update(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	poolName := fmt.Sprintf("tf%s", randString(t, 10))
-	ruleName := fmt.Sprintf("tf%s", randString(t, 10))
+  poolName := fmt.Sprintf("tf%s", randString(t, 10))
+  ruleName := fmt.Sprintf("tf%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeForwardingRuleDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeForwardingRule_basic(poolName, ruleName),
-			},
-			{
-				ResourceName:      "google_compute_forwarding_rule.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeForwardingRule_update(poolName, ruleName),
-			},
-			{
-				ResourceName:      "google_compute_forwarding_rule.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
+  vcrTest(t, resource.TestCase{
+    PreCheck:     func() { testAccPreCheck(t) },
+    Providers:    testAccProviders,
+    CheckDestroy: testAccCheckComputeForwardingRuleDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccComputeForwardingRule_basic(poolName, ruleName),
+      },
+      {
+        ResourceName:      "google_compute_forwarding_rule.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccComputeForwardingRule_update(poolName, ruleName),
+      },
+      {
+        ResourceName:      "google_compute_forwarding_rule.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
 }
 
 
@@ -100,32 +100,32 @@ func TestAccComputeForwardingRule_networkTier(t *testing.T) {
 }
 
 func TestAccComputeForwardingRule_serviceDirectoryRegistrations(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	poolName := fmt.Sprintf("tf%s", randString(t, 10))
-	ruleName := fmt.Sprintf("tf%s", randString(t, 10))
-	svcDirNamespace := fmt.Sprintf("svcdirns-%s", randString(t, 10))
-	serviceName := fmt.Sprintf("svcdirservice-%s", randString(t, 10))
+  poolName := fmt.Sprintf("tf%s", randString(t, 10))
+  ruleName := fmt.Sprintf("tf%s", randString(t, 10))
+  svcDirNamespace := fmt.Sprintf("svcdirns-%s", randString(t, 10))
+  serviceName := fmt.Sprintf("svcdirservice-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeForwardingRuleDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeForwardingRule_serviceDirectoryRegistrations(poolName, ruleName, svcDirNamespace, serviceName),
-			},
-			{
-				ResourceName:      "google_compute_forwarding_rule.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
+  vcrTest(t, resource.TestCase{
+    PreCheck:     func() { testAccPreCheck(t) },
+    Providers:    testAccProviders,
+    CheckDestroy: testAccCheckComputeForwardingRuleDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccComputeForwardingRule_serviceDirectoryRegistrations(poolName, ruleName, svcDirNamespace, serviceName),
+      },
+      {
+        ResourceName:      "google_compute_forwarding_rule.foobar",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
 }
 
 func testAccComputeForwardingRule_serviceDirectoryRegistrations(poolName, ruleName, svcDirNamespace, serviceName string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
   resource "google_compute_target_pool" "foo-tp" {
     description = "Resource created for Terraform acceptance testing"
     instances   = ["us-central1-a/foo", "us-central1-b/bar"]
@@ -164,7 +164,7 @@ func testAccComputeForwardingRule_serviceDirectoryRegistrations(poolName, ruleNa
 }
 
 func testAccComputeForwardingRule_basic(poolName, ruleName string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
   resource "google_compute_target_pool" "foo-tp" {
     description = "Resource created for Terraform acceptance testing"
     instances   = ["us-central1-a/foo", "us-central1-b/bar"]
