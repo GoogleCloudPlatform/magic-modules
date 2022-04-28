@@ -25,3 +25,15 @@ resource "google_storage_bucket_object" "default" {
   bucket       = google_storage_bucket.static.id
 }
 # [END storage_upload_object_tf]
+
+# [START storage_get_object_metadata_tf]
+# Get object metadata
+data "google_storage_bucket_object" "default" {
+  name         = google_storage_bucket_object.default.name
+  bucket       = google_storage_bucket.static.id
+}
+
+output "object_metadata" {
+  value        = data.google_storage_bucket_object.default
+}
+# [END storage_get_object_metadata_tf]

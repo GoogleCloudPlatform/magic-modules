@@ -50,9 +50,7 @@ var (
 		"scheduling.0.preemptible",
 		"scheduling.0.node_affinities",
 		"scheduling.0.min_node_cpus",
-<% unless version == 'ga' -%>
 		"scheduling.0.provisioning_model",
-<% end -%>
 	}
 
 	shieldedInstanceConfigKeys = []string{
@@ -325,7 +323,6 @@ func resourceComputeInstance() *schema.Resource {
 										Type:         schema.TypeString,
 										Optional:     true,
 										Computed:     true,
-										ValidateFunc: validation.StringInSlice([]string{"PREMIUM", "STANDARD"}, false),
 										Description:  `The networking tier used for configuring this instance. One of PREMIUM or STANDARD.`,
 									},
 
@@ -382,7 +379,6 @@ func resourceComputeInstance() *schema.Resource {
 									"network_tier": {
 										Type:         schema.TypeString,
 										Required:     true,
-										ValidateFunc: validation.StringInSlice([]string{"PREMIUM"}, false),
 										Description:  `The service-level to be provided for IPv6 traffic when the subnet has an external subnet. Only PREMIUM tier is valid for IPv6`,
 									},
 									"public_ptr_domain_name": {
@@ -630,7 +626,6 @@ func resourceComputeInstance() *schema.Resource {
 							Optional:     true,
 							AtLeastOneOf: schedulingKeys,
 						},
- <% unless version == 'ga' -%>
 						"provisioning_model": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -639,7 +634,6 @@ func resourceComputeInstance() *schema.Resource {
 							AtLeastOneOf: schedulingKeys,
 							Description:  `Whether the instance is spot. If this is set as SPOT.`,
 						},
-<% end -%>
 					},
 				},
 			},
@@ -1438,7 +1432,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	// Change back to getInstance(config, d) once updating alias ips is GA.
 	instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, d.Get("name").(string)).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Instance %s", instance.Name))
+		return handleNotFoundError(err, d, fmt.Sprintf("Instance %s", d.Get("name").(string)))
 	}
 
 	// Enable partial mode for the resource since it is possible

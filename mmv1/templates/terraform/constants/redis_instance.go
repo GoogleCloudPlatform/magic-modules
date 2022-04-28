@@ -28,3 +28,12 @@ func isRedisVersionDecreasingFunc(old, new interface{}) bool {
 
 	return newVersion < oldVersion
 }
+
+// returns true if old=new or old='auto'
+func secondaryIpDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+  if ((strings.ToLower(new) == "auto" && old != "") || old == new) {
+    return true
+  }
+  return false
+}
+
