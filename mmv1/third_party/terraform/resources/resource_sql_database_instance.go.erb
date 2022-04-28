@@ -176,7 +176,6 @@ func resourceSqlDatabaseInstance() *schema.Resource {
                   "domain": {
                     Type:         schema.TypeString,
                     Required:     true,
-                    AtLeastOneOf: activeDirectoryConfigKeys,
                     Description:  `Domain name of the Active Directory for SQL Server (e.g., mydomain.com).`,
                   },
                 },
@@ -191,16 +190,15 @@ func resourceSqlDatabaseInstance() *schema.Resource {
                   "bucket": {
                     Type:         schema.TypeString,
                     Required:     true,
-                    AtLeastOneOf: sqlServerAuditConfigKeys,
                     Description:  `The name of the destination bucket (e.g., gs://mybucket).`,
                   },
-                  "retentionInterval": {
+                  "retention_interval": {
                     Type:         schema.TypeString,
                     Optional:     true,
                     AtLeastOneOf: sqlServerAuditConfigKeys,
                     Description:  `How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by the letter s (e.g., 3.5s).`,
                   },
-                  "uploadInterval": {
+                  "upload_interval": {
                     Type:         schema.TypeString,
                     Optional:     true,
                     AtLeastOneOf: sqlServerAuditConfigKeys,
@@ -1528,7 +1526,7 @@ func flattenActiveDirectoryConfig(sqlActiveDirectoryConfig *sqladmin.SqlActiveDi
 	}
 	return []map[string]interface{}{
 		{
-			"Domain": sqlActiveDirectoryConfig.Domain,
+			"domain": sqlActiveDirectoryConfig.Domain,
 		},
 	}
 }
@@ -1539,9 +1537,9 @@ func flattenSqlServerAuditConfig(sqlServerAuditConfig *sqladmin.SqlServerAuditCo
 	}
 	return []map[string]interface{}{
 		{
-			"Bucket": sqlServerAuditConfig.Bucket,
-      "RetentionInterval": sqlServerAuditConfig.RetentionInterval,
-			"UploadInterval": sqlServerAuditConfig.UploadInterval,
+			"bucket": sqlServerAuditConfig.Bucket,
+      "retention_interval": sqlServerAuditConfig.RetentionInterval,
+			"upload_interval": sqlServerAuditConfig.UploadInterval,
 		},
 	}
 }
