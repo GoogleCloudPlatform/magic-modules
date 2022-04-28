@@ -524,6 +524,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           new_bucket: "new-bucket"
           new_object: "new-object"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "storage_make_data_public"
+        primary_resource_type: "google_storage_bucket"
+        primary_resource_id: "default"
+        vars:
+          example_bucket_name: "example-bucket-name"
+        min_version: beta
+        # ignore_read_extra:
+        #   - "port_range"
+        #   - "target"
+        #   - "ip_address"
     properties:
 
 
