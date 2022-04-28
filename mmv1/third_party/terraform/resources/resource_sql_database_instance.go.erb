@@ -62,10 +62,6 @@ var (
 		"settings.0.maintenance_window.0.update_track",
 	}
 
-  activeDirectoryConfigKeys = []string {
-    "settings.0.active_directory_config.0.domain",
-  }
-
   sqlServerAuditConfigKeys = []string {
     "settings.0.sql_server_audit_config.0.bucket",
     "settings.0.sql_server_audit_config.0.retention_interval",
@@ -189,7 +185,8 @@ func resourceSqlDatabaseInstance() *schema.Resource {
                 Schema: map[string]*schema.Schema{
                   "bucket": {
                     Type:         schema.TypeString,
-                    Required:     true,
+                    Optional:     true,
+                    AtLeastOneOf: sqlServerAuditConfigKeys,
                     Description:  `The name of the destination bucket (e.g., gs://mybucket).`,
                   },
                   "retention_interval": {
