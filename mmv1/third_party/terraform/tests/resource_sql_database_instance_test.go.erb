@@ -1074,7 +1074,7 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_ActiveDirectory(masterID),
+				Config: testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(masterID),
 			},
 			{
 				ResourceName:      "google_sql_database_instance.instance",
