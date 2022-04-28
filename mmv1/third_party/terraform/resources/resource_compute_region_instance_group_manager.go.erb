@@ -243,7 +243,8 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"minimal_action": {
 							Type:         schema.TypeString,
-							Required:     true,
+							Optional:     true,
+							Default:      "REPLACE",
 							ValidateFunc: validation.StringInSlice([]string{"REFRESH", "RESTART", "REPLACE"}, false),
 							Description:  `Minimal action to be taken on an instance. You can specify either REFRESH to update without stopping instances, RESTART to restart existing instances or REPLACE to delete and create new instances from the target template. If you specify a REFRESH, the Updater will attempt to perform that action only. However, if the Updater determines that the minimal action you specify is not enough to perform the update, it might perform a more disruptive action.`,
 						},
@@ -781,14 +782,26 @@ func expandRegionUpdatePolicy(configured []interface{}) *compute.InstanceGroupMa
 	for _, raw := range configured {
 		data := raw.(map[string]interface{})
 
-		updatePolicy.MinimalAction = data["minimal_action"].(string)
-		updatePolicy.MostDisruptiveAllowedAction = data["most_disruptive_allowed_action"].(string)
+		updatePolicy.NullFields = []string{}
+		minimalAction := data["minimal_action"].(string)
+		if minimalAction != "" {
+			updatePolicy.MinimalAction = minimalAction
+		} else {
+			updatePolicy.NullFields = append(updatePolicy.NullFields, "MinimalAction")
+		}
+		mostDisruptiveAllowedAction := data["most_disruptive_allowed_action"].(string)
+		if mostDisruptiveAllowedAction != "" {
+			updatePolicy.MostDisruptiveAllowedAction = mostDisruptiveAllowedAction
+		} else {
+			updatePolicy.NullFields = append(updatePolicy.NullFields, "MostDisruptiveAllowedAction")
+		}
+		updatePolicy.ForceSendFields = []string{"MinimalAction", "MostDisruptiveAllowedAction"}
 		updatePolicy.Type = data["type"].(string)
 		updatePolicy.InstanceRedistributionType = data["instance_redistribution_type"].(string)
 		updatePolicy.ReplacementMethod = data["replacement_method"].(string)
 <% unless version == "ga" -%>
 		updatePolicy.MinReadySec = int64(data["min_ready_sec"].(int))
-		updatePolicy.ForceSendFields = []string{"MinReadySec"}
+		updatePolicy.ForceSendFields = append(updatePolicy.ForceSendFields, "MinReadySec")
 <% end -%>
 
 		// percent and fixed values are conflicting
