@@ -32,6 +32,7 @@ objects:
     create_url: projects/{{project}}/locations/{{location}}/functions?functionId={{name}}
     self_link: projects/{{project}}/locations/{{location}}/functions/{{name}}
     create_verb: :POST
+    update_verb: :PATCH
     references: !ruby/object:Api::Resource::ReferenceLinks
       api: 'https://cloud.google.com/functions/docs/reference/rest/v2beta/projects.locations.functions'
     description: |
