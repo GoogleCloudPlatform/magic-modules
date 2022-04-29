@@ -125,6 +125,12 @@ resource "google_container_aws_node_pool" "primary" {
       key    = "taint-key"
       value  = "taint-value"
     }
+
+    instance_placement {
+      tenancy = "DEDICATED"
+    }
+
+    image_type = "ubuntu"
   }
 
   location = "us-west1"
