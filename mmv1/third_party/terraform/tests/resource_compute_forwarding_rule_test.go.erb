@@ -113,7 +113,7 @@ func TestAccComputeForwardingRule_serviceDirectoryRegistrations(t *testing.T) {
 		CheckDestroy: testAccCheckComputeForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccComputeForwardingRule_serviceDirectoryRegistrations(poolName, ruleName),
+				Config: testAccComputeForwardingRule_serviceDirectoryRegistrations(poolName, ruleName, svcDirNamespace, serviceName),
 			},
 
 			resource.TestStep{
