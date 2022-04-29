@@ -13666,7 +13666,6 @@ objects:
               name: 'description'
               description: |
                 A description of the rule.
-              default_value: ""
             - !ruby/object:Api::Type::Integer
               name: 'priority'
               description: |
@@ -13719,7 +13718,6 @@ objects:
                         e.g. a file name and a position in the file.
                 - !ruby/object:Api::Type::String
                   name: 'versionedExpr'
-                  default_value: ""
                   description: |
                     Preconfigured versioned expression. If this field is specified, config must also be specified.
                     Available preconfigured expressions along with their requirements are: `SRC_IPS_V1` - must specify
