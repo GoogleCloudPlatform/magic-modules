@@ -6306,11 +6306,6 @@ func ComputeGlobalForwardingRuleAsHCL(r compute.ForwardingRule, hasGAEquivalent 
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
-	if r.ServiceDirectoryRegistrations != nil {
-		for _, v := range r.ServiceDirectoryRegistrations {
-			outputConfig += fmt.Sprintf("\tservice_directory_registrations %s\n", convertComputeGlobalForwardingRuleServiceDirectoryRegistrationsToHCL(&v))
-		}
-	}
 	formatted, err := formatHCL(outputConfig + "}")
 	if err != nil {
 		return "", err
@@ -6348,20 +6343,6 @@ func convertComputeGlobalForwardingRuleMetadataFilterFilterLabelToHCL(r *compute
 	}
 	if r.Value != nil {
 		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
-	}
-	return outputConfig + "}"
-}
-
-func convertComputeGlobalForwardingRuleServiceDirectoryRegistrationsToHCL(r *compute.ForwardingRuleServiceDirectoryRegistrations) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Namespace != nil {
-		outputConfig += fmt.Sprintf("\tnamespace = %#v\n", *r.Namespace)
-	}
-	if r.Service != nil {
-		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
 	}
 	return outputConfig + "}"
 }
@@ -15425,28 +15406,6 @@ func convertComputeGlobalForwardingRuleMetadataFilterFilterLabelList(i interface
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertComputeGlobalForwardingRuleMetadataFilterFilterLabel(v))
-	}
-	return out
-}
-
-func convertComputeGlobalForwardingRuleServiceDirectoryRegistrations(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"namespace": in["namespace"],
-		"service":   in["service"],
-	}
-}
-
-func convertComputeGlobalForwardingRuleServiceDirectoryRegistrationsList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertComputeGlobalForwardingRuleServiceDirectoryRegistrations(v))
 	}
 	return out
 }
