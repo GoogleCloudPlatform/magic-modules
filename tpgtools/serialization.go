@@ -1254,11 +1254,6 @@ func ComputeGlobalForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule, hasGAEqu
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
-	if r.ServiceDirectoryRegistrations != nil {
-		for _, v := range r.ServiceDirectoryRegistrations {
-			outputConfig += fmt.Sprintf("\tservice_directory_registrations %s\n", convertComputeGlobalForwardingRuleBetaServiceDirectoryRegistrationsToHCL(&v))
-		}
-	}
 	formatted, err := formatHCL(outputConfig + "}")
 	if err != nil {
 		return "", err
@@ -1296,20 +1291,6 @@ func convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelToHCL(r *com
 	}
 	if r.Value != nil {
 		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
-	}
-	return outputConfig + "}"
-}
-
-func convertComputeGlobalForwardingRuleBetaServiceDirectoryRegistrationsToHCL(r *computeBeta.ForwardingRuleServiceDirectoryRegistrations) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Namespace != nil {
-		outputConfig += fmt.Sprintf("\tnamespace = %#v\n", *r.Namespace)
-	}
-	if r.Service != nil {
-		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
 	}
 	return outputConfig + "}"
 }
@@ -10623,28 +10604,6 @@ func convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelList(i inter
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabel(v))
-	}
-	return out
-}
-
-func convertComputeGlobalForwardingRuleBetaServiceDirectoryRegistrations(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"namespace": in["namespace"],
-		"service":   in["service"],
-	}
-}
-
-func convertComputeGlobalForwardingRuleBetaServiceDirectoryRegistrationsList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertComputeGlobalForwardingRuleBetaServiceDirectoryRegistrations(v))
 	}
 	return out
 }
