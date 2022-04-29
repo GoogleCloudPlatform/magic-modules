@@ -1066,7 +1066,10 @@ func TestAccSqlDatabaseInstance_encryptionKey(t *testing.T) {
 func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 	t.Parallel()
 
-	masterID := randInt(t)
+	databaseName := "tf-test-" + randString(t, 10)
+	addressName := "tf-test-" + randString(t, 10)
+	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private")
+	rootPassword := randString(t, 15)
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -1074,13 +1077,14 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(masterID),
+        Config: fmt.Sprintf(
+          testGoogleSqlDatabaseInstance_ActiveDirectoryConfig, databaseName, addressName, networkName, rootPassword),
 			},
 			{
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
 			},
 		},
 	})
@@ -1089,7 +1093,8 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 func TestAccSqlDatabaseInstance_SqlServerAuditConfig(t *testing.T) {
 	t.Parallel()
 
-	masterID := randInt(t)
+	databaseName := "tf-test-" + randString(t, 10)
+	rootPassword := randString(t, 15)
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -1097,13 +1102,14 @@ func TestAccSqlDatabaseInstance_SqlServerAuditConfig(t *testing.T) {
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_SqlServerAuditConfig(masterID),
+        Config: fmt.Sprintf(
+          testGoogleSqlDatabaseInstance_SqlServerAuditConfig, databaseName, rootPassword),
 			},
 			{
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
 			},
 		},
 	})
@@ -1141,6 +1147,66 @@ resource "google_sql_database_instance" "instance" {
   settings {
     tier = "db-custom-1-3840"
     collation = "Polish_CI_AS"
+  }
+}
+`
+
+func testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressRangeName string) string {
+	return fmt.Sprintf(`
+data "google_compute_network" "servicenet" {
+  name                    = "%s"
+}
+
+resource "google_compute_global_address" "foobar" {
+  name          = "%s"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = data.google_compute_network.servicenet.self_link
+}
+
+resource "google_service_networking_connection" "foobar" {
+  network                 = data.google_compute_network.servicenet.self_link
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.foobar.name]
+}
+
+resource "google_sql_database_instance" "instance-with-ad" {
+  name             = "%s"
+  region           = "us-central1"
+  database_version = "SQLSERVER_2017_STANDARD"
+  root_password    = "%s"
+  deletion_protection = false
+  settings {
+    tier = "db-custom-2-7680"
+    ip_configuration {
+      ipv4_enabled       = "false"
+      private_network    = data.google_compute_network.servicenet.self_link
+      allocated_ip_range = google_compute_global_address.foobar.name
+    }
+
+    active_directory_config {
+      domain = "ci-managed-ad.com"
+    }
+  }
+}`, networkName, addressRangeName, databaseName)
+}
+
+var testGoogleSqlDatabaseInstance_SqlServerAuditConfig = `
+resource "google_sql_database_instance" "instance-with-audit" {
+  name             = "%s"
+  region           = "us-central1"
+  database_version = "SQLSERVER_2017_STANDARD"
+  root_password    = "%s"
+  deletion_protection = false
+  settings {
+    tier = "db-custom-2-7680"
+
+    sql_server_audit_config {
+      bucket = "gs://mybucket"
+      retention_interval = "3.5s"
+      upload_interval = "3.5s"
+    }
   }
 }
 `
@@ -1811,40 +1877,6 @@ resource "google_sql_database_instance" "replica" {
 }
 `
 <% end -%>
-
-func testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(masterID int) string {
-	return fmt.Sprintf(`
-resource "google_sql_database_instance" "instance-with-ad" {
-  name             = "tf-test-%d"
-  region           = "us-central1"
-  database_version = "SQLSERVER_2017_STANDARD"
-  settings {
-    tier = "db-custom-2-7680"
-    active_directory_config {
-      domain = "ad.domain.com"
-    }
-  }
-}
-`, masterID)
-}
-
-func testGoogleSqlDatabaseInstance_SqlServerAuditConfig(masterID int) string {
-	return fmt.Sprintf(`
-resource "google_sql_database_instance" "instance-with-audit" {
-  name             = "tf-test-%d"
-  region           = "us-central1"
-  database_version = "SQLSERVER_2017_STANDARD"
-  settings {
-    tier = "db-custom-2-7680"
-    sql_server_audit_config {
-      bucket = "gs://mybucket"
-      retention_interval = "3.5s"
-      upload_interval = "3.5s"
-    }
-  }
-}
-`, masterID)
-}
 
 func testGoogleSqlDatabaseInstance_PointInTimeRecoveryEnabled(masterID int, pointInTimeRecoveryEnabled bool) string {
 	return fmt.Sprintf(`
