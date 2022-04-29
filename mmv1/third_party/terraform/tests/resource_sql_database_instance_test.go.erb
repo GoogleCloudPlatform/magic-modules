@@ -1077,8 +1077,7 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-        Config: fmt.Sprintf(
-          testGoogleSqlDatabaseInstance_ActiveDirectoryConfig, databaseName, addressName, networkName, rootPassword),
+        Config: testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressName, rootPassword),
 			},
 			{
 				ResourceName:      "google_sql_database_instance.instance",
@@ -1151,7 +1150,7 @@ resource "google_sql_database_instance" "instance" {
 }
 `
 
-func testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressRangeName string) string {
+func testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressRangeName, rootPassword string) string {
 	return fmt.Sprintf(`
 data "google_compute_network" "servicenet" {
   name                    = "%s"
