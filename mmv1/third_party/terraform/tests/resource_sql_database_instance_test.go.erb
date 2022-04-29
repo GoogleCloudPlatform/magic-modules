@@ -1183,10 +1183,6 @@ resource "google_sql_database_instance" "instance-with-ad" {
       private_network    = data.google_compute_network.servicenet.self_link
       allocated_ip_range = google_compute_global_address.foobar.name
     }
-
-    active_directory_config {
-      domain = "ci-managed-ad.com"
-    }
   }
 }`, networkName, addressRangeName, databaseName, rootPassword)
 }
