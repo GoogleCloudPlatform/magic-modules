@@ -1167,6 +1167,11 @@ func ComputeForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule, hasGAEquivalen
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tregion = %#v\n", *r.Location)
 	}
+	if r.ServiceDirectoryRegistrations != nil {
+		for _, v := range r.ServiceDirectoryRegistrations {
+			outputConfig += fmt.Sprintf("\tservice_directory_registrations %s\n", convertComputeForwardingRuleBetaServiceDirectoryRegistrationsToHCL(&v))
+		}
+	}
 	if r.ServiceLabel != nil {
 		outputConfig += fmt.Sprintf("\tservice_label = %#v\n", *r.ServiceLabel)
 	}
@@ -1185,6 +1190,20 @@ func ComputeForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule, hasGAEquivalen
 		return withProviderLine(formatted), nil
 	}
 	return formatted, nil
+}
+
+func convertComputeForwardingRuleBetaServiceDirectoryRegistrationsToHCL(r *computeBeta.ForwardingRuleServiceDirectoryRegistrations) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Namespace != nil {
+		outputConfig += fmt.Sprintf("\tnamespace = %#v\n", *r.Namespace)
+	}
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
+	}
+	return outputConfig + "}"
 }
 
 // ComputeGlobalForwardingRuleBetaAsHCL returns a string representation of the specified resource in HCL.
@@ -1235,6 +1254,11 @@ func ComputeGlobalForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule, hasGAEqu
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
+	if r.ServiceDirectoryRegistrations != nil {
+		for _, v := range r.ServiceDirectoryRegistrations {
+			outputConfig += fmt.Sprintf("\tservice_directory_registrations %s\n", convertComputeGlobalForwardingRuleBetaServiceDirectoryRegistrationsToHCL(&v))
+		}
+	}
 	formatted, err := formatHCL(outputConfig + "}")
 	if err != nil {
 		return "", err
@@ -1276,6 +1300,20 @@ func convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelToHCL(r *com
 	return outputConfig + "}"
 }
 
+func convertComputeGlobalForwardingRuleBetaServiceDirectoryRegistrationsToHCL(r *computeBeta.ForwardingRuleServiceDirectoryRegistrations) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Namespace != nil {
+		outputConfig += fmt.Sprintf("\tnamespace = %#v\n", *r.Namespace)
+	}
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
+	}
+	return outputConfig + "}"
+}
+
 // ContainerAwsClusterBetaAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -1312,6 +1350,9 @@ func ContainerAwsClusterBetaAsHCL(r containerawsBeta.Cluster, hasGAEquivalent bo
 	outputConfig += "}\n"
 	if r.Description != nil {
 		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if v := convertContainerAwsClusterBetaLoggingConfigToHCL(r.LoggingConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
@@ -1378,6 +1419,9 @@ func convertContainerAwsClusterBetaControlPlaneToHCL(r *containerawsBeta.Cluster
 	if r.Version != nil {
 		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
 	}
+	if v := convertContainerAwsClusterBetaControlPlaneInstancePlacementToHCL(r.InstancePlacement); v != "" {
+		outputConfig += fmt.Sprintf("\tinstance_placement %s\n", v)
+	}
 	if r.InstanceType != nil {
 		outputConfig += fmt.Sprintf("\tinstance_type = %#v\n", *r.InstanceType)
 	}
@@ -1440,6 +1484,17 @@ func convertContainerAwsClusterBetaControlPlaneDatabaseEncryptionToHCL(r *contai
 	outputConfig := "{\n"
 	if r.KmsKeyArn != nil {
 		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaControlPlaneInstancePlacementToHCL(r *containerawsBeta.ClusterControlPlaneInstancePlacement) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Tenancy != nil {
+		outputConfig += fmt.Sprintf("\ttenancy = %#v\n", *r.Tenancy)
 	}
 	return outputConfig + "}"
 }
@@ -1545,6 +1600,32 @@ func convertContainerAwsClusterBetaNetworkingToHCL(r *containerawsBeta.ClusterNe
 	return outputConfig + "}"
 }
 
+func convertContainerAwsClusterBetaLoggingConfigToHCL(r *containerawsBeta.ClusterLoggingConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertContainerAwsClusterBetaLoggingConfigComponentConfigToHCL(r.ComponentConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tcomponent_config %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsClusterBetaLoggingConfigComponentConfigToHCL(r *containerawsBeta.ClusterLoggingConfigComponentConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.EnableComponents != nil {
+		outputConfig += "\tenable_components = ["
+		for _, v := range r.EnableComponents {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
 func convertContainerAwsClusterBetaWorkloadIdentityConfigToHCL(r *containerawsBeta.ClusterWorkloadIdentityConfig) string {
 	if r == nil {
 		return ""
@@ -1629,6 +1710,12 @@ func convertContainerAwsNodePoolBetaConfigToHCL(r *containerawsBeta.NodePoolConf
 	if r.IamInstanceProfile != nil {
 		outputConfig += fmt.Sprintf("\tiam_instance_profile = %#v\n", *r.IamInstanceProfile)
 	}
+	if r.ImageType != nil {
+		outputConfig += fmt.Sprintf("\timage_type = %#v\n", *r.ImageType)
+	}
+	if v := convertContainerAwsNodePoolBetaConfigInstancePlacementToHCL(r.InstancePlacement); v != "" {
+		outputConfig += fmt.Sprintf("\tinstance_placement %s\n", v)
+	}
 	if r.InstanceType != nil {
 		outputConfig += fmt.Sprintf("\tinstance_type = %#v\n", *r.InstanceType)
 	}
@@ -1670,6 +1757,17 @@ func convertContainerAwsNodePoolBetaConfigConfigEncryptionToHCL(r *containerawsB
 	outputConfig := "{\n"
 	if r.KmsKeyArn != nil {
 		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolBetaConfigInstancePlacementToHCL(r *containerawsBeta.NodePoolConfigInstancePlacement) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Tenancy != nil {
+		outputConfig += fmt.Sprintf("\ttenancy = %#v\n", *r.Tenancy)
 	}
 	return outputConfig + "}"
 }
@@ -1809,6 +1907,9 @@ func ContainerAzureClusterBetaAsHCL(r containerazureBeta.Cluster, hasGAEquivalen
 	outputConfig += "}\n"
 	if r.Description != nil {
 		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if v := convertContainerAzureClusterBetaLoggingConfigToHCL(r.LoggingConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
@@ -1998,6 +2099,32 @@ func convertContainerAzureClusterBetaNetworkingToHCL(r *containerazureBeta.Clust
 	return outputConfig + "}"
 }
 
+func convertContainerAzureClusterBetaLoggingConfigToHCL(r *containerazureBeta.ClusterLoggingConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertContainerAzureClusterBetaLoggingConfigComponentConfigToHCL(r.ComponentConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tcomponent_config %s\n", v)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureClusterBetaLoggingConfigComponentConfigToHCL(r *containerazureBeta.ClusterLoggingConfigComponentConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.EnableComponents != nil {
+		outputConfig += "\tenable_components = ["
+		for _, v := range r.EnableComponents {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
 func convertContainerAzureClusterBetaWorkloadIdentityConfigToHCL(r *containerazureBeta.ClusterWorkloadIdentityConfig) string {
 	if r == nil {
 		return ""
@@ -2082,6 +2209,12 @@ func convertContainerAzureNodePoolBetaConfigToHCL(r *containerazureBeta.NodePool
 	if v := convertContainerAzureNodePoolBetaConfigSshConfigToHCL(r.SshConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
 	}
+	if r.ImageType != nil {
+		outputConfig += fmt.Sprintf("\timage_type = %#v\n", *r.ImageType)
+	}
+	if v := convertContainerAzureNodePoolBetaConfigProxyConfigToHCL(r.ProxyConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tproxy_config %s\n", v)
+	}
 	if v := convertContainerAzureNodePoolBetaConfigRootVolumeToHCL(r.RootVolume); v != "" {
 		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
 	}
@@ -2103,6 +2236,20 @@ func convertContainerAzureNodePoolBetaConfigSshConfigToHCL(r *containerazureBeta
 	outputConfig := "{\n"
 	if r.AuthorizedKey != nil {
 		outputConfig += fmt.Sprintf("\tauthorized_key = %#v\n", *r.AuthorizedKey)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolBetaConfigProxyConfigToHCL(r *containerazureBeta.NodePoolConfigProxyConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ResourceGroupId != nil {
+		outputConfig += fmt.Sprintf("\tresource_group_id = %#v\n", *r.ResourceGroupId)
+	}
+	if r.SecretId != nil {
+		outputConfig += fmt.Sprintf("\tsecret_id = %#v\n", *r.SecretId)
 	}
 	return outputConfig + "}"
 }
@@ -6072,6 +6219,11 @@ func ComputeForwardingRuleAsHCL(r compute.ForwardingRule, hasGAEquivalent bool) 
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tregion = %#v\n", *r.Location)
 	}
+	if r.ServiceDirectoryRegistrations != nil {
+		for _, v := range r.ServiceDirectoryRegistrations {
+			outputConfig += fmt.Sprintf("\tservice_directory_registrations %s\n", convertComputeForwardingRuleServiceDirectoryRegistrationsToHCL(&v))
+		}
+	}
 	if r.ServiceLabel != nil {
 		outputConfig += fmt.Sprintf("\tservice_label = %#v\n", *r.ServiceLabel)
 	}
@@ -6090,6 +6242,20 @@ func ComputeForwardingRuleAsHCL(r compute.ForwardingRule, hasGAEquivalent bool) 
 		return withProviderLine(formatted), nil
 	}
 	return formatted, nil
+}
+
+func convertComputeForwardingRuleServiceDirectoryRegistrationsToHCL(r *compute.ForwardingRuleServiceDirectoryRegistrations) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Namespace != nil {
+		outputConfig += fmt.Sprintf("\tnamespace = %#v\n", *r.Namespace)
+	}
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
+	}
+	return outputConfig + "}"
 }
 
 // ComputeGlobalForwardingRuleAsHCL returns a string representation of the specified resource in HCL.
@@ -6140,6 +6306,11 @@ func ComputeGlobalForwardingRuleAsHCL(r compute.ForwardingRule, hasGAEquivalent 
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
+	if r.ServiceDirectoryRegistrations != nil {
+		for _, v := range r.ServiceDirectoryRegistrations {
+			outputConfig += fmt.Sprintf("\tservice_directory_registrations %s\n", convertComputeGlobalForwardingRuleServiceDirectoryRegistrationsToHCL(&v))
+		}
+	}
 	formatted, err := formatHCL(outputConfig + "}")
 	if err != nil {
 		return "", err
@@ -6177,6 +6348,20 @@ func convertComputeGlobalForwardingRuleMetadataFilterFilterLabelToHCL(r *compute
 	}
 	if r.Value != nil {
 		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
+	}
+	return outputConfig + "}"
+}
+
+func convertComputeGlobalForwardingRuleServiceDirectoryRegistrationsToHCL(r *compute.ForwardingRuleServiceDirectoryRegistrations) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Namespace != nil {
+		outputConfig += fmt.Sprintf("\tnamespace = %#v\n", *r.Namespace)
+	}
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
 	}
 	return outputConfig + "}"
 }
@@ -6542,6 +6727,9 @@ func convertContainerAwsNodePoolConfigToHCL(r *containeraws.NodePoolConfig) stri
 		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
 	}
 	outputConfig += "}\n"
+	if v := convertContainerAwsNodePoolConfigProxyConfigToHCL(r.ProxyConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tproxy_config %s\n", v)
+	}
 	if v := convertContainerAwsNodePoolConfigRootVolumeToHCL(r.RootVolume); v != "" {
 		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
 	}
@@ -6575,6 +6763,20 @@ func convertContainerAwsNodePoolConfigConfigEncryptionToHCL(r *containeraws.Node
 	outputConfig := "{\n"
 	if r.KmsKeyArn != nil {
 		outputConfig += fmt.Sprintf("\tkms_key_arn = %#v\n", *r.KmsKeyArn)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolConfigProxyConfigToHCL(r *containeraws.NodePoolConfigProxyConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.SecretArn != nil {
+		outputConfig += fmt.Sprintf("\tsecret_arn = %#v\n", *r.SecretArn)
+	}
+	if r.SecretVersion != nil {
+		outputConfig += fmt.Sprintf("\tsecret_version = %#v\n", *r.SecretVersion)
 	}
 	return outputConfig + "}"
 }
@@ -6987,6 +7189,9 @@ func convertContainerAzureNodePoolConfigToHCL(r *containerazure.NodePoolConfig) 
 	if v := convertContainerAzureNodePoolConfigSshConfigToHCL(r.SshConfig); v != "" {
 		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
 	}
+	if v := convertContainerAzureNodePoolConfigProxyConfigToHCL(r.ProxyConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tproxy_config %s\n", v)
+	}
 	if v := convertContainerAzureNodePoolConfigRootVolumeToHCL(r.RootVolume); v != "" {
 		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
 	}
@@ -7008,6 +7213,20 @@ func convertContainerAzureNodePoolConfigSshConfigToHCL(r *containerazure.NodePoo
 	outputConfig := "{\n"
 	if r.AuthorizedKey != nil {
 		outputConfig += fmt.Sprintf("\tauthorized_key = %#v\n", *r.AuthorizedKey)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAzureNodePoolConfigProxyConfigToHCL(r *containerazure.NodePoolConfigProxyConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.ResourceGroupId != nil {
+		outputConfig += fmt.Sprintf("\tresource_group_id = %#v\n", *r.ResourceGroupId)
+	}
+	if r.SecretId != nil {
+		outputConfig += fmt.Sprintf("\tsecret_id = %#v\n", *r.SecretId)
 	}
 	return outputConfig + "}"
 }
@@ -10361,6 +10580,28 @@ func convertComputeFirewallPolicyRuleBetaMatchLayer4ConfigsList(i interface{}) (
 	return out
 }
 
+func convertComputeForwardingRuleBetaServiceDirectoryRegistrations(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"namespace": in["namespace"],
+		"service":   in["service"],
+	}
+}
+
+func convertComputeForwardingRuleBetaServiceDirectoryRegistrationsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeForwardingRuleBetaServiceDirectoryRegistrations(v))
+	}
+	return out
+}
+
 func convertComputeGlobalForwardingRuleBetaMetadataFilter(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -10401,6 +10642,28 @@ func convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabelList(i inter
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertComputeGlobalForwardingRuleBetaMetadataFilterFilterLabel(v))
+	}
+	return out
+}
+
+func convertComputeGlobalForwardingRuleBetaServiceDirectoryRegistrations(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"namespace": in["namespace"],
+		"service":   in["service"],
+	}
+}
+
+func convertComputeGlobalForwardingRuleBetaServiceDirectoryRegistrationsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeGlobalForwardingRuleBetaServiceDirectoryRegistrations(v))
 	}
 	return out
 }
@@ -10459,6 +10722,7 @@ func convertContainerAwsClusterBetaControlPlane(i interface{}) map[string]interf
 		"iamInstanceProfile":        in["iam_instance_profile"],
 		"subnetIds":                 in["subnet_ids"],
 		"version":                   in["version"],
+		"instancePlacement":         convertContainerAwsClusterBetaControlPlaneInstancePlacement(in["instance_placement"]),
 		"instanceType":              in["instance_type"],
 		"mainVolume":                convertContainerAwsClusterBetaControlPlaneMainVolume(in["main_volume"]),
 		"proxyConfig":               convertContainerAwsClusterBetaControlPlaneProxyConfig(in["proxy_config"]),
@@ -10540,6 +10804,27 @@ func convertContainerAwsClusterBetaControlPlaneDatabaseEncryptionList(i interfac
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertContainerAwsClusterBetaControlPlaneDatabaseEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaControlPlaneInstancePlacement(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"tenancy": in["tenancy"],
+	}
+}
+
+func convertContainerAwsClusterBetaControlPlaneInstancePlacementList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaControlPlaneInstancePlacement(v))
 	}
 	return out
 }
@@ -10680,6 +10965,48 @@ func convertContainerAwsClusterBetaNetworkingList(i interface{}) (out []map[stri
 	return out
 }
 
+func convertContainerAwsClusterBetaLoggingConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"componentConfig": convertContainerAwsClusterBetaLoggingConfigComponentConfig(in["component_config"]),
+	}
+}
+
+func convertContainerAwsClusterBetaLoggingConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaLoggingConfig(v))
+	}
+	return out
+}
+
+func convertContainerAwsClusterBetaLoggingConfigComponentConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"enableComponents": in["enable_components"],
+	}
+}
+
+func convertContainerAwsClusterBetaLoggingConfigComponentConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsClusterBetaLoggingConfigComponentConfig(v))
+	}
+	return out
+}
+
 func convertContainerAwsClusterBetaWorkloadIdentityConfig(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -10733,6 +11060,8 @@ func convertContainerAwsNodePoolBetaConfig(i interface{}) map[string]interface{}
 	return map[string]interface{}{
 		"configEncryption":   convertContainerAwsNodePoolBetaConfigConfigEncryption(in["config_encryption"]),
 		"iamInstanceProfile": in["iam_instance_profile"],
+		"imageType":          in["image_type"],
+		"instancePlacement":  convertContainerAwsNodePoolBetaConfigInstancePlacement(in["instance_placement"]),
 		"instanceType":       in["instance_type"],
 		"labels":             in["labels"],
 		"rootVolume":         convertContainerAwsNodePoolBetaConfigRootVolume(in["root_volume"]),
@@ -10771,6 +11100,27 @@ func convertContainerAwsNodePoolBetaConfigConfigEncryptionList(i interface{}) (o
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertContainerAwsNodePoolBetaConfigConfigEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolBetaConfigInstancePlacement(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"tenancy": in["tenancy"],
+	}
+}
+
+func convertContainerAwsNodePoolBetaConfigInstancePlacementList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolBetaConfigInstancePlacement(v))
 	}
 	return out
 }
@@ -11109,6 +11459,48 @@ func convertContainerAzureClusterBetaNetworkingList(i interface{}) (out []map[st
 	return out
 }
 
+func convertContainerAzureClusterBetaLoggingConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"componentConfig": convertContainerAzureClusterBetaLoggingConfigComponentConfig(in["component_config"]),
+	}
+}
+
+func convertContainerAzureClusterBetaLoggingConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaLoggingConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureClusterBetaLoggingConfigComponentConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"enableComponents": in["enable_components"],
+	}
+}
+
+func convertContainerAzureClusterBetaLoggingConfigComponentConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureClusterBetaLoggingConfigComponentConfig(v))
+	}
+	return out
+}
+
 func convertContainerAzureClusterBetaWorkloadIdentityConfig(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -11160,10 +11552,12 @@ func convertContainerAzureNodePoolBetaConfig(i interface{}) map[string]interface
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"sshConfig":  convertContainerAzureNodePoolBetaConfigSshConfig(in["ssh_config"]),
-		"rootVolume": convertContainerAzureNodePoolBetaConfigRootVolume(in["root_volume"]),
-		"tags":       in["tags"],
-		"vmSize":     in["vm_size"],
+		"sshConfig":   convertContainerAzureNodePoolBetaConfigSshConfig(in["ssh_config"]),
+		"imageType":   in["image_type"],
+		"proxyConfig": convertContainerAzureNodePoolBetaConfigProxyConfig(in["proxy_config"]),
+		"rootVolume":  convertContainerAzureNodePoolBetaConfigRootVolume(in["root_volume"]),
+		"tags":        in["tags"],
+		"vmSize":      in["vm_size"],
 	}
 }
 
@@ -11195,6 +11589,28 @@ func convertContainerAzureNodePoolBetaConfigSshConfigList(i interface{}) (out []
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertContainerAzureNodePoolBetaConfigSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolBetaConfigProxyConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"resourceGroupId": in["resource_group_id"],
+		"secretId":        in["secret_id"],
+	}
+}
+
+func convertContainerAzureNodePoolBetaConfigProxyConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolBetaConfigProxyConfig(v))
 	}
 	return out
 }
@@ -14947,6 +15363,28 @@ func convertComputeFirewallPolicyRuleMatchLayer4ConfigsList(i interface{}) (out 
 	return out
 }
 
+func convertComputeForwardingRuleServiceDirectoryRegistrations(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"namespace": in["namespace"],
+		"service":   in["service"],
+	}
+}
+
+func convertComputeForwardingRuleServiceDirectoryRegistrationsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeForwardingRuleServiceDirectoryRegistrations(v))
+	}
+	return out
+}
+
 func convertComputeGlobalForwardingRuleMetadataFilter(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -14987,6 +15425,28 @@ func convertComputeGlobalForwardingRuleMetadataFilterFilterLabelList(i interface
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertComputeGlobalForwardingRuleMetadataFilterFilterLabel(v))
+	}
+	return out
+}
+
+func convertComputeGlobalForwardingRuleServiceDirectoryRegistrations(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"namespace": in["namespace"],
+		"service":   in["service"],
+	}
+}
+
+func convertComputeGlobalForwardingRuleServiceDirectoryRegistrationsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeGlobalForwardingRuleServiceDirectoryRegistrations(v))
 	}
 	return out
 }
@@ -15321,6 +15781,7 @@ func convertContainerAwsNodePoolConfig(i interface{}) map[string]interface{} {
 		"iamInstanceProfile": in["iam_instance_profile"],
 		"instanceType":       in["instance_type"],
 		"labels":             in["labels"],
+		"proxyConfig":        convertContainerAwsNodePoolConfigProxyConfig(in["proxy_config"]),
 		"rootVolume":         convertContainerAwsNodePoolConfigRootVolume(in["root_volume"]),
 		"securityGroupIds":   in["security_group_ids"],
 		"sshConfig":          convertContainerAwsNodePoolConfigSshConfig(in["ssh_config"]),
@@ -15357,6 +15818,28 @@ func convertContainerAwsNodePoolConfigConfigEncryptionList(i interface{}) (out [
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertContainerAwsNodePoolConfigConfigEncryption(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolConfigProxyConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"secretArn":     in["secret_arn"],
+		"secretVersion": in["secret_version"],
+	}
+}
+
+func convertContainerAwsNodePoolConfigProxyConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolConfigProxyConfig(v))
 	}
 	return out
 }
@@ -15746,10 +16229,11 @@ func convertContainerAzureNodePoolConfig(i interface{}) map[string]interface{} {
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"sshConfig":  convertContainerAzureNodePoolConfigSshConfig(in["ssh_config"]),
-		"rootVolume": convertContainerAzureNodePoolConfigRootVolume(in["root_volume"]),
-		"tags":       in["tags"],
-		"vmSize":     in["vm_size"],
+		"sshConfig":   convertContainerAzureNodePoolConfigSshConfig(in["ssh_config"]),
+		"proxyConfig": convertContainerAzureNodePoolConfigProxyConfig(in["proxy_config"]),
+		"rootVolume":  convertContainerAzureNodePoolConfigRootVolume(in["root_volume"]),
+		"tags":        in["tags"],
+		"vmSize":      in["vm_size"],
 	}
 }
 
@@ -15781,6 +16265,28 @@ func convertContainerAzureNodePoolConfigSshConfigList(i interface{}) (out []map[
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertContainerAzureNodePoolConfigSshConfig(v))
+	}
+	return out
+}
+
+func convertContainerAzureNodePoolConfigProxyConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"resourceGroupId": in["resource_group_id"],
+		"secretId":        in["secret_id"],
+	}
+}
+
+func convertContainerAzureNodePoolConfigProxyConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAzureNodePoolConfigProxyConfig(v))
 	}
 	return out
 }
