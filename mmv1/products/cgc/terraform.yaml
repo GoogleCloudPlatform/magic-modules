@@ -56,6 +56,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           database_instance_name: "sqlserver-instance"
           deletion_protection: "true"
+          user: "user"
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
@@ -68,6 +69,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           database_instance_name: "postgres-instance"
           deletion_protection: "true"
+          user: "user"
         skip_test: true
         test_vars_overrides:
           deletion_protection: "false"
@@ -80,6 +82,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           database_instance_name: "mysql-instance"
           deletion_protection: "true"
+          user: "user"
         skip_test: true
         test_vars_overrides:
           deletion_protection: "false"
