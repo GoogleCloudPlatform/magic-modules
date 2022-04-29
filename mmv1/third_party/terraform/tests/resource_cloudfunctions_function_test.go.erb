@@ -338,7 +338,7 @@ func TestAccCloudFunctionsFunction_dockerRepository(t *testing.T) {
 <% unless version == "ga" -%>
 func TestAccCloudFunctionsFunction_cmek(t *testing.T) {
 	t.Parallel()
-	kmsSuffix := randString(t, 10)
+	kmsKey := BootstrapKMSKeyInLocation(t, "us-central1")
 	funcResourceName := "google_cloudfunctions_function.function"
 	arRepoName := fmt.Sprintf("tf-cmek-test-docker-repository-%s", randString(t, 10))
 	functionName := fmt.Sprintf("tf-cmek-test-%s", randString(t, 10))
@@ -352,7 +352,7 @@ func TestAccCloudFunctionsFunction_cmek(t *testing.T) {
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudFunctionsFunction_cmek(kmsSuffix, arRepoName, functionName, bucketName, zipFilePath),
+				Config: testAccCloudFunctionsFunction_cmek(kmsKey.CryptoKey.Name, arRepoName, functionName, bucketName, zipFilePath),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -1112,19 +1112,9 @@ resource "google_cloudfunctions_function" "function" {
 <% end -%>
 
 <% unless version == "ga" -%>
-func testAccCloudFunctionsFunction_cmek(kmsSuffix, arRepoName, functionName, bucketName, zipFilePath string) string {
+func testAccCloudFunctionsFunction_cmek(kmsKey, arRepoName, functionName, bucketName, zipFilePath string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
-}
-
-resource "google_kms_key_ring" "gcf_cmek_key_ring" {
-  name     = "gcf-cmek-key-ring-%s"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "gcf_cmek_crypto_key" {
-  name     = "gcf-cmek-crypto-key-%s"
-  key_ring = google_kms_key_ring.gcf_cmek_key_ring.id
 }
 
 resource "google_artifact_registry_repository" "unencoded-ar-repo" {
@@ -1142,8 +1132,14 @@ resource "google_artifact_registry_repository_iam_binding" "binding" {
   ]
 }
 
+resource "google_project_iam_member" "cloud_build_sa_builder_permission" {
+  project = data.google_project.project.project_id
+  role    = "roles/cloudbuild.builds.builder"
+  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+}
+
 resource "google_kms_crypto_key_iam_binding" "gcf_cmek_keyuser" {
-  crypto_key_id = google_kms_crypto_key.gcf_cmek_crypto_key.id
+  crypto_key_id = "%s"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
   members = [
@@ -1155,7 +1151,7 @@ resource "google_kms_crypto_key_iam_binding" "gcf_cmek_keyuser" {
 
 resource "google_artifact_registry_repository" "encoded-ar-repo" {
   repository_id = "%s"
-  kms_key_name = google_kms_crypto_key.gcf_cmek_crypto_key.id
+  kms_key_name = "%s"
   location = "us-central1"
   format = "DOCKER"
 }
@@ -1179,12 +1175,12 @@ resource "google_cloudfunctions_function" "function" {
   source_archive_bucket = google_storage_bucket.bucket.name
   source_archive_object = google_storage_bucket_object.archive.name
   docker_repository     = google_artifact_registry_repository.encoded-ar-repo.id
-  kms_key_name          = google_kms_crypto_key.gcf_cmek_crypto_key.id
+  kms_key_name          = "%s"
   trigger_http          = true
   timeout               = 61
   entry_point           = "helloGET"
 }
-`, kmsSuffix, kmsSuffix, arRepoName, bucketName, zipFilePath, functionName)
+`, kmsKey, arRepoName, kmsKey, bucketName, zipFilePath, functionName, kmsKey)
 }
 <% end -%>
 
