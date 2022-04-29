@@ -1,9 +1,4 @@
-var staged bool
-if d.Get("type").(string) == "SELF_SIGNED" {
-	staged = true
-} else {
-	staged = false
-}
+staged := d.Get("type").(string) == "SELF_SIGNED"
 
 // Enable the CA if `desired_state` is unspecified or specified as `ENABLED`.
 if p, ok := d.GetOk("desired_state"); !ok || p.(string) == "ENABLED" {
