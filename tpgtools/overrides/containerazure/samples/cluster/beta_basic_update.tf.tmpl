@@ -1,3 +1,8 @@
+data "google_container_azure_versions" "versions" {
+  project = "{{project}}"
+  location = "us-west1"
+}
+
 resource "google_container_azure_cluster" "primary" {
   authorization {
     admin_users {
