@@ -4012,6 +4012,29 @@ objects:
           - :PREMIUM
           - :STANDARD
         input: true
+      - !ruby/object:Api::Type::Array
+        name: 'serviceDirectoryRegistrations'
+        description: |
+          Service Directory resources to register this forwarding rule with. Currently,
+          only supports a single Service Directory resource.  
+        required: false
+        min_size: 0
+        max_size: 1
+        input: true         
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'namespace'
+              description: |
+                Service Directory namespace to register the forwarding rule under.
+              required: true
+              input: true
+            - !ruby/object:Api::Type::String
+              name: 'service'
+              description: |
+                Service Directory service to register the forwarding rule under.
+              required: true
+              input: true
       - !ruby/object:Api::Type::String
         name: 'serviceLabel'
         description: |
