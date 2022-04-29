@@ -1188,7 +1188,7 @@ resource "google_sql_database_instance" "instance-with-ad" {
       domain = "ci-managed-ad.com"
     }
   }
-}`, networkName, addressRangeName, databaseName)
+}`, networkName, addressRangeName, databaseName, rootPassword)
 }
 
 var testGoogleSqlDatabaseInstance_SqlServerAuditConfig = `
