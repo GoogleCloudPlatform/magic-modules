@@ -1089,31 +1089,6 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 	})
 }
 
-func TestAccSqlDatabaseInstance_SqlServerAuditConfig(t *testing.T) {
-	t.Parallel()
-
-	databaseName := "tf-test-" + randString(t, 10)
-	rootPassword := randString(t, 15)
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-        Config: fmt.Sprintf(
-          testGoogleSqlDatabaseInstance_SqlServerAuditConfig, databaseName, rootPassword),
-			},
-			{
-				ResourceName:      "google_sql_database_instance.instance",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
-			},
-		},
-	})
-}
-
 var testGoogleSqlDatabaseInstance_basic2 = `
 resource "google_sql_database_instance" "instance" {
   region              = "us-central1"
@@ -1164,12 +1139,6 @@ resource "google_compute_global_address" "foobar" {
   network       = data.google_compute_network.servicenet.self_link
 }
 
-resource "google_service_networking_connection" "foobar" {
-  network                 = data.google_compute_network.servicenet.self_link
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.foobar.name]
-}
-
 resource "google_sql_database_instance" "instance-with-ad" {
   name             = "%s"
   region           = "us-central1"
@@ -1189,25 +1158,6 @@ resource "google_sql_database_instance" "instance-with-ad" {
   }
 }`, networkName, addressRangeName, databaseName, rootPassword)
 }
-
-var testGoogleSqlDatabaseInstance_SqlServerAuditConfig = `
-resource "google_sql_database_instance" "instance-with-audit" {
-  name             = "%s"
-  region           = "us-central1"
-  database_version = "SQLSERVER_2017_STANDARD"
-  root_password    = "%s"
-  deletion_protection = false
-  settings {
-    tier = "db-custom-2-7680"
-
-    sql_server_audit_config {
-      bucket = "gs://mybucket"
-      retention_interval = "3.5s"
-      upload_interval = "3.5s"
-    }
-  }
-}
-`
 
 func testGoogleSqlDatabaseInstanceConfig_withoutReplica(instanceName string) string {
 	return fmt.Sprintf(`
