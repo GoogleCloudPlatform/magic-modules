@@ -1724,6 +1724,9 @@ func convertContainerAwsNodePoolBetaConfigToHCL(r *containerawsBeta.NodePoolConf
 		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
 	}
 	outputConfig += "}\n"
+	if v := convertContainerAwsNodePoolBetaConfigProxyConfigToHCL(r.ProxyConfig); v != "" {
+		outputConfig += fmt.Sprintf("\tproxy_config %s\n", v)
+	}
 	if v := convertContainerAwsNodePoolBetaConfigRootVolumeToHCL(r.RootVolume); v != "" {
 		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
 	}
@@ -1768,6 +1771,20 @@ func convertContainerAwsNodePoolBetaConfigInstancePlacementToHCL(r *containeraws
 	outputConfig := "{\n"
 	if r.Tenancy != nil {
 		outputConfig += fmt.Sprintf("\ttenancy = %#v\n", *r.Tenancy)
+	}
+	return outputConfig + "}"
+}
+
+func convertContainerAwsNodePoolBetaConfigProxyConfigToHCL(r *containerawsBeta.NodePoolConfigProxyConfig) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.SecretArn != nil {
+		outputConfig += fmt.Sprintf("\tsecret_arn = %#v\n", *r.SecretArn)
+	}
+	if r.SecretVersion != nil {
+		outputConfig += fmt.Sprintf("\tsecret_version = %#v\n", *r.SecretVersion)
 	}
 	return outputConfig + "}"
 }
@@ -11064,6 +11081,7 @@ func convertContainerAwsNodePoolBetaConfig(i interface{}) map[string]interface{}
 		"instancePlacement":  convertContainerAwsNodePoolBetaConfigInstancePlacement(in["instance_placement"]),
 		"instanceType":       in["instance_type"],
 		"labels":             in["labels"],
+		"proxyConfig":        convertContainerAwsNodePoolBetaConfigProxyConfig(in["proxy_config"]),
 		"rootVolume":         convertContainerAwsNodePoolBetaConfigRootVolume(in["root_volume"]),
 		"securityGroupIds":   in["security_group_ids"],
 		"sshConfig":          convertContainerAwsNodePoolBetaConfigSshConfig(in["ssh_config"]),
@@ -11121,6 +11139,28 @@ func convertContainerAwsNodePoolBetaConfigInstancePlacementList(i interface{}) (
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertContainerAwsNodePoolBetaConfigInstancePlacement(v))
+	}
+	return out
+}
+
+func convertContainerAwsNodePoolBetaConfigProxyConfig(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"secretArn":     in["secret_arn"],
+		"secretVersion": in["secret_version"],
+	}
+}
+
+func convertContainerAwsNodePoolBetaConfigProxyConfigList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertContainerAwsNodePoolBetaConfigProxyConfig(v))
 	}
 	return out
 }
