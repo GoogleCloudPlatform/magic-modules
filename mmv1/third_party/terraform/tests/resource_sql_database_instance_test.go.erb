@@ -1068,7 +1068,7 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 
 	databaseName := "tf-test-" + randString(t, 10)
 	addressName := "tf-test-" + randString(t, 10)
-	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private-allocated-ip-range")
+	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private")
 	rootPassword := randString(t, 15)
 
 	vcrTest(t, resource.TestCase{
@@ -1157,7 +1157,6 @@ resource "google_sql_database_instance" "instance-with-ad" {
     ip_configuration {
       ipv4_enabled       = "false"
       private_network    = data.google_compute_network.servicenet.self_link
-      allocated_ip_range = google_compute_global_address.foobar.name
     }
 
     active_directory_config {
