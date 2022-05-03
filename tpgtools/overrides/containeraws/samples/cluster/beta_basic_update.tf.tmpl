@@ -59,6 +59,10 @@ resource "google_container_aws_cluster" "primary" {
     tags = {
       owner = "{{test_service_account}}"
     }
+
+    instance_placement {
+      tenancy = "DEDICATED"
+    }
   }
 
   fleet {
@@ -75,76 +79,16 @@ resource "google_container_aws_cluster" "primary" {
   }
 
   annotations = {
-    label-one = "value-one"
-  }
-
-  description = "A sample aws cluster"
-  project     = "{{project}}"
-}
-
-resource "google_container_aws_node_pool" "primary" {
-  autoscaling {
-    max_node_count = 5
-    min_node_count = 1
-  }
-
-  cluster = google_container_aws_cluster.primary.name
-
-  config {
-    config_encryption {
-      kms_key_arn = "arn:aws:kms:{{aws_region}}:{{aws_account_id}}:key/{{aws_database_encryption_key}}"
-    }
-
-    iam_instance_profile = "{{byo_multicloud_prefix}}-1p-dev-nodepool"
-    instance_type        = "t3.medium"
-
-    labels = {
-      label-one = "value-one"
-    }
-
-    root_volume {
-      iops        = 3000
-      kms_key_arn = "arn:aws:kms:{{aws_region}}:{{aws_account_id}}:key/{{aws_volume_encryption_key}}"
-      size_gib    = 10
-      volume_type = "GP3"
-    }
-
-    security_group_ids = ["{{aws_security_group}}"]
-
-    proxy_config {
-      secret_arn     = "arn:aws:secretsmanager:us-west-2:126285863215:secret:proxy_config20210824150329476300000001-ABCDEF"
-      secret_version = "12345678-ABCD-EFGH-IJKL-987654321098"
-    }
-
-    ssh_config {
-      ec2_key_pair = "{{byo_multicloud_prefix}}-1p-dev-ssh"
-    }
-
-    tags = {
-      tag-one = "value-one"
-    }
-
-    taints {
-      effect = "PREFER_NO_SCHEDULE"
-      key    = "taint-key"
-      value  = "taint-value"
-    }
-  }
-
-  location = "us-west1"
-
-  max_pods_constraint {
-    max_pods_per_node = 110
-  }
-
-  name      = "{{node-pool-name}}"
-  subnet_id = "{{aws_subnet}}"
-  version   = "${data.google_container_aws_versions.versions.valid_versions[0]}"
-
-  annotations = {
     label-two = "value-two"
   }
 
-  project = "{{project}}"
+  description = "An updated sample aws cluster"
+  project     = "{{project}}"
+
+  logging_config {
+    component_config {
+      enable_components = ["SYSTEM_COMPONENTS", "WORKLOADS"]
+    }
+  }
 }
 

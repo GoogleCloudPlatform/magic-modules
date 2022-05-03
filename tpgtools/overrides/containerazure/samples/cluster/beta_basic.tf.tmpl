@@ -20,34 +20,6 @@ resource "google_container_azure_cluster" "primary" {
 
     subnet_id = "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-byo/providers/Microsoft.Network/virtualNetworks/{{byo_multicloud_prefix}}-dev-vnet/subnets/default"
     version   = "${data.google_container_azure_versions.versions.valid_versions[0]}"
-
-    database_encryption {
-      key_id = "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-cluster/providers/Microsoft.KeyVault/vaults/{{byo_multicloud_prefix}}-dev-keyvault/keys/{{byo_multicloud_prefix}}-dev-key"
-    }
-
-    main_volume {
-      size_gib = 8
-    }
-
-    proxy_config {
-      resource_group_id = "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-cluster"
-      secret_id         = "https://{{byo_multicloud_prefix}}-dev-keyvault.vault.azure.net/secrets/{{byo_multicloud_prefix}}-dev-secret/{{azure_config_secret}}"
-    }
-
-    replica_placements {
-      azure_availability_zone = "1"
-      subnet_id               = "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-byo/providers/Microsoft.Network/virtualNetworks/{{byo_multicloud_prefix}}-dev-vnet/subnets/default"
-    }
-
-    root_volume {
-      size_gib = 32
-    }
-
-    tags = {
-      owner = "mmv2"
-    }
-
-    vm_size = "Standard_DS2_v2"
   }
 
   fleet {
@@ -64,13 +36,13 @@ resource "google_container_azure_cluster" "primary" {
   }
 
   resource_group_id = "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-cluster"
+  project           = "{{project}}"
 
-  annotations = {
-    annotation-one = "value-one"
+  logging_config {
+    component_config {
+      enable_components = ["SYSTEM_COMPONENTS", "WORKLOADS"]
+    }
   }
-
-  description = "An updated sample azure cluster"
-  project     = "{{project}}"
 }
 
 resource "google_container_azure_client" "basic" {
@@ -80,5 +52,4 @@ resource "google_container_azure_client" "basic" {
   tenant_id      = "{{azure_tenant}}"
   project        = "{{project}}"
 }
-
 
