@@ -4017,7 +4017,6 @@ objects:
         description: |
           Service Directory resources to register this forwarding rule with. Currently,
           only supports a single Service Directory resource.  
-        required: false
         min_size: 0
         max_size: 1
         input: true         
@@ -4027,13 +4026,11 @@ objects:
               name: 'namespace'
               description: |
                 Service Directory namespace to register the forwarding rule under.
-              required: true
               input: true
             - !ruby/object:Api::Type::String
               name: 'service'
               description: |
                 Service Directory service to register the forwarding rule under.
-              required: true
               input: true
       - !ruby/object:Api::Type::String
         name: 'serviceLabel'
