@@ -3,7 +3,6 @@ data "google_container_azure_versions" "versions" {
   location = "us-west1"
 }
 
-
 resource "google_container_azure_cluster" "primary" {
   authorization {
     admin_users {
@@ -75,6 +74,8 @@ resource "google_container_azure_node_pool" "primary" {
     }
 
     vm_size = "Standard_DS2_v2"
+
+    image_type = "ubuntu"
   }
 
   location = "us-west1"
@@ -88,7 +89,7 @@ resource "google_container_azure_node_pool" "primary" {
   version   = "${data.google_container_azure_versions.versions.valid_versions[0]}"
 
   annotations = {
-    annotation-two = "value-two"
+    annotation-one = "value-one"
   }
 
   project = "{{project}}"

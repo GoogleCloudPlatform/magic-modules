@@ -82,6 +82,7 @@ resource "google_container_aws_cluster" "primary" {
   project     = "{{project}}"
 }
 
+
 resource "google_container_aws_node_pool" "primary" {
   autoscaling {
     max_node_count = 5
@@ -129,6 +130,12 @@ resource "google_container_aws_node_pool" "primary" {
       key    = "taint-key"
       value  = "taint-value"
     }
+
+    instance_placement {
+      tenancy = "DEDICATED"
+    }
+
+    image_type = "ubuntu"
   }
 
   location = "us-west1"
@@ -142,7 +149,7 @@ resource "google_container_aws_node_pool" "primary" {
   version   = "${data.google_container_aws_versions.versions.valid_versions[0]}"
 
   annotations = {
-    label-two = "value-two"
+    label-one = "value-one"
   }
 
   project = "{{project}}"
