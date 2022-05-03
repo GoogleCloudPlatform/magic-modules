@@ -1148,7 +1148,7 @@ resource "google_service_networking_connection" "foobar" {
 resource "google_active_directory_domain" "ad-domain" {
   domain_name       = "ad.domain.com"
   locations         = ["us-central1"]
-  reserved_ip_range = [google_compute_global_address.foobar.name]
+  reserved_ip_range = "10.128.0.0/9"
 }
 
 resource "google_sql_database_instance" "instance-with-ad" {
