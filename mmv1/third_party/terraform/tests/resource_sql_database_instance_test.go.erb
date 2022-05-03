@@ -1067,16 +1067,30 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 	t.Parallel()
 
 	databaseName := "tf-test-" + randString(t, 10)
-	networkName := "default"
+	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private")
 	rootPassword := randString(t, 15)
+	domain := fmt.Sprintf("tf-test%s.org1.com", randString(t, 5))
+	context := map[string]interface{}{
+		"domain":        domain,
+		"resource_name": "ad-domain",
+	}
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
+      {
+				Config: testAccADDomainBasic(context),
+			},
 			{
-        Config: testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, rootPassword),
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"domain_name"},
+			},
+			{
+        Config: testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressName, rootPassword),
 			},
 			{
 				ResourceName:      "google_sql_database_instance.instance",
@@ -1124,13 +1138,34 @@ resource "google_sql_database_instance" "instance" {
 }
 `
 
-func testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, rootPassword string) string {
+func testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressRangeName, rootPassword string) string {
 	return fmt.Sprintf(`
 data "google_compute_network" "servicenet" {
   name                    = "%s"
 }
 
+resource "google_compute_global_address" "foobar" {
+  name          = "%s"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = data.google_compute_network.servicenet.self_link
+}
+
+resource "google_service_networking_connection" "foobar" {
+  network                 = data.google_compute_network.servicenet.self_link
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.foobar.name]
+}
+
+resource "google_active_directory_domain" "ad-domain" {
+  domain_name       = "ad.domain.com"
+  locations         = ["us-central1"]
+  reserved_ip_range = [google_compute_global_address.foobar.name]
+}
+
 resource "google_sql_database_instance" "instance-with-ad" {
+  depends_on = [google_service_networking_connection.foobar]
   name             = "%s"
   region           = "us-central1"
   database_version = "SQLSERVER_2017_STANDARD"
@@ -1144,10 +1179,10 @@ resource "google_sql_database_instance" "instance-with-ad" {
     }
 
     active_directory_config {
-      domain = "ci-managed-ad.com"
+      domain = "ad.domain.com"
     }
   }
-}`, networkName, databaseName, rootPassword)
+}`, networkName, addressRangeName, databaseName, rootPassword)
 }
 
 func testGoogleSqlDatabaseInstanceConfig_withoutReplica(instanceName string) string {
