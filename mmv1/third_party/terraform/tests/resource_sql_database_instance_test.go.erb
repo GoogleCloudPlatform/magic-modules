@@ -1067,6 +1067,7 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 	t.Parallel()
 
 	databaseName := "tf-test-" + randString(t, 10)
+	addressName := "tf-test-" + randString(t, 10)
 	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private")
 	rootPassword := randString(t, 15)
 	domain := fmt.Sprintf("tf-test%s.org1.com", randString(t, 5))
@@ -1080,15 +1081,6 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
-      {
-				Config: testAccADDomainBasic(context),
-			},
-			{
-				ResourceName:            resourceName,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"domain_name"},
-			},
 			{
         Config: testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressName, rootPassword),
 			},
