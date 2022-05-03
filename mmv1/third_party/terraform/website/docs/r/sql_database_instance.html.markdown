@@ -259,14 +259,6 @@ The optional `settings.active_directory_config` subblock supports:
 * `domain` - (Required) The domain name for the active directory (e.g., mydomain.com).
     Can only be used with SQL Server.
 
-The optional `settings.sql_server_audit_config` subblock supports:
-
-* `bucket` - (Required) The name of the destination bucket (e.g., gs://mybucket).
-
-* `retention_interval` - (Required) How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
-
-* `upload_interval` - (Required) How often to upload generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
-
 The optional `settings.backup_configuration` subblock supports:
 
 * `binary_log_enabled` - (Optional) True if binary logging is enabled.
