@@ -1070,11 +1070,6 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 	addressName := "tf-test-" + randString(t, 10)
 	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private")
 	rootPassword := randString(t, 15)
-	domain := fmt.Sprintf("tf-test%s.org1.com", randString(t, 5))
-	context := map[string]interface{}{
-		"domain":        domain,
-		"resource_name": "ad-domain",
-	}
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
