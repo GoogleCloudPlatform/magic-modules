@@ -53,9 +53,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "sql_database_instance_sqlserver"
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "instance"
+        # Random provider
+        skip_vcr: true
         vars:
           database_instance_name: "sqlserver-instance"
           deletion_protection: "true"
+          user: "user"
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
@@ -65,9 +68,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "sql_database_instance_postgres"
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "instance"
+        # Random provider
+        skip_vcr: true
         vars:
           database_instance_name: "postgres-instance"
           deletion_protection: "true"
+          user: "user"
         skip_test: true
         test_vars_overrides:
           deletion_protection: "false"
@@ -77,9 +83,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "sql_database_instance_my_sql"
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "instance"
+        # Random provider
+        skip_vcr: true
         vars:
           database_instance_name: "mysql-instance"
           deletion_protection: "true"
+          user: "user"
         skip_test: true
         test_vars_overrides:
           deletion_protection: "false"
