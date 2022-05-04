@@ -78,6 +78,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           Whether or not to allow Terraform to destroy the CertificateAuthority. Unless this field is set to false
           in Terraform state, a `terraform destroy` or `terraform apply` that would delete the instance will fail.
+      - !ruby/object:Api::Type::Enum
+        name: 'desired_state'
+        description: |
+          Desired state of the CertificateAuthority. Set this field to `STAGED` to create a `STAGED` root CA.
+        values:
+          - :ENABLED
+          - :DISABLED
+          - :STAGED
     properties:
       type: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
@@ -90,8 +98,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.erb'
         custom_expand: 'templates/terraform/custom_expand/privateca_certificate_509_config.go.erb'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: 'templates/terraform/constants/privateca_certificate_authority.go.erb'
+      resource_definition: 'templates/terraform/resource_definition/privateca_certificate_authority.go.erb'
       decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
-      post_create: templates/terraform/post_create/privateca_authority_enable.go.erb
+      post_create: templates/terraform/post_create/privateca_certificate_authority.go.erb
+      pre_update: templates/terraform/pre_update/privateca_certificate_authority.go.erb
       pre_delete: templates/terraform/pre_delete/privateca_authority_disable.go.erb
       post_import: templates/terraform/post_import/privateca_import.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate_authority.go.erb
