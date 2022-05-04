@@ -1069,7 +1069,8 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 	databaseName := "tf-test-" + randString(t, 10)
 	addressName := "tf-test-" + randString(t, 10)
 	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private")
-	rootPassword := randString(t, 15)
+  authorizedNetwork := fmt.Sprintf("projects/%s/global/networks/%s", getTestProjectFromEnv(), networkName)
+  rootPassword := randString(t, 15)
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -1077,7 +1078,7 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-        Config: testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressName, rootPassword),
+        Config: testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressName, authorizedNetwork, rootPassword),
 			},
 			{
 				ResourceName:      "google_sql_database_instance.instance",
@@ -1125,7 +1126,7 @@ resource "google_sql_database_instance" "instance" {
 }
 `
 
-func testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressRangeName, rootPassword string) string {
+func testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressRangeName, authorizedNetwork, rootPassword string) string {
 	return fmt.Sprintf(`
 data "google_compute_network" "servicenet" {
   name                    = "%s"
@@ -1149,6 +1150,7 @@ resource "google_active_directory_domain" "ad-domain" {
   domain_name       = "ad.domain.com"
   locations         = ["us-central1"]
   reserved_ip_range = "10.128.0.0/9"
+  authorized_networks = "%s"
 }
 
 resource "google_sql_database_instance" "instance-with-ad" {
@@ -1169,7 +1171,7 @@ resource "google_sql_database_instance" "instance-with-ad" {
       domain = "ad.domain.com"
     }
   }
-}`, networkName, addressRangeName, databaseName, rootPassword)
+}`, networkName, addressRangeName, authorizedNetwork, databaseName, rootPassword)
 }
 
 func testGoogleSqlDatabaseInstanceConfig_withoutReplica(instanceName string) string {
