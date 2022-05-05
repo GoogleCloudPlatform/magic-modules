@@ -71,6 +71,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_vars_overrides:
           network_name: 'BootstrapSharedTestNetwork(t, "redis-scheduled-rdb-snapshot")'       
     properties:
+      persistenceConfig.persistenceMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       alternativeLocationId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       authorizedNetwork: !ruby/object:Overrides::Terraform::PropertyOverride
