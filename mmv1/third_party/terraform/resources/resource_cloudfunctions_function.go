@@ -300,7 +300,7 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 			"https_trigger_security_level": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "SECURE_OPTIONAL",
+				Computed:    true,
 				Description: `The security level for the function. Defaults to SECURE_OPTIONAL. Valid only if trigger_http is used.`,
 			},
 
