@@ -61,6 +61,7 @@ func resourceProjectOrgPolicyImporter(d *schema.ResourceData, meta interface{}) 
 
 func resourceGoogleProjectOrganizationPolicyCreate(d *schema.ResourceData, meta interface{}) error {
 	if isOrganizationPolicyUnset(d) {
+		d.SetId(fmt.Sprintf("%s:%s", d.Get("project"), d.Get("constraint")))
 		return resourceGoogleProjectOrganizationPolicyDelete(d, meta)
 	}
 
