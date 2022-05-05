@@ -89,7 +89,7 @@ func resourceStorageBucketObject() *schema.Resource {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ForceNew:      true,
-				ConflictsWith: []string{"source"},
+				ExactlyOneOf:  []string{"source"},
 				Sensitive:     true,
 				Description:   `Data as string to be uploaded. Must be defined if source is not. Note: The content field is marked as sensitive. To view the raw contents of the object, please define an output.`,
 			},
@@ -110,7 +110,7 @@ func resourceStorageBucketObject() *schema.Resource {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ForceNew:      true,
-				ConflictsWith: []string{"content"},
+				ExactlyOneOf:  []string{"content"},
 				Description:   `A path to the data you want to upload. Must be defined if content is not.`,
 			},
 
