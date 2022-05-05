@@ -411,7 +411,6 @@ objects:
         - !ruby/object:Api::Type::Enum
           name: persistenceMode
           min_version: beta
-          default_from_api: true
           description: |
             Optional. 
             Controls whether Persistence features are enabled. 
