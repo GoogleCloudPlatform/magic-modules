@@ -411,15 +411,14 @@ objects:
         - !ruby/object:Api::Type::Enum
           name: persistenceMode
           min_version: beta
+          default_from_api: true
           description: |
             Optional. 
             Controls whether Persistence features are enabled. 
             If not provided, the existing value will be used.
-            - PERSISTENCE_MODE_UNSPECIFIED: Not set.
             - DISABLED: Persistence is disabled for the instance, and any existing snapshots are deleted.
             - RDB: RDB based Persistence is enabled.
           values:
-            - :PERSISTENCE_MODE_UNSPECIFIED
             - :DISABLED
             - :RDB
           input: true
@@ -429,13 +428,11 @@ objects:
           description: |
             Optional. 
             Period between RDB snapshots. Snapshots will be attempted every period starting from the provided snapshot start time.
-            - SNAPSHOT_PERIOD_UNSPECIFIED: Not set.
             - ONE_HOUR: every 1 hour.
             - SIX_HOURS	every 6 hours.
             - TWELVE_HOURS: every 12 hours.
             - TWENTY_FOUR_HOURS: every 24 horus
           values:
-            - :SNAPSHOT_PERIOD_UNSPECIFIED
             - :ONE_HOUR
             - :SIX_HOURS
             - :TWELVE_HOURS
