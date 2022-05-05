@@ -410,21 +410,20 @@ func schemaNodeConfig() *schema.Schema {
 					Description: `Setting this field will assign instances of this pool to run on the specified node group. This is useful for running workloads on sole tenant nodes.`,
 				},
 				"advanced_machine_features": {
-                    Type:        schema.TypeList,
-                    MaxItems:    1,
-                    Optional:    true,
-                    Description: `Controls for advanced machine-related behavior features.`,
-                    Elem: &schema.Resource{
-                        Schema: map[string]*schema.Schema{
-                            "threads_per_core": {
-                                Type:        schema.TypeInt,
-                                Optional:    true,
-                                AtLeastOneOf: []string{"advanced_machine_features.0.threads_per_core"},
-                                Description: `The number of threads per physical core. To disable simultaneous multithreading (SMT) set this to 1. If unset, the maximum number of threads supported per core by the underlying processor is assumed.`,
-                            },
-                        },
-                    },
-                },
+					Type:        schema.TypeList,
+					MaxItems:    1,
+					Optional:    true,
+					Description: `Controls for advanced machine-related behavior features.`,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"threads_per_core": {
+								Type:        schema.TypeInt,
+								Required:    true,
+								Description: `The number of threads per physical core. To disable simultaneous multithreading (SMT) set this to 1. If unset, the maximum number of threads supported per core by the underlying processor is assumed.`,
+							},
+						},
+					},
+				},
 			},
 		},
 	}
