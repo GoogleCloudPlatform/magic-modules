@@ -1,4 +1,4 @@
-# [START compute_spot_instace_create]
+# [START compute_spot_instance_create]
 
 resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
   name         = "<%= ctx[:vars]['spot_instance_name'] %>"
@@ -25,4 +25,4 @@ resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
   }
 }
 
-# [END compute_spot_instace_create]
+# [END compute_spot_instance_create]
