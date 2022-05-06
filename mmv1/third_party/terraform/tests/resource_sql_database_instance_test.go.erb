@@ -1069,7 +1069,7 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 	databaseName := "tf-test-" + randString(t, 10)
 	addressName := "tf-test-" + randString(t, 10)
 	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private")
-  authorizedNetwork := fmt.Sprintf("projects/%s/global/networks/%s", getTestProjectFromEnv(), networkName)
+  //authorizedNetwork := fmt.Sprintf("projects/%s/global/networks/%s", getTestProjectFromEnv(), networkName)
   rootPassword := randString(t, 15)
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -1077,7 +1077,7 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-        Config: testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressName, authorizedNetwork, rootPassword),
+        Config: testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressName, rootPassword),
 			},
 			{
 				ResourceName:      "google_sql_database_instance.instance",
@@ -1125,7 +1125,7 @@ resource "google_sql_database_instance" "instance" {
 }
 `
 
-func testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressName, authorizedNetwork, rootPassword string) string {
+func testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressRangeName, rootPassword string) string {
 	return fmt.Sprintf(`
 data "google_compute_network" "servicenet" {
   name                    = "%s"
@@ -1156,7 +1156,7 @@ resource "google_sql_database_instance" "instance-with-ad" {
     tier = "db-custom-2-7680"
     ip_configuration {
       ipv4_enabled       = "false"
-      private_network    = "https://www.googleapis.com/compute/v1/projects/priyampatel-playground/global/networks/tf-bootstrap-net-sql-instance-private"
+      private_network    = data.google_compute_network.servicenet.self_link
     }
 
     active_directory_config {
