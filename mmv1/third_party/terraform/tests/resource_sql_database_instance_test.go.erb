@@ -1065,13 +1065,12 @@ func TestAccSqlDatabaseInstance_encryptionKey(t *testing.T) {
 
 func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 	t.Parallel()
-
+  //adDomainName := BootstrapSharedTestADDomain(t, "test-domain", "tf-bootstrap-net-sql-instance-private")
 	databaseName := "tf-test-" + randString(t, 10)
 	addressName := "tf-test-" + randString(t, 10)
 	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private")
   authorizedNetwork := fmt.Sprintf("projects/%s/global/networks/%s", getTestProjectFromEnv(), networkName)
   rootPassword := randString(t, 15)
-
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -1126,7 +1125,7 @@ resource "google_sql_database_instance" "instance" {
 }
 `
 
-func testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressRangeName, authorizedNetwork, rootPassword string) string {
+func testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressName, authorizedNetwork, rootPassword string) string {
 	return fmt.Sprintf(`
 data "google_compute_network" "servicenet" {
   name                    = "%s"
@@ -1146,13 +1145,6 @@ resource "google_service_networking_connection" "foobar" {
   reserved_peering_ranges = [google_compute_global_address.foobar.name]
 }
 
-resource "google_active_directory_domain" "ad-domain" {
-  domain_name       = "ad.domain.com"
-  locations         = ["us-central1"]
-  reserved_ip_range = "10.0.1.0/24"
-  authorized_networks = ["%s"]
-}
-
 resource "google_sql_database_instance" "instance-with-ad" {
   depends_on = [google_service_networking_connection.foobar]
   name             = "%s"
@@ -1164,14 +1156,14 @@ resource "google_sql_database_instance" "instance-with-ad" {
     tier = "db-custom-2-7680"
     ip_configuration {
       ipv4_enabled       = "false"
-      private_network    = data.google_compute_network.servicenet.self_link
+      private_network    = "https://www.googleapis.com/compute/v1/projects/priyampatel-playground/global/networks/tf-bootstrap-net-sql-instance-private"
     }
 
     active_directory_config {
       domain = "ad.domain.com"
     }
   }
-}`, networkName, addressRangeName, authorizedNetwork, databaseName, rootPassword)
+}`, networkName, addressRangeName, databaseName, rootPassword)
 }
 
 func testGoogleSqlDatabaseInstanceConfig_withoutReplica(instanceName string) string {

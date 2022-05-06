@@ -211,6 +211,57 @@ func BootstrapServiceAccount(t *testing.T, project, testRunner string) string {
 	return sa.Email
 }
 
+const SharedTestADDomainPrefix = "tf-bootstrap-ad"
+
+// BootstrapSharedTestADDomain will return a shared Active Directory(AD) Domain
+// for a test or set of tests. Often resources create complementing
+// AD domains, which we don't control and which don't get cleaned
+// up after our owned resource is deleted in test. These tenant resources
+// have quotas, so creating a shared test active directory domain prevents hitting these limits.
+//
+// testId specifies the test/suite for which a shared AD domain is used/initialized.
+// Returns the name of an AD domain, creating it if hasn't been created in the test projcet.
+// func BootstrapSharedTestADDomain(t *testing.T, testId string, networkName string) string {
+// 	project := getTestProjectFromEnv()
+// 	sharedADDomain := fmt.Sprintf("%s.%s.com", SharedTestADDomainPrefix, testId)
+// 	adDomainName := fmt.Sprintf("projects/%s/locations/global/domains/%s", project, sharedADDomain)
+
+// 	config := BootstrapConfig(t)
+// 	if config == nil {
+// 		return ""
+// 	}
+
+// 	log.Printf("[DEBUG] Getting shared test active directory domain %q", adDomainName)
+// 	url := fmt.Sprintf("%s%s", config.ActiveDirectoryBasePath, adDomainName)
+// 	res, err := sendRequestWithTimeout(config, "GET", project, url, config.userAgent, nil, 4*time.Minute)
+// 	if err != nil && isGoogleApiErrorWithCode(err, 404) {
+// 		log.Printf("[DEBUG] AD domain %q not found, bootstrapping", sharedADDomain)
+// 		url := fmt.Sprintf("%sprojects/%s/locations/global/domains?domainName=%s", config.ActiveDirectoryBasePath, project, sharedADDomain)
+// 		domainObj := map[string]interface{}{
+// 			"locations":          []string{"us-central1"},
+// 			"reservedIpRange":    "10.0.1.0/24",
+// 			"authorizedNetworks": []string{fmt.Sprintf("projects/%s/global/networks/%s", project, networkName)},
+// 		}
+
+// 		res, err := sendRequestWithTimeout(config, "POST", project, url, config.userAgent, domainObj, 60*time.Minute)
+// 		if err != nil {
+// 			t.Fatalf("Error bootstrapping shared active directory domain %q: %s", adDomainName, err)
+// 		}
+
+// 		log.Printf("[DEBUG] Waiting for active directory domain creation to finish")
+// 		err = computeOperationWaitTime(config, res, project, "Error bootstrapping shared active directory domain", config.userAgent, 60*time.Minute)
+// 		if err != nil {
+// 			t.Fatalf("Error bootstrapping shared test active directory domain %q: %s", adDomainName, err)
+// 		}
+// 	}
+
+// 	if res == nil {
+// 		t.Fatalf("Error getting shared test active directory %q: is nil", adDomainName)
+// 	}
+
+// 	return sharedADDomain
+// }
+
 const SharedTestNetworkPrefix = "tf-bootstrap-net-"
 
 // BootstrapSharedTestNetwork will return a shared compute network
