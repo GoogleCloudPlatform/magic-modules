@@ -83,19 +83,29 @@ func resourceSqlUser() *schema.Resource {
                 The default is the database's built-in user type. Flags include "BUILT_IN", "CLOUD_IAM_USER", or "CLOUD_IAM_SERVICE_ACCOUNT".`,
 				ValidateFunc: validation.StringInSlice([]string{"BUILT_IN", "CLOUD_IAM_USER", "CLOUD_IAM_SERVICE_ACCOUNT", ""}, false),
 			},
+			"sql_server_user_details": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"disabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: `If the user has been disabled.`,
+						},
+						"server_roles": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: `The server roles for this user in the database.`,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
+			},
 
-			"disabled": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
-				Description: `If the user has been disabled.`,
-			},
-			"server_roles": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Description: `The server roles for this user in the database.`,
-				Elem:        &schema.Schema{Type: schema.TypeString},
-			},
 			"project": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -117,6 +127,22 @@ func resourceSqlUser() *schema.Resource {
 	}
 }
 
+func expandSqlServerUserDetails(cfg interface{}) (*sqladmin.SqlServerUserDetails, error) {
+	raw := cfg.([]interface{})[0].(map[string]interface{})
+
+	ssud := &sqladmin.SqlServerUserDetails{}
+
+	if v, ok := raw["disabled"]; ok {
+		ssud.Disabled = v.(bool)
+	}
+	if v, ok := raw["server_roles"]; ok {
+		ssud.ServerRoles = expandStringArray(v)
+	}
+
+	return ssud, nil
+
+}
+
 func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
@@ -134,8 +160,6 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	password := d.Get("password").(string)
 	host := d.Get("host").(string)
 	typ := d.Get("type").(string)
-	disabled := d.Get("disabled").(bool)
-	serverRoles := expandStringArray(d.Get("server_roles"))
 
 	user := &sqladmin.User{
 		Name:     name,
@@ -143,10 +167,14 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 		Password: password,
 		Host:     host,
 		Type:     typ,
-		SqlserverUserDetails: &sqladmin.SqlServerUserDetails{
-			Disabled:    disabled,
-			ServerRoles: serverRoles,
-		},
+	}
+
+	if v, ok := d.GetOk("sql_server_user_details"); ok {
+		ssud, err := expandSqlServerUserDetails(v)
+		if err != nil {
+			return err
+		}
+		user.SqlserverUserDetails = ssud
 	}
 
 	mutexKV.Lock(instanceMutexKey(project, instance))
@@ -274,17 +302,19 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 		instance := d.Get("instance").(string)
 		password := d.Get("password").(string)
 		host := d.Get("host").(string)
-		disabled := d.Get("disabled").(bool)
-		serverRoles := expandStringArray(d.Get("server_roles").(string))
 
 		user := &sqladmin.User{
 			Name:     name,
 			Instance: instance,
 			Password: password,
-			SqlserverUserDetails: &sqladmin.SqlServerUserDetails{
-				Disabled:    disabled,
-				ServerRoles: serverRoles,
-			},
+		}
+
+		if v, ok := d.GetOk("sql_server_user_details"); ok {
+			ssud, err := expandSqlServerUserDetails(v)
+			if err != nil {
+				return err
+			}
+			user.SqlserverUserDetails = ssud
 		}
 
 		mutexKV.Lock(instanceMutexKey(project, instance))
