@@ -3,7 +3,8 @@
 resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
   name         = "<%= ctx[:vars]['custom_hostname_instance_name'] %>"
   machine_type = "f1-micro"
-  provider = google
+  provider     = google
+  zone         = "us-central1-a"
 
   # Set a custom hostname below 
   hostname = "hashicorptest.com"
