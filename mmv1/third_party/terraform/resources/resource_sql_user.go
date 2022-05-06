@@ -135,7 +135,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	host := d.Get("host").(string)
 	typ := d.Get("type").(string)
 	disabled := d.Get("disabled").(bool)
-	serverRoles :=  expandStringArray(d.Get("server_roles").(string))
+	serverRoles := expandStringArray(d.Get("server_roles").(string))
 
 	user := &sqladmin.User{
 		Name:     name,
@@ -144,9 +144,9 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 		Host:     host,
 		Type:     typ,
 		SqlserverUserDetails: &sqladmin.SqlServerUserDetails{
-			Disabled: disabled,
+			Disabled:    disabled,
 			ServerRoles: serverRoles,
-		},		
+		},
 	}
 
 	mutexKV.Lock(instanceMutexKey(project, instance))
@@ -252,7 +252,7 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	if err := d.Set("server_roles", user.SqlserverUserDetails.ServerRoles); err != nil {
 		return fmt.Errorf("Error setting server_roles: %s", err)
-	}	
+	}
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
 	return nil
 }
@@ -275,16 +275,16 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 		password := d.Get("password").(string)
 		host := d.Get("host").(string)
 		disabled := d.Get("disabled").(bool)
-		serverRoles :=  expandStringArray(d.Get("server_roles").(string))		
+		serverRoles := expandStringArray(d.Get("server_roles").(string))
 
 		user := &sqladmin.User{
 			Name:     name,
 			Instance: instance,
 			Password: password,
 			SqlserverUserDetails: &sqladmin.SqlServerUserDetails{
-				Disabled: disabled,
+				Disabled:    disabled,
 				ServerRoles: serverRoles,
-			},			
+			},
 		}
 
 		mutexKV.Lock(instanceMutexKey(project, instance))
