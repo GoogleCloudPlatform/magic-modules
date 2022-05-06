@@ -262,6 +262,8 @@ resource "google_sql_user" "user1" {
   instance = google_sql_database_instance.instance.name
   host     = "google.com"
   password = "%s"
+  disabled = "false"
+  server_roles = [ "admin" ]  
 }
 
 resource "google_sql_user" "user2" {

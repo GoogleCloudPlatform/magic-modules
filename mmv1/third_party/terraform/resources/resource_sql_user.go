@@ -84,6 +84,18 @@ func resourceSqlUser() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"BUILT_IN", "CLOUD_IAM_USER", "CLOUD_IAM_SERVICE_ACCOUNT", ""}, false),
 			},
 
+			"disabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: `If the user has been disabled.`,
+			},
+			"server_roles": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: `The server roles for this user in the database.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"project": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -122,6 +134,8 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	password := d.Get("password").(string)
 	host := d.Get("host").(string)
 	typ := d.Get("type").(string)
+	disabled := d.Get("disabled").(bool)
+	serverRoles :=  expandStringArray(d.Get("server_roles").(string))
 
 	user := &sqladmin.User{
 		Name:     name,
@@ -129,6 +143,10 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 		Password: password,
 		Host:     host,
 		Type:     typ,
+		SqlserverUserDetails: &sqladmin.SqlServerUserDetails{
+			Disabled: disabled,
+			ServerRoles: serverRoles,
+		},		
 	}
 
 	mutexKV.Lock(instanceMutexKey(project, instance))
@@ -229,6 +247,12 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
+	if err := d.Set("disabled", user.SqlserverUserDetails.Disabled); err != nil {
+		return fmt.Errorf("Error setting disabled: %s", err)
+	}
+	if err := d.Set("server_roles", user.SqlserverUserDetails.ServerRoles); err != nil {
+		return fmt.Errorf("Error setting server_roles: %s", err)
+	}	
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
 	return nil
 }
@@ -250,11 +274,17 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 		instance := d.Get("instance").(string)
 		password := d.Get("password").(string)
 		host := d.Get("host").(string)
+		disabled := d.Get("disabled").(bool)
+		serverRoles :=  expandStringArray(d.Get("server_roles").(string))		
 
 		user := &sqladmin.User{
 			Name:     name,
 			Instance: instance,
 			Password: password,
+			SqlserverUserDetails: &sqladmin.SqlServerUserDetails{
+				Disabled: disabled,
+				ServerRoles: serverRoles,
+			},			
 		}
 
 		mutexKV.Lock(instanceMutexKey(project, instance))
