@@ -244,7 +244,6 @@ func BootstrapSharedTestADDomain(t *testing.T, testId string, networkName string
 		}
 
 		_, err := sendRequestWithTimeout(config, "POST", project, postURL, config.userAgent, domainObj, 60*time.Minute)
-
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared active directory domain %q: %s", adDomainName, err)
 		}
