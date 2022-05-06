@@ -135,7 +135,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	host := d.Get("host").(string)
 	typ := d.Get("type").(string)
 	disabled := d.Get("disabled").(bool)
-	serverRoles := expandStringArray(d.Get("server_roles").(string))
+	serverRoles := expandStringArray(d.Get("server_roles"))
 
 	user := &sqladmin.User{
 		Name:     name,
