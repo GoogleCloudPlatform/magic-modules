@@ -1080,7 +1080,7 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
         Config: testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressName, rootPassword, adDomainName),
 			},
 			{
-				ResourceName:      "google_sql_database_instance.instance",
+				ResourceName:      "google_sql_database_instance.instance-with-ad",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
