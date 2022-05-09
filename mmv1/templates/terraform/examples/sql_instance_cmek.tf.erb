@@ -1,5 +1,5 @@
 # [START cloud_sql_instance_service_identity]
-resource "google_project_service_identity" "gcp-sa-cloud-sql" {
+resource "google_project_service_identity" "gcp_sa_cloud_sql" {
   provider = google-beta
   service  = "sqladmin.googleapis.com"
 }
@@ -8,7 +8,7 @@ resource "google_project_service_identity" "gcp-sa-cloud-sql" {
 # [START cloud_sql_instance_keyring]
 resource "google_kms_key_ring" "keyring" {
   name     = "<%= ctx[:vars]['keyring_name'] %>"
-  location = "europe-north1"
+  location = "us-central1"
 }
 # [END cloud_sql_instance_keyring]
 
@@ -26,7 +26,7 @@ resource "google_kms_crypto_key_iam_binding" "crypto_key" {
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
   members = [
-    "serviceAccount:${google_project_service_identity.gcp-sa-cloud-sql.email}",
+    "serviceAccount:${google_project_service_identity.gcp_sa_cloud_sql.email}",
   ]
 }
 # [END cloud_sql_instance_crypto_key]
