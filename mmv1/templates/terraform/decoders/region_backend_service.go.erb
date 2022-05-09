@@ -24,6 +24,19 @@ if ok && m["enabled"] == false {
 	delete(res, "iap")
 }
 
+<% unless version == 'ga' -%>
+// Since we add in a NONE subsetting policy, we need to remove it in some
+// cases for backwards compatibility with the config
+v, ok = res["subsetting"]
+if ok && v != nil {
+	subsetting := v.(map[string]interface{})
+	policy, ok := subsetting["policy"]
+	if ok && policy == "NONE" {
+		delete(res, "subsetting")
+	}
+}
+<% end -%>
+
 // Requests with consistentHash will error for specific values of
 // localityLbPolicy. However, the API will not remove it if the backend
 // service is updated to from supporting to non-supporting localityLbPolicy

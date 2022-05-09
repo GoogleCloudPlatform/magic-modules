@@ -4,6 +4,7 @@ resource "google_privateca_certificate_authority" "test-ca" {
   location = "us-central1"
   pool = "<%= ctx[:vars]["pool"] %>"
   ignore_active_certificates_on_deletion = true
+  deletion_protection = false
   config {
     subject_config {
       subject {

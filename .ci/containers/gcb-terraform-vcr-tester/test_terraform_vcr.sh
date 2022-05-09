@@ -76,6 +76,8 @@ export ACCTEST_PARALLELISM=32
 export GOOGLE_CREDENTIALS=$SA_KEY
 export GOOGLE_APPLICATION_CREDENTIALS=$local_path/sa_key.json
 
+echo "checking terraform version"
+terraform version
 
 TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v -run=TestAcc -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > replaying_test.log
 
@@ -88,11 +90,11 @@ test_suffix=""
 
 while [[ -n $TESTS_TERMINATED ]]; do
   # store the previous replaying build log
-  gsutil -q cp replaying_test$test_suffix.log gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
+  gsutil -h "Content-Type:text/plain" -q cp replaying_test$test_suffix.log gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
 
   if [[ $counter -gt 3 ]]; then
     comment="Failed to run VCR tests in REPLAYING mode${NEWLINE}"
-    comment+="You can view the build log here: https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/replaying_test$test_suffix.log${NEWLINE}"
+    comment+="View the [build log](https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/replaying_test$test_suffix.log)${NEWLINE}"
     comment+="If you believe the error is unrelated to your PR, please rerun the tests"
     add_comment "${comment}"
     update_status "failure"
@@ -112,10 +114,10 @@ while [[ -n $TESTS_TERMINATED ]]; do
 done
 
 # store replaying build log
-gsutil -q cp replaying_test$test_suffix.log gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
+gsutil -h "Content-Type:text/plain" -q cp replaying_test$test_suffix.log gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
 
 # store replaying test logs
-gsutil -m -q cp testlog/replaying/* gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/replaying/
+gsutil -h "Content-Type:text/plain" -m -q cp testlog/replaying/* gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/replaying/
 
 # handle provider crash
 TESTS_PANIC=$(grep "^panic: " replaying_test$test_suffix.log)
@@ -123,7 +125,7 @@ TESTS_PANIC=$(grep "^panic: " replaying_test$test_suffix.log)
 if [[ -n $TESTS_PANIC ]]; then
   comment="The provider crashed while running the VCR tests in REPLAYING mode${NEWLINE}"
   comment+="Please fix it to complete your PR${NEWLINE}"
-  comment+="You can view the build log here: https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/replaying_test$test_suffix.log"
+  comment+="View the [build log](https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/replaying_test$test_suffix.log)"
   add_comment "${comment}"
   update_status "failure"
   exit 0
@@ -165,6 +167,8 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   add_comment "${comment}"
   # RECORDING mode
   export VCR_MODE=RECORDING
+  # Clear fixtures folder
+  rm $VCR_PATH/*
   TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run=$FAILED_TESTS_PATTERN -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > recording_test.log
   test_exit_code=$?
 
@@ -172,10 +176,10 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   gsutil -m -q cp fixtures/* gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$pr_number/fixtures/
 
   # store recording build log
-  gsutil -q cp recording_test.log gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
+  gsutil -h "Content-Type:text/plain" -q cp recording_test.log gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
 
   # store recording test logs
-  gsutil -m -q cp testlog/recording/* gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording/
+  gsutil -h "Content-Type:text/plain" -m -q cp testlog/recording/* gs://vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording/
 
   # handle provider crash
   RECORDING_TESTS_PANIC=$(grep "^panic: " recording_test.log)
@@ -183,15 +187,15 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   if [[ -n $RECORDING_TESTS_PANIC ]]; then
     comment="The provider crashed while running the VCR tests in RECORDING mode${NEWLINE}"
     comment+="Please fix it to complete your PR${NEWLINE}"
-    comment+="You can view the build log here: https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/recording_test.log"
+    comment+="View the [build log](https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/recording_test.log)"
     add_comment "${comment}"
     update_status "failure"
     exit 0
   fi
 
 
-  RECORDING_FAILED_TESTS=$(grep "^--- FAIL: TestAcc" recording_test.log | awk '{print "`"$3"`"}')
-  RECORDING_PASSED_TESTS=$(grep "^--- PASS: TestAcc" recording_test.log | awk '{print "`"$3"`"}')
+  RECORDING_FAILED_TESTS=$(grep "^--- FAIL: TestAcc" recording_test.log | awk -v pr_number=$pr_number -v build_id=$build_id '{print "`"$3"`[[view](https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/recording/"$3".log)]"}')
+  RECORDING_PASSED_TESTS=$(grep "^--- PASS: TestAcc" recording_test.log | awk -v pr_number=$pr_number -v build_id=$build_id '{print "`"$3"`[[view](https://storage.cloud.google.com/vcr-test-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/recording/"$3".log)]"}')
 
   comment=""
   if [[ -n $RECORDING_PASSED_TESTS ]]; then

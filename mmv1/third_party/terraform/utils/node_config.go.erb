@@ -49,8 +49,7 @@ func schemaNodeConfig() *schema.Schema {
 					Optional:     true,
 					Computed:     true,
 					ForceNew:     true,
-					ValidateFunc: validation.StringInSlice([]string{"pd-standard", "pd-balanced", "pd-ssd"}, false),
-					Description:  `Type of the disk attached to each node.`,
+					Description:  `Type of the disk attached to each node. Such as pd-standard, pd-balanced or pd-ssd`,
 				},
 
 				"guest_accelerator": &schema.Schema{
