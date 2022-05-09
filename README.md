@@ -301,3 +301,5 @@ Target single resource
 
 For more advanced usage of mmv1 compiler flags, please execute the compiler directly
 from within the mmv1 directory.
+
+For additional logging in the tpgtools compiler set `VERBOSE=true` when executing the `make` command
