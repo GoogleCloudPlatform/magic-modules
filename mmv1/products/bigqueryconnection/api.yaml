@@ -16,8 +16,8 @@ name: BigqueryConnection
 display_name: BigQuery Connection
 versions:
   - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://bigqueryconnection.googleapis.com/v1beta1/
+    name: ga
+    base_url: https://bigqueryconnection.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/bigquery
 apis_required:
@@ -74,9 +74,11 @@ objects:
         description: |
           True if the connection has credential assigned. 
       - !ruby/object:Api::Type::NestedObject
-        name: cloudSql
+        name: 'cloudSql'
+        exactly_one_of:
+          - cloud_sql
+          - cloud_resource
         description: Cloud SQL properties.
-        required: true
         properties:
           - !ruby/object:Api::Type::String
             name: 'instanceId'
@@ -107,3 +109,15 @@ objects:
               - :DATABASE_TYPE_UNSPECIFIED
               - :POSTGRES
               - :MYSQL
+      - !ruby/object:Api::Type::NestedObject
+        name: 'cloudResource'
+        exactly_one_of:
+          - cloud_sql
+          - cloud_resource
+        description: Cloud Resource properties.
+        send_empty_value: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: serviceAccountId
+            description: The account ID of the service created for the purpose of this connection.
+            output: true

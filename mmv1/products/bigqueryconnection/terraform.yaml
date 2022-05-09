@@ -30,7 +30,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/bigquery_connection.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        min_version: beta
         name: "bigquery_connection_basic"
         pull_external: true
         primary_resource_id: "connection"
@@ -47,7 +46,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "cloud_sql.0.credential" # password removed
       - !ruby/object:Provider::Terraform::Examples
-        min_version: beta
         name: "bigquery_connection_full"
         pull_external: true
         primary_resource_id: "connection"
@@ -64,6 +62,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "cloud_sql.0.credential" # password removed
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_connection_cloud_resource"
+        pull_external: true
+        primary_resource_id: "connection"
+        vars:
+          connection_id: "my-connection"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
