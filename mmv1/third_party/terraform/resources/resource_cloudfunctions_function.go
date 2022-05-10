@@ -146,6 +146,18 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 				},
 			},
 
+			"docker_repository": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `User managed repository created in Artifact Registry optionally with a customer managed encryption key. If specified, deployments will use Artifact Registry for storing images built with Cloud Build.`,
+			},
+
+			"kms_key_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `Resource name of a KMS crypto key (managed by the user) used to encrypt/decrypt function resources.`,
+			},
+
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -283,6 +295,13 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: `URL which triggers function execution. Returned only if trigger_http is used.`,
+			},
+
+			"https_trigger_security_level": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: `The security level for the function. Defaults to SECURE_OPTIONAL. Valid only if trigger_http is used.`,
 			},
 
 			"max_instances": {
@@ -469,6 +488,7 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 		function.EventTrigger = expandEventTrigger(v.([]interface{}), project)
 	} else if v, ok := d.GetOk("trigger_http"); ok && v.(bool) {
 		function.HttpsTrigger = &cloudfunctions.HttpsTrigger{}
+		function.HttpsTrigger.SecurityLevel = d.Get("https_trigger_security_level").(string)
 	} else {
 		return fmt.Errorf("One of `event_trigger` or `trigger_http` is required: " +
 			"You must specify a trigger when deploying a new function.")
@@ -496,6 +516,14 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 
 	if v, ok := d.GetOk("vpc_connector_egress_settings"); ok {
 		function.VpcConnectorEgressSettings = v.(string)
+	}
+
+	if v, ok := d.GetOk("docker_repository"); ok {
+		function.DockerRepository = v.(string)
+	}
+
+	if v, ok := d.GetOk("kms_key_name"); ok {
+		function.KmsKeyName = v.(string)
 	}
 
 	if v, ok := d.GetOk("max_instances"); ok {
@@ -624,10 +652,19 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 		if err := d.Set("https_trigger_url", function.HttpsTrigger.Url); err != nil {
 			return fmt.Errorf("Error setting https_trigger_url: %s", err)
 		}
+		if err := d.Set("https_trigger_security_level", function.HttpsTrigger.SecurityLevel); err != nil {
+			return fmt.Errorf("Error setting https_trigger_security_level: %s", err)
+		}
 	}
 
 	if err := d.Set("event_trigger", flattenEventTrigger(function.EventTrigger)); err != nil {
 		return fmt.Errorf("Error setting event_trigger: %s", err)
+	}
+	if err := d.Set("docker_repository", function.DockerRepository); err != nil {
+		return fmt.Errorf("Error setting docker_repository: %s", err)
+	}
+	if err := d.Set("kms_key_name", function.KmsKeyName); err != nil {
+		return fmt.Errorf("Error setting kms_key_name: %s", err)
 	}
 	if err := d.Set("max_instances", function.MaxInstances); err != nil {
 		return fmt.Errorf("Error setting max_instances: %s", err)
@@ -752,6 +789,21 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	if d.HasChange("event_trigger") {
 		function.EventTrigger = expandEventTrigger(d.Get("event_trigger").([]interface{}), project)
 		updateMaskArr = append(updateMaskArr, "eventTrigger", "eventTrigger.failurePolicy.retry")
+	}
+
+	if d.HasChange("https_trigger_security_level") {
+		function.HttpsTrigger.SecurityLevel = d.Get("https_trigger_security_level").(string)
+		updateMaskArr = append(updateMaskArr, "httpsTrigger", "httpsTrigger.securityLevel")
+	}
+
+	if d.HasChange("docker_repository") {
+		function.Runtime = d.Get("docker_repository").(string)
+		updateMaskArr = append(updateMaskArr, "dockerRepository")
+	}
+
+	if d.HasChange("kms_key_name") {
+		function.Runtime = d.Get("docker_repository").(string)
+		updateMaskArr = append(updateMaskArr, "kmsKeyName")
 	}
 
 	if d.HasChange("max_instances") {

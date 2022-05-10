@@ -1611,7 +1611,7 @@ func flattenEncryptionConfiguration(ec *bigquery.EncryptionConfiguration) []map[
 	if len(paths) > 0 {
 		return []map[string]interface{}{
 			{
-				"kms_key_name":    paths[0],
+				"kms_key_name":    paths[1],
 				"kms_key_version": ec.KmsKeyName,
 			},
 		}

@@ -111,6 +111,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 									"versioned_expr": {
 										Type:         schema.TypeString,
 										Optional:     true,
+										Default:      "",
 										ValidateFunc: validation.StringInSlice([]string{"SRC_IPS_V1"}, false),
 										Description:  `Predefined rule expression. If this field is specified, config must also be specified. Available options:   SRC_IPS_V1: Must specify the corresponding src_ip_ranges field in config.`,
 									},
@@ -150,6 +151,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 
 						"description": {
 							Type:        schema.TypeString,
+							Default:     "",
 							Optional:    true,
 							Description: `An optional description of this rule. Max size is 64.`,
 						},
@@ -270,6 +272,29 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 									},
 								},
 							},
+						},
+
+						"redirect_options": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"type": {
+										Type:         schema.TypeString,
+										Required:     true,
+										ValidateFunc: validation.StringInSlice([]string{"EXTERNAL_302", "GOOGLE_RECAPTCHA"}, false),
+										Description:  `Type of the redirect action. Available options: EXTERNAL_302: Must specify the corresponding target field in config. GOOGLE_RECAPTCHA: Cannot specify target field in config.`,
+									},
+
+									"target": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										Description:  `Target for the redirect action. This is required if the type is EXTERNAL_302 and cannot be specified for GOOGLE_RECAPTCHA.`,
+									},
+								},
+							},
+							Description: `Parameters defining the redirect action. Cannot be specified for any other actions.`,
 						},
 					<% end -%>
 					},
@@ -636,6 +661,7 @@ func expandSecurityPolicyRule(raw interface{}) *compute.SecurityPolicyRule {
 		Match:           	expandSecurityPolicyMatch(data["match"].([]interface{})),
 	<% unless version == 'ga' -%>
 		RateLimitOptions:	expandSecurityPolicyRuleRateLimitOptions(data["rate_limit_options"].([]interface{})),
+		RedirectOptions:        expandSecurityPolicyRuleRedirectOptions(data["redirect_options"].([]interface{})),
 	<% end -%>
 		ForceSendFields: 	[]string{"Description", "Preview"},
 	}
@@ -691,6 +717,7 @@ func flattenSecurityPolicyRules(rules []*compute.SecurityPolicyRule) []map[strin
 			"match":       		flattenMatch(rule.Match),
 		<% unless version == 'ga' -%>
 			"rate_limit_options":	flattenSecurityPolicyRuleRateLimitOptions(rule.RateLimitOptions),
+			"redirect_options":     flattenSecurityPolicyRedirectOptions(rule.RedirectOptions),
 		<% end -%>
 		}
 
@@ -799,13 +826,14 @@ func expandSecurityPolicyRuleRateLimitOptions(configured []interface{}) *compute
 
 	data := configured[0].(map[string]interface{})
 	return &compute.SecurityPolicyRuleRateLimitOptions{
-		BanThreshold:       expandThreshold(data["ban_threshold"].([]interface{})),
-		RateLimitThreshold: expandThreshold(data["rate_limit_threshold"].([]interface{})),
-		ExceedAction:       data["exceed_action"].(string),
-		ConformAction:      data["conform_action"].(string),
-		EnforceOnKey:       data["enforce_on_key"].(string),
-		EnforceOnKeyName:   data["enforce_on_key_name"].(string),
-		BanDurationSec:     int64(data["ban_duration_sec"].(int)),
+		BanThreshold:          expandThreshold(data["ban_threshold"].([]interface{})),
+		RateLimitThreshold:    expandThreshold(data["rate_limit_threshold"].([]interface{})),
+		ExceedAction:          data["exceed_action"].(string),
+		ConformAction:         data["conform_action"].(string),
+		EnforceOnKey:          data["enforce_on_key"].(string),
+		EnforceOnKeyName:      data["enforce_on_key_name"].(string),
+		BanDurationSec:        int64(data["ban_duration_sec"].(int)),
+		ExceedRedirectOptions: expandSecurityPolicyRuleRedirectOptions(data["exceed_redirect_options"].([]interface{})),
 	}
 }
 
@@ -827,13 +855,14 @@ func flattenSecurityPolicyRuleRateLimitOptions(conf *compute.SecurityPolicyRuleR
 	}
 
 	data := map[string]interface{}{
-		"ban_threshold":        flattenThreshold(conf.BanThreshold),
-		"rate_limit_threshold": flattenThreshold(conf.RateLimitThreshold),
-		"exceed_action":        conf.ExceedAction,
-		"conform_action":       conf.ConformAction,
-		"enforce_on_key":       conf.EnforceOnKey,
-		"enforce_on_key_name":  conf.EnforceOnKeyName,
-		"ban_duration_sec":     conf.BanDurationSec,
+		"ban_threshold":           flattenThreshold(conf.BanThreshold),
+		"rate_limit_threshold":    flattenThreshold(conf.RateLimitThreshold),
+		"exceed_action":           conf.ExceedAction,
+		"conform_action":          conf.ConformAction,
+		"enforce_on_key":          conf.EnforceOnKey,
+		"enforce_on_key_name":     conf.EnforceOnKeyName,
+		"ban_duration_sec":        conf.BanDurationSec,
+		"exceed_redirect_options": flattenSecurityPolicyRedirectOptions(conf.ExceedRedirectOptions),
 	}
 
 	return []map[string]interface{}{data}
@@ -847,6 +876,31 @@ func flattenThreshold(conf *compute.SecurityPolicyRuleRateLimitOptionsThreshold)
 	data := map[string]interface{}{
 		"count":        conf.Count,
 		"interval_sec": conf.IntervalSec,
+	}
+
+	return []map[string]interface{}{data}
+}
+
+func expandSecurityPolicyRuleRedirectOptions(configured []interface{}) *compute.SecurityPolicyRuleRedirectOptions {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+
+	data := configured[0].(map[string]interface{})
+	return &compute.SecurityPolicyRuleRedirectOptions{
+		Type:   data["type"].(string),
+		Target: data["target"].(string),
+	}
+}
+
+func flattenSecurityPolicyRedirectOptions(conf *compute.SecurityPolicyRuleRedirectOptions) []map[string]interface{} {
+	if conf == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{
+		"type":   conf.Type,
+		"target": conf.Target,
 	}
 
 	return []map[string]interface{}{data}

@@ -16,7 +16,6 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -80,12 +79,7 @@ func main() {
 		if skipResource(resource) {
 			continue
 		}
-		resJSON, err := json.MarshalIndent(resource, "", "  ")
-		if err != nil {
-			glog.Errorf("Failed to marshal resource struct")
-		} else {
-			glog.Infof("Generating from resource %s", string(resJSON))
-		}
+		glog.Infof("Generating from resource %s", resource.TitleCaseFullName())
 
 		generateResourceFile(resource)
 		generateSweeperFile(resource)
@@ -193,6 +187,9 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 				}
 
 				overrides := loadOverrides(packagePath, resourceFile.Name())
+				if(len(overrides) > 0){
+					glog.Infof("Loaded overrides for %s", resourceFile.Name())
+				}
 
 				newResources = append(newResources, createResourcesFromDocumentAndOverrides(document, overrides, packagePath, version)...)
 			}
@@ -203,6 +200,8 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 			}
 
 			products[version] = append(products[version], GetProductMetadataFromDocument(document, packagePath))
+			glog.Infof("Loaded product %s", packagePath)
+
 			resources[version] = append(resources[version], newResources...)
 		}
 	}

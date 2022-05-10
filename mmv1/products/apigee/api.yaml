@@ -171,9 +171,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'location'
         description: |
-          Compute Engine location where the instance resides. For trial organization
-          subscriptions, the location must be a Compute Engine zone. For paid organization
-          subscriptions, it should correspond to a Compute Engine region.
+          Required. Compute Engine location where the instance resides.
         required: true
       - !ruby/object:Api::Type::String
         name: 'peeringCidrRange'
@@ -213,6 +211,22 @@ objects:
         name: 'port'
         description: |
           Output only. Port number of the exposed Apigee endpoint.
+        output: true
+      - !ruby/object:Api::Type::Array
+        name: 'consumerAcceptList'
+        description: |
+          Optional. Customer accept list represents the list of projects (id/number) on customer
+          side that can privately connect to the service attachment. It is an optional field
+          which the customers can provide during the instance creation. By default, the customer
+          project associated with the Apigee organization will be included to the list.
+        required: false
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::String
+        name: 'serviceAttachment'
+        description: |
+          Output only. Resource name of the service attachment created for the instance in
+          the format: projects/*/regions/*/serviceAttachments/* Apigee customers can privately
+          forward traffic to this service attachment using the PSC endpoints.
         output: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
