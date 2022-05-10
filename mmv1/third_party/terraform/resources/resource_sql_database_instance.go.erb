@@ -158,9 +158,9 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 							Description: `This specifies when the instance should be active. Can be either ALWAYS, NEVER or ON_DEMAND.`,
 						},
 						"active_directory_config": {
-            	Type:     schema.TypeList,
+							Type:     schema.TypeList,
 							Optional: true,
-              MaxItems: 1,
+							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"domain": {
