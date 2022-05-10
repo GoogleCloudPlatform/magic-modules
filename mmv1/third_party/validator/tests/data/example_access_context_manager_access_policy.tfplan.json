@@ -1,0 +1,85 @@
+{
+    "format_version": "1.0",
+    "terraform_version": "1.1.9",
+    "planned_values": {
+        "root_module": {
+            "resources": [
+                {
+                    "address": "google_access_context_manager_access_policy.access-policy",
+                    "mode": "managed",
+                    "type": "google_access_context_manager_access_policy",
+                    "name": "access-policy",
+                    "provider_name": "google",
+                    "schema_version": 0,
+                    "values": {
+                        "parent": "organizations/{{.OrgID}}",
+                        "timeouts": null,
+                        "title": "Scoped Access Policy"
+                    },
+                    "sensitive_values": {
+                        "scopes": []
+                    }
+                }
+            ]
+        }
+    },
+    "resource_changes": [
+        {
+            "address": "google_access_context_manager_access_policy.access-policy",
+            "mode": "managed",
+            "type": "google_access_context_manager_access_policy",
+            "name": "access-policy",
+            "provider_name": "google",
+            "change": {
+                "actions": [
+                    "create"
+                ],
+                "before": null,
+                "after": {
+                    "parent": "organizations/{{.OrgID}}",
+                    "timeouts": null,
+                    "title": "Scoped Access Policy"
+                },
+                "after_unknown": {
+                    "create_time": true,
+                    "id": true,
+                    "name": true,
+                    "scopes": true,
+                    "update_time": true
+                },
+                "before_sensitive": false,
+                "after_sensitive": {
+                    "scopes": []
+                }
+            }
+        }
+    ],
+    "configuration": {
+        "root_module": {
+            "resources": [
+                {
+                    "address": "google_access_context_manager_access_policy.access-policy",
+                    "mode": "managed",
+                    "type": "google_access_context_manager_access_policy",
+                    "name": "access-policy",
+                    "provider_config_key": "google",
+                    "expressions": {
+                        "parent": {
+                            "constant_value": "organizations/{{.OrgID}}"
+                        },
+                        "scopes": {
+                            "references": [
+                                "google_project.{{.Provider.project}}.number",
+                                "google_project.{{.Provider.project}}"
+                            ]
+                        },
+                        "title": {
+                            "constant_value": "Scoped Access Policy"
+                        }
+                    },
+                    "schema_version": 0
+                }
+            ]
+        }
+    }
+}
