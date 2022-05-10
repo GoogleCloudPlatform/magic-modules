@@ -241,7 +241,6 @@ func BootstrapSharedTestADDomain(t *testing.T, testId string, networkName string
 		}
 
 		log.Printf("[DEBUG] Waiting for active directory domain creation to finish")
-		//time.Sleep(60 * time.Minute)
 	}
 
 	_, err = sendRequestWithTimeout(config, "GET", project, getURL, config.userAgent, nil, 4*time.Minute)

@@ -1068,8 +1068,8 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 	databaseName := "tf-test-" + randString(t, 10)
 	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private-test-ad")
 	addressName := "tf-test-" + randString(t, 10)
-  rootPassword := randString(t, 15)
-  adDomainName := BootstrapSharedTestADDomain(t, "test-domain", networkName)
+	rootPassword := randString(t, 15)
+	adDomainName := BootstrapSharedTestADDomain(t, "test-domain", networkName)
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -1077,7 +1077,7 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-        Config: testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressName, rootPassword, adDomainName),
+				Config: testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressName, rootPassword, adDomainName),
 			},
 			{
 				ResourceName:      "google_sql_database_instance.instance-with-ad",
