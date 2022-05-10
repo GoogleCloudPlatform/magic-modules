@@ -157,6 +157,20 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 							Default:  "ALWAYS",
 							Description: `This specifies when the instance should be active. Can be either ALWAYS, NEVER or ON_DEMAND.`,
 						},
+						"active_directory_config": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"domain": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: `Domain name of the Active Directory for SQL Server (e.g., mydomain.com).`,
+									},
+								},
+							},
+						},
 						"availability_type": {
 							Type:             schema.TypeString,
 							Optional:         true,
@@ -969,6 +983,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}) *sqladmin.Setti
 		Tier:                        _settings["tier"].(string),
 		ForceSendFields:             []string{"StorageAutoResize"},
 		ActivationPolicy:            _settings["activation_policy"].(string),
+		ActiveDirectoryConfig:       expandActiveDirectoryConfig(_settings["active_directory_config"].([]interface{})),
 		AvailabilityType:            _settings["availability_type"].(string),
 		Collation:                   _settings["collation"].(string),
 		DataDiskSizeGb:              int64(_settings["disk_size"].(int)),
@@ -1128,6 +1143,18 @@ func expandBackupRetentionSettings(configured interface{}) *sqladmin.BackupReten
 	return &sqladmin.BackupRetentionSettings{
 		RetainedBackups: int64(config["retained_backups"].(int)),
 		RetentionUnit:   config["retention_unit"].(string),
+	}
+}
+
+func expandActiveDirectoryConfig(configured interface{}) *sqladmin.SqlActiveDirectoryConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 {
+		return nil
+	}
+
+	config := l[0].(map[string]interface{})
+	return &sqladmin.SqlActiveDirectoryConfig{
+		Domain: config["domain"].(string),
 	}
 }
 
@@ -1374,6 +1401,10 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 		"user_labels":                 settings.UserLabels,
 	}
 
+	if settings.ActiveDirectoryConfig != nil {
+		data["active_directory_config"] = flattenActiveDirectoryConfig(settings.ActiveDirectoryConfig)
+	}
+
 	if settings.BackupConfiguration != nil {
 		data["backup_configuration"] = flattenBackupConfiguration(settings.BackupConfiguration)
 	}
@@ -1434,6 +1465,16 @@ func flattenBackupRetentionSettings(b *sqladmin.BackupRetentionSettings) []map[s
 	}
 }
 
+func flattenActiveDirectoryConfig(sqlActiveDirectoryConfig *sqladmin.SqlActiveDirectoryConfig) []map[string]interface{} {
+	if sqlActiveDirectoryConfig == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"domain": sqlActiveDirectoryConfig.Domain,
+		},
+	}
+}
 
 func flattenDatabaseFlags(databaseFlags []*sqladmin.DatabaseFlags) []map[string]interface{} {
 	flags := make([]map[string]interface{}, 0, len(databaseFlags))
