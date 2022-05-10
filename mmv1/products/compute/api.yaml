@@ -8431,14 +8431,15 @@ objects:
           Type of network endpoints in this network endpoint group. Defaults to SERVERLESS
         values:
           - :SERVERLESS
+          - :PRIVATE_SERVICE_CONNECT
         default_value: :SERVERLESS
+      - !ruby/object:Api::Type::String
+        name: 'pscTargetService'
+        description: |
+          The target service url used to set up private service connection to
+          a Google API or a PSC Producer Service Attachment.
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudRun'
-        exactly_one_of:
-          - cloudRun
-          - cloudFunction
-          - appEngine
-          - serverlessDeployment
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
           Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
@@ -8475,11 +8476,6 @@ objects:
               and { service="bar2", tag="foo2" } respectively.
       - !ruby/object:Api::Type::NestedObject
         name: 'appEngine'
-        exactly_one_of:
-          - appEngine
-          - cloudFunction
-          - cloudRun
-          - serverlessDeployment
         allow_empty_object: true
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
@@ -8510,11 +8506,6 @@ objects:
               them to { service = "foo1", version = "v1" } and { service = "foo1", version = "v2" } respectively.
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudFunction'
-        exactly_one_of:
-          - appEngine
-          - cloudFunction
-          - cloudRun
-          - serverlessDeployment
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
           Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
@@ -8544,11 +8535,6 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'serverlessDeployment'
         min_version: beta
-        exactly_one_of:
-          - appEngine
-          - cloudFunction
-          - cloudRun
-          - serverlessDeployment
         allow_empty_object: true
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
