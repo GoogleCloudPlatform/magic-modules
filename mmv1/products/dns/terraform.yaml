@@ -17,6 +17,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: 'projects/{{project}}/managedZones/{{name}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        name: "dns_domain_tutorial"
+        primary_resource_id: "default"
+        skip_docs: true
+        vars:
+          dns_compute_instance: "dns-compute-instance"
+          allow_http_traffic: "allow-http-traffic"
+          example_zone_googlecloudexample: "example-zone-googlecloudexample"
+          server_ip_dns_record: "server-ip-dns-record"
+        min_version: beta
+        # ignore_read_extra:
+        #   - "port_range"
+        #   - "target"
+        #   - "ip_address"
+      - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_basic"
         primary_resource_id: "example-zone"
         pull_external: true

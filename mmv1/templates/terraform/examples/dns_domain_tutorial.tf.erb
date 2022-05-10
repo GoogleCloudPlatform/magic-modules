@@ -1,7 +1,7 @@
-[START dns_domain_tutorial]
+#[START dns_domain_tutorial]
 # to setup a web-server
 resource "google_compute_instance" "default" {
-  name         = "dns-compute-instance"
+  name         = "<%= ctx[:vars]['dns_compute_instance'] %>"
   machine_type = "g1-small"
   zone         = "us-central1-b"
 
@@ -22,7 +22,7 @@ resource "google_compute_instance" "default" {
 
 # to allow http traffic
 resource "google_compute_firewall" "default" {
-  name    = "allow-http-traffic"
+  name    = "<%= ctx[:vars]['allow_http_traffic'] %>"
   network = "default"
   allow {
     ports    = ["80"]
@@ -31,22 +31,20 @@ resource "google_compute_firewall" "default" {
   source_ranges = ["0.0.0.0/0"]
 }
 
-
 # to create a DNS zone
 resource "google_dns_managed_zone" "default" {
-  name          = "example-zone-googlecloudexample"
+  name          = "<%= ctx[:vars]['example_zone_googlecloudexample'] %>"
   dns_name      = "googlecloudexample.com."
   description   = "Example DNS zone"
   force_destroy = "true"
 }
 
 # to register web-server's ip address in DNS
-resource "google_dns_record_set" "default" {
+resource "google_dns_record_set" "<%= ctx[:primary_resource_id] %>" {
+  name         = "<%= ctx[:vars]['server_ip_dns_record'] %>"
   managed_zone = google_dns_managed_zone.default.name
-  name         = "server-ip-record.${google_dns_managed_zone.default.dns_name}"
   type         = "A"
   ttl          = 300
   rrdatas      = [google_compute_instance.default.network_interface[0].access_config[0].nat_ip]
 }
-
-[END dns_domain_tutorial]
+#[END dns_domain_tutorial]
