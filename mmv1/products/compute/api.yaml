@@ -8440,6 +8440,10 @@ objects:
           a Google API or a PSC Producer Service Attachment.
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudRun'
+        conflicts:
+          - cloud_function
+          - app_engine
+          - serverless_deployment
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
           Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
@@ -8476,6 +8480,10 @@ objects:
               and { service="bar2", tag="foo2" } respectively.
       - !ruby/object:Api::Type::NestedObject
         name: 'appEngine'
+        conflicts:
+          - cloud_run
+          - cloud_function
+          - serverless_deployment
         allow_empty_object: true
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
@@ -8506,6 +8514,10 @@ objects:
               them to { service = "foo1", version = "v1" } and { service = "foo1", version = "v2" } respectively.
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudFunction'
+        conflicts:
+          - cloud_run
+          - app_engine
+          - serverless_deployment
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
           Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
@@ -8535,6 +8547,10 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'serverlessDeployment'
         min_version: beta
+        conflicts:
+          - cloud_run
+          - cloud_function
+          - app_engine
         allow_empty_object: true
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
