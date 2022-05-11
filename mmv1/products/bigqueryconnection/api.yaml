@@ -16,8 +16,8 @@ name: BigqueryConnection
 display_name: BigQuery Connection
 versions:
   - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://bigqueryconnection.googleapis.com/v1beta1/
+    name: ga
+    base_url: https://bigqueryconnection.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/bigquery
 apis_required:
@@ -37,7 +37,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         "Cloud SQL federated queries": "https://cloud.google.com/bigquery/docs/cloud-sql-federated-queries"
-      api: "https://cloud.google.com/bigquery/docs/reference/bigqueryconnection/rest/v1beta1/projects.locations.connections/create"
+      api: "https://cloud.google.com/bigquery/docs/reference/bigqueryconnection/rest/v1/projects.locations.connections/create"
     properties:
       - !ruby/object:Api::Type::String
         name: name
@@ -76,7 +76,12 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: cloudSql
         description: Cloud SQL properties.
-        required: true
+        exactly_one_of:
+          - cloud_sql
+          - aws
+          - azure
+          - cloud_spanner
+          - cloud_resource
         properties:
           - !ruby/object:Api::Type::String
             name: 'instanceId'
@@ -107,3 +112,87 @@ objects:
               - :DATABASE_TYPE_UNSPECIFIED
               - :POSTGRES
               - :MYSQL
+      - !ruby/object:Api::Type::NestedObject
+        name: aws
+        description: Connection properties specific to Amazon Web Services.
+        exactly_one_of:
+          - cloud_sql
+          - aws
+          - azure
+          - cloud_spanner
+          - cloud_resource
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: accessRole
+            description: Authentication using Google owned service account to assume into customer's AWS IAM Role.
+            required: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: iamRoleId
+                description: The user’s AWS IAM Role that trusts the Google-owned AWS IAM user Connection.
+                required: true
+              - !ruby/object:Api::Type::String
+                name: identity
+                description: A unique Google-owned and Google-generated identity for the Connection. This identity will be used to access the user's AWS IAM Role.
+                required: true     
+      - !ruby/object:Api::Type::NestedObject
+        name: azure
+        description: Container for connection properties specific to Azure.
+        exactly_one_of:
+          - cloud_sql
+          - aws
+          - azure
+          - cloud_spanner
+          - cloud_resource
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'application'
+            description: The name of the Azure Active Directory Application.
+            output: true
+          - !ruby/object:Api::Type::String
+            name: 'clientId'
+            output: true            
+            description: The client id of the Azure Active Directory Application.
+          - !ruby/object:Api::Type::String
+            name: 'objectId'
+            output: true            
+            description: The object id of the Azure Active Directory Application.                         
+          - !ruby/object:Api::Type::String
+            name: 'customerTenantId'
+            description: The id of customer's directory that host the data.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'redirectUri'
+            description: The URL user will be redirected to after granting consent during connection setup.
+            required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: cloudSpanner
+        description: Connection properties specific to Cloud Spanner
+        exactly_one_of:
+          - cloud_sql
+          - aws
+          - azure
+          - cloud_spanner
+          - cloud_resource
+        properties:                            
+          - !ruby/object:Api::Type::String
+            name: 'database'
+            description: Cloud Spanner database in the form `project/instance/database'
+            required: true
+          - !ruby/object:Api::Type::Boolean
+            name: 'useParallelism'
+            description: If parallelism should be used when reading from Cloud Spanner
+      - !ruby/object:Api::Type::NestedObject
+        name: cloudResource
+        description: Container for connection properties for delegation of access to GCP resources.
+        exactly_one_of:
+          - cloud_sql
+          - aws
+          - azure
+          - cloud_spanner
+          - cloud_resource
+        properties:                            
+          - !ruby/object:Api::Type::String
+            name: 'serviceAccountId'
+            description: The account ID of the service created for the purpose of this connection.
+            output: true
