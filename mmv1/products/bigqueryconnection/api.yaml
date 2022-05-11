@@ -69,10 +69,10 @@ objects:
         name: 'description'
         description: A descriptive description for the connection
       - !ruby/object:Api::Type::Boolean
-        name: 'hasCredential' 
+        name: 'hasCredential'
         output: true
         description: |
-          True if the connection has credential assigned. 
+          True if the connection has credential assigned.
       - !ruby/object:Api::Type::NestedObject
         name: cloudSql
         description: Cloud SQL properties.
@@ -85,11 +85,11 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'instanceId'
-            description: Cloud SQL instance ID in the form project:location:instance. 
+            description: Cloud SQL instance ID in the form project:location:instance.
             required: true
           - !ruby/object:Api::Type::String
             name: 'database'
-            description: Database name. 
+            description: Database name.
             required: true
           - !ruby/object:Api::Type::NestedObject
             name: credential
@@ -134,7 +134,7 @@ objects:
               - !ruby/object:Api::Type::String
                 name: identity
                 description: A unique Google-owned and Google-generated identity for the Connection. This identity will be used to access the user's AWS IAM Role.
-                required: true     
+                required: true
       - !ruby/object:Api::Type::NestedObject
         name: azure
         description: Container for connection properties specific to Azure.
@@ -151,12 +151,12 @@ objects:
             output: true
           - !ruby/object:Api::Type::String
             name: 'clientId'
-            output: true            
+            output: true
             description: The client id of the Azure Active Directory Application.
           - !ruby/object:Api::Type::String
             name: 'objectId'
-            output: true            
-            description: The object id of the Azure Active Directory Application.                         
+            output: true
+            description: The object id of the Azure Active Directory Application.
           - !ruby/object:Api::Type::String
             name: 'customerTenantId'
             description: The id of customer's directory that host the data.
@@ -174,7 +174,7 @@ objects:
           - azure
           - cloud_spanner
           - cloud_resource
-        properties:                            
+        properties:
           - !ruby/object:Api::Type::String
             name: 'database'
             description: Cloud Spanner database in the form `project/instance/database'
@@ -191,7 +191,7 @@ objects:
           - azure
           - cloud_spanner
           - cloud_resource
-        properties:                            
+        properties:
           - !ruby/object:Api::Type::String
             name: 'serviceAccountId'
             description: The account ID of the service created for the purpose of this connection.

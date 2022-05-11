@@ -67,7 +67,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         pull_external: true
         primary_resource_id: "connection"
         vars:
-          connection_id: "my-connection" 
+          connection_id: "my-connection"
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_connection_aws"
         pull_external: true
@@ -83,7 +83,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           connection_id: "my-connection"
           customer_tenant_id: "customer-tenant-id"
-          redirect_uri: "redirect-uri"   
+          redirect_uri: "redirect-uri"
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_connection_cloudspanner"
         pull_external: true
