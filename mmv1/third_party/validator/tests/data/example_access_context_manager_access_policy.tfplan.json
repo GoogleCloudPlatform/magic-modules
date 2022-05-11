@@ -1,6 +1,6 @@
 {
-    "format_version": "1.0",
-    "terraform_version": "1.1.9",
+    "format_version": "0.1",
+    "terraform_version": "0.12.31",
     "planned_values": {
         "root_module": {
             "resources": [
@@ -13,11 +13,11 @@
                     "schema_version": 0,
                     "values": {
                         "parent": "organizations/{{.OrgID}}",
+                        "scopes": [
+                            "projects/{{.Provider.project}}"
+                        ],
                         "timeouts": null,
                         "title": "Scoped Access Policy"
-                    },
-                    "sensitive_values": {
-                        "scopes": []
                     }
                 }
             ]
@@ -37,6 +37,9 @@
                 "before": null,
                 "after": {
                     "parent": "organizations/{{.OrgID}}",
+                    "scopes": [
+                        "projects/{{.Provider.project}}"
+                    ],
                     "timeouts": null,
                     "title": "Scoped Access Policy"
                 },
@@ -44,17 +47,20 @@
                     "create_time": true,
                     "id": true,
                     "name": true,
-                    "scopes": true,
+                    "scopes": [
+                        false
+                    ],
                     "update_time": true
-                },
-                "before_sensitive": false,
-                "after_sensitive": {
-                    "scopes": []
                 }
             }
         }
     ],
     "configuration": {
+        "provider_config": {
+            "google": {
+                "name": "google"
+            }
+        },
         "root_module": {
             "resources": [
                 {
@@ -68,9 +74,8 @@
                             "constant_value": "organizations/{{.OrgID}}"
                         },
                         "scopes": {
-                            "references": [
-                                "google_project.{{.Provider.project}}.number",
-                                "google_project.{{.Provider.project}}"
+                            "constant_value": [
+                                "projects/{{.Provider.project}}"
                             ]
                         },
                         "title": {

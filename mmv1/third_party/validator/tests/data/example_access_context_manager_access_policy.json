@@ -1,6 +1,6 @@
 [
     {
-        "name": "//accesscontextmanager.googleapis.com/accessPolicies/placeholder-BpLnfgDs",
+        "name": "//accesscontextmanager.googleapis.com/accessPolicies/placeholder-foobar",
         "asset_type": "accesscontextmanager.googleapis.com/AccessPolicy",
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
         "resource": {
