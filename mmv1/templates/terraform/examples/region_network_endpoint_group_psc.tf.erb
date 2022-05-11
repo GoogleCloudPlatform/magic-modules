@@ -1,0 +1,7 @@
+resource "google_compute_region_network_endpoint_group" "<%= ctx[:primary_resource_id] %>" {
+  name                  = "<%= ctx[:vars]['neg_name'] %>"
+  region                = "asia-northeast3"
+
+  network_endpoint_type = "PRIVATE_SERVICE_CONNECT"
+  psc_target_service    = "asia-northeast3-cloudkms.googleapis.com"
+}
