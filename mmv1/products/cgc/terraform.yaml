@@ -48,6 +48,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "spot_vm_instance"
         vars:
           spot_instance_name: "spot-instance-name"
+    ### Custom Hostname VM ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "instance_custom_hostname"
+        primary_resource_type: "google_compute_instance"
+        primary_resource_id: "custom_hostname_instance"
+        vars:
+          custom_hostname_instance_name: "custom-hostname-instance-name"
     # SQL
     ### When including separate samples for each DB type, add `skip_test: true`
     ### for Postgres and MySQL, but not for SQL Server
