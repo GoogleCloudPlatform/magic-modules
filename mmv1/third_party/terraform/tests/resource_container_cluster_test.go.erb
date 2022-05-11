@@ -1879,8 +1879,11 @@ func TestAccContainerCluster_withAdvancedMachineFeatures(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withAdvancedMachineFeatures(resourceName),
+				Config: testAccContainerCluster_withAdvancedMachineFeatures(resourceName, 1),
 			},
+            {
+                Config: testAccContainerCluster_withAdvancedMachineFeatures(resourceName, 2),
+            },
 			{
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
@@ -4948,7 +4951,7 @@ resource "google_container_cluster" "primary" {
 }
 
 
-func testAccContainerCluster_withAdvancedMachineFeatures(name string) string {
+func testAccContainerCluster_withAdvancedMachineFeatures(name string, numThreadsPerCore int) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
@@ -4957,9 +4960,9 @@ resource "google_container_cluster" "primary" {
   node_config {
     machine_type    = "n1-standard-2"
     advanced_machine_features {
-      threads_per_core = 1
+      threads_per_core = %d
     }
   }
 }
-`, name)
+`, name, numThreadsPerCore)
 }
