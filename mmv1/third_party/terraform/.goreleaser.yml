@@ -65,6 +65,7 @@ signs:
       sign
       --dearmor
       --file ${artifact}
+      --signer {{ .Env.SIGNER }}
       --out ${signature}
     artifacts: checksum
   # Signature file with GPG Public Key ID in filename (i.e. terraform-provider-awscc_VERSION_SHA256SUMS.7685B676.sig)
@@ -78,6 +79,7 @@ signs:
       sign
       --dearmor
       --file ${artifact}
+      --signer {{ .Env.SIGNER }}
       --out ${signature}
     artifacts: checksum
 snapshot:
