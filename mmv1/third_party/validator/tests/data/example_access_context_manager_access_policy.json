@@ -1,6 +1,6 @@
 [
     {
-        "name": "//accesscontextmanager.googleapis.com/accessPolicies/placeholder-foobar",
+        "name": "//accesscontextmanager.googleapis.com/accessPolicies/placeholder-BpLnfgDs",
         "asset_type": "accesscontextmanager.googleapis.com/AccessPolicy",
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
         "resource": {
@@ -10,6 +10,9 @@
             "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
             "data": {
                 "parent": "organizations/{{.OrgID}}",
+                "scopes": [
+                    "projects/{{.Provider.project}}"
+                ],
                 "title": "Scoped Access Policy"
             }
         }
