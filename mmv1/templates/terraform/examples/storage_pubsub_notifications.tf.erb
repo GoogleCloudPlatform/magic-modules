@@ -11,13 +11,13 @@ data "google_storage_project_service_account" "gcs_account" {
 }
 
 resource "google_pubsub_topic" "<%= ctx[:primary_resource_id] %>" {
-  # name    = "default_iam_binding"
+  name    = "default_iam_binding"
   topic   = google_pubsub_topic.topic.id
   role    = "roles/pubsub.publisher"
   members = ["serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"]
 }
 
-// Create a new storage bucket
+// Create a new storage bucket.
 resource "google_storage_bucket" "bucket" {
   name     = "<%= ctx[:vars]['example_bucket_name'] %>"
   location = "US"
