@@ -46,4 +46,5 @@
 <% end -%>
 'main.go': 'third_party/terraform/main.go.erb'
 'go.mod': 'third_party/terraform/go.mod.erb'
-'.goreleaser.yml': 'third_party/terraform/.goreleaser.yml'
+'.goreleaser.yml': 'third_party/terraform/.goreleaser.yml.erb'
+'terraform-registry-manifest.json': 'third_party/terraform/terraform-registry-manifest.json.erb'
