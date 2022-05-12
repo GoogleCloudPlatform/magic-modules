@@ -17,6 +17,7 @@
         ],
         "networks": [
           {
+            "connectMode": "DIRECT_PEERING",
             "modes": [
               "MODE_IPV4"
             ],
