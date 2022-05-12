@@ -17,7 +17,7 @@ resource "google_pubsub_topic" "<%= ctx[:primary_resource_id] %>" {
   members = ["serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"]
 }
 
-// End enabling notifications
+// Create a new storage bucket
 resource "google_storage_bucket" "bucket" {
   name     = "<%= ctx[:vars]['example_bucket_name'] %>"
   location = "US"
