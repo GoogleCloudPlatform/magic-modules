@@ -555,6 +555,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         #   - "port_range"
         #   - "target"
         #   - "ip_address"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "main"
+        primary_resource_id: "topic"
+        primary_resource_type: "google_pubsub_topic"
+        vars:
+          example_bucket_name: "example-bucket-name"
+          your_topic_name: "your_topic_name"
+        min_version: beta
+        # ignore_read_extra:
+        #   - "port_range"
+        #   - "target"
+        #   - "ip_address"
     properties:
 
 
