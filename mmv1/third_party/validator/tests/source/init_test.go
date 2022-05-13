@@ -136,6 +136,10 @@ func normalizeAssets(t *testing.T, assets []google.Asset, offline bool) []google
 			// remove the ancestry as the value of that is dependent on project,
 			// and is not important for the test.
 			asset.Ancestry = ""
+			// remove the parent as the value of that is dependent on project.
+			if asset.Resource != nil {
+				asset.Resource.Parent = ""
+			}
 		}
 		// Replace placeholder in names. This allows us to compare generated placeholders
 		// (for example due to "unknown after apply") with the values in the expected
