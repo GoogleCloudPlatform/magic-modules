@@ -56,12 +56,14 @@ objects:
         required: false
         input: true
         url_param_only: true
-        default_value: US
         description: |-
           The geographic location where the connection should reside.
           Cloud SQL instance must be in the same location as the connection
           with following exceptions: Cloud SQL us-central1 maps to BigQuery US, Cloud SQL europe-west1 maps to BigQuery EU.
-          Examples: US, EU, asia-northeast1, us-central1, europe-west1. The default value is US.
+          Examples: US, EU, asia-northeast1, us-central1, europe-west1.
+          Spanner Connections same as spanner region
+          AWS allowed regions are aws-us-east-1
+          Azure allowed regions are azure-eastus2
       - !ruby/object:Api::Type::String
         name: 'friendlyName'
         description: A descriptive name for the connection

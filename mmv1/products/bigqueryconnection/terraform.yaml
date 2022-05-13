@@ -90,7 +90,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "connection"
         vars:
           connection_id: "my-connection"
-          database: "database"
+          database: "projects/project/instances/instance/databases/database"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
