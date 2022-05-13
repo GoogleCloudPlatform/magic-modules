@@ -1,0 +1,8 @@
+resource "google_bigquery_connection" "<%= ctx[:primary_resource_id] %>" {
+   connection_id = "<%= ctx[:vars]['connection_id'] %>"
+   location      = "US"
+   friendly_name = "👋"
+   description   = "a riveting description"
+   cloud_resource {}
+}
+
