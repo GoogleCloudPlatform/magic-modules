@@ -2,7 +2,7 @@
   {
     "name": "//cloudresourcemanager.googleapis.com/organizations/{{.OrgID}}",
     "asset_type": "cloudresourcemanager.googleapis.com/Organization",
-    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "ancestry_path": "organization/{{.OrgID}}",
     "org_policy": [
       {
         "constraint": "constraints/compute.disableSerialPortAccess",

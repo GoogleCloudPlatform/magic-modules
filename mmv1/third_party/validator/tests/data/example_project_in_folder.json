@@ -1,22 +1,21 @@
 [
-    {
-      "name": "//cloudresourcemanager.googleapis.com/projects/foobat",
-      "asset_type": "cloudresourcemanager.googleapis.com/Project",
-      "ancestry_path": "organization/unknown/folder/{{.FolderID}}/project/foobat",
-      "resource": {
-        "version": "v1",
-        "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
-        "discovery_name": "Project",
-        "parent": "//cloudresourcemanager.googleapis.com/projects/foobat",
-        "data": {
-          "name": "My Project",
-          "projectId": "foobat",
-          "parent": {
-            "type": "folder",
-            "id": "{{.FolderID}}"
-          }
+  {
+    "name": "//cloudresourcemanager.googleapis.com/projects/foobat",
+    "asset_type": "cloudresourcemanager.googleapis.com/Project",
+    "ancestry_path": "organization/{{.OrgID}}/folder/{{.FolderID}}/project/foobat",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+      "discovery_name": "Project",
+      "parent": "//cloudresourcemanager.googleapis.com/folders/{{.FolderID}}",
+      "data": {
+        "name": "My Project",
+        "projectId": "foobat",
+        "parent": {
+          "type": "folder",
+          "id": "{{.FolderID}}"
         }
       }
     }
-  ]
-  
+  }
+]
