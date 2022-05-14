@@ -5,6 +5,5 @@ resource "google_bigquery_connection" "<%= ctx[:primary_resource_id] %>" {
    description   = "a riveting description"
    azure {
       customer_tenant_id = "<%= ctx[:vars]['customer_tenant_id'] %>"
-      redirect_uri       = "<%= ctx[:vars]['redirect_uri'] %>"
    }
 }

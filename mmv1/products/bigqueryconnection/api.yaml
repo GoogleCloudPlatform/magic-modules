@@ -136,7 +136,7 @@ objects:
               - !ruby/object:Api::Type::String
                 name: identity
                 description: A unique Google-owned and Google-generated identity for the Connection. This identity will be used to access the user's AWS IAM Role.
-                required: true
+                output: true
       - !ruby/object:Api::Type::NestedObject
         name: azure
         description: Container for connection properties specific to Azure.
@@ -166,7 +166,6 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'redirectUri'
             description: The URL user will be redirected to after granting consent during connection setup.
-            required: true
       - !ruby/object:Api::Type::NestedObject
         name: cloudSpanner
         description: Connection properties specific to Cloud Spanner
