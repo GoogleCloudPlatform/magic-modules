@@ -79,17 +79,10 @@ objects:
         name: 'cloudSql'
         exactly_one_of:
           - cloud_sql
-          - cloud_resource
-        description: Cloud SQL properties.
-<<<<<<< HEAD
-        exactly_one_of:
-          - cloud_sql
           - aws
           - azure
           - cloud_spanner
           - cloud_resource
-=======
->>>>>>> 39ac35cf20385faf9da3fb12c441f62cac3434f1
         properties:
           - !ruby/object:Api::Type::String
             name: 'instanceId'
