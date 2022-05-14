@@ -121,7 +121,6 @@ objects:
               - :POSTGRES
               - :MYSQL
       - !ruby/object:Api::Type::NestedObject
-<<<<<<< HEAD
         name: aws
         description: Connection properties specific to Amazon Web Services.
         exactly_one_of:
@@ -204,16 +203,3 @@ objects:
             name: 'serviceAccountId'
             description: The account ID of the service created for the purpose of this connection.
             output: true
-=======
-        name: 'cloudResource'
-        exactly_one_of:
-          - cloud_sql
-          - cloud_resource
-        description: Cloud Resource properties.
-        send_empty_value: true
-        properties:
-          - !ruby/object:Api::Type::String
-            name: serviceAccountId
-            description: The account ID of the service created for the purpose of this connection.
-            output: true
->>>>>>> 39ac35cf20385faf9da3fb12c441f62cac3434f1
