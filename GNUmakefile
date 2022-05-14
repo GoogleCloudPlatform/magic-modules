@@ -38,6 +38,10 @@ else
   serialize_compile = --path "api" --overrides "overrides"
 endif
 
+ifneq ($(VERBOSE),)
+  tpgtools_compile += --logtostderr=1 --stderrthreshold=2
+endif
+
 UNAME := $(shell uname)
 
 # The inplace editing semantics are different between linux and osx.

@@ -19,9 +19,9 @@ Manages a Google Kubernetes Engine (GKE) cluster. For more information see
 [the official documentation](https://cloud.google.com/container-engine/docs/clusters)
 and [the API reference](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters).
 
-~> **Note:** All arguments and attributes, including basic auth username and
+~> **Warning:** All arguments and attributes, including basic auth username and
 passwords as well as certificate outputs will be stored in the raw state as
-plaintext. [Read more about sensitive data in state](/language/state/sensitive-data.html).
+plaintext. [Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
 
 ## Example Usage - with a separately managed node pool (recommended)
 
@@ -394,6 +394,9 @@ subnetwork in which the cluster's instances are launched.
 *  `config_connector_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     The status of the ConfigConnector addon. It is disabled by default; Set `enabled = true` to enable.
 
+*  `gke_backup_agent_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+    The status of the Backup for GKE agent addon. It is disabled by default; Set `enabled = true` to enable.
+
 This example `addons_config` disables two addons:
 
 ```hcl
@@ -538,6 +541,13 @@ maintenance_policy {
 
 * `maintenance_exclusion` - Exceptions to maintenance window. Non-emergency maintenance should not occur in these windows. A cluster can have up to three maintenance exclusions at a time [Maintenance Window and Exclusions](https://cloud.google.com/kubernetes-engine/docs/concepts/maintenance-windows-and-exclusions)
 
+<a name="nested_maintenance_exclusion"></a>The `maintenance_exclusion` block supports:
+* `exclusion_options` - (Optional) MaintenanceExclusionOptions provides maintenance exclusion related options.
+
+
+<a name="nested_exclusion_options"></a>The `exclusion_options` block supports:
+* `scope` - (Required) The scope of automatic upgrades to restrict in the exclusion window. One of: **NO_UPGRADES | NO_MINOR_UPGRADES | NO_MINOR_OR_NODE_UPGRADES**
+
 Specify `start_time` and `end_time` in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) "Zulu" date format.  The start time's date is
 the initial date that the window starts, and the end time is used for calculating duration.Specify `recurrence` in
 [RFC5545](https://tools.ietf.org/html/rfc5545#section-3.8.5.3) RRULE format, to specify when this recurs.
@@ -556,11 +566,17 @@ maintenance_policy {
     exclusion_name = "batch job"
     start_time = "2019-01-01T00:00:00Z"
     end_time = "2019-01-02T00:00:00Z"
+    exclusion_options {
+      scope = "NO_UPGRADES"
+    }
   }
   maintenance_exclusion{
     exclusion_name = "holiday data load"
     start_time = "2019-05-01T00:00:00Z"
     end_time = "2019-05-02T00:00:00Z"
+    exclusion_options {
+      scope = "NO_MINOR_UPGRADES"
+    }
   }
 }
 ```
@@ -996,7 +1012,7 @@ exported:
     to authenticate to the cluster endpoint.
 
 * `master_auth.0.cluster_ca_certificate` - Base64 encoded public certificate
-    that is the root of trust for the cluster.
+    that is the root certificate of the cluster.
 
 * `master_version` - The current version of the master in the cluster. This may
     be different than the `min_master_version` set in the config if the master

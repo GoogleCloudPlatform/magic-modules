@@ -113,7 +113,9 @@ func resource<%= resource_name -%>() *schema.Resource {
             "<%= field.name -%>": {
               Type: <%= tf_type(field) -%>,
               Optional: true,
+            <% unless field.default_value.nil? -%>
               Default:  <%= go_literal(field.default_value) -%>,
+            <% end -%>
             },
 <%        end -%>
 <%      end -%>
@@ -469,6 +471,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
       billingProject = bp
     }
 
+    <%= lines(compile(pwd + '/' + object.custom_code.pre_read)) if object.custom_code.pre_read -%>
     res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
 <%  if object.read_error_transform -%>
@@ -510,11 +513,13 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%- unless object.virtual_fields.empty? -%>
   // Explicitly set virtual fields to default values if unset
 <%-   object.virtual_fields.each do |field| -%>
+    <% unless field.default_value.nil? -%>
     if _, ok := d.GetOkExists("<%= field.name -%>"); !ok {
       if err := d.Set("<%= field.name -%>", <%= go_literal(field.default_value) -%>); err != nil {
       	return fmt.Errorf("Error setting <%= field.name -%>: %s", err)
       }
     }
+    <% end -%>
 <%    end -%>
 <%  end -%>
 <%  if has_project -%>
@@ -955,9 +960,11 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 <%-  unless object.virtual_fields.empty? -%>
     // Explicitly set virtual fields to default values on import
   <%-  object.virtual_fields.each do |field| -%>
+    <% unless field.default_value.nil? -%>
     if err := d.Set("<%= field.name %>", <%= go_literal(field.default_value) -%>); err != nil {
     	return nil, fmt.Errorf("Error setting <%= field.name %>: %s", err)
     }
+    <% end -%>
   <%   end -%>
 <%   end -%>
 <%= lines(compile(pwd + '/' + object.custom_code.post_import)) if object.custom_code.post_import -%>

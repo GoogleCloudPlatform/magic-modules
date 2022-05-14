@@ -86,7 +86,7 @@ var (
 
 <% unless version == 'ga' -%>
 func diffSuppressSqlReplicaKeyName(k, old, new string, d *schema.ResourceData) bool {
-	if d.Get("replica_configuration") != nil {
+	if d.Get("master_instance_name").(string) != "" {
 		// This is a replica and the config value must be null, but the API will
 		// return the key name of the master instance, so we'll suppress this diff
 		return true
@@ -116,7 +116,6 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 			customdiff.ForceNewIfChange("settings.0.disk_size", isDiskShrinkage),
 			privateNetworkCustomizeDiff,
 			pitrPostgresOnlyCustomizeDiff,
-			insightsPostgresOnlyCustomizeDiff,
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -157,15 +156,31 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 							Default:  "ALWAYS",
 							Description: `This specifies when the instance should be active. Can be either ALWAYS, NEVER or ON_DEMAND.`,
 						},
+						"active_directory_config": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"domain": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: `Domain name of the Active Directory for SQL Server (e.g., mydomain.com).`,
+									},
+								},
+							},
+						},
 						"availability_type": {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Default:      "ZONAL",
 							ValidateFunc: validation.StringInSlice([]string{"REGIONAL", "ZONAL"}, false),
 							Description:  `The availability type of the Cloud SQL instance, high availability
-(REGIONAL) or single zone (ZONAL). For MySQL instances, ensure that
-settings.backup_configuration.enabled and
-settings.backup_configuration.binary_log_enabled are both set to true.`,
+(REGIONAL) or single zone (ZONAL). For all instances, ensure that
+settings.backup_configuration.enabled is set to true.
+For MySQL instances, ensure that settings.backup_configuration.binary_log_enabled is set to true.
+For Postgres instances, ensure that settings.backup_configuration.point_in_time_recovery_enabled
+is set to true.`,
 						},
 						"backup_configuration": {
 							Type:     schema.TypeList,
@@ -178,7 +193,7 @@ settings.backup_configuration.binary_log_enabled are both set to true.`,
 										Type:         schema.TypeBool,
 										Optional:     true,
 										AtLeastOneOf: backupConfigurationKeys,
-										Description:  `True if binary logging is enabled. If settings.backup_configuration.enabled is false, this must be as well. Cannot be used with Postgres.`,
+										Description:  `True if binary logging is enabled. If settings.backup_configuration.enabled is false, this must be as well. Can only be used with MySQL.`,
 									},
 									"enabled": {
 										Type:         schema.TypeBool,
@@ -265,7 +280,7 @@ settings.backup_configuration.binary_log_enabled are both set to true.`,
 							Type:             schema.TypeBool,
 							Optional:         true,
 							Default:          true,
-							Description:      `Configuration to increase storage size automatically.  Note that future terraform apply calls will attempt to resize the disk to the value specified in disk_size - if this is set, do not set disk_size.`,
+							Description:      `Enables auto-resizing of the storage size. Defaults to true. Set to false if you want to set disk_size.`,
 						},
 						"disk_autoresize_limit": {
 							Type:             schema.TypeInt,
@@ -278,7 +293,7 @@ settings.backup_configuration.binary_log_enabled are both set to true.`,
 							Optional: true,
 							// Default is likely 10gb, but it is undocumented and may change.
 							Computed:    true,
-							Description: `The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased.`,
+							Description: `The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. If you want to set this field, set disk_autoresize to false.`,
 						},
 						"disk_type": {
 							Type:     schema.TypeString,
@@ -746,15 +761,6 @@ func pitrPostgresOnlyCustomizeDiff(_ context.Context, diff *schema.ResourceDiff,
 	return nil
 }
 
-func insightsPostgresOnlyCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
-	insights := diff.Get("settings.0.insights_config.0.query_insights_enabled").(bool)
-	dbVersion := diff.Get("database_version").(string)
-	if insights && !strings.Contains(dbVersion, "POSTGRES") {
-		return fmt.Errorf("query_insights_enabled is only available for Postgres now.")
-	}
-	return nil
-}
-
 func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
@@ -967,6 +973,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}) *sqladmin.Setti
 		Tier:                        _settings["tier"].(string),
 		ForceSendFields:             []string{"StorageAutoResize"},
 		ActivationPolicy:            _settings["activation_policy"].(string),
+		ActiveDirectoryConfig:       expandActiveDirectoryConfig(_settings["active_directory_config"].([]interface{})),
 		AvailabilityType:            _settings["availability_type"].(string),
 		Collation:                   _settings["collation"].(string),
 		DataDiskSizeGb:              int64(_settings["disk_size"].(int)),
@@ -1022,8 +1029,8 @@ func expandCloneContext(configured []interface{}) (*sqladmin.CloneContext, strin
 	_cloneConfiguration := configured[0].(map[string]interface{})
 
 	return &sqladmin.CloneContext{
-		PointInTime: _cloneConfiguration["point_in_time"].(string), 
-		AllocatedIpRange: _cloneConfiguration["allocated_ip_range"].(string), 
+		PointInTime: _cloneConfiguration["point_in_time"].(string),
+		AllocatedIpRange: _cloneConfiguration["allocated_ip_range"].(string),
 	}, _cloneConfiguration["source_instance_name"].(string)
 }
 
@@ -1126,6 +1133,18 @@ func expandBackupRetentionSettings(configured interface{}) *sqladmin.BackupReten
 	return &sqladmin.BackupRetentionSettings{
 		RetainedBackups: int64(config["retained_backups"].(int)),
 		RetentionUnit:   config["retention_unit"].(string),
+	}
+}
+
+func expandActiveDirectoryConfig(configured interface{}) *sqladmin.SqlActiveDirectoryConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 {
+		return nil
+	}
+
+	config := l[0].(map[string]interface{})
+	return &sqladmin.SqlActiveDirectoryConfig{
+		Domain: config["domain"].(string),
 	}
 }
 
@@ -1372,6 +1391,10 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 		"user_labels":                 settings.UserLabels,
 	}
 
+	if settings.ActiveDirectoryConfig != nil {
+		data["active_directory_config"] = flattenActiveDirectoryConfig(settings.ActiveDirectoryConfig)
+	}
+
 	if settings.BackupConfiguration != nil {
 		data["backup_configuration"] = flattenBackupConfiguration(settings.BackupConfiguration)
 	}
@@ -1432,6 +1455,16 @@ func flattenBackupRetentionSettings(b *sqladmin.BackupRetentionSettings) []map[s
 	}
 }
 
+func flattenActiveDirectoryConfig(sqlActiveDirectoryConfig *sqladmin.SqlActiveDirectoryConfig) []map[string]interface{} {
+	if sqlActiveDirectoryConfig == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"domain": sqlActiveDirectoryConfig.Domain,
+		},
+	}
+}
 
 func flattenDatabaseFlags(databaseFlags []*sqladmin.DatabaseFlags) []map[string]interface{} {
 	flags := make([]map[string]interface{}, 0, len(databaseFlags))

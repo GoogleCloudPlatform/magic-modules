@@ -26,7 +26,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/redis_location_id_for_fallback_zone.go.erb
       decoder: templates/terraform/decoders/redis_instance.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/redis_instance.erb
-      constants: templates/terraform/constants/redis_version.go
+      constants: templates/terraform/constants/redis_instance.go
       resource_definition: templates/terraform/resource_definition/redis_instance.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -87,6 +87,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       maintenancePolicy.weeklyMaintenanceWindow.startTime.nanos: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(0,999999999)'
+      readReplicasMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       redisVersion: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         update_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}:upgrade'
@@ -99,6 +101,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       replicaCount: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      readReplicasMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      secondaryIpRange: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        diff_suppress_func: 'secondaryIpDiffSuppress'
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

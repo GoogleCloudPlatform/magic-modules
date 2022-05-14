@@ -115,11 +115,22 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       min_version: beta
       # Resource creation race
       skip_vcr: true
+    - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_instance_service_attachment_basic_test"
+      primary_resource_id: "apigee_instance"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_docs: true
+      # Resource creation race
+      skip_vcr: true
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 60
       delete_minutes: 60
     properties:
       peeringCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      consumerAcceptList: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       ipRange: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
@@ -144,6 +155,21 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       skip_docs: true
       # Resource creation race
       skip_vcr: true
+    - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_environment_basic_deployment_apiproxy_type_test"
+      primary_resource_id: "apigee_environment"
+      primary_resource_name: "fmt.Sprintf(\"organizations/tf-test%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"])"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_docs: true
+      # Resource creation race
+      skip_vcr: true
+    properties:
+      deploymentType: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      apiProxyType: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 30
       delete_minutes: 30
@@ -176,7 +202,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     import_format: ["{{instance_id}}/attachments/{{name}}", "{{instance_id}}/{{name}}"]
     delete_url: '{{instance_id}}/attachments/{{name}}'
-    mutex: "{{instance_id}}"
+    # Creating a global lock on instance attachments.
+    mutex: "apigeeInstanceAttachments"
     examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "apigee_instance_attachment_basic"

@@ -76,14 +76,20 @@ objects:
         description: |
           True if the connection has credential assigned.
       - !ruby/object:Api::Type::NestedObject
-        name: cloudSql
+        name: 'cloudSql'
+        exactly_one_of:
+          - cloud_sql
+          - cloud_resource
         description: Cloud SQL properties.
+<<<<<<< HEAD
         exactly_one_of:
           - cloud_sql
           - aws
           - azure
           - cloud_spanner
           - cloud_resource
+=======
+>>>>>>> 39ac35cf20385faf9da3fb12c441f62cac3434f1
         properties:
           - !ruby/object:Api::Type::String
             name: 'instanceId'
@@ -115,6 +121,7 @@ objects:
               - :POSTGRES
               - :MYSQL
       - !ruby/object:Api::Type::NestedObject
+<<<<<<< HEAD
         name: aws
         description: Connection properties specific to Amazon Web Services.
         exactly_one_of:
@@ -197,3 +204,16 @@ objects:
             name: 'serviceAccountId'
             description: The account ID of the service created for the purpose of this connection.
             output: true
+=======
+        name: 'cloudResource'
+        exactly_one_of:
+          - cloud_sql
+          - cloud_resource
+        description: Cloud Resource properties.
+        send_empty_value: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: serviceAccountId
+            description: The account ID of the service created for the purpose of this connection.
+            output: true
+>>>>>>> 39ac35cf20385faf9da3fb12c441f62cac3434f1

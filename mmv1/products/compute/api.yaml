@@ -2852,6 +2852,19 @@ objects:
         description: |
           The URL of the network to which this backend service belongs.
           This field can only be specified when the load balancing scheme is set to INTERNAL.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'subsetting'
+        min_version: beta
+        description: |
+          Subsetting configuration for this BackendService. Currently this is applicable only for Internal TCP/UDP load balancing and Internal HTTP(S) load balancing.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'policy'
+            values:
+              - :CONSISTENT_HASH_SUBSETTING
+            required: true
+            description: |
+              The algorithm used for subsetting.
   - !ruby/object:Api::Resource
     name: 'BackendServiceSignedUrlKey'
     kind: 'compute#BackendServiceSignedUrlKey'
@@ -3999,6 +4012,26 @@ objects:
           - :PREMIUM
           - :STANDARD
         input: true
+      - !ruby/object:Api::Type::Array
+        name: 'serviceDirectoryRegistrations'
+        description: |
+          Service Directory resources to register this forwarding rule with. Currently,
+          only supports a single Service Directory resource.  
+        min_size: 0
+        max_size: 1
+        input: true         
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'namespace'
+              description: |
+                Service Directory namespace to register the forwarding rule under.
+              input: true
+            - !ruby/object:Api::Type::String
+              name: 'service'
+              description: |
+                Service Directory service to register the forwarding rule under.
+              input: true
       - !ruby/object:Api::Type::String
         name: 'serviceLabel'
         description: |
@@ -8398,14 +8431,19 @@ objects:
           Type of network endpoints in this network endpoint group. Defaults to SERVERLESS
         values:
           - :SERVERLESS
+          - :PRIVATE_SERVICE_CONNECT
         default_value: :SERVERLESS
+      - !ruby/object:Api::Type::String
+        name: 'pscTargetService'
+        description: |
+          The target service url used to set up private service connection to
+          a Google API or a PSC Producer Service Attachment.
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudRun'
-        exactly_one_of:
-          - cloudRun
-          - cloudFunction
-          - appEngine
-          - serverlessDeployment
+        conflicts:
+          - cloud_function
+          - app_engine
+          - serverless_deployment
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
           Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
@@ -8442,11 +8480,10 @@ objects:
               and { service="bar2", tag="foo2" } respectively.
       - !ruby/object:Api::Type::NestedObject
         name: 'appEngine'
-        exactly_one_of:
-          - appEngine
-          - cloudFunction
-          - cloudRun
-          - serverlessDeployment
+        conflicts:
+          - cloud_run
+          - cloud_function
+          - serverless_deployment
         allow_empty_object: true
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
@@ -8477,11 +8514,10 @@ objects:
               them to { service = "foo1", version = "v1" } and { service = "foo1", version = "v2" } respectively.
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudFunction'
-        exactly_one_of:
-          - appEngine
-          - cloudFunction
-          - cloudRun
-          - serverlessDeployment
+        conflicts:
+          - cloud_run
+          - app_engine
+          - serverless_deployment
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
           Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
@@ -8511,11 +8547,10 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'serverlessDeployment'
         min_version: beta
-        exactly_one_of:
-          - appEngine
-          - cloudFunction
-          - cloudRun
-          - serverlessDeployment
+        conflicts:
+          - cloud_run
+          - cloud_function
+          - app_engine
         allow_empty_object: true
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
@@ -8544,7 +8579,7 @@ objects:
               API Gateway: Unused, App Engine: The service version, Cloud Functions: Unused, Cloud Run: The service tag
           - !ruby/object:Api::Type::String
             name: 'urlMask'
-            required: true
+            required: false
             description: |
               A template to parse platform-specific fields from a request URL. URL mask allows for routing to multiple resources
               on the same serverless platform without having to create multiple Network Endpoint Groups and backend resources.

@@ -2,7 +2,7 @@
 resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   name             = "<%= ctx[:vars]['postgres_instance_with_authorized_network'] %>"
   region           = "us-central1"
-  database_version = "POSTGRES_12"
+  database_version = "POSTGRES_14"
   settings {
     tier = "db-custom-2-7680"
     ip_configuration {

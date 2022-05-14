@@ -230,15 +230,17 @@ The `settings` block supports:
     active. Can be either `ALWAYS`, `NEVER` or `ON_DEMAND`.
 
 * `availability_type` - (Optional, Default: `ZONAL`) The availability type of the Cloud SQL
-instance, high availability (`REGIONAL`) or single zone (`ZONAL`).' For MySQL
-instances, ensure that `settings.backup_configuration.enabled` and
-`settings.backup_configuration.binary_log_enabled` are both set to `true`.
+  instance, high availability (`REGIONAL`) or single zone (`ZONAL`).' For all instances, ensure that
+  `settings.backup_configuration.enabled` is set to `true`.
+  For MySQL instances, ensure that `settings.backup_configuration.binary_log_enabled` is set to `true`.
+  For Postgres instances, ensure that `settings.backup_configuration.point_in_time_recovery_enabled`
+  is set to `true`.
 
 * `collation` - (Optional) The name of server instance collation.
 
-* `disk_autoresize` - (Optional, Default: `true`) Configuration to increase storage size automatically.  Note that future `terraform apply` calls will attempt to resize the disk to the value specified in `disk_size` - if this is set, do not set `disk_size`.
+* `disk_autoresize` - (Optional, Default: `true`) Enables auto-resizing of the storage size. Set to false if you want to set `disk_size`.
 
-* `disk_size` - (Optional, Default: `10`) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased.
+* `disk_size` - (Optional, Default: `10`) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. If you want to set this field, set `disk_autoresize` to false.
 
 * `disk_type` - (Optional, Default: `PD_SSD`) The type of data disk: PD_SSD or PD_HDD.
 
@@ -252,10 +254,15 @@ The optional `settings.database_flags` sublist supports:
 
 * `value` - (Required) Value of the flag.
 
+The optional `settings.active_directory_config` subblock supports:
+
+* `domain` - (Required) The domain name for the active directory (e.g., mydomain.com).
+    Can only be used with SQL Server.
+
 The optional `settings.backup_configuration` subblock supports:
 
 * `binary_log_enabled` - (Optional) True if binary logging is enabled.
-    Cannot be used with Postgres.
+    Can only be used with MySQL.
 
 * `enabled` - (Optional) True if backup configuration is enabled.
 
