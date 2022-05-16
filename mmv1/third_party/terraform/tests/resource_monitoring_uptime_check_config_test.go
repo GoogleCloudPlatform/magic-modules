@@ -116,7 +116,7 @@ func testAccMonitoringUptimeCheckConfig_update(suffix, path, pwd, project, host 
 	return fmt.Sprintf(`
 resource "google_monitoring_uptime_check_config" "http" {
   display_name = "http-uptime-check-%s"
-  timeout      = "80s"
+  timeout      = "30s"
 
   http_check {
     path = "/%s"
