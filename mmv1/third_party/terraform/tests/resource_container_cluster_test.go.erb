@@ -1879,11 +1879,8 @@ func TestAccContainerCluster_withAdvancedMachineFeatures(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withAdvancedMachineFeatures(resourceName, 1),
+				Config: testAccContainerCluster_withAdvancedMachineFeatures(resourceName),
 			},
-            {
-                Config: testAccContainerCluster_withAdvancedMachineFeatures(resourceName, 2),
-            },
 			{
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
@@ -4951,7 +4948,7 @@ resource "google_container_cluster" "primary" {
 }
 
 
-func testAccContainerCluster_withAdvancedMachineFeatures(name string, numThreadsPerCore int) string {
+func testAccContainerCluster_withAdvancedMachineFeatures(name string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
@@ -4964,5 +4961,5 @@ resource "google_container_cluster" "primary" {
     }
   }
 }
-`, name, numThreadsPerCore)
+`, name)
 }
