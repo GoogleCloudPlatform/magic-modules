@@ -270,6 +270,8 @@ region are guaranteed to support the same version.
 
 * `confidential_nodes` - Configuration for [Confidential Nodes](https://cloud.google.com/kubernetes-engine/docs/how-to/confidential-gke-nodes) feature. Structure is documented below [documented below](#nested_confidential_nodes).
 
+* `advanced_machine_features` (Optional) - Configure Simultaneous Hyper Threading on these nodes. Structure is [documented below](#nested_advanced_machine_features)
+
 * `pod_security_policy_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
     [PodSecurityPolicy](https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies) feature.
     Structure is [documented below](#nested_pod_security_policy_config).
@@ -974,6 +976,11 @@ and all pods running on the nodes. Specified as a map from the key, such as
 * `cluster_dns_scope` - (Optional) The scope of access to cluster DNS records. `DNS_SCOPE_UNSPECIFIED` (default) or `CLUSTER_SCOPE` or `VPC_SCOPE`.
 
 * `cluster_dns_domain` - (Optional) The suffix used for all cluster service records.
+
+<a name="nested_advanced_machine_features"></a>The `advanced_machine_features` block supports:
+
+* `threads_per_core` The number of threads per physical core. To disable [simultaneous multithreading (SMT)](https://cloud.google.com/compute/docs/instances/disabling-smt) set this to 1.
+
 
 ## Attributes Reference
 
