@@ -164,6 +164,7 @@ objects:
             required: true
           - !ruby/object:Api::Type::String
             name: 'redirectUri'
+            output: true
             description: The URL user will be redirected to after granting consent during connection setup.
       - !ruby/object:Api::Type::NestedObject
         name: cloudSpanner
