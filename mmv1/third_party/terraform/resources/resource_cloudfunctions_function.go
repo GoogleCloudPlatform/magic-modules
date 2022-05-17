@@ -154,7 +154,7 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 			"docker_registry": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      "CONTAINER_REGISTRY",
+				Computed:     true,
 				ValidateFunc: validation.StringInSlice(allowedDockerRegistrySettings, true),
 				Description:  `Docker Registry to use for storing the function's Docker images. Allowed values are CONTAINER_REGISTRY (default) and ARTIFACT_REGISTRY.`,
 			},
