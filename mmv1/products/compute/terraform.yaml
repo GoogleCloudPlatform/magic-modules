@@ -166,6 +166,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           backend_bucket_name: "image-backend-bucket"
           bucket_name: "image-store-bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_bucket_cache_key_policy"
+        primary_resource_id: "image_backend"
+        vars:
+          backend_bucket_name: "image-backend-bucket"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
       post_update: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
