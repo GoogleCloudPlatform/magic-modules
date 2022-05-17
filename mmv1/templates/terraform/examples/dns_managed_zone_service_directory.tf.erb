@@ -1,4 +1,4 @@
-#[START dns_managed_zone_service_directory]
+# [START dns_managed_zone_service_directory]
 resource "google_dns_managed_zone" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
 
@@ -28,4 +28,4 @@ resource "google_compute_network" "network" {
   name                    = "<%= ctx[:vars]['network_name'] %>"
   auto_create_subnetworks = false
 }
-#[END dns_managed_zone_service_directory]
+# [END dns_managed_zone_service_directory]

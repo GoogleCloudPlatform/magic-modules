@@ -1,4 +1,4 @@
-#[START dns_response_policy_basic]
+# [START dns_response_policy_basic]
 resource "google_compute_network" "network-1" {
   provider = google-beta
 
@@ -25,4 +25,4 @@ resource "google_dns_response_policy" "<%= ctx[:primary_resource_id] %>" {
     network_url = google_compute_network.network-2.id
   }
 }
-#[END dns_response_policy_basic]
+# [END dns_response_policy_basic]

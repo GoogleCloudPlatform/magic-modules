@@ -1,4 +1,4 @@
-#[START dns_domain_tutorial]
+# [START dns_domain_tutorial]
 # to setup a web-server
 resource "google_compute_instance" "default" {
   name         = "<%= ctx[:vars]['dns_compute_instance'] %>"
@@ -17,7 +17,11 @@ resource "google_compute_instance" "default" {
            // Ephemeral public IP
    }
   }
-  metadata_startup_script = "sudo apt-get update && sudo apt-get install apache2 -y && echo \'<!doctype html><html><body><h1>Hello World!</h1></body></html>\' > /var/www/html/index.html"
+  metadata_startup_script = <<-EOF
+  sudo apt-get update && \
+  sudo apt-get install apache2 -y && \
+  echo "<!doctype html><html><body><h1>Hello World!</h1>`date`</body></html>" > /var/www/html/index.html
+  EOF
 }
 
 # to allow http traffic
@@ -47,4 +51,4 @@ resource "google_dns_record_set" "<%= ctx[:primary_resource_id] %>" {
   ttl          = 300
   rrdatas      = [google_compute_instance.default.network_interface[0].access_config[0].nat_ip]
 }
-#[END dns_domain_tutorial]
+# [END dns_domain_tutorial]
