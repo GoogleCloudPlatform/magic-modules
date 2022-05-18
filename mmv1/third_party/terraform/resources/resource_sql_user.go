@@ -275,11 +275,13 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-	if err := d.Set("disabled", user.SqlserverUserDetails.Disabled); err != nil {
-		return fmt.Errorf("Error setting disabled: %s", err)
-	}
-	if err := d.Set("server_roles", user.SqlserverUserDetails.ServerRoles); err != nil {
-		return fmt.Errorf("Error setting server_roles: %s", err)
+	if user.SqlserverUserDetails != nil {
+		if err := d.Set("disabled", user.SqlserverUserDetails.Disabled); err != nil {
+			return fmt.Errorf("Error setting disabled: %s", err)
+		}
+		if err := d.Set("server_roles", user.SqlserverUserDetails.ServerRoles); err != nil {
+			return fmt.Errorf("Error setting server_roles: %s", err)
+		}
 	}
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
 	return nil
