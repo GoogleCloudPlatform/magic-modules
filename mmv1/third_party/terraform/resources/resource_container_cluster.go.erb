@@ -589,7 +589,7 @@ func resourceContainerCluster() *schema.Resource {
 							Required:    true,
 							ForceNew:    false,
 							Description: `Whether to enable or disable RBAC security group usage. Default is true.`,
-						}
+						},
 					},
 				},
 			},
@@ -2059,7 +2059,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		agc := d.Get("authenticator_groups_config")
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
-				AuthenticatorGroupsConfig: expandAuthenticatorGroupsConfig(agc),
+				DesiredAuthenticatorGroupsConfig: expandAuthenticatorGroupsConfig(agc),
 			},
 		}
 
