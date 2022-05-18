@@ -122,6 +122,24 @@ func isBeenEnabled(_ context.Context, old, new, _ interface{}) bool {
 }
 <% end -%>
 
+func securityGroupUnchanged(_ context.Context, old, new, _ interface{}) bool {
+	if old == nil {
+		return false
+	}
+	if new == nil {
+		return true
+	}
+
+	oldGroup := (old.(map[string]interface{}))["security_group"].(string)
+	newGroup := (new.(map[string]interface{}))["security_group"].(string)
+
+	if len(oldGroup) == 0 || oldGroup == newGroup {
+		return false
+	}
+
+	return true
+}
+
 func resourceContainerCluster() *schema.Resource {
 	return &schema.Resource{
 		UseJSONNumber: true,
@@ -137,6 +155,7 @@ func resourceContainerCluster() *schema.Resource {
 			<% end -%>
 			containerClusterAutopilotCustomizeDiff,
 			containerClusterNodeVersionRemoveDefaultCustomizeDiff,
+			customdiff.ForceNewIfChange("authenticator_groups_config", securityGroupUnchanged),
 		),
 
 		Timeouts: &schema.ResourceTimeout{
@@ -581,7 +600,7 @@ func resourceContainerCluster() *schema.Resource {
 						"security_group": {
 							Type:        schema.TypeString,
 							Required:    true,
-							ForceNew:    true,
+							ForceNew:    false,
 							Description: `The name of the RBAC security group for use with Google security groups in Kubernetes RBAC. Group name must be in format gke-security-groups@yourdomain.com.`,
 						},
 						"enabled": {
