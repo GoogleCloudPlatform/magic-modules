@@ -480,7 +480,8 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 <a name="nested_authenticator_groups_config"></a>The `authenticator_groups_config` block supports:
 
-* `security_group` - (Required) The name of the RBAC security group for use with Google security groups in Kubernetes RBAC. Group name must be in format `gke-security-groups@yourdomain.com`.
+* `security_group` - (Required) Cannot be changed once set. The name of the RBAC security group for use with Google security groups in Kubernetes RBAC. Group name must be in format `gke-security-groups@yourdomain.com`.
+* `enabled` - (Optional) Enables or disables Kubernetes RBAC support. Defaults to true when specified.
 
 <a name="nested_logging_config"></a>The `logging_config` block supports:
 

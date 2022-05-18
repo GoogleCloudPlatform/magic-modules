@@ -607,7 +607,9 @@ func resourceContainerCluster() *schema.Resource {
 						},
 						"enabled": {
 							Type:        schema.TypeBool,
-							Required:    true,
+							Required:    false,
+							Optional:    true,
+							Default:     true,
 							ForceNew:    false,
 							Description: `Whether to enable or disable RBAC security group usage. Default is true.`,
 						},
