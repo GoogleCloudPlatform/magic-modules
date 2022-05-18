@@ -1757,6 +1757,25 @@ objects:
             - :NOT_CONTAINS_STRING
             - :MATCHES_REGEX
             - :NOT_MATCHES_REGEX
+            - :MATCHES_JSON_PATH
+            - :NOT_MATCHES_JSON_PATH
+        - !ruby/object:Api::Type::NestedObject
+          name: jsonPathMatcher
+          description: Information needed to perform a JSONPath content match.
+            Used for `ContentMatcherOption::MATCHES_JSON_PATH` and
+            `ContentMatcherOption::NOT_MATCHES_JSON_PATH`.
+          properties:
+          - !ruby/object:Api::Type::String
+            name: jsonPath
+            description: JSONPath within the response output pointing to the expected
+              `ContentMatcher::content` to match against.
+          - !ruby/object:Api::Type::Enum
+            name: jsonMatcher
+            description: Options to perform JSONPath content matching.
+            default_value: :EXACT_MATCH
+            values:
+              - :EXACT_MATCH
+              - :REGEX_MATCH
     - !ruby/object:Api::Type::Array
       name: selectedRegions
       description: The list of regions from which the check will be run. Some regions
@@ -1941,7 +1960,8 @@ objects:
       input: true
       description: 'The monitored resource (https://cloud.google.com/monitoring/api/resources)
         associated with the configuration. The following monitored resource types are
-        supported for uptime checks:  uptime_url  gce_instance  gae_app  aws_ec2_instance  aws_elb_load_balancer'
+        supported for uptime checks:  uptime_url  gce_instance  gae_app  aws_ec2_instance 
+        aws_elb_load_balancer  k8s_service  servicedirectory_service'
       exactly_one_of:
         - monitored_resource
         - resource_group
