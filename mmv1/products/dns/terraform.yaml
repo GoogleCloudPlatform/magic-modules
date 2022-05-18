@@ -24,7 +24,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           dns_compute_instance: "dns-compute-instance"
           allow_http_traffic: "allow-http-traffic"
           example_zone_googlecloudexample: "example-zone-googlecloudexample"
-          server_ip_dns_record: "server-ip-dns-record"
         min_version: beta
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_basic"
