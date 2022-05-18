@@ -15,11 +15,6 @@ import (
 	"time"
 )
 
-var allowedDockerRegistrySettings = []string{
-	"CONTAINER_REGISTRY",
-	"ARTIFACT_REGISTRY",
-}
-
 var allowedIngressSettings = []string{
 	"ALLOW_ALL",
 	"ALLOW_INTERNAL_AND_GCLB",
@@ -155,7 +150,6 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				ValidateFunc: validation.StringInSlice(allowedDockerRegistrySettings, true),
 				Description:  `Docker Registry to use for storing the function's Docker images. Allowed values are CONTAINER_REGISTRY (default) and ARTIFACT_REGISTRY.`,
 			},
 
