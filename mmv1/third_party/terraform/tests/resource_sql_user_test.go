@@ -72,7 +72,7 @@ func TestAccSqlUser_mysqlDisabled(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_sql_user.user2",
+				ResourceName:            "google_sql_user.user1",
 				ImportStateId:           fmt.Sprintf("%s/%s/gmail.com/admin", getTestProjectFromEnv(), instance),
 				ImportState:             true,
 				ImportStateVerify:       true,
