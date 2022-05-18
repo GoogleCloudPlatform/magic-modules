@@ -20,7 +20,7 @@ func TestAccSqlUser_mysql(t *testing.T) {
 		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlUser_mysql(instance, "password"),
+				Config: testGoogleSqlUser_mysql(instance, "password", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user2"),
@@ -28,10 +28,49 @@ func TestAccSqlUser_mysql(t *testing.T) {
 			},
 			{
 				// Update password
-				Config: testGoogleSqlUser_mysql(instance, "new_password"),
+				Config: testGoogleSqlUser_mysql(instance, "new_password", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user2"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_user.user2",
+				ImportStateId:           fmt.Sprintf("%s/%s/gmail.com/admin", getTestProjectFromEnv(), instance),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password"},
+			},
+		},
+	})
+}
+
+func TestAccSqlUser_mysqlDisabled(t *testing.T) {
+	// Multiple fine-grained resources
+	skipIfVcr(t)
+	t.Parallel()
+
+	instance := fmt.Sprintf("i-%d", randInt(t))
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccSqlUserDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlUser_mysql(instance, "password", true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user2"),
+					resource.TestCheckResourceAttr("google_sql_user.user1", "sql_server_user_details.disabled", "true"),
+				),
+			},
+			{
+				// Update password
+				Config: testGoogleSqlUser_mysql(instance, "password", false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user2"),
+					resource.TestCheckResourceAttr("google_sql_user.user1", "sql_server_user_details.disabled", "false"),
 				),
 			},
 			{
@@ -245,7 +284,7 @@ func testAccSqlUserDestroyProducer(t *testing.T) func(s *terraform.State) error 
 	}
 }
 
-func testGoogleSqlUser_mysql(instance, password string) string {
+func testGoogleSqlUser_mysql(instance, password string, disabled bool) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
@@ -262,10 +301,10 @@ resource "google_sql_user" "user1" {
   instance = google_sql_database_instance.instance.name
   host     = "google.com"
   password = "%s"
-	sql_server_user_details {
-		disabled = "false"
-		server_roles = [ "admin" ]  	
-	}
+  sql_server_user_details {
+    disabled = "%t"
+    server_roles = [ "admin" ]  	
+  }
 }
 
 resource "google_sql_user" "user2" {
@@ -274,7 +313,7 @@ resource "google_sql_user" "user2" {
   host     = "gmail.com"
   password = "hunter2"
 }
-`, instance, password)
+`, instance, password, disabled)
 }
 
 func testGoogleSqlUser_postgres(instance, password string) string {
