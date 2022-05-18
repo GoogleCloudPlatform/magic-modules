@@ -573,7 +573,7 @@ func resourceContainerCluster() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
-				ForceNew:    true,
+				ForceNew:    false,
 				MaxItems:    1,
 				Description: `Configuration for the Google Groups for GKE feature.`,
 				Elem: &schema.Resource{
@@ -2053,6 +2053,21 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			// Wait until it's updated
 			return containerOperationWait(config, op, project, location, updateDescription, userAgent, d.Timeout(schema.TimeoutUpdate))
 		}
+	}
+
+	if d.HasChange("authenticator_groups_config") {
+		agc := d.Get("authenticator_groups_config")
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				AuthenticatorGroupsConfig: expandAuthenticatorGroupsConfig(agc),
+			},
+		}
+
+		updateF := updateFunc(req, "updating GKE cluster authenticator groups config")
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+		log.Printf("[INFO] GKE cluster %s authenticator groups config has been updated", d.Id())
 	}
 
 	// The ClusterUpdate object that we use for most of these updates only allows updating one field at a time,
