@@ -147,10 +147,10 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 			},
 
 			"docker_registry": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				Description:  `Docker Registry to use for storing the function's Docker images. Allowed values are CONTAINER_REGISTRY (default) and ARTIFACT_REGISTRY.`,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: `Docker Registry to use for storing the function's Docker images. Allowed values are CONTAINER_REGISTRY (default) and ARTIFACT_REGISTRY.`,
 			},
 
 			"docker_repository": {
