@@ -123,15 +123,17 @@ func isBeenEnabled(_ context.Context, old, new, _ interface{}) bool {
 <% end -%>
 
 func securityGroupUnchanged(_ context.Context, old, new, _ interface{}) bool {
-	if old == nil {
+	if old == nil || len(old.([]interface{})) == 0 {
 		return false
 	}
-	if new == nil {
+	if new == nil || len(new.([]interface{})) == 0 {
 		return true
 	}
 
-	oldGroup := (old.(map[string]interface{}))["security_group"].(string)
-	newGroup := (new.(map[string]interface{}))["security_group"].(string)
+	oldSGU := (old.([]interface{}))[0]
+	newSGU := (new.([]interface{}))[0]
+	oldGroup := (oldSGU.(map[string]interface{}))["security_group"].(string)
+	newGroup := (newSGU.(map[string]interface{}))["security_group"].(string)
 
 	if len(oldGroup) == 0 || oldGroup == newGroup {
 		return false
