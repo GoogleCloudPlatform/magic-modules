@@ -118,6 +118,11 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 	// We poll until the resource is found due to eventual consistency issue
 	// on part of the api https://cloud.google.com/iam/docs/overview#consistency
 	err = PollingWaitTime(resourceServiceAccountPollRead(d, meta), PollCheckForExistence, "Creating Service Account", d.Timeout(schema.TimeoutCreate), 1)
+
+	if err != nil {
+		return err
+	}
+
 	return resourceGoogleServiceAccountRead(d, meta)
 }
 
