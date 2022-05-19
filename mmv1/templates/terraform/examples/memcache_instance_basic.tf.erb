@@ -34,4 +34,16 @@ resource "google_memcache_instance" "<%= ctx[:primary_resource_id] %>" {
   }
   node_count = 1
   memcache_version = "MEMCACHE_1_5"
+
+  maintenance_policy {
+    weekly_maintenance_window {
+      day = "SATURDAY"
+      start_time {
+        hours = 0
+        minutes = 30
+        seconds = 0
+        nanos = 0
+      }
+    }
+  }
 }
