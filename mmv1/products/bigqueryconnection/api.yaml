@@ -192,6 +192,7 @@ objects:
           - azure
           - cloud_spanner
           - cloud_resource
+        send_empty_value: true
         properties:
           - !ruby/object:Api::Type::String
             name: 'serviceAccountId'
