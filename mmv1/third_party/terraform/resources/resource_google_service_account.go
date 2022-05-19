@@ -115,7 +115,22 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("Error reading service account after creation: %s", err)
 	}
 
-	return resourceGoogleServiceAccountRead(d, meta)
+	err = resourceGoogleServiceAccountRead(d, meta)
+
+	if err != nil {
+		return err
+	}
+
+	// If the id was unset through 404 on the resoource then we assume eventual consistency issue
+	// on part of the api https://cloud.google.com/iam/docs/overview#consistency
+	// Thus we retry ..
+	if d.Id() == "" {
+		d.SetId(sa.Name)
+		time.Sleep(time.Second * 5)
+		return resourceGoogleServiceAccountRead(d, meta)
+	}
+
+	return nil
 }
 
 func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
