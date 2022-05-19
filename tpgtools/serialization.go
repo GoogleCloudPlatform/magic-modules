@@ -39,6 +39,8 @@ import (
 	containerawsBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containeraws/beta"
 	containerazure "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containerazure"
 	containerazureBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containerazure/beta"
+	dataplex "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataplex"
+	dataplexBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataplex/beta"
 	dataproc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc"
 	dataprocBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc/beta"
 	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc"
@@ -107,6 +109,12 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 			return "google_container_azure_cluster", nil
 		case "containerazure/node_pool":
 			return "google_container_azure_node_pool", nil
+		case "dataplex/asset":
+			return "google_dataplex_asset", nil
+		case "dataplex/lake":
+			return "google_dataplex_lake", nil
+		case "dataplex/zone":
+			return "google_dataplex_zone", nil
 		case "dataproc/workflow_template":
 			return "google_dataproc_workflow_template", nil
 		case "eventarc/trigger":
@@ -175,6 +183,12 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 		return "google_container_azure_cluster", nil
 	case "containerazure/node_pool":
 		return "google_container_azure_node_pool", nil
+	case "dataplex/asset":
+		return "google_dataplex_asset", nil
+	case "dataplex/lake":
+		return "google_dataplex_lake", nil
+	case "dataplex/zone":
+		return "google_dataplex_zone", nil
 	case "dataproc/workflow_template":
 		return "google_dataproc_workflow_template", nil
 	case "eventarc/trigger":
@@ -319,6 +333,24 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 				return "", err
 			}
 			return ContainerAzureNodePoolBetaAsHCL(*r, hasGAEquivalent)
+		case "dataplex/asset":
+			r := &dataplexBeta.Asset{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return DataplexAssetBetaAsHCL(*r, hasGAEquivalent)
+		case "dataplex/lake":
+			r := &dataplexBeta.Lake{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return DataplexLakeBetaAsHCL(*r, hasGAEquivalent)
+		case "dataplex/zone":
+			r := &dataplexBeta.Zone{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return DataplexZoneBetaAsHCL(*r, hasGAEquivalent)
 		case "dataproc/workflow_template":
 			r := &dataprocBeta.WorkflowTemplate{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -515,6 +547,24 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 			return "", err
 		}
 		return ContainerAzureNodePoolAsHCL(*r, hasGAEquivalent)
+	case "dataplex/asset":
+		r := &dataplex.Asset{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return DataplexAssetAsHCL(*r, hasGAEquivalent)
+	case "dataplex/lake":
+		r := &dataplex.Lake{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return DataplexLakeAsHCL(*r, hasGAEquivalent)
+	case "dataplex/zone":
+		r := &dataplex.Zone{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return DataplexZoneAsHCL(*r, hasGAEquivalent)
 	case "dataproc/workflow_template":
 		r := &dataproc.WorkflowTemplate{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -2508,6 +2558,378 @@ func convertContainerAzureNodePoolBetaMaxPodsConstraintToHCL(r *containerazureBe
 	if r.MaxPodsPerNode != nil {
 		outputConfig += fmt.Sprintf("\tmax_pods_per_node = %#v\n", *r.MaxPodsPerNode)
 	}
+	return outputConfig + "}"
+}
+
+// DataplexAssetBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func DataplexAssetBetaAsHCL(r dataplexBeta.Asset, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_dataplex_asset\" \"output\" {\n"
+	if r.Lake != nil {
+		outputConfig += fmt.Sprintf("\tlake = %#v\n", *r.Lake)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if v := convertDataplexAssetBetaResourceSpecToHCL(r.ResourceSpec); v != "" {
+		outputConfig += fmt.Sprintf("\tresource_spec %s\n", v)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if v := convertDataplexAssetBetaDiscoverySpecToHCL(r.DiscoverySpec); v != "" {
+		outputConfig += fmt.Sprintf("\tdiscovery_spec %s\n", v)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if r.Zone != nil {
+		outputConfig += fmt.Sprintf("\tzone = %#v\n", *r.Zone)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertDataplexAssetBetaResourceSpecToHCL(r *dataplexBeta.AssetResourceSpec) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Type != nil {
+		outputConfig += fmt.Sprintf("\ttype = %#v\n", *r.Type)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexAssetBetaDiscoverySpecToHCL(r *dataplexBeta.AssetDiscoverySpec) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertDataplexAssetBetaDiscoverySpecCsvOptionsToHCL(r.CsvOptions); v != "" {
+		outputConfig += fmt.Sprintf("\tcsv_options %s\n", v)
+	}
+	if r.Enabled != nil {
+		outputConfig += fmt.Sprintf("\tenabled = %#v\n", *r.Enabled)
+	}
+	if r.ExcludePatterns != nil {
+		outputConfig += "\texclude_patterns = ["
+		for _, v := range r.ExcludePatterns {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.IncludePatterns != nil {
+		outputConfig += "\tinclude_patterns = ["
+		for _, v := range r.IncludePatterns {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertDataplexAssetBetaDiscoverySpecJsonOptionsToHCL(r.JsonOptions); v != "" {
+		outputConfig += fmt.Sprintf("\tjson_options %s\n", v)
+	}
+	if r.Schedule != nil {
+		outputConfig += fmt.Sprintf("\tschedule = %#v\n", *r.Schedule)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexAssetBetaDiscoverySpecCsvOptionsToHCL(r *dataplexBeta.AssetDiscoverySpecCsvOptions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Delimiter != nil {
+		outputConfig += fmt.Sprintf("\tdelimiter = %#v\n", *r.Delimiter)
+	}
+	if r.DisableTypeInference != nil {
+		outputConfig += fmt.Sprintf("\tdisable_type_inference = %#v\n", *r.DisableTypeInference)
+	}
+	if r.Encoding != nil {
+		outputConfig += fmt.Sprintf("\tencoding = %#v\n", *r.Encoding)
+	}
+	if r.HeaderRows != nil {
+		outputConfig += fmt.Sprintf("\theader_rows = %#v\n", *r.HeaderRows)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexAssetBetaDiscoverySpecJsonOptionsToHCL(r *dataplexBeta.AssetDiscoverySpecJsonOptions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.DisableTypeInference != nil {
+		outputConfig += fmt.Sprintf("\tdisable_type_inference = %#v\n", *r.DisableTypeInference)
+	}
+	if r.Encoding != nil {
+		outputConfig += fmt.Sprintf("\tencoding = %#v\n", *r.Encoding)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexAssetBetaDiscoveryStatusToHCL(r *dataplexBeta.AssetDiscoveryStatus) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertDataplexAssetBetaDiscoveryStatusStatsToHCL(r *dataplexBeta.AssetDiscoveryStatusStats) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertDataplexAssetBetaResourceStatusToHCL(r *dataplexBeta.AssetResourceStatus) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertDataplexAssetBetaSecurityStatusToHCL(r *dataplexBeta.AssetSecurityStatus) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+// DataplexLakeBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func DataplexLakeBetaAsHCL(r dataplexBeta.Lake, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_dataplex_lake\" \"output\" {\n"
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if v := convertDataplexLakeBetaMetastoreToHCL(r.Metastore); v != "" {
+		outputConfig += fmt.Sprintf("\tmetastore %s\n", v)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertDataplexLakeBetaMetastoreToHCL(r *dataplexBeta.LakeMetastore) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexLakeBetaAssetStatusToHCL(r *dataplexBeta.LakeAssetStatus) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertDataplexLakeBetaMetastoreStatusToHCL(r *dataplexBeta.LakeMetastoreStatus) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+// DataplexZoneBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func DataplexZoneBetaAsHCL(r dataplexBeta.Zone, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_dataplex_zone\" \"output\" {\n"
+	if r.Lake != nil {
+		outputConfig += fmt.Sprintf("\tlake = %#v\n", *r.Lake)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if v := convertDataplexZoneBetaResourceSpecToHCL(r.ResourceSpec); v != "" {
+		outputConfig += fmt.Sprintf("\tresource_spec %s\n", v)
+	}
+	if r.Type != nil {
+		outputConfig += fmt.Sprintf("\ttype = %#v\n", *r.Type)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if v := convertDataplexZoneBetaDiscoverySpecToHCL(r.DiscoverySpec); v != "" {
+		outputConfig += fmt.Sprintf("\tdiscovery_spec %s\n", v)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertDataplexZoneBetaResourceSpecToHCL(r *dataplexBeta.ZoneResourceSpec) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.LocationType != nil {
+		outputConfig += fmt.Sprintf("\tlocation_type = %#v\n", *r.LocationType)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexZoneBetaDiscoverySpecToHCL(r *dataplexBeta.ZoneDiscoverySpec) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Enabled != nil {
+		outputConfig += fmt.Sprintf("\tenabled = %#v\n", *r.Enabled)
+	}
+	if v := convertDataplexZoneBetaDiscoverySpecCsvOptionsToHCL(r.CsvOptions); v != "" {
+		outputConfig += fmt.Sprintf("\tcsv_options %s\n", v)
+	}
+	if r.ExcludePatterns != nil {
+		outputConfig += "\texclude_patterns = ["
+		for _, v := range r.ExcludePatterns {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.IncludePatterns != nil {
+		outputConfig += "\tinclude_patterns = ["
+		for _, v := range r.IncludePatterns {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertDataplexZoneBetaDiscoverySpecJsonOptionsToHCL(r.JsonOptions); v != "" {
+		outputConfig += fmt.Sprintf("\tjson_options %s\n", v)
+	}
+	if r.Schedule != nil {
+		outputConfig += fmt.Sprintf("\tschedule = %#v\n", *r.Schedule)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexZoneBetaDiscoverySpecCsvOptionsToHCL(r *dataplexBeta.ZoneDiscoverySpecCsvOptions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Delimiter != nil {
+		outputConfig += fmt.Sprintf("\tdelimiter = %#v\n", *r.Delimiter)
+	}
+	if r.DisableTypeInference != nil {
+		outputConfig += fmt.Sprintf("\tdisable_type_inference = %#v\n", *r.DisableTypeInference)
+	}
+	if r.Encoding != nil {
+		outputConfig += fmt.Sprintf("\tencoding = %#v\n", *r.Encoding)
+	}
+	if r.HeaderRows != nil {
+		outputConfig += fmt.Sprintf("\theader_rows = %#v\n", *r.HeaderRows)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexZoneBetaDiscoverySpecJsonOptionsToHCL(r *dataplexBeta.ZoneDiscoverySpecJsonOptions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.DisableTypeInference != nil {
+		outputConfig += fmt.Sprintf("\tdisable_type_inference = %#v\n", *r.DisableTypeInference)
+	}
+	if r.Encoding != nil {
+		outputConfig += fmt.Sprintf("\tencoding = %#v\n", *r.Encoding)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexZoneBetaAssetStatusToHCL(r *dataplexBeta.ZoneAssetStatus) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
 	return outputConfig + "}"
 }
 
@@ -7672,6 +8094,378 @@ func convertContainerAzureNodePoolMaxPodsConstraintToHCL(r *containerazure.NodeP
 	return outputConfig + "}"
 }
 
+// DataplexAssetAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func DataplexAssetAsHCL(r dataplex.Asset, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_dataplex_asset\" \"output\" {\n"
+	if r.Lake != nil {
+		outputConfig += fmt.Sprintf("\tlake = %#v\n", *r.Lake)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if v := convertDataplexAssetResourceSpecToHCL(r.ResourceSpec); v != "" {
+		outputConfig += fmt.Sprintf("\tresource_spec %s\n", v)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if v := convertDataplexAssetDiscoverySpecToHCL(r.DiscoverySpec); v != "" {
+		outputConfig += fmt.Sprintf("\tdiscovery_spec %s\n", v)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	if r.Zone != nil {
+		outputConfig += fmt.Sprintf("\tzone = %#v\n", *r.Zone)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertDataplexAssetResourceSpecToHCL(r *dataplex.AssetResourceSpec) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Type != nil {
+		outputConfig += fmt.Sprintf("\ttype = %#v\n", *r.Type)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexAssetDiscoverySpecToHCL(r *dataplex.AssetDiscoverySpec) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if v := convertDataplexAssetDiscoverySpecCsvOptionsToHCL(r.CsvOptions); v != "" {
+		outputConfig += fmt.Sprintf("\tcsv_options %s\n", v)
+	}
+	if r.Enabled != nil {
+		outputConfig += fmt.Sprintf("\tenabled = %#v\n", *r.Enabled)
+	}
+	if r.ExcludePatterns != nil {
+		outputConfig += "\texclude_patterns = ["
+		for _, v := range r.ExcludePatterns {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.IncludePatterns != nil {
+		outputConfig += "\tinclude_patterns = ["
+		for _, v := range r.IncludePatterns {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertDataplexAssetDiscoverySpecJsonOptionsToHCL(r.JsonOptions); v != "" {
+		outputConfig += fmt.Sprintf("\tjson_options %s\n", v)
+	}
+	if r.Schedule != nil {
+		outputConfig += fmt.Sprintf("\tschedule = %#v\n", *r.Schedule)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexAssetDiscoverySpecCsvOptionsToHCL(r *dataplex.AssetDiscoverySpecCsvOptions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Delimiter != nil {
+		outputConfig += fmt.Sprintf("\tdelimiter = %#v\n", *r.Delimiter)
+	}
+	if r.DisableTypeInference != nil {
+		outputConfig += fmt.Sprintf("\tdisable_type_inference = %#v\n", *r.DisableTypeInference)
+	}
+	if r.Encoding != nil {
+		outputConfig += fmt.Sprintf("\tencoding = %#v\n", *r.Encoding)
+	}
+	if r.HeaderRows != nil {
+		outputConfig += fmt.Sprintf("\theader_rows = %#v\n", *r.HeaderRows)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexAssetDiscoverySpecJsonOptionsToHCL(r *dataplex.AssetDiscoverySpecJsonOptions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.DisableTypeInference != nil {
+		outputConfig += fmt.Sprintf("\tdisable_type_inference = %#v\n", *r.DisableTypeInference)
+	}
+	if r.Encoding != nil {
+		outputConfig += fmt.Sprintf("\tencoding = %#v\n", *r.Encoding)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexAssetDiscoveryStatusToHCL(r *dataplex.AssetDiscoveryStatus) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertDataplexAssetDiscoveryStatusStatsToHCL(r *dataplex.AssetDiscoveryStatusStats) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertDataplexAssetResourceStatusToHCL(r *dataplex.AssetResourceStatus) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertDataplexAssetSecurityStatusToHCL(r *dataplex.AssetSecurityStatus) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+// DataplexLakeAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func DataplexLakeAsHCL(r dataplex.Lake, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_dataplex_lake\" \"output\" {\n"
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if v := convertDataplexLakeMetastoreToHCL(r.Metastore); v != "" {
+		outputConfig += fmt.Sprintf("\tmetastore %s\n", v)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertDataplexLakeMetastoreToHCL(r *dataplex.LakeMetastore) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexLakeAssetStatusToHCL(r *dataplex.LakeAssetStatus) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertDataplexLakeMetastoreStatusToHCL(r *dataplex.LakeMetastoreStatus) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+// DataplexZoneAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func DataplexZoneAsHCL(r dataplex.Zone, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_dataplex_zone\" \"output\" {\n"
+	if r.Lake != nil {
+		outputConfig += fmt.Sprintf("\tlake = %#v\n", *r.Lake)
+	}
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if v := convertDataplexZoneResourceSpecToHCL(r.ResourceSpec); v != "" {
+		outputConfig += fmt.Sprintf("\tresource_spec %s\n", v)
+	}
+	if r.Type != nil {
+		outputConfig += fmt.Sprintf("\ttype = %#v\n", *r.Type)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if v := convertDataplexZoneDiscoverySpecToHCL(r.DiscoverySpec); v != "" {
+		outputConfig += fmt.Sprintf("\tdiscovery_spec %s\n", v)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertDataplexZoneResourceSpecToHCL(r *dataplex.ZoneResourceSpec) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.LocationType != nil {
+		outputConfig += fmt.Sprintf("\tlocation_type = %#v\n", *r.LocationType)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexZoneDiscoverySpecToHCL(r *dataplex.ZoneDiscoverySpec) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Enabled != nil {
+		outputConfig += fmt.Sprintf("\tenabled = %#v\n", *r.Enabled)
+	}
+	if v := convertDataplexZoneDiscoverySpecCsvOptionsToHCL(r.CsvOptions); v != "" {
+		outputConfig += fmt.Sprintf("\tcsv_options %s\n", v)
+	}
+	if r.ExcludePatterns != nil {
+		outputConfig += "\texclude_patterns = ["
+		for _, v := range r.ExcludePatterns {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.IncludePatterns != nil {
+		outputConfig += "\tinclude_patterns = ["
+		for _, v := range r.IncludePatterns {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if v := convertDataplexZoneDiscoverySpecJsonOptionsToHCL(r.JsonOptions); v != "" {
+		outputConfig += fmt.Sprintf("\tjson_options %s\n", v)
+	}
+	if r.Schedule != nil {
+		outputConfig += fmt.Sprintf("\tschedule = %#v\n", *r.Schedule)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexZoneDiscoverySpecCsvOptionsToHCL(r *dataplex.ZoneDiscoverySpecCsvOptions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Delimiter != nil {
+		outputConfig += fmt.Sprintf("\tdelimiter = %#v\n", *r.Delimiter)
+	}
+	if r.DisableTypeInference != nil {
+		outputConfig += fmt.Sprintf("\tdisable_type_inference = %#v\n", *r.DisableTypeInference)
+	}
+	if r.Encoding != nil {
+		outputConfig += fmt.Sprintf("\tencoding = %#v\n", *r.Encoding)
+	}
+	if r.HeaderRows != nil {
+		outputConfig += fmt.Sprintf("\theader_rows = %#v\n", *r.HeaderRows)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexZoneDiscoverySpecJsonOptionsToHCL(r *dataplex.ZoneDiscoverySpecJsonOptions) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.DisableTypeInference != nil {
+		outputConfig += fmt.Sprintf("\tdisable_type_inference = %#v\n", *r.DisableTypeInference)
+	}
+	if r.Encoding != nil {
+		outputConfig += fmt.Sprintf("\tencoding = %#v\n", *r.Encoding)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexZoneAssetStatusToHCL(r *dataplex.ZoneAssetStatus) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
 // DataprocWorkflowTemplateAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -12250,6 +13044,380 @@ func convertContainerAzureNodePoolBetaMaxPodsConstraintList(i interface{}) (out 
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertContainerAzureNodePoolBetaMaxPodsConstraint(v))
+	}
+	return out
+}
+
+func convertDataplexAssetBetaResourceSpec(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"type": in["type"],
+		"name": in["name"],
+	}
+}
+
+func convertDataplexAssetBetaResourceSpecList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexAssetBetaResourceSpec(v))
+	}
+	return out
+}
+
+func convertDataplexAssetBetaDiscoverySpec(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"csvOptions":      convertDataplexAssetBetaDiscoverySpecCsvOptions(in["csv_options"]),
+		"enabled":         in["enabled"],
+		"excludePatterns": in["exclude_patterns"],
+		"includePatterns": in["include_patterns"],
+		"jsonOptions":     convertDataplexAssetBetaDiscoverySpecJsonOptions(in["json_options"]),
+		"schedule":        in["schedule"],
+	}
+}
+
+func convertDataplexAssetBetaDiscoverySpecList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexAssetBetaDiscoverySpec(v))
+	}
+	return out
+}
+
+func convertDataplexAssetBetaDiscoverySpecCsvOptions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"delimiter":            in["delimiter"],
+		"disableTypeInference": in["disable_type_inference"],
+		"encoding":             in["encoding"],
+		"headerRows":           in["header_rows"],
+	}
+}
+
+func convertDataplexAssetBetaDiscoverySpecCsvOptionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexAssetBetaDiscoverySpecCsvOptions(v))
+	}
+	return out
+}
+
+func convertDataplexAssetBetaDiscoverySpecJsonOptions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"disableTypeInference": in["disable_type_inference"],
+		"encoding":             in["encoding"],
+	}
+}
+
+func convertDataplexAssetBetaDiscoverySpecJsonOptionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexAssetBetaDiscoverySpecJsonOptions(v))
+	}
+	return out
+}
+
+func convertDataplexAssetBetaDiscoveryStatus(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"lastRunDuration": in["last_run_duration"],
+		"lastRunTime":     in["last_run_time"],
+		"message":         in["message"],
+		"state":           in["state"],
+		"stats":           convertDataplexAssetBetaDiscoveryStatusStats(in["stats"]),
+		"updateTime":      in["update_time"],
+	}
+}
+
+func convertDataplexAssetBetaDiscoveryStatusList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexAssetBetaDiscoveryStatus(v))
+	}
+	return out
+}
+
+func convertDataplexAssetBetaDiscoveryStatusStats(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"dataItems": in["data_items"],
+		"dataSize":  in["data_size"],
+		"filesets":  in["filesets"],
+		"tables":    in["tables"],
+	}
+}
+
+func convertDataplexAssetBetaDiscoveryStatusStatsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexAssetBetaDiscoveryStatusStats(v))
+	}
+	return out
+}
+
+func convertDataplexAssetBetaResourceStatus(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"message":    in["message"],
+		"state":      in["state"],
+		"updateTime": in["update_time"],
+	}
+}
+
+func convertDataplexAssetBetaResourceStatusList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexAssetBetaResourceStatus(v))
+	}
+	return out
+}
+
+func convertDataplexAssetBetaSecurityStatus(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"message":    in["message"],
+		"state":      in["state"],
+		"updateTime": in["update_time"],
+	}
+}
+
+func convertDataplexAssetBetaSecurityStatusList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexAssetBetaSecurityStatus(v))
+	}
+	return out
+}
+
+func convertDataplexLakeBetaMetastore(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"service": in["service"],
+	}
+}
+
+func convertDataplexLakeBetaMetastoreList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexLakeBetaMetastore(v))
+	}
+	return out
+}
+
+func convertDataplexLakeBetaAssetStatus(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"activeAssets":                 in["active_assets"],
+		"securityPolicyApplyingAssets": in["security_policy_applying_assets"],
+		"updateTime":                   in["update_time"],
+	}
+}
+
+func convertDataplexLakeBetaAssetStatusList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexLakeBetaAssetStatus(v))
+	}
+	return out
+}
+
+func convertDataplexLakeBetaMetastoreStatus(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"endpoint":   in["endpoint"],
+		"message":    in["message"],
+		"state":      in["state"],
+		"updateTime": in["update_time"],
+	}
+}
+
+func convertDataplexLakeBetaMetastoreStatusList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexLakeBetaMetastoreStatus(v))
+	}
+	return out
+}
+
+func convertDataplexZoneBetaResourceSpec(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"locationType": in["location_type"],
+	}
+}
+
+func convertDataplexZoneBetaResourceSpecList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexZoneBetaResourceSpec(v))
+	}
+	return out
+}
+
+func convertDataplexZoneBetaDiscoverySpec(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"enabled":         in["enabled"],
+		"csvOptions":      convertDataplexZoneBetaDiscoverySpecCsvOptions(in["csv_options"]),
+		"excludePatterns": in["exclude_patterns"],
+		"includePatterns": in["include_patterns"],
+		"jsonOptions":     convertDataplexZoneBetaDiscoverySpecJsonOptions(in["json_options"]),
+		"schedule":        in["schedule"],
+	}
+}
+
+func convertDataplexZoneBetaDiscoverySpecList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexZoneBetaDiscoverySpec(v))
+	}
+	return out
+}
+
+func convertDataplexZoneBetaDiscoverySpecCsvOptions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"delimiter":            in["delimiter"],
+		"disableTypeInference": in["disable_type_inference"],
+		"encoding":             in["encoding"],
+		"headerRows":           in["header_rows"],
+	}
+}
+
+func convertDataplexZoneBetaDiscoverySpecCsvOptionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexZoneBetaDiscoverySpecCsvOptions(v))
+	}
+	return out
+}
+
+func convertDataplexZoneBetaDiscoverySpecJsonOptions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"disableTypeInference": in["disable_type_inference"],
+		"encoding":             in["encoding"],
+	}
+}
+
+func convertDataplexZoneBetaDiscoverySpecJsonOptionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexZoneBetaDiscoverySpecJsonOptions(v))
+	}
+	return out
+}
+
+func convertDataplexZoneBetaAssetStatus(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"activeAssets":                 in["active_assets"],
+		"securityPolicyApplyingAssets": in["security_policy_applying_assets"],
+		"updateTime":                   in["update_time"],
+	}
+}
+
+func convertDataplexZoneBetaAssetStatusList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexZoneBetaAssetStatus(v))
 	}
 	return out
 }
@@ -17081,6 +18249,380 @@ func convertContainerAzureNodePoolMaxPodsConstraintList(i interface{}) (out []ma
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertContainerAzureNodePoolMaxPodsConstraint(v))
+	}
+	return out
+}
+
+func convertDataplexAssetResourceSpec(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"type": in["type"],
+		"name": in["name"],
+	}
+}
+
+func convertDataplexAssetResourceSpecList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexAssetResourceSpec(v))
+	}
+	return out
+}
+
+func convertDataplexAssetDiscoverySpec(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"csvOptions":      convertDataplexAssetDiscoverySpecCsvOptions(in["csv_options"]),
+		"enabled":         in["enabled"],
+		"excludePatterns": in["exclude_patterns"],
+		"includePatterns": in["include_patterns"],
+		"jsonOptions":     convertDataplexAssetDiscoverySpecJsonOptions(in["json_options"]),
+		"schedule":        in["schedule"],
+	}
+}
+
+func convertDataplexAssetDiscoverySpecList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexAssetDiscoverySpec(v))
+	}
+	return out
+}
+
+func convertDataplexAssetDiscoverySpecCsvOptions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"delimiter":            in["delimiter"],
+		"disableTypeInference": in["disable_type_inference"],
+		"encoding":             in["encoding"],
+		"headerRows":           in["header_rows"],
+	}
+}
+
+func convertDataplexAssetDiscoverySpecCsvOptionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexAssetDiscoverySpecCsvOptions(v))
+	}
+	return out
+}
+
+func convertDataplexAssetDiscoverySpecJsonOptions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"disableTypeInference": in["disable_type_inference"],
+		"encoding":             in["encoding"],
+	}
+}
+
+func convertDataplexAssetDiscoverySpecJsonOptionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexAssetDiscoverySpecJsonOptions(v))
+	}
+	return out
+}
+
+func convertDataplexAssetDiscoveryStatus(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"lastRunDuration": in["last_run_duration"],
+		"lastRunTime":     in["last_run_time"],
+		"message":         in["message"],
+		"state":           in["state"],
+		"stats":           convertDataplexAssetDiscoveryStatusStats(in["stats"]),
+		"updateTime":      in["update_time"],
+	}
+}
+
+func convertDataplexAssetDiscoveryStatusList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexAssetDiscoveryStatus(v))
+	}
+	return out
+}
+
+func convertDataplexAssetDiscoveryStatusStats(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"dataItems": in["data_items"],
+		"dataSize":  in["data_size"],
+		"filesets":  in["filesets"],
+		"tables":    in["tables"],
+	}
+}
+
+func convertDataplexAssetDiscoveryStatusStatsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexAssetDiscoveryStatusStats(v))
+	}
+	return out
+}
+
+func convertDataplexAssetResourceStatus(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"message":    in["message"],
+		"state":      in["state"],
+		"updateTime": in["update_time"],
+	}
+}
+
+func convertDataplexAssetResourceStatusList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexAssetResourceStatus(v))
+	}
+	return out
+}
+
+func convertDataplexAssetSecurityStatus(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"message":    in["message"],
+		"state":      in["state"],
+		"updateTime": in["update_time"],
+	}
+}
+
+func convertDataplexAssetSecurityStatusList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexAssetSecurityStatus(v))
+	}
+	return out
+}
+
+func convertDataplexLakeMetastore(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"service": in["service"],
+	}
+}
+
+func convertDataplexLakeMetastoreList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexLakeMetastore(v))
+	}
+	return out
+}
+
+func convertDataplexLakeAssetStatus(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"activeAssets":                 in["active_assets"],
+		"securityPolicyApplyingAssets": in["security_policy_applying_assets"],
+		"updateTime":                   in["update_time"],
+	}
+}
+
+func convertDataplexLakeAssetStatusList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexLakeAssetStatus(v))
+	}
+	return out
+}
+
+func convertDataplexLakeMetastoreStatus(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"endpoint":   in["endpoint"],
+		"message":    in["message"],
+		"state":      in["state"],
+		"updateTime": in["update_time"],
+	}
+}
+
+func convertDataplexLakeMetastoreStatusList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexLakeMetastoreStatus(v))
+	}
+	return out
+}
+
+func convertDataplexZoneResourceSpec(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"locationType": in["location_type"],
+	}
+}
+
+func convertDataplexZoneResourceSpecList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexZoneResourceSpec(v))
+	}
+	return out
+}
+
+func convertDataplexZoneDiscoverySpec(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"enabled":         in["enabled"],
+		"csvOptions":      convertDataplexZoneDiscoverySpecCsvOptions(in["csv_options"]),
+		"excludePatterns": in["exclude_patterns"],
+		"includePatterns": in["include_patterns"],
+		"jsonOptions":     convertDataplexZoneDiscoverySpecJsonOptions(in["json_options"]),
+		"schedule":        in["schedule"],
+	}
+}
+
+func convertDataplexZoneDiscoverySpecList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexZoneDiscoverySpec(v))
+	}
+	return out
+}
+
+func convertDataplexZoneDiscoverySpecCsvOptions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"delimiter":            in["delimiter"],
+		"disableTypeInference": in["disable_type_inference"],
+		"encoding":             in["encoding"],
+		"headerRows":           in["header_rows"],
+	}
+}
+
+func convertDataplexZoneDiscoverySpecCsvOptionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexZoneDiscoverySpecCsvOptions(v))
+	}
+	return out
+}
+
+func convertDataplexZoneDiscoverySpecJsonOptions(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"disableTypeInference": in["disable_type_inference"],
+		"encoding":             in["encoding"],
+	}
+}
+
+func convertDataplexZoneDiscoverySpecJsonOptionsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexZoneDiscoverySpecJsonOptions(v))
+	}
+	return out
+}
+
+func convertDataplexZoneAssetStatus(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"activeAssets":                 in["active_assets"],
+		"securityPolicyApplyingAssets": in["security_policy_applying_assets"],
+		"updateTime":                   in["update_time"],
+	}
+}
+
+func convertDataplexZoneAssetStatusList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexZoneAssetStatus(v))
 	}
 	return out
 }
