@@ -3,6 +3,7 @@ resource "google_compute_service_attachment" "<%= ctx[:primary_resource_id] %>" 
   region      = "us-west2"
   description = "A service attachment configured with Terraform"
 
+  domain_names             = ["gcp.tfacc.hashicorptest.com."]
   enable_proxy_protocol    = true
   connection_preference    = "ACCEPT_MANUAL"
   nat_subnets              = [google_compute_subnetwork.psc_ilb_nat.id]
