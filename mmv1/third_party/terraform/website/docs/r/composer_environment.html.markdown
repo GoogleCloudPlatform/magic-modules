@@ -306,7 +306,7 @@ The following arguments are supported:
   The configuration settings for the Airflow web server App Engine instance.
 
 * `encryption_config` -
-  (Optional, Cloud Composer 1 only)
+  (Optional)
   The encryption options for the Cloud Composer environment and its
   dependencies.
 
@@ -658,6 +658,11 @@ The `config` block supports:
   The configuration used for the Private IP Cloud Composer environment. Structure is documented
   below.
 
+* `encryption_config` -
+  (Optional)
+  The encryption options for the Cloud Composer environment and its
+  dependencies.
+
 * `maintenance_window` -
   (Optional)
   The configuration settings for Cloud Composer maintenance windows.
@@ -842,7 +847,15 @@ The `ip_allocation_policy` block supports:
   (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to pick a specific range to use.
   Specify either `services_secondary_range_name` or `services_ipv4_cidr_block` but not both.
 
-The `maintenance_window` block supports:
+<a name="nested_encryption_config_comp_2"></a>The `encryption_config` block supports:
+
+* `kms_key_name` -
+  (Required)
+  Customer-managed Encryption Key available through Google's Key Management Service. It must
+  be the fully qualified resource name,
+  i.e. projects/project-id/locations/location/keyRings/keyring/cryptoKeys/key. Cannot be updated.
+
+<a name="nested_maintenance_window_comp_2"></a>The `maintenance_window` block supports:
 
 * `start_time` -
   (Required)

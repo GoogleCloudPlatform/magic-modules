@@ -297,7 +297,7 @@ func TestAccComposerEnvironment_withWebServerConfig(t *testing.T) {
 	})
 }
 
-func TestAccComposerEnvironment_withEncryptionConfig(t *testing.T) {
+func TestAccComposerEnvironment_withEncryptionConfigComposer1(t *testing.T) {
   t.Parallel()
 
   kms := BootstrapKMSKeyInLocation(t, "us-central1")
@@ -312,7 +312,8 @@ func TestAccComposerEnvironment_withEncryptionConfig(t *testing.T) {
     CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
     Steps: []resource.TestStep{
       {
-        Config: testAccComposerEnvironment_encryptionCfg(pid, envName, kms.CryptoKey.Name, network, subnetwork),
+//        Config: testAccComposerEnvironment_encryptionCfg(pid, "1", "1", envName, kms.CryptoKey.Name, network, subnetwork),
+				Config: testAccComposerEnvironment_encryptionCfg(pid, envName, kms.CryptoKey.Name, network, subnetwork),
       },
       {
         ResourceName:      "google_composer_environment.test",
@@ -325,12 +326,48 @@ func TestAccComposerEnvironment_withEncryptionConfig(t *testing.T) {
       {
         PlanOnly:           true,
         ExpectNonEmptyPlan: false,
-        Config:             testAccComposerEnvironment_encryptionCfg(pid, envName, kms.CryptoKey.Name, network, subnetwork),
-        Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
+//        Config:             testAccComposerEnvironment_encryptionCfg(pid, "1", "1", envName, kms.CryptoKey.Name, network, subnetwork),
+				Config:             testAccComposerEnvironment_encryptionCfg(pid, envName, kms.CryptoKey.Name, network, subnetwork),
+				Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
       },
     },
   })
 }
+
+//func TestAccComposerEnvironment_withEncryptionConfigComposer2(t *testing.T) {
+//	t.Parallel()
+
+//	kms := BootstrapKMSKeyInLocation(t, "us-central1")
+//	pid := getTestProjectFromEnv()
+//	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
+//	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+//	subnetwork := network + "-1"
+
+//	vcrTest(t, resource.TestCase{
+//		PreCheck:     func() { testAccPreCheck(t) },
+//		Providers:    testAccProviders,
+//		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+//		Steps: []resource.TestStep{
+//			{
+//				Config: testAccComposerEnvironment_encryptionCfg(pid, "2", "2", envName, kms.CryptoKey.Name, network, subnetwork),
+//			},
+//			{
+//				ResourceName:      "google_composer_environment.test",
+//				ImportState:       true,
+//				ImportStateVerify: true,
+//			},
+//			// This is a terrible clean-up step in order to get destroy to succeed,
+//			// due to dangling firewall rules left by the Composer Environment blocking network deletion.
+//			// TODO(dzarmola): Remove this check if firewall rules bug gets fixed by Composer.
+//			{
+//				PlanOnly:           true,
+//				ExpectNonEmptyPlan: false,
+//				Config:             testAccComposerEnvironment_encryptionCfg(pid, "2", "2", envName, kms.CryptoKey.Name, network, subnetwork),
+//				Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
+//			},
+//		},
+//	})
+//}
 
 func TestAccComposerEnvironment_withMaintenanceWindow(t *testing.T) {
   t.Parallel()
@@ -1111,11 +1148,20 @@ resource "google_compute_subnetwork" "test" {
 `, name, network, subnetwork)
 }
 
+//func testAccComposerEnvironment_encryptionCfg(pid, compVersion, airflowVersion, name, kmsKey, network, subnetwork string) string {
 func testAccComposerEnvironment_encryptionCfg(pid, name, kmsKey, network, subnetwork string) string {
   return fmt.Sprintf(`
 data "google_project" "project" {
   project_id = "%s"
 }
+
+# locals {
+# 	composer_version = "%s"  # both composer_version and airflow_version are parts of regex, so if either 1 or 2 version is ok "[12]" should be used,
+# 	airflow_version = "%s"   # if sub-version is needed remember to escape "." with "\\." for example 1.2 should be written as "1\\.2"
+# 	reg_ex = join("", ["composer-", local.composer_version, "\\.[\\d+\\.]*\\d+.*-airflow-", local.airflow_version, "\\.[\\d+\\.]*\\d+"])
+# 	matching_images = [for v in data.google_composer_image_versions.all.image_versions[*].image_version_id: v if length(regexall(local.reg_ex, v)) > 0]
+# }
+
 resource "google_project_iam_member" "kms-project-binding1" {
   project = data.google_project.project.project_id
   role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
@@ -1158,6 +1204,11 @@ resource "google_composer_environment" "test" {
       subnetwork = google_compute_subnetwork.test.self_link
       zone       = "us-central1-a"
     }
+
+		# software_config {
+			# image_version = local.matching_images[0]
+		# }
+
     encryption_config {
       kms_key_name  = "%s"
     }
@@ -1175,7 +1226,9 @@ resource "google_compute_subnetwork" "test" {
   region        = "us-central1"
   network       = google_compute_network.test.self_link
 }
-`, pid, kmsKey, name, kmsKey, network, subnetwork)
+`,
+//pid, compVersion, airflowVersion, kmsKey, name, kmsKey, network, subnetwork)
+		pid, kmsKey, name, kmsKey, network, subnetwork)
 }
 
 
