@@ -103,7 +103,7 @@ objects:
           properties:
             - !ruby/object:Api::Type::String
               name: 'nodeId'
-              description: Identifier of the Memcached node. 
+              description: Identifier of the Memcached node.
                 The node id does not include project or location like the Memcached instance name.
               output: true
             - !ruby/object:Api::Type::String
@@ -120,7 +120,7 @@ objects:
               output: true
             - !ruby/object:Api::Type::String
               name: state
-              description: Current state of the Memcached node.               
+              description: Current state of the Memcached node.
               output: true
       - !ruby/object:Api::Type::Time
         name: 'createTime'
