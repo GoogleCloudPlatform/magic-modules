@@ -1,0 +1,13 @@
+{
+  "name": "{{asset_name}}",
+  "displayName": "Asset for DCL",
+  "location": "{{region}}",
+  "project": "{{project}}",
+  "resourceSpec": {
+    "name": "projects/{{project}}/buckets/{{ref:basic.storage.bucket.json:name}}",
+    "type": "STORAGE_BUCKET"
+  },
+  "description": "Updated Asset for DCL",
+  "lake": "{{ref:basic.lake.json:name}}",
+  "zone": "{{ref:basic.zone.json:name}}"
+}
