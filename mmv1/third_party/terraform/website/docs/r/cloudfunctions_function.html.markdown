@@ -115,6 +115,10 @@ Eg. `"nodejs16"`, `"python39"`, `"dotnet3"`, `"go116"`, `"java11"`, `"ruby30"`, 
 
 - - -
 
+* `project` - Project of the function. If it is not provided, the provider project is used.
+
+* `region` - Region of function. If it is not provided, the provider region is used.
+
 * `description` - (Optional) Description of the function.
 
 * `available_memory_mb` - (Optional) Memory (in MB), available to the function. Default value is `256`. Possible values include `128`, `256`, `512`, `1024`, etc.
@@ -220,10 +224,6 @@ exported:
 * `https_trigger_url` - URL which triggers function execution. Returned only if `trigger_http` is used.
 
 * `source_repository.0.deployed_url` - The URL pointing to the hosted repository where the function was defined at the time of deployment.
-
-* `project` - Project of the function. If it is not provided, the provider project is used.
-
-* `region` - Region of function. If it is not provided, the provider region is used.
 
 ## Timeouts
 
