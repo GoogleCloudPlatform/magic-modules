@@ -81,7 +81,7 @@ func dataSourceGoogleTagsTagKeyRead(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if tagKeyMatch == nil {
-		return fmt.Errorf("tag key not found: %s/%s", parent, shortName)
+		return fmt.Errorf("tag key with short_name %s not found under parent %s", shortName, parent)
 	}
 
 	d.SetId(tagKeyMatch.Name)

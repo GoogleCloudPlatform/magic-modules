@@ -81,7 +81,7 @@ func dataSourceGoogleTagsTagValueRead(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if tagValueMatch == nil {
-		return fmt.Errorf("tag value not found: %s/%s", parent, shortName)
+		return fmt.Errorf("tag value with short_name %s not found under parent %s", shortName, parent)
 	}
 
 	d.SetId(tagValueMatch.Name)
