@@ -116,7 +116,6 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 			customdiff.ForceNewIfChange("settings.0.disk_size", isDiskShrinkage),
 			privateNetworkCustomizeDiff,
 			pitrPostgresOnlyCustomizeDiff,
-			insightsPostgresOnlyCustomizeDiff,
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -281,7 +280,7 @@ is set to true.`,
 							Type:             schema.TypeBool,
 							Optional:         true,
 							Default:          true,
-							Description:      `Configuration to increase storage size automatically.  Note that future terraform apply calls will attempt to resize the disk to the value specified in disk_size - if this is set, do not set disk_size.`,
+							Description:      `Enables auto-resizing of the storage size. Defaults to true. Set to false if you want to set disk_size.`,
 						},
 						"disk_autoresize_limit": {
 							Type:             schema.TypeInt,
@@ -294,7 +293,7 @@ is set to true.`,
 							Optional: true,
 							// Default is likely 10gb, but it is undocumented and may change.
 							Computed:    true,
-							Description: `The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased.`,
+							Description: `The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. If you want to set this field, set disk_autoresize to false.`,
 						},
 						"disk_type": {
 							Type:     schema.TypeString,
@@ -762,15 +761,6 @@ func pitrPostgresOnlyCustomizeDiff(_ context.Context, diff *schema.ResourceDiff,
 	return nil
 }
 
-func insightsPostgresOnlyCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
-	insights := diff.Get("settings.0.insights_config.0.query_insights_enabled").(bool)
-	dbVersion := diff.Get("database_version").(string)
-	if insights && !strings.Contains(dbVersion, "POSTGRES") {
-		return fmt.Errorf("query_insights_enabled is only available for Postgres now.")
-	}
-	return nil
-}
-
 func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
@@ -1039,8 +1029,8 @@ func expandCloneContext(configured []interface{}) (*sqladmin.CloneContext, strin
 	_cloneConfiguration := configured[0].(map[string]interface{})
 
 	return &sqladmin.CloneContext{
-		PointInTime: _cloneConfiguration["point_in_time"].(string), 
-		AllocatedIpRange: _cloneConfiguration["allocated_ip_range"].(string), 
+		PointInTime: _cloneConfiguration["point_in_time"].(string),
+		AllocatedIpRange: _cloneConfiguration["allocated_ip_range"].(string),
 	}, _cloneConfiguration["source_instance_name"].(string)
 }
 
