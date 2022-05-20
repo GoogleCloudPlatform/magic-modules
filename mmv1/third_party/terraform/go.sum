@@ -1602,3 +1602,5 @@ github.com/GoogleCloudPlatform/declarative-resource-client-library v1.7.0 h1:yeT
 github.com/GoogleCloudPlatform/declarative-resource-client-library v1.7.0/go.mod h1:UJoDYx6t3+xCOd+dZX8+NrEB+Y/eW1pQlvxh2Gt7y5E=
 github.com/GoogleCloudPlatform/declarative-resource-client-library v1.7.0 h1:yeTuK0eMUI8FDPR4+NK0LS6rIogHkNGF3/sjws49CVk=
 github.com/GoogleCloudPlatform/declarative-resource-client-library v1.7.0/go.mod h1:UJoDYx6t3+xCOd+dZX8+NrEB+Y/eW1pQlvxh2Gt7y5E=
+github.com/GoogleCloudPlatform/declarative-resource-client-library v1.7.0 h1:yeTuK0eMUI8FDPR4+NK0LS6rIogHkNGF3/sjws49CVk=
+github.com/GoogleCloudPlatform/declarative-resource-client-library v1.7.0/go.mod h1:UJoDYx6t3+xCOd+dZX8+NrEB+Y/eW1pQlvxh2Gt7y5E=

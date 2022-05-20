@@ -22,7 +22,7 @@ updates:
 - resource: samples/update.lake.json
   dependencies: []
 variables:
-- name: lake_name
+- name: lake
   type: resource_name
 - name: project
   type: project
