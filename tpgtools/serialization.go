@@ -39,6 +39,8 @@ import (
 	containerawsBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containeraws/beta"
 	containerazure "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containerazure"
 	containerazureBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containerazure/beta"
+	dataplex "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataplex"
+	dataplexBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataplex/beta"
 	dataproc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc"
 	dataprocBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc/beta"
 	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc"
@@ -107,6 +109,8 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 			return "google_container_azure_cluster", nil
 		case "containerazure/node_pool":
 			return "google_container_azure_node_pool", nil
+		case "dataplex/lake":
+			return "google_dataplex_lake", nil
 		case "dataproc/workflow_template":
 			return "google_dataproc_workflow_template", nil
 		case "eventarc/trigger":
@@ -175,6 +179,8 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 		return "google_container_azure_cluster", nil
 	case "containerazure/node_pool":
 		return "google_container_azure_node_pool", nil
+	case "dataplex/lake":
+		return "google_dataplex_lake", nil
 	case "dataproc/workflow_template":
 		return "google_dataproc_workflow_template", nil
 	case "eventarc/trigger":
@@ -319,6 +325,12 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 				return "", err
 			}
 			return ContainerAzureNodePoolBetaAsHCL(*r, hasGAEquivalent)
+		case "dataplex/lake":
+			r := &dataplexBeta.Lake{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return DataplexLakeBetaAsHCL(*r, hasGAEquivalent)
 		case "dataproc/workflow_template":
 			r := &dataprocBeta.WorkflowTemplate{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -515,6 +527,12 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 			return "", err
 		}
 		return ContainerAzureNodePoolAsHCL(*r, hasGAEquivalent)
+	case "dataplex/lake":
+		r := &dataplex.Lake{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return DataplexLakeAsHCL(*r, hasGAEquivalent)
 	case "dataproc/workflow_template":
 		r := &dataproc.WorkflowTemplate{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -2508,6 +2526,75 @@ func convertContainerAzureNodePoolBetaMaxPodsConstraintToHCL(r *containerazureBe
 	if r.MaxPodsPerNode != nil {
 		outputConfig += fmt.Sprintf("\tmax_pods_per_node = %#v\n", *r.MaxPodsPerNode)
 	}
+	return outputConfig + "}"
+}
+
+// DataplexLakeBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func DataplexLakeBetaAsHCL(r dataplexBeta.Lake, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_dataplex_lake\" \"output\" {\n"
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if v := convertDataplexLakeBetaMetastoreToHCL(r.Metastore); v != "" {
+		outputConfig += fmt.Sprintf("\tmetastore %s\n", v)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertDataplexLakeBetaMetastoreToHCL(r *dataplexBeta.LakeMetastore) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexLakeBetaAssetStatusToHCL(r *dataplexBeta.LakeAssetStatus) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertDataplexLakeBetaMetastoreStatusToHCL(r *dataplexBeta.LakeMetastoreStatus) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
 	return outputConfig + "}"
 }
 
@@ -7672,6 +7759,75 @@ func convertContainerAzureNodePoolMaxPodsConstraintToHCL(r *containerazure.NodeP
 	return outputConfig + "}"
 }
 
+// DataplexLakeAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func DataplexLakeAsHCL(r dataplex.Lake, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_dataplex_lake\" \"output\" {\n"
+	if r.Location != nil {
+		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.DisplayName != nil {
+		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
+	}
+	outputConfig += "\tlabels = {"
+	for k, v := range r.Labels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	}
+	outputConfig += "}\n"
+	if v := convertDataplexLakeMetastoreToHCL(r.Metastore); v != "" {
+		outputConfig += fmt.Sprintf("\tmetastore %s\n", v)
+	}
+	if r.Project != nil {
+		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
+	}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+func convertDataplexLakeMetastoreToHCL(r *dataplex.LakeMetastore) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Service != nil {
+		outputConfig += fmt.Sprintf("\tservice = %#v\n", *r.Service)
+	}
+	return outputConfig + "}"
+}
+
+func convertDataplexLakeAssetStatusToHCL(r *dataplex.LakeAssetStatus) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
+func convertDataplexLakeMetastoreStatusToHCL(r *dataplex.LakeMetastoreStatus) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	return outputConfig + "}"
+}
+
 // DataprocWorkflowTemplateAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -12250,6 +12406,74 @@ func convertContainerAzureNodePoolBetaMaxPodsConstraintList(i interface{}) (out 
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertContainerAzureNodePoolBetaMaxPodsConstraint(v))
+	}
+	return out
+}
+
+func convertDataplexLakeBetaMetastore(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"service": in["service"],
+	}
+}
+
+func convertDataplexLakeBetaMetastoreList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexLakeBetaMetastore(v))
+	}
+	return out
+}
+
+func convertDataplexLakeBetaAssetStatus(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"activeAssets":                 in["active_assets"],
+		"securityPolicyApplyingAssets": in["security_policy_applying_assets"],
+		"updateTime":                   in["update_time"],
+	}
+}
+
+func convertDataplexLakeBetaAssetStatusList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexLakeBetaAssetStatus(v))
+	}
+	return out
+}
+
+func convertDataplexLakeBetaMetastoreStatus(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"endpoint":   in["endpoint"],
+		"message":    in["message"],
+		"state":      in["state"],
+		"updateTime": in["update_time"],
+	}
+}
+
+func convertDataplexLakeBetaMetastoreStatusList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexLakeBetaMetastoreStatus(v))
 	}
 	return out
 }
@@ -17081,6 +17305,74 @@ func convertContainerAzureNodePoolMaxPodsConstraintList(i interface{}) (out []ma
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertContainerAzureNodePoolMaxPodsConstraint(v))
+	}
+	return out
+}
+
+func convertDataplexLakeMetastore(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"service": in["service"],
+	}
+}
+
+func convertDataplexLakeMetastoreList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexLakeMetastore(v))
+	}
+	return out
+}
+
+func convertDataplexLakeAssetStatus(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"activeAssets":                 in["active_assets"],
+		"securityPolicyApplyingAssets": in["security_policy_applying_assets"],
+		"updateTime":                   in["update_time"],
+	}
+}
+
+func convertDataplexLakeAssetStatusList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexLakeAssetStatus(v))
+	}
+	return out
+}
+
+func convertDataplexLakeMetastoreStatus(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"endpoint":   in["endpoint"],
+		"message":    in["message"],
+		"state":      in["state"],
+		"updateTime": in["update_time"],
+	}
+}
+
+func convertDataplexLakeMetastoreStatusList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertDataplexLakeMetastoreStatus(v))
 	}
 	return out
 }
