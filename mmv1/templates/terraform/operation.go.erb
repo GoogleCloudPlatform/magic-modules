@@ -6,7 +6,11 @@
 package google
 
 import (
+<% if async.result.resource_inside_response -%>
+  "encoding/json"
+<% end -%>
   "fmt"
+  "time"
 )
 
 type <%= product_name -%>OperationWaiter struct {

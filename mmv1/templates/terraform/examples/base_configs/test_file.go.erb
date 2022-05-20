@@ -4,6 +4,9 @@ package google
 
 import (
   "fmt"
+<% unless object.skip_delete || object.cgc_only -%>
+  "strings"
+<% end -%>
   "testing"
 
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
