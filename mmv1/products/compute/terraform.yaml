@@ -1602,6 +1602,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "appengine_neg"
         vars:
           neg_name: "appengine-neg"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_network_endpoint_group_psc"
+        primary_resource_id: "psc_neg"
+        vars:
+          neg_name: "psc-neg"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation

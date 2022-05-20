@@ -1765,6 +1765,14 @@ objects:
         message is returned. Not specifying this field will result in uptime checks
         running from all regions.
       item_type: Api::Type::String
+    - !ruby/object:Api::Type::Enum
+      name: checkerType
+      input: true
+      description: The checker type to use for the check. If the monitored resource type 
+        is servicedirectory_service, checkerType must be set to VPC_CHECKERS.
+      values:
+        - :STATIC_IP_CHECKERS
+        - :VPC_CHECKERS
     - !ruby/object:Api::Type::NestedObject
       name: httpCheck
       description: Contains information needed to make an HTTP or HTTPS check.

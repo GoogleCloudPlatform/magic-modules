@@ -8431,14 +8431,19 @@ objects:
           Type of network endpoints in this network endpoint group. Defaults to SERVERLESS
         values:
           - :SERVERLESS
+          - :PRIVATE_SERVICE_CONNECT
         default_value: :SERVERLESS
+      - !ruby/object:Api::Type::String
+        name: 'pscTargetService'
+        description: |
+          The target service url used to set up private service connection to
+          a Google API or a PSC Producer Service Attachment.
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudRun'
-        exactly_one_of:
-          - cloudRun
-          - cloudFunction
-          - appEngine
-          - serverlessDeployment
+        conflicts:
+          - cloud_function
+          - app_engine
+          - serverless_deployment
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
           Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
@@ -8475,11 +8480,10 @@ objects:
               and { service="bar2", tag="foo2" } respectively.
       - !ruby/object:Api::Type::NestedObject
         name: 'appEngine'
-        exactly_one_of:
-          - appEngine
-          - cloudFunction
-          - cloudRun
-          - serverlessDeployment
+        conflicts:
+          - cloud_run
+          - cloud_function
+          - serverless_deployment
         allow_empty_object: true
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
@@ -8510,11 +8514,10 @@ objects:
               them to { service = "foo1", version = "v1" } and { service = "foo1", version = "v2" } respectively.
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudFunction'
-        exactly_one_of:
-          - appEngine
-          - cloudFunction
-          - cloudRun
-          - serverlessDeployment
+        conflicts:
+          - cloud_run
+          - app_engine
+          - serverless_deployment
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
           Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
@@ -8544,11 +8547,10 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'serverlessDeployment'
         min_version: beta
-        exactly_one_of:
-          - appEngine
-          - cloudFunction
-          - cloudRun
-          - serverlessDeployment
+        conflicts:
+          - cloud_run
+          - cloud_function
+          - app_engine
         allow_empty_object: true
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
@@ -12823,7 +12825,9 @@ objects:
               - group_placement_policy.0.vm_count
               - group_placement_policy.0.availability_domain_count
             description: |
-              Number of vms in this placement group.
+              Number of VMs in this placement group. Google does not recommend that you use this field
+              unless you use a compact policy and you want your policy to work only if it contains this
+              exact number of VMs.
           - !ruby/object:Api::Type::Integer
             name: 'availabilityDomainCount'
             at_least_one_of:
@@ -13391,6 +13395,15 @@ objects:
         name: minPortsPerVm
         description: |
           Minimum number of ports allocated to a VM from this NAT.
+      - !ruby/object:Api::Type::Boolean
+        name: enableDynamicPortAllocation
+        description: |
+          Enable Dynamic Port Allocation.
+          If minPorts is set, minPortsPerVm must be set to a power of two greater than or equal to 32. 
+          If minPortsPerVm is not set, a minimum of 32 ports will be allocated to a VM from this NAT config.
+
+          Mutually exclusive with enableEndpointIndependentMapping.
+        default_value: false
       - !ruby/object:Api::Type::Integer
         name: udpIdleTimeoutSec
         description: |
@@ -14505,6 +14518,15 @@ objects:
           If true, enable the proxy protocol which is for supplying client TCP/IP
           address data in TCP connections that traverse proxies on their way to
           destination servers.
+      - !ruby/object:Api::Type::Array
+        name: 'domainNames'
+        input: true
+        item_type: Api::Type::String
+        description: |
+          If specified, the domain name will be used during the integration between
+          the PSC connected endpoints and the Cloud DNS. For example, this is a
+          valid domain name: "p.mycompany.com.". Current max number of domain names
+          supported is 1.
       - !ruby/object:Api::Type::Array
         name: 'consumerRejectLists'
         item_type: Api::Type::String
