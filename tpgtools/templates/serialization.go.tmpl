@@ -32,6 +32,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	fmtcmd "github.com/hashicorp/hcl/hcl/fmtcmd"
@@ -162,8 +163,17 @@ func {{ $res.TitleCaseFullName }}{{$version.SerializationSuffix}}AsHCL(r {{$res.
 				{{- else if eq $field.Type.String "TypeMap" }}
 		{{- /* TODO(magic-modules-eng): Implement maps with non-string values */}}
 		outputConfig += "{{ if not $field.Collapsed }}\t{{end}}{{$field.Name}} = {"
-		for k, v := range r.{{$field.PackageName}} {
-			outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+		keys{{$field.PackageName}} := []string{}
+		// golang range goes over maps in an arbitrary order- we've gotta order the
+		// keys ourselves to make the output deterministic
+		for k, _ := range r.{{$field.PackageName}} {
+			keys{{$field.PackageName}} = append(keys{{$field.PackageName}}, k)
+		}
+
+		sort.Strings(keys{{$field.PackageName}})
+
+		for _, k := range keys{{$field.PackageName}} {
+			outputConfig += fmt.Sprintf("%v = %q, ", k, r.{{$field.PackageName}}[k])
 		}
 		outputConfig += "}\n"
 				{{- end}}
@@ -218,9 +228,18 @@ func convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$v.Packa
 	}
 					{{- else if eq $field.Type.String "TypeMap" }}
 		{{- /* TODO(magic-modules-eng): Implement maps with non-string values */}}
-		outputConfig += "{{ if not $v.Collapsed }}\t{{end}}{{$field.Name}} = {"
-		for k, v := range r.{{$field.PackageName}} {
-			outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+		outputConfig += "{{ if not $field.Collapsed }}\t{{end}}{{$field.Name}} = {"
+		keys{{$field.PackageName}} := []string{}
+		// golang range goes over maps in an arbitrary order- we've gotta order the
+		// keys ourselves to make the output deterministic
+		for k, _ := range r.{{$field.PackageName}} {
+			keys{{$field.PackageName}} = append(keys{{$field.PackageName}}, k)
+		}
+
+		sort.Strings(keys{{$field.PackageName}})
+
+		for _, k := range keys{{$field.PackageName}} {
+			outputConfig += fmt.Sprintf("%v = %q, ", k, r.{{$field.PackageName}}[k])
 		}
 		outputConfig += "}\n"
 					{{- end}}
