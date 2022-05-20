@@ -10,7 +10,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# These files contains code that needs to be compiled before being delivered to
+
+# These files contain code that needs to be compiled before being delivered to
 # the final module tree structure:
 <%
   dir = @target_version_name == 'ga' ? 'google' : "google-#{@target_version_name}"
@@ -31,6 +32,13 @@
     fname = file_path.split('/')[-1]
 -%>
 '<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/data_sources/<%= fname -%>'
+<% end -%>
+<%
+  Dir["third_party/terraform/custom_code/**/*.go.erb"].each do |file_path|
+    sourceFilename = file_path
+    targetFilename = file_path.split('/')[-1].delete_suffix(".erb")
+-%>
+'<%= dir -%>/<%= targetFilename %>': '<%= sourceFilename %>'
 <% end -%>
 <%
   Dir["third_party/terraform/utils/*.go.erb"].each do |file_path|

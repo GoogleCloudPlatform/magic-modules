@@ -13,7 +13,7 @@
 --- !ruby/object:Api::Product
 name: ServiceUsage
 display_name: Service Usage
-operation_retry: templates/terraform/operation_retry/service_usage.go
+operation_retry_func: ServiceUsageOperationIsRetryable
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
