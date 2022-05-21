@@ -135,7 +135,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: 'Set this true to delete all records in the zone.'
         default_value: false
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      encoder: templates/terraform/encoders/managed_dns_zone.go.erb
+      update_encoder: templates/terraform/update_encoder/managed_dns_zone.go.erb
       pre_delete: templates/terraform/pre_delete/managed_dns_zone.go.erb
   Policy: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: 'projects/{{project}}/policies/{{name}}'
