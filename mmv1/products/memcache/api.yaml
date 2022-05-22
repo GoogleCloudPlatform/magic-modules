@@ -226,9 +226,10 @@ objects:
           - !ruby/object:Api::Type::Array
             name: 'weeklyMaintenanceWindow'
             description: |
-              Optional. Maintenance window that is applied to resources covered by this policy.
-              Minimum 1. For the current version, the maximum number
-              of weekly_window is expected to be one.
+              Required. Maintenance window that is applied to resources covered by this policy.
+              Minimum 1. For the current version, the maximum number of weekly_maintenance_windows
+              is expected to be one.
+            required: true
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::Enum
@@ -255,10 +256,9 @@ objects:
                     - :SUNDAY
                 - !ruby/object:Api::Type::String
                   name: 'duration'
-                  output: true
+                  required: true
                   description: |
-                    Output only. Duration of the maintenance window.
-                    The current window is fixed at 1 hour.
+                    Required. Duration of the time window.
                     A duration in seconds with up to nine fractional digits,
                     terminated by 's'. Example: "3.5s".
                 - !ruby/object:Api::Type::NestedObject
@@ -289,7 +289,8 @@ objects:
                         Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
       - !ruby/object:Api::Type::NestedObject
         name: maintenanceSchedule
-        description: Upcoming maintenance schedule.
+        description: Output only. Published maintenance schedule.
+        output: true
         properties:
           - !ruby/object:Api::Type::String
             name: 'startTime'
