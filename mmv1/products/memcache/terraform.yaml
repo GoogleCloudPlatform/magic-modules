@@ -48,6 +48,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       maintenancePolicy.weeklyMaintenanceWindow.startTime.hours: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(0,23)'
+      maintenancePolicy.description: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(0, 512)'
       maintenancePolicy.weeklyMaintenanceWindow.startTime.minutes: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(0,59)'
