@@ -3862,13 +3862,13 @@ func EventarcTriggerBetaAsHCL(r eventarcBeta.Trigger, hasGAEquivalent bool) (str
 	if v := convertEventarcTriggerBetaDestinationToHCL(r.Destination); v != "" {
 		outputConfig += fmt.Sprintf("\tdestination %s\n", v)
 	}
+	if r.EventFilters != nil {
+		for _, v := range r.EventFilters {
+			outputConfig += fmt.Sprintf("\tevent_filters %s\n", convertEventarcTriggerBetaEventFiltersToHCL(&v))
+		}
+	}
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
-	}
-	if r.MatchingCriteria != nil {
-		for _, v := range r.MatchingCriteria {
-			outputConfig += fmt.Sprintf("\tmatching_criteria %s\n", convertEventarcTriggerBetaMatchingCriteriaToHCL(&v))
-		}
 	}
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
@@ -3906,8 +3906,8 @@ func convertEventarcTriggerBetaDestinationToHCL(r *eventarcBeta.TriggerDestinati
 	if r.CloudFunction != nil {
 		outputConfig += fmt.Sprintf("\tcloud_function = %#v\n", *r.CloudFunction)
 	}
-	if v := convertEventarcTriggerBetaDestinationCloudRunServiceToHCL(r.CloudRunService); v != "" {
-		outputConfig += fmt.Sprintf("\tcloud_run_service %s\n", v)
+	if v := convertEventarcTriggerBetaDestinationCloudRunToHCL(r.CloudRun); v != "" {
+		outputConfig += fmt.Sprintf("\tcloud_run %s\n", v)
 	}
 	if v := convertEventarcTriggerBetaDestinationGkeToHCL(r.Gke); v != "" {
 		outputConfig += fmt.Sprintf("\tgke %s\n", v)
@@ -3918,7 +3918,7 @@ func convertEventarcTriggerBetaDestinationToHCL(r *eventarcBeta.TriggerDestinati
 	return outputConfig + "}"
 }
 
-func convertEventarcTriggerBetaDestinationCloudRunServiceToHCL(r *eventarcBeta.TriggerDestinationCloudRunService) string {
+func convertEventarcTriggerBetaDestinationCloudRunToHCL(r *eventarcBeta.TriggerDestinationCloudRun) string {
 	if r == nil {
 		return ""
 	}
@@ -3958,7 +3958,7 @@ func convertEventarcTriggerBetaDestinationGkeToHCL(r *eventarcBeta.TriggerDestin
 	return outputConfig + "}"
 }
 
-func convertEventarcTriggerBetaMatchingCriteriaToHCL(r *eventarcBeta.TriggerMatchingCriteria) string {
+func convertEventarcTriggerBetaEventFiltersToHCL(r *eventarcBeta.TriggerEventFilters) string {
 	if r == nil {
 		return ""
 	}
@@ -9050,13 +9050,13 @@ func EventarcTriggerAsHCL(r eventarc.Trigger, hasGAEquivalent bool) (string, err
 	if v := convertEventarcTriggerDestinationToHCL(r.Destination); v != "" {
 		outputConfig += fmt.Sprintf("\tdestination %s\n", v)
 	}
+	if r.EventFilters != nil {
+		for _, v := range r.EventFilters {
+			outputConfig += fmt.Sprintf("\tevent_filters %s\n", convertEventarcTriggerEventFiltersToHCL(&v))
+		}
+	}
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
-	}
-	if r.MatchingCriteria != nil {
-		for _, v := range r.MatchingCriteria {
-			outputConfig += fmt.Sprintf("\tmatching_criteria %s\n", convertEventarcTriggerMatchingCriteriaToHCL(&v))
-		}
 	}
 	if r.Name != nil {
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
@@ -9094,8 +9094,8 @@ func convertEventarcTriggerDestinationToHCL(r *eventarc.TriggerDestination) stri
 	if r.CloudFunction != nil {
 		outputConfig += fmt.Sprintf("\tcloud_function = %#v\n", *r.CloudFunction)
 	}
-	if v := convertEventarcTriggerDestinationCloudRunServiceToHCL(r.CloudRunService); v != "" {
-		outputConfig += fmt.Sprintf("\tcloud_run_service %s\n", v)
+	if v := convertEventarcTriggerDestinationCloudRunToHCL(r.CloudRun); v != "" {
+		outputConfig += fmt.Sprintf("\tcloud_run %s\n", v)
 	}
 	if v := convertEventarcTriggerDestinationGkeToHCL(r.Gke); v != "" {
 		outputConfig += fmt.Sprintf("\tgke %s\n", v)
@@ -9106,7 +9106,7 @@ func convertEventarcTriggerDestinationToHCL(r *eventarc.TriggerDestination) stri
 	return outputConfig + "}"
 }
 
-func convertEventarcTriggerDestinationCloudRunServiceToHCL(r *eventarc.TriggerDestinationCloudRunService) string {
+func convertEventarcTriggerDestinationCloudRunToHCL(r *eventarc.TriggerDestinationCloudRun) string {
 	if r == nil {
 		return ""
 	}
@@ -9146,7 +9146,7 @@ func convertEventarcTriggerDestinationGkeToHCL(r *eventarc.TriggerDestinationGke
 	return outputConfig + "}"
 }
 
-func convertEventarcTriggerMatchingCriteriaToHCL(r *eventarc.TriggerMatchingCriteria) string {
+func convertEventarcTriggerEventFiltersToHCL(r *eventarc.TriggerEventFilters) string {
 	if r == nil {
 		return ""
 	}
@@ -13794,10 +13794,10 @@ func convertEventarcTriggerBetaDestination(i interface{}) map[string]interface{}
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"cloudFunction":   in["cloud_function"],
-		"cloudRunService": convertEventarcTriggerBetaDestinationCloudRunService(in["cloud_run_service"]),
-		"gke":             convertEventarcTriggerBetaDestinationGke(in["gke"]),
-		"workflow":        in["workflow"],
+		"cloudFunction": in["cloud_function"],
+		"cloudRun":      convertEventarcTriggerBetaDestinationCloudRun(in["cloud_run"]),
+		"gke":           convertEventarcTriggerBetaDestinationGke(in["gke"]),
+		"workflow":      in["workflow"],
 	}
 }
 
@@ -13812,7 +13812,7 @@ func convertEventarcTriggerBetaDestinationList(i interface{}) (out []map[string]
 	return out
 }
 
-func convertEventarcTriggerBetaDestinationCloudRunService(i interface{}) map[string]interface{} {
+func convertEventarcTriggerBetaDestinationCloudRun(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -13824,13 +13824,13 @@ func convertEventarcTriggerBetaDestinationCloudRunService(i interface{}) map[str
 	}
 }
 
-func convertEventarcTriggerBetaDestinationCloudRunServiceList(i interface{}) (out []map[string]interface{}) {
+func convertEventarcTriggerBetaDestinationCloudRunList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertEventarcTriggerBetaDestinationCloudRunService(v))
+		out = append(out, convertEventarcTriggerBetaDestinationCloudRun(v))
 	}
 	return out
 }
@@ -13860,7 +13860,7 @@ func convertEventarcTriggerBetaDestinationGkeList(i interface{}) (out []map[stri
 	return out
 }
 
-func convertEventarcTriggerBetaMatchingCriteria(i interface{}) map[string]interface{} {
+func convertEventarcTriggerBetaEventFilters(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -13872,13 +13872,13 @@ func convertEventarcTriggerBetaMatchingCriteria(i interface{}) map[string]interf
 	}
 }
 
-func convertEventarcTriggerBetaMatchingCriteriaList(i interface{}) (out []map[string]interface{}) {
+func convertEventarcTriggerBetaEventFiltersList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertEventarcTriggerBetaMatchingCriteria(v))
+		out = append(out, convertEventarcTriggerBetaEventFilters(v))
 	}
 	return out
 }
@@ -18627,10 +18627,10 @@ func convertEventarcTriggerDestination(i interface{}) map[string]interface{} {
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"cloudFunction":   in["cloud_function"],
-		"cloudRunService": convertEventarcTriggerDestinationCloudRunService(in["cloud_run_service"]),
-		"gke":             convertEventarcTriggerDestinationGke(in["gke"]),
-		"workflow":        in["workflow"],
+		"cloudFunction": in["cloud_function"],
+		"cloudRun":      convertEventarcTriggerDestinationCloudRun(in["cloud_run"]),
+		"gke":           convertEventarcTriggerDestinationGke(in["gke"]),
+		"workflow":      in["workflow"],
 	}
 }
 
@@ -18645,7 +18645,7 @@ func convertEventarcTriggerDestinationList(i interface{}) (out []map[string]inte
 	return out
 }
 
-func convertEventarcTriggerDestinationCloudRunService(i interface{}) map[string]interface{} {
+func convertEventarcTriggerDestinationCloudRun(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -18657,13 +18657,13 @@ func convertEventarcTriggerDestinationCloudRunService(i interface{}) map[string]
 	}
 }
 
-func convertEventarcTriggerDestinationCloudRunServiceList(i interface{}) (out []map[string]interface{}) {
+func convertEventarcTriggerDestinationCloudRunList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertEventarcTriggerDestinationCloudRunService(v))
+		out = append(out, convertEventarcTriggerDestinationCloudRun(v))
 	}
 	return out
 }
@@ -18693,7 +18693,7 @@ func convertEventarcTriggerDestinationGkeList(i interface{}) (out []map[string]i
 	return out
 }
 
-func convertEventarcTriggerMatchingCriteria(i interface{}) map[string]interface{} {
+func convertEventarcTriggerEventFilters(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -18705,13 +18705,13 @@ func convertEventarcTriggerMatchingCriteria(i interface{}) map[string]interface{
 	}
 }
 
-func convertEventarcTriggerMatchingCriteriaList(i interface{}) (out []map[string]interface{}) {
+func convertEventarcTriggerEventFiltersList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertEventarcTriggerMatchingCriteria(v))
+		out = append(out, convertEventarcTriggerEventFilters(v))
 	}
 	return out
 }
