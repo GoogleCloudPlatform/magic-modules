@@ -838,84 +838,82 @@ func TestAccBigQueryExternalDataTable_CSV(t *testing.T) {
 	})
 }
 
-
 func TestAccBigQueryExternalDataTable_CSV_WithSchemaAndConnectionID_UpdateNoConnectionID(t *testing.T) {
-        t.Parallel()
+	t.Parallel()
 
-        bucketName := testBucketName(t)
-        objectName := fmt.Sprintf("tf_test_%s.csv", randString(t, 10))
+	bucketName := testBucketName(t)
+	objectName := fmt.Sprintf("tf_test_%s.csv", randString(t, 10))
 
-        datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
-        tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
-        connectionID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+	connectionID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
 	projectID := getTestProjectFromEnv()
 
-        vcrTest(t, resource.TestCase{
-                PreCheck:     func() { testAccPreCheck(t) },
-                Providers:    testAccProviders,
-                CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
-                Steps: []resource.TestStep{
-                        {
-                                Config: testAccBigQueryTableFromGCSWithSchemaWithConnectionId(datasetID, tableID, connectionID, projectID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_SIMPLE_CSV_SCHEMA),
-                        },
-                        {
-                                ResourceName:      "google_bigquery_table.test",
-                                ImportState:       true,
-                                ImportStateVerify: true,
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableFromGCSWithSchemaWithConnectionId(datasetID, tableID, connectionID, projectID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_SIMPLE_CSV_SCHEMA),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
-                        },
-                        {
-                                Config: testAccBigQueryTableFromGCSWithSchema(datasetID, tableID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_SIMPLE_CSV_SCHEMA),
-                        },
-                        {
-                                ResourceName:      "google_bigquery_table.test",
-                                ImportState:       true,
-                                ImportStateVerify: true,
+			},
+			{
+				Config: testAccBigQueryTableFromGCSWithSchema(datasetID, tableID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_SIMPLE_CSV_SCHEMA),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
-                        },
-                },
-        })
+			},
+		},
+	})
 }
 
-
 func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateToConnectionID(t *testing.T) {
-        t.Parallel()
+	t.Parallel()
 
-        bucketName := testBucketName(t)
-        objectName := fmt.Sprintf("tf_test_%s.csv", randString(t, 10))
+	bucketName := testBucketName(t)
+	objectName := fmt.Sprintf("tf_test_%s.csv", randString(t, 10))
 
-        datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
-        tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
-        connectionID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+	connectionID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
 	projectID := getTestProjectFromEnv()
 
-        vcrTest(t, resource.TestCase{
-                PreCheck:     func() { testAccPreCheck(t) },
-                Providers:    testAccProviders,
-                CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
-                Steps: []resource.TestStep{
-                        {
-                                Config: testAccBigQueryTableFromGCSWithSchema(datasetID, tableID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_SIMPLE_CSV_SCHEMA),
-                        },
-                        {
-                                ResourceName:      "google_bigquery_table.test",
-                                ImportState:       true,
-                                ImportStateVerify: true,
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableFromGCSWithSchema(datasetID, tableID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_SIMPLE_CSV_SCHEMA),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
-                        },
-                        {
-                                Config: testAccBigQueryTableFromGCSWithSchemaWithConnectionId(datasetID, tableID, connectionID, projectID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_SIMPLE_CSV_SCHEMA),
-                        },
-                        {
-                                ResourceName:      "google_bigquery_table.test",
-                                ImportState:       true,
-                                ImportStateVerify: true,
+			},
+			{
+				Config: testAccBigQueryTableFromGCSWithSchemaWithConnectionId(datasetID, tableID, connectionID, projectID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_SIMPLE_CSV_SCHEMA),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
-                        },
-                },
-        })
+			},
+		},
+	})
 }
 
 func TestAccBigQueryDataTable_bigtable(t *testing.T) {
