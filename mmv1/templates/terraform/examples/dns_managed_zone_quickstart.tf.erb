@@ -20,7 +20,7 @@ resource "google_compute_instance" "default" {
   metadata_startup_script = <<-EOF
   sudo apt-get update && \
   sudo apt-get install apache2 -y && \
-  echo "<!doctype html><html><body><h1>Hello World!</h1>`date`</body></html>" > /var/www/html/index.html
+  echo "<!doctype html><html><body><h1>Hello World!</h1></body></html>" > /var/www/html/index.html
   EOF
 }
 
