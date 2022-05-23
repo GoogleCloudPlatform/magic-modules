@@ -25,6 +25,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           allow_http_traffic: "allow-http-traffic"
           example_zone_googlecloudexample: "example-zone-googlecloudexample"
         min_version: beta
+        ignore_read_extra:
+          - "force_destroy"
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_basic"
         primary_resource_id: "example-zone"
