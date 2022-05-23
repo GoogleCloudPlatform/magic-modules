@@ -15316,20 +15316,17 @@ objects:
           resource: 'RegionSslCertificate'
           imports: 'selfLink'
           description: 'The SSL certificates used by this TargetHttpsProxy'
-     # This field is present in the schema but as of 2019 Sep 23 attempting to set it fails with
-     # a 400 "SSL policy is supported only with global TargetHttpsProxy". jamessynge@ said in an
-     # email sent on 2019 Sep 20 that will support this "in the next 6 months I hope."
-     #- !ruby/object:Api::Type::ResourceRef
-     #  name: 'sslPolicy'
-     #  resource: 'SslPolicy'
-     #  imports: 'selfLink'
-     #  description: |
-     #    A reference to the SslPolicy resource that will be associated with
-     #    the TargetHttpsProxy resource. If not set, the TargetHttpsProxy
-     #    resource will not have any SSL policy configured.
-     #  update_verb: :POST
-     #  update_url:
-     #    'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslPolicy'
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'sslPolicy'
+        resource: 'SslPolicy'
+        imports: 'selfLink'
+        description: |
+          A reference to the SslPolicy resource that will be associated with
+          the TargetHttpsProxy resource. If not set, the TargetHttpsProxy
+          resource will not have any SSL policy configured.
+        update_verb: :POST
+        update_url:
+          'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslPolicy'
       - !ruby/object:Api::Type::ResourceRef
         name: 'urlMap'
         resource: 'RegionUrlMap'
