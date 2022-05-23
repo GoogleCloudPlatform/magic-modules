@@ -56,20 +56,17 @@ func TestAccSqlUser_mysqlDisabled(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleSqlUser_mysql(instance, "password", true),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
-					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user2"),
-					resource.TestCheckResourceAttr("google_sql_user.user1", "sql_server_user_details.disabled", "true"),
-				),
+			},
+			{
+				ResourceName:            "google_sql_user.user1",
+				ImportStateId:           fmt.Sprintf("%s/%s/gmail.com/admin", getTestProjectFromEnv(), instance),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password"},
 			},
 			{
 				// Update password
 				Config: testGoogleSqlUser_mysql(instance, "password", false),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
-					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user2"),
-					resource.TestCheckResourceAttr("google_sql_user.user1", "sql_server_user_details.disabled", "false"),
-				),
 			},
 			{
 				ResourceName:            "google_sql_user.user1",
