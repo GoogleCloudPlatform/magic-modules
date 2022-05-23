@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	apikeys "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/apikeys"
@@ -760,8 +761,17 @@ func AssuredWorkloadsWorkloadBetaAsHCL(r assuredworkloadsBeta.Workload, hasGAEqu
 		outputConfig += fmt.Sprintf("\tkms_settings %s\n", v)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.ProvisionedResourcesParent != nil {
@@ -868,8 +878,17 @@ func CloudbuildWorkerPoolBetaAsHCL(r cloudbuildBeta.WorkerPool, hasGAEquivalent 
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
 	outputConfig += "\tannotations = {"
-	for k, v := range r.Annotations {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysAnnotations := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Annotations {
+		keysAnnotations = append(keysAnnotations, k)
+	}
+
+	sort.Strings(keysAnnotations)
+
+	for _, k := range keysAnnotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Annotations[k])
 	}
 	outputConfig += "}\n"
 	if r.DisplayName != nil {
@@ -938,16 +957,34 @@ func ClouddeployDeliveryPipelineBetaAsHCL(r clouddeployBeta.DeliveryPipeline, ha
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
 	outputConfig += "\tannotations = {"
-	for k, v := range r.Annotations {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysAnnotations := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Annotations {
+		keysAnnotations = append(keysAnnotations, k)
+	}
+
+	sort.Strings(keysAnnotations)
+
+	for _, k := range keysAnnotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Annotations[k])
 	}
 	outputConfig += "}\n"
 	if r.Description != nil {
 		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.Project != nil {
@@ -1037,8 +1074,17 @@ func ClouddeployTargetBetaAsHCL(r clouddeployBeta.Target, hasGAEquivalent bool) 
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
 	outputConfig += "\tannotations = {"
-	for k, v := range r.Annotations {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysAnnotations := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Annotations {
+		keysAnnotations = append(keysAnnotations, k)
+	}
+
+	sort.Strings(keysAnnotations)
+
+	for _, k := range keysAnnotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Annotations[k])
 	}
 	outputConfig += "}\n"
 	if v := convertClouddeployTargetBetaAnthosClusterToHCL(r.AnthosCluster); v != "" {
@@ -1056,8 +1102,17 @@ func ClouddeployTargetBetaAsHCL(r clouddeployBeta.Target, hasGAEquivalent bool) 
 		outputConfig += fmt.Sprintf("\tgke %s\n", v)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.Project != nil {
@@ -1163,8 +1218,17 @@ func CloudResourceManagerProjectBetaAsHCL(r cloudresourcemanagerBeta.Project, ha
 		outputConfig += fmt.Sprintf("\tdisplayname = %#v\n", *r.DisplayName)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.Name != nil {
@@ -1375,8 +1439,17 @@ func ComputeForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule, hasGAEquivalen
 		outputConfig += fmt.Sprintf("\tis_mirroring_collector = %#v\n", *r.IsMirroringCollector)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.LoadBalancingScheme != nil {
@@ -1470,8 +1543,17 @@ func ComputeGlobalForwardingRuleBetaAsHCL(r computeBeta.ForwardingRule, hasGAEqu
 		outputConfig += fmt.Sprintf("\tip_version = %#v\n", *r.IPVersion)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.LoadBalancingScheme != nil {
@@ -1562,8 +1644,17 @@ func ContainerAwsClusterBetaAsHCL(r containerawsBeta.Cluster, hasGAEquivalent bo
 		outputConfig += fmt.Sprintf("\tnetworking %s\n", v)
 	}
 	outputConfig += "\tannotations = {"
-	for k, v := range r.Annotations {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysAnnotations := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Annotations {
+		keysAnnotations = append(keysAnnotations, k)
+	}
+
+	sort.Strings(keysAnnotations)
+
+	for _, k := range keysAnnotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Annotations[k])
 	}
 	outputConfig += "}\n"
 	if r.Description != nil {
@@ -1663,8 +1754,17 @@ func convertContainerAwsClusterBetaControlPlaneToHCL(r *containerawsBeta.Cluster
 		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
 	}
 	outputConfig += "\ttags = {"
-	for k, v := range r.Tags {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysTags := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Tags {
+		keysTags = append(keysTags, k)
+	}
+
+	sort.Strings(keysTags)
+
+	for _, k := range keysTags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Tags[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -1885,8 +1985,17 @@ func ContainerAwsNodePoolBetaAsHCL(r containerawsBeta.NodePool, hasGAEquivalent 
 		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
 	}
 	outputConfig += "\tannotations = {"
-	for k, v := range r.Annotations {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysAnnotations := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Annotations {
+		keysAnnotations = append(keysAnnotations, k)
+	}
+
+	sort.Strings(keysAnnotations)
+
+	for _, k := range keysAnnotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Annotations[k])
 	}
 	outputConfig += "}\n"
 	if r.Project != nil {
@@ -1938,8 +2047,17 @@ func convertContainerAwsNodePoolBetaConfigToHCL(r *containerawsBeta.NodePoolConf
 		outputConfig += fmt.Sprintf("\tinstance_type = %#v\n", *r.InstanceType)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if v := convertContainerAwsNodePoolBetaConfigProxyConfigToHCL(r.ProxyConfig); v != "" {
@@ -1959,8 +2077,17 @@ func convertContainerAwsNodePoolBetaConfigToHCL(r *containerawsBeta.NodePoolConf
 		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
 	}
 	outputConfig += "\ttags = {"
-	for k, v := range r.Tags {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysTags := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Tags {
+		keysTags = append(keysTags, k)
+	}
+
+	sort.Strings(keysTags)
+
+	for _, k := range keysTags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Tags[k])
 	}
 	outputConfig += "}\n"
 	if r.Taints != nil {
@@ -2136,8 +2263,17 @@ func ContainerAzureClusterBetaAsHCL(r containerazureBeta.Cluster, hasGAEquivalen
 		outputConfig += fmt.Sprintf("\tresource_group_id = %#v\n", *r.ResourceGroupId)
 	}
 	outputConfig += "\tannotations = {"
-	for k, v := range r.Annotations {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysAnnotations := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Annotations {
+		keysAnnotations = append(keysAnnotations, k)
+	}
+
+	sort.Strings(keysAnnotations)
+
+	for _, k := range keysAnnotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Annotations[k])
 	}
 	outputConfig += "}\n"
 	if r.Description != nil {
@@ -2216,8 +2352,17 @@ func convertContainerAzureClusterBetaControlPlaneToHCL(r *containerazureBeta.Clu
 		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
 	}
 	outputConfig += "\ttags = {"
-	for k, v := range r.Tags {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysTags := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Tags {
+		keysTags = append(keysTags, k)
+	}
+
+	sort.Strings(keysTags)
+
+	for _, k := range keysTags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Tags[k])
 	}
 	outputConfig += "}\n"
 	if r.VmSize != nil {
@@ -2401,8 +2546,17 @@ func ContainerAzureNodePoolBetaAsHCL(r containerazureBeta.NodePool, hasGAEquival
 		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
 	}
 	outputConfig += "\tannotations = {"
-	for k, v := range r.Annotations {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysAnnotations := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Annotations {
+		keysAnnotations = append(keysAnnotations, k)
+	}
+
+	sort.Strings(keysAnnotations)
+
+	for _, k := range keysAnnotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Annotations[k])
 	}
 	outputConfig += "}\n"
 	if r.AzureAvailabilityZone != nil {
@@ -2454,8 +2608,17 @@ func convertContainerAzureNodePoolBetaConfigToHCL(r *containerazureBeta.NodePool
 		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
 	}
 	outputConfig += "\ttags = {"
-	for k, v := range r.Tags {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysTags := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Tags {
+		keysTags = append(keysTags, k)
+	}
+
+	sort.Strings(keysTags)
+
+	for _, k := range keysTags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Tags[k])
 	}
 	outputConfig += "}\n"
 	if r.VmSize != nil {
@@ -2537,8 +2700,17 @@ func DataprocWorkflowTemplateBetaAsHCL(r dataprocBeta.WorkflowTemplate, hasGAEqu
 		outputConfig += fmt.Sprintf("\tdag_timeout = %#v\n", *r.DagTimeout)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.Parameters != nil {
@@ -2578,8 +2750,17 @@ func convertDataprocWorkflowTemplateBetaJobsToHCL(r *dataprocBeta.WorkflowTempla
 		outputConfig += fmt.Sprintf("\thive_job %s\n", v)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if v := convertDataprocWorkflowTemplateBetaJobsPigJobToHCL(r.PigJob); v != "" {
@@ -2656,8 +2837,17 @@ func convertDataprocWorkflowTemplateBetaJobsHadoopJobToHCL(r *dataprocBeta.Workf
 		outputConfig += fmt.Sprintf("\tmain_jar_file_uri = %#v\n", *r.MainJarFileUri)
 	}
 	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysProperties := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Properties {
+		keysProperties = append(keysProperties, k)
+	}
+
+	sort.Strings(keysProperties)
+
+	for _, k := range keysProperties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Properties[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -2669,8 +2859,17 @@ func convertDataprocWorkflowTemplateBetaJobsHadoopJobLoggingConfigToHCL(r *datap
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tdriver_log_levels = {"
-	for k, v := range r.DriverLogLevels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysDriverLogLevels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.DriverLogLevels {
+		keysDriverLogLevels = append(keysDriverLogLevels, k)
+	}
+
+	sort.Strings(keysDriverLogLevels)
+
+	for _, k := range keysDriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.DriverLogLevels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -2692,8 +2891,17 @@ func convertDataprocWorkflowTemplateBetaJobsHiveJobToHCL(r *dataprocBeta.Workflo
 		outputConfig += "]\n"
 	}
 	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysProperties := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Properties {
+		keysProperties = append(keysProperties, k)
+	}
+
+	sort.Strings(keysProperties)
+
+	for _, k := range keysProperties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Properties[k])
 	}
 	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
@@ -2703,8 +2911,17 @@ func convertDataprocWorkflowTemplateBetaJobsHiveJobToHCL(r *dataprocBeta.Workflo
 		outputConfig += fmt.Sprintf("\tquery_list %s\n", v)
 	}
 	outputConfig += "\tscript_variables = {"
-	for k, v := range r.ScriptVariables {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysScriptVariables := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.ScriptVariables {
+		keysScriptVariables = append(keysScriptVariables, k)
+	}
+
+	sort.Strings(keysScriptVariables)
+
+	for _, k := range keysScriptVariables {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.ScriptVariables[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -2744,8 +2961,17 @@ func convertDataprocWorkflowTemplateBetaJobsPigJobToHCL(r *dataprocBeta.Workflow
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
 	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysProperties := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Properties {
+		keysProperties = append(keysProperties, k)
+	}
+
+	sort.Strings(keysProperties)
+
+	for _, k := range keysProperties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Properties[k])
 	}
 	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
@@ -2755,8 +2981,17 @@ func convertDataprocWorkflowTemplateBetaJobsPigJobToHCL(r *dataprocBeta.Workflow
 		outputConfig += fmt.Sprintf("\tquery_list %s\n", v)
 	}
 	outputConfig += "\tscript_variables = {"
-	for k, v := range r.ScriptVariables {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysScriptVariables := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.ScriptVariables {
+		keysScriptVariables = append(keysScriptVariables, k)
+	}
+
+	sort.Strings(keysScriptVariables)
+
+	for _, k := range keysScriptVariables {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.ScriptVariables[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -2768,8 +3003,17 @@ func convertDataprocWorkflowTemplateBetaJobsPigJobLoggingConfigToHCL(r *dataproc
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tdriver_log_levels = {"
-	for k, v := range r.DriverLogLevels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysDriverLogLevels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.DriverLogLevels {
+		keysDriverLogLevels = append(keysDriverLogLevels, k)
+	}
+
+	sort.Strings(keysDriverLogLevels)
+
+	for _, k := range keysDriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.DriverLogLevels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -2812,8 +3056,17 @@ func convertDataprocWorkflowTemplateBetaJobsPrestoJobToHCL(r *dataprocBeta.Workf
 		outputConfig += fmt.Sprintf("\toutput_format = %#v\n", *r.OutputFormat)
 	}
 	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysProperties := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Properties {
+		keysProperties = append(keysProperties, k)
+	}
+
+	sort.Strings(keysProperties)
+
+	for _, k := range keysProperties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Properties[k])
 	}
 	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
@@ -2831,8 +3084,17 @@ func convertDataprocWorkflowTemplateBetaJobsPrestoJobLoggingConfigToHCL(r *datap
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tdriver_log_levels = {"
-	for k, v := range r.DriverLogLevels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysDriverLogLevels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.DriverLogLevels {
+		keysDriverLogLevels = append(keysDriverLogLevels, k)
+	}
+
+	sort.Strings(keysDriverLogLevels)
+
+	for _, k := range keysDriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.DriverLogLevels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -2893,8 +3155,17 @@ func convertDataprocWorkflowTemplateBetaJobsPysparkJobToHCL(r *dataprocBeta.Work
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
 	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysProperties := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Properties {
+		keysProperties = append(keysProperties, k)
+	}
+
+	sort.Strings(keysProperties)
+
+	for _, k := range keysProperties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Properties[k])
 	}
 	outputConfig += "}\n"
 	if r.PythonFileUris != nil {
@@ -2913,8 +3184,17 @@ func convertDataprocWorkflowTemplateBetaJobsPysparkJobLoggingConfigToHCL(r *data
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tdriver_log_levels = {"
-	for k, v := range r.DriverLogLevels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysDriverLogLevels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.DriverLogLevels {
+		keysDriverLogLevels = append(keysDriverLogLevels, k)
+	}
+
+	sort.Strings(keysDriverLogLevels)
+
+	for _, k := range keysDriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.DriverLogLevels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -2977,8 +3257,17 @@ func convertDataprocWorkflowTemplateBetaJobsSparkJobToHCL(r *dataprocBeta.Workfl
 		outputConfig += fmt.Sprintf("\tmain_jar_file_uri = %#v\n", *r.MainJarFileUri)
 	}
 	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysProperties := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Properties {
+		keysProperties = append(keysProperties, k)
+	}
+
+	sort.Strings(keysProperties)
+
+	for _, k := range keysProperties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Properties[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -2990,8 +3279,17 @@ func convertDataprocWorkflowTemplateBetaJobsSparkJobLoggingConfigToHCL(r *datapr
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tdriver_log_levels = {"
-	for k, v := range r.DriverLogLevels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysDriverLogLevels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.DriverLogLevels {
+		keysDriverLogLevels = append(keysDriverLogLevels, k)
+	}
+
+	sort.Strings(keysDriverLogLevels)
+
+	for _, k := range keysDriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.DriverLogLevels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -3030,8 +3328,17 @@ func convertDataprocWorkflowTemplateBetaJobsSparkRJobToHCL(r *dataprocBeta.Workf
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
 	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysProperties := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Properties {
+		keysProperties = append(keysProperties, k)
+	}
+
+	sort.Strings(keysProperties)
+
+	for _, k := range keysProperties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Properties[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -3043,8 +3350,17 @@ func convertDataprocWorkflowTemplateBetaJobsSparkRJobLoggingConfigToHCL(r *datap
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tdriver_log_levels = {"
-	for k, v := range r.DriverLogLevels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysDriverLogLevels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.DriverLogLevels {
+		keysDriverLogLevels = append(keysDriverLogLevels, k)
+	}
+
+	sort.Strings(keysDriverLogLevels)
+
+	for _, k := range keysDriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.DriverLogLevels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -3066,8 +3382,17 @@ func convertDataprocWorkflowTemplateBetaJobsSparkSqlJobToHCL(r *dataprocBeta.Wor
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
 	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysProperties := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Properties {
+		keysProperties = append(keysProperties, k)
+	}
+
+	sort.Strings(keysProperties)
+
+	for _, k := range keysProperties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Properties[k])
 	}
 	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
@@ -3077,8 +3402,17 @@ func convertDataprocWorkflowTemplateBetaJobsSparkSqlJobToHCL(r *dataprocBeta.Wor
 		outputConfig += fmt.Sprintf("\tquery_list %s\n", v)
 	}
 	outputConfig += "\tscript_variables = {"
-	for k, v := range r.ScriptVariables {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysScriptVariables := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.ScriptVariables {
+		keysScriptVariables = append(keysScriptVariables, k)
+	}
+
+	sort.Strings(keysScriptVariables)
+
+	for _, k := range keysScriptVariables {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.ScriptVariables[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -3090,8 +3424,17 @@ func convertDataprocWorkflowTemplateBetaJobsSparkSqlJobLoggingConfigToHCL(r *dat
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tdriver_log_levels = {"
-	for k, v := range r.DriverLogLevels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysDriverLogLevels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.DriverLogLevels {
+		keysDriverLogLevels = append(keysDriverLogLevels, k)
+	}
+
+	sort.Strings(keysDriverLogLevels)
+
+	for _, k := range keysDriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.DriverLogLevels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -3132,8 +3475,17 @@ func convertDataprocWorkflowTemplateBetaPlacementClusterSelectorToHCL(r *datapro
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tcluster_labels = {"
-	for k, v := range r.ClusterLabels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysClusterLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.ClusterLabels {
+		keysClusterLabels = append(keysClusterLabels, k)
+	}
+
+	sort.Strings(keysClusterLabels)
+
+	for _, k := range keysClusterLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.ClusterLabels[k])
 	}
 	outputConfig += "}\n"
 	if r.Zone != nil {
@@ -3154,8 +3506,17 @@ func convertDataprocWorkflowTemplateBetaPlacementManagedClusterToHCL(r *dataproc
 		outputConfig += fmt.Sprintf("\tconfig %s\n", v)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -3258,8 +3619,17 @@ func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigGceClusterC
 		outputConfig += fmt.Sprintf("\tinternal_ip_only = %#v\n", *r.InternalIPOnly)
 	}
 	outputConfig += "\tmetadata = {"
-	for k, v := range r.Metadata {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysMetadata := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Metadata {
+		keysMetadata = append(keysMetadata, k)
+	}
+
+	sort.Strings(keysMetadata)
+
+	for _, k := range keysMetadata {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Metadata[k])
 	}
 	outputConfig += "}\n"
 	if r.Network != nil {
@@ -3619,8 +3989,17 @@ func convertDataprocWorkflowTemplateBetaPlacementManagedClusterConfigSoftwareCon
 		outputConfig += "]\n"
 	}
 	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysProperties := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Properties {
+		keysProperties = append(keysProperties, k)
+	}
+
+	sort.Strings(keysProperties)
+
+	for _, k := range keysProperties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Properties[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -3787,8 +4166,17 @@ func EventarcTriggerBetaAsHCL(r eventarcBeta.Trigger, hasGAEquivalent bool) (str
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.Project != nil {
@@ -4016,8 +4404,17 @@ func GkeHubFeatureBetaAsHCL(r gkehubBeta.Feature, hasGAEquivalent bool) (string,
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.Name != nil {
@@ -4324,8 +4721,17 @@ func NetworkConnectivityHubBetaAsHCL(r networkconnectivityBeta.Hub, hasGAEquival
 		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.Project != nil {
@@ -4371,8 +4777,17 @@ func NetworkConnectivitySpokeBetaAsHCL(r networkconnectivityBeta.Spoke, hasGAEqu
 		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if v := convertNetworkConnectivitySpokeBetaLinkedInterconnectAttachmentsToHCL(r.LinkedInterconnectAttachments); v != "" {
@@ -4650,8 +5065,17 @@ func convertOsConfigOsPolicyAssignmentBetaInstanceFilterExclusionLabelsToHCL(r *
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -4663,8 +5087,17 @@ func convertOsConfigOsPolicyAssignmentBetaInstanceFilterInclusionLabelsToHCL(r *
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -5438,8 +5871,17 @@ func PrivatecaCertificateTemplateBetaAsHCL(r privatecaBeta.CertificateTemplate, 
 		outputConfig += fmt.Sprintf("\tidentity_constraints %s\n", v)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if v := convertPrivatecaCertificateTemplateBetaPassthroughExtensionsToHCL(r.PassthroughExtensions); v != "" {
@@ -5739,8 +6181,17 @@ func RecaptchaEnterpriseKeyBetaAsHCL(r recaptchaenterpriseBeta.Key, hasGAEquival
 		outputConfig += fmt.Sprintf("\tios_settings %s\n", v)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.Project != nil {
@@ -6013,8 +6464,17 @@ func AssuredWorkloadsWorkloadAsHCL(r assuredworkloads.Workload, hasGAEquivalent 
 		outputConfig += fmt.Sprintf("\tkms_settings %s\n", v)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.ProvisionedResourcesParent != nil {
@@ -6121,8 +6581,17 @@ func CloudbuildWorkerPoolAsHCL(r cloudbuild.WorkerPool, hasGAEquivalent bool) (s
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
 	outputConfig += "\tannotations = {"
-	for k, v := range r.Annotations {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysAnnotations := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Annotations {
+		keysAnnotations = append(keysAnnotations, k)
+	}
+
+	sort.Strings(keysAnnotations)
+
+	for _, k := range keysAnnotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Annotations[k])
 	}
 	outputConfig += "}\n"
 	if r.DisplayName != nil {
@@ -6191,16 +6660,34 @@ func ClouddeployDeliveryPipelineAsHCL(r clouddeploy.DeliveryPipeline, hasGAEquiv
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
 	outputConfig += "\tannotations = {"
-	for k, v := range r.Annotations {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysAnnotations := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Annotations {
+		keysAnnotations = append(keysAnnotations, k)
+	}
+
+	sort.Strings(keysAnnotations)
+
+	for _, k := range keysAnnotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Annotations[k])
 	}
 	outputConfig += "}\n"
 	if r.Description != nil {
 		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.Project != nil {
@@ -6290,8 +6777,17 @@ func ClouddeployTargetAsHCL(r clouddeploy.Target, hasGAEquivalent bool) (string,
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
 	outputConfig += "\tannotations = {"
-	for k, v := range r.Annotations {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysAnnotations := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Annotations {
+		keysAnnotations = append(keysAnnotations, k)
+	}
+
+	sort.Strings(keysAnnotations)
+
+	for _, k := range keysAnnotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Annotations[k])
 	}
 	outputConfig += "}\n"
 	if v := convertClouddeployTargetAnthosClusterToHCL(r.AnthosCluster); v != "" {
@@ -6309,8 +6805,17 @@ func ClouddeployTargetAsHCL(r clouddeploy.Target, hasGAEquivalent bool) (string,
 		outputConfig += fmt.Sprintf("\tgke %s\n", v)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.Project != nil {
@@ -6416,8 +6921,17 @@ func CloudResourceManagerProjectAsHCL(r cloudresourcemanager.Project, hasGAEquiv
 		outputConfig += fmt.Sprintf("\tdisplayname = %#v\n", *r.DisplayName)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.Name != nil {
@@ -6628,8 +7142,17 @@ func ComputeForwardingRuleAsHCL(r compute.ForwardingRule, hasGAEquivalent bool) 
 		outputConfig += fmt.Sprintf("\tis_mirroring_collector = %#v\n", *r.IsMirroringCollector)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.LoadBalancingScheme != nil {
@@ -6723,8 +7246,17 @@ func ComputeGlobalForwardingRuleAsHCL(r compute.ForwardingRule, hasGAEquivalent 
 		outputConfig += fmt.Sprintf("\tip_version = %#v\n", *r.IPVersion)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.LoadBalancingScheme != nil {
@@ -6815,8 +7347,17 @@ func ContainerAwsClusterAsHCL(r containeraws.Cluster, hasGAEquivalent bool) (str
 		outputConfig += fmt.Sprintf("\tnetworking %s\n", v)
 	}
 	outputConfig += "\tannotations = {"
-	for k, v := range r.Annotations {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysAnnotations := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Annotations {
+		keysAnnotations = append(keysAnnotations, k)
+	}
+
+	sort.Strings(keysAnnotations)
+
+	for _, k := range keysAnnotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Annotations[k])
 	}
 	outputConfig += "}\n"
 	if r.Description != nil {
@@ -6910,8 +7451,17 @@ func convertContainerAwsClusterControlPlaneToHCL(r *containeraws.ClusterControlP
 		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
 	}
 	outputConfig += "\ttags = {"
-	for k, v := range r.Tags {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysTags := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Tags {
+		keysTags = append(keysTags, k)
+	}
+
+	sort.Strings(keysTags)
+
+	for _, k := range keysTags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Tags[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -7095,8 +7645,17 @@ func ContainerAwsNodePoolAsHCL(r containeraws.NodePool, hasGAEquivalent bool) (s
 		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
 	}
 	outputConfig += "\tannotations = {"
-	for k, v := range r.Annotations {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysAnnotations := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Annotations {
+		keysAnnotations = append(keysAnnotations, k)
+	}
+
+	sort.Strings(keysAnnotations)
+
+	for _, k := range keysAnnotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Annotations[k])
 	}
 	outputConfig += "}\n"
 	if r.Project != nil {
@@ -7142,8 +7701,17 @@ func convertContainerAwsNodePoolConfigToHCL(r *containeraws.NodePoolConfig) stri
 		outputConfig += fmt.Sprintf("\tinstance_type = %#v\n", *r.InstanceType)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if v := convertContainerAwsNodePoolConfigProxyConfigToHCL(r.ProxyConfig); v != "" {
@@ -7163,8 +7731,17 @@ func convertContainerAwsNodePoolConfigToHCL(r *containeraws.NodePoolConfig) stri
 		outputConfig += fmt.Sprintf("\tssh_config %s\n", v)
 	}
 	outputConfig += "\ttags = {"
-	for k, v := range r.Tags {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysTags := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Tags {
+		keysTags = append(keysTags, k)
+	}
+
+	sort.Strings(keysTags)
+
+	for _, k := range keysTags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Tags[k])
 	}
 	outputConfig += "}\n"
 	if r.Taints != nil {
@@ -7329,8 +7906,17 @@ func ContainerAzureClusterAsHCL(r containerazure.Cluster, hasGAEquivalent bool) 
 		outputConfig += fmt.Sprintf("\tresource_group_id = %#v\n", *r.ResourceGroupId)
 	}
 	outputConfig += "\tannotations = {"
-	for k, v := range r.Annotations {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysAnnotations := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Annotations {
+		keysAnnotations = append(keysAnnotations, k)
+	}
+
+	sort.Strings(keysAnnotations)
+
+	for _, k := range keysAnnotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Annotations[k])
 	}
 	outputConfig += "}\n"
 	if r.Description != nil {
@@ -7406,8 +7992,17 @@ func convertContainerAzureClusterControlPlaneToHCL(r *containerazure.ClusterCont
 		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
 	}
 	outputConfig += "\ttags = {"
-	for k, v := range r.Tags {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysTags := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Tags {
+		keysTags = append(keysTags, k)
+	}
+
+	sort.Strings(keysTags)
+
+	for _, k := range keysTags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Tags[k])
 	}
 	outputConfig += "}\n"
 	if r.VmSize != nil {
@@ -7565,8 +8160,17 @@ func ContainerAzureNodePoolAsHCL(r containerazure.NodePool, hasGAEquivalent bool
 		outputConfig += fmt.Sprintf("\tversion = %#v\n", *r.Version)
 	}
 	outputConfig += "\tannotations = {"
-	for k, v := range r.Annotations {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysAnnotations := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Annotations {
+		keysAnnotations = append(keysAnnotations, k)
+	}
+
+	sort.Strings(keysAnnotations)
+
+	for _, k := range keysAnnotations {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Annotations[k])
 	}
 	outputConfig += "}\n"
 	if r.AzureAvailabilityZone != nil {
@@ -7615,8 +8219,17 @@ func convertContainerAzureNodePoolConfigToHCL(r *containerazure.NodePoolConfig) 
 		outputConfig += fmt.Sprintf("\troot_volume %s\n", v)
 	}
 	outputConfig += "\ttags = {"
-	for k, v := range r.Tags {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysTags := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Tags {
+		keysTags = append(keysTags, k)
+	}
+
+	sort.Strings(keysTags)
+
+	for _, k := range keysTags {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Tags[k])
 	}
 	outputConfig += "}\n"
 	if r.VmSize != nil {
@@ -7698,8 +8311,17 @@ func DataprocWorkflowTemplateAsHCL(r dataproc.WorkflowTemplate, hasGAEquivalent 
 		outputConfig += fmt.Sprintf("\tdag_timeout = %#v\n", *r.DagTimeout)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.Parameters != nil {
@@ -7739,8 +8361,17 @@ func convertDataprocWorkflowTemplateJobsToHCL(r *dataproc.WorkflowTemplateJobs) 
 		outputConfig += fmt.Sprintf("\thive_job %s\n", v)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if v := convertDataprocWorkflowTemplateJobsPigJobToHCL(r.PigJob); v != "" {
@@ -7817,8 +8448,17 @@ func convertDataprocWorkflowTemplateJobsHadoopJobToHCL(r *dataproc.WorkflowTempl
 		outputConfig += fmt.Sprintf("\tmain_jar_file_uri = %#v\n", *r.MainJarFileUri)
 	}
 	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysProperties := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Properties {
+		keysProperties = append(keysProperties, k)
+	}
+
+	sort.Strings(keysProperties)
+
+	for _, k := range keysProperties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Properties[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -7830,8 +8470,17 @@ func convertDataprocWorkflowTemplateJobsHadoopJobLoggingConfigToHCL(r *dataproc.
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tdriver_log_levels = {"
-	for k, v := range r.DriverLogLevels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysDriverLogLevels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.DriverLogLevels {
+		keysDriverLogLevels = append(keysDriverLogLevels, k)
+	}
+
+	sort.Strings(keysDriverLogLevels)
+
+	for _, k := range keysDriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.DriverLogLevels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -7853,8 +8502,17 @@ func convertDataprocWorkflowTemplateJobsHiveJobToHCL(r *dataproc.WorkflowTemplat
 		outputConfig += "]\n"
 	}
 	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysProperties := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Properties {
+		keysProperties = append(keysProperties, k)
+	}
+
+	sort.Strings(keysProperties)
+
+	for _, k := range keysProperties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Properties[k])
 	}
 	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
@@ -7864,8 +8522,17 @@ func convertDataprocWorkflowTemplateJobsHiveJobToHCL(r *dataproc.WorkflowTemplat
 		outputConfig += fmt.Sprintf("\tquery_list %s\n", v)
 	}
 	outputConfig += "\tscript_variables = {"
-	for k, v := range r.ScriptVariables {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysScriptVariables := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.ScriptVariables {
+		keysScriptVariables = append(keysScriptVariables, k)
+	}
+
+	sort.Strings(keysScriptVariables)
+
+	for _, k := range keysScriptVariables {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.ScriptVariables[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -7905,8 +8572,17 @@ func convertDataprocWorkflowTemplateJobsPigJobToHCL(r *dataproc.WorkflowTemplate
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
 	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysProperties := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Properties {
+		keysProperties = append(keysProperties, k)
+	}
+
+	sort.Strings(keysProperties)
+
+	for _, k := range keysProperties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Properties[k])
 	}
 	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
@@ -7916,8 +8592,17 @@ func convertDataprocWorkflowTemplateJobsPigJobToHCL(r *dataproc.WorkflowTemplate
 		outputConfig += fmt.Sprintf("\tquery_list %s\n", v)
 	}
 	outputConfig += "\tscript_variables = {"
-	for k, v := range r.ScriptVariables {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysScriptVariables := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.ScriptVariables {
+		keysScriptVariables = append(keysScriptVariables, k)
+	}
+
+	sort.Strings(keysScriptVariables)
+
+	for _, k := range keysScriptVariables {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.ScriptVariables[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -7929,8 +8614,17 @@ func convertDataprocWorkflowTemplateJobsPigJobLoggingConfigToHCL(r *dataproc.Wor
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tdriver_log_levels = {"
-	for k, v := range r.DriverLogLevels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysDriverLogLevels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.DriverLogLevels {
+		keysDriverLogLevels = append(keysDriverLogLevels, k)
+	}
+
+	sort.Strings(keysDriverLogLevels)
+
+	for _, k := range keysDriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.DriverLogLevels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -7973,8 +8667,17 @@ func convertDataprocWorkflowTemplateJobsPrestoJobToHCL(r *dataproc.WorkflowTempl
 		outputConfig += fmt.Sprintf("\toutput_format = %#v\n", *r.OutputFormat)
 	}
 	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysProperties := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Properties {
+		keysProperties = append(keysProperties, k)
+	}
+
+	sort.Strings(keysProperties)
+
+	for _, k := range keysProperties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Properties[k])
 	}
 	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
@@ -7992,8 +8695,17 @@ func convertDataprocWorkflowTemplateJobsPrestoJobLoggingConfigToHCL(r *dataproc.
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tdriver_log_levels = {"
-	for k, v := range r.DriverLogLevels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysDriverLogLevels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.DriverLogLevels {
+		keysDriverLogLevels = append(keysDriverLogLevels, k)
+	}
+
+	sort.Strings(keysDriverLogLevels)
+
+	for _, k := range keysDriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.DriverLogLevels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -8054,8 +8766,17 @@ func convertDataprocWorkflowTemplateJobsPysparkJobToHCL(r *dataproc.WorkflowTemp
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
 	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysProperties := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Properties {
+		keysProperties = append(keysProperties, k)
+	}
+
+	sort.Strings(keysProperties)
+
+	for _, k := range keysProperties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Properties[k])
 	}
 	outputConfig += "}\n"
 	if r.PythonFileUris != nil {
@@ -8074,8 +8795,17 @@ func convertDataprocWorkflowTemplateJobsPysparkJobLoggingConfigToHCL(r *dataproc
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tdriver_log_levels = {"
-	for k, v := range r.DriverLogLevels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysDriverLogLevels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.DriverLogLevels {
+		keysDriverLogLevels = append(keysDriverLogLevels, k)
+	}
+
+	sort.Strings(keysDriverLogLevels)
+
+	for _, k := range keysDriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.DriverLogLevels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -8138,8 +8868,17 @@ func convertDataprocWorkflowTemplateJobsSparkJobToHCL(r *dataproc.WorkflowTempla
 		outputConfig += fmt.Sprintf("\tmain_jar_file_uri = %#v\n", *r.MainJarFileUri)
 	}
 	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysProperties := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Properties {
+		keysProperties = append(keysProperties, k)
+	}
+
+	sort.Strings(keysProperties)
+
+	for _, k := range keysProperties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Properties[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -8151,8 +8890,17 @@ func convertDataprocWorkflowTemplateJobsSparkJobLoggingConfigToHCL(r *dataproc.W
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tdriver_log_levels = {"
-	for k, v := range r.DriverLogLevels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysDriverLogLevels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.DriverLogLevels {
+		keysDriverLogLevels = append(keysDriverLogLevels, k)
+	}
+
+	sort.Strings(keysDriverLogLevels)
+
+	for _, k := range keysDriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.DriverLogLevels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -8191,8 +8939,17 @@ func convertDataprocWorkflowTemplateJobsSparkRJobToHCL(r *dataproc.WorkflowTempl
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
 	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysProperties := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Properties {
+		keysProperties = append(keysProperties, k)
+	}
+
+	sort.Strings(keysProperties)
+
+	for _, k := range keysProperties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Properties[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -8204,8 +8961,17 @@ func convertDataprocWorkflowTemplateJobsSparkRJobLoggingConfigToHCL(r *dataproc.
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tdriver_log_levels = {"
-	for k, v := range r.DriverLogLevels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysDriverLogLevels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.DriverLogLevels {
+		keysDriverLogLevels = append(keysDriverLogLevels, k)
+	}
+
+	sort.Strings(keysDriverLogLevels)
+
+	for _, k := range keysDriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.DriverLogLevels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -8227,8 +8993,17 @@ func convertDataprocWorkflowTemplateJobsSparkSqlJobToHCL(r *dataproc.WorkflowTem
 		outputConfig += fmt.Sprintf("\tlogging_config %s\n", v)
 	}
 	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysProperties := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Properties {
+		keysProperties = append(keysProperties, k)
+	}
+
+	sort.Strings(keysProperties)
+
+	for _, k := range keysProperties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Properties[k])
 	}
 	outputConfig += "}\n"
 	if r.QueryFileUri != nil {
@@ -8238,8 +9013,17 @@ func convertDataprocWorkflowTemplateJobsSparkSqlJobToHCL(r *dataproc.WorkflowTem
 		outputConfig += fmt.Sprintf("\tquery_list %s\n", v)
 	}
 	outputConfig += "\tscript_variables = {"
-	for k, v := range r.ScriptVariables {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysScriptVariables := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.ScriptVariables {
+		keysScriptVariables = append(keysScriptVariables, k)
+	}
+
+	sort.Strings(keysScriptVariables)
+
+	for _, k := range keysScriptVariables {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.ScriptVariables[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -8251,8 +9035,17 @@ func convertDataprocWorkflowTemplateJobsSparkSqlJobLoggingConfigToHCL(r *datapro
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tdriver_log_levels = {"
-	for k, v := range r.DriverLogLevels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysDriverLogLevels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.DriverLogLevels {
+		keysDriverLogLevels = append(keysDriverLogLevels, k)
+	}
+
+	sort.Strings(keysDriverLogLevels)
+
+	for _, k := range keysDriverLogLevels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.DriverLogLevels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -8293,8 +9086,17 @@ func convertDataprocWorkflowTemplatePlacementClusterSelectorToHCL(r *dataproc.Wo
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tcluster_labels = {"
-	for k, v := range r.ClusterLabels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysClusterLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.ClusterLabels {
+		keysClusterLabels = append(keysClusterLabels, k)
+	}
+
+	sort.Strings(keysClusterLabels)
+
+	for _, k := range keysClusterLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.ClusterLabels[k])
 	}
 	outputConfig += "}\n"
 	if r.Zone != nil {
@@ -8315,8 +9117,17 @@ func convertDataprocWorkflowTemplatePlacementManagedClusterToHCL(r *dataproc.Wor
 		outputConfig += fmt.Sprintf("\tconfig %s\n", v)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -8413,8 +9224,17 @@ func convertDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfi
 		outputConfig += fmt.Sprintf("\tinternal_ip_only = %#v\n", *r.InternalIPOnly)
 	}
 	outputConfig += "\tmetadata = {"
-	for k, v := range r.Metadata {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysMetadata := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Metadata {
+		keysMetadata = append(keysMetadata, k)
+	}
+
+	sort.Strings(keysMetadata)
+
+	for _, k := range keysMetadata {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Metadata[k])
 	}
 	outputConfig += "}\n"
 	if r.Network != nil {
@@ -8738,8 +9558,17 @@ func convertDataprocWorkflowTemplatePlacementManagedClusterConfigSoftwareConfigT
 		outputConfig += "]\n"
 	}
 	outputConfig += "\tproperties = {"
-	for k, v := range r.Properties {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysProperties := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Properties {
+		keysProperties = append(keysProperties, k)
+	}
+
+	sort.Strings(keysProperties)
+
+	for _, k := range keysProperties {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Properties[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -8906,8 +9735,17 @@ func EventarcTriggerAsHCL(r eventarc.Trigger, hasGAEquivalent bool) (string, err
 		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.Project != nil {
@@ -9175,8 +10013,17 @@ func NetworkConnectivityHubAsHCL(r networkconnectivity.Hub, hasGAEquivalent bool
 		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.Project != nil {
@@ -9222,8 +10069,17 @@ func NetworkConnectivitySpokeAsHCL(r networkconnectivity.Spoke, hasGAEquivalent 
 		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if v := convertNetworkConnectivitySpokeLinkedInterconnectAttachmentsToHCL(r.LinkedInterconnectAttachments); v != "" {
@@ -9501,8 +10357,17 @@ func convertOsConfigOsPolicyAssignmentInstanceFilterExclusionLabelsToHCL(r *osco
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -9514,8 +10379,17 @@ func convertOsConfigOsPolicyAssignmentInstanceFilterInclusionLabelsToHCL(r *osco
 	}
 	outputConfig := "{\n"
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	return outputConfig + "}"
@@ -10289,8 +11163,17 @@ func PrivatecaCertificateTemplateAsHCL(r privateca.CertificateTemplate, hasGAEqu
 		outputConfig += fmt.Sprintf("\tidentity_constraints %s\n", v)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if v := convertPrivatecaCertificateTemplatePassthroughExtensionsToHCL(r.PassthroughExtensions); v != "" {
@@ -10590,8 +11473,17 @@ func RecaptchaEnterpriseKeyAsHCL(r recaptchaenterprise.Key, hasGAEquivalent bool
 		outputConfig += fmt.Sprintf("\tios_settings %s\n", v)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if r.Project != nil {
