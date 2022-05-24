@@ -37,7 +37,8 @@ resource "google_memcache_instance" "<%= ctx[:primary_resource_id] %>" {
 
   maintenance_policy {
     weekly_maintenance_window {
-      day = "SATURDAY"
+      day      = "SATURDAY"
+      duration = "14400s"
       start_time {
         hours = 0
         minutes = 30
