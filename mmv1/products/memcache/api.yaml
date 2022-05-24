@@ -257,7 +257,6 @@ objects:
                 - !ruby/object:Api::Type::String
                   name: 'duration'
                   required: true
-                  default_value: '10800s'
                   description: |
                     Required. The length of the maintenance window, ranging from 3 hours to 8 hours.
                     A duration in seconds with up to nine fractional digits,
