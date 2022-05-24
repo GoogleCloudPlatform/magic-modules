@@ -2,7 +2,7 @@
   {
     "name": "//cloudresourcemanager.googleapis.com/projects/foobat",
     "asset_type": "cloudresourcemanager.googleapis.com/Project",
-    "ancestry_path": "organization/{{.OrgID}}/folder/{{.FolderID}}/project/foobat",
+    "ancestry_path": "{{.Ancestry}}/project/foobat",
     "resource": {
       "version": "v1",
       "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
