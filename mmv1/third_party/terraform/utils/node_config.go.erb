@@ -413,6 +413,7 @@ func schemaNodeConfig() *schema.Schema {
 					Type:        schema.TypeList,
 					MaxItems:    1,
 					Optional:    true,
+					ForceNew:    true,
 					Description: `Controls for advanced machine-related behavior features.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
