@@ -60,6 +60,10 @@ module Provider
                              relative_path(@output_folder + '/' + path, @output_folder).to_s)
       ctx.local_variable_set('pwd', pwd)
 
+      # check if the parent folder exists, and make it if not
+      parentPath = File.dirname(path)
+      FileUtils.mkdir_p(parentPath) unless File.directory?(parentPath)
+
       Google::LOGGER.debug "Generating #{path}"
       File.open(path, 'w') { |f| f.puts compile_file(ctx, pwd + '/' + template) }
 
