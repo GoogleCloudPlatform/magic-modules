@@ -400,7 +400,7 @@ func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 				Config: testAccContainerCluster_removeNetworkPolicy(clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_network_policy_enabled",
-						"network_policy.#", "0"),
+						"network_policy.0.enabled", "false"),
 				),
 			},
 			{
