@@ -286,6 +286,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       resourceGroup.groupId: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: "templates/terraform/custom_expand/resource_from_self_link.go.erb"
         custom_flatten: "templates/terraform/custom_flatten/group_id_to_name.erb"
+      checkerType: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
 
   MetricDescriptor: !ruby/object:Overrides::Terraform::ResourceOverride
     async: !ruby/object:Provider::Terraform::PollAsync

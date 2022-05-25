@@ -1,3 +1,8 @@
+data "google_container_azure_versions" "versions" {
+  project = "{{project}}"
+  location = "us-west1"
+}
+
 resource "google_container_azure_cluster" "primary" {
   authorization {
     admin_users {
@@ -14,7 +19,7 @@ resource "google_container_azure_cluster" "primary" {
     }
 
     subnet_id = "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-byo/providers/Microsoft.Network/virtualNetworks/{{byo_multicloud_prefix}}-dev-vnet/subnets/default"
-    version   = "1.21.6-gke.1500"
+    version   = "${data.google_container_azure_versions.versions.valid_versions[0]}"
 
     database_encryption {
       key_id = "/subscriptions/{{azure_subscription}}/resourceGroups/{{byo_multicloud_prefix}}-dev-cluster/providers/Microsoft.KeyVault/vaults/{{byo_multicloud_prefix}}-dev-keyvault/keys/{{byo_multicloud_prefix}}-dev-key"

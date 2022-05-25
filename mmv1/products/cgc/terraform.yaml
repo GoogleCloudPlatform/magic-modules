@@ -17,6 +17,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     cgc_only: true
     examples:
     # Compute
+    ### Flask quickstart ###
       - !ruby/object:Provider::Terraform::Examples
         name: "flask_google_cloud_quickstart"
         primary_resource_type: "google_compute_instance"
@@ -29,6 +30,31 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "metadata"
           - "metadata_startup_script"
+    ### SQL Server VM ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_sqlserver_vm_instance"
+        primary_resource_type: "google_compute_instance"
+        primary_resource_id: "sqlserver_vm"
+        vars:
+          vpc_network: "vpc-network"
+          vpc_subnet: "vpc-subnet"
+          sqlserver_vm: "sqlserver-vm"
+          sql_server_1433_3: "sql-server-1433-3"
+        min_version: beta
+    ### Spot VM ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "spot_instance_basic"
+        primary_resource_type: "google_compute_instance"
+        primary_resource_id: "spot_vm_instance"
+        vars:
+          spot_instance_name: "spot-instance-name"
+    ### Custom Hostname VM ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "instance_custom_hostname"
+        primary_resource_type: "google_compute_instance"
+        primary_resource_id: "custom_hostname_instance"
+        vars:
+          custom_hostname_instance_name: "custom-hostname-instance-name"
     # SQL
     ### When including separate samples for each DB type, add `skip_test: true`
     ### for Postgres and MySQL, but not for SQL Server
@@ -38,9 +64,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "sql_database_instance_sqlserver"
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "instance"
+        # Random provider
+        skip_vcr: true
         vars:
           database_instance_name: "sqlserver-instance"
           deletion_protection: "true"
+          user: "user"
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
@@ -50,9 +79,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "sql_database_instance_postgres"
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "instance"
+        # Random provider
+        skip_vcr: true
         vars:
           database_instance_name: "postgres-instance"
           deletion_protection: "true"
+          user: "user"
         skip_test: true
         test_vars_overrides:
           deletion_protection: "false"
@@ -62,9 +94,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "sql_database_instance_my_sql"
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "instance"
+        # Random provider
+        skip_vcr: true
         vars:
           database_instance_name: "mysql-instance"
           deletion_protection: "true"
+          user: "user"
         skip_test: true
         test_vars_overrides:
           deletion_protection: "false"
@@ -368,6 +403,139 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           private_ip_address: "private-ip-address"
           private_ip_sql_instance: "private-ip-sql-instance"
         skip_test: true
+    ### Flags and User ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_mysql_instance_flags"
+        primary_resource_id: "instance"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          mysql_instance: "mysql-instance"
+          username: "username"
+          deletion_protection: "true"
+        skip_test: true
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_postgres_instance_flags"
+        primary_resource_id: "instance"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          postgres_instance: "postgres-instance"
+          username: "username"
+          deletion_protection: "true"
+        skip_test: true
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_sqlserver_instance_flags"
+        primary_resource_id: "instance"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          sqlserver_instance: "sqlserver-instance"
+          username: "username"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+          - "root_password"
+    ### HA ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_instance_ha"
+        primary_resource_id: "default"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          mysql_instance_ha: "mysql-instance-ha"
+          postgres_instance_ha: "postgres-instance-ha"
+          sqlserver_instance_ha: "sqlserver-instance-ha"
+          deletion_protection: "true"
+        skip_test: true
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+          - "root_password"
+    ### CMEK ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_instance_cmek"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "default"
+        vars:
+          keyring_name: "keyring-name"
+          crypto_key_name: "crypto-key-name"
+          mysql_instance_cmek: "mysql-instance-cmek"
+          postgres_instance_cmek: "postgres-instance-cmek"
+          sqlserver_instance_cmek: "sqlserver-instance-cmek"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+          - "root_password"
+    ### IAM Conditions ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_instance_iam_condition"
+        primary_resource_id: "default"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          mysql_instance_iam_condition: "mysql-instance-iam-condition"
+          deletion_protection: "true"
+        min_version: beta
+        skip_test: true
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+    ### Labels ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_instance_labels"
+        primary_resource_id: "default"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          mysql_instance_labels: "mysql-instance-labels"
+          postgres_instance_labels: "postgres-instance-labels"
+          sqlserver_instance_labels: "sqlserver-instance-labels"
+          deletion_protection: "true"
+        skip_test: true
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+          - "root_password"
+    ### PITR ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_instance_pitr"
+        primary_resource_id: "default"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          mysql_instance_pitr: "mysql-instance-pitr"
+          postgres_instance_pitr: "postgres-instance-pitr"
+          deletion_protection: "true"
+        skip_test: true
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+    ### SSL cert ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_instance_ssl_cert"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "sqlserver_instance"
+        vars:
+          mysql_instance: "mysql-instance"
+          postgres_instance: "postgres-instance"
+          sqlserver_instance: "sqlserver-instance"
+          deletion_protection: "true"
+        skip_test: true
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+          - "root_password"
     # Storage
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_new_bucket"
@@ -376,8 +544,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           new_bucket: "new-bucket"
           new_object: "new-object"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "storage_make_data_public"
+        primary_resource_type: "google_storage_bucket"
+        primary_resource_id: "default"
+        vars:
+          example_bucket_name: "example-bucket-name"
+        min_version: beta
+        # ignore_read_extra:
+        #   - "port_range"
+        #   - "target"
+        #   - "ip_address"
     properties:
-    
+
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

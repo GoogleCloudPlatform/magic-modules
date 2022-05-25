@@ -2217,7 +2217,6 @@ func TestAccComputeInstance_queueCount(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeInstance_spotVM(t *testing.T) {
 	t.Parallel()
 
@@ -2271,7 +2270,6 @@ func TestAccComputeInstance_spotVM_update(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestComputeInstance_networkIPCustomizedDiff(t *testing.T) {
 	t.Parallel()
@@ -6238,7 +6236,6 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeInstance_spotVM(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -6270,6 +6267,4 @@ resource "google_compute_instance" "foobar" {
 }
 `, instance)
 }
-<% end -%>
-
 

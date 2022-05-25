@@ -1,0 +1,50 @@
+if d.HasChange("desired_state") {
+	// Currently, most CA state update operations are not idempotent.
+	// Try to change state only if the current `state` does not match the `desired_state`.
+	if p, ok := d.GetOk("desired_state"); ok && p.(string) != d.Get("state").(string) {
+		switch p.(string) {
+		case "ENABLED":
+			enableUrl, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:enable")
+			if err != nil {
+				return err
+			}
+
+			log.Printf("[DEBUG] Enabling CA: %#v", obj)
+
+			res, err := sendRequest(config, "POST", billingProject, enableUrl, userAgent, nil)
+			if err != nil {
+				return fmt.Errorf("Error enabling CA: %s", err)
+			}
+
+			var opRes map[string]interface{}
+			err = privatecaOperationWaitTimeWithResponse(
+				config, res, &opRes, project, "Enabling CA", userAgent,
+				d.Timeout(schema.TimeoutCreate))
+			if err != nil {
+				return fmt.Errorf("Error waiting to enable CA: %s", err)
+			}
+		case "DISABLED":
+			disableUrl, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:disable")
+			if err != nil {
+				return err
+			}
+
+			log.Printf("[DEBUG] Disabling CA: %#v", obj)
+
+			dRes, err := sendRequest(config, "POST", billingProject, disableUrl, userAgent, nil)
+			if err != nil {
+				return fmt.Errorf("Error disabling CA: %s", err)
+			}
+
+			var opRes map[string]interface{}
+			err = privatecaOperationWaitTimeWithResponse(
+				config, dRes, &opRes, project, "Disabling CA", userAgent,
+				d.Timeout(schema.TimeoutDelete))
+			if err != nil {
+				return fmt.Errorf("Error waiting to disable CA: %s", err)
+			}	
+		default:
+			return fmt.Errorf("Unsupported value in field `desired_state`")
+		}
+	}
+}

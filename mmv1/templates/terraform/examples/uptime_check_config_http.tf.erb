@@ -21,5 +21,7 @@ resource "google_monitoring_uptime_check_config" "<%= ctx[:primary_resource_id] 
   content_matchers {
     content = "example"
   }
+
+  checker_type = "STATIC_IP_CHECKERS"
 }
 

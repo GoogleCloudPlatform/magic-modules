@@ -19,7 +19,7 @@ resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
   description = "a new function"
  
   build_config {
-    runtime = "nodejs12"
+    runtime = "nodejs16"
     entry_point = "helloHttp"
     source {
       storage_source {

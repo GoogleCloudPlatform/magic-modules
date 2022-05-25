@@ -1,6 +1,6 @@
 {
   "format_version": "0.1",
-  "terraform_version": "0.13.5",
+  "terraform_version": "0.12.31",
   "planned_values": {
     "root_module": {
       "resources": [
@@ -9,20 +9,24 @@
           "mode": "managed",
           "type": "google_filestore_instance",
           "name": "test",
-          "provider_name": "registry.terraform.io/hashicorp/google",
-          "schema_version": 0,
+          "provider_name": "google",
+          "schema_version": 1,
           "values": {
             "description": null,
             "file_shares": [
               {
                 "capacity_gb": 2660,
-                "name": "share1"
+                "name": "share1",
+                "nfs_export_options": []
               }
             ],
+            "kms_key_name": null,
             "labels": null,
+            "location": "us-central1-b",
             "name": "test-instance",
             "networks": [
               {
+                "connect_mode": "DIRECT_PEERING",
                 "modes": [
                   "MODE_IPV4"
                 ],
@@ -30,8 +34,7 @@
               }
             ],
             "tier": "BASIC_SSD",
-            "timeouts": null,
-            "location": "us-central1-b"
+            "timeouts": null
           }
         }
       ]
@@ -43,7 +46,7 @@
       "mode": "managed",
       "type": "google_filestore_instance",
       "name": "test",
-      "provider_name": "registry.terraform.io/hashicorp/google",
+      "provider_name": "google",
       "change": {
         "actions": [
           "create"
@@ -54,13 +57,17 @@
           "file_shares": [
             {
               "capacity_gb": 2660,
-              "name": "share1"
+              "name": "share1",
+              "nfs_export_options": []
             }
           ],
+          "kms_key_name": null,
           "labels": null,
+          "location": "us-central1-b",
           "name": "test-instance",
           "networks": [
             {
+              "connect_mode": "DIRECT_PEERING",
               "modes": [
                 "MODE_IPV4"
               ],
@@ -68,12 +75,16 @@
             }
           ],
           "tier": "BASIC_SSD",
-          "timeouts": null,
-          "location": "us-central1-b"
+          "timeouts": null
         },
         "after_unknown": {
           "create_time": true,
           "etag": true,
+          "file_shares": [
+            {
+                "nfs_export_options": []
+            }
+        ],
           "id": true,
           "networks": [
             {
@@ -84,7 +95,8 @@
               "reserved_ip_range": true
             }
           ],
-          "project": true
+          "project": true,
+          "zone": true
         }
       }
     }
@@ -92,20 +104,7 @@
   "configuration": {
     "provider_config": {
       "google": {
-        "name": "google",
-        "expressions": {
-          "project": {
-            "constant_value": "{{.Provider.project}}"
-          }
-        }
-      },
-      "google": {
-        "name": "google",
-        "expressions": {
-          "project": {
-            "constant_value": "{{.Provider.project}}"
-          }
-        }
+        "name": "google"
       }
     },
     "root_module": {
@@ -127,6 +126,9 @@
                 }
               }
             ],
+            "location": {
+              "constant_value": "us-central1-b"
+            },
             "name": {
               "constant_value": "test-instance"
             },
@@ -144,12 +146,9 @@
             ],
             "tier": {
               "constant_value": "BASIC_SSD"
-            },
-            "location": {
-              "constant_value": "us-central1-b"
             }
           },
-          "schema_version": 0
+          "schema_version": 1
         }
       ]
     }
