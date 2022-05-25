@@ -761,7 +761,6 @@ func resourceContainerCluster() *schema.Resource {
 <% end -%>
 							},
 						},
-<% if version == "beta" -%>
 						"managed_prometheus": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -778,7 +777,6 @@ func resourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
-<% end -%>
 					},
 				},
 			},
@@ -3703,21 +3701,18 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 	}
 	mc := &container.MonitoringConfig{}
 	config := l[0].(map[string]interface{})
-<%# In version == 'ga' enable_components will always be specified. %>
 	if v, ok := config["enable_components"]; ok && len(v.([]interface{})) > 0 {
 		enable_components := v.([]interface{})
 		mc.ComponentConfig = &container.MonitoringComponentConfig{
 			EnableComponents: convertStringArr(enable_components),
 		}
 	}
-<% if version == 'beta' -%>
 	if v, ok := config["managed_prometheus"]; ok && len(v.([]interface{})) > 0 {
 		managed_prometheus := v.([]interface{})[0].(map[string]interface{})
 		mc.ManagedPrometheusConfig = &container.ManagedPrometheusConfig{
 			Enabled: managed_prometheus["enabled"].(bool),
 		}
 	}
-<% end -%>
 	return mc
 }
 
@@ -4247,15 +4242,12 @@ func flattenMonitoringConfig(c *container.MonitoringConfig) []map[string]interfa
 	if c.ComponentConfig != nil {
 		result["enable_components"] = c.ComponentConfig.EnableComponents
 	}
-<% if version == 'beta' -%>
 	if c.ManagedPrometheusConfig != nil {
 		result["managed_prometheus"] = flattenManagedPrometheusConfig(c.ManagedPrometheusConfig)
 	}
-<% end -%>
 	return []map[string]interface{}{result}
 }
 
-<% if version == 'beta' -%>
 func flattenManagedPrometheusConfig(c *container.ManagedPrometheusConfig) []map[string]interface{} {
 	return []map[string]interface{}{
 		{
@@ -4263,7 +4255,6 @@ func flattenManagedPrometheusConfig(c *container.ManagedPrometheusConfig) []map[
 		},
 	}
 }
-<% end -%>
 
 func resourceContainerClusterStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)

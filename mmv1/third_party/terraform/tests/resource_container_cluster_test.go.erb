@@ -2032,7 +2032,6 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 			{
 				Config: testAccContainerCluster_withMonitoringConfigEnabled(clusterName),
 			},
-<% if version == 'beta' -%>
 			{
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
@@ -2071,7 +2070,6 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
 			{
 				Config: testAccContainerCluster_basic(clusterName),
 			},
@@ -5245,7 +5243,6 @@ resource "google_container_cluster" "primary" {
 `, name)
 }
 
-<% if version == 'beta' -%>
 func testAccContainerCluster_withMonitoringConfigUpdated(name string) string {
        return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
@@ -5289,7 +5286,6 @@ resource "google_container_cluster" "primary" {
 }
 `, name)
 }
-<% end -%>
 
 func testAccContainerCluster_withSoleTenantGroup(name string) string {
 	return fmt.Sprintf(`
