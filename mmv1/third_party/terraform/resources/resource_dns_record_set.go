@@ -3,10 +3,8 @@ package google
 import (
 	"fmt"
 	"log"
-
-	"strings"
-
 	"net"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/dns/v1"
@@ -14,7 +12,7 @@ import (
 
 func rrdatasDnsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	o, n := d.GetChange("rrdatas")
-	if o == nil || n == nil {
+	if o == nil || n == nil || d.HasChange("routing_policy") {
 		return false
 	}
 
@@ -300,15 +298,11 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("ttl", rrset.Ttl); err != nil {
 		return fmt.Errorf("Error setting ttl: %s", err)
 	}
-	if len(rrset.Rrdatas) > 0 {
-		if err := d.Set("rrdatas", rrset.Rrdatas); err != nil {
-			return fmt.Errorf("Error setting rrdatas: %s", err)
-		}
+	if err := d.Set("rrdatas", rrset.Rrdatas); err != nil {
+		return fmt.Errorf("Error setting rrdatas: %s", err)
 	}
-	if rrset.RoutingPolicy != nil {
-		if err := d.Set("routing_policy", flattenDnsRecordSetRoutingPolicy(rrset.RoutingPolicy)); err != nil {
-			return fmt.Errorf("Error setting routing_policy: %s", err)
-		}
+	if err := d.Set("routing_policy", flattenDnsRecordSetRoutingPolicy(rrset.RoutingPolicy)); err != nil {
+		return fmt.Errorf("Error setting routing_policy: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
