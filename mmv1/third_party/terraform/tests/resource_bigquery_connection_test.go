@@ -1,6 +1,4 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"testing"
@@ -18,9 +16,9 @@ func TestAccBigqueryConnectionConnection_bigqueryConnectionBasic(t *testing.T) {
 	}
 
 	vcrTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		Providers:         testAccProvidersOiCS,
-		CheckDestroy:      testAccCheckBigqueryConnectionConnectionDestroyProducer(t),
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBigqueryConnectionConnectionDestroyProducer(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 		},
@@ -31,7 +29,7 @@ func TestAccBigqueryConnectionConnection_bigqueryConnectionBasic(t *testing.T) {
 			{
 				ImportState:             true,
 				ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"cloud_sql.0.credential.0.password", "cloud_sql.0.credential.0.username"},
+				ImportStateVerifyIgnore: []string{"cloud_sql.0.credential.0.password", "cloud_sql.0.credential.0.username"},
 				ResourceName:            "google_bigquery_connection.connection",
 			},
 			{
@@ -40,7 +38,7 @@ func TestAccBigqueryConnectionConnection_bigqueryConnectionBasic(t *testing.T) {
 			{
 				ImportState:             true,
 				ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"cloud_sql.0.credential.0.password", "cloud_sql.0.credential.0.username"},
+				ImportStateVerifyIgnore: []string{"cloud_sql.0.credential.0.password", "cloud_sql.0.credential.0.username"},
 				ResourceName:            "google_bigquery_connection.connection",
 			},
 		},
@@ -50,7 +48,6 @@ func TestAccBigqueryConnectionConnection_bigqueryConnectionBasic(t *testing.T) {
 func testAccBigqueryConnectionConnection_bigqueryConnectionBasic(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_sql_database_instance" "instance" {
-    provider         = google-beta
     name             = "tf-test-pg-database-instance%{random_suffix}"
     database_version = "POSTGRES_11"
     region           = "us-central1"
@@ -62,7 +59,6 @@ resource "google_sql_database_instance" "instance" {
 }
 
 resource "google_sql_database" "db" {
-    provider = google-beta
     instance = google_sql_database_instance.instance.name
     name     = "db"
 }
@@ -73,14 +69,12 @@ resource "random_password" "pwd" {
 }
 
 resource "google_sql_user" "user" {
-    provider = google-beta
     name = "username"
     instance = google_sql_database_instance.instance.name
     password = random_password.pwd.result
 }
 
 resource "google_bigquery_connection" "connection" {
-    provider      = google-beta
     connection_id = "tf-test-my-connection%{random_suffix}"
     location      = "US"
     friendly_name = "👋"
@@ -101,7 +95,6 @@ resource "google_bigquery_connection" "connection" {
 func testAccBigqueryConnectionConnection_bigqueryConnectionBasicUpdate(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_sql_database_instance" "instance" {
-    provider         = google-beta
     name             = "tf-test-mysql-database-instance%{random_suffix}"
     database_version = "MYSQL_5_6"
     region           = "us-central1"
@@ -148,6 +141,3 @@ resource "google_bigquery_connection" "connection" {
 }
 `, context)
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>

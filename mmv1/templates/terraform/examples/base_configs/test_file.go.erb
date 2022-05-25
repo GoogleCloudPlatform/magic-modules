@@ -3,11 +3,18 @@
 package google
 
 import (
+<% unless object.skip_delete || object.cgc_only -%>
+<%   unless object.custom_code.test_check_destroy -%>
   "fmt"
+<%   end -%>
+  "strings"
+<% end -%>
   "testing"
 
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+<% unless object.skip_delete || object.cgc_only -%>
   "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+<% end -%>
 )
 <%
 
