@@ -116,13 +116,6 @@ func TestGetConfigExtractsEnvVars(t *testing.T) {
 			expected:       "whatever",
 			getConfigValue: getRegionValue,
 		},
-		{
-			name:           "GOOGLE_TERRAFORM_VALIDATOR_USERAGENT_EXTENSION",
-			envKey:         "GOOGLE_TERRAFORM_VALIDATOR_USERAGENT_EXTENSION",
-			envValue:       "whatever",
-			expected:       "config-validator-tf/dev whatever",
-			getConfigValue: getUserAgent,
-		},
 	}
 
 	for _, c := range cases {
@@ -133,7 +126,7 @@ func TestGetConfigExtractsEnvVars(t *testing.T) {
 				t.Fatalf("error setting env var %s=%s: %s", c.envKey, c.envValue, err)
 			}
 
-			cfg, err := GetConfig(ctx, "project", offline)
+			cfg, err := GetConfig(ctx, "project", offline, "")
 			if err != nil {
 				t.Fatalf("error building converter: %s", err)
 			}
@@ -151,6 +144,35 @@ func TestGetConfigExtractsEnvVars(t *testing.T) {
 					t.Fatalf("error unsetting env var %s: %s", c.envKey, err)
 				}
 			}
+		})
+	}
+}
+
+func TestGetConfigUserAgent(t *testing.T) {
+	ctx := context.Background()
+	offline := true
+	cases := []struct {
+		userAgent string
+		expected  string
+	}{
+		{
+			userAgent: "",
+			expected:  "",
+		},
+		{
+			userAgent: "whatever",
+			expected:  "whatever",
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.userAgent, func(t *testing.T) {
+			cfg, err := GetConfig(ctx, "project", offline, c.userAgent)
+			if err != nil {
+				t.Fatalf("error building converter: %s", err)
+			}
+
+			assert.Equal(t, c.expected, getUserAgent(cfg))
 		})
 	}
 }
