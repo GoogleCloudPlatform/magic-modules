@@ -72,9 +72,7 @@ var (
 		"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
 		"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
 		"config.0.private_environment_config.0.cloud_composer_network_ipv4_cidr_block",
-<% unless version == "ga" -%>
 		"config.0.private_environment_config.0.enable_privately_used_public_ips",
-<% end -%>
 		"config.0.private_environment_config.0.cloud_composer_connection_subnetwork",
 	}
 
@@ -249,6 +247,7 @@ func resourceComposerEnvironment() *schema.Resource {
 										ValidateFunc:     validation.IntBetween(8, 110),
 										Description:      `The maximum pods per node in the GKE cluster allocated during environment creation. Lowering this value reduces IP address consumption by the Cloud Composer Kubernetes cluster. This value can only be set during environment creation, and only if the environment is VPC-Native. The range of possible values is 8-110, and the default is 32. Cannot be updated. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-*.*.*.`,
 									},
+<% end -%>
 									"enable_ip_masq_agent": {
 										Type:             schema.TypeBool,
 										Computed:         true,
@@ -256,7 +255,7 @@ func resourceComposerEnvironment() *schema.Resource {
 										ForceNew:         true,
 										Description:      `Deploys 'ip-masq-agent' daemon set in the GKE cluster and defines nonMasqueradeCIDRs equals to pod IP range so IP masquerading is used for all destination addresses, except between pods traffic. See: https://cloud.google.com/kubernetes-engine/docs/how-to/ip-masquerade-agent`,
 									},
-<% end -%>
+
 									"tags": {
 										Type:     schema.TypeSet,
 										Optional: true,
@@ -436,7 +435,6 @@ func resourceComposerEnvironment() *schema.Resource {
 										ForceNew: true,
 										Description: `The CIDR block from which IP range for Cloud Composer Network in tenant project will be reserved. Needs to be disjoint from private_cluster_config.master_ipv4_cidr_block and cloud_sql_ipv4_cidr_block. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
 									},
-<% unless version == "ga" -%>
 									"enable_privately_used_public_ips": {
 										Type:     schema.TypeBool,
 										Optional: true,
@@ -445,7 +443,6 @@ func resourceComposerEnvironment() *schema.Resource {
 										ForceNew: true,
 										Description: `When enabled, IPs from public (non-RFC1918) ranges can be used for ip_allocation_policy.cluster_ipv4_cidr_block and ip_allocation_policy.service_ipv4_cidr_block.`,
 									},
-<% end -%>
 									"cloud_composer_connection_subnetwork": {
 										Type:     schema.TypeString,
 										Optional: true,
@@ -1284,9 +1281,7 @@ func flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg *composer.P
 	transformed["cloud_sql_ipv4_cidr_block"] = envCfg.CloudSqlIpv4CidrBlock
 	transformed["web_server_ipv4_cidr_block"] = envCfg.WebServerIpv4CidrBlock
 	transformed["cloud_composer_network_ipv4_cidr_block"] = envCfg.CloudComposerNetworkIpv4CidrBlock
-<% unless version == "ga" -%>
 	transformed["enable_privately_used_public_ips"] = envCfg.EnablePrivatelyUsedPublicIps
-<% end -%>
 	transformed["cloud_composer_connection_subnetwork"] = envCfg.CloudComposerConnectionSubnetwork
 
 	return []interface{}{transformed}
@@ -1306,8 +1301,8 @@ func flattenComposerEnvironmentConfigNodeConfig(nodeCfg *composer.NodeConfig) in
 	transformed["oauth_scopes"] = flattenComposerEnvironmentConfigNodeConfigOauthScopes(nodeCfg.OauthScopes)
 <% unless version == "ga" -%>
 	transformed["max_pods_per_node"] = nodeCfg.MaxPodsPerNode
-	transformed["enable_ip_masq_agent"] = nodeCfg.EnableIpMasqAgent
 <% end -%>
+	transformed["enable_ip_masq_agent"] = nodeCfg.EnableIpMasqAgent
 	transformed["tags"] = flattenComposerEnvironmentConfigNodeConfigTags(nodeCfg.Tags)
 	transformed["ip_allocation_policy"] = flattenComposerEnvironmentConfigNodeConfigIPAllocationPolicy(nodeCfg.IpAllocationPolicy)
 	return []interface{}{transformed}
@@ -1675,11 +1670,9 @@ func expandComposerEnvironmentConfigPrivateEnvironmentConfig(v interface{}, d *s
 	if v, ok := original["cloud_composer_network_ipv4_cidr_block"]; ok {
 		transformed.CloudComposerNetworkIpv4CidrBlock = v.(string)
 	}
-<% unless version == "ga" -%>
 	if v, ok := original["enable_privately_used_public_ips"]; ok {
 		transformed.EnablePrivatelyUsedPublicIps = v.(bool)
 	}
-<% end -%>
 	if v, ok := original["cloud_composer_connection_subnetwork"]; ok {
 		transformed.CloudComposerConnectionSubnetwork = v.(string)
 	}
@@ -1714,11 +1707,10 @@ func expandComposerEnvironmentConfigNodeConfig(v interface{}, d *schema.Resource
 	if transformedMaxPodsPerNode, ok := original["max_pods_per_node"]; ok {
 		transformed.MaxPodsPerNode = int64(transformedMaxPodsPerNode.(int))
 	}
-
+<% end -%>
 	if transformedEnableIpMasqAgent, ok := original["enable_ip_masq_agent"]; ok {
 		transformed.EnableIpMasqAgent = transformedEnableIpMasqAgent.(bool)
 	}
-<% end -%>
 
 	var nodeConfigZone string
 	if v, ok := original["zone"]; ok {
