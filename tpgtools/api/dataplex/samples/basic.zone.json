@@ -1,5 +1,5 @@
 {
-  "name": "{{zone_name}}",
+  "name": "{{zone}}",
   "displayName": "Zone for DCL",
   "location": "{{region}}",
   "project": "{{project}}",

@@ -24,11 +24,11 @@ updates:
   dependencies:
   - samples/basic.lake.json
 variables:
-- name: lake_name
+- name: lake
   type: resource_name
 - name: project
   type: project
 - name: region
   type: region
-- name: zone_name
+- name: zone
   type: resource_name
