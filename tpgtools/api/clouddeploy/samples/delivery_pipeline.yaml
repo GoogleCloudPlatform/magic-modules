@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 name: delivery_pipeline
-description: tests creating and updating a delivery pipeline
+description: Creates a basic Cloud Deploy delivery pipeline
 type: delivery_pipeline
 versions:
 - ga

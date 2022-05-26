@@ -45,6 +45,21 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       parameters: !ruby/object:Overrides::Terraform::PropertyOverride
         name: memcacheParameters
+      maintenancePolicy.weeklyMaintenanceWindow.startTime.hours: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0,23)'
+      maintenancePolicy.description: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(0, 512)'
+      maintenancePolicy.weeklyMaintenanceWindow.startTime.minutes: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0,59)'
+      maintenancePolicy.weeklyMaintenanceWindow.startTime.seconds: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0,60)'
+      maintenancePolicy.weeklyMaintenanceWindow.startTime.nanos: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0,999999999)'
 
 
 # This is for copying files over
