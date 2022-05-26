@@ -167,7 +167,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           backend_bucket_name: "image-backend-bucket"
           bucket_name: "image-store-bucket"
       - !ruby/object:Provider::Terraform::Examples
-        name: "backend_bucket_cache_key_policy"
+        name: "backend_bucket_query_string_whitelist"
+        primary_resource_id: "image_backend"
+        vars:
+          backend_bucket_name: "image-backend-bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_bucket_include_http_headers"
         primary_resource_id: "image_backend"
         vars:
           backend_bucket_name: "image-backend-bucket"
