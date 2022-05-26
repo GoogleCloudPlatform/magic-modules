@@ -15,12 +15,22 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Processor: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{%name}}"]
+    properties:
+      defaultProcessorVersion: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "documentai_processor"
         primary_resource_id: "processor"
         vars:
           processor_name: "test-processor"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "documentai_processor_with_default"
+        primary_resource_id: "processor"
+        vars:
+          processor_name: "test-processor"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/documentai_processor.go.erb
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

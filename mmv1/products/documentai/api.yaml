@@ -60,15 +60,18 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'displayName'
         required: true
+        input: true
         description: |
           The display name. Must be unique.
       - !ruby/object:Api::Type::String
         name: 'defaultProcessorVersion'
-        output: true
+        update_verb: :POST
+        update_url: '{{name}}:setDefaultProcessorVersion'
         description: |
           The default processor version.
       - !ruby/object:Api::Type::String
         name: 'kmsKeyName'
+        input: true
         description: |
           The KMS key used for encryption/decryption in CMEK scenarios. See https://cloud.google.com/security-key-management.
 
