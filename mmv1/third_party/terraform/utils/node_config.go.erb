@@ -221,7 +221,6 @@ func schemaNodeConfig() *schema.Schema {
 					Description: `Whether the nodes are created as preemptible VM instances.`,
 				},
 
-<% unless version == 'ga' -%>
 				"spot": {
 					Type:        schema.TypeBool,
 					Optional:    true,
@@ -229,7 +228,6 @@ func schemaNodeConfig() *schema.Schema {
 					Default:     false,
 					Description: `Whether the nodes are created as spot VM instances.`,
 				},
-<% end -%>
 
 				"service_account": {
 					Type:     schema.TypeString,
@@ -536,9 +534,9 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 
 	// Preemptible Is Optional+Default, so it always has a value
 	nc.Preemptible = nodeConfig["preemptible"].(bool)
-<% unless version == 'ga' -%>
+
+	// Spot Is Optional+Default, so it always has a value
 	nc.Spot = nodeConfig["spot"].(bool)
-<% end -%>
 
 	if v, ok := nodeConfig["min_cpu_platform"]; ok {
 		nc.MinCpuPlatform = v.(string)
@@ -684,9 +682,7 @@ func flattenNodeConfig(c *container.NodeConfig) []map[string]interface{} {
 		"labels":                   c.Labels,
 		"tags":                     c.Tags,
 		"preemptible":              c.Preemptible,
-<% unless version == 'ga' -%>
 		"spot":                     c.Spot,
-<% end -%>
 		"min_cpu_platform":         c.MinCpuPlatform,
 		"shielded_instance_config": flattenShieldedInstanceConfig(c.ShieldedInstanceConfig),
 		"taint":                    flattenTaints(c.Taints),
