@@ -21,7 +21,7 @@
             },
             "name": "My New Project",
             "number": "{{.Project.Number}}",
-            "org_id": "{{.OrgID}}",
+            "org_id": "12345",
             "project_id": "{{.Provider.project}}",
             "skip_delete": null,
             "timeouts": null
@@ -51,7 +51,7 @@
           },
           "name": "My Project",
           "number": "{{.Project.Number}}",
-          "org_id": "{{.OrgID}}",
+          "org_id": "12345",
           "project_id": "{{.Provider.project}}",
           "skip_delete": null,
           "timeouts": null
@@ -66,7 +66,7 @@
           },
           "name": "My New Project",
           "number": "{{.Project.Number}}",
-          "org_id": "{{.OrgID}}",
+          "org_id": "12345",
           "project_id": "{{.Provider.project}}",
           "skip_delete": null,
           "timeouts": null
@@ -98,7 +98,7 @@
               },
               "name": "My Project",
               "number": "{{.Project.Number}}",
-              "org_id": "{{.OrgID}}",
+              "org_id": "12345",
               "project_id": "{{.Provider.project}}",
               "skip_delete": null,
               "timeouts": null
@@ -122,7 +122,7 @@
               "constant_value": "{{.Project.BillingAccountName}}"
             },
             "org_id": {
-              "constant_value": "organizations/{{.OrgID}}"
+              "constant_value": "organizations/12345"
             },
             "labels": {
               "constant_value": {
