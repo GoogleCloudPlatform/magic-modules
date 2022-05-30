@@ -22,7 +22,7 @@ func TestReadPlannedAssetsCoverage(t *testing.T) {
 		name string
 	}{
 		// read-only, the following tests are not in cli_test or
-		// have unique paramters that separate them
+		// have unique parameters that separate them
 		{name: "example_project_create"},
 		{name: "example_project_update"},
 		{name: "example_project_iam_binding"},
@@ -58,6 +58,13 @@ func TestReadPlannedAssetsCoverage(t *testing.T) {
 			var want []google.Asset
 			if err := json.Unmarshal(payload, &want); err != nil {
 				t.Fatalf("cannot unmarshal JSON into assets: %s", err)
+			}
+			for ix := range want {
+				ancestors, err := ancestryPathToAncestors(want[ix].Ancestry)
+				if err != nil {
+					t.Fatalf("failed to convert to ancestors: %s", err)
+				}
+				want[ix].Ancestors = ancestors
 			}
 
 			planfile := filepath.Join(dir, c.name+".tfplan.json")

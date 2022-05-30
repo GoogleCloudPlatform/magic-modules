@@ -40,6 +40,13 @@ func testConvertCommand(t *testing.T, dir, name string, offline bool, compare co
 	if err := json.Unmarshal(expectedRaw, &expected); err != nil {
 		t.Fatalf("unmarshaling: %v", err)
 	}
+	for ix := range expected {
+		ancestors, err := ancestryPathToAncestors(expected[ix].Ancestry)
+		if err != nil {
+			t.Fatalf("failed to convert to ancestors: %s", err)
+		}
+		expected[ix].Ancestors = ancestors
+	}
 
 	// Get converted assets
 	var actualRaw []byte
