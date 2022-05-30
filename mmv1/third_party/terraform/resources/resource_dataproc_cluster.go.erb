@@ -241,13 +241,25 @@ func resourceDataprocCluster() *schema.Resource {
 										Description:  `The Cloud Storage staging bucket used to stage files, such as Hadoop jars, between client machines and the cluster. Note: If you don't explicitly specify a staging_bucket then GCP will auto create / assign one for you. However, you are not guaranteed an auto generated bucket which is solely dedicated to your cluster; it may be shared with other clusters in the same region/zone also choosing to use the auto generation option.`,
 									},
 
-									"staging_bucket": {
-										Type:         schema.TypeString,
-										Optional:     true,
+									"kubernetes_cluster_config": {
+										Type:         schema.TypeSet,
+										Optional:     false,
 										Computed:     true,
 										AtLeastOneOf: gkeClusterConfigKeys,
 										ForceNew:     true,
-										Description:  `The Cloud Storage staging bucket used to stage files, such as Hadoop jars, between client machines and the cluster. Note: If you don't explicitly specify a staging_bucket then GCP will auto create / assign one for you. However, you are not guaranteed an auto generated bucket which is solely dedicated to your cluster; it may be shared with other clusters in the same region/zone also choosing to use the auto generation option.`,
+										Description:  `The configuration for running the Dataproc cluster on GKE.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"enable_secure_boot": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													Default:      false,
+													AtLeastOneOf: kubernetesClusterConfigKeys,
+													ForceNew:     true,
+													Description:  `A namespace within the Kubernetes cluster to deploy into. If this namespace does not exist, it is created. If it exists, Dataproc verifies that another Dataproc VirtualCluster is not installed into it. If not specified, the name of the Dataproc Cluster is used.`,
+												},
+											}
+										}
 									},
 								}
 							}
