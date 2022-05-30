@@ -25,32 +25,12 @@ var (
 
 	gkeClusterConfigKeys = []string{
 		"cluster_config.0.gke_cluster_config.0.staging_bucket",
-		"cluster_config.0.gke_cluster_config.0.auxiliary_services_config",
 		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config",
-	}
-
-	auxiliaryServicesConfigKeys = []string{
-		"cluster_config.0.gke_cluster_config.0.auxiliary_services_config.0.metastore_config",
-		"cluster_config.0.gke_cluster_config.0.auxiliary_services_config.0.spark_history_server_config",
-	}
-
-	metastoreConfigKeys = []string{
-		"cluster_config.0.gke_cluster_config.0.auxiliary_services_config.0.metastore_config.0.dataproc_metastore_service",
-	}
-
-	sparkHistoryServerConfigKeys = []string{
-		"cluster_config.0.gke_cluster_config.0.auxiliary_services_config.0.spark_history_server_config.0.dataproc_cluster",
 	}
 
 	kubernetesClusterConfigKeys = []string{
 		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.kubernetes_namespace",
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.kubernetes_software_config",
 		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config",
-	}
-
-	kubernetesSoftwareConfigKeys = []string{
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.kubernetes_software_config.0.component_version",
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.kubernetes_software_config.0.properties",
 	}
 
 	gkeClusterConfigKeys = []string{
@@ -62,32 +42,6 @@ var (
 		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool",
 		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.roles",
 		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool_config",
-	}
-
-	gkeNodePoolConfigKeys = []string{
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool_config.0.config",
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool_config.0.locations",
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool_config.0.autoscaling",
-	}
-
-	gkeNodeConfigKeys = []string{
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool_config.0.config.0.machine_type",
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool_config.0.config.0.local_ssd_count",
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool_config.0.config.0.preemptible",
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool_config.0.config.0.accelerators",
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool_config.0.config.0.min_cpu_platform",
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool_config.0.config.0.spot",
-	}
-
-	gkeNodePoolAcceleratorConfigKeys = []string{
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool_config.0.config.0.accelerators.0.accelerator_count",
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool_config.0.config.0.accelerators.0.accelerator_type",
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool_config.0.config.0.accelerators.0.gpu_partition_size",
-	}
-
-	gkeNodePoolAutoscalingConfigKeys = []string{
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool_config.0.autoscaling.0.min_node_count",
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool_config.0.autoscaling.0.max_node_count",
 	}
 
 	gceClusterConfigKeys = []string{
@@ -277,6 +231,15 @@ func resourceDataprocCluster() *schema.Resource {
 							Description:  `Common config settings for resources of Google Kubernetes Engine cluster instances, applicable to all instances in the cluster.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
+
+									"staging_bucket": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: gkeClusterConfigKeys,
+										ForceNew:     true,
+										Description:  `The Cloud Storage staging bucket used to stage files, such as Hadoop jars, between client machines and the cluster. Note: If you don't explicitly specify a staging_bucket then GCP will auto create / assign one for you. However, you are not guaranteed an auto generated bucket which is solely dedicated to your cluster; it may be shared with other clusters in the same region/zone also choosing to use the auto generation option.`,
+									},
 
 									"staging_bucket": {
 										Type:         schema.TypeString,
