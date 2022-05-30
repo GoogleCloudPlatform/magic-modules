@@ -34,9 +34,6 @@ else
     fi
 fi
 
-# Check out the Ansible and Inspec providers
-git submodule update --init
-
 # Download additional ruby code.
 bundle install
 
