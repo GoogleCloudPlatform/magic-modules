@@ -11,7 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Product
+---
+!ruby/object:Api::Product
 name: Dataproc
 versions:
   - !ruby/object:Api::Product::Version
@@ -28,15 +29,15 @@ apis_required:
     url: https://console.cloud.google.com/apis/library/dataproc.googleapis.com
 objects:
   - !ruby/object:Api::Resource
-    name: 'AutoscalingPolicy'
+    name: "AutoscalingPolicy"
     base_url: "projects/{{project}}/locations/{{location}}/autoscalingPolicies"
     self_link: "projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{id}}"
-    collection_url_key: 'policies'
+    collection_url_key: "policies"
     description: |
       Describes an autoscaling policy for Dataproc cluster autoscaler.
     parameters:
       - !ruby/object:Api::Type::String
-        name: 'location'
+        name: "location"
         url_param_only: true
         input: true
         default_value: global
@@ -45,34 +46,34 @@ objects:
           The default value is `global`.
     properties:
       - !ruby/object:Api::Type::String
-        name: 'id'
+        name: "id"
         required: true
         description: |
           The policy id. The id must contain only letters (a-z, A-Z), numbers (0-9), underscores (_),
           and hyphens (-). Cannot begin or end with underscore or hyphen. Must consist of between
           3 and 50 characters.
       - !ruby/object:Api::Type::String
-        name: 'name'
+        name: "name"
         output: true
         description: |
           The "resource name" of the autoscaling policy.
       - !ruby/object:Api::Type::NestedObject
-        name: 'workerConfig'
+        name: "workerConfig"
         description: |
           Describes how the autoscaler will operate for primary workers.
         properties:
           - !ruby/object:Api::Type::Integer
-            name: 'minInstances'
+            name: "minInstances"
             default_value: 2
             description: |
               Minimum number of instances for this group. Bounds: [2, maxInstances]. Defaults to 2.
           - !ruby/object:Api::Type::Integer
-            name: 'maxInstances'
+            name: "maxInstances"
             required: true
             description: |
               Maximum number of instances for this group.
           - !ruby/object:Api::Type::Integer
-            name: 'weight'
+            name: "weight"
             default_value: 1
             description: |
               Weight for the instance group, which is used to determine the fraction of total workers
@@ -90,12 +91,12 @@ objects:
               the cluster will default to zero weight on the unset group. For example if weight is set
               only on primary workers, the cluster will use primary workers only and no secondary workers.
       - !ruby/object:Api::Type::NestedObject
-        name: 'secondaryWorkerConfig'
+        name: "secondaryWorkerConfig"
         description: |
           Describes how the autoscaler will operate for secondary workers.
         properties:
           - !ruby/object:Api::Type::Integer
-            name: 'minInstances'
+            name: "minInstances"
             at_least_one_of:
               - secondary_worker_config.0.min_instances
               - secondary_worker_config.0.max_instances
@@ -104,7 +105,7 @@ objects:
             description: |
               Minimum number of instances for this group. Bounds: [0, maxInstances]. Defaults to 0.
           - !ruby/object:Api::Type::Integer
-            name: 'maxInstances'
+            name: "maxInstances"
             at_least_one_of:
               - secondary_worker_config.0.min_instances
               - secondary_worker_config.0.max_instances
@@ -115,7 +116,7 @@ objects:
               secondary workers. Required for secondary workers if the minimum secondary instances is set.
               Bounds: [minInstances, ). Defaults to 0.
           - !ruby/object:Api::Type::Integer
-            name: 'weight'
+            name: "weight"
             at_least_one_of:
               - secondary_worker_config.0.min_instances
               - secondary_worker_config.0.max_instances
@@ -137,12 +138,12 @@ objects:
               the cluster will default to zero weight on the unset group. For example if weight is set
               only on primary workers, the cluster will use primary workers only and no secondary workers.
       - !ruby/object:Api::Type::NestedObject
-        name: 'basicAlgorithm'
+        name: "basicAlgorithm"
         description: |
           Basic algorithm for autoscaling.
         properties:
           - !ruby/object:Api::Type::String
-            name: 'cooldownPeriod'
+            name: "cooldownPeriod"
             default_value: "120s"
             description: |
               Duration between scaling events. A scaling period starts after the
@@ -150,13 +151,13 @@ objects:
 
               Bounds: [2m, 1d]. Default: 2m.
           - !ruby/object:Api::Type::NestedObject
-            name: 'yarnConfig'
+            name: "yarnConfig"
             required: true
             description: |
               YARN autoscaling configuration.
             properties:
               - !ruby/object:Api::Type::String
-                name: 'gracefulDecommissionTimeout'
+                name: "gracefulDecommissionTimeout"
                 required: true
                 description: |
                   Timeout for YARN graceful decommissioning of Node Managers. Specifies the
@@ -165,7 +166,7 @@ objects:
 
                   Bounds: [0s, 1d].
               - !ruby/object:Api::Type::Double
-                name: 'scaleUpFactor'
+                name: "scaleUpFactor"
                 required: true
                 description: |
                   Fraction of average pending memory in the last cooldown period for which to
@@ -176,7 +177,7 @@ objects:
 
                   Bounds: [0.0, 1.0].
               - !ruby/object:Api::Type::Double
-                name: 'scaleDownFactor'
+                name: "scaleDownFactor"
                 required: true
                 description: |
                   Fraction of average pending memory in the last cooldown period for which to
@@ -187,7 +188,7 @@ objects:
 
                   Bounds: [0.0, 1.0].
               - !ruby/object:Api::Type::Double
-                name: 'scaleUpMinWorkerFraction'
+                name: "scaleUpMinWorkerFraction"
                 default_value: 0.0
                 description: |
                   Minimum scale-up threshold as a fraction of total cluster size before scaling
@@ -197,7 +198,7 @@ objects:
 
                   Bounds: [0.0, 1.0]. Default: 0.0.
               - !ruby/object:Api::Type::Double
-                name: 'scaleDownMinWorkerFraction'
+                name: "scaleDownMinWorkerFraction"
                 default_value: 0.0
                 description: |
                   Minimum scale-down threshold as a fraction of total cluster size before scaling occurs.
@@ -207,62 +208,232 @@ objects:
 
                   Bounds: [0.0, 1.0]. Default: 0.0.
   - !ruby/object:Api::Resource
-    name: 'Cluster'
+    name: "Cluster"
     base_url: "projects/{{project}}/regions/{{region}}/clusters"
     self_link: "projects/{{project}}/regions/{{region}}/clusters/{{clusterName}}"
     description: |
       Describes an autoscaling policy for Dataproc cluster autoscaler.
     parameters:
       - !ruby/object:Api::Type::String
-        name: 'region'
+        name: "region"
         url_param_only: true
         input: true
         description: |
           The region in which the cluster and associated nodes will be created in.
     properties:
       - !ruby/object:Api::Type::String
-        name: 'clusterName'
+        name: "clusterName"
         required: true
         description: |
           The name of the cluster, unique within the project and region.
       - !ruby/object:Api::Type::KeyValuePairs
-        name: 'labels'
+        name: "labels"
         description: |
           Labels to apply to this cluster.  A list of key->value pairs.
       - !ruby/object:Api::Type::NestedObject
-        name: 'config'
+        name: "virtualClusterConfig"
+        description: |
+          The Dataproc cluster config for a cluster that does not directly control the underlying compute resources, 
+          such as a Dataproc-on-GKE cluster.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "stagingBucket"
+            description: |
+              Optional. A Cloud Storage bucket used to stage job dependencies, config files, 
+              and job driver console output.
+          - !ruby/object:Api::Type::NestedObject
+            name: "auxiliaryServicesConfig"
+            description: |
+              Optional. Configuration of auxiliary services used by this cluster.
+            properties:
+              - !ruby/object:Api::Type::NestedObject
+                name: "metastoreConfig"
+                description: |
+                  Optional. The Hive Metastore configuration for this workload.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: "dataprocMetastoreService"
+                    required: true
+                    description: |
+                      Required. Resource name of an existing Dataproc Metastore service.
+              - !ruby/object:Api::Type::NestedObject
+                name: "sparkHistoryServerConfig"
+                description: |
+                  Optional. The Spark History Server configuration for the workload.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: "dataprocCluster"
+                    description: |
+                      Optional. Resource name of an existing Dataproc Cluster 
+                      to act as a Spark History Server for the workload.
+          - !ruby/object:Api::Type::NestedObject
+            name: "kubernetesClusterConfig"
+            required: true
+            description: |
+              Required. The configuration for running the Dataproc cluster on Kubernetes.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: "kubernetesNamespace"
+                description: |
+                  Optional. A namespace within the Kubernetes cluster to deploy into.
+              - !ruby/object:Api::Type::NestedObject
+                name: "kubernetesSoftwareConfig"
+                description: |
+                  Optional. The software configuration for this Dataproc cluster running on Kubernetes.
+                properties:
+                  - !ruby/object:Api::Type::KeyValuePairs
+                    name: "componentVersion"
+                    description: |
+                      The components that should be installed in this Dataproc cluster. 
+                      The key must be a string from the KubernetesComponent enumeration. 
+                      The value is the version of the software to be installed. 
+                      At least one entry must be specified.
+                  - !ruby/object:Api::Type::KeyValuePairs
+                    name: "properties"
+                    description: |
+                      The properties to set on daemon config files.
+                      Property keys are specified in prefix:property format, 
+                      for example spark:spark.kubernetes.container.image. 
+                      The following are supported prefixes and their mappings:
+                        - spark: spark-defaults.conf
+              - !ruby/object:Api::Type::NestedObject
+                name: "gkeClusterConfig"
+                required: true
+                description: |
+                  Required. The configuration for running the Dataproc cluster on GKE.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: "kubernetesNamespace"
+                    description: |
+                      Optional. A target GKE cluster to deploy to. 
+                      It must be in the same project and region as the Dataproc cluster 
+                      (the GKE cluster can be zonal or regional)
+                  - !ruby/object:Api::Type::Array
+                    name: "nodePoolTarget"
+                    item_type: Api::Type::NestedObject
+                    description: |
+                      Optional. GKE node pools where workloads will be scheduled. 
+                      At least one node pool must be assigned the DEFAULT GkeNodePoolTarget.Role.
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: "nodePool"
+                        required: true
+                        description: |
+                          Required. The target GKE node pool.
+                      - !ruby/object:Api::Type::Array
+                        name: "nodePool"
+                        required: true
+                        item_type: Api::Type::Enum
+                        description: |
+                          Required. The roles associated with the GKE node pool.
+                        values:
+                          - :ROLE_UNSPECIFIED
+                          - :DEFAULT
+                          - :CONTROLLER
+                          - :SPARK_DRIVER
+                          - :SPARK_EXECUTOR
+                        default_value: :DEFAULT
+                  - !ruby/object:Api::Type::NestedObject
+                    name: "nodePoolConfig"
+                    input: true
+                    description: |
+                      Input only. The configuration for the GKE node pool.
+                    properties:
+                      - !ruby/object:Api::Type::NestedObject
+                        name: "config"
+                        description: |
+                          Optional. The node pool configuration.
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: "machineType"
+                            description: |
+                              Optional. The name of a Compute Engine machine type.
+                          - !ruby/object:Api::Type::Integer
+                            name: "localSsdCount"
+                            description: |
+                              Optional. The number of local SSD disks to attach to the node, which is limited by the maximum number of disks allowable per zone (see Adding Local SSDs).
+                          - !ruby/object:Api::Type::Boolean
+                            name: "preemptible"
+                            description: |
+                              Optional. Whether the nodes are created as preemptible VM instances.
+                          - !ruby/object:Api::Type::Array
+                            name: "accelerators"
+                            item_type: Api::Type::NestedObject
+                            description: |
+                              Optional. A list of hardware accelerators to attach to each node.
+                            properties:
+                              - !ruby/object:Api::Type::String
+                                name: "acceleratorCount"
+                                description: |
+                                  Int64 format. The number of accelerator cards exposed to an instance.
+                              - !ruby/object:Api::Type::String
+                                name: "acceleratorType"
+                                description: |
+                                  The accelerator type resource namename (see GPUs on Compute Engine).
+                              - !ruby/object:Api::Type::String
+                                name: "gpuPartitionSize"
+                                description: |
+                                  Size of partitions to create on the GPU. Valid values are described in the NVIDIA mig user guide.
+                          - !ruby/object:Api::Type::String
+                            name: "minCpuPlatform"
+                            description: |
+                              Optional. Minimum CPU platform to be used by this instance.
+                          - !ruby/object:Api::Type::Boolean
+                            name: "spot"
+                            description: |
+                              Optional. Spot flag for enabling Spot VM, which is a rebrand of the existing preemptible flag.
+                      - !ruby/object:Api::Type::Array
+                        name: "locations"
+                        item_type: Api::Type::String
+                        description: |
+                          Optional. The list of Compute Engine zones where node pool nodes associated with a Dataproc on GKE virtual cluster will be located.
+                      - !ruby/object:Api::Type::NestedObject
+                        name: "autoscaling"
+                        description: |
+                          Optional. The autoscaler configuration for this node pool. The autoscaler is enabled only when a valid configuration is present.
+                        properties:
+                          - !ruby/object:Api::Type::Integer
+                            name: "minNodeCount"
+                            description: |
+                              The minimum number of nodes in the node pool. Must be >= 0 and <= maxNodeCount.
+                          - !ruby/object:Api::Type::Integer
+                            name: "maxNodeCount"
+                            description: |
+                              The maximum number of nodes in the node pool. Must be >= minNodeCount, and must be > 0.
+      - !ruby/object:Api::Type::NestedObject
+        name: "config"
         description: |
           Configuration for the cluster
         properties:
           - !ruby/object:Api::Type::String
-            name: 'configBucket'
+            name: "configBucket"
             description: |
               The Cloud Storage staging bucket used to stage files, such as Hadoop jars,
               between client machines and the cluster.
           - !ruby/object:Api::Type::NestedObject
-            name: 'gceClusterConfig'
+            name: "gceClusterConfig"
             description: |
               Common config settings for resources of Google Compute Engine cluster instances,
               applicable to all instances in the cluster.
             properties:
               - !ruby/object:Api::Type::String
-                name: 'zoneUri'
+                name: "zoneUri"
                 description: |
                   The zone where the Compute Engine cluster will be located
               - !ruby/object:Api::Type::String
-                name: 'networkUri'
+                name: "networkUri"
                 description: |
                   The Compute Engine network to be used for machine communications
               - !ruby/object:Api::Type::String
-                name: 'subnetworkUri'
+                name: "subnetworkUri"
                 description: |
                   The Compute Engine subnetwork to be used for machine communications
               - !ruby/object:Api::Type::Boolean
-                name: 'internalIpOnly'
+                name: "internalIpOnly"
                 description: |
                   If true, all instances int he cluster will only have internal IP addresses
               - !ruby/object:Api::Type::Array
-                name: 'serviceAccountScopes'
+                name: "serviceAccountScopes"
                 item_type: Api::Type::String
                 description: |
                   The URIs of service account scopes to be included in Compute Engine instances
@@ -274,80 +445,80 @@ objects:
 
                   https://www.googleapis.com/auth/logging.write
               - !ruby/object:Api::Type::Array
-                name: 'tags'
+                name: "tags"
                 item_type: Api::Type::String
                 description: |
                   The Compute Engine tags to add to all instances
               - !ruby/object:Api::Type::KeyValuePairs
-                name: 'metadata'
+                name: "metadata"
                 description: |
                   The map of metadata entries to add to all instances
           - !ruby/object:Api::Type::NestedObject
-            name: 'masterConfig'
+            name: "masterConfig"
             description: |
               The config settings for Compute Engine resources in an instance group, such as a
               master or worker group.
             properties:
               - !ruby/object:Api::Type::Integer
-                name: 'numInstances'
+                name: "numInstances"
                 description: |
                   The number of VM instances in the instance group. For master instance groups,
                   must be set to 1.
               - !ruby/object:Api::Type::Array
-                name: 'instanceNames'
+                name: "instanceNames"
                 output: true
                 item_type: Api::Type::String
                 description: |
                   The list of instance names.
               - !ruby/object:Api::Type::String
-                name: 'imageUri'
+                name: "imageUri"
                 description: |
                   The Compute Engine image resource used for cluster instances.
               - !ruby/object:Api::Type::String
-                name: 'machineTypeUri'
+                name: "machineTypeUri"
                 description: |
                   The Compute Engine machine type used for cluster instances
               - !ruby/object:Api::Type::NestedObject
-                name: 'diskConfig'
+                name: "diskConfig"
                 description: |
                   Disk option config settings
                 properties:
                   - !ruby/object:Api::Type::String
-                    name: 'bootDiskType'
+                    name: "bootDiskType"
                     description: |
                       Type of the boot disk. Valid values are "pd-ssd" or "pd-standard"
                   - !ruby/object:Api::Type::Integer
-                    name: 'bootDiskSizeGb'
+                    name: "bootDiskSizeGb"
                     description: |
                       Size in GB of the boot disk.
                   - !ruby/object:Api::Type::Integer
-                    name: 'numLocalSsds'
+                    name: "numLocalSsds"
                     description: |
                       Number of attached SSDs, from 0 to 4.
               - !ruby/object:Api::Type::Boolean
-                name: 'isPreemptible'
+                name: "isPreemptible"
                 output: true
                 description: |
                   Specifies if this instance group contains preemptible instances.
               - !ruby/object:Api::Type::Enum
-                name: 'preemptibility'
+                name: "preemptibility"
                 description: |
                   Specifies the preemptibility of the instance group.
                   The default value for master and worker groups is NON_PREEMPTIBLE. This default cannot be changed.
                   The default value for secondary instances is PREEMPTIBLE.
                 values:
-                - :PREEMPTIBILITY_UNSPECIFIED
-                - :NON_PREEMPTIBLE
-                - :PREEMPTIBLE
+                  - :PREEMPTIBILITY_UNSPECIFIED
+                  - :NON_PREEMPTIBLE
+                  - :PREEMPTIBLE
               - !ruby/object:Api::Type::NestedObject
-                name: 'managedGroupConfig'
+                name: "managedGroupConfig"
                 output: true
                 description: |
                   The config for Compute Engine Instance Group Manager that manages this group.
                   This is only used for preemptible instance groups.
                 properties:
                   - !ruby/object:Api::Type::String
-                    name: 'instanceTemplateName'
+                    name: "instanceTemplateName"
                     description: |
                       The name of the Instance Template used for the Managed Instance Group.
                   - !ruby/object:Api::Type::String
@@ -355,71 +526,71 @@ objects:
                     description: |
                       The name of the Instance Group Manager for this group
           - !ruby/object:Api::Type::NestedObject
-            name: 'workerConfig'
+            name: "workerConfig"
             description: |
               The config settings for Compute Engine resources in an instance group, such as a
               master or worker group.
             properties:
               - !ruby/object:Api::Type::Integer
-                name: 'numInstances'
+                name: "numInstances"
                 description: |
                   The number of VM instances in the instance group. For master instance groups,
                   must be set to 1.
               - !ruby/object:Api::Type::Array
-                name: 'instanceNames'
+                name: "instanceNames"
                 output: true
                 item_type: Api::Type::String
                 description: |
                   The list of instance names.
               - !ruby/object:Api::Type::String
-                name: 'imageUri'
+                name: "imageUri"
                 description: |
                   The Compute Engine image resource used for cluster instances.
               - !ruby/object:Api::Type::String
-                name: 'machineTypeUri'
+                name: "machineTypeUri"
                 description: |
                   The Compute Engine machine type used for cluster instances
               - !ruby/object:Api::Type::NestedObject
-                name: 'diskConfig'
+                name: "diskConfig"
                 description: |
                   Disk option config settings
                 properties:
                   - !ruby/object:Api::Type::String
-                    name: 'bootDiskType'
+                    name: "bootDiskType"
                     description: |
                       Type of the boot disk. Valid values are "pd-ssd" or "pd-standard"
                   - !ruby/object:Api::Type::Integer
-                    name: 'bootDiskSizeGb'
+                    name: "bootDiskSizeGb"
                     description: |
                       Size in GB of the boot disk.
                   - !ruby/object:Api::Type::Integer
-                    name: 'numLocalSsds'
+                    name: "numLocalSsds"
                     description: |
                       Number of attached SSDs, from 0 to 4.
               - !ruby/object:Api::Type::Boolean
-                name: 'isPreemptible'
+                name: "isPreemptible"
                 output: true
                 description: |
                   Specifies if this instance group contains preemptible instances.
               - !ruby/object:Api::Type::Enum
-                name: 'preemptibility'
+                name: "preemptibility"
                 description: |
                   Specifies the preemptibility of the instance group.
                   The default value for master and worker groups is NON_PREEMPTIBLE. This default cannot be changed.
                   The default value for secondary instances is PREEMPTIBLE.
                 values:
-                - :PREEMPTIBILITY_UNSPECIFIED
-                - :NON_PREEMPTIBLE
-                - :PREEMPTIBLE
+                  - :PREEMPTIBILITY_UNSPECIFIED
+                  - :NON_PREEMPTIBLE
+                  - :PREEMPTIBLE
               - !ruby/object:Api::Type::NestedObject
-                name: 'managedGroupConfig'
+                name: "managedGroupConfig"
                 output: true
                 description: |
                   The config for Compute Engine Instance Group Manager that manages this group.
                   This is only used for preemptible instance groups.
                 properties:
                   - !ruby/object:Api::Type::String
-                    name: 'instanceTemplateName'
+                    name: "instanceTemplateName"
                     description: |
                       The name of the Instance Template used for the Managed Instance Group.
                   - !ruby/object:Api::Type::String
@@ -427,71 +598,71 @@ objects:
                     description: |
                       The name of the Instance Group Manager for this group
           - !ruby/object:Api::Type::NestedObject
-            name: 'secondaryWorkerConfig'
+            name: "secondaryWorkerConfig"
             description: |
               The config settings for Compute Engine resources in an instance group, such as a
               master or worker group.
             properties:
               - !ruby/object:Api::Type::Integer
-                name: 'numInstances'
+                name: "numInstances"
                 description: |
                   The number of VM instances in the instance group. For master instance groups,
                   must be set to 1.
               - !ruby/object:Api::Type::Array
-                name: 'instanceNames'
+                name: "instanceNames"
                 output: true
                 item_type: Api::Type::String
                 description: |
                   The list of instance names.
               - !ruby/object:Api::Type::String
-                name: 'imageUri'
+                name: "imageUri"
                 description: |
                   The Compute Engine image resource used for cluster instances.
               - !ruby/object:Api::Type::String
-                name: 'machineTypeUri'
+                name: "machineTypeUri"
                 description: |
                   The Compute Engine machine type used for cluster instances
               - !ruby/object:Api::Type::NestedObject
-                name: 'diskConfig'
+                name: "diskConfig"
                 description: |
                   Disk option config settings
                 properties:
                   - !ruby/object:Api::Type::String
-                    name: 'bootDiskType'
+                    name: "bootDiskType"
                     description: |
                       Type of the boot disk. Valid values are "pd-ssd" or "pd-standard"
                   - !ruby/object:Api::Type::Integer
-                    name: 'bootDiskSizeGb'
+                    name: "bootDiskSizeGb"
                     description: |
                       Size in GB of the boot disk.
                   - !ruby/object:Api::Type::Integer
-                    name: 'numLocalSsds'
+                    name: "numLocalSsds"
                     description: |
                       Number of attached SSDs, from 0 to 4.
               - !ruby/object:Api::Type::Boolean
-                name: 'isPreemptible'
+                name: "isPreemptible"
                 output: true
                 description: |
                   Specifies if this instance group contains preemptible instances.
               - !ruby/object:Api::Type::Enum
-                name: 'preemptibility'
+                name: "preemptibility"
                 description: |
                   Specifies the preemptibility of the instance group.
                   The default value for master and worker groups is NON_PREEMPTIBLE. This default cannot be changed.
                   The default value for secondary instances is PREEMPTIBLE.
                 values:
-                - :PREEMPTIBILITY_UNSPECIFIED
-                - :NON_PREEMPTIBLE
-                - :PREEMPTIBLE
+                  - :PREEMPTIBILITY_UNSPECIFIED
+                  - :NON_PREEMPTIBLE
+                  - :PREEMPTIBLE
               - !ruby/object:Api::Type::NestedObject
-                name: 'managedGroupConfig'
+                name: "managedGroupConfig"
                 output: true
                 description: |
                   The config for Compute Engine Instance Group Manager that manages this group.
                   This is only used for preemptible instance groups.
                 properties:
                   - !ruby/object:Api::Type::String
-                    name: 'instanceTemplateName'
+                    name: "instanceTemplateName"
                     description: |
                       The name of the Instance Template used for the Managed Instance Group.
                   - !ruby/object:Api::Type::String
@@ -499,119 +670,119 @@ objects:
                     description: |
                       The name of the Instance Group Manager for this group
           - !ruby/object:Api::Type::NestedObject
-            name: 'softwareConfig'
+            name: "softwareConfig"
             description: |
               Specifies the selection and config of software inside the cluster
             properties:
               - !ruby/object:Api::Type::String
-                name: 'imageVersion'
+                name: "imageVersion"
                 description: |
                   The version of software inside the cluster. It must be one of the supported Cloud Dataproc
                   Versions, such as "1.2" (including a subminor version, such as "1.2.29"), or the "preview"
                   version.
               - !ruby/object:Api::Type::KeyValuePairs
-                name: 'properties'
+                name: "properties"
                 description: |
                   The properties to set on daemon config files.
                   Property keys are specified in the prefix:property format, for example `core:hadoop.tmp.dir`
               - !ruby/object:Api::Type::Enum
-                name: 'optionalComponents'
+                name: "optionalComponents"
                 description: |
                   The set of optional components to activate on the cluster.
 
                   Possible values include: COMPONENT_UNSPECIFIED, ANACONDA, HIVE_WEBHCAT, JUPYTER, ZEPPELIN, HBASE, SOLR, and RANGER
                 values:
-                - :COMPONENT_UNSPECIFIED
-                - :ANACONDA
-                - :HBASE
-                - :RANGER
-                - :SOLR
-                - :HIVE_WEBHCAT
-                - :JUPYTER
-                - :ZEPPELIN
+                  - :COMPONENT_UNSPECIFIED
+                  - :ANACONDA
+                  - :HBASE
+                  - :RANGER
+                  - :SOLR
+                  - :HIVE_WEBHCAT
+                  - :JUPYTER
+                  - :ZEPPELIN
           - !ruby/object:Api::Type::Array
-            name: 'initializationActions'
+            name: "initializationActions"
             description: |
               Specifies an executable to run on a fully configured node and a timeout period for executable completion.
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
-                  name: 'executableFile'
+                  name: "executableFile"
                   description: |
                     Cloud Storage URI of the executable file
                 - !ruby/object:Api::Type::String
-                  name: 'executionTimeout'
+                  name: "executionTimeout"
                   description: |
                     Amount of time executable has to complete
           - !ruby/object:Api::Type::NestedObject
-            name: 'encryptionConfig'
+            name: "encryptionConfig"
             description: |
               Encryption settings for the cluster.
             properties:
               - !ruby/object:Api::Type::String
-                name: 'gcePdKmsKeyName'
+                name: "gcePdKmsKeyName"
                 description: |
                   The Cloud KMS key name to use for PD disk encryption for all instances in the cluster.
           - !ruby/object:Api::Type::NestedObject
-            name: 'securityConfig'
+            name: "securityConfig"
             description: |
               Kerberos config holder.
             properties:
               - !ruby/object:Api::Type::NestedObject
-                name: 'kerberosConfig'
+                name: "kerberosConfig"
                 description: |
                   Kerberos related configuration.
                 properties:
                   - !ruby/object:Api::Type::Boolean
-                    name: 'enableKerberos'
+                    name: "enableKerberos"
                     description: |
                       Flag to indicate whether to Kerberize the cluster.
                   - !ruby/object:Api::Type::String
-                    name: 'rootprincipalPasswordUri'
+                    name: "rootprincipalPasswordUri"
                     description: |
                       The cloud Storage URI of a KMS encrypted file containing the root principal password.
                   - !ruby/object:Api::Type::String
-                    name: 'kmsKeyUri'
+                    name: "kmsKeyUri"
                     description: |
                       The uri of the KMS key used to encrypt various sensitive files.
                   - !ruby/object:Api::Type::String
-                    name: 'keystoreUri'
+                    name: "keystoreUri"
                     description: |
                       The Cloud Storage URI of the keystore file used for SSL encryption.
                   - !ruby/object:Api::Type::String
-                    name: 'truststoreUri'
+                    name: "truststoreUri"
                     description: |
                       The Cloud Storage URI of a KMS encrypted file containing the password to the user provided keystore.
                   - !ruby/object:Api::Type::String
-                    name: 'keyPasswordUri'
+                    name: "keyPasswordUri"
                     description: |
                       The Cloud Storage URI of a KMS encrypted file containing the password to the user provided key.
                   - !ruby/object:Api::Type::String
-                    name: 'truststorePasswordUri'
+                    name: "truststorePasswordUri"
                     description: |
                       The Cloud Storage URI of a KMS encrypted file containing the password to the user provided truststore.
                   - !ruby/object:Api::Type::String
-                    name: 'crossRealmTrustRealm'
+                    name: "crossRealmTrustRealm"
                     description: |
                       The remote realm the Dataproc on-cluster KDC will trust, should the user enable cross realm trust.
                   - !ruby/object:Api::Type::String
-                    name: 'crossRealmTrustAdminServer'
+                    name: "crossRealmTrustAdminServer"
                     description: |
                       The admin server (IP or hostname) for the remote trusted realm in a cross realm trust relationship.
                   - !ruby/object:Api::Type::String
-                    name: 'crossRealmTrustSharedPasswordUri'
+                    name: "crossRealmTrustSharedPasswordUri"
                     description: |
                       The Cloud Storage URI of a KMS encrypted file containing the shared password between the on-cluster
                       Kerberos realm and the remote trusted realm, in a cross realm trust relationship.
                   - !ruby/object:Api::Type::String
-                    name: 'kdcDbKeyUri'
+                    name: "kdcDbKeyUri"
                     description: |
                       The Cloud Storage URI of a KMS encrypted file containing the master key of the KDC database.
                   - !ruby/object:Api::Type::String
-                    name: 'tgtLifetimeHours'
+                    name: "tgtLifetimeHours"
                     description: |
                       The lifetime of the ticket granting ticket, in hours.
                   - !ruby/object:Api::Type::String
-                    name: 'realm'
+                    name: "realm"
                     description: |
                       The name of the on-cluster Kerberos realm.
