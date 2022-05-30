@@ -83,9 +83,9 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 		case "cloudbuild/worker_pool":
 			return "google_cloudbuild_worker_pool", nil
 		case "clouddeploy/delivery_pipeline":
-			return "google_clouddeploy_delivery_pipeline", nil
+			return "google_cloud_deploy_delivery_pipeline", nil
 		case "clouddeploy/target":
-			return "google_clouddeploy_target", nil
+			return "google_cloud_deploy_target", nil
 		case "cloudresourcemanager/folder":
 			return "google_folder", nil
 		case "cloudresourcemanager/project":
@@ -153,9 +153,9 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 	case "cloudbuild/worker_pool":
 		return "google_cloudbuild_worker_pool", nil
 	case "clouddeploy/delivery_pipeline":
-		return "google_clouddeploy_delivery_pipeline", nil
+		return "google_cloud_deploy_delivery_pipeline", nil
 	case "clouddeploy/target":
-		return "google_clouddeploy_target", nil
+		return "google_cloud_deploy_target", nil
 	case "cloudresourcemanager/folder":
 		return "google_folder", nil
 	case "cloudresourcemanager/project":
@@ -247,13 +247,13 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return ClouddeployDeliveryPipelineBetaAsHCL(*r, hasGAEquivalent)
+			return CloudDeployDeliveryPipelineBetaAsHCL(*r, hasGAEquivalent)
 		case "clouddeploy/target":
 			r := &clouddeployBeta.Target{}
 			if err := json.Unmarshal(b, r); err != nil {
 				return "", err
 			}
-			return ClouddeployTargetBetaAsHCL(*r, hasGAEquivalent)
+			return CloudDeployTargetBetaAsHCL(*r, hasGAEquivalent)
 		case "cloudresourcemanager/folder":
 			r := &cloudresourcemanagerBeta.Folder{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -449,13 +449,13 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return ClouddeployDeliveryPipelineAsHCL(*r, hasGAEquivalent)
+		return CloudDeployDeliveryPipelineAsHCL(*r, hasGAEquivalent)
 	case "clouddeploy/target":
 		r := &clouddeploy.Target{}
 		if err := json.Unmarshal(b, r); err != nil {
 			return "", err
 		}
-		return ClouddeployTargetAsHCL(*r, hasGAEquivalent)
+		return CloudDeployTargetAsHCL(*r, hasGAEquivalent)
 	case "cloudresourcemanager/folder":
 		r := &cloudresourcemanager.Folder{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -960,14 +960,14 @@ func convertCloudbuildWorkerPoolBetaWorkerConfigToHCL(r *cloudbuildBeta.WorkerPo
 	return outputConfig + "}"
 }
 
-// ClouddeployDeliveryPipelineBetaAsHCL returns a string representation of the specified resource in HCL.
+// CloudDeployDeliveryPipelineBetaAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func ClouddeployDeliveryPipelineBetaAsHCL(r clouddeployBeta.DeliveryPipeline, hasGAEquivalent bool) (string, error) {
-	outputConfig := "resource \"google_clouddeploy_delivery_pipeline\" \"output\" {\n"
+func CloudDeployDeliveryPipelineBetaAsHCL(r clouddeployBeta.DeliveryPipeline, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_cloud_deploy_delivery_pipeline\" \"output\" {\n"
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
 	}
@@ -1008,7 +1008,7 @@ func ClouddeployDeliveryPipelineBetaAsHCL(r clouddeployBeta.DeliveryPipeline, ha
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
-	if v := convertClouddeployDeliveryPipelineBetaSerialPipelineToHCL(r.SerialPipeline); v != "" {
+	if v := convertCloudDeployDeliveryPipelineBetaSerialPipelineToHCL(r.SerialPipeline); v != "" {
 		outputConfig += fmt.Sprintf("\tserial_pipeline %s\n", v)
 	}
 	formatted, err := formatHCL(outputConfig + "}")
@@ -1022,20 +1022,20 @@ func ClouddeployDeliveryPipelineBetaAsHCL(r clouddeployBeta.DeliveryPipeline, ha
 	return formatted, nil
 }
 
-func convertClouddeployDeliveryPipelineBetaSerialPipelineToHCL(r *clouddeployBeta.DeliveryPipelineSerialPipeline) string {
+func convertCloudDeployDeliveryPipelineBetaSerialPipelineToHCL(r *clouddeployBeta.DeliveryPipelineSerialPipeline) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
 	if r.Stages != nil {
 		for _, v := range r.Stages {
-			outputConfig += fmt.Sprintf("\tstages %s\n", convertClouddeployDeliveryPipelineBetaSerialPipelineStagesToHCL(&v))
+			outputConfig += fmt.Sprintf("\tstages %s\n", convertCloudDeployDeliveryPipelineBetaSerialPipelineStagesToHCL(&v))
 		}
 	}
 	return outputConfig + "}"
 }
 
-func convertClouddeployDeliveryPipelineBetaSerialPipelineStagesToHCL(r *clouddeployBeta.DeliveryPipelineSerialPipelineStages) string {
+func convertCloudDeployDeliveryPipelineBetaSerialPipelineStagesToHCL(r *clouddeployBeta.DeliveryPipelineSerialPipelineStages) string {
 	if r == nil {
 		return ""
 	}
@@ -1053,7 +1053,7 @@ func convertClouddeployDeliveryPipelineBetaSerialPipelineStagesToHCL(r *clouddep
 	return outputConfig + "}"
 }
 
-func convertClouddeployDeliveryPipelineBetaConditionToHCL(r *clouddeployBeta.DeliveryPipelineCondition) string {
+func convertCloudDeployDeliveryPipelineBetaConditionToHCL(r *clouddeployBeta.DeliveryPipelineCondition) string {
 	if r == nil {
 		return ""
 	}
@@ -1061,7 +1061,7 @@ func convertClouddeployDeliveryPipelineBetaConditionToHCL(r *clouddeployBeta.Del
 	return outputConfig + "}"
 }
 
-func convertClouddeployDeliveryPipelineBetaConditionPipelineReadyConditionToHCL(r *clouddeployBeta.DeliveryPipelineConditionPipelineReadyCondition) string {
+func convertCloudDeployDeliveryPipelineBetaConditionPipelineReadyConditionToHCL(r *clouddeployBeta.DeliveryPipelineConditionPipelineReadyCondition) string {
 	if r == nil {
 		return ""
 	}
@@ -1069,7 +1069,7 @@ func convertClouddeployDeliveryPipelineBetaConditionPipelineReadyConditionToHCL(
 	return outputConfig + "}"
 }
 
-func convertClouddeployDeliveryPipelineBetaConditionTargetsPresentConditionToHCL(r *clouddeployBeta.DeliveryPipelineConditionTargetsPresentCondition) string {
+func convertCloudDeployDeliveryPipelineBetaConditionTargetsPresentConditionToHCL(r *clouddeployBeta.DeliveryPipelineConditionTargetsPresentCondition) string {
 	if r == nil {
 		return ""
 	}
@@ -1077,14 +1077,14 @@ func convertClouddeployDeliveryPipelineBetaConditionTargetsPresentConditionToHCL
 	return outputConfig + "}"
 }
 
-// ClouddeployTargetBetaAsHCL returns a string representation of the specified resource in HCL.
+// CloudDeployTargetBetaAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func ClouddeployTargetBetaAsHCL(r clouddeployBeta.Target, hasGAEquivalent bool) (string, error) {
-	outputConfig := "resource \"google_clouddeploy_target\" \"output\" {\n"
+func CloudDeployTargetBetaAsHCL(r clouddeployBeta.Target, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_cloud_deploy_target\" \"output\" {\n"
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
 	}
@@ -1105,7 +1105,7 @@ func ClouddeployTargetBetaAsHCL(r clouddeployBeta.Target, hasGAEquivalent bool) 
 		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Annotations[k])
 	}
 	outputConfig += "}\n"
-	if v := convertClouddeployTargetBetaAnthosClusterToHCL(r.AnthosCluster); v != "" {
+	if v := convertCloudDeployTargetBetaAnthosClusterToHCL(r.AnthosCluster); v != "" {
 		outputConfig += fmt.Sprintf("\tanthos_cluster %s\n", v)
 	}
 	if r.Description != nil {
@@ -1113,10 +1113,10 @@ func ClouddeployTargetBetaAsHCL(r clouddeployBeta.Target, hasGAEquivalent bool) 
 	}
 	if r.ExecutionConfigs != nil {
 		for _, v := range r.ExecutionConfigs {
-			outputConfig += fmt.Sprintf("\texecution_configs %s\n", convertClouddeployTargetBetaExecutionConfigsToHCL(&v))
+			outputConfig += fmt.Sprintf("\texecution_configs %s\n", convertCloudDeployTargetBetaExecutionConfigsToHCL(&v))
 		}
 	}
-	if v := convertClouddeployTargetBetaGkeToHCL(r.Gke); v != "" {
+	if v := convertCloudDeployTargetBetaGkeToHCL(r.Gke); v != "" {
 		outputConfig += fmt.Sprintf("\tgke %s\n", v)
 	}
 	outputConfig += "\tlabels = {"
@@ -1150,7 +1150,7 @@ func ClouddeployTargetBetaAsHCL(r clouddeployBeta.Target, hasGAEquivalent bool) 
 	return formatted, nil
 }
 
-func convertClouddeployTargetBetaAnthosClusterToHCL(r *clouddeployBeta.TargetAnthosCluster) string {
+func convertCloudDeployTargetBetaAnthosClusterToHCL(r *clouddeployBeta.TargetAnthosCluster) string {
 	if r == nil {
 		return ""
 	}
@@ -1161,7 +1161,7 @@ func convertClouddeployTargetBetaAnthosClusterToHCL(r *clouddeployBeta.TargetAnt
 	return outputConfig + "}"
 }
 
-func convertClouddeployTargetBetaExecutionConfigsToHCL(r *clouddeployBeta.TargetExecutionConfigs) string {
+func convertCloudDeployTargetBetaExecutionConfigsToHCL(r *clouddeployBeta.TargetExecutionConfigs) string {
 	if r == nil {
 		return ""
 	}
@@ -1185,7 +1185,7 @@ func convertClouddeployTargetBetaExecutionConfigsToHCL(r *clouddeployBeta.Target
 	return outputConfig + "}"
 }
 
-func convertClouddeployTargetBetaGkeToHCL(r *clouddeployBeta.TargetGke) string {
+func convertCloudDeployTargetBetaGkeToHCL(r *clouddeployBeta.TargetGke) string {
 	if r == nil {
 		return ""
 	}
@@ -2713,8 +2713,17 @@ func DataplexLakeBetaAsHCL(r dataplexBeta.Lake, hasGAEquivalent bool) (string, e
 		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if v := convertDataplexLakeBetaMetastoreToHCL(r.Metastore); v != "" {
@@ -4645,6 +4654,9 @@ func convertGkeHubFeatureMembershipBetaConfigmanagementConfigSyncToHCL(r *gkehub
 	outputConfig := "{\n"
 	if v := convertGkeHubFeatureMembershipBetaConfigmanagementConfigSyncGitToHCL(r.Git); v != "" {
 		outputConfig += fmt.Sprintf("\tgit %s\n", v)
+	}
+	if r.PreventDrift != nil {
+		outputConfig += fmt.Sprintf("\tprevent_drift = %#v\n", *r.PreventDrift)
 	}
 	if r.SourceFormat != nil {
 		outputConfig += fmt.Sprintf("\tsource_format = %#v\n", *r.SourceFormat)
@@ -6732,14 +6744,14 @@ func convertCloudbuildWorkerPoolWorkerConfigToHCL(r *cloudbuild.WorkerPoolWorker
 	return outputConfig + "}"
 }
 
-// ClouddeployDeliveryPipelineAsHCL returns a string representation of the specified resource in HCL.
+// CloudDeployDeliveryPipelineAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func ClouddeployDeliveryPipelineAsHCL(r clouddeploy.DeliveryPipeline, hasGAEquivalent bool) (string, error) {
-	outputConfig := "resource \"google_clouddeploy_delivery_pipeline\" \"output\" {\n"
+func CloudDeployDeliveryPipelineAsHCL(r clouddeploy.DeliveryPipeline, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_cloud_deploy_delivery_pipeline\" \"output\" {\n"
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
 	}
@@ -6780,7 +6792,7 @@ func ClouddeployDeliveryPipelineAsHCL(r clouddeploy.DeliveryPipeline, hasGAEquiv
 	if r.Project != nil {
 		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
 	}
-	if v := convertClouddeployDeliveryPipelineSerialPipelineToHCL(r.SerialPipeline); v != "" {
+	if v := convertCloudDeployDeliveryPipelineSerialPipelineToHCL(r.SerialPipeline); v != "" {
 		outputConfig += fmt.Sprintf("\tserial_pipeline %s\n", v)
 	}
 	formatted, err := formatHCL(outputConfig + "}")
@@ -6794,20 +6806,20 @@ func ClouddeployDeliveryPipelineAsHCL(r clouddeploy.DeliveryPipeline, hasGAEquiv
 	return formatted, nil
 }
 
-func convertClouddeployDeliveryPipelineSerialPipelineToHCL(r *clouddeploy.DeliveryPipelineSerialPipeline) string {
+func convertCloudDeployDeliveryPipelineSerialPipelineToHCL(r *clouddeploy.DeliveryPipelineSerialPipeline) string {
 	if r == nil {
 		return ""
 	}
 	outputConfig := "{\n"
 	if r.Stages != nil {
 		for _, v := range r.Stages {
-			outputConfig += fmt.Sprintf("\tstages %s\n", convertClouddeployDeliveryPipelineSerialPipelineStagesToHCL(&v))
+			outputConfig += fmt.Sprintf("\tstages %s\n", convertCloudDeployDeliveryPipelineSerialPipelineStagesToHCL(&v))
 		}
 	}
 	return outputConfig + "}"
 }
 
-func convertClouddeployDeliveryPipelineSerialPipelineStagesToHCL(r *clouddeploy.DeliveryPipelineSerialPipelineStages) string {
+func convertCloudDeployDeliveryPipelineSerialPipelineStagesToHCL(r *clouddeploy.DeliveryPipelineSerialPipelineStages) string {
 	if r == nil {
 		return ""
 	}
@@ -6825,7 +6837,7 @@ func convertClouddeployDeliveryPipelineSerialPipelineStagesToHCL(r *clouddeploy.
 	return outputConfig + "}"
 }
 
-func convertClouddeployDeliveryPipelineConditionToHCL(r *clouddeploy.DeliveryPipelineCondition) string {
+func convertCloudDeployDeliveryPipelineConditionToHCL(r *clouddeploy.DeliveryPipelineCondition) string {
 	if r == nil {
 		return ""
 	}
@@ -6833,7 +6845,7 @@ func convertClouddeployDeliveryPipelineConditionToHCL(r *clouddeploy.DeliveryPip
 	return outputConfig + "}"
 }
 
-func convertClouddeployDeliveryPipelineConditionPipelineReadyConditionToHCL(r *clouddeploy.DeliveryPipelineConditionPipelineReadyCondition) string {
+func convertCloudDeployDeliveryPipelineConditionPipelineReadyConditionToHCL(r *clouddeploy.DeliveryPipelineConditionPipelineReadyCondition) string {
 	if r == nil {
 		return ""
 	}
@@ -6841,7 +6853,7 @@ func convertClouddeployDeliveryPipelineConditionPipelineReadyConditionToHCL(r *c
 	return outputConfig + "}"
 }
 
-func convertClouddeployDeliveryPipelineConditionTargetsPresentConditionToHCL(r *clouddeploy.DeliveryPipelineConditionTargetsPresentCondition) string {
+func convertCloudDeployDeliveryPipelineConditionTargetsPresentConditionToHCL(r *clouddeploy.DeliveryPipelineConditionTargetsPresentCondition) string {
 	if r == nil {
 		return ""
 	}
@@ -6849,14 +6861,14 @@ func convertClouddeployDeliveryPipelineConditionTargetsPresentConditionToHCL(r *
 	return outputConfig + "}"
 }
 
-// ClouddeployTargetAsHCL returns a string representation of the specified resource in HCL.
+// CloudDeployTargetAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func ClouddeployTargetAsHCL(r clouddeploy.Target, hasGAEquivalent bool) (string, error) {
-	outputConfig := "resource \"google_clouddeploy_target\" \"output\" {\n"
+func CloudDeployTargetAsHCL(r clouddeploy.Target, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"google_cloud_deploy_target\" \"output\" {\n"
 	if r.Location != nil {
 		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
 	}
@@ -6877,7 +6889,7 @@ func ClouddeployTargetAsHCL(r clouddeploy.Target, hasGAEquivalent bool) (string,
 		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Annotations[k])
 	}
 	outputConfig += "}\n"
-	if v := convertClouddeployTargetAnthosClusterToHCL(r.AnthosCluster); v != "" {
+	if v := convertCloudDeployTargetAnthosClusterToHCL(r.AnthosCluster); v != "" {
 		outputConfig += fmt.Sprintf("\tanthos_cluster %s\n", v)
 	}
 	if r.Description != nil {
@@ -6885,10 +6897,10 @@ func ClouddeployTargetAsHCL(r clouddeploy.Target, hasGAEquivalent bool) (string,
 	}
 	if r.ExecutionConfigs != nil {
 		for _, v := range r.ExecutionConfigs {
-			outputConfig += fmt.Sprintf("\texecution_configs %s\n", convertClouddeployTargetExecutionConfigsToHCL(&v))
+			outputConfig += fmt.Sprintf("\texecution_configs %s\n", convertCloudDeployTargetExecutionConfigsToHCL(&v))
 		}
 	}
-	if v := convertClouddeployTargetGkeToHCL(r.Gke); v != "" {
+	if v := convertCloudDeployTargetGkeToHCL(r.Gke); v != "" {
 		outputConfig += fmt.Sprintf("\tgke %s\n", v)
 	}
 	outputConfig += "\tlabels = {"
@@ -6922,7 +6934,7 @@ func ClouddeployTargetAsHCL(r clouddeploy.Target, hasGAEquivalent bool) (string,
 	return formatted, nil
 }
 
-func convertClouddeployTargetAnthosClusterToHCL(r *clouddeploy.TargetAnthosCluster) string {
+func convertCloudDeployTargetAnthosClusterToHCL(r *clouddeploy.TargetAnthosCluster) string {
 	if r == nil {
 		return ""
 	}
@@ -6933,7 +6945,7 @@ func convertClouddeployTargetAnthosClusterToHCL(r *clouddeploy.TargetAnthosClust
 	return outputConfig + "}"
 }
 
-func convertClouddeployTargetExecutionConfigsToHCL(r *clouddeploy.TargetExecutionConfigs) string {
+func convertCloudDeployTargetExecutionConfigsToHCL(r *clouddeploy.TargetExecutionConfigs) string {
 	if r == nil {
 		return ""
 	}
@@ -6957,7 +6969,7 @@ func convertClouddeployTargetExecutionConfigsToHCL(r *clouddeploy.TargetExecutio
 	return outputConfig + "}"
 }
 
-func convertClouddeployTargetGkeToHCL(r *clouddeploy.TargetGke) string {
+func convertCloudDeployTargetGkeToHCL(r *clouddeploy.TargetGke) string {
 	if r == nil {
 		return ""
 	}
@@ -8393,8 +8405,17 @@ func DataplexLakeAsHCL(r dataplex.Lake, hasGAEquivalent bool) (string, error) {
 		outputConfig += fmt.Sprintf("\tdisplay_name = %#v\n", *r.DisplayName)
 	}
 	outputConfig += "\tlabels = {"
-	for k, v := range r.Labels {
-		outputConfig += fmt.Sprintf("%v = %q, ", k, v)
+	keysLabels := []string{}
+	// golang range goes over maps in an arbitrary order- we've gotta order the
+	// keys ourselves to make the output deterministic
+	for k, _ := range r.Labels {
+		keysLabels = append(keysLabels, k)
+	}
+
+	sort.Strings(keysLabels)
+
+	for _, k := range keysLabels {
+		outputConfig += fmt.Sprintf("%v = %q, ", k, r.Labels[k])
 	}
 	outputConfig += "}\n"
 	if v := convertDataplexLakeMetastoreToHCL(r.Metastore); v != "" {
@@ -12002,7 +12023,7 @@ func convertCloudbuildWorkerPoolBetaWorkerConfigList(i interface{}) (out []map[s
 	return out
 }
 
-func convertClouddeployDeliveryPipelineBetaSerialPipeline(i interface{}) map[string]interface{} {
+func convertCloudDeployDeliveryPipelineBetaSerialPipeline(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -12012,18 +12033,18 @@ func convertClouddeployDeliveryPipelineBetaSerialPipeline(i interface{}) map[str
 	}
 }
 
-func convertClouddeployDeliveryPipelineBetaSerialPipelineList(i interface{}) (out []map[string]interface{}) {
+func convertCloudDeployDeliveryPipelineBetaSerialPipelineList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertClouddeployDeliveryPipelineBetaSerialPipeline(v))
+		out = append(out, convertCloudDeployDeliveryPipelineBetaSerialPipeline(v))
 	}
 	return out
 }
 
-func convertClouddeployDeliveryPipelineBetaSerialPipelineStages(i interface{}) map[string]interface{} {
+func convertCloudDeployDeliveryPipelineBetaSerialPipelineStages(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -12034,40 +12055,40 @@ func convertClouddeployDeliveryPipelineBetaSerialPipelineStages(i interface{}) m
 	}
 }
 
-func convertClouddeployDeliveryPipelineBetaSerialPipelineStagesList(i interface{}) (out []map[string]interface{}) {
+func convertCloudDeployDeliveryPipelineBetaSerialPipelineStagesList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertClouddeployDeliveryPipelineBetaSerialPipelineStages(v))
+		out = append(out, convertCloudDeployDeliveryPipelineBetaSerialPipelineStages(v))
 	}
 	return out
 }
 
-func convertClouddeployDeliveryPipelineBetaCondition(i interface{}) map[string]interface{} {
+func convertCloudDeployDeliveryPipelineBetaCondition(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"pipelineReadyCondition":  convertClouddeployDeliveryPipelineBetaConditionPipelineReadyCondition(in["pipeline_ready_condition"]),
-		"targetsPresentCondition": convertClouddeployDeliveryPipelineBetaConditionTargetsPresentCondition(in["targets_present_condition"]),
+		"pipelineReadyCondition":  convertCloudDeployDeliveryPipelineBetaConditionPipelineReadyCondition(in["pipeline_ready_condition"]),
+		"targetsPresentCondition": convertCloudDeployDeliveryPipelineBetaConditionTargetsPresentCondition(in["targets_present_condition"]),
 	}
 }
 
-func convertClouddeployDeliveryPipelineBetaConditionList(i interface{}) (out []map[string]interface{}) {
+func convertCloudDeployDeliveryPipelineBetaConditionList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertClouddeployDeliveryPipelineBetaCondition(v))
+		out = append(out, convertCloudDeployDeliveryPipelineBetaCondition(v))
 	}
 	return out
 }
 
-func convertClouddeployDeliveryPipelineBetaConditionPipelineReadyCondition(i interface{}) map[string]interface{} {
+func convertCloudDeployDeliveryPipelineBetaConditionPipelineReadyCondition(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -12078,18 +12099,18 @@ func convertClouddeployDeliveryPipelineBetaConditionPipelineReadyCondition(i int
 	}
 }
 
-func convertClouddeployDeliveryPipelineBetaConditionPipelineReadyConditionList(i interface{}) (out []map[string]interface{}) {
+func convertCloudDeployDeliveryPipelineBetaConditionPipelineReadyConditionList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertClouddeployDeliveryPipelineBetaConditionPipelineReadyCondition(v))
+		out = append(out, convertCloudDeployDeliveryPipelineBetaConditionPipelineReadyCondition(v))
 	}
 	return out
 }
 
-func convertClouddeployDeliveryPipelineBetaConditionTargetsPresentCondition(i interface{}) map[string]interface{} {
+func convertCloudDeployDeliveryPipelineBetaConditionTargetsPresentCondition(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -12101,18 +12122,18 @@ func convertClouddeployDeliveryPipelineBetaConditionTargetsPresentCondition(i in
 	}
 }
 
-func convertClouddeployDeliveryPipelineBetaConditionTargetsPresentConditionList(i interface{}) (out []map[string]interface{}) {
+func convertCloudDeployDeliveryPipelineBetaConditionTargetsPresentConditionList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertClouddeployDeliveryPipelineBetaConditionTargetsPresentCondition(v))
+		out = append(out, convertCloudDeployDeliveryPipelineBetaConditionTargetsPresentCondition(v))
 	}
 	return out
 }
 
-func convertClouddeployTargetBetaAnthosCluster(i interface{}) map[string]interface{} {
+func convertCloudDeployTargetBetaAnthosCluster(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -12122,18 +12143,18 @@ func convertClouddeployTargetBetaAnthosCluster(i interface{}) map[string]interfa
 	}
 }
 
-func convertClouddeployTargetBetaAnthosClusterList(i interface{}) (out []map[string]interface{}) {
+func convertCloudDeployTargetBetaAnthosClusterList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertClouddeployTargetBetaAnthosCluster(v))
+		out = append(out, convertCloudDeployTargetBetaAnthosCluster(v))
 	}
 	return out
 }
 
-func convertClouddeployTargetBetaExecutionConfigs(i interface{}) map[string]interface{} {
+func convertCloudDeployTargetBetaExecutionConfigs(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -12146,18 +12167,18 @@ func convertClouddeployTargetBetaExecutionConfigs(i interface{}) map[string]inte
 	}
 }
 
-func convertClouddeployTargetBetaExecutionConfigsList(i interface{}) (out []map[string]interface{}) {
+func convertCloudDeployTargetBetaExecutionConfigsList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertClouddeployTargetBetaExecutionConfigs(v))
+		out = append(out, convertCloudDeployTargetBetaExecutionConfigs(v))
 	}
 	return out
 }
 
-func convertClouddeployTargetBetaGke(i interface{}) map[string]interface{} {
+func convertCloudDeployTargetBetaGke(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -12168,13 +12189,13 @@ func convertClouddeployTargetBetaGke(i interface{}) map[string]interface{} {
 	}
 }
 
-func convertClouddeployTargetBetaGkeList(i interface{}) (out []map[string]interface{}) {
+func convertCloudDeployTargetBetaGkeList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertClouddeployTargetBetaGke(v))
+		out = append(out, convertCloudDeployTargetBetaGke(v))
 	}
 	return out
 }
@@ -15045,6 +15066,7 @@ func convertGkeHubFeatureMembershipBetaConfigmanagementConfigSync(i interface{})
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
 		"git":          convertGkeHubFeatureMembershipBetaConfigmanagementConfigSyncGit(in["git"]),
+		"preventDrift": in["prevent_drift"],
 		"sourceFormat": in["source_format"],
 	}
 }
@@ -17031,7 +17053,7 @@ func convertCloudbuildWorkerPoolWorkerConfigList(i interface{}) (out []map[strin
 	return out
 }
 
-func convertClouddeployDeliveryPipelineSerialPipeline(i interface{}) map[string]interface{} {
+func convertCloudDeployDeliveryPipelineSerialPipeline(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -17041,18 +17063,18 @@ func convertClouddeployDeliveryPipelineSerialPipeline(i interface{}) map[string]
 	}
 }
 
-func convertClouddeployDeliveryPipelineSerialPipelineList(i interface{}) (out []map[string]interface{}) {
+func convertCloudDeployDeliveryPipelineSerialPipelineList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertClouddeployDeliveryPipelineSerialPipeline(v))
+		out = append(out, convertCloudDeployDeliveryPipelineSerialPipeline(v))
 	}
 	return out
 }
 
-func convertClouddeployDeliveryPipelineSerialPipelineStages(i interface{}) map[string]interface{} {
+func convertCloudDeployDeliveryPipelineSerialPipelineStages(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -17063,40 +17085,40 @@ func convertClouddeployDeliveryPipelineSerialPipelineStages(i interface{}) map[s
 	}
 }
 
-func convertClouddeployDeliveryPipelineSerialPipelineStagesList(i interface{}) (out []map[string]interface{}) {
+func convertCloudDeployDeliveryPipelineSerialPipelineStagesList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertClouddeployDeliveryPipelineSerialPipelineStages(v))
+		out = append(out, convertCloudDeployDeliveryPipelineSerialPipelineStages(v))
 	}
 	return out
 }
 
-func convertClouddeployDeliveryPipelineCondition(i interface{}) map[string]interface{} {
+func convertCloudDeployDeliveryPipelineCondition(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
 	in := i.(map[string]interface{})
 	return map[string]interface{}{
-		"pipelineReadyCondition":  convertClouddeployDeliveryPipelineConditionPipelineReadyCondition(in["pipeline_ready_condition"]),
-		"targetsPresentCondition": convertClouddeployDeliveryPipelineConditionTargetsPresentCondition(in["targets_present_condition"]),
+		"pipelineReadyCondition":  convertCloudDeployDeliveryPipelineConditionPipelineReadyCondition(in["pipeline_ready_condition"]),
+		"targetsPresentCondition": convertCloudDeployDeliveryPipelineConditionTargetsPresentCondition(in["targets_present_condition"]),
 	}
 }
 
-func convertClouddeployDeliveryPipelineConditionList(i interface{}) (out []map[string]interface{}) {
+func convertCloudDeployDeliveryPipelineConditionList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertClouddeployDeliveryPipelineCondition(v))
+		out = append(out, convertCloudDeployDeliveryPipelineCondition(v))
 	}
 	return out
 }
 
-func convertClouddeployDeliveryPipelineConditionPipelineReadyCondition(i interface{}) map[string]interface{} {
+func convertCloudDeployDeliveryPipelineConditionPipelineReadyCondition(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -17107,18 +17129,18 @@ func convertClouddeployDeliveryPipelineConditionPipelineReadyCondition(i interfa
 	}
 }
 
-func convertClouddeployDeliveryPipelineConditionPipelineReadyConditionList(i interface{}) (out []map[string]interface{}) {
+func convertCloudDeployDeliveryPipelineConditionPipelineReadyConditionList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertClouddeployDeliveryPipelineConditionPipelineReadyCondition(v))
+		out = append(out, convertCloudDeployDeliveryPipelineConditionPipelineReadyCondition(v))
 	}
 	return out
 }
 
-func convertClouddeployDeliveryPipelineConditionTargetsPresentCondition(i interface{}) map[string]interface{} {
+func convertCloudDeployDeliveryPipelineConditionTargetsPresentCondition(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -17130,18 +17152,18 @@ func convertClouddeployDeliveryPipelineConditionTargetsPresentCondition(i interf
 	}
 }
 
-func convertClouddeployDeliveryPipelineConditionTargetsPresentConditionList(i interface{}) (out []map[string]interface{}) {
+func convertCloudDeployDeliveryPipelineConditionTargetsPresentConditionList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertClouddeployDeliveryPipelineConditionTargetsPresentCondition(v))
+		out = append(out, convertCloudDeployDeliveryPipelineConditionTargetsPresentCondition(v))
 	}
 	return out
 }
 
-func convertClouddeployTargetAnthosCluster(i interface{}) map[string]interface{} {
+func convertCloudDeployTargetAnthosCluster(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -17151,18 +17173,18 @@ func convertClouddeployTargetAnthosCluster(i interface{}) map[string]interface{}
 	}
 }
 
-func convertClouddeployTargetAnthosClusterList(i interface{}) (out []map[string]interface{}) {
+func convertCloudDeployTargetAnthosClusterList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertClouddeployTargetAnthosCluster(v))
+		out = append(out, convertCloudDeployTargetAnthosCluster(v))
 	}
 	return out
 }
 
-func convertClouddeployTargetExecutionConfigs(i interface{}) map[string]interface{} {
+func convertCloudDeployTargetExecutionConfigs(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -17175,18 +17197,18 @@ func convertClouddeployTargetExecutionConfigs(i interface{}) map[string]interfac
 	}
 }
 
-func convertClouddeployTargetExecutionConfigsList(i interface{}) (out []map[string]interface{}) {
+func convertCloudDeployTargetExecutionConfigsList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertClouddeployTargetExecutionConfigs(v))
+		out = append(out, convertCloudDeployTargetExecutionConfigs(v))
 	}
 	return out
 }
 
-func convertClouddeployTargetGke(i interface{}) map[string]interface{} {
+func convertCloudDeployTargetGke(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
@@ -17197,13 +17219,13 @@ func convertClouddeployTargetGke(i interface{}) map[string]interface{} {
 	}
 }
 
-func convertClouddeployTargetGkeList(i interface{}) (out []map[string]interface{}) {
+func convertCloudDeployTargetGkeList(i interface{}) (out []map[string]interface{}) {
 	if i == nil {
 		return nil
 	}
 
 	for _, v := range i.([]interface{}) {
-		out = append(out, convertClouddeployTargetGke(v))
+		out = append(out, convertCloudDeployTargetGke(v))
 	}
 	return out
 }
