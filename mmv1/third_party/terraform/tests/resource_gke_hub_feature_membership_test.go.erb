@@ -388,7 +388,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership.membership_id
   configmanagement {
-    version = "1.9.0"
+    version = "1.10.0"
     config_sync {
       git {
         sync_repo = "https://github.com/hashicorp/terraform"
@@ -398,6 +398,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
         sync_rev = "v3.60.0"
         sync_wait_secs = "30"
       }
+      prevent_drift = false
     }
     policy_controller {
       enabled = true
@@ -460,11 +461,12 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership.membership_id
   configmanagement {
-    version = "1.9.0"
+    version = "1.10.0"
     config_sync {
       git {
         sync_repo = "https://github.com/hashicorp/terraform"
       }
+      prevent_drift = false
     }
   }
   provider = google-beta
