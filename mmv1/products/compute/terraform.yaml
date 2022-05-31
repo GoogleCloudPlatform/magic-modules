@@ -236,6 +236,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           backend_service_name: "backend-service"
           http_health_check_name: "health-check"
       - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_include_named_cookies"
+        primary_resource_id: "default"
+        vars:
+          backend_service_name: "backend-service"
+      - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_cache"
         primary_resource_id: "default"
         vars:
