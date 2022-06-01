@@ -1,0 +1,15 @@
+resource "google_vertex_ai_metadata_schema" "primary" {
+  location       = "{{region}}"
+  metadata_store = google_vertex_ai_metadata_store.minimal.name
+  name           = "{{schema}}"
+  schema         = "title: sample.Schema\ntype: object"
+  schema_type    = "ARTIFACT_TYPE"
+  schema_version = "1.0.0"
+  project        = "{{project}}"
+}
+
+resource "google_vertex_ai_metadata_store" "minimal" {
+  location = "{{region}}"
+  name     = "{{store}}"
+  project  = "projects/{{project}}"
+}

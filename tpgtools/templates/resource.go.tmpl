@@ -474,26 +474,27 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 {{- end }}
 
 func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) error {
+{{- if $.HasDelete }}
 	config := meta.(*Config)
 
-{{- range $v := .Properties }}
-	{{- if $v.IdentityGetter }}
+	{{- range $v := .Properties }}
+		{{- if $v.IdentityGetter }}
 	{{$v.Name}}, err := {{$v.IdentityGetter}}
 	if err != nil {
 		return err
 	}
-	{{- end -}}
-{{ end }}
+		{{- end -}}
+	{{ end }}
 
 	obj := &{{$.Package}}.{{$.DCLStructName}}{
-{{- range $v := .Properties }}
-	{{- if ($v.StateGetter) }}
+	{{- range $v := .Properties }}
+		{{- if ($v.StateGetter) }}
 	{{$v.PackageName}}: {{$v.StateGetter}},
-	{{- end -}}
-{{ end }}
+		{{- end -}}
+	{{ end }}
 	}
 
-{{- if $.Mutex }}
+	{{- if $.Mutex }}
 	lockName, err := {{ $.IdFunction }}(d, config, "{{$.Mutex}}")
 	if err != nil {
 		return err
@@ -501,14 +502,14 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 	mutexKV.Lock(lockName)
 	defer mutexKV.Unlock(lockName)
 
-{{ end }}
-{{ if $.PreDeleteFunction }}
+	{{ end }}
+	{{ if $.PreDeleteFunction }}
 	if err := {{$.PreDeleteFunction}}(d, config, obj); err != nil {
 		return fmt.Errorf("error encountered in pre-delete: %v", err)
 	}
-{{ end }}
+	{{ end }}
 
-{{- if $.SkipDeleteFunction }}
+	{{- if $.SkipDeleteFunction }}
 	skip, err := {{$.SkipDeleteFunction}}(config, obj)
 	if err != nil {
 		return fmt.Errorf("error encountered in skip-delete: %v", err)
@@ -516,18 +517,18 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 	if skip {
 		return nil
 	}
-{{- end }}
+	{{- end }}
 
 	log.Printf("[DEBUG] Deleting {{$.DCLTitle}} %q", d.Id())
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-{{- if $.HasProject }}
+	{{- if $.HasProject }}
 	billingProject := project
-{{- else }}
+	{{- else }}
 	billingProject := ""
-{{- end}}
+	{{- end}}
 	// err == nil indicates that the billing_project value was found
 	if bp, err := getBillingProject(d, config); err == nil {
 		billingProject = bp
@@ -548,6 +549,7 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 	if err := client.Delete{{$.DCLTitle}}(context.Background(), obj); err != nil {
 		return fmt.Errorf("Error deleting {{$.DCLTitle}}: %s", err)
 	}
+{{- end }}
 
 	log.Printf("[DEBUG] Finished deleting {{$.DCLTitle}} %q", d.Id())
 	return nil
