@@ -30,6 +30,7 @@ objects:
     create_url: 'projects/{{project}}/locations/{{location}}/processors'
     self_link: '{{name}}'
     base_url: '{{name}}'
+    input: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -63,12 +64,6 @@ objects:
         input: true
         description: |
           The display name. Must be unique.
-      - !ruby/object:Api::Type::String
-        name: 'defaultProcessorVersion'
-        update_verb: :POST
-        update_url: '{{name}}:setDefaultProcessorVersion'
-        description: |
-          The default processor version.
       - !ruby/object:Api::Type::String
         name: 'kmsKeyName'
         input: true
