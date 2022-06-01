@@ -15,9 +15,6 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Processor: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{%name}}"]
-    properties:
-      defaultProcessorVersion: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "documentai_processor"
