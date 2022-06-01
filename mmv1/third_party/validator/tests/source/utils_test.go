@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -30,22 +29,9 @@ func testConvertCommand(t *testing.T, dir, name string, offline bool, compare co
 	}
 
 	// Load expected assets
-	var expectedRaw []byte
-	testfile := filepath.Join(dir, name+".json")
-	expectedRaw, err := ioutil.ReadFile(testfile)
+	expected, err := readExpectedTestFile(filepath.Join(dir, name+".json"))
 	if err != nil {
-		t.Fatalf("Error reading %v: %v", testfile, err)
-	}
-	var expected []google.Asset
-	if err := json.Unmarshal(expectedRaw, &expected); err != nil {
-		t.Fatalf("unmarshaling: %v", err)
-	}
-	for ix := range expected {
-		ancestors, err := ancestryPathToAncestors(expected[ix].Ancestry)
-		if err != nil {
-			t.Fatalf("failed to convert to ancestors: %s", err)
-		}
-		expected[ix].Ancestors = ancestors
+		t.Fatal(err)
 	}
 
 	// Get converted assets

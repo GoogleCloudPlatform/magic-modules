@@ -3,6 +3,7 @@ package test
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -34,6 +35,12 @@ type testData struct {
 	OrgID    string
 	FolderID string
 	Ancestry string
+}
+
+// testAsset is similar to Asset but with AncestryPath.
+type testAsset struct {
+	google.Asset
+	Ancestry string `json:"ancestry_path"`
 }
 
 // init initializes the variables used for testing. As tests rely on
@@ -135,7 +142,6 @@ func normalizeAssets(t *testing.T, assets []google.Asset, offline bool) []google
 		if !offline {
 			// remove the ancestry as the value of that is dependent on project,
 			// and is not important for the test.
-			asset.Ancestry = ""
 			asset.Ancestors = nil
 			// remove the parent as the value of that is dependent on project.
 			if asset.Resource != nil {
@@ -180,4 +186,28 @@ func formatAncestryPath(s string) string {
 		ret = strings.ReplaceAll(ret, r.old, r.new)
 	}
 	return ret
+}
+
+func readExpectedTestFile(f string) ([]google.Asset, error) {
+	payload, err := ioutil.ReadFile(f)
+	if err != nil {
+		return nil, fmt.Errorf("cannot open %s, got: %s", f, err)
+	}
+	var want []testAsset
+	if err := json.Unmarshal(payload, &want); err != nil {
+		return nil, fmt.Errorf("cannot unmarshal JSON into assets: %s", err)
+	}
+	for ix := range want {
+		ancestors, err := ancestryPathToAncestors(want[ix].Ancestry)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert to ancestors: %s", err)
+		}
+		want[ix].Ancestors = ancestors
+	}
+
+	ret := make([]google.Asset, len(want))
+	for ix := range want {
+		ret[ix] = want[ix].Asset
+	}
+	return ret, nil
 }
