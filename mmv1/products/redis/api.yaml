@@ -414,13 +414,13 @@ objects:
           description: |
             Optional. 
             Controls whether Persistence features are enabled. 
-            If not provided, the existing value will be used.
             - DISABLED: Persistence is disabled for the instance, and any existing snapshots are deleted.
             - RDB: RDB based Persistence is enabled.
           values:
             - :DISABLED
             - :RDB
           input: true
+          default_value: :DISABLED
         - !ruby/object:Api::Type::Enum
           min_version: beta
           name: rdbSnapshotPeriod
