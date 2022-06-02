@@ -78,19 +78,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       budgetFilter.creditTypes: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       budgetFilter: !ruby/object:Overrides::Terraform::PropertyOverride
-       #default_from_api: true
-       update_mask_fields:
+        default_from_api: true
+        update_mask_fields:
          - "budgetFilter.projects"
          - "budgetFilter.labels"
          - "budget_filter.calendarPeriod"
-         - "budget_filter.customPeriod"
-       diff_suppress_func: 'emptyOrUnsetBlockDiffSuppress'
+         - "budget_filter.customPeriod"      
       budgetFilter.services: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       budgetFilter.subaccounts: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       budgetFilter.labels: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
+        #default_from_api: true
         custom_expand: 'templates/terraform/custom_expand/billing_budget_budget_filter_labels.erb'
         custom_flatten: "templates/terraform/custom_flatten/billing_budget_budget_filter_labels.erb"
       budgetFilter.projects: !ruby/object:Overrides::Terraform::PropertyOverride

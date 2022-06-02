@@ -178,7 +178,6 @@ objects:
               A CalendarPeriod represents the abstract concept of a recurring time period that has a
               canonical start. Grammatically, "the start of the current CalendarPeriod".
               All calendar times begin at 12 AM US and Canadian Pacific Time (UTC-8).
-           # default_value: :MONTH
             values:
               - :MONTH
               - :QUARTER
@@ -193,7 +192,7 @@ objects:
               - budget_filter.0.subaccounts
               - budget_filter.0.labels
               - budget_filter.0.calendarPeriod
-              - budget_filter.0.customPeriod         
+              - budget_filter.0.customPeriod
             description: |
               Specifies to track usage from any start date (required) to any end date (optional).
               This time period is static, it does not recur.
