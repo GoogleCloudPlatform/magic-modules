@@ -50,7 +50,6 @@ var {{$pkg.BasePathIdentifier.ToTitle}}EndpointEntry = &schema.Schema{
 {{- end}}
 {{end}}
 
-//Add new values to config.go.erb config object declaration
 type DCLConfig struct {
 {{- range $index, $pkg := . }}
 {{- if $pkg.ShouldWriteProductBasePath }}
