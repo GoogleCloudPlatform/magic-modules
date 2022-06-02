@@ -17,7 +17,7 @@ endif
 ifeq ($(ENGINE),mmv1)
   # we specify the product to one that doesn't
   # exist so exclusively build base mmv1 implementation
-	tpgtools_compile = --service does-not-exist
+  tpgtools_compile = --service does-not-exist
 else ifneq ($(PRODUCT),)
   tpgtools_compile = --service $(PRODUCT)
 else
@@ -55,39 +55,39 @@ ifeq ($(FORCE_DCL),)
   FORCE_DCL=latest
 endif
 terraform build:
-	make mmv1
-	make tpgtools
+  make mmv1
+  make tpgtools
 
 mmv1:
-	cd mmv1;\
-		bundle; \
-		bundle exec compiler -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile);
+  cd mmv1;\
+    bundle; \
+    bundle exec compiler -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile);
 
 tpgtools:
   make serialize
-	cd tpgtools;\
-		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
+  cd tpgtools;\
+    go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
 
 validator:
-	cd mmv1;\
-		bundle; \
-		bundle exec compiler -e terraform -f validator -o $(OUTPUT_PATH) $(mmv1_compile);
+  cd mmv1;\
+    bundle; \
+    bundle exec compiler -e terraform -f validator -o $(OUTPUT_PATH) $(mmv1_compile);
 
 serialize:
-	cd tpgtools;\
-		cp -f serialization.go.base serialization.go &&\
-		go run . $(serialize_compile) --mode "serialization" > temp.serial &&\
-		mv -f temp.serial serialization.go
+  cd tpgtools;\
+    cp -f serialization.go.base serialization.go &&\
+    go run . $(serialize_compile) --mode "serialization" > temp.serial &&\
+    mv -f temp.serial serialization.go
 
 upgrade-dcl:
-	cd tpgtools && \
-		go mod edit -dropreplace=github.com/GoogleCloudPlatform/declarative-resource-client-library &&\
-		go mod edit -require=github.com/GoogleCloudPlatform/declarative-resource-client-library@$(FORCE_DCL) &&\
-		go mod tidy;\
-		MOD_LINE=$$(grep declarative-resource-client-library go.mod);\
-		SUM_LINE=$$(grep declarative-resource-client-library go.sum);\
-	cd ../mmv1/third_party/terraform && \
-		sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod.erb; echo "$$SUM_LINE" >> go.sum
+  cd tpgtools && \
+    go mod edit -dropreplace=github.com/GoogleCloudPlatform/declarative-resource-client-library &&\
+    go mod edit -require=github.com/GoogleCloudPlatform/declarative-resource-client-library@$(FORCE_DCL) &&\
+    go mod tidy;\
+    MOD_LINE=$$(grep declarative-resource-client-library go.mod);\
+    SUM_LINE=$$(grep declarative-resource-client-library go.sum);\
+  cd ../mmv1/third_party/terraform && \
+    sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod.erb; echo "$$SUM_LINE" >> go.sum
 
 
 
