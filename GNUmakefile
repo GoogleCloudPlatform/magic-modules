@@ -55,7 +55,6 @@ ifeq ($(FORCE_DCL),)
   FORCE_DCL=latest
 endif
 terraform build:
-	make serialize
 	make mmv1
 	make tpgtools
 
@@ -65,6 +64,7 @@ mmv1:
 		bundle exec compiler -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile);
 
 tpgtools:
+	make serialize
 	cd tpgtools;\
 		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
 
