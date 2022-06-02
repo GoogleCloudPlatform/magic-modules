@@ -63,9 +63,7 @@ var (
 		"config.0.maintenance_window",
 		"config.0.workloads_config",
 		"config.0.environment_size",
-<% unless version == "ga" -%>
 		"config.0.master_authorized_networks_config",
-<% end -%>
 	}
 
 	composerPrivateEnvironmentConfig = []string{
@@ -103,7 +101,6 @@ var (
 		},
 	}
 
-<% unless version == "ga" -%>
 	cidrBlocks = &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"display_name": {
@@ -118,7 +115,6 @@ var (
 			},
 		},
 	}
-<% end -%>
 )
 
 func resourceComposerEnvironment() *schema.Resource {
@@ -700,7 +696,6 @@ func resourceComposerEnvironment() *schema.Resource {
               ValidateFunc: validation.StringInSlice([]string{"ENVIRONMENT_SIZE_SMALL", "ENVIRONMENT_SIZE_MEDIUM", "ENVIRONMENT_SIZE_LARGE"}, false),
               Description:  `The size of the Cloud Composer environment. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
             },
-<% unless version == "ga" -%>
 						"master_authorized_networks_config": {
 							Type:        	schema.TypeList,
 							Optional:    	true,
@@ -723,7 +718,6 @@ func resourceComposerEnvironment() *schema.Resource {
 								},
 							},
 						},
-<% end -%>
 						"airflow_uri": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -1024,7 +1018,6 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
     }
-<% unless version == "ga" -%>
 		if d.HasChange("config.0.master_authorized_networks_config") {
 			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
 			if config != nil {
@@ -1035,7 +1028,6 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
 		}
-<% end -%>
 	}
 
 	if d.HasChange("labels") {
@@ -1161,9 +1153,7 @@ func flattenComposerEnvironmentConfig(envCfg *composer.EnvironmentConfig) interf
 	transformed["maintenance_window"] = flattenComposerEnvironmentConfigMaintenanceWindow(envCfg.MaintenanceWindow)
 	transformed["workloads_config"] = flattenComposerEnvironmentConfigWorkloadsConfig(envCfg.WorkloadsConfig)
 	transformed["environment_size"] = envCfg.EnvironmentSize
-<% unless version == "ga" -%>
 	transformed["master_authorized_networks_config"] = flattenComposerEnvironmentConfigMasterAuthorizedNetworksConfig(envCfg.MasterAuthorizedNetworksConfig)
-<% end -%>
 	return []interface{}{transformed}
 }
 
@@ -1365,7 +1355,6 @@ func flattenComposerEnvironmentConfigSoftwareConfig(softwareCfg *composer.Softwa
 	return []interface{}{transformed}
 }
 
-<% unless version == "ga" -%>
 func flattenComposerEnvironmentConfigMasterAuthorizedNetworksConfig(masterAuthNetsCfg *composer.MasterAuthorizedNetworksConfig) interface{} {
 	if masterAuthNetsCfg == nil {
 		return nil
@@ -1386,7 +1375,6 @@ func flattenComposerEnvironmentConfigMasterAuthorizedNetworksConfig(masterAuthNe
 
 	return []interface{}{masterAuthorizedNetworksConfig}
 }
-<% end -%>
 
 func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, config *Config) (*composer.EnvironmentConfig, error) {
 	l := v.([]interface{})
@@ -1462,13 +1450,11 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
   		return nil, err
   	}
   	transformed.EnvironmentSize = transformedEnvironmentSize
-<% unless version == "ga" -%>
 	transformedMasterAuthorizedNetworksConfig, err := expandComposerEnvironmentConfigMasterAuthorizedNetworksConfig(original["master_authorized_networks_config"], d, config)
 	if err != nil {
 		return nil, err
 	}
 	transformed.MasterAuthorizedNetworksConfig = transformedMasterAuthorizedNetworksConfig
-<% end -%>
 	return transformed, nil
 }
 
@@ -1508,7 +1494,6 @@ func expandComposerEnvironmentConfigWebServerNetworkAccessControl(v interface{},
 	return transformed, nil
 }
 
-<% unless version == "ga" -%>
 func expandComposerEnvironmentConfigMasterAuthorizedNetworksConfig(v interface{}, d *schema.ResourceData, config *Config) (*composer.MasterAuthorizedNetworksConfig, error) {
 	l := v.([]interface{})
 	if len(l) == 0 {
@@ -1536,7 +1521,6 @@ func expandComposerEnvironmentConfigMasterAuthorizedNetworksConfig(v interface{}
 	return transformed, nil
 }
 
-<% end -%>
 
 func expandComposerEnvironmentConfigDatabaseConfig(v interface{}, d *schema.ResourceData, config *Config) (*composer.DatabaseConfig, error) {
 	l := v.([]interface{})
