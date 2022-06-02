@@ -137,7 +137,7 @@ func TestAccStorageTransferJob_posixSink(t *testing.T) {
 	})
 }
 
-func TestAccStorageTransferJob_transfreOptions(t *testing.T) {
+func TestAccStorageTransferJob_transferOptions(t *testing.T) {
 	t.Parallel()
 
 	testDataSourceBucketName := randString(t, 10)
