@@ -2,7 +2,7 @@
   {
     "name": "//run.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/services/cloudrun-to-get-cai",
     "asset_type": "run.googleapis.com/Service",
-    "ancestry_path": "organization/{{.OrgID}}/folder/{{.FolderID}}/project/{{.Provider.project}}",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "resource": {
       "version": "v1",
       "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/run/v1/rest",
