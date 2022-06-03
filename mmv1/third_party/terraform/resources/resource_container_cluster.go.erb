@@ -532,7 +532,7 @@ func resourceContainerCluster() *schema.Resource {
                                                         Type:          schema.TypeBool,
                                                         Default:       false,
                                                         Optional:      true,
-                                                        Description:   "Enable Binary Authorization for this cluster",
+                                                        Description:   "Enable Binary Authorization for this cluster.",
                                                         ConflictsWith: []string{"enable_autopilot", "binary_authorization.0.evaluation_mode"},
                                                 },
                                                 "evaluation_mode": {
