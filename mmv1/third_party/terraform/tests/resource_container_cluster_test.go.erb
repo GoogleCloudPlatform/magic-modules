@@ -4821,7 +4821,7 @@ func testAccContainerCluster_withBinaryAuthorizationEnabledBool(clusterName stri
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_binary_authorization_enabled_bool" {
   name               = "%s"
-  location           = "us-central1-a"
+  location           = "us-central1"
   initial_node_count = 1
 
   binary_authorization {
