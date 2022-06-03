@@ -750,7 +750,7 @@ objects:
           - !ruby/object:Api::Type::Enum
             name: 'channel'
             description: 'Which release channel the cluster is subscribed to.'
-            values:
+            values: 
               - UNSPECIFIED
               - RAPID
               - REGULAR
