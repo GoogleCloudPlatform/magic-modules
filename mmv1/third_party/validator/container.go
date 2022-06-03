@@ -44,38 +44,8 @@ func expandContainerClusterEnableLegacyAbac(v interface{}, d TerraformResourceDa
 	return expandContainerEnabledObject(v, d, config)
 }
 
-func expandContainerClusterBinaryAuthorization(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	l := v.([]interface{})
-	if len(l) == 0 || l[0] == nil {
-		return nil, nil
-	}
-	raw := l[0]
-	original := raw.(map[string]interface{})
-	transformed := make(map[string]interface{})
-
-	transformedEnabled, err := expandContainerClusterBinaryAuthorizationEnabled(original["enabled"], d, config)
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedEnabled); val.IsValid() && !isEmptyValue(val) {
-		transformed["enabled"] = transformedEnabled
-	}
-
-	transformedEvaluationMode, err := expandContainerClusterBinaryAuthorizationEvaluationMode(original["evaluation_mode"], d, config)
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedEvaluationMode); val.IsValid() && !isEmptyValue(val) {
-		transformed["evaluation_mode"] = transformedEvaluationMode
-	}
-
-	return transformed, nil
-}
-
-func expandContainerClusterBinaryAuthorizationEnabled(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	return v, nil
-}
-
-func expandContainerClusterBinaryAuthorizationEvaluationMode(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	return v, nil
+func expandContainerClusterEnableBinaryAuthorization(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return expandContainerEnabledObject(v, d, config)
 }
 
 func expandContainerMaxPodsConstraint(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
@@ -153,10 +123,10 @@ func GetContainerClusterCaiObject(d TerraformResourceData, config *Config) ([]As
 
 func GetContainerClusterApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
 	obj := make(map[string]interface{})
-	binaryAuthorizationProp, err := expandContainerClusterBinaryAuthorization(d.Get("binary_authorization"), d, config)
+	binaryAuthorizationProp, err := expandContainerClusterEnableBinaryAuthorization(d.Get("enable_binary_authorization"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("binary_authorization"); !isEmptyValue(reflect.ValueOf(binaryAuthorizationProp)) && (ok || !reflect.DeepEqual(v, binaryAuthorizationProp)) {
+	} else if v, ok := d.GetOkExists("enable_binary_authorization"); !isEmptyValue(reflect.ValueOf(binaryAuthorizationProp)) && (ok || !reflect.DeepEqual(v, binaryAuthorizationProp)) {
 		obj["binaryAuthorization"] = binaryAuthorizationProp
 	}
 	enableKubernetesAlphaProp, err := expandContainerClusterEnableKubernetesAlpha(d.Get("enable_kubernetes_alpha"), d, config)
