@@ -2165,7 +2165,7 @@ func TestAccContainerCluster_withBinaryAuthorizationEvaluationModeAutopilot(t *t
 				ImportStateVerify:	 true,
 			},
 			{
-				Config: TestAccContainerCluster_withBinaryAuthorizationEvaluationMode(clusterName, true, "DISABLED"),
+				Config: testAccContainerCluster_withBinaryAuthorizationEvaluationMode(clusterName, true, "DISABLED"),
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_binary_authorization_evaluation_mode",
@@ -2187,7 +2187,7 @@ func TestAccContainerCluster_withBinaryAuthorizationEnabledBool(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccContainerCluster_withBinaryAuthorizationEnabledBool(clusterName, true),
+				Config: testAccContainerCluster_withBinaryAuthorizationEnabledBool(clusterName, true),
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_binary_authorization_enabled_bool",
