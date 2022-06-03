@@ -4806,8 +4806,8 @@ func testAccContainerCluster_withBinaryAuthorizationEvaluationMode(clusterName s
 resource "google_container_cluster" "with_binary_authorization_evaluation_mode" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 1
-
+  ip_allocation_policy {
+  }
   enable_autopilot = %v
 
   binary_authorization {
