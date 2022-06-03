@@ -1769,6 +1769,7 @@ objects:
             name: jsonPath
             description: JSONPath within the response output pointing to the expected
               `ContentMatcher::content` to match against.
+            required: true
           - !ruby/object:Api::Type::Enum
             name: jsonMatcher
             description: Options to perform JSONPath content matching.
