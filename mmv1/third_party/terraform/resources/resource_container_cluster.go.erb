@@ -521,11 +521,19 @@ func resourceContainerCluster() *schema.Resource {
 				Description: ` Description of the cluster.`,
 			},
 
+                        "enable_binary_authorization": {
+				Default:     false,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: `Enable Binary Authorization for this cluster. If enabled, all container images will be validated by Google Binary Authorization.`,
+				ConflictsWith: []string{"enable_autopilot", "binary_authorization"},
+			},
                         "binary_authorization": {
                                 Type:         schema.TypeList,
                                 Optional:     true,
                                 MaxItems:     1,
                                 Description:  "Configuration options for the Binary Authorization feature.",
+                                ConflictsWith: []string{"enable_binary_authorization"},
                                 Elem: &schema.Resource{
                                         Schema: map[string]*schema.Schema{
                                                 "enabled": {
@@ -1529,7 +1537,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		PodSecurityPolicyConfig: expandPodSecurityPolicyConfig(d.Get("pod_security_policy_config")),
 <% end -%>
 		Autoscaling:             expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
-		BinaryAuthorization:     expandBinaryAuthorization(d.Get("binary_authorization")),
+		BinaryAuthorization:     expandBinaryAuthorization(d.Get("binary_authorization"), d.Get("enable_binary_authorization").(bool)),
 		Autopilot: &container.Autopilot{
 			Enabled:         d.Get("enable_autopilot").(bool),
 			ForceSendFields: []string{"Enabled"},
@@ -1887,6 +1895,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("cluster_autoscaling", flattenClusterAutoscaling(cluster.Autoscaling)); err != nil {
 		return err
 	}
+	if err := d.Set("enable_binary_authorization", cluster.BinaryAuthorization != nil && cluster.BinaryAuthorization.Enabled); err != nil {
+          return fmt.Errorf("Error setting enable_binary_authorization: %s", err)
+        }
 	if err := d.Set("binary_authorization", flattenBinaryAuthorization(cluster.BinaryAuthorization)); err != nil {
 		return err
 	}
@@ -2113,6 +2124,26 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		log.Printf("[INFO] GKE cluster %s's cluster-wide autoscaling has been updated", d.Id())
+	}
+
+	if d.HasChange("enable_binary_authorization") {
+		enabled := d.Get("enable_binary_authorization").(bool)
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredBinaryAuthorization: &container.BinaryAuthorization{
+					Enabled:         enabled,
+					ForceSendFields: []string{"Enabled"},
+				},
+			},
+		}
+
+		updateF := updateFunc(req, "updating GKE binary authorization")
+		// Call update serially.
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s's binary authorization has been updated to %v", d.Id(), enabled)
 	}
 
         if d.HasChange("binary_authorization") {
@@ -3414,14 +3445,15 @@ func expandNotificationConfig(configured interface{}) *container.NotificationCon
 }
 <% end -%>
 
-func expandBinaryAuthorization(configured interface{}) *container.BinaryAuthorization {
+func expandBinaryAuthorization(configured interface{}, bool legacy_enabled) *container.BinaryAuthorization {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
 	config := l[0].(map[string]interface{})
+        enabled := config["enabled"].(bool) || legacy_enabled
 	return &container.BinaryAuthorization{
-		Enabled:        config["enabled"].(bool),
+		Enabled:        enabled,
                 EvaluationMode: config["evaluation_mode"].(string),
 	}
 }
