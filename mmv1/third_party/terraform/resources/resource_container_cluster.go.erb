@@ -524,20 +524,20 @@ func resourceContainerCluster() *schema.Resource {
                         "binary_authorization": {
                                 Type:         schema.TypeList,
                                 Optional:     true,
-                                AtLeastOneOf: addonsConfigKeys,
                                 MaxItems:     1,
                                 Description:  "Configuration options for the Binary Authorization feature.",
                                 Elem: &schema.Resource{
                                         Schema: map[string]*schema.Schema{
                                                 "enabled": {
-                                                        Default:       false,
                                                         Type:          schema.TypeBool,
+                                                        Default:       false,
                                                         Optional:      true,
                                                         Description:   "Enable Binary Authorization for this cluster",
                                                         ConflictsWith: []string{"enable_autopilot", "binary_authorization.0.evaluation_mode"},
                                                 },
                                                 "evaluation_mode": {
                                                         Type:          schema.TypeString,
+                                                        Default:       false,
                                                         Optional:      true,
                                                         ValidateFunc:  validation.StringInSlice([]string{"DISABLED", "PROJECT_SINGLETON_POLICY_ENFORCE"}, false),
                                                         Description:   "Mode of operation for Binary Authorization policy evaluation.",
