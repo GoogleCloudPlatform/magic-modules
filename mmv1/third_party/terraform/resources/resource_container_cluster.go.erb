@@ -3448,12 +3448,14 @@ func expandNotificationConfig(configured interface{}) *container.NotificationCon
 func expandBinaryAuthorization(configured interface{}, legacy_enabled bool)  *container.BinaryAuthorization {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
-		return nil
+		return &container.BinaryAuthorization{
+			Enabled:         legacy_enabled,
+			ForceSendFields: []string{"Enabled"},
+		},
 	}
 	config := l[0].(map[string]interface{})
-        enabled := config["enabled"].(bool) || legacy_enabled
 	return &container.BinaryAuthorization{
-		Enabled:        enabled,
+		Enabled:        config["enabled"].(bool),
                 EvaluationMode: config["evaluation_mode"].(string),
 	}
 }
