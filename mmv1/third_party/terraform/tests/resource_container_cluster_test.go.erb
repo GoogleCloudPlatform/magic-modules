@@ -4836,6 +4836,7 @@ func testAccContainerCluster_withBinaryAuthorizationEvaluationMode(clusterName s
 resource "google_container_cluster" "with_binary_authorization_evaluation_mode" {
   name               = "%s"
   location           = "us-central1"
+  initial_node_count = 1
   ip_allocation_policy {
   }
   enable_autopilot = %v
@@ -4856,6 +4857,7 @@ resource "google_container_cluster" "with_binary_authorization_enabled_bool" {
 
   binary_authorization {
     enabled = %v
+    evaluation_mode = "EVALUATION_MODE_UNSPECIFIED"
   }
 }
 `, clusterName, enabled)
