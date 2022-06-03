@@ -3445,7 +3445,7 @@ func expandNotificationConfig(configured interface{}) *container.NotificationCon
 }
 <% end -%>
 
-func expandBinaryAuthorization(configured interface{}, bool legacy_enabled) *container.BinaryAuthorization {
+func expandBinaryAuthorization(configured interface{}, legacy_enabled bool)  *container.BinaryAuthorization {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil
