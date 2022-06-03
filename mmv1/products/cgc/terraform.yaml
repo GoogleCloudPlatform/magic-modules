@@ -558,7 +558,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "main"
         primary_resource_id: "topic"
-        primary_resource_type: "google_pubsub_topic"
         vars:
           example_bucket_name: "example-bucket-name"
           your_topic_name: "your_topic_name"
