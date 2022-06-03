@@ -4797,7 +4797,7 @@ resource "google_container_cluster" "shared_vpc_cluster" {
 `, projectName, org, billingId, projectName, org, billingId, suffix, suffix, name)
 }
 
-func testAccContainerCluster_withBinaryAuthorizationEvaluationMode(clusterName string, enabled bool, evaluation_mode string) string {
+func testAccContainerCluster_withBinaryAuthorizationEvaluationMode(clusterName string, autopilot_enabled bool, evaluation_mode string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_binary_authorization_evaluation_mode" {
   name               = "%s"
@@ -4805,9 +4805,12 @@ resource "google_container_cluster" "with_binary_authorization_evaluation_mode" 
   initial_node_count = 1
 
   enable_autopilot = %v
-  binary_authorization_evaluation_mode = "%s"
+
+  binary_authorization {
+    evaluation_mode = "%s"
+  }
 }
-`, clusterName, enabled, evaluation_mode)
+`, clusterName, autopilot_enabled, evaluation_mode)
 }
 
 func testAccContainerCluster_withBinaryAuthorizationEnabledBool(clusterName string, enabled bool) string {
@@ -4817,7 +4820,9 @@ resource "google_container_cluster" "with_binary_authorization_enabled_bool" {
   location           = "us-central1-a"
   initial_node_count = 1
 
-  enable_binary_authorization = %v
+  binary_authorization {
+    enabled = %v
+  }
 }
 `, clusterName, enabled)
 }
