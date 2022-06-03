@@ -22,7 +22,7 @@ func TestReadPlannedAssetsCoverage(t *testing.T) {
 		name string
 	}{
 		// read-only, the following tests are not in cli_test or
-		// have unique paramters that separate them
+		// have unique parameters that separate them
 		{name: "example_project_create"},
 		{name: "example_project_update"},
 		{name: "example_project_iam_binding"},
@@ -51,13 +51,9 @@ func TestReadPlannedAssetsCoverage(t *testing.T) {
 
 			// Unmarshal payload from testfile into `want` variable.
 			f := filepath.Join(dir, c.name+".json")
-			payload, err := ioutil.ReadFile(f)
+			want, err := readExpectedTestFile(f)
 			if err != nil {
-				t.Fatalf("cannot open %s, got: %s", f, err)
-			}
-			var want []google.Asset
-			if err := json.Unmarshal(payload, &want); err != nil {
-				t.Fatalf("cannot unmarshal JSON into assets: %s", err)
+				t.Fatal(err)
 			}
 
 			planfile := filepath.Join(dir, c.name+".tfplan.json")

@@ -503,7 +503,6 @@ func TestAccComposerEnvironment_composerV2PrivateServiceConnect(t *testing.T) {
 	})
 }
 
-<% unless version == "ga" -%>
 func TestAccComposerEnvironment_composerV1MasterAuthNetworks(t *testing.T) {
 	t.Parallel()
 
@@ -637,7 +636,7 @@ func TestAccComposerEnvironment_composerV2MasterAuthNetworksUpdate(t *testing.T)
 		},
 	})
 }
-<% end -%>
+
 // Checks behavior of node config, including dependencies on Compute resources.
 func TestAccComposerEnvironment_withNodeConfig(t *testing.T) {
 	t.Parallel()
@@ -1344,7 +1343,6 @@ resource "google_compute_subnetwork" "test" {
 `, envName, network, subnetwork)
 }
 
-<% unless version == "ga" -%>
 func testAccComposerEnvironment_MasterAuthNetworks(compVersion, airflowVersion, envName, network, subnetwork string) string {
 	return fmt.Sprintf(`
 resource "google_composer_environment" "test" {
@@ -1431,7 +1429,6 @@ resource "google_compute_subnetwork" "test" {
 `, envName, compVersion, airflowVersion, network, subnetwork)
 }
 
-<% end -%>
 
 func testAccComposerEnvironment_update(name, network, subnetwork string) string {
 	return fmt.Sprintf(`
