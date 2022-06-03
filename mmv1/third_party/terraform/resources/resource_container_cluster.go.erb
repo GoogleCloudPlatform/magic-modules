@@ -1896,7 +1896,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 	if err := d.Set("enable_binary_authorization", cluster.BinaryAuthorization != nil && cluster.BinaryAuthorization.Enabled); err != nil {
-          return fmt.Errorf("Error setting enable_binary_authorization: %s", err)
+                return fmt.Errorf("Error setting enable_binary_authorization: %s", err)
         }
 	if err := d.Set("binary_authorization", flattenBinaryAuthorization(cluster.BinaryAuthorization)); err != nil {
 		return err
@@ -2149,7 +2149,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
         if d.HasChange("binary_authorization") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
-				DesiredBinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization")),
+				DesiredBinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization"), false),
 			},
 		}
 
