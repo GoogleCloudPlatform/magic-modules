@@ -53,3 +53,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         sensitive: true
       selfManaged.privateKeyPem: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
+      scope: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'certManagerDefaultScopeDiffSuppress'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/cert_manager.erb

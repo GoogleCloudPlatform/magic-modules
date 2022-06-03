@@ -2,12 +2,8 @@ package google
 
 import (
 	"context"
-	"fmt"
-	"os"
 
 	"github.com/pkg/errors"
-
-	"github.com/GoogleCloudPlatform/terraform-validator/version"
 )
 
 // Return the value of the private userAgent field
@@ -15,10 +11,10 @@ func (c *Config) UserAgent() string {
 	return c.userAgent
 }
 
-func GetConfig(ctx context.Context, project string, offline bool) (*Config, error) {
+func GetConfig(ctx context.Context, project string, offline bool, userAgent string) (*Config, error) {
 	cfg := &Config{
 		Project:   project,
-		userAgent: fmt.Sprintf("config-validator-tf/%s", version.BuildVersion()),
+		userAgent: userAgent,
 	}
 
 	// Search for default credentials
@@ -47,12 +43,6 @@ func GetConfig(ctx context.Context, project string, offline bool) (*Config, erro
 		"GCLOUD_REGION",
 		"CLOUDSDK_COMPUTE_REGION",
 	})
-
-	// opt in extension for adding to the User-Agent header
-	if ext := os.Getenv("GOOGLE_TERRAFORM_VALIDATOR_USERAGENT_EXTENSION"); ext != "" {
-		ua := cfg.userAgent
-		cfg.userAgent = fmt.Sprintf("%s %s", ua, ext)
-	}
 
 	if !offline {
 		ConfigureBasePaths(cfg)

@@ -2,7 +2,7 @@
   {
     "name": "//cloudresourcemanager.googleapis.com/organizations/123456789",
     "asset_type": "cloudresourcemanager.googleapis.com/Organization",
-    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "ancestry_path": "organization/123456789",
     "iam_policy": {
       "bindings": [
         {
