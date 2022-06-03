@@ -13,7 +13,7 @@
           "schema_version": 1,
           "values": {
             "description": null,
-            "enable_binary_authorization": false,
+            "binary_authorization": [],
             "enable_intranode_visibility": null,
             "enable_kubernetes_alpha": false,
             "enable_legacy_abac": false,
@@ -98,7 +98,7 @@
         "before": null,
         "after": {
           "description": null,
-          "enable_binary_authorization": false,
+          "binary_authorization": [],
           "enable_intranode_visibility": null,
           "enable_kubernetes_alpha": false,
           "enable_legacy_abac": false,
