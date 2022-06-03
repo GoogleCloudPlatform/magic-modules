@@ -67,9 +67,6 @@ resource "google_container_cluster" "full_list_default_1" {
     http_load_balancing { disabled = true }
     network_policy_config { disabled = true }
   }
-  binary_authorization {
-    evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
-  }
   default_max_pods_per_node = 42
   description               = "test-description"
   enable_kubernetes_alpha   = true

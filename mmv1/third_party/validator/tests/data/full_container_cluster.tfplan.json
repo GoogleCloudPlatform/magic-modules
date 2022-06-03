@@ -31,11 +31,6 @@
                 ]
               }
             ],
-            "binary_authorization": [
-              {
-	        "evaluation_mode" : "PROJECT_SINGLETON_POLICY_ENFORCE"
-	      }
-	    ],
             "default_max_pods_per_node": 42,
             "description": "test-description",
             "enable_autopilot": null,
@@ -278,11 +273,6 @@
               ]
             }
           ],
-          "binary_authorization": [
-            {
-	      "evaluation_mode" : "PROJECT_SINGLETON_POLICY_ENFORCE"
-	    }
-	  ],
           "default_max_pods_per_node": 42,
           "description": "test-description",
           "enable_autopilot": null,

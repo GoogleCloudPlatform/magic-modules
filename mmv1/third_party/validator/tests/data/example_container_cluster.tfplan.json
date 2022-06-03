@@ -12,7 +12,6 @@
           "provider_name": "registry.terraform.io/hashicorp/google",
           "schema_version": 1,
           "values": {
-            "binary_authorization": [],
             "description": null,
             "enable_intranode_visibility": null,
             "enable_kubernetes_alpha": false,
@@ -97,7 +96,6 @@
         ],
         "before": null,
         "after": {
-          "binary_authorization": [],
           "description": null,
           "enable_intranode_visibility": null,
           "enable_kubernetes_alpha": false,
