@@ -36,7 +36,6 @@ resource "google_container_cluster" "full_list_default_1" {
   # authenticator_groups_config
   # cluster_autoscaling
   # database_encryption
-  # enable_binary_authorization
   # enable_intranode_visibility
   # enable_shielded_nodes
   # enable_tpu
@@ -67,6 +66,9 @@ resource "google_container_cluster" "full_list_default_1" {
     horizontal_pod_autoscaling { disabled = true }
     http_load_balancing { disabled = true }
     network_policy_config { disabled = true }
+  }
+  binary_authorization {
+    evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
   }
   default_max_pods_per_node = 42
   description               = "test-description"
