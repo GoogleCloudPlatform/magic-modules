@@ -129,10 +129,6 @@ The following arguments are supported:
 * `enabled` -
   (Optional)
   Whether binauthz is enabled in this cluster.
-
-* `evaluation_mode` -
-  (Optional)
-  Mode of operation for Binary Authorization policy evaluation.
     
 <a name="nested_config_sync"></a>The `config_sync` block supports:
     
