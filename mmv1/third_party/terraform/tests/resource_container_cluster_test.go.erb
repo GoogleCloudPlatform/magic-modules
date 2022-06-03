@@ -2146,6 +2146,36 @@ func TestAccContainerCluster_sharedVpc(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withBinaryAuthorizationEnabledBool(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:	  func() { testAccPreCheck(t) },
+		Providers:	  testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withBinaryAuthorizationEnabledBool(clusterName, true),
+			},
+			{
+				ResourceName:		 "google_container_cluster.with_binary_authorization_enabled_bool",
+				ImportState:		 true,
+				ImportStateVerify:	 true,
+			},
+			{
+				Config: testAccContainerCluster_withBinaryAuthorizationEnabledBool(clusterName, false),
+			},
+			{
+				ResourceName:		 "google_container_cluster.with_binary_authorization_enabled_bool",
+				ImportState:		 true,
+				ImportStateVerify:	 true,
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withBinaryAuthorizationEvaluationModeAutopilot(t *testing.T) {
 	t.Parallel()
 
@@ -2176,7 +2206,7 @@ func TestAccContainerCluster_withBinaryAuthorizationEvaluationModeAutopilot(t *t
 	})
 }
 
-func TestAccContainerCluster_withBinaryAuthorizationEnabledBool(t *testing.T) {
+func TestAccContainerCluster_withBinaryAuthorizationEvaluationModeClassic(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
@@ -2187,18 +2217,18 @@ func TestAccContainerCluster_withBinaryAuthorizationEnabledBool(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withBinaryAuthorizationEnabledBool(clusterName, true),
+				Config: testAccContainerCluster_withBinaryAuthorizationEvaluationMode(clusterName, false, "PROJECT_SINGLETON_POLICY_ENFORCE"),
 			},
 			{
-				ResourceName:		 "google_container_cluster.with_binary_authorization_enabled_bool",
+				ResourceName:		 "google_container_cluster.with_binary_authorization_evaluation_mode",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
 			{
-				Config: testAccContainerCluster_withBinaryAuthorizationEnabledBool(clusterName, false),
+				Config: testAccContainerCluster_withBinaryAuthorizationEvaluationMode(clusterName, false, "DISABLED"),
 			},
 			{
-				ResourceName:		 "google_container_cluster.with_binary_authorization_enabled_bool",
+				ResourceName:		 "google_container_cluster.with_binary_authorization_evaluation_mode",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
