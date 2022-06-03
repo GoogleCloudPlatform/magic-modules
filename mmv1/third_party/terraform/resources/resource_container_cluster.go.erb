@@ -522,29 +522,30 @@ func resourceContainerCluster() *schema.Resource {
 			},
 
                         "binary_authorization": {
-                          Type: schema.TypeList,
-                          Optional: true,
-                          MaxItems: 1,
-                          Description: "Configuration options for the Binary Authorization feature."
-                          Elem: &schema.Resource{
-                            Schema: map[string]*schema.Schema{
-                              "enabled": {
-                                Default: false,
-                                Type: schema.TypeBool,
-                                Optional: true,
-				Description: `Enable Binary Authorization for this cluster. If enabled, all container images will be validated by Google Binary Authorization.`,
-                                Description: "Enable Binary Authorization for this cluster".
-				ConflictsWith: []string{"enable_autopilot"},
-                              },
-                              "evaluation_mode": {
-                                Type: schema.TypeString,
-                                Optional: true,
-                                ValidateFunc: validation.StringInSlice([]string{"DISABLED", "PROJECT_SINGLETON_POLICY_ENFORCE"}, false),
-                                Description: "Mode of operation for Binary Authorization policy evaluation."
-                                ConflictsWith: []string{"binary_authorization.enabled"},
-                              },
-                            },
-
+                                Type:         schema.TypeList,
+                                Optional:     true,
+                                AtLeastOneOf: addonsConfigKeys,
+                                MaxItems:     1,
+                                Description:  "Configuration options for the Binary Authorization feature.",
+                                Elem: &schema.Resource{
+                                        Schema: map[string]*schema.Schema{
+                                                "enabled": {
+                                                        Default:       false,
+                                                        Type:          schema.TypeBool,
+                                                        Optional:      true,
+                                                        Description:   "Enable Binary Authorization for this cluster",
+                                                        ConflictsWith: []string{"enable_autopilot", "binary_authorization.0.evaluation_mode"},
+                                                },
+                                                "evaluation_mode": {
+                                                        Type:          schema.TypeString,
+                                                        Optional:      true,
+                                                        ValidateFunc:  validation.StringInSlice([]string{"DISABLED", "PROJECT_SINGLETON_POLICY_ENFORCE"}, false),
+                                                        Description:   "Mode of operation for Binary Authorization policy evaluation.",
+                                                        ConflictsWith: []string{"binary_authorization.0.enabled"},
+                                                },
+                                        },
+                                },
+                        },
 
 			"enable_kubernetes_alpha": {
 				Type:        schema.TypeBool,
@@ -1529,11 +1530,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		PodSecurityPolicyConfig: expandPodSecurityPolicyConfig(d.Get("pod_security_policy_config")),
 <% end -%>
 		Autoscaling:             expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
-		BinaryAuthorization: &container.BinaryAuthorization{
-                  Enabled:         d.Get("binary_authorization.0.enabled").(bool),
-                  EvaluationMode:  d.Get("binary_authorization.0.evaluation_mode").(string),
-			ForceSendFields: []string{"Enabled"},
-		},
+		BinaryAuthorization:     expandBinaryAuthorization(d.Get("binary_authorization")),
 		Autopilot: &container.Autopilot{
 			Enabled:         d.Get("enable_autopilot").(bool),
 			ForceSendFields: []string{"Enabled"},
@@ -2119,14 +2116,10 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s's cluster-wide autoscaling has been updated", d.Id())
 	}
 
-	if d.HasChange("binary_authorization.0.enabled") {
-		enabled := d.Get("binary_authorization.0.enabled").(bool)
+        if d.HasChange("binary_authorization") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
-				DesiredBinaryAuthorization: &container.BinaryAuthorization{
-					Enabled:         enabled,
-					ForceSendFields: []string{"Enabled"},
-				},
+				DesiredBinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization")),
 			},
 		}
 
@@ -2136,27 +2129,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			return err
 		}
 
-		log.Printf("[INFO] GKE cluster %s's binary authorization has been updated to %v", d.Id(), enabled)
-	}
-
-	if d.HasChange("binary_authorization.0.evaluation_mode") {
-		evaluation_mode := d.Get("binary_authorization.0.evaluation_mode").(string)
-		req := &container.UpdateClusterRequest{
-			Update: &container.ClusterUpdate{
-				DesiredBinaryAuthorization: &container.BinaryAuthorization{
-					EvaluationMode:         evaluation_mode,
-					ForceSendFields: []string{"EvaluationMode"},
-				},
-			},
-		}
-
-		updateF := updateFunc(req, "updating GKE binary authorization")
-		// Call update serially.
-		if err := lockedCall(lockKey, updateF); err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] GKE cluster %s's binary authorization evaluation mode has been updated to %v", d.Id(), evaluation_mode)
+		log.Printf("[INFO] GKE cluster %s's binary authorization has been updated to %v", d.Id(), req.Update.DesiredBinaryAuthorization)
 	}
 
 	if d.HasChange("enable_shielded_nodes") {
@@ -3442,6 +3415,18 @@ func expandNotificationConfig(configured interface{}) *container.NotificationCon
 }
 <% end -%>
 
+func expandBinaryAuthorization(configured interface{}) *container.BinaryAuthorization {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	config := l[0].(map[string]interface{})
+	return &container.BinaryAuthorization{
+		Enabled:        config["enabled"].(bool),
+                EvaluationMode: config["evaluation_mode"].(string),
+	}
+}
+
 func expandConfidentialNodes(configured interface{}) *container.ConfidentialNodes {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -3748,15 +3733,16 @@ func flattenNotificationConfig(c *container.NotificationConfig) []map[string]int
 }
 <% end -%>
 
-func flattenBinaryAuthorization(c *container.ConfidentialNodes) []map[string]interface{} {
+func flattenBinaryAuthorization(c *container.BinaryAuthorization) []map[string]interface{} {
         if c == nil {
-          return nil
+                return nil
         }
+
         return []map[string]interface{}{
-          {
-            "enabled": c.Enabled,
-            "evaluation_mode": c.EvaluationMode,
-          },
+                {
+                        "enabled":         c.Enabled,
+                        "evaluation_mode": c.EvaluationMode,
+                },
         }
 }
 
