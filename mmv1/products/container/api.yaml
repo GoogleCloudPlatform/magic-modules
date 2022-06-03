@@ -734,6 +734,13 @@ objects:
           - !ruby/object:Api::Type::Boolean
             name: 'enabled'
             description: If enabled, all container images will be validated by Binary Authorization.
+          - !ruby/object:Api::Type::Enum
+            name: 'evaluationMode'
+            description: 'Mode of operation for Binary Authorization policy evaluation.'
+            values:
+              - EVALUATION_MODE_UNSPECIFIED
+              - DISABLED
+              - PROJECT_SINGLETON_POLICY_ENFORCE
       - !ruby/object:Api::Type::NestedObject
         name: 'releaseChannel'
         description: |
@@ -743,7 +750,7 @@ objects:
           - !ruby/object:Api::Type::Enum
             name: 'channel'
             description: 'Which release channel the cluster is subscribed to.'
-            values: 
+            values:
               - UNSPECIFIED
               - RAPID
               - REGULAR
