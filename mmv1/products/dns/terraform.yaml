@@ -62,7 +62,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       dnssecConfig.nonExistence: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       id: !ruby/object:Overrides::Terraform::PropertyOverride
-        name: 'uniqueResourceID'
+        name: 'managedZoneID'
       nameServerSet: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       privateVisibilityConfig: !ruby/object:Overrides::Terraform::PropertyOverride
