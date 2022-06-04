@@ -400,12 +400,10 @@ objects:
           an existing instance. For DIRECT_PEERING mode value must be a CIDR range of size /28, or
           "auto". For PRIVATE_SERVICE_ACCESS mode value must be the name of an allocated address 
           range associated with the private service access connection, or "auto".
-        input: true
       - !ruby/object:Api::Type::NestedObject
         name: persistenceConfig
         description: Configuration of the persistence functionality.
         min_version: beta
-        allow_empty_object: true
         send_empty_value: true
         properties:
         - !ruby/object:Api::Type::Enum
@@ -450,4 +448,3 @@ objects:
             Optional. 
             Date and time in the RFC3339 UTC "Zulu" format at which the first snapshot was/will be attempted, 
             and to which future snapshots will be aligned. If not provided, the current time will be used.
-          input: true
