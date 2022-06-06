@@ -201,8 +201,8 @@ func TestAccContainerCluster_withNotificationConfig(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
-	topic := "test-topic"
-	newTopic := "test-topic-2"
+	topic := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
+	newTopic := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
