@@ -12,7 +12,7 @@ data "google_storage_project_service_account" "gcs_account" {
 }
 
 // Create a Pub/Sub topic.
-resource "google_pubsub_topic" "<%= ctx[:primary_resource_id] %>" {
+resource "google_pubsub_topic_iam_binding" "binding" {
   name    = "default_iam_binding"
   topic   = google_pubsub_topic.topic.id
   role    = "roles/pubsub.publisher"
@@ -26,7 +26,7 @@ resource "google_storage_bucket" "bucket" {
   uniform_bucket_level_access = true
 }
 
-resource "google_pubsub_topic" "topic" {
+resource "google_pubsub_topic" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]['your_topic_name'] %>"
 }
 # [END storage_create_pubsub_notifications_tf]
