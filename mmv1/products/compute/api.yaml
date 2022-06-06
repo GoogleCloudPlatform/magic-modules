@@ -4114,6 +4114,23 @@ objects:
           The internal fully qualified service name for this Forwarding Rule.
           This field is only used for INTERNAL load balancing.
         output: true
+      - !ruby/object:Api::Type::String
+        name: 'pscConnectionId'
+        description: |
+          [Output Only] The PSC connection id of the PSC Forwarding Rule in uint64 format.
+        output: true
+      - !ruby/object:Api::Type::Enum
+        name: 'pscConnectionStatus'
+        description: |
+          The PSC connection status, can be one of the following: ACCEPTED, CLOSED, PENDING,
+          REJECTED, STATUS_UNSPECIFIED, UNDEFINED_PSC_CONNECTION_STATUS.
+        values:
+          - :ACCEPTED
+          - :CLOSED
+          - :PENDING
+          - :REJECTED
+          - :STATUS_UNSPECIFIED
+          - :UNDEFINED_PSC_CONNECTION_STATUS
   - !ruby/object:Api::Resource
     name: 'GlobalAddress'
     kind: 'compute#address'
@@ -4491,6 +4508,23 @@ objects:
           addressType of INTERNAL, only "all-apis" and "vpc-sc" are valid.
         update_verb: :POST
         update_url: 'projects/{{project}}/global/forwardingRules/{{name}}/setTarget'
+      - !ruby/object:Api::Type::String
+        name: 'pscConnectionId'
+        description: |
+          [Output Only] The PSC connection id of the PSC Forwarding Rule in uint64 format.
+        output: true
+      - !ruby/object:Api::Type::Enum
+        name: 'pscConnectionStatus'
+        description: |
+          The PSC connection status, can be one of the following: ACCEPTED, CLOSED, PENDING,
+          REJECTED, STATUS_UNSPECIFIED, UNDEFINED_PSC_CONNECTION_STATUS.
+        values:
+          - :ACCEPTED
+          - :CLOSED
+          - :PENDING
+          - :REJECTED
+          - :STATUS_UNSPECIFIED
+          - :UNDEFINED_PSC_CONNECTION_STATUS
   - !ruby/object:Api::Resource
     name: 'HttpHealthCheck'
     kind: 'compute#httpHealthCheck'
