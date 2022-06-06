@@ -608,12 +608,12 @@ func resourceBigQueryTable() *schema.Resource {
 						// ConnectionId: [Optional] The connection specifying the credentials
 						// to be used to read external storage, such as Azure Blob,
 						// Cloud Storage, or S3. The connectionId can have the form
-						// "<project_id>.<location_id>.<connection_id>" or
-						// "projects/<project_id>/locations/<location_id>/connections/<connection_id>".
+						// "{{project}}.{{location}}.{{connection_id}}" or
+						// "projects/{{project}}/locations/{{location}}/connections/{{connection_id}}".
 						"connection_id": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: `The connection specifying the credentials to be used to read external storage, such as Azure Blob, Cloud Storage, or S3. The connectionId can have the form "<project_id>.<location_id>.<connection_id>" or "projects/<project_id>/locations/<location_id>/connections/<connection_id>".`,
+							Description: `The connection specifying the credentials to be used to read external storage, such as Azure Blob, Cloud Storage, or S3. The connectionId can have the form "{{project}}.{{location}}.{{connection_id}}" or "projects/{{project}}/locations/{{location}}/connections/{{connection_id}}".`,
 						},
 					},
 				},
