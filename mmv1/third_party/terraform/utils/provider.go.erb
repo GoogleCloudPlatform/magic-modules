@@ -688,7 +688,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		return nil, diag.FromErr(err)
 	}
 
-	return providerDCLConfigure(ctx, d, p, &config)
+	return providerDCLConfigure(d, &config), nil
 }
 
 func validateCredentials(v interface{}, k string) (warnings []string, errors []error) {
