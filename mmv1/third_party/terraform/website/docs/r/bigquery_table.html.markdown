@@ -152,8 +152,8 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     Valid values are "NONE" or "GZIP".
 
 * `connection_id` (Optional) - The connection specifying the credentials to be used to read
-    external storage, such as Azure Blob, Cloud Storage, or S3. The connectionId can have the
-    form "{{project}}.{{location}}.{{connection_id}}"
+    external storage, such as Azure Blob, Cloud Storage, or S3. The `connection_id` can have
+    the form "{{project}}.{{location}}.{{connection_id}}"
     or "projects/{{project}}/locations/{{location}}/connections/{{connection_id}}".
 
 * `csv_options` (Optional) - Additional properties to set if
