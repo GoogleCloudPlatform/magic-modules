@@ -1,3 +1,6 @@
+# The upstream update method (https://cloud.google.com/dns/docs/reference/v1/managedZones/update)
+# requires the full ManagedZones object, therefore, we need to keep some input only values in the struct
+# and then reuse it in the update
 nameServers, ok := d.GetOkExists("name_servers")
 if !ok {
     nameServers = []string{}
