@@ -1484,6 +1484,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       mtu: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      internalIpv6Range: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
   NetworkEndpoint: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -2932,6 +2934,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           subnetwork_name: "ipv6-test-subnetwork"
           network_name: "ipv6-test-network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "subnetwork_internal_ipv6"
+        primary_resource_id: "subnetwork-internal-ipv6"
+        vars:
+          subnetwork_name: "internal-ipv6-test-subnetwork"
+          network_name: "internal-ipv6-test-network"
   TargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
