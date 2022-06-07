@@ -553,6 +553,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: beta
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_pubsub_notifications"
+        primary_resource_type: "google_pubsub_topic"
         primary_resource_id: "topic"
         vars:
           example_bucket_name: "example-bucket-name"
