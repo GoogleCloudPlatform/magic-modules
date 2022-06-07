@@ -4117,7 +4117,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'pscConnectionId'
         description: |
-          [Output Only] The PSC connection id of the PSC Forwarding Rule in uint64 format.
+          The PSC connection id of the PSC Forwarding Rule in uint64 format.
         output: true
       - !ruby/object:Api::Type::String
         name: 'pscConnectionStatus'
@@ -4505,7 +4505,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'pscConnectionId'
         description: |
-          [Output Only] The PSC connection id of the PSC Forwarding Rule in uint64 format.
+          The PSC connection id of the PSC Forwarding Rule in uint64 format.
         output: true
       - !ruby/object:Api::Type::String
         name: 'pscConnectionStatus'
