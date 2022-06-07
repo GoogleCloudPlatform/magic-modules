@@ -154,8 +154,6 @@ func TestAccContainerCluster_misc(t *testing.T) {
 }
 
 func TestAccContainerCluster_withAddons(t *testing.T) {
-	// Multiple fine-grained resources cause VCR to fail
-  	skipIfVcr(t)
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
@@ -249,8 +247,6 @@ func TestAccContainerCluster_withNotificationConfig(t *testing.T) {
 <% end -%>
 
 func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
-	// Multiple fine-grained resources cause VCR to fail
-  	skipIfVcr(t)
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
