@@ -794,21 +794,27 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 	return samples
 }
 
+func (r *Resource) getDCLSamplePath() Filepath {
+	dclPath := getDCLPackageLocation()
+	packagePath := r.productMetadata.PackagePath
+	packagePath = Filepath(strings.Split(string(packagePath), "/")[0])
+	samplesPath := Filepath(path.Join(dclPath, "services", "google", string(packagePath), "samples"))
+	return samplesPath
+}
+
 func (r *Resource) loadDCLSamples() []Sample {
 	sampleAccessoryFolder := r.getSampleAccessoryFolder()
-	packagePath := r.productMetadata.PackagePath
 	version := r.versionMetadata.V
 	resourceType := r.DCLTitle()
 	sampleFriendlyMetaPath := path.Join(string(sampleAccessoryFolder), "meta.yaml")
 	samples := []Sample{}
+	samplesPath := r.getDCLSamplePath()
 
 	if mode != nil && *mode == "serialization" {
 		return samples
 	}
 
 	// Samples appear in the root product folder
-	packagePath = Filepath(strings.Split(string(packagePath), "/")[0])
-	samplesPath := Filepath(path.Join(*fPath, string(packagePath), "samples"))
 	files, err := ioutil.ReadDir(string(samplesPath))
 	if err != nil {
 		// ignore the error if the file just doesn't exist

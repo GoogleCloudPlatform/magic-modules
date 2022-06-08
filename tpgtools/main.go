@@ -31,7 +31,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var fPath = flag.String("path", "", "to be removed - path to the root service directory holding samples")
 var tPath = flag.String("overrides", "", "path to the root directory holding overrides files")
 var cPath = flag.String("handwritten", "handwritten", "path to the root directory holding handwritten files to copy")
 var oPath = flag.String("output", "", "path to output generated files to")
@@ -187,7 +186,7 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 				}
 
 				overrides := loadOverrides(packagePath, resourceFile.Name())
-				if(len(overrides) > 0){
+				if len(overrides) > 0 {
 					glog.Infof("Loaded overrides for %s", resourceFile.Name())
 				}
 
@@ -509,11 +508,11 @@ func generateProductsFile(fileName string, products []*ProductMetadata) {
 }
 
 var TemplateFunctions = template.FuncMap{
-	"title":             strings.Title,
-	"patternToRegex":    PatternToRegex,
-	"replace":           strings.Replace,
-	"isLastIndex":       isLastIndex,
-	"escapeDescription": escapeDescription,
+	"title":                           strings.Title,
+	"patternToRegex":                  PatternToRegex,
+	"replace":                         strings.Replace,
+	"isLastIndex":                     isLastIndex,
+	"escapeDescription":               escapeDescription,
 	"shouldAllowForwardSlashInFormat": shouldAllowForwardSlashInFormat,
 }
 

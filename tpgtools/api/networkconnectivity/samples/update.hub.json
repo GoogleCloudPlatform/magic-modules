@@ -1,8 +1,0 @@
-{
-  "name": "{{hub}}",
-  "project": "{{project}}",
-  "labels": {
-    "label-two": "value-one"
-  },
-  "description": "An updated sample hub"
-}

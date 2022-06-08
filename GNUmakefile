@@ -34,8 +34,8 @@ ifneq ($(OVERRIDES),)
   tpgtools_compile += --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
   serialize_compile = --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
 else
-  tpgtools_compile += --path "api" --overrides "overrides"
-  serialize_compile = --path "api" --overrides "overrides"
+  tpgtools_compile += --overrides "overrides"
+  serialize_compile = --overrides "overrides"
 endif
 
 ifneq ($(VERBOSE),)
@@ -64,9 +64,13 @@ mmv1:
 		bundle exec compiler -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile);
 
 tpgtools:
-	make serialize
+	make serialize;\
+	make tpgtools-light;
+
+tpgtools-light:
 	cd tpgtools;\
 		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
+
 
 validator:
 	cd mmv1;\
