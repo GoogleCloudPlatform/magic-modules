@@ -104,7 +104,6 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 			customdiff.ForceNewIfChange("settings.0.disk_size", isDiskShrinkage),
 			privateNetworkCustomizeDiff,
 			pitrPostgresOnlyCustomizeDiff,
-			sqlReplicaKeyNameCustomizeDiff,
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -747,50 +746,6 @@ func pitrPostgresOnlyCustomizeDiff(_ context.Context, diff *schema.ResourceDiff,
 	if pitr && !strings.Contains(dbVersion, "POSTGRES") {
 		return fmt.Errorf("point_in_time_recovery_enabled is only available for Postgres. You may want to consider using binary_log_enabled instead.")
 	}
-	return nil
-}
-
-// If a replica is in the same region as the master instance, we will use the returned key value to populate
-// state for the replica. If the replica is in a different region, we want to use the key set on the replica.
-func sqlReplicaKeyNameCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
-	// This only applies to replica instances
-	_, isReplicaInstance := diff.GetOk("master_instance_name")
-	if !isReplicaInstance {
-		fmt.Println(diff.Get("name").(string), " is the instance in region ", diff.Get("region").(string))
-		return nil
-	}
-	fmt.Println(diff.Get("name").(string), " is a replica in region ", diff.Get("region").(string))
-
-	config := meta.(*Config)
-	project, err := getProjectFromDiff(diff, config)
-	if err != nil {
-		return err
-	}
-
-	// Find the master instance's region
-	masterInstance, err := config.NewSqlAdminClient(config.userAgent).Instances.Get(project, diff.Get("master_instance_name").(string)).Do()
-	if err != nil {
-		// The master instance has not yet been created, so we don't know what region it is in, we're going to assume
-		// that if the user passed in an encryption key, it must be correct
-		if isGoogleApiErrorWithCode(err, 404) {
-			fmt.Println("master instance is not yet created")
-			return nil
-		}
-
-		// A different error than we'd expect, so return it
-		return err
-	}
-
-	// If the master region and the replica region are the same, we'll set encryption_key_name to new value known
-	if masterInstance.Region == diff.Get("region").(string) {
-		//old, _ := diff.GetChange("encryption_key_name")
-		//diff.SetNew("encryption_key_name", old)
-		//diff.SetNewComputed("encryption_key_name")
-		diff.Clear("encryption_key_name")
-		return nil
-	}
-
-	// The regions differ, so we'll continue using the encryption key name that was passed in.
 	return nil
 }
 
