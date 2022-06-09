@@ -23,6 +23,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           processor_name: "test-processor"
   ProcessorDefaultVersion: !ruby/object:Overrides::Terraform::ResourceOverride
     skip_delete: true
+    import_format: ["{{%processor}}"]
+    properties:
+      processor: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "documentai_default_version"

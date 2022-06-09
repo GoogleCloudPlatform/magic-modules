@@ -2,10 +2,9 @@ resource "google_document_ai_processor" "processor" {
   location = "us"
   display_name = "<%= ctx[:vars]['processor_name'] %>"
   type = "OCR_PROCESSOR"
-  default_processor_version = "pretrained-next"
 }
 
 resource "google_document_ai_processor_default_version" "<%= ctx[:primary_resource_id] %>" {
   processor = google_document_ai_processor.processor.name
-  version = "${google_document_ai_processor.processor.name}/versions/pretrained-next"
+  version = "${google_document_ai_processor.processor.name}/processorVersions/pretrained-next"
 }
