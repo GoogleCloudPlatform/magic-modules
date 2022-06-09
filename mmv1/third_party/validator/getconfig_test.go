@@ -2,6 +2,7 @@ package google
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"testing"
 
@@ -18,9 +19,6 @@ func getAccessToken(cfg *Config) string {
 }
 func getImpersonateServiceAccount(cfg *Config) string {
 	return cfg.ImpersonateServiceAccount
-}
-func getUserAgent(cfg *Config) string {
-	return cfg.UserAgent()
 }
 func getZoneValue(cfg *Config) string {
 	return cfg.Zone
@@ -169,10 +167,33 @@ func TestGetConfigUserAgent(t *testing.T) {
 		t.Run(c.userAgent, func(t *testing.T) {
 			cfg, err := GetConfig(ctx, "project", offline, c.userAgent)
 			if err != nil {
-				t.Fatalf("error building converter: %s", err)
+				t.Fatalf("error building config: %s", err)
 			}
 
-			assert.Equal(t, c.expected, getUserAgent(cfg))
+			assert.Equal(t, c.expected, cfg.UserAgent())
 		})
 	}
+}
+
+func TestGetConfigUserAgent_nilClientUsesDefault(t *testing.T) {
+	ctx := context.Background()
+	offline := false
+	cfg, err := NewConfig(ctx, "project", offline, "", nil)
+	if err != nil {
+		t.Fatalf("error building config: %s", err)
+	}
+
+	assert.NotEmpty(t, cfg.Client())
+}
+
+func TestGetConfigUserAgent_usesPassedClient(t *testing.T) {
+	ctx := context.Background()
+	offline := false
+	client := &http.Client{}
+	cfg, err := NewConfig(ctx, "project", offline, "", client)
+	if err != nil {
+		t.Fatalf("error building config: %s", err)
+	}
+
+	assert.Exactly(t, client, cfg.Client())
 }
