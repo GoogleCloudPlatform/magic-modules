@@ -33,7 +33,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_docs: true
         vars:
           zone_name: "sample-zone"
-        min_version: beta
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_basic"
         primary_resource_id: "example-zone"
