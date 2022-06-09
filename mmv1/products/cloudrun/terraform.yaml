@@ -79,7 +79,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           pubsub_subscription: "pubsub_subscription"
         test_env_vars:
           project: :PROJECT_NAME
-        min_version: beta
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_basic"
         primary_resource_id: "default"
