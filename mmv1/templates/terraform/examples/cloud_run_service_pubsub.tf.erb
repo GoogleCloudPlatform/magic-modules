@@ -1,0 +1,62 @@
+resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
+    name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
+    location = "us-central1"
+
+    template {
+      spec {
+            containers {
+                image = "gcr.io/cloudrun/hello"
+            }
+      }
+    }
+    traffic {
+      percent         = 100
+      latest_revision = true
+    }
+}
+
+resource "google_service_account" "sa" {
+  account_id   = "cloud-run-pubsub-invoker"
+  display_name = "Cloud Run Pub/Sub Invoker"
+}
+
+locals {
+  cloud_run_url = google_cloud_run_service.cloud-run.status[0].url
+  pubsub_sa= google_service_account.sa.email
+}
+
+resource "google_cloud_run_service_iam_binding" "binding" {
+  location = google_cloud_run_service.cloud-run.location
+  project = google_cloud_run_service.cloud-run.project
+  service = google_cloud_run_service.cloud-run.name
+  role = "roles/run.invoker"
+  members = ["serviceAccount:${local.pubsub_sa}"]
+}
+
+resource "google_project_iam_binding" "project" {
+  project = "<%= ctx[:test_env_vars]["project"] %>"
+  role    = "roles/iam.serviceAccountTokenCreator"
+  members = ["serviceAccount:${local.pubsub_sa}"]
+}
+
+
+# [START cloud_run_service_pubsub]
+resource "google_pubsub_topic" "topic" {
+  name = "<%= ctx[:vars]['pubsub_topic'] %>"
+}
+
+resource "google_pubsub_subscription" "subscription" {
+  name  = "<%= ctx[:vars]['pubsub_subscription'] %>"
+  topic = google_pubsub_topic.topic.name
+
+  push_config {
+    push_endpoint = "${local.cloud_run_url}"
+    oidc_token {
+      service_account_email = "${local.pubsub_sa}"
+    }
+    attributes = {
+      x-goog-version = "v1"
+    }
+  }
+}
+# [END cloud_run_service_pubsub]

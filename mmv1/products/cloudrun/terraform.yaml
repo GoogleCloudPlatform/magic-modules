@@ -70,6 +70,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       actions: ['create', 'update']
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_pubsub"
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "cloud_run"
+        vars:
+          cloud_run_service_name: "cloud_run_service_name"
+          pubsub_topic: "pubsub_topic"
+          pubsub_subscription: "pubsub_subscription"
+        test_env_vars:
+          project: :PROJECT_NAME
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_basic"
         primary_resource_id: "default"
         primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
