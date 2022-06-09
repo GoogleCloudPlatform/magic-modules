@@ -21,6 +21,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "processor"
         vars:
           processor_name: "test-processor"
+  ProcessorDefaultVersion: !ruby/object:Overrides::Terraform::ResourceOverride
+    skip_delete: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "documentai_default_version"
+        primary_resource_id: "processor"
+        vars:
+          processor_name: "test-processor"
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
