@@ -33,6 +33,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "cloudbuild_trigger_service_account"
         primary_resource_id: "service-account-trigger"
       - !ruby/object:Provider::Terraform::Examples
+        name: "cloudbuild_trigger_include_build_logs"
+        primary_resource_id: "include-build-logs-trigger"
+        skip_test: true
+      - !ruby/object:Provider::Terraform::Examples
         name: "cloudbuild_trigger_pubsub_config"
         primary_resource_id: "pubsub-config-trigger"
       - !ruby/object:Provider::Terraform::Examples
