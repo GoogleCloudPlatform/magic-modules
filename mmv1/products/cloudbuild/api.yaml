@@ -78,6 +78,15 @@ objects:
           ([PROJECT_NUM]@system.gserviceaccount.com) will be used instead.
           
           Format: projects/{PROJECT_ID}/serviceAccounts/{ACCOUNT_ID_OR_EMAIL}
+      - !ruby/object:Api::Type::Enum
+        name: 'includeBuildLogs'
+        values:
+          - :INCLUDE_BUILD_LOGS_UNSPECIFIED
+          - :INCLUDE_BUILD_LOGS_WITH_STATUS
+        description: |
+          Build logs will be sent back to GitHub as part of the checkrun
+          result.  Values can be INCLUDE_BUILD_LOGS_UNSPECIFIED or
+          INCLUDE_BUILD_LOGS_WITH_STATUS
       - !ruby/object:Api::Type::String
         name: 'filename'
         exactly_one_of:
