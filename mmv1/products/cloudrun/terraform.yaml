@@ -72,7 +72,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_pubsub"
         primary_resource_type: "google_cloud_run_service"
-        primary_resource_id: "cloud_run"
+        primary_resource_id: "default"
         vars:
           cloud_run_service_name: "cloud_run_service_name"
           pubsub_topic: "pubsub_topic"
