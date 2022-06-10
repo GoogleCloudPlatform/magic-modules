@@ -2,7 +2,6 @@
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
     name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
     location = "us-central1"
-
     template {
       spec {
             containers {
@@ -25,15 +24,14 @@ resource "google_service_account" "sa" {
 # [START cloud_run_service_pubsub_sa]
 
 locals {
-  cloud_run_url = google_cloud_run_service.cloud-run.status[0].url
+  cloud_run_url = google_cloud_run_service.default.status[0].url
   pubsub_sa= google_service_account.sa.email
 }
 
 # [START cloud_run_service_pubsub_run_invoke_permissions]
 resource "google_cloud_run_service_iam_binding" "binding" {
-  location = google_cloud_run_service.cloud-run.location
-  project = google_cloud_run_service.cloud-run.project
-  service = google_cloud_run_service.cloud-run.name
+  location = google_cloud_run_service.default.location
+  service = google_cloud_run_service.default.name
   role = "roles/run.invoker"
   members = ["serviceAccount:${local.pubsub_sa}"]
 }
@@ -41,7 +39,6 @@ resource "google_cloud_run_service_iam_binding" "binding" {
 
 # [START cloud_run_service_pubsub_token_permissions]
 resource "google_project_iam_binding" "project" {
-  project = "<%= ctx[:test_env_vars]["project"] %>"
   role    = "roles/iam.serviceAccountTokenCreator"
   members = ["serviceAccount:${local.pubsub_sa}"]
 }
