@@ -2,16 +2,28 @@ package google
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/pkg/errors"
 )
+
+// Compatibility shim to let this change happen in two commits.
+// NewConfig better matches golang best practices.
+func GetConfig(ctx context.Context, project string, offline bool, userAgent string) (*Config, error) {
+	return NewConfig(ctx, project, offline, userAgent, nil)
+}
 
 // Return the value of the private userAgent field
 func (c *Config) UserAgent() string {
 	return c.userAgent
 }
 
-func GetConfig(ctx context.Context, project string, offline bool, userAgent string) (*Config, error) {
+// Return the value of the private client field
+func (c *Config) Client() *http.Client {
+	return c.client
+}
+
+func NewConfig(ctx context.Context, project string, offline bool, userAgent string, client *http.Client) (*Config, error) {
 	cfg := &Config{
 		Project:   project,
 		userAgent: userAgent,
@@ -48,6 +60,9 @@ func GetConfig(ctx context.Context, project string, offline bool, userAgent stri
 		ConfigureBasePaths(cfg)
 		if err := cfg.LoadAndValidate(ctx); err != nil {
 			return nil, errors.Wrap(err, "load and validate config")
+		}
+		if client != nil {
+			cfg.client = client
 		}
 	}
 
