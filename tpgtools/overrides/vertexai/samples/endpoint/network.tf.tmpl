@@ -5,33 +5,11 @@ resource "google_vertex_ai_endpoint" "primary" {
   labels       = {
     label-one = "value-one"
   }
-  encryption_spec {
-    kms_key_name = google_kms_crypto_key.vertex_key.id
-  }
   network      = google_compute_network.vertex_network.id
   project      = "{{project}}"
   depends_on   = [
-    google_kms_crypto_key_iam_member.vertex_member,
     google_service_networking_connection.vertex_vpc_connection
   ]
-}
-
-resource "google_kms_crypto_key_iam_member" "vertex_member" {
-  crypto_key_id = google_kms_crypto_key.vertex_key.id
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-{{project_number}}@gcp-sa-aiplatform.iam.gserviceaccount.com"
-}
-
-resource "google_kms_crypto_key" "vertex_key" {
-  name            = "vertex-key"
-  key_ring        = google_kms_key_ring.vertex_keyring.id
-}
-
-resource "google_kms_key_ring" "vertex_keyring" {
-  name       = "vertex-keyring"
-  location   = "{{region}}"
-  project    = google_project.project.project_id
-  depends_on = [google_project_service.cloudkms]
 }
 
 resource "google_service_networking_connection" "vertex_vpc_connection" {
@@ -52,16 +30,4 @@ resource "google_compute_global_address" "vertex_range" {
 resource "google_compute_network" "vertex_network" {
   name       = "vertex-network"
   project    = "{{project}}"
-}
-
-resource "google_project_service" "cloudkms" {
-  project    = google_project.project.project_id
-  service    = "cloudkms.googleapis.com"
-}
-
-resource "google_project" "project" {
-  project_id      = "{{id}}"
-  name            = "{{id}}"
-  org_id          = "{{org_id}}"
-  billing_account = "{{billing_account}}"
 }
