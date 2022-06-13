@@ -205,8 +205,6 @@ module Provider
                         'third_party/validator/storage_bucket.go'],
                        ['converters/google/resources/cloudfunctions_function.go',
                         'third_party/validator/cloudfunctions_function.go'],
-                       ['converters/google/resources/dcl.go',
-                        'third_party/validator/dcl.go'],
                        ['converters/google/resources/cloudfunctions_cloud_function.go',
                         'third_party/validator/cloudfunctions_cloud_function.go'],
                        ['converters/google/resources/bigquery_table.go',
