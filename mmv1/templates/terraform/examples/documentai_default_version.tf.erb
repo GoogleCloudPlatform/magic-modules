@@ -5,6 +5,6 @@ resource "google_document_ai_processor" "processor" {
 }
 
 resource "google_document_ai_processor_default_version" "<%= ctx[:primary_resource_id] %>" {
-  processor = google_document_ai_processor.processor.name
-  version = "${google_document_ai_processor.processor.name}/processorVersions/pretrained-next"
+  processor = google_document_ai_processor.processor.id
+  version = "${google_document_ai_processor.processor.id}/processorVersions/pretrained-next"
 }
