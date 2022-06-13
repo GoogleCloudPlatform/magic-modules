@@ -251,9 +251,12 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 	d.SetId(id)
 
 {{- if $.CustomCreateDirectiveFunction }}
-  createDirective := {{ $.CustomCreateDirectiveFunction }}(obj)
+	directive := {{ $.CustomCreateDirectiveFunction }}(obj)
+{{- else if $.HasCreate }}
+	directive := CreateDirective
 {{- else }}
-  createDirective := CreateDirective
+	{{/* Resource has no create method, so we skip the BlockModification parameter. */}}
+	directive := UpdateDirective
 {{- end }}
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
@@ -281,7 +284,7 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 	} else {
 		client.Config.BasePath = bp
 	}
-	res, err := client.Apply{{$.DCLTitle}}(context.Background(), obj, createDirective...)
+	res, err := client.Apply{{$.DCLTitle}}(context.Background(), obj, directive...)
 
 	if _, ok := err.(dcl.DiffAfterApplyError); ok {
 		log.Printf("[DEBUG] Diff after apply returned from the DCL: %s", err)
