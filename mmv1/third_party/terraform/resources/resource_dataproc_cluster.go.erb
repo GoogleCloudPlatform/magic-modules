@@ -23,6 +23,13 @@ import (
 var (
 	resolveDataprocImageVersion = regexp.MustCompile(`(?P<Major>[^\s.-]+)\.(?P<Minor>[^\s.-]+)(?:\.(?P<Subminor>[^\s.-]+))?(?:\-(?P<Distr>[^\s.-]+))?`)
 
+	gkeClusterConfigKeys = []string{
+		"cluster_config.0.gke_cluster_config.0.image_version",
+		"cluster_config.0.gke_cluster_config.0.namespace",
+		"cluster_config.0.gke_cluster_config.0.cluster",
+		"cluster_config.0.gke_cluster_config.0.node_pool_config",
+	}
+
 	gceClusterConfigKeys = []string{
 		"cluster_config.0.gce_cluster_config.0.zone",
 		"cluster_config.0.gce_cluster_config.0.network",
@@ -57,6 +64,7 @@ var (
 		"cluster_config.0.staging_bucket",
 		"cluster_config.0.temp_bucket",
 		"cluster_config.0.gce_cluster_config",
+		"cluster_config.0.gke_cluster_config",
 		"cluster_config.0.master_config",
 		"cluster_config.0.worker_config",
 		"cluster_config.0.preemptible_worker_config",
@@ -198,6 +206,69 @@ func resourceDataprocCluster() *schema.Resource {
 							AtLeastOneOf: clusterConfigKeys,
 							ForceNew:     true,
 							Description:  `The Cloud Storage temp bucket used to store ephemeral cluster and jobs data, such as Spark and MapReduce history files. Note: If you don't explicitly specify a temp_bucket then GCP will auto create / assign one for you.`,
+						},
+
+						"gke_cluster_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							AtLeastOneOf: clusterConfigKeys,
+							Computed:     true,
+							MaxItems:     1,
+							Description:  `Common config settings for resources of Google Kubernetes Engine cluster instances, applicable to all instances in the cluster.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+
+									"image_version": {
+										Type:             schema.TypeString,
+										Optional:         true,
+										Default:          "dataproc-2.0",
+										AtLeastOneOf:     gkeClusterConfigKeys,
+										ForceNew:         true,
+										DiffSuppressFunc: dataprocImageVersionDiffSuppress,
+										Description:      `The Cloud Dataproc image version to use for the cluster - this controls the sets of software versions installed onto the nodes when you create clusters. If not specified, defaults to the latest version.`,
+									},
+									"namespace": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										Default:      false,
+										AtLeastOneOf: gkeClusterConfigKeys,
+										ForceNew:     true,
+										Description:  `Namespace`,
+									},
+									"cluster": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										Default:      false,
+										AtLeastOneOf: gkeClusterConfigKeys,
+										ForceNew:     true,
+										Description:  `A target GKE cluster to deploy to. It must be in the same project and region as the Dataproc cluster (the GKE cluster can be zonal or regional).`,
+									},
+									"node_pool_config": {
+										Type:         schema.TypeList,
+										Optional:     true,
+										AtLeastOneOf: gkeClusterConfigKeys,
+										MinItems:     1,
+										Description:  `Common config settings for resources of Google Kubernetes Engine cluster instances, applicable to all instances in the cluster.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"node_pool": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Default:     false,
+													ForceNew:    true,
+													Description: `Nodepool`,
+												},
+												"roles": {
+													Type:        schema.TypeSet,
+													Elem:        &schema.Schema{Type: schema.TypeString},
+													Required:    true,
+													Description: `Shielded Instance Config for clusters using Compute Engine Shielded VMs.`,
+												},
+											},
+										},
+									},
+								},
+							},
 						},
 
 						"gce_cluster_config": {
@@ -897,7 +968,13 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 		ProjectId:   project,
 	}
 
-	cluster.Config, err = expandClusterConfig(d, config)
+	if _, ok := d.GetOk("cluster_config.0.gke_cluster_config"); ok {
+		cluster.VirtualClusterConfig, err = expandGkeClusterConfig(d, config)
+		cluster.VirtualClusterConfig.StagingBucket = d.Get("cluster_config.0.staging_bucket").(string)
+	} else {
+		cluster.Config, err = expandClusterConfig(d, config)
+	}
+
 	if err != nil {
 		return err
 	}
@@ -933,6 +1010,57 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 
 	log.Printf("[INFO] Dataproc cluster %s has been created", cluster.ClusterName)
 	return resourceDataprocClusterRead(d, meta)
+}
+
+func expandGkeClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.VirtualClusterConfig, error) {
+	conf := &dataproc.VirtualClusterConfig{}
+
+	if v, ok := d.GetOk("cluster_config"); ok {
+		confs := v.([]interface{})
+		if (len(confs)) == 0 {
+			return conf, nil
+		}
+	}
+
+	if cfg, ok := configOptions(d, "cluster_config.0.gke_cluster_config"); ok {
+		conf.KubernetesClusterConfig = &dataproc.KubernetesClusterConfig{
+			KubernetesSoftwareConfig: &dataproc.KubernetesSoftwareConfig{
+				ComponentVersion: map[string]string{
+					"SPARK": cfg["image_version"].(string),
+				},
+			},
+		}
+
+		if v, ok := cfg["namespace"]; ok {
+			conf.KubernetesClusterConfig.KubernetesNamespace = v.(string)
+		}
+
+		if clusterAddress, ok := cfg["cluster"]; ok {
+			conf.KubernetesClusterConfig.GkeClusterConfig = &dataproc.GkeClusterConfig{}
+			conf.KubernetesClusterConfig.GkeClusterConfig.GkeClusterTarget = clusterAddress.(string)
+
+			if nodePoolTarget, ok := d.GetOk("cluster_config.0.gke_cluster_config.0.node_pool_config"); ok {
+				conf.KubernetesClusterConfig.GkeClusterConfig.NodePoolTarget = expandNodePoolTarget(nodePoolTarget, clusterAddress.(string))
+			}
+		}
+	}
+	return conf, nil
+}
+
+func expandNodePoolTarget(v interface{}, clusterAddress string) []*dataproc.GkeNodePoolTarget {
+	nodePoolList := v.([]interface{})
+
+	nodePools := []*dataproc.GkeNodePoolTarget{}
+	for _, v1 := range nodePoolList {
+		nodePoolItem := v1.(map[string]interface{})
+		nodePool := &dataproc.GkeNodePoolTarget{
+			NodePool: clusterAddress + "/nodePools/" + nodePoolItem["node_pool"].(string),
+			Roles:    convertStringSet(nodePoolItem["roles"].(*schema.Set)),
+		}
+		nodePools = append(nodePools, nodePool)
+	}
+
+	return nodePools
 }
 
 func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.ClusterConfig, error) {
@@ -1448,7 +1576,14 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error setting labels: %s", err)
 	}
 
-	cfg, err := flattenClusterConfig(d, cluster.Config)
+	var cfg []map[string]interface{}
+
+	if cluster.Config != nil {
+		cfg, err = flattenClusterConfig(d, cluster.Config)
+	} else {
+		cfg, err = flattenVirtualClusterConfig(d, cluster.VirtualClusterConfig)
+	}
+
 	if err != nil {
 		return err
 	}
@@ -1458,6 +1593,53 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 	return nil
+}
+
+func flattenGkeClusterConfig(d *schema.ResourceData, cfg *dataproc.VirtualClusterConfig) []map[string]interface{} {
+	if cfg == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{
+		"namespace":     cfg.KubernetesClusterConfig.KubernetesNamespace,
+		"image_version": cfg.KubernetesClusterConfig.KubernetesSoftwareConfig.ComponentVersion["SPARK"],
+		"cluster":       cfg.KubernetesClusterConfig.GkeClusterConfig.GkeClusterTarget,
+	}
+
+	if len(cfg.KubernetesClusterConfig.GkeClusterConfig.NodePoolTarget) > 0 {
+		val, err := flattenNodePoolTargetConfig(cfg.KubernetesClusterConfig.GkeClusterConfig.NodePoolTarget, cfg.KubernetesClusterConfig.GkeClusterConfig.GkeClusterTarget)
+		if err != nil {
+			return nil
+		}
+		data["node_pool_config"] = val
+	}
+
+	return []map[string]interface{}{data}
+}
+
+func flattenNodePoolTargetConfig(nia []*dataproc.GkeNodePoolTarget, clusterAddress string) ([]map[string]interface{}, error) {
+
+	nodePools := []map[string]interface{}{}
+	for _, v := range nia {
+		nodePoolAddress := strings.Split(v.NodePool, "/")
+		nodePool := map[string]interface{}{
+			"node_pool": nodePoolAddress[len(nodePoolAddress)-1],
+			"roles":     v.Roles,
+		}
+
+		nodePools = append(nodePools, nodePool)
+	}
+	return nodePools, nil
+
+}
+
+func flattenVirtualClusterConfig(d *schema.ResourceData, cfg *dataproc.VirtualClusterConfig) ([]map[string]interface{}, error) {
+	data := map[string]interface{}{
+		"staging_bucket":     d.Get("cluster_config.0.staging_bucket").(string),
+		"gke_cluster_config": flattenGkeClusterConfig(d, cfg),
+	}
+
+	return []map[string]interface{}{data}, nil
 }
 
 func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) ([]map[string]interface{}, error) {
