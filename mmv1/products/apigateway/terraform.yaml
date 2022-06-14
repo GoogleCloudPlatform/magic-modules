@@ -68,6 +68,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "api_cfg"
         vars:
           name: "api-cfg"
+      - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
+        name: "apigateway_api_config_grpc"
+        primary_resource_id: "api_cfg"
+        vars:
+          name: "api-cfg"
+          config: "cfg"
+        ignore_read_extra:
+          - "grpc_services.0.file_descriptor_set"
+      - !ruby/object:Provider::Terraform::Examples
+        skip_docs: true
+        min_version: beta
+        name: "apigateway_api_config_grpc_full"
+        primary_resource_id: "api_cfg"
+        vars:
+          name: "api-cfg"
+          config: "cfg"
     properties:
       openapiDocuments.document.contents: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
@@ -78,6 +95,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       apiConfigId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      grpcServices: !ruby/object:Overrides::Terraform::PropertyOverride
+        # grpcServices.fileDescriptorSet returns empty value.
+        # grpcServices.source returns value but `ignore_read` was not supported on nested value.
+        ignore_read: true
+      grpcServices.fileDescriptorSet.contents: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateBase64String'
+      grpcServices.source.contents: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateBase64String'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       extra_schema_entry: templates/terraform/extra_schema_entry/api_config.erb
       encoder: 'templates/terraform/encoders/api_config.go.erb'
