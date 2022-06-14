@@ -3,5 +3,4 @@
 ## Skip base path generation... needs to not share a name with GKEHub Membership
 - type: PRODUCT_BASE_PATH
   details:
-    skip: true
-    basepathidentifier: gke_hub
+    basepathidentifier: gke_hub_feature
