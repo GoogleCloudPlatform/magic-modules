@@ -79,7 +79,7 @@ objects:
     identity:
       - processor
     description: |
-      The default version for the processor
+      The default version for the processor. Deleting this resource is a no-op, and does not unset the default version.
     parameters:
       - !ruby/object:Api::Type::String
         name: 'processor'
