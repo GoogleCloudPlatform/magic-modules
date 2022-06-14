@@ -72,12 +72,17 @@ objects:
         name: 'maintenanceVersion'
         output: true
         description: |
-          The maintenance version.
+          The current software version on the instance. This attribute can not
+          be set during creation. Refer to available_maintenance_versions
+          attribute to see what maintenance_versions are available for upgrade.
+          When this attribute gets updated, it will cause an instance restart.
+
       - !ruby/object:Api::Type::Array
         name: 'availableMaintenanceVersions'
         output: true
         description: |
-          The maintenance versions available for the instance.
+          The list of all maintenance versions applicable on the instance. This
+          attribute can not be updated.
         item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'connectionName'
