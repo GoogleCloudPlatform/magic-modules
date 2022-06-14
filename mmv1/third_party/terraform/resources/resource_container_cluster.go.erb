@@ -543,10 +543,7 @@ func resourceContainerCluster() *schema.Resource {
 				ForceNew:    true,
 				Description: `Whether to enable Cloud TPU resources in this cluster.`,
 <% unless version == 'ga' -%>
-				ExactlyOneOf: []string{
-					"enable_tpu",
-					"tpu_config",
-				},
+				ConflictsWith: []string{"tpu_config"},
 				Computed: true,
 				// TODO: deprecate when tpu_config is correctly returned by the API
 				// Deprecated: "Deprecated in favor of tpu_config",
