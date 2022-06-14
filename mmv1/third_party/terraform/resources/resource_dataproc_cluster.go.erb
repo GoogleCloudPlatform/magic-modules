@@ -23,27 +23,6 @@ import (
 var (
 	resolveDataprocImageVersion = regexp.MustCompile(`(?P<Major>[^\s.-]+)\.(?P<Minor>[^\s.-]+)(?:\.(?P<Subminor>[^\s.-]+))?(?:\-(?P<Distr>[^\s.-]+))?`)
 
-	gkeClusterConfigKeys = []string{
-		"cluster_config.0.gke_cluster_config.0.staging_bucket",
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config",
-	}
-
-	kubernetesClusterConfigKeys = []string{
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.kubernetes_namespace",
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config",
-	}
-
-	gkeClusterConfigKeys = []string{
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.gke_cluster_target",
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target",
-	}
-
-	gkeNodePoolTargetKeys = []string{
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool",
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.roles",
-		"cluster_config.0.gke_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool_config",
-	}
-
 	gceClusterConfigKeys = []string{
 		"cluster_config.0.gce_cluster_config.0.zone",
 		"cluster_config.0.gce_cluster_config.0.network",
@@ -78,7 +57,6 @@ var (
 		"cluster_config.0.staging_bucket",
 		"cluster_config.0.temp_bucket",
 		"cluster_config.0.gce_cluster_config",
-		"cluster_config.0.gke_cluster_config",
 		"cluster_config.0.master_config",
 		"cluster_config.0.worker_config",
 		"cluster_config.0.preemptible_worker_config",
@@ -220,49 +198,6 @@ func resourceDataprocCluster() *schema.Resource {
 							AtLeastOneOf: clusterConfigKeys,
 							ForceNew:     true,
 							Description:  `The Cloud Storage temp bucket used to store ephemeral cluster and jobs data, such as Spark and MapReduce history files. Note: If you don't explicitly specify a temp_bucket then GCP will auto create / assign one for you.`,
-						},
-
-						"gke_cluster_config": {
-							Type:		  schema.TypeList,
-							Optional:	  true,
-							AtLeastOneOf: clusterConfigKeys,
-							Computed:     true,
-							MaxItems:     1,
-							Description:  `Common config settings for resources of Google Kubernetes Engine cluster instances, applicable to all instances in the cluster.`,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-
-									"staging_bucket": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										Computed:     true,
-										AtLeastOneOf: gkeClusterConfigKeys,
-										ForceNew:     true,
-										Description:  `The Cloud Storage staging bucket used to stage files, such as Hadoop jars, between client machines and the cluster. Note: If you don't explicitly specify a staging_bucket then GCP will auto create / assign one for you. However, you are not guaranteed an auto generated bucket which is solely dedicated to your cluster; it may be shared with other clusters in the same region/zone also choosing to use the auto generation option.`,
-									},
-
-									"kubernetes_cluster_config": {
-										Type:         schema.TypeSet,
-										Optional:     false,
-										Computed:     true,
-										AtLeastOneOf: gkeClusterConfigKeys,
-										ForceNew:     true,
-										Description:  `The configuration for running the Dataproc cluster on GKE.`,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"enable_secure_boot": {
-													Type:         schema.TypeString,
-													Optional:     true,
-													Default:      false,
-													AtLeastOneOf: kubernetesClusterConfigKeys,
-													ForceNew:     true,
-													Description:  `A namespace within the Kubernetes cluster to deploy into. If this namespace does not exist, it is created. If it exists, Dataproc verifies that another Dataproc VirtualCluster is not installed into it. If not specified, the name of the Dataproc Cluster is used.`,
-												},
-											}
-										}
-									},
-								}
-							}
 						},
 
 						"gce_cluster_config": {
