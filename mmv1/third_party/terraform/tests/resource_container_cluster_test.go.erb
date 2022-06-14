@@ -5348,6 +5348,8 @@ resource "google_container_cluster" "primary" {
 `, name, name, name)
 }
 
+
+<% unless version == 'ga' -%>
 func testAccContainerCluster_withTPUConfig(network, cluster string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
@@ -5401,3 +5403,4 @@ resource "google_container_cluster" "with_tpu" {
 }
 `, network, cluster)
 }
+<% end -%>
