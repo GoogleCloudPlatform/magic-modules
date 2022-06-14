@@ -69,6 +69,17 @@ objects:
           - :SECOND_GEN
           - :EXTERNAL
       - !ruby/object:Api::Type::String
+        name: 'maintenanceVersion'
+        output: true
+        description: |
+          The maintenance version.
+      - !ruby/object:Api::Type::Array
+        name: 'availableMaintenanceVersions'
+        output: true
+        description: |
+          The maintenance versions available for the instance.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::String
         name: 'connectionName'
         description: |
           Connection name of the Cloud SQL instance used in connection strings.
