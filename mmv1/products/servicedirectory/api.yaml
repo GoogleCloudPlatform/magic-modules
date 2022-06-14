@@ -180,6 +180,7 @@ objects:
           Metadata that goes beyond any these limits will be rejected.
       - !ruby/object:Api::Type::String
         name: 'network'
+        input: true
         description: |
           The URL to the network, such as projects/PROJECT_NUMBER/locations/global/networks/NETWORK_NAME.          
 

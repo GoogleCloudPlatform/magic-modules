@@ -2,7 +2,7 @@
   {
     "name": "//run.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/DomainMappings/tf-test-domain-meep.gcp.tfacc.hashicorptest.com",
     "asset_type": "run.googleapis.com/DomainMapping",
-    "ancestry_path": "organization/{{.OrgID}}/folder/{{.FolderID}}/project/{{.Provider.project}}",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "resource": {
       "version": "v1",
       "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/run/v1/rest",
@@ -25,7 +25,7 @@
   {
     "name": "//run.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/services/tf-test-cloudrun-srv-beep",
     "asset_type": "run.googleapis.com/Service",
-    "ancestry_path": "organization/{{.OrgID}}/folder/{{.FolderID}}/project/{{.Provider.project}}",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "resource": {
       "version": "v1",
       "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/run/v1/rest",

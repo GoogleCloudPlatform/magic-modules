@@ -52,3 +52,5 @@ mmv1/build/*
 
 # ignore serialization generation build data
 tpgtools/temp.serial
+
+tpgtools/serialization.go

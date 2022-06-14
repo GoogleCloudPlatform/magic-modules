@@ -84,18 +84,6 @@ var (
   }
 )
 
-<% unless version == 'ga' -%>
-func diffSuppressSqlReplicaKeyName(k, old, new string, d *schema.ResourceData) bool {
-	if d.Get("master_instance_name").(string) != "" {
-		// This is a replica and the config value must be null, but the API will
-		// return the key name of the master instance, so we'll suppress this diff
-		return true
-	}
-
-	return false
-}
-<% end -%>
-
 func resourceSqlDatabaseInstance() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceSqlDatabaseInstanceCreate,
@@ -116,7 +104,6 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 			customdiff.ForceNewIfChange("settings.0.disk_size", isDiskShrinkage),
 			privateNetworkCustomizeDiff,
 			pitrPostgresOnlyCustomizeDiff,
-			insightsPostgresOnlyCustomizeDiff,
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -281,7 +268,7 @@ is set to true.`,
 							Type:             schema.TypeBool,
 							Optional:         true,
 							Default:          true,
-							Description:      `Configuration to increase storage size automatically.  Note that future terraform apply calls will attempt to resize the disk to the value specified in disk_size - if this is set, do not set disk_size.`,
+							Description:      `Enables auto-resizing of the storage size. Defaults to true. Set to false if you want to set disk_size.`,
 						},
 						"disk_autoresize_limit": {
 							Type:             schema.TypeInt,
@@ -294,7 +281,7 @@ is set to true.`,
 							Optional: true,
 							// Default is likely 10gb, but it is undocumented and may change.
 							Computed:    true,
-							Description: `The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased.`,
+							Description: `The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. If you want to set this field, set disk_autoresize to false.`,
 						},
 						"disk_type": {
 							Type:     schema.TypeString,
@@ -476,14 +463,14 @@ is set to true.`,
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: `The MySQL, PostgreSQL or SQL Server (beta) version to use. Supported values include MYSQL_5_6, MYSQL_5_7, MYSQL_8_0, POSTGRES_9_6, POSTGRES_10, POSTGRES_11, POSTGRES_12, POSTGRES_13, SQLSERVER_2017_STANDARD, SQLSERVER_2017_ENTERPRISE, SQLSERVER_2017_EXPRESS, SQLSERVER_2017_WEB. Database Version Policies includes an up-to-date reference of supported versions.`,
+				Description: `The MySQL, PostgreSQL or SQL Server (beta) version to use. Supported values include MYSQL_5_6, MYSQL_5_7, MYSQL_8_0, POSTGRES_9_6, POSTGRES_10, POSTGRES_11, POSTGRES_12, POSTGRES_13, POSTGRES_14, SQLSERVER_2017_STANDARD, SQLSERVER_2017_ENTERPRISE, SQLSERVER_2017_EXPRESS, SQLSERVER_2017_WEB. Database Version Policies includes an up-to-date reference of supported versions.`,
 			},
 
 <% unless version == 'ga' -%>
 			"encryption_key_name": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DiffSuppressFunc: diffSuppressSqlReplicaKeyName,
+				Computed: true,
 				ForceNew: true,
 			},
  <% end -%>
@@ -776,15 +763,6 @@ func pitrPostgresOnlyCustomizeDiff(_ context.Context, diff *schema.ResourceDiff,
 	return nil
 }
 
-func insightsPostgresOnlyCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
-	insights := diff.Get("settings.0.insights_config.0.query_insights_enabled").(bool)
-	dbVersion := diff.Get("database_version").(string)
-	if insights && !strings.Contains(dbVersion, "POSTGRES") {
-		return fmt.Errorf("query_insights_enabled is only available for Postgres now.")
-	}
-	return nil
-}
-
 func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
@@ -1053,8 +1031,8 @@ func expandCloneContext(configured []interface{}) (*sqladmin.CloneContext, strin
 	_cloneConfiguration := configured[0].(map[string]interface{})
 
 	return &sqladmin.CloneContext{
-		PointInTime: _cloneConfiguration["point_in_time"].(string), 
-		AllocatedIpRange: _cloneConfiguration["allocated_ip_range"].(string), 
+		PointInTime: _cloneConfiguration["point_in_time"].(string),
+		AllocatedIpRange: _cloneConfiguration["allocated_ip_range"].(string),
 	}, _cloneConfiguration["source_instance_name"].(string)
 }
 

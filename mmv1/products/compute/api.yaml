@@ -621,6 +621,31 @@ objects:
         name: 'cdnPolicy'
         description: 'Cloud CDN configuration for this Backend Bucket.'
         properties:
+        - !ruby/object:Api::Type::NestedObject
+          name: 'cacheKeyPolicy'
+          description: 'The CacheKeyPolicy for this CdnPolicy.'
+          properties:
+          - !ruby/object:Api::Type::Array
+            send_empty_value: true
+            name: 'queryStringWhitelist'
+            at_least_one_of:
+              - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+              - cdn_policy.0.cache_key_policy.0.include_http_headers
+            description: |
+              Names of query string parameters to include in cache keys.
+              Default parameters are always included. '&' and '=' will
+              be percent encoded and not treated as delimiters.
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Array
+            send_empty_value: true
+            name: 'includeHttpHeaders'
+            at_least_one_of:
+              - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+              - cdn_policy.0.cache_key_policy.0.include_http_headers
+            description: |
+              Allows HTTP request headers (by name) to be used in the
+              cache key.
+            item_type: Api::Type::String
         - !ruby/object:Api::Type::Integer
           name: 'signedUrlCacheMaxAgeSec'
           description: |
@@ -1145,6 +1170,7 @@ objects:
                   - cdn_policy.0.cache_key_policy.0.include_query_string
                   - cdn_policy.0.cache_key_policy.0.query_string_blacklist
                   - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_named_cookies
                 description: |
                   If true requests to different hosts will be cached separately.
               - !ruby/object:Api::Type::Boolean
@@ -1156,6 +1182,7 @@ objects:
                   - cdn_policy.0.cache_key_policy.0.include_query_string
                   - cdn_policy.0.cache_key_policy.0.query_string_blacklist
                   - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_named_cookies
                 description: |
                   If true, http and https requests will be cached separately.
               - !ruby/object:Api::Type::Boolean
@@ -1167,6 +1194,7 @@ objects:
                   - cdn_policy.0.cache_key_policy.0.include_query_string
                   - cdn_policy.0.cache_key_policy.0.query_string_blacklist
                   - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_named_cookies
                 description: |
                   If true, include query string parameters in the cache key
                   according to query_string_whitelist and
@@ -1184,6 +1212,7 @@ objects:
                   - cdn_policy.0.cache_key_policy.0.include_query_string
                   - cdn_policy.0.cache_key_policy.0.query_string_blacklist
                   - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_named_cookies
                 description: |
                   Names of query string parameters to exclude in cache keys.
 
@@ -1201,6 +1230,7 @@ objects:
                   - cdn_policy.0.cache_key_policy.0.include_query_string
                   - cdn_policy.0.cache_key_policy.0.query_string_blacklist
                   - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_named_cookies
                 description: |
                   Names of query string parameters to include in cache keys.
 
@@ -1208,6 +1238,19 @@ objects:
                   query_string_whitelist or query_string_blacklist, not both.
                   '&' and '=' will be percent encoded and not treated as
                   delimiters.
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::Array
+                name: 'includeNamedCookies'
+                send_empty_value: true
+                at_least_one_of:
+                  - cdn_policy.0.cache_key_policy.0.include_host
+                  - cdn_policy.0.cache_key_policy.0.include_protocol
+                  - cdn_policy.0.cache_key_policy.0.include_query_string
+                  - cdn_policy.0.cache_key_policy.0.query_string_blacklist
+                  - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_named_cookies
+                description: |
+                  Names of cookies to include in cache keys.
                 item_type: Api::Type::String
           - !ruby/object:Api::Type::Integer
             name: 'signedUrlCacheMaxAgeSec'
@@ -2153,6 +2196,7 @@ objects:
                   - cdn_policy.0.cache_key_policy.0.include_query_string
                   - cdn_policy.0.cache_key_policy.0.query_string_blacklist
                   - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_named_cookies
                 description: |
                   If true requests to different hosts will be cached separately.
               - !ruby/object:Api::Type::Boolean
@@ -2164,6 +2208,7 @@ objects:
                   - cdn_policy.0.cache_key_policy.0.include_query_string
                   - cdn_policy.0.cache_key_policy.0.query_string_blacklist
                   - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_named_cookies
                 description: |
                   If true, http and https requests will be cached separately.
               - !ruby/object:Api::Type::Boolean
@@ -2175,6 +2220,7 @@ objects:
                   - cdn_policy.0.cache_key_policy.0.include_query_string
                   - cdn_policy.0.cache_key_policy.0.query_string_blacklist
                   - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_named_cookies
                 description: |
                   If true, include query string parameters in the cache key
                   according to query_string_whitelist and
@@ -2192,6 +2238,7 @@ objects:
                   - cdn_policy.0.cache_key_policy.0.include_query_string
                   - cdn_policy.0.cache_key_policy.0.query_string_blacklist
                   - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_named_cookies
                 description: |
                   Names of query string parameters to exclude in cache keys.
 
@@ -2209,6 +2256,7 @@ objects:
                   - cdn_policy.0.cache_key_policy.0.include_query_string
                   - cdn_policy.0.cache_key_policy.0.query_string_blacklist
                   - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_named_cookies
                 description: |
                   Names of query string parameters to include in cache keys.
 
@@ -2216,6 +2264,19 @@ objects:
                   query_string_whitelist or query_string_blacklist, not both.
                   '&' and '=' will be percent encoded and not treated as
                   delimiters.
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::Array
+                name: 'includeNamedCookies'
+                send_empty_value: true
+                at_least_one_of:
+                  - cdn_policy.0.cache_key_policy.0.include_host
+                  - cdn_policy.0.cache_key_policy.0.include_protocol
+                  - cdn_policy.0.cache_key_policy.0.include_query_string
+                  - cdn_policy.0.cache_key_policy.0.query_string_blacklist
+                  - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_named_cookies
+                description: |
+                  Names of cookies to include in cache keys.
                 item_type: Api::Type::String
           - !ruby/object:Api::Type::Integer
             name: 'signedUrlCacheMaxAgeSec'
@@ -8030,6 +8091,21 @@ objects:
           Maximum Transmission Unit in bytes. The minimum value for this field is 1460
           and the maximum value is 1500 bytes.
         input: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableUlaInternalIpv6'
+        description: |
+          Enable ULA internal ipv6 on this network. Enabling this feature will assign 
+          a /48 from google defined ULA prefix fd20::/20.
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'internalIpv6Range'
+        description: |
+          When enabling ula internal ipv6, caller optionally can specify the /48 range 
+          they want from the google defined ULA prefix fd20::/20. The input must be a 
+          valid /48 ULA IPv6 address and must be within the fd20::/20. Operation will 
+          fail if the speficied /48 is already in used by another resource. 
+          If the field is not speficied, then a /48 range will be randomly allocated from fd20::/20 and returned via this field.
+        input: true
   - !ruby/object:Api::Resource
     name: 'NetworkEndpoint'
     kind: 'compute#networkEndpoint'
@@ -8431,14 +8507,19 @@ objects:
           Type of network endpoints in this network endpoint group. Defaults to SERVERLESS
         values:
           - :SERVERLESS
+          - :PRIVATE_SERVICE_CONNECT
         default_value: :SERVERLESS
+      - !ruby/object:Api::Type::String
+        name: 'pscTargetService'
+        description: |
+          The target service url used to set up private service connection to
+          a Google API or a PSC Producer Service Attachment.
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudRun'
-        exactly_one_of:
-          - cloudRun
-          - cloudFunction
-          - appEngine
-          - serverlessDeployment
+        conflicts:
+          - cloud_function
+          - app_engine
+          - serverless_deployment
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
           Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
@@ -8475,11 +8556,10 @@ objects:
               and { service="bar2", tag="foo2" } respectively.
       - !ruby/object:Api::Type::NestedObject
         name: 'appEngine'
-        exactly_one_of:
-          - appEngine
-          - cloudFunction
-          - cloudRun
-          - serverlessDeployment
+        conflicts:
+          - cloud_run
+          - cloud_function
+          - serverless_deployment
         allow_empty_object: true
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
@@ -8510,11 +8590,10 @@ objects:
               them to { service = "foo1", version = "v1" } and { service = "foo1", version = "v2" } respectively.
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudFunction'
-        exactly_one_of:
-          - appEngine
-          - cloudFunction
-          - cloudRun
-          - serverlessDeployment
+        conflicts:
+          - cloud_run
+          - app_engine
+          - serverless_deployment
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
           Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
@@ -8544,11 +8623,10 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'serverlessDeployment'
         min_version: beta
-        exactly_one_of:
-          - appEngine
-          - cloudFunction
-          - cloudRun
-          - serverlessDeployment
+        conflicts:
+          - cloud_run
+          - cloud_function
+          - app_engine
         allow_empty_object: true
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
@@ -12823,7 +12901,9 @@ objects:
               - group_placement_policy.0.vm_count
               - group_placement_policy.0.availability_domain_count
             description: |
-              Number of vms in this placement group.
+              Number of VMs in this placement group. Google does not recommend that you use this field
+              unless you use a compact policy and you want your policy to work only if it contains this
+              exact number of VMs.
           - !ruby/object:Api::Type::Integer
             name: 'availabilityDomainCount'
             at_least_one_of:
@@ -13391,6 +13471,15 @@ objects:
         name: minPortsPerVm
         description: |
           Minimum number of ports allocated to a VM from this NAT.
+      - !ruby/object:Api::Type::Boolean
+        name: enableDynamicPortAllocation
+        description: |
+          Enable Dynamic Port Allocation.
+          If minPorts is set, minPortsPerVm must be set to a power of two greater than or equal to 32. 
+          If minPortsPerVm is not set, a minimum of 32 ports will be allocated to a VM from this NAT config.
+
+          Mutually exclusive with enableEndpointIndependentMapping.
+        default_value: false
       - !ruby/object:Api::Type::Integer
         name: udpIdleTimeoutSec
         description: |
@@ -14506,6 +14595,15 @@ objects:
           address data in TCP connections that traverse proxies on their way to
           destination servers.
       - !ruby/object:Api::Type::Array
+        name: 'domainNames'
+        input: true
+        item_type: Api::Type::String
+        description: |
+          If specified, the domain name will be used during the integration between
+          the PSC connected endpoints and the Cloud DNS. For example, this is a
+          valid domain name: "p.mycompany.com.". Current max number of domain names
+          supported is 1.
+      - !ruby/object:Api::Type::Array
         name: 'consumerRejectLists'
         item_type: Api::Type::String
         send_empty_value: true
@@ -14623,6 +14721,128 @@ objects:
           list. This field must be empty if the profile is not CUSTOM.
         item_type: Api::Type::String
       - !ruby/object:Api::Type::String
+        name: 'fingerprint'
+        description: |
+          Fingerprint of this resource. A hash of the contents stored in this
+          object. This field is used in optimistic locking.
+        output: true
+      - !ruby/object:Api::Type::Array
+        name: 'warnings'
+        description: |
+          If potential misconfigurations are detected for this SSL policy, this
+          field will be populated with warning messages.
+        output: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'code'
+              description: 'A warning code, if applicable.'
+              output: true
+            - !ruby/object:Api::Type::String
+              name: 'message'
+              description: 'A human-readable description of the warning code.'
+              output: true
+  - !ruby/object:Api::Resource
+    name: 'RegionSslPolicy'
+    kind: 'compute#sslPolicy'
+    base_url: projects/{{project}}/regions/{{region}}/sslPolicies
+    collection_url_key: 'items'
+    update_verb: :PATCH
+    has_self_link: true
+    min_version: beta
+    description: |
+      Represents a Regional SSL policy. SSL policies give you the ability to control the
+      features of SSL that your SSL proxy or HTTPS load balancer negotiates.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+          guides:
+            'Using SSL Policies': 'https://cloud.google.com/compute/docs/load-balancing/ssl-policies'
+          api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionSslPolicies'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'name'
+        required: true
+        input: true
+        description: |
+          The region where the regional SSL policy resides.
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional description of this resource.'
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource. Provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035. Specifically, the name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+        input: true
+        required: true
+      - !ruby/object:Api::Type::Enum
+        name: 'profile'
+        description: |
+          Profile specifies the set of SSL features that can be used by the
+          load balancer when negotiating SSL with clients. If using `CUSTOM`,
+          the set of SSL features to enable must be specified in the
+          `customFeatures` field.
+        values:
+          - :COMPATIBLE
+          - :MODERN
+          - :RESTRICTED
+          - :CUSTOM
+      - !ruby/object:Api::Type::Enum
+        name: 'minTlsVersion'
+        description: |
+          The minimum version of SSL protocol that can be used by the clients
+          to establish a connection with the load balancer.
+        values:
+          - :TLS_1_0
+          - :TLS_1_1
+          - :TLS_1_2
+      - !ruby/object:Api::Type::Array
+        name: 'enabledFeatures'
+        description: 'The list of features enabled in the SSL policy.'
+        output: true
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'customFeatures'
+        description: |
+          A list of features enabled when the selected profile is CUSTOM. The
+          method returns the set of features that can be specified in this
+          list. This field must be empty if the profile is not CUSTOM.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Fingerprint
         name: 'fingerprint'
         description: |
           Fingerprint of this resource. A hash of the contents stored in this
@@ -14914,6 +15134,7 @@ objects:
         name: 'ipv6AccessType'
         values:
           - :EXTERNAL
+          - :INTERNAL
         description: |
           The access type of IPv6 address this subnet holds. It's immutable and can only be specified during creation
           or the first time the subnet is updated into IPV4_IPV6 dual stack. If the ipv6_type is EXTERNAL then this subnet
@@ -15294,17 +15515,17 @@ objects:
           resource: 'RegionSslCertificate'
           imports: 'selfLink'
           description: 'The SSL certificates used by this TargetHttpsProxy'
-     # This field is present in the schema but as of 2019 Sep 23 attempting to set it fails with
-     # a 400 "SSL policy is supported only with global TargetHttpsProxy". jamessynge@ said in an
-     # email sent on 2019 Sep 20 that will support this "in the next 6 months I hope."
-     #- !ruby/object:Api::Type::ResourceRef
-     #  name: 'sslPolicy'
-     #  resource: 'SslPolicy'
-     #  imports: 'selfLink'
-     #  description: |
-     #    A reference to the SslPolicy resource that will be associated with
-     #    the TargetHttpsProxy resource. If not set, the TargetHttpsProxy
-     #    resource will not have any SSL policy configured.
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'sslPolicy'
+        resource: 'RegionSslPolicy'
+        imports: 'selfLink'
+        min_version: beta 
+        description: |
+          A reference to the Region SslPolicy resource that will be associated with
+          the TargetHttpsProxy resource. If not set, the TargetHttpsProxy
+          resource will not have any SSL policy configured.
+     # 2022 May 28 - setSslPolicy method not yet listed
+     # https://cloud.google.com/compute/docs/reference/rest/beta/regionTargetHttpsProxies
      #  update_verb: :POST
      #  update_url:
      #    'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslPolicy'

@@ -51,6 +51,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           and that links to this Note.
       attestationAuthorityNote.publicKeys.id: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      attestationAuthorityNote.publicKeys.pkixPublicKey.signatureAlgorithm: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSignatureAlgorithm'
   Policy: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}"
     import_format: ["projects/{{project}}"]

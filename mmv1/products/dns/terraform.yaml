@@ -17,6 +17,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: 'projects/{{project}}/managedZones/{{name}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        name: "dns_managed_zone_quickstart"
+        primary_resource_id: "default"
+        skip_docs: true
+        vars:
+          dns_compute_instance: "dns-compute-instance"
+          allow_http_traffic: "allow-http-traffic"
+          example_zone_googlecloudexample: "example-zone-googlecloudexample"
+        min_version: beta
+        ignore_read_extra:
+          - "force_destroy"
+      - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_basic"
         primary_resource_id: "example-zone"
         pull_external: true
@@ -52,8 +63,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           zone_name: "peering-zone"
           network_name: "network"
     properties:
-      creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
       description: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           A textual description field. Defaults to 'Managed by Terraform'.
@@ -64,7 +73,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       dnssecConfig.nonExistence: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       id: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
+        name: 'managedZoneID'
       nameServerSet: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       privateVisibilityConfig: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -137,6 +146,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: 'Set this true to delete all records in the zone.'
         default_value: false
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      update_encoder: templates/terraform/update_encoder/managed_dns_zone.go.erb
       pre_delete: templates/terraform/pre_delete/managed_dns_zone.go.erb
   Policy: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: 'projects/{{project}}/policies/{{name}}'

@@ -137,6 +137,7 @@ func resourceContainerCluster() *schema.Resource {
 			<% end -%>
 			containerClusterAutopilotCustomizeDiff,
 			containerClusterNodeVersionRemoveDefaultCustomizeDiff,
+			containerClusterNetworkPolicyEmptyCustomizeDiff,
 		),
 
 		Timeouts: &schema.ResourceTimeout{
@@ -742,11 +743,13 @@ func resourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"enable_components": {
 							Type:        schema.TypeList,
-							Required:    true,
 <% if version == "ga" -%>
+							Required:    true,
 							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS.`,
 <% end -%>
 <% if version == "beta" -%>
+							Optional:    true,
+							Computed:    true,
 							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS and WORKLOADS.`,
 <% end -%>
 							Elem: &schema.Schema{
@@ -759,6 +762,24 @@ func resourceContainerCluster() *schema.Resource {
 <% end -%>
 							},
 						},
+<% if version == "beta" -%>
+						"managed_prometheus": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: `Configuration for Google Cloud Managed Services for Prometheus.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Whether or not the managed collection is enabled.`,
+									},
+								},
+							},
+						},
+<% end -%>
 					},
 				},
 			},
@@ -899,12 +920,12 @@ func resourceContainerCluster() *schema.Resource {
 			},
 
 			"network_policy": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Computed:    true,
-				MaxItems:    1,
-				Description: `Configuration options for the NetworkPolicy feature.`,
-				ConflictsWith: []string{"enable_autopilot"},
+				Type:             schema.TypeList,
+				Optional:         true,
+				MaxItems:         1,
+				Description:      `Configuration options for the NetworkPolicy feature.`,
+				ConflictsWith:    []string{"enable_autopilot"},
+				DiffSuppressFunc: containerClusterNetworkPolicyDiffSuppress,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
@@ -3463,11 +3484,11 @@ func expandMasterAuthorizedNetworksConfig(configured interface{}) *container.Mas
 }
 
 func expandNetworkPolicy(configured interface{}) *container.NetworkPolicy {
+	result := &container.NetworkPolicy{}
 	l := configured.([]interface{})
 	if len(l) == 0 {
-		return nil
+		return result
 	}
-	result := &container.NetworkPolicy{}
 	config := l[0].(map[string]interface{})
 	if enabled, ok := config["enabled"]; ok && enabled.(bool) {
 		result.Enabled = true
@@ -3681,13 +3702,24 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
-
+	mc := &container.MonitoringConfig{}
 	config := l[0].(map[string]interface{})
-	return &container.MonitoringConfig{
-		ComponentConfig: &container.MonitoringComponentConfig{
-			EnableComponents: convertStringArr(config["enable_components"].([]interface{})),
-		},
+<%# In version == 'ga' enable_components will always be specified. %>
+	if v, ok := config["enable_components"]; ok && len(v.([]interface{})) > 0 {
+		enable_components := v.([]interface{})
+		mc.ComponentConfig = &container.MonitoringComponentConfig{
+			EnableComponents: convertStringArr(enable_components),
+		}
 	}
+<% if version == 'beta' -%>
+	if v, ok := config["managed_prometheus"]; ok && len(v.([]interface{})) > 0 {
+		managed_prometheus := v.([]interface{})[0].(map[string]interface{})
+		mc.ManagedPrometheusConfig = &container.ManagedPrometheusConfig{
+			Enabled: managed_prometheus["enabled"].(bool),
+		}
+	}
+<% end -%>
+	return mc
 }
 
 <% unless version == 'ga' -%>
@@ -4212,12 +4244,27 @@ func flattenMonitoringConfig(c *container.MonitoringConfig) []map[string]interfa
 		return nil
 	}
 
+	result := make(map[string]interface{})
+	if c.ComponentConfig != nil {
+		result["enable_components"] = c.ComponentConfig.EnableComponents
+	}
+<% if version == 'beta' -%>
+	if c.ManagedPrometheusConfig != nil {
+		result["managed_prometheus"] = flattenManagedPrometheusConfig(c.ManagedPrometheusConfig)
+	}
+<% end -%>
+	return []map[string]interface{}{result}
+}
+
+<% if version == 'beta' -%>
+func flattenManagedPrometheusConfig(c *container.ManagedPrometheusConfig) []map[string]interface{} {
 	return []map[string]interface{}{
 		{
-			"enable_components":        c.ComponentConfig.EnableComponents,
+			"enabled": c != nil && c.Enabled,
 		},
 	}
 }
+<% end -%>
 
 func resourceContainerClusterStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
@@ -4380,6 +4427,18 @@ func containerClusterNodeVersionRemoveDefaultCustomizeDiff(_ context.Context, d 
 	return nil
 }
 
+func containerClusterNetworkPolicyEmptyCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	// we want to set computed only in the case that there wasn't a previous network_policy configured
+	// because we default a returned empty network policy to a configured false, this will only apply
+	// on the first run, if network_policy is not configured - all other runs will store empty configurations
+	// as enabled=false and provider=PROVIDER_UNSPECIFIED
+	o, n := d.GetChange("network_policy")
+	if o == nil && n == nil {
+		return d.SetNewComputed("network_policy")
+	}
+	return nil
+}
+
 <% unless version == 'ga' -%>
 func podSecurityPolicyCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
 	if k == "pod_security_policy_config.#" && old == "1" && new == "0" {
@@ -4395,3 +4454,17 @@ func podSecurityPolicyCfgSuppress(k, old, new string, r *schema.ResourceData) bo
 	return false
 }
 <% end -%>
+
+func containerClusterNetworkPolicyDiffSuppress(k, old, new string, r *schema.ResourceData) bool {
+	// if network_policy configuration is empty, we store it as populated and enabled=false, and
+	// provider=PROVIDER_UNSPECIFIED, in the case that it was previously stored with this state,
+	// and the configuration removed, we want to suppress the diff
+	if k == "network_policy.#" && old == "1" && new == "0" {
+		o, _ := r.GetChange("network_policy.0.enabled")
+		if !o.(bool) {
+			return true
+		}
+	}
+
+	return false
+}
