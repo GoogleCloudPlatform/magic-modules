@@ -26,6 +26,9 @@ for i := len(oldDdls); i < len(newDdls); i++ {
 if d.HasChange("version_retention_period") {
     dbName := d.Get("name")
     retentionDdl := fmt.Sprintf("ALTER DATABASE `%s` SET OPTIONS (version_retention_period=\"%s\")", dbName, obj["versionRetentionPeriod"])
+    if dialect, ok := d.GetOk("database_dialect"); ok && dialect == "POSTGRESQL" {
+        retentionDdl = fmt.Sprintf("ALTER DATABASE \"%s\" SET spanner.version_retention_period TO \"%s\"", dbName, obj["versionRetentionPeriod"])
+    }
     updateDdls = append(updateDdls, retentionDdl)
 }
 

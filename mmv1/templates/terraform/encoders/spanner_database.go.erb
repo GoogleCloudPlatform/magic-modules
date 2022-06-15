@@ -1,9 +1,14 @@
 obj["createStatement"] = fmt.Sprintf("CREATE DATABASE `%s`", obj["name"])
-if dialect, ok := obj["databaseDialect"]; ok && dialect == "POSTGRESQL" {
+dialect, dialectOk := obj["databaseDialect"];
+retentionPeriod, retentionPeriodOk := obj["versionRetentionPeriod"];
+
+if dialectOk && dialect == "POSTGRESQL" {
     obj["createStatement"] = fmt.Sprintf("CREATE DATABASE \"%s\"", obj["name"])
 }
 
-if retentionPeriod, ok := obj["versionRetentionPeriod"]; ok {
+if retentionPeriodOk && dialect != "POSTGRESQL" {
+        // Only include GOOGLE_STANDARD_SQL syntax in create encoder because : 
+        // "DDL statements other than <CREATE DATABASE> are not allowed in database creation request for PostgreSQL-enabled databases"
         retentionDdl := fmt.Sprintf("ALTER DATABASE `%s` SET OPTIONS (version_retention_period=\"%s\")", obj["name"], retentionPeriod)
 
         // Handle scenario where ddl is not set at create stage
