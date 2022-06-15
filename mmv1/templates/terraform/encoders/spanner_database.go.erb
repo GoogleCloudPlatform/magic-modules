@@ -4,10 +4,19 @@ if dialect, ok := obj["databaseDialect"]; ok && dialect == "POSTGRESQL" {
 }
 
 if retentionPeriod, ok := obj["versionRetentionPeriod"]; ok {
-		retentionDdl := fmt.Sprintf("ALTER DATABASE `%s` SET OPTIONS (version_retention_period=\"%s\")", obj["name"], retentionPeriod)
-		extraStatements := obj["extraStatements"].([]interface{})
-		extraStatements = append(extraStatements, retentionDdl)
-		obj["extraStatements"] = extraStatements
+        retentionDdl := fmt.Sprintf("ALTER DATABASE `%s` SET OPTIONS (version_retention_period=\"%s\")", obj["name"], retentionPeriod)
+
+        // Handle scenario where ddl is not set at create stage
+        var extraStatements []interface{}
+        switch v := obj["extraStatements"].(type) {
+        case []interface{}:
+            extraStatements = v
+        default:
+            extraStatements = make([]interface{}, 0)
+        }
+
+        extraStatements = append(extraStatements, retentionDdl)
+        obj["extraStatements"] = extraStatements
 }
 
 delete(obj, "name")
