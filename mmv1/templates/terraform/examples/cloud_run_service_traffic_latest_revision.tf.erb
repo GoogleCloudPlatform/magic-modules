@@ -1,0 +1,11 @@
+resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['cloudrun_srv'] %>"
+  location = "us-central1"
+
+  template {}
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+}

@@ -183,6 +183,33 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           cloud_run_service_name: "cloudrun-srv"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_traffic_gradual_rollout"
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "default"
+        vars:
+          cloudrun_srv: "cloudrun-srv"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_traffic_latest_revision"
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "default"
+        vars:
+          cloudrun_srv: "cloudrun-srv"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_traffic_rollback"
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "default"
+        vars:
+          cloudrun_srv: "cloudrun-srv"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_traffic_split_tag"
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "default"
+        vars:
+          cloudrun_srv: "cloudrun-srv"
         min_version: beta
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
