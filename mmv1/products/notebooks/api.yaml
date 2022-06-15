@@ -146,6 +146,8 @@ objects:
     create_url: projects/{{project}}/locations/{{location}}/instances?instanceId={{name}}
     self_link: projects/{{project}}/locations/{{location}}/instances/{{name}}
     create_verb: :POST
+    update_verb: :PATCH
+    update_mask: true
     input: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
@@ -475,6 +477,8 @@ objects:
     create_url: projects/{{project}}/locations/{{location}}/runtimes?runtimeId={{name}}
     self_link: projects/{{project}}/locations/{{location}}/runtimes/{{name}}
     create_verb: :POST
+    update_verb: :PATCH
+    update_mask: true
     # When set, if any parameter change, they will get recreated.
     # Use wisely because any `update_url:` in the hierarchy below this will get ignored.
     # input: true
@@ -814,6 +818,11 @@ objects:
                   - UNSPECIFIED_NIC_TYPE
                   - VIRTIO_NET
                   - GVNIC
+              - !ruby/object:Api::Type::String
+                name: "reservedIpRange"
+                description: |
+                  Optional. Reserved IP Range name is used for VPC Peering. The
+                  subnetwork allocation will use the range *name* if it's assigned.
       - !ruby/object:Api::Type::Enum
         name: 'state'
         values:
@@ -859,6 +868,8 @@ objects:
             output: true
       - !ruby/object:Api::Type::NestedObject
         name: "softwareConfig"
+        update_verb: :PATCH
+        update_url: 'projects/{{project}}/locations/{{location}}/runtimes/{{name}}?updateMask=softwareConfig.idle_shutdown,softwareConfig.idle_shutdown_timeout,softwareConfig.custom_gpu_driver_path,softwareConfig.post_startup_script'
         description: |
           The config settings for software inside the runtime.
         properties:
