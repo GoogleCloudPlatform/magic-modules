@@ -151,6 +151,28 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           trigger_pubsub_tf: "trigger-pubsub-tf"
           trigger_auditlog_tf: "trigger-auditlog-tf"
         min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_remove_tag"
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "default"
+        vars:
+          cloudrun_srv: "cloudrun-srv"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_add_tag"
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "default"
+        vars:
+          cloudrun_srv: "cloudrun-srv"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_add_tag_no_revision"
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "default"
+        vars:
+          cloudrun_srv: "cloudrun-srv"
+        min_version: beta
+
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'autogenerate_revision_name'

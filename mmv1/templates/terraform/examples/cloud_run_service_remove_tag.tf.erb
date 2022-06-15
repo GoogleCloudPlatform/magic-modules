@@ -1,0 +1,18 @@
+resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['cloudrun_srv'] %>"
+  location = "us-central1"
+
+  template {}
+
+  traffic {
+    percent       = 100
+    revision_name = "cloudrun-srv-green" # This revision needs to already exist
+  }
+
+  traffic {
+    # Keep revision at 0% traffic
+    percent = 0
+    revision_name = "cloudrun-srv-blue" # This revision needs to already exist
+    # No tags for this revision
+  }
+}
