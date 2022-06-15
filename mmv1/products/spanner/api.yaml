@@ -178,6 +178,15 @@ objects:
           the instance is created. Values are of the form [a-z][-a-z0-9]*[a-z0-9].
         input: true
         required: true
+      - !ruby/object:Api::Type::String
+        name: 'versionRetentionPeriod'
+        update_url: projects/{{project}}/instances/{{instance}}/databases/{{name}}/ddl
+        update_verb: :PATCH
+        description: |
+          The retention period for the database. The retention period must be between 1 hour
+          and 7 days, and can be specified in days, hours, minutes, or seconds. For example,
+          the values 1d, 24h, 1440m, and 86400s are equivalent. Default value is 1h.
+        required: no
       - !ruby/object:Api::Type::Array
         item_type: Api::Type::String
         name: 'extraStatements'

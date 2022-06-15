@@ -22,8 +22,16 @@ for i := len(oldDdls); i < len(newDdls); i++ {
     updateDdls = append(updateDdls, newDdls[i].(string))
 }
 
+//Add statement to update version_retention_period property, if needed
+if d.HasChange("version_retention_period") {
+	dbName := d.Get("name")
+	retentionDdl := fmt.Sprintf("ALTER DATABASE `%s` SET OPTIONS (version_retention_period=\"%s\")", dbName, obj["versionRetentionPeriod"])
+	updateDdls = append(updateDdls, retentionDdl)
+}
+
 obj["statements"] = updateDdls
 delete(obj, "name")
+delete(obj, "versionRetentionPeriod")
 delete(obj, "instance")
 delete(obj, "extraStatements")
 return obj, nil

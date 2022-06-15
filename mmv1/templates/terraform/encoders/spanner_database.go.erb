@@ -2,6 +2,15 @@ obj["createStatement"] = fmt.Sprintf("CREATE DATABASE `%s`", obj["name"])
 if dialect, ok := obj["databaseDialect"]; ok && dialect == "POSTGRESQL" {
     obj["createStatement"] = fmt.Sprintf("CREATE DATABASE \"%s\"", obj["name"])
 }
+
+if retentionPeriod, ok := obj["versionRetentionPeriod"]; ok {
+		retentionDdl := fmt.Sprintf("ALTER DATABASE `%s` SET OPTIONS (version_retention_period=\"%s\")", obj["name"], retentionPeriod)
+		extraStatements := obj["extraStatements"].([]interface{})
+		extraStatements = append(extraStatements, retentionDdl)
+		obj["extraStatements"] = extraStatements
+}
+
 delete(obj, "name")
+delete(obj, "versionRetentionPeriod")
 delete(obj, "instance")
 return obj, nil
