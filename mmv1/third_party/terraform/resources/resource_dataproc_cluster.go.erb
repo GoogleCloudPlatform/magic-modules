@@ -1765,31 +1765,6 @@ func flattenNodePoolTargetConfig(d *schema.ResourceData, nia []*dataproc.GkeNode
 	return nodePools, nil
 }
 
-func flattenNodePoolConfigConfig(cfg *dataproc.GkeNodePoolConfig) []map[string]interface{} {
-	if cfg == nil {
-		return nil
-	}
-
-	data := map[string]interface{}{}
-
-	if cfg.Config != nil {
-		data["machine_type"] = cfg.Config.MachineType
-		data["local_ssd_count"] = cfg.Config.LocalSsdCount
-		data["preemptible"] = cfg.Config.Preemptible
-	}
-
-	if cfg.Autoscaling != nil {
-		data["min_node_count"] = cfg.Autoscaling.MinNodeCount
-		data["max_node_count"] = cfg.Autoscaling.MaxNodeCount
-	}
-
-	if cfg.Locations != nil {
-		data["locations"] = cfg.Locations
-	}
-
-	return []map[string]interface{}{data}
-}
-
 func flattenVirtualClusterConfig(d *schema.ResourceData, cfg *dataproc.VirtualClusterConfig) ([]map[string]interface{}, error) {
 	data := map[string]interface{}{
 		"staging_bucket":     d.Get("cluster_config.0.staging_bucket").(string),
