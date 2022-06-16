@@ -46,10 +46,9 @@ func resourceSpannerDBDdlCustomDiff(_ context.Context, diff *schema.ResourceDiff
 
 func validateDatabaseRetentionPeriod(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
-	
 	valueError := fmt.Errorf("version_retention_period should be in range [1h, 7d], in a format resembling 1d, 24h, 1440m, or 86400s")
 
-	r := regexp.MustCompile("^(\\d{1}d|\\d{2,3}h|\\d{4,5}m|\\d{5,6}s)$")
+	r := regexp.MustCompile("^(\\d{1}d|\\d{1,3}h|\\d{2,5}m|\\d{4,6}s)$")
 	if !r.MatchString(value) {
 		errors = append(errors, valueError)
 		return
