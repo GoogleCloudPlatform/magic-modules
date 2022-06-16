@@ -780,8 +780,7 @@ func resourceContainerCluster() *schema.Resource {
 <% if version == "ga" -%>
 							Required:    true,
 							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS.`,
-<% end -%>
-<% if version == "beta" -%>
+<% else -%>
 							Optional:    true,
 							Computed:    true,
 							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS and WORKLOADS.`,
@@ -790,13 +789,12 @@ func resourceContainerCluster() *schema.Resource {
 								Type: schema.TypeString,
 <% if version == "ga" -%>
 								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS"}, false),
-<% end -%>
-<% if version == "beta" -%>
+<% else -%>
 								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS", "WORKLOADS"}, false),
 <% end -%>
 							},
 						},
-<% if version == "beta" -%>
+<% unless version == "ga" -%>
 						"managed_prometheus": {
 							Type:        schema.TypeList,
 							Optional:    true,
