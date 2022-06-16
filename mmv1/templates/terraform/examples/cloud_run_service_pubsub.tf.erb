@@ -48,7 +48,7 @@ resource "google_pubsub_topic" "topic" {
 # [START cloud_run_service_pubsub_sub]
 resource "google_pubsub_subscription" "subscription" {
   name  = "<%= ctx[:vars]['pubsub_subscription'] %>"
-  topic = google_pubsub_topic["<%= ctx[:vars]['pubsub_topic'] %>"].name
+  topic = google_pubsub_topic.topic.name
   push_config {
     push_endpoint = "<%= ctx[:vars]['cloud_run_service_url'] %>"
     oidc_token {
