@@ -27,7 +27,7 @@ var (
 		"cluster_config.0.gke_cluster_config.0.image_version",
 		"cluster_config.0.gke_cluster_config.0.namespace",
 		"cluster_config.0.gke_cluster_config.0.cluster",
-		"cluster_config.0.gke_cluster_config.0.node_pool_config",
+		"cluster_config.0.gke_cluster_config.0.node_pool",
 	}
 
 	gceClusterConfigKeys = []string{
@@ -214,55 +214,117 @@ func resourceDataprocCluster() *schema.Resource {
 							AtLeastOneOf: clusterConfigKeys,
 							Computed:     true,
 							MaxItems:     1,
-							Description:  `Common config settings for resources of Google Kubernetes Engine cluster instances, applicable to all instances in the cluster.`,
+							Description:  `The Dataproc cluster config for a cluster that does not directly control the underlying compute resources, such as a Dataproc-on-GKE cluster.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 
 									"image_version": {
 										Type:             schema.TypeString,
 										Optional:         true,
-										Default:          "dataproc-2.0",
+										Default:          "3.1-dataproc-7",
 										AtLeastOneOf:     gkeClusterConfigKeys,
 										ForceNew:         true,
 										DiffSuppressFunc: dataprocImageVersionDiffSuppress,
 										Description:      `The Cloud Dataproc image version to use for the cluster - this controls the sets of software versions installed onto the nodes when you create clusters. If not specified, defaults to the latest version.`,
 									},
+
+									"optional_components": {
+										Type:        schema.TypeMap,
+										Optional:    true,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+										Computed:    true,
+										Description: `The components that should be installed in this Dataproc cluster. The key must be a string from the KubernetesComponent enumeration. The value is the version of the software to be installed.`,
+									},
+
 									"namespace": {
 										Type:         schema.TypeString,
 										Optional:     true,
 										Default:      false,
 										AtLeastOneOf: gkeClusterConfigKeys,
 										ForceNew:     true,
-										Description:  `Namespace`,
+										Description:  `A namespace within the Kubernetes cluster to deploy into. If this namespace does not exist, it is created. If it exists, Dataproc verifies that another Dataproc VirtualCluster is not installed into it. If not specified, the name of the Dataproc Cluster is used.`,
 									},
+
 									"cluster": {
 										Type:         schema.TypeString,
 										Optional:     true,
 										Default:      false,
 										AtLeastOneOf: gkeClusterConfigKeys,
 										ForceNew:     true,
-										Description:  `A target GKE cluster to deploy to. It must be in the same project and region as the Dataproc cluster (the GKE cluster can be zonal or regional).`,
+										Description:  `A target GKE cluster to deploy to. It must be in the same project and region as the Dataproc cluster (the GKE cluster can be zonal or regional). Format: 'projects/{project}/locations/{location}/clusters/{cluster_id}'`,
 									},
-									"node_pool_config": {
+
+									"node_pool": {
 										Type:         schema.TypeList,
 										Optional:     true,
 										AtLeastOneOf: gkeClusterConfigKeys,
 										MinItems:     1,
-										Description:  `Common config settings for resources of Google Kubernetes Engine cluster instances, applicable to all instances in the cluster.`,
+										Description:  `GKE node pools where workloads will be scheduled. At least one node pool must be assigned the DEFAULT GkeNodePoolTarget.Role. If a GkeNodePoolTarget is not specified, Dataproc constructs a DEFAULT GkeNodePoolTarget.`,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
-												"node_pool": {
+
+												"node_pool_name": {
 													Type:        schema.TypeString,
 													Optional:    true,
 													Default:     false,
 													ForceNew:    true,
-													Description: `Nodepool`,
+													Description: `The target GKE node pool.`,
 												},
+
 												"roles": {
 													Type:        schema.TypeSet,
 													Elem:        &schema.Schema{Type: schema.TypeString},
 													Required:    true,
-													Description: `Shielded Instance Config for clusters using Compute Engine Shielded VMs.`,
+													Description: `The roles associated with the GKE node pool.`,
+												},
+
+												"node_pool_config": {
+													Type:        schema.TypeList,
+													Optional:    true,
+													Computed:    true,
+													MaxItems:    1,
+													Description: `Input only. The configuration for the GKE node pool.`,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+
+															"preemptible": {
+																Type:        schema.TypeBool,
+																Required:    true,
+																Description: `Whether the nodes are created as preemptible VM instances. Preemptible nodes cannot be used in a node pool with the CONTROLLER role or in the DEFAULT node pool if the CONTROLLER role is not assigned (the DEFAULT node pool will assume the CONTROLLER role).`,
+															},
+
+															"locations": {
+																Type:        schema.TypeSet,
+																Elem:        &schema.Schema{Type: schema.TypeString},
+																Required:    true,
+																Description: `The list of Compute Engine zones where node pool nodes associated with a Dataproc on GKE virtual cluster will be located.`,
+															},
+
+															"machine_type": {
+																Type:        schema.TypeString,
+																Required:    true,
+																Description: `The name of a Compute Engine machine type.`,
+															},
+
+															"local_ssd_count": {
+																Type:        schema.TypeInt,
+																Optional:    true,
+																Description: `The number of local SSD disks to attach to the node, which is limited by the maximum number of disks allowable per zone.`,
+															},
+
+															"min_node_count": {
+																Type:        schema.TypeInt,
+																Required:    true,
+																Description: `The minimum number of nodes in the node pool. Must be >= 0 and <= maxNodeCount.`,
+															},
+
+															"max_node_count": {
+																Type:        schema.TypeInt,
+																Required:    true,
+																Description: `The maximum number of nodes in the node pool. Must be >= minNodeCount, and must be > 0.`,
+															},
+														},
+													},
 												},
 											},
 										},
@@ -1024,12 +1086,20 @@ func expandGkeClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.V
 
 	if cfg, ok := configOptions(d, "cluster_config.0.gke_cluster_config"); ok {
 		conf.KubernetesClusterConfig = &dataproc.KubernetesClusterConfig{
-			KubernetesSoftwareConfig: &dataproc.KubernetesSoftwareConfig{
-				ComponentVersion: map[string]string{
-					"SPARK": cfg["image_version"].(string),
-				},
-			},
+			KubernetesSoftwareConfig: &dataproc.KubernetesSoftwareConfig{},
 		}
+
+		components := map[string]string{
+			"SPARK": cfg["image_version"].(string),
+		}
+
+		if compSet, ok := cfg["optional_components"]; ok {
+			for k, val := range compSet.(map[string]interface{}) {
+				components[k] = val.(string)
+			}
+		}
+
+		conf.KubernetesClusterConfig.KubernetesSoftwareConfig.ComponentVersion = components
 
 		if v, ok := cfg["namespace"]; ok {
 			conf.KubernetesClusterConfig.KubernetesNamespace = v.(string)
@@ -1039,24 +1109,58 @@ func expandGkeClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.V
 			conf.KubernetesClusterConfig.GkeClusterConfig = &dataproc.GkeClusterConfig{}
 			conf.KubernetesClusterConfig.GkeClusterConfig.GkeClusterTarget = clusterAddress.(string)
 
-			if nodePoolTarget, ok := d.GetOk("cluster_config.0.gke_cluster_config.0.node_pool_config"); ok {
-				conf.KubernetesClusterConfig.GkeClusterConfig.NodePoolTarget = expandNodePoolTarget(nodePoolTarget, clusterAddress.(string))
+			if nodePoolTarget, ok := d.GetOk("cluster_config.0.gke_cluster_config.0.node_pool"); ok {
+				conf.KubernetesClusterConfig.GkeClusterConfig.NodePoolTarget = expandNodePoolTarget(d, nodePoolTarget, clusterAddress.(string))
 			}
 		}
 	}
 	return conf, nil
 }
 
-func expandNodePoolTarget(v interface{}, clusterAddress string) []*dataproc.GkeNodePoolTarget {
+func expandNodePoolTarget(d *schema.ResourceData, v interface{}, clusterAddress string) []*dataproc.GkeNodePoolTarget {
 	nodePoolList := v.([]interface{})
 
 	nodePools := []*dataproc.GkeNodePoolTarget{}
 	for _, v1 := range nodePoolList {
 		nodePoolItem := v1.(map[string]interface{})
 		nodePool := &dataproc.GkeNodePoolTarget{
-			NodePool: clusterAddress + "/nodePools/" + nodePoolItem["node_pool"].(string),
+			NodePool: clusterAddress + "/nodePools/" + nodePoolItem["node_pool_name"].(string),
 			Roles:    convertStringSet(nodePoolItem["roles"].(*schema.Set)),
 		}
+
+		if v, ok := d.GetOk("cluster_config.0.gke_cluster_config.0.node_pool.0.node_pool_config"); ok {
+			cfgNp := v.([]interface{})[0].(map[string]interface{})
+
+			nodePool.NodePoolConfig = &dataproc.GkeNodePoolConfig{
+				Config:      &dataproc.GkeNodeConfig{},
+				Autoscaling: &dataproc.GkeNodePoolAutoscalingConfig{},
+			}
+
+			if v, ok := cfgNp["machine_type"]; ok {
+				nodePool.NodePoolConfig.Config.MachineType = v.(string)
+			}
+
+			if v, ok := cfgNp["local_ssd_count"]; ok {
+				nodePool.NodePoolConfig.Config.LocalSsdCount = int64(v.(int))
+			}
+
+			if v, ok := cfgNp["preemptible"]; ok {
+				nodePool.NodePoolConfig.Config.Preemptible = v.(bool)
+			}
+
+			if v, ok := cfgNp["min_node_count"]; ok {
+				nodePool.NodePoolConfig.Autoscaling.MinNodeCount = int64(v.(int))
+			}
+
+			if v, ok := cfgNp["max_node_count"]; ok {
+				nodePool.NodePoolConfig.Autoscaling.MaxNodeCount = int64(v.(int))
+			}
+
+			if v, ok := cfgNp["locations"]; ok {
+				nodePool.NodePoolConfig.Locations = convertStringSet(v.(*schema.Set))
+			}
+		}
+
 		nodePools = append(nodePools, nodePool)
 	}
 
@@ -1607,30 +1711,83 @@ func flattenGkeClusterConfig(d *schema.ResourceData, cfg *dataproc.VirtualCluste
 	}
 
 	if len(cfg.KubernetesClusterConfig.GkeClusterConfig.NodePoolTarget) > 0 {
-		val, err := flattenNodePoolTargetConfig(cfg.KubernetesClusterConfig.GkeClusterConfig.NodePoolTarget, cfg.KubernetesClusterConfig.GkeClusterConfig.GkeClusterTarget)
+		val, err := flattenNodePoolTargetConfig(d, cfg.KubernetesClusterConfig.GkeClusterConfig.NodePoolTarget, cfg.KubernetesClusterConfig.GkeClusterConfig.GkeClusterTarget)
 		if err != nil {
 			return nil
 		}
-		data["node_pool_config"] = val
+
+		data["node_pool"] = val
+	}
+
+	if len(cfg.KubernetesClusterConfig.KubernetesSoftwareConfig.ComponentVersion) > 1 {
+		val, err := flattenOptionalComponents(cfg.KubernetesClusterConfig.KubernetesSoftwareConfig)
+		if err != nil {
+			return nil
+		}
+
+		data["optional_components"] = val
 	}
 
 	return []map[string]interface{}{data}
 }
 
-func flattenNodePoolTargetConfig(nia []*dataproc.GkeNodePoolTarget, clusterAddress string) ([]map[string]interface{}, error) {
+func flattenOptionalComponents(nia *dataproc.KubernetesSoftwareConfig) (map[string]string, error) {
+	optionalComponents := map[string]string{}
+	for component, version := range nia.ComponentVersion {
+		if component == "SPARK" {
+			continue
+		}
 
+		optionalComponents[component] = version
+	}
+
+	return optionalComponents, nil
+}
+
+func flattenNodePoolTargetConfig(d *schema.ResourceData, nia []*dataproc.GkeNodePoolTarget, clusterAddress string) ([]map[string]interface{}, error) {
 	nodePools := []map[string]interface{}{}
-	for _, v := range nia {
+	for i, v := range nia {
 		nodePoolAddress := strings.Split(v.NodePool, "/")
 		nodePool := map[string]interface{}{
-			"node_pool": nodePoolAddress[len(nodePoolAddress)-1],
-			"roles":     v.Roles,
+			"node_pool_name": nodePoolAddress[len(nodePoolAddress)-1],
+			"roles":          v.Roles,
+		}
+
+		if npc, ok := d.GetOk(fmt.Sprintf("cluster_config.0.gke_cluster_config.0.node_pool.%d.node_pool_config", i)); ok {
+			// We can't read the node pool config details due to `Input only`-field,
+			// copy the initialize_params from what the user originally specified to avoid diffs.
+			nodePool["node_pool_config"] = npc
 		}
 
 		nodePools = append(nodePools, nodePool)
 	}
-	return nodePools, nil
 
+	return nodePools, nil
+}
+
+func flattenNodePoolConfigConfig(cfg *dataproc.GkeNodePoolConfig) []map[string]interface{} {
+	if cfg == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{}
+
+	if cfg.Config != nil {
+		data["machine_type"] = cfg.Config.MachineType
+		data["local_ssd_count"] = cfg.Config.LocalSsdCount
+		data["preemptible"] = cfg.Config.Preemptible
+	}
+
+	if cfg.Autoscaling != nil {
+		data["min_node_count"] = cfg.Autoscaling.MinNodeCount
+		data["max_node_count"] = cfg.Autoscaling.MaxNodeCount
+	}
+
+	if cfg.Locations != nil {
+		data["locations"] = cfg.Locations
+	}
+
+	return []map[string]interface{}{data}
 }
 
 func flattenVirtualClusterConfig(d *schema.ResourceData, cfg *dataproc.VirtualClusterConfig) ([]map[string]interface{}, error) {
