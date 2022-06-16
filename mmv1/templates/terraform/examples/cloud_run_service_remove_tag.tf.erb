@@ -6,13 +6,15 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
 
   traffic {
     percent       = 100
-    revision_name = "cloudrun-srv-green" # This revision needs to already exist
+    # This revision needs to already exist
+    revision_name = "<%= ctx[:vars]['cloud_run_service_name'] %>-green"
+  
   }
-
   traffic {
-    # Keep revision at 0% traffic
-    percent = 0
-    revision_name = "cloudrun-srv-blue" # This revision needs to already exist
     # No tags for this revision
+    # Keep revision at 0% traffic
+    percent       = 0
+    # This revision needs to already exist
+    revision_name = "<%= ctx[:vars]['cloud_run_service_name'] %>-blue"
   }
 }
