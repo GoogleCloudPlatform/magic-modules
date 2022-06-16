@@ -23,12 +23,14 @@ import (
 var (
 	resolveDataprocImageVersion = regexp.MustCompile(`(?P<Major>[^\s.-]+)\.(?P<Minor>[^\s.-]+)(?:\.(?P<Subminor>[^\s.-]+))?(?:\-(?P<Distr>[^\s.-]+))?`)
 
+<% if version == "ga" -%>
 	gkeClusterConfigKeys = []string{
 		"cluster_config.0.gke_cluster_config.0.image_version",
 		"cluster_config.0.gke_cluster_config.0.namespace",
 		"cluster_config.0.gke_cluster_config.0.cluster",
 		"cluster_config.0.gke_cluster_config.0.node_pool",
 	}
+<% end -%>
 
 	gceClusterConfigKeys = []string{
 		"cluster_config.0.gce_cluster_config.0.zone",
@@ -64,7 +66,9 @@ var (
 		"cluster_config.0.staging_bucket",
 		"cluster_config.0.temp_bucket",
 		"cluster_config.0.gce_cluster_config",
+<% if version == "ga" -%>
 		"cluster_config.0.gke_cluster_config",
+<% end -%>
 		"cluster_config.0.master_config",
 		"cluster_config.0.worker_config",
 		"cluster_config.0.preemptible_worker_config",
@@ -208,6 +212,7 @@ func resourceDataprocCluster() *schema.Resource {
 							Description:  `The Cloud Storage temp bucket used to store ephemeral cluster and jobs data, such as Spark and MapReduce history files. Note: If you don't explicitly specify a temp_bucket then GCP will auto create / assign one for you.`,
 						},
 
+<% if version == "ga" -%>
 						"gke_cluster_config": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -332,6 +337,7 @@ func resourceDataprocCluster() *schema.Resource {
 								},
 							},
 						},
+<% end -%>
 
 						"gce_cluster_config": {
 							Type:         schema.TypeList,
@@ -1030,12 +1036,16 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 		ProjectId:   project,
 	}
 
+<% if version == "ga" -%>
 	if _, ok := d.GetOk("cluster_config.0.gke_cluster_config"); ok {
 		cluster.VirtualClusterConfig, err = expandGkeClusterConfig(d, config)
 		cluster.VirtualClusterConfig.StagingBucket = d.Get("cluster_config.0.staging_bucket").(string)
 	} else {
 		cluster.Config, err = expandClusterConfig(d, config)
 	}
+<% else -%>
+	cluster.Config, err = expandClusterConfig(d, config)
+<% end -%>
 
 	if err != nil {
 		return err
@@ -1074,6 +1084,7 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 	return resourceDataprocClusterRead(d, meta)
 }
 
+<% if version == "ga" -%>
 func expandGkeClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.VirtualClusterConfig, error) {
 	conf := &dataproc.VirtualClusterConfig{}
 
@@ -1166,6 +1177,7 @@ func expandNodePoolTarget(d *schema.ResourceData, v interface{}, clusterAddress 
 
 	return nodePools
 }
+<% end -%>
 
 func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.ClusterConfig, error) {
 	conf := &dataproc.ClusterConfig{
@@ -1682,11 +1694,15 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 
 	var cfg []map[string]interface{}
 
+<% if version == "ga" -%>
 	if cluster.Config != nil {
 		cfg, err = flattenClusterConfig(d, cluster.Config)
 	} else {
 		cfg, err = flattenVirtualClusterConfig(d, cluster.VirtualClusterConfig)
 	}
+<% else -%>
+	cfg, err = flattenClusterConfig(d, cluster.Config)
+<% end -%>
 
 	if err != nil {
 		return err
@@ -1699,6 +1715,7 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 	return nil
 }
 
+<% if version == "ga" -%>
 func flattenGkeClusterConfig(d *schema.ResourceData, cfg *dataproc.VirtualClusterConfig) []map[string]interface{} {
 	if cfg == nil {
 		return nil
@@ -1773,6 +1790,7 @@ func flattenVirtualClusterConfig(d *schema.ResourceData, cfg *dataproc.VirtualCl
 
 	return []map[string]interface{}{data}, nil
 }
+<% end -%>
 
 func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) ([]map[string]interface{}, error) {
 
