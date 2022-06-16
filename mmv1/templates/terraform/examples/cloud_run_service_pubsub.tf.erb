@@ -28,7 +28,7 @@ resource "google_cloud_run_service_iam_binding" "binding" {
   location = google_cloud_run_service["<%= ctx[:primary_resource_id] %>"].location
   service = google_cloud_run_service["<%= ctx[:primary_resource_id] %>"].name
   role = "roles/run.invoker"
-  members = ["serviceAccount:<%= ctx[:vars]['pubsub_sa'] %>"]
+  members = ["serviceAccount:${google_service_account.sa.email}"]
 }
 # [END cloud_run_service_pubsub_run_invoke_permissions]
 
