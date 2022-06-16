@@ -60,6 +60,11 @@ objects:
           'https://cloud.google.com/certificate-authority-service'
       api: 'https://cloud.google.com/certificate-authority-service/docs/reference/rest'
     properties:
+      - !ruby/object:Api::Type::String
+        name: pem_ca_certificate
+        description: |
+          The signed CA certificate issued from the subordinated CA's CSR. This is needed when activating the subordiante CA with a third party issuer.
+        url_param_only: true                
       - !ruby/object:Api::Type::Boolean
         name: 'ignore_active_certificates_on_deletion'
         default_value: false
@@ -422,34 +427,64 @@ objects:
         required: true
         input: true
         properties:
-        - !ruby/object:Api::Type::String
-          name: 'cloudKmsKeyVersion'
-          description: |
-            The resource name for an existing Cloud KMS CryptoKeyVersion in the format
-            `projects/*/locations/*/keyRings/*/cryptoKeys/*/cryptoKeyVersions/*`.
-          input: true
-          exactly_one_of:
-          - key_spec.0.cloud_kms_key_version
-          - key_spec.0.algorithm
-        - !ruby/object:Api::Type::Enum
-          name: 'algorithm'
-          description: |
-            The algorithm to use for creating a managed Cloud KMS key for a for a simplified
-            experience. All managed keys will be have their ProtectionLevel as HSM.
-          input: true
-          values:
-            - :SIGN_HASH_ALGORITHM_UNSPECIFIED
-            - :RSA_PSS_2048_SHA256
-            - :RSA_PSS_3072_SHA256
-            - :RSA_PSS_4096_SHA256
-            - :RSA_PKCS1_2048_SHA256
-            - :RSA_PKCS1_3072_SHA256
-            - :RSA_PKCS1_4096_SHA256
-            - :EC_P256_SHA256
-            - :EC_P384_SHA384
-          exactly_one_of:
-          - key_spec.0.cloud_kms_key_version
-          - key_spec.0.algorithm
+          - !ruby/object:Api::Type::String
+            name: 'cloudKmsKeyVersion'
+            description: |
+              The resource name for an existing Cloud KMS CryptoKeyVersion in the format
+              `projects/*/locations/*/keyRings/*/cryptoKeys/*/cryptoKeyVersions/*`.
+            input: true
+            exactly_one_of:
+            - key_spec.0.cloud_kms_key_version
+            - key_spec.0.algorithm
+          - !ruby/object:Api::Type::Enum
+            name: 'algorithm'
+            description: |
+              The algorithm to use for creating a managed Cloud KMS key for a for a simplified
+              experience. All managed keys will be have their ProtectionLevel as HSM.
+            input: true
+            values:
+              - :SIGN_HASH_ALGORITHM_UNSPECIFIED
+              - :RSA_PSS_2048_SHA256
+              - :RSA_PSS_3072_SHA256
+              - :RSA_PSS_4096_SHA256
+              - :RSA_PKCS1_2048_SHA256
+              - :RSA_PKCS1_3072_SHA256
+              - :RSA_PKCS1_4096_SHA256
+              - :EC_P256_SHA256
+              - :EC_P384_SHA384
+            exactly_one_of:
+            - key_spec.0.cloud_kms_key_version
+            - key_spec.0.algorithm
+      - !ruby/object:Api::Type::NestedObject
+        name: 'subordinateConfig'
+        description: |
+          If this is a subordinate CertificateAuthority, this field will be set
+          with the subordinate configuration, which describes its issuers.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'certificateAuthority'
+            description: |
+              This can refer to a CertificateAuthority that was used to create a
+              subordinate CertificateAuthority. This field is used for information
+              and usability purposes only. The resource name is in the format
+              `projects/*/locations/*/caPools/*/certificateAuthorities/*`. 
+            exactly_one_of:
+              - subordinate_config.0.certificate_authority
+              - subordinate_config.0.pem_issuer_chain
+          - !ruby/object:Api::Type::NestedObject
+            name: 'pemIssuerChain'
+            description: |
+              Contains the PEM certificate chain for the issuers of this CertificateAuthority, 
+              but not pem certificate for this CA itself.
+            exactly_one_of:
+              - subordinate_config.0.certificate_authority
+              - subordinate_config.0.pem_issuer_chain
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'pemCertificates'
+                description: |
+                  Expected to be in leaf-to-root order according to RFC 5246.
+                item_type: Api::Type::String
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: The State for this CertificateAuthority.
@@ -546,7 +581,10 @@ objects:
       - !ruby/object:Api::Type::String
         name: certificate_authority
         description:  |
-          Certificate Authority name.
+          The Certificate Authority ID that should issue the certificate. For example, to issue a Certificate from
+          a Certificate Authority with resource name `projects/my-project/locations/us-central1/caPools/my-pool/certificateAuthorities/my-ca`,
+          argument `pool` should be set to `projects/my-project/locations/us-central1/caPools/my-pool`, argument `certificate_authority`
+          should be set to `my-ca`.
         input: true
         url_param_only: true                
     properties:
@@ -566,7 +604,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'issuerCertificateAuthority'
         description: |
-          The resource name of the issuing CertificateAuthority in the format projects/*/locations/*/caPools/*/certificateAuthorities/*.
+          The resource name of the issuing CertificateAuthority in the format `projects/*/locations/*/caPools/*/certificateAuthorities/*`.
         output: true
       - !ruby/object:Api::Type::String
         name: 'lifetime'
