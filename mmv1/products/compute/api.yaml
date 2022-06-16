@@ -3874,6 +3874,15 @@ objects:
             can only be set to true for load balancers that have their
             loadBalancingScheme set to INTERNAL.
       - !ruby/object:Api::Type::String
+        name: 'pscConnectionId'
+        description: 'The PSC connection id of the PSC Forwarding Rule.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'pscConnectionStatus'
+        description: 'The PSC connection status of the PSC Forwarding Rule. Possible
+            values: STATUS_UNSPECIFIED, PENDING, ACCEPTED, REJECTED, CLOSED'
+        output: true
+      - !ruby/object:Api::Type::String
         name: 'description'
         description: |
           An optional description of this resource. Provide this property when
