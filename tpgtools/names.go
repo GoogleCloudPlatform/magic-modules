@@ -125,8 +125,8 @@ func (b BasePathOverrideNameSnakeCase) ToTitle() RenderedString {
 	if strings.HasPrefix(string(b), "os") {
 		return RenderedString("OS" + title[2:])
 	}
-	if strings.HasPrefix(string(b), "gke") {
-		return RenderedString("GKE" + title[3:])
+	if strings.HasPrefix(string(b), "gkehub") {
+		return RenderedString("GKEHub" + title[6:])
 	}
 	return RenderedString(title)
 }
