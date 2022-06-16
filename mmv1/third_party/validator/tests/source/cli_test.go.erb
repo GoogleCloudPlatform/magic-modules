@@ -64,6 +64,7 @@ func TestCLI(t *testing.T) {
 		{name: "sql"},
 		{name: "example_compute_forwarding_rule"},
 		{name: "example_compute_instance"},
+		{name: "example_folder_iam_member", compareConvertOutput: compareMergedIamMemberOutput},
 		{name: "example_project_create", constraints: []constraint{alwaysViolate, constraint{name: "project_match_target", wantViolation: false, wantOutputRegex: ""}}},
 		{name: "example_project_update", constraints: []constraint{alwaysViolate, constraint{name: "project_match_target", wantViolation: true, wantOutputRegex: "Constraint GCPAlwaysViolatesConstraintV1.always_violates_project_match_target on resource"}}},
 		{name: "example_project_iam_binding", compareConvertOutput: compareMergedIamBindingOutput},
