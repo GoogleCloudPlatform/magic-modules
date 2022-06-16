@@ -26,6 +26,7 @@ func TestAccSpannerDatabase_basic(t *testing.T) {
 				Config: testAccSpannerDatabase_basic(instanceName, databaseName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_spanner_database.basic", "state"),
+					resource.TestCheckResourceAttr("google_spanner_database.basic", "version_retention_period", "1h"), // default set by API
 				),
 			},
 			{
@@ -39,6 +40,7 @@ func TestAccSpannerDatabase_basic(t *testing.T) {
 				Config: testAccSpannerDatabase_basicUpdate(instanceName, databaseName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_spanner_database.basic", "state"),
+					resource.TestCheckResourceAttr("google_spanner_database.basic", "version_retention_period", "2d"),
 				),
 			},
 			{
@@ -106,6 +108,7 @@ resource "google_spanner_instance" "basic" {
 resource "google_spanner_database" "basic" {
   instance = google_spanner_instance.basic.name
   name     = "%s"
+  version_retention_period = "2d" # increase from default 1h
   ddl = [
 	"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
 	"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
@@ -190,6 +193,7 @@ resource "google_spanner_database" "basic_spangres" {
   instance = google_spanner_instance.basic.name
   name     = "%s-spangres"
   database_dialect = "POSTGRESQL"
+  version_retention_period = "2d" # increase from default 1h
   ddl = [
      "CREATE TABLE t1 (t1 bigint NOT NULL PRIMARY KEY)",
      "CREATE TABLE t2 (t2 bigint NOT NULL PRIMARY KEY)",
