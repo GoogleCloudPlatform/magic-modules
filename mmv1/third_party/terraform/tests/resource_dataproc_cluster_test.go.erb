@@ -222,6 +222,38 @@ func TestAccDataprocCluster_basic(t *testing.T) {
 	})
 }
 
+func TestAccDataprocGkeCluster_basic(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	rnd := randString(t, 10)
+	pid := getTestProjectFromEnv()
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocGkeCluster_basic(pid, rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.gke_cluster", &cluster),
+
+					// Expect 1 dataproc on gke instances with computed values
+					resource.TestCheckResourceAttr("google_dataproc_cluster.gke_cluster", "cluster_config.0.gke_cluster_config.#", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.gke_cluster", "cluster_config.0.gke_cluster_config.0.node_pool.#", "1"),
+					resource.TestCheckResourceAttrSet("google_dataproc_cluster.gke_cluster", "cluster_config.0.gke_cluster_config.0.node_pool.0.node_pool_name"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.gke_cluster", "cluster_config.0.gke_cluster_config.0.node_pool.0.roles.#", "1"),
+					testAccCheckDataprocGkeClusterNodePoolsHaveRoles(&cluster, "DEFAULT"),
+
+					resource.TestCheckResourceAttrSet("google_dataproc_cluster.gke_cluster", "cluster_config.0.gke_cluster_config.0.cluster"),
+					resource.TestCheckResourceAttrSet("google_dataproc_cluster.gke_cluster", "cluster_config.0.gke_cluster_config.0.namespace"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDataprocCluster_withAccelerators(t *testing.T) {
 	t.Parallel()
 
@@ -1102,6 +1134,71 @@ resource "google_dataproc_cluster" "basic" {
   region = "us-central1"
 }
 `, rnd)
+}
+
+func testAccDataprocGkeCluster_basic(projectID string, rnd string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_container_cluster" "primary" {
+  name     = "tf-test-gke-%s"
+  location = "us-central1-a"
+
+  initial_node_count = 1
+
+  workload_identity_config {
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+  }
+}
+
+resource "google_project_iam_binding" "workloadidentity" {
+  project = "%s"
+  role    = "roles/iam.workloadIdentityUser"
+
+  members = [
+    "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[tf-test-dproc-%s/agent]",
+    "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[tf-test-dproc-%s/spark-driver]",
+    "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[tf-test-dproc-%s/spark-executor]",
+  ]
+}
+
+resource "google_dataproc_cluster" "gke_cluster" {
+  depends_on = [
+    google_project_iam_binding.workloadidentity
+  ]
+
+  name   	= "tf-test-dproc-%s"
+  region 	= "us-central1"
+
+  cluster_config {
+    gke_cluster_config {
+      cluster = google_container_cluster.primary.id
+      namespace = "tf-test-dproc-%s"
+      node_pool {
+        node_pool_name = "tf-test-gke-np-%s"
+        roles = [
+          "DEFAULT"
+        ]
+      }
+    }
+  }
+}
+`, projectID, rnd, projectID, rnd, rnd, rnd, rnd, rnd, rnd)
+}
+
+func testAccCheckDataprocGkeClusterNodePoolsHaveRoles(cluster *dataproc.Cluster, roles ...string) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+
+		for _, nodePool := range cluster.VirtualClusterConfig.KubernetesClusterConfig.GkeClusterConfig.NodePoolTarget {
+			if reflect.DeepEqual(roles, nodePool.Roles) {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("Cluster NodePools does not contain expected roles : %v", roles)
+	}
 }
 
 func testAccDataprocCluster_withAccelerators(rnd, acceleratorType, zone string) string {
