@@ -76,8 +76,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_test: true
         vars:
           cloud_run_service_name: "cloud_run_service_name"
-          cloud_run_service_url: "cloud_run_service_url"
-          pubsub_sa: "pubsub_sa"
           pubsub_topic: "pubsub_topic"
           pubsub_subscription: "pubsub_subscription"
       - !ruby/object:Provider::Terraform::Examples

@@ -35,7 +35,7 @@ resource "google_cloud_run_service_iam_binding" "binding" {
 # [START cloud_run_service_pubsub_token_permissions]
 resource "google_project_iam_binding" "project" {
   role    = "roles/iam.serviceAccountTokenCreator"
-  members = ["serviceAccount:<%= ctx[:vars]['pubsub_sa'] %>"]
+  members = ["serviceAccount:${google_service_account.sa.email}"]
 }
 # [END cloud_run_service_pubsub_token_permissions]
 
@@ -48,11 +48,11 @@ resource "google_pubsub_topic" "topic" {
 # [START cloud_run_service_pubsub_sub]
 resource "google_pubsub_subscription" "subscription" {
   name  = "<%= ctx[:vars]['pubsub_subscription'] %>"
-  topic = google_pubsub_topic.topic.name
+  topic = google_pubsub_topic.<%= ctx[:vars]['pubsub_topic'] %>.name
   push_config {
-    push_endpoint = "<%= ctx[:vars]['cloud_run_service_url'] %>"
+    push_endpoint = google_cloud_run_service.<%= ctx[:primary_resource_id] %>.status[0].url
     oidc_token {
-      service_account_email = "<%= ctx[:vars]['pubsub_sa'] %>"
+      service_account_email = google_service_account.sa.email
     }
     attributes = {
       x-goog-version = "v1"
