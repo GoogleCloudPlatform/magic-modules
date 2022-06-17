@@ -24,7 +24,7 @@ resource "google_kms_crypto_key" "key" {
 
 # [START cloud_sql_instance_crypto_key]
 resource "google_kms_crypto_key_iam_binding" "crypto_key" {
-  provider = google-beta
+  provider      = google-beta
   crypto_key_id = google_kms_crypto_key.key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
