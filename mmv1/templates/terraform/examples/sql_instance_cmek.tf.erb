@@ -7,6 +7,7 @@ resource "google_project_service_identity" "gcp_sa_cloud_sql" {
 
 # [START cloud_sql_instance_keyring]
 resource "google_kms_key_ring" "keyring" {
+  provider = google-beta
   name     = "<%= ctx[:vars]['keyring_name'] %>"
   location = "us-central1"
 }
@@ -14,6 +15,7 @@ resource "google_kms_key_ring" "keyring" {
 
 # [START cloud_sql_instance_key]
 resource "google_kms_crypto_key" "key" {
+  provider = google-beta
   name     = "<%= ctx[:vars]['crypto_key_name'] %>"
   key_ring = google_kms_key_ring.keyring.id
   purpose  = "ENCRYPT_DECRYPT"
@@ -22,6 +24,7 @@ resource "google_kms_crypto_key" "key" {
 
 # [START cloud_sql_instance_crypto_key]
 resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+  provider      = google-beta
   crypto_key_id = google_kms_crypto_key.key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
