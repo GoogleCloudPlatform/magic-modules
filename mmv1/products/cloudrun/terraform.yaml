@@ -70,6 +70,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       actions: ['create', 'update']
     examples:
       - !ruby/object:Provider::Terraform::Examples
+<<<<<<< Updated upstream
+=======
+        name: "cloud_run_service_tasks"
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "default"
+        skip_test: true
+        vars:
+          project_id: "project-id"
+          region: "us-central1"
+          cloud_run_service_name: "cloud-run-service-name"
+          cloud_tasks_queue_name: "cloud-tasks-queue-name"
+      - !ruby/object:Provider::Terraform::Examples
+>>>>>>> Stashed changes
         name: "cloud_run_service_basic"
         primary_resource_id: "default"
         primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
