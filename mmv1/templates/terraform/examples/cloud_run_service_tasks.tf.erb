@@ -2,6 +2,7 @@
 resource "<%= ctx[:vars]['primary_resource_type'] %>" "<%= ctx[:primary_resource_id] %>" {
     name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
     location = "<%= ctx[:vars]['region'] %>"
+    project = "<%= ctx[:vars]['project_id'] %>"
     template {
       spec {
             containers {
