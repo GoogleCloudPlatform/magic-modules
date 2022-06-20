@@ -61,7 +61,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       versionRetentionPeriod: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: validateDatabaseRetentionPeriod
-        default_value: "1h"
+        default_from_api: true
       extraStatements: !ruby/object:Overrides::Terraform::PropertyOverride
         name: ddl
         ignore_read: true
