@@ -1798,6 +1798,7 @@ func flattenGkeClusterConfig(d *schema.ResourceData, cfg *dataproc.VirtualCluste
 		"namespace":     cfg.KubernetesClusterConfig.KubernetesNamespace,
 		"image_version": cfg.KubernetesClusterConfig.KubernetesSoftwareConfig.ComponentVersion["SPARK"],
 		"cluster":       cfg.KubernetesClusterConfig.GkeClusterConfig.GkeClusterTarget,
+		"auxiliary_services": flattenAuxiliaryServicesConfig(d, cfg.AuxiliaryServicesConfig),
 	}
 
 	if len(cfg.KubernetesClusterConfig.GkeClusterConfig.NodePoolTarget) > 0 {
@@ -1871,6 +1872,23 @@ func flattenNodePoolTargetConfig(d *schema.ResourceData, nia []*dataproc.GkeNode
 	}
 
 	return nodePools, nil
+}
+
+func flattenAuxiliaryServicesConfig(d *schema.ResourceData, asc *dataproc.AuxiliaryServicesConfig) []map[string]interface{} {
+	if asc == nil {
+		return nil
+	}
+	data := map[string]interface{}{}
+
+	if asc.MetastoreConfig != nil {
+		data["metastore_service"] = asc.MetastoreConfig.DataprocMetastoreService
+	}
+
+	if asc.SparkHistoryServerConfig != nil {
+		data["spark_history_server"] = asc.SparkHistoryServerConfig.DataprocCluster
+	}
+
+	return []map[string]interface{}{data}
 }
 
 func flattenVirtualClusterConfig(d *schema.ResourceData, cfg *dataproc.VirtualClusterConfig) ([]map[string]interface{}, error) {
