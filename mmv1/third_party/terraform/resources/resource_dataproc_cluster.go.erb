@@ -29,6 +29,12 @@ var (
 		"cluster_config.0.gke_cluster_config.0.namespace",
 		"cluster_config.0.gke_cluster_config.0.cluster",
 		"cluster_config.0.gke_cluster_config.0.node_pool",
+		"cluster_config.0.gke_cluster_config.0.auxiliary_services",
+	}
+
+	auxiliaryServicesConfigKeys = []string{
+		"cluster_config.0.gke_cluster_config.0.auxiliary_services.0.metastore_service",
+		"cluster_config.0.gke_cluster_config.0.auxiliary_services.0.spark_history_server",
 	}
 <% end -%>
 
@@ -241,6 +247,14 @@ func resourceDataprocCluster() *schema.Resource {
 										Description: `The components that should be installed in this Dataproc cluster. The key must be a string from the KubernetesComponent enumeration. The value is the version of the software to be installed.`,
 									},
 
+									"properties": {
+										Type:        schema.TypeMap,
+										Optional:    true,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+										Computed:    true,
+										Description: `The properties to set on daemon config files.`,
+									},
+
 									"namespace": {
 										Type:         schema.TypeString,
 										Optional:     true,
@@ -257,6 +271,33 @@ func resourceDataprocCluster() *schema.Resource {
 										AtLeastOneOf: gkeClusterConfigKeys,
 										ForceNew:     true,
 										Description:  `A target GKE cluster to deploy to. It must be in the same project and region as the Dataproc cluster (the GKE cluster can be zonal or regional). Format: 'projects/{project}/locations/{location}/clusters/{cluster_id}'`,
+									},
+
+									"auxiliary_services": {
+										Type:         schema.TypeList,
+										Optional:     true,
+										Computed:     true,
+										MaxItems:     1,
+										AtLeastOneOf: gkeClusterConfigKeys,
+										Description:  `Auxiliary services configuration for a Cluster.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+
+												"metastore_service": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													AtLeastOneOf: auxiliaryServicesConfigKeys,
+													Description:  `The Hive Metastore configuration for this workload.`,
+												},
+
+												"spark_history_server": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													AtLeastOneOf: auxiliaryServicesConfigKeys,
+													Description:  `The Spark History Server configuration for the workload.`,
+												},
+											},
+										},
 									},
 
 									"node_pool": {
@@ -1112,6 +1153,16 @@ func expandGkeClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.V
 
 		conf.KubernetesClusterConfig.KubernetesSoftwareConfig.ComponentVersion = components
 
+		properties := map[string]string{}
+
+		if propSet, ok := cfg["properties"]; ok {
+			for k, val := range propSet.(map[string]interface{}) {
+				properties[k] = val.(string)
+			}
+		}
+
+		conf.KubernetesClusterConfig.KubernetesSoftwareConfig.Properties = properties
+
 		if v, ok := cfg["namespace"]; ok {
 			conf.KubernetesClusterConfig.KubernetesNamespace = v.(string)
 		}
@@ -1123,6 +1174,10 @@ func expandGkeClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.V
 			if nodePoolTarget, ok := d.GetOk("cluster_config.0.gke_cluster_config.0.node_pool"); ok {
 				conf.KubernetesClusterConfig.GkeClusterConfig.NodePoolTarget = expandNodePoolTarget(d, nodePoolTarget, clusterAddress.(string))
 			}
+		}
+
+		if auxiliaryServices, ok := d.GetOk("cluster_config.0.gke_cluster_config.0.auxiliary_services"); ok {
+			conf.AuxiliaryServicesConfig = expandAuxiliaryServices(d, auxiliaryServices)
 		}
 	}
 	return conf, nil
@@ -1176,6 +1231,24 @@ func expandNodePoolTarget(d *schema.ResourceData, v interface{}, clusterAddress 
 	}
 
 	return nodePools
+}
+
+func expandAuxiliaryServices(d *schema.ResourceData, v interface{}) *dataproc.AuxiliaryServicesConfig {
+	auxiliaryServicesConfig := &dataproc.AuxiliaryServicesConfig{}
+
+	if metastoreConfig, ok := d.GetOk("cluster_config.0.gke_cluster_config.0.auxiliary_services.0.metastore_service"); ok {
+		auxiliaryServicesConfig.MetastoreConfig = &dataproc.MetastoreConfig{
+			DataprocMetastoreService: metastoreConfig.(string),
+		}
+	}
+
+	if sparkHistoryServerConfig, ok := d.GetOk("cluster_config.0.gke_cluster_config.0.auxiliary_services.0.spark_history_server"); ok {
+		auxiliaryServicesConfig.SparkHistoryServerConfig = &dataproc.SparkHistoryServerConfig{
+			DataprocCluster: sparkHistoryServerConfig.(string),
+		}
+	}
+
+	return auxiliaryServicesConfig
 }
 <% end -%>
 
@@ -1745,6 +1818,15 @@ func flattenGkeClusterConfig(d *schema.ResourceData, cfg *dataproc.VirtualCluste
 		data["optional_components"] = val
 	}
 
+	if len(cfg.KubernetesClusterConfig.KubernetesSoftwareConfig.Properties) > 0 {
+		val, err := flattenProperties(cfg.KubernetesClusterConfig.KubernetesSoftwareConfig)
+		if err != nil {
+			return nil
+		}
+
+		data["properties"] = val
+	}
+
 	return []map[string]interface{}{data}
 }
 
@@ -1759,6 +1841,15 @@ func flattenOptionalComponents(nia *dataproc.KubernetesSoftwareConfig) (map[stri
 	}
 
 	return optionalComponents, nil
+}
+
+func flattenProperties(nia *dataproc.KubernetesSoftwareConfig) (map[string]string, error) {
+	properties := map[string]string{}
+	for key, value := range nia.Properties {
+		properties[key] = value
+	}
+
+	return properties, nil
 }
 
 func flattenNodePoolTargetConfig(d *schema.ResourceData, nia []*dataproc.GkeNodePoolTarget, clusterAddress string) ([]map[string]interface{}, error) {
