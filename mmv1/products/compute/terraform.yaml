@@ -1080,8 +1080,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           network_name: "my-network"
           default_backend_service_name: "backend-default"
           hybrid_backend_service_name: "backend-hybrid"
+          internal_backend_service_name": "backend-internal"
           default_neg_name: "default-neg"
           hybrid_neg_name: "hybrid-neg"
+          internal_neg_name": "internal-neg"
           health_check_name: "health-check"
         ignore_read_extra:
           - "port_range"
