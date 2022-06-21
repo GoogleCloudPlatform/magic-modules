@@ -46,6 +46,7 @@ resource "google_billing_budget" "budget" {
     labels  = {
       label = "bar"
     }
+	calendar_period = "MONTH"
   }
 
   amount {
@@ -131,6 +132,7 @@ resource "google_billing_budget" "budget" {
     labels  = {
       label = "bar"
     }
+	calendar_period = "MONTH"
   }
 
   amount {
@@ -177,6 +179,7 @@ resource "google_billing_budget" "budget" {
   budget_filter {
     projects = []
     labels = {}
+	calendar_period = "MONTH"
   }
 
   amount {
@@ -225,6 +228,18 @@ resource "google_billing_budget" "budget" {
     labels  = {
       label1 = "bar2"
     }
+	custom_period {
+	  start_date {
+		year = 2022
+		month = 1
+		day = 1
+	  }
+	  end_date {
+		year = 2023
+		month = 12
+		day = 31
+	  }		
+	}
   }
 
   amount {
@@ -362,6 +377,7 @@ resource "google_billing_budget" "budget" {
 			"projects/${google_project.project1.number}",
 			"projects/${google_project.project2.number}",
 		]
+		calendar_period = "MONTH"
 	}
 
 	amount {
@@ -406,6 +422,7 @@ resource "google_billing_budget" "budget" {
 			"projects/${google_project.project2.number}",
 			"projects/${google_project.project1.number}",
 		]
+		calendar_period = "MONTH"
 	}
 
 	amount {
