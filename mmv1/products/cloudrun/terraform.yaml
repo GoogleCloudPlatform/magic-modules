@@ -144,6 +144,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "autogenerate_revision_name"
       - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_ingress"
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "default"
+        skip_test: true
+        vars:
+          cloudrun_service_name: "ingress-service"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
         name: "eventarc_basic_tf"
         primary_resource_id: "default"
         vars:
