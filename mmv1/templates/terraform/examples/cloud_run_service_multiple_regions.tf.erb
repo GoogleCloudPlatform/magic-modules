@@ -3,57 +3,28 @@
 ######################################
 # Terraform (Project-wide resources) #
 ######################################
-data "google_project" "app" {
-  project_id = var.project_id
-}
-
 resource "google_project_service" "compute_api" {
-  project                    = data.google_project.app.project_id
+  project                    = "<%= ctx[:vars]['project_id'] %>"
   service                    = "compute.googleapis.com"
   disable_dependent_services = true
   disable_on_destroy         = false
 }
 
 resource "google_project_service" "run_api" {
-  project                    = data.google_project.app.project_id
+  project                    = "<%= ctx[:vars]['project_id'] %>"
   service                    = "run.googleapis.com"
   disable_dependent_services = true
   disable_on_destroy         = false
 }
 
 # [START cloudloadbalancing_run_multiregion]
-############################
-# Input variables (config) #
-############################
-variable "project_id" {
-  type        = string
-  description = "Your GCP Project ID"
-}
-
-variable "domain_name" {
-  type        = string
-  description = "Your domain name (e.g. `example.com`)"
-}
-
-variable "run_container_image" {
-  type        = string
-  description = "URL of the container image to run."
-  default     = "us-docker.pkg.dev/cloudrun/container/hello"
-}
-
-variable "run_regions" {
-  type        = list(string)
-  description = "The regions to deploy this application to"
-  default     = ["us-central1", "europe-west1"]
-}
-
 ######################################
 # Terraform (Load Balancer creation) #
 ######################################
 
 resource "google_compute_global_address" "lb_default" {
-  name    = "myservice-service-ip"
-  project = data.google_project.app.project_id
+  name    = "<%= ctx[:vars]['myservice_service_ip'] %>"
+  project = "<%= ctx[:vars]['project_id'] %>"
 
   # Use an explicit depends_on clause to wait until API is enabled
   depends_on = [
@@ -62,8 +33,8 @@ resource "google_compute_global_address" "lb_default" {
 }
 
 resource "google_compute_backend_service" "lb_default" {
-  name                  = "myservice-backend"
-  project               = data.google_project.app.project_id
+  name                  = "<%= ctx[:vars]['myservice_backend'] %>"
+  project               = "<%= ctx[:vars]['project_id'] %>"
   load_balancing_scheme = "EXTERNAL_MANAGED"
 
   backend {
@@ -86,8 +57,8 @@ resource "google_compute_backend_service" "lb_default" {
 
 
 resource "google_compute_url_map" "lb_default" {
-  name            = "myservice-lb-urlmap"
-  project         = data.google_project.app.project_id
+  name            = "<%= ctx[:vars]['myservice_lb_urlmap'] %>"
+  project         = "<%= ctx[:vars]['project_id'] %>"
   default_service = google_compute_backend_service.lb_default.id
 
   path_matcher {
@@ -104,17 +75,17 @@ resource "google_compute_url_map" "lb_default" {
 }
 
 resource "google_compute_managed_ssl_certificate" "lb_default" {
-  name    = "myservice-ssl-cert"
-  project = data.google_project.app.project_id
+  name    = "<%= ctx[:vars]['myservice_ssl_cert'] %>"
+  project = "<%= ctx[:vars]['project_id'] %>"
 
   managed {
-    domains = [var.domain_name]
+    domains = ["<%= ctx[:vars]['domain_name'] %>"]
   }
 }
 
 resource "google_compute_target_https_proxy" "lb_default" {
-  name    = "myservice-https-proxy"
-  project = data.google_project.app.project_id
+  name    = "<%= ctx[:vars]['myservice_https_proxy'] %>"
+  project = "<%= ctx[:vars]['project_id'] %>"
   url_map = google_compute_url_map.lb_default.id
   ssl_certificates = [
     google_compute_managed_ssl_certificate.lb_default.name
@@ -125,8 +96,8 @@ resource "google_compute_target_https_proxy" "lb_default" {
 }
 
 resource "google_compute_global_forwarding_rule" "lb_default" {
-  name                  = "myservice-lb-forwarding-rule"
-  project               = data.google_project.app.project_id
+  name                  = "<%= ctx[:vars]['myservice_lb_forwarding_rule'] %>"
+  project               = "<%= ctx[:vars]['project_id'] %>"
   load_balancing_scheme = "EXTERNAL_MANAGED"
   target                = google_compute_target_https_proxy.lb_default.id
   ip_address            = google_compute_global_address.lb_default.id
@@ -135,11 +106,11 @@ resource "google_compute_global_forwarding_rule" "lb_default" {
 }
 
 resource "google_compute_region_network_endpoint_group" "lb_default" {
-  count                 = length(var.run_regions)
-  project               = data.google_project.app.project_id
-  name                  = "myservice-neg"
+  count                 = length(<%= ctx[:vars]['run_regions'] %>)
+  project               = "<%= ctx[:vars]['project_id'] %>"
+  name                  = "<%= ctx[:vars]['myservice_neg'] %>"
   network_endpoint_type = "SERVERLESS"
-  region                = var.run_regions[count.index]
+  region                = <%= ctx[:vars]['run_regions'] %>[count.index]
   cloud_run {
     service = google_cloud_run_service.run_default[count.index].name
   }
@@ -152,16 +123,16 @@ output "load_balancer_ip_addr" {
 #############################
 # Terraform (Cloud Run app) #
 #############################
-resource "google_cloud_run_service" "run_default" {
-  count    = length(var.run_regions)
-  project  = data.google_project.app.project_id
-  name     = "myservice-run-app-BANANAMAN"
-  location = var.run_regions[count.index]
+resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
+  count    = length(<%= ctx[:vars]['run_regions'] %>)
+  project  = "<%= ctx[:vars]['project_id'] %>"
+  name     = "<%= ctx[:vars]['myservice_run_app_REGIONMAN'] %>"
+  location = <%= ctx[:vars]['run_regions'] %>[count.index]
 
   template {
     spec {
       containers {
-        image = var.run_container_image
+        image = "us-docker.pkg.dev/cloudrun/container/hello"
       }
     }
   }
@@ -177,30 +148,21 @@ resource "google_cloud_run_service" "run_default" {
   ]
 }
 
-data "google_iam_policy" "run_allow_unauthenticated" {
-  binding {
-    role = "roles/run.invoker"
-    members = [
-      "allUsers",
-    ]
-  }
-}
-
-resource "google_cloud_run_service_iam_policy" "run_default" {
-  count    = length(var.run_regions)
-  project  = data.google_project.app.project_id
+resource "google_cloud_run_service_iam_member" "run_allow_unauthenticated" {
+  count    = length(<%= ctx[:vars]['run_regions'] %>)
+  project  = "<%= ctx[:vars]['project_id'] %>"
   location = google_cloud_run_service.run_default[count.index].location
   service  = google_cloud_run_service.run_default[count.index].name
-
-  policy_data = data.google_iam_policy.run_allow_unauthenticated.policy_data
+  role     = "roles/run.invoker"
+  member   = "allUsers"
 }
 
 #############################
 # Terraform (HTTP -> HTTPS) #
 #############################
 resource "google_compute_url_map" "https_default" {
-  name    = "myservice-https-urlmap"
-  project = data.google_project.app.project_id
+  name    = "<%= ctx[:vars]['myservice_https_urlmap'] %>"
+  project = "<%= ctx[:vars]['project_id'] %>"
 
   default_url_redirect {
     redirect_response_code = "MOVED_PERMANENTLY_DEFAULT"
@@ -210,8 +172,8 @@ resource "google_compute_url_map" "https_default" {
 }
 
 resource "google_compute_target_http_proxy" "https_default" {
-  name    = "myservice-http-proxy"
-  project = data.google_project.app.project_id
+  name    = "<%= ctx[:vars]['myservice_http_proxy'] %>"
+  project = "<%= ctx[:vars]['project_id'] %>"
   url_map = google_compute_url_map.https_default.id
 
   depends_on = [
@@ -220,8 +182,8 @@ resource "google_compute_target_http_proxy" "https_default" {
 }
 
 resource "google_compute_global_forwarding_rule" "https_default" {
-  name       = "myservice-https-forwarding-rule"
-  project    = data.google_project.app.project_id
+  name       = "<%= ctx[:vars]['myservice_https_forwarding_rule'] %>"
+  project    = "<%= ctx[:vars]['project_id'] %>"
   target     = google_compute_target_http_proxy.https_default.id
   ip_address = google_compute_global_address.lb_default.id
   port_range = "80"
