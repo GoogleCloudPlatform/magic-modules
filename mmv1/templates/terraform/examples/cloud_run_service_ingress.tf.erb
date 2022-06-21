@@ -1,4 +1,4 @@
-# [START cloud_run_service_hello]
+# [START cloud_run_service_ingress]
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
     name     = "<%= ctx[:vars]['cloudrun_service_name'] %>"
     location = "us-central1"
@@ -23,5 +23,5 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
       }
     }
 }
-# [END cloud_run_service_hello]
+# [END cloud_run_service_ingress]
 
