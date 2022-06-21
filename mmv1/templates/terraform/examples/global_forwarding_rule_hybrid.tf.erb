@@ -13,6 +13,14 @@ resource "google_compute_network_endpoint_group" "default" {
   network_endpoint_type = "GCE_VM_IP_PORT"
 }
 
+// Zonal NEG with GCE_VM_IP
+resource "google_compute_network_endpoint_group" "internal" {
+  name                  = "<%= ctx[:vars]['internal_neg_name'] %>"
+  network               = google_compute_network.internal.id
+  zone                  = "us-central1-a"
+  network_endpoint_type = "GCE_VM_IP"
+}
+
 // Hybrid connectivity NEG
 resource "google_compute_network_endpoint_group" "hybrid" {
   name                  = "<%= ctx[:vars]['hybrid_neg_name'] %>"
@@ -38,6 +46,20 @@ resource "google_compute_backend_service" "default" {
     group = google_compute_network_endpoint_group.default.id
     balancing_mode               = "RATE"
     max_rate_per_endpoint        = 10
+  }
+  health_checks = [google_compute_health_check.default.id]
+}
+
+// Backgend service for Internal NEG
+resource "google_compute_backend_service" "internal" {
+  name                  = "<%= ctx[:vars]['internal_backend_service_name'] %>"
+  port_name             = "http"
+  protocol              = "HTTP"
+  timeout_sec           = 10
+  backend {
+    group                        = google_compute_network_endpoint_group.internal.id
+    balancing_mode               = "RATE"
+    max_rate_per_endpoint = 10
   }
   health_checks = [google_compute_health_check.default.id]
 }
