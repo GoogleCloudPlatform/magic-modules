@@ -1228,22 +1228,22 @@ func testGoogleSqlDatabaseInstance_SqlServerAuditConfig(databaseName, rootPasswo
 resource "google_storage_bucket" "bucket" {
   name                      	= "%s"
   location                  	= "US"
-	uniform_bucket_level_access = true
+  uniform_bucket_level_access = true
 }
 
 data "google_compute_network" "servicenet" {
-	name = "default"
+  name = "default"
 }
 
 resource "google_sql_database_instance" "instance" {
   name             = "%s"
   region           = "us-central1"
   database_version = "SQLSERVER_2017_STANDARD"
-	root_password    = "%s"
-	deletion_protection = false
+  root_password    = "%s"
+  deletion_protection = false
   settings {
     tier = "db-custom-1-3840"
-		ip_configuration {
+    ip_configuration {
       ipv4_enabled       = "false"
       private_network    = data.google_compute_network.servicenet.self_link
     }
