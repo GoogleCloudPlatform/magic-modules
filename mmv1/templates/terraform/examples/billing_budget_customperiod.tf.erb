@@ -13,7 +13,19 @@ resource "google_billing_budget" "<%= ctx[:primary_resource_id] %>" {
     projects = ["projects/${data.google_project.project.number}"]
     credit_types_treatment = "EXCLUDE_ALL_CREDITS"
     services = ["services/24E6-581D-38E5"] # Bigquery
-    calendar_period = "MONTH"
+    
+    custom_period { 
+        start_date {
+          year = 2022
+          month = 1
+          day = 1
+        }
+        end_date {
+          year = 2023
+          month = 12
+          day = 31
+        }
+      }
   }
 
   amount {
@@ -28,6 +40,5 @@ resource "google_billing_budget" "<%= ctx[:primary_resource_id] %>" {
   }
   threshold_rules {
     threshold_percent = 0.9
-    spend_basis = "FORECASTED_SPEND"
   }
 }

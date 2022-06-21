@@ -10,7 +10,8 @@ resource "google_billing_budget" "<%= ctx[:primary_resource_id] %>" {
   display_name = "<%= ctx[:vars]['display_name'] %>"
   
   budget_filter {
-    projects = ["projects/${data.google_project.project.number}"]
+    projects        = ["projects/${data.google_project.project.number}"]
+    calendar_period = "MONTH"
   }
 
   amount {
