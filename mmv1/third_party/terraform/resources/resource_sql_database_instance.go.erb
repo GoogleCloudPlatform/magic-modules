@@ -165,20 +165,20 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"bucket": {
-                    Type:         schema.TypeString,
-                    Required:     true,
-                    Description:  `The name of the destination bucket (e.g., gs://mybucket).`,
-                  },
+										Type:         schema.TypeString,
+									   	Required:     true,
+									    	Description:  `The name of the destination bucket (e.g., gs://mybucket).`,
+									},
 									"retention_interval": {
-                    Type:         schema.TypeString,
+										Type:         schema.TypeString,
 										Optional:     true,
-                    Description:  `How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s"..`,
-                  },
+										Description:  `How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s"..`,
+									},
 									"upload_interval": {
-                    Type:         schema.TypeString,
+										Type:         schema.TypeString,
 										Optional:     true,
-                    Description:  `How often to upload generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".`,
-                  },
+										Description:  `How often to upload generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".`,
+                  							},
 								},
 							},
 						},
@@ -986,7 +986,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}) *sqladmin.Setti
 		ForceSendFields:             []string{"StorageAutoResize"},
 		ActivationPolicy:            _settings["activation_policy"].(string),
 		ActiveDirectoryConfig:       expandActiveDirectoryConfig(_settings["active_directory_config"].([]interface{})),
-		SqlServerAuditConfig: 			 expandSqlServerAuditConfig(_settings["sql_server_audit_config"].([]interface{})),
+		SqlServerAuditConfig: 	     expandSqlServerAuditConfig(_settings["sql_server_audit_config"].([]interface{})),
 		AvailabilityType:            _settings["availability_type"].(string),
 		Collation:                   _settings["collation"].(string),
 		DataDiskSizeGb:              int64(_settings["disk_size"].(int)),
@@ -1167,11 +1167,11 @@ func expandSqlServerAuditConfig(configured interface{}) *sqladmin.SqlServerAudit
 		return nil
 	}
 
-  config := l[0].(map[string]interface{})
+  	config := l[0].(map[string]interface{})
 	return &sqladmin.SqlServerAuditConfig{
 		Bucket: config["bucket"].(string),
-    RetentionInterval: config["retention_interval"].(string),
-    UploadInterval: config["upload_interval"].(string),
+    		RetentionInterval: config["retention_interval"].(string),
+    		UploadInterval: config["upload_interval"].(string),
 	}
 }
 
@@ -1504,7 +1504,7 @@ func flattenSqlServerAuditConfig(sqlServerAuditConfig *sqladmin.SqlServerAuditCo
 	return []map[string]interface{}{
 		{
 			"bucket": sqlServerAuditConfig.Bucket,
-      "retention_interval": sqlServerAuditConfig.RetentionInterval,
+      			"retention_interval": sqlServerAuditConfig.RetentionInterval,
 			"upload_interval": sqlServerAuditConfig.UploadInterval,
 		},
 	}
