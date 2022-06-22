@@ -174,9 +174,6 @@ objects:
               - budget_filter.0.labels
               - budget_filter.0.calendarPeriod
               - budget_filter.0.customPeriod
-            exactly_one_of:
-              - budget_filter.0.calendarPeriod
-              - budget_filter.0.customPeriod
             description: |
               A CalendarPeriod represents the abstract concept of a recurring time period that has a
               canonical start. Grammatically, "the start of the current CalendarPeriod".
@@ -194,9 +191,6 @@ objects:
               - budget_filter.0.services
               - budget_filter.0.subaccounts
               - budget_filter.0.labels
-              - budget_filter.0.calendarPeriod
-              - budget_filter.0.customPeriod
-            exactly_one_of:
               - budget_filter.0.calendarPeriod
               - budget_filter.0.customPeriod
             description: |

@@ -95,6 +95,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       budgetFilter.projects: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
       budgetFilter.calendarPeriod: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'emptyOrDefaultStringSuppress("MONTH")'
         description: |
           {{description}}
           Exactly one of `calendar_period`, `custom_period` must be provided.
