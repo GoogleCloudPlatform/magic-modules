@@ -163,7 +163,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           myservice_https_proxy: "myservice-https-proxy"
           myservice_lb_forwarding_rule: "myservice-lb-forwarding-rule"
           myservice_neg: "myservice-neg"
-          myservice_run_app_REGIONMAN: "myservice-run-app-REGIONMAN"
+          myservice_run_app: "myservice-run-app"
           myservice_https_urlmap: "myservice-https-urlmap"
           myservice_http_proxy: "myservice-http-proxy"
           myservice_https_forwarding_rule: "myservice-https-forwarding-rule"
