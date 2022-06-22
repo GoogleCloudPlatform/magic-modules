@@ -1,30 +1,23 @@
 # Cloud Run service replicated across multiple GCP regions
 
-######################################
-# Terraform (Project-wide resources) #
-######################################
 resource "google_project_service" "compute_api" {
-  project                    = "<%= ctx[:vars]['project_id'] %>"
+  project                    = "<%= ctx[:test_env_vars]['project'] %>"
   service                    = "compute.googleapis.com"
   disable_dependent_services = true
   disable_on_destroy         = false
 }
 
 resource "google_project_service" "run_api" {
-  project                    = "<%= ctx[:vars]['project_id'] %>"
+  project                    = "<%= ctx[:test_env_vars]['project'] %>"
   service                    = "run.googleapis.com"
   disable_dependent_services = true
   disable_on_destroy         = false
 }
 
 # [START cloudloadbalancing_run_multiregion]
-######################################
-# Terraform (Load Balancer creation) #
-######################################
-
 resource "google_compute_global_address" "lb_default" {
   name    = "<%= ctx[:vars]['myservice_service_ip'] %>"
-  project = "<%= ctx[:vars]['project_id'] %>"
+  project = "<%= ctx[:test_env_vars]['project'] %>"
 
   # Use an explicit depends_on clause to wait until API is enabled
   depends_on = [
@@ -34,18 +27,18 @@ resource "google_compute_global_address" "lb_default" {
 
 resource "google_compute_backend_service" "lb_default" {
   name                  = "<%= ctx[:vars]['myservice_backend'] %>"
-  project               = "<%= ctx[:vars]['project_id'] %>"
+  project               = "<%= ctx[:test_env_vars]['project'] %>"
   load_balancing_scheme = "EXTERNAL_MANAGED"
 
   backend {
     balancing_mode  = "UTILIZATION"
-    capacity_scaler = 0.85 # TODO what does this do? docs are unclear! :(
+    capacity_scaler = 0.85
     group           = google_compute_region_network_endpoint_group.lb_default[0].id
   }
 
   backend {
     balancing_mode  = "UTILIZATION"
-    capacity_scaler = 0.85 # TODO what does this do? docs are unclear! :(
+    capacity_scaler = 0.85
     group           = google_compute_region_network_endpoint_group.lb_default[1].id
   }
 
@@ -58,7 +51,7 @@ resource "google_compute_backend_service" "lb_default" {
 
 resource "google_compute_url_map" "lb_default" {
   name            = "<%= ctx[:vars]['myservice_lb_urlmap'] %>"
-  project         = "<%= ctx[:vars]['project_id'] %>"
+  project         = "<%= ctx[:test_env_vars]['project'] %>"
   default_service = google_compute_backend_service.lb_default.id
 
   path_matcher {
@@ -76,7 +69,7 @@ resource "google_compute_url_map" "lb_default" {
 
 resource "google_compute_managed_ssl_certificate" "lb_default" {
   name    = "<%= ctx[:vars]['myservice_ssl_cert'] %>"
-  project = "<%= ctx[:vars]['project_id'] %>"
+  project = "<%= ctx[:test_env_vars]['project'] %>"
 
   managed {
     domains = ["<%= ctx[:vars]['domain_name'] %>"]
@@ -85,7 +78,7 @@ resource "google_compute_managed_ssl_certificate" "lb_default" {
 
 resource "google_compute_target_https_proxy" "lb_default" {
   name    = "<%= ctx[:vars]['myservice_https_proxy'] %>"
-  project = "<%= ctx[:vars]['project_id'] %>"
+  project = "<%= ctx[:test_env_vars]['project'] %>"
   url_map = google_compute_url_map.lb_default.id
   ssl_certificates = [
     google_compute_managed_ssl_certificate.lb_default.name
@@ -97,7 +90,7 @@ resource "google_compute_target_https_proxy" "lb_default" {
 
 resource "google_compute_global_forwarding_rule" "lb_default" {
   name                  = "<%= ctx[:vars]['myservice_lb_forwarding_rule'] %>"
-  project               = "<%= ctx[:vars]['project_id'] %>"
+  project               = "<%= ctx[:test_env_vars]['project'] %>"
   load_balancing_scheme = "EXTERNAL_MANAGED"
   target                = google_compute_target_https_proxy.lb_default.id
   ip_address            = google_compute_global_address.lb_default.id
@@ -107,7 +100,7 @@ resource "google_compute_global_forwarding_rule" "lb_default" {
 
 resource "google_compute_region_network_endpoint_group" "lb_default" {
   count                 = length(<%= ctx[:vars]['run_regions'] %>)
-  project               = "<%= ctx[:vars]['project_id'] %>"
+  project               = "<%= ctx[:test_env_vars]['project'] %>"
   name                  = "<%= ctx[:vars]['myservice_neg'] %>"
   network_endpoint_type = "SERVERLESS"
   region                = <%= ctx[:vars]['run_regions'] %>[count.index]
@@ -120,12 +113,9 @@ output "load_balancer_ip_addr" {
   value = google_compute_global_address.lb_default.address
 }
 
-#############################
-# Terraform (Cloud Run app) #
-#############################
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   count    = length(<%= ctx[:vars]['run_regions'] %>)
-  project  = "<%= ctx[:vars]['project_id'] %>"
+  project  = "<%= ctx[:test_env_vars]['project'] %>"
   name     = "<%= ctx[:vars]['myservice_run_app_REGIONMAN'] %>"
   location = <%= ctx[:vars]['run_regions'] %>[count.index]
 
@@ -150,19 +140,16 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
 
 resource "google_cloud_run_service_iam_member" "run_allow_unauthenticated" {
   count    = length(<%= ctx[:vars]['run_regions'] %>)
-  project  = "<%= ctx[:vars]['project_id'] %>"
+  project  = "<%= ctx[:test_env_vars]['project'] %>"
   location = google_cloud_run_service.run_default[count.index].location
   service  = google_cloud_run_service.run_default[count.index].name
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
 
-#############################
-# Terraform (HTTP -> HTTPS) #
-#############################
 resource "google_compute_url_map" "https_default" {
   name    = "<%= ctx[:vars]['myservice_https_urlmap'] %>"
-  project = "<%= ctx[:vars]['project_id'] %>"
+  project = "<%= ctx[:test_env_vars]['project'] %>"
 
   default_url_redirect {
     redirect_response_code = "MOVED_PERMANENTLY_DEFAULT"
@@ -173,7 +160,7 @@ resource "google_compute_url_map" "https_default" {
 
 resource "google_compute_target_http_proxy" "https_default" {
   name    = "<%= ctx[:vars]['myservice_http_proxy'] %>"
-  project = "<%= ctx[:vars]['project_id'] %>"
+  project = "<%= ctx[:test_env_vars]['project'] %>"
   url_map = google_compute_url_map.https_default.id
 
   depends_on = [
@@ -183,7 +170,7 @@ resource "google_compute_target_http_proxy" "https_default" {
 
 resource "google_compute_global_forwarding_rule" "https_default" {
   name       = "<%= ctx[:vars]['myservice_https_forwarding_rule'] %>"
-  project    = "<%= ctx[:vars]['project_id'] %>"
+  project    = "<%= ctx[:test_env_vars]['project'] %>"
   target     = google_compute_target_http_proxy.https_default.id
   ip_address = google_compute_global_address.lb_default.id
   port_range = "80"
