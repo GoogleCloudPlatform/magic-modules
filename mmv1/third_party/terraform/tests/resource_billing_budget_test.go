@@ -46,7 +46,6 @@ resource "google_billing_budget" "budget" {
     labels  = {
       label = "bar"
     }
-	calendar_period = "MONTH"
   }
 
   amount {
@@ -148,7 +147,6 @@ resource "google_billing_budget" "budget" {
     labels  = {
       label = "bar"
     }
-	calendar_period = "MONTH"
   }
 
   amount {
@@ -195,7 +193,6 @@ resource "google_billing_budget" "budget" {
   budget_filter {
     projects = []
     labels = {}
-	calendar_period = "MONTH"
   }
 
   amount {
@@ -500,7 +497,6 @@ resource "google_billing_budget" "budget" {
 			"projects/${google_project.project1.number}",
 			"projects/${google_project.project2.number}",
 		]
-		calendar_period = "MONTH"
 	}
 
 	amount {
@@ -545,7 +541,6 @@ resource "google_billing_budget" "budget" {
 			"projects/${google_project.project2.number}",
 			"projects/${google_project.project1.number}",
 		]
-		calendar_period = "MONTH"
 	}
 
 	amount {
