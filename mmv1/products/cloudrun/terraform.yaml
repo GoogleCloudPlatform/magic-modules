@@ -170,7 +170,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project_id: "project-id"
           domain_name: "example.com"
           run_container_image: "us-docker.pkg.dev/cloudrun/container/hello"
-          run_regions: "[\"us-central1\", \"europe-west1\"]"
+          run_regions: ["us-central1", "europe-west1"]
         min_version: beta
         # ignore_read_extra:
         #   - "port_range"
