@@ -397,7 +397,6 @@ The following arguments are supported:
 
 * `enable_ip_masq_agent` -
   (Optional)
-  Cloud Composer 1 only)
   Deploys 'ip-masq-agent' daemon set in the GKE cluster and defines
   nonMasqueradeCIDRs equals to pod IP range so IP masquerading is used for
   all destination addresses, except between pods traffic.
@@ -719,6 +718,13 @@ The `node_config` block supports:
   Structure is documented below.
   Cannot be updated.
 
+* `enable_ip_masq_agent` -
+  (Optional)
+  Deploys 'ip-masq-agent' daemon set in the GKE cluster and defines
+  nonMasqueradeCIDRs equals to pod IP range so IP masquerading is used for
+  all destination addresses, except between pods traffic.
+  See the [documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-masquerade-agent).
+
 The `software_config` block supports:
 
 * `airflow_config_overrides` -
@@ -803,7 +809,7 @@ See [documentation](https://cloud.google.com/composer/docs/how-to/managing/confi
   The CIDR block from which IP range for Cloud Composer Network in tenant project will be reserved. Needs to be disjoint from private_cluster_config.master_ipv4_cidr_block and cloud_sql_ipv4_cidr_block.
 
 * `enable_privately_used_public_ips` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  (Optional)
   When enabled, IPs from public (non-RFC1918) ranges can be used for
   `ip_allocation_policy.cluster_ipv4_cidr_block` and `ip_allocation_policy.service_ipv4_cidr_block`.
 
