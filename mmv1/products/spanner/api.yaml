@@ -188,7 +188,6 @@ objects:
           the values 1d, 24h, 1440m, and 86400s are equivalent. Default value is 1h.
           If this property is used, you must avoid adding new DDL statements to `ddl` that
           update the database's version_retention_period. 
-        required: no
       - !ruby/object:Api::Type::Array
         item_type: Api::Type::String
         name: 'extraStatements'

@@ -24,7 +24,7 @@ if retentionPeriodOk && dialect != "POSTGRESQL" {
 if retentionPeriodOk && dialect == "POSTGRESQL" {
     // DDL statements other than <CREATE DATABASE> are not allowed in database creation request for PostgreSQL-enabled databases
     // https://cloud.google.com/spanner/docs/create-manage-databases#create_a_database
-    log.Printf("[DEBUG] Skipping setting version_retention_period during creation of PostgreSQL-enabled database. To set this parameter, re-run the plan after the database is created.")
+    log.Printf("[DEBUG] Skipping setting version_retention_period during creation of PostgreSQL-enabled database. To set this parameter, re-apply after the database is created.")
 }
 
 delete(obj, "name")
