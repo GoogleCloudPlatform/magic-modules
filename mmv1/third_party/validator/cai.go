@@ -6,7 +6,6 @@ import (
 	"regexp"
 )
 
-// force test run
 type ConvertFunc func(d TerraformResourceData, config *Config) ([]Asset, error)
 type GetApiObjectFunc func(d TerraformResourceData, config *Config) (map[string]interface{}, error)
 
