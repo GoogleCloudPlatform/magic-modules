@@ -300,8 +300,8 @@ objects:
                 This field is part of a union field `target_proxy`: Only one of `targetHttpsProxy` or
                 `targetSslProxy` may be set.
               exactly_one_of:
-                - gclbTargets.0.target_ssl_proxy
-                - gclbTargets.0.target_https_proxy
+                - gclbTargets.target_ssl_proxy
+                - gclbTargets.target_https_proxy
             - !ruby/object:Api::Type::String
               name: 'targetSslProxy'
               description: |
@@ -309,5 +309,5 @@ objects:
                 This field is part of a union field `target_proxy`: Only one of `targetHttpsProxy` or
                 `targetSslProxy` may be set.
               exactly_one_of:
-                - gclbTargets.0.target_ssl_proxy
-                - gclbTargets.0.target_https_proxy
+                - gclbTargets.target_ssl_proxy
+                - gclbTargets.target_https_proxy
