@@ -263,7 +263,7 @@ The optional `settings.sql_server_audit_config` subblock supports:
 
 * `bucket` - (Required) The name of the destination bucket (e.g., gs://mybucket).
 
-* `upload_interval` - (Required) How often to upload generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+* `upload_interval` - (Optional) How often to upload generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
 
 * `retention_interval` - (Optional) How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s". 
 
