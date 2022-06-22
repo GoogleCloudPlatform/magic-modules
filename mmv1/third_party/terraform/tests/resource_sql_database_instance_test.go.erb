@@ -1126,9 +1126,15 @@ func TestAccSqlDatabaseInstance_SqlServerAuditConfig(t *testing.T) {
 	t.Parallel()
 	databaseName := "tf-test-" + randString(t, 10)
 	rootPassword := randString(t, 15)
-	bucketName := fmt.Sprintf("%s-%d", "tf-test-bucket", randInt(t))
 	addressName := "tf-test-" + randString(t, 10)
 	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private-allocated-ip-range")
+	bucketName := fmt.Sprintf("%s-%d", "tf-test-bucket", randInt(t))
+	uploadInterval := "900s"
+	retentionInterval := "86400s"
+	bucketNameUpdate := fmt.Sprintf("%s-%d", "tf-test-bucket", randInt(t)) + "update"
+	uploadIntervalUpdate := "1200s"
+	retentionIntervalUpdate := "172800s"
+
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -1136,7 +1142,16 @@ func TestAccSqlDatabaseInstance_SqlServerAuditConfig(t *testing.T) {
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_SqlServerAuditConfig(networkName, addressName, databaseName, rootPassword, bucketName),
+				Config: testGoogleSqlDatabaseInstance_SqlServerAuditConfig(networkName, addressName, databaseName, rootPassword, bucketName, uploadInterval, retentionInterval),
+			},
+			{
+				ResourceName:      "google_sql_database_instance.instance",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_SqlServerAuditConfig(networkName, addressName, databaseName, rootPassword, bucketNameUpdate, uploadIntervalUpdate, retentionIntervalUpdate),
 			},
 			{
 				ResourceName:      "google_sql_database_instance.instance",
@@ -1225,7 +1240,7 @@ resource "google_sql_database_instance" "instance-with-ad" {
 }`, networkName, addressRangeName, databaseName, rootPassword, adDomainName)
 }
 
-func testGoogleSqlDatabaseInstance_SqlServerAuditConfig(networkName, addressName, databaseName, rootPassword, bucketName string) string {
+func testGoogleSqlDatabaseInstance_SqlServerAuditConfig(networkName, addressName, databaseName, rootPassword, bucketName, uploadInterval, retentionInterval string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "gs-bucket" {
   name                      	= "%s"
@@ -1266,12 +1281,12 @@ resource "google_sql_database_instance" "instance" {
     }
     sql_server_audit_config {
       bucket = "gs://%s"
-      retention_interval = "86400s"
-      upload_interval = "900s"
+      retention_interval = "%s"
+      upload_interval = "%s"
     }
   }
 }
-`, bucketName, networkName, addressName, databaseName, rootPassword, bucketName)
+`, bucketName, networkName, addressName, databaseName, rootPassword, bucketName, retentionInterval, uploadInterval)
 }
 
 func testGoogleSqlDatabaseInstanceConfig_withoutReplica(instanceName string) string {
