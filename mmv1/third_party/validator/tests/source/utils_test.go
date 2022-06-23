@@ -228,18 +228,19 @@ func getTestPrefix() string {
 `, data.Provider["version"], credentials)
 }
 
-func getDiff(t *testing.T, actualAssets, expectedAssets []google.Asset) diff.Changelog {
+func assertAssetsMatch(t *testing.T, actualAssets, expectedAssets []google.Asset) {
 	d, err := diff.NewDiffer(diff.SliceOrdering(false))
 	if err != nil {
 		panic(err)
 	}
 	changes, _ := d.Diff(actualAssets, expectedAssets)
 	if len(changes) == 0 {
-		return changes
+		return
 	}
+	t.Log("[Error] The following changes have occurred")
 	for _, i := range changes {
 		t.Log("[Error] The folllowing change has occoured")
 		t.Logf("        Element %v has been %sd from `%v` to  `%v`\n", i.Path, i.Type, i.From, i.To)
 	}
-	return changes
+	t.Fail()
 }
