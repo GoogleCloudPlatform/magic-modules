@@ -162,7 +162,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       virtualMachine.virtualMachineConfig.containerImages: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       softwareConfig: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
+        update_mask_fields:
+          - "softwareConfig.idleShutdown"
+          - "softwareConfig.idleShutdownTimeout"
+          - "softwareConfig.customGpuDriverPath"
+          - "softwareConfig.postStartupScript"
   Location: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
