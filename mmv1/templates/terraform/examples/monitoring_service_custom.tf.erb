@@ -5,4 +5,9 @@ resource "google_monitoring_custom_service" "<%= ctx[:primary_resource_id] -%>" 
   telemetry {
   	resource_name = "<%= ctx[:vars]['resource_name'] -%>"
   }
+
+  user_labels = {
+    my_key       = "my_value"
+    my_other_key = "my_other_value"
+  }
 }

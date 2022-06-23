@@ -263,7 +263,6 @@ objects:
             output: true
           - !ruby/object:Api::Type::String
             name: 'serviceAccountEmail'
-            output: true
             description: 'The email of the service account for this function.'
           - !ruby/object:Api::Type::Boolean 
             name: 'allTrafficOnLatestRevision'
@@ -296,7 +295,6 @@ objects:
               as the transport topic for the event delivery.
           - !ruby/object:Api::Type::String
             name: 'serviceAccountEmail'
-            output: true
             description: 'The email of the service account for this function.'
           - !ruby/object:Api::Type::Enum 
             name: 'retryPolicy'

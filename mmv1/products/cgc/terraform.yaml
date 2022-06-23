@@ -471,6 +471,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           postgres_instance_cmek: "postgres-instance-cmek"
           sqlserver_instance_cmek: "sqlserver-instance-cmek"
           deletion_protection: "true"
+        min_version: beta
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
@@ -551,10 +552,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           example_bucket_name: "example-bucket-name"
         min_version: beta
-        # ignore_read_extra:
-        #   - "port_range"
-        #   - "target"
-        #   - "ip_address"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "storage_pubsub_notifications"
+        primary_resource_type: "google_pubsub_topic"
+        primary_resource_id: "topic"
+        vars:
+          example_bucket_name: "example-bucket-name"
+          your_topic_name: "your_topic_name"
+        min_version: beta
     properties:
 
 

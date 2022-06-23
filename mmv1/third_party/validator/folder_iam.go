@@ -90,7 +90,7 @@ func newFolderIamAsset(
 
 func FetchFolderIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
 	return fetchIamPolicy(
-		NewProjectIamUpdater,
+		NewFolderIamUpdater,
 		d,
 		config,
 		"//cloudresourcemanager.googleapis.com/{{folder}}",

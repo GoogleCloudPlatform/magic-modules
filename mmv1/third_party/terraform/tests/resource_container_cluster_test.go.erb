@@ -196,13 +196,12 @@ func TestAccContainerCluster_withAddons(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withNotificationConfig(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
-	topic := "test-topic"
-	newTopic := "test-topic-2"
+	topic := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
+	newTopic := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -244,7 +243,6 @@ func TestAccContainerCluster_withNotificationConfig(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 	t.Parallel()
@@ -2012,6 +2010,78 @@ func TestAccContainerCluster_withLoggingConfig(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_basic(clusterName),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerCluster_withMonitoringConfigEnabled(clusterName),
+			},
+<% if version == 'beta' -%>
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerCluster_withMonitoringConfigUpdated(clusterName),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerCluster_withMonitoringConfigPrometheusUpdated(clusterName),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Back to basic settings to test setting Prometheus on its own
+			{
+				Config: testAccContainerCluster_basic(clusterName),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerCluster_withMonitoringConfigPrometheusOnly(clusterName),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+<% end -%>
+			{
+				Config: testAccContainerCluster_basic(clusterName),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withSoleTenantGroup(t *testing.T) {
 	t.Parallel()
 
@@ -2163,6 +2233,7 @@ func TestAccContainerCluster_withBinaryAuthorizationEnabledBool(t *testing.T) {
 				ResourceName:		 "google_container_cluster.with_binary_authorization_enabled_bool",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
+                                ImportStateVerifyIgnore: []string{"enable_binary_authorization"},
 			},
 			{
 				Config: testAccContainerCluster_withBinaryAuthorizationEnabledBool(clusterName, false),
@@ -2193,6 +2264,7 @@ func TestAccContainerCluster_withBinaryAuthorizationEnabledBoolLegacy(t *testing
 				ResourceName:		 "google_container_cluster.with_binary_authorization_enabled_bool_legacy",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
+                                ImportStateVerifyIgnore: []string{"enable_binary_authorization", "binary_authorization.#", "binary_authorization.0.%", "binary_authorization.0.enabled", "binary_authorization.0.evaluation_mode"},
 			},
 			{
 				Config: testAccContainerCluster_withBinaryAuthorizationEnabledBoolLegacy(clusterName, false),
@@ -2201,6 +2273,7 @@ func TestAccContainerCluster_withBinaryAuthorizationEnabledBoolLegacy(t *testing
 				ResourceName:		 "google_container_cluster.with_binary_authorization_enabled_bool_legacy",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
+                                ImportStateVerifyIgnore: []string{"enable_binary_authorization"},
 			},
 		},
 	})
@@ -2564,6 +2637,32 @@ func TestAccContainerCluster_withDNSConfig(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
+func TestAccContainerCluster_withTPUConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withTPUConfig(containerNetName, clusterName),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_tpu_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// TODO: remove when tpu_config can be read from the API
+				ImportStateVerifyIgnore: []string{"tpu_config"},
+			},
+		},
+	})
+}
+<% end -%>
+
 func testAccContainerCluster_masterAuthorizedNetworksDisabled(t *testing.T, resource_name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resource_name]
@@ -2837,13 +2936,13 @@ resource "google_container_cluster" "primary" {
     cloudrun_config {
       disabled = true
     }
+	dns_cache_config {
+      enabled = false
+    }
 <% unless version == 'ga' -%>
     istio_config {
       disabled = true
       auth     = "AUTH_MUTUAL_TLS"
-    }
-    dns_cache_config {
-      enabled = false
     }
     gce_persistent_disk_csi_driver_config {
       enabled = false
@@ -2896,14 +2995,15 @@ resource "google_container_cluster" "primary" {
     cloudrun_config {
       disabled = false
     }
+	dns_cache_config {
+      enabled = true
+	}
 <% unless version == 'ga' -%>
     istio_config {
       disabled = false
       auth     = "AUTH_NONE"
     }
-    dns_cache_config {
-      enabled = true
-    }
+
     gce_persistent_disk_csi_driver_config {
       enabled = true
 	}
@@ -2958,7 +3058,6 @@ resource "google_container_cluster" "primary" {
 `, projectID, clusterName)
 }
 
-<% unless version == 'ga' -%>
 func testAccContainerCluster_withNotificationConfig(clusterName string, topic string) string {
 	return fmt.Sprintf(`
 
@@ -2994,7 +3093,6 @@ resource "google_container_cluster" "notification_config" {
 }
 `, clusterName)
 }
-<% end -%>
 
 func testAccContainerCluster_withConfidentialNodes(clusterName string, npName string) string {
 	return fmt.Sprintf(`
@@ -4861,23 +4959,6 @@ resource "google_container_cluster" "shared_vpc_cluster" {
 `, projectName, org, billingId, projectName, org, billingId, suffix, suffix, name)
 }
 
-func testAccContainerCluster_withBinaryAuthorizationEvaluationMode(clusterName string, autopilot_enabled bool, evaluation_mode string) string {
-	return fmt.Sprintf(`
-resource "google_container_cluster" "with_binary_authorization_evaluation_mode" {
-  name               = "%s"
-  location           = "us-central1"
-  initial_node_count = 1
-  ip_allocation_policy {
-  }
-  enable_autopilot = %v
-
-  binary_authorization {
-    evaluation_mode = "%s"
-  }
-}
-`, clusterName, autopilot_enabled, evaluation_mode)
-}
-
 func testAccContainerCluster_withBinaryAuthorizationEnabledBool(clusterName string, enabled bool) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_binary_authorization_enabled_bool" {
@@ -4902,6 +4983,23 @@ resource "google_container_cluster" "with_binary_authorization_enabled_bool_lega
   enable_binary_authorization = %v
 }
 `, clusterName, enabled)
+}
+
+func testAccContainerCluster_withBinaryAuthorizationEvaluationMode(clusterName string, autopilot_enabled bool, evaluation_mode string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_binary_authorization_evaluation_mode" {
+  name               = "%s"
+  location           = "us-central1"
+  initial_node_count = 1
+  ip_allocation_policy {
+  }
+  enable_autopilot = %v
+
+  binary_authorization {
+    evaluation_mode = "%s"
+  }
+}
+`, clusterName, autopilot_enabled, evaluation_mode)
 }
 
 func testAccContainerCluster_withFlexiblePodCIDR(containerNetName string, clusterName string) string {
@@ -5284,6 +5382,65 @@ resource "google_container_cluster" "primary" {
 `, name)
 }
 
+func testAccContainerCluster_withMonitoringConfigEnabled(name string) string {
+       return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  monitoring_config {
+      enable_components = [ "SYSTEM_COMPONENTS" ]
+  }
+}
+`, name)
+}
+
+<% if version == 'beta' -%>
+func testAccContainerCluster_withMonitoringConfigUpdated(name string) string {
+       return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  monitoring_config {
+         enable_components = [ "SYSTEM_COMPONENTS", "WORKLOADS" ]
+  }
+}
+`, name)
+}
+
+func testAccContainerCluster_withMonitoringConfigPrometheusUpdated(name string) string {
+       return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  monitoring_config {
+         enable_components = [ "SYSTEM_COMPONENTS", "WORKLOADS" ]
+         managed_prometheus {
+                 enabled = true
+         }
+  }
+}
+`, name)
+}
+
+func testAccContainerCluster_withMonitoringConfigPrometheusOnly(name string) string {
+       return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  monitoring_config {
+         managed_prometheus {
+                 enabled = true
+         }
+  }
+}
+`, name)
+}
+<% end -%>
+
 func testAccContainerCluster_withSoleTenantGroup(name string) string {
 	return fmt.Sprintf(`
 resource "google_compute_node_template" "soletenant-tmpl" {
@@ -5314,3 +5471,62 @@ resource "google_container_cluster" "primary" {
 }
 `, name, name, name)
 }
+
+
+<% unless version == 'ga' -%>
+func testAccContainerCluster_withTPUConfig(network, cluster string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "container_network" {
+	name                    = "%s"
+	auto_create_subnetworks = false
+}
+	  
+resource "google_compute_subnetwork" "container_subnetwork" {
+	name                     = google_compute_network.container_network.name
+	network                  = google_compute_network.container_network.name
+	ip_cidr_range            = "10.0.36.0/24"
+	region                   = "us-central1"
+	private_ip_google_access = true
+
+	secondary_ip_range {
+		range_name    = "pod"
+		ip_cidr_range = "10.0.0.0/19"
+	}
+
+	secondary_ip_range {
+		range_name    = "svc"
+		ip_cidr_range = "10.0.32.0/22"
+	}
+}
+	
+resource "google_container_cluster" "with_tpu_config" {
+	name               = "%s"
+	location           = "us-central1-a"
+	initial_node_count = 1
+	
+	
+	tpu_config {
+		enabled                = true
+		use_service_networking = true
+	}
+	
+	network         = google_compute_network.container_network.name
+	subnetwork      = google_compute_subnetwork.container_subnetwork.name
+	networking_mode = "VPC_NATIVE"
+	
+	private_cluster_config {
+		enable_private_endpoint = true
+		enable_private_nodes    = true
+		master_ipv4_cidr_block  = "10.42.0.0/28"
+	}
+	master_authorized_networks_config {
+	}
+	
+	ip_allocation_policy {
+		cluster_secondary_range_name  = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
+		services_secondary_range_name = google_compute_subnetwork.container_subnetwork.secondary_ip_range[1].range_name
+	}
+}
+`, network, cluster)
+}
+<% end -%>

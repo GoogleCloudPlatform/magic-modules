@@ -149,8 +149,9 @@ per node in this cluster. This doesn't work on "routes-based" clusters, clusters
 that don't have IP Aliasing enabled. See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/flexible-pod-cidr)
 for more information.
 
-* `enable_binary_authorization` - (Optional) Enable Binary Authorization for this cluster.
+* `enable_binary_authorization` - (DEPRECATED) Enable Binary Authorization for this cluster.
     If enabled, all container images will be validated by Google Binary Authorization.
+    Deprecated in favor of `binary_authorization`.
 
 * `enable_kubernetes_alpha` - (Optional) Whether to enable Kubernetes Alpha features for
     this cluster. Note that when this option is enabled, the cluster cannot be upgraded
@@ -269,7 +270,7 @@ region are guaranteed to support the same version.
     `version_prefix` field to approximate fuzzy versions in a Terraform-compatible way.
     To update nodes in other node pools, use the `version` attribute on the node pool.
 
-* `notification_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the [cluster upgrade notifications](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-upgrade-notifications) feature. Structure is [documented below](#nested_notification_config).
+* `notification_config` - (Optional) Configuration for the [cluster upgrade notifications](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-upgrade-notifications) feature. Structure is [documented below](#nested_notification_config).
 
 * `confidential_nodes` - Configuration for [Confidential Nodes](https://cloud.google.com/kubernetes-engine/docs/how-to/confidential-gke-nodes) feature. Structure is documented below [documented below](#nested_confidential_nodes).
 
@@ -381,7 +382,7 @@ subnetwork in which the cluster's instances are launched.
 
 * `identity_service_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)). Structure is [documented below](#nested_identity_service_config).
 
-* `dns_cache_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+* `dns_cache_config` - (Optional).
     The status of the NodeLocal DNSCache addon. It is disabled by default.
     Set `enabled = true` to enable.
 
@@ -413,10 +414,9 @@ addons_config {
   }
 }
 ```
-<a name="nested_binary_authorization"></a>The `binary_authorization` block
-supports:
+<a name="nested_binary_authorization"></a>The `binary_authorization` block supports:
 
-* `enabled` - (Optional) Enable Binary Authorization for this cluster.
+* `enabled` - (DEPRECATED) Enable Binary Authorization for this cluster. Deprecated in favor of `evaluation_mode`.
 
 * `evaluation_mode` - (Optional) Mode of operation for Binary Authorization policy evaluation.
 
@@ -498,7 +498,13 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 <a name="nested_monitoring_config"></a>The `monitoring_config` block supports:
 
-*  `enable_components` - (Required) The GKE components exposing logs. `SYSTEM_COMPONENTS` and in beta provider, both `SYSTEM_COMPONENTS` and `WORKLOADS` are supported.
+*  `enable_components` - (Optional) The GKE components exposing metrics. `SYSTEM_COMPONENTS` and in beta provider, both `SYSTEM_COMPONENTS` and `WORKLOADS` are supported. (`WORKLOADS` is deprecated and removed in GKE 1.24.)
+
+*  `managed_prometheus` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for Managed Service for Prometheus. Structure is [documented below](#nested_managed_prometheus).
+
+<a name="nested_managed_prometheus"></a>The `managed_prometheus` block supports:
+
+* `enabled` - (Required) Whether or not the managed collection is enabled.
 
 <a name="nested_maintenance_policy"></a>The `maintenance_policy` block supports:
 * `daily_maintenance_window` - (Optional) structure documented below.
