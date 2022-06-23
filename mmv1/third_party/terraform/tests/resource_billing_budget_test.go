@@ -241,6 +241,7 @@ resource "google_billing_budget" "budget" {
     labels  = {
       label1 = "bar2"
     }
+  }
 
   amount {
     specified_amount {
