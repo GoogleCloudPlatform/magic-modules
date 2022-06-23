@@ -400,7 +400,7 @@ The following arguments are supported:
   Deploys 'ip-masq-agent' daemon set in the GKE cluster and defines
   nonMasqueradeCIDRs equals to pod IP range so IP masquerading is used for
   all destination addresses, except between pods traffic.
-  See the [documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-masquerade-agent).
+  See the [documentation](https://cloud.google.com/composer/docs/enable-ip-masquerade-agent).
 
 <a name="nested_software_config"></a>The `software_config` block supports:
 
@@ -720,10 +720,10 @@ The `node_config` block supports:
 
 * `enable_ip_masq_agent` -
   (Optional)
-  Deploys 'ip-masq-agent' daemon set in the GKE cluster and defines
-  nonMasqueradeCIDRs equals to pod IP range so IP masquerading is used for
-  all destination addresses, except between pods traffic.
-  See the [documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-masquerade-agent).
+  IP Masq Agent translates Pod IP addresses to node IP addresses, so that 
+  destinations and services targeted from Airflow DAGs and tasks only receive 
+  packets from node IP addresses instead of Pod IP addresses
+  See the [documentation](https://cloud.google.com/composer/docs/enable-ip-masquerade-agent).
 
 The `software_config` block supports:
 
