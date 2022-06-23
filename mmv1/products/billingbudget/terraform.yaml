@@ -54,13 +54,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           channel_name: 'Example Notification Channel'
         test_env_vars:
           billing_acct: :BILLING_ACCT
-#        - !ruby/object:Provider::Terraform::Examples
-#        name: 'billing_budget_customperiod'
-#        primary_resource_id: 'budget'
-#        vars:
-#          display_name: 'Example Billing Budget'
-#        test_env_vars:
-#          billing_acct: :BILLING_ACCT
+      - !ruby/object:Provider::Terraform::Examples
+        name: 'billing_budget_customperiod'
+        primary_resource_id: 'budget'
+        vars:
+          display_name: 'Example Billing Budget'
+        test_env_vars:
+          billing_acct: :BILLING_ACCT
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
