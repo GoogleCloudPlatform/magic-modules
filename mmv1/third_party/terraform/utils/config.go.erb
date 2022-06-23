@@ -66,7 +66,7 @@ import (
 	"google.golang.org/api/pubsub/v1"
 <% unless version == 'ga' -%>
 	runtimeconfig "google.golang.org/api/runtimeconfig/v1beta1"
-	<% end -%>
+<% end -%>
 	"google.golang.org/api/servicemanagement/v1"
 	"google.golang.org/api/servicenetworking/v1"
 	"google.golang.org/api/serviceusage/v1"
@@ -160,6 +160,7 @@ func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 // Config is the configuration structure used to instantiate the Google
 // provider.
 type Config struct {
+	DCLConfig
 	AccessToken                         string
 	Credentials                         string
 	ImpersonateServiceAccount           string
@@ -200,30 +201,12 @@ type Config struct {
 	StorageTransferBasePath string
 	BigtableAdminBasePath string
 
-	requestBatcherServiceUsage *RequestBatcher
-	requestBatcherIam          *RequestBatcher
-
-	// start DCLBasePaths
-	// dataprocBasePath is implemented in mm
-	AssuredWorkloadsBasePath string
-	ClouddeployBasePath string
-	CloudResourceManagerBasePath string
+	// dcl
 	ContainerAwsBasePath string
 	ContainerAzureBasePath string
-	DataplexBasePath string
-	EventarcBasePath string
-	FirebaserulesBasePath string
-	GkeHubBasePath string
-	NetworkConnectivityBasePath string
-	OrgPolicyBasePath string
-	RecaptchaEnterpriseBasePath string
-	ApikeysBasePath string
-	<% if version == 'private' -%>
-	VmwareBasePath string
-	RunBasePath string
-	<% end -%>
-	// CloudBuild WorkerPool uses a different endpoint (v1beta1) than any other CloudBuild resources
-	CloudBuildWorkerPoolBasePath string
+
+	requestBatcherServiceUsage *RequestBatcher
+	requestBatcherIam          *RequestBatcher
 }
 
 <% products.each do |product| -%>
@@ -239,7 +222,6 @@ const ResourceManagerV3BasePathKey = "ResourceManagerV3"
 const ServiceNetworkingBasePathKey = "ServiceNetworking"
 const StorageTransferBasePathKey = "StorageTransfer"
 const BigtableAdminBasePathKey = "BigtableAdmin"
-const GkeHubFeatureBasePathKey = "GkeHubFeature"
 const ContainerAwsBasePathKey = "ContainerAws"
 const ContainerAzureBasePathKey = "ContainerAzure"
 
@@ -266,9 +248,8 @@ var DefaultBasePaths = map[string]string{
 	ServiceNetworkingBasePathKey : "https://servicenetworking.googleapis.com/v1/",
 	StorageTransferBasePathKey : "https://storagetransfer.googleapis.com/v1/",
 	BigtableAdminBasePathKey : "https://bigtableadmin.googleapis.com/v2/",
-	GkeHubFeatureBasePathKey: "https://gkehub.googleapis.com/v1beta/",
-        ContainerAwsBasePathKey:  "https://{{location}}-gkemulticloud.googleapis.com/v1/",
-        ContainerAzureBasePathKey: "https://{{location}}-gkemulticloud.googleapis.com/v1/",
+	ContainerAwsBasePathKey:  "https://{{location}}-gkemulticloud.googleapis.com/v1/",
+	ContainerAzureBasePathKey: "https://{{location}}-gkemulticloud.googleapis.com/v1/",
 }
 
 var DefaultClientScopes = []string{
