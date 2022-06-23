@@ -1,18 +1,9 @@
+# [START cloud_run_service_add_tag]
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
   location = "us-central1"
 
-  template {
-    spec {
-      containers {
-        # image or tag must be different from previous revision
-        image = "us-docker.pkg.dev/cloudrun/container/hello"
-      }
-    }
-    metadata {
-      name = "<%= ctx[:vars]['cloud_run_service_name'] %>-blue"
-    }
-  }
+  template {}
 
   traffic {
     percent       = 100
@@ -22,8 +13,9 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
 
   traffic {
     # Deploy new revision with 0% traffic
-    percent = 0
+    percent       = 0
     revision_name = "<%= ctx[:vars]['cloud_run_service_name'] %>-blue"
-    tag = "tag-name"
+    tag           = "tag-name"
   }
 }
+# [END cloud_run_service_add_tag]

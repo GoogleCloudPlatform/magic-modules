@@ -160,7 +160,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           cloud_run_service_name: "cloudrun-srv"
         min_version: beta
       - !ruby/object:Provider::Terraform::Examples
-        name: "cloud_run_service_add_tag"
+        name: "cloud_run_service_deploy_tag"
         skip_test: true
         primary_resource_type: "google_cloud_run_service"
         primary_resource_id: "default"
@@ -168,7 +168,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           cloud_run_service_name: "cloudrun-srv"
         min_version: beta
       - !ruby/object:Provider::Terraform::Examples
-        name: "cloud_run_service_add_tag_no_revision"
+        name: "cloud_run_service_add_tag"
         skip_test: true
         primary_resource_type: "google_cloud_run_service"
         primary_resource_id: "default"
