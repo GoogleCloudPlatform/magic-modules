@@ -1,3 +1,4 @@
+# [START cloud_run_service_traffic_rollback]
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
   location = "us-central1"
@@ -10,3 +11,4 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
     revision_name = "<%= ctx[:vars]['cloud_run_service_name'] %>-green"
   }
 }
+# [END cloud_run_service_traffic_rollback]
