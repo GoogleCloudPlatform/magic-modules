@@ -175,6 +175,11 @@ steps:
       id: tfv-test
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tfv-head", "tfv-base"]
+      env:
+        - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
+        - TEST_FOLDER_ID=$_VALIDATOR_TEST_FOLDER
+        - TEST_ANCESTRY=$_VALIDATOR_TEST_ANCESTRY
+        - TEST_ORG_ID=$_VALIDATOR_TEST_ORG
       args:
           - $_PR_NUMBER
           - $COMMIT_SHA
@@ -189,6 +194,9 @@ steps:
       env:
         - TERRAFORM_VERSION=0.12.31
         - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
+        - TEST_FOLDER_ID=$_VALIDATOR_TEST_FOLDER
+        - TEST_ANCESTRY=$_VALIDATOR_TEST_ANCESTRY
+        - TEST_ORG_ID=$_VALIDATOR_TEST_ORG
       args:
           - $_PR_NUMBER
           - $COMMIT_SHA
@@ -203,6 +211,9 @@ steps:
       env:
         - TERRAFORM_VERSION=0.13.7
         - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
+        - TEST_FOLDER_ID=$_VALIDATOR_TEST_FOLDER
+        - TEST_ANCESTRY=$_VALIDATOR_TEST_ANCESTRY
+        - TEST_ORG_ID=$_VALIDATOR_TEST_ORG
       args:
           - $_PR_NUMBER
           - $COMMIT_SHA
