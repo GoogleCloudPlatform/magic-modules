@@ -19,5 +19,10 @@ resource "google_monitoring_uptime_check_config" "<%= ctx[:primary_resource_id] 
 
   content_matchers {
     content = "example"
+    matcher = "MATCHES_JSON_PATH"
+    json_path_matcher {
+      json_path = "$.path"
+      json_matcher = "REGEX_MATCH"
+    }
   }
 }

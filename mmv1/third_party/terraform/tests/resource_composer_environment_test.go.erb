@@ -503,7 +503,6 @@ func TestAccComposerEnvironment_composerV2PrivateServiceConnect(t *testing.T) {
 	})
 }
 
-<% unless version == "ga" -%>
 func TestAccComposerEnvironment_composerV1MasterAuthNetworks(t *testing.T) {
 	t.Parallel()
 
@@ -637,7 +636,7 @@ func TestAccComposerEnvironment_composerV2MasterAuthNetworksUpdate(t *testing.T)
 		},
 	})
 }
-<% end -%>
+
 // Checks behavior of node config, including dependencies on Compute resources.
 func TestAccComposerEnvironment_withNodeConfig(t *testing.T) {
 	t.Parallel()
@@ -854,9 +853,7 @@ resource "google_composer_environment" "test" {
 		}
 		private_environment_config {
 			enable_private_endpoint = true
-<% unless version == "ga" -%>
 			enable_privately_used_public_ips = true
-<% end -%>
 	}
 	}
 }
@@ -1344,7 +1341,6 @@ resource "google_compute_subnetwork" "test" {
 `, envName, network, subnetwork)
 }
 
-<% unless version == "ga" -%>
 func testAccComposerEnvironment_MasterAuthNetworks(compVersion, airflowVersion, envName, network, subnetwork string) string {
 	return fmt.Sprintf(`
 resource "google_composer_environment" "test" {
@@ -1431,7 +1427,6 @@ resource "google_compute_subnetwork" "test" {
 `, envName, compVersion, airflowVersion, network, subnetwork)
 }
 
-<% end -%>
 
 func testAccComposerEnvironment_update(name, network, subnetwork string) string {
 	return fmt.Sprintf(`
@@ -1572,18 +1567,18 @@ data "google_project" "project" {}
 
 resource "google_composer_environment" "test" {
 	name   = "%s"
-	region = "us-east1"  # later should be changed to us-central1, when ip_masq_agent feature is accessible globally
+	region = "us-central1"
 	config {
 		node_config {
 			network    = google_compute_network.test.self_link
 			subnetwork = google_compute_subnetwork.test.self_link
-			zone       = "us-east1-b"   # later should be changed to us-central1-a, when ip_masq_agent feature is accessible globally
+			zone       = "us-central1-a"
 
 			service_account = google_service_account.test.name
 <% unless version == "ga" -%>
 			max_pods_per_node = 33
-			enable_ip_masq_agent = true
 <% end -%>
+			enable_ip_masq_agent = true
 			ip_allocation_policy {
 				use_ip_aliases          = true
 				cluster_ipv4_cidr_block = "10.0.0.0/16"
@@ -1601,7 +1596,7 @@ resource "google_compute_network" "test" {
 resource "google_compute_subnetwork" "test" {
 	name          = "%s"
 	ip_cidr_range = "10.2.0.0/16"
-	region        = "us-east1"  # later should be changed to us-central1, when ip_masq_agent feature is accessible globally
+	region        = "us-central1"
 	network       = google_compute_network.test.self_link
 }
 

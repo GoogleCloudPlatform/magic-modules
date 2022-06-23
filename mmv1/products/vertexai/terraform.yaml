@@ -39,6 +39,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "featurestore"
         vars:
           name: "terraform"
+        ignore_read_extra:
+          - "force_destroy"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true

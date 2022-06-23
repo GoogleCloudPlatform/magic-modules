@@ -68,3 +68,11 @@ if [ $found -eq 0 ]; then
 else
     warn "grn" "   found!"
 fi
+
+
+count_in_path "make"
+if [ $found -eq 0 ]; then
+    warn "yel" "   make not found. See https://www.gnu.org/software/make/ for information on downloading it."
+else
+    warn "grn" "   found!"
+fi
