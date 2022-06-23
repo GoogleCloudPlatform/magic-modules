@@ -95,7 +95,7 @@ func TestAccBillingBudget_billingBudgetUpdate(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccBillingBudget_billingBudgetUpdate(context),
+				Config: testAccBillingBudget_billingBudgetCalendarUpdate(context),
 			},
 			{
 				ResourceName:      "google_billing_budget.budget",
@@ -103,7 +103,7 @@ func TestAccBillingBudget_billingBudgetUpdate(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccBillingBudget_billingBudgetCalendarUpdate(context),
+				Config: testAccBillingBudget_billingBudgetUpdate(context),
 			},
 			{
 				ResourceName:      "google_billing_budget.budget",
