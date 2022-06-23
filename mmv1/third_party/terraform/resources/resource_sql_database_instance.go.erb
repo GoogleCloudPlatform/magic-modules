@@ -166,8 +166,8 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"bucket": {
 										Type:         schema.TypeString,
-									   	Required:     true,
-									    	Description:  `The name of the destination bucket (e.g., gs://mybucket).`,
+										Required:     true,
+										Description:  `The name of the destination bucket (e.g., gs://mybucket).`,
 									},
 									"retention_interval": {
 										Type:         schema.TypeString,
