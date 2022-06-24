@@ -239,7 +239,6 @@ func assertAssetsMatch(t *testing.T, actualAssets, expectedAssets []google.Asset
 	}
 	t.Log("[Error] The following changes have occurred")
 	for _, i := range changes {
-		t.Log("[Error] The folllowing change has occoured")
 		t.Logf("        Element %v has been %sd from `%v` to  `%v`\n", i.Path, i.Type, i.From, i.To)
 	}
 	t.Fail()
