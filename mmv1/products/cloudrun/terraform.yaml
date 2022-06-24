@@ -178,7 +178,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           myservice_https_forwarding_rule: "myservice-https-forwarding-rule"
           domain_name: "example.com"
           run_container_image: "us-docker.pkg.dev/cloudrun/container/hello"
-          run_regions: ["us-central1", "europe-west1"]
         test_env_vars:
           project: :PROJECT_NAME
         min_version: beta
