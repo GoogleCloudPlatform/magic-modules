@@ -15,6 +15,11 @@ resource "google_project_service" "run_api" {
 }
 
 # [START cloudloadbalancing_run_multiregion]
+variable "domain_name" {
+  type    = string
+  default = "example.com"
+}
+
 variable "run_regions" {
   type    = list(string)
   default = ["us-central1", "europe-west1"]
@@ -77,7 +82,7 @@ resource "google_compute_managed_ssl_certificate" "lb_default" {
   project = "<%= ctx[:test_env_vars]['project'] %>"
 
   managed {
-    domains = ["<%= ctx[:vars]['domain_name'] %>"]
+    domains = [var.domain_name]
   }
 }
 
