@@ -719,6 +719,11 @@ func TestAccComposerEnvironmentAirflow2_withSoftwareConfig(t *testing.T) {
 				Config: testAccComposerEnvironment_airflow2SoftwareCfg(envName, network, subnetwork),
 			},
 			{
+				ResourceName:			"google_composer_environment.test",
+				ImportState:			 true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: testAccComposerEnvironmentUpdate_airflow2SoftwareCfg(envName, network, subnetwork),
 			},
 			{
@@ -732,8 +737,8 @@ func TestAccComposerEnvironmentAirflow2_withSoftwareConfig(t *testing.T) {
 			{
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: false,
-				Config:						  testAccComposerEnvironmentUpdate_airflow2SoftwareCfg(envName, network, subnetwork),
-				Check:							testAccCheckClearComposerEnvironmentFirewalls(t, network),
+				Config:             testAccComposerEnvironmentUpdate_airflow2SoftwareCfg(envName, network, subnetwork),
+				Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
 			},
 		},
 	})
