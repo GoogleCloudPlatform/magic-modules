@@ -1,3 +1,7 @@
+data "google_data_fusion_instance_versions" "versions" {
+  location = "us-central1"
+}
+
 resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]["instance_name"] %>"
   description = "My Data Fusion instance"
@@ -13,7 +17,7 @@ resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
     network = "default"
     ip_allocation = "10.89.48.0/22"
   }
-  version = "6.3.0"
+  version = data.google_data_fusion_instance_versions.versions.instance_versions[0].version_number
   dataproc_service_account = data.google_app_engine_default_service_account.default.email
 }
 
