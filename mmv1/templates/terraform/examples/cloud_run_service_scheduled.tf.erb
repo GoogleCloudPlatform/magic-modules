@@ -23,6 +23,7 @@ resource "google_project_service" "scheduler_api" {
   disable_on_destroy         = false
 }
 
+# [START cloudrun_service_scheduled]
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   project  = "<%= ctx[:test_env_vars]['project'] %>"
   name     = "<%= ctx[:vars]['service_name'] %>"
@@ -92,3 +93,4 @@ resource "google_cloud_run_service_iam_member" "default" {
   role = "roles/run.invoker"
   member = google_service_account.default.email
 }
+# [END cloudrun_service_scheduled]
