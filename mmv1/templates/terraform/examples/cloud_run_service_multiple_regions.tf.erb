@@ -15,6 +15,11 @@ resource "google_project_service" "run_api" {
 }
 
 # [START cloudloadbalancing_run_multiregion]
+variable "run_regions" {
+  type    = list(string)
+  default = ["us-central1", "europe-west1"]
+}
+
 resource "google_compute_global_address" "lb_default" {
   name    = "<%= ctx[:vars]['myservice_service_ip'] %>"
   project = "<%= ctx[:test_env_vars]['project'] %>"
@@ -99,11 +104,11 @@ resource "google_compute_global_forwarding_rule" "lb_default" {
 }
 
 resource "google_compute_region_network_endpoint_group" "lb_default" {
-  count                 = length(<%= ctx[:vars]['run_regions'] %>)
+  count                 = length(var.run_regions)
   project               = "<%= ctx[:test_env_vars]['project'] %>"
   name                  = "<%= ctx[:vars]['myservice_neg'] %>"
   network_endpoint_type = "SERVERLESS"
-  region                = <%= ctx[:vars]['run_regions'] %>[count.index]
+  region                = var.run_regions[count.index]
   cloud_run {
     service = google_cloud_run_service.run_default[count.index].name
   }
@@ -114,10 +119,10 @@ output "load_balancer_ip_addr" {
 }
 
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
-  count    = length(<%= ctx[:vars]['run_regions'] %>)
+  count    = length(var.run_regions)
   project  = "<%= ctx[:test_env_vars]['project'] %>"
   name     = "<%= ctx[:vars]['myservice_run_app_REGIONMAN'] %>"
-  location = <%= ctx[:vars]['run_regions'] %>[count.index]
+  location = var.run_regions[count.index]
 
   template {
     spec {
@@ -139,7 +144,7 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_cloud_run_service_iam_member" "run_allow_unauthenticated" {
-  count    = length(<%= ctx[:vars]['run_regions'] %>)
+  count    = length(var.run_regions)
   project  = "<%= ctx[:test_env_vars]['project'] %>"
   location = google_cloud_run_service.run_default[count.index].location
   service  = google_cloud_run_service.run_default[count.index].name
