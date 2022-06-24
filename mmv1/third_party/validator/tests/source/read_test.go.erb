@@ -69,7 +69,7 @@ func TestReadPlannedAssetsCoverage(t *testing.T) {
 
 			expectedAssets := normalizeAssets(t, want, true)
 			actualAssets := normalizeAssets(t, got, true)
-			change := getDiff(t, actualAssets, expectedAssets)
+			change := assertAssetsMatch(t, actualAssets, expectedAssets)
 			assert.Equal(t, len(change), 0, "There should not no difference")
 		})
 	}

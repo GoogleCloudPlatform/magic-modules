@@ -20,7 +20,7 @@ import (
 func defaultCompareConverterOutput(t *testing.T, expected []google.Asset, actual []google.Asset, offline bool) {
 	expectedAssets := normalizeAssets(t, expected, offline)
 	actualAssets := normalizeAssets(t, actual, offline)
-	change := getDiff(t, actualAssets, expectedAssets)
+	change := assertAssetsMatch(t, actualAssets, expectedAssets)
 	assert.Equal(t, len(change), 0, "There should not no difference")
 }
 
