@@ -145,9 +145,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "autogenerate_revision_name"
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_ingress"
-        primary_resource_type: "google_cloud_run_service"
         primary_resource_id: "default"
-        skip_test: true
         vars:
           cloudrun_service_name: "ingress-service"
         min_version: beta
