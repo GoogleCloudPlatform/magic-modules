@@ -14,7 +14,7 @@ resource "google_project_service" "run_api" {
   disable_on_destroy         = false
 }
 
-# [START cloudloadbalancing_run_multiregion]
+# [START cloudrun_multiregion]
 variable "domain_name" {
   type    = string
   default = "example.com"
@@ -186,4 +186,4 @@ resource "google_compute_global_forwarding_rule" "https_default" {
   port_range = "80"
   depends_on = [google_compute_target_http_proxy.https_default]
 }
-# [END cloudloadbalancing_run_multiregion]
+# [END cloudrun_multiregion]
