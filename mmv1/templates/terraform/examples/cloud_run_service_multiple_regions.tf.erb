@@ -121,7 +121,7 @@ output "load_balancer_ip_addr" {
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   count    = length(var.run_regions)
   project  = "<%= ctx[:test_env_vars]['project'] %>"
-  name     = "<%= ctx[:vars]['myservice_run_app_REGIONMAN'] %>"
+  name     = "<%= ctx[:vars]['myservice_run_app'] %>-${var.run_regions[count.index]}"
   location = var.run_regions[count.index]
 
   template {
