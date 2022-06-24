@@ -91,6 +91,6 @@ resource "google_cloud_run_service_iam_member" "default" {
   location = google_cloud_run_service.default.location
   service = google_cloud_run_service.default.name
   role = "roles/run.invoker"
-  member = google_service_account.default.email
+  member = "serviceAccount:${google_service_account.default.email}"
 }
 # [END cloudrun_service_scheduled]
