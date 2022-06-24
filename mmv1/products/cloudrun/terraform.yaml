@@ -73,12 +73,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "cloud_run_service_tasks"
         primary_resource_type: "google_cloud_run_service"
         primary_resource_id: "default"
-        skip_test: true
         vars:
           project_id: "project-id"
           region: "us-central1"
           cloud_run_service_name: "cloud-run-service-name"
           cloud_tasks_queue_name: "cloud-tasks-queue-name"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_pubsub"
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "default"
+        skip_test: true
+        vars:
+          cloud_run_service_name: "cloud_run_service_name"
+          pubsub_topic: "pubsub_topic"
+          pubsub_subscription: "pubsub_subscription"
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_basic"
         primary_resource_id: "default"
@@ -160,6 +168,30 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           cloudrun_hello_tf: "cloudrun-hello-tf"
           trigger_pubsub_tf: "trigger-pubsub-tf"
           trigger_auditlog_tf: "trigger-auditlog-tf"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_remove_tag"
+        skip_test: true
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "default"
+        vars:
+          cloud_run_service_name: "cloudrun-srv"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_deploy_tag"
+        skip_test: true
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "default"
+        vars:
+          cloud_run_service_name: "cloudrun-srv"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_add_tag"
+        skip_test: true
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "default"
+        vars:
+          cloud_run_service_name: "cloudrun-srv"
         min_version: beta
     virtual_fields:
       - !ruby/object:Api::Type::Boolean

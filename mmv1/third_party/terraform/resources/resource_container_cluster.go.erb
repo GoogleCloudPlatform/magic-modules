@@ -65,9 +65,9 @@ var (
 		"addons_config.0.network_policy_config",
 		"addons_config.0.cloudrun_config",
 		"addons_config.0.gcp_filestore_csi_driver_config",
+		"addons_config.0.dns_cache_config",
 	<% unless version == 'ga' -%>
 		"addons_config.0.istio_config",
-		"addons_config.0.dns_cache_config",
 		"addons_config.0.gce_persistent_disk_csi_driver_config",
 		"addons_config.0.kalm_config",
 		"addons_config.0.config_connector_config",
@@ -299,6 +299,23 @@ func resourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
+						"dns_cache_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the NodeLocal DNSCache addon. It is disabled by default. Set enabled = true to enable.`,
+							ConflictsWith: []string{"enable_autopilot"},
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
 						<% unless version == 'ga' -%>
 						"istio_config": {
 							Type:         schema.TypeList,
@@ -321,23 +338,6 @@ func resourceContainerCluster() *schema.Resource {
 										DiffSuppressFunc: emptyOrDefaultStringSuppress("AUTH_NONE"),
 										ValidateFunc:     validation.StringInSlice([]string{"AUTH_NONE", "AUTH_MUTUAL_TLS"}, false),
 										Description:      `The authentication type between services in Istio. Available options include AUTH_MUTUAL_TLS.`,
-									},
-								},
-							},
-						},
-						"dns_cache_config": {
-							Type:         schema.TypeList,
-							Optional:     true,
-							Computed:     true,
-							AtLeastOneOf: addonsConfigKeys,
-							MaxItems:     1,
-							Description:  `The status of the NodeLocal DNSCache addon. It is disabled by default. Set enabled = true to enable.`,
-							ConflictsWith: []string{"enable_autopilot"},
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"enabled": {
-										Type:     schema.TypeBool,
-										Required: true,
 									},
 								},
 							},
@@ -816,7 +816,6 @@ func resourceContainerCluster() *schema.Resource {
 				},
 			},
 
-<% unless version == 'ga' -%>
 			"notification_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -848,7 +847,6 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 
 			"confidential_nodes": {
 				Type:        schema.TypeList,
@@ -1588,9 +1586,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			DnsConfig:                 expandDnsConfig(d.Get("dns_config")),
 	    },
 		MasterAuth:     expandMasterAuth(d.Get("master_auth")),
-<% unless version == 'ga' -%>
 		NotificationConfig: expandNotificationConfig(d.Get("notification_config")),
-<% end -%>
 		ConfidentialNodes: expandConfidentialNodes(d.Get("confidential_nodes")),
 		ResourceLabels: expandStringMap(d, "resource_labels"),
 	}
@@ -1945,10 +1941,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("release_channel", flattenReleaseChannel(cluster.ReleaseChannel)); err != nil {
 		return err
 	}
-<% unless version == 'ga' -%>
 	if err := d.Set("notification_config", flattenNotificationConfig(cluster.NotificationConfig)); err != nil {
 		return err
 	}
+<% unless version == 'ga' -%>
 	if err := d.Set("enable_l4_ilb_subsetting", cluster.NetworkConfig.EnableL4ilbSubsetting); err != nil {
 		return fmt.Errorf("Error setting enable_l4_ilb_subsetting: %s", err)
 	}
@@ -2652,7 +2648,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
-<% unless version == 'ga' -%>
 	if d.HasChange("notification_config") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -2684,7 +2679,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s Notification Config has been updated to %#v", d.Id(), req.Update.DesiredNotificationConfig)
 	}
-<% end -%>
 
 	if d.HasChange("vertical_pod_autoscaling") {
 		if ac, ok := d.GetOk("vertical_pod_autoscaling"); ok {
@@ -3165,6 +3159,14 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 		}
 	}
 
+	if v, ok := config["dns_cache_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.DnsCacheConfig = &container.DnsCacheConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
+
 <% unless version == 'ga' -%>
 	if v, ok := config["istio_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
@@ -3172,14 +3174,6 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 			Disabled:        addon["disabled"].(bool),
 			Auth:            addon["auth"].(string),
 			ForceSendFields: []string{"Disabled"},
-		}
-	}
-
-	if v, ok := config["dns_cache_config"]; ok && len(v.([]interface{})) > 0 {
-		addon := v.([]interface{})[0].(map[string]interface{})
-		ac.DnsCacheConfig = &container.DnsCacheConfig{
-			Enabled:         addon["enabled"].(bool),
-			ForceSendFields: []string{"Enabled"},
 		}
 	}
 
@@ -3427,7 +3421,6 @@ func expandAuthenticatorGroupsConfig(configured interface{}) *container.Authenti
 	return result
 }
 
-<% unless version == 'ga' -%>
 func expandNotificationConfig(configured interface{}) *container.NotificationConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -3458,7 +3451,6 @@ func expandNotificationConfig(configured interface{}) *container.NotificationCon
 		},
 	}
 }
-<% end -%>
 
 func expandConfidentialNodes(configured interface{}) *container.ConfidentialNodes {
 	l := configured.([]interface{})
@@ -3771,6 +3763,7 @@ func expandContainerClusterTpuConfig(configured interface{}) *container.TpuConfi
 		UseServiceNetworking: config["use_service_networking"].(bool),
 	}
 }
+<% end -%>
 
 func flattenNotificationConfig(c *container.NotificationConfig) []map[string]interface{} {
 	if c == nil {
@@ -3788,8 +3781,6 @@ func flattenNotificationConfig(c *container.NotificationConfig) []map[string]int
 		},
 	}
 }
-<% end -%>
-
 func flattenConfidentialNodes(c *container.ConfidentialNodes) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
@@ -3863,20 +3854,20 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 		result["cloudrun_config"] = []map[string]interface{}{cloudRunConfig}
 	}
 
+	if c.DnsCacheConfig != nil {
+		result["dns_cache_config"] = []map[string]interface{}{
+			{
+				"enabled": c.DnsCacheConfig.Enabled,
+			},
+		}
+	}
+
 <% unless version == 'ga' -%>
 	if c.IstioConfig != nil {
 		result["istio_config"] = []map[string]interface{}{
 			{
 				"disabled": c.IstioConfig.Disabled,
 				"auth":     c.IstioConfig.Auth,
-			},
-		}
-	}
-
-	if c.DnsCacheConfig != nil {
-		result["dns_cache_config"] = []map[string]interface{}{
-			{
-				"enabled": c.DnsCacheConfig.Enabled,
 			},
 		}
 	}

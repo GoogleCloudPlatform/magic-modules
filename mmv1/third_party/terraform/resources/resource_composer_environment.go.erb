@@ -449,6 +449,7 @@ func resourceComposerEnvironment() *schema.Resource {
 										Computed: true,
 										AtLeastOneOf: composerPrivateEnvironmentConfig,
 										ForceNew: true,
+										DiffSuppressFunc: compareSelfLinkRelativePaths,
 										Description: `When specified, the environment will use Private Service Connect instead of VPC peerings to connect to Cloud SQL in the Tenant Project, and the PSC endpoint in the Customer Project will use an IP address from this subnetwork. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
 									},
 								},
@@ -882,6 +883,21 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			}
 		}
 <% end -%>
+
+		if d.HasChange("config.0.software_config.0.scheduler_count") {
+			patchObj := &composer.Environment{
+				Config: &composer.EnvironmentConfig{
+					SoftwareConfig: &composer.SoftwareConfig{},
+				},
+			}
+			if config != nil && config.SoftwareConfig != nil {
+				patchObj.Config.SoftwareConfig.SchedulerCount = config.SoftwareConfig.SchedulerCount
+			}
+			err = resourceComposerEnvironmentPatchField("config.softwareConfig.schedulerCount", userAgent, patchObj, d, tfConfig)
+			if err != nil {
+				return err
+			}
+		}
 
 		if d.HasChange("config.0.software_config.0.airflow_config_overrides") {
 			patchObj := &composer.Environment{
