@@ -86,6 +86,7 @@ func resourceSqlUser() *schema.Resource {
 			"sql_server_user_details": {
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -98,6 +99,7 @@ func resourceSqlUser() *schema.Resource {
 						"server_roles": {
 							Type:        schema.TypeList,
 							Optional:    true,
+							Computed:    true,
 							Description: `The server roles for this user in the database.`,
 							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
@@ -187,7 +189,16 @@ func expandSqlServerUserDetails(cfg interface{}) (*sqladmin.SqlServerUserDetails
 	}
 
 	return ssud, nil
+}
 
+func flattenSqlServerUserDetails(v *sqladmin.SqlServerUserDetails) []interface{} {
+	if v == nil {
+		return []interface{}{}
+	}
+	transformed := make(map[string]interface{})
+	transformed["disabled"] = v.Disabled
+	transformed["server_roles"] = v.ServerRoles
+	return []interface{}{transformed}
 }
 
 func expandPasswordPolicy(cfg interface{}) *sqladmin.UserPasswordValidationPolicy {
@@ -351,15 +362,9 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-	if user.SqlserverUserDetails != nil {
-		if err := d.Set("disabled", user.SqlserverUserDetails.Disabled); err != nil {
-			return fmt.Errorf("Error setting disabled: %s", err)
-		}
-		if err := d.Set("server_roles", user.SqlserverUserDetails.ServerRoles); err != nil {
-			return fmt.Errorf("Error setting server_roles: %s", err)
-		}
+	if err := d.Set("sql_server_user_details", flattenSqlServerUserDetails(user.SqlserverUserDetails)); err != nil {
+		return fmt.Errorf("Error setting sql server user details: %s", err)
 	}
-
 	if user.PasswordPolicy != nil {
 		passwordPolicy := flattenPasswordPolicy(user.PasswordPolicy)
 		if len(passwordPolicy.([]map[string]interface{})[0]) != 0 {
@@ -368,6 +373,7 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 			}
 		}
 	}
+
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
 	return nil
 }
