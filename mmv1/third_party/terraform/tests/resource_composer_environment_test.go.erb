@@ -727,8 +727,8 @@ func TestAccComposerEnvironmentAirflow2_withSoftwareConfig(t *testing.T) {
 				Config: testAccComposerEnvironmentUpdate_airflow2SoftwareCfg(envName, network, subnetwork),
 			},
 			{
-				ResourceName:			"google_composer_environment.test",
-				ImportState:			 true,
+				ResourceName:      "google_composer_environment.test",
+				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			// This is a terrible clean-up step in order to get destroy to succeed,
