@@ -14,14 +14,12 @@ import (
 
 	"github.com/GoogleCloudPlatform/terraform-validator/converters/google"
 	"github.com/r3labs/diff/v2"
-	"github.com/stretchr/testify/assert"
 )
 
 func defaultCompareConverterOutput(t *testing.T, expected []google.Asset, actual []google.Asset, offline bool) {
 	expectedAssets := normalizeAssets(t, expected, offline)
 	actualAssets := normalizeAssets(t, actual, offline)
-	change := assertAssetsMatch(t, actualAssets, expectedAssets)
-	assert.Equal(t, len(change), 0, "There should not no difference")
+	assertAssetsMatch(t, actualAssets, expectedAssets)
 }
 
 func testConvertCommand(t *testing.T, dir, name string, offline bool, compare compareConvertOutputFunc) {

@@ -10,8 +10,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/GoogleCloudPlatform/terraform-validator/converters/google"
 	"github.com/GoogleCloudPlatform/terraform-validator/tfgcv"
 	"go.uber.org/zap/zaptest"
@@ -69,8 +67,7 @@ func TestReadPlannedAssetsCoverage(t *testing.T) {
 
 			expectedAssets := normalizeAssets(t, want, true)
 			actualAssets := normalizeAssets(t, got, true)
-			change := assertAssetsMatch(t, actualAssets, expectedAssets)
-			assert.Equal(t, len(change), 0, "There should not no difference")
+			assertAssetsMatch(t, actualAssets, expectedAssets)
 		})
 	}
 }
