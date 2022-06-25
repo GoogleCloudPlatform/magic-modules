@@ -34,6 +34,9 @@ objects:
     min_version: beta
     description: |
       A managed metastore service that serves metadata queries.
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'      
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
