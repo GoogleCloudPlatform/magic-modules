@@ -84,17 +84,9 @@ resource "google_dataproc_metastore_service" "my_metastore" {
 
 func testAccDataprocMetastoreService_networking(name, tier string) string {
 	return fmt.Sprintf(`
-resource "google_compute_network" "test" {
-	name                    = "%[1]s"
-	auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "test" {
-	name                     = "%[1]s"
-	ip_cidr_range            = "10.2.0.0/16"
-	region                   = "us-central1"
-	network                  = google_compute_network.test.self_link
-	private_ip_google_access = true
+data "google_compute_subnetwork" "test" {
+  name   = "default"
+  region = "us-central1"
 }
 
 resource "google_dataproc_metastore_service" "my_metastore" {
