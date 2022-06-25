@@ -17,6 +17,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: 'projects/{{project}}/managedZones/{{name}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        name: "dns_managed_zone_basic"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-managed-zone%s\", context[\"random_suffix\"])"
+        primary_resource_id: "example-zone"
+        pull_external: true
+        # Randomness from random provider
+        skip_vcr: true    
+      - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_quickstart"
         primary_resource_id: "default"
         skip_docs: true
@@ -26,18 +33,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           example_zone_googlecloudexample: "example-zone-googlecloudexample"
         ignore_read_extra:
           - "force_destroy"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "dns_record_set_basic"
-        primary_resource_id: "parent-zone"
-        skip_docs: true
-        vars:
-          sample_zone: "sample-zone"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "dns_managed_zone_basic"
-        primary_resource_id: "example-zone"
-        pull_external: true
-        # Randomness from random provider
-        skip_vcr: true
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_private"
         primary_resource_id: "private-zone"

@@ -21,6 +21,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://dns.googleapis.com/dns/v1beta2/
+  - !ruby/object:Api::Product::Version
+    name: beta2
+    base_url: https://dns.googleapis.com/dns/v2/    
 scopes:
   - https://www.googleapis.com/auth/ndev.clouddns.readwrite
 apis_required:
@@ -276,6 +279,10 @@ objects:
                 description: |
                   The fully qualified URL of the service directory namespace that should be
                   associated with the zone. Ignored for `public` visibility zones.
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      parent_resource_attribute: 'name'
+      base_url: 'projects/{{project}}/locations/global/managedZones/{{name}}'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Managing Zones':
