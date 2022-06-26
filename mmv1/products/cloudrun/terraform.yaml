@@ -176,7 +176,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           myservice_https_urlmap: "myservice-https-urlmap"
           myservice_http_proxy: "myservice-http-proxy"
           myservice_https_forwarding_rule: "myservice-https-fr"
-          run_container_image: "us-docker.pkg.dev/cloudrun/container/hello"
         test_env_vars:
           project: :PROJECT_NAME
         min_version: beta
