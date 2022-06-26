@@ -33,6 +33,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "bigquery_connection_basic"
         pull_external: true
         primary_resource_id: "connection"
+        primary_resource_name: "fmt.Sprintf(\"tf_test_conn_id%s\", context[\"random_suffix\"])"
         # Random provider
         skip_vcr: true
         vars:
