@@ -1,20 +1,24 @@
-# [END functions_v2_full]
+# [START functions_v2_full]
 resource "google_service_account" "account" {
+  provider = google-beta
   account_id = "test-service-account"
   display_name = "Test Service Account"
 }
 
 resource "google_pubsub_topic" "sub" {
+  provider = google-beta
   name = "pubsub"
 }
 
 resource "google_storage_bucket" "bucket" {
+  provider = google-beta
   name     = "<%= ctx[:vars]['bucket_name'] %>"  # Every bucket name must be globally unique
   location = "US"
   uniform_bucket_level_access = true
 }
  
 resource "google_storage_bucket_object" "object" {
+  provider = google-beta
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
   source = "<%= ctx[:vars]['zip_path'] %>"  # Add path to the zipped function source code
