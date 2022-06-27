@@ -358,9 +358,8 @@ resource "google_sql_database_instance" "instance" {
 }
 
 resource "google_sql_user" "user1" {
-  name     = "admin"
+  name     = "admin1"
   instance = google_sql_database_instance.instance.name
-  host     = "google.com"
   password = "%s"
   sql_server_user_details {
     disabled = "%t"
@@ -369,9 +368,8 @@ resource "google_sql_user" "user1" {
 }
 
 resource "google_sql_user" "user2" {
-  name     = "admin"
+  name     = "admin2"
   instance = google_sql_database_instance.instance.name
-  host     = "gmail.com"
   password = "hunter2"
   depends_on = [google_sql_user.user1]
 }
