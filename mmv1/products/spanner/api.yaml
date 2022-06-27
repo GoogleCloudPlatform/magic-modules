@@ -224,9 +224,6 @@ objects:
         description: |
           The dialect of the Cloud Spanner Database.
           If it is not provided, "GOOGLE_STANDARD_SQL" will be used. 
-          Note: Databases that are created with POSTGRESQL dialect do not support 
-          extra DDL statements in the `CreateDatabase` call. You must therefore re-apply 
-          terraform with ddl on the same database after creation.
         values:
           - :GOOGLE_STANDARD_SQL
           - :POSTGRESQL

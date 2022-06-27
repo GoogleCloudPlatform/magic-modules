@@ -175,6 +175,11 @@ resource "google_spanner_database" "basic_spangres" {
   instance = google_spanner_instance.basic.name
   name     = "%s-spangres"
   database_dialect = "POSTGRESQL"
+  // Confirm that DDL can be run at creation time for POSTGRESQL
+  version_retention_period = "2h"
+  ddl = [
+     "CREATE TABLE t1 (t1 bigint NOT NULL PRIMARY KEY)",
+  ]
   deletion_protection = false
 }
 `, instanceName, instanceName, databaseName)
@@ -193,9 +198,8 @@ resource "google_spanner_database" "basic_spangres" {
   instance = google_spanner_instance.basic.name
   name     = "%s-spangres"
   database_dialect = "POSTGRESQL"
-  version_retention_period = "2d" # increase from default 1h
+  version_retention_period = "4d"
   ddl = [
-     "CREATE TABLE t1 (t1 bigint NOT NULL PRIMARY KEY)",
      "CREATE TABLE t2 (t2 bigint NOT NULL PRIMARY KEY)",
      "CREATE TABLE t3 (t3 bigint NOT NULL PRIMARY KEY)",
      "CREATE TABLE t4 (t4 bigint NOT NULL PRIMARY KEY)",
