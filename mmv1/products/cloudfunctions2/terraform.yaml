@@ -47,7 +47,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           zip_path: "path/to/index.zip"
           router: "gcf2-router"
         test_vars_overrides:
-          zip_path: "\"./test-fixtures/cloudfunctions2/function-source.zip\""
+          zip_path: "\"./test-fixtures/cloudfunctions2/function-source-pubsub.zip\""
           primary_resource_id: "\"terraform-test\""
           location: "\"us-central1\""
         # ignore these fields during import step
