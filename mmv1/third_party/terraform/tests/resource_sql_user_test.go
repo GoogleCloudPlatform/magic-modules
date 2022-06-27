@@ -45,40 +45,6 @@ func TestAccSqlUser_mysql(t *testing.T) {
 	})
 }
 
-func TestAccSqlUser_mysqlDisabled(t *testing.T) {
-	t.Parallel()
-
-	instance := fmt.Sprintf("i-%d", randInt(t))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccSqlUserDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testGoogleSqlUser_sqlServer(instance, "password", true),
-			},
-			{
-				ResourceName:            "google_sql_user.user1",
-				ImportStateId:           fmt.Sprintf("%s/%s/gmail.com/admin", getTestProjectFromEnv(), instance),
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"password"},
-			},
-			{
-				// Update password
-				Config: testGoogleSqlUser_sqlServer(instance, "password", false),
-			},
-			{
-				ResourceName:            "google_sql_user.user1",
-				ImportStateId:           fmt.Sprintf("%s/%s/gmail.com/admin", getTestProjectFromEnv(), instance),
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"password"},
-			},
-		},
-	})
-}
-
 func TestAccSqlUser_iamUser(t *testing.T) {
 	// Multiple fine-grained resources
 	skipIfVcr(t)
@@ -342,38 +308,6 @@ resource "google_sql_user" "user2" {
   password = "hunter2"
 }
 `, instance, password)
-}
-
-func testGoogleSqlUser_sqlServer(instance, password string, disabled bool) string {
-	return fmt.Sprintf(`
-resource "google_sql_database_instance" "instance" {
-  name                = "%s"
-  region              = "us-central1"
-  database_version    = "SQLSERVER_2019_STANDARD"
-  root_password       = "INSERT-PASSWORD-HERE "
-  deletion_protection = false
-  settings {
-    tier = "db-custom-2-7680"
-  }
-}
-
-resource "google_sql_user" "user1" {
-  name     = "admin1"
-  instance = google_sql_database_instance.instance.name
-  password = "%s"
-  sql_server_user_details {
-    disabled = "%t"
-    server_roles = [ "admin" ]  	
-  }
-}
-
-resource "google_sql_user" "user2" {
-  name     = "admin2"
-  instance = google_sql_database_instance.instance.name
-  password = "hunter2"
-  depends_on = [google_sql_user.user1]
-}
-`, instance, password, disabled)
 }
 
 func testGoogleSqlUser_mysqlPasswordPolicy(instance, password string, disabled bool) string {

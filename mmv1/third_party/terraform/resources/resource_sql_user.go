@@ -85,20 +85,17 @@ func resourceSqlUser() *schema.Resource {
 			},
 			"sql_server_user_details": {
 				Type:     schema.TypeList,
-				Optional: true,
 				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"disabled": {
 							Type:        schema.TypeBool,
-							Optional:    true,
-							Default:     false,
+							Computed:    true,
 							Description: `If the user has been disabled.`,
 						},
 						"server_roles": {
 							Type:        schema.TypeList,
-							Optional:    true,
 							Computed:    true,
 							Description: `The server roles for this user in the database.`,
 							Elem:        &schema.Schema{Type: schema.TypeString},
@@ -176,21 +173,6 @@ func resourceSqlUser() *schema.Resource {
 	}
 }
 
-func expandSqlServerUserDetails(cfg interface{}) (*sqladmin.SqlServerUserDetails, error) {
-	raw := cfg.([]interface{})[0].(map[string]interface{})
-
-	ssud := &sqladmin.SqlServerUserDetails{}
-
-	if v, ok := raw["disabled"]; ok {
-		ssud.Disabled = v.(bool)
-	}
-	if v, ok := raw["server_roles"]; ok {
-		ssud.ServerRoles = expandStringArray(v)
-	}
-
-	return ssud, nil
-}
-
 func flattenSqlServerUserDetails(v *sqladmin.SqlServerUserDetails) []interface{} {
 	if v == nil {
 		return []interface{}{}
@@ -249,14 +231,6 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 		Password: password,
 		Host:     host,
 		Type:     typ,
-	}
-
-	if v, ok := d.GetOk("sql_server_user_details"); ok {
-		ssud, err := expandSqlServerUserDetails(v)
-		if err != nil {
-			return err
-		}
-		user.SqlserverUserDetails = ssud
 	}
 
 	if v, ok := d.GetOk("password_policy"); ok {
@@ -440,15 +414,6 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 			Instance: instance,
 			Password: password,
 		}
-
-		if v, ok := d.GetOk("sql_server_user_details"); ok {
-			ssud, err := expandSqlServerUserDetails(v)
-			if err != nil {
-				return err
-			}
-			user.SqlserverUserDetails = ssud
-		}
-		user.PasswordPolicy = expandPasswordPolicy(d.Get("password_policy"))
 
 		mutexKV.Lock(instanceMutexKey(project, instance))
 		defer mutexKV.Unlock(instanceMutexKey(project, instance))
