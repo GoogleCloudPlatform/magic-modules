@@ -43,7 +43,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_name: "terraform-test"
         vars:
           bucket_name: "cloudfunctions2-function-bucket"
-          service_account: "test-service-account"
+          service_account: "sa"
           subscription: "pubsub"
           function: "test-function"
           zip_path: "path/to/index.zip"
