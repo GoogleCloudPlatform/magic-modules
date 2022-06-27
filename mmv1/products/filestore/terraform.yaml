@@ -46,7 +46,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       networks.connectMode: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
-      networks.network:
+      networks.network: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       networks.reservedIpRange: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
