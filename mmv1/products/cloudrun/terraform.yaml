@@ -179,10 +179,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project: :PROJECT_NAME
         min_version: beta
-        # ignore_read_extra:
-        #   - "port_range"
-        #   - "target"
-        #   - "ip_address"
+        skip_import_test: true
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_remove_tag"
         skip_test: true
