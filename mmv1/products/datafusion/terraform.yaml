@@ -30,6 +30,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "extended_instance"
         vars:
           instance_name: "my-instance"
+          ip_alloc: "datafusion-ip-alloc"
+          network_name: "datafusion-full-network"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
