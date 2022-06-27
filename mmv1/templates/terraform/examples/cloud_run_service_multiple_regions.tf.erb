@@ -115,7 +115,7 @@ resource "google_compute_region_network_endpoint_group" "lb_default" {
   network_endpoint_type = "SERVERLESS"
   region                = var.run_regions[count.index]
   cloud_run {
-    service = google_cloud_run_service.run_default[count.index].name
+    service = google_cloud_run_service.<%= ctx[:primary_resource_id] %>[count.index].name
   }
 }
 
@@ -151,8 +151,8 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
 resource "google_cloud_run_service_iam_member" "run_allow_unauthenticated" {
   count    = length(var.run_regions)
   project  = "<%= ctx[:test_env_vars]['project'] %>"
-  location = google_cloud_run_service.run_default[count.index].location
-  service  = google_cloud_run_service.run_default[count.index].name
+  location = google_cloud_run_service.<%= ctx[:primary_resource_id] %>[count.index].location
+  service  = google_cloud_run_service.<%= ctx[:primary_resource_id] %>[count.index].name
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
