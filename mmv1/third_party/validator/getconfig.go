@@ -2,23 +2,31 @@ package google
 
 import (
 	"context"
-	"fmt"
-	"os"
+	"net/http"
 
 	"github.com/pkg/errors"
-
-	"github.com/GoogleCloudPlatform/terraform-validator/version"
 )
+
+// Compatibility shim to let this change happen in two commits.
+// NewConfig better matches golang best practices.
+func GetConfig(ctx context.Context, project string, offline bool, userAgent string) (*Config, error) {
+	return NewConfig(ctx, project, offline, userAgent, nil)
+}
 
 // Return the value of the private userAgent field
 func (c *Config) UserAgent() string {
 	return c.userAgent
 }
 
-func GetConfig(ctx context.Context, project string, offline bool) (*Config, error) {
+// Return the value of the private client field
+func (c *Config) Client() *http.Client {
+	return c.client
+}
+
+func NewConfig(ctx context.Context, project string, offline bool, userAgent string, client *http.Client) (*Config, error) {
 	cfg := &Config{
 		Project:   project,
-		userAgent: fmt.Sprintf("config-validator-tf/%s", version.BuildVersion()),
+		userAgent: userAgent,
 	}
 
 	// Search for default credentials
@@ -48,16 +56,13 @@ func GetConfig(ctx context.Context, project string, offline bool) (*Config, erro
 		"CLOUDSDK_COMPUTE_REGION",
 	})
 
-	// opt in extension for adding to the User-Agent header
-	if ext := os.Getenv("GOOGLE_TERRAFORM_VALIDATOR_USERAGENT_EXTENSION"); ext != "" {
-		ua := cfg.userAgent
-		cfg.userAgent = fmt.Sprintf("%s %s", ua, ext)
-	}
-
 	if !offline {
 		ConfigureBasePaths(cfg)
 		if err := cfg.LoadAndValidate(ctx); err != nil {
 			return nil, errors.Wrap(err, "load and validate config")
+		}
+		if client != nil {
+			cfg.client = client
 		}
 	}
 

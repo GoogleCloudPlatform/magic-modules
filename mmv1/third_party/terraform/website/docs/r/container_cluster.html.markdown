@@ -266,7 +266,7 @@ region are guaranteed to support the same version.
     `version_prefix` field to approximate fuzzy versions in a Terraform-compatible way.
     To update nodes in other node pools, use the `version` attribute on the node pool.
 
-* `notification_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the [cluster upgrade notifications](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-upgrade-notifications) feature. Structure is [documented below](#nested_notification_config).
+* `notification_config` - (Optional) Configuration for the [cluster upgrade notifications](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-upgrade-notifications) feature. Structure is [documented below](#nested_notification_config).
 
 * `confidential_nodes` - Configuration for [Confidential Nodes](https://cloud.google.com/kubernetes-engine/docs/how-to/confidential-gke-nodes) feature. Structure is documented below [documented below](#nested_confidential_nodes).
 
@@ -378,7 +378,7 @@ subnetwork in which the cluster's instances are launched.
 
 * `identity_service_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)). Structure is [documented below](#nested_identity_service_config).
 
-* `dns_cache_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+* `dns_cache_config` - (Optional).
     The status of the NodeLocal DNSCache addon. It is disabled by default.
     Set `enabled = true` to enable.
 
@@ -489,7 +489,13 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 <a name="nested_monitoring_config"></a>The `monitoring_config` block supports:
 
-*  `enable_components` - (Required) The GKE components exposing logs. `SYSTEM_COMPONENTS` and in beta provider, both `SYSTEM_COMPONENTS` and `WORKLOADS` are supported.
+*  `enable_components` - (Optional) The GKE components exposing metrics. `SYSTEM_COMPONENTS` and in beta provider, both `SYSTEM_COMPONENTS` and `WORKLOADS` are supported. (`WORKLOADS` is deprecated and removed in GKE 1.24.)
+
+*  `managed_prometheus` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for Managed Service for Prometheus. Structure is [documented below](#nested_managed_prometheus).
+
+<a name="nested_managed_prometheus"></a>The `managed_prometheus` block supports:
+
+* `enabled` - (Required) Whether or not the managed collection is enabled.
 
 <a name="nested_maintenance_policy"></a>The `maintenance_policy` block supports:
 * `daily_maintenance_window` - (Optional) structure documented below.
@@ -719,8 +725,8 @@ gvnic {
     are preemptible. See the [official documentation](https://cloud.google.com/container-engine/docs/preemptible-vm)
     for more information. Defaults to false.
 
-* `spot` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) A boolean
-    that represents whether the underlying node VMs are spot. See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms)
+* `spot` - (Optional) A boolean that represents whether the underlying node VMs are spot.
+    See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms)
     for more information. Defaults to false.
 
 * `sandbox_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) [GKE Sandbox](https://cloud.google.com/kubernetes-engine/docs/how-to/sandbox-pods) configuration. When enabling this feature you must specify `image_type = "COS_CONTAINERD"` and `node_version = "1.12.7-gke.17"` or later to use it.
