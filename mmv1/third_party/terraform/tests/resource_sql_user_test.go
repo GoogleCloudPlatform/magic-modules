@@ -20,7 +20,7 @@ func TestAccSqlUser_mysql(t *testing.T) {
 		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlUser_mysql(instance, "password", false),
+				Config: testGoogleSqlUser_mysql(instance, "password"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user2"),
@@ -28,7 +28,7 @@ func TestAccSqlUser_mysql(t *testing.T) {
 			},
 			{
 				// Update password
-				Config: testGoogleSqlUser_mysql(instance, "new_password", false),
+				Config: testGoogleSqlUser_mysql(instance, "new_password"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user2"),
@@ -55,7 +55,7 @@ func TestAccSqlUser_mysqlDisabled(t *testing.T) {
 		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlUser_mysql(instance, "password", true),
+				Config: testGoogleSqlUser_sqlServer(instance, "password", true),
 			},
 			{
 				ResourceName:            "google_sql_user.user1",
@@ -66,7 +66,7 @@ func TestAccSqlUser_mysqlDisabled(t *testing.T) {
 			},
 			{
 				// Update password
-				Config: testGoogleSqlUser_mysql(instance, "password", false),
+				Config: testGoogleSqlUser_sqlServer(instance, "password", false),
 			},
 			{
 				ResourceName:            "google_sql_user.user1",
@@ -316,7 +316,7 @@ func TestAccSqlUser_mysqlPasswordPolicy(t *testing.T) {
 	})
 }
 
-func testGoogleSqlUser_mysql(instance, password string, disabled bool) string {
+func testGoogleSqlUser_mysql(instance, password string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
@@ -325,6 +325,35 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
   settings {
     tier = "db-f1-micro"
+  }
+}
+
+resource "google_sql_user" "user1" {
+  name     = "admin"
+  instance = google_sql_database_instance.instance.name
+  host     = "google.com"
+  password = "%s"
+}
+
+resource "google_sql_user" "user2" {
+  name     = "admin"
+  instance = google_sql_database_instance.instance.name
+  host     = "gmail.com"
+  password = "hunter2"
+}
+`, instance, password)
+}
+
+func testGoogleSqlUser_sqlServer(instance, password string, disabled bool) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "SQLSERVER_2019_STANDARD"
+  root_password       = "INSERT-PASSWORD-HERE "
+  deletion_protection = false
+  settings {
+    tier = "db-custom-2-7680"
   }
 }
 
