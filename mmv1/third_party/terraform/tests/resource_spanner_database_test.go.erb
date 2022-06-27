@@ -209,6 +209,156 @@ resource "google_spanner_database" "basic_spangres" {
 `, instanceName, instanceName, databaseName)
 }
 
+func TestAccSpannerDatabase_versionRetentionPeriod(t *testing.T) {
+	t.Parallel()
+
+	rnd := randString(t, 10)
+	instanceName := fmt.Sprintf("tf-test-%s", rnd)
+	databaseName := fmt.Sprintf("tfgen_%s", rnd)
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckSpannerDatabaseDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Test creating a database with `version_retention_period` set
+				Config: testAccSpannerDatabase_versionRetentionPeriod(instanceName, databaseName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_database.basic", "state"),
+					resource.TestCheckResourceAttr("google_spanner_database.basic", "version_retention_period", "2h"),
+				),
+			},
+			{
+				// Test removing `version_retention_period` and setting retention period to a new value with a DDL statement in `ddl`
+				Config: testAccSpannerDatabase_versionRetentionPeriodUpdate1(instanceName, databaseName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_database.basic", "state"),
+					resource.TestCheckResourceAttr("google_spanner_database.basic", "version_retention_period", "4h"),
+				),
+			},
+			{
+				// Test that adding `version_retention_period` controls retention time, regardless of any previous statements in `ddl`
+				Config: testAccSpannerDatabase_versionRetentionPeriodUpdate2(instanceName, databaseName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_database.basic", "state"),
+					resource.TestCheckResourceAttr("google_spanner_database.basic", "version_retention_period", "2h"),
+				),
+			},
+			{
+				// Test that changing the retention value via DDL when `version_retention_period` is set:
+				// - changes the value (from 2h to 8h)
+				// - is unstable; non-empty plan afterwards due to conflict
+				Config:             testAccSpannerDatabase_versionRetentionPeriodUpdate3(instanceName, databaseName),
+				ExpectNonEmptyPlan: true, // is unstable
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_database.basic", "state"),
+					resource.TestCheckResourceAttr("google_spanner_database.basic", "version_retention_period", "8h"),
+				),
+			},
+			{
+				// Test that when the above config is reapplied:
+				// - changes the value (reverts to set value of `version_retention_period`, 2h)
+				// - is stable; no further conflict
+				Config:             testAccSpannerDatabase_versionRetentionPeriodUpdate3(instanceName, databaseName), //same as previous step
+				ExpectNonEmptyPlan: false, // is stable
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_database.basic", "state"),
+					resource.TestCheckResourceAttr("google_spanner_database.basic", "version_retention_period", "2h"),
+				),
+			},
+		},
+	})
+}
+
+func testAccSpannerDatabase_versionRetentionPeriod(instanceName, databaseName string) string {
+	return fmt.Sprintf(`
+resource "google_spanner_instance" "basic" {
+  name         = "%s"
+  config       = "regional-us-central1"
+  display_name = "%s-display"
+  num_nodes    = 1
+}
+
+resource "google_spanner_database" "basic" {
+  instance = google_spanner_instance.basic.name
+  name     = "%s"
+  version_retention_period = "2h"
+  ddl = [
+     "CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+  ]
+  deletion_protection = false
+}
+`, instanceName, instanceName, databaseName)
+}
+
+func testAccSpannerDatabase_versionRetentionPeriodUpdate1(instanceName, databaseName string) string {
+	return fmt.Sprintf(`
+resource "google_spanner_instance" "basic" {
+  name         = "%s"
+  config       = "regional-us-central1"
+  display_name = "%s-display"
+  num_nodes    = 1
+}
+
+resource "google_spanner_database" "basic" {
+  instance = google_spanner_instance.basic.name
+  name     = "%s"
+  // Change 1/2 : deleted version_retention_period argument
+  ddl = [
+    "CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+    "ALTER DATABASE %s SET OPTIONS (version_retention_period=\"4h\")",  // Change 2/2 : set retention with new DDL
+  ]
+  deletion_protection = false
+}
+`, instanceName, instanceName, databaseName, databaseName)
+}
+
+func testAccSpannerDatabase_versionRetentionPeriodUpdate2(instanceName, databaseName string) string {
+	return fmt.Sprintf(`
+resource "google_spanner_instance" "basic" {
+  name         = "%s"
+  config       = "regional-us-central1"
+  display_name = "%s-display"
+  num_nodes    = 1
+}
+
+resource "google_spanner_database" "basic" {
+  instance = google_spanner_instance.basic.name
+  name     = "%s"
+  version_retention_period = "2h" // Change : added version_retention_period argument
+  ddl = [
+    "CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+    "ALTER DATABASE %s SET OPTIONS (version_retention_period=\"4h\")",
+  ]
+  deletion_protection = false
+}
+`, instanceName, instanceName, databaseName, databaseName)
+}
+
+func testAccSpannerDatabase_versionRetentionPeriodUpdate3(instanceName, databaseName string) string {
+	return fmt.Sprintf(`
+resource "google_spanner_instance" "basic" {
+  name         = "%s"
+  config       = "regional-us-central1"
+  display_name = "%s-display"
+  num_nodes    = 1
+}
+
+resource "google_spanner_database" "basic" {
+  instance = google_spanner_instance.basic.name
+  name     = "%s"
+  version_retention_period = "2h"
+  ddl = [
+    "CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+    "ALTER DATABASE %s SET OPTIONS (version_retention_period=\"4h\")",
+    "ALTER DATABASE %s SET OPTIONS (version_retention_period=\"8h\")",  // Change : set retention with new DDL
+  ]
+  deletion_protection = false
+}
+`, instanceName, instanceName, databaseName, databaseName, databaseName)
+}
+
 // Unit Tests for type spannerDatabaseId
 func TestDatabaseNameForApi(t *testing.T) {
 	id := spannerDatabaseId{
