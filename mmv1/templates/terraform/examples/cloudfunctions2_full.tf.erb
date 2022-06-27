@@ -1,13 +1,13 @@
 # [START functions_v2_full]
 resource "google_service_account" "account" {
   provider = google-beta
-  account_id = "test-service-account"
+  account_id = "<%= ctx[:vars]['service_account'] %>"
   display_name = "Test Service Account"
 }
 
 resource "google_pubsub_topic" "sub" {
   provider = google-beta
-  name = "pubsub"
+  name = "<%= ctx[:vars]['subscription'] %>"
 }
 
 resource "google_storage_bucket" "bucket" {
