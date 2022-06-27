@@ -141,6 +141,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project: :PROJECT_NAME
         min_version: beta
+        skip_import_test: true
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_secret_environment_variables"
         primary_resource_id: "default"
