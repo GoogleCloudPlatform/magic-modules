@@ -34,6 +34,11 @@ objects:
     min_version: beta
     description: |
       A managed metastore service that serves metadata queries.
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      parent_resource_attribute: service_id
+      exclude: false
+      method_name_separator: ':'
+      import_format: ["projects/{{project}}/locations/{{location}}/services/{{service_id}}", "{{service_id}}"]
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
