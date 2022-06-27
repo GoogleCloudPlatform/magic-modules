@@ -198,13 +198,15 @@ objects:
         input: true
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
-            - !ruby/object:Api::Type::String
+            - !ruby/object:Api::Type::ResourceRef
               name: 'network'
               description: |
                 The name of the GCE VPC network to which the
                 instance is connected.
               required: true
               input: true
+              resource: 'Instance' # really 'Network' in GCE, but the value here doesn't matter
+              imports: 'name' # really `selfLink`, but this resource doesn't have one
             - !ruby/object:Api::Type::Array
               name: 'modes'
               description: |
