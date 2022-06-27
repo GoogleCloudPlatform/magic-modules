@@ -872,6 +872,9 @@ objects:
                 For global HTTP(S) or TCP/SSL load balancing, the default is
                 UTILIZATION. Valid values are UTILIZATION, RATE (for HTTP(S))
                 and CONNECTION (for TCP/SSL).
+
+                See the [Backend Services Overview](https://cloud.google.com/load-balancing/docs/backend-service#balancing-mode)
+                for an explanation of load balancing modes.
             - !ruby/object:Api::Type::Double
               name: 'capacityScaler'
               send_empty_value: true
@@ -1878,6 +1881,9 @@ objects:
                 - :CONNECTION
               description: |
                 Specifies the balancing mode for this backend.
+
+                See the [Backend Services Overview](https://cloud.google.com/load-balancing/docs/backend-service#balancing-mode)
+                for an explanation of load balancing modes.
             - !ruby/object:Api::Type::Double
               name: 'capacityScaler'
               description: |
@@ -13480,12 +13486,19 @@ objects:
         name: minPortsPerVm
         description: |
           Minimum number of ports allocated to a VM from this NAT.
+      - !ruby/object:Api::Type::Integer
+        name: maxPortsPerVm
+        description: |
+          Maximum number of ports allocated to a VM from this NAT.
+          This field can only be set when enableDynamicPortAllocation is enabled.
       - !ruby/object:Api::Type::Boolean
         name: enableDynamicPortAllocation
         description: |
           Enable Dynamic Port Allocation.
-          If minPorts is set, minPortsPerVm must be set to a power of two greater than or equal to 32. 
+          If minPortsPerVm is set, minPortsPerVm must be set to a power of two greater than or equal to 32.
           If minPortsPerVm is not set, a minimum of 32 ports will be allocated to a VM from this NAT config.
+          If maxPortsPerVm is set, maxPortsPerVm must be set to a power of two greater than minPortsPerVm.
+          If maxPortsPerVm is not set, a maximum of 65536 ports will be allocated to a VM from this NAT config.
 
           Mutually exclusive with enableEndpointIndependentMapping.
       - !ruby/object:Api::Type::Integer

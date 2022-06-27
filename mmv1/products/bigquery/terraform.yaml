@@ -313,6 +313,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       configuration.query.destinationTable: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_query_destinationtable.go.erb'
+        default_from_api: true
       configuration.query.destinationTable.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
