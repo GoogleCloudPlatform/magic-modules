@@ -2843,13 +2843,13 @@ resource "google_container_cluster" "primary" {
 	dns_cache_config {
       enabled = false
     }
+	gce_persistent_disk_csi_driver_config {
+	  disabled = true
+	}
 <% unless version == 'ga' -%>
     istio_config {
       disabled = true
       auth     = "AUTH_MUTUAL_TLS"
-    }
-    gce_persistent_disk_csi_driver_config {
-      enabled = false
     }
     kalm_config {
 	  enabled = false
@@ -2902,15 +2902,14 @@ resource "google_container_cluster" "primary" {
 	dns_cache_config {
       enabled = true
 	}
+	gce_persistent_disk_csi_driver_config {
+	  disabled = false
+	}
 <% unless version == 'ga' -%>
     istio_config {
       disabled = false
       auth     = "AUTH_NONE"
     }
-
-    gce_persistent_disk_csi_driver_config {
-      enabled = true
-	}
 	kalm_config {
 	  enabled = true
 	}
