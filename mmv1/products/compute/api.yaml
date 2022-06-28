@@ -10337,7 +10337,6 @@ objects:
           - !ruby/object:Api::Type::String
             # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
             name: 'kmsKeyName'
-            min_version: beta
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
         input: true
