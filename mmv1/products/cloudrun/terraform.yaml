@@ -167,6 +167,26 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           trigger_auditlog_tf: "trigger-auditlog-tf"
         min_version: beta
       - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_multiple_regions"
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "run_default"
+        vars:
+          myservice_service_ip: "myservice-service-ip"
+          myservice_backend: "myservice-backend"
+          myservice_lb_urlmap: "myservice-lb-urlmap"
+          myservice_ssl_cert: "myservice-ssl-cert"
+          myservice_https_proxy: "myservice-https-proxy"
+          myservice_lb_forwarding_rule: "myservice-lb-fr"
+          myservice_neg: "myservice-neg"
+          myservice_run_app: "myservice-run-app"
+          myservice_https_urlmap: "myservice-https-urlmap"
+          myservice_http_proxy: "myservice-http-proxy"
+          myservice_https_forwarding_rule: "myservice-https-fr"
+        test_env_vars:
+          project: :PROJECT_NAME
+        min_version: beta
+        skip_import_test: true
+      - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_remove_tag"
         skip_test: true
         primary_resource_type: "google_cloud_run_service"
