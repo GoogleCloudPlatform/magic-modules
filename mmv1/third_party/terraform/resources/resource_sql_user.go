@@ -86,7 +86,6 @@ func resourceSqlUser() *schema.Resource {
 			"sql_server_user_details": {
 				Type:     schema.TypeList,
 				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"disabled": {
