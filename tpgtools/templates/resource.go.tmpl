@@ -722,6 +722,7 @@ func flatten{{$.PathType}}{{$v.PackagePath}}Array(obj []{{$.Package}}.{{$v.Objec
 	return items
 }
 
+	{{- if $v.Settable }}
 func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.{{$v.ObjectType}}Enum {
 	objs := o.([]interface{})
 	items := make([]{{$.Package}}.{{$v.ObjectType}}Enum, 0, len(objs))
@@ -731,5 +732,6 @@ func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.
 	}
   return items
 }
+	{{- end }}
 {{ end }}
 
