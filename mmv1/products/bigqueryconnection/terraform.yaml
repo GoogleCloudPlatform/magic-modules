@@ -32,10 +32,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_connection_cloud_resource"
         pull_external: true
+        region_override: "US"
         primary_resource_id: "connection"
-        primary_resource_name: "fmt.Sprintf(\"tf_test_conn_id%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-connection%s\", context[\"random_suffix\"])"
         vars:
-          connection_id: "my-connection"    
+          connection_id: "my-connection"
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_connection_basic"
         pull_external: true
