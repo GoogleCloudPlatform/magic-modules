@@ -12,11 +12,14 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	//If custom_period exists and calendar_period is set to default value, set calendar_period to null so as to not send both fields to the API.
-	
-	if _, ok := d.GetOkExists("budget_filter.0.custom_period"); (ok && v == "MONTH") {
-		return nil, nil
+
+// Check to see if a specified value in the config exists and supress diffs if so. Otherwise run emptyOrDefaultStringSuppress.
+
+func checkValAndDefaultStringSuppress(defaultVal string, checkVal string) schema.SchemaDiffSuppressFunc {
+	return func(k, old, new string, d *schema.ResourceData) bool {
+		if _, ok := d.GetOkExists(checkVal); ok {
+			return false
+		}
+		return (old == "" && new == defaultVal) || (new == "" && old == defaultVal)
 	}
-	return v, nil	
 }

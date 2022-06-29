@@ -104,8 +104,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       budgetFilter.projects: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
       budgetFilter.calendarPeriod: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/billing_budget_budget_filter_calendar.erb'
-        diff_suppress_func: 'emptyOrDefaultStringSuppress("MONTH")'
+        diff_suppress_func: 'checkValAndDefaultStringSuppress("MONTH", "budget_filter.0.custom_period.0.start_date")'
         description: |
           {{description}}
           Exactly one of `calendar_period`, `custom_period` must be provided.
