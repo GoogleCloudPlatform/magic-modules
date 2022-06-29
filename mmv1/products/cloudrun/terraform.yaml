@@ -131,6 +131,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_scheduled"
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "default"
+        vars:
+          service_name: "my-scheduled-service"
+          sa_name: "scheduler-sa"
+          scheduled_cloud_run_job: "scheduled-cloud-run-job"
+        test_env_vars:
+          project: :PROJECT_NAME
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_secret_environment_variables"
         primary_resource_id: "default"
         primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
