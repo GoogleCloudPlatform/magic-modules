@@ -235,9 +235,18 @@ func assertAssetsMatch(t *testing.T, actualAssets, expectedAssets []google.Asset
 	if len(changes) == 0 {
 		return
 	}
-	t.Log("[Error] The following changes have occurred")
+	t.Log("[Error] Differences Summary (+++ added,  -+ updated, --- deleted):")
 	for _, i := range changes {
-		t.Logf("        Element %v has been %sd from `%v` to  `%v`\n", i.Path, i.Type, i.From, i.To)
+		t.log("Object %v\n", i.Path)
+		switch i.Type {
+		case 'create':
+			t.Logf("+++ %v\n", i.To)
+		case 'update':
+			t.Logf("--- %v\n", i.From)
+			t.Logf("+++ %v\n", i.To)
+		case 'delete':
+			t.Log("--- %v\n", i.To)
+		}
 	}
 	t.Fail()
 }
