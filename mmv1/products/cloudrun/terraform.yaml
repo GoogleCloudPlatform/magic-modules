@@ -73,8 +73,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "cloud_run_service_tasks"
         primary_resource_id: "default"
         vars:
-          project_id: "project-id"
-          region: "us-central1"
+          skip_docs: true
           cloud_run_service_name: "cloud-run-service-name"
           cloud_tasks_queue_name: "cloud-tasks-queue-name"
         min_version: beta
