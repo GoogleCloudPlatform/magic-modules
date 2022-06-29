@@ -133,7 +133,7 @@ objects:
         path: 'error'
         message: 'message'
     description: |-
-      A service endpoint is a base URL that specifies the network address of an API service.
+      Models are deployed into it, and afterwards Endpoint is called to obtain predictions and explanations.
     parameters:
       - !ruby/object:Api::Type::String
         name: region
@@ -174,7 +174,6 @@ objects:
             description: |
               The timestamp of when the endpoint was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
             output: true
-            input: false
           # TODO: Add explanationSpec and object(ExplanationSpec) here
           # Reason for not including: Very deeply nested objects within objects which requires further thought to support readibility and deployment.
           - !ruby/object:Api::Type::String
@@ -195,7 +194,6 @@ objects:
               Note that Stackdriver logs may incur a cost, especially if your project receives prediction requests at a high queries per second rate (QPS). Estimate your costs before enabling this option.
           - !ruby/object:Api::Type::NestedObject
             name: 'privateEndpoints'
-            input: false
             output: true
             description: |
               Provide paths for users to send predict/explain/health requests directly to the deployed model services running on Cloud via private services access. This field is populated if network is configured.  
@@ -203,17 +201,14 @@ objects:
               - !ruby/object:Api::Type::String
                 name: 'predictHttpUri'
                 description: Http(s) path to send prediction requests.
-                input: false
                 output: true
               - !ruby/object:Api::Type::String
                 name: 'explainHttpUri'
                 description: Http(s) path to send explain requests.
                 output: true
-                input: false
               - !ruby/object:Api::Type::String
                 name: 'healthHttpUri'
                 description: Http(s) path to send health requests.
-                input: false
                 output: true
           - !ruby/object:Api::Type::NestedObject
             name: 'dedicatedResources'
@@ -222,7 +217,7 @@ objects:
               Cannot be used with `automaticResources`
             properties:
               - !ruby/object:Api::Type::NestedObject
-                name: 'MachineSpec'
+                name: 'machineSpec'
                 required: true
                 description: |
                   Immutable. The specification of a single machine used by the prediction.
@@ -251,7 +246,7 @@ objects:
                     description: The number of accelerators to attach to the machine.
               - !ruby/object:Api::Type::Integer
                 name: 'minReplicaCount'
-                description: 
+                description:
                   Immutable. The minimum number of machine replicas this DeployedModel will be always deployed on. This value must be greater than or equal to 1.  
                   If traffic against the DeployedModel increases, it may dynamically be deployed onto more replicas, and as traffic decreases, some of these extra replicas may be freed.
                 required: true
@@ -298,19 +293,6 @@ objects:
         name: 'labels'
         description: |
           A set of key/value label pairs to assign to this Endpoint.
-        
-      - !ruby/object:Api::Type::String
-        name: 'createTime'
-        output: true
-        input: false
-        description: |
-          The timestamp of when the endpoint was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-      - !ruby/object:Api::Type::String
-        name: 'updateTime'
-        output: true
-        input: false
-        description: |
-          The timestamp of when the endpoint was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
       - !ruby/object:Api::Type::NestedObject
         name: 'encryptionSpec'
         input: true
