@@ -11,7 +11,7 @@
       "data": {
         "billingAccountName": "billingAccounts/{{.Project.BillingAccountName}}",
         "name": "projects/{{.Project.Number}}/billingInfo",
-        "projectId": "{{.Project.Number}}"
+        "projectId": "{{.Provider.project}}"
       }
     }
   },

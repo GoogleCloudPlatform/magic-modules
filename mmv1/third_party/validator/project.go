@@ -136,7 +136,7 @@ func GetProjectBillingInfoApiObject(d TerraformResourceData, project string) (ma
 	ba := &cloudbilling.ProjectBillingInfo{
 		BillingAccountName: fmt.Sprintf("billingAccounts/%s", d.Get("billing_account")),
 		Name:               fmt.Sprintf("projects/%s/billingInfo", project),
-		ProjectId:          project,
+		ProjectId:          d.Get("project_id").(string),
 	}
 
 	return jsonMap(ba)
