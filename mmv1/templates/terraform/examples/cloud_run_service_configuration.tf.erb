@@ -1,0 +1,156 @@
+# Example configuration of a Cloud Run service
+
+# Min instances
+# https://cloud.google.com/run/docs/configuring/min-instances
+variable "min_instances" {
+  type    = number
+  default = 1
+}
+
+# Max instances
+# https://cloud.google.com/run/docs/configuring/max-instances
+variable "max_instances" {
+  type    = number
+  default = 1
+}
+
+# Request timeout
+# https://cloud.google.com/run/docs/configuring/request-timeout
+variable "timeout_seconds" {
+  type    = number
+  default = 300
+}
+
+# Maximum concurrent requests
+# https://cloud.google.com/run/docs/configuring/concurrency
+variable "concurrency_limit" {
+  type    = number
+  default = 80
+}
+
+# Memory usage limit (per container)
+# https://cloud.google.com/run/docs/configuring/memory-limits
+variable "memory_limit" {
+  type    = string
+  default = "512Mi"
+}
+
+# CPU limit
+# https://cloud.google.com/run/docs/configuring/cpu
+variable "cpu_limit" {
+  type    = string
+  default = "1000m" # 1 vCPU
+}
+
+# Whether (or not) to shut off CPU if no requests are received
+# https://cloud.google.com/run/docs/configuring/cpu-allocation
+variable "cpu_shutoff" {
+  type    = bool
+  default = false
+}
+
+# Container "entry-point" command
+# https://cloud.google.com/run/docs/configuring/containers#configure-entrypoint
+variable "container_cmd" {
+  type    = list(string)
+  default = ["/server"]
+}
+
+# Container "entry-point" args
+# https://cloud.google.com/run/docs/configuring/containers#configure-entrypoint
+variable "container_args" {
+  type    = list(string)
+  default = []
+}
+
+#################
+# Service Setup #
+#################
+resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['config'] %>"
+  location = "us-central1"
+
+  template {
+    spec {
+      containers {
+        image = "us-docker.pkg.dev/cloudrun/container/hello"
+
+        # Container "entry-point" command
+        # https://cloud.google.com/run/docs/configuring/containers#configure-entrypoint
+        command = var.container_cmd
+
+        # Container "entry-point" args
+        # https://cloud.google.com/run/docs/configuring/containers#configure-entrypoint
+        args = var.container_args
+
+        # Enable HTTP/2
+        # https://cloud.google.com/run/docs/configuring/http2
+        ports {
+          name           = "h2c"
+          container_port = 8080
+        }
+
+        # Environment variables
+        # https://cloud.google.com/run/docs/configuring/environment-variables
+        env {
+          name  = "foo"
+          value = "bar"
+        }
+        env {
+          name  = "baz"
+          value = "quux"
+        }
+
+        resources {
+          limits = {
+            # CPU usage limit
+            # https://cloud.google.com/run/docs/configuring/cpu
+            cpu = var.cpu_limit
+
+            # Memory usage limit (per container)
+            # https://cloud.google.com/run/docs/configuring/memory-limits
+            memory = var.memory_limit
+          }
+        }
+      }
+
+      # Timeout
+      # https://cloud.google.com/run/docs/configuring/request-timeout
+      timeout_seconds = var.timeout_seconds
+
+      # Maximum concurrent requests
+      # https://cloud.google.com/run/docs/configuring/concurrency
+      container_concurrency = var.concurrency_limit
+    }
+
+    metadata {
+      annotations = {
+
+        # Max instances
+        # https://cloud.google.com/run/docs/configuring/max-instances
+        "autoscaling.knative.dev/maxScale" = var.max_instances
+
+        # Min instances
+        # https://cloud.google.com/run/docs/configuring/min-instances
+        "autoscaling.knative.dev/minScale" = var.min_instances
+
+        # Whether (or not) to shut off CPU if no requests are received
+        # https://cloud.google.com/run/docs/configuring/cpu-allocation
+        "run.googleapis.com/cpu-throttling" = var.cpu_shutoff
+      }
+
+      # Labels
+      # https://cloud.google.com/run/docs/configuring/labels
+      labels = {
+        foo : "bar"
+        baz : "quux"
+      }
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+}
+
