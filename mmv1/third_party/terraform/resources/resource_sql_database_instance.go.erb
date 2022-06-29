@@ -1075,7 +1075,7 @@ func expandLocationPreference(configured []interface{}) *sqladmin.LocationPrefer
 	return &sqladmin.LocationPreference{
 		FollowGaeApplication: _locationPreference["follow_gae_application"].(string),
 		Zone:                 _locationPreference["zone"].(string),
-	    SecondaryZone:        _locationPreference["secondary_zone"].(string),
+		SecondaryZone:        _locationPreference["secondary_zone"].(string),
 	}
 }
 
