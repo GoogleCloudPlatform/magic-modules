@@ -664,8 +664,10 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
 	}
 	<% unless version == "ga" -%>
-	if err = d.Set("all_instances_config", flattenAllInstancesConfig(manager.AllInstancesConfig)); err != nil {
-		return fmt.Errorf("Error setting all_instances_config in state: %s", err.Error())
+	if manager.AllInstancesConfig != nil {
+		if err = d.Set("all_instances_config", flattenAllInstancesConfig(manager.AllInstancesConfig)); err != nil {
+			return fmt.Errorf("Error setting all_instances_config in state: %s", err.Error())
+		}
 	}
 	<% end -%>
 	if err = d.Set("stateful_disk", flattenStatefulPolicy(manager.StatefulPolicy)); err != nil {
