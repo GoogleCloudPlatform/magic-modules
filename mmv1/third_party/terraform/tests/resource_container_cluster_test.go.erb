@@ -2840,12 +2840,12 @@ resource "google_container_cluster" "primary" {
     cloudrun_config {
       disabled = true
     }
-	dns_cache_config {
+    dns_cache_config {
       enabled = false
     }
-	gce_persistent_disk_csi_driver_config {
-	  disabled = true
-	}
+    gce_persistent_disk_csi_driver_config {
+      disabled = true
+    }
 <% unless version == 'ga' -%>
     istio_config {
       disabled = true
@@ -2899,12 +2899,12 @@ resource "google_container_cluster" "primary" {
     cloudrun_config {
       disabled = false
     }
-	dns_cache_config {
+    dns_cache_config {
       enabled = true
-	}
-	gce_persistent_disk_csi_driver_config {
-	  disabled = false
-	}
+    }
+    gce_persistent_disk_csi_driver_config {
+      disabled = false
+    }
 <% unless version == 'ga' -%>
     istio_config {
       disabled = false
