@@ -1473,7 +1473,6 @@ resource "google_compute_subnetwork" "test" {
 `, envName, network, subnetwork)
 }
 
-<% unless version == "ga" -%>
 func testAccComposerEnvironment_MasterAuthNetworks(compVersion, airflowVersion, envName, network, subnetwork string) string {
 	return fmt.Sprintf(`
 resource "google_composer_environment" "test" {
