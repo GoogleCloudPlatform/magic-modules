@@ -686,8 +686,10 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
 	}
 	<% unless version == "ga" -%>
-	if err = d.Set("all_instances_config", flattenAllInstancesConfig(manager.AllInstancesConfig)); err != nil {
-		return fmt.Errorf("Error setting all_instances_config in state: %s", err.Error())
+	if manager.AllInstancesConfig != nil {
+		if err = d.Set("all_instances_config", flattenAllInstancesConfig(manager.AllInstancesConfig)); err != nil {
+			return fmt.Errorf("Error setting all_instances_config in state: %s", err.Error())
+		}
 	}
 	<% end -%>
 	if err = d.Set("status", flattenStatus(manager.Status)); err != nil {
@@ -1138,12 +1140,14 @@ func expandAllInstancesConfig(old []interface{}, new []interface{}) *compute.Ins
 
 func flattenAllInstancesConfig(allInstancesConfig *compute.InstanceGroupManagerAllInstancesConfig) []map[string]interface{} {
   results := []map[string]interface{}{}
-  if allInstancesConfig != nil {
-    props := map[string]interface{}{}
-    props["metadata"] = allInstancesConfig.Properties.Metadata
-    props["labels"] = allInstancesConfig.Properties.Labels
-    results = append(results, props)
-  }
+	props := map[string]interface{}{}
+	if len(allInstancesConfig.Properties.Metadata) > 0 {
+		props["metadata"] = allInstancesConfig.Properties.Metadata
+	}
+	if len(allInstancesConfig.Properties.Labels) > 0 {
+		props["labels"] = allInstancesConfig.Properties.Labels
+	}
+	results = append(results, props)
   return results
 }
 <% end -%>
