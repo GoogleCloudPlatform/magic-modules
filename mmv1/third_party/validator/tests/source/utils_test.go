@@ -245,7 +245,7 @@ func assertAssetsMatch(t *testing.T, actualAssets, expectedAssets []google.Asset
 			t.Logf("--- %v\n", i.From)
 			t.Logf("+++ %v\n", i.To)
 		case 'delete':
-			t.Log("--- %v\n", i.To)
+			t.Log("--- %v\n", i.From)
 		}
 	}
 	t.Fail()
