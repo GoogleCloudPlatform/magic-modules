@@ -64,6 +64,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "redis_instance_cmek"
         primary_resource_id: "cache"
+        skip_test: true
         vars:
           instance_name: "cmek-memory-cache"
           network_name: "redis-test-network"
@@ -114,8 +115,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       secondaryIpRange: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         diff_suppress_func: 'secondaryIpDiffSuppress'
-      customerManagedKey: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
