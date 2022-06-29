@@ -61,6 +61,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "queue_basic"
         primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloud-tasks-queue-test%s\", context[\"random_suffix\"])"        
         vars:
           name: "cloud-tasks-queue-test"
       - !ruby/object:Provider::Terraform::Examples
