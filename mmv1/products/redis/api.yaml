@@ -402,6 +402,7 @@ objects:
           range associated with the private service access connection, or "auto".
       - !ruby/object:Api::Type::String
         name: customerManagedKey
+        input: true
         description: |
           Optional. The KMS key reference that you want to use to encrypt the data at rest for this Redis
           instance. If this is provided, CMEK is enabled.
