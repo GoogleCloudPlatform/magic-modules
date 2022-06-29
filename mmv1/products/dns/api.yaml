@@ -136,6 +136,10 @@ objects:
         name: 'id'
         description: Unique identifier for the resource; defined by the server.
         output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'managedZoneId'
+        description: Unique identifier for the resource; defined by the server.
+        output: true
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
