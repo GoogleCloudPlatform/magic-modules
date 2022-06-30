@@ -13,3 +13,5 @@ require (
 	github.com/nasa9084/go-openapi v0.0.0-20200604141640-2875b7376353
 	gopkg.in/yaml.v2 v2.4.0
 )
+
+replace github.com/GoogleCloudPlatform/declarative-resource-client-library => github.com/trodge/declarative-resource-client-library v0.0.0-20220630184644-c3a4aac9f4fa
