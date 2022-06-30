@@ -22,22 +22,22 @@ func defaultCompareConverterOutput(t *testing.T, expected []google.Asset, actual
 	require.ElementsMatch(t, expectedAssets, actualAssets)
 }
 
-func testConvertCommand(t *testing.T, dir, name string, offline bool, compare compareConvertOutputFunc) {
+func testConvertCommand(t *testing.T, dir, tfplanName string, jsonName string, offline bool, withProject bool, compare compareConvertOutputFunc) {
 
 	if compare == nil {
 		compare = defaultCompareConverterOutput
 	}
 
 	// Load expected assets
-	expected, err := readExpectedTestFile(filepath.Join(dir, name+".json"))
+	expected, err := readExpectedTestFile(filepath.Join(dir, jsonName+".json"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// Get converted assets
 	var actualRaw []byte
-	fileNameToConvert := name + ".tfplan.json"
-	actualRaw = tfvConvert(t, dir, fileNameToConvert, offline)
+	fileNameToConvert := tfplanName + ".tfplan.json"
+	actualRaw = tfvConvert(t, dir, fileNameToConvert, offline, withProject)
 	var actual []google.Asset
 	err = json.Unmarshal(actualRaw, &actual)
 	if err != nil {
@@ -47,23 +47,23 @@ func testConvertCommand(t *testing.T, dir, name string, offline bool, compare co
 	compare(t, expected, actual, offline)
 }
 
-func testValidateCommandGeneric(t *testing.T, dir, name string, offline bool) {
+func testValidateCommandGeneric(t *testing.T, dir, name string, offline bool, withProject bool) {
 
 	wantViolation := true
 	wantContents := "Constraint GCPAlwaysViolatesConstraintV1.always_violates_all on resource"
 	constraintName := "always_violate"
 
-	testValidateCommand(t, wantViolation, wantContents, dir, name, offline, constraintName)
+	testValidateCommand(t, wantViolation, wantContents, dir, name, offline, withProject, constraintName)
 }
 
-func testValidateCommand(t *testing.T, wantViolation bool, wantContents, dir, name string, offline bool, constraintName string) {
+func testValidateCommand(t *testing.T, wantViolation bool, wantContents, dir, name string, offline bool, withProject bool, constraintName string) {
 	cwd, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("cannot get current directory: %v", err)
 	}
 	policyPath := filepath.Join(cwd, samplePolicyPath, constraintName)
 	var got []byte
-	got = tfvValidate(t, wantViolation, dir, name+".tfplan.json", policyPath, offline)
+	got = tfvValidate(t, wantViolation, dir, name+".tfplan.json", policyPath, offline, withProject)
 	wantRe := regexp.MustCompile(wantContents)
 	if wantContents != "" && !wantRe.Match(got) {
 		t.Fatalf("binary did not return expect output, \ngot=%s \nwant (regex)=%s", string(got), wantContents)
@@ -110,10 +110,13 @@ func saveFile(t *testing.T, dir, filename string, payload []byte) {
 	}
 }
 
-func tfvConvert(t *testing.T, dir, tfPlanFile string, offline bool) []byte {
+func tfvConvert(t *testing.T, dir, tfPlanFile string, offline bool, withProject bool) []byte {
 	executable := tfvBinary
 	wantError := false
-	args := []string{"convert", "--project", data.Provider["project"]}
+	args := []string{"convert"}
+	if withProject {
+		args = append(args, []string{"--project", data.Provider["project"]}...)
+	}
 	if offline {
 		args = append(args, "--offline", "--ancestry", data.Ancestry)
 	}
@@ -130,9 +133,12 @@ func tfvConvert(t *testing.T, dir, tfPlanFile string, offline bool) []byte {
 	return payload
 }
 
-func tfvValidate(t *testing.T, wantError bool, dir, tfplan, policyPath string, offline bool) []byte {
+func tfvValidate(t *testing.T, wantError bool, dir, tfplan, policyPath string, offline bool, withProject bool) []byte {
 	executable := tfvBinary
-	args := []string{"validate", "--project", data.Provider["project"], "--policy-path", policyPath}
+	args := []string{"validate", "--policy-path", policyPath}
+	if withProject {
+		args = append(args, []string{"--project", data.Provider["project"]}...)
+	}
 	if offline {
 		args = append(args, "--offline", "--ancestry", data.Ancestry)
 	}
@@ -184,7 +190,7 @@ func generateTFVconvertedAsset(t *testing.T, testDir, testSlug string) {
 	// Get converted assets
 	var conversionRaw []byte
 	fileNameToConvert := testSlug + ".tfplan.json"
-	conversionRaw = tfvConvert(t, testDir, fileNameToConvert, true)
+	conversionRaw = tfvConvert(t, testDir, fileNameToConvert, true, true)
 	dstDir := "../testdata/generatedconvert"
 	if _, err := os.Stat(dstDir); os.IsNotExist(err) {
 		os.MkdirAll(dstDir, 0700)
