@@ -44,10 +44,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       location: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
         default_from_api: true
-      networks.reservedIpRange: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
       networks.connectMode: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+      networks.network: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+      networks.reservedIpRange: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/filestore.erb
       pre_create: templates/terraform/pre_create/filestore_instance.go.erb
