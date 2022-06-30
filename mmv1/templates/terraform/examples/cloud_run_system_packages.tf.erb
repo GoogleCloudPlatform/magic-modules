@@ -1,0 +1,30 @@
+# Example of how to deploy a Cloud Run application with system packages
+# (In this case, `graphviz`.)
+
+data "google_project" "project" {}
+
+resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['graphviz_example'] %>"
+  location = "us-central1"
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/${data.google_project.project.project_id}/graphviz"
+      }
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+}
+
+# Make Cloud Run service publicly accessible
+resource "google_cloud_run_service_iam_member" "allow_unauthenticated" {
+  service  = google_cloud_run_service.<%= ctx[:primary_resource_id] %>.name
+  location = google_cloud_run_service.<%= ctx[:primary_resource_id] %>.location
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
