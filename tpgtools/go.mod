@@ -14,4 +14,4 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 )
 
-replace github.com/GoogleCloudPlatform/declarative-resource-client-library => github.com/trodge/declarative-resource-client-library v0.0.0-20220630184644-c3a4aac9f4fa
+replace github.com/GoogleCloudPlatform/declarative-resource-client-library => github.com/trodge/declarative-resource-client-library v0.0.0-20220630223415-00cdde6c9dc6
