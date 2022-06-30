@@ -400,3 +400,9 @@ objects:
           an existing instance. For DIRECT_PEERING mode value must be a CIDR range of size /28, or
           "auto". For PRIVATE_SERVICE_ACCESS mode value must be the name of an allocated address 
           range associated with the private service access connection, or "auto".
+      - !ruby/object:Api::Type::String
+        name: customerManagedKey
+        input: true
+        description: |
+          Optional. The KMS key reference that you want to use to encrypt the data at rest for this Redis
+          instance. If this is provided, CMEK is enabled.
