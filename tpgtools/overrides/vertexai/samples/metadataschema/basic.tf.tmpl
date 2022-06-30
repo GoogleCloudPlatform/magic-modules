@@ -9,7 +9,7 @@ resource "google_vertex_ai_metadata_schema" "primary" {
 }
 
 resource "google_vertex_ai_metadata_store" "minimal" {
-  location = "{{region}}"
-  name     = "{{store}}"
-  project  = "projects/{{project}}"
+  region  = "{{region}}"
+  name    = "{{store}}"
+  project = "projects/{{project}}"
 }
