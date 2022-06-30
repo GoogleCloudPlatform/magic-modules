@@ -325,7 +325,7 @@ func resourceContainerCluster() *schema.Resource {
 							Description:  `Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Defaults to enabled; set disabled = true to disable.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"disabled": {
+									"enabled": {
 										Type:     schema.TypeBool,
 										Required: true,
 									},
@@ -3170,7 +3170,7 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 	if v, ok := config["gce_persistent_disk_csi_driver_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
 		ac.GcePersistentDiskCsiDriverConfig = &container.GcePersistentDiskCsiDriverConfig{
-			Enabled:         !addon["disabled"].(bool),
+			Enabled:         addon["enabled"].(bool),
 			ForceSendFields: []string{"Enabled"},
 		}
 	}
@@ -3865,7 +3865,7 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 	if c.GcePersistentDiskCsiDriverConfig != nil {
 		result["gce_persistent_disk_csi_driver_config"] = []map[string]interface{}{
 			{
-				"disabled": !c.GcePersistentDiskCsiDriverConfig.Enabled,
+				"enabled": c.GcePersistentDiskCsiDriverConfig.Enabled,
 			},
 		}
 	}

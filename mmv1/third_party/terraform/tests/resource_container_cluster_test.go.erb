@@ -2844,7 +2844,7 @@ resource "google_container_cluster" "primary" {
       enabled = false
     }
     gce_persistent_disk_csi_driver_config {
-      disabled = true
+      enabled = false
     }
 <% unless version == 'ga' -%>
     istio_config {
@@ -2903,7 +2903,7 @@ resource "google_container_cluster" "primary" {
       enabled = true
     }
     gce_persistent_disk_csi_driver_config {
-      disabled = false
+      enabled = true
     }
 <% unless version == 'ga' -%>
     istio_config {
