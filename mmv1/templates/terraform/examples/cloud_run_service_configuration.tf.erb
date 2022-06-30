@@ -1,71 +1,5 @@
 # Example configuration of a Cloud Run service
 
-# Min instances
-# https://cloud.google.com/run/docs/configuring/min-instances
-variable "min_instances" {
-  type    = number
-  default = 1
-}
-
-# Max instances
-# https://cloud.google.com/run/docs/configuring/max-instances
-variable "max_instances" {
-  type    = number
-  default = 1
-}
-
-# Request timeout
-# https://cloud.google.com/run/docs/configuring/request-timeout
-variable "timeout_seconds" {
-  type    = number
-  default = 300
-}
-
-# Maximum concurrent requests
-# https://cloud.google.com/run/docs/configuring/concurrency
-variable "concurrency_limit" {
-  type    = number
-  default = 80
-}
-
-# Memory usage limit (per container)
-# https://cloud.google.com/run/docs/configuring/memory-limits
-variable "memory_limit" {
-  type    = string
-  default = "512Mi"
-}
-
-# CPU limit
-# https://cloud.google.com/run/docs/configuring/cpu
-variable "cpu_limit" {
-  type    = string
-  default = "1000m" # 1 vCPU
-}
-
-# Whether (or not) to shut off CPU if no requests are received
-# https://cloud.google.com/run/docs/configuring/cpu-allocation
-variable "cpu_shutoff" {
-  type    = bool
-  default = false
-}
-
-# Container "entry-point" command
-# https://cloud.google.com/run/docs/configuring/containers#configure-entrypoint
-variable "container_cmd" {
-  type    = list(string)
-  default = ["/server"]
-}
-
-# Container "entry-point" args
-# https://cloud.google.com/run/docs/configuring/containers#configure-entrypoint
-variable "container_args" {
-  type    = list(string)
-  default = []
-}
-
-#################
-# Service Setup #
-#################
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['config'] %>"
   location = "us-central1"
@@ -77,11 +11,11 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
 
         # Container "entry-point" command
         # https://cloud.google.com/run/docs/configuring/containers#configure-entrypoint
-        command = var.container_cmd
+        command = ["/server"]
 
         # Container "entry-point" args
         # https://cloud.google.com/run/docs/configuring/containers#configure-entrypoint
-        args = var.container_args
+        args = []
 
         # Enable HTTP/2
         # https://cloud.google.com/run/docs/configuring/http2
@@ -105,22 +39,22 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
           limits = {
             # CPU usage limit
             # https://cloud.google.com/run/docs/configuring/cpu
-            cpu = var.cpu_limit
+            cpu = "1000m" # 1 vCPU
 
             # Memory usage limit (per container)
             # https://cloud.google.com/run/docs/configuring/memory-limits
-            memory = var.memory_limit
+            memory = "512Mi"
           }
         }
       }
 
       # Timeout
       # https://cloud.google.com/run/docs/configuring/request-timeout
-      timeout_seconds = var.timeout_seconds
+      timeout_seconds = 300
 
       # Maximum concurrent requests
       # https://cloud.google.com/run/docs/configuring/concurrency
-      container_concurrency = var.concurrency_limit
+      container_concurrency = 80
     }
 
     metadata {
@@ -128,15 +62,15 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
 
         # Max instances
         # https://cloud.google.com/run/docs/configuring/max-instances
-        "autoscaling.knative.dev/maxScale" = var.max_instances
+        "autoscaling.knative.dev/maxScale" = 10
 
         # Min instances
         # https://cloud.google.com/run/docs/configuring/min-instances
-        "autoscaling.knative.dev/minScale" = var.min_instances
+        "autoscaling.knative.dev/minScale" = 1
 
-        # Whether (or not) to shut off CPU if no requests are received
+        # If true, garbage-collect CPU when once a request finishes
         # https://cloud.google.com/run/docs/configuring/cpu-allocation
-        "run.googleapis.com/cpu-throttling" = var.cpu_shutoff
+        "run.googleapis.com/cpu-throttling" = false
       }
 
       # Labels
