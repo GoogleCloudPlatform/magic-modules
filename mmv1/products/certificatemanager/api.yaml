@@ -305,3 +305,111 @@ objects:
                 Proxy name must be in the format projects/*/locations/*/targetSslProxies/*.
                 This field is part of a union field `target_proxy`: Only one of `targetHttpsProxy` or
                 `targetSslProxy` may be set.
+  - !ruby/object:Api::Resource
+      name: 'CertificateMapEntry'
+      base_url: 'projects/{{project}}/locations/global/certificateMaps'
+      create_url: 'projects/{{project}}/locations/global/certificateMaps?certificateMapId={{name}}'
+      self_link: 'projects/{{project}}/locations/global/certificateMaps/{{name}}'
+      update_verb: :PATCH
+      update_mask: true
+      description: |
+        CertificateMapEntry is a list of certificate configurations,
+        that have been issued for a particular hostname 
+      async: !ruby/object:Api::OpAsync
+        operation: !ruby/object:Api::OpAsync::Operation
+          path: 'name'
+          base_url: '{{op_id}}'
+          wait_ms: 1000
+        result: !ruby/object:Api::OpAsync::Result
+          path: 'response'
+        status: !ruby/object:Api::OpAsync::Status
+          path: 'done'
+          complete: true
+          allowed:
+            - true
+            - false
+        error: !ruby/object:Api::OpAsync::Error
+          path: 'error'
+          message: 'message'
+      parameters:
+        - !ruby/object:Api::Type::String
+          name: 'name'
+          required: true
+          input: true
+          url_param_only: true
+          pattern: projects/{{project}}/locations/global/certificateMaps/{{name}}
+          description: |
+            A user-defined name of the Certificate Map Entry. Certificate Map Entry 
+            names must be unique globally and match pattern 
+            'projects/*/locations/*/certificateMaps/*/certificateMapEntries/*'
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'description'
+          description: |
+            A human-readable description of the resource.
+        - !ruby/object:Api::Type::String
+          name: 'createTime'
+          output: true
+          description: |
+            Creation timestamp of a Certificate Map Entry. Timestamp in RFC3339 UTC "Zulu" format, 
+            with nanosecond resolution and up to nine fractional digits. 
+            Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+        - !ruby/object:Api::Type::Time
+          name: 'updateTime'
+          description: |
+            Update timestamp of a Certificate Map Entry. Timestamp in RFC3339 UTC "Zulu" format, 
+            with nanosecond resolution and up to nine fractional digits. 
+            Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+          output: true
+        - !ruby/object:Api::Type::KeyValuePairs
+          name: 'labels'
+          description: |
+            Set of labels associated with a Certificate Map Entry resource.
+        - !ruby/object:Api::Type::String
+          name: 'certificates'
+          description: |
+            A set of Certificates defined for the given hostname.
+        - !ruby/object:Api::Type::Enum
+          name: 'state'
+          input: true
+          description: |
+            A serving state of this Certificate Map Entry.
+
+            The status is undefined.
+
+            The configuration is serving.
+
+            Update is in progress. Some frontends may serve this configuration.
+          values:
+            - :SERVING_STATE_UNSPECIFIFED
+            - :ACTIVE
+            - :PENDING
+          default_value: :ACTIVE
+        - !ruby/object:Api::Type::String
+          name: 'hostname'
+          description: |
+            A hostname xpression (*.example.com) 
+            for a set of hostnames with common suffix.
+          exactly_one_of:
+            - hostname
+            - matcher
+        - !ruby/object:Api::Type::Enum
+          name: 'matcher'
+          input: true
+          exactly_one_of:
+            - hostname
+            - matcher
+          description: |
+            A predefined matcher for particular cases, other than SNI selection
+          properties:
+            - !ruby/object:Api::Type::String
+              name: MATCHER_UNSPECIFIED
+              required: true
+              description: |
+                A matcher has't been recognized.
+            - !ruby/object:Api::Type::String
+              name: PRIMARY
+              required: true
+              dscription: | 
+                A primary certificate that is served when SNI wasn't 
+                specified in the request or SNI couldn't be found in the map.
