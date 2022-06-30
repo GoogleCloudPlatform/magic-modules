@@ -90,6 +90,7 @@ resource "google_sql_database_instance" "main" {
     location_preference {
       follow_gae_application = "test-follow_gae_application"
       zone                   = "us-central1-a"
+      secondary_zone         = "us-central1-b"
     }
     maintenance_window {
       day          = 42
