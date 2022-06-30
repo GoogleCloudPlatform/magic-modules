@@ -93,7 +93,7 @@ func testAcc<%= test_slug -%>_shared(t *testing.T, testSlug string, offline bool
   // need to have comparison.. perhaps test vs checked in code
   // testConvertCommand(t, dir, c.name, offline, c.compareConvertOutput)
 
-  testValidateCommandGeneric(t, dir, testSlug, offline)
+  testValidateCommandGeneric(t, dir, testSlug, offline, true)
 }
 
 func testAcc<%= test_slug -%>(context map[string]interface{}) string {
