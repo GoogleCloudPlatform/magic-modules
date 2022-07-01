@@ -1,7 +1,4 @@
 # Example of how to deploy a Cloud Run application with system packages
-# (In this case, 'graphviz'.)
-
-data "google_project" "project" {}
 
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['graphviz_example'] %>"
@@ -10,7 +7,9 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   template {
     spec {
       containers {
-        image = "gcr.io/${data.google_project.project.project_id}/graphviz"
+        # Replace with the URL of your graphviz image
+        #   gcr.io/<YOUR_GCP_PROJECT_ID>/graphviz
+        image = "gcr.io/cloudrun/hello"
       }
     }
   }
