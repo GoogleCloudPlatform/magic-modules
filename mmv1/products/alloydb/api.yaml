@@ -173,10 +173,14 @@ objects:
 
           If no policy is provided then the default policy will be used. The default policy takes one backup a day, has a backup window of 1 hour, and retains backups for 14 days.
         properties:
-          - !ruby/object:Api::Type::Time
+          - !ruby/object:Api::Type::String
             name: "backupWindow"
             description: |
               The length of the time window during which a backup can be taken. If a backup does not succeed within this time window, it will be canceled and considered failed.
+              
+              The backup window must be at least 5 minutes long. There is no upper bound on the window. If not set, it will default to 1 hour.
+              
+              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
           - !ruby/object:Api::Type::String
             name: "location"
             description: |
@@ -233,10 +237,11 @@ objects:
             description: |
               Time-based Backup retention policy.
             properties:
-              - !ruby/object:Api::Type::Time
+              - !ruby/object:Api::Type::String
                 name: "retentionPeriod"
                 description: |
                   The retention period.
+                  A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
           - !ruby/object:Api::Type::NestedObject
             name: "quantityBasedRetention"
             description: |
