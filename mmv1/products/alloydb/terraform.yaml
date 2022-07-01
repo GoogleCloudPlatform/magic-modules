@@ -22,10 +22,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       initialUser.password: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
-      network: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: "compareSelfLinkOrResourceName"
-        custom_flatten: "templates/terraform/custom_flatten/alloydb_cluster_network_flatten.go.erb"        
-        ignore_read: true
     autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples

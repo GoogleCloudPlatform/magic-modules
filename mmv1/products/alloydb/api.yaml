@@ -138,7 +138,6 @@ objects:
             name: "user"
             description: |
               The database username.
-            required: true
           - !ruby/object:Api::Type::String
             name: "password"
             description: |
