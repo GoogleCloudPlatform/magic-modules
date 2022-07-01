@@ -43,11 +43,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_name: "terraform-test"
         vars:
           bucket_name: "cloudfunctions2-function-bucket"
+          service_account: "s-a"
+          subscription: "pub-sub"
           function: "test-function"
           zip_path: "path/to/index.zip"
-          router: "gcf2-router"
         test_vars_overrides:
-          zip_path: "\"./test-fixtures/cloudfunctions2/function-source.zip\""
+          zip_path: "\"./test-fixtures/cloudfunctions2/function-source-pubsub.zip\""
           primary_resource_id: "\"terraform-test\""
           location: "\"us-central1\""
         # ignore these fields during import step
