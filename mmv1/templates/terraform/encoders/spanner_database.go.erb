@@ -10,8 +10,6 @@ log.Printf("[DEBUG] Preparing to create new Database. Any extra DDL statements w
 
 delete(obj, "name")
 delete(obj, "instance")
-<% unless compiler == "terraformvalidator-codegen" -%>
 delete(obj, "versionRetentionPeriod")
 delete(obj, "extraStatements")
-<% end -%>
 return obj, nil
