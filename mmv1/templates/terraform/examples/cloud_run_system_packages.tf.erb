@@ -1,5 +1,6 @@
 # Example of how to deploy a Cloud Run application with system packages
 
+# [START cloudrun_system_packages]
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['graphviz_example'] %>"
   location = "us-central1"
@@ -27,3 +28,4 @@ resource "google_cloud_run_service_iam_member" "allow_unauthenticated" {
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
+# [END cloudrun_system_packages]
