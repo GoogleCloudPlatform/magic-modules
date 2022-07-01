@@ -1,0 +1,34 @@
+provider "google" {
+    project = "gcek8s"
+}
+
+
+
+# [START cloudrun_service_access_control]
+resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['cloud_run_srv'] %>"
+  location = "us-central1"
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+      }
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+}
+
+resource "google_cloud_run_service_iam_binding" "default" {
+    location = google_cloud_run_service.default.location
+    service = google_cloud_run_service.default.name
+    role = "roles/run.invoker"
+    members = [
+        "allUsers"
+    ]
+}
+# [END cloudrun_service_access_control]

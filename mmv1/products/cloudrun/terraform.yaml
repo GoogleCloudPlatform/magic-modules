@@ -252,6 +252,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           cloud_run_service_name: "cloudrun-srv"
         min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudrun_service_access_control"
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "default"
+        skip_docs: true
+        vars:
+          cloud_run_srv: "cloud-run-srv"
+        min_version: beta
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'autogenerate_revision_name'
