@@ -80,6 +80,7 @@ serialize:
 		mv -f temp.serial serialization.go
 
 upgrade-dcl:
+	make serialize
 	cd tpgtools && \
 		go mod edit -dropreplace=github.com/GoogleCloudPlatform/declarative-resource-client-library &&\
 		go mod edit -require=github.com/GoogleCloudPlatform/declarative-resource-client-library@$(FORCE_DCL) &&\
