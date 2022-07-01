@@ -99,7 +99,9 @@ objects:
       - !ruby/object:Api::Type::KeyValuePairs
         name: "labels"
         description: "User-defined labels for the alloydb cluster."
-      # This is an x-product resource reference.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: "annotations"
+        description: "Annotations to allow client tools to store small amount of arbitrary data. This is distinct from labels."
       - !ruby/object:Api::Type::String
         name: "network"
         required: true
@@ -150,7 +152,7 @@ objects:
           - !ruby/object:Api::Type::Enum
             name: "sslMode"
             description: |
-              SSL mode. Specifies client-server SSL/TLS connection behavior.
+              The SSL mode. Specifies client-server SSL/TLS connection behavior.
             default_value: :SSL_MODE_ALLOW
             values:
               - :SSL_MODE_UNSPECIFIED
@@ -160,14 +162,13 @@ objects:
           - !ruby/object:Api::Type::Enum
             name: "caSource"
             description: |
-              Certificate Authority (CA) source.
+              The Certificate Authority (CA) source.
             default_value: :CA_SOURCE_MANAGED
             values:
               - :CA_SOURCE_MANAGED
               - :CA_SOURCE_UNSPECIFIED
       - !ruby/object:Api::Type::NestedObject
         name: "automatedBackupPolicy"
-        input: true
         description: |
           The automated backup policy for this cluster.
 
@@ -228,6 +229,28 @@ objects:
                       name: nanos
                       description: |
                         Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+          - !ruby/object:Api::Type::NestedObject
+            name: "timeBasedRetention"
+            description: |
+              Time-based Backup retention policy.
+            properties:
+              - !ruby/object:Api::Type::Time
+                name: "retentionPeriod"
+                description: |
+                  The retention period.
+          - !ruby/object:Api::Type::NestedObject
+            name: "quantityBasedRetention"
+            description: |
+              Quantity-based Backup retention policy to retain recent backups.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: "count"
+                description: |
+                  The number of backups to retain.
+          - !ruby/object:Api::Type::Boolean
+            name: "enabled"
+            description: |
+              Whether automated automated backups are enabled.
       - !ruby/object:Api::Type::NestedObject
         name: "backupSource"
         output: true

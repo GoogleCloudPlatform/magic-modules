@@ -15,7 +15,6 @@
 !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Cluster: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}"
     import_format: ["projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}", "{{cluster_id}}"]
     properties:
       initialUser: !ruby/object:Overrides::Terraform::PropertyOverride
