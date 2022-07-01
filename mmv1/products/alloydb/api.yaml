@@ -34,8 +34,7 @@ objects:
     update_verb: :PATCH
     update_mask: true
     min_version: beta
-    description: |
-      A managed alloydb cluster.
+    description: "A managed alloydb cluster."
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         "AlloyDB": "https://cloud.google.com/alloydb/docs/"
@@ -229,3 +228,25 @@ objects:
                       name: nanos
                       description: |
                         Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+      - !ruby/object:Api::Type::NestedObject
+        name: "backupSource"
+        output: true
+        description: "Cluster created from backup."
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "backupName"
+            description: "The name of the backup resource."
+      - !ruby/object:Api::Type::NestedObject
+        name: "migrationSource"
+        output: true
+        description: "Cluster created via DMS migration."
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "hostPort"
+            description: "The host and port of the on-premises instance in host:port format"
+          - !ruby/object:Api::Type::String
+            name: "referenceId"
+            description: "Place holder for the external source identifier(e.g DMS job name) that created the cluster."
+          - !ruby/object:Api::Type::String
+            name: "sourceType"
+            description: "Type of migration source."
