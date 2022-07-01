@@ -48,11 +48,11 @@ func PatternToRegex(s string, allowForwardSlash bool) string {
 	return re.ReplaceAllString(s, "(?P<$1>[^/]+)")
 }
 
-// Finds the correct resource id based on the schema and any overrides
-func findResourceId(schema *openapi.Schema, overrides Overrides, location string) (string, error) {
+// Finds the correct resource id based on the schema and any overrides. Returns whether a custom ID override was used.
+func findResourceID(schema *openapi.Schema, overrides Overrides, location string) (string, bool, error) {
 	id, ok := schema.Extension["x-dcl-id"].(string)
 	if !ok {
-		return "", fmt.Errorf("Malformed or missing x-dcl-id: %v", schema.Extension["x-dcl-id"])
+		return "", false, fmt.Errorf("Malformed or missing x-dcl-id: %v", schema.Extension["x-dcl-id"])
 	}
 
 	// Replace the camel case parameters in x-dcl-id with snake case.
@@ -63,7 +63,7 @@ func findResourceId(schema *openapi.Schema, overrides Overrides, location string
 	cid := CustomIDDetails{}
 	cidOk, err := overrides.ResourceOverrideWithDetails(CustomID, &cid, location)
 	if err != nil {
-		return "", fmt.Errorf("failed to decode custom id details: %v", err)
+		return "", false, fmt.Errorf("failed to decode custom id details: %v", err)
 	}
 
 	if cidOk {
@@ -77,7 +77,7 @@ func findResourceId(schema *openapi.Schema, overrides Overrides, location string
 			}
 		}
 	}
-	return id, nil
+	return id, cidOk, nil
 }
 
 // Finds all import formats for a given id. This can include short forms and

@@ -224,7 +224,7 @@ func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) erro
 	}
 
 {{- if $.Mutex }}
-	lockName, err := {{ $.IdFunction }}(d, config, "{{$.Mutex}}")
+	lockName, err := {{ $.IDFunction }}(d, config, "{{$.Mutex}}")
 	if err != nil {
 		return err
 	}
@@ -238,12 +238,12 @@ func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) erro
 	}
 {{ end }}
 
-{{- if $.UseDCLID }}
+{{- if $.UseTerraformID }}
 {{/* TODO(magic-modules-eng): When the DCL can correctly handle IDs for regional/global splits, all resources
 should be converted to use the DCL's ID method, so normalization can be uniform. */}}
-	id, err := obj.ID()
+	id, err := {{ $.IDFunction }}(d, config, "{{$.ID}}")
 {{- else }}
-	id, err := {{ $.IdFunction }}(d, config, "{{$.ID}}")
+	id, err := obj.ID()
 {{- end }}
 	if err != nil {
 		return fmt.Errorf("error constructing id: %s", err)
@@ -295,27 +295,27 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 	}
 
 {{ if $.HasServerGeneratedName}}
-  {{ if $.UseDCLID }}
-  id, err = obj.ID()
-  if err != nil {
-    return fmt.Errorf("error constructing id: %s", err)
-  }
-  d.SetId(id)
-  {{ else }}
-    {{ range $v := .Properties -}}
-	    {{- if ($v.IsServerGeneratedName) }}
+		{{ range $v := .Properties -}}
+			{{- if ($v.IsServerGeneratedName) }}
 	if err = {{$v.StateSetter}}; err != nil {
 		return fmt.Errorf("error setting {{$v.Name}} in state: %s", err)
 	}
-	    {{- end -}}
-    {{- end }}
-  // Id has a server-generated value, set again after creation
-	id, err = {{ $.IdFunction }}(d, config, "{{$.ID}}")
+			{{- end -}}
+		{{- end }}
+	// ID has a server-generated value, set again after creation.
+	{{ if $.UseTerraformID }}
+	id, err = {{ $.IDFunction }}(d, config, "{{$.ID}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
-  {{ end}}
+	{{ else }}
+	id, err = res.ID()
+	if err != nil {
+		return fmt.Errorf("error constructing id: %s", err)
+	}
+	d.SetId(id)
+	{{ end}}
 {{ end }}
 
 	log.Printf("[DEBUG] Finished creating {{$.DCLTitle}} %q: %#v", d.Id(), res)
@@ -425,7 +425,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 {{- end }}
 
 {{- if $.Mutex }}
-	lockName, err := {{ $.IdFunction }}(d, config, "{{$.Mutex}}")
+	lockName, err := {{ $.IDFunction }}(d, config, "{{$.Mutex}}")
 	if err != nil {
 		return err
 	}
@@ -498,7 +498,7 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	{{- if $.Mutex }}
-	lockName, err := {{ $.IdFunction }}(d, config, "{{$.Mutex}}")
+	lockName, err := {{ $.IDFunction }}(d, config, "{{$.Mutex}}")
 	if err != nil {
 		return err
 	}
@@ -575,7 +575,7 @@ func resource{{$.PathType}}Import(d *schema.ResourceData, meta interface{}) ([]*
 	}
 
 	// Replace import id for the resource id
-	id, err := {{ $.IdFunction }}(d, config, "{{$.ID}}")
+	id, err := {{ $.IDFunction }}(d, config, "{{$.ID}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
