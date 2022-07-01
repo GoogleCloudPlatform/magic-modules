@@ -1,8 +1,6 @@
 provider "google" {
-    project = "gcek8s"
+  project = "gcek8s"
 }
-
-
 
 # [START cloudrun_service_access_control]
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
@@ -24,11 +22,11 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_cloud_run_service_iam_binding" "default" {
-    location = google_cloud_run_service.default.location
-    service = google_cloud_run_service.default.name
-    role = "roles/run.invoker"
-    members = [
-        "allUsers"
-    ]
+  location = google_cloud_run_service.default.location
+  service  = google_cloud_run_service.default.name
+  role     = "roles/run.invoker"
+  members = [
+    "allUsers"
+  ]
 }
 # [END cloudrun_service_access_control]
