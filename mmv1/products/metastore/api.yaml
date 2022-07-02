@@ -222,6 +222,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'databaseType'
         input: true
+        default_value: :MYSQL
         description: |
           The database type that the Metastore service stores its data.
         values:
