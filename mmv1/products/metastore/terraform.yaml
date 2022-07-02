@@ -19,13 +19,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dataproc_metastore_service_basic"
-        min_version: beta
+        primary_resource_name: "fmt.Sprintf(\"tf-test-metastore-srv%s\", context[\"random_suffix\"])"
         primary_resource_id: "default"
         vars:
           metastore_service_name: "metastore-srv"
       - !ruby/object:Provider::Terraform::Examples
         name: "dataproc_metastore_service_cmek_test"
-        min_version: beta
         skip_docs: true
         primary_resource_id: "default"
         vars:
@@ -34,7 +33,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           keyring_name: "example-keyring"
       - !ruby/object:Provider::Terraform::Examples
         name: "dataproc_metastore_service_cmek_example"
-        min_version: beta
         skip_test: true
         primary_resource_id: "default"
         vars:
