@@ -56,3 +56,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       hiveMetastoreConfig.configOverrides: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         diff_suppress_func: 'dataprocMetastoreServiceOverrideSuppress'
+  Federation: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    import_format: ["projects/{{project}}/locations/{{location}}/federations/{{federationId}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dataproc_metastore_federation_basic"
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-metastore-federation%s\", context[\"random_suffix\"])"
+        vars:
+          metastore_federation_name: "metastore-federation"
