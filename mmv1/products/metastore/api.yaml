@@ -247,7 +247,6 @@ objects:
     base_url: "projects/{{project}}/locations/{{location}}/federations"
     create_url: 'projects/{{project}}/locations/{{location}}/federations?federationId={{federation_id}}'
     self_link: "projects/{{project}}/locations/{{location}}/federations/{{federation_id}}"    
-    min_version: beta
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -262,10 +261,6 @@ objects:
         path: 'name'
         base_url: '{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 40
-          update_minutes: 40
-          delete_minutes: 40
       result: !ruby/object:Api::OpAsync::Result
         path: 'response'
       status: !ruby/object:Api::OpAsync::Status
