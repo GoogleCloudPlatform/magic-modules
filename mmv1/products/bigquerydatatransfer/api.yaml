@@ -168,6 +168,7 @@ objects:
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'params'
         required: true
+        input: true
         description: |
           Parameters specific to each data source. For more information see the bq tab in the 'Setting up a data transfer'
           section for each data source. For example the parameters for Cloud Storage transfers are listed here:
