@@ -3,7 +3,8 @@
 resource "google_compute_reservation" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]['gce_reservation_local'] %>"
   zone = "us-central1-c"
-  project = "my-project-name"
+  # Uncomment and Add the project name below
+  # project = "my-project-name"
 
   share_settings {
     share_type = "LOCAL"
