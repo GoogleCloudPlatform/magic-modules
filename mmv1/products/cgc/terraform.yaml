@@ -62,7 +62,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "gce_reservation_local"
         vars:
           gce_reservation_local: "gce-reservation-local"
-        min_version: beta
     # SQL
     ### When including separate samples for each DB type, add `skip_test: true`
     ### for Postgres and MySQL, but not for SQL Server
