@@ -234,6 +234,8 @@ objects:
                         Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
           - !ruby/object:Api::Type::NestedObject
             name: "timeBasedRetention"
+            conflicts:
+              - quantity_based_retention
             description: |
               Time-based Backup retention policy.
             properties:
