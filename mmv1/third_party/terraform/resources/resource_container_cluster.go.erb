@@ -65,9 +65,9 @@ var (
 		"addons_config.0.network_policy_config",
 		"addons_config.0.cloudrun_config",
 		"addons_config.0.gcp_filestore_csi_driver_config",
+		"addons_config.0.dns_cache_config",
 	<% unless version == 'ga' -%>
 		"addons_config.0.istio_config",
-		"addons_config.0.dns_cache_config",
 		"addons_config.0.gce_persistent_disk_csi_driver_config",
 		"addons_config.0.kalm_config",
 		"addons_config.0.config_connector_config",
@@ -137,6 +137,7 @@ func resourceContainerCluster() *schema.Resource {
 			<% end -%>
 			containerClusterAutopilotCustomizeDiff,
 			containerClusterNodeVersionRemoveDefaultCustomizeDiff,
+			containerClusterNetworkPolicyEmptyCustomizeDiff,
 		),
 
 		Timeouts: &schema.ResourceTimeout{
@@ -298,6 +299,23 @@ func resourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
+						"dns_cache_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the NodeLocal DNSCache addon. It is disabled by default. Set enabled = true to enable.`,
+							ConflictsWith: []string{"enable_autopilot"},
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
 						<% unless version == 'ga' -%>
 						"istio_config": {
 							Type:         schema.TypeList,
@@ -320,23 +338,6 @@ func resourceContainerCluster() *schema.Resource {
 										DiffSuppressFunc: emptyOrDefaultStringSuppress("AUTH_NONE"),
 										ValidateFunc:     validation.StringInSlice([]string{"AUTH_NONE", "AUTH_MUTUAL_TLS"}, false),
 										Description:      `The authentication type between services in Istio. Available options include AUTH_MUTUAL_TLS.`,
-									},
-								},
-							},
-						},
-						"dns_cache_config": {
-							Type:         schema.TypeList,
-							Optional:     true,
-							Computed:     true,
-							AtLeastOneOf: addonsConfigKeys,
-							MaxItems:     1,
-							Description:  `The status of the NodeLocal DNSCache addon. It is disabled by default. Set enabled = true to enable.`,
-							ConflictsWith: []string{"enable_autopilot"},
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"enabled": {
-										Type:     schema.TypeBool,
-										Required: true,
 									},
 								},
 							},
@@ -542,9 +543,43 @@ func resourceContainerCluster() *schema.Resource {
 				ForceNew:    true,
 				Description: `Whether to enable Cloud TPU resources in this cluster.`,
 <% unless version == 'ga' -%>
-				Default: false,
+				ConflictsWith: []string{"tpu_config"},
+				Computed: true,
+				// TODO: deprecate when tpu_config is correctly returned by the API
+				// Deprecated: "Deprecated in favor of tpu_config",
 <% end -%>
 			},
+
+<% unless version == 'ga' -%>
+			"tpu_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `TPU configuration for the cluster.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:        schema.TypeBool,
+							Required:    true,
+							ForceNew:    true,
+							Description: `Whether Cloud TPU integration is enabled or not`,
+						},
+						"ipv4_cidr_block": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `IPv4 CIDR block reserved for Cloud TPU in the VPC.`,
+						},
+						"use_service_networking": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `Whether to use service networking for Cloud TPU or not`,
+						},
+					},
+				},
+			},
+<% end -%>
 
 			"enable_legacy_abac": {
 				Type:        schema.TypeBool,
@@ -742,28 +777,45 @@ func resourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"enable_components": {
 							Type:        schema.TypeList,
-							Required:    true,
 <% if version == "ga" -%>
+							Required:    true,
 							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS.`,
-<% end -%>
-<% if version == "beta" -%>
+<% else -%>
+							Optional:    true,
+							Computed:    true,
 							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS and WORKLOADS.`,
 <% end -%>
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 <% if version == "ga" -%>
 								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS"}, false),
-<% end -%>
-<% if version == "beta" -%>
+<% else -%>
 								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS", "WORKLOADS"}, false),
 <% end -%>
 							},
 						},
+<% unless version == "ga" -%>
+						"managed_prometheus": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: `Configuration for Google Cloud Managed Services for Prometheus.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Whether or not the managed collection is enabled.`,
+									},
+								},
+							},
+						},
+<% end -%>
 					},
 				},
 			},
 
-<% unless version == 'ga' -%>
 			"notification_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -795,7 +847,6 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 
 			"confidential_nodes": {
 				Type:        schema.TypeList,
@@ -899,12 +950,12 @@ func resourceContainerCluster() *schema.Resource {
 			},
 
 			"network_policy": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Computed:    true,
-				MaxItems:    1,
-				Description: `Configuration options for the NetworkPolicy feature.`,
-				ConflictsWith: []string{"enable_autopilot"},
+				Type:             schema.TypeList,
+				Optional:         true,
+				MaxItems:         1,
+				Description:      `Configuration options for the NetworkPolicy feature.`,
+				ConflictsWith:    []string{"enable_autopilot"},
+				DiffSuppressFunc: containerClusterNetworkPolicyDiffSuppress,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
@@ -1535,9 +1586,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			DnsConfig:                 expandDnsConfig(d.Get("dns_config")),
 	    },
 		MasterAuth:     expandMasterAuth(d.Get("master_auth")),
-<% unless version == 'ga' -%>
 		NotificationConfig: expandNotificationConfig(d.Get("notification_config")),
-<% end -%>
 		ConfidentialNodes: expandConfidentialNodes(d.Get("confidential_nodes")),
 		ResourceLabels: expandStringMap(d, "resource_labels"),
 	}
@@ -1639,6 +1688,10 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 <% unless version == 'ga' -%>
 	if v, ok := d.GetOk("identity_service_config"); ok {
 		cluster.IdentityServiceConfig = expandIdentityServiceConfig(v)
+	}
+
+	if v, ok := d.GetOk("tpu_config"); ok {
+		cluster.TpuConfig = expandContainerClusterTpuConfig(v)
 	}
 
 <% end -%>
@@ -1888,10 +1941,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("release_channel", flattenReleaseChannel(cluster.ReleaseChannel)); err != nil {
 		return err
 	}
-<% unless version == 'ga' -%>
 	if err := d.Set("notification_config", flattenNotificationConfig(cluster.NotificationConfig)); err != nil {
 		return err
 	}
+<% unless version == 'ga' -%>
 	if err := d.Set("enable_l4_ilb_subsetting", cluster.NetworkConfig.EnableL4ilbSubsetting); err != nil {
 		return fmt.Errorf("Error setting enable_l4_ilb_subsetting: %s", err)
 	}
@@ -2595,7 +2648,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
-<% unless version == 'ga' -%>
 	if d.HasChange("notification_config") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -2627,7 +2679,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s Notification Config has been updated to %#v", d.Id(), req.Update.DesiredNotificationConfig)
 	}
-<% end -%>
 
 	if d.HasChange("vertical_pod_autoscaling") {
 		if ac, ok := d.GetOk("vertical_pod_autoscaling"); ok {
@@ -3108,6 +3159,14 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 		}
 	}
 
+	if v, ok := config["dns_cache_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.DnsCacheConfig = &container.DnsCacheConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
+
 <% unless version == 'ga' -%>
 	if v, ok := config["istio_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
@@ -3115,14 +3174,6 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 			Disabled:        addon["disabled"].(bool),
 			Auth:            addon["auth"].(string),
 			ForceSendFields: []string{"Disabled"},
-		}
-	}
-
-	if v, ok := config["dns_cache_config"]; ok && len(v.([]interface{})) > 0 {
-		addon := v.([]interface{})[0].(map[string]interface{})
-		ac.DnsCacheConfig = &container.DnsCacheConfig{
-			Enabled:         addon["enabled"].(bool),
-			ForceSendFields: []string{"Enabled"},
 		}
 	}
 
@@ -3370,7 +3421,6 @@ func expandAuthenticatorGroupsConfig(configured interface{}) *container.Authenti
 	return result
 }
 
-<% unless version == 'ga' -%>
 func expandNotificationConfig(configured interface{}) *container.NotificationConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -3401,7 +3451,6 @@ func expandNotificationConfig(configured interface{}) *container.NotificationCon
 		},
 	}
 }
-<% end -%>
 
 func expandConfidentialNodes(configured interface{}) *container.ConfidentialNodes {
 	l := configured.([]interface{})
@@ -3463,11 +3512,11 @@ func expandMasterAuthorizedNetworksConfig(configured interface{}) *container.Mas
 }
 
 func expandNetworkPolicy(configured interface{}) *container.NetworkPolicy {
+	result := &container.NetworkPolicy{}
 	l := configured.([]interface{})
 	if len(l) == 0 {
-		return nil
+		return result
 	}
-	result := &container.NetworkPolicy{}
 	config := l[0].(map[string]interface{})
 	if enabled, ok := config["enabled"]; ok && enabled.(bool) {
 		result.Enabled = true
@@ -3681,16 +3730,41 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
-
+	mc := &container.MonitoringConfig{}
 	config := l[0].(map[string]interface{})
-	return &container.MonitoringConfig{
-		ComponentConfig: &container.MonitoringComponentConfig{
-			EnableComponents: convertStringArr(config["enable_components"].([]interface{})),
-		},
+<%# In version == 'ga' enable_components will always be specified. %>
+	if v, ok := config["enable_components"]; ok && len(v.([]interface{})) > 0 {
+		enable_components := v.([]interface{})
+		mc.ComponentConfig = &container.MonitoringComponentConfig{
+			EnableComponents: convertStringArr(enable_components),
+		}
 	}
+<% if version == 'beta' -%>
+	if v, ok := config["managed_prometheus"]; ok && len(v.([]interface{})) > 0 {
+		managed_prometheus := v.([]interface{})[0].(map[string]interface{})
+		mc.ManagedPrometheusConfig = &container.ManagedPrometheusConfig{
+			Enabled: managed_prometheus["enabled"].(bool),
+		}
+	}
+<% end -%>
+	return mc
 }
 
 <% unless version == 'ga' -%>
+func expandContainerClusterTpuConfig(configured interface{}) *container.TpuConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+
+	config := l[0].(map[string]interface{})
+	return &container.TpuConfig{
+		Enabled:              config["enabled"].(bool),
+		UseServiceNetworking: config["use_service_networking"].(bool),
+	}
+}
+<% end -%>
+
 func flattenNotificationConfig(c *container.NotificationConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -3707,8 +3781,6 @@ func flattenNotificationConfig(c *container.NotificationConfig) []map[string]int
 		},
 	}
 }
-<% end -%>
-
 func flattenConfidentialNodes(c *container.ConfidentialNodes) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
@@ -3782,20 +3854,20 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 		result["cloudrun_config"] = []map[string]interface{}{cloudRunConfig}
 	}
 
+	if c.DnsCacheConfig != nil {
+		result["dns_cache_config"] = []map[string]interface{}{
+			{
+				"enabled": c.DnsCacheConfig.Enabled,
+			},
+		}
+	}
+
 <% unless version == 'ga' -%>
 	if c.IstioConfig != nil {
 		result["istio_config"] = []map[string]interface{}{
 			{
 				"disabled": c.IstioConfig.Disabled,
 				"auth":     c.IstioConfig.Auth,
-			},
-		}
-	}
-
-	if c.DnsCacheConfig != nil {
-		result["dns_cache_config"] = []map[string]interface{}{
-			{
-				"enabled": c.DnsCacheConfig.Enabled,
 			},
 		}
 	}
@@ -4212,12 +4284,27 @@ func flattenMonitoringConfig(c *container.MonitoringConfig) []map[string]interfa
 		return nil
 	}
 
+	result := make(map[string]interface{})
+	if c.ComponentConfig != nil {
+		result["enable_components"] = c.ComponentConfig.EnableComponents
+	}
+<% if version == 'beta' -%>
+	if c.ManagedPrometheusConfig != nil {
+		result["managed_prometheus"] = flattenManagedPrometheusConfig(c.ManagedPrometheusConfig)
+	}
+<% end -%>
+	return []map[string]interface{}{result}
+}
+
+<% if version == 'beta' -%>
+func flattenManagedPrometheusConfig(c *container.ManagedPrometheusConfig) []map[string]interface{} {
 	return []map[string]interface{}{
 		{
-			"enable_components":        c.ComponentConfig.EnableComponents,
+			"enabled": c != nil && c.Enabled,
 		},
 	}
 }
+<% end -%>
 
 func resourceContainerClusterStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
@@ -4380,6 +4467,18 @@ func containerClusterNodeVersionRemoveDefaultCustomizeDiff(_ context.Context, d 
 	return nil
 }
 
+func containerClusterNetworkPolicyEmptyCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	// we want to set computed only in the case that there wasn't a previous network_policy configured
+	// because we default a returned empty network policy to a configured false, this will only apply
+	// on the first run, if network_policy is not configured - all other runs will store empty configurations
+	// as enabled=false and provider=PROVIDER_UNSPECIFIED
+	o, n := d.GetChange("network_policy")
+	if o == nil && n == nil {
+		return d.SetNewComputed("network_policy")
+	}
+	return nil
+}
+
 <% unless version == 'ga' -%>
 func podSecurityPolicyCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
 	if k == "pod_security_policy_config.#" && old == "1" && new == "0" {
@@ -4395,3 +4494,17 @@ func podSecurityPolicyCfgSuppress(k, old, new string, r *schema.ResourceData) bo
 	return false
 }
 <% end -%>
+
+func containerClusterNetworkPolicyDiffSuppress(k, old, new string, r *schema.ResourceData) bool {
+	// if network_policy configuration is empty, we store it as populated and enabled=false, and
+	// provider=PROVIDER_UNSPECIFIED, in the case that it was previously stored with this state,
+	// and the configuration removed, we want to suppress the diff
+	if k == "network_policy.#" && old == "1" && new == "0" {
+		o, _ := r.GetChange("network_policy.0.enabled")
+		if !o.(bool) {
+			return true
+		}
+	}
+
+	return false
+}

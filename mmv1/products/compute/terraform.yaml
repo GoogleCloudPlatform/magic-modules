@@ -166,6 +166,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           backend_bucket_name: "image-backend-bucket"
           bucket_name: "image-store-bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_bucket_query_string_whitelist"
+        primary_resource_id: "image_backend"
+        vars:
+          backend_bucket_name: "image-backend-bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_bucket_include_http_headers"
+        primary_resource_id: "image_backend"
+        vars:
+          backend_bucket_name: "image-backend-bucket"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
       post_update: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
@@ -235,6 +245,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           backend_service_name: "backend-service"
           http_health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_cache_include_named_cookies"
+        primary_resource_id: "default"
+        vars:
+          backend_service_name: "backend-service"
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_cache"
         primary_resource_id: "default"
@@ -1469,6 +1484,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       mtu: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      internalIpv6Range: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
   NetworkEndpoint: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -2493,6 +2510,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       tcpTransitoryIdleTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+      enableDynamicPortAllocation: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/router_nat.go.erb'
       resource_definition: 'templates/terraform/resource_definition/router_nat.go.erb'
@@ -2835,6 +2854,36 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_value: :TLS_1_0
       warnings: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+  # Find that Region SSL Policy needs the same custom code as SSL Policy
+  RegionSslPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants:  'templates/terraform/constants/region_ssl_policy.erb'
+      resource_definition: 'templates/terraform/resource_definition/region_ssl_policy.erb'
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      customFeatures: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        send_empty_value: true
+        description: |
+          {{description}}
+          See the [official documentation](https://cloud.google.com/compute/docs/load-balancing/ssl-policies#profilefeaturesupport)
+          for which ciphers are available to use. **Note**: this argument
+          *must* be present when using the `CUSTOM` profile. This argument
+          *must not* be present when using any other profile.
+      enabledFeatures: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      profile: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_value: :COMPATIBLE
+        description: |
+          {{description}}
+          See the [official documentation](https://cloud.google.com/compute/docs/load-balancing/ssl-policies#profilefeaturesupport)
+          for information on what cipher suites each profile provides. If
+          `CUSTOM` is used, the `custom_features` attribute **must be set**.
+      minTlsVersion: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_value: :TLS_1_0
+      warnings: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
   Subnetwork: !ruby/object:Overrides::Terraform::ResourceOverride
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/compute.networkUser'
@@ -2917,6 +2966,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           subnetwork_name: "ipv6-test-subnetwork"
           network_name: "ipv6-test-network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "subnetwork_internal_ipv6"
+        primary_resource_id: "subnetwork-internal-ipv6"
+        vars:
+          subnetwork_name: "internal-ipv6-test-subnetwork"
+          network_name: "internal-ipv6-test-network"
   TargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples

@@ -1043,6 +1043,16 @@ objects:
       name: displayName
       description: |
         Name used for UI elements listing this Service.
+    - !ruby/object:Api::Type::KeyValuePairs
+      name: 'userLabels'
+      description: |
+        Labels which have been used to annotate the service. Label keys must start
+        with a letter. Label keys and values may contain lowercase letters,
+        numbers, underscores, and dashes. Label keys and values have a maximum
+        length of 63 characters, and must be less than 128 bytes in size. Up to 64
+        label entries may be stored. For labels which do not have a semantic value,
+        the empty string may be supplied for the label value.
+      send_empty_value: true
     - !ruby/object:Api::Type::NestedObject
       name: telemetry
       description: |
@@ -1128,6 +1138,15 @@ objects:
         - WEEK
         - FORTNIGHT
         - MONTH
+    - !ruby/object:Api::Type::KeyValuePairs
+      name: userLabels
+      description: |
+        This field is intended to be used for organizing and identifying the AlertPolicy
+        objects.The field can contain up to 64 entries. Each key and value is limited
+        to 63 Unicode characters or 128 bytes, whichever is smaller. Labels and values
+        can contain only lowercase letters, numerals, underscores, and dashes. Keys
+        must begin with a letter.
+      send_empty_value: true
     - !ruby/object:Api::Type::NestedObject
       name: serviceLevelIndicator
       description: |
@@ -1757,6 +1776,26 @@ objects:
             - :NOT_CONTAINS_STRING
             - :MATCHES_REGEX
             - :NOT_MATCHES_REGEX
+            - :MATCHES_JSON_PATH
+            - :NOT_MATCHES_JSON_PATH
+        - !ruby/object:Api::Type::NestedObject
+          name: jsonPathMatcher
+          description: Information needed to perform a JSONPath content match.
+            Used for `ContentMatcherOption::MATCHES_JSON_PATH` and
+            `ContentMatcherOption::NOT_MATCHES_JSON_PATH`.
+          properties:
+          - !ruby/object:Api::Type::String
+            name: jsonPath
+            description: JSONPath within the response output pointing to the expected
+              `ContentMatcher::content` to match against.
+            required: true
+          - !ruby/object:Api::Type::Enum
+            name: jsonMatcher
+            description: Options to perform JSONPath content matching.
+            default_value: :EXACT_MATCH
+            values:
+              - :EXACT_MATCH
+              - :REGEX_MATCH
     - !ruby/object:Api::Type::Array
       name: selectedRegions
       description: The list of regions from which the check will be run. Some regions
@@ -1941,7 +1980,8 @@ objects:
       input: true
       description: 'The monitored resource (https://cloud.google.com/monitoring/api/resources)
         associated with the configuration. The following monitored resource types are
-        supported for uptime checks:  uptime_url  gce_instance  gae_app  aws_ec2_instance  aws_elb_load_balancer'
+        supported for uptime checks:  uptime_url  gce_instance  gae_app  aws_ec2_instance 
+        aws_elb_load_balancer  k8s_service  servicedirectory_service'
       exactly_one_of:
         - monitored_resource
         - resource_group
