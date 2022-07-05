@@ -331,7 +331,6 @@ func resourceDataprocCluster() *schema.Resource {
 									"gke_cluster_config": {
 										Type:         schema.TypeList,
 										Required:     true,
-										Computed:     true,
 										MaxItems:     1,
 										AtLeastOneOf: kubernetesClusterConfigKeys,
 										Description:  `The configuration for running the Dataproc cluster on GKE.`,
