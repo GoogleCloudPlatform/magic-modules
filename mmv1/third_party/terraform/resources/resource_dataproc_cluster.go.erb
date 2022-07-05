@@ -46,7 +46,6 @@ var (
 	kubernetesClusterConfigKeys = []string{
 		"virtual_cluster_config.0.kubernetes_cluster_config.0.kubernetes_namespace",
 		"virtual_cluster_config.0.kubernetes_cluster_config.0.kubernetes_software_config",
-		"virtual_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config",
 	}
 
 	kubernetesSoftwareConfigKeys = []string{
@@ -332,7 +331,6 @@ func resourceDataprocCluster() *schema.Resource {
 										Type:         schema.TypeList,
 										Required:     true,
 										MaxItems:     1,
-										AtLeastOneOf: kubernetesClusterConfigKeys,
 										Description:  `The configuration for running the Dataproc cluster on GKE.`,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
