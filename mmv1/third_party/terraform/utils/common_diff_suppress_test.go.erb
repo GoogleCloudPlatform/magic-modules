@@ -307,8 +307,8 @@ func TestLastSlashDiffSuppress(t *testing.T) {
 			ExpectDiffSuppress: true,
 		},
 		"no slash to no slash": {
-			Old:                "https://hello-rehvs75zla-uc.a.run.app/",
-			New:                "https://hello-rehvs75zla-uc.a.run.app/",
+			Old:                "https://hello-rehvs75zla-uc.a.run.app",
+			New:                "https://hello-rehvs75zla-uc.a.run.app",
 			ExpectDiffSuppress: true,
 		},
 		"different domains": {
