@@ -39,6 +39,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           metastore_service_name: "example-service"
           key_name: "example-key"
           keyring_name: "example-keyring"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dataproc_metastore_service_endpoint"
+        skip_docs: true
+        primary_resource_id: "endpoint"
+        vars:
+          metastore_service_name: "metastore-endpoint"          
     properties:
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
