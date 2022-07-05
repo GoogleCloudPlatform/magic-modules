@@ -72,7 +72,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
         labels: !ruby/object:Overrides::Terraform::PropertyOverride
           default_from_api: true
-  CertificatMapEntry: !ruby/object:Overrides::Terraform::ResourceOverride
+  CertificateMapEntry: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         These resources require allow-listing to use, and are not openly available to all Cloud customers. Engage with your Cloud account team to discuss how to onboard.
@@ -80,10 +80,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["projects/{{project}}/locations/global/certificateMaps/certificateMapEntries/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "certificate_manager_certificate_map_basic"
+        name: "certificate_manager_certificate_map_entry_basic"
         primary_resource_id: "default"
         vars:
-          cert_map_name: "cert-map-entry"
+          cert_map_entry_name: "cert-map-entry"
     properties:
         labels: !ruby/object:Overrides::Terraform::PropertyOverride
           default_from_api: true 

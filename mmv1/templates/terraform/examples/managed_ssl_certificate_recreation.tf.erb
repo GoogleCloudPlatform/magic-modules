@@ -12,9 +12,6 @@ locals {
   managed_domains = tolist(["test.example.com"])
 }
 
-//certificate map entry resource
-
-
 
 resource "random_id" "certificate" {
   byte_length = 4

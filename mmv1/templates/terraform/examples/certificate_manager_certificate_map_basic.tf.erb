@@ -7,11 +7,11 @@ resource "google_certificate_manager_certificate_map" "<%= ctx[:primary_resource
   }
 }
 
-resource "google_certificate_manager_certificate_map_entry" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['cert_map_name'] %>"
-  description = "My acceptance test certificate map entry"
-  labels      = {
-    "terraform" : true,
-    "acc-test"  : true,
-  }
-}
+# resource "google_certificate_manager_certificate_map_entry" "<%= ctx[:primary_resource_id] %>" {
+#   name        = "<%= ctx[:vars]['cert_map_entry_name'] %>"
+#   description = "My acceptance test certificate map entry"
+#   labels      = {
+#     "terraform" : true,
+#     "acc-test"  : true,
+#   }
+# }

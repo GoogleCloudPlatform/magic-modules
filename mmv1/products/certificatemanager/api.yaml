@@ -401,15 +401,18 @@ objects:
             - matcher
           description: |
             A predefined matcher for particular cases, other than SNI selection
-          properties:
-            - !ruby/object:Api::Type::String
-              name: MATCHER_UNSPECIFIED
-              required: true
-              description: |
-                A matcher has't been recognized.
-            - !ruby/object:Api::Type::String
-              name: PRIMARY
-              required: true
-              dscription: | 
-                A primary certificate that is served when SNI wasn't 
-                specified in the request or SNI couldn't be found in the map.
+          values:
+            - :MATCHER_UNSPECIFIED
+            - :PRIMARY
+          # properties:
+          #   - !ruby/object:Api::Type::String
+          #     name: MATCHER_UNSPECIFIED
+          #     required: true
+          #     description: |
+          #       A matcher has't been recognized.
+          #   - !ruby/object:Api::Type::String
+          #     name: PRIMARY
+          #     required: true
+          #     dscription: | 
+          #       A primary certificate that is served when SNI wasn't 
+          #       specified in the request or SNI couldn't be found in the map.
