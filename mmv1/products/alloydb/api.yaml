@@ -336,7 +336,7 @@ objects:
         name: "name"
         output: true
         description: |
-          The name of the instnace resource.
+          The name of the instance resource.
       - !ruby/object:Api::Type::Time
         exclude: true
         name: "createTime"
