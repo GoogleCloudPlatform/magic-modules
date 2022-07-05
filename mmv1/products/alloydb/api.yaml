@@ -246,6 +246,8 @@ objects:
                   A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
           - !ruby/object:Api::Type::NestedObject
             name: "quantityBasedRetention"
+            conflicts:
+              - time_based_retention
             description: |
               Quantity-based Backup retention policy to retain recent backups.
             properties:
