@@ -291,22 +291,27 @@ func TestLastSlashDiffSuppress(t *testing.T) {
 		Old, New           string
 		ExpectDiffSuppress bool
 	}{
-		"locations to zones": {
+		"slash to no slash": {
 			Old:                "https://hello-rehvs75zla-uc.a.run.app/",
 			New:                "https://hello-rehvs75zla-uc.a.run.app",
 			ExpectDiffSuppress: true,
 		},
-		"regions to locations": {
+		"no slash to slash": {
 			Old:                "https://hello-rehvs75zla-uc.a.run.app",
 			New:                "https://hello-rehvs75zla-uc.a.run.app/",
 			ExpectDiffSuppress: true,
 		},
-		"locations to locations": {
+		"slash to slash": {
 			Old:                "https://hello-rehvs75zla-uc.a.run.app/",
 			New:                "https://hello-rehvs75zla-uc.a.run.app/",
 			ExpectDiffSuppress: true,
 		},
-		"zones to regions": {
+		"no slash to no slash": {
+			Old:                "https://hello-rehvs75zla-uc.a.run.app/",
+			New:                "https://hello-rehvs75zla-uc.a.run.app/",
+			ExpectDiffSuppress: true,
+		},
+		"different domains": {
 			Old:                "https://x.a.run.app/",
 			New:                "https://y.a.run.app",
 			ExpectDiffSuppress: false,
