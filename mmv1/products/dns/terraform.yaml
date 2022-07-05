@@ -29,10 +29,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "force_destroy"
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_record_set_basic"
-        primary_resource_id: "default"
+        name: "dns_record_set_basic"
+        primary_resource_id: "parent_zone"
         skip_docs: true
         vars:
-          zone_name: "sample-zone"
+          sample_zone: "sample-zone"
+          test_record.sample_zone.hashicorptest.com.: "test-record.sample-zone.hashicorptest.com."
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_basic"
         primary_resource_id: "example-zone"
