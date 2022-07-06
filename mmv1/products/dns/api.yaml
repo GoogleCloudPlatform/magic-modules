@@ -280,7 +280,7 @@ objects:
       method_name_separator: ':'
       fetch_iam_policy_verb: :POST
       parent_resource_attribute: 'name'
-      base_url: 'projects/{{project}}/locations/global/managedZones/{{name}}'
+      base_url: 'projects/{{project}}/managedZones/{{name}}'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Managing Zones':
