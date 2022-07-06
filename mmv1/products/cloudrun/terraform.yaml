@@ -254,7 +254,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: beta
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_system_packages"
-        primary_resource_type: "google_cloud_run_service"
         primary_resource_id: "default"
         skip_docs: true
         vars:
