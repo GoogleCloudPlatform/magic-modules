@@ -442,7 +442,7 @@ func TestAccComputeDisk_deleteDetachIGM(t *testing.T) {
 	})
 }
 
-func TestProvisionedIopDisk_basic(t *testing.T) {
+func TestAccComputeDisk_pdExtremeImplicitProvisionedIops(t *testing.T) {
 	t.Parallel()
 
 	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
@@ -452,7 +452,7 @@ func TestProvisionedIopDisk_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testProvisionedIopsDisk_basic(diskName),
+				Config: testAccComputeDisk_pdExtremeImplicitProvisionedIops(diskName),
 			},
 			{
 				ResourceName:      "google_compute_disk.foobar",
@@ -796,7 +796,7 @@ resource "google_compute_instance_group_manager" "manager" {
 `, diskName, mgrName)
 }
 
-func testProvisionedIopsDisk_basic(diskName string) string {
+func testAccComputeDisk_pdExtremeImplicitProvisionedIops(diskName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_disk" "foobar" {
   name  = "%s"
