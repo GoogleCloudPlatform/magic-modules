@@ -307,9 +307,9 @@ objects:
                 `targetSslProxy` may be set.
   - !ruby/object:Api::Resource
       name: 'CertificateMapEntry'
-      base_url: 'projects/{{project}}/locations/global/certificateMaps'
-      create_url: 'projects/{{project}}/locations/global/certificateMaps?certificateMapId={{name}}'
-      self_link: 'projects/{{project}}/locations/global/certificateMaps/{{name}}'
+      base_url: 'projects/{{project}}/locations/global/certificateMapsEntries'
+      create_url: 'projects/{{project}}/locations/global/certificateMapsEntries'
+      self_link: 'projects/{{project}}/locations/global/certificateMaps/certificateMapsEntries/{{name}}'
       update_verb: :PATCH
       update_mask: true
       description: |
@@ -336,8 +336,8 @@ objects:
           name: 'name'
           required: true
           input: true
-          url_param_only: true
-          pattern: projects/{{project}}/locations/global/certificateMaps/{{name}}
+          # url_param_only: true
+          pattern: projects/{{project}}/locations/global/certificateMaps/certificateMapsEntries/{{name}}
           description: |
             A user-defined name of the Certificate Map Entry. Certificate Map Entry 
             names must be unique globally and match pattern 
@@ -346,7 +346,8 @@ objects:
         - !ruby/object:Api::Type::String
           name: 'description'
           description: |
-            A human-readable description of the resource.
+            CertificateMapEntry is a list of certificate configurations,
+            that have been issued for a particular hostname
         - !ruby/object:Api::Type::String
           name: 'createTime'
           output: true
@@ -364,14 +365,19 @@ objects:
         - !ruby/object:Api::Type::KeyValuePairs
           name: 'labels'
           description: |
-            Set of labels associated with a Certificate Map Entry resource.
-        - !ruby/object:Api::Type::String
+            Set of labels associated with a Certificate Map Entry.
+            An object containing a list of "key": value pairs.
+            Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+        - !ruby/object:Api::Type::Array
           name: 'certificates'
           description: |
-            A set of Certificates defined for the given hostname.
+            A set of Certificates defines for the given hostname.
+            There can be defined up to fifteen certificates in each Certificate Map Entry.
+            Each certificate must match pattern projects/*/locations/*/certificates/*.
+          item_type: Api::Type::String
         - !ruby/object:Api::Type::Enum
           name: 'state'
-          input: true
+          output: true
           description: |
             A serving state of this Certificate Map Entry.
 
@@ -388,14 +394,14 @@ objects:
         - !ruby/object:Api::Type::String
           name: 'hostname'
           description: |
-            A hostname xpression (*.example.com) 
-            for a set of hostnames with common suffix.
+            A Hostname (FQDN, e.g. example.com) or a wildcard hostname expression (*.example.com)
+            for a set of hostnames with common suffix. Used as Server Name Indication (SNI) for
+            selecting a proper certificate.
           exactly_one_of:
             - hostname
             - matcher
         - !ruby/object:Api::Type::Enum
           name: 'matcher'
-          input: true
           exactly_one_of:
             - hostname
             - matcher

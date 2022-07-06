@@ -80,7 +80,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["projects/{{project}}/locations/global/certificateMaps/certificateMapEntries/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "certificate_manager_certificate_map_entry_basic"
+        name: "certificate_manager_certificate_map_entry_full"
         primary_resource_id: "default"
         vars:
           cert_map_entry_name: "cert-map-entry"
