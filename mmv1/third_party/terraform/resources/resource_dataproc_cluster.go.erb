@@ -57,11 +57,6 @@ var (
 		"virtual_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.gke_cluster_target",
 		"virtual_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target",
 	}
-
-	gkeNodepoolAutoscalingConfigKeys = []string{
-		"virtual_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool_config.0.autoscaling.0.min_node_count",
-		"virtual_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target.0.node_pool_config.0.autoscaling.0.max_node_count",
-	}
 <% end -%>
 
 	gceClusterConfigKeys = []string{
@@ -443,14 +438,14 @@ func resourceDataprocCluster() *schema.Resource {
 																					"min_node_count": {
 																						Type:        schema.TypeInt,
 																						ForceNew:    true,
-																						Required:    true,
+																						Optional:    true,
 																						Description: `The minimum number of nodes in the node pool. Must be >= 0 and <= maxNodeCount.`,
 																					},
 
 																					"max_node_count": {
 																						Type:        schema.TypeInt,
 																						ForceNew:    true,
-																						Required:    true,
+																						Optional:    true,
 																						Description: `The maximum number of nodes in the node pool. Must be >= minNodeCount, and must be > 0.`,
 																					},
 																				},
