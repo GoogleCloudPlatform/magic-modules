@@ -281,6 +281,7 @@ objects:
                   associated with the zone. Ignored for `public` visibility zones.
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
       parent_resource_attribute: 'name'
       base_url: 'projects/{{project}}/locations/global/managedZones/{{name}}'
     references: !ruby/object:Api::Resource::ReferenceLinks
