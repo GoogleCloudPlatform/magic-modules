@@ -18,7 +18,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_basic"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-managed-zone%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"example-zone%s\", context[\"random_suffix\"])"
         primary_resource_id: "example-zone"
         pull_external: true
         # Randomness from random provider
