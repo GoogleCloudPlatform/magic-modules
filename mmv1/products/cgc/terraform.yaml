@@ -64,6 +64,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           gce_reservation_local: "gce-reservation-local"
         test_env_vars:
           project: :PROJECT_NAME
+        skip_import_test: true
     # SQL
     ### When including separate samples for each DB type, add `skip_test: true`
     ### for Postgres and MySQL, but not for SQL Server
