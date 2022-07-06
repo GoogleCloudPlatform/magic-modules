@@ -1,4 +1,4 @@
-# [START cloudrun_service_access_control]
+# [START cloudrun_service_access_control_run_service]
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['cloud_run_srv'] %>"
   location = "us-central1"
@@ -16,7 +16,9 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
     latest_revision = true
   }
 }
+# [END cloudrun_service_access_control_run_service]
 
+# [START cloudrun_service_access_control_iam_binding]
 resource "google_cloud_run_service_iam_binding" "default" {
   location = google_cloud_run_service.default.location
   service  = google_cloud_run_service.default.name
@@ -25,4 +27,4 @@ resource "google_cloud_run_service_iam_binding" "default" {
     "allUsers"
   ]
 }
-# [END cloudrun_service_access_control]
+# [END cloudrun_service_access_control_iam_binding]
