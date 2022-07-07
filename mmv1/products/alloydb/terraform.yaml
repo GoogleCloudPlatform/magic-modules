@@ -31,7 +31,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           alloydb_cluster_name: "alloydb-cluster"
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}/instances/{{instance_id}}", "clusters/{{cluster_id}}/instances/{{instance_id}}"]
+    import_format: ["{{cluster}}/instances/{{instance_id}}"]
     autogen_async: true
     properties:
       availabilityType: !ruby/object:Overrides::Terraform::PropertyOverride

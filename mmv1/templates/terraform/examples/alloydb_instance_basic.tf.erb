@@ -1,8 +1,7 @@
 resource "google_alloydb_instance" "<%= ctx[:primary_resource_id] %>" {
   provider      = google-beta
-  cluster_id    = google_alloydb_cluster.<%= ctx[:primary_resource_id] %>.cluster_id
+  cluster       = google_alloydb_cluster.<%= ctx[:primary_resource_id] %>.id
   instance_id   = "<%= ctx[:vars]['alloydb_instance_name'] %>"
-  location      = "us-central1"
   instance_type = "PRIMARY"
 }
 
@@ -10,7 +9,7 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
   provider   = google-beta
   cluster_id = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
   location   = "us-central1"
-  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.my_network.name}"
+  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
 
   initial_user {
     password = "<%= ctx[:vars]['alloydb_cluster_name'] %>"

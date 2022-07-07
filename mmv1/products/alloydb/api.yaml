@@ -59,6 +59,7 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: "error"
         message: "message"
+      include_project: true        
     parameters:
       - !ruby/object:Api::Type::String
         name: "clusterId"
@@ -277,9 +278,9 @@ objects:
             description: "Type of migration source."
   - !ruby/object:Api::Resource
     name: "Instance"
-    self_link: "projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}/instances/{{instance_id}}"
-    base_url: "projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}/instances"
-    create_url: "projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}/instances?instanceId={{instance_id}}"
+    self_link: "{{cluster}}/instances/{{instance_id}}"
+    base_url: "{{cluster}}/instances"
+    create_url: "{{cluster}}/instances?instanceId={{instance_id}}"
     update_verb: :PATCH
     update_mask: true
     min_version: beta
@@ -308,9 +309,10 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: "error"
         message: "message"
+      include_project: true
     parameters:
       - !ruby/object:Api::Type::String
-        name: "clusterId"
+        name: "cluster"
         required: true
         input: true
         url_param_only: true
