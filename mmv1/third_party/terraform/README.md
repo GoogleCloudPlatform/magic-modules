@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Google providers for Terraform have a large number of handwritten go files, written before Magic Modules was used with them. While conversion is ongoing, many resources are still managed by hand.
+The Google providers for Terraform have a large number of handwritten go files, primarily for resources written before Magic Modules was used with them. Most handwritten files are expected to stay handwritten indefinitely, although conversion to a generator may be possible for a limited subset of them.
 
 Handwritten resources like [google_container_cluster](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster) can be identified if they have source code present under the [mmv1/third_party/terraform/resources](./resources) folder or by the absence of the `AUTO GENERATED CODE` header in their [Go source](https://github.com/hashicorp/terraform-provider-google/blob/main/google/resource_container_cluster.go) in the downstream repositories. Handwritten datasources should be under the [mmv1/third_party/terraform/data_sources](./data_sources) folder, tests under the [mmv1/third_party/terraform/tests](./tests) folder and web documentaion under the [mmv1/third_party/terraform/website](./website) folder.
 
@@ -21,7 +21,7 @@ Handwritten resources like [google_container_cluster](https://registry.terraform
 
 ## Contributing
 
-We'd love to accept your contributions! Thanks for making the changes :) Here's some guidance on how to contribute to handwritten resources.
+We're glad to accept contributions to handwritten resources. Tutorials and guidance on making changes are available below.
 
 ### Resource
 

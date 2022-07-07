@@ -1,10 +1,10 @@
-# MMV1
+# MMv1
 
 ## Overview
 
-Mmv1 is a code generator that implements the Terraform Google Provider (TGP) resources from ruby scripts.
+MMv1 is a Ruby-based code generator that implements Terraform Provider Google (TPG) resources from YAML specification files.
 
-Mmv1-generated resources like [google_compute_address](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address) can be identified by looking in their [Go source](https://github.com/hashicorp/terraform-provider-google/blob/main/google/resource_compute_address.go) for an `AUTO GENERATED CODE` header as well as a Type `MMv1`. Mmv1-generated resources should have source code present under their product folder, like [mmv1/products/compute](./products/compute) for [google_compute_address](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address) resource.
+MMv1-generated resources like [google_compute_address](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address) can be identified by looking in their [Go source](https://github.com/hashicorp/terraform-provider-google/blob/main/google/resource_compute_address.go) for an `AUTO GENERATED CODE` header as well as a Type `MMv1`. MMv1-generated resources should have source code present under their product folders, like [mmv1/products/compute](./products/compute) for [google_compute_address](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address) resource.
 
 ## Table of Contents
 - [Contributing](#contributing)
@@ -19,7 +19,7 @@ Mmv1-generated resources like [google_compute_address](https://registry.terrafor
 
 ## Contributing
 
-We'd love to accept your contributions! Thanks for making the changes :) Here's some guidance on how to contribute to mmv1-genereated resources.
+We're glad to accept contributions to MMv1-generated resources. Tutorials and guidance on making changes are available below.
 
 ### Resource
 
