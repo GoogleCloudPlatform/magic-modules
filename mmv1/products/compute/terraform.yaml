@@ -2615,6 +2615,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "snapshot_basic"
         primary_resource_id: "snapshot"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-snapshot%s\", context[\"random_suffix\"])"
         vars:
           snapshot_name: "my-snapshot"
           disk_name: "debian-disk"
