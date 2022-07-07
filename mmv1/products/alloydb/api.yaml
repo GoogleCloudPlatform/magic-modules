@@ -80,13 +80,11 @@ objects:
         description: |
           The name of the cluster resource.
       - !ruby/object:Api::Type::Time
-        exclude: true
         name: "createTime"
         description: |
           Time the Cluster was created in UTC.
         output: true
       - !ruby/object:Api::Type::Time
-        exclude: true
         name: "updateTime"
         description: |
           Time the Cluster was updated in UTC.
@@ -234,8 +232,6 @@ objects:
                         Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
           - !ruby/object:Api::Type::NestedObject
             name: "timeBasedRetention"
-            conflicts:
-              - quantity_based_retention
             description: |
               Time-based Backup retention policy.
             properties:
@@ -246,8 +242,6 @@ objects:
                   A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
           - !ruby/object:Api::Type::NestedObject
             name: "quantityBasedRetention"
-            conflicts:
-              - time_based_retention
             description: |
               Quantity-based Backup retention policy to retain recent backups.
             properties:
@@ -329,12 +323,6 @@ objects:
         url_param_only: true
         description: |
           The ID of the alloydb instance.
-      - !ruby/object:Api::Type::String
-        name: "location"
-        url_param_only: true
-        input: true
-        description: |
-          The location where the alloydb instance should reside.
     properties:
       - !ruby/object:Api::Type::String
         name: "name"
@@ -342,13 +330,11 @@ objects:
         description: |
           The name of the instance resource.
       - !ruby/object:Api::Type::Time
-        exclude: true
         name: "createTime"
         description: |
           Time the Instance was created in UTC.
         output: true
       - !ruby/object:Api::Type::Time
-        exclude: true
         name: "updateTime"
         description: |
           Time the Instance was updated in UTC.
@@ -414,4 +400,11 @@ objects:
         properties:
           - !ruby/object:Api::Type::Integer
             name: "nodeCount"
-            description: "Read capacity, i.e. number of nodes in a read pool instance."         
+            description: "Read capacity, i.e. number of nodes in a read pool instance."
+      - !ruby/object:Api::Type::NestedObject
+        name: "machineConfig"
+        description: "Configurations for the machines that host the underlying database engine."
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: "cpuCount"
+            description: "The number of CPU's in the VM instance."
