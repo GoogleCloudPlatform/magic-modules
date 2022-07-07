@@ -65,6 +65,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project: :PROJECT_NAME
         skip_import_test: true
+    ### Compute Instance Enable Virtual Display
+      - !ruby/object:Provider::Terraform::Examples
+        name: "instance_virtual_display_enabled"
+        primary_resource_type: "google_compute_instance"
+        primary_resource_id: "instance_virtual_display"
+        vars:
+          instance_virtual_display: "instance-virtual-display"
     # SQL
     ### When including separate samples for each DB type, add `skip_test: true`
     ### for Postgres and MySQL, but not for SQL Server
