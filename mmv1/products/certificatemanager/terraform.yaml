@@ -82,8 +82,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "certificate_manager_certificate_map_entry_full"
         primary_resource_id: "default"
-        vars:
-          cert_map_entry_name: "cert-map-entry"
+        vars: 
+          dns_auth_name: "dns-auth"
+          dns_auth_subdomain: "subdomain"
+          dns_auth_name2: "dns-auth2"
+          dns_auth_subdomain2: "subdomain2"
+          cert_name: "cert-map-entry"
+          # cert_map_entry_name: "cert-map-entry"
     properties:
         labels: !ruby/object:Overrides::Terraform::PropertyOverride
           default_from_api: true 
