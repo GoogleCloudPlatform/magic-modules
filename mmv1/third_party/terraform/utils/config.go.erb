@@ -257,6 +257,12 @@ var DefaultClientScopes = []string{
 	"https://www.googleapis.com/auth/userinfo.email",
 }
 
+// DefaultHTTPClient allows for tests to replace the HTTP client used for non-oauth2 requests
+var DefaultHTTPClient *http.Client = nil
+
+// OAuth2HTTPClient allows for tests to replace the HTTP client used for oauth2 requests
+var OAuth2HTTPClient *http.Client = nil
+
 func (c *Config) LoadAndValidate(ctx context.Context) error {
 	if len(c.Scopes) == 0 {
 		c.Scopes = DefaultClientScopes
@@ -271,10 +277,14 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 
 	c.tokenSource = tokenSource
 
-	cleanCtx := context.WithValue(ctx, oauth2.HTTPClient, cleanhttp.DefaultClient())
+	oauth2Client := OAuth2HTTPClient
+	if oauth2Client == nil {
+		oauth2Client = cleanhttp.DefaultClient()
+	}
+	cleanCtx := context.WithValue(ctx, oauth2.HTTPClient, oauth2Client)
 
 	// 1. MTLS TRANSPORT/CLIENT - sets up proper auth headers
-	client, _, err := transport.NewHTTPClient(cleanCtx, option.WithTokenSource(tokenSource))
+	client, _, err := transport.NewHTTPClient(cleanCtx, option.WithTokenSource(tokenSource), option.WithHTTPClient(DefaultHTTPClient))
 	if err != nil {
 		return err
 	}
