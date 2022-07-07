@@ -253,6 +253,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           cloud_run_service_name: "cloudrun-srv"
         min_version: beta
       - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_system_packages"
+        primary_resource_id: "default"
+        skip_docs: true
+        vars:
+          graphviz_example: "graphviz-example"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_secure_services"
         primary_resource_type: "google_cloud_run_service"
         skip_docs: true
