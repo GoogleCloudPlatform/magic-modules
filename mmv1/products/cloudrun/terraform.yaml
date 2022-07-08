@@ -258,6 +258,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_docs: true
         vars:
           cloud_run_srv: "cloud-run-srv"
+        name: "cloud_run_system_packages"
+        primary_resource_id: "default"
+        skip_docs: true
+        vars:
+          graphviz_example: "graphviz-example"
         min_version: beta
     virtual_fields:
       - !ruby/object:Api::Type::Boolean

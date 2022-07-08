@@ -55,6 +55,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "custom_hostname_instance"
         vars:
           custom_hostname_instance_name: "custom-hostname-instance-name"
+    ### Compute Reservation Local ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "compute_reservation"
+        primary_resource_type: "google_compute_reservation"
+        primary_resource_id: "gce_reservation_local"
+        vars:
+          gce_reservation_local: "gce-reservation-local"
+        test_env_vars:
+          project: :PROJECT_NAME
+        skip_import_test: true
+    ### Compute Instance Enable Virtual Display
+      - !ruby/object:Provider::Terraform::Examples
+        name: "instance_virtual_display_enabled"
+        primary_resource_type: "google_compute_instance"
+        primary_resource_id: "instance_virtual_display"
+        vars:
+          instance_virtual_display: "instance-virtual-display"
     # SQL
     ### When including separate samples for each DB type, add `skip_test: true`
     ### for Postgres and MySQL, but not for SQL Server

@@ -115,6 +115,7 @@ objects:
           - "ENCRYPT_DECRYPT"
           - "ASYMMETRIC_SIGN"
           - "ASYMMETRIC_DECRYPT"
+          - "MAC"
         default_value: :ENCRYPT_DECRYPT
         input: true
       - !ruby/object:Api::Type::String
