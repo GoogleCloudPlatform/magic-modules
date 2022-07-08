@@ -1,5 +1,5 @@
 # [START cloud_run_secure_services_backend]
-resource "google_cloud_run_service" "<%= ctx[:vars]['renderer'] %>" {
+resource "google_cloud_run_service" "renderer" {
   name     = "<%= ctx[:vars]['renderer'] %>"
   location = "us-central1"
   template {
@@ -20,7 +20,7 @@ resource "google_cloud_run_service" "<%= ctx[:vars]['renderer'] %>" {
 # [END cloud_run_secure_service_backend]
 
 # [START cloud_run_secure_services_frontend]
-resource "google_cloud_run_service" "<%= ctx[:vars]['editor'] %>" {
+resource "google_cloud_run_service" "editor" {
   name     = "<%= ctx[:vars]['editor'] %>"
   location = "us-central1"
   template {
@@ -45,14 +45,14 @@ resource "google_cloud_run_service" "<%= ctx[:vars]['editor'] %>" {
 # [END cloud_run_secure_services_frontend]
 
 # [START cloud_run_secure_services_backend_identity]
-resource "google_service_account" "<%= ctx[:vars]['renderer'] %>" {
+resource "google_service_account" "renderer" {
   account_id   = "renderer-identity"
   display_name = "Service identity of the Renderer (Backend) service."
 }
 # [END cloud_run_secure_services_backend_identity]
 
 # [START cloud_run_secure_services_frontend_identity]
-resource "google_service_account" "<%= ctx[:vars]['editor'] %>" {
+resource "google_service_account" "editor" {
   account_id   = "editor-identity"
   display_name = "Service identity of the Editor (Frontend) service."
 }
