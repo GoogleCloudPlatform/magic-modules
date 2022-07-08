@@ -388,7 +388,6 @@ objects:
             - :SERVING_STATE_UNSPECIFIFED
             - :ACTIVE
             - :PENDING
-          default_value: :ACTIVE
         - !ruby/object:Api::Type::String
           name: 'hostname'
           description: |
@@ -408,15 +407,4 @@ objects:
           values:
             - :MATCHER_UNSPECIFIED
             - :PRIMARY
-          # properties:
-          #   - !ruby/object:Api::Type::String
-          #     name: MATCHER_UNSPECIFIED
-          #     required: true
-          #     description: |
-          #       A matcher has't been recognized.
-          #   - !ruby/object:Api::Type::String
-          #     name: PRIMARY
-          #     required: true
-          #     dscription: | 
-          #       A primary certificate that is served when SNI wasn't 
-          #       specified in the request or SNI couldn't be found in the map.
+            
