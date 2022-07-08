@@ -314,10 +314,9 @@ func resourceDataprocCluster() *schema.Resource {
 												},
 
 												"properties": {
-													Type:     schema.TypeMap,
-													Optional: true,
-													ForceNew: true,
-													// GCP automatically adds properties
+													Type:             schema.TypeMap,
+													Optional:         true,
+													ForceNew:         true,
 													DiffSuppressFunc: resourceDataprocPropertyDiffSuppress,
 													Elem:             &schema.Schema{Type: schema.TypeString},
 													Computed:         true,
@@ -468,9 +467,9 @@ func resourceDataprocCluster() *schema.Resource {
 								},
 							},
 						},
-					},	
-				},	
-			},						
+					},
+				},
+			},
 <% end -%>
 
 			"cluster_config": {
