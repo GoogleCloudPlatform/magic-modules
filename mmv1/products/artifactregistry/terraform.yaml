@@ -20,7 +20,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "artifact_registry_repository_basic"
-        min_version: 'beta'
         primary_resource_id: "my-repo"
         vars:
           repository_id: "my-repository"
