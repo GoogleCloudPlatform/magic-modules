@@ -35,12 +35,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       processor: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+      version: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: projectNumberDiffSupress
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "documentai_default_version"
         primary_resource_id: "processor"
         vars:
           processor_name: "test-processor"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_create: templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.erb
+      pre_update: templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.erb
+      pre_delete: templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.erb
+      pre_read: templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.erb
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
