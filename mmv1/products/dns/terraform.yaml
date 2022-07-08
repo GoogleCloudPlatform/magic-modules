@@ -34,6 +34,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "force_destroy"
       - !ruby/object:Provider::Terraform::Examples
+        name: "dns_record_set_basic"
+        primary_resource_id: "parent-zone"
+        skip_docs: true
+        vars:
+          sample_zone: "sample-zone"          
+      - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_private"
         primary_resource_id: "private-zone"
         vars:
