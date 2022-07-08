@@ -58,7 +58,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/artifact-registry/docs/overview'
-      api: 'https://cloud.google.com/artifact-registry/docs/reference/rest/v1beta2/projects.locations.repositories'
+      api: 'https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories'
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
       method_name_separator: ':'

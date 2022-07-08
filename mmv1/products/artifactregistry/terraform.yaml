@@ -26,7 +26,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           description: "example docker repository"
       - !ruby/object:Provider::Terraform::Examples
         name: "artifact_registry_repository_cmek"
-        min_version: 'beta'
         primary_resource_id: "my-repo"
         vars:
           repository_id: "my-repository"
@@ -35,7 +34,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       - !ruby/object:Provider::Terraform::Examples
         name: "artifact_registry_repository_iam"
-        min_version: 'beta'
         primary_resource_id: "my-repo"
         vars:
           account_id: "my-account"
