@@ -299,18 +299,17 @@ func resourceDataprocCluster() *schema.Resource {
 
 									"kubernetes_software_config": {
 										Type:         schema.TypeList,
-										MaxItems:    1,
-										Required:    true,
+										MaxItems:     1,
+										Required:     true,
 										Description:  `The software configuration for this Dataproc cluster running on Kubernetes.`,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 
 												"component_version": {
 													Type:         schema.TypeMap,
-													Required:    true,
-													ForceNew:    true,
+													Required:     true,
+													ForceNew:     true,
 													Elem:         &schema.Schema{Type: schema.TypeString},
-													Computed:     true,
 													Description:  `The components that should be installed in this Dataproc cluster. The key must be a string from the KubernetesComponent enumeration. The value is the version of the software to be installed.`,
 												},
 
