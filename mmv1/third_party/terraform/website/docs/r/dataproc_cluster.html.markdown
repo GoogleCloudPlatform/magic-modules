@@ -246,30 +246,39 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
     }
 ```
 
-* `kubernetes_namespace` (Optional) A namespace within the Kubernetes cluster to deploy into. If this namespace does not exist, it is created. 
+* `kubernetes_namespace` (Optional) A namespace within the Kubernetes cluster to deploy into. 
+   If this namespace does not exist, it is created. 
    If it  exists, Dataproc verifies that another Dataproc VirtualCluster is not installed into it. 
    If not specified, the name of the Dataproc Cluster is used.
 
 * `kubernetes_software_config` (Required) The software configuration for this Dataproc cluster running on Kubernetes.
 
-  * `component_version` (Required) The components that should be installed in this Dataproc cluster. The key must be a string from the KubernetesComponent enumeration. The value is the version of the software to be installed. At least one entry must be specified.
+  * `component_version` (Required) The components that should be installed in this Dataproc cluster. The key must be a string from the   
+     KubernetesComponent enumeration. The value is the version of the software to be installed. At least one entry must be specified.
     * **NOTE** : `component_version[SPARK]` is mandatory to set, or the creation of the cluster will fail.
 
-  * `properties` (Optional) The properties to set on daemon config files. Property keys are specified in prefix:property format, for example spark:spark.kubernetes.container.image.
+  * `properties` (Optional) The properties to set on daemon config files. Property keys are specified in prefix:property format, 
+     for example spark:spark.kubernetes.container.image.
 
 * `gke_cluster_config` (Required) The configuration for running the Dataproc cluster on GKE.
 
-  * `gke_cluster_target` (Optional) A target GKE cluster to deploy to. It must be in the same project and region as the Dataproc cluster (the GKE cluster can be zonal or regional)
+  * `gke_cluster_target` (Optional) A target GKE cluster to deploy to. It must be in the same project and region as the Dataproc cluster 
+     (the GKE cluster can be zonal or regional)
 
-  * `node_pool_target` (Optional) GKE node pools where workloads will be scheduled. At least one node pool must be assigned the `DEFAULT` GkeNodePoolTarget.Role. If a GkeNodePoolTarget is not specified, Dataproc constructs a `DEFAULT` GkeNodePoolTarget. Each role can be given to only one GkeNodePoolTarget. All node pools must have the same location settings.
+  * `node_pool_target` (Optional) GKE node pools where workloads will be scheduled. At least one node pool must be assigned the `DEFAULT` 
+     GkeNodePoolTarget.Role. If a GkeNodePoolTarget is not specified, Dataproc constructs a `DEFAULT` GkeNodePoolTarget. 
+     Each role can be given to only one GkeNodePoolTarget. All node pools must have the same location settings.
 
     * `node_pool` (Required) The target GKE node pool.
 
     * `roles` (Required) The roles associated with the GKE node pool. One of `"DEFAULT"`, `"CONTROLLER"`, `"SPARK_DRIVER"` or `"SPARK_EXECUTOR"`.
 
-    * `node_pool_config` (Input only) The configuration for the GKE node pool. If specified, Dataproc attempts to create a node pool with the specified shape. If one with the same name already exists, it is verified against all specified fields. If a field differs, the virtual cluster creation will fail.
+    * `node_pool_config` (Input only) The configuration for the GKE node pool. If specified, Dataproc attempts to create a node pool with the 
+       specified shape. If one with the same name already exists, it is verified against all specified fields. 
+       If a field differs, the virtual cluster creation will fail.
 
-      * `autoscaling` (Optional) The autoscaler configuration for this node pool. The autoscaler is enabled only when a valid configuration is present.
+      * `autoscaling` (Optional) The autoscaler configuration for this node pool. 
+         The autoscaler is enabled only when a valid configuration is present.
 
         * `min_node_count` (Optional) The minimum number of nodes in the node pool. Must be >= 0 and <= maxNodeCount.
 
@@ -279,16 +288,21 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 
         * `machine_type` (Optional) The name of a Compute Engine machine type.
 
-        * `local_ssd_count` (Optional) The number of local SSD disks to attach to the node, which is limited by the maximum number of disks allowable per zone.
+        * `local_ssd_count` (Optional) The number of local SSD disks to attach to the node, 
+           which is limited by the maximum number of disks allowable per zone.
 
         * `preemptible` (Optional) Whether the nodes are created as preemptible VM instances. 
-        Preemptible nodes cannot be used in a node pool with the CONTROLLER role or in the DEFAULT node pool if the CONTROLLER role is not assigned (the DEFAULT node pool will assume the CONTROLLER role).
+           Preemptible nodes cannot be used in a node pool with the CONTROLLER role or in the DEFAULT node pool if the 
+           CONTROLLER role is not assigned (the DEFAULT node pool will assume the CONTROLLER role).
 
-        * `min_cpu_platform` (Optional) Minimum CPU platform to be used by this instance. The instance may be scheduled on the specified or a newer CPU platform. Specify the friendly names of CPU platforms, such as "Intel Haswell" or "Intel Sandy Bridge".
+        * `min_cpu_platform` (Optional) Minimum CPU platform to be used by this instance. 
+           The instance may be scheduled on the specified or a newer CPU platform. 
+           Specify the friendly names of CPU platforms, such as "Intel Haswell" or "Intel Sandy Bridge".
 
         * `spot` (Optional) Spot flag for enabling Spot VM, which is a rebrand of the existing preemptible flag.
 
-      * `locations` (Optional) The list of Compute Engine zones where node pool nodes associated with a Dataproc on GKE virtual cluster will be located.
+      * `locations` (Optional) The list of Compute Engine zones where node pool nodes associated 
+         with a Dataproc on GKE virtual cluster will be located.
 - - -
 
 <a name="nested_cluster_config"></a>The `cluster_config` block supports:
