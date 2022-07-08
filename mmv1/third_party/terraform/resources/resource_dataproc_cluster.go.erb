@@ -45,12 +45,6 @@ var (
 
 	kubernetesClusterConfigKeys = []string{
 		"virtual_cluster_config.0.kubernetes_cluster_config.0.kubernetes_namespace",
-		"virtual_cluster_config.0.kubernetes_cluster_config.0.kubernetes_software_config",
-	}
-
-	kubernetesSoftwareConfigKeys = []string{
-		"virtual_cluster_config.0.kubernetes_cluster_config.0.kubernetes_software_config.0.component_version",
-		"virtual_cluster_config.0.kubernetes_cluster_config.0.kubernetes_software_config.0.properties",
 	}
 
 	gkeClusterConfigKeys = []string{
@@ -124,6 +118,20 @@ func resourceDataprocLabelDiffSuppress(k, old, new string, d *schema.ResourceDat
 	// For other keys, don't suppress diff.
 	return false
 }
+
+<% if version == "ga" -%>
+var resourceDataprocGoogleProvidedDPGKEPrefix = regexp.MustCompile(`virtual_cluster_config\.0\.kubernetes_cluster_config\.0\.kubernetes_software_config\.0\.properties\.(dpgke|spark).*`)
+
+func resourceDataprocPropertyDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Suppress diffs for the properties provided by API
+	if resourceDataprocGoogleProvidedDPGKEPrefix.MatchString(k) && new == "" {
+		return true
+	}
+
+	// For other keys, don't suppress diff.
+	return false
+}
+<% end -%>
 
 func resourceDataprocCluster() *schema.Resource {
 	return &schema.Resource{
@@ -291,19 +299,16 @@ func resourceDataprocCluster() *schema.Resource {
 
 									"kubernetes_software_config": {
 										Type:         schema.TypeList,
-										Optional:     true,
-										Computed:     true,
-										MaxItems:     1,
-										AtLeastOneOf: kubernetesClusterConfigKeys,
+										MaxItems:    1,
+										Required:    true,
 										Description:  `The software configuration for this Dataproc cluster running on Kubernetes.`,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 
 												"component_version": {
 													Type:         schema.TypeMap,
-													Optional:     true,
-													ForceNew:     true,
-													AtLeastOneOf: kubernetesSoftwareConfigKeys,
+													Required:    true,
+													ForceNew:    true,
 													Elem:         &schema.Schema{Type: schema.TypeString},
 													Computed:     true,
 													Description:  `The components that should be installed in this Dataproc cluster. The key must be a string from the KubernetesComponent enumeration. The value is the version of the software to be installed.`,
@@ -311,9 +316,10 @@ func resourceDataprocCluster() *schema.Resource {
 
 												"properties": {
 													Type:         schema.TypeMap,
-													Optional:     true,
-													ForceNew:     true,
-													AtLeastOneOf: kubernetesSoftwareConfigKeys,
+													Optional: true,
+													ForceNew: true,
+													// GCP automatically adds properties
+													DiffSuppressFunc: resourceDataprocPropertyDiffSuppress,
 													Elem:         &schema.Schema{Type: schema.TypeString},
 													Computed:     true,
 													Description:  `The properties to set on daemon config files. Property keys are specified in prefix:property format, for example spark:spark.kubernetes.container.image.`,
