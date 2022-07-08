@@ -1,6 +1,5 @@
 ---
 subcategory: "Secret Manager"
-layout: "google"
 page_title: "Google: google_secret_manager_secret"
 sidebar_current: "docs-google-datasource-secret-manager-secret"
 description: |-

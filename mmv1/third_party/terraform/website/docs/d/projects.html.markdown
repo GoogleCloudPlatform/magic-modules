@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Platform"
-layout: "google"
 page_title: "Google: google_projects"
 sidebar_current: "docs-google-datasource-projects"
 description: |-

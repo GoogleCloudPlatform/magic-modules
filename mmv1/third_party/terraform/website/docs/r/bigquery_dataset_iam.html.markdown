@@ -1,5 +1,4 @@
 ---
-layout: "google"
 subcategory: "BigQuery"
 page_title: "Google: google_bigquery_dataset_iam"
 sidebar_current: "docs-google-bigquery-dataset-iam"

@@ -1,5 +1,4 @@
 ---
-layout: "google"
 page_title: "Using GKE with Terraform"
 sidebar_current: "docs-google-provider-guides-using-gke"
 description: |-

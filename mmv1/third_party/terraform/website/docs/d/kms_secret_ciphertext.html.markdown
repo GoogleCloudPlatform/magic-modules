@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Key Management Service"
-layout: "google"
 page_title: "Google: google_kms_secret_ciphertext"
 sidebar_current: "docs-google-kms-secret-ciphertext"
 description: |-

@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Platform"
-layout: "google"
 page_title: "Google: google_iam_testable_permissions"
 sidebar_current: "docs-google-datasource-iam-testable-permissions"
 description: |-

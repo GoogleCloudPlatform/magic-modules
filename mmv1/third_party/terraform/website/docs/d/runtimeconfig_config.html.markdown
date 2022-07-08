@@ -1,6 +1,5 @@
 ---
 subcategory: "Runtime Configurator"
-layout: "google"
 page_title: "Google: google_runtimeconfig_config"
 sidebar_current: "docs-google-datasource-runtimeconfig-config"
 description: |-

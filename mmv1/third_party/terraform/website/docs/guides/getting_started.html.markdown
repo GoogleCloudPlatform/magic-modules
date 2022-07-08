@@ -1,5 +1,4 @@
 ---
-layout: "google"
 page_title: "Getting Started with the Google provider"
 sidebar_current: "docs-google-provider-guides-getting-started"
 description: |-

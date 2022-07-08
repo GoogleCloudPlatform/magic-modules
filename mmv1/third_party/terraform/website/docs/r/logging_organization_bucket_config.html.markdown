@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud (Stackdriver) Logging"
-layout: "google"
 page_title: "Google: google_logging_organization_bucket_config"
 sidebar_current: "docs-google-logging-organization-bucket-config"
 description: |-

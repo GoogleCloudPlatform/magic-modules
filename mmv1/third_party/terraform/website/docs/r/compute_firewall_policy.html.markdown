@@ -14,7 +14,6 @@
 #
 # ----------------------------------------------------------------------------
 subcategory: "Compute Engine"
-layout: "google"
 page_title: "Google: google_compute_firewall_policy"
 sidebar_current: "docs-google-compute-firewall-policy"
 description: |-

@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Key Management Service"
-layout: "google"
 page_title: "Google: google_kms_secret_asymmetric"
 sidebar_current: "docs-google-kms-secret-asymmetric"
 description: |-

@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Billing"
-layout: "google"
 page_title: "Google: google_billing_account_iam"
 sidebar_current: "docs-google-billing-account-iam"
 description: |-

@@ -1,5 +1,4 @@
 ---
-layout: "google"
 page_title: "Handling diffs with deleted IAM principals"
 sidebar_current: "docs-google-provider-guides-iam-deleted"
 description: |-

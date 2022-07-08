@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Platform"
-layout: "google"
 page_title: "Google: google_folders"
 sidebar_current: "docs-google-datasource-folders"
 description: |-

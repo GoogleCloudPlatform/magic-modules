@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud DNS"
-layout: "google"
 page_title: "Google: google_dns_keys"
 sidebar_current: "docs-google-datasource-dns-keys"
 description: |-

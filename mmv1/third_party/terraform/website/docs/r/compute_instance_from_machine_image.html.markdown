@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-layout: "google"
 page_title: "Google: google_compute_instance_from_machine_image"
 sidebar_current: "docs-google-compute-instance-from-machine-image"
 description: |-

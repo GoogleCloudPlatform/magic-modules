@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Storage"
-layout: "google"
 page_title: "Google: google_storage_bucket"
 sidebar_current: "docs-google-datasource-storage-bucket"
 description: |-

@@ -1,6 +1,5 @@
 ---
 subcategory: "Dataflow"
-layout: "google"
 page_title: "Google: google_dataflow_flex_template_job"
 sidebar_current: "docs-google-dataflow-flex-template-job"
 description: |-

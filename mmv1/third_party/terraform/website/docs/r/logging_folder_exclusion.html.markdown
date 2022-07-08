@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud (Stackdriver) Logging"
-layout: "google"
 page_title: "Google: google_logging_folder_exclusion"
 sidebar_current: "docs-google-logging-folder-exclusion"
 description: |-

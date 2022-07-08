@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-layout: "google"
 page_title: "Google: google_compute_default_service_account"
 sidebar_current: "docs-google-datasource-compute-default-service-account"
 description: |-

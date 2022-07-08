@@ -1,6 +1,5 @@
 ---
 subcategory: "Dataproc"
-layout: "google"
 page_title: "Google: google_dataproc_metastore_service"
 sidebar_current: "docs-google-datasource-dataproc-metastore-service"
 description: |-

@@ -1,6 +1,5 @@
 ---
 subcategory: "GKEHub"
-layout: "google"
 page_title: "Google: google_gke_hub_feature"
 sidebar_current: "docs-google-gkehub-feature"
 description: |-

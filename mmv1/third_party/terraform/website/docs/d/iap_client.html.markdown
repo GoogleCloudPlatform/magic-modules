@@ -1,6 +1,5 @@
 ---
 subcategory: "Identity-Aware Proxy"
-layout: "google"
 page_title: "Google: google_iap_client"
 sidebar_current: "docs-google-datasource-iap-client"
 description: |-

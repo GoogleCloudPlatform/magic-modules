@@ -1,5 +1,4 @@
 ---
-layout: "google"
 page_title: "Terraform Google Provider 2.0.0 Upgrade Guide"
 sidebar_current: "docs-google-provider-guides-version-2-upgrade"
 description: |-

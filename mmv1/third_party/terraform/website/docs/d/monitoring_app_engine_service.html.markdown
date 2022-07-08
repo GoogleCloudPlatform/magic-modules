@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud (Stackdriver) Monitoring"
-layout: "google"
 page_title: "Google: google_monitoring_app_engine_service"
 sidebar_current: "docs-google-datasource-monitoring-app-engine-service"
 description: |-

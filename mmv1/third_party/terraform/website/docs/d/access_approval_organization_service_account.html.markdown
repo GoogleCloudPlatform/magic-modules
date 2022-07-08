@@ -1,6 +1,5 @@
 ---
 subcategory: "Access Approval"
-layout: "google"
 page_title: "Google: google_access_approval_organization_service_account"
 sidebar_current: "docs-google-datasource-access-approval-organization-service-account"
 description: |-

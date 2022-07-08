@@ -1,6 +1,5 @@
 ---
 subcategory: "App Engine"
-layout: "google"
 page_title: "Google: google_app_engine_default_service_account"
 sidebar_current: "docs-google-datasource-app_engine-default-service-account"
 description: |-

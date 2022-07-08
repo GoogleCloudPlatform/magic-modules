@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud SQL"
-layout: "google"
 page_title: "Google: google_sql_backup_run"
 sidebar_current: "docs-google-datasource-sql-backup-run"
 description: |-

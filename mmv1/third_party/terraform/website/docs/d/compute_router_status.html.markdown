@@ -1,5 +1,4 @@
 ---
-layout: "google"
 subcategory: "Compute Engine"
 page_title: "Google: google_compute_router_status"
 sidebar_current: "docs-google-datasource-compute-router-status"

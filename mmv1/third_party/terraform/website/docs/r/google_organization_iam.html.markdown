@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Platform"
-layout: "google"
 page_title: "Google: google_organization_iam"
 sidebar_current: "docs-google-organization-iam"
 description: |-

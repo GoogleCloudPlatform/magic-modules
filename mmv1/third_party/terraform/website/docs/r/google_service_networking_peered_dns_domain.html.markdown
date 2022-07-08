@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Platform"
-layout: "google"
 page_title: "Google: google_service_networking_peered_dns_domain"
 sidebar_current: "docs-google-project-service-peered-dns-domain-x"
 description: |-

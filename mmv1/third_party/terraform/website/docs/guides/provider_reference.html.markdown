@@ -1,5 +1,4 @@
 ---
-layout: "google"
 page_title: "Google Provider Configuration Reference"
 sidebar_current: "docs-google-provider-reference"
 description: |-

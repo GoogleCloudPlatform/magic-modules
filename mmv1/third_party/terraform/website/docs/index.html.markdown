@@ -1,5 +1,4 @@
 ---
-layout: "google"
 page_title: "Provider: Google Cloud Platform"
 sidebar_current: "docs-google-provider-x"
 description: |-

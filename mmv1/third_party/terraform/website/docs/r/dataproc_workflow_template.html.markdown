@@ -1,6 +1,5 @@
 ---
 subcategory: "Dataproc"
-layout: "google"
 page_title: "Google: google_dataproc_workflow_template"
 sidebar_current: "docs-google-dataproc-workflow-template"
 description: |-
