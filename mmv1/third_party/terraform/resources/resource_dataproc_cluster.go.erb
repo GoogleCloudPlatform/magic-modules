@@ -298,40 +298,40 @@ func resourceDataprocCluster() *schema.Resource {
 									},
 
 									"kubernetes_software_config": {
-										Type:         schema.TypeList,
-										MaxItems:     1,
-										Required:     true,
-										Description:  `The software configuration for this Dataproc cluster running on Kubernetes.`,
+										Type:        schema.TypeList,
+										MaxItems:    1,
+										Required:    true,
+										Description: `The software configuration for this Dataproc cluster running on Kubernetes.`,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 
 												"component_version": {
-													Type:         schema.TypeMap,
-													Required:     true,
-													ForceNew:     true,
-													Elem:         &schema.Schema{Type: schema.TypeString},
-													Description:  `The components that should be installed in this Dataproc cluster. The key must be a string from the KubernetesComponent enumeration. The value is the version of the software to be installed.`,
+													Type:        schema.TypeMap,
+													Required:    true,
+													ForceNew:    true,
+													Elem:        &schema.Schema{Type: schema.TypeString},
+													Description: `The components that should be installed in this Dataproc cluster. The key must be a string from the KubernetesComponent enumeration. The value is the version of the software to be installed.`,
 												},
 
 												"properties": {
-													Type:         schema.TypeMap,
+													Type:     schema.TypeMap,
 													Optional: true,
 													ForceNew: true,
 													// GCP automatically adds properties
 													DiffSuppressFunc: resourceDataprocPropertyDiffSuppress,
-													Elem:         &schema.Schema{Type: schema.TypeString},
-													Computed:     true,
-													Description:  `The properties to set on daemon config files. Property keys are specified in prefix:property format, for example spark:spark.kubernetes.container.image.`,
+													Elem:             &schema.Schema{Type: schema.TypeString},
+													Computed:         true,
+													Description:      `The properties to set on daemon config files. Property keys are specified in prefix:property format, for example spark:spark.kubernetes.container.image.`,
 												},
 											},
 										},
 									},
 
 									"gke_cluster_config": {
-										Type:         schema.TypeList,
-										Required:     true,
-										MaxItems:     1,
-										Description:  `The configuration for running the Dataproc cluster on GKE.`,
+										Type:        schema.TypeList,
+										Required:    true,
+										MaxItems:    1,
+										Description: `The configuration for running the Dataproc cluster on GKE.`,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 
@@ -468,9 +468,9 @@ func resourceDataprocCluster() *schema.Resource {
 								},
 							},
 						},
-					},
-				},
-			},				
+					},	
+				},	
+			},						
 <% end -%>
 
 			"cluster_config": {
