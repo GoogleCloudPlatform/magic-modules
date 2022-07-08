@@ -67,6 +67,7 @@ objects:
       import_format: ["projects/{{project}}/locations/{{location}}/repositories/{{repository}}", "{{repository}}"]
       base_url: projects/{{project}}/locations/{{location}}/repositories/{{name}}
       self_link: projects/{{project}}/locations/{{location}}/repositories/{{name}}
+      allowed_iam_role: 'roles/artifactregistry.reader'
     properties:
     - !ruby/object:Api::Type::String
       name: name
