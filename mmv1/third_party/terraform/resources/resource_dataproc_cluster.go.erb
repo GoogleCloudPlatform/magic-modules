@@ -120,11 +120,11 @@ func resourceDataprocLabelDiffSuppress(k, old, new string, d *schema.ResourceDat
 }
 
 <% if version == "ga" -%>
-var resourceDataprocGoogleProvidedDPGKEPrefix = regexp.MustCompile(`virtual_cluster_config\.0\.kubernetes_cluster_config\.0\.kubernetes_software_config\.0\.properties\.(dpgke|spark).*`)
+var resourceDataprocGoogleProvidedDpgkePrefix = regexp.MustCompile(`virtual_cluster_config\.0\.kubernetes_cluster_config\.0\.kubernetes_software_config\.0\.properties\.(dpgke|spark).*`)
 
 func resourceDataprocPropertyDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// Suppress diffs for the properties provided by API
-	if resourceDataprocGoogleProvidedDPGKEPrefix.MatchString(k) && new == "" {
+	if resourceDataprocGoogleProvidedDpgkePrefix.MatchString(k) && new == "" {
 		return true
 	}
 
