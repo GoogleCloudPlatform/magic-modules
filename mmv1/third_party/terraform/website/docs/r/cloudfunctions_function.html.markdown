@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Functions"
 page_title: "Google: google_cloudfunctions_function"
-sidebar_current: "docs-google-cloudfunctions-function"
 description: |-
   Creates a new Cloud Function.
 ---

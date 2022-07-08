@@ -1,7 +1,6 @@
 ---
 subcategory: "Kubernetes (Container) Engine"
 page_title: "Google: google_container_cluster"
-sidebar_current: "docs-google-datasource-container-cluster"
 description: |-
   Get info about a Google Kubernetes Engine cluster.
 ---

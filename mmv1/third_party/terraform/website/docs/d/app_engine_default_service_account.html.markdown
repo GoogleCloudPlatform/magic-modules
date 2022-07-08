@@ -1,7 +1,6 @@
 ---
 subcategory: "App Engine"
 page_title: "Google: google_app_engine_default_service_account"
-sidebar_current: "docs-google-datasource-app_engine-default-service-account"
 description: |-
   Retrieve the default App Engine service account used in this project
 ---

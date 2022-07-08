@@ -1,6 +1,5 @@
 ---
 page_title: "Google Provider Configuration Reference"
-sidebar_current: "docs-google-provider-reference"
 description: |-
   Configuration reference for the Google provider for Terraform.
 ---

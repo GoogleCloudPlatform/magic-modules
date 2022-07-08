@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Platform"
 page_title: "Google: google_client_config"
-sidebar_current: "docs-google-datasource-client-config"
 description: |-
   Get information about the configuration of the Google Cloud provider.
 ---

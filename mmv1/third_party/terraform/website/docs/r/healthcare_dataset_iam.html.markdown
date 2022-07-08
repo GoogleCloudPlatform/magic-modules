@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Healthcare"
 page_title: "Google: google_healthcare_dataset_iam"
-sidebar_current: "docs-google-healthcare-dataset-iam"
 description: |-
  Collection of resources to manage IAM policy for a Google Cloud Healthcare dataset.
 ---

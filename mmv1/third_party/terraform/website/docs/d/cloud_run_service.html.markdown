@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Run"
 page_title: "Google: google_cloud_run_service"
-sidebar_current: "docs-google-datasource-cloud-run-service"
 description: |-
   Get information about a Google Cloud Run Service.
 ---

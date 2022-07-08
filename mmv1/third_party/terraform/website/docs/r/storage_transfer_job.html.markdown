@@ -1,7 +1,6 @@
 ---
 subcategory: "Storage Transfer Service"
 page_title: "Google: google_storage_transfer_job"
-sidebar_current: "docs-google-storage-transfer-job-x"
 description: |-
   Creates a new Transfer Job in Google Cloud Storage Transfer.
 ---

@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Platform"
 page_title: "Google: google_organization_iam"
-sidebar_current: "docs-google-organization-iam"
 description: |-
  Collection of resources to manage IAM policy for a organization.
 ---

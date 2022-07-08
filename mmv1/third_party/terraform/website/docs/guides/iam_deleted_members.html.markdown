@@ -1,6 +1,5 @@
 ---
 page_title: "Handling diffs with deleted IAM principals"
-sidebar_current: "docs-google-provider-guides-iam-deleted"
 description: |-
   Handling diffs with deleted IAM principals
 ---

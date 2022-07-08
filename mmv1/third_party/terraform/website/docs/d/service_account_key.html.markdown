@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Platform"
 page_title: "Google: google_service_account_key"
-sidebar_current: "docs-google-datasource-service-account-key"
 description: |-
   Get a Google Cloud Platform service account Public Key
 ---

@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Platform"
 page_title: "Google: google_project_organization_policy"
-sidebar_current: "docs-google-project-organization-policy"
 description: |-
  Allows management of Organization policies for a Google Project.
 ---

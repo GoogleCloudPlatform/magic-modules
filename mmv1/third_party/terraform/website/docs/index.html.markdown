@@ -1,6 +1,5 @@
 ---
 page_title: "Provider: Google Cloud Platform"
-sidebar_current: "docs-google-provider-x"
 description: |-
    The Google provider is used to configure your Google Cloud Platform infrastructure
 ---

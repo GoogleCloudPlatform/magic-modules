@@ -1,7 +1,6 @@
 ---
 subcategory: "Dataproc"
 page_title: "Google: google_dataproc_cluster_iam"
-sidebar_current: "docs-google-dataproc-cluster-iam"
 description: |-
  Collection of resources to manage IAM policy for a Dataproc cluster.
 ---

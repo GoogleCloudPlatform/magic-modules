@@ -1,7 +1,6 @@
 ---
 subcategory: "Compute Engine"
 page_title: "Google: google_compute_network_endpoint_group"
-sidebar_current: "docs-google-datasource-compute-network-endpoint-group"
 description: |-
   Retrieve Network Endpoint Group's details.
 ---

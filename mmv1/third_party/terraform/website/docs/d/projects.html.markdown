@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Platform"
 page_title: "Google: google_projects"
-sidebar_current: "docs-google-datasource-projects"
 description: |-
   Retrieve a set of projects based on a filter.
 ---

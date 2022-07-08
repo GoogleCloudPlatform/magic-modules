@@ -1,7 +1,6 @@
 ---
 subcategory: "Container Registry"
 page_title: "Google: google_container_registry"
-sidebar_current: "docs-google-container-registry"
 description: |-
   Ensures the GCS bucket backing Google Container Registry exists.
 ---

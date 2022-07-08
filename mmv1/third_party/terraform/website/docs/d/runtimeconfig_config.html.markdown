@@ -1,7 +1,6 @@
 ---
 subcategory: "Runtime Configurator"
 page_title: "Google: google_runtimeconfig_config"
-sidebar_current: "docs-google-datasource-runtimeconfig-config"
 description: |-
   Get information about a Google Cloud RuntimeConfig.
 ---

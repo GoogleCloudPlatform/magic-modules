@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud DNS"
 page_title: "Google: google_dns_record_set"
-sidebar_current: "docs-google-datasource-dns-record-set"
 description: |-
   Get a DNS record set within Google Cloud DNS
 ---

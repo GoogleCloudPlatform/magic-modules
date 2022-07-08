@@ -1,6 +1,5 @@
 ---
 page_title: "Using GKE with Terraform"
-sidebar_current: "docs-google-provider-guides-using-gke"
 description: |-
   Recommendations and best practices for using GKE with Terraform.
 ---

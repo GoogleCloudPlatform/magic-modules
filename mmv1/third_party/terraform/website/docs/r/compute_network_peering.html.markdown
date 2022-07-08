@@ -1,7 +1,6 @@
 ---
 subcategory: "Compute Engine"
 page_title: "Google: google_compute_network_peering"
-sidebar_current: "docs-google-compute-network-peering"
 description: |-
   Manages a network peering within GCE.
 ---

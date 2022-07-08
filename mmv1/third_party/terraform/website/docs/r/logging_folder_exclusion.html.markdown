@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud (Stackdriver) Logging"
 page_title: "Google: google_logging_folder_exclusion"
-sidebar_current: "docs-google-logging-folder-exclusion"
 description: |-
   Manages a folder-level logging exclusion.
 ---

@@ -1,7 +1,6 @@
 ---
 subcategory: "Dataproc"
 page_title: "Google: google_dataproc_metastore_service"
-sidebar_current: "docs-google-datasource-dataproc-metastore-service"
 description: |-
   Get a Dataproc Metastore Service from Google Cloud
 ---

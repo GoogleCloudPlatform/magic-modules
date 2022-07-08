@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Platform"
 page_title: "Google: google_iam_role"
-sidebar_current: "docs-google-datasource-iam-role"
 description: |-
   Get information about a Google IAM Role.
 ---

@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Platform"
 page_title: "Google: google_project_service_identity"
-sidebar_current: "docs-google-project-service-identity"
 description: |-
  Generate service identity for a service.
 ---

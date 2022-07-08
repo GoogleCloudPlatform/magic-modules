@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Storage"
 page_title: "Google: google_storage_object_acl"
-sidebar_current: "docs-google-storage-object-acl"
 description: |-
   Creates a new object ACL in Google Cloud Storage.
 ---

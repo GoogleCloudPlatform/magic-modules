@@ -1,7 +1,6 @@
 ---
 subcategory: "GKEHub"
 page_title: "Google: google_gke_hub_feature_membership"
-sidebar_current: "docs-google-gkehub-feature-membership"
 description: |-
   Contains information about a GKEHub Feature Memberships.
 ---

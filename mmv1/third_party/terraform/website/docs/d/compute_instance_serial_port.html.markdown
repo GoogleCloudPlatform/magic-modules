@@ -1,7 +1,6 @@
 ---
 subcategory: "Compute Engine"
 page_title: "Google: google_compute_instance_serial_port"
-sidebar_current: "docs-google-datasource-compute-instance-serial-port"
 description: |-
   Get the serial port output from a Compute Instance.
 ---

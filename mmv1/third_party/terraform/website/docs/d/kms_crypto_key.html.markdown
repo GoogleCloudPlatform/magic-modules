@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Key Management Service"
 page_title: "Google: google_kms_crypto_key"
-sidebar_current: "docs-google-datasource-kms-crypto-key"
 description: |-
  Provides access to KMS key data with Google Cloud KMS.
 ---

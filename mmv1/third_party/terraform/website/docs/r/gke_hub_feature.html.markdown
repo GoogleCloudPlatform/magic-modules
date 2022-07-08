@@ -1,7 +1,6 @@
 ---
 subcategory: "GKEHub"
 page_title: "Google: google_gke_hub_feature"
-sidebar_current: "docs-google-gkehub-feature"
 description: |-
   Contains information about a GKEHub Feature.
 ---

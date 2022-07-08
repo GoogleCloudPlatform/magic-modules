@@ -1,7 +1,6 @@
 ---
 subcategory: "Compute Engine"
 page_title: "Google: google_compute_zones"
-sidebar_current: "docs-google-datasource-compute-zones"
 description: |-
   Provides a list of available Google Compute zones
 ---

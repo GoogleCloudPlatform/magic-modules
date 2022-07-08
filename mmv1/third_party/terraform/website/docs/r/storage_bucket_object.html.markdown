@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Storage"
 page_title: "Google: google_storage_bucket_object"
-sidebar_current: "docs-google-storage-bucket-object"
 description: |-
   Creates a new object inside a specified bucket
 ---

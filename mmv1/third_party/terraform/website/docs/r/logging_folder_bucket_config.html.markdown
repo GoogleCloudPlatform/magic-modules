@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud (Stackdriver) Logging"
 page_title: "Google: google_logging_folder_bucket_config"
-sidebar_current: "docs-google-logging-folder-bucket-config"
 description: |-
   Manages a folder-level logging bucket config.
 ---

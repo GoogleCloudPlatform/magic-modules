@@ -1,7 +1,6 @@
 ---
 subcategory: "Compute Engine"
 page_title: "Google: google_compute_forwarding_rule"
-sidebar_current: "docs-google-datasource-compute-forwarding-rule"
 description: |-
   Get a regional forwarding rule within GCE.
 ---

@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Platform"
 page_title: "Google: google_folders"
-sidebar_current: "docs-google-datasource-folders"
 description: |-
   Retrieve a set of folders based on a parent ID.
 ---

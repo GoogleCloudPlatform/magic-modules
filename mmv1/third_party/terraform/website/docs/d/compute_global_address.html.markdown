@@ -1,7 +1,6 @@
 ---
 subcategory: "Compute Engine"
 page_title: "Google: google_compute_global_address"
-sidebar_current: "docs-google-datasource-compute-global-address"
 description: |-
   Get the IP address from a static address reserved for a Global Forwarding Rule.
 ---

@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud DNS"
 page_title: "Google: google_dns_record_set"
-sidebar_current: "docs-google-dns-record-set"
 description: |-
   Manages a set of DNS records within Google Cloud DNS.
 ---

@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Key Management Service"
 page_title: "Google: google_kms_secret_ciphertext"
-sidebar_current: "docs-google-kms-secret-ciphertext"
 description: |-
   Encrypts secret data with Google Cloud KMS and provides access to the ciphertext
 ---

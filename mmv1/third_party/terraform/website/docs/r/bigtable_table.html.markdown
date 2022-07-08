@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Bigtable"
 page_title: "Google: google_bigtable_table"
-sidebar_current: "docs-google-bigtable-table"
 description: |-
   Creates a Google Cloud Bigtable table inside an instance.
 ---

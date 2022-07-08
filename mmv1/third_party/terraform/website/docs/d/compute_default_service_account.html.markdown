@@ -1,7 +1,6 @@
 ---
 subcategory: "Compute Engine"
 page_title: "Google: google_compute_default_service_account"
-sidebar_current: "docs-google-datasource-compute-default-service-account"
 description: |-
   Retrieve default service account used by VMs running in this project
 ---

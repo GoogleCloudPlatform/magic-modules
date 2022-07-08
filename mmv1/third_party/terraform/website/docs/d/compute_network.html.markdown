@@ -1,7 +1,6 @@
 ---
 subcategory: "Compute Engine"
 page_title: "Google: google_compute_network"
-sidebar_current: "docs-google-datasource-compute-network"
 description: |-
   Get a network within GCE.
 ---

@@ -1,6 +1,5 @@
 ---
 page_title: "Google Provider Versions"
-sidebar_current: "docs-google-provider-versions"
 description: |-
   How to use the different Google Provider versions
 ---

@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Source Repositories"
 page_title: "Google: google_sourcerepo_repository"
-sidebar_current: "docs-google-datasource-sourcerepo-repository"
 description: |-
   Get information about a Google Cloud Source Repository.
 ---

@@ -1,7 +1,6 @@
 ---
 subcategory: "Container Registry"
 page_title: "Google: google_container_registry_image"
-sidebar_current: "docs-google-datasource-container-image"
 description: |-
   Get URLs for a given project's container registry image.
 ---

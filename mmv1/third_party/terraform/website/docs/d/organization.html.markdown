@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Platform"
 page_title: "Google: google_organization"
-sidebar_current: "docs-google-datasource-organization"
 description: |-
   Get information about a Google Cloud Organization.
 ---

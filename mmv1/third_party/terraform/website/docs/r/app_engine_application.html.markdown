@@ -1,7 +1,6 @@
 ---
 subcategory: "App Engine"
 page_title: "Google: google_app_engine_application"
-sidebar_current: "docs-google-app-engine-application"
 description: |-
  Allows management of an App Engine application.
 ---

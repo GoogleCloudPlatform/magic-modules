@@ -1,7 +1,6 @@
 ---
 subcategory: "Compute Engine"
 page_title: "Google: google_compute_region_instance_group_manager"
-sidebar_current: "docs-google-compute-region_instance-group-manager"
 description: |-
   Manages an Regional Instance Group within GCE.
 ---

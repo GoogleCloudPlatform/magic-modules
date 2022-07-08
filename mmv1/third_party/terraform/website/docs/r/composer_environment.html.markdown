@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Composer"
 page_title: "Google: google_composer_environment"
-sidebar_current: "docs-google-composer-environment"
 description: |-
   An environment for running orchestration tasks.
 ---

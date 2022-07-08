@@ -1,7 +1,6 @@
 ---
 subcategory: "Cloud Build"
 page_title: "Google: google_cloudbuild_worker_pool"
-sidebar_current: "docs-google-cloudbuild-worker-pool"
 description: |-
   Configuration for custom WorkerPool to run builds
 ---
