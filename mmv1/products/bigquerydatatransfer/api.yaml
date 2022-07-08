@@ -29,7 +29,6 @@ objects:
     name: 'Config'
     create_url: projects/{{project}}/locations/{{location}}/transferConfigs?serviceAccountName={{service_account_name}}
     base_url: "projects/{{project}}/locations/{{location}}/transferConfigs"
-    self_link: "projects/{{project}}/locations/{{location}}/transferConfigs/{{name}}"
     # see comment at service_account_name, PATCHing service_account_name also required update_mask entry
     # update_url: "{{name}}?serviceAccountName={{service_account_name}}"
     update_verb: :PATCH
