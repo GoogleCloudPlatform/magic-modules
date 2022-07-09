@@ -59,7 +59,6 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: "error"
         message: "message"
-      include_project: true        
     parameters:
       - !ruby/object:Api::Type::String
         name: "clusterId"
@@ -309,7 +308,6 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: "error"
         message: "message"
-      include_project: true
     parameters:
       - !ruby/object:Api::Type::String
         name: "cluster"
