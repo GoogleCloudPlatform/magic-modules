@@ -2,6 +2,7 @@ package google
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"testing"
 
@@ -19,17 +20,8 @@ func getAccessToken(cfg *Config) string {
 func getImpersonateServiceAccount(cfg *Config) string {
 	return cfg.ImpersonateServiceAccount
 }
-func getUserAgent(cfg *Config) string {
-	return cfg.UserAgent()
-}
-func getZoneValue(cfg *Config) string {
-	return cfg.Zone
-}
-func getRegionValue(cfg *Config) string {
-	return cfg.Region
-}
 
-func TestGetConfigExtractsEnvVars(t *testing.T) {
+func TestNewConfigExtractsEnvVars(t *testing.T) {
 	ctx := context.Background()
 	offline := true
 	cases := []struct {
@@ -74,48 +66,6 @@ func TestGetConfigExtractsEnvVars(t *testing.T) {
 			expected:       "whatever",
 			getConfigValue: getImpersonateServiceAccount,
 		},
-		{
-			name:            "GOOGLE_ZONE",
-		        envKey:          "GOOGLE_ZONE",
-		        envValue:        "whatever",
-		        expected:        "whatever",
-		        getConfigValue:  getZoneValue,
-	        },
-		{
-			name:           "GCLOUD_ZONE",
-			envKey:         "GCLOUD_ZONE",
-			envValue:       "whatever",
-			expected:       "whatever",
-			getConfigValue: getZoneValue,
-		},
-		{
-			name:           "CLOUDSDK_COMPUTE_ZONE",
-			envKey:         "CLOUDSDK_COMPUTE_ZONE",
-			envValue:       "whatever",
-			expected:       "whatever",
-			getConfigValue: getZoneValue,
-		},
-		{
-			name:           "GOOGLE_REGION",
-			envKey:         "GOOGLE_REGION",
-			envValue:       "whatever",
-			expected:       "whatever",
-			getConfigValue: getRegionValue,
-		},
-		{
-			name:           "GCLOUD_REGION",
-			envKey:         "GCLOUD_REGION",
-			envValue:       "whatever",
-			expected:       "whatever",
-			getConfigValue: getRegionValue,
-		},
-		{
-			name:           "CLOUDSDK_COMPUTE_REGION",
-			envKey:         "CLOUDSDK_COMPUTE_REGION",
-			envValue:       "whatever",
-			expected:       "whatever",
-			getConfigValue: getRegionValue,
-		},
 	}
 
 	for _, c := range cases {
@@ -126,7 +76,7 @@ func TestGetConfigExtractsEnvVars(t *testing.T) {
 				t.Fatalf("error setting env var %s=%s: %s", c.envKey, c.envValue, err)
 			}
 
-			cfg, err := GetConfig(ctx, "project", offline, "")
+			cfg, err := NewConfig(ctx, "project", "", "", offline, "", nil)
 			if err != nil {
 				t.Fatalf("error building converter: %s", err)
 			}
@@ -148,7 +98,7 @@ func TestGetConfigExtractsEnvVars(t *testing.T) {
 	}
 }
 
-func TestGetConfigUserAgent(t *testing.T) {
+func TestNewConfigUserAgent(t *testing.T) {
 	ctx := context.Background()
 	offline := true
 	cases := []struct {
@@ -167,12 +117,35 @@ func TestGetConfigUserAgent(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.userAgent, func(t *testing.T) {
-			cfg, err := GetConfig(ctx, "project", offline, c.userAgent)
+			cfg, err := NewConfig(ctx, "project", "", "", offline, c.userAgent, nil)
 			if err != nil {
-				t.Fatalf("error building converter: %s", err)
+				t.Fatalf("error building config: %s", err)
 			}
 
-			assert.Equal(t, c.expected, getUserAgent(cfg))
+			assert.Equal(t, c.expected, cfg.UserAgent())
 		})
 	}
+}
+
+func TestNewConfigUserAgent_nilClientUsesDefault(t *testing.T) {
+	ctx := context.Background()
+	offline := false
+	cfg, err := NewConfig(ctx, "project", "", "", offline, "", nil)
+	if err != nil {
+		t.Fatalf("error building config: %s", err)
+	}
+
+	assert.NotEmpty(t, cfg.Client())
+}
+
+func TestNewConfigUserAgent_usesPassedClient(t *testing.T) {
+	ctx := context.Background()
+	offline := false
+	client := &http.Client{}
+	cfg, err := NewConfig(ctx, "project", "", "", offline, "", client)
+	if err != nil {
+		t.Fatalf("error building config: %s", err)
+	}
+
+	assert.Exactly(t, client, cfg.Client())
 }

@@ -34,6 +34,11 @@ objects:
     collection_url_key: 'policies'
     description: |
       Describes an autoscaling policy for Dataproc cluster autoscaler.
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      parent_resource_attribute: 'policy_id'
+      fetch_iam_policy_verb: :POST
+      import_format: ["projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}", "{{policy_id}}"]        
     parameters:
       - !ruby/object:Api::Type::String
         name: 'location'

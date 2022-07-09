@@ -1,8 +1,6 @@
 <% autogen_exception -%>
 package google
 
-<% unless version == 'ga' -%>
-
 import (
 	"fmt"
 
@@ -30,5 +28,3 @@ func dataSourceDataprocMetastoreServiceRead(d *schema.ResourceData, meta interfa
 	d.SetId(id)
 	return resourceDataprocMetastoreServiceRead(d, meta)
 }
-
-<% end -%>

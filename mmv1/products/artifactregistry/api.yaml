@@ -20,6 +20,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://artifactregistry.googleapis.com/v1beta2/
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://artifactregistry.googleapis.com/v1/    
 apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Artifact Registry API
@@ -50,13 +53,12 @@ objects:
     self_link: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
     update_verb: :PATCH
     update_mask: true
-    min_version: beta
     description: A repository for storing artifacts
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
           'https://cloud.google.com/artifact-registry/docs/overview'
-      api: 'https://cloud.google.com/artifact-registry/docs/reference/rest/v1beta2/projects.locations.repositories'
+      api: 'https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories'
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
       method_name_separator: ':'
@@ -65,6 +67,7 @@ objects:
       import_format: ["projects/{{project}}/locations/{{location}}/repositories/{{repository}}", "{{repository}}"]
       base_url: projects/{{project}}/locations/{{location}}/repositories/{{name}}
       self_link: projects/{{project}}/locations/{{location}}/repositories/{{name}}
+      allowed_iam_role: 'roles/artifactregistry.reader'
     properties:
     - !ruby/object:Api::Type::String
       name: name
@@ -90,17 +93,10 @@ objects:
     - !ruby/object:Api::Type::String
       name: format
       description: |-
-        The format of packages that are stored in the repository. You can only create
-        alpha formats if you are a member of the [alpha user group](https://cloud.google.com/artifact-registry/docs/supported-formats#alpha-access).
-
-        - DOCKER
-        - MAVEN ([Preview](https://cloud.google.com/products#product-launch-stages))
-        - NPM ([Preview](https://cloud.google.com/products#product-launch-stages))
-        - PYTHON ([Preview](https://cloud.google.com/products#product-launch-stages))
-        - APT ([alpha](https://cloud.google.com/products#product-launch-stages))
-        - YUM ([alpha](https://cloud.google.com/products#product-launch-stages))
-        - HELM ([alpha](https://cloud.google.com/products#product-launch-stages))
-        
+        The format of packages that are stored in the repository. Supported formats
+        can be found [here](https://cloud.google.com/artifact-registry/docs/supported-formats).
+        You can only create alpha formats if you are a member of the
+        [alpha user group](https://cloud.google.com/artifact-registry/docs/supported-formats#alpha-access).
       required: true
       input: true
     - !ruby/object:Api::Type::String

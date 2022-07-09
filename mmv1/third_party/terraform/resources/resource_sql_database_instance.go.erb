@@ -84,18 +84,6 @@ var (
   }
 )
 
-<% unless version == 'ga' -%>
-func diffSuppressSqlReplicaKeyName(k, old, new string, d *schema.ResourceData) bool {
-	if d.Get("master_instance_name").(string) != "" {
-		// This is a replica and the config value must be null, but the API will
-		// return the key name of the master instance, so we'll suppress this diff
-		return true
-	}
-
-	return false
-}
-<% end -%>
-
 func resourceSqlDatabaseInstance() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceSqlDatabaseInstanceCreate,
@@ -167,6 +155,30 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 										Required:    true,
 										Description: `Domain name of the Active Directory for SQL Server (e.g., mydomain.com).`,
 									},
+								},
+							},
+						},
+						"sql_server_audit_config": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"bucket": {
+										Type:         schema.TypeString,
+										Required:     true,
+										Description:  `The name of the destination bucket (e.g., gs://mybucket).`,
+									},
+									"retention_interval": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										Description:  `How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s"..`,
+									},
+									"upload_interval": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										Description:  `How often to upload generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".`,
+		 							},
 								},
 							},
 						},
@@ -363,6 +375,11 @@ is set to true.`,
 										AtLeastOneOf: []string{"settings.0.location_preference.0.follow_gae_application", "settings.0.location_preference.0.zone"},
 										Description:  `The preferred compute engine zone.`,
 									},
+									"secondary_zone": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										Description:  `The preferred Compute Engine zone for the secondary/failover`,
+									},
 								},
 							},
 						},
@@ -463,14 +480,12 @@ is set to true.`,
 				Description: `The MySQL, PostgreSQL or SQL Server (beta) version to use. Supported values include MYSQL_5_6, MYSQL_5_7, MYSQL_8_0, POSTGRES_9_6, POSTGRES_10, POSTGRES_11, POSTGRES_12, POSTGRES_13, POSTGRES_14, SQLSERVER_2017_STANDARD, SQLSERVER_2017_ENTERPRISE, SQLSERVER_2017_EXPRESS, SQLSERVER_2017_WEB. Database Version Policies includes an up-to-date reference of supported versions.`,
 			},
 
-<% unless version == 'ga' -%>
 			"encryption_key_name": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DiffSuppressFunc: diffSuppressSqlReplicaKeyName,
+				Computed: true,
 				ForceNew: true,
 			},
- <% end -%>
 
 
 			"root_password": {
@@ -827,13 +842,12 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		mutexKV.Lock(instanceMutexKey(project, instance.MasterInstanceName))
 		defer mutexKV.Unlock(instanceMutexKey(project, instance.MasterInstanceName))
 	}
-    <% unless version == 'ga' -%>
-    if k, ok := d.GetOk("encryption_key_name"); ok {
-        instance.DiskEncryptionConfiguration = &sqladmin.DiskEncryptionConfiguration{
-            KmsKeyName: k.(string),
+
+        if k, ok := d.GetOk("encryption_key_name"); ok {
+            instance.DiskEncryptionConfiguration = &sqladmin.DiskEncryptionConfiguration{
+                KmsKeyName: k.(string),
+            }
         }
-    }
-    <% end -%>
 
 	var patchData *sqladmin.DatabaseInstance
 
@@ -974,6 +988,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}) *sqladmin.Setti
 		ForceSendFields:             []string{"StorageAutoResize"},
 		ActivationPolicy:            _settings["activation_policy"].(string),
 		ActiveDirectoryConfig:       expandActiveDirectoryConfig(_settings["active_directory_config"].([]interface{})),
+		SqlServerAuditConfig: 	     expandSqlServerAuditConfig(_settings["sql_server_audit_config"].([]interface{})),
 		AvailabilityType:            _settings["availability_type"].(string),
 		Collation:                   _settings["collation"].(string),
 		DataDiskSizeGb:              int64(_settings["disk_size"].(int)),
@@ -1057,6 +1072,7 @@ func expandLocationPreference(configured []interface{}) *sqladmin.LocationPrefer
 	return &sqladmin.LocationPreference{
 		FollowGaeApplication: _locationPreference["follow_gae_application"].(string),
 		Zone:                 _locationPreference["zone"].(string),
+		SecondaryZone:        _locationPreference["secondary_zone"].(string),
 	}
 }
 
@@ -1148,6 +1164,20 @@ func expandActiveDirectoryConfig(configured interface{}) *sqladmin.SqlActiveDire
 	}
 }
 
+func expandSqlServerAuditConfig(configured interface{}) *sqladmin.SqlServerAuditConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 {
+		return nil
+	}
+
+  	config := l[0].(map[string]interface{})
+	return &sqladmin.SqlServerAuditConfig{
+		Bucket: config["bucket"].(string),
+    		RetentionInterval: config["retention_interval"].(string),
+    		UploadInterval: config["upload_interval"].(string),
+	}
+}
+
 func expandInsightsConfig(configured []interface{}) *sqladmin.InsightsConfig {
 	if len(configured) == 0 || configured[0] == nil {
 		return nil
@@ -1202,13 +1232,12 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("settings", flattenSettings(instance.Settings)); err != nil {
 		log.Printf("[WARN] Failed to set SQL Database Instance Settings")
 	}
-    <% unless version == 'ga' -%>
-    if instance.DiskEncryptionConfiguration != nil {
-        if err := d.Set("encryption_key_name", instance.DiskEncryptionConfiguration.KmsKeyName); err != nil {
-        	return fmt.Errorf("Error setting encryption_key_name: %s", err)
+
+        if instance.DiskEncryptionConfiguration != nil {
+            if err := d.Set("encryption_key_name", instance.DiskEncryptionConfiguration.KmsKeyName); err != nil {
+                 return fmt.Errorf("Error setting encryption_key_name: %s", err)
+            }
         }
-    }
-    <% end -%>
 
 	if err := d.Set("replica_configuration", flattenReplicaConfiguration(instance.ReplicaConfiguration, d)); err != nil {
 		log.Printf("[WARN] Failed to set SQL Database Instance Replica Configuration")
@@ -1395,6 +1424,10 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 		data["active_directory_config"] = flattenActiveDirectoryConfig(settings.ActiveDirectoryConfig)
 	}
 
+	if settings.SqlServerAuditConfig != nil {
+		data["sql_server_audit_config"] = flattenSqlServerAuditConfig(settings.SqlServerAuditConfig)
+	}
+
 	if settings.BackupConfiguration != nil {
 		data["backup_configuration"] = flattenBackupConfiguration(settings.BackupConfiguration)
 	}
@@ -1466,6 +1499,19 @@ func flattenActiveDirectoryConfig(sqlActiveDirectoryConfig *sqladmin.SqlActiveDi
 	}
 }
 
+func flattenSqlServerAuditConfig(sqlServerAuditConfig *sqladmin.SqlServerAuditConfig) []map[string]interface{} {
+	if sqlServerAuditConfig == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"bucket": sqlServerAuditConfig.Bucket,
+      			"retention_interval": sqlServerAuditConfig.RetentionInterval,
+			"upload_interval": sqlServerAuditConfig.UploadInterval,
+		},
+	}
+}
+
 func flattenDatabaseFlags(databaseFlags []*sqladmin.DatabaseFlags) []map[string]interface{} {
 	flags := make([]map[string]interface{}, 0, len(databaseFlags))
 
@@ -1516,6 +1562,7 @@ func flattenLocationPreference(locationPreference *sqladmin.LocationPreference) 
 	data := map[string]interface{}{
 		"follow_gae_application": locationPreference.FollowGaeApplication,
 		"zone":                   locationPreference.Zone,
+		"secondary_zone":         locationPreference.SecondaryZone,
 	}
 
 	return []map[string]interface{}{data}

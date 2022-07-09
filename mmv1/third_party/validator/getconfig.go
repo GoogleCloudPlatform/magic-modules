@@ -2,6 +2,7 @@ package google
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/pkg/errors"
 )
@@ -11,9 +12,16 @@ func (c *Config) UserAgent() string {
 	return c.userAgent
 }
 
-func GetConfig(ctx context.Context, project string, offline bool, userAgent string) (*Config, error) {
+// Return the value of the private client field
+func (c *Config) Client() *http.Client {
+	return c.client
+}
+
+func NewConfig(ctx context.Context, project, zone, region string, offline bool, userAgent string, client *http.Client) (*Config, error) {
 	cfg := &Config{
 		Project:   project,
+		Zone:      zone,
+		Region:    region,
 		userAgent: userAgent,
 	}
 
@@ -32,22 +40,13 @@ func GetConfig(ctx context.Context, project string, offline bool, userAgent stri
 		"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
 	})
 
-	cfg.Zone = multiEnvSearch([]string{
-		"GOOGLE_ZONE",
-		"GCLOUD_ZONE",
-		"CLOUDSDK_COMPUTE_ZONE",
-	})
-
-	cfg.Region = multiEnvSearch([]string{
-		"GOOGLE_REGION",
-		"GCLOUD_REGION",
-		"CLOUDSDK_COMPUTE_REGION",
-	})
-
 	if !offline {
 		ConfigureBasePaths(cfg)
 		if err := cfg.LoadAndValidate(ctx); err != nil {
 			return nil, errors.Wrap(err, "load and validate config")
+		}
+		if client != nil {
+			cfg.client = client
 		}
 	}
 

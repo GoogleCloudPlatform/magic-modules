@@ -1,6 +1,5 @@
 <% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"strings"
@@ -24,4 +23,3 @@ func dataprocMetastoreServiceOverrideSuppress(k, old, new string, d *schema.Reso
 	// For other keys, don't suppress diff.
 	return false
 }
-<% end -%>

@@ -73,6 +73,8 @@ objects:
               - budget_filter.0.services
               - budget_filter.0.subaccounts
               - budget_filter.0.labels
+              - budget_filter.0.calendarPeriod
+              - budget_filter.0.customPeriod              
             description: |
               A set of projects of the form projects/{project_number},
               specifying that usage from only this set of projects should be
@@ -96,6 +98,8 @@ objects:
               - budget_filter.0.services
               - budget_filter.0.subaccounts
               - budget_filter.0.labels
+              - budget_filter.0.calendarPeriod
+              - budget_filter.0.customPeriod
           - !ruby/object:Api::Type::Array
             name: services
             description: |
@@ -112,22 +116,23 @@ objects:
               - budget_filter.0.services
               - budget_filter.0.subaccounts
               - budget_filter.0.labels
+              - budget_filter.0.calendarPeriod
+              - budget_filter.0.customPeriod              
           - !ruby/object:Api::Type::Array
             name: creditTypes
             description: |
-              A set of subaccounts of the form billingAccounts/{account_id},
-              specifying that usage from only this set of subaccounts should
-              be included in the budget. If a subaccount is set to the name of
-              the parent account, usage from the parent account will be included.
-              If the field is omitted, the report will include usage from the parent
-              account and all subaccounts, if they exist.
-            item_type: Api::Type::String
+              Optional. If creditTypesTreatment is INCLUDE_SPECIFIED_CREDITS,
+              this is a list of credit types to be subtracted from gross cost to determine the spend for threshold calculations. See a list of acceptable credit type values.
+              If creditTypesTreatment is not INCLUDE_SPECIFIED_CREDITS, this field must be empty. 
+            item_type: Api::Type::String 
             at_least_one_of:
               - budget_filter.0.projects
               - budget_filter.0.credit_types_treatment
               - budget_filter.0.services
               - budget_filter.0.subaccounts
               - budget_filter.0.labels
+              - budget_filter.0.calendarPeriod
+              - budget_filter.0.customPeriod            
           - !ruby/object:Api::Type::Array
             name: subaccounts
             description: |
@@ -144,6 +149,8 @@ objects:
               - budget_filter.0.services
               - budget_filter.0.subaccounts
               - budget_filter.0.labels
+              - budget_filter.0.calendarPeriod
+              - budget_filter.0.customPeriod
           - !ruby/object:Api::Type::KeyValuePairs
             name: 'labels'
             description: |
@@ -155,6 +162,83 @@ objects:
               - budget_filter.0.services
               - budget_filter.0.subaccounts
               - budget_filter.0.labels
+              - budget_filter.0.calendarPeriod
+              - budget_filter.0.customPeriod
+          - !ruby/object:Api::Type::Enum
+            name: calendarPeriod
+            at_least_one_of:
+              - budget_filter.0.projects
+              - budget_filter.0.credit_types_treatment
+              - budget_filter.0.services
+              - budget_filter.0.subaccounts
+              - budget_filter.0.labels
+              - budget_filter.0.calendarPeriod
+              - budget_filter.0.customPeriod
+            description: |
+              A CalendarPeriod represents the abstract concept of a recurring time period that has a
+              canonical start. Grammatically, "the start of the current CalendarPeriod".
+              All calendar times begin at 12 AM US and Canadian Pacific Time (UTC-8).
+            values:
+              - :MONTH
+              - :QUARTER
+              - :YEAR
+              - :CALENDAR_PERIOD_UNSPECIFIED
+          - !ruby/object:Api::Type::NestedObject
+            name: customPeriod
+            at_least_one_of:
+              - budget_filter.0.projects
+              - budget_filter.0.credit_types_treatment
+              - budget_filter.0.services
+              - budget_filter.0.subaccounts
+              - budget_filter.0.labels
+              - budget_filter.0.calendarPeriod
+              - budget_filter.0.customPeriod
+            description: |
+              Specifies to track usage from any start date (required) to any end date (optional).
+              This time period is static, it does not recur.
+            properties:
+              - !ruby/object:Api::Type::NestedObject
+                name: startDate
+                required: true
+                description: |
+                  A start date is required. The start date must be after January 1, 2017.
+                properties:
+                  - !ruby/object:Api::Type::Integer
+                    name: year
+                    required: true
+                    description: |
+                      Year of the date. Must be from 1 to 9999.
+                  - !ruby/object:Api::Type::Integer
+                    name: month
+                    required: true
+                    description: |
+                      Month of a year. Must be from 1 to 12.
+                  - !ruby/object:Api::Type::Integer
+                    name: day
+                    required: true
+                    description: |
+                      Day of a month. Must be from 1 to 31 and valid for the year and month.
+              - !ruby/object:Api::Type::NestedObject
+                name: endDate
+                description: |
+                  Optional. The end date of the time period. Budgets with elapsed end date won't be processed. 
+                  If unset, specifies to track all usage incurred since the startDate.
+                properties:
+                  - !ruby/object:Api::Type::Integer
+                    name: year
+                    required: true
+                    description: |
+                      Year of the date. Must be from 1 to 9999.
+                  - !ruby/object:Api::Type::Integer
+                    name: month
+                    required: true
+                    description: |
+                      Month of a year. Must be from 1 to 12.
+                  - !ruby/object:Api::Type::Integer
+                    name: day
+                    required: true
+                    description: |
+                      Day of a month. Must be from 1 to 31 and valid for the year and month.
       - !ruby/object:Api::Type::NestedObject
         name: amount
         required: true

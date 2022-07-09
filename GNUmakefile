@@ -55,7 +55,6 @@ ifeq ($(FORCE_DCL),)
   FORCE_DCL=latest
 endif
 terraform build:
-	make serialize
 	make mmv1
 	make tpgtools
 
@@ -65,6 +64,7 @@ mmv1:
 		bundle exec compiler -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile);
 
 tpgtools:
+	make serialize
 	cd tpgtools;\
 		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
 
@@ -80,6 +80,7 @@ serialize:
 		mv -f temp.serial serialization.go
 
 upgrade-dcl:
+	make serialize
 	cd tpgtools && \
 		go mod edit -dropreplace=github.com/GoogleCloudPlatform/declarative-resource-client-library &&\
 		go mod edit -require=github.com/GoogleCloudPlatform/declarative-resource-client-library@$(FORCE_DCL) &&\

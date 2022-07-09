@@ -55,6 +55,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "custom_hostname_instance"
         vars:
           custom_hostname_instance_name: "custom-hostname-instance-name"
+    ### Compute Reservation Local ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "compute_reservation"
+        primary_resource_type: "google_compute_reservation"
+        primary_resource_id: "gce_reservation_local"
+        vars:
+          gce_reservation_local: "gce-reservation-local"
+        test_env_vars:
+          project: :PROJECT_NAME
+        skip_import_test: true
+    ### Compute Instance Enable Virtual Display
+      - !ruby/object:Provider::Terraform::Examples
+        name: "instance_virtual_display_enabled"
+        primary_resource_type: "google_compute_instance"
+        primary_resource_id: "instance_virtual_display"
+        vars:
+          instance_virtual_display: "instance-virtual-display"
     # SQL
     ### When including separate samples for each DB type, add `skip_test: true`
     ### for Postgres and MySQL, but not for SQL Server
@@ -471,6 +488,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           postgres_instance_cmek: "postgres-instance-cmek"
           sqlserver_instance_cmek: "sqlserver-instance-cmek"
           deletion_protection: "true"
+        min_version: beta
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
@@ -551,10 +569,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           example_bucket_name: "example-bucket-name"
         min_version: beta
-        # ignore_read_extra:
-        #   - "port_range"
-        #   - "target"
-        #   - "ip_address"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "storage_pubsub_notifications"
+        primary_resource_type: "google_pubsub_topic"
+        primary_resource_id: "topic"
+        vars:
+          example_bucket_name: "example-bucket-name"
+          your_topic_name: "your_topic_name"
+        min_version: beta
     properties:
 
 

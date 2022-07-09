@@ -95,10 +95,10 @@ var (
 		"cluster_config.0.initialization_action",
 		"cluster_config.0.encryption_config",
 		"cluster_config.0.autoscaling_config",
+		"cluster_config.0.metastore_config",
 <% unless version == 'ga' -%>
 		"cluster_config.0.lifecycle_config",
 		"cluster_config.0.endpoint_config",
-		"cluster_config.0.metastore_config",
 <% end -%>
 	}
 )
@@ -956,6 +956,23 @@ by Dataproc`,
 								},
 							},
 						},
+						"metastore_config": {
+							Type:             schema.TypeList,
+							Optional:         true,
+							AtLeastOneOf:     clusterConfigKeys,
+							MaxItems:         1,
+							Description:      `Specifies a Metastore configuration.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"dataproc_metastore_service": {
+										Type:             schema.TypeString,
+										Required:         true,
+										ForceNew:         true,
+										Description:      `Resource name of an existing Dataproc Metastore service.`,
+									},
+								},
+							},
+						},						
 <% unless version == 'ga' -%>
 						"lifecycle_config": {
 							Type:         schema.TypeList,
@@ -1015,23 +1032,6 @@ by Dataproc`,
 										Type:        schema.TypeMap,
 										Computed:    true,
 										Description: `The map of port descriptions to URLs. Will only be populated if enable_http_port_access is true.`,
-									},
-								},
-							},
-						},
-						"metastore_config": {
-							Type:             schema.TypeList,
-							Optional:         true,
-							AtLeastOneOf:     clusterConfigKeys,
-							MaxItems:         1,
-							Description:      `Specifies a Metastore configuration.`,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"dataproc_metastore_service": {
-										Type:             schema.TypeString,
-										Required:         true,
-										ForceNew:         true,
-										Description:      `Resource name of an existing Dataproc Metastore service.`,
 									},
 								},
 							},
@@ -1489,6 +1489,10 @@ func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.Clus
 		conf.AutoscalingConfig = expandAutoscalingConfig(cfg)
 	}
 
+	if cfg, ok := configOptions(d, "cluster_config.0.metastore_config"); ok {
+		conf.MetastoreConfig = expandMetastoreConfig(cfg)
+	}
+
 <% unless version == 'ga' -%>
 	if cfg, ok := configOptions(d, "cluster_config.0.lifecycle_config"); ok {
 		conf.LifecycleConfig = expandLifecycleConfig(cfg)
@@ -1496,10 +1500,6 @@ func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.Clus
 
 	if cfg, ok := configOptions(d, "cluster_config.0.endpoint_config"); ok {
 		conf.EndpointConfig = expandEndpointConfig(cfg)
-	}
-
-	if cfg, ok := configOptions(d, "cluster_config.0.metastore_config"); ok {
-		conf.MetastoreConfig = expandMetastoreConfig(cfg)
 	}
 <% end -%>
 
@@ -1701,6 +1701,7 @@ func expandEndpointConfig(cfg map[string]interface{}) *dataproc.EndpointConfig {
 	}
 	return conf
 }
+<% end -%>
 
 func expandMetastoreConfig(cfg map[string]interface{}) *dataproc.MetastoreConfig {
 	conf := &dataproc.MetastoreConfig{}
@@ -1709,7 +1710,6 @@ func expandMetastoreConfig(cfg map[string]interface{}) *dataproc.MetastoreConfig
 	}
 	return conf
 }
-<% end -%>
 
 func expandInitializationActions(v interface{}) []*dataproc.NodeInitializationAction {
 	actionList := v.([]interface{})
@@ -2126,10 +2126,10 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 		"autoscaling_config":        flattenAutoscalingConfig(d, cfg.AutoscalingConfig),
 		"security_config":           flattenSecurityConfig(d, cfg.SecurityConfig),
 		"preemptible_worker_config": flattenPreemptibleInstanceGroupConfig(d, cfg.SecondaryWorkerConfig),
+		"metastore_config":          flattenMetastoreConfig(d, cfg.MetastoreConfig),
 <% unless version == 'ga' -%>
 		"lifecycle_config": flattenLifecycleConfig(d, cfg.LifecycleConfig),
 		"endpoint_config":  flattenEndpointConfig(d, cfg.EndpointConfig),
-		"metastore_config": flattenMetastoreConfig(d, cfg.MetastoreConfig),
 <% end -%>
 	}
 
@@ -2237,6 +2237,7 @@ func flattenEndpointConfig(d *schema.ResourceData, ec *dataproc.EndpointConfig) 
 
 	return []map[string]interface{}{data}
 }
+<% end -%>
 
 func flattenMetastoreConfig(d *schema.ResourceData, ec *dataproc.MetastoreConfig) []map[string]interface{} {
 	if ec == nil {
@@ -2249,7 +2250,6 @@ func flattenMetastoreConfig(d *schema.ResourceData, ec *dataproc.MetastoreConfig
 
 	return []map[string]interface{}{data}
 }
-<% end -%>
 
 func flattenAccelerators(accelerators []*dataproc.AcceleratorConfig) interface{} {
 	acceleratorsTypeSet := schema.NewSet(schema.HashResource(acceleratorsSchema()), []interface{}{})

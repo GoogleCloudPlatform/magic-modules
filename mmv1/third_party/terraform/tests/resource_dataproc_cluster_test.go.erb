@@ -849,7 +849,6 @@ func TestAccDataprocCluster_withAutoscalingPolicy(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccDataprocCluster_withMetastoreConfig(t *testing.T) {
 	t.Parallel()
 
@@ -883,7 +882,6 @@ func TestAccDataprocCluster_withMetastoreConfig(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func testAccCheckDataprocClusterDestroy(t *testing.T) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -1950,7 +1948,6 @@ resource "google_dataproc_autoscaling_policy" "asp" {
 `, rnd, rnd)
 }
 
-<% unless version == 'ga' -%>
 func testAccDataprocCluster_withMetastoreConfig(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_metastore_config" {
@@ -2012,4 +2009,3 @@ resource "google_dataproc_metastore_service" "ms" {
 }
 `, rnd)
 }
-<% end -%>
