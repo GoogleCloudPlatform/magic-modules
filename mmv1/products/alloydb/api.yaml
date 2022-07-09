@@ -113,6 +113,11 @@ objects:
         description: |
           The current state of the alloydb cluster.
       - !ruby/object:Api::Type::String
+        name: "selfLink"
+        output: true
+        description: |
+          The selfLink of the alloydb cluster.          
+      - !ruby/object:Api::Type::String
         name: "displayName"
         description: |
           User-settable and human-readable display name for the Cluster.
@@ -309,11 +314,13 @@ objects:
         path: "error"
         message: "message"
     parameters:
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
         name: "cluster"
         required: true
         input: true
         url_param_only: true
+        resource: 'Cluster'
+        imports: 'selfLink'
         description: |
           The ID of the alloydb cluster.
           Must be in the format
