@@ -65,7 +65,7 @@ import (
 
 <%  if object.async&.is_a? Api::OpAsync -%>
     <%  if object.async.include_project -%>
-var <%= resource_name -%>Project string
+    var project string
     <%  end -%>
 <% end -%>
 
