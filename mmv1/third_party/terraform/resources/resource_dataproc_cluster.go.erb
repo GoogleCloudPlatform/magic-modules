@@ -1285,7 +1285,7 @@ func expandVirtualClusterConfig(d *schema.ResourceData, config *Config) (*datapr
 func expandAuxiliaryServicesConfig(d *schema.ResourceData, cfg map[string]interface{}) *dataproc.AuxiliaryServicesConfig {
 	conf := &dataproc.AuxiliaryServicesConfig{}
 	if mcfg, ok := configOptions(d, "virtual_cluster_config.0.auxiliary_services_config.0.metastore_config"); ok {
-		conf.MetastoreConfig = expandMetastoreConfig(mcfg)
+		conf.MetastoreConfig = expandVCMetastoreConfig(mcfg)
 	}
 
 	if shscfg, ok := configOptions(d, "virtual_cluster_config.0.auxiliary_services_config.0.spark_history_server_config"); ok {
@@ -1294,7 +1294,7 @@ func expandAuxiliaryServicesConfig(d *schema.ResourceData, cfg map[string]interf
 	return conf
 }
 
-func expandMetastoreConfig(cfg map[string]interface{}) *dataproc.MetastoreConfig {
+func expandVCMetastoreConfig(cfg map[string]interface{}) *dataproc.MetastoreConfig {
 	conf := &dataproc.MetastoreConfig{}
 	if v, ok := cfg["dataproc_metastore_service"]; ok {
 		conf.DataprocMetastoreService = v.(string)
@@ -2010,14 +2010,14 @@ func flattenAuxiliaryServicesConfig(d *schema.ResourceData, cfg *dataproc.Auxili
 	}
 
 	data := map[string]interface{}{
-		"metastore_config":            flattenMetastoreConfig(d, cfg.MetastoreConfig),
+		"metastore_config":            flattenVCMetastoreConfig(d, cfg.MetastoreConfig),
 		"spark_history_server_config": flattenSparkHistoryServerConfig(d, cfg.SparkHistoryServerConfig),
 	}
 
 	return []map[string]interface{}{data}
 }
 
-func flattenMetastoreConfig(d *schema.ResourceData, cfg *dataproc.MetastoreConfig) []map[string]interface{} {
+func flattenVCMetastoreConfig(d *schema.ResourceData, cfg *dataproc.MetastoreConfig) []map[string]interface{} {
 	if cfg == nil {
 		return nil
 	}
