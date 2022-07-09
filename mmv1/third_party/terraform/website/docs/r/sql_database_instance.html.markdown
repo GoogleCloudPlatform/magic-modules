@@ -198,7 +198,7 @@ includes an up-to-date reference of supported versions.
 
 * `root_password` - (Optional) Initial root password. Required for MS SQL Server, ignored by MySQL and PostgreSQL.
 
-* `encryption_key_name` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `encryption_key_name` - (Optional)
     The full path to the encryption key used for the CMEK disk encryption.  Setting
     up disk encryption currently requires manual steps outside of Terraform.
     The provided key must be in the same region as the SQL instance.  In order
@@ -239,6 +239,8 @@ The `settings` block supports:
 * `collation` - (Optional) The name of server instance collation.
 
 * `disk_autoresize` - (Optional, Default: `true`) Enables auto-resizing of the storage size. Set to false if you want to set `disk_size`.
+
+* `disk_autoresize` - (Optional, Default: `0`) The maximum size to which storage capacity can be automatically increased. The default value is 0, which specifies that there is no limit.
 
 * `disk_size` - (Optional, Default: `10`) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. If you want to set this field, set `disk_autoresize` to false.
 
@@ -325,6 +327,8 @@ The optional `settings.location_preference` subblock supports:
 
 * `zone` - (Optional) The preferred compute engine
     [zone](https://cloud.google.com/compute/docs/zones?hl=en).
+
+* `secondary_zone` - (Optional) The preferred Compute Engine zone for the secondary/failover.
 
 The optional `settings.maintenance_window` subblock for instances declares a one-hour
 [maintenance window](https://cloud.google.com/sql/docs/instance-settings?hl=en#maintenance-window-2ndgen)

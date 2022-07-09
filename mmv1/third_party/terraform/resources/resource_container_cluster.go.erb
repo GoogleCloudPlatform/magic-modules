@@ -66,9 +66,9 @@ var (
 		"addons_config.0.cloudrun_config",
 		"addons_config.0.gcp_filestore_csi_driver_config",
 		"addons_config.0.dns_cache_config",
+		"addons_config.0.gce_persistent_disk_csi_driver_config",
 	<% unless version == 'ga' -%>
 		"addons_config.0.istio_config",
-		"addons_config.0.gce_persistent_disk_csi_driver_config",
 		"addons_config.0.kalm_config",
 		"addons_config.0.config_connector_config",
 		"addons_config.0.gke_backup_agent_config",
@@ -316,6 +316,22 @@ func resourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
+						"gce_persistent_disk_csi_driver_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Defaults to enabled; set disabled = true to disable.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
 						<% unless version == 'ga' -%>
 						"istio_config": {
 							Type:         schema.TypeList,
@@ -338,22 +354,6 @@ func resourceContainerCluster() *schema.Resource {
 										DiffSuppressFunc: emptyOrDefaultStringSuppress("AUTH_NONE"),
 										ValidateFunc:     validation.StringInSlice([]string{"AUTH_NONE", "AUTH_MUTUAL_TLS"}, false),
 										Description:      `The authentication type between services in Istio. Available options include AUTH_MUTUAL_TLS.`,
-									},
-								},
-							},
-						},
-						"gce_persistent_disk_csi_driver_config": {
-							Type:         schema.TypeList,
-							Optional:     true,
-							Computed:     true,
-							AtLeastOneOf: addonsConfigKeys,
-							MaxItems:     1,
-							Description:  `Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Defaults to disabled; set enabled = true to enable.`,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"enabled": {
-										Type:     schema.TypeBool,
-										Required: true,
 									},
 								},
 							},
@@ -521,13 +521,40 @@ func resourceContainerCluster() *schema.Resource {
 				Description: ` Description of the cluster.`,
 			},
 
-			"enable_binary_authorization": {
-				Default:     false,
+                        "enable_binary_authorization": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+                                Default:     false,
+                                Deprecated:  "Deprecated in favor of binary_authorization.",
 				Description: `Enable Binary Authorization for this cluster. If enabled, all container images will be validated by Google Binary Authorization.`,
-				ConflictsWith: []string{"enable_autopilot"},
+				ConflictsWith: []string{"enable_autopilot", "binary_authorization"},
 			},
+                        "binary_authorization": {
+                                Type:             schema.TypeList,
+                                Optional:         true,
+                                DiffSuppressFunc: BinaryAuthorizationDiffSuppress,
+                                MaxItems:         1,
+                                Description:      "Configuration options for the Binary Authorization feature.",
+                                ConflictsWith:    []string{"enable_binary_authorization"},
+                                Elem: &schema.Resource{
+                                        Schema: map[string]*schema.Schema{
+                                                "enabled": {
+                                                        Type:          schema.TypeBool,
+                                                        Optional:      true,
+                                                        Deprecated:    "Deprecated in favor of evaluation_mode.",
+                                                        Description:   "Enable Binary Authorization for this cluster.",
+                                                        ConflictsWith: []string{"enable_autopilot", "binary_authorization.0.evaluation_mode"},
+                                                },
+                                                "evaluation_mode": {
+                                                        Type:          schema.TypeString,
+                                                        Optional:      true,
+                                                        ValidateFunc:  validation.StringInSlice([]string{"DISABLED", "PROJECT_SINGLETON_POLICY_ENFORCE"}, false),
+                                                        Description:   "Mode of operation for Binary Authorization policy evaluation.",
+                                                        ConflictsWith: []string{"binary_authorization.0.enabled"},
+                                                },
+                                        },
+                                },
+                        },
 
 			"enable_kubernetes_alpha": {
 				Type:        schema.TypeBool,
@@ -1562,10 +1589,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		PodSecurityPolicyConfig: expandPodSecurityPolicyConfig(d.Get("pod_security_policy_config")),
 <% end -%>
 		Autoscaling:             expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
-		BinaryAuthorization: &container.BinaryAuthorization{
-			Enabled:         d.Get("enable_binary_authorization").(bool),
-			ForceSendFields: []string{"Enabled"},
-		},
+		BinaryAuthorization:     expandBinaryAuthorization(d.Get("binary_authorization"), d.Get("enable_binary_authorization").(bool)),
 		Autopilot: &container.Autopilot{
 			Enabled:         d.Get("enable_autopilot").(bool),
 			ForceSendFields: []string{"Enabled"},
@@ -1924,10 +1948,19 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 	if err := d.Set("cluster_autoscaling", flattenClusterAutoscaling(cluster.Autoscaling)); err != nil {
 		return err
-	}
-	if err := d.Set("enable_binary_authorization", cluster.BinaryAuthorization != nil && cluster.BinaryAuthorization.Enabled); err != nil {
-		return fmt.Errorf("Error setting enable_binary_authorization: %s", err)
-	}
+        }
+        binauthz_enabled := d.Get("binary_authorization.0.enabled").(bool)
+        legacy_binauthz_enabled := d.Get("enable_binary_authorization").(bool)
+        if !binauthz_enabled {
+ 	        if err := d.Set("enable_binary_authorization", cluster.BinaryAuthorization != nil && cluster.BinaryAuthorization.Enabled); err != nil {
+	                return fmt.Errorf("Error setting enable_binary_authorization: %s", err)
+                }
+        }
+        if !legacy_binauthz_enabled {
+                if err := d.Set("binary_authorization", flattenBinaryAuthorization(cluster.BinaryAuthorization)); err != nil {
+                        return err
+                }
+        }
 	if cluster.Autopilot != nil {
 		if err := d.Set("enable_autopilot", cluster.Autopilot.Enabled); err != nil {
 			return fmt.Errorf("Error setting enable_autopilot: %s", err)
@@ -2171,6 +2204,22 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		log.Printf("[INFO] GKE cluster %s's binary authorization has been updated to %v", d.Id(), enabled)
+	}
+
+        if d.HasChange("binary_authorization") {
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredBinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization"), d.Get("enable_binary_authorization").(bool)),
+			},
+		}
+
+		updateF := updateFunc(req, "updating GKE binary authorization")
+		// Call update serially.
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s's binary authorization has been updated to %v", d.Id(), req.Update.DesiredBinaryAuthorization)
 	}
 
 	if d.HasChange("enable_shielded_nodes") {
@@ -3167,6 +3216,14 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 		}
 	}
 
+	if v, ok := config["gce_persistent_disk_csi_driver_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.GcePersistentDiskCsiDriverConfig = &container.GcePersistentDiskCsiDriverConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
+
 <% unless version == 'ga' -%>
 	if v, ok := config["istio_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
@@ -3174,14 +3231,6 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 			Disabled:        addon["disabled"].(bool),
 			Auth:            addon["auth"].(string),
 			ForceSendFields: []string{"Disabled"},
-		}
-	}
-
-	if v, ok := config["gce_persistent_disk_csi_driver_config"]; ok && len(v.([]interface{})) > 0 {
-		addon := v.([]interface{})[0].(map[string]interface{})
-		ac.GcePersistentDiskCsiDriverConfig = &container.GcePersistentDiskCsiDriverConfig{
-			Enabled:         addon["enabled"].(bool),
-			ForceSendFields: []string{"Enabled"},
 		}
 	}
 
@@ -3449,6 +3498,21 @@ func expandNotificationConfig(configured interface{}) *container.NotificationCon
 		Pubsub: &container.PubSub{
 			Enabled: false,
 		},
+	}
+}
+
+func expandBinaryAuthorization(configured interface{}, legacy_enabled bool) *container.BinaryAuthorization {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return &container.BinaryAuthorization{
+			Enabled:         legacy_enabled,
+                        ForceSendFields: []string{"Enabled"},
+		}
+	}
+	config := l[0].(map[string]interface{})
+	return &container.BinaryAuthorization{
+                Enabled:        config["enabled"].(bool),
+                EvaluationMode: config["evaluation_mode"].(string),
 	}
 }
 
@@ -3781,6 +3845,18 @@ func flattenNotificationConfig(c *container.NotificationConfig) []map[string]int
 		},
 	}
 }
+
+func flattenBinaryAuthorization(c *container.BinaryAuthorization) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+                        "enabled":         c.Enabled,
+			"evaluation_mode": c.EvaluationMode,
+		})
+        }
+	return result
+}
+
 func flattenConfidentialNodes(c *container.ConfidentialNodes) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
@@ -3862,20 +3938,20 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 		}
 	}
 
+	if c.GcePersistentDiskCsiDriverConfig != nil {
+		result["gce_persistent_disk_csi_driver_config"] = []map[string]interface{}{
+			{
+				"enabled": c.GcePersistentDiskCsiDriverConfig.Enabled,
+			},
+		}
+	}
+
 <% unless version == 'ga' -%>
 	if c.IstioConfig != nil {
 		result["istio_config"] = []map[string]interface{}{
 			{
 				"disabled": c.IstioConfig.Disabled,
 				"auth":     c.IstioConfig.Auth,
-			},
-		}
-	}
-
-	if c.GcePersistentDiskCsiDriverConfig != nil {
-		result["gce_persistent_disk_csi_driver_config"] = []map[string]interface{}{
-			{
-				"enabled": c.GcePersistentDiskCsiDriverConfig.Enabled,
 			},
 		}
 	}
@@ -4502,6 +4578,18 @@ func containerClusterNetworkPolicyDiffSuppress(k, old, new string, r *schema.Res
 	if k == "network_policy.#" && old == "1" && new == "0" {
 		o, _ := r.GetChange("network_policy.0.enabled")
 		if !o.(bool) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func BinaryAuthorizationDiffSuppress(k, old, new string, r *schema.ResourceData) bool {
+        // An empty config is equivalent to a config with enabled set to false.
+	if k == "binary_authorization.#" && old == "1" && new == "0" {
+		o, _ := r.GetChange("binary_authorization.0.enabled")
+		if !o.(bool) && !r.HasChange("binary_authorization.0.evaluation_mode") {
 			return true
 		}
 	}

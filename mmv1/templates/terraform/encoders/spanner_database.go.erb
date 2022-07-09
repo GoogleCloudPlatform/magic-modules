@@ -9,7 +9,10 @@ if dialect, ok := obj["databaseDialect"]; ok && dialect == "POSTGRESQL" {
 log.Printf("[DEBUG] Preparing to create new Database. Any extra DDL statements will be applied to the Database in a separate API call")
 
 delete(obj, "name")
-delete(obj, "versionRetentionPeriod")
 delete(obj, "instance")
+<%# These are added back in post-create, but do not remove for Validator. %>
+<% unless compiler == "terraformvalidator-codegen" -%>
+delete(obj, "versionRetentionPeriod")
 delete(obj, "extraStatements")
+<% end -%>
 return obj, nil

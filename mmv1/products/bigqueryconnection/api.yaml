@@ -198,3 +198,9 @@ objects:
             name: 'serviceAccountId'
             description: The account ID of the service created for the purpose of this connection.
             output: true
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
+      parent_resource_attribute: 'connection_id'
+      import_format: ["projects/{{project}}/locations/{{location}}/connections/{{connection_id}}", "{{connection_id}}"]

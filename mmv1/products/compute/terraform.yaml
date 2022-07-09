@@ -633,6 +633,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      provisionedIops: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
       sourceImage: !ruby/object:Overrides::Terraform::PropertyOverride
         name: image
         diff_suppress_func: 'diskImageDiffSuppress'
@@ -1078,10 +1081,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           forwarding_rule_name: "global-rule"
           http_proxy_name: "target-proxy"
           network_name: "my-network"
+          internal_network_name: "my-internal-network"
+          subnetwork_name: "my-subnetwork"
           default_backend_service_name: "backend-default"
           hybrid_backend_service_name: "backend-hybrid"
+          internal_backend_service_name": "backend-internal"
           default_neg_name: "default-neg"
           hybrid_neg_name: "hybrid-neg"
+          internal_neg_name: "internal-neg"
           health_check_name: "health-check"
         ignore_read_extra:
           - "port_range"
@@ -2611,6 +2618,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "snapshot_basic"
         primary_resource_id: "snapshot"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-snapshot%s\", context[\"random_suffix\"])"
         vars:
           snapshot_name: "my-snapshot"
           disk_name: "debian-disk"
