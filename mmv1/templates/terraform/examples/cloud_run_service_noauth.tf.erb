@@ -13,7 +13,9 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 }
+# [END cloudrun_noauth]
 
+# [START cloudrun_noauth_iam]
 data "google_iam_policy" "noauth" {
   binding {
     role = "roles/run.invoker"
@@ -30,4 +32,4 @@ resource "google_cloud_run_service_iam_policy" "noauth" {
 
   policy_data = data.google_iam_policy.noauth.policy_data
 }
-# [END cloudrun_noauth]
+# [END cloudrun_noauth_iam]
