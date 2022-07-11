@@ -882,6 +882,7 @@ objects:
             name: "enableHealthMonitoring"
             description: |
               Verifies core internal services are running.
+            default_value: true
           - !ruby/object:Api::Type::Boolean
             name: "idleShutdown"
             description: |
