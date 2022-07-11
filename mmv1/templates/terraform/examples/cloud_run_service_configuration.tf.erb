@@ -1,5 +1,6 @@
 # Example configuration of a Cloud Run service
 
+# [START cloudrun_service_configuration]
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['config'] %>"
   location = "us-central1"
@@ -87,4 +88,4 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
     latest_revision = true
   }
 }
-
+# [END cloudrun_service_configuration]
