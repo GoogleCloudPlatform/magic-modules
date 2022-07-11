@@ -62,7 +62,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dataproc_metastore_federation_basic"
-        min_version: beta
         primary_resource_id: "default"
         primary_resource_name: "fmt.Sprintf(\"tf-test-metastore-federation%s\", context[\"random_suffix\"])"
         vars:
