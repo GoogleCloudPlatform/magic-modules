@@ -341,7 +341,7 @@ objects:
             names must be unique globally and match pattern 
             'projects/*/locations/*/certificateMaps/*/certificateMapEntries/*'
         - !ruby/object:Api::Type::String
-          name: 'my-map-entry'
+          name: 'map'
           required: true
           input: true
           url_param_only: true
