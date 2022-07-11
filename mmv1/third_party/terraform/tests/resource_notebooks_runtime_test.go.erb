@@ -13,7 +13,9 @@ func TestAccNotebooksRuntime_update(t *testing.T) {
 	}
 
 	vcrTest(t, resource.TestCase{
-		Providers: testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNotebooksRuntimeDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNotebooksRuntime_basic(context),
