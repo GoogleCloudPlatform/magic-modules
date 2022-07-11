@@ -116,6 +116,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'issuer'
+            input: true
             required: true
             description: |
               A JSON Web Token (JWT) issuer URI. `issuer` must start with `https://` and // be a valid 
