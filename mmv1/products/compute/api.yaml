@@ -9329,13 +9329,9 @@ objects:
             api_name: 'IPProtocols'
             description: |
                 Protocols that apply as a filter on mirrored traffic.
-            item_type: !ruby/object:Api::Type::Enum
+            item_type: !ruby/object:Api::Type::String
               name: ipProtocols
-              description: Possible IP protocols to filter on.
-              values:
-                - tcp
-                - udp
-                - icmp
+              description: Possible IP protocols including tcp, udp, icmp and esp
           - !ruby/object:Api::Type::Array
             name: cidrRanges
             description: |
