@@ -162,6 +162,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       virtualMachine.virtualMachineConfig.containerImages: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       softwareConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        # API returns default idleShutdown (true) and default idleShutdownTimeout (180).
+        default_from_api: true
         update_mask_fields:
           - "softwareConfig.idleShutdown"
           - "softwareConfig.idleShutdownTimeout"
