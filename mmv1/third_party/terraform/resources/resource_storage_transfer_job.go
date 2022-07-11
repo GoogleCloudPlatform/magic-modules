@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/storagetransfer/v1"
+	"google.golang.org/genproto/googleapis/cloud/aiplatform/v1beta1/schema"
 )
 
 var (
@@ -65,6 +66,31 @@ func resourceStorageTransferJob() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.StringLenBetween(0, 1024),
 				Description:  `Unique description to identify the Transfer Job.`,
+			},
+			"loggingConfig": {
+				Type:     schema.TypeList,
+				Required: false,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"log_actions": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringinSlice(["LOGGABLE_ACTION_UNSPECIFIED", "FIND", "DELETE", "COPY"], false),
+							Description:  `Specifies the actions to be logged. If empty, no logs are generated. Not supported for transfers with PosixFilesystem data sources; use enableOnpremGcsTransferLogs instead.`,
+						},
+						"log_action_states": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringinSlice(["LOGGABLE_ACTION_STATE_UNSPECIFIED", "SUCEEDED", "FAILED"], false),
+							Description:  `States in which logActions are logged. If empty, no logs are generated. Not supported for transfers with PosixFilesystem data sources; use enableOnpremGcsTransferLogs instead.`,
+						},
+						"enable_on_prem_gcs_transfer": {
+							Type:         schema.TypeBool,
+							Optional:     true,
+							Description:  `For transfers with a PosixFilesystem source, this option enables the Cloud Storage transfer logs for this transfer.`,
+						},
+					},
+				Description: `Specifies the logging behavior for transfer operations.`,
 			},
 			"project": {
 				Type:        schema.TypeString,
