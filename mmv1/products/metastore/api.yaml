@@ -291,7 +291,8 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
-        output: true
+        input: true
+        required: true
         description: |
           The relative resource name of the metastore federation.
       - !ruby/object:Api::Type::KeyValuePairs
@@ -320,6 +321,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'version'
         input: true
+        required: true
         description: |
           The Apache Hive metastore version of the federation. All backend metastore versions must be compatible with the federation version.
       - !ruby/object:Api::Type::Map
