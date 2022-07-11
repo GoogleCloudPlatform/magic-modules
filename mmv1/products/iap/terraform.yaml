@@ -13,6 +13,8 @@
 
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Settings: !ruby/object:Overrides::Terraform::ResourceOverride
+    skip_delete: true
   Web: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/iap_web"
     import_format: ["projects/{{project}}/iap_web"]

@@ -237,3 +237,130 @@ objects:
         description: |
           Human-friendly name given to the OAuth client.
         required: true
+  - !ruby/object:Api::Resource
+    name: 'Settings'
+    base_url: 'projects/{{project_id}}/iap_web/compute/services/{{backendServiceId}}:iapSettings'
+    self_link: 'projects/{{project_id}}/iap_web/compute/services/{{backendServiceId}}:iapSettings'
+    create_verb: :PATCH
+    update_verb: :PATCH
+    input: true
+    description: |
+      The IAP configurable settings.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      api: 'https://cloud.google.com/iap/docs/reference/rest/v1/IapSettings'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: project_id
+        description: |
+          ID of the project of the access approval settings.
+        required: true
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: 'backendServiceId'
+        description: |
+          Identifier of the backend service to which this IAP settings should be attached to.
+        input: true
+        required: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Required. The resource name of the IAP protected resource.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'accessSettings'
+        description: |
+          Top level wrapper for all access related setting in IAP
+        properties:
+        - !ruby/object:Api::Type::NestedObject
+          name: 'gcipSettings'
+          description: |
+            GCIP claims and endpoint configurations for 3p identity providers. Allows customers to configure tenant_id for GCIP instance per-app.
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: 'tenantIds'
+              description: |
+                GCIP tenant ids that are linked to the IAP resource. tenantIds could be a string beginning with a number character to indicate authenticating with GCIP tenant flow, or in the format of _ to indicate authenticating with GCIP agent flow. If agent flow is used, tenantIds should only contain one single element, while for tenant flow, tenantIds can contain multiple elements.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::String
+              name: 'loginPageUri'
+              description: |
+                Login page URI associated with the GCIP tenants. Typically, all resources within the same project share the same login page, though it could be overridden at the sub resource level.
+        - !ruby/object:Api::Type::NestedObject
+          name: 'corsSettings'
+          description: |
+            Configuration to allow cross-origin requests via IAP.
+          properties:
+            - !ruby/object:Api::Type::Boolean
+              name: 'allowHttpOptions'
+              description: |
+                Configuration to allow HTTP OPTIONS calls to skip authorization. If undefined, IAP will not apply any special logic to OPTIONS requests.
+        - !ruby/object:Api::Type::NestedObject
+          name: 'oauthSettings'
+          description: |
+            Settings to configure IAP's OAuth behavior.
+          properties:
+          - !ruby/object:Api::Type::String
+            name: 'loginHint'
+            description: |
+              Domain hint to send as hd=? parameter in OAuth request flow. Enables redirect to primary IDP by skipping Google's login screen. https://developers.google.com/identity/protocols/OpenIDConnect#hd-param Note: IAP does not verify that the id token's hd claim matches this value since access behavior is managed by IAM policies.
+        - !ruby/object:Api::Type::NestedObject
+          name: 'reauthSettings'
+          description: |
+            Settings to configure reauthentication policies in IAP.
+          properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'method'
+            description: |
+              Reauth method required by the policy.
+            values:
+              - :METHOD_UNSPECIFIED
+              - :LOGIN
+              - :PASSWORD
+              - :SECURE_KEY
+          - !ruby/object:Api::Type::String
+            name: 'maxAge'
+            description: |
+              Reauth session lifetime, how long before a user has to reauthenticate again.
+
+              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+          - !ruby/object:Api::Type::Enum
+            name: 'policyType'
+            description: |
+              How IAP determines the effective policy in cases of hierarchial policies. Policies are merged from higher in the hierarchy to lower in the hierarchy.
+            values:
+              - :POLICY_TYPE_UNSPECIFIED
+              - :MINIMUM
+              - :DEFAULT
+      - !ruby/object:Api::Type::NestedObject
+        name: 'applicationSettings'
+        description: |
+          Top level wrapper for all application related settings in IAP.
+        properties:
+        - !ruby/object:Api::Type::NestedObject
+          name: 'csmSettings'
+          description: |
+            Configuration for RCTokens generated for CSM workloads protected by IAP. RCTokens are IAP generated JWTs that can be verified at the application. The RCToken is primarily used for ISTIO deployments, and can be scoped to a single mesh by configuring the audience field accordingly
+          properties:
+          - !ruby/object:Api::Type::String
+            name: 'rctokenAud'
+            description: |
+              Audience claim set in the generated RCToken. This value is not validated by IAP.
+        - !ruby/object:Api::Type::NestedObject
+          name: 'accessDeniedPageSettings'
+          description: |
+            Custom content configuration for access denied page. IAP allows customers to define a custom URI to use as the error page when access is denied to users. If IAP prevents access to this page, the default IAP error page will be displayed instead.
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'accessDeniedPageUri'
+              description: |
+                The URI to be redirected to when access is denied.
+            - !ruby/object:Api::Type::String
+              name: 'generateTroubleshootingUri'
+              description: |
+                Whether to generate a troubleshooting URL on access denied events to this application.
+        - !ruby/object:Api::Type::String
+          name: 'cookieDomain'
+          description: |
+            The Domain value to set for cookies generated by IAP. This value is not validated by the API, but will be ignored at runtime if invalid.
