@@ -13,7 +13,9 @@ func TestAccNotebooksRuntime_update(t *testing.T) {
 	}
 
 	vcrTest(t, resource.TestCase{
-		Providers: testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNotebooksRuntimeDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNotebooksRuntime_basic(context),
@@ -53,6 +55,7 @@ resource "google_notebooks_runtime" "runtime" {
     access_type = "SINGLE_USER"
     runtime_owner = "admin@hashicorptest.com"
   }
+  software_config {}
   virtual_machine {
     virtual_machine_config {
      machine_type = "n1-standard-4"
