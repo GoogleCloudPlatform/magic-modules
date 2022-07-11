@@ -107,6 +107,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           config: "config"
         min_version: beta
+        skip_docs: true
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_noauth"
         primary_resource_id: "default"
