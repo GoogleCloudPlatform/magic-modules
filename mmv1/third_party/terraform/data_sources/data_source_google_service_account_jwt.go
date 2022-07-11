@@ -22,6 +22,7 @@ func dataSourceGoogleServiceAccountJwt() *schema.Resource {
 			},
 			"target_service_account": {
 				Type:         schema.TypeString,
+				Required:     true,
 				ValidateFunc: validateRegexp("(" + strings.Join(PossibleServiceAccountNames, "|") + ")"),
 			},
 			"delegates": {
@@ -59,7 +60,7 @@ func dataSourceGoogleServiceAccountJwtRead(d *schema.ResourceData, meta interfac
 	}
 
 	jwtRequest := &iamcredentials.SignJwtRequest{
-		Payload:   payload,
+		Payload:   string(payload),
 		Delegates: convertStringSet(d.Get("delegates").(*schema.Set)),
 	}
 
