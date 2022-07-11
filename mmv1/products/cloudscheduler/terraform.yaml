@@ -63,6 +63,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'authHeaderDiffSuppress'
       httpTarget.oidcToken: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'authHeaderDiffSuppress'
+      httpTarget.uri: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'lastSlashDiffSuppress'
       appEngineHttpTarget.headers: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/http_headers.erb'
         validation: !ruby/object:Provider::Terraform::Validation

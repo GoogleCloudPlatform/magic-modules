@@ -633,6 +633,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      provisionedIops: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
       sourceImage: !ruby/object:Overrides::Terraform::PropertyOverride
         name: image
         diff_suppress_func: 'diskImageDiffSuppress'
@@ -2615,6 +2618,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "snapshot_basic"
         primary_resource_id: "snapshot"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-snapshot%s\", context[\"random_suffix\"])"
         vars:
           snapshot_name: "my-snapshot"
           disk_name: "debian-disk"

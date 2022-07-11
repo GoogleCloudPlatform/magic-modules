@@ -18,6 +18,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://iam.googleapis.com/v1beta/
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://iam.googleapis.com/v/    
 scopes:
   - https://www.googleapis.com/auth/iam
 apis_required:
@@ -43,7 +46,6 @@ async: !ruby/object:Api::OpAsync
 objects:
   - !ruby/object:Api::Resource
     name: 'WorkloadIdentityPool'
-    min_version: beta
     base_url: projects/{{project}}/locations/global/workloadIdentityPools
     self_link: projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}
     create_url: projects/{{project}}/locations/global/workloadIdentityPools?workloadIdentityPoolId={{workload_identity_pool_id}}
@@ -56,7 +58,7 @@ objects:
       guides:
         'Managing workload identity pools':
           'https://cloud.google.com/iam/docs/manage-workload-identity-pools-providers#pools'
-      api: 'https://cloud.google.com/iam/docs/reference/rest/v1beta/projects.locations.workloadIdentityPools'
+      api: 'https://cloud.google.com/iam/docs/reference/rest/v1/projects.locations.workloadIdentityPools'
     properties:
       - !ruby/object:Api::Type::String
          name: 'workloadIdentityPoolId'
@@ -104,7 +106,6 @@ objects:
           access again.
   - !ruby/object:Api::Resource
     name: 'WorkloadIdentityPoolProvider'
-    min_version: beta
     base_url: projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers
     self_link: projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers/{{workload_identity_pool_provider_id}}
     create_url: projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers?workloadIdentityPoolProviderId={{workload_identity_pool_provider_id}}
@@ -115,7 +116,7 @@ objects:
       guides:
         'Managing workload identity providers':
           'https://cloud.google.com/iam/docs/manage-workload-identity-pools-providers#managing_workload_identity_providers'
-      api: 'https://cloud.google.com/iam/docs/reference/rest/v1beta/projects.locations.workloadIdentityPools.providers'
+      api: 'https://cloud.google.com/iam/docs/reference/rest/v1/projects.locations.workloadIdentityPools.providers'
     properties:
       - !ruby/object:Api::Type::String
          name: 'workloadIdentityPoolId'

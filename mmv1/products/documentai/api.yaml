@@ -17,7 +17,7 @@ display_name: Essential Contacts
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://documentai.googleapis.com/v1/
+    base_url: https://{{location}}-documentai.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -27,9 +27,7 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'Processor'
-    create_url: 'projects/{{project}}/locations/{{location}}/processors'
-    self_link: '{{name}}'
-    base_url: '{{name}}'
+    base_url: 'projects/{{project}}/locations/{{location}}/processors'
     input: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
