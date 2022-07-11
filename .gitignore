@@ -20,9 +20,6 @@
 *.pyc
 *.python-version
 
-# Ruby
-.ruby-version
-
 # Python virtual environment
 .env/*
 
