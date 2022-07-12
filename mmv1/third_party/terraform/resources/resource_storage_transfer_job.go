@@ -75,13 +75,13 @@ func resourceStorageTransferJob() *schema.Resource {
 						"log_actions": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: validation.StringinSlice([]string{"LOGGABLE_ACTION_UNSPECIFIED", "FIND", "DELETE", "COPY"}, false),
+							ValidateFunc: validation.StringinSlice([]string{"FIND", "DELETE", "COPY"}, false),
 							Description:  `Specifies the actions to be logged. If empty, no logs are generated. Not supported for transfers with PosixFilesystem data sources; use enableOnpremGcsTransferLogs instead.`,
 						},
 						"log_action_states": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: validation.StringinSlice([]string{"LOGGABLE_ACTION_STATE_UNSPECIFIED", "SUCEEDED", "FAILED"}, false),
+							ValidateFunc: validation.StringinSlice([]string{"SUCEEDED", "FAILED"}, false),
 							Description:  `States in which logActions are logged. If empty, no logs are generated. Not supported for transfers with PosixFilesystem data sources; use enableOnpremGcsTransferLogs instead.`,
 						},
 						"enable_on_prem_gcs_transfer": {
