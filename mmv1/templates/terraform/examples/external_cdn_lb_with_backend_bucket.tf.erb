@@ -7,7 +7,6 @@
 # VPC
 resource "google_compute_network" "default" {
   name                    = "<%= ctx[:vars]['cdn_network'] %>"
-  provider                = google-beta
   auto_create_subnetworks = false
 }
 # [END cloudloadbalancing_cdn_with_backend_bucket_vpc]
@@ -16,7 +15,6 @@ resource "google_compute_network" "default" {
 # backend subnet
 resource "google_compute_subnetwork" "default" {
   name          = "<%= ctx[:vars]['cdn_subnet'] %>"
-  provider      = google-beta
   ip_cidr_range = "10.0.1.0/24"
   region        = "us-central1"
   network       = google_compute_network.default.id
@@ -26,7 +24,6 @@ resource "google_compute_subnetwork" "default" {
 # [START cloudloadbalancing_cdn_with_backend_bucket_ip_address]
 # reserve IP address
 resource "google_compute_global_address" "default" {
-  provider = google-beta
   name     = "<%= ctx[:vars]['cdn_static_ip'] %>"
 }
 # [END cloudloadbalancing_cdn_with_backend_bucket_ip_address]
@@ -35,7 +32,6 @@ resource "google_compute_global_address" "default" {
 # forwarding rule
 resource "google_compute_global_forwarding_rule" "default" {
   name                  = "<%= ctx[:vars]['cdn_forwarding_rule'] %>"
-  provider              = google-beta
   ip_protocol           = "TCP"
   load_balancing_scheme = "EXTERNAL"
   port_range            = "80"
@@ -48,7 +44,6 @@ resource "google_compute_global_forwarding_rule" "default" {
 # http proxy
 resource "google_compute_target_http_proxy" "default" {
   name     = "<%= ctx[:vars]['cdn_target_http_proxy'] %>"
-  provider = google-beta
   url_map  = google_compute_url_map.default.id
 }
 # [END cloudloadbalancing_cdn_with_backend_bucket_http_proxy]
@@ -57,7 +52,6 @@ resource "google_compute_target_http_proxy" "default" {
 # url map
 resource "google_compute_url_map" "default" {
   name            = "<%= ctx[:vars]['cdn_url_map'] %>"
-  provider        = google-beta
   default_service = google_compute_backend_bucket.default.id
 }
 # [END cloudloadbalancing_cdn_with_backend_bucket_url_map]
