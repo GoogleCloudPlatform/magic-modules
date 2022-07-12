@@ -58,11 +58,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'dataprocMetastoreServiceOverrideSuppress'
   Federation: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
-    import_format: ["projects/{{project}}/locations/{{location}}/federations/{{federationId}}"]
+    import_format: ["projects/{{project}}/locations/{{location}}/federations/{{federation_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dataproc_metastore_federation_basic"
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-metastore-federation%s\", context[\"random_suffix\"])"
+        min_version: beta
+        primary_resource_name: "fmt.Sprintf(\"fed%s\", context[\"random_suffix\"])"
         vars:
-          metastore_federation_name: "metastore-federation"
+          metastore_federation_name: "fed"

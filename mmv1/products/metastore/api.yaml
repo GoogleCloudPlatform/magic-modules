@@ -291,8 +291,7 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
-        input: true
-        required: true
+        output: true
         description: |
           The relative resource name of the metastore federation.
       - !ruby/object:Api::Type::KeyValuePairs

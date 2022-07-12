@@ -3,7 +3,6 @@ resource "google_dataproc_metastore_federation" "<%= ctx[:primary_resource_id] %
   location      = "us-central1"
   federation_id = "<%= ctx[:vars]['metastore_federation_name'] %>"
   version       = "3.1.2"
-  name          = "<%= ctx[:vars]['metastore_federation_name'] %>"
 
   backend_metastores {
       rank           = "1"
