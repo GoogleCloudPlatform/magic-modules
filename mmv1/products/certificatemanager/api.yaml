@@ -307,8 +307,8 @@ objects:
                 `targetSslProxy` may be set.
   - !ruby/object:Api::Resource
       name: 'CertificateMapEntry'
-      base_url: 'projects/{{project}}/locations/global/certificateMapsEntries'
-      create_url: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapEntries'
+      base_url: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapEntries'
+      create_url: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapEntries?certificateMapEntryId={{name}}'
       self_link: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapsEntries/{{name}}'
       update_verb: :PATCH
       update_mask: true
@@ -323,11 +323,11 @@ objects:
         result: !ruby/object:Api::OpAsync::Result
           path: 'response'
         status: !ruby/object:Api::OpAsync::Status
-          path: 'done'
-          complete: true
+          path: 'state'
+          complete: 'ACTIVE'
           allowed:
-            - true
-            - false
+            - 'PENDING'
+            - 'ACTIVE'
         error: !ruby/object:Api::OpAsync::Error
           path: 'error'
           message: 'message'
@@ -336,18 +336,20 @@ objects:
           name: 'name'
           required: true
           input: true
+          # url_param_only: true
           description: |
             A user-defined name of the Certificate Map Entry. Certificate Map Entry 
             names must be unique globally and match pattern 
             'projects/*/locations/*/certificateMaps/*/certificateMapEntries/*'
-        - !ruby/object:Api::Type::String
+        - !ruby/object:Api::Type::ResourceRef
           name: 'map'
           required: true
           input: true
           url_param_only: true
+          imports: 'name'
+          resource: 'CertificateMap'
           description: |
             A map entry that is inputted into the cetrificate map
-            using the 
       properties:
         - !ruby/object:Api::Type::String
           name: 'description'
@@ -376,6 +378,7 @@ objects:
             Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
         - !ruby/object:Api::Type::Array
           name: 'certificates'
+          required: true
           description: |
             A set of Certificates defines for the given hostname.
             There can be defined up to fifteen certificates in each Certificate Map Entry.

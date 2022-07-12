@@ -1,18 +1,28 @@
-resource "google_certificate_manager_certificate_map_entry" "<%= ctx[:primary_resource_id] %>" {
+resource "google_certificate_manager_certificate_map" "certificate_map" {
   name        = "<%= ctx[:vars]['cert_map_entry_name'] %>"
-  description = "My acceptance test certificate map entry"
+  description = "My acceptance test certificate map"
    labels      = {
     "terraform" : true,
     "acc-test"  : true,
- }
+  }
+}
+
+resource "google_certificate_manager_certificate_map_entry" "<%= ctx[:primary_resource_id] %>" {
+  name        = "<%= ctx[:vars]['cert_map_entry_name'] %>"
+  description = "My acceptance test certificate map entry"
+  map = google_certificate_manager_certificate_map.certificate_map.name 
+  labels      = {
+    "terraform" : true,
+    "acc-test"  : true,
+  }
   certificates = [google_certificate_manager_certificate.certificate.id]
   matcher = "PRIMARY"
 }
 
 resource "google_certificate_manager_certificate" "certificate" {
-  name        = "<%= ctx[:vars]['cert_name'] %>"
+  name        = "<%= ctx[:vars]['cert_map_entry_name'] %>"
   description = "The default cert"
-  scope       = "EDGE_CACHE"
+  scope       = "DEFAULT"
   managed {
     domains = [
       google_certificate_manager_dns_authorization.instance.domain,
