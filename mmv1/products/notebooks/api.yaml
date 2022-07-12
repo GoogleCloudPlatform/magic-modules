@@ -913,6 +913,7 @@ objects:
               Install Nvidia Driver automatically.
           - !ruby/object:Api::Type::Boolean
             name: "upgradeable"
+            output: true
             description: |
               Bool indicating whether an newer image is available in an image family.
           - !ruby/object:Api::Type::String
