@@ -1,0 +1,23 @@
+resource "google_project" "project" {
+  project_id = "tf-test%{random_suffix}"
+  name       = "tf-test%{random_suffix}"
+  org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
+}
+
+resource "google_project_service" "project_service" {
+  project = google_project.project.project_id
+  service = "iap.googleapis.com"
+}
+
+resource "google_compute_backend_service" "default" {
+  project       = google_project_service.project_service.project
+  name          = "backend-service%{random_suffix}"
+}
+
+resource "google_iap_settings" "iap_settings" {
+  project           = google_project_service.project_service.project
+  backend_service_id = google_compute_backend_service.default.name
+  application_settings {
+    cookie_domain = "domain.dev"
+  }
+}

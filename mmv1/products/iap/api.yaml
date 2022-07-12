@@ -239,25 +239,17 @@ objects:
         required: true
   - !ruby/object:Api::Resource
     name: 'Settings'
-    base_url: 'projects/{{project_id}}/iap_web/compute/services/{{backendServiceId}}:iapSettings'
-    self_link: 'projects/{{project_id}}/iap_web/compute/services/{{backendServiceId}}:iapSettings'
+    base_url: 'projects/{{project}}/iap_web/compute/services'
+    self_link: 'projects/{{project}}/iap_web/compute/services/{{backend_service_id}}:iapSettings'
     create_verb: :PATCH
     update_verb: :PATCH
-    input: true
     description: |
       The IAP configurable settings.
     references: !ruby/object:Api::Resource::ReferenceLinks
       api: 'https://cloud.google.com/iap/docs/reference/rest/v1/IapSettings'
     parameters:
       - !ruby/object:Api::Type::String
-        name: project_id
-        description: |
-          ID of the project of the access approval settings.
-        required: true
-        input: true
-        url_param_only: true
-      - !ruby/object:Api::Type::String
-        name: 'backendServiceId'
+        name: 'backend_service_id'
         description: |
           Identifier of the backend service to which this IAP settings should be attached to.
         input: true
@@ -266,6 +258,7 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
+        output: true
         description: |
           Required. The resource name of the IAP protected resource.
       - !ruby/object:Api::Type::NestedObject
