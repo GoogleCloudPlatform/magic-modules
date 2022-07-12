@@ -4,7 +4,7 @@
   "location": "{{region}}",
   "trafficSplit": [
     {
-      "deployedModelId": "{{ref:minimal.model_deployment.json:id}}",
+      "deployedModelId": "{{ref:minimal.model_deployment.json:deployedModelId}}",
       "trafficPercentage": 100
     }
   ]
