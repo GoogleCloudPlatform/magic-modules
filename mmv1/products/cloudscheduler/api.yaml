@@ -72,6 +72,10 @@ objects:
         required: false
         default_value: 'Etc/UTC'
       - !ruby/object:Api::Type::String
+        name: state
+        description: |
+          State of the job.
+        output: true
         name: attemptDeadline
         description: |
           The deadline for job attempts. If the request handler does not respond by this deadline then the request is
