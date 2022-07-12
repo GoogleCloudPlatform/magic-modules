@@ -229,6 +229,17 @@ The `azure_credentials` block supports:
 
 * `nanos` - (Required) Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
 
+The `logging_config` block supports:
+
+* `log_actions` - (Optional) A list of actions to be logged. If empty, no logs are generated. Not supported for transfers with PosixFilesystem data sources; use enableOnpremGcsTransferLogs instead. 
+Each action may be one of `FIND`, `DELETE`, and `COPY`.
+
+* `log_action_states` - (Optional) A list of loggable action states. If empty, no logs are generated. Not supported for transfers with PosixFilesystem data sources; use enableOnpremGcsTransferLogs instead.
+Each action state may be one of `SUCCEEDED`, and `FAILED`.
+
+* `enable_on_prem_gcs_transfer` - (Optional) For transfers with a PosixFilesystem source, this option enables the Cloud Storage transfer logs for this transfer. 
+Defaults to false.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
