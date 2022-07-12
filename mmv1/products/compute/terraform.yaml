@@ -176,6 +176,21 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "image_backend"
         vars:
           backend_bucket_name: "image-backend-bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "external_cdn_lb_with_backend_bucket"
+        primary_resource_id: "default"
+        vars:
+          cdn_network: "cdn-network"
+          cdn_subnet: "cdn-subnet"
+          cdn_static_ip: "cdn-static-ip"
+          cdn_forwarding_rule: "cdn-forwarding-rule"
+          cdn_target_http_proxy: "cdn-target-http-proxy"
+          cdn_url_map: "cdn-url-map"
+          image_backend_bucket: "image-backend-bucket"
+          cdn_backend_storage_bucket: "cdn-backend-storage-bucket"
+          index_page: "index-page"
+          404_page: "404-page"
+          test_object: "test-object"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
       post_update: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
