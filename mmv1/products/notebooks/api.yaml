@@ -146,8 +146,6 @@ objects:
     create_url: projects/{{project}}/locations/{{location}}/instances?instanceId={{name}}
     self_link: projects/{{project}}/locations/{{location}}/instances/{{name}}
     create_verb: :POST
-    update_verb: :PATCH
-    update_mask: true
     input: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
