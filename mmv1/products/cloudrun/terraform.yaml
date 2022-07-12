@@ -183,7 +183,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         skip_docs: true
         vars:
-          private_service_name: "private_service_name"
+          private_service_name: "private-service"
       - !ruby/object:Provider::Terraform::Examples
         name: "eventarc_basic_tf"
         primary_resource_id: "default"
