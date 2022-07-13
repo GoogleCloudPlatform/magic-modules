@@ -545,6 +545,11 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "AdvancedOptionsConfig", "advancedOptionsConfig.jsonParsing", "advancedOptionsConfig.logLevel")
 	}
 
+	if d.HasChange("adaptive_protection_config") {
+		securityPolicy.AdaptiveProtectionConfig = expandSecurityPolicyAdaptiveProtectionConfig(d.Get("adaptive_protection_config").([]interface{}))
+		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "AdaptiveProtectionConfig", "adaptiveProtectionConfig.layer7DdosDefenseConfig.enable", "adaptiveProtectionConfig.layer7DdosDefenseConfig.ruleVisibility")
+	}
+
 	if len(securityPolicy.ForceSendFields) > 0 {
 		client := config.NewComputeClient(userAgent)
 
