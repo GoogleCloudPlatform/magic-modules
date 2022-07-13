@@ -430,11 +430,7 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 
 	log.Printf("[DEBUG] SecurityPolicy insert request: %#v", securityPolicy)
 
-<% if version == 'ga' -%>
 	client := config.NewComputeClient(userAgent)
-<% else -%>
-	client := config.NewComputeClient(userAgent)
-<% end -%>
 
 	op, err := client.SecurityPolicies.Insert(project, securityPolicy).Do()
 
@@ -470,11 +466,7 @@ func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{})
 
 	sp := d.Get("name").(string)
 
-<% if version == 'ga' -%>
 	client := config.NewComputeClient(userAgent)
-<% else -%>
-	client := config.NewComputeClient(userAgent)
-<% end -%>
 
 	securityPolicy, err := client.SecurityPolicies.Get(project, sp).Do()
 	if err != nil {
@@ -660,11 +652,7 @@ func resourceComputeSecurityPolicyDelete(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-<% if version == 'ga' -%>
 	client := config.NewComputeClient(userAgent)
-<% else -%>
-	client := config.NewComputeClient(userAgent)
-<% end -%>
 
 	// Delete the SecurityPolicy
 	op, err := client.SecurityPolicies.Delete(project, d.Get("name").(string)).Do()
