@@ -191,6 +191,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           index_page: "index-page"
           404_page: "404-page"
           test_object: "test-object"
+        skip_docs: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
       post_update: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
