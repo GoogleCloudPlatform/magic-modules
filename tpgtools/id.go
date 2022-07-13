@@ -1,11 +1,11 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"bitbucket.org/creachadair/stringset"
+	"github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	"github.com/nasa9084/go-openapi"
 )
 
@@ -54,6 +55,10 @@ func findResourceId(schema *openapi.Schema, overrides Overrides, location string
 		return "", fmt.Errorf("Malformed or missing x-dcl-id: %v", schema.Extension["x-dcl-id"])
 	}
 
+	// Replace the camel case parameters in x-dcl-id with snake case.
+	r := regexp.MustCompile(PatternPart)
+	id = r.ReplaceAllStringFunc(id, dcl.TitleToSnakeCase)
+
 	// Resource Override: Custom ID
 	cid := CustomIDDetails{}
 	cidOk, err := overrides.ResourceOverrideWithDetails(CustomID, &cid, location)
@@ -79,8 +84,8 @@ func findResourceId(schema *openapi.Schema, overrides Overrides, location string
 // partial forms with inferred project/region/etc
 func defaultImportFormats(id string, onlyLongFormFormat bool) (formats []string) {
 	if onlyLongFormFormat {
-                return []string{id}
-        }
+		return []string{id}
+	}
 	uniqueFormats := stringset.New()
 
 	uniqueFormats.Add(id)
