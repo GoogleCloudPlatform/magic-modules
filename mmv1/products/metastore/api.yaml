@@ -244,6 +244,7 @@ objects:
           The globally unique resource identifier of the metastore service.          
   - !ruby/object:Api::Resource
     name: 'Federation'
+    min_version: beta
     base_url: "projects/{{project}}/locations/{{location}}/federations"
     create_url: 'projects/{{project}}/locations/{{location}}/federations?federationId={{federation_id}}'
     self_link: "projects/{{project}}/locations/{{location}}/federations/{{federation_id}}"    
