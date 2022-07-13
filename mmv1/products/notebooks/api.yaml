@@ -866,8 +866,6 @@ objects:
             output: true
       - !ruby/object:Api::Type::NestedObject
         name: "softwareConfig"
-        update_verb: :PATCH
-        update_url: 'projects/{{project}}/locations/{{location}}/runtimes/{{name}}?updateMask=softwareConfig.idle_shutdown,softwareConfig.idle_shutdown_timeout,softwareConfig.custom_gpu_driver_path,softwareConfig.post_startup_script'
         description: |
           The config settings for software inside the runtime.
         properties:
