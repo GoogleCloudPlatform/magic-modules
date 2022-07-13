@@ -505,7 +505,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
-            The name specified for the Notebook instance.
+            The name specified for the Notebook runtime.
         required: true
         input: true
         url_param_only: true
@@ -675,6 +675,7 @@ objects:
                 name: "containerImages"
                 description: |
                   Use a list of container images to start the notebook instance.
+                input: true
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::String
@@ -691,6 +692,7 @@ objects:
                 name: "encryptionConfig"
                 description: |
                   Encryption settings for virtual machine data disk.
+                input: true
                 properties:
                   - !ruby/object:Api::Type::String
                     name: "kmsKey"
@@ -704,6 +706,7 @@ objects:
                 name: "shieldedInstanceConfig"
                 description: |
                   Shielded VM Instance configuration settings.
+                input: true
                 properties:
                   - !ruby/object:Api::Type::Boolean
                     name: "enableSecureBoot"
@@ -759,6 +762,7 @@ objects:
                     configuring Private Service Access.
                     * Shared VPC (network & subnet are required). Requires
                     configuring Private Service Access.
+                input: true
               - !ruby/object:Api::Type::String
                 name: "subnet"
                 description: |
@@ -768,6 +772,7 @@ objects:
                     * `https://www.googleapis.com/compute/v1/projects/[project_id]/
                     regions/us-east1/subnetworks/sub0`
                     * `projects/[project_id]/regions/us-east1/subnetworks/sub0`
+                input: true
               - !ruby/object:Api::Type::Boolean
                 name: "internalIpOnly"
                 description: |
@@ -777,6 +782,7 @@ objects:
                   `internal_ip_only` restriction can only be enabled for subnetwork
                   enabled networks, and all dependencies must be configured to be
                   accessible without external IP addresses.
+                input: true
               - !ruby/object:Api::Type::Array
                 name: "tags"
                 description: |
@@ -812,6 +818,7 @@ objects:
                 description: |
                   The type of vNIC to be used on this interface. This may be gVNIC
                   or VirtioNet.
+                input: true
                 values:
                   - UNSPECIFIED_NIC_TYPE
                   - VIRTIO_NET
@@ -821,6 +828,7 @@ objects:
                 description: |
                   Optional. Reserved IP Range name is used for VPC Peering. The
                   subnetwork allocation will use the range *name* if it's assigned.
+                input: true
       - !ruby/object:Api::Type::Enum
         name: 'state'
         values:
