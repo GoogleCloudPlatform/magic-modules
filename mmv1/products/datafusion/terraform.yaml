@@ -33,7 +33,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           instance_name: "my-instance"
       - !ruby/object:Provider::Terraform::Examples
         name: "data_fusion_instance_cmek"
-        primary_resource_id: "basic_cmek"
+        primary_resource_id: "cmek"
         vars:
           instance_name: "my-instance"
       - !ruby/object:Provider::Terraform::Examples
@@ -43,9 +43,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           instance_name: "my-instance"
       - !ruby/object:Provider::Terraform::Examples
         name: "data_fusion_instance_event"
-        primary_resource_id: "basic_event"
+        primary_resource_id: "event"
         vars:
-          instance_name: "my-instance"                 
+          instance_name: "my-instance"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "data_fusion_instance_zone"
+        primary_resource_id: "zone"
+        vars:
+          instance_name: "my-instance"              
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_update: templates/terraform/pre_update/datafusion_instance_update.go.erb
     properties:
