@@ -283,6 +283,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project: :PROJECT_NAME
         min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudrun_service_identity"
+        primary_resource_id: "default"
+        skip_docs: true
+        vars:
+          cloud_run_srv: "cloud-run-srv"
+        min_version: beta
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'autogenerate_revision_name'
