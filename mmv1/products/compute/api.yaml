@@ -612,6 +612,11 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      min_version: beta
+      exclude: false
+      parent_resource_attribute: 'name'
+      import_format: ["projects/{{project}}/global/backendBuckets/{{name}}", "{{name}}"]    
     properties:
       - !ruby/object:Api::Type::String
         name: 'bucketName'
@@ -706,6 +711,22 @@ objects:
           send_empty_value: true
           description: |
             Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
+        - !ruby/object:Api::Type::Boolean        
+          name: 'requestCoalescing'
+          send_empty_value: true
+          description: |
+            If true then Cloud CDN will combine multiple concurrent cache fill requests into a small number of requests to the origin.
+        - !ruby/object:Api::Type::Array
+          name: 'bypassCacheOnRequestHeaders'
+          description: |
+            Bypass the cache when the specified request headers are matched - e.g. Pragma or Authorization headers. Up to 5 headers can be specified. The cache is bypassed for all cdnPolicy.cacheMode settings.
+          max_size: 5  
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'headerName'
+                description: |
+                  The header field name to match on when bypassing cache. Values are case-insensitive.
       - !ruby/object:Api::Type::String
         name: 'edgeSecurityPolicy'
         description: |
