@@ -577,6 +577,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           example_bucket_name: "example-bucket-name"
           your_topic_name: "your_topic_name"
         min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "storage_object_lifecycle_setting"
+        primary_resource_type: "google_storage_bucket"
+        primary_resource_id: "auto_expire"
+        vars:
+          example_bucket: "example-bucket"
+        min_version: beta
     properties:
 
 
