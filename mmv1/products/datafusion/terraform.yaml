@@ -23,6 +23,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "data_fusion_instance_basic"
         primary_resource_id: "basic_instance"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\", context[\"random_suffix\"])"
         vars:
           instance_name: "my-instance"
       - !ruby/object:Provider::Terraform::Examples
@@ -40,6 +41,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "enterprise_instance"
         vars:
           instance_name: "my-instance"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "data_fusion_instance_event"
+        primary_resource_id: "basic_event"
+        vars:
+          instance_name: "my-instance"                 
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_update: templates/terraform/pre_update/datafusion_instance_update.go.erb
     properties:

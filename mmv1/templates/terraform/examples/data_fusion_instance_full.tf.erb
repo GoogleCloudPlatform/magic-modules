@@ -1,10 +1,12 @@
 resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]["instance_name"] %>"
   description = "My Data Fusion instance"
+  display_name = "My Data Fusion instance"
   region = "us-central1"
   type = "BASIC"
   enable_stackdriver_logging = true
   enable_stackdriver_monitoring = true
+  enable_rbac = true
   labels = {
     example_key = "example_value"
   }
