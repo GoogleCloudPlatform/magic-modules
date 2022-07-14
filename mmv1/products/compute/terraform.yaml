@@ -150,7 +150,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_bucket_basic"
         primary_resource_id: "image_backend"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-image-store-bucket%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-image-backend-bucket%s\", context[\"random_suffix\"])"
         vars:
           backend_bucket_name: "image-backend-bucket"
           bucket_name: "image-store-bucket"
