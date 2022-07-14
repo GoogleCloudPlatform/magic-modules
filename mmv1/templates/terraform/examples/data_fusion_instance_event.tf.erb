@@ -1,7 +1,8 @@
 resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]["instance_name"] %>"
-  region = "us-central1"
-  type = "BASIC"
+  name    = "<%= ctx[:vars]["instance_name"] %>"
+  region  = "us-central1"
+  type    = "BASIC"
+  version = "6.7.0"
 
   event_publish_config {
     enabled = true
