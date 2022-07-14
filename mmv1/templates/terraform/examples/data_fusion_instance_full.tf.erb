@@ -6,7 +6,6 @@ resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
   type = "BASIC"
   enable_stackdriver_logging = true
   enable_stackdriver_monitoring = true
-  enable_rbac = true
   labels = {
     example_key = "example_value"
   }
