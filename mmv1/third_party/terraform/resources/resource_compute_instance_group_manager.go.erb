@@ -1162,9 +1162,6 @@ func flattenStatus(status *compute.InstanceGroupManagerStatus) []map[string]inte
 		"is_stable":      status.IsStable,
 		"stateful":       flattenStatusStateful(status.Stateful),
 		"version_target": flattenStatusVersionTarget(status.VersionTarget),
-    <% unless version == "ga" -%>
-		"all_instances_config": flattenStatusAllInstancesConfig(status.AllInstancesConfig),
-     <% end -%>
 	}
 	<% unless version == "ga" -%>
 	if status.AllInstancesConfig != nil {
