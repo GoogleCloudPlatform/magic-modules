@@ -3391,9 +3391,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "vpn_tunnel_basic"
         primary_resource_id: "tunnel1"
         vars:
-          vpn_tunnel_name: "tunnel1"
-          target_vpn_gateway_name: "vpn1"
-          network_name: "network1"
+          vpn_tunnel_name: "tunnel-1"
+          target_vpn_gateway_name: "vpn-1"
+          network_name: "network-1"
           address_name: "vpn-static-ip"
           esp_forwarding_rule_name: "fr-esp"
           udp500_forwarding_rule_name: "fr-udp500"
@@ -3404,9 +3404,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "tunnel1"
         min_version: beta
         vars:
-          vpn_tunnel_name: "tunnel1"
-          target_vpn_gateway_name: "vpn1"
-          network_name: "network1"
+          vpn_tunnel_name: "tunnel-1"
+          target_vpn_gateway_name: "vpn-1"
+          network_name: "network-1"
           address_name: "vpn-static-ip"
           esp_forwarding_rule_name: "fr-esp"
           udp500_forwarding_rule_name: "fr-udp500"
