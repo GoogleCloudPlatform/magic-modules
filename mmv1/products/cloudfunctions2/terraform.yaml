@@ -55,6 +55,28 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "build_config.0.source.0.storage_source.0.object"
           - "build_config.0.source.0.storage_source.0.bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudfunctions2_full_gcs"
+        min_version: beta
+        primary_resource_id: "terraform-test"
+        primary_resource_name: "terraform-test"
+        test_env_vars:
+          org_id: :ORG_ID
+          billing_account: :BILLING_ACCT
+        vars:
+          bucket_name: "cloudfunctions2-function-bucket"
+          service_account: "s-a"
+          subscription: "pub-sub"
+          function: "test-function"
+          zip_path: "path/to/index.zip"
+        test_vars_overrides:
+          zip_path: "\"./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip\""
+          primary_resource_id: "\"terraform-test\""
+          location: "\"us-central1\""
+        # ignore these fields during import step
+        ignore_read_extra:
+          - "build_config.0.source.0.storage_source.0.object"
+          - "build_config.0.source.0.storage_source.0.bucket"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
