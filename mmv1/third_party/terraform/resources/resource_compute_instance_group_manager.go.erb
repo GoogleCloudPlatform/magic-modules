@@ -760,11 +760,10 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 	<% unless version == "ga" -%>
 	if d.HasChange("all_instances_config") {
 		oldAic, newAic := d.GetChange("all_instances_config")
-		if len(newAic.([]interface{})) == 0 {
+		if newAic == nil || len(newAic.([]interface{})) == 0 {
 			updatedManager.NullFields = append(updatedManager.NullFields, "AllInstancesConfig")
 		} else {
 			updatedManager.AllInstancesConfig = expandAllInstancesConfig(oldAic.([]interface{}), newAic.([]interface{}))
-			updatedManager.ForceSendFields = append(updatedManager.ForceSendFields, "AllInstancesConfig")
 		}
 		change = true
 	}
@@ -1105,10 +1104,10 @@ func flattenUpdatePolicy(updatePolicy *compute.InstanceGroupManagerUpdatePolicy)
 
 <% unless version == "ga" -%>
 func expandAllInstancesConfig(old []interface{}, new []interface{}) *compute.InstanceGroupManagerAllInstancesConfig {
-	allInstancesConfig := &compute.InstanceGroupManagerAllInstancesConfig{}
+	var properties *compute.InstancePropertiesPatch
 	for _, raw := range new {
+		properties = &compute.InstancePropertiesPatch{}
 		data := raw.(map[string]interface{})
-		properties := &compute.InstancePropertiesPatch{}
 		properties.Metadata = convertStringMap(data["metadata"].(map[string]interface{}))
 		if len(properties.Metadata) == 0 {
 			properties.NullFields = append(properties.NullFields, "Metadata")
@@ -1117,25 +1116,30 @@ func expandAllInstancesConfig(old []interface{}, new []interface{}) *compute.Ins
 		if len(properties.Labels) == 0 {
 			properties.NullFields = append(properties.NullFields, "Labels")
 		}
-		allInstancesConfig.Properties = properties
 	}
 
-	if allInstancesConfig.Properties != nil {
+	if properties != nil {
 		for _, raw := range old {
 			data := raw.(map[string]interface{})
 			for k, _ := range data["metadata"].(map[string]interface{}) {
-				if _, exist := allInstancesConfig.Properties.Metadata[k]; !exist {
-					allInstancesConfig.Properties.NullFields = append(allInstancesConfig.Properties.NullFields, fmt.Sprintf("Metadata.%s", k))
+				if _, exist := properties.Metadata[k]; !exist {
+					properties.NullFields = append(properties.NullFields, fmt.Sprintf("Metadata.%s", k))
 				}
 			}
 			for k, _ := range data["labels"].(map[string]interface{}) {
-				if _, exist := allInstancesConfig.Properties.Labels[k]; !exist {
-					allInstancesConfig.Properties.NullFields = append(allInstancesConfig.Properties.NullFields, fmt.Sprintf("Labels.%s", k))
+				if _, exist := properties.Labels[k]; !exist {
+					properties.NullFields = append(properties.NullFields, fmt.Sprintf("Labels.%s", k))
 				}
 			}
 		}
 	}
-	return allInstancesConfig
+	if properties != nil {
+		allInstancesConfig := &compute.InstanceGroupManagerAllInstancesConfig{}
+		allInstancesConfig.Properties = properties
+		return allInstancesConfig
+	} else {
+		return nil
+	}
 }
 
 func flattenAllInstancesConfig(allInstancesConfig *compute.InstanceGroupManagerAllInstancesConfig) []map[string]interface{} {

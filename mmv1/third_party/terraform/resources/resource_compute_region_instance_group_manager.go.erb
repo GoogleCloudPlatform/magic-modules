@@ -735,11 +735,10 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 	<% unless version == "ga" -%>
 	if d.HasChange("all_instances_config") {
 		oldAic, newAic := d.GetChange("all_instances_config")
-		if len(newAic.([]interface{})) == 0 {
+		if newAic == nil || len(newAic.([]interface{})) == 0 {
 			updatedManager.NullFields = append(updatedManager.NullFields, "AllInstancesConfig")
 		} else {
 			updatedManager.AllInstancesConfig = expandAllInstancesConfig(oldAic.([]interface{}), newAic.([]interface{}))
-			updatedManager.ForceSendFields = append(updatedManager.ForceSendFields, "AllInstancesConfig")
 		}
 		change = true
 	}
