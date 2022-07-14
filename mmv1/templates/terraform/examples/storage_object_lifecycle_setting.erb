@@ -1,3 +1,4 @@
+# [START storage_create_lifecycle_setting_tf]
 resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
   name          = "<%= ctx[:vars]['example_bucket'] %>"
   location      = "US"
@@ -13,3 +14,4 @@ resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 }
+# [END storage_create_lifecycle_setting_tf]
