@@ -49,9 +49,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # We don't support ignore_read on nested fields
         ignore_read: true
         custom_flatten: "templates/terraform/custom_flatten/certificate_manager_certificate_managed_dns_auth.go.erb"
-      selfManaged.certificatePem: !ruby/object:Overrides::Terraform::PropertyOverride
+      selfManaged.pemCertificate: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
-      selfManaged.privateKeyPem: !ruby/object:Overrides::Terraform::PropertyOverride
+      selfManaged.pemPrivateKey: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
       scope: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'certManagerDefaultScopeDiffSuppress'
