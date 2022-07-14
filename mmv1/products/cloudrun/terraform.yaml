@@ -101,6 +101,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "autogenerate_revision_name"
       - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_configuration"
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "default"
+        vars:
+          config: "config"
+        min_version: beta
+        skip_docs: true
+      - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_noauth"
         primary_resource_id: "default"
         primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
@@ -253,11 +261,27 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           cloud_run_service_name: "cloudrun-srv"
         min_version: beta
       - !ruby/object:Provider::Terraform::Examples
+        name: "cloudrun_service_access_control"
+        primary_resource_id: "default"
+        skip_docs: true
+        vars:
+          cloud_run_srv: "cloud-run-srv"
+      - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_system_packages"
         primary_resource_id: "default"
         skip_docs: true
         vars:
           graphviz_example: "graphviz-example"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_tasks"
+        primary_resource_id: "default"
+        skip_docs: true
+        vars:
+          cloud_run_service_name: "cloud-run-service-name"
+          cloud_tasks_queue_name: "cloud-tasks-queue-name"
+        test_env_vars:
+          project: :PROJECT_NAME
         min_version: beta
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
