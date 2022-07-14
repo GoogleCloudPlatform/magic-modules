@@ -106,4 +106,4 @@ resource "google_cloud_run_service_iam_member" "default" {
   role = "roles/run.invoker"
   member = "serviceAccount:${google_service_account.default.email}"
 }
-# [START cloudrun_service_scheduled_iam]
+# [END cloudrun_service_scheduled_iam]
