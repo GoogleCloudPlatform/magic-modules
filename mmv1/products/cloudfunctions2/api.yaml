@@ -253,11 +253,11 @@ objects:
               - :ALLOW_INTERNAL_ONLY
               - :ALLOW_INTERNAL_AND_GCLB
             default_value: :ALLOW_ALL
-          - !ruby/object:Api::Type::String 
+          - !ruby/object:Api::Type::String
             name: 'uri'
             description: 'URI of the Service deployed.'
             output: true
-          - !ruby/object:Api::Type::String 
+          - !ruby/object:Api::Type::String
             name: 'gcfUri'
             description: 'URIs of the Service deployed'
             output: true
@@ -274,18 +274,18 @@ objects:
           An Eventarc trigger managed by Google Cloud Functions that fires events in
           response to a condition in another service.
         properties:
-          - !ruby/object:Api::Type::String 
+          - !ruby/object:Api::Type::String
             name: 'trigger'
             description: 'The resource name of the Eventarc trigger.'
             output: true
-          - !ruby/object:Api::Type::String 
+          - !ruby/object:Api::Type::String
             name: 'triggerRegion'
             description: |
               The region that the trigger will be in. The trigger will only receive
               events originating in this region. It can be the same
               region as the function, a different region or multi-region, or the global
               region. If not provided, defaults to the same region as the function.
-          - !ruby/object:Api::Type::String 
+          - !ruby/object:Api::Type::String
             name: 'eventType'
             description: 'Required. The type of event to observe.'
           - !ruby/object:Api::Type::Array
@@ -314,7 +314,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'serviceAccountEmail'
             description: 'The email of the service account for this function.'
-          - !ruby/object:Api::Type::Enum 
+          - !ruby/object:Api::Type::Enum
             name: 'retryPolicy'
             description: |
               Describes the retry policy in case of function's execution failure.
