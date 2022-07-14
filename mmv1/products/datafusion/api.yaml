@@ -238,7 +238,6 @@ objects:
         name: 'enableRbac'
         description: |
           Option to enable granular role-based access control.
-        input: true
       - !ruby/object:Api::Type::NestedObject
         name: 'cryptoKeyConfig'
         description: |
@@ -255,14 +254,12 @@ objects:
         name: 'eventPublishConfig'
         description: |
           Option to enable and pass metadata for event publishing.
-        input: true
         properties:
           - !ruby/object:Api::Type::Boolean
             name: 'enabled'
             description: |
               Option to enable Event Publishing.
             required: true
-            input: true         
           - !ruby/object:Api::Type::String
             name: 'topic'
             description: |
