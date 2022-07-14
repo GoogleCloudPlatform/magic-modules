@@ -130,6 +130,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "autogenerate_revision_name"
       - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_static_outbound"
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "default"
+        vars:
+          cloudrun_static_ip_network: "cloudrun-static-ip-network"
+          cloudrun_static_ip: "cloudrun-static-ip"
+          cloudrun_static_ip_conn: "cloudrun-static-ip-conn"
+          cloudrun_static_ip_router: "cloudrun-static-ip-router"
+          cloudrun_static_ip_addr: "cloudrun-static-ip-addr"
+          cloudrun_static_nat: "cloudrun-static-nat"
+          cloudrun_static_ip_service: "cloudrun-static-ip-service"
+        min_version: beta
+        skip_docs: true
+      - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_traffic_split"
         skip_test: true
         primary_resource_id: "default"
