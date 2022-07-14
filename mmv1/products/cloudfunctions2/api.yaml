@@ -288,7 +288,25 @@ objects:
           - !ruby/object:Api::Type::String 
             name: 'eventType'
             description: 'Required. The type of event to observe.'
-          - !ruby/object:Api::Type::String 
+          - !ruby/object:Api::Type::Array
+            name: 'eventFilters'
+            description: 'Criteria used to filter events.'
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: attribute
+                  description: 'Required. The name of a CloudEvents attribute.'
+                - !ruby/object:Api::Type::String
+                  name: value
+                  description: 'Required. The value for the attribute.'
+                - !ruby/object:Api::Type::String
+                  name: operator
+                  description: |
+                    Optional. The operator used for matching the events with the value of
+                    the filter. If not specified, only events that have an exact key-value
+                    pair specified in the filter are matched.
+                    The only allowed value is `match-path-pattern`.'
+          - !ruby/object:Api::Type::String
             name: 'pubsubTopic'
             description: |
               The name of a Pub/Sub topic in the same project that will be used
