@@ -1,0 +1,5 @@
+if strings.Contains(url,"https://-"){
+	location := GetRegionFromRegionalSelfLink(url)
+	url = strings.TrimPrefix(url, "https://")
+	url = "https://" + location + url
+}

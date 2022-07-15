@@ -14,7 +14,7 @@ data "google_iam_policy" "sql_iam_policy" {
       "serviceAccount:${google_project_service_identity.gcp_sa_cloud_sql.email}",
     ]
     condition {
-      expression  = "resource.name == 'google_sql_database_instance.default.id' && resource.type == 'sqladmin.googleapis.com/Instance'"
+      expression  = "resource.name == 'google_sql_database_instance.default.id' && resource.service == 'sqladmin.googleapis.com'"
       title       = "created"
       description = "Cloud SQL instance creation"
     }
