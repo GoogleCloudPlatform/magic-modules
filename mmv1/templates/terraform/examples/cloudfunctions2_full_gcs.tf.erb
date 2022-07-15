@@ -23,7 +23,6 @@ resource "google_storage_bucket" "source-bucket" {
  
 resource "google_storage_bucket_object" "object" {
   provider = google-beta
-  project = google_project.project.project_id
   name   = "function-source.zip"
   bucket = google_storage_bucket.source-bucket.name
   source = "<%= ctx[:vars]['zip_path'] %>"  # Add path to the zipped function source code
