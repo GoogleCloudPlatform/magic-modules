@@ -16,7 +16,7 @@ resource "google_project_service" "run_api" {
   disable_on_destroy         = false
 }
 
-# [START cloudrun_multiregion]
+# [START cloudrun_multiregion_variables]
 variable "domain_name" {
   type    = string
   default = "example.com"
@@ -26,7 +26,9 @@ variable "run_regions" {
   type    = list(string)
   default = ["us-central1", "europe-west1"]
 }
+# [END cloudrun_multiregion_variables]
 
+# [START cloudrun_multiregion_addr]
 resource "google_compute_global_address" "lb_default" {
   provider = google-beta
   name    = "<%= ctx[:vars]['myservice_service_ip'] %>"
@@ -37,7 +39,9 @@ resource "google_compute_global_address" "lb_default" {
     google_project_service.compute_api
   ]
 }
+# [END cloudrun_multiregion_addr]
 
+# [START cloudrun_multiregion_backend]
 resource "google_compute_backend_service" "lb_default" {
   provider = google-beta
   name                  = "<%= ctx[:vars]['myservice_backend'] %>"
@@ -61,8 +65,9 @@ resource "google_compute_backend_service" "lb_default" {
     google_project_service.compute_api,
   ]
 }
+# [END cloudrun_multiregion_backend]
 
-
+# [START cloudrun_multiregion_urlmap]
 resource "google_compute_url_map" "lb_default" {
   provider = google-beta
   name            = "<%= ctx[:vars]['myservice_lb_urlmap'] %>"
@@ -81,7 +86,9 @@ resource "google_compute_url_map" "lb_default" {
     }
   }
 }
+# [END cloudrun_multiregion_urlmap]
 
+# [START cloudrun_multiregion_cert]
 resource "google_compute_managed_ssl_certificate" "lb_default" {
   provider = google-beta
   name    = "<%= ctx[:vars]['myservice_ssl_cert'] %>"
@@ -91,7 +98,9 @@ resource "google_compute_managed_ssl_certificate" "lb_default" {
     domains = [var.domain_name]
   }
 }
+# [END cloudrun_multiregion_cert]
 
+# [START cloudrun_multiregion_proxy_https]
 resource "google_compute_target_https_proxy" "lb_default" {
   provider = google-beta
   name    = "<%= ctx[:vars]['myservice_https_proxy'] %>"
@@ -104,7 +113,9 @@ resource "google_compute_target_https_proxy" "lb_default" {
     google_compute_managed_ssl_certificate.lb_default
   ]
 }
+# [END cloudrun_multiregion_proxy_https]
 
+# [START cloudrun_multiregion_forwarding]
 resource "google_compute_global_forwarding_rule" "lb_default" {
   provider = google-beta
   name                  = "<%= ctx[:vars]['myservice_lb_forwarding_rule'] %>"
@@ -115,7 +126,9 @@ resource "google_compute_global_forwarding_rule" "lb_default" {
   port_range            = "443"
   depends_on            = [google_compute_target_https_proxy.lb_default]
 }
+# [END cloudrun_multiregion_forwarding]
 
+# [START cloudrun_multiregion_neg]
 resource "google_compute_region_network_endpoint_group" "lb_default" {
   provider = google-beta
   count                 = length(var.run_regions)
@@ -127,11 +140,15 @@ resource "google_compute_region_network_endpoint_group" "lb_default" {
     service = google_cloud_run_service.<%= ctx[:primary_resource_id] %>[count.index].name
   }
 }
+# [END cloudrun_multiregion_neg]
 
+# [START cloudrun_multiregion_addr]
 output "load_balancer_ip_addr" {
   value = google_compute_global_address.lb_default.address
 }
+# [END cloudrun_multiregion_addr]
 
+# [START cloudrun_multiregion_service]
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   count    = length(var.run_regions)
@@ -157,7 +174,9 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
     google_project_service.run_api
   ]
 }
+# [END cloudrun_multiregion_service]
 
+# [START cloudrun_multiregion_service_iam]
 resource "google_cloud_run_service_iam_member" "run_allow_unauthenticated" {
   provider = google-beta
   count    = length(var.run_regions)
@@ -167,7 +186,9 @@ resource "google_cloud_run_service_iam_member" "run_allow_unauthenticated" {
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
+# [END cloudrun_multiregion_service_iam]
 
+# [START cloudrun_multiregion_urlmap_https]
 resource "google_compute_url_map" "https_default" {
   provider = google-beta
   name    = "<%= ctx[:vars]['myservice_https_urlmap'] %>"
@@ -179,7 +200,9 @@ resource "google_compute_url_map" "https_default" {
     strip_query            = false
   }
 }
+# [END cloudrun_multiregion_urlmap_https]
 
+# [START cloudrun_multiregion_proxy]
 resource "google_compute_target_http_proxy" "https_default" {
   provider = google-beta
   name    = "<%= ctx[:vars]['myservice_http_proxy'] %>"
@@ -190,7 +213,9 @@ resource "google_compute_target_http_proxy" "https_default" {
     google_compute_url_map.https_default
   ]
 }
+# [END cloudrun_multiregion_proxy]
 
+# [START cloudrun_multiregion_forwarding_https]
 resource "google_compute_global_forwarding_rule" "https_default" {
   provider = google-beta
   name       = "<%= ctx[:vars]['myservice_https_forwarding_rule'] %>"
@@ -200,4 +225,4 @@ resource "google_compute_global_forwarding_rule" "https_default" {
   port_range = "80"
   depends_on = [google_compute_target_http_proxy.https_default]
 }
-# [END cloudrun_multiregion]
+# [END cloudrun_multiregion_forwarding_https]
