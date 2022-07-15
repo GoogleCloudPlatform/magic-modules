@@ -309,7 +309,7 @@ objects:
       name: 'CertificateMapEntry'
       base_url: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapEntries'
       create_url: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapEntries?certificateMapEntryId={{name}}'
-      self_link: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapsEntries/{{name}}'
+      self_link: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapEntries/{{name}}'
       update_verb: :PATCH
       update_mask: true
       description: |
