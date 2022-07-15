@@ -826,7 +826,7 @@ objects:
               - !ruby/object:Api::Type::String
                 name: "reservedIpRange"
                 description: |
-                  Optional. Reserved IP Range name is used for VPC Peering. The
+                  Reserved IP Range name is used for VPC Peering. The
                   subnetwork allocation will use the range *name* if it's assigned.
                 input: true
       - !ruby/object:Api::Type::Enum
