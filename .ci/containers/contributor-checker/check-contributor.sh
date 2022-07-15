@@ -25,7 +25,6 @@ else
   echo "Issue is assigned, retriving previous reviewers to re-request reviews"
   REVIEWERS=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
     "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/reviews" | jq -r 'map(.user.login) | unique | .[]')
-
 fi
 
 USER=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
