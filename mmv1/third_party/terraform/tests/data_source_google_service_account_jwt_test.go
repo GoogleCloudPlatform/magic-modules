@@ -15,12 +15,19 @@ import (
 )
 
 const (
-	jwtTestSubject = "custom-subject"
+	jwtTestSubject          = "custom-subject"
+	jwtTestFoo              = "bar"
+	jwtTestComplexFooNested = "baz"
 )
 
 type jwtTestPayload struct {
 	Subject string `json:"sub"`
-	Foo     string `json:"foo"`
+
+	Foo string `json:"foo"`
+
+	ComplexFoo struct {
+		Nested string `json:"nested"`
+	} `json:"complexFoo"`
 }
 
 func testAccCheckServiceAccountJwtValue(name, audience string) resource.TestCheckFunc {
@@ -60,7 +67,15 @@ func testAccCheckServiceAccountJwtValue(name, audience string) resource.TestChec
 		}
 
 		if payload.Subject != jwtTestSubject {
-			return fmt.Errorf("invalid subject, expected '%s', got '%s'", jwtTestSubject, payload.Subject)
+			return fmt.Errorf("invalid 'sub', expected '%s', got '%s'", jwtTestSubject, payload.Subject)
+		}
+
+		if payload.Foo != jwtTestFoo {
+			return fmt.Errorf("invalid 'foo', expected '%s', got '%s'", jwtTestFoo, payload.Foo)
+		}
+
+		if payload.ComplexFoo.Nested != jwtTestComplexFooNested {
+			return fmt.Errorf("invalid 'foo', expected '%s', got '%s'", jwtTestComplexFooNested, payload.ComplexFoo.Nested)
 		}
 
 		return nil
@@ -79,7 +94,7 @@ func TestAccDataSourceGoogleServiceAccountJwt(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckGoogleServiceAccountJwt(jwtTestSubject, targetServiceAccountEmail),
+				Config: testAccCheckGoogleServiceAccountJwt(targetServiceAccountEmail),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServiceAccountJwtValue(resourceName, targetAudience),
 				),
@@ -88,15 +103,18 @@ func TestAccDataSourceGoogleServiceAccountJwt(t *testing.T) {
 	})
 }
 
-func testAccCheckGoogleServiceAccountJwt(subject string, targetServiceAccount string) string {
+func testAccCheckGoogleServiceAccountJwt(targetServiceAccount string) string {
 	return fmt.Sprintf(`
 data "google_service_account_jwt" "default" {
 	target_service_account = "%s"
 
-    payload = {
+    payload = jsonencode({
       sub: "%s",
-      foo: "bar",
-    }
+      foo: "%s",
+      complexFoo: {
+        nested: "%s"
+      }
+    })
 }
-`, targetServiceAccount, subject)
+`, targetServiceAccount, jwtTestSubject, jwtTestFoo, jwtTestComplexFooNested)
 }

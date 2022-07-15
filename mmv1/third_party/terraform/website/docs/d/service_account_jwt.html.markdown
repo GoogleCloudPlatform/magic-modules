@@ -19,10 +19,10 @@ Note: in order to use the following, the caller must have _at least_ `roles/iam.
 data "google_service_account_jwt" "foo" {
   target_service_account = "impersonated-account@project.iam.gserviceaccount.com"
 
-  payload = {
+  payload = jsonencode({
     foo: "bar",
     sub: "subject",
-  }
+  })
 }
 
 output "jwt" {
@@ -35,7 +35,7 @@ output "jwt" {
 The following arguments are supported:
 
 * `target_service_account` (Required) - The email of the service account that will sign the JWT.
-* `payload` (Required) - The JWT Claims Set to include in the self-signed JWT.
+* `payload` (Required) - The JSON-encoded JWT claims set to include in the self-signed JWT.
 * `delegates` (Optional) - Delegate chain of approvals needed to perform full impersonation. Specify the fully qualified service account name.
 
 ## Attributes Reference

@@ -1,7 +1,6 @@
 package google
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -15,10 +14,9 @@ func dataSourceGoogleServiceAccountJwt() *schema.Resource {
 		Read: dataSourceGoogleServiceAccountJwtRead,
 		Schema: map[string]*schema.Schema{
 			"payload": {
-				Type:        schema.TypeMap,
+				Type:        schema.TypeString,
 				Required:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: `A JWT Claims Set that will be included in the signed JWT.`,
+				Description: `A JSON-encoded JWT claims set that will be included in the signed JWT.`,
 			},
 			"target_service_account": {
 				Type:         schema.TypeString,
@@ -53,14 +51,8 @@ func dataSourceGoogleServiceAccountJwtRead(d *schema.ResourceData, meta interfac
 
 	name := fmt.Sprintf("projects/-/serviceAccounts/%s", d.Get("target_service_account").(string))
 
-	payload, err := json.Marshal(d.Get("payload").(map[string]interface{}))
-
-	if err != nil {
-		return fmt.Errorf("error marshaling payload JSON: %w", err)
-	}
-
 	jwtRequest := &iamcredentials.SignJwtRequest{
-		Payload:   string(payload),
+		Payload:   d.Get("payload").(string),
 		Delegates: convertStringSet(d.Get("delegates").(*schema.Set)),
 	}
 
