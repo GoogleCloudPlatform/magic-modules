@@ -295,7 +295,10 @@ objects:
               properties:
                 - !ruby/object:Api::Type::String
                   name: attribute
-                  description: 'Required. The name of a CloudEvents attribute.'
+                  description: |
+                    'Required. The name of a CloudEvents attribute.
+                    Currently, only a subset of attributes are supported for filtering. Use the `gcloud eventarc providers describe` command to learn more about events and their attributes.
+                    Do not filter for the 'type' attribute here, as this is already achieved by the resource's `event_type` attribute.
                 - !ruby/object:Api::Type::String
                   name: value
                   description: 'Required. The value for the attribute.'
