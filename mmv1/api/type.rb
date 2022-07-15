@@ -213,11 +213,6 @@ module Api
       check :conflicts, type: ::Array, default: [], item_type: ::String
 
       return if @conflicts.empty?
-
-      names = @__resource.all_user_properties.map(&:lineage)
-      @conflicts.each do |p|
-        raise "#{p} does not exist" unless names.include?(p)
-      end
     end
 
     # Returns list of properties that are in conflict with this property.
