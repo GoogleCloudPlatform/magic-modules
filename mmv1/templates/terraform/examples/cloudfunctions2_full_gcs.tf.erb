@@ -50,7 +50,22 @@ resource "google_project_iam_member" "gcs-pubsub-publishing" {
   role    = "roles/pubsub.publisher"
   member  = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
 }
- 
+
+# Permissions on the service account for the function and Eventarc trigger
+resource "google_project_iam_member" "invoking" {
+  provider = google-beta
+  project = google_project.project.project_id # Required argument
+  role    = "roles/run.invoker"
+  member  = "serviceAccount:${google_service_account.account.email}"
+}
+
+resource "google_project_iam_member" "event-receiving" {
+  provider = google-beta
+  project = google_project.project.project_id # Required argument
+  role    = "roles/eventarc.eventReceiver"
+  member  = "serviceAccount:${google_service_account.account.email}"
+}
+
 resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   project = google_project.project.project_id
