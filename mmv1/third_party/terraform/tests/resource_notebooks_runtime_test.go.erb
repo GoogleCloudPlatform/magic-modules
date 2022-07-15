@@ -93,6 +93,7 @@ resource "google_notebooks_runtime" "runtime" {
           disk_type = "PD_STANDARD"
         }
       }
+      reserved_ip_range = "192.168.255.0/24"
     }
   }
 }
