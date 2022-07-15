@@ -24,7 +24,7 @@ if [[ "$ASSIGNEE" == "null"  || -z "$ASSIGNEE" ]] ; then
 else
   echo "Issue is assigned, retriving previous reviewers to re-request reviews"
   REVIEWERS=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
-    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/reviews" | jq 'map(.user.login) | unique')
+    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/reviews" | jq -r 'map(.user.login) | unique | .[]')
 
 fi
 
@@ -39,15 +39,15 @@ if $(echo $USER | fgrep -wq -e megan07 -e rambleraptor -e SirGitsalot -e sleveni
 fi
 
 if [[ -n $REVIEWERS ]]; then
-  # re-request reviews from previous reviewers who are on the review rotation list
   for reviewer in $REVIEWERS
   do
     # re-request review list
+    # only re-request reviews from previous reviewers who are on the random-assignee rotation.
     # If you add people to the random-assignee rotation list below, please also add them to this list
     if $(echo $reviewer | fgrep -wq -e rileykarson -e slevenick -e c2thorn -e melinath -e ScottSuarez -e shuyama1 -e megan07); then
-    curl -H "Authorization: token ${GITHUB_TOKEN}" \
-      -d "$(jq -r --arg assignee "$reviewer" -n "{reviewers: [\$assignee], team_reviewers: []}")" \
-      "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/requested_reviewers"
+      curl -H "Authorization: token ${GITHUB_TOKEN}" \
+        -d "$(jq -r --arg assignee "$reviewer" -n "{reviewers: [\$assignee], team_reviewers: []}")" \
+        "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/requested_reviewers"
     fi
   done
   exit 0
