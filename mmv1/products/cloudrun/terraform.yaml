@@ -136,7 +136,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           cloudrun_static_ip_network: "cr-static-ip-network"
           cloudrun_static_ip: "cr-static-ip"
-          cloudrun_static_ip_conn: "cr-static-ip-conn"
+          cloudrun_static_ip_conn: "cr-conn"
           cloudrun_static_ip_router: "cr-static-ip-router"
           cloudrun_static_ip_addr: "cr-static-ip-addr"
           cloudrun_static_nat: "cr-static-nat"
