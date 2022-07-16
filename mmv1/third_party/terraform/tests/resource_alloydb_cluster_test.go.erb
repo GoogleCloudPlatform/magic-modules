@@ -1,5 +1,6 @@
 <% autogen_exception -%>
 package google
+<% unless version == 'ga' -%>
 
 import (
 	"testing"
@@ -68,3 +69,4 @@ resource "google_compute_network" "default" {
 } 
 `, context)
 }
+<% end -%>

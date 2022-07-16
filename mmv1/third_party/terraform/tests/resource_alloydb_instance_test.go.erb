@@ -1,5 +1,6 @@
 <% autogen_exception -%>
 package google
+<% unless version == 'ga' -%>
 
 import (
 	"testing"
@@ -94,3 +95,4 @@ resource "google_service_networking_connection" "vpc_connection" {
 }
 `, context)
 }
+<% end -%>
