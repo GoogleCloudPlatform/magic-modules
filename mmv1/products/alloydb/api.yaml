@@ -116,7 +116,7 @@ objects:
         name: "selfLink"
         output: true
         description: |
-          The selfLink of the alloydb cluster.          
+          The selfLink of the alloydb cluster.
       - !ruby/object:Api::Type::String
         name: "displayName"
         description: |
@@ -282,9 +282,9 @@ objects:
             description: "Type of migration source."
   - !ruby/object:Api::Resource
     name: "Instance"
-    self_link: "{{cluster}}/instances/{{instance_id}}"
-    base_url: "{{cluster}}/instances"
-    create_url: "{{cluster}}/instances?instanceId={{instance_id}}"
+    self_link: "projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}/instances/{{instance_id}}"
+    base_url: "projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}/instances"
+    create_url: "projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}/instances?instanceId={{instance_id}}"
     update_verb: :PATCH
     update_mask: true
     min_version: beta
@@ -314,17 +314,19 @@ objects:
         path: "error"
         message: "message"
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
-        name: "cluster"
+      - !ruby/object:Api::Type::String
+        name: "cluster_id"
         required: true
         input: true
         url_param_only: true
-        resource: 'Cluster'
-        imports: 'selfLink'
         description: |
           The ID of the alloydb cluster.
-          Must be in the format
-          'projects/{project}/locations/{location}/clusters/{cluster_id}'
+      - !ruby/object:Api::Type::String
+        name: "location"
+        url_param_only: true
+        input: true
+        description: |
+          The location where the alloydb cluster should reside.
       - !ruby/object:Api::Type::String
         name: "instanceId"
         required: true
@@ -416,4 +418,5 @@ objects:
         properties:
           - !ruby/object:Api::Type::Integer
             name: "cpuCount"
+            input: true
             description: "The number of CPU's in the VM instance."

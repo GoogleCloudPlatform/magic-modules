@@ -31,11 +31,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           alloydb_cluster_name: "alloydb-cluster"
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "{{cluster}}/instances/{{instance_id}}"
-    import_format: ["{{cluster}}/instances/{{instance_id}}"]
+    import_format: ["projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}/instances/{{instance_id}}", "{{instance_id}}"]
     autogen_async: true
     properties:
       availabilityType: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      machineConfig.cpuCount: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      machineConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
