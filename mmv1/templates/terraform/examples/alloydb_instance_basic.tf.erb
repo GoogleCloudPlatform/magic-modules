@@ -1,8 +1,11 @@
 resource "google_alloydb_instance" "<%= ctx[:primary_resource_id] %>" {
   provider      = google-beta
-  cluster       = google_alloydb_cluster.<%= ctx[:primary_resource_id] %>.id
+  cluster_id    = google_alloydb_cluster.<%= ctx[:primary_resource_id] %>.cluster_id
+  location      = google_alloydb_cluster.<%= ctx[:primary_resource_id] %>.location
   instance_id   = "<%= ctx[:vars]['alloydb_instance_name'] %>"
   instance_type = "PRIMARY"
+
+  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
@@ -23,4 +26,20 @@ data "google_project" "project" {
 resource "google_compute_network" "default" {
   provider = google-beta
   name = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
+}
+
+resource "google_compute_global_address" "private_ip_alloc" {
+  provider = google-beta
+  name          =  "<%= ctx[:vars]['alloydb_cluster_name'] %>"
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  prefix_length = 16
+  network       = google_compute_network.default.id
+}
+
+resource "google_service_networking_connection" "vpc_connection" {
+  provider   = google-beta
+  network                 = google_compute_network.default.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
