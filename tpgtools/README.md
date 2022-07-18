@@ -179,7 +179,7 @@ variables:
     type: "org_id"
 ```
 
-`type` is the inferred from `sample.go`'s translation map to figure out what needs
+`type` is inferred from `sample.go`'s translation map to figure out what needs
 to be placed in the field. `name` is used for substitution in the file itself and in
 the case of `resource_name`, actually used to create the value itself.
 
