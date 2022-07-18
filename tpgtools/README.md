@@ -83,6 +83,10 @@ make serialize
 ```
 
 #### Adding a Non DCL Test
+In some cases you may need to add a non DCL test when either the current
+tests are insufficient or you want to showcase/test some specific behavior
+not present in the dcl tests. 
+
 If you need to write tests manually you can add terraform templates to
 the relevant `./overrides/<product>/samples/<resource>` folder.
 
