@@ -553,6 +553,5 @@ func checkGCSName(name string) error {
 	if gPrefix {
 		return fmt.Errorf("error: string cannot start with %q %v\n", "goog", name)
 	}
-	fmt.Println(name)
 	return nil
 }
