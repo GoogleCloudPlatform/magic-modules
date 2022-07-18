@@ -127,6 +127,12 @@ type Resource struct {
 	// HasProject tells us if the resource has a project field
 	HasProject bool
 
+	// HasCreate tells us if the resource has a create method
+	HasCreate bool
+
+	// HasDelete tells us if the resource has a delete method
+	HasDelete bool
+
 	// HasSweeper says if this resource has a generated sweeper.
 	HasSweeper bool
 
@@ -563,6 +569,12 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 			}
 		}
 	}
+
+	// Determine if a resource has a create method.
+	res.HasCreate, _ = schema.Extension["x-dcl-has-create"].(bool)
+
+	// Determine if a resource has a delete method.
+	_, res.HasDelete = typeFetcher.doc.Paths["delete"]
 
 	// Determine if a resource can use a generated sweeper or not
 	// We only supply a certain set of parent values to sweepers, so only generate
