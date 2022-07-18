@@ -3786,6 +3786,8 @@ objects:
           connection does not need to match both properties for the firewall to
           apply. Only IPv4 is supported. For INGRESS traffic, one of `source_ranges`,
           `source_tags` or `source_service_accounts` is required.
+        conflicts:
+          - destination_ranges
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'sourceServiceAccounts'
@@ -3821,6 +3823,10 @@ objects:
           to match both properties for the firewall to apply. For INGRESS traffic,
           one of `source_ranges`, `source_tags` or `source_service_accounts` is required.
         item_type: Api::Type::String
+        conflicts:
+          - source_service_accounts
+          - destination_ranges
+          - target_service_accounts
       - !ruby/object:Api::Type::Array
         name: 'targetServiceAccounts'
         description: |
@@ -3843,6 +3849,9 @@ objects:
           If no targetTags are specified, the firewall rule applies to all
           instances on the specified network.
         item_type: Api::Type::String
+        conflicts:
+          - source_service_accounts
+          - target_service_accounts
   - !ruby/object:Api::Resource
     name: 'ForwardingRule'
     kind: 'compute#forwardingRule'
