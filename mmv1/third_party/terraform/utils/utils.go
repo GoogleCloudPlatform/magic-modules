@@ -529,7 +529,6 @@ func fake404(reasonResourceType, resourceName string) *googleapi.Error {
 
 // validate name of the gcs bucket.
 func checkGCSName(name string) error {
-
 	MAX_LENGTH := 63
 	if strings.Contains(name, ".") {
 		var err error
