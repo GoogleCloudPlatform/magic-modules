@@ -393,9 +393,8 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 
 	// Get the bucket and location
 	bucket := d.Get("name").(string)
-	bucketConstraint, _ := regexp.MatchString("[goog][a-z0-9][a-z0-9_.-]{1,220}[a-z0-9]", bucket)
-	if bucketConstraint {
-		return fmt.Errorf("eror: bucket name does not meet the requirements. refer- https://cloud.google.com/storage/docs/naming-buckets")
+	if err := checkGCSName(bucket); err != nil {
+		return err
 	}
 	location := d.Get("location").(string)
 
