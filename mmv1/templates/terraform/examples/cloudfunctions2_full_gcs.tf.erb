@@ -9,7 +9,7 @@ resource "google_project" "project" {
 
 
 locals {
-  enabled_services = set([
+  enabled_services = toset([
     "iam.googleapis.com",
     "cloudfunctions.googleapis.com",
     "eventarc.googleapis.com",
