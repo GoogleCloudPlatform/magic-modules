@@ -1,0 +1,10 @@
+{
+  "model": "projects/{{project}}/locations/{{region}}/models/{{ref:basic.model.json:name}}",
+  "endpoint": "projects/{{project}}/locations/{{region}}/endpoints/{{ref:minimal.endpoint.json:name}}",
+  "dedicatedResources": {
+    "machineSpec": {
+      "machineType": "n1-standard-2"
+    },
+    "minReplicaCount": 1
+  }
+}
