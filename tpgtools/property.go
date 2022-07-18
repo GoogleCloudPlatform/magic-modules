@@ -313,14 +313,10 @@ func (p Property) DefaultStateSetter() string {
 	case SchemaTypeMap:
 		return fmt.Sprintf("d.Set(%q, res.%s)", p.Name(), p.PackageName)
 	case SchemaTypeList, SchemaTypeSet:
-		if p.Type.typ.Items != nil && p.Type.typ.Items.Type == "string" {
+		if p.typ.Items != nil && ((p.typ.Items.Type == "string" && len(p.typ.Items.Enum) == 0) || p.typ.Items.Type == "integer") {
 			return fmt.Sprintf("d.Set(%q, res.%s)", p.Name(), p.PackageName)
 		}
-		if p.Type.typ.Items != nil && p.Type.typ.Items.Type == "integer" {
-			return fmt.Sprintf("d.Set(%q, res.%s)", p.Name(), p.PackageName)
-		}
-
-		if p.Type.typ.Items != nil && len(p.Properties) > 0 {
+		if p.typ.Items != nil && (len(p.Properties) > 0 || len(p.typ.Items.Enum) > 0) {
 			return fmt.Sprintf("d.Set(%q, flatten%s%sArray(res.%s))", p.Name(), p.resource.PathType(), p.PackagePath(), p.PackageName)
 		}
 	}
