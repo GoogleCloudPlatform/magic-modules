@@ -178,6 +178,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           cloudrun_service_name: "ingress-service"
         min_version: beta
       - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_interservice"
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "default"
+        skip_docs: true
+        vars:
+          private_service_name: "private-service"
+      - !ruby/object:Provider::Terraform::Examples
         name: "eventarc_basic_tf"
         primary_resource_id: "default"
         vars:
@@ -282,6 +289,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           cloud_tasks_queue_name: "cloud-tasks-queue-name"
         test_env_vars:
           project: :PROJECT_NAME
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudrun_service_identity"
+        primary_resource_id: "default"
+        skip_docs: true
+        vars:
+          cloud_run_srv: "cloud-run-srv"
         min_version: beta
     virtual_fields:
       - !ruby/object:Api::Type::Boolean

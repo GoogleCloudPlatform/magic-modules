@@ -150,6 +150,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_bucket_basic"
         primary_resource_id: "image_backend"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-image-backend-bucket%s\", context[\"random_suffix\"])"
         vars:
           backend_bucket_name: "image-backend-bucket"
           bucket_name: "image-store-bucket"
@@ -176,6 +177,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "image_backend"
         vars:
           backend_bucket_name: "image-backend-bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_bucket_bypass_cache"
+        primary_resource_id: "image_backend"
+        skip_docs: true        
+        vars:
+          backend_bucket_name: "image-backend-bucket"
+          bucket_name: "image-store-bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_bucket_coalescing"
+        primary_resource_id: "image_backend"
+        skip_docs: true
+        vars:
+          backend_bucket_name: "image-backend-bucket"
+          bucket_name: "image-store-bucket"          
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
       post_update: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
@@ -3394,9 +3409,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "vpn_tunnel_basic"
         primary_resource_id: "tunnel1"
         vars:
-          vpn_tunnel_name: "tunnel1"
-          target_vpn_gateway_name: "vpn1"
-          network_name: "network1"
+          vpn_tunnel_name: "tunnel-1"
+          target_vpn_gateway_name: "vpn-1"
+          network_name: "network-1"
           address_name: "vpn-static-ip"
           esp_forwarding_rule_name: "fr-esp"
           udp500_forwarding_rule_name: "fr-udp500"
@@ -3407,9 +3422,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "tunnel1"
         min_version: beta
         vars:
-          vpn_tunnel_name: "tunnel1"
-          target_vpn_gateway_name: "vpn1"
-          network_name: "network1"
+          vpn_tunnel_name: "tunnel-1"
+          target_vpn_gateway_name: "vpn-1"
+          network_name: "network-1"
           address_name: "vpn-static-ip"
           esp_forwarding_rule_name: "fr-esp"
           udp500_forwarding_rule_name: "fr-udp500"

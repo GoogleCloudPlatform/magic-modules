@@ -27,7 +27,7 @@ resource "google_project_service" "scheduler_api" {
   disable_on_destroy         = false
 }
 
-# [START cloudrun_service_scheduled]
+# [START cloudrun_service_scheduled_service]
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   project  = "<%= ctx[:test_env_vars]['project'] %>"
@@ -52,7 +52,9 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
     google_project_service.run_api
   ]
 }
+# [END cloudrun_service_scheduled_service]
 
+# [START cloudrun_service_scheduled_sa]
 resource "google_service_account" "default" {
   provider = google-beta
   project      = "<%= ctx[:test_env_vars]['project'] %>"
@@ -65,7 +67,9 @@ resource "google_service_account" "default" {
     google_project_service.iam_api
   ]
 }
+# [END cloudrun_service_scheduled_sa]
 
+# [START cloudrun_service_scheduled_job]
 resource "google_cloud_scheduler_job" "default" {
   provider = google-beta
   name             = "<%= ctx[:vars]['scheduled_cloud_run_job'] %>"
@@ -92,7 +96,9 @@ resource "google_cloud_scheduler_job" "default" {
     google_project_service.scheduler_api
   ]
 }
+# [END cloudrun_service_scheduled_job]
 
+# [START cloudrun_service_scheduled_iam]
 resource "google_cloud_run_service_iam_member" "default" {
   project = "<%= ctx[:test_env_vars]['project'] %>"
   location = google_cloud_run_service.default.location
@@ -100,4 +106,4 @@ resource "google_cloud_run_service_iam_member" "default" {
   role = "roles/run.invoker"
   member = "serviceAccount:${google_service_account.default.email}"
 }
-# [END cloudrun_service_scheduled]
+# [END cloudrun_service_scheduled_iam]
