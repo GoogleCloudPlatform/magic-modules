@@ -1,0 +1,5 @@
+{
+  "project": "{{project}}",
+  "location": "{{region}}",
+  "displayName": "sample-endpoint"
+}
