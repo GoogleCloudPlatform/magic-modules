@@ -5,7 +5,6 @@ resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
     name          = "<%= ctx[:vars]['static_website_bucket'] %>"
     location      = "US"
     storage_class = "COLDLINE"
-    uniform_bucket_level_access = true
     website {
         main_page_suffix = "<%= ctx[:vars]['main_page_suffix'] %>"
         not_found_page = "<%= ctx[:vars]['main_page_suffix'] %>"
