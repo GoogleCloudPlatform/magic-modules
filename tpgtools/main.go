@@ -75,6 +75,7 @@ func main() {
 		terraformResourceDirectory = "google-private"
 	}
 
+	generatedResources := make([]*Resource, 0, len(resourcesForVersion))
 	for _, resource := range resourcesForVersion {
 		if skipResource(resource) {
 			continue
@@ -84,7 +85,11 @@ func main() {
 		generateResourceFile(resource)
 		generateSweeperFile(resource)
 		generateResourceTestFile(resource)
+		generatedResources = append(generatedResources, resource)
 	}
+
+	generateProviderResourcesFile(generatedResources)
+
 	// GA website files are always generated for the beta version.
 	websiteVersion := *version
 	if *version == GA_VERSION {
@@ -470,6 +475,31 @@ func generateResourceTestFile(res *Resource) {
 	}
 }
 
+func generateProviderResourcesFile(resources []*Resource) {
+	tmpl, err := template.New("provider_dcl_resources.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
+		"templates/provider_dcl_resources.go.tmpl",
+	)
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	contents := bytes.Buffer{}
+	if err = tmpl.ExecuteTemplate(&contents, "provider_dcl_resources.go.tmpl", resources); err != nil {
+		glog.Exit(err)
+	}
+
+	formatted, err := formatSource(&contents)
+	if err != nil {
+		glog.Error(fmt.Errorf("error formatting package provider_dcl_resource.go.tmpl file: \n%w", err))
+	}
+
+	if oPath == nil || *oPath == "" {
+		fmt.Print(string(formatted))
+	} else if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, "provider_dcl_resources.go"), formatted, 0644); err != nil {
+		glog.Exit(err)
+	}
+}
+
 func generateProductsFile(fileName string, products []*ProductMetadata) {
 	if len(products) <= 0 {
 		return
@@ -488,21 +518,16 @@ func generateProductsFile(fileName string, products []*ProductMetadata) {
 		glog.Exit(err)
 	}
 
-	if err != nil {
-		glog.Exit(err)
-	}
-
 	formatted, err := formatSource(&contents)
 	if err != nil {
 		glog.Error(fmt.Errorf("error formatting package %s file: \n%w", fileName, err))
 	}
 
 	if oPath == nil || *oPath == "" {
-		fmt.Printf("%v", string(formatted))
+		fmt.Print(string(formatted))
 	} else {
-		outname := fmt.Sprintf(fileName + ".go")
-		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
-		if err != nil {
+		outname := fileName + ".go"
+		if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644); err != nil {
 			glog.Exit(err)
 		}
 	}
