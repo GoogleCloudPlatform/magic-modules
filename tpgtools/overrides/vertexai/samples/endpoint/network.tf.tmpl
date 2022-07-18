@@ -1,0 +1,33 @@
+resource "google_vertex_ai_endpoint" "primary" {
+  display_name = "sample-endpoint"
+  description  = "A sample vertex endpoint"
+  location     = "{{region}}"
+  labels       = {
+    label-one = "value-one"
+  }
+  network      = google_compute_network.vertex_network.id
+  project      = "{{project}}"
+  depends_on   = [
+    google_service_networking_connection.vertex_vpc_connection
+  ]
+}
+
+resource "google_service_networking_connection" "vertex_vpc_connection" {
+  network                 = google_compute_network.vertex_network.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.vertex_range.name]
+}
+
+resource "google_compute_global_address" "vertex_range" {
+  name          = "{{address}}"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 24
+  network       = google_compute_network.vertex_network.id
+  project       = "{{project}}"
+}
+
+resource "google_compute_network" "vertex_network" {
+  name       = "{{network}}"
+  project    = "{{project}}"
+}
