@@ -32,7 +32,7 @@ fi
 if [[ "$ASSIGNEE" == "null"  || -z "$ASSIGNEE" ]] ; then
   echo "Issue is not assigned."
 else
-  echo "Issue is assigned, retriving previous reviewers to re-request reviews"
+  echo "Issue is assigned, retrieving previous reviewers to re-request reviews"
   REVIEWERS=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
     "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/reviews" | jq -r 'map(.user.login) | unique | .[]')
   for reviewer in $REVIEWERS
