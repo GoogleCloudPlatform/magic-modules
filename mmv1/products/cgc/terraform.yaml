@@ -577,6 +577,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           example_bucket_name: "example-bucket-name"
           your_topic_name: "your_topic_name"
         min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "storage_static_website"
+        primary_resource_type: "google_storage_bucket"
+        primary_resource_id: "static_website"
+        vars:
+          static_website_bucket: "static-website-bucket"
+          main_page_suffix: "index.html"
+          not_found_page: "404.html"
     properties:
 
 
