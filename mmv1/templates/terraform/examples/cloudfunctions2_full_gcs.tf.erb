@@ -1,9 +1,28 @@
 # [START functions_v2_full]
 resource "google_project" "project" {
+  provider        = google-beta
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
   org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
   billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
+}
+
+
+locals {
+  enabled_services = set([
+    "iam.googleapis.com",
+    "cloudfunctions.googleapis.com",
+    "eventarc.googleapis.com",
+  ])
+}
+
+resource "google_project_service" "enabled_services" {
+  for_each     = local.enabled_services
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = each.value
+
+  disable_dependent_services = true
 }
 
 resource "google_service_account" "account" {
