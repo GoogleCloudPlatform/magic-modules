@@ -21,7 +21,6 @@ import (
 	"strings"
 
 	"bitbucket.org/creachadair/stringset"
-	"github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	"github.com/nasa9084/go-openapi"
 )
 
@@ -54,10 +53,6 @@ func findResourceID(schema *openapi.Schema, overrides Overrides, location string
 	if !ok {
 		return "", false, fmt.Errorf("Malformed or missing x-dcl-id: %v", schema.Extension["x-dcl-id"])
 	}
-
-	// Replace the camel case parameters in x-dcl-id with snake case.
-	r := regexp.MustCompile(PatternPart)
-	id = r.ReplaceAllStringFunc(id, dcl.TitleToSnakeCase)
 
 	// Resource Override: Custom ID
 	cid := CustomIDDetails{}
