@@ -1,0 +1,36 @@
+{
+  "project": "{{project}}",
+  "location": "{{region}}",
+  "versionAliases": ["default", "v1", "v2"],
+  "displayName": "sample-model",
+  "description": "A sample model",
+  "versionDescription": "A sample model version",
+  "containerSpec": {
+    "imageUri": "us-docker.pkg.dev/vertex-ai/prediction/xgboost-cpu.1-5:latest",
+    "command": ["sample", "command"],
+    "args": ["sample", "args"],
+    "env": [
+      {
+        "name": "env_one",
+        "value": "value_one"
+      }
+    ],
+    "ports": [
+      {
+        "containerPort": 8080
+      }
+    ],
+    "predictRoute": "/predict",
+    "healthRoute": "/health",
+    "acceleratorRequirements": [
+      {
+        "type": "CORAL_EDGE_TPU",
+        "count": 1
+      }
+    ]
+  },
+  "artifactUri": "gs://cloud-samples-data/vertex-ai/google-cloud-aiplatform-ci-artifacts/models/iris_xgboost/",
+  "labels": {
+    "label-one": "value-one"
+  }
+}
