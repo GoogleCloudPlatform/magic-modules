@@ -226,7 +226,134 @@ See [Tests that use a beta feature](#tests-that-use-a-beta-feature)
 
 ### Beta Feature
 
-#### Add or update a beta feature
+When the underlying API of a feature is not final (i.e. a `vN` version like
+`v1` or `v2`), is in preview, or the API has no SLO we add it to the
+`google-beta` provider rather than the `google `provider, allowing users to
+self-select for the stability level they are comfortable with.
+
+Both the `google` and `google-beta` providers operate off of a shared codebase,
+including for handwritten code. MMv1 allows us to write Go source files as
+`.go.erb` templated source, and renders them as `.go` files in the downstream
+repo.
+
+The sole generator feature you need to be aware of is a "version guard", what is
+effectively a preprocessor directive implemented using Embedded Ruby (ERB). A
+version guard is a snippet used across this codebase by convention guarding
+versioned code on an `unless` clause in a version check. For example:
+
+```
+	networkInterfaces, err := expandNetworkInterfaces(d, config)
+	if err != nil {
+		return nil, fmt.Errorf("Error creating network interfaces: %s", err)
+	}
+<% unless version == 'ga' -%>
+	networkPerformanceConfig, err := expandNetworkPerformanceConfig(d, config)
+	if err != nil {
+		return nil, fmt.Errorf("Error creating network performance config: %s", err)
+	}
+<% end -%>
+```
+
+In the snippet above, the `networkInterfaces` field is generally available and
+is not guarded. The `networkPerformanceConfig` field is only available at beta,
+and is guarded by `unless version == ga`, and the guarded block is terminated by
+an `end` statement.
+
+If a service includes handwritten resources and mixed features or resources at
+different versions, the client libraries used by each provider must be switched
+using guards so that the stability level of the client library matches that of
+the provider. For example, all handwritten Google Compute Engine (GCE) files
+have the following guarded import:
+
+```
+<% if version == "ga" -%>
+	"google.golang.org/api/compute/v1"
+<% else -%>
+	compute "google.golang.org/api/compute/v0.beta"
+<% end -%>
+```
+
+This is not necessary for beta-only services, or for services that are generally
+available in their entirety.
+
+#### Adding a beta resource
+
+MMv1 doesn't selectively generate files, and any file that is beta-only must
+have all of its contents guarded. When writing a resource that's available at
+beta, start with the following snippet:
+
+```
+
+<% autogen_exception -%>
+package google
+
+<% unless version == 'ga' -%>
+
+// Add the implementation of the file here
+
+<% end ->
+```
+
+This will generate a blank file in the `google` provider. The resource file,
+resource test file, and any service or resource specific utility files should be
+guarded in this way.
+
+Documentation **should not** be guarded. Instead, write it as normal including
+the following snippet above the first example.
+
+```
+~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
+```
+
+When registering the resource in
+[`provider.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/utils/provider.go.erb),
+the entry should be guarded:
+
+```diff
+				"google_monitoring_dashboard":                  resourceMonitoringDashboard(),
++				<% unless version == 'ga' -%>
++				"google_project_service_identity":              resourceProjectServiceIdentity(),
++				<% end -%>
+				"google_service_networking_connection":         resourceServiceNetworkingConnection(),
+```
+
+If this is a new service entirely, all service-specific entries like client
+factory initialization should be guarded as well. However, new services should
+generally be implemented using an alternate engine- either MMv1 or tpgtools/DCL.
+
+#### Adding beta field(s)
+
+By contrast to beta resources, adding support for a beta field is much more
+involved as small snippets of code throughout a resource file must be annotated.
+
+To begin with, add the field to the `Schema` of the resource with guards, i.e.:
+
+```
+<% unless version == 'ga' -%>
+			"network_performance_config": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				ForceNew:    true,
+				Description: `Configures network performance settings for the instance. If not specified, the instance will be created with its default network performance configuration.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"total_egress_bandwidth_tier": {
+							// ...
+						},
+					},
+				},
+			},
+<% end -%>
+```
+
+Next, implement the d.Get/d.Set calls (for top level fields) or
+expanders/flatteners for nested fields within guards.
+
+Even if there are other guarded fields, it's recommended that you add distinct
+guards per feature- that way, promotion (covered below) will be simpler as
+you'll only need to remove lines rather that move them around.
 
 #### Tests that use a beta feature
 
@@ -242,4 +369,44 @@ end in `.go.erb`.
 <% end -%>
 ```
 
+Otherwise, tests using a beta feature are written exactly the same as tests
+using a GA one. Normally to use the beta provider, it's necessary to specify
+`provider = google-beta`, as Terraform maps any resources prefixed with
+`google_` to the `google` provider by default. However, inside the test
+framework, the `google-beta` provider has been aliased as the `google` provider
+and that is not necessary.
+
+Note: You _may_ use version guards to test different configurations between the
+GA and beta provider tests, but it's strongly recommended that you write
+different test cases instead, even if they're slightly duplicative.
+
 #### Promote a beta feature
+
+"Promoting" a beta feature- making it available in the GA `google` provider when
+the underlying feature or service has gone GA- requires removing the version
+guards placed previously, so that the previously beta-only code is generated in
+the `google` provider as well.
+
+For all promotions, ensure that you remove the guards in:
+
+* The documentation for the resource or field
+* The test(s) for the resource or field.
+
+For whole resource promotions, you'll generally only need to remove the file-level
+guards.
+
+For field promotions ensure that you remove the guards in:
+
+* The Resource schema
+* The Resource CRUD methods (for top level fields)
+* The Resource Expanders and Flatteners (for nested fields)
+
+When writing a changelog entry for a promotion, write it as if it was a new
+field or resource, and suffix it with `(ga only)`. For example, if the
+`google_container_cluster` resource was promoted to GA in your change:
+
+```
+\`\`\`release-note:new-resource
+`google_container_cluster` (ga only)
+\`\`\`
+```
