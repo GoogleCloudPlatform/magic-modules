@@ -11,6 +11,16 @@ PR_NUMBER=$1
 
 set -x
 
+USER=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
+  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}" | jq .user.login)
+
+# This is where you add users who do not need to have an assignee chosen for
+# them.
+if $(echo $USER | fgrep -wq -e megan07 -e rambleraptor -e SirGitsalot -e slevenick -e c2thorn -e rileykarson -e melinath -e ScottSuarez -e shuyama1); then
+  echo "User is on the list, not assigning."
+  exit 0
+fi
+
 ASSIGNEE=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/requested_reviewers" | jq .users[0].login)
 
@@ -25,19 +35,6 @@ else
   echo "Issue is assigned, retriving previous reviewers to re-request reviews"
   REVIEWERS=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
     "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/reviews" | jq -r 'map(.user.login) | unique | .[]')
-fi
-
-USER=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
-  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}" | jq .user.login)
-
-# This is where you add users who do not need to have an assignee chosen for
-# them.
-if $(echo $USER | fgrep -wq -e megan07 -e rambleraptor -e SirGitsalot -e slevenick -e c2thorn -e rileykarson -e melinath -e ScottSuarez -e shuyama1); then
-  echo "User is on the list, not assigning."
-  exit 0
-fi
-
-if [[ -n $REVIEWERS ]]; then
   for reviewer in $REVIEWERS
   do
     # re-request review list
