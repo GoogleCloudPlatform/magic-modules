@@ -165,7 +165,7 @@ Adding samples is essential for generating tests and documentation. In fact Docu
 
 Tests come from two sources.
   * The top level api (`./api`) folder. If you look in here you'll see a bunch of yaml files
-  and json files. These are DCL tests ! Forked from the dcl library.
+  and json files. These are DCL tests! Forked from the dcl library.
   * The override folder (`./overrides/<product>/samples/<resource>`).
   This contains `meta.yaml` a file used for managing resource-wide test configurations and custom
   non-dcl tests.
