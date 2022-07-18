@@ -530,27 +530,24 @@ func fake404(reasonResourceType, resourceName string) *googleapi.Error {
 // validate name of the gcs bucket.
 func checkGCSName(name string) error {
 	MAX_LENGTH := 63
-	if strings.Contains(name, ".") {
-		var err error
-		for _, str := range strings.Split(name, ".") {
-			err = checkGCSName(str)
-			if err != nil {
-				break
-			}
+	var err error
+	for _, str := range strings.Split(name, ".") {
+		strLen := len(str)
+		fmt.Println(str)
+		if strLen > MAX_LENGTH {
+			return fmt.Errorf("error: maximum length exceeded %v\n", str)
 		}
-		return err
-	}
-	strLen := len(name)
-	if strLen > MAX_LENGTH {
-		return fmt.Errorf("error: maximum length exceeded %v\n", name)
-	}
-	notValid, _ := regexp.MatchString("[A-Z]", name)
-	if notValid {
-		return fmt.Errorf("error: string contains upper case characters %v\n", name)
-	}
-	gPrefix := strings.HasPrefix(name, "goog")
-	if gPrefix {
-		return fmt.Errorf("error: string cannot start with %q %v\n", "goog", name)
+		valid, _ := regexp.MatchString("^[a-z0-9]+(-[a-z0-9]+)*$", str)
+		if !valid {
+			return fmt.Errorf("error: string validation failed %v\n", str)
+		}
+		gPrefix := strings.HasPrefix(str, "goog")
+		if gPrefix {
+			return fmt.Errorf("error: string cannot start with %q %v\n", "goog", str)
+		}
+		if err != nil {
+			break
+		}
 	}
 	return nil
 }
