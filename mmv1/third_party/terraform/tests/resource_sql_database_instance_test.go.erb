@@ -334,6 +334,24 @@ func TestAccSqlDatabaseInstance_settings_deletionProtection(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_maintenanceVersionWithOtherFields(t *testing.T) {
+        t.Parallel()
+
+        databaseName := "tf-test-" + randString(t, 10)
+
+        vcrTest(t, resource.TestCase{
+                PreCheck:     func() { testAccPreCheck(t) },
+                Providers:    testAccProviders,
+                CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
+                Steps: []resource.TestStep{
+                        {
+                                Config: fmt.Sprintf(
+                                        testGoogleSqlDatabaseInstance_maintenanceVersionWithOtherFields, databaseName, databaseName),
+                        },
+                },
+        })
+}
+
 func TestAccSqlDatabaseInstance_settings_checkServiceNetworking(t *testing.T) {
 	t.Parallel()
 
@@ -1513,6 +1531,22 @@ resource "google_sql_database_instance" "instance" {
     }
 
     activation_policy = "ALWAYS"
+  }
+}
+`
+var testGoogleSqlDatabaseInstance_maintenanceVersionWithOtherFields = `
+resource "google_compute_network" "maintver" {
+  name                    = "%s"
+}
+
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+  maintenance_version = "MYSQL_5_7_37.R20210508.01_03"
+  settings {
+    tier = "db-f1-micro"
   }
 }
 `
