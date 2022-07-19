@@ -11,6 +11,16 @@ PR_NUMBER=$1
 
 set -x
 
+USER=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
+  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}" | jq .user.login)
+
+# This is where you add users who do not need to have an assignee chosen for
+# them.
+if $(echo $USER | fgrep -wq -e megan07 -e rambleraptor -e SirGitsalot -e slevenick -e c2thorn -e rileykarson -e melinath -e ScottSuarez -e shuyama1); then
+  echo "User is on the list, not assigning."
+  exit 0
+fi
+
 ASSIGNEE=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/requested_reviewers" | jq .users[0].login)
 
@@ -22,24 +32,27 @@ fi
 if [[ "$ASSIGNEE" == "null"  || -z "$ASSIGNEE" ]] ; then
   echo "Issue is not assigned."
 else
-  echo "Issue is assigned, not assigning."
+  echo "Issue is assigned, retrieving previous reviewers to re-request reviews"
+  REVIEWERS=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
+    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/reviews" | jq -r 'map(.user.login) | unique | .[]')
+  for reviewer in $REVIEWERS
+  do
+    # re-request review list
+    # only re-request reviews from previous reviewers who are on the random-assignee rotation.
+    # If you add people to the random-assignee rotation list below, please also add them to this list
+    if $(echo $reviewer | fgrep -wq -e rileykarson -e slevenick -e c2thorn -e melinath -e ScottSuarez -e shuyama1 -e megan07); then
+      curl -H "Authorization: token ${GITHUB_TOKEN}" \
+        -d "$(jq -r --arg assignee "$reviewer" -n "{reviewers: [\$assignee], team_reviewers: []}")" \
+        "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/requested_reviewers"
+    fi
+  done
   exit 0
 fi
 
-USER=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
-  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}" | jq .user.login)
-
-# This is where you add users who do not need to have an assignee chosen for
-# them.
-if $(echo $USER | fgrep -wq -e megan07 -e rambleraptor -e SirGitsalot -e slevenick -e c2thorn -e rileykarson -e melinath -e ScottSuarez -e shuyama1); then
-  echo "User is on the list, not assigning."
-  exit 0
-fi
-
-# This is where you add people to the random-assignee rotation.  This list
-# might not equal the list above.
-ASSIGNEE=$(shuf -n 1 <(printf "rileykarson\nc2thorn\nslevenick\nscottsuarez\nshuyama1\nmegan07"))
-
+# This is where you add people to the random-assignee rotation. This list
+# might not equal the list of users who do not need to have an assigne.
+# If you add people to this list, please also add them to the re-request review list above
+ASSIGNEE=$(shuf -n 1 <(printf "rileykarson\nc2thorn\nslevenick\nscottsuarez\nshuyama1\nmegan07\nmelinath"))
 comment=$(cat << EOF
 Hello!  I am a robot who works on Magic Modules PRs.
 

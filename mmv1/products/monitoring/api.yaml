@@ -347,6 +347,16 @@ objects:
                      The absolute number of time series
                      that must fail the predicate for the
                      condition to be triggered.
+              - !ruby/object:Api::Type::Enum
+                name: evaluationMissingData
+                description: |
+                  A condition control that determines how
+                  metric-threshold conditions are evaluated when
+                  data stops arriving.
+                values:
+                  - :EVALUATION_MISSING_DATA_INACTIVE
+                  - :EVALUATION_MISSING_DATA_ACTIVE
+                  - :EVALUATION_MISSING_DATA_NO_OP
            - !ruby/object:Api::Type::NestedObject
              name: conditionThreshold
              description: |
@@ -734,6 +744,16 @@ objects:
                   resource labels, and metric labels. This
                   field may not exceed 2048 Unicode characters
                   in length.
+              - !ruby/object:Api::Type::Enum
+                name: evaluationMissingData
+                description: |
+                  A condition control that determines how
+                  metric-threshold conditions are evaluated when
+                  data stops arriving.
+                values:
+                  - :EVALUATION_MISSING_DATA_INACTIVE
+                  - :EVALUATION_MISSING_DATA_ACTIVE
+                  - :EVALUATION_MISSING_DATA_NO_OP
            - !ruby/object:Api::Type::String
              name: displayName
              required: true
