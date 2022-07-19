@@ -52,7 +52,7 @@ for Cloud IOT Registries.
 
 `parent_resource_attribute` - (Required) determines the field name of the parent
 resource reference in the IAM resources. Generally, this should be the singular
-form of the parent resource kind in camel case, i.e. `registries` -> `registry`
+form of the parent resource kind in snake case, i.e. `registries` -> `registry`
 or `backendServices` -> `backend_service`.
 
 `method_name_separator` - (Required) should be set to the character preceding
