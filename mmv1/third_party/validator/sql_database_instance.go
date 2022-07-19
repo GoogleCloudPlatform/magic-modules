@@ -97,20 +97,20 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, secondGen bool)
 	_settings := configured[0].(map[string]interface{})
 	settings := &sqladmin.Settings{
 		// Version is unset in Create but is set during update
-		SettingsVersion:             int64(_settings["version"].(int)),
-		Tier:                        _settings["tier"].(string),
-		ForceSendFields:             []string{"StorageAutoResize"},
-		ActivationPolicy:            _settings["activation_policy"].(string),
-		AvailabilityType:            _settings["availability_type"].(string),
-		DataDiskSizeGb:              int64(_settings["disk_size"].(int)),
-		DataDiskType:                _settings["disk_type"].(string),
-		PricingPlan:                 _settings["pricing_plan"].(string),
-		UserLabels:                  convertStringMap(_settings["user_labels"].(map[string]interface{})),
-		BackupConfiguration:         expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
-		DatabaseFlags:               expandDatabaseFlags(_settings["database_flags"].([]interface{})),
-		IpConfiguration:             expandIpConfiguration(_settings["ip_configuration"].([]interface{})),
-		LocationPreference:          expandLocationPreference(_settings["location_preference"].([]interface{})),
-		MaintenanceWindow:           expandMaintenanceWindow(_settings["maintenance_window"].([]interface{})),
+		SettingsVersion:     int64(_settings["version"].(int)),
+		Tier:                _settings["tier"].(string),
+		ForceSendFields:     []string{"StorageAutoResize"},
+		ActivationPolicy:    _settings["activation_policy"].(string),
+		AvailabilityType:    _settings["availability_type"].(string),
+		DataDiskSizeGb:      int64(_settings["disk_size"].(int)),
+		DataDiskType:        _settings["disk_type"].(string),
+		PricingPlan:         _settings["pricing_plan"].(string),
+		UserLabels:          convertStringMap(_settings["user_labels"].(map[string]interface{})),
+		BackupConfiguration: expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
+		DatabaseFlags:       expandDatabaseFlags(_settings["database_flags"].([]interface{})),
+		IpConfiguration:     expandIpConfiguration(_settings["ip_configuration"].([]interface{})),
+		LocationPreference:  expandLocationPreference(_settings["location_preference"].([]interface{})),
+		MaintenanceWindow:   expandMaintenanceWindow(_settings["maintenance_window"].([]interface{})),
 	}
 
 	// 1st Generation instances don't support the disk_autoresize parameter
@@ -173,6 +173,7 @@ func expandLocationPreference(configured []interface{}) *sqladmin.LocationPrefer
 	return &sqladmin.LocationPreference{
 		FollowGaeApplication: _locationPreference["follow_gae_application"].(string),
 		Zone:                 _locationPreference["zone"].(string),
+		SecondaryZone:        _locationPreference["secondary_zone"].(string),
 	}
 }
 
