@@ -17,7 +17,8 @@ Handwritten resources like [google_container_cluster](https://registry.terraform
     - [Testing Beta Features](#testing-beta-features)
   - [Documentation](#documentation)
   - [Beta Feature](#beta-feature)
-    - [Add or update a beta feature](#add-or-update-a-beta-feature)
+    - [Adding a beta resource](#adding-a-beta-resource)
+    - [Adding beta field(s)](#adding-beta-fields)
     - [Tests that use a beta feature](#tests-that-use-a-beta-feature)
     - [Promote a beta feature](#promote-a-beta-feature)
 
@@ -393,7 +394,7 @@ For all promotions, ensure that you remove the guards in:
 * The test(s) for the resource or field.
 
 For whole resource promotions, you'll generally only need to remove the file-level
-guards.
+guards and the guards on the resource registration in `provider.go.erb`.
 
 For field promotions ensure that you remove the guards in:
 
@@ -408,5 +409,14 @@ field or resource, and suffix it with `(ga only)`. For example, if the
 ```
 \`\`\`release-note:new-resource
 `google_container_cluster` (ga only)
+\`\`\`
+```
+
+Alternatively, for field promotions, you may use "{{service}}: promoted
+{{field}} in {{resource}} to GA", i.e.
+
+```
+\`\`\`release-note:enhancement
+container: promoted `node_locations` field in google_container_cluster` to GA
 \`\`\`
 ```
