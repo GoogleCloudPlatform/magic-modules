@@ -1,7 +1,3 @@
-// This example allows the list of managed domains to be modified and will
-// recreate the ssl certificate and update the target https proxy correctly
-
-//certificate map resource
 resource "google_compute_target_https_proxy" "default" {
   name             = "test-proxy"
   url_map          = google_compute_url_map.default.id

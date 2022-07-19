@@ -252,7 +252,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
-          A human-readable description of the resource.
+          One or more paragraphs of text description of a certificate map entry.
       - !ruby/object:Api::Type::String
         name: 'createTime'
         output: true
