@@ -229,12 +229,6 @@ func (r Resource) TerraformName() SnakeCaseFullName {
 	return SnakeCaseFullName(concatenateSnakeCase(googlePrefix, r.ProductName(), r.Name()))
 }
 
-// TerraformName is the Terraform resource type used for the sidebar_current field in documentation.
-// For example, "google-compute-instance"
-func (r Resource) SidebarCurrentName() KebabCaseTerraformResourceName {
-	return KebabCaseTerraformResourceName(r.TerraformName().ToKebab())
-}
-
 // PathType is the title-cased name of a resource preceded by its package,
 // often used to namespace functions. For example, "RedisInstance".
 func (r Resource) PathType() TitleCaseFullName {
