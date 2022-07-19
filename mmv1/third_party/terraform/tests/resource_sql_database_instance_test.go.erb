@@ -334,7 +334,7 @@ func TestAccSqlDatabaseInstance_settings_deletionProtection(t *testing.T) {
 	})
 }
 
-func TestAccSqlDatabaseInstance_maintenanceVersionWithOtherFields(t *testing.T) {
+func TestAccSqlDatabaseInstance_maintenanceVersionWithOldVersion_suppressConfig(t *testing.T) {
         t.Parallel()
 
         databaseName := "tf-test-" + randString(t, 10)
@@ -346,7 +346,7 @@ func TestAccSqlDatabaseInstance_maintenanceVersionWithOtherFields(t *testing.T) 
                 Steps: []resource.TestStep{
                         {
                                 Config: fmt.Sprintf(
-                                        testGoogleSqlDatabaseInstance_maintenanceVersionWithOtherFields, databaseName, databaseName),
+                                        testGoogleSqlDatabaseInstance_maintenanceVersionWithOldVersion, databaseName, databaseName),
                         },
                 },
         })
@@ -1534,7 +1534,7 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 `
-var testGoogleSqlDatabaseInstance_maintenanceVersionWithOtherFields = `
+var testGoogleSqlDatabaseInstance_maintenanceVersionWithOldVersion = `
 resource "google_compute_network" "maintver" {
   name                    = "%s"
 }
