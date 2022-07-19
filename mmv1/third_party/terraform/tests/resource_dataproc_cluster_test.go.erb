@@ -9,9 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-<% unless version == "ga" -%>
 	"time"
-<% end -%>
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -644,7 +642,6 @@ func TestAccDataprocCluster_withOptionalComponents(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccDataprocCluster_withLifecycleConfigIdleDeleteTtl(t *testing.T) {
 	t.Parallel()
 
@@ -701,7 +698,6 @@ func TestAccDataprocCluster_withLifecycleConfigAutoDeletion(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccDataprocCluster_withLabels(t *testing.T) {
 	t.Parallel()
@@ -752,7 +748,6 @@ func TestAccDataprocCluster_withNetworkRefs(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccDataprocCluster_withEndpointConfig(t *testing.T) {
 	t.Parallel()
 
@@ -773,7 +768,6 @@ func TestAccDataprocCluster_withEndpointConfig(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccDataprocCluster_KMS(t *testing.T) {
 	t.Parallel()
@@ -1606,7 +1600,6 @@ resource "google_dataproc_cluster" "with_labels" {
 `, rnd)
 }
 
-<% unless version == 'ga' -%>
 func testAccDataprocCluster_withEndpointConfig(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_endpoint_config" {
@@ -1621,7 +1614,6 @@ resource "google_dataproc_cluster" "with_endpoint_config" {
 }
 `, rnd)
 }
-<% end -%>
 
 func testAccDataprocCluster_withImageVersion(rnd, version string) string {
 	return fmt.Sprintf(`
@@ -1653,7 +1645,6 @@ resource "google_dataproc_cluster" "with_opt_components" {
 `, rnd)
 }
 
-<% unless version == 'ga' -%>
 func testAccDataprocCluster_withLifecycleConfigIdleDeleteTtl(rnd, tm string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_lifecycle_config" {
@@ -1683,7 +1674,6 @@ resource "google_dataproc_cluster" "with_lifecycle_config" {
 }
 `, rnd, tm)
 }
-<% end -%>
 
 func testAccDataprocCluster_withServiceAcc(sa string, rnd string) string {
 	return fmt.Sprintf(`

@@ -96,10 +96,8 @@ var (
 		"cluster_config.0.encryption_config",
 		"cluster_config.0.autoscaling_config",
 		"cluster_config.0.metastore_config",
-<% unless version == 'ga' -%>
 		"cluster_config.0.lifecycle_config",
 		"cluster_config.0.endpoint_config",
-<% end -%>
 	}
 )
 
@@ -973,7 +971,6 @@ by Dataproc`,
 								},
 							},
 						},						
-<% unless version == 'ga' -%>
 						"lifecycle_config": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -1036,7 +1033,6 @@ by Dataproc`,
 								},
 							},
 						},
-<% end -%>
 					},
 				},
 			},
@@ -1493,7 +1489,6 @@ func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.Clus
 		conf.MetastoreConfig = expandMetastoreConfig(cfg)
 	}
 
-<% unless version == 'ga' -%>
 	if cfg, ok := configOptions(d, "cluster_config.0.lifecycle_config"); ok {
 		conf.LifecycleConfig = expandLifecycleConfig(cfg)
 	}
@@ -1501,7 +1496,6 @@ func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.Clus
 	if cfg, ok := configOptions(d, "cluster_config.0.endpoint_config"); ok {
 		conf.EndpointConfig = expandEndpointConfig(cfg)
 	}
-<% end -%>
 
 	if cfg, ok := configOptions(d, "cluster_config.0.master_config"); ok {
 		log.Println("[INFO] got master_config")
@@ -1682,7 +1676,6 @@ func expandAutoscalingConfig(cfg map[string]interface{}) *dataproc.AutoscalingCo
 	return conf
 }
 
-<% unless version == 'ga' -%>
 func expandLifecycleConfig(cfg map[string]interface{}) *dataproc.LifecycleConfig {
 	conf := &dataproc.LifecycleConfig{}
 	if v, ok := cfg["idle_delete_ttl"]; ok {
@@ -1701,7 +1694,6 @@ func expandEndpointConfig(cfg map[string]interface{}) *dataproc.EndpointConfig {
 	}
 	return conf
 }
-<% end -%>
 
 func expandMetastoreConfig(cfg map[string]interface{}) *dataproc.MetastoreConfig {
 	conf := &dataproc.MetastoreConfig{}
@@ -1872,7 +1864,6 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 		updMask = append(updMask, "config.autoscaling_config.policy_uri")
 	}
 
-<% unless version == 'ga' -%>
 	if d.HasChange("cluster_config.0.lifecycle_config.0.idle_delete_ttl") {
 		idleDeleteTtl := d.Get("cluster_config.0.lifecycle_config.0.idle_delete_ttl").(string)
 		cluster.Config.LifecycleConfig = &dataproc.LifecycleConfig{
@@ -1894,7 +1885,6 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 
 		updMask = append(updMask, "config.lifecycle_config.auto_delete_time")
 	}
-<% end -%>
 
 	if len(updMask) > 0 {
 		gracefulDecommissionTimeout := d.Get("graceful_decommission_timeout").(string)
@@ -2127,10 +2117,8 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 		"security_config":           flattenSecurityConfig(d, cfg.SecurityConfig),
 		"preemptible_worker_config": flattenPreemptibleInstanceGroupConfig(d, cfg.SecondaryWorkerConfig),
 		"metastore_config":          flattenMetastoreConfig(d, cfg.MetastoreConfig),
-<% unless version == 'ga' -%>
-		"lifecycle_config": flattenLifecycleConfig(d, cfg.LifecycleConfig),
-		"endpoint_config":  flattenEndpointConfig(d, cfg.EndpointConfig),
-<% end -%>
+		"lifecycle_config":          flattenLifecycleConfig(d, cfg.LifecycleConfig),
+		"endpoint_config":           flattenEndpointConfig(d, cfg.EndpointConfig),
 	}
 
 	if len(cfg.InitializationActions) > 0 {
@@ -2211,7 +2199,6 @@ func flattenAutoscalingConfig(d *schema.ResourceData, ec *dataproc.AutoscalingCo
 	return []map[string]interface{}{data}
 }
 
-<% unless version == 'ga' -%>
 func flattenLifecycleConfig(d *schema.ResourceData, lc *dataproc.LifecycleConfig) []map[string]interface{} {
 	if lc == nil {
 		return nil
@@ -2237,7 +2224,6 @@ func flattenEndpointConfig(d *schema.ResourceData, ec *dataproc.EndpointConfig) 
 
 	return []map[string]interface{}{data}
 }
-<% end -%>
 
 func flattenMetastoreConfig(d *schema.ResourceData, ec *dataproc.MetastoreConfig) []map[string]interface{} {
 	if ec == nil {
