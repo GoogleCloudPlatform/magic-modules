@@ -35,6 +35,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           job_name: "test-job"
       - !ruby/object:Provider::Terraform::Examples
+        name: "scheduler_job_paused"
+        primary_resource_id: "job"
+        vars:
+          job_name: "test-job"
+      - !ruby/object:Provider::Terraform::Examples
         name: "scheduler_job_app_engine"
         primary_resource_id: "job"
         vars:
