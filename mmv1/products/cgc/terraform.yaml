@@ -83,10 +83,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           pubsub_workflow_tf: "pubsub-workflow-tf"
           trigger_pubsub_workflow_tf: "trigger-pubsub-workflow-tf"
         min_version: beta
-        # ignore_read_extra:
-        #   - "port_range"
-        #   - "target"
-        #   - "ip_address"
 
     # SQL
     ### When including separate samples for each DB type, add `skip_test: true`

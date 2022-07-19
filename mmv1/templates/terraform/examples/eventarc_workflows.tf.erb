@@ -42,10 +42,7 @@ resource "google_project_iam_binding" "project_binding_eventarc" {
   project = data.google_project.project.id
   role    = "roles/logging.logWriter"
 
-members = [
-
-"serviceAccount:${google_service_account.eventarc_workflows_service_account.email}"
-]
+members = ["serviceAccount:${google_service_account.eventarc_workflows_service_account.email}"]
 
   depends_on = [google_service_account.eventarc_workflows_service_account]
 }
@@ -56,10 +53,7 @@ resource "google_project_iam_binding" "project_binding_workflows" {
   project = data.google_project.project.id
   role    = "roles/workflows.invoker"
 
-members = [
-
-"serviceAccount:${google_service_account.eventarc_workflows_service_account.email}"
-]
+members = ["serviceAccount:${google_service_account.eventarc_workflows_service_account.email}"]
 
   depends_on = [google_service_account.eventarc_workflows_service_account]
 }
@@ -105,4 +99,3 @@ google_service_account.eventarc_workflows_service_account]
 }
 
 # [END eventarc_create_pubsub_trigger]
-
