@@ -279,7 +279,6 @@ See [Tests that use a beta feature](#tests-that-use-a-beta-feature)
 
 #### Tests that use a beta feature
 
-
 For tests that use beta features, you'll need to perform two additional steps:
 
 1.  Add `provider = google-beta` to every resource in the test (even resources
