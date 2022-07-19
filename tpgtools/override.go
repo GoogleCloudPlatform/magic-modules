@@ -52,7 +52,6 @@ const (
 	SerializationOnly                  = "SERIALIZATION_ONLY"
 	CustomSerializer                   = "CUSTOM_SERIALIZER"
 	TerraformProductName               = "CUSTOM_TERRAFORM_PRODUCT_NAME"
-	UseDCLID                           = "USE_DCL_ID"
 	CustomTimeout                      = "CUSTOM_TIMEOUT"
 )
 
