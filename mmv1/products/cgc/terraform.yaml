@@ -76,7 +76,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # Eventarc
     ### Eventarc Workflows quickstart
       - !ruby/object:Provider::Terraform::Examples
-        name: "eventarc-workflows"
+        name: "eventarc_workflows"
         primary_resource_type: "google_eventarc_trigger"
         primary_resource_id: "trigger_pubsub_tf"
         vars:
