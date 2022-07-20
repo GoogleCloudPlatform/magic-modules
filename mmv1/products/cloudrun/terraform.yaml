@@ -262,6 +262,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_secure_services"
         primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "renderer"
         skip_docs: true
         vars:
           renderer: "renderer"
