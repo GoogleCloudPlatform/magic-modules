@@ -16,6 +16,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -45,7 +46,10 @@ var mode = flag.String("mode", "", "mode for the generator. If unset, creates th
 var terraformResourceDirectory = "google-beta"
 
 func main() {
-	resources, products := loadAndModelResources()
+	resources, products, err := loadAndModelResources()
+	if err != nil {
+		glog.Exitf("Error loading resources: %w", err)
+	}
 
 	if mode != nil && *mode == "serialization" {
 		if vFilter != nil {
@@ -133,17 +137,15 @@ func skipResource(r *Resource) bool {
 	return r.SerializationOnly
 }
 
-// TODO(rileykarson): Change interface to an error, handle exceptional stuff in
-// main func.
-func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMetadata) {
+func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMetadata, error) {
 	flag.Parse()
 	if tPath == nil || *tPath == "" {
-		glog.Exit("No path specified")
+		return nil, nil, errors.New("no path specified")
 	}
 
 	dirs, err := ioutil.ReadDir(*tPath)
 	if err != nil {
-		glog.Fatal(err)
+		return nil, nil, err
 	}
 	resources := make(map[Version][]*Resource)
 	products := make(map[Version][]*ProductMetadata)
@@ -178,17 +180,17 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 				document = &openapi.Document{}
 				b := directory.Services().GetResource(version.V, v.Name(), stripExt(resourceFile.Name()))
 				if b == nil {
-					glog.Exit(fmt.Errorf("could not find resource in DCL directory: %q in %q at %q", stripExt(resourceFile.Name()), packagePath, version.V))
+					return nil, nil, fmt.Errorf("could not find resource in DCL directory: %q in %q at %q", stripExt(resourceFile.Name()), packagePath, version.V)
 				}
 
 				err = yaml.Unmarshal(b.Bytes(), document)
 				if err != nil {
-					glog.Exit(err)
+					return nil, nil, err
 				}
 				// TODO: the openapi library cannot handle extensions except in the Schema object.  If this is ever added,
 				// this workaround can be removed.
 				if err := addInfoExtensionsToSchemaObjects(document, b.Bytes()); err != nil {
-					glog.Exit(err)
+					return nil, nil, err
 				}
 
 				overrides := loadOverrides(packagePath, resourceFile.Name())
@@ -211,7 +213,7 @@ func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMet
 		}
 	}
 
-	return resources, products
+	return resources, products, nil
 }
 
 func addInfoExtensionsToSchemaObjects(document *openapi.Document, b []byte) error {
