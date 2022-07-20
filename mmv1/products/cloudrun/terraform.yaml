@@ -311,6 +311,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           cloud_run_srv: "cloud-run-srv"
         min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudrun_custom_domain_mapping"
+        primary_resource_id: "default"
+        skip_docs: true
+        vars:
+          cloud_run_srv: "cloud-run-srv"
+          verified_domain: "verified-domain"
+        min_version: beta
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'autogenerate_revision_name'
