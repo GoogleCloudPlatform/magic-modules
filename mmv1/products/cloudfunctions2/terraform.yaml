@@ -22,15 +22,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudfunctions2_basic"
         min_version: beta
-        primary_resource_id: "terraform-test2"
-        primary_resource_name: "terraform-test2"
+        primary_resource_id: "function"
+        primary_resource_name: "function"
         vars:
           bucket_name: "cloudfunctions2-function-bucket"
           function: "test-function"
-          zip_path: "path/to/index.zip"
+          zip_path: "function-source.zip"
         test_vars_overrides:
           zip_path: "\"./test-fixtures/cloudfunctions2/function-source.zip\""
-          primary_resource_id: "\"terraform-test2\""
+          primary_resource_id: "\"function\""
           location: "\"us-central1\""
         # ignore these fields during import step
         ignore_read_extra:
@@ -46,7 +46,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           service_account: "test-sa"
           topic: "functions2-topic"
           function: "test-function"
-          zip_path: "path/to/index.zip"
+          zip_path: "function-source.zip"
         test_vars_overrides:
           zip_path: "\"./test-fixtures/cloudfunctions2/function-source-pubsub.zip\""
           primary_resource_id: "\"terraform-test\""
