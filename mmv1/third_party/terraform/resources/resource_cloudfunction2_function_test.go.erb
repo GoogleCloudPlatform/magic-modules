@@ -218,8 +218,8 @@ func testAccCloudfunctions2function_eventFilteringProjectSetup(context map[strin
   return Nprintf(`
 resource "google_project" "project" {
   provider        = google-beta
-  project_id      = %{project}
-  name            = "tf-test%{random_suffix}"
+  project_id      = "%{project}"
+  name            = "%{project}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
 }
@@ -249,7 +249,7 @@ func testAccCloudfunctions2function_eventFilteringAddResources(context map[strin
 resource "google_project" "project" {
   provider        = google-beta
   project_id      = "%{project}"
-  name            = "tf-test%{random_suffix}"
+  name            = "%{project}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
 }
