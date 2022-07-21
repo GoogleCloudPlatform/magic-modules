@@ -41,8 +41,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudfunctions2_full"
         min_version: beta
-        primary_resource_id: "terraform-test"
-        primary_resource_name: "terraform-test"
+        primary_resource_id: "function"
+        primary_resource_name: "function"
         vars:
           bucket_name: "cloudfunctions2-bucket"
           service_account: "test-sa"
