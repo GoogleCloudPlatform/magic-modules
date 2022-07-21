@@ -3,6 +3,7 @@ package google
 <% unless version == 'ga' -%>
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -39,7 +40,7 @@ func TestAccCloudFunctions2Function_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.bucket"},
 			},
-      {
+			{
 				Config: testAccCloudFunctions2Function_test_redeploy(context),
 			},
 			{
@@ -184,4 +185,199 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
 }
 `, context)
 }
+
+func TestAccCloudFunctions2Function_eventFiltering(t *testing.T) {
+  t.Parallel()
+
+  random_suffix := randString(t, 10)
+
+  context := map[string]interface{}{
+    "zip_path":        "./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip",
+    "random_suffix":   random_suffix,
+    "project":         fmt.Sprintf("tf-test-%s", random_suffix),
+    "org_id":          getTestOrgFromEnv(t),
+    "billing_account": getTestBillingAccountFromEnv(t),
+  }
+
+  vcrTest(t, resource.TestCase{
+    PreCheck:     func() { testAccPreCheck(t) },
+    Providers:    testAccProvidersOiCS,
+    CheckDestroy: testAccCheckCloudfunctions2functionDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccCloudfunctions2function_eventFilteringProjectSetup(context),
+      },
+      {
+        Config: testAccCloudfunctions2function_eventFilteringAddResources(context),
+      },
+    },
+  })
+}
+
+func testAccCloudfunctions2function_eventFilteringProjectSetup(context map[string]interface{}) string {
+  return Nprintf(`
+resource "google_project" "project" {
+  provider        = google-beta
+  project_id      = %{project}
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+}
+
+
+locals {
+  enabled_services = toset([
+    "iam.googleapis.com",
+    "cloudfunctions.googleapis.com",
+    "eventarc.googleapis.com",
+  ])
+}
+
+# APIs need to be activated before resources can be created
+resource "google_project_service" "enabled_services" {
+  for_each     = local.enabled_services
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = each.value
+
+  disable_dependent_services = true
+}`, context)
+}
+
+func testAccCloudfunctions2function_eventFilteringAddResources(context map[string]interface{}) string {
+  return Nprintf(`
+resource "google_project" "project" {
+  provider        = google-beta
+  project_id      = "%{project}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+}
+
+
+locals {
+  enabled_services = toset([
+    "iam.googleapis.com",
+    "cloudfunctions.googleapis.com",
+    "eventarc.googleapis.com",
+  ])
+}
+
+# APIs need to be activated before resources can be created
+resource "google_project_service" "enabled_services" {
+  for_each     = local.enabled_services
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = each.value
+
+  disable_dependent_services = true
+}
+
+resource "google_service_account" "account" {
+  provider = google-beta
+  project = google_project.project.project_id
+  account_id = "tf-test-sa-%{random_suffix}"
+  display_name = "Test Service Account"
+}
+
+resource "google_storage_bucket" "source-bucket" {
+  provider = google-beta
+  project = google_project.project.project_id
+  name     = "tf-test-source-bucket-%{random_suffix}"
+  location = "US"
+  uniform_bucket_level_access = true
+}
+ 
+resource "google_storage_bucket_object" "object" {
+  provider = google-beta
+  name   = "function-source.zip"
+  bucket = google_storage_bucket.source-bucket.name
+  source = "%{zip_path}"  # Add path to the zipped function source code
+}
+
+resource "google_storage_bucket" "trigger-bucket" {
+  provider = google-beta
+  project  = google_project.project.project_id
+  name     = "tf-test-trigger-bucket-%{random_suffix}"
+  location = "us-central1" # The trigger must be in the same location as the bucket
+  uniform_bucket_level_access = true
+}
+
+data "google_storage_project_service_account" "gcs_account" {
+  provider = google-beta
+  project = google_project.project.project_id
+}
+
+# To use GCS CloudEvent triggers, the GCS service account requires the Pub/Sub Publisher(roles/pubsub.publisher) IAM role in the specified project.
+# (See https://cloud.google.com/eventarc/docs/run/quickstart-storage#before-you-begin)
+resource "google_project_iam_member" "gcs-pubsub-publishing" {
+  provider = google-beta
+  project  = google_project.project.project_id # Required argument
+  role     = "roles/pubsub.publisher"
+  member   = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
+}
+
+# Permissions on the service account for the function and Eventarc trigger
+resource "google_project_iam_member" "invoking" {
+  provider = google-beta
+  project  = google_project.project.project_id # Required argument
+  role     = "roles/run.invoker"
+  member   = "serviceAccount:${google_service_account.account.email}"
+}
+
+resource "google_project_iam_member" "event-receiving" {
+  provider = google-beta
+  project = google_project.project.project_id # Required argument
+  role    = "roles/eventarc.eventReceiver"
+  member  = "serviceAccount:${google_service_account.account.email}"
+}
+
+resource "google_cloudfunctions2_function" "tf-test-function-%{random_suffix}" {
+  provider    = google-beta
+  project     = google_project.project.project_id
+  name        = "tf-test-function-%{random_suffix}"
+  location    = "us-central1"
+  description = "a new function"
+ 
+  build_config {
+    runtime     = "nodejs12"
+    entry_point = "entryPoint" # Set the entry point 
+    environment_variables = {
+      BUILD_CONFIG_TEST = "build_test"
+    }
+    source {
+      storage_source {
+        bucket = google_storage_bucket.source-bucket.name
+        object = google_storage_bucket_object.object.name
+      }
+    }
+  }
+ 
+  service_config {
+    max_instance_count  = 3
+    min_instance_count = 1
+    available_memory    = "256M"
+    timeout_seconds     = 60
+    environment_variables = {
+        SERVICE_CONFIG_TEST = "config_test"
+    }
+    ingress_settings = "ALLOW_INTERNAL_ONLY"
+    all_traffic_on_latest_revision = true
+    service_account_email = google_service_account.account.email
+  }
+
+  event_trigger {
+    trigger_region = "us-central1" # The trigger must be in the same location as the bucket
+    event_type = "google.cloud.storage.object.v1.finalized"
+    retry_policy = "RETRY_POLICY_RETRY"
+    service_account_email = google_service_account.account.email
+    event_filters {
+      attribute = "bucket"
+      value = google_storage_bucket.trigger-bucket.name
+    }
+  }
+}
+`, context)
+}
+
 <% end -%>
