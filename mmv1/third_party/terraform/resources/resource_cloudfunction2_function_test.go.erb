@@ -292,7 +292,7 @@ resource "google_project_service" "eventarc" {
   project      = google_project.project.project_id
   service      = "eventarc.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false # Fix for issue when disabling Eventarc API
 }
 
 resource "google_project_service" "run" {
