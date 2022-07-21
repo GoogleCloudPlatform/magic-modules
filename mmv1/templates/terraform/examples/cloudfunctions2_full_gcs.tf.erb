@@ -16,6 +16,7 @@ locals {
   ])
 }
 
+# APIs need to be activated before resources can be created
 resource "google_project_service" "enabled_services" {
   for_each     = local.enabled_services
   provider     = google-beta
@@ -26,9 +27,6 @@ resource "google_project_service" "enabled_services" {
 }
 
 resource "google_service_account" "account" {
-  depends_on = [
-    google_project_service.enabled_services["iam.googleapis.com"],
-  ]
   provider = google-beta
   project = google_project.project.project_id
   account_id = "<%= ctx[:vars]['service_account'] %>"
@@ -67,9 +65,6 @@ data "google_storage_project_service_account" "gcs_account" {
 # (See https://cloud.google.com/eventarc/docs/run/quickstart-storage#before-you-begin)
 resource "google_project_iam_member" "gcs-pubsub-publishing" {
   provider = google-beta
-  depends_on = [
-    google_project_service.enabled_services["iam.googleapis.com"],
-  ]
   project = google_project.project.project_id # Required argument
   role    = "roles/pubsub.publisher"
   member  = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
@@ -78,9 +73,6 @@ resource "google_project_iam_member" "gcs-pubsub-publishing" {
 # Permissions on the service account for the function and Eventarc trigger
 resource "google_project_iam_member" "invoking" {
   provider = google-beta
-  depends_on = [
-    google_project_service.enabled_services["iam.googleapis.com"],
-  ]
   project = google_project.project.project_id # Required argument
   role    = "roles/run.invoker"
   member  = "serviceAccount:${google_service_account.account.email}"
@@ -88,9 +80,6 @@ resource "google_project_iam_member" "invoking" {
 
 resource "google_project_iam_member" "event-receiving" {
   provider = google-beta
-  depends_on = [
-    google_project_service.enabled_services["iam.googleapis.com"],
-  ]
   project = google_project.project.project_id # Required argument
   role    = "roles/eventarc.eventReceiver"
   member  = "serviceAccount:${google_service_account.account.email}"
@@ -98,10 +87,6 @@ resource "google_project_iam_member" "event-receiving" {
 
 resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
-  depends_on = [
-    google_project_service.enabled_services["cloudfunctions.googleapis.com"],
-    google_project_service.enabled_services["eventarc.googleapis.com"],
-  ]
   project = google_project.project.project_id
   name = "<%= ctx[:vars]['function'] %>"
   location = "us-central1"
