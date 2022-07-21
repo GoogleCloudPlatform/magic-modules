@@ -140,9 +140,27 @@ make terraform VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraf
 make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=dataproc
 ```
 
+If you are only working on common files or third_party code, you can pass a non-existent `PRODUCT`
+to reduce the generation time.
+```
+# Only generate common files, including all third_party code
+make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=foo
+```
+
 It's worth noting that Magic Modules will only generate new files when run
 locally. The "Magician"- the Magic Modules CI system- handles deletion of old
 files when creating PRs.
+
+#### Building the provider binaries
+
+After the provider code is generated into the location at `OUTPUT_PATH`, you must still build the code
+to generate the provider binary.
+
+```
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+make
+```
+Refer to the [the instructions in the provider repo](https://github.com/hashicorp/terraform-provider-google/blob/main/.github/CONTRIBUTING.md#instructing-terraform-to-use-a-local-copy-of-the-provider) for how to test the provider binaries.
 
 #### Generating terraform-validator
 
