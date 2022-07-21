@@ -158,7 +158,7 @@ to generate the provider binary.
 
 ```
 cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-make
+make build
 ```
 Refer to the [the instructions in the provider repo](https://github.com/hashicorp/terraform-provider-google/blob/main/.github/CONTRIBUTING.md#instructing-terraform-to-use-a-local-copy-of-the-provider) for how to test the provider binaries.
 
