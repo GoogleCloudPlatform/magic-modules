@@ -248,6 +248,14 @@ resource "google_project_service" "eventarc" {
   service      = "eventarc.googleapis.com"
 
   disable_dependent_services = true
+}
+
+resource "google_project_service" "run" {
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = "run.googleapis.com"
+
+  disable_dependent_services = true
 }`, context)
 }
 
@@ -283,6 +291,14 @@ resource "google_project_service" "eventarc" {
   provider     = google-beta
   project      = google_project.project.project_id
   service      = "eventarc.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "run" {
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = "run.googleapis.com"
 
   disable_dependent_services = true
 }
