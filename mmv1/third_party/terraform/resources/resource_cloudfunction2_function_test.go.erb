@@ -225,20 +225,27 @@ resource "google_project" "project" {
 }
 
 
-locals {
-  enabled_services = toset([
-    "iam.googleapis.com",
-    "cloudfunctions.googleapis.com",
-    "eventarc.googleapis.com",
-  ])
-}
-
 # APIs need to be activated before resources can be created
-resource "google_project_service" "enabled_services" {
-  for_each     = local.enabled_services
+resource "google_project_service" "iam" {
   provider     = google-beta
   project      = google_project.project.project_id
-  service      = each.value
+  service      = "iam.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "cloudfunctions" {
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = "cloudfunctions.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "eventarc" {
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = "eventarc.googleapis.com"
 
   disable_dependent_services = true
 }`, context)
@@ -255,20 +262,27 @@ resource "google_project" "project" {
 }
 
 
-locals {
-  enabled_services = toset([
-    "iam.googleapis.com",
-    "cloudfunctions.googleapis.com",
-    "eventarc.googleapis.com",
-  ])
-}
-
 # APIs need to be activated before resources can be created
-resource "google_project_service" "enabled_services" {
-  for_each     = local.enabled_services
+resource "google_project_service" "iam" {
   provider     = google-beta
   project      = google_project.project.project_id
-  service      = each.value
+  service      = "iam.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "cloudfunctions" {
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = "cloudfunctions.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "eventarc" {
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = "eventarc.googleapis.com"
 
   disable_dependent_services = true
 }
