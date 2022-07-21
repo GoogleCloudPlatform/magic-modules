@@ -1,9 +1,11 @@
 data "google_container_aws_versions" "versions" {
+  provider = google-beta
   project = "{{project}}"
   location = "us-west1"
 }
 
 resource "google_container_aws_cluster" "primary" {
+  provider = google-beta
   authorization {
     admin_users {
       username = "{{test_service_account}}"

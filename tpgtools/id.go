@@ -1,11 +1,11 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,18 +47,18 @@ func PatternToRegex(s string, allowForwardSlash bool) string {
 	return re.ReplaceAllString(s, "(?P<$1>[^/]+)")
 }
 
-// Finds the correct resource id based on the schema and any overrides
-func findResourceId(schema *openapi.Schema, overrides Overrides, location string) (string, error) {
+// Finds the correct resource id based on the schema and any overrides. Returns whether a custom ID override was used.
+func findResourceID(schema *openapi.Schema, overrides Overrides, location string) (string, bool, error) {
 	id, ok := schema.Extension["x-dcl-id"].(string)
 	if !ok {
-		return "", fmt.Errorf("Malformed or missing x-dcl-id: %v", schema.Extension["x-dcl-id"])
+		return "", false, fmt.Errorf("Malformed or missing x-dcl-id: %v", schema.Extension["x-dcl-id"])
 	}
 
 	// Resource Override: Custom ID
 	cid := CustomIDDetails{}
 	cidOk, err := overrides.ResourceOverrideWithDetails(CustomID, &cid, location)
 	if err != nil {
-		return "", fmt.Errorf("failed to decode custom id details: %v", err)
+		return "", false, fmt.Errorf("failed to decode custom id details: %v", err)
 	}
 
 	if cidOk {
@@ -72,15 +72,15 @@ func findResourceId(schema *openapi.Schema, overrides Overrides, location string
 			}
 		}
 	}
-	return id, nil
+	return id, cidOk, nil
 }
 
 // Finds all import formats for a given id. This can include short forms and
 // partial forms with inferred project/region/etc
 func defaultImportFormats(id string, onlyLongFormFormat bool) (formats []string) {
 	if onlyLongFormFormat {
-                return []string{id}
-        }
+		return []string{id}
+	}
 	uniqueFormats := stringset.New()
 
 	uniqueFormats.Add(id)

@@ -612,6 +612,11 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      min_version: beta
+      exclude: false
+      parent_resource_attribute: 'name'
+      import_format: ["projects/{{project}}/global/backendBuckets/{{name}}", "{{name}}"]    
     properties:
       - !ruby/object:Api::Type::String
         name: 'bucketName'
@@ -706,6 +711,22 @@ objects:
           send_empty_value: true
           description: |
             Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
+        - !ruby/object:Api::Type::Boolean        
+          name: 'requestCoalescing'
+          send_empty_value: true
+          description: |
+            If true then Cloud CDN will combine multiple concurrent cache fill requests into a small number of requests to the origin.
+        - !ruby/object:Api::Type::Array
+          name: 'bypassCacheOnRequestHeaders'
+          description: |
+            Bypass the cache when the specified request headers are matched - e.g. Pragma or Authorization headers. Up to 5 headers can be specified. The cache is bypassed for all cdnPolicy.cacheMode settings.
+          max_size: 5  
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'headerName'
+                description: |
+                  The header field name to match on when bypassing cache. Values are case-insensitive.
       - !ruby/object:Api::Type::String
         name: 'edgeSecurityPolicy'
         description: |
@@ -3765,6 +3786,8 @@ objects:
           connection does not need to match both properties for the firewall to
           apply. Only IPv4 is supported. For INGRESS traffic, one of `source_ranges`,
           `source_tags` or `source_service_accounts` is required.
+        conflicts:
+          - destination_ranges
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'sourceServiceAccounts'
@@ -3800,6 +3823,10 @@ objects:
           to match both properties for the firewall to apply. For INGRESS traffic,
           one of `source_ranges`, `source_tags` or `source_service_accounts` is required.
         item_type: Api::Type::String
+        conflicts:
+          - source_service_accounts
+          - destination_ranges
+          - target_service_accounts
       - !ruby/object:Api::Type::Array
         name: 'targetServiceAccounts'
         description: |
@@ -3822,6 +3849,9 @@ objects:
           If no targetTags are specified, the firewall rule applies to all
           instances on the specified network.
         item_type: Api::Type::String
+        conflicts:
+          - source_service_accounts
+          - target_service_accounts
   - !ruby/object:Api::Resource
     name: 'ForwardingRule'
     kind: 'compute#forwardingRule'
@@ -9329,13 +9359,9 @@ objects:
             api_name: 'IPProtocols'
             description: |
                 Protocols that apply as a filter on mirrored traffic.
-            item_type: !ruby/object:Api::Type::Enum
-              name: ipProtocols
-              description: Possible IP protocols to filter on.
-              values:
-                - tcp
-                - udp
-                - icmp
+            item_type: Api::Type::String
+            name: ipProtocols
+            description: Possible IP protocols including tcp, udp, icmp and esp
           - !ruby/object:Api::Type::Array
             name: cidrRanges
             description: |

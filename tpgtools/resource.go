@@ -39,9 +39,9 @@ type Resource struct {
 	// import formats can be derived from it.
 	ID string
 
-	// If the DCL ID formatter should be used.  For example, resources with multiple parent types
-	// need to use the DCL ID formatter.
-	UseDCLID bool
+	// If the Terraform ID format should be used instead of the DCL ID function.
+	// For example, resources with a regional/global cannot use the DCL ID formatter.
+	UseTerraformID bool
 
 	// ImportFormats are pattern format strings for importing the Terraform resource.
 	// TODO: if none are set, the resource does not support import.
@@ -229,12 +229,6 @@ func (r Resource) TerraformName() SnakeCaseFullName {
 	return SnakeCaseFullName(concatenateSnakeCase(googlePrefix, r.ProductName(), r.Name()))
 }
 
-// TerraformName is the Terraform resource type used for the sidebar_current field in documentation.
-// For example, "google-compute-instance"
-func (r Resource) SidebarCurrentName() KebabCaseTerraformResourceName {
-	return KebabCaseTerraformResourceName(r.TerraformName().ToKebab())
-}
-
 // PathType is the title-cased name of a resource preceded by its package,
 // often used to namespace functions. For example, "RedisInstance".
 func (r Resource) PathType() TitleCaseFullName {
@@ -371,7 +365,7 @@ func (r Resource) SweeperFunctionArgs() string {
 }
 
 // Returns the name of the ID function for the Terraform resource.
-func (r Resource) IdFunction() string {
+func (r Resource) IDFunction() string {
 	for _, p := range r.Properties {
 		if p.forwardSlashAllowed {
 			return "replaceVars"
@@ -413,7 +407,6 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		InsertTimeoutMinutes: 20,
 		UpdateTimeoutMinutes: 20,
 		DeleteTimeoutMinutes: 20,
-		UseDCLID:             overrides.ResourceOverride(UseDCLID, location),
 	}
 
 	// Since the resource's "info" extension field can't be accessed, the relevant
@@ -442,11 +435,12 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		res.title = SnakeCaseTerraformResourceName(crname.Title)
 	}
 
-	id, err := findResourceId(schema, overrides, location)
+	id, customID, err := findResourceID(schema, overrides, location)
 	if err != nil {
 		return nil, err
 	}
 	res.ID = id
+	res.UseTerraformID = customID
 
 	// Resource Override: Custom Import Function
 	cifd := CustomImportFunctionDetails{}
