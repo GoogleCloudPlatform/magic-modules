@@ -66,7 +66,7 @@ func resourceStorageTransferJob() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(0, 1024),
 				Description:  `Unique description to identify the Transfer Job.`,
 			},
-			"loggingConfig": {
+			"logging_config": {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
