@@ -232,7 +232,7 @@ func (s Sample) ReplaceReferences(d *Dependency) error {
 
 	for _, match := range matches {
 		referenceFileName := match[1]
-		idField := match[2]
+		idField := dcl.TitleToSnakeCase(match[2])
 		var tfReference string
 		for _, dep := range s.DependencyList {
 			if dep.FileName == referenceFileName {
