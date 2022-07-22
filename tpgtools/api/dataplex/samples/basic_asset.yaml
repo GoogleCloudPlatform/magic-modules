@@ -28,7 +28,7 @@ updates:
 variables:
 - name: lake
   type: resource_name
-  name: zone
+- name: zone
   type: resource_name
 - name: asset
   type: resource_name
