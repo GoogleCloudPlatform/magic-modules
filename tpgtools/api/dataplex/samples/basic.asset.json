@@ -4,7 +4,7 @@
   "location": "{{region}}",
   "project": "{{project}}",
   "resourceSpec": {
-    "name": "projects/{{project}}/buckets/dataproc-examples",
+    "name": "projects/{{project}}/buckets/{{ref:basic.storage.bucket.json:name}}",
     "type": "STORAGE_BUCKET"
   },
   "discoverySpec": {

@@ -20,11 +20,13 @@ resource: samples/basic.asset.json
 dependencies:
 - samples/basic.lake.json
 - samples/basic.zone.json
+- samples/basic.storage.bucket.json
 updates:
 - resource: samples/update.asset.json
   dependencies:
   - samples/basic.lake.json
   - samples/basic.zone.json
+  - samples/basic.storage.bucket.json
 variables:
 - name: lake
   type: resource_name
