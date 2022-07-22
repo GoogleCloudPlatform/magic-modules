@@ -30,9 +30,13 @@ updates:
 variables:
 - name: lake
   type: resource_name
+  name: zone
+  type: resource_name
+- name: asset
+  type: resource_name
+- name: bucket
+  type: resource_name
 - name: project
   type: project
 - name: region
   type: region
-- name: asset
-  type: resource_name
