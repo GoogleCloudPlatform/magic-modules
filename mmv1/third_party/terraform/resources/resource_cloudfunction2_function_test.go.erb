@@ -323,7 +323,14 @@ resource "google_service_account" "account" {
   provider = google-beta
   project = google_project.project.project_id
   account_id = "tf-test-sa-%{random_suffix}"
-  display_name = "Test Service Account"
+  display_name = "Test Service Account - used for both the cloud function and eventarc trigger in the test"
+}
+
+resource "google_project_iam_member" "artifactregistry-reader" {
+  provider = google-beta
+  project  = google_project.project.project_id # Required argument
+  role     = "roles/artifactregistry.reader"
+  member   = "serviceAccount:${google_service_account.account.email}"
 }
 
 resource "google_storage_bucket" "source-bucket" {
