@@ -264,6 +264,14 @@ resource "google_project_service" "artifactregistry" {
   service      = "artifactregistry.googleapis.com"
 
   disable_dependent_services = true
+}
+
+resource "google_project_service" "cloudbuild" {
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = "cloudbuild.googleapis.com"
+
+  disable_dependent_services = true
 }`, context)
 }
 
@@ -315,6 +323,14 @@ resource "google_project_service" "artifactregistry" {
   provider     = google-beta
   project      = google_project.project.project_id
   service      = "artifactregistry.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "cloudbuild" {
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = "cloudbuild.googleapis.com"
 
   disable_dependent_services = true
 }
