@@ -34,5 +34,5 @@ variables:
   type: project
 - name: region
   type: region
-- name: zone
+- name: asset
   type: resource_name

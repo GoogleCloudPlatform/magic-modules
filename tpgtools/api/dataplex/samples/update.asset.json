@@ -1,5 +1,5 @@
 {
-  "name": "{{asset_name}}",
+  "name": "{{asset}}",
   "displayName": "Asset for DCL",
   "location": "{{region}}",
   "project": "{{project}}",
