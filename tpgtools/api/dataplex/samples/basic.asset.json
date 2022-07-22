@@ -4,7 +4,7 @@
   "location": "{{region}}",
   "project": "{{project}}",
   "resourceSpec": {
-    "name": "projects/{{project}}/buckets/{{ref:basic.storage.bucket.json:name}}",
+    "name": "projects/{{project}}/buckets/dataplex-examples",
     "type": "STORAGE_BUCKET"
   },
   "discoverySpec": {
