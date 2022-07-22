@@ -418,6 +418,10 @@ addons_config {
 
 * `evaluation_mode` - (Optional) Mode of operation for Binary Authorization policy evaluation.
 
+<a name="nested_migration_certificates"></a>The `migration_certificate` block supports:
+
+* `enable_certificates` - (Required) Controls the issuance of workload mTLS certificates. It is enabled by default. Workload Identity is required, see [workload_config](#nested_workload_identity_config).
+
 <a name="nested_database_encryption"></a>The `database_encryption` block supports:
 
 * `state` - (Required) `ENCRYPTED` or `DECRYPTED`
