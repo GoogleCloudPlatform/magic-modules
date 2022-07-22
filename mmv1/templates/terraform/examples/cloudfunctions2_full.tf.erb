@@ -1,6 +1,6 @@
 # [START functions_v2_full]
 locals {
-  project = "<%= ctx[:vars]['project_id'] %>" # Google Cloud Platform Project ID
+  project = "<%= ctx[:test_env_vars]['project_id'] %>" # Google Cloud Platform Project ID
 }
 
 provider "google-beta" {
