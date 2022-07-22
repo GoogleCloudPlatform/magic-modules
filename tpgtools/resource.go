@@ -124,8 +124,11 @@ type Resource struct {
 	// location is one of "zone", "region", or "global".
 	location string
 
-	// HasProject tells us if the resource has a project field
+	// HasProject tells us if the resource has a project field.
 	HasProject bool
+
+	// HasCreate tells us if the resource has a create endpoint.
+	HasCreate bool
 
 	// HasSweeper says if this resource has a generated sweeper.
 	HasSweeper bool
@@ -563,6 +566,9 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 			}
 		}
 	}
+
+	// Determine if a resource has a create method.
+	res.HasCreate, _ = schema.Extension["x-dcl-has-create"].(bool)
 
 	// Determine if a resource can use a generated sweeper or not
 	// We only supply a certain set of parent values to sweepers, so only generate
