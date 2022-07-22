@@ -137,6 +137,9 @@ for more details. Structure is [documented below](#nested_cluster_autoscaling).
 * `binary_authorization` - (Optional) Configuration options for the Binary
   Authorization feature. Structure is [documented below](#nested_binary_authorization).
 
+* `mesh_certificates` - (Optional)
+    Structure is [documented below](#nested_mesh_encryption).
+
 * `database_encryption` - (Optional)
     Structure is [documented below](#nested_database_encryption).
 
@@ -417,6 +420,10 @@ addons_config {
 * `enabled` - (DEPRECATED) Enable Binary Authorization for this cluster. Deprecated in favor of `evaluation_mode`.
 
 * `evaluation_mode` - (Optional) Mode of operation for Binary Authorization policy evaluation.
+
+<a name="nested_mesh_certificates"></a>The `mesh_certificates` block supports:
+
+* `enable_certificates` - (Required) Controls the issuance of workload mTLS certificates. It is enabled by default. Workload Identity is required, see [workload_config](#nested_workload_identity_config).
 
 <a name="nested_database_encryption"></a>The `database_encryption` block supports:
 
