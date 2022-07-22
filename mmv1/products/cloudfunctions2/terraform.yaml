@@ -28,14 +28,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           bucket_name: "gcf-source"
           function: "test-function"
           zip_path: "function-source.zip"
-          project_id: "ProjectId"
         test_env_vars:
-          project_id: :PROJECT_NAME
+          project: :PROJECT_NAME
         test_vars_overrides:
           zip_path: "\"./test-fixtures/cloudfunctions2/function-source.zip\""
           primary_resource_id: "\"function\""
           location: "\"us-central1\""
-          project_id: :PROJECT_NAME
         # ignore these fields during import step
         ignore_read_extra:
           - "build_config.0.source.0.storage_source.0.object"
@@ -51,14 +49,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           topic: "functions2-topic"
           function: "test-function"
           zip_path: "function-source.zip"
-          project_id: "ProjectId"
         test_env_vars:
-          project_id: :PROJECT_NAME
+          project: :PROJECT_NAME
         test_vars_overrides:
           zip_path: "\"./test-fixtures/cloudfunctions2/function-source-pubsub.zip\""
           primary_resource_id: "\"terraform-test\""
           location: "\"us-central1\""
-          project_id: :PROJECT_NAME
         # ignore these fields during import step
         ignore_read_extra:
           - "build_config.0.source.0.storage_source.0.object"
