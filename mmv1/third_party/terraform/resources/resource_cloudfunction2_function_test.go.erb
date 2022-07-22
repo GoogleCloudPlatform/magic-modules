@@ -335,6 +335,14 @@ resource "google_project_service" "cloudbuild" {
   disable_dependent_services = true
 }
 
+resource "google_project_service" "pubsub" {
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = "pubsub.googleapis.com"
+
+  disable_dependent_services = true
+}
+
 resource "google_service_account" "account" {
   provider = google-beta
   project = google_project.project.project_id
