@@ -35,7 +35,7 @@ objects:
     update_verb: :PATCH
     update_mask: true
     description: |
-      DnsAuthorization represents a HTTP-reachable backend for an DnsAuthorization.
+      DnsAuthorization represents a HTTP-reachable backend for a DnsAuthorization.
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
@@ -67,9 +67,23 @@ objects:
         name: 'description'
         description: |
           A human-readable description of the resource.
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          Creation timestamp of a DNS Authorization. Timestamp in RFC3339 UTC "Zulu" format,
+          with nanosecond resolution and up to nine fractional digits.
+          Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+      - !ruby/object:Api::Type::Time
+        name: 'updateTime'
+        description: |
+          Update timestamp of a DNS Authorization. Timestamp in RFC3339 UTC "Zulu" format,
+          with nanosecond resolution and up to nine fractional digits.
+          Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+        output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
-        description: 'Set of label tags associated with the EdgeCache resource.'
+        description: 'Set of label tags associated with the DNS Authorization resource.'
       - !ruby/object:Api::Type::String
         name: 'domain'
         input: true
@@ -91,6 +105,7 @@ objects:
             output: true
             description: |
               Fully qualified name of the DNS Resource Record.
+              E.g. `_acme-challenge.example.com`.
           - !ruby/object:Api::Type::String
             name: 'type'
             output: true
@@ -109,7 +124,7 @@ objects:
     update_verb: :PATCH
     update_mask: true
     description: |
-      Certificate represents a HTTP-reachable backend for an Certificate.
+      Certificate represents a HTTP-reachable backend for a Certificate.
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
@@ -141,9 +156,23 @@ objects:
         name: 'description'
         description: |
           A human-readable description of the resource.
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          Creation timestamp of a Certificate. Timestamp in RFC3339 UTC "Zulu" format,
+          with nanosecond resolution and up to nine fractional digits.
+          Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+      - !ruby/object:Api::Type::Time
+        name: 'updateTime'
+        description: |
+          Update timestamp of a Certificate. Timestamp in RFC3339 UTC "Zulu" format,
+          with nanosecond resolution and up to nine fractional digits.
+          Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+        output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
-        description: 'Set of label tags associated with the EdgeCache resource.'
+        description: 'Set of label tags associated with the Certificate resource.'
       - !ruby/object:Api::Type::Enum
         name: scope
         input: true
@@ -194,11 +223,6 @@ objects:
           Certificate Manager provisions and renews Managed Certificates
           automatically, for as long as it's authorized to do so.
         properties:
-          - !ruby/object:Api::Type::String
-            name: state
-            output: true
-            description: |
-              State of the managed certificate resource.
           - !ruby/object:Api::Type::Array
             name: domains
             input: true
@@ -212,6 +236,122 @@ objects:
             description: |
               Authorizations that will be used for performing domain authorization
             item_type: Api::Type::String
+          - !ruby/object:Api::Type::Enum
+            name: 'state'
+            output: true
+            description: |
+              A state of this Managed Certificate.
+
+              The state is undefined.
+
+              Certificate Manager attempts to provision or renew the certificate.
+              If the process takes longer than expected, consult the
+              `provisioning_issue` field.
+
+              Multiple certificate provisioning attempts failed and Certificate
+              Manager gave up. To try again, delete and create a new managed
+              Certificate resource.
+              For details see the `provisioning_issue` field.
+
+              The certificate management is working, and a certificate has been
+              provisioned.
+            values:
+              - :STATE_UNSPECIFIED
+              - :PROVISIONING
+              - :FAILED
+              - :ACTIVE
+          - !ruby/object:Api::Type::NestedObject
+            name: 'provisioningIssue'
+            output: true
+            description: |
+              Information about issues with provisioning this Managed Certificate.
+            properties:
+              - !ruby/object:Api::Type::Enum
+                name: 'reason'
+                output: true
+                description: |
+                  Reason for provisioning failures.
+
+                  The reason is undefined.
+
+                  Certificate provisioning failed due to an issue with one or more of
+                  the domains on the certificate.
+                  For details of which domains failed, consult the
+                  `authorization_attempt_info` field.
+
+                  Exceeded Certificate Authority quotas or internal rate limits of the
+                  system. Provisioning may take longer to complete.
+                values:
+                  - :REASON_UNSPECIFIED
+                  - :AUTHORIZATION_ISSUE
+                  - :RATE_LIMITED
+              - !ruby/object:Api::Type::String
+                name: details
+                output: true
+                description: |
+                  Human readable explanation about the issue. Provided to help address
+                  the configuration issues.
+                  Not guaranteed to be stable. For programmatic access use `reason` field.
+          - !ruby/object:Api::Type::Array
+            name: 'authorizationAttemptInfo'
+            output: true
+            description: |
+              Detailed state of the latest authorization attempt for each domain
+              specified for this Managed Certificate.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: domain
+                  output: true
+                  description: |
+                    Domain name of the authorization attempt.
+                - !ruby/object:Api::Type::Enum
+                  name: 'state'
+                  output: true
+                  description: |
+                    State of the domain for managed certificate issuance.
+
+                    The State is undefined.
+
+                    Certificate provisioning for this domain is under way. GCP will
+                    attempt to authorize the domain.
+
+                    A managed certificate can be provisioned, no issues for this domain.
+
+                    Attempt to authorize the domain failed. This prevents the Managed
+                    Certificate from being issued.
+                    /See `failure_reason` and `details` fields for more information.
+                  values:
+                    - :STATE_UNSPECIFIED
+                    - :AUTHORIZING
+                    - :AUTHORIZED
+                    - :FAILED
+                - !ruby/object:Api::Type::Enum
+                  name: 'failureReason'
+                  output: true
+                  description: |
+                    Reason for failure of the authorization attempt for the domain.
+
+                    There was a problem with the user's DNS or load balancer
+                    configuration for this domain.
+
+                    Certificate issuance forbidden by an explicit CAA record for the
+                    domain or a failure to check CAA records for the domain.
+
+                    Reached a CA or internal rate-limit for the domain,
+                    e.g. for certificates per top-level private domain.
+                  values:
+                    - :FAILURE_REASON_UNSPECIFIED
+                    - :CONFIG
+                    - :CAA
+                    - :RATE_LIMITED
+                - !ruby/object:Api::Type::String
+                  name: details
+                  output: true
+                  description: |
+                    Human readable explanation for reaching the state. Provided to help
+                    address the configuration issues.
+                    Not guaranteed to be stable. For programmatic access use `failure_reason` field.
   - !ruby/object:Api::Resource
     name: 'CertificateMap'
     base_url: 'projects/{{project}}/locations/global/certificateMaps'
@@ -360,14 +500,14 @@ objects:
           name: 'createTime'
           output: true
           description: |
-            Creation timestamp of a Certificate Map Entry. Timestamp in RFC3339 UTC "Zulu" format, 
-            with nanosecond resolution and up to nine fractional digits. 
+            Creation timestamp of a Certificate Map Entry. Timestamp in RFC3339 UTC "Zulu" format,
+            with nanosecond resolution and up to nine fractional digits.
             Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
         - !ruby/object:Api::Type::Time
           name: 'updateTime'
           description: |
-            Update timestamp of a Certificate Map Entry. Timestamp in RFC3339 UTC "Zulu" format, 
-            with nanosecond resolution and up to nine fractional digits. 
+            Update timestamp of a Certificate Map Entry. Timestamp in RFC3339 UTC "Zulu" format,
+            with nanosecond resolution and up to nine fractional digits.
             Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
           output: true
         - !ruby/object:Api::Type::KeyValuePairs
