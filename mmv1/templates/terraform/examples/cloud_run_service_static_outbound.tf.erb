@@ -2,12 +2,14 @@
 
 # [START cloudrun_service_static_network]
 resource "google_compute_network" "default" {
+  provider = google-beta
   name = "<%= ctx[:vars]['cloudrun_static_ip_network'] %>"
 }
 # [END cloudrun_service_static_network]
 
 # [START cloudrun_service_static_subnet]
 resource "google_compute_subnetwork" "default" {
+  provider = google-beta
   name          = "<%= ctx[:vars]['cloudrun_static_ip'] %>"
   ip_cidr_range = "10.124.0.0/28"
   network       = google_compute_network.default.id
@@ -17,6 +19,7 @@ resource "google_compute_subnetwork" "default" {
 
 # [START cloudrun_service_static_vpc_conn]
 resource "google_project_service" "vpc" {
+  provider = google-beta
   service = "vpcaccess.googleapis.com"
 }
 
@@ -38,6 +41,7 @@ resource "google_vpc_access_connector" "default" {
 
 # [START cloudrun_service_static_router]
 resource "google_compute_router" "default" {
+  provider = google-beta
   name    = "<%= ctx[:vars]['cloudrun_static_ip_router'] %>"
   network = google_compute_network.default.name
   region  = google_compute_subnetwork.default.region
@@ -46,6 +50,7 @@ resource "google_compute_router" "default" {
 
 # [START cloudrun_service_static_addr]
 resource "google_compute_address" "default" {
+  provider = google-beta
   name   = "<%= ctx[:vars]['cloudrun_static_ip_addr'] %>"
   region = google_compute_subnetwork.default.region
 }
@@ -53,6 +58,7 @@ resource "google_compute_address" "default" {
 
 # [START cloudrun_service_static_nat]
 resource "google_compute_router_nat" "default" {
+  provider = google-beta
   name   = "<%= ctx[:vars]['cloudrun_static_nat'] %>"
   router = google_compute_router.default.name
   region = google_compute_subnetwork.default.region
@@ -70,6 +76,7 @@ resource "google_compute_router_nat" "default" {
 
 # [START cloudrun_service_service]
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
   name     = "<%= ctx[:vars]['cloudrun_static_ip_service'] %>"
   location = google_compute_subnetwork.default.region
 
