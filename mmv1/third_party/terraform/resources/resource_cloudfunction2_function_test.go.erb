@@ -326,13 +326,6 @@ resource "google_service_account" "account" {
   display_name = "Test Service Account - used for both the cloud function and eventarc trigger in the test"
 }
 
-resource "google_project_iam_member" "artifactregistry-reader" {
-  provider = google-beta
-  project  = google_project.project.project_id # Required argument
-  role     = "roles/artifactregistry.reader"
-  member   = "serviceAccount:${google_service_account.account.email}"
-}
-
 resource "google_storage_bucket" "source-bucket" {
   provider = google-beta
   project = google_project.project.project_id
@@ -385,8 +378,19 @@ resource "google_project_iam_member" "event-receiving" {
   member  = "serviceAccount:${google_service_account.account.email}"
 }
 
+resource "google_project_iam_member" "artifactregistry-reader" {
+  provider = google-beta
+  project  = google_project.project.project_id # Required argument
+  role     = "roles/artifactregistry.reader"
+  member   = "serviceAccount:${google_service_account.account.email}"
+}
+
 resource "google_cloudfunctions2_function" "tf-test-function-%{random_suffix}" {
   provider    = google-beta
+  depends_on = [
+    google_project_iam_member.event-receiving,
+    google_project_iam_member.artifactregistry-reader,
+  ]
   project     = google_project.project.project_id
   name        = "tf-test-function-%{random_suffix}"
   location    = "us-central1"
