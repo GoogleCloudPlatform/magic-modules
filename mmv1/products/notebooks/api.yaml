@@ -861,16 +861,12 @@ objects:
         description: |
           The config settings for accessing runtime.
         properties:
-          - !ruby/object:Api::Type::Enum
+          - !ruby/object:Api::Type::String
             name: 'accessType'
             description: |
               The type of access mode this instance. For valid values, see
               `https://cloud.google.com/vertex-ai/docs/workbench/reference/
-              rest/v1/projects.locations.runtimes#RuntimeAccessType`.
-            values:
-              - RUNTIME_ACCESS_TYPE_UNSPECIFIED
-              - SINGLE_USER
-              - SERVICE_ACCOUNT           
+              rest/v1/projects.locations.runtimes#RuntimeAccessType`.       
           - !ruby/object:Api::Type::String
             name: 'runtimeOwner'
             description: |
