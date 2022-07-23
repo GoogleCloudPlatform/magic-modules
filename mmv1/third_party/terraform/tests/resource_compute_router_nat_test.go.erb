@@ -1111,7 +1111,7 @@ resource "google_compute_router_nat" "foobar" {
 	rule_number = 2
 	match       = "inIpRange(destination.ip, '3.3.0.0/16') || inIpRange(destination.ip, '4.4.0.0/16')"
 	action {
-	  source_nat_active_ips = [google_compute_address.foobar2.id]
+	  source_nat_active_ips = [google_compute_address.foobar3.id]
 	}
   }
 }
