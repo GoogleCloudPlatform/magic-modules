@@ -58,6 +58,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           instance_name: "notebooks-instance"
         test_env_vars:
           service_account: :SERVICE_ACCT
+      - !ruby/object:Provider::Terraform::Examples
+        name: "notebook_instance_forward_ip"
+        skip_docs: true
+        primary_resource_id: "instance"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"random_suffix\"])"
+        region_override: "us-west1-a"
+        vars:
+          instance_name: "notebooks-instance"          
     description: |
       {{description}}
 
