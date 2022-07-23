@@ -63,9 +63,6 @@ func TestAccComputeRouterNat_basic(t *testing.T) {
 func TestAccComputeRouterNat_tcpTimeWaitTimeoutSec(t *testing.T) {
 	t.Parallel()
 
-	project := getTestProjectFromEnv()
-	region := getTestRegionFromEnv()
-
 	testId := randString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
 
