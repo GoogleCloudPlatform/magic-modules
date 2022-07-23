@@ -142,7 +142,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime-container%s\", context[\"random_suffix\"])"
         region_override: "us-central1"
         vars:
-          runtime_name: "notebooks-runtime-kernel"          
+          runtime_name: "notebooks-runtime-kernel"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "notebook_runtime_script"
+        primary_resource_id: "runtime_container"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime-container%s\", context[\"random_suffix\"])"
+        region_override: "us-central1"
+        vars:
+          runtime_name: "notebooks-runtime-script"           
     description: |
       {{description}}
 
