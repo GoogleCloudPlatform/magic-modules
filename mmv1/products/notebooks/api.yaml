@@ -369,12 +369,7 @@ objects:
       - !ruby/object:Api::Type::Boolean
         name: 'noRemoveDataDisk'
         description: |
-            If true, the data disk will not be auto deleted when deleting the instance.
-      - !ruby/object:Api::Type::Boolean
-        name: 'canIpForward'
-        default_value: false
-        description: |
-            Flag to enable ip forwarding or not, default false/off.           
+            If true, the data disk will not be auto deleted when deleting the instance.          
       - !ruby/object:Api::Type::Enum
         name: 'diskEncryption'
         values:
