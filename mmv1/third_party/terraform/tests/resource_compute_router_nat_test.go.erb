@@ -80,6 +80,15 @@ func TestAccComputeRouterNat_rule(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccComputeRouterNatRuleUpdate(routerName),
+			},
+			{
+				// implicitly full ImportStateId
+				ResourceName: "google_compute_router_nat.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -1012,4 +1021,66 @@ resource "google_compute_router_nat" "foobar" {
   }
 }
 `, routerName, routerName, routerName, routerName, routerName, routerName)
+}
+
+func testAccComputeRouterNatRuleUpdate(routerName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name = "%s-net"
+}
+
+resource "google_compute_subnetwork" "foobar" {
+  name          = "%s-subnet"
+  network       = google_compute_network.foobar.self_link
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+}
+
+resource "google_compute_router" "foobar" {
+  name    = "%s"
+  region  = google_compute_subnetwork.foobar.region
+  network = google_compute_network.foobar.self_link
+}
+
+resource "google_compute_address" "foobar" {
+  name   = "%s-addr"
+  region = google_compute_subnetwork.foobar.region
+}
+
+resource "google_compute_address" "foobar2" {
+  name   = "%s-addr-2"
+  region = google_compute_subnetwork.foobar.region
+}
+
+resource "google_compute_address" "foobar3" {
+  name   = "%s-addr-3"
+  region = google_compute_subnetwork.foobar.region
+}
+
+resource "google_compute_router_nat" "foobar" {
+  name                                = "%s"
+  router                              = google_compute_router.foobar.name
+  region                              = google_compute_router.foobar.region
+  nat_ip_allocate_option              = "MANUAL_ONLY"
+  nat_ips                             = [google_compute_address.foobar.id]
+  source_subnetwork_ip_ranges_to_nat  = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+  enable_endpoint_independent_mapping = false
+
+  rules {
+	rule_number = 1
+	match       = "inIpRange(destination.ip, '1.1.0.0/16') || inIpRange(destination.ip, '5.5.0.0/16')"
+	action {
+	  source_nat_active_ips = [google_compute_address.foobar2.id]
+	}
+  }
+
+  rules {
+	rule_number = 2
+	match       = "inIpRange(destination.ip, '3.3.0.0/16') || inIpRange(destination.ip, '4.4.0.0/16')"
+	action {
+	  source_nat_active_ips = [google_compute_address.foobar2.id]
+	}
+  }
+}
+`, routerName, routerName, routerName, routerName, routerName, routerName, routerName)
 }
