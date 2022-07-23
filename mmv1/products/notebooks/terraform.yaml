@@ -57,7 +57,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           instance_name: "notebooks-instance"
         test_env_vars:
-          service_account: :SERVICE_ACCT      
+          service_account: :SERVICE_ACCT
     description: |
       {{description}}
 
@@ -136,6 +136,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         region_override: "us-central1"
         vars:
           runtime_name: "notebooks-runtime-container"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "notebook_runtime_kernels"
+        primary_resource_id: "runtime_container"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime-container%s\", context[\"random_suffix\"])"
+        region_override: "us-central1"
+        vars:
+          runtime_name: "notebooks-runtime-kernel"          
     description: |
       {{description}}
 
