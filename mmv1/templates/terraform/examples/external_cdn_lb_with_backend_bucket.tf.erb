@@ -3,7 +3,7 @@
 # [START cloudloadbalancing_cdn_with_backend_bucket_cloud_storage_bucket]
 # Cloud Storage bucket
 resource "google_storage_bucket" "default" {
-  name                        = "<%= ctx[:vars]['betsy_7896'] %>"
+  name                        = "<%= ctx[:vars]['my_bucket'] %>"
   location                    = "us-east1"
   uniform_bucket_level_access = true
   storage_class               = "STANDARD"
