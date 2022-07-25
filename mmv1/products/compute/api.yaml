@@ -8562,6 +8562,21 @@ objects:
         description: |
           The target service url used to set up private service connection to
           a Google API or a PSC Producer Service Attachment.
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'network'
+        resource: 'Network'
+        imports: 'selfLink'
+        description: |
+          This field is only used for PSC.
+          The URL of the network to which all network endpoints in the NEG belong. Uses
+          "default" project network if unspecified.
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'subnetwork'
+        resource: 'Subnetwork'
+        imports: 'selfLink'
+        description: |
+          This field is only used for PSC.
+          Optional URL of the subnetwork to which all network endpoints in the NEG belong.
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudRun'
         conflicts:
