@@ -537,7 +537,7 @@ func checkGCSName(name string) error {
 		if strLen > MAX_LENGTH {
 			return fmt.Errorf("error: maximum length exceeded %v\n", str)
 		}
-		valid, _ := regexp.MatchString("^[a-z0-9]+(-[a-z0-9]+)*$", str)
+		valid, _ := regexp.MatchString("^[a-z0-9_]+(-[a-z0-9]+)*$", str)
 		if !valid {
 			return fmt.Errorf("error: string validation failed %v\n", str)
 		}
