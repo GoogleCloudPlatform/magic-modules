@@ -1662,6 +1662,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "psc_neg"
         vars:
           neg_name: "psc-neg"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_network_endpoint_group_psc_service_attachment"
+        primary_resource_id: "psc_neg_service_attachment"
+        vars:
+          neg_name: "psc-neg"
+          network_name: "psc-network"
+          subnetwork_name: "psc-subnetwork"
+          psc_subnetwork_name: "psc-subnetwork-nat"
+          backend_service_name: "psc-backend"
+          forwarding_rule_name: "psc-forwarding-rule"
+          service_attachment_name: "psc-service-attachment"
+          health_check_name: "psc-healthcheck"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
