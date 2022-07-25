@@ -251,9 +251,12 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 	d.SetId(id)
 
 {{- if $.CustomCreateDirectiveFunction }}
-  createDirective := {{ $.CustomCreateDirectiveFunction }}(obj)
+	directive := {{ $.CustomCreateDirectiveFunction }}(obj)
+{{- else if $.HasCreate }}
+	directive := CreateDirective
 {{- else }}
-  createDirective := CreateDirective
+	{{/* Resource has no create method, so we skip the BlockModification parameter. */}}
+	directive := UpdateDirective
 {{- end }}
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
@@ -281,7 +284,7 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 	} else {
 		client.Config.BasePath = bp
 	}
-	res, err := client.Apply{{$.DCLTitle}}(context.Background(), obj, createDirective...)
+	res, err := client.Apply{{$.DCLTitle}}(context.Background(), obj, directive...)
 
 	if _, ok := err.(dcl.DiffAfterApplyError); ok {
 		log.Printf("[DEBUG] Diff after apply returned from the DCL: %s", err)
@@ -493,7 +496,7 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 {{ end }}
 	}
 
-	{{- if $.Mutex }}
+{{- if $.Mutex }}
 	lockName, err := {{ $.IDFunction }}(d, config, "{{$.Mutex}}")
 	if err != nil {
 		return err
@@ -533,12 +536,12 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 		billingProject = bp
 	}
 	client := NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
-	{{- if $.AppendToBasePath }}
+{{- if $.AppendToBasePath }}
 	client.Config.BasePath += "{{$.AppendToBasePath}}"
-	{{- end }}
-	{{- if $.ReplaceInBasePath.Present }}
+{{- end }}
+{{- if $.ReplaceInBasePath.Present }}
 	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
-	{{- end }}
+{{- end }}
 	if bp, err := replaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
@@ -717,6 +720,7 @@ func flatten{{$.PathType}}{{$v.PackagePath}}Array(obj []{{$.Package}}.{{$v.Objec
 	return items
 }
 
+	{{- if $v.Settable }}
 func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.{{$v.ObjectType}}Enum {
 	objs := o.([]interface{})
 	items := make([]{{$.Package}}.{{$v.ObjectType}}Enum, 0, len(objs))
@@ -726,5 +730,6 @@ func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.
 	}
   return items
 }
+	{{- end }}
 {{ end }}
 
