@@ -106,7 +106,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           config: "config"
-        min_version: beta
         skip_docs: true
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_noauth"
@@ -162,7 +161,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           scheduled_cloud_run_job: "scheduled-cloud-run-job"
         test_env_vars:
           project: :PROJECT_NAME
-        min_version: beta
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_secret_environment_variables"
         primary_resource_id: "default"
@@ -293,7 +291,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_docs: true
         vars:
           graphviz_example: "graphviz-example"
-        min_version: beta
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_tasks"
         primary_resource_id: "default"
@@ -310,7 +307,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_docs: true
         vars:
           cloud_run_srv: "cloud-run-srv"
-        min_version: beta
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'autogenerate_revision_name'
