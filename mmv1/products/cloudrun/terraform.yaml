@@ -292,6 +292,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           graphviz_example: "graphviz-example"
       - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_secure_services"
+        primary_resource_type: "google_cloud_run_service"
+        primary_resource_id: "renderer"
+        skip_docs: true
+        vars:
+          renderer: "renderer"
+          editor: "editor"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_tasks"
         primary_resource_id: "default"
         skip_docs: true
