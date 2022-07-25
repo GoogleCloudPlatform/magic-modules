@@ -209,23 +209,19 @@ module Api
     end
 
     # Checks that all conflicting properties actually exist.
+    # This currently just returns if empty, because we don't want to do the check, since
+    # this list will have a full path for nested attributes.
     def check_conflicts
       check :conflicts, type: ::Array, default: [], item_type: ::String
 
       return if @conflicts.empty?
-
-      names = @__resource.all_user_properties.map(&:lineage)
-      @conflicts.each do |p|
-        raise "#{p} does not exist" unless names.include?(p)
-      end
     end
 
     # Returns list of properties that are in conflict with this property.
     def conflicting
       return [] unless @__resource
 
-      (@__resource.all_user_properties.select { |p| @conflicts.include?(p.lineage) } +
-      @__resource.all_user_properties.select { |p| p.conflicts.include?(lineage) }).uniq
+      @conflicts
     end
 
     # Checks that all properties that needs at least one of their fields actually exist.
