@@ -208,7 +208,10 @@ func TestAccCloudFunctions2Function_eventFiltering(t *testing.T) {
         Config: testAccCloudfunctions2function_eventFilteringProjectSetup(context),
       },
       {
-        Config: testAccCloudfunctions2function_eventFilteringAddResources(context),
+        Config: testAccCloudfunctions2function_eventFilteringAddResources1(context),
+      },
+      {
+        Config: testAccCloudfunctions2function_eventFilteringAddResources2(context),
       },
     },
   })
@@ -283,7 +286,7 @@ resource "google_project_service" "pubsub" {
 }`, context)
 }
 
-func testAccCloudfunctions2function_eventFilteringAddResources(context map[string]interface{}) string {
+func testAccCloudfunctions2function_eventFilteringAddResources1(context map[string]interface{}) string {
   return Nprintf(`
 resource "google_project" "project" {
   provider        = google-beta
@@ -416,14 +419,141 @@ resource "google_project_iam_member" "artifactregistry-reader" {
   role     = "roles/artifactregistry.reader"
   member   = "serviceAccount:${google_service_account.account.email}"
 }
+`, context)
+}
 
-# Setting an IAM binding at the level of a repository as well as project-level binding above
-resource "google_artifact_registry_repository_iam_member" "artifactregistry-repo-reader" {
-  project    = google_project.project.project_id
-  location   = "us-central1" # Same as the cloud function
-  repository = "projects/${google_project.project.project_id}/locations/us-central1/repositories/gcf-artifacts" # Inferred name as it's a google-managed resource
-  role       = "roles/artifactregistry.reader"
-  member     = "serviceAccount:${google_service_account.account.email}"
+func testAccCloudfunctions2function_eventFilteringAddResources2(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_project" "project" {
+  provider        = google-beta
+  project_id      = "%{project}"
+  name            = "%{project}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+}
+
+
+# APIs need to be activated before resources can be created
+resource "google_project_service" "iam" {
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = "iam.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "cloudfunctions" {
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = "cloudfunctions.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "eventarc" {
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = "eventarc.googleapis.com"
+
+  disable_dependent_services = false # Fix for issue when disabling Eventarc API
+}
+
+resource "google_project_service" "run" {
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = "run.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "artifactregistry" {
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = "artifactregistry.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "cloudbuild" {
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = "cloudbuild.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "pubsub" {
+  provider     = google-beta
+  project      = google_project.project.project_id
+  service      = "pubsub.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_service_account" "account" {
+  provider = google-beta
+  project = google_project.project.project_id
+  account_id = "tf-test-sa-%{random_suffix}"
+  display_name = "Test Service Account - used for both the cloud function and eventarc trigger in the test"
+}
+
+resource "google_storage_bucket" "source-bucket" {
+  provider = google-beta
+  project = google_project.project.project_id
+  name     = "tf-test-source-bucket-%{random_suffix}"
+  location = "US"
+  uniform_bucket_level_access = true
+}
+ 
+resource "google_storage_bucket_object" "object" {
+  provider = google-beta
+  name   = "function-source.zip"
+  bucket = google_storage_bucket.source-bucket.name
+  source = "%{zip_path}"  # Add path to the zipped function source code
+}
+
+resource "google_storage_bucket" "trigger-bucket" {
+  provider = google-beta
+  project  = google_project.project.project_id
+  name     = "tf-test-trigger-bucket-%{random_suffix}"
+  location = "us-central1" # The trigger must be in the same location as the bucket
+  uniform_bucket_level_access = true
+}
+
+data "google_storage_project_service_account" "gcs_account" {
+  provider = google-beta
+  project = google_project.project.project_id
+}
+
+# To use GCS CloudEvent triggers, the GCS service account requires the Pub/Sub Publisher(roles/pubsub.publisher) IAM role in the specified project.
+# (See https://cloud.google.com/eventarc/docs/run/quickstart-storage#before-you-begin)
+resource "google_project_iam_member" "gcs-pubsub-publishing" {
+  provider = google-beta
+  project  = google_project.project.project_id # Required argument
+  role     = "roles/pubsub.publisher"
+  member   = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
+}
+
+# Permissions on the service account for the function and Eventarc trigger
+resource "google_project_iam_member" "invoking" {
+  provider = google-beta
+  project  = google_project.project.project_id # Required argument
+  role     = "roles/run.invoker"
+  member   = "serviceAccount:${google_service_account.account.email}"
+}
+
+resource "google_project_iam_member" "event-receiving" {
+  provider = google-beta
+  project = google_project.project.project_id # Required argument
+  role    = "roles/eventarc.eventReceiver"
+  member  = "serviceAccount:${google_service_account.account.email}"
+}
+
+resource "google_project_iam_member" "artifactregistry-reader" {
+  provider = google-beta
+  project  = google_project.project.project_id # Required argument
+  role     = "roles/artifactregistry.reader"
+  member   = "serviceAccount:${google_service_account.account.email}"
 }
 
 resource "google_cloudfunctions2_function" "tf-test-function-%{random_suffix}" {
