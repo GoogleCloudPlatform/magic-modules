@@ -380,7 +380,7 @@ The following arguments are supported:
 * `ip_allocation_policy` -
   (Optional)
   Configuration for controlling how IPs are allocated in the GKE cluster.
-  Structure is [documented below](#nested_ip_allocation_policy).
+  Structure is [documented below](#nested_ip_allocation_policy_1).
   Cannot be updated.
 
 * `max_pods_per_node` -
@@ -509,7 +509,7 @@ The `web_server_network_access_control` supports:
   (Optional)
   A description of this ip range.
 
-<a name="nested_ip_allocation_policy"></a>The `ip_allocation_policy` block supports:
+<a name="nested_ip_allocation_policy_1"></a>The `ip_allocation_policy` block supports:
 
 * `use_ip_aliases` -
   (Optional, Cloud Composer 1 only)
@@ -711,7 +711,7 @@ The following arguments are supported:
 * `ip_allocation_policy` -
   (Optional)
   Configuration for controlling how IPs are allocated in the GKE cluster.
-  Structure is documented below.
+  Structure is [documented below](#nested_ip_allocation_policy_2).
   Cannot be updated.
 
 * `enable_ip_masq_agent` -
@@ -817,7 +817,7 @@ See [documentation](https://cloud.google.com/composer/docs/how-to/managing/confi
   versions `composer-2.*.*-airflow-*.*.*` and newer.
 
 
-The `ip_allocation_policy` block supports:
+<a name="nested_ip_allocation_policy_2"></a>The `ip_allocation_policy` block supports:
 
 * `cluster_secondary_range_name` -
   (Optional)
