@@ -283,7 +283,7 @@ The following arguments are supported:
 
 * `software_config` -
   (Optional)
-  The configuration settings for software inside the environment.  Structure is [documented below](#nested_software_config).
+  The configuration settings for software inside the environment.  Structure is [documented below](#nested_software_config_1).
 
 * `private_environment_config` -
   (Optional)
@@ -399,7 +399,7 @@ The following arguments are supported:
   all destination addresses, except between pods traffic.
   See the [documentation](https://cloud.google.com/composer/docs/enable-ip-masquerade-agent).
 
-<a name="nested_software_config"></a>The `software_config` block supports:
+<a name="nested_software_config_1"></a>The `software_config` block supports:
 
 * `airflow_config_overrides` -
   (Optional) Apache Airflow configuration properties to override. Property keys contain the section and property names,
@@ -647,7 +647,7 @@ The following arguments are supported:
 * `software_config` -
   (Optional)
   The configuration settings for software (Airflow) inside the environment. Structure is
-  documented below.
+  [documented below](#nested_software_config_2).
 
 * `private_environment_config` -
   (Optional)
@@ -721,7 +721,7 @@ The following arguments are supported:
   packets from node IP addresses instead of Pod IP addresses
   See the [documentation](https://cloud.google.com/composer/docs/enable-ip-masquerade-agent).
 
-The `software_config` block supports:
+<a name="nested_software_config_2"></a>The `software_config` block supports:
 
 * `airflow_config_overrides` -
   (Optional) Apache Airflow configuration properties to override. Property keys contain the section and property names,
