@@ -2,6 +2,11 @@ resource "google_storage_bucket" "basic_bucket" {
   name          = "dataplex-bucket-%{random_suffix}"
   location      = "{{region}}"
   uniform_bucket_level_access = true
+  lifecycle {
+    ignore_changes = [
+      labels
+    ]
+  }
  
   project = "{{project}}"
 }
