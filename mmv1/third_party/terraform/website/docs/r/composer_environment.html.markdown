@@ -930,7 +930,7 @@ The `worker` block supports:
   (Optional)
   The amount of memory (GB) for a single Airflow worker.
 
-* `float storage_gb`
+* `storage_gb`
   (Optional)
   The amount of storage (GB) for a single Airflow worker.
 
