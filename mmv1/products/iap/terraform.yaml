@@ -241,6 +241,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "iap_settings"
         vars:
           project_id: 'settings-proj-'
+          org_id: :ORG_ID`
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
