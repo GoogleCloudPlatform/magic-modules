@@ -249,7 +249,7 @@ The following arguments are supported:
 
 * `config` -
   (Optional)
-  Configuration parameters for this environment. Structure is [documented below](#nested_config_1).
+  Configuration parameters for this environment. Structure is [documented below](#nested_config).
 
 * `labels` -
   (Optional)
@@ -271,7 +271,7 @@ The following arguments are supported:
   (Optional) The ID of the project in which the resource belongs.
   If it is not provided, the provider project is used.
 
-<a name="nested_config_1"></a>The `config` block supports:
+<a name="nested_config"></a>The `config` block supports:
 
 * `node_count` -
   (Optional, Cloud Composer 1 only)
@@ -279,11 +279,11 @@ The following arguments are supported:
 
 * `node_config` -
   (Optional)
-  The configuration used for the Kubernetes Engine cluster.  Structure is [documented below](#nested_node_config_1).
+  The configuration used for the Kubernetes Engine cluster.  Structure is [documented below](#nested_node_config).
 
 * `software_config` -
   (Optional)
-  The configuration settings for software inside the environment.  Structure is [documented below](#nested_software_config_1).
+  The configuration settings for software inside the environment.  Structure is [documented below](#nested_software_config).
 
 * `private_environment_config` -
   (Optional)
@@ -319,7 +319,7 @@ The following arguments are supported:
   Kubernetes master through HTTPS except traffic from the given CIDR blocks,
   Google Compute Engine Public IPs and Google Prod IPs. Structure is [documented below](#nested_master_authorized_networks_config).
 
-<a name="nested_node_config_1"></a>The `node_config` block supports:
+<a name="nested_node_config"></a>The `node_config` block supports:
 
 * `zone` -
   (Optional, Cloud Composer 1 only)
@@ -380,7 +380,7 @@ The following arguments are supported:
 * `ip_allocation_policy` -
   (Optional)
   Configuration for controlling how IPs are allocated in the GKE cluster.
-  Structure is [documented below](#nested_ip_allocation_policy_1).
+  Structure is [documented below](#nested_ip_allocation_policy).
   Cannot be updated.
 
 * `max_pods_per_node` -
@@ -399,7 +399,7 @@ The following arguments are supported:
   all destination addresses, except between pods traffic.
   See the [documentation](https://cloud.google.com/composer/docs/enable-ip-masquerade-agent).
 
-<a name="nested_software_config_1"></a>The `software_config` block supports:
+<a name="nested_software_config"></a>The `software_config` block supports:
 
 * `airflow_config_overrides` -
   (Optional) Apache Airflow configuration properties to override. Property keys contain the section and property names,
@@ -509,7 +509,7 @@ The `web_server_network_access_control` supports:
   (Optional)
   A description of this ip range.
 
-<a name="nested_ip_allocation_policy_1"></a>The `ip_allocation_policy` block supports:
+<a name="nested_ip_allocation_policy"></a>The `ip_allocation_policy` block supports:
 
 * `use_ip_aliases` -
   (Optional, Cloud Composer 1 only)
