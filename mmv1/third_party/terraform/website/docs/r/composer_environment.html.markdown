@@ -279,7 +279,7 @@ The following arguments are supported:
 
 * `node_config` -
   (Optional)
-  The configuration used for the Kubernetes Engine cluster.  Structure is [documented below](#nested_node_config).
+  The configuration used for the Kubernetes Engine cluster.  Structure is [documented below](#nested_node_config_1).
 
 * `software_config` -
   (Optional)
@@ -320,7 +320,7 @@ The following arguments are supported:
   Google Compute Engine Public IPs and Google Prod IPs. Structure is
   [documented below](#nested_master_authorized_networks_config).
 
-<a name="nested_node_config"></a>The `node_config` block supports:
+<a name="nested_node_config_1"></a>The `node_config` block supports:
 
 * `zone` -
   (Optional, Cloud Composer 1 only)
@@ -643,7 +643,7 @@ The following arguments are supported:
 
 * `node_config` -
   (Optional)
-  The configuration used for the Kubernetes Engine cluster. Structure is documented below.
+  The configuration used for the Kubernetes Engine cluster. Structure is [documented below](#nested_node_config_2).
 
 * `software_config` -
   (Optional)
@@ -684,7 +684,7 @@ The following arguments are supported:
   Google Compute Engine Public IPs and Google Prod IPs. Structure is
   documented below.
 
-The `node_config` block supports:
+<a name="nested_node_config_2"></a>The `node_config` block supports:
 
 * `network` -
   (Optional)
