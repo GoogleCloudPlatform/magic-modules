@@ -178,6 +178,22 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           backend_bucket_name: "image-backend-bucket"
       - !ruby/object:Provider::Terraform::Examples
+        name: "external_cdn_lb_with_backend_bucket"
+        primary_resource_id: "default"
+        vars:
+          cdn_network: "cdn-network"
+          cdn_subnet: "cdn-subnet"
+          cdn_static_ip: "cdn-static-ip"
+          cdn_forwarding_rule: "cdn-forwarding-rule"
+          cdn_target_http_proxy: "cdn-target-http-proxy"
+          cdn_url_map: "cdn-url-map"
+          image_backend_bucket: "image-backend-bucket"
+          cdn_backend_storage_bucket: "cdn-backend-storage-bucket"
+          index_page: "index-page"
+          404_page: "404-page"
+          test_object: "test-object"
+        skip_docs: true
+      - !ruby/object:Provider::Terraform::Examples
         name: "backend_bucket_bypass_cache"
         primary_resource_id: "image_backend"
         skip_docs: true        
@@ -1646,6 +1662,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "psc_neg"
         vars:
           neg_name: "psc-neg"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_network_endpoint_group_psc_service_attachment"
+        primary_resource_id: "psc_neg_service_attachment"
+        vars:
+          neg_name: "psc-neg"
+          network_name: "psc-network"
+          subnetwork_name: "psc-subnetwork"
+          psc_subnetwork_name: "psc-subnetwork-nat"
+          backend_service_name: "psc-backend"
+          forwarding_rule_name: "psc-forwarding-rule"
+          service_attachment_name: "psc-service-attachment"
+          health_check_name: "psc-healthcheck"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
