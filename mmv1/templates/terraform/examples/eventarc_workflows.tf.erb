@@ -69,7 +69,7 @@ resource "google_workflows_workflow" "workflows_example" {
   description     = "A sample workflow"
   service_account = google_service_account.eventarc_workflows_service_account.id
   # Imported main workflow YAML file
-  source_contents = templatefile("text-fixtures/workflow.yaml",{})
+  source_contents = templatefile("test-fixtures/workflow.yaml",{})
 
   depends_on = [google_project_service.workflows, 
 google_service_account.eventarc_workflows_service_account]
