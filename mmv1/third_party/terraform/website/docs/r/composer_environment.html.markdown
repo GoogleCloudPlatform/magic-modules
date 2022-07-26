@@ -249,7 +249,7 @@ The following arguments are supported:
 
 * `config` -
   (Optional)
-  Configuration parameters for this environment  Structure is [documented below](#nested_config).
+  Configuration parameters for this environment. Structure is [documented below](#nested_config_1).
 
 * `labels` -
   (Optional)
@@ -271,7 +271,7 @@ The following arguments are supported:
   (Optional) The ID of the project in which the resource belongs.
   If it is not provided, the provider project is used.
 
-<a name="nested_config"></a>The `config` block supports:
+<a name="nested_config_1"></a>The `config` block supports:
 
 * `node_count` -
   (Optional, Cloud Composer 1 only)
@@ -617,7 +617,7 @@ The following arguments are supported:
 
 * `config` -
   (Optional)
-  Configuration parameters for this environment. Structure is documented below.
+  Configuration parameters for this environment. Structure is [documented below](#nested_config_2).
 
 * `labels` -
   (Optional)
@@ -639,7 +639,7 @@ The following arguments are supported:
   (Optional) The ID of the project in which the resource belongs.
   If it is not provided, the provider project is used.
 
-The `config` block supports:
+<a name="nested_config_2"></a>The `config` block supports:
 
 * `node_config` -
   (Optional)
