@@ -4,9 +4,16 @@ resource "google_project" "project" {
   org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
 }
 
+locals {
+  apis = ["compute.googleapis.com", "iap.googleapis.com"]
+}
+
 resource "google_project_service" "project_service" {
+  for_each = toset(local.apis)
   project = google_project.project.project_id
-  service = "iap.googleapis.com"
+  service  = each.key
+
+  disable_on_destroy = false
 }
 
 resource "google_compute_backend_service" "default" {
