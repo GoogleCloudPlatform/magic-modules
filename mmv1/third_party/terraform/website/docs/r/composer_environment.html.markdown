@@ -317,8 +317,7 @@ The following arguments are supported:
   Configuration options for the master authorized networks feature. Enabled
   master authorized networks will disallow all external traffic to access
   Kubernetes master through HTTPS except traffic from the given CIDR blocks,
-  Google Compute Engine Public IPs and Google Prod IPs. Structure is
-  [documented below](#nested_master_authorized_networks_config).
+  Google Compute Engine Public IPs and Google Prod IPs. Structure is [documented below](#nested_master_authorized_networks_config).
 
 <a name="nested_node_config_1"></a>The `node_config` block supports:
 
@@ -681,8 +680,7 @@ The following arguments are supported:
   Configuration options for the master authorized networks feature. Enabled
   master authorized networks will disallow all external traffic to access
   Kubernetes master through HTTPS except traffic from the given CIDR blocks,
-  Google Compute Engine Public IPs and Google Prod IPs. Structure is
-  documented below.
+  Google Compute Engine Public IPs and Google Prod IPs. Structure is [documented above in the Cloud Composer 1 section](#nested_master_authorized_networks_config).
 
 <a name="nested_node_config_2"></a>The `node_config` block supports:
 
