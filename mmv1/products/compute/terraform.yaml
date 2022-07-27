@@ -1401,8 +1401,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "on_prem"
         vars:
           interconnect_attachment_name: "on-prem-attachment"
-          router_name: "router"
-          network_name: "network"
+          router_name: "router-1"
+          network_name: "network-1"
       - !ruby/object:Provider::Terraform::Examples
         name: "compute_interconnect_attachment_ipsec_encryption"
         primary_resource_id: "ipsec-encrypted-interconnect-attachment"
@@ -3195,8 +3195,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "target_vpn_gateway_basic"
         primary_resource_id: "target_gateway"
         vars:
-          target_vpn_gateway_name: "vpn1"
-          network_name: "network1"
+          target_vpn_gateway_name: "vpn-1"
+          network_name: "network-1"
           address_name: "vpn-static-ip"
           esp_forwarding_rule_name: "fr-esp"
           udp500_forwarding_rule_name: "fr-udp500"
@@ -3274,7 +3274,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_vcr: true
         vars:
           ha_vpn_gateway_name: "ha-vpn"
-          network_name: "network"
+          network_name: "network-1"
           external_gateway_name: "external-gateway"
           global_address_name: "global-address"
           router_name: "ha-vpn-router1"
