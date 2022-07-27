@@ -242,7 +242,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           project_id: 'settings-proj-'
         test_env_vars:
-          org_id: :ORG_ID`
+          org_id: :ORG_ID
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
