@@ -384,7 +384,7 @@ func TestAccContainerCluster_withAuthenticatorGroupsConfig(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccContainerCluster_basic(clusterName),
+				Config: testAccContainerCluster_withAuthenticatorGroupsConfigUpdate2(clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_container_cluster.primary",
 						"authenticator_groups_config.0.enabled"),
@@ -3370,6 +3370,20 @@ resource "google_container_cluster" "primary" {
 	}
 }
 `, name, orgDomain)
+}
+
+func testAccContainerCluster_withAuthenticatorGroupsConfigUpdate2(name string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+	name               = "%s"
+	location           = "us-central1-a"
+	initial_node_count = 1
+
+	authenticator_groups_config {
+		security_group = ""
+	}
+}
+`, name)
 }
 
 
