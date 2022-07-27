@@ -67,20 +67,6 @@ objects:
         name: 'description'
         description: |
           A human-readable description of the resource.
-      - !ruby/object:Api::Type::String
-        name: 'createTime'
-        output: true
-        description: |
-          Creation timestamp of a DNS Authorization. Timestamp in RFC3339 UTC "Zulu" format,
-          with nanosecond resolution and up to nine fractional digits.
-          Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-      - !ruby/object:Api::Type::Time
-        name: 'updateTime'
-        description: |
-          Update timestamp of a DNS Authorization. Timestamp in RFC3339 UTC "Zulu" format,
-          with nanosecond resolution and up to nine fractional digits.
-          Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-        output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: 'Set of label tags associated with the DNS Authorization resource.'
@@ -156,38 +142,14 @@ objects:
         name: 'description'
         description: |
           A human-readable description of the resource.
-      - !ruby/object:Api::Type::String
-        name: 'createTime'
-        output: true
-        description: |
-          Creation timestamp of a Certificate. Timestamp in RFC3339 UTC "Zulu" format,
-          with nanosecond resolution and up to nine fractional digits.
-          Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-      - !ruby/object:Api::Type::Time
-        name: 'updateTime'
-        description: |
-          Update timestamp of a Certificate. Timestamp in RFC3339 UTC "Zulu" format,
-          with nanosecond resolution and up to nine fractional digits.
-          Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-        output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: 'Set of label tags associated with the Certificate resource.'
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: scope
         input: true
         description: |
           The scope of the certificate.
-
-          Certificates with default scope are served from core Google data centers.
-          If unsure, choose this option.
-
-          Certificates with scope EDGE_CACHE are special-purposed certificates,
-          served from non-core Google data centers.
-          Currently allowed only for managed certificates.
-        values:
-          - :DEFAULT
-          - :EDGE_CACHE
         default_value: :DEFAULT
       - !ruby/object:Api::Type::NestedObject
         name: selfManaged
@@ -236,55 +198,22 @@ objects:
             description: |
               Authorizations that will be used for performing domain authorization
             item_type: Api::Type::String
-          - !ruby/object:Api::Type::Enum
+          - !ruby/object:Api::Type::String
             name: 'state'
             output: true
             description: |
               A state of this Managed Certificate.
-
-              The state is undefined.
-
-              Certificate Manager attempts to provision or renew the certificate.
-              If the process takes longer than expected, consult the
-              `provisioning_issue` field.
-
-              Multiple certificate provisioning attempts failed and Certificate
-              Manager gave up. To try again, delete and create a new managed
-              Certificate resource.
-              For details see the `provisioning_issue` field.
-
-              The certificate management is working, and a certificate has been
-              provisioned.
-            values:
-              - :STATE_UNSPECIFIED
-              - :PROVISIONING
-              - :FAILED
-              - :ACTIVE
           - !ruby/object:Api::Type::NestedObject
             name: 'provisioningIssue'
             output: true
             description: |
               Information about issues with provisioning this Managed Certificate.
             properties:
-              - !ruby/object:Api::Type::Enum
+              - !ruby/object:Api::Type::String
                 name: 'reason'
                 output: true
                 description: |
                   Reason for provisioning failures.
-
-                  The reason is undefined.
-
-                  Certificate provisioning failed due to an issue with one or more of
-                  the domains on the certificate.
-                  For details of which domains failed, consult the
-                  `authorization_attempt_info` field.
-
-                  Exceeded Certificate Authority quotas or internal rate limits of the
-                  system. Provisioning may take longer to complete.
-                values:
-                  - :REASON_UNSPECIFIED
-                  - :AUTHORIZATION_ISSUE
-                  - :RATE_LIMITED
               - !ruby/object:Api::Type::String
                 name: details
                 output: true
@@ -305,46 +234,16 @@ objects:
                   output: true
                   description: |
                     Domain name of the authorization attempt.
-                - !ruby/object:Api::Type::Enum
+                - !ruby/object:Api::Type::String
                   name: 'state'
                   output: true
                   description: |
                     State of the domain for managed certificate issuance.
-
-                    The State is undefined.
-
-                    Certificate provisioning for this domain is under way. GCP will
-                    attempt to authorize the domain.
-
-                    A managed certificate can be provisioned, no issues for this domain.
-
-                    Attempt to authorize the domain failed. This prevents the Managed
-                    Certificate from being issued.
-                    /See `failure_reason` and `details` fields for more information.
-                  values:
-                    - :STATE_UNSPECIFIED
-                    - :AUTHORIZING
-                    - :AUTHORIZED
-                    - :FAILED
-                - !ruby/object:Api::Type::Enum
+                - !ruby/object:Api::Type::String
                   name: 'failureReason'
                   output: true
                   description: |
                     Reason for failure of the authorization attempt for the domain.
-
-                    There was a problem with the user's DNS or load balancer
-                    configuration for this domain.
-
-                    Certificate issuance forbidden by an explicit CAA record for the
-                    domain or a failure to check CAA records for the domain.
-
-                    Reached a CA or internal rate-limit for the domain,
-                    e.g. for certificates per top-level private domain.
-                  values:
-                    - :FAILURE_REASON_UNSPECIFIED
-                    - :CONFIG
-                    - :CAA
-                    - :RATE_LIMITED
                 - !ruby/object:Api::Type::String
                   name: details
                   output: true
@@ -393,20 +292,6 @@ objects:
         name: 'description'
         description: |
           One or more paragraphs of text description of a certificate map entry.
-      - !ruby/object:Api::Type::String
-        name: 'createTime'
-        output: true
-        description: |
-          Creation timestamp of a Certificate Map. Timestamp is in RFC3339 UTC "Zulu" format,
-          accurate to nanoseconds with up to nine fractional digits.
-          Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-      - !ruby/object:Api::Type::Time
-        name: 'updateTime'
-        description: |
-          Update timestamp of a Certificate Map. Timestamp is in RFC3339 UTC "Zulu" format,
-          accurate to nanoseconds with up to nine fractional digits.
-          Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-        output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
@@ -496,20 +381,6 @@ objects:
           description: |
             CertificateMapEntry is a list of certificate configurations,
             that have been issued for a particular hostname
-        - !ruby/object:Api::Type::String
-          name: 'createTime'
-          output: true
-          description: |
-            Creation timestamp of a Certificate Map Entry. Timestamp in RFC3339 UTC "Zulu" format,
-            with nanosecond resolution and up to nine fractional digits.
-            Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-        - !ruby/object:Api::Type::Time
-          name: 'updateTime'
-          description: |
-            Update timestamp of a Certificate Map Entry. Timestamp in RFC3339 UTC "Zulu" format,
-            with nanosecond resolution and up to nine fractional digits.
-            Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-          output: true
         - !ruby/object:Api::Type::KeyValuePairs
           name: 'labels'
           description: |
@@ -524,21 +395,11 @@ objects:
             There can be defined up to fifteen certificates in each Certificate Map Entry.
             Each certificate must match pattern projects/*/locations/*/certificates/*.
           item_type: Api::Type::String
-        - !ruby/object:Api::Type::Enum
+        - !ruby/object:Api::Type::String
           name: 'state'
           output: true
           description: |
             A serving state of this Certificate Map Entry.
-
-            The status is undefined.
-
-            The configuration is serving.
-
-            Update is in progress. Some frontends may serve this configuration.
-          values:
-            - :SERVING_STATE_UNSPECIFIFED
-            - :ACTIVE
-            - :PENDING
         - !ruby/object:Api::Type::String
           name: 'hostname'
           description: |
@@ -548,14 +409,11 @@ objects:
           exactly_one_of:
             - hostname
             - matcher
-        - !ruby/object:Api::Type::Enum
+        - !ruby/object:Api::Type::String
           name: 'matcher'
           exactly_one_of:
             - hostname
             - matcher
           description: |
             A predefined matcher for particular cases, other than SNI selection
-          values:
-            - :MATCHER_UNSPECIFIED
-            - :PRIMARY
             
