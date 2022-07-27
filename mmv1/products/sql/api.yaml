@@ -399,6 +399,40 @@ objects:
             name: 'userLabels'
             description: |
               User-provided labels, represented as a dictionary where each label is a single key value pair.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'passwordValidationPolicy'
+            description: |
+              Database instance local user password validation policy
+            properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'minLength'
+              description: |
+                Minimum number of characters allowed.
+            - !ruby/object:Api::Type::Enum
+              name: 'complexity'
+              description: |
+                Password complexity.
+              values:
+              - :COMPLEXITY_UNSPECIFIED
+              - :COMPLEXITY_DEFAULT
+              default_value: :COMPLEXITY_DEFAULT
+            - !ruby/object:Api::Type::Integer
+              name: 'reuseInterval'
+              description: |
+                Number of previous passwords that cannot be reused.
+            - !ruby/object:Api::Type::Boolean
+              name: 'disallowUsernameSubstring'
+              description: |
+                Disallow username as a part of the password.
+            - !ruby/object:Api::Type::String
+              name: 'passwordChangeInterval'
+              description: |
+                Minimum interval after which the password can be changed. This flag is only
+                supported for PostgresSQL.
+            - !ruby/object:Api::Type::Boolean
+              name: 'enablePasswordPolicy'
+              description: |
+                Whether the password policy is enabled or not.
       - !ruby/object:Api::Type::String
         name: 'gceZone'
         output: true
