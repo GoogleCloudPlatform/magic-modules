@@ -234,7 +234,8 @@ resource "google_project_service" "iam" {
   project      = google_project.project.project_id
   service      = "iam.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_project_service" "cloudfunctions" {
@@ -242,7 +243,8 @@ resource "google_project_service" "cloudfunctions" {
   project      = google_project.project.project_id
   service      = "cloudfunctions.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_project_service" "eventarc" {
@@ -250,7 +252,8 @@ resource "google_project_service" "eventarc" {
   project      = google_project.project.project_id
   service      = "eventarc.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_project_service" "run" {
@@ -258,7 +261,8 @@ resource "google_project_service" "run" {
   project      = google_project.project.project_id
   service      = "run.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_project_service" "artifactregistry" {
@@ -266,7 +270,8 @@ resource "google_project_service" "artifactregistry" {
   project      = google_project.project.project_id
   service      = "artifactregistry.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_project_service" "cloudbuild" {
@@ -274,7 +279,8 @@ resource "google_project_service" "cloudbuild" {
   project      = google_project.project.project_id
   service      = "cloudbuild.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_project_service" "pubsub" {
@@ -282,12 +288,13 @@ resource "google_project_service" "pubsub" {
   project      = google_project.project.project_id
   service      = "pubsub.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }`, context)
 }
 
 func testAccCloudfunctions2function_eventFilteringAddResources1(context map[string]interface{}) string {
-  return Nprintf(`
+	return Nprintf(`
 resource "google_project" "project" {
   provider        = google-beta
   project_id      = "%{project}"
@@ -303,7 +310,8 @@ resource "google_project_service" "iam" {
   project      = google_project.project.project_id
   service      = "iam.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_project_service" "cloudfunctions" {
@@ -311,7 +319,8 @@ resource "google_project_service" "cloudfunctions" {
   project      = google_project.project.project_id
   service      = "cloudfunctions.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_project_service" "eventarc" {
@@ -319,7 +328,8 @@ resource "google_project_service" "eventarc" {
   project      = google_project.project.project_id
   service      = "eventarc.googleapis.com"
 
-  disable_dependent_services = false # Fix for issue when disabling Eventarc API
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_project_service" "run" {
@@ -327,7 +337,8 @@ resource "google_project_service" "run" {
   project      = google_project.project.project_id
   service      = "run.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_project_service" "artifactregistry" {
@@ -335,7 +346,8 @@ resource "google_project_service" "artifactregistry" {
   project      = google_project.project.project_id
   service      = "artifactregistry.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_project_service" "cloudbuild" {
@@ -343,7 +355,8 @@ resource "google_project_service" "cloudbuild" {
   project      = google_project.project.project_id
   service      = "cloudbuild.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_project_service" "pubsub" {
@@ -351,7 +364,8 @@ resource "google_project_service" "pubsub" {
   project      = google_project.project.project_id
   service      = "pubsub.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_service_account" "account" {
@@ -439,7 +453,8 @@ resource "google_project_service" "iam" {
   project      = google_project.project.project_id
   service      = "iam.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_project_service" "cloudfunctions" {
@@ -447,7 +462,8 @@ resource "google_project_service" "cloudfunctions" {
   project      = google_project.project.project_id
   service      = "cloudfunctions.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_project_service" "eventarc" {
@@ -455,7 +471,8 @@ resource "google_project_service" "eventarc" {
   project      = google_project.project.project_id
   service      = "eventarc.googleapis.com"
 
-  disable_dependent_services = false # Fix for issue when disabling Eventarc API
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_project_service" "run" {
@@ -463,7 +480,8 @@ resource "google_project_service" "run" {
   project      = google_project.project.project_id
   service      = "run.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_project_service" "artifactregistry" {
@@ -471,7 +489,8 @@ resource "google_project_service" "artifactregistry" {
   project      = google_project.project.project_id
   service      = "artifactregistry.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_project_service" "cloudbuild" {
@@ -479,7 +498,8 @@ resource "google_project_service" "cloudbuild" {
   project      = google_project.project.project_id
   service      = "cloudbuild.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_project_service" "pubsub" {
@@ -487,7 +507,8 @@ resource "google_project_service" "pubsub" {
   project      = google_project.project.project_id
   service      = "pubsub.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_service_account" "account" {
