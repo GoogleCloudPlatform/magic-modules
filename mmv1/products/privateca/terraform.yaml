@@ -199,6 +199,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "privateca_quickstart"
         primary_resource_id: "default"
         skip_test: true
+        skip_docs: true
         vars:
           my_ca_pool: "my-ca-pool"
           my_certificate: "my-certificate"
