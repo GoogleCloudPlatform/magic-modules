@@ -151,7 +151,7 @@ elif [ "$REPO" == "tf-cloud-docs" ]; then
     # use terraform generator with cloud docs override
     bundle exec compiler -a -e terraform -f cloud_docs -o $LOCAL_PATH -v $VERSION
 else
-    if [ "$REPO" == "terraform" ] && [ "$VERSION" == "ga" ]; then
+    if [ "$REPO" == "terraform" ]; then
         if [ "$VERSION" == "ga" ]; then
             bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION --no-docs
             bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v beta --no-code
