@@ -26,7 +26,7 @@ func TestAccPrivatecaCertificateAuthority_privatecaCertificateAuthorityUpdate(t 
 				// we added a `desired_state` field in https://github.com/GoogleCloudPlatform/magic-modules/pull/5934, this ensures
 				// we don't regress and that CAs are enabled by default
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "state", "ENABLED"),
+					resource.TestCheckResourceAttr("google_privateca_certificate_authority.default", "state", "ENABLED"),
 				),
 			},
 			{
