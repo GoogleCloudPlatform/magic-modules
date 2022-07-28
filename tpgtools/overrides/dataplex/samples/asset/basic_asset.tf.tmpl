@@ -42,7 +42,7 @@ resource "google_dataplex_asset" "primary" {
   location      = "{{region}}"
  
   lake = google_dataplex_lake.basic_lake.name
-  zone = google_dataplex_zone.basic_zone.name
+  dataplex_zone = google_dataplex_zone.basic_zone.name
  
   discovery_spec {
     enabled = false
