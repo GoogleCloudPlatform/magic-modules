@@ -1,9 +1,9 @@
-from golang:1.16.3-stretch as resource
+from golang:1.18-stretch as resource
 
 SHELL ["/bin/bash", "-c"]
 
-RUN go get golang.org/x/tools/cmd/goimports@d088b475e3360caabc032aaee1dc66351d4e729a
-RUN go get github.com/github/hub
+RUN go install golang.org/x/tools/cmd/goimports@d088b475e3360caabc032aaee1dc66351d4e729a
+RUN go install github.com/github/hub@v2.11.2+incompatible
 
 # Set up Github SSH cloning.
 RUN ssh-keyscan github.com >> /known_hosts
