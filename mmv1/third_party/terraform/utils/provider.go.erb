@@ -523,6 +523,7 @@ end     # products.each do
 				"google_service_account_iam_binding":           ResourceIamBinding(IamServiceAccountSchema, NewServiceAccountIamUpdater, ServiceAccountIdParseFunc),
 				"google_service_account_iam_member":            ResourceIamMember(IamServiceAccountSchema, NewServiceAccountIamUpdater, ServiceAccountIdParseFunc),
 				"google_service_account_iam_policy":            ResourceIamPolicy(IamServiceAccountSchema, NewServiceAccountIamUpdater, ServiceAccountIdParseFunc),
+				// ####### END non-generated IAM resources ###########
 			},
 			dclResources,
 		)
