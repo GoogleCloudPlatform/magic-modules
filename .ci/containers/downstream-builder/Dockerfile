@@ -1,4 +1,4 @@
-from golang:1.16.3-stretch as resource
+from golang:1.18-stretch as resource
 
 SHELL ["/bin/bash", "-c"]
 
