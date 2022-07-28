@@ -91,7 +91,6 @@ objects:
           The current state of this Peering.
       - !ruby/object:Api::Type::String
         name: statusMessage
-        url_param_only: true
         description: |
           Additional information about the current status of this peering, if available.
   - !ruby/object:Api::Resource
