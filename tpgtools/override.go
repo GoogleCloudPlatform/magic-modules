@@ -44,6 +44,7 @@ const (
 	PreCreate                          = "PRE_CREATE_FUNCTION"
 	PostCreate                         = "POST_CREATE_FUNCTION"
 	PreDelete                          = "PRE_DELETE_FUNCTION"
+	SkipInProvider                     = "SKIP_IN_PROVIDER"
 	CustomResourceName                 = "CUSTOM_RESOURCE_NAME"
 	NoSweeper                          = "NO_SWEEPER"
 	CustomImport                       = "CUSTOM_IMPORT_FUNCTION"

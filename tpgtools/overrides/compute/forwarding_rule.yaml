@@ -5,6 +5,7 @@
   location: region
 - type: EXCLUDE
   field: id
+- type: SKIP_IN_PROVIDER
 - type: CUSTOM_RESOURCE_NAME
   details:
     title: global_forwarding_rule
