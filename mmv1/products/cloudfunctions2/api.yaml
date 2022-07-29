@@ -302,6 +302,9 @@ objects:
                   required: true
                 - !ruby/object:Api::Type::String
                   name: value
+                  description: |
+                    Required. The value for the attribute.
+                    If the operator field is set as `match-path-pattern`, this value can be a path pattern instead of an exact value.
                   required: true
                 - !ruby/object:Api::Type::String
                   name: operator
@@ -309,7 +312,8 @@ objects:
                     Optional. The operator used for matching the events with the value of
                     the filter. If not specified, only events that have an exact key-value
                     pair specified in the filter are matched.
-                    The only allowed value is `match-path-pattern`.'
+                    The only allowed value is `match-path-pattern`.
+                    [See documentation on path patterns here](https://cloud.google.com/eventarc/docs/path-patterns)'
           - !ruby/object:Api::Type::String
             name: 'pubsubTopic'
             description: |
