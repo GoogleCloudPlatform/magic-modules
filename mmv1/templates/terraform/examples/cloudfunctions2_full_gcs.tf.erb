@@ -1,88 +1,8 @@
 # [START functions_v2_full]
-resource "google_project" "project" {
-  provider        = google-beta
-  project_id      = "tf-test%{random_suffix}"
-  name            = "tf-test%{random_suffix}"
-  org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
-  billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
-}
-
-
-# APIs need to be activated before resources can be created
-resource "google_project_service" "iam" {
-  provider     = google-beta
-  project      = google_project.project.project_id
-  service      = "iam.googleapis.com"
-
-  disable_dependent_services = false
-  disable_on_destroy         = false
-}
-
-resource "google_project_service" "cloudfunctions" {
-  provider     = google-beta
-  project      = google_project.project.project_id
-  service      = "cloudfunctions.googleapis.com"
-
-  disable_dependent_services = false
-  disable_on_destroy         = false
-}
-
-resource "google_project_service" "eventarc" {
-  provider     = google-beta
-  project      = google_project.project.project_id
-  service      = "eventarc.googleapis.com"
-
-  disable_dependent_services = false
-  disable_on_destroy         = false
-}
-
-resource "google_project_service" "run" {
-  provider     = google-beta
-  project      = google_project.project.project_id
-  service      = "run.googleapis.com"
-
-  disable_dependent_services = false
-  disable_on_destroy         = false
-}
-
-resource "google_project_service" "artifactregistry" {
-  provider     = google-beta
-  project      = google_project.project.project_id
-  service      = "artifactregistry.googleapis.com"
-
-  disable_dependent_services = false
-  disable_on_destroy         = false
-}
-
-resource "google_project_service" "cloudbuild" {
-  provider     = google-beta
-  project      = google_project.project.project_id
-  service      = "cloudbuild.googleapis.com"
-
-  disable_dependent_services = false
-  disable_on_destroy         = false
-}
-
-resource "google_project_service" "pubsub" {
-  provider     = google-beta
-  project      = google_project.project.project_id
-  service      = "pubsub.googleapis.com"
-
-  disable_dependent_services = false
-  disable_on_destroy         = false
-}
-
-resource "google_service_account" "account" {
-  provider     = google-beta
-  project      = google_project.project.project_id
-  account_id   = "<%= ctx[:vars]['service_account'] %>"
-  display_name = "Test Service Account - used for both the cloud function and eventarc trigger in the test"
-}
 
 resource "google_storage_bucket" "source-bucket" {
   provider = google-beta
-  project = google_project.project.project_id
-  name     = "<%= ctx[:vars]['bucket_name'] %>-source"
+  name     = "<%= ctx[:vars]['bucket_name_source'] %>"
   location = "US"
   uniform_bucket_level_access = true
 }
@@ -96,44 +16,48 @@ resource "google_storage_bucket_object" "object" {
 
 resource "google_storage_bucket" "trigger-bucket" {
   provider = google-beta
-  project = google_project.project.project_id
-  name     = "<%= ctx[:vars]['bucket_name'] %>-trigger"
+  name     = "<%= ctx[:vars]['bucket_name_trigger'] %>"
   location = "us-central1" # The trigger must be in the same location as the bucket
   uniform_bucket_level_access = true
 }
 
 data "google_storage_project_service_account" "gcs_account" {
   provider = google-beta
-  project = google_project.project.project_id
 }
 
 # To use GCS CloudEvent triggers, the GCS service account requires the Pub/Sub Publisher(roles/pubsub.publisher) IAM role in the specified project.
 # (See https://cloud.google.com/eventarc/docs/run/quickstart-storage#before-you-begin)
 resource "google_project_iam_member" "gcs-pubsub-publishing" {
   provider = google-beta
-  project = google_project.project.project_id # Required argument
+  project = "<%= ctx[:test_env_vars]['project'] %>"
   role    = "roles/pubsub.publisher"
   member  = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
 }
 
-# Permissions on the service account for the function and Eventarc trigger
+resource "google_service_account" "account" {
+  provider     = google-beta
+  account_id   = "<%= ctx[:vars]['service_account'] %>"
+  display_name = "Test Service Account - used for both the cloud function and eventarc trigger in the test"
+}
+
+# Permissions on the service account used by the function and Eventarc trigger
 resource "google_project_iam_member" "invoking" {
   provider = google-beta
-  project = google_project.project.project_id # Required argument
+  project = "<%= ctx[:test_env_vars]['project'] %>"
   role    = "roles/run.invoker"
   member  = "serviceAccount:${google_service_account.account.email}"
 }
 
 resource "google_project_iam_member" "event-receiving" {
   provider = google-beta
-  project = google_project.project.project_id # Required argument
+  project = "<%= ctx[:test_env_vars]['project'] %>"
   role    = "roles/eventarc.eventReceiver"
   member  = "serviceAccount:${google_service_account.account.email}"
 }
 
 resource "google_project_iam_member" "artifactregistry-reader" {
   provider = google-beta
-  project  = google_project.project.project_id # Required argument
+  project = "<%= ctx[:test_env_vars]['project'] %>"
   role     = "roles/artifactregistry.reader"
   member   = "serviceAccount:${google_service_account.account.email}"
 }
@@ -145,14 +69,13 @@ resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
     google_project_iam_member.event-receiving,
     google_project_iam_member.artifactregistry-reader,
   ]
-  project = google_project.project.project_id
-  name = "<%= ctx[:vars]['function'] %>"
+  name = "<%= ctx[:vars]['function_name'] %>"
   location = "us-central1"
   description = "a new function"
  
   build_config {
     runtime     = "nodejs12"
-    entry_point = "entryPoint" # Set the entry point 
+    entry_point = "entryPoint" # Set the entry point in the code
     environment_variables = {
       BUILD_CONFIG_TEST = "build_test"
     }
