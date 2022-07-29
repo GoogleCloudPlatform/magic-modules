@@ -239,7 +239,8 @@ objects:
         required: true
   - !ruby/object:Api::Resource
     name: 'Settings'
-    base_url: 'projects/{{project}}/iap_web/compute/services'
+    base_url: '{{name}}:iapSettings'
+    create_url: 'projects/{{project}}/iap_web/compute/services/{{backend_service_id}}:iapSettings'
     self_link: 'projects/{{project}}/iap_web/compute/services/{{backend_service_id}}:iapSettings'
     create_verb: :PATCH
     update_verb: :PATCH
@@ -253,14 +254,15 @@ objects:
         description: |
           Identifier of the backend service to which this IAP settings should be attached to.
         input: true
+        output: false
         required: true
         url_param_only: true
-    properties:
       - !ruby/object:Api::Type::String
         name: 'name'
         output: true
         description: |
           Required. The resource name of the IAP protected resource.
+    properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'accessSettings'
         description: |

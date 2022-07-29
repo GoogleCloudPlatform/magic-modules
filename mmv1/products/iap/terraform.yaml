@@ -235,12 +235,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Settings: !ruby/object:Overrides::Terraform::ResourceOverride
     skip_delete: true
     id_format: '{{project}}/iap_web/compute/services/{{backend_service_id}}:iapSettings'
+    import_format: [ '{{project}}/iap_web/compute/services/{{backend_service_id}}:iapSettings']
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "iap_settings"
         primary_resource_id: "iap_settings"
-        vars:
-          project_id: 'settings-proj-'
         test_env_vars:
           org_id: :ORG_ID
 # This is for copying files over
