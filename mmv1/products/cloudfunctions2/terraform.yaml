@@ -56,7 +56,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "build_config.0.source.0.storage_source.0.object"
           - "build_config.0.source.0.storage_source.0.bucket"
       - !ruby/object:Provider::Terraform::Examples
-        name: "cloudfunctions2_full_gcs"
+        name: "cloudfunctions2_basic_gcs"
         min_version: beta
         primary_resource_id: "function"
         vars:

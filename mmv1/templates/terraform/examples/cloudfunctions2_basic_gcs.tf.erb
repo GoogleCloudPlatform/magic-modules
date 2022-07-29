@@ -1,4 +1,4 @@
-# [START functions_v2_full]
+# [START functions_v2_basic_gcs]
 
 resource "google_storage_bucket" "source-bucket" {
   provider = google-beta
@@ -111,4 +111,4 @@ resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 }
-# [END functions_v2_full]
+# [END functions_v2_basic_gcs]
