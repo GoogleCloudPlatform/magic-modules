@@ -62,7 +62,6 @@ resource "google_project_iam_member" "artifactregistry-reader" {
   member   = "serviceAccount:${google_service_account.account.email}"
 }
 
-
 resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   depends_on = [
