@@ -33,7 +33,7 @@ objects:
     base_url: "projects/{{project}}/locations/global/memberships"
     create_url: "projects/{{project}}/locations/global/memberships?membershipId={{membership_id}}"
     update_url: "projects/{{project}}/locations/global/memberships/{{membership_id}}"
-    self_link: "{{name}}"
+    self_link: "projects/{{project}}/locations/global/memberships/{{membership_id}}"
     update_verb: :PATCH
     update_mask: true
     description: |
