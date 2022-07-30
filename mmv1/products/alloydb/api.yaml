@@ -28,9 +28,9 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: "Cluster"
-    self_link: "projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}"
+    self_link: "projects/{{project}}/locations/{{location}}/clusters/{{clusterId}}"
     base_url: "projects/{{project}}/locations/{{location}}/clusters"
-    create_url: "projects/{{project}}/locations/{{location}}/clusters?clusterId={{cluster_id}}"
+    create_url: "projects/{{project}}/locations/{{location}}/clusters?clusterId={{clusterId}}"
     update_verb: :PATCH
     update_mask: true
     min_version: beta
@@ -64,11 +64,13 @@ objects:
         name: "clusterId"
         required: true
         input: true
+        url_param_only: true
         description: |
           The ID of the alloydb cluster.
       - !ruby/object:Api::Type::String
         name: "location"
         input: true
+        url_param_only: true
         description: |
           The location where the alloydb cluster should reside.
     properties:
@@ -284,9 +286,9 @@ objects:
             description: "Type of migration source."
   - !ruby/object:Api::Resource
     name: "Instance"
-    self_link: "projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}/instances/{{instance_id}}"
-    base_url: "projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}/instances"
-    create_url: "projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}/instances?instanceId={{instance_id}}"
+    self_link: "projects/{{project}}/locations/{{location}}/clusters/{{clusterId}}/instances/{{instance_id}}"
+    base_url: "projects/{{project}}/locations/{{location}}/clusters/{{clusterId}}/instances"
+    create_url: "projects/{{project}}/locations/{{location}}/clusters/{{clusterId}}/instances?instanceId={{instance_id}}"
     update_verb: :PATCH
     update_mask: true
     min_version: beta
@@ -317,13 +319,15 @@ objects:
         message: "message"
     parameters:
       - !ruby/object:Api::Type::String
-        name: "cluster_id"
+        name: "clusterId"
         required: true
         input: true
+        url_param_only: true
         description: |
           The ID of the alloydb cluster.
       - !ruby/object:Api::Type::String
         name: "location"
+        url_param_only: true
         input: true
         description: |
           The location where the alloydb cluster should reside.
@@ -331,6 +335,7 @@ objects:
         name: "instanceId"
         required: true
         input: true
+        url_param_only: true
         description: |
           The ID of the alloydb instance.
     properties:
