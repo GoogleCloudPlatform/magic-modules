@@ -237,6 +237,8 @@ objects:
             name: "timeBasedRetention"
             description: |
               Time-based Backup retention policy.
+            conflicts: 
+              - automated_backup_policy.0.quantity_based_retention  
             properties:
               - !ruby/object:Api::Type::String
                 name: "retentionPeriod"
@@ -245,6 +247,8 @@ objects:
                   A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
           - !ruby/object:Api::Type::NestedObject
             name: "quantityBasedRetention"
+            conflicts: 
+              - automated_backup_policy.0.time_based_retention            
             description: |
               Quantity-based Backup retention policy to retain recent backups.
             properties:
