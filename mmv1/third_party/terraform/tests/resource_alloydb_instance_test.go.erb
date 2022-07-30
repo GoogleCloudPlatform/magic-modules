@@ -27,7 +27,6 @@ func TestAccAlloydbInstance_update(t *testing.T) {
 				ResourceName:            "google_alloydb_instance.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster_id", "location", "instance_id"},
 			},
 			{
 				Config: testAccAlloydbInstance_update(context),
@@ -36,7 +35,6 @@ func TestAccAlloydbInstance_update(t *testing.T) {
 				ResourceName:            "google_alloydb_instance.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster_id", "location", "instance_id"},
 			},			
 		},
 	})

@@ -316,12 +316,10 @@ objects:
         name: "cluster_id"
         required: true
         input: true
-        url_param_only: true
         description: |
           The ID of the alloydb cluster.
       - !ruby/object:Api::Type::String
         name: "location"
-        url_param_only: true
         input: true
         description: |
           The location where the alloydb cluster should reside.
@@ -329,7 +327,6 @@ objects:
         name: "instanceId"
         required: true
         input: true
-        url_param_only: true
         description: |
           The ID of the alloydb instance.
     properties:
