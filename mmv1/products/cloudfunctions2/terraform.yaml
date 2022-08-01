@@ -81,8 +81,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           bucket_name_source: "gcf-source-bucket"
           bucket_name_auditlogs: "gcf-auditlog-bucket"
-          service_account: "test-sa"
-          function_name: "test-function"
+          service_account: "gcf-sa"
+          function_name: "gcf-function"
           zip_path: "function-source.zip"
         test_env_vars:
           project: :PROJECT_NAME
