@@ -111,6 +111,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       eventTrigger.serviceAccountEmail: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      eventTrigger.eventFilters: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       min_version: beta
       parent_resource_attribute: 'cloud_function'
