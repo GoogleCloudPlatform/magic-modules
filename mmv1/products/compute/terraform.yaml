@@ -1512,6 +1512,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           If set to `true`, default routes (`0.0.0.0/0`) will be deleted
           immediately after network creation. Defaults to `false`.
     properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)'
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       # We want this to be the smallest change possible, so exclude this for now.
