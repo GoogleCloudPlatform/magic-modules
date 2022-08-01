@@ -316,6 +316,31 @@ objects:
           - "PROGRAMMABLE"
           - "CONFIGURABLE"
         input: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'nodeConfig'
+        description: |
+          NodeConfig for setting the min/max number of nodes associated with the environment.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'minNodeCount'
+            description: |
+              The minimum total number of gateway nodes that the is reserved for all instances that
+              has the specified environment. If not specified, the default is determined by the
+              recommended minimum number of nodes for that gateway.
+            input: true
+          - !ruby/object:Api::Type::String
+            name: 'maxNodeCount'
+            description: |
+              The maximum total number of gateway nodes that the is reserved for all instances that
+              has the specified environment. If not specified, the default is determined by the
+              recommended maximum number of nodes for that gateway.
+            input: true
+          - !ruby/object:Api::Type::String
+            name: 'currentAggregateNodeCount'
+            description: |
+              The current total number of gateway nodes that each environment currently has across
+              all instances.
+            output: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Creating an environment':
