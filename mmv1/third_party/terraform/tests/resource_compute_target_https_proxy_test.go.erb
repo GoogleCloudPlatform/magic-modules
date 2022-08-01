@@ -50,18 +50,32 @@ func TestAccComputeTargetHttpsProxy_update(t *testing.T) {
 					testAccComputeTargetHttpsProxyHasSslCertificate(t, "httpsproxy-test-cert2-"+resourceSuffix, &proxy),
 				),
 			},
-
-			{
-				Config: testAccComputeTargetHttpsProxy_basic3(resourceSuffix),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeTargetHttpsProxyExists(
-						t, "google_compute_target_https_proxy.foobar", &proxy),
-					testAccComputeTargetHttpsProxyDescription("Resource created for Terraform acceptance testing", &proxy),
-					testAccComputeTargetHttpsProxyHasCertificateMap(t, "certificatemap-test-"+resourceSuffix, &proxy),
-				),
-			},
 		},
 	})
+}
+
+func TestAccComputeTargetHttpsProxy_certificateMap(t *testing.T) {
+	t.Parallel()
+
+	var proxy compute.TargetHttpsProxy
+	resourceSuffix := randString(t, 10)
+
+    vcrTest(t, resource.TestCase{
+        PreCheck:     func() { testAccPreCheck(t) },
+        Providers:    testAccProviders,
+        CheckDestroy: testAccCheckComputeTargetHttpsProxyDestroyProducer(t),
+        Steps: []resource.TestStep{
+            {
+                Config: testAccComputeTargetHttpsProxy_certificateMap(resourceSuffix),
+                Check: resource.ComposeTestCheckFunc(
+                    testAccCheckComputeTargetHttpsProxyExists(
+                        t, "google_compute_target_https_proxy.foobar", &proxy),
+                    testAccComputeTargetHttpsProxyDescription("Resource created for Terraform acceptance testing", &proxy),
+                    testAccComputeTargetHttpsProxyHasCertificateMap(t, "certificatemap-test-"+resourceSuffix, &proxy),
+                ),
+            },
+        },
+    })
 }
 
 func testAccCheckComputeTargetHttpsProxyExists(t *testing.T, n string, proxy *compute.TargetHttpsProxy) resource.TestCheckFunc {
@@ -268,7 +282,7 @@ resource "google_compute_ssl_certificate" "foobar2" {
 `, id, id, id, id, id, id, id)
 }
 
-func testAccComputeTargetHttpsProxy_basic3(id string) string {
+func testAccComputeTargetHttpsProxy_certificateMap(id string) string {
 	return fmt.Sprintf(`
 resource "google_compute_target_https_proxy" "foobar" {
   description      = "Resource created for Terraform acceptance testing"

@@ -60,9 +60,5 @@ resource "google_compute_target_https_proxy" "https-proxy" {
 }
 
 resource "google_compute_url_map" "url-map" {
-  name = "<%= ctx[:vars]['https_proxy_name'] %>"
-  labels = {
-    "terraform" : true,
-    "acc-test"  : true,
-  }
+  name = "<%= ctx[:vars]['url_map_name'] %>"
 }
