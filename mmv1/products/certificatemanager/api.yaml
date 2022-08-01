@@ -150,7 +150,14 @@ objects:
         input: true
         description: |
           The scope of the certificate.
-        default_value: :DEFAULT
+
+          DEFAULT: Certificates with default scope are served from core Google data centers.
+          If unsure, choose this option.
+          
+          EDGE_CACHE: Certificates with scope EDGE_CACHE are special-purposed certificates,
+          served from non-core Google data centers.
+          Currently allowed only for managed certificates.
+        default_value: DEFAULT
       - !ruby/object:Api::Type::NestedObject
         name: selfManaged
         input: true
@@ -291,7 +298,21 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
-          One or more paragraphs of text description of a certificate map entry.
+          A human-readable description of the resource.
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          Creation timestamp of a Certificate Map. Timestamp is in RFC3339 UTC "Zulu" format,
+          accurate to nanoseconds with up to nine fractional digits.
+          Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+      - !ruby/object:Api::Type::Time
+        name: 'updateTime'
+        description: |
+          Update timestamp of a Certificate Map. Timestamp is in RFC3339 UTC "Zulu" format,
+          accurate to nanoseconds with up to nine fractional digits.
+          Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+        output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
@@ -379,8 +400,21 @@ objects:
         - !ruby/object:Api::Type::String
           name: 'description'
           description: |
-            CertificateMapEntry is a list of certificate configurations,
-            that have been issued for a particular hostname
+            A human-readable description of the resource.
+        - !ruby/object:Api::Type::String
+          name: 'createTime'
+          output: true
+          description: |
+            Creation timestamp of a Certificate Map Entry. Timestamp in RFC3339 UTC "Zulu" format, 
+            with nanosecond resolution and up to nine fractional digits. 
+            Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+        - !ruby/object:Api::Type::Time
+          name: 'updateTime'
+          description: |
+            Update timestamp of a Certificate Map Entry. Timestamp in RFC3339 UTC "Zulu" format, 
+            with nanosecond resolution and up to nine fractional digits. 
+            Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+          output: true
         - !ruby/object:Api::Type::KeyValuePairs
           name: 'labels'
           description: |
