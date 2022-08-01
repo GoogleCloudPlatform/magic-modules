@@ -47,6 +47,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       min_version: beta
       # Resource creation race
       skip_vcr: true
+    - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_organization_retention_test"
+      primary_resource_id: "org"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_docs: true
+      min_version: beta
+      # Resource creation race
+      skip_vcr: true
     properties:
       billingType: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -74,7 +84,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       skip_vcr: true
     - !ruby/object:Provider::Terraform::Examples
       name: "apigee_instance_cidr_range"
-      skip_test: true      
+      skip_test: true
     - !ruby/object:Provider::Terraform::Examples
       # This is a more verbose version of the above that creates all
       # the resources needed for the acceptance test.

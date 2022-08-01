@@ -64,6 +64,20 @@ objects:
         required: true
         input: true
         url_param_only: true
+      - !ruby/object:Api::Type::Enum
+        name: 'retention'
+        description: |
+          Optional. This setting is applicable only for organizations that are soft-deleted (i.e., BillingType
+          is not EVALUATION). It controls how long Organization data will be retained after the initial delete
+          operation completes. During this period, the Organization may be restored to its last known state.
+          After this period, the Organization will no longer be able to be restored.
+        values:
+          - "DELETION_RETENTION_UNSPECIFIED"
+          - "MINIMUM"
+        default_value: :DELETION_RETENTION_UNSPECIFIED
+        required: false
+        input: true
+        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
