@@ -47,18 +47,3 @@ resource "google_certificate_manager_dns_authorization" "instance2" {
   description = "The default dnss"
   domain      = "<%= ctx[:vars]['dns_auth_subdomain2'] %>.hashicorptest.com"
 }
-
-
-resource "google_compute_target_https_proxy" "https-proxy" {
-  name = "<%= ctx[:vars]['https_proxy_name'] %>"
-  labels = {
-    "terraform" : true,
-    "acc-test"  : true,
-  }
-  url_map         = google_compute_url_map.url-map.id
-  certificate_map = google_certificate_manager_certificate_map.certificate_map.id
-}
-
-resource "google_compute_url_map" "url-map" {
-  name = "<%= ctx[:vars]['url_map_name'] %>"
-}

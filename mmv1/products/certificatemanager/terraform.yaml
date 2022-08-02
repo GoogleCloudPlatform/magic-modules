@@ -87,8 +87,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           dns_auth_name2: "dns-auth2"
           dns_auth_subdomain2: "subdomain2"
           cert_map_entry_name: "cert-map-entry"
-          https_proxy_name: "https-proxy"
-          url_map_name: "url-map"
     properties:
         labels: !ruby/object:Overrides::Terraform::PropertyOverride
           default_from_api: true

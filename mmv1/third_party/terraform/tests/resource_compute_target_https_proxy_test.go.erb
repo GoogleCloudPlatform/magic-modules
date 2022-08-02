@@ -288,7 +288,7 @@ resource "google_compute_target_https_proxy" "foobar" {
   description      = "Resource created for Terraform acceptance testing"
   name             = "httpsproxy-test-%s"
   url_map          = google_compute_url_map.foobar.self_link
-  certificate_map  = google_certificate_manager_certificate_map.map.id
+  certificate_map = "//certificatemanager.googleapis.com/${google_certificate_manager_certificate_map.map.id}"
 }
 
 resource "google_compute_backend_service" "foobar" {
