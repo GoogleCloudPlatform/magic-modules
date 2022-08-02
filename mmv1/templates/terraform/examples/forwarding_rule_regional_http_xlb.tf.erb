@@ -51,7 +51,7 @@ resource "google_compute_region_backend_service" "default" {
 
 data "google_compute_image" "debian_image" {
   provider = google-beta
-  family   = "debian-9"
+  family   = "debian-11"
   project  = "debian-cloud"
 }
 
