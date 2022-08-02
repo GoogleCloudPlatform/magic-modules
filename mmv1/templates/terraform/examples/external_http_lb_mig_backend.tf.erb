@@ -7,7 +7,7 @@ resource "google_compute_instance_template" "default" {
     boot         = true
     device_name  = "persistent-disk-0"
     mode         = "READ_WRITE"
-    source_image = "projects/debian-cloud/global/images/family/debian-9"
+    source_image = "projects/debian-cloud/global/images/family/debian-11"
     type         = "PERSISTENT"
   }
   labels = {
