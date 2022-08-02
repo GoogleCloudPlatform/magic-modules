@@ -35,7 +35,7 @@ objects:
     update_verb: :PATCH
     update_mask: true
     description: |
-      DnsAuthorization represents a HTTP-reachable backend for an DnsAuthorization.
+      DnsAuthorization represents a HTTP-reachable backend for a DnsAuthorization.
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
@@ -69,7 +69,7 @@ objects:
           A human-readable description of the resource.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
-        description: 'Set of label tags associated with the EdgeCache resource.'
+        description: 'Set of label tags associated with the DNS Authorization resource.'
       - !ruby/object:Api::Type::String
         name: 'domain'
         input: true
@@ -91,6 +91,7 @@ objects:
             output: true
             description: |
               Fully qualified name of the DNS Resource Record.
+              E.g. `_acme-challenge.example.com`.
           - !ruby/object:Api::Type::String
             name: 'type'
             output: true
@@ -109,7 +110,7 @@ objects:
     update_verb: :PATCH
     update_mask: true
     description: |
-      Certificate represents a HTTP-reachable backend for an Certificate.
+      Certificate represents a HTTP-reachable backend for a Certificate.
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
@@ -143,23 +144,20 @@ objects:
           A human-readable description of the resource.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
-        description: 'Set of label tags associated with the EdgeCache resource.'
-      - !ruby/object:Api::Type::Enum
+        description: 'Set of label tags associated with the Certificate resource.'
+      - !ruby/object:Api::Type::String
         name: scope
         input: true
         description: |
           The scope of the certificate.
 
-          Certificates with default scope are served from core Google data centers.
+          DEFAULT: Certificates with default scope are served from core Google data centers.
           If unsure, choose this option.
-
-          Certificates with scope EDGE_CACHE are special-purposed certificates,
+          
+          EDGE_CACHE: Certificates with scope EDGE_CACHE are special-purposed certificates,
           served from non-core Google data centers.
           Currently allowed only for managed certificates.
-        values:
-          - :DEFAULT
-          - :EDGE_CACHE
-        default_value: :DEFAULT
+        default_value: DEFAULT
       - !ruby/object:Api::Type::NestedObject
         name: selfManaged
         input: true
@@ -194,11 +192,6 @@ objects:
           Certificate Manager provisions and renews Managed Certificates
           automatically, for as long as it's authorized to do so.
         properties:
-          - !ruby/object:Api::Type::String
-            name: state
-            output: true
-            description: |
-              State of the managed certificate resource.
           - !ruby/object:Api::Type::Array
             name: domains
             input: true
@@ -212,6 +205,59 @@ objects:
             description: |
               Authorizations that will be used for performing domain authorization
             item_type: Api::Type::String
+          - !ruby/object:Api::Type::String
+            name: 'state'
+            output: true
+            description: |
+              A state of this Managed Certificate.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'provisioningIssue'
+            output: true
+            description: |
+              Information about issues with provisioning this Managed Certificate.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'reason'
+                output: true
+                description: |
+                  Reason for provisioning failures.
+              - !ruby/object:Api::Type::String
+                name: details
+                output: true
+                description: |
+                  Human readable explanation about the issue. Provided to help address
+                  the configuration issues.
+                  Not guaranteed to be stable. For programmatic access use `reason` field.
+          - !ruby/object:Api::Type::Array
+            name: 'authorizationAttemptInfo'
+            output: true
+            description: |
+              Detailed state of the latest authorization attempt for each domain
+              specified for this Managed Certificate.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: domain
+                  output: true
+                  description: |
+                    Domain name of the authorization attempt.
+                - !ruby/object:Api::Type::String
+                  name: 'state'
+                  output: true
+                  description: |
+                    State of the domain for managed certificate issuance.
+                - !ruby/object:Api::Type::String
+                  name: 'failureReason'
+                  output: true
+                  description: |
+                    Reason for failure of the authorization attempt for the domain.
+                - !ruby/object:Api::Type::String
+                  name: details
+                  output: true
+                  description: |
+                    Human readable explanation for reaching the state. Provided to help
+                    address the configuration issues.
+                    Not guaranteed to be stable. For programmatic access use `failure_reason` field.
   - !ruby/object:Api::Resource
     name: 'CertificateMap'
     base_url: 'projects/{{project}}/locations/global/certificateMaps'
@@ -252,7 +298,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
-          One or more paragraphs of text description of a certificate map entry.
+          A human-readable description of the resource.
       - !ruby/object:Api::Type::String
         name: 'createTime'
         output: true
@@ -354,8 +400,7 @@ objects:
         - !ruby/object:Api::Type::String
           name: 'description'
           description: |
-            CertificateMapEntry is a list of certificate configurations,
-            that have been issued for a particular hostname
+            A human-readable description of the resource.
         - !ruby/object:Api::Type::String
           name: 'createTime'
           output: true
@@ -384,21 +429,11 @@ objects:
             There can be defined up to fifteen certificates in each Certificate Map Entry.
             Each certificate must match pattern projects/*/locations/*/certificates/*.
           item_type: Api::Type::String
-        - !ruby/object:Api::Type::Enum
+        - !ruby/object:Api::Type::String
           name: 'state'
           output: true
           description: |
             A serving state of this Certificate Map Entry.
-
-            The status is undefined.
-
-            The configuration is serving.
-
-            Update is in progress. Some frontends may serve this configuration.
-          values:
-            - :SERVING_STATE_UNSPECIFIFED
-            - :ACTIVE
-            - :PENDING
         - !ruby/object:Api::Type::String
           name: 'hostname'
           description: |
@@ -408,14 +443,11 @@ objects:
           exactly_one_of:
             - hostname
             - matcher
-        - !ruby/object:Api::Type::Enum
+        - !ruby/object:Api::Type::String
           name: 'matcher'
           exactly_one_of:
             - hostname
             - matcher
           description: |
             A predefined matcher for particular cases, other than SNI selection
-          values:
-            - :MATCHER_UNSPECIFIED
-            - :PRIMARY
             
