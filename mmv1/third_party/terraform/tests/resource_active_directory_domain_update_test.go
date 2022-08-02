@@ -8,6 +8,7 @@ import (
 )
 
 func TestAccActiveDirectoryDomain_update(t *testing.T) {
+	skipIfVcr(t)
 	t.Parallel()
 
 	domain := fmt.Sprintf("tf-test%s.org1.com", randString(t, 5))
