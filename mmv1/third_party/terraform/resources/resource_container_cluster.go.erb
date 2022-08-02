@@ -812,18 +812,18 @@ func resourceContainerCluster() *schema.Resource {
 							Type:        schema.TypeList,
 <% if version == "ga" -%>
 							Required:    true,
-							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS.`,
+							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, CONTROLLER_MANAGER, and SCHEDULER.`,
 <% else -%>
 							Optional:    true,
 							Computed:    true,
-							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS and WORKLOADS.`,
+							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, CONTROLLER_MANAGER, SCHEDULER, and WORKLOADS.`,
 <% end -%>
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 <% if version == "ga" -%>
-								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS"}, false),
+								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER"}, false),
 <% else -%>
-								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS", "WORKLOADS"}, false),
+								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER", "WORKLOADS"}, false),
 <% end -%>
 							},
 						},
