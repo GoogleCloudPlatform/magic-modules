@@ -171,7 +171,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   # RECORDING mode
   export VCR_MODE=RECORDING
   FAILED_TESTS=$(grep "^--- FAIL: TestAcc" replaying_test$test_suffix.log | awk '{print $3}')
-  test_exit_code=1
+  test_exit_code=0
   for failed_test in $FAILED_TESTS
   do
       TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run=$failed_test -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" >> recording_test.log &
