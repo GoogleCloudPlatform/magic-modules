@@ -540,7 +540,7 @@ func checkGCSName(name string) error {
 
 	valid, _ := regexp.MatchString("^[a-z0-9][a-z0-9_.-]{1,220}[a-z0-9]$", name)
 	if !valid {
-		return fmt.Errorf("error: bucket name validation failed %v", name)
+		return fmt.Errorf("error: bucket name validation failed %v. See https://cloud.google.com/storage/docs/naming-buckets", name)
 	}
 
 	for _, str := range strings.Split(name, ".") {
