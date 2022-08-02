@@ -15,7 +15,7 @@
 !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Cluster: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["projects/{{project}}/locations/{{location}}/clusters/{{clusterId}}", "{{clusterId}}"]
+    import_format: ["projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}", "{{cluster_id}}"]
     properties:
       initialUser: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: "templates/terraform/custom_flatten/alloydb_cluster_input_user_flatten.go.erb"
@@ -31,7 +31,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           alloydb_cluster_name: "alloydb-cluster"
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["projects/{{project}}/locations/{{location}}/clusters/{{clusterId}}/instances/{{instanceId}}", "{{instanceId}}"]
+    import_format: ["projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}/instances/{{instance_id}}", "{{instance_id}}"]
     autogen_async: true
     properties:
       availabilityType: !ruby/object:Overrides::Terraform::PropertyOverride
