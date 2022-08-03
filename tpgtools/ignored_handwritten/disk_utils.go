@@ -120,7 +120,7 @@ func diskImageEquals(oldImageName, newImageName string) bool {
 
 func diskImageFamilyEquals(imageName, familyName string) bool {
 	// Handles the case when the image name includes the family name
-	// e.g. image name: debian-9-drawfork-v20180109, family name: debian-9
+	// e.g. image name: debian-11-bullseye-v20220719, family name: debian-11
 	if strings.Contains(imageName, familyName) {
 		return true
 	}
