@@ -1136,24 +1136,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project: :PROJECT_NAME
         ignore_read_extra:
           - "ip_address"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "external_http_lb_mig_backend"
-        primary_resource_id: "default"
-        vars:
-          lb_backend_template: "lb-backend-template"
-          lb_backend_example: "lb-backend-example"
-          fw_allow_health_check: "fw-allow-health-check"
-          lb_ipv4_1: "lb-ipv4-1"
-          http_basic_check: "http-basic-check"
-          web_backend_service: "web-backend-service"
-          web_map_http: "web-map-http"
-          http_lb_proxy: "http-lb-proxy"
-          http_content_rule: "http-content-rule"
-        skip_docs: true
-        skip_test: true # Very similar to external_http_lb_mig_backend_custom_header
-        ignore_read_extra:
-          - "metadata"
-          - "metadata_startup_script"
     properties:
       creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -3353,6 +3335,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           service_a_backend_service_name: "service-a"
           service_b_backend_service_name: "service-b"
           health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "external_http_lb_mig_backend"
+        primary_resource_id: "default"
+        vars:
+          lb_backend_template: "lb-backend-template"
+          lb_backend_example: "lb-backend-example"
+          fw_allow_health_check: "fw-allow-health-check"
+          lb_ipv4_1: "lb-ipv4-1"
+          http_basic_check: "http-basic-check"
+          web_backend_service: "web-backend-service"
+          web_map_http: "web-map-http"
+          http_lb_proxy: "http-lb-proxy"
+          http_content_rule: "http-content-rule"
+        skip_docs: true
+        skip_test: true # Very similar to external_http_lb_mig_backend_custom_header
+        ignore_read_extra:
+          - "metadata"
+          - "metadata_startup_script"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "map_id"
