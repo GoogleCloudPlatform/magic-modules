@@ -36,7 +36,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           # the random suffix is 10 chars. In order to make sure these get swept,
           # 'tfgen' is the only option here.
           domain_name: tfgen
-        skip_vcr: true
+        skip_test: true
   DomainTrust: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/locations/global/domains/{{domain}}/{{target_domain_name}}"
     import_format: ["projects/{{project}}/locations/global/domains/{{domain}}/{{target_domain_name}}"]
@@ -78,7 +78,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
           billing_account: :BILLING_ACCT
         skip_import_test: true
-        skip_vcr: true
+        skip_test: true
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
