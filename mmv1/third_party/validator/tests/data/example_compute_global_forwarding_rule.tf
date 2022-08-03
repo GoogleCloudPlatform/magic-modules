@@ -34,5 +34,8 @@ resource "google_compute_global_forwarding_rule" "test" {
   ip_protocol            = "TCP"
   ip_version             = "IPV4"
   port_range             = "80"
+  service_directory_registrations {
+    service_directory_region    = "us-central1a"
+  }
 }
 

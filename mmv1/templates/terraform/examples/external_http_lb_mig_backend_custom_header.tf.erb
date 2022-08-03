@@ -24,6 +24,11 @@ resource "google_compute_global_address" "default" {
   name = "<%= ctx[:vars]['address_name'] %>"
 }
 
+# forwarding rule service directory region
+resource "google_compute_global_forwarding_rule" "service_directory_registrations" {
+    service_directory_region    = "us-central1"
+}
+
 # forwarding rule
 resource "google_compute_global_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   name                  = "<%= ctx[:vars]['forwarding_rule_name'] %>"
@@ -33,6 +38,7 @@ resource "google_compute_global_forwarding_rule" "<%= ctx[:primary_resource_id] 
   port_range            = "80"
   target                = google_compute_target_http_proxy.default.id
   ip_address            = google_compute_global_address.default.id
+  service_directory_registrations = google_compute_global_forwarding_rule.service_directory_registrations.id
 }
 
 # http proxy

@@ -1582,6 +1582,11 @@ resource "google_compute_global_forwarding_rule" "forwarding_rule" {
   port_range            = "80"
   load_balancing_scheme = "INTERNAL_SELF_MANAGED"
   ip_address            = "0.0.0.0"
+  service_directory_registrations	= google_compute_global_forwarding_rule.service_directory_registrations.self_link
+}
+
+resource "google_compute_global_forwarding_rule" "service_directory_registrations" {
+    service_directory_region    = "us-central1"
 }
 
 resource "google_compute_target_http_proxy" "default" {

@@ -22,7 +22,6 @@ resource "google_compute_global_address" "default" {
   name = "<%= ctx[:vars]['ssl_proxy_xlb_ip'] %>"
 }
 
-
 # Self-signed regional SSL certificate for testing
 resource "tls_private_key" "default" {
   algorithm = "RSA"
@@ -67,7 +66,15 @@ resource "google_compute_target_ssl_proxy" "default" {
   ssl_certificates = [google_compute_ssl_certificate.default.id]
 }
 
-
+# forwarding rule service directory region
+resource "google_compute_global_forwarding_rule" "service_directory_registrations" {
+    service_directory_region    = "us-central1"
+    namespace                   = google_compute_namespace.default.id
+}
+# forwarding rule namespace
+resource "google_compute_namespace" "default" {
+    name    = "google-compute-ns"
+}
 
 # forwarding rule
 resource "google_compute_global_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
@@ -78,6 +85,7 @@ resource "google_compute_global_forwarding_rule" "<%= ctx[:primary_resource_id] 
   port_range            = "443"
   target                = google_compute_target_ssl_proxy.default.id
   ip_address            = google_compute_global_address.default.id
+  service_directory_registrations = google_compute_global_forwarding_rule.service_directory_registrations.id
 }
 
 

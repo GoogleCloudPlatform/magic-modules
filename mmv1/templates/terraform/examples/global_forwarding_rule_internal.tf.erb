@@ -12,6 +12,12 @@ resource "google_compute_global_forwarding_rule" "default" {
       value = "MARS"
     }
   }
+  service_directory_registrations {
+    service_directory_region    = "us-central1a"
+    namespace {
+        name        = "google-compute-ns"
+    }
+  }
 }
 
 resource "google_compute_target_http_proxy" "default" {

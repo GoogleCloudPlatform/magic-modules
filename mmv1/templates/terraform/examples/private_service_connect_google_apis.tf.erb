@@ -29,6 +29,19 @@ resource "google_compute_global_address" "default" {
 }
 # [END compute_internal_ip_private_access]
 
+# [START compute_forwarding_rule_service_directory_registrations]
+resource "google_compute_global_forwarding_rule" "service_directory_registrations" {
+    service_directory_region    = "us-central1"
+    namespace                   = google_compute_namespace.default.id
+}
+# [END compute_forwarding_rule_service_directory_registrations]
+
+# [START google_compute_namespace]
+resource "google_compute_namespace" "default" {
+    name    = "google-compute-ns"
+}
+# [END google_compute_namespace]
+
 # [START compute_forwarding_rule_private_access]
 resource "google_compute_global_forwarding_rule" "default" {
   provider      = google-beta
@@ -38,5 +51,6 @@ resource "google_compute_global_forwarding_rule" "default" {
   network       = google_compute_network.network.id
   ip_address    = google_compute_global_address.default.id
   load_balancing_scheme = ""
+  service_directory_registrations = google_compute_global_forwarding_rule.service_directory_registrations.id
 }
 # [END compute_forwarding_rule_private_access]

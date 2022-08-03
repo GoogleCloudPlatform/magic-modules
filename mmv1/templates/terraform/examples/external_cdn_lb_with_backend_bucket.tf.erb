@@ -28,6 +28,29 @@ resource "google_compute_global_address" "default" {
 }
 # [END cloudloadbalancing_cdn_with_backend_bucket_ip_address]
 
+# [START google_compute_namespace]
+resource "google_compute_namespace" "default" {
+  namespace     = "google-compute-ns"
+  region        = "us-central1"
+}
+# [END google_compute_namespace]
+
+# [START google_compute_service_directory]
+resource "google_compute_service_directory" "default" {
+  namespace     = "google-compute-service"
+  region        = "us-central1"
+}
+# [END google_compute_service_directory]
+
+# [START compute_forwarding_rule_service_directory_registrations]
+# forwarding rule service directory region
+resource "google_compute_global_forwarding_rule" "service_directory_registrations" {
+    service_directory_region    = "us-central1"
+    namespace = google_compute_namespace.default.id
+    service =
+}
+# [END compute_forwarding_rule_service_directory_registrations]
+
 # [START cloudloadbalancing_cdn_with_backend_bucket_forwarding_rule]
 # forwarding rule
 resource "google_compute_global_forwarding_rule" "default" {
@@ -37,6 +60,7 @@ resource "google_compute_global_forwarding_rule" "default" {
   port_range            = "80"
   target                = google_compute_target_http_proxy.default.id
   ip_address            = google_compute_global_address.default.id
+  service_directory_registrations = google_compute_global_forwarding_rule.service_directory_registrations.id
 }
 # [END cloudloadbalancing_cdn_with_backend_bucket_forwarding_rule]
 

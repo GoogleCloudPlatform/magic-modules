@@ -20,7 +20,10 @@
             "name": "test-global-rule",
             "port_range": "80",
             "target": "target-id",
-            "timeouts": null
+            "timeouts": null,
+            "service_directory_registrations": {
+              "service_directory_region": "us-central1a"
+            }
           }
         }
       ]
@@ -96,6 +99,10 @@
             },
             "target": {
               "constant_value": "target-id"
+            },
+            "service_directory_registrations": {
+              "service_directory_region": "us-central1a",
+              "namespace": "default"
             }
           },
           "schema_version": 0

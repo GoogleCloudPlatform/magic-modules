@@ -23,6 +23,17 @@ resource "google_compute_global_address" "default" {
   name = "<%= ctx[:vars]['tcp_proxy_xlb_ip'] %>"
 }
 
+# service namespace
+resource "google_compute_namespace" "default" {
+    name = "google-compute-ns"
+}
+
+# forwarding rule service directory region
+resource "google_compute_global_forwarding_rule" "service_directory_registrations" {
+    service_directory_region    = "us-central1"
+    namespace                   = google_compute_namespace.default.id
+}
+
 # forwarding rule
 resource "google_compute_global_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   name                  = "<%= ctx[:vars]['tcp_proxy_xlb_forwarding_rule'] %>"
@@ -32,6 +43,7 @@ resource "google_compute_global_forwarding_rule" "<%= ctx[:primary_resource_id] 
   port_range            = "110"
   target                = google_compute_target_tcp_proxy.default.id
   ip_address            = google_compute_global_address.default.id
+  service_directory_registrations = google_compute_global_forwarding_rule.service_directory_registrations.id
 }
 
 resource "google_compute_target_tcp_proxy" "default" {

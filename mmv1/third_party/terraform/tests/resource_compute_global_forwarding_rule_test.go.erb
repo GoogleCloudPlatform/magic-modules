@@ -171,6 +171,11 @@ resource "google_compute_global_forwarding_rule" "forwarding_rule" {
   name        = "%s"
   port_range  = "80"
   target      = google_compute_target_http_proxy.%s.self_link
+  service_directory_registrations	= google_compute_global_forwarding_rule.service_directory_registrations.self_link
+}
+
+resource "google_compute_global_forwarding_rule" "service_directory_registrations" {
+    service_directory_region    = "us-central1"
 }
 
 resource "google_compute_target_http_proxy" "proxy" {
@@ -344,6 +349,11 @@ resource "google_compute_global_forwarding_rule" "forwarding_rule" {
   port_range  = "80"
   target      = google_compute_target_http_proxy.proxy.self_link
   ip_version  = "IPV6"
+  service_directory_registrations = google_compute_global_forwarding_rule.service_directory_registrations.self_link
+}
+
+resource "google_compute_global_forwarding_rule" "service_directory_registrations"{
+    service_directory_region    = "us-central1"
 }
 
 resource "google_compute_target_http_proxy" "proxy" {
@@ -403,6 +413,9 @@ resource "google_compute_global_forwarding_rule" "forwarding_rule" {
       name  = "PLANET"
       value = "NEPTUNE"
     }
+  }
+  service_directory_registrations {
+    service_directory_region    = "us-central1a"
   }
 }
 
@@ -522,6 +535,9 @@ resource "google_compute_global_forwarding_rule" "forwarding_rule" {
       name  = "SPECIES"
       value = "ALIEN"
     }
+  }
+  service_directory_registrations {
+    service_directory_region    = "us-central1a"
   }
 }
 

@@ -27,6 +27,9 @@ The following arguments are supported:
 
 * `project` - (Optional) The project in which the resource belongs. If it
     is not provided, the provider project is used.
+- - -
+
+* `service_directory_registrations` - (Optional) Service Directory resources to register this forwarding rule with. Currently, only supports a single Service Directory resource.
 
 ## Attributes Reference
 See [google_compute_global_forwarding_rule](https://www.terraform.io/docs/providers/google/r/compute_global_forwarding_rule.html) resource for details of the available attributes.
