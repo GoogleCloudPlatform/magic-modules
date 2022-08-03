@@ -3522,14 +3522,14 @@ objects:
 
           To create a disk with one of the public operating system images,
           specify the image by its family name. For example, specify
-          family/debian-9 to use the latest Debian 9 image:
+          family/debian-11 to use the latest Debian 11 image:
 
-          projects/debian-cloud/global/images/family/debian-9
+          projects/debian-cloud/global/images/family/debian-11
 
           Alternatively, use a specific version of a public operating system
           image:
 
-          projects/debian-cloud/global/images/debian-9-stretch-vYYYYMMDD
+          projects/debian-cloud/global/images/debian-11-bullseye-vYYYYMMDD
 
           To create a disk with a private image that you created, specify the
           image name in the following format:
