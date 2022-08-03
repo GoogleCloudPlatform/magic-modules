@@ -174,7 +174,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   test_exit_code=0
   for failed_test in $FAILED_TESTS
   do
-      TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run=$failed_test -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" >> recording_test.log &
+      TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run=$failed_test -timeout 90m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" >> recording_test.log &
       test_exit_code=$(($test_exit_code || $?))
   done
   wait
