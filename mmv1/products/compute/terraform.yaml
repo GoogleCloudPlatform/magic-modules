@@ -1138,7 +1138,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "ip_address"
       - !ruby/object:Provider::Terraform::Examples
         name: "external_http_lb_mig_backend"
-        primary_resource_type: "google_compute_global_forwarding_rule"
         primary_resource_id: "default"
         vars:
           lb_backend_template: "lb-backend-template"

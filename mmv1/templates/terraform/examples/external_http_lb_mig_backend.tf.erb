@@ -2,7 +2,7 @@
 
 # [START cloudloadbalancing_ext_http_gce_instance_template]
 resource "google_compute_instance_template" "default" {
-  name = "<%= ctx[:vars]['my_template'] %>"
+  name = "<%= ctx[:vars]['lb_backend_template'] %>"
   disk {
     auto_delete  = true
     boot         = true
@@ -22,10 +22,10 @@ resource "google_compute_instance_template" "default" {
     access_config {
       network_tier = "PREMIUM"
     }
-    network            = "global/networks/default"
-    subnetwork         = "regions/us-east1/subnetworks/default"
+    network    = "global/networks/default"
+    subnetwork = "regions/us-east1/subnetworks/default"
   }
-  region  = "us-east1"
+  region = "us-east1"
   scheduling {
     automatic_restart   = true
     on_host_maintenance = "MIGRATE"
@@ -41,8 +41,8 @@ resource "google_compute_instance_template" "default" {
 
 # [START cloudloadbalancing_ext_http_gce_instance_mig]
 resource "google_compute_instance_group_manager" "default" {
-  name     = "<%= ctx[:vars]['lb_backend_example'] %>"
-  zone     = "us-east1-b"
+  name = "<%= ctx[:vars]['lb_backend_example'] %>"
+  zone = "us-east1-b"
   named_port {
     name = "http"
     port = 80
@@ -81,7 +81,7 @@ resource "google_compute_global_address" "default" {
 
 # [START cloudloadbalancing_ext_http_gce_instance_health_check]
 resource "google_compute_health_check" "default" {
-  name                = "<%= ctx[:vars]['http_basic_check'] %>"
+  name               = "<%= ctx[:vars]['http_basic_check'] %>"
   check_interval_sec = 5
   healthy_threshold  = 2
   http_health_check {
