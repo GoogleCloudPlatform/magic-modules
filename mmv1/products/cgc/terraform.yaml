@@ -103,6 +103,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
+          - "root_password"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_database_instance_postgres"
         primary_resource_type: "google_sql_database_instance"
@@ -146,6 +147,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
+          - "root_password"
           - "clone"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_postgres_instance_clone"
@@ -211,6 +213,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
+          - "root_password"
     ### Authorized networks ###
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_mysql_instance_authorized_network"
@@ -235,6 +238,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
+          - "root_password"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_postgres_instance_authorized_network"
         primary_resource_type: "google_sql_database_instance"
@@ -258,6 +262,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
+          - "root_password"
           - "deletion_protection"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_mysql_instance_backup_location"
@@ -294,6 +299,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
+          - "root_password"
           - "deletion_protection"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_mysql_instance_backup_retention"
@@ -345,6 +351,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
+          - "root_password"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_postgres_instance_replica"
         primary_resource_type: "google_sql_database_instance"
@@ -370,6 +377,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
+          - "root_password"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_mysql_instance_public_ip"
         primary_resource_id: "mysql_public_ip_instance_name"
@@ -404,6 +412,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           private_ip_address: "private-ip-address"
           private_ip_sql_instance: "private-ip-sql-instance"
         ignore_read_extra:
+          - "root_password"
           - "deletion_protection"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_postgres_instance_private_ip"
@@ -462,6 +471,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
+          - "root_password"
     ### Password Validation Policy ###
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_mysql_instance_pvp"
@@ -478,10 +488,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "sql_postgres_instance_pvp"
         primary_resource_id: "postgres_pvp_instance_name"
         primary_resource_type: "google_sql_database_instance"
-        skip_test: true
         vars:
           postgres_pvp_instance_name: "postgres-pvp-instance-name"
           deletion_protection: "true"
+        skip_test: true
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
@@ -501,6 +511,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
+          - "root_password"
     ### CMEK ###
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_instance_cmek"
@@ -518,6 +529,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
+          - "root_password"
     ### IAM Conditions ###
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_instance_iam_condition"
@@ -547,6 +559,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
+          - "root_password"
     ### PITR ###
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_instance_pitr"
@@ -576,6 +589,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
+          - "root_password"
     # Storage
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_new_bucket"
