@@ -72,6 +72,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "instance_virtual_display"
         vars:
           instance_virtual_display: "instance-virtual-display"
+ 
+    # Eventarc
+    ### Eventarc Workflows quickstart
+      - !ruby/object:Provider::Terraform::Examples
+        name: "eventarc_workflows"
+        primary_resource_type: "google_eventarc_trigger"
+        primary_resource_id: "trigger_pubsub_tf"
+        vars:
+          pubsub_workflow_tf: "pubsub-workflow-tf"
+          trigger_pubsub_workflow_tf: "trigger-pubsub-workflow-tf"
+        min_version: beta
+
     # SQL
     ### When including separate samples for each DB type, add `skip_test: true`
     ### for Postgres and MySQL, but not for SQL Server

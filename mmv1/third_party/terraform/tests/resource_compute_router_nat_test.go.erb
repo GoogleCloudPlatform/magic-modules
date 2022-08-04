@@ -3,7 +3,9 @@ package google
 
 import (
 	"fmt"
+<% unless version == "ga" -%>
 	"regexp"
+<% end -%>
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -59,73 +61,6 @@ func TestAccComputeRouterNat_basic(t *testing.T) {
 		},
 	})
 }
-
-func TestAccComputeRouterNat_tcpTimeWaitTimeoutSec(t *testing.T) {
-	t.Parallel()
-
-	testId := randString(t, 10)
-	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeRouterNatTcpTimeWaitTimeoutSec(routerName, 180),
-			},
-			{
-				// implicitly full ImportStateId
-				ResourceName: "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeRouterNatTcpTimeWaitTimeoutSec(routerName, 150),
-			},
-			{
-				// implicitly full ImportStateId
-				ResourceName: "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func TestAccComputeRouterNat_rule(t *testing.T) {
-	t.Parallel()
-
-	testId := randString(t, 10)
-	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeRouterNatRule(routerName),
-			},
-			{
-				// implicitly full ImportStateId
-				ResourceName: "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeRouterNatRuleUpdate(routerName),
-			},
-			{
-				// implicitly full ImportStateId
-				ResourceName: "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 
 func TestAccComputeRouterNat_update(t *testing.T) {
 	t.Parallel()
@@ -291,6 +226,7 @@ func TestAccComputeRouterNat_withPortAllocationMethods(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccComputeRouterNat_withNatIpsAndDrainNatIps(t *testing.T) {
 	t.Parallel()
 
@@ -338,6 +274,8 @@ func TestAccComputeRouterNat_withNatIpsAndDrainNatIps(t *testing.T) {
 		},
 	})
 }
+
+<% end -%>
 
 func testAccCheckComputeRouterNatDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
@@ -777,6 +715,7 @@ resource "google_compute_router_nat" "foobar" {
 `, routerName, routerName, routerName, routerName, routerName, enableEndpointIndependentMapping, enableDynamicPortAllocation, minPortsPerVm, maxPortsPerVm)
 }
 
+<% unless version == 'ga' -%>
 func testAccComputeRouterNatBaseResourcesWithNatIps(routerName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
@@ -923,6 +862,8 @@ resource "google_compute_router_nat" "foobar" {
 `, testAccComputeRouterNatBaseResourcesWithNatIps(routerName), routerName)
 }
 
+<% end -%>
+
 func testAccComputeRouterNatKeepRouter(routerName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
@@ -1005,145 +946,4 @@ resource "google_compute_router_nat" "foobar" {
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
 }
 `, routerName, routerName, routerName, routerName)
-}
-
-func testAccComputeRouterNatRule(routerName string) string {
-	return fmt.Sprintf(`
-resource "google_compute_network" "foobar" {
-  name = "%s-net"
-}
-
-resource "google_compute_subnetwork" "foobar" {
-  name          = "%s-subnet"
-  network       = google_compute_network.foobar.self_link
-  ip_cidr_range = "10.0.0.0/16"
-  region        = "us-central1"
-}
-
-resource "google_compute_router" "foobar" {
-  name    = "%s"
-  region  = google_compute_subnetwork.foobar.region
-  network = google_compute_network.foobar.self_link
-}
-
-resource "google_compute_address" "foobar" {
-  name   = "%s-addr"
-  region = google_compute_subnetwork.foobar.region
-}
-
-resource "google_compute_address" "foobar2" {
-  name   = "%s-addr-2"
-  region = google_compute_subnetwork.foobar.region
-}
-
-resource "google_compute_router_nat" "foobar" {
-  name                                = "%s"
-  router                              = google_compute_router.foobar.name
-  region                              = google_compute_router.foobar.region
-  nat_ip_allocate_option              = "MANUAL_ONLY"
-  nat_ips                             = [google_compute_address.foobar.id]
-  source_subnetwork_ip_ranges_to_nat  = "ALL_SUBNETWORKS_ALL_IP_RANGES"
-  enable_endpoint_independent_mapping = false
-
-  rules {
-	rule_number = 1
-	match       = "inIpRange(destination.ip, '1.1.0.0/16') || inIpRange(destination.ip, '2.2.0.0/16')"
-	action {
-	  source_nat_active_ips = [google_compute_address.foobar2.id]
-	}
-  }
-}
-`, routerName, routerName, routerName, routerName, routerName, routerName)
-}
-
-func testAccComputeRouterNatRuleUpdate(routerName string) string {
-	return fmt.Sprintf(`
-resource "google_compute_network" "foobar" {
-  name = "%s-net"
-}
-
-resource "google_compute_subnetwork" "foobar" {
-  name          = "%s-subnet"
-  network       = google_compute_network.foobar.self_link
-  ip_cidr_range = "10.0.0.0/16"
-  region        = "us-central1"
-}
-
-resource "google_compute_router" "foobar" {
-  name    = "%s"
-  region  = google_compute_subnetwork.foobar.region
-  network = google_compute_network.foobar.self_link
-}
-
-resource "google_compute_address" "foobar" {
-  name   = "%s-addr"
-  region = google_compute_subnetwork.foobar.region
-}
-
-resource "google_compute_address" "foobar2" {
-  name   = "%s-addr-2"
-  region = google_compute_subnetwork.foobar.region
-}
-
-resource "google_compute_address" "foobar3" {
-  name   = "%s-addr-3"
-  region = google_compute_subnetwork.foobar.region
-}
-
-resource "google_compute_router_nat" "foobar" {
-  name                                = "%s"
-  router                              = google_compute_router.foobar.name
-  region                              = google_compute_router.foobar.region
-  nat_ip_allocate_option              = "MANUAL_ONLY"
-  nat_ips                             = [google_compute_address.foobar.id]
-  source_subnetwork_ip_ranges_to_nat  = "ALL_SUBNETWORKS_ALL_IP_RANGES"
-  enable_endpoint_independent_mapping = false
-
-  rules {
-	rule_number = 1
-	match       = "inIpRange(destination.ip, '1.1.0.0/16') || inIpRange(destination.ip, '5.5.0.0/16')"
-	action {
-	  source_nat_active_ips = [google_compute_address.foobar2.id]
-	}
-  }
-
-  rules {
-	rule_number = 2
-	match       = "inIpRange(destination.ip, '3.3.0.0/16') || inIpRange(destination.ip, '4.4.0.0/16')"
-	action {
-	  source_nat_active_ips = [google_compute_address.foobar3.id]
-	}
-  }
-}
-`, routerName, routerName, routerName, routerName, routerName, routerName, routerName)
-}
-
-func testAccComputeRouterNatTcpTimeWaitTimeoutSec(routerName string, timeout int) string {
-	return fmt.Sprintf(`
-resource "google_compute_network" "foobar" {
-  name = "%s-net"
-}
-
-resource "google_compute_subnetwork" "foobar" {
-  name          = "%s-subnet"
-  network       = google_compute_network.foobar.self_link
-  ip_cidr_range = "10.0.0.0/16"
-  region        = "us-central1"
-}
-
-resource "google_compute_router" "foobar" {
-  name    = "%s"
-  region  = google_compute_subnetwork.foobar.region
-  network = google_compute_network.foobar.self_link
-}
-
-resource "google_compute_router_nat" "foobar" {
-  name                               = "%s"
-  router                             = google_compute_router.foobar.name
-  region                             = google_compute_router.foobar.region
-  nat_ip_allocate_option             = "AUTO_ONLY"
-  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
-  tcp_time_wait_timeout_sec          = "%d"
-}
-`, routerName, routerName, routerName, routerName, timeout)
 }

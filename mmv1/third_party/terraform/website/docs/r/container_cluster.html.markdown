@@ -137,6 +137,9 @@ for more details. Structure is [documented below](#nested_cluster_autoscaling).
 * `binary_authorization` - (Optional) Configuration options for the Binary
   Authorization feature. Structure is [documented below](#nested_binary_authorization).
 
+* `mesh_certificates` - (Optional)
+    Structure is [documented below](#nested_mesh_encryption).
+
 * `database_encryption` - (Optional)
     Structure is [documented below](#nested_database_encryption).
 
@@ -420,6 +423,10 @@ addons_config {
   and `PROJECT_SINGLETON_POLICY_ENFORCE`. `PROJECT_SINGLETON_POLICY_ENFORCE` is functionally equivalent to the
   deprecated `enable_binary_authorization` parameter being set to `true`.
 
+<a name="nested_mesh_certificates"></a>The `mesh_certificates` block supports:
+
+* `enable_certificates` - (Required) Controls the issuance of workload mTLS certificates. It is enabled by default. Workload Identity is required, see [workload_config](#nested_workload_identity_config).
+
 <a name="nested_database_encryption"></a>The `database_encryption` block supports:
 
 * `state` - (Required) `ENCRYPTED` or `DECRYPTED`
@@ -500,7 +507,7 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 <a name="nested_monitoring_config"></a>The `monitoring_config` block supports:
 
-*  `enable_components` - (Optional) The GKE components exposing metrics. `SYSTEM_COMPONENTS` and in beta provider, both `SYSTEM_COMPONENTS` and `WORKLOADS` are supported. (`WORKLOADS` is deprecated and removed in GKE 1.24.)
+*  `enable_components` - (Optional) The GKE components exposing metrics. Supported values include: `SYSTEM_COMPONENTS`, `APISERVER`, `CONTROLLER_MANAGER`, and `SCHEDULER`. In beta provider, `WORKLOADS` is supported on top of those 4 values. (`WORKLOADS` is deprecated and removed in GKE 1.24.)
 
 *  `managed_prometheus` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for Managed Service for Prometheus. Structure is [documented below](#nested_managed_prometheus).
 

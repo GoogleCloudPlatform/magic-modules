@@ -97,7 +97,7 @@ instance_template:
   can_ip_forward: false
   scheduling_automatic_restart: true
   scheduling_on_host_maintenance: MIGRATE
-  disk_source_image: debian-cloud/debian-9
+  disk_source_image: debian-cloud/debian-11
   disk_auto_delete: true
   disk_boot: true
   network_interface_network: default

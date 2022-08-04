@@ -179,24 +179,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           backend_bucket_name: "image-backend-bucket"
       - !ruby/object:Provider::Terraform::Examples
         name: "external_cdn_lb_with_backend_bucket"
+        primary_resource_type: "google_compute_backend_bucket"
         primary_resource_id: "default"
         vars:
-          cdn_network: "cdn-network"
-          cdn_subnet: "cdn-subnet"
-          cdn_static_ip: "cdn-static-ip"
-          cdn_forwarding_rule: "cdn-forwarding-rule"
-          cdn_target_http_proxy: "cdn-target-http-proxy"
-          cdn_url_map: "cdn-url-map"
-          image_backend_bucket: "image-backend-bucket"
-          cdn_backend_storage_bucket: "cdn-backend-storage-bucket"
+          my_bucket: "my-bucket"
           index_page: "index-page"
           404_page: "404-page"
           test_object: "test-object"
+          example_ip: "example-ip"
+          http_lb_forwarding_rule: "http-lb-forwarding-rule"
+          http_lb_proxy: "http-lb-proxy"
+          http_lb: "http-lb"
+          cat_backend_bucket: "cat-backend-bucket"
         skip_docs: true
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_bucket_bypass_cache"
         primary_resource_id: "image_backend"
-        skip_docs: true        
+        skip_docs: true
         vars:
           backend_bucket_name: "image-backend-bucket"
           bucket_name: "image-store-bucket"
@@ -206,7 +205,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_docs: true
         vars:
           backend_bucket_name: "image-backend-bucket"
-          bucket_name: "image-store-bucket"          
+          bucket_name: "image-store-bucket"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
       post_update: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
@@ -1137,6 +1136,25 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project: :PROJECT_NAME
         ignore_read_extra:
           - "ip_address"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "external_http_lb_mig_backend"
+        primary_resource_type: "google_compute_global_forwarding_rule"
+        primary_resource_id: "default"
+        vars:
+          lb_backend_template: "lb-backend-template"
+          lb_backend_example: "lb-backend-example"
+          fw_allow_health_check: "fw-allow-health-check"
+          lb_ipv4_1: "lb-ipv4-1"
+          http_basic_check: "http-basic-check"
+          web_backend_service: "web-backend-service"
+          web_map_http: "web-map-http"
+          http_lb_proxy: "http-lb-proxy"
+          http_content_rule: "http-content-rule"
+        skip_docs: true
+        skip_test: true # Very similar to external_http_lb_mig_backend_custom_header
+        ignore_read_extra:
+          - "metadata"
+          - "metadata_startup_script"
     properties:
       creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1402,8 +1420,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "on_prem"
         vars:
           interconnect_attachment_name: "on-prem-attachment"
-          router_name: "router"
-          network_name: "network"
+          router_name: "router-1"
+          network_name: "network-1"
       - !ruby/object:Provider::Terraform::Examples
         name: "compute_interconnect_attachment_ipsec_encryption"
         primary_resource_id: "ipsec-encrypted-interconnect-attachment"
@@ -3196,8 +3214,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "target_vpn_gateway_basic"
         primary_resource_id: "target_gateway"
         vars:
-          target_vpn_gateway_name: "vpn1"
-          network_name: "network1"
+          target_vpn_gateway_name: "vpn-1"
+          network_name: "network-1"
           address_name: "vpn-static-ip"
           esp_forwarding_rule_name: "fr-esp"
           udp500_forwarding_rule_name: "fr-udp500"
@@ -3275,7 +3293,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_vcr: true
         vars:
           ha_vpn_gateway_name: "ha-vpn"
-          network_name: "network"
+          network_name: "network-1"
           external_gateway_name: "external-gateway"
           global_address_name: "global-address"
           router_name: "ha-vpn-router1"
