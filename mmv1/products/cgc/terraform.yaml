@@ -484,6 +484,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
+          - "root_password"
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_postgres_instance_pvp"
         primary_resource_id: "postgres_pvp_instance_name"
@@ -496,6 +497,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         ignore_read_extra:
           - "deletion_protection"
+          - "root_password"
     ### HA ###
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_instance_ha"
