@@ -1306,6 +1306,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 
 	var op *sqladmin.Operation
 	var instance *sqladmin.DatabaseInstance
+	// Major version upgrade
 	if v, ok := d.GetOk("database_version"); ok {
 		instance = &sqladmin.DatabaseInstance{DatabaseVersion: v.(string)}
 		err = retryTimeDuration(func() (rerr error) {
@@ -1313,9 +1314,9 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 			return rerr
 		}, d.Timeout(schema.TimeoutUpdate), isSqlOperationInProgressError)
 		if err != nil {
-			return fmt.Errorf("error, failed to patch instance settings for %s: %s", instance.Name, err)
+			return fmt.Errorf("Error, failed to patch instance settings for %s: %s", instance.Name, err)
 		}
-		err = sqlAdminOperationWaitTime(config, op, project, "Update Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = sqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
