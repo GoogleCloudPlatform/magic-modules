@@ -262,6 +262,16 @@ objects:
                 - :OWNER
                 - :MANAGER
                 - :MEMBER
+            - !ruby/object:Api::Type::NestedObject
+              name: 'expiryDetail'
+              description: |
+                The MembershipRole expiry details.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'expireTime'
+                  input: true
+                  description: |
+                    The time at which the MembershipRole will expire.
         update_verb: :POST
         update_url: '{{name}}:modifyMembershipRoles'
       - !ruby/object:Api::Type::String
