@@ -56,6 +56,10 @@ type Resource struct {
 	// replacing one substring with another.
 	ReplaceInBasePath BasePathReplacement
 
+	// SkipInProvider is true when the resource shouldn't be included in the dclResources
+	// map for the provider. This is usually because it was already included through mmv1.
+	SkipInProvider bool
+
 	// title is the name of the resource in snake_case. For example,
 	// "instance", "backend_service".
 	title SnakeCaseTerraformResourceName
@@ -426,6 +430,10 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		res.InsertTimeoutMinutes = ctd.TimeoutMinutes
 		res.UpdateTimeoutMinutes = ctd.TimeoutMinutes
 		res.DeleteTimeoutMinutes = ctd.TimeoutMinutes
+	}
+
+	if overrides.ResourceOverride(SkipInProvider, location) {
+		res.SkipInProvider = true
 	}
 
 	crname := CustomResourceNameDetails{}
