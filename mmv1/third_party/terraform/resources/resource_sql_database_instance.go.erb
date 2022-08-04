@@ -824,7 +824,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 
 	cloneContext, cloneSource := expandCloneContext(d.Get("clone").([]interface{}))
 
-    s, ok := d.GetOk("settings")
+    	s, ok := d.GetOk("settings")
 	desiredSettings := expandSqlDatabaseInstanceSettings(s.([]interface{}))
 	if ok {
 		instance.Settings = desiredSettings
@@ -1303,7 +1303,6 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	}
 
 	desiredSetting := d.Get("settings")
-
 	var op *sqladmin.Operation
 	var instance *sqladmin.DatabaseInstance
 	// Major version upgrade
