@@ -96,29 +96,29 @@ resource "google_compute_network" "internal" {
 }
 
 resource "google_compute_subnetwork" "internal"{
-	name                    = "tf-test-my-subnetwork%{random_suffix}"
-	network                 = google_compute_network.internal.id
-	ip_cidr_range           = "10.128.0.0/20"
-	region                  = "us-central1"
-	private_ip_google_access= true
+  name                    = "tf-test-my-subnetwork%{random_suffix}"
+  network                 = google_compute_network.internal.id
+  ip_cidr_range           = "10.128.0.0/20"
+  region                  = "us-central1"
+  private_ip_google_access= true
 }
 
 resource "google_compute_instance" "default" {
-	name         = "tf-test-neg-%{random_suffix}"
-	machine_type = "e2-medium"
+  name         = "tf-test-neg-%{random_suffix}"
+  machine_type = "e2-medium"
   
-	boot_disk {
-	  initialize_params {
-		image = "debian-8-jessie-v20160803"
-		}
-	}
+  boot_disk {
+    initialize_params {
+      image = "debian-8-jessie-v20160803"
+    }
+   }
   
-	network_interface {
-	  subnetwork = google_compute_subnetwork.internal.self_link
-	  access_config {
-	  }
-	}
+  network_interface {
+    subnetwork = google_compute_subnetwork.internal.self_link
+    access_config {
+    }
+  }
 }
-  
+
 `, context)
 }
