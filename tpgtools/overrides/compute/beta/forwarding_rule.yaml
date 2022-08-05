@@ -107,7 +107,7 @@
   field: ip_address
 - type: CUSTOM_VALIDATION
   details:
-    function: validateGCPName
+    function: validateGCEName
   field: service_label
 - type: DIFF_SUPPRESS_FUNC
   details:
