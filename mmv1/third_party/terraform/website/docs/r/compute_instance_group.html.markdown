@@ -1,8 +1,6 @@
 ---
 subcategory: "Compute Engine"
-layout: "google"
 page_title: "Google: google_compute_instance_group"
-sidebar_current: "docs-google-compute-instance-group-x"
 description: |-
   Manages an Instance Group within GCE.
 ---
@@ -80,7 +78,7 @@ resource "google_compute_instance_group" "staging_group" {
 }
 
 data "google_compute_image" "debian_image" {
-  family  = "debian-9"
+  family  = "debian-11"
   project = "debian-cloud"
 }
 

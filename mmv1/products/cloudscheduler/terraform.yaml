@@ -18,6 +18,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/scheduler.erb
       resource_definition: templates/terraform/resource_definition/scheduler_auth.erb
+      encoder: templates/terraform/encoders/cloud_scheduler.go.erb
+      update_encoder: templates/terraform/update_encoder/cloud_scheduler.go.erb
+      post_create: templates/terraform/post_create/cloud_scheduler.go.erb
+      post_update: templates/terraform/post_update/cloud_scheduler.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "scheduler_job_pubsub"
@@ -27,6 +31,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           topic_name: "job-topic"
       - !ruby/object:Provider::Terraform::Examples
         name: "scheduler_job_http"
+        primary_resource_id: "job"
+        vars:
+          job_name: "test-job"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "scheduler_job_paused"
         primary_resource_id: "job"
         vars:
           job_name: "test-job"
@@ -52,6 +61,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      paused: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        custom_flatten: templates/terraform/custom_flatten/cloud_scheduler_paused.go.erb
       httpTarget.body: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateBase64String'

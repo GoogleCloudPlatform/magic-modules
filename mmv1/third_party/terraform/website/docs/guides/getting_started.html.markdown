@@ -1,7 +1,5 @@
 ---
-layout: "google"
 page_title: "Getting Started with the Google provider"
-sidebar_current: "docs-google-provider-guides-getting-started"
 description: |-
   Getting started with the Google Cloud Platform provider
 ---
@@ -78,7 +76,7 @@ resource "google_compute_instance" "vm_instance" {
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-9"
+      image = "debian-cloud/debian-11"
     }
   }
 
@@ -207,7 +205,7 @@ resource "google_compute_instance" "vm_instance" {
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-9"
+      image = "debian-cloud/debian-11"
     }
   }
 

@@ -54,7 +54,6 @@ func TestAccComputeSecurityPolicy_withRule(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeSecurityPolicy_withRuleExpr(t *testing.T) {
 	t.Parallel()
 
@@ -76,7 +75,6 @@ func TestAccComputeSecurityPolicy_withRuleExpr(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccComputeSecurityPolicy_update(t *testing.T) {
 	t.Parallel()
@@ -162,7 +160,6 @@ func TestAccComputeSecurityPolicy_withAdvancedOptionsConfig(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeSecurityPolicy_withAdaptiveProtection(t *testing.T) {
 	t.Parallel()
 
@@ -184,9 +181,7 @@ func TestAccComputeSecurityPolicy_withAdaptiveProtection(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
-<% unless version == 'ga' -%>
 func TestAccComputeSecurityPolicy_withRateLimitOptions(t *testing.T) {
 	t.Parallel()
 
@@ -230,7 +225,6 @@ func TestAccComputeSecurityPolicy_withRateLimitWithRedirectOptions(t *testing.T)
 		},
 	})
 }
-<% end -%>
 
 func testAccCheckComputeSecurityPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
@@ -389,7 +383,6 @@ resource "google_compute_security_policy" "policy" {
 `, spName)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeSecurityPolicy_withRuleExpr(spName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_security_policy" "policy" {
@@ -423,7 +416,6 @@ resource "google_compute_security_policy" "policy" {
 }
 `, spName)
 }
-<% end -%>
 
 func testAccComputeSecurityPolicy_withAdvancedOptionsConfig(spName string) string {
 	return fmt.Sprintf(`
@@ -439,7 +431,6 @@ resource "google_compute_security_policy" "policy" {
 `, spName)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeSecurityPolicy_withAdaptiveProtection(spName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_security_policy" "policy" {
@@ -455,9 +446,7 @@ resource "google_compute_security_policy" "policy" {
 }
 `, spName)
 }
-<% end -%>
 
-<% unless version == 'ga' -%>
 func testAccComputeSecurityPolicy_withRateLimitOptions(spName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_security_policy" "policy" {
@@ -548,9 +537,7 @@ resource "google_compute_security_policy" "policy" {
 `, spName)
 }
 
-<% end -%>
 
-<% unless version == 'ga' -%>
 func TestAccComputeSecurityPolicy_withRedirectOptionsRecaptcha(t *testing.T) {
 	t.Parallel()
 
@@ -671,4 +658,3 @@ resource "google_compute_security_policy" "policy" {
 }
 `, spName)
 }
-<% end -%>
