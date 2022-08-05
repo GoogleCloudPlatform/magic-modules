@@ -104,7 +104,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
       autoscalingPolicy.minNumReplicas: !ruby/object:Overrides::Terraform::PropertyOverride
         name: minReplicas
         # Even though this field isn't actually required by the API, it makes our
@@ -807,7 +807,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           The name or self_link of the network to attach this firewall to.
@@ -982,7 +982,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: false
       serviceLabel: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
   GlobalAddress: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1514,7 +1514,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          regex: '(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)'
+          function: 'validateGCEName'
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       # We want this to be the smallest change possible, so exclude this for now.
@@ -1604,7 +1604,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
@@ -1655,7 +1655,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
   RegionNetworkEndpointGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1698,7 +1698,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
   NetworkPeeringRoutesConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"
     import_format: ["projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"]
@@ -1877,7 +1877,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
       priority: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
@@ -2055,7 +2055,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
       autoscalingPolicy.minNumReplicas: !ruby/object:Overrides::Terraform::PropertyOverride
         name: minReplicas
         # Even though this field isn't actually required by the API, it makes our
@@ -2517,7 +2517,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
       bgp.asn: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateRFC6996Asn'
@@ -2808,7 +2808,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.erb'
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
         description: |
           {{description}}
 
@@ -2867,7 +2867,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.erb'
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
         description: |
           {{description}}
 
@@ -2966,7 +2966,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
       secondaryIpRanges: !ruby/object:Overrides::Terraform::PropertyOverride
         name: secondaryIpRange
         unordered_list: true
@@ -2982,7 +2982,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           For more details about this behavior, see [this section](https://www.terraform.io/docs/configuration/attr-as-blocks.html#defining-a-fixed-object-collection-value).
       secondaryIpRanges.rangeName: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
       secondaryIpRanges.ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'
@@ -3273,7 +3273,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride

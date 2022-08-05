@@ -82,7 +82,7 @@ var rfc1918Networks = []string{
 	"192.168.0.0/16",
 }
 
-func validateGCPName(v interface{}, k string) (ws []string, errors []error) {
+func validateGCEName(v interface{}, k string) (ws []string, errors []error) {
 	re := `^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$`
 	return validateRegexp(re)(v, k)
 }
