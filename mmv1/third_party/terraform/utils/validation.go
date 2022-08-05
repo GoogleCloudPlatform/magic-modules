@@ -105,7 +105,7 @@ func validateRegexp(re string) schema.SchemaValidateFunc {
 		value := v.(string)
 		if !regexp.MustCompile(re).MatchString(value) {
 			errors = append(errors, fmt.Errorf(
-				"%q (%q) doesn't match regexp %q", k, value, re))
+				"%q (%q) doesn't match regexp %q for more info refer to https://cloud.google.com/compute/docs/naming-resources#resource-name-format", k, value, re))
 		}
 
 		return
