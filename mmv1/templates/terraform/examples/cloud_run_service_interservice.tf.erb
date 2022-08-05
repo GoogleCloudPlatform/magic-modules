@@ -2,7 +2,7 @@
 
 # [START cloudrun_service_interservice_public_service]
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['private_service_name'] %>"
+  name     = "<%= ctx[:vars]['public_service_name'] %>"
   location = "us-central1"
 
   template {
@@ -57,7 +57,7 @@ resource "google_service_account" "default" {
 
 # [START cloudrun_service_interservice_private_service]
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>_private" {
-  name     = "<%= ctx[:vars]['private_service_name'] %>-private"
+  name     = "<%= ctx[:vars]['public_service_name'] %>-private"
   location = "us-central1"
 
   template {
