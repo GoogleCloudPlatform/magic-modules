@@ -8227,7 +8227,6 @@ objects:
         name: 'port'
         description: |
           Port number of network endpoint.
-        required: true
       - !ruby/object:Api::Type::String
         name: 'ipAddress'
         description: |
