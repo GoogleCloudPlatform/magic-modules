@@ -21,6 +21,7 @@ resource "google_compute_subnetwork" "default" {
 resource "google_project_service" "vpc" {
   provider = google-beta
   service = "vpcaccess.googleapis.com"
+  disable_on_destroy = false
 }
 
 resource "google_vpc_access_connector" "default" {
