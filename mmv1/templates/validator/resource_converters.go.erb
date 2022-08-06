@@ -131,6 +131,9 @@ func ResourceConverters() map[string][]ResourceConverter {
 		"google_project_iam_binding": {resourceConverterProjectIamBinding()},
 		"google_project_iam_member": {resourceConverterProjectIamMember()},
 		"google_project_iam_custom_role": {resourceConverterProjectIAMCustomRole()},
+		"google_compute_instance_iam_policy":                      {resourceConverterComputeInstanceIamPolicy()},
+		"google_compute_instance_iam_binding":                     {resourceConverterComputeInstanceIamBinding()},
+		"google_compute_instance_iam_member":                      {resourceConverterComputeInstanceIamMember()},
 		"google_organization_iam_custom_role": {resourceConverterOrganizationIAMCustomRole()},
 		"google_vpc_access_connector": {resourceConverterVPCAccessConnector()},
 	}
