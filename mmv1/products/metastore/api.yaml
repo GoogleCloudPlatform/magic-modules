@@ -274,11 +274,13 @@ objects:
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'dataCatalogConfig'
+            required: true
             description: |
               The integration config for the Data Catalog service.
             properties:
               - !ruby/object:Api::Type::Boolean
                 name: 'enabled'
+                required: true
                 description: |
                   Defines whether the metastore metadata should be synced to Data Catalog. The default value is to disable syncing metastore metadata to Data Catalog.      
   - !ruby/object:Api::Resource
