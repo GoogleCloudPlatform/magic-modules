@@ -90,9 +90,9 @@ this within the schema.
 Thus the block for terraform to utilize this field would then be
 ```terraform
 resource "x" "y" {
-  `identity_service_config{
+  identity_service_config{
     enabled = true
-  }`
+  }
 }
 ```
 
@@ -123,6 +123,83 @@ the changes to the state of the resource. Following existing patterns to create
 this operation will be the best way to implement this. As there are many unique ways
 to implement a given field we won't get into specifics.
 
+For example a field in bigtable `google_sheets_options` containers two nested properties.
+`range` and `skip_leading_rows`.
+
+```golang
+						// GoogleSheetsOptions: [Optional] Additional options if sourceFormat is set to GOOGLE_SHEETS.
+						"google_sheets_options": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: `Additional options if source_format is set to "GOOGLE_SHEETS".`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									// Range: [Optional] Range of a sheet to query from. Only used when non-empty.
+									// Typical format: !:
+									"range": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `Range of a sheet to query from. Only used when non-empty. At least one of range or skip_leading_rows must be set. Typical format: "sheet_name!top_left_cell_id:bottom_right_cell_id" For example: "sheet1!A1:B20"`,
+										AtLeastOneOf: []string{
+											"external_data_configuration.0.google_sheets_options.0.skip_leading_rows",
+											"external_data_configuration.0.google_sheets_options.0.range",
+										},
+									},
+									// SkipLeadingRows: [Optional] The number of rows at the top
+									// of the sheet that BigQuery will skip when reading the data.
+									"skip_leading_rows": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Description: `The number of rows at the top of the sheet that BigQuery will skip when reading the data. At least one of range or skip_leading_rows must be set.`,
+										AtLeastOneOf: []string{
+											"external_data_configuration.0.google_sheets_options.0.skip_leading_rows",
+											"external_data_configuration.0.google_sheets_options.0.range",
+										},
+									},
+								},
+							},
+						},
+```
+
+To simplify the implementation management of these fields can be delegated to expanders and
+flatteners.
+
+```golang
+func expandGoogleSheetsOptions(configured interface{}) *bigquery.GoogleSheetsOptions {
+	if len(configured.([]interface{})) == 0 {
+		return nil
+	}
+
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	opts := &bigquery.GoogleSheetsOptions{}
+
+	if v, ok := raw["range"]; ok {
+		opts.Range = v.(string)
+	}
+
+	if v, ok := raw["skip_leading_rows"]; ok {
+		opts.SkipLeadingRows = int64(v.(int))
+	}
+	return opts
+}
+
+func flattenGoogleSheetsOptions(opts *bigquery.GoogleSheetsOptions) []map[string]interface{} {
+	result := map[string]interface{}{}
+
+	if opts.Range != "" {
+		result["range"] = opts.Range
+	}
+
+	if opts.SkipLeadingRows != 0 {
+		result["skip_leading_rows"] = opts.SkipLeadingRows
+	}
+
+	return []map[string]interface{}{result}
+}
+
+```
+
 #### Add a testcase for the field or extend an existing one
 Once your field has been implemented, go to the corresponding test file for
 your resource and extend it. If your field is updatable it's good practice to
@@ -139,6 +216,8 @@ just be opening the corresponding markdown file and adding documentation, likely
 copied from the rest api to the markdown file. Follow the existing patterns there-in.
 
 ### Datasource
+**Note** : only handwritten datasources are currently supported
+
 Datasources are like terraform resources except they don't *create* anything.
 They are simply read-only operations that will expose some sort of values needed
 for subsequent resource operations. If you're adding a field to an existing
@@ -153,9 +232,10 @@ a new datasource there are 5 steps to doing so.
   datasource.
 1. Add documentation.
 
-We won't go in depth on how-to's for this section but if you have any questions or
-thoughts on how to expand this section please don't hesitate to open an issue
-or pull request.
+For creating a datasource based off an existing resource you can [make use of the
+schema directly](https://github.com/GoogleCloudPlatform/magic-modules/blob/1d293f7bfadacaa20580874c8e8634827fb99a14/mmv1/third_party/terraform/data_sources/data_source_cloud_run_service.go).
+Otherwise [implementing the schema directly](https://github.com/GoogleCloudPlatform/magic-modules/blob/1d293f7bfadacaa20580874c8e8634827fb99a14/mmv1/third_party/terraform/data_sources/data_source_google_compute_address.go),
+similar to normal resource creation, is the desired path.
 
 ### IAM Resource
 
