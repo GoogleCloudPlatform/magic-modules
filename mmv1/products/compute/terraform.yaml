@@ -1354,7 +1354,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
     iam_policy: !ruby/object:Api::Resource::IamPolicy
-      exclude_validator: true
       allowed_iam_role: 'roles/compute.osLogin'
       parent_resource_attribute: 'instance_name'
       iam_conditions_request_type: :QUERY_PARAM

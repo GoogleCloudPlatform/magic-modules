@@ -21,12 +21,13 @@
 
   resource_uri = object.iam_policy.base_url || object.self_link_uri
   parent_resource_name = object.iam_policy.parent_resource_attribute || object.name.underscore
+  asset_resource_name = parent_resource_name.downcase || object.name.downcase
   resource_params = extract_identifiers(resource_uri.gsub('{{name}}', "{{#{parent_resource_name}}}"))
   resource_params.delete('project')
 
   import_format = object.iam_policy.import_format || object.import_format
   if import_format.nil? || import_format.empty?
-    asset_name_template = '//' + product_backend_name.downcase + '.googleapis.com/' + (object.cai_base_url || object.self_link || object.base_url) + '/{{' + object.name.downcase + '}}'
+    asset_name_template = '//' + product_backend_name.downcase + '.googleapis.com/' + (object.cai_base_url || object.self_link || object.base_url) + '/{{' + asset_resource_name + '}}'
   else
     asset_name_template = '//' + product_backend_name.downcase + '.googleapis.com/' + import_format[0].gsub('{{name}}', "{{#{parent_resource_name}}}").gsub('%', '')
   end
