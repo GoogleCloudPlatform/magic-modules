@@ -1,7 +1,5 @@
 ---
-layout: "google"
 page_title: "Terraform Google Provider 2.0.0 Upgrade Guide"
-sidebar_current: "docs-google-provider-guides-version-2-upgrade"
 description: |-
   Terraform Google Provider 2.0.0 Upgrade Guide
 ---
@@ -386,7 +384,7 @@ Use the `disk_encryption_key` block instead:
 
 ```hcl
 data "google_compute_image" "my_image" {
-  family  = "debian-9"
+  family  = "debian-11"
   project = "debian-cloud"
 }
 
@@ -486,7 +484,7 @@ Use the `snapshot_encryption_key` block instead:
 
 ```hcl
 data "google_compute_image" "my_image" {
-  family  = "debian-9"
+  family  = "debian-11"
   project = "debian-cloud"
 }
 
@@ -514,7 +512,7 @@ Use the `source_disk_encryption_key` block instead:
 
 ```hcl
 data "google_compute_image" "my_image" {
-  family  = "debian-9"
+  family  = "debian-11"
   project = "debian-cloud"
 }
 resource "google_compute_disk" "my_disk" {

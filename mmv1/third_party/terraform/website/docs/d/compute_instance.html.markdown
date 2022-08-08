@@ -1,8 +1,6 @@
 ---
 subcategory: "Compute Engine"
-layout: "google"
 page_title: "Google: google_compute_instance"
-sidebar_current: "docs-google-datasource-compute-instance-x"
 description: |-
   Get a VM instance within GCE.
 ---
@@ -129,6 +127,8 @@ The following arguments are supported:
 * `type` - The GCE disk type. One of `pd-standard` or `pd-ssd`.
 
 * `image` - The image from which this disk was initialised.
+
+* `labels` - A set of key/value label pairs assigned to the disk.
 
 <a name="nested_scratch_disk"></a>The `scratch_disk` block supports:
 

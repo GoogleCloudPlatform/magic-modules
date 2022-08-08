@@ -29,7 +29,8 @@ MMv1-generated resources like [google_compute_address](https://registry.terrafor
     - [Tests that use beta features](#tests-that-use-beta-features)
   - [Documentation](#documentation)
   - [Beta Feature](#beta-feature)
-    - [Add or update a beta feature](#add-or-update-a-beta-feature)
+    - [Adding a beta resource](#adding-a-beta-resource)
+    - [Adding beta field(s)](#adding-beta-fields)
     - [Tests that use a beta feature](#tests-that-use-a-beta-feature)
     - [Promote a beta feature](#promote-a-beta-feature)
 
@@ -587,7 +588,103 @@ See [Tests that use a beta feature](#tests-that-use-a-beta-feature)
 
 ### Beta Feature
 
-#### Add or update a beta feature
+When the underlying API of a feature is not final (i.e. a `vN` version like
+`v1` or `v2`), is in preview, or the API has no SLO we add it to the
+`google-beta` provider rather than the `google `provider, allowing users to
+self-select for the stability level they are comfortable with.
+
+In MMv1, a "version tag" can be annotated on resources, fields, resource iam
+metadata and examples to control the stability level that a feature is available
+at. Version tags are a specification of the minimum version a feature is
+available at, written as `min_version: {{version}}`. This is only
+specified when a feature is available at `beta`, and omitting a tag indicates
+the target is generally available, or available at `ga`.
+
+#### Adding a beta resource
+
+To add support for a beta resource in a preexisting product, ensure that a
+`beta` level exists in the `versions` map in the `api.yaml` file for the product.
+If one doesn't already exist, add it, setting the `base_url` to the appropriate
+value. This is generally an API version including `beta`, such as `v1beta`, but
+may be the same `base_url` as the `ga` entry for services that mix fields with
+different stability levels within a single endpoint.
+
+For example:
+
+```diff
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://compute.googleapis.com/compute/v1/
++  - !ruby/object:Api::Product::Version
++    name: beta
++    base_url: https://compute.googleapis.com/compute/beta/
+```
+
+If the product doesn't already exist, it's only necessary to add the `beta`
+entry, i.e.:
+
+```
+versions:
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://runtimeconfig.googleapis.com/v1beta1/
+```
+
+Next, annotate the resource (part of `resources` in `api.yaml`) i.e.:
+
+```diff
+  - !ruby/object:Api::Resource
+    name: 'Config'
+    base_url: projects/{{project}}/configs
+    self_link: projects/{{project}}/configs/{{name}}
++    min_version: beta
+    description: |
+      A RuntimeConfig resource is the primary resource in the Cloud RuntimeConfig service.
+      A RuntimeConfig resource consists of metadata and a hierarchy of variables.
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      parent_resource_attribute: 'config'
+      method_name_separator: ':'
+      exclude: false
+    properties:
+...
+```
+
+You'll notice above that the `iam_policy` is not annotated with a version tag.
+Due to the resource having a `min_version` tagged already, that's passed through
+to the `iam_policy` (although the same is *not* true for `examples` entries used
+to [create tests](#tests-that-use-a-beta-feature)). IAM-level tagging is only
+necessary in the (rare) case that a resource is available at a higher stability
+level than its `getIamPolicy`/`setIamPolicy` methods.
+
+#### Adding beta field(s)
+
+NOTE: If a resource is already tagged as `min_version: beta`, follow the general
+instructions for adding a field instead.
+
+To add support for a beta field to a GA resource, ensure that the `beta` entry
+already exists in the `versions` map for the product. See
+[above](#adding-a-beta-resource) for details on doing so.
+
+Next, add the field(s) as normal with a `min_version: beta` tag specified. In
+the case of nested fields, only the highest-level field must be tagged, as
+demonstrated below:
+
+```diff
+         - !ruby/object:Api::Type::NestedObject
+            name: 'scaleDownControl'
++            min_version: beta
+            description: |
+              Defines scale down controls to reduce the risk of response latency
+              and outages due to abrupt scale-in events
+            properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'timeWindowSec'
+              description: |
+                How long back autoscaling should look when computing recommendations
+                to include directives regarding slower scale down, as described above.
+...
+```
 
 #### Tests that use a beta feature
 
@@ -636,3 +733,47 @@ resource "google_pubsub_subscription" "<%= ctx[:primary_resource_id] %>" {
 ```
 
 #### Promote a beta feature
+
+In order to promote a beta feature to GA, remove the version tags previously set
+on the feature or its tests. This will automatically make it available in the
+`google` provider and remove the note that the feature is in beta in the provider
+documentation.
+
+For a resource, this typically means ensuring their removal:
+
+* At the resource level, `resources` in `api.yaml`
+* On all resource examples, `examples` in `terraform.yaml` (unless some examples
+use other beta resources or fields)
+  * Additionally, for any modified examples, all `provider = google-beta`
+annotations must be cleared
+
+For a field, this typically means ensuring their removal:
+
+* At the field level, `properties` in `api.yaml`
+* On any resource examples where this was the last beta feature, `examples` in
+`terraform.yaml`
+  * Additionally, for any modified examples, all `provider = google-beta`
+annotations must be cleared
+
+If the feature was tested using handwritten tests, the version guards must be
+removed, as described in the
+[guidance for handwritten resources](third_party/terraform/README.md#promote-a-beta-feature).
+
+When writing a changelog entry for a promotion, write it as if it was a new
+field or resource, and suffix it with `(ga only)`. For example, if the
+`google_container_cluster` resource was promoted to GA in your change:
+
+```
+\`\`\`release-note:new-resource
+`google_container_cluster` (ga only)
+\`\`\`
+```
+
+Alternatively, for field promotions, you may use "{{service}}: promoted
+{{field}} in {{resource}} to GA", i.e.
+
+```
+\`\`\`release-note:enhancement
+container: promoted `node_locations` field in google_container_cluster` to GA
+\`\`\`
+```

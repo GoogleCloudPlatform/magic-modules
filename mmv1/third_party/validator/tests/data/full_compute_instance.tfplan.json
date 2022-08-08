@@ -35,7 +35,7 @@
                 "disk_encryption_key_raw": "test-disk_encryption_key_raw",
                 "initialize_params": [
                   {
-                    "image": "projects/debian-cloud/global/images/debian-9",
+                    "image": "projects/debian-cloud/global/images/debian-11",
                     "size": 42,
                     "type": "pd-standard"
                   }
@@ -239,7 +239,7 @@
               "disk_encryption_key_raw": "test-disk_encryption_key_raw",
               "initialize_params": [
                 {
-                  "image": "projects/debian-cloud/global/images/debian-9",
+                  "image": "projects/debian-cloud/global/images/debian-11",
                   "size": 42,
                   "type": "pd-standard"
                 }
@@ -598,7 +598,7 @@
                 "initialize_params": [
                   {
                     "image": {
-                      "constant_value": "projects/debian-cloud/global/images/debian-9"
+                      "constant_value": "projects/debian-cloud/global/images/debian-11"
                     },
                     "size": {
                       "constant_value": 42
