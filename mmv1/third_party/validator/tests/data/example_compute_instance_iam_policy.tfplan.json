@@ -320,48 +320,6 @@
       }
     }
   ],
-  "prior_state": {
-    "format_version": "0.2",
-    "terraform_version": "1.0.10",
-    "values": {
-      "root_module": {
-        "resources": [
-          {
-            "address": "data.google_iam_policy.admin",
-            "mode": "data",
-            "type": "google_iam_policy",
-            "name": "admin",
-            "provider_name": "registry.terraform.io/hashicorp/google",
-            "schema_version": 0,
-            "values": {
-              "audit_config": null,
-              "binding": [
-                {
-                  "condition": [],
-                  "members": [
-                    "user:jane@example.com"
-                  ],
-                  "role": "roles/compute.osLogin"
-                }
-              ],
-              "id": "40448769",
-              "policy_data": "{\"bindings\":[{\"members\":[\"user:jane@example.com\"],\"role\":\"roles/compute.osLogin\"}]}"
-            },
-            "sensitive_values": {
-              "binding": [
-                {
-                  "condition": [],
-                  "members": [
-                    false
-                  ]
-                }
-              ]
-            }
-          }
-        ]
-      }
-    }
-  },
   "configuration": {
     "root_module": {
       "resources": [
@@ -436,12 +394,7 @@
                 "google_compute_instance.default"
               ]
             },
-            "policy_data": {
-              "references": [
-                "data.google_iam_policy.admin.policy_data",
-                "data.google_iam_policy.admin"
-              ]
-            },
+            "policy_data": {},
             "project": {
               "references": [
                 "google_compute_instance.default.project",
@@ -454,28 +407,6 @@
                 "google_compute_instance.default"
               ]
             }
-          },
-          "schema_version": 0
-        },
-        {
-          "address": "data.google_iam_policy.admin",
-          "mode": "data",
-          "type": "google_iam_policy",
-          "name": "admin",
-          "provider_config_key": "google",
-          "expressions": {
-            "binding": [
-              {
-                "members": {
-                  "constant_value": [
-                    "user:jane@example.com"
-                  ]
-                },
-                "role": {
-                  "constant_value": "roles/compute.osLogin"
-                }
-              }
-            ]
           },
           "schema_version": 0
         }

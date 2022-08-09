@@ -58,19 +58,20 @@ resource "google_compute_instance" "default" {
   }
 }
 
-data "google_iam_policy" "admin" {
-  binding {
-    role = "roles/compute.osLogin"
-    members = [
-      "user:jane@example.com",
-    ]
-  }
-}
-
 resource "google_compute_instance_iam_policy" "policy" {
   project = google_compute_instance.default.project
   zone = google_compute_instance.default.zone
   instance_name = google_compute_instance.default.name
-  policy_data = data.google_iam_policy.admin.policy_data
+  policy_data = jsonencode(
+    {
+      bindings = [
+        {
+          members = [
+            "user:jane@example.com",
+          ]
+          role = "roles/compute.osLogin"
+        }
+      ]
+    }
+  )
 }
-
