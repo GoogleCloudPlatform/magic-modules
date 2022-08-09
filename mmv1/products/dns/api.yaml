@@ -501,7 +501,7 @@ objects:
     name: 'ResponsePolicy'
     kind: 'dns#responsePolicy'
     description: |
-      A Response Policy is a collection of selectors that apply to queries 
+      A Response Policy is a collection of selectors that apply to queries
       made against one or more Virtual Private Cloud networks.
     base_url: 'projects/{{project}}/responsePolicies'
     self_link: 'projects/{{project}}/responsePolicies/{{response_policy_name}}'
@@ -625,3 +625,8 @@ objects:
                 name: 'rrdatas'
                 description: |
                   As defined in RFC 1035 (section 5) and RFC 1034 (section 3.6.1)
+      - !ruby/object:Api::Type::String
+        name: 'behavior'
+        min_version: beta
+        description: Answer this query with a behavior rather than DNS data. Acceptable values are 'behaviorUnspecified', and 'bypassResponsePolicy'
+        update_verb: :PATCH
