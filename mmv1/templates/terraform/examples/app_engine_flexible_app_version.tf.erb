@@ -17,6 +17,11 @@ resource "google_project_service" "service" {
   disable_dependent_services = false
 }
 
+resource "google_service_account" "custom_service_account" {
+  account_id   = "<%= ctx[:vars]['account_id'] %>"
+  display_name = "Custom Service Account"
+}
+
 resource "google_project_iam_member" "gae_api" {
   project = google_project_service.service.project
   role    = "roles/compute.networkUser"
@@ -71,6 +76,7 @@ resource "google_app_engine_flexible_app_version" "<%= ctx[:primary_resource_id]
   }
 
   noop_on_destroy = true
+  service_account = google_service_account.custom_service_account.id
 }
 
 resource "google_storage_bucket" "bucket" {
