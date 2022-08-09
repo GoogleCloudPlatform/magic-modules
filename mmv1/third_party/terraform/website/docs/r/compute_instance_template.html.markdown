@@ -1,8 +1,6 @@
 ---
 subcategory: "Compute Engine"
-layout: "google"
 page_title: "Google: google_compute_instance_template"
-sidebar_current: "docs-google-compute-instance-template"
 description: |-
   Manages a VM instance template resource within GCE.
 ---
@@ -44,7 +42,7 @@ resource "google_compute_instance_template" "default" {
 
   // Create a new boot disk from an image
   disk {
-    source_image      = "debian-cloud/debian-9"
+    source_image      = "debian-cloud/debian-11"
     auto_delete       = true
     boot              = true
     // backup the disk every day
@@ -75,7 +73,7 @@ resource "google_compute_instance_template" "default" {
 }
 
 data "google_compute_image" "my_image" {
-  family  = "debian-9"
+  family  = "debian-11"
   project = "debian-cloud"
 }
 
@@ -108,7 +106,7 @@ data "google_compute_default_service_account" "default" {
 }
 
 data "google_compute_image" "my_image" {
-  family  = "debian-9"
+  family  = "debian-11"
   project = "debian-cloud"
 }
 
@@ -244,7 +242,7 @@ the template to use that specific image:
 
 ```tf
 data "google_compute_image" "my_image" {
-  family  = "debian-9"
+  family  = "debian-11"
   project = "debian-cloud"
 }
 
@@ -272,7 +270,7 @@ resource "google_compute_instance_template" "instance_template" {
 
   // boot disk
   disk {
-    source_image = "debian-cloud/debian-9"
+    source_image = "debian-cloud/debian-11"
   }
 }
 ```
@@ -524,10 +522,12 @@ specified, then this instance will have no external IPv6 Internet access. Struct
    [here](https://cloud.google.com/compute/docs/nodes/create-nodes).
    Structure [documented below](#nested_node_affinities).
    
-* `provisioning_model` - (Optional, Beta) Describe the type of preemptible VM. This field accepts the value `STANDARD` or `SPOT`. If the value is `STANDARD`, there will be no discount. If this   is set to `SPOT`, 
+* `provisioning_model` - (Optional) Describe the type of preemptible VM. This field accepts the value `STANDARD` or `SPOT`. If the value is `STANDARD`, there will be no discount. If this   is set to `SPOT`, 
     `preemptible` should be `true` and `auto_restart` should be
     `false`. For more info about
     `SPOT`, read [here](https://cloud.google.com/compute/docs/instances/spot)
+    
+* `instance_termination_action` - (Optional) Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot) 
     
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 

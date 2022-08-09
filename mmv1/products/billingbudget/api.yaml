@@ -286,7 +286,6 @@ objects:
               use the `specified_amount` block.
       - !ruby/object:Api::Type::Array
         name: thresholdRules
-        required: true
         description: |
           Rules that trigger alerts (notifications of thresholds being
           crossed) when spend exceeds the specified percentages of the
@@ -336,6 +335,7 @@ objects:
               https://cloud.google.com/billing/docs/how-to/budgets#notification_format.
           - !ruby/object:Api::Type::Array
             name: monitoringNotificationChannels
+            max_size: 5
             at_least_one_of:
               - all_updates_rule.0.pubsub_topic
               - all_updates_rule.0.monitoring_notification_channels

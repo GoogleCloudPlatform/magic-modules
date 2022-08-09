@@ -1,8 +1,6 @@
 ---
 subcategory: "Compute Engine"
-layout: "google"
 page_title: "Google: google_compute_instance"
-sidebar_current: "docs-google-datasource-compute-instance-x"
 description: |-
   Get a VM instance within GCE.
 ---
@@ -130,6 +128,8 @@ The following arguments are supported:
 
 * `image` - The image from which this disk was initialised.
 
+* `labels` - A set of key/value label pairs assigned to the disk.
+
 <a name="nested_scratch_disk"></a>The `scratch_disk` block supports:
 
 * `interface` - The disk interface used for attaching this disk. One of `SCSI` or `NVME`.
@@ -192,7 +192,9 @@ The following arguments are supported:
 * `automatic_restart` - Specifies if the instance should be
     restarted if it was terminated by Compute Engine (not a user).
     
-* `provisioning_model` - (Beta) Describe the type of preemptible VM.
+* `provisioning_model` - Describe the type of preemptible VM.
+
+* `instance_termination_action` - Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot) 
 
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
