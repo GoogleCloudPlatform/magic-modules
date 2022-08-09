@@ -1305,7 +1305,8 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	desiredSetting := d.Get("settings")
 	var op *sqladmin.Operation
 	var instance *sqladmin.DatabaseInstance
-	// Major version upgrade
+	// Check if the database version is being updated, because patching database version is an atomic operation and can not be
+	// performed with other fields, we first patch database version before updating the rest of the fields.
 	if v, ok := d.GetOk("database_version"); ok {
 		instance = &sqladmin.DatabaseInstance{DatabaseVersion: v.(string)}
 		err = retryTimeDuration(func() (rerr error) {
@@ -1330,6 +1331,9 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		Settings: expandSqlDatabaseInstanceSettings(desiredSetting.([]interface{})),
 	}
 	_settings := s.([]interface{})[0].(map[string]interface{})
+	// Instance.Patch operation on completion updates the settings proto version by +8. As terraform does not know this it tries
+	// to make an update call with the proto version before patch and fails. To resolve this issue we update the setting version
+	// before making the update call.
 	instance.Settings.SettingsVersion = int64(_settings["version"].(int))
 	// Collation cannot be included in the update request
 	instance.Settings.Collation = ""
