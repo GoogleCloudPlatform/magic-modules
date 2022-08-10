@@ -443,13 +443,13 @@ is set to true.`,
 				Computed:    true,
 				Description: `The connection name of the instance to be used in connection strings. For example, when connecting with Cloud SQL Proxy.`,
 			},
-                        "maintenance_version": {
-                                Type:        schema.TypeString,
-                                Computed:    true,
-                                Optional:    true,
-                                DiffSuppressFunc: maintenanceVersionDiffSuppress,
-                                Description: `Maintenance version.`,
-                        },
+			"maintenance_version": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Optional:    true,
+				DiffSuppressFunc: maintenanceVersionDiffSuppress,
+				Description: `Maintenance version.`,
+			},
                         "available_maintenance_versions": {
                                 Type:        schema.TypeList,
                                 Computed:    true,
@@ -789,7 +789,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	if err := d.Set("name", name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
-
+	
 	// SQL Instances that fail to create are expensive- see https://github.com/hashicorp/terraform-provider-google/issues/7154
 	// We can fail fast to stop instance names from getting reserved.
 	network := d.Get("settings.0.ip_configuration.0.private_network").(string)
@@ -814,6 +814,12 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	desiredSettings := expandSqlDatabaseInstanceSettings(s.([]interface{}))
 	if ok {
 		instance.Settings = desiredSettings
+	}
+
+	var maintenance_version string
+	if v, ok := d.GetOk("maintenance_version"); ok {
+		maintenance_version = v.(string)
+		instance.MaintenanceVersion = d.Get("maintenance_version").(string)
 	}
 
 	// MSSQL Server require rootPassword to be set
@@ -1286,8 +1292,8 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	}
 
 	// Update only updates the settings, so they are all we need to set.
-	instance := &sqladmin.DatabaseInstance{
-                MaintenanceVersion: maintenance_version,
+	instance := &sqladmin.DatabaseInstance {
+		MaintenanceVersion: maintenance_version,
 		Settings: expandSqlDatabaseInstanceSettings(d.Get("settings").([]interface{})),
 	}
 
@@ -1326,12 +1332,12 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func maintenanceVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
-  if old > new {
-    log.Printf("[DEBUG] Maintenance version in configuration [%s] is older than current maintenance version [%s] on instance. Suppressing diff", new, old)
-    return true
-  } else {
-    return false
-  }
+	if old > new {
+		log.Printf("[DEBUG] Maintenance version in configuration [%s] is older than current maintenance version [%s] on instance. Suppressing diff", new, old)
+		return true
+	} else {
+		return false
+	}
 }
 
 func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{}) error {
