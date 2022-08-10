@@ -18,7 +18,7 @@ resource "google_project_service" "service" {
 }
 
 resource "google_service_account" "custom_service_account" {
-  account_id   = "<%= ctx[:vars]['account_id'] %>"
+  account_id   = "my-account"
   display_name = "Custom Service Account"
 }
 
