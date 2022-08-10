@@ -816,9 +816,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		instance.Settings = desiredSettings
 	}
 
-	var maintenance_version string
-	if v, ok := d.GetOk("maintenance_version"); ok {
-		maintenance_version = v.(string)
+	if _, ok := d.GetOk("maintenance_version"); ok {
 		instance.MaintenanceVersion = d.Get("maintenance_version").(string)
 	}
 

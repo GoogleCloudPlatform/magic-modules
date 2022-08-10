@@ -334,7 +334,7 @@ func TestAccSqlDatabaseInstance_settings_deletionProtection(t *testing.T) {
 	})
 }
 
-func TestAccSqlDatabaseInstance_maintenanceVersionWithOldVersion_suppressConfig(t *testing.T) {
+func TestAccSqlDatabaseInstance_maintenanceVersion_suppressDiff(t *testing.T) {
 	t.Parallel()
 
 	databaseName := "tf-test-" + randString(t, 10)
@@ -344,24 +344,12 @@ func TestAccSqlDatabaseInstance_maintenanceVersionWithOldVersion_suppressConfig(
 		Providers:    testAccProviders,
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			{
-				Config: fmt.Sprintf(
-					testGoogleSqlDatabaseInstance_maintenanceVersionWithOldVersion, databaseName, databaseName),
-			},
-		},
-	})
-}
-
-func TestAccSqlDatabaseInstance_maintenanceVersion_upgrade(t *testing.T) {
-	t.Parallel()
-
-	databaseName := "tf-test-" + randString(t, 10)
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
+                        resource.TestStep{
+                                Config: fmt.Sprintf(
+                                        testGoogleSqlDatabaseInstance_maintenanceVersionWithOldVersion, databaseName),
+      				ExpectError: regexp.MustCompile(
+					`.*Maintenance version \(MYSQL_5_7_37.R20210508.01_03\) must not be set.*`),
+                        },
 			resource.TestStep{
 				Config: fmt.Sprintf(
 					testGoogleSqlDatabaseInstance_basic3, databaseName),
@@ -374,7 +362,7 @@ func TestAccSqlDatabaseInstance_maintenanceVersion_upgrade(t *testing.T) {
 			},
 			resource.TestStep{
 				Config: fmt.Sprintf(
-					testGoogleSqlDatabaseInstance_settings, databaseName),
+					testGoogleSqlDatabaseInstance_maintenanceVersionWithOldVersion, databaseName),
 			},
 			resource.TestStep{
 				ResourceName:      "google_sql_database_instance.instance",
@@ -1569,10 +1557,6 @@ resource "google_sql_database_instance" "instance" {
 }
 `
 var testGoogleSqlDatabaseInstance_maintenanceVersionWithOldVersion = `
-resource "google_compute_network" "maintver" {
-  name                    = "%s"
-}
-
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
   region              = "us-central1"
