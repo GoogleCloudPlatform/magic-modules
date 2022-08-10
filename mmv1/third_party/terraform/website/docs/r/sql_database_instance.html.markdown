@@ -349,6 +349,20 @@ The optional `settings.insights_config` subblock for instances declares [Query I
 
 * `record_client_address` - True if Query Insights will record client address when enabled.
 
+The optional `settings.passward_validation_policy` subblock for instances declares [Password Validation Policy](https://cloud.google.com/sql/docs/postgres/built-in-authentication) configuration. It contains:
+
+* `min_length` - Specifies the minimum number of characters that the password must have.
+
+* `complexity` - Checks if the password is a combination of lowercase, uppercase, numeric, and non-alphanumeric characters.
+
+* `reuse_interval` - Specifies the number of previous passwords that you can't reuse.
+
+* `disallow_username_substring` - Prevents the use of the username in the password.
+
+* `password_change_interval` - Specifies the minimum duration after which you can change the password.
+
+* `enable_password_policy` - Enables or disable the password validation policy.
+
 The optional `replica_configuration` block must have `master_instance_name` set
 to work, cannot be updated, and supports:
 
