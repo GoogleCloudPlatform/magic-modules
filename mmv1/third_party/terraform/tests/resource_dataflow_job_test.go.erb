@@ -51,7 +51,6 @@ func TestAccDataflowJob_basic(t *testing.T) {
 				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "status.0.state"},
 			},
 		},
 	})
@@ -84,7 +83,6 @@ func TestAccDataflowJobSkipWait_basic(t *testing.T) {
 				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "status.0.state"},
 			},
 		},
 	})
@@ -116,7 +114,6 @@ func TestAccDataflowJob_withRegion(t *testing.T) {
 				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "status.0.state"},
 			},
 		},
 	})
@@ -150,7 +147,6 @@ func TestAccDataflowJob_withServiceAccount(t *testing.T) {
 				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "status.0.state"},
 			},
 		},
 	})
@@ -184,7 +180,6 @@ func TestAccDataflowJob_withNetwork(t *testing.T) {
 				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "status.0.state"},
 			},
 		},
 	})
@@ -219,7 +214,6 @@ func TestAccDataflowJob_withSubnetwork(t *testing.T) {
 				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "status.0.state"},
 			},
 		},
 	})
@@ -254,7 +248,6 @@ func TestAccDataflowJob_withLabels(t *testing.T) {
 				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "status.0.state"},
 			},
 		},
 	})
@@ -286,7 +279,6 @@ func TestAccDataflowJob_withIpConfig(t *testing.T) {
 				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "status.0.state"},
 			},
 		},
 	})
@@ -321,7 +313,6 @@ func TestAccDataflowJob_withKmsKey(t *testing.T) {
 				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "status.0.state"},
 			},
 		},
 	})
@@ -354,7 +345,6 @@ func TestAccDataflowJobWithAdditionalExperiments(t *testing.T) {
 				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "status.0.state"},
 			},
 		},
 	})
@@ -389,7 +379,6 @@ func TestAccDataflowJob_streamUpdate(t *testing.T) {
 				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "status.0.state"},
 			},
 		},
 	})
@@ -429,7 +418,6 @@ func TestAccDataflowJob_virtualUpdate(t *testing.T) {
 				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "status.0.state"},
 			},
 		},
 	})
