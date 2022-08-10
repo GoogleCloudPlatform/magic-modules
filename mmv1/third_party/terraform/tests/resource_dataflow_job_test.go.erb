@@ -48,7 +48,6 @@ func TestAccDataflowJob_basic(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_dataflow_job.big_data",
-				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 			},
@@ -80,7 +79,6 @@ func TestAccDataflowJobSkipWait_basic(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_dataflow_job.big_data",
-				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 			},
@@ -111,7 +109,6 @@ func TestAccDataflowJob_withRegion(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_dataflow_job.big_data",
-				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 			},
@@ -144,7 +141,6 @@ func TestAccDataflowJob_withServiceAccount(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_dataflow_job.big_data",
-				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 			},
@@ -177,7 +173,6 @@ func TestAccDataflowJob_withNetwork(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_dataflow_job.big_data",
-				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 			},
@@ -211,7 +206,6 @@ func TestAccDataflowJob_withSubnetwork(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_dataflow_job.big_data",
-				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 			},
@@ -245,7 +239,6 @@ func TestAccDataflowJob_withLabels(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_dataflow_job.with_labels",
-				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 			},
@@ -276,7 +269,6 @@ func TestAccDataflowJob_withIpConfig(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_dataflow_job.big_data",
-				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 			},
@@ -310,7 +302,6 @@ func TestAccDataflowJob_withKmsKey(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_dataflow_job.big_data",
-				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 			},
@@ -342,7 +333,6 @@ func TestAccDataflowJobWithAdditionalExperiments(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_dataflow_job.with_additional_experiments",
-				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 			},
@@ -376,7 +366,6 @@ func TestAccDataflowJob_streamUpdate(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_dataflow_job.pubsub_stream",
-				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 			},
@@ -415,7 +404,6 @@ func TestAccDataflowJob_virtualUpdate(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_dataflow_job.pubsub_stream",
-				ImportStateId:           importID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 			},
