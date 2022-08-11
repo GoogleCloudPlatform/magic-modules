@@ -552,6 +552,11 @@ objects:
         description: |
           Format: projects/*/regions/*/serviceAttachments/*
         required: true
+      - !ruby/object:Api::Type::String
+        name: 'connectionState'
+        description: |
+          State of the endpoint attachment connection to the service attachment.
+        output: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Creating an environment':
