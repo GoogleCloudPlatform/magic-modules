@@ -174,10 +174,22 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   test_exit_code=0
   for failed_test in $FAILED_TESTS
   do
-      TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run=$failed_test -timeout 90m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" >> recording_test.log &
-      test_exit_code=$(($test_exit_code || $?))
+      TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run=$failed_test -timeout 90m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > ${failed_test}_recording_test.log & pids+=($!)
   done
-  wait
+
+  # Check if any process fails 
+  for pid in ${pids[*]}; do
+    if ! wait $pid; then
+        test_exit_code=1
+    fi
+  done
+
+  # Concatenate recording build logs to one file
+  # Note: build logs are different from debug logs
+  for failed_test in $FAILED_TESTS
+  do
+    cat ${failed_test}_recording_test.log >> recording_test.log
+  done
 
   # store cassettes
   gsutil -m -q cp fixtures/* gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-$pr_number/fixtures/
