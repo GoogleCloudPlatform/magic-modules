@@ -101,7 +101,6 @@ resource "google_dns_response_policy_rule" "example-response-policy-rule" {
   response_policy = google_dns_response_policy.response-policy.response_policy_name
   rule_name       = "tf-test-response-policy-rule-%s"
   dns_name        = "dns.example.com."
-
 	behavior				= "bypassResponsePolicy"
 }
 `, suffix, suffix, suffix, network, suffix)
@@ -148,8 +147,6 @@ resource "google_dns_response_policy_rule" "example-response-policy-rule" {
       rrdatas = ["192.0.2.91"]
     }
   }
-
-  behavior = "bypassResponsePolicy"
 }
 `, suffix, suffix, suffix, network, suffix)
 }

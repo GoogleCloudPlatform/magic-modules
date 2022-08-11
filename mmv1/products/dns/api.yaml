@@ -575,6 +575,8 @@ objects:
         update_verb: :PATCH
       - !ruby/object:Api::Type::NestedObject
         name: 'localData'
+        conflicts:
+          - behavior
         description: |
           Answer this query directly with DNS data. These ResourceRecordSets override any other DNS behavior for the matched name;
           in particular they override private zones, the public internet, and GCP internal DNS. No SOA nor NS types are allowed.
@@ -627,6 +629,8 @@ objects:
                   As defined in RFC 1035 (section 5) and RFC 1034 (section 3.6.1)
       - !ruby/object:Api::Type::String
         name: 'behavior'
+        conflicts:
+          - local_data
         min_version: beta
         description: Answer this query with a behavior rather than DNS data. Acceptable values are 'behaviorUnspecified', and 'bypassResponsePolicy'
         update_verb: :PATCH
