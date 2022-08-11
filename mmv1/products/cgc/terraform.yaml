@@ -477,6 +477,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "sql_mysql_instance_pvp"
         primary_resource_id: "mysql_pvp_instance_name"
         primary_resource_type: "google_sql_database_instance"
+        skip_test: true
         vars:
           mysql_pvp_instance_name: "mysql-pvp-instance-name"
           deletion_protection: "true"
