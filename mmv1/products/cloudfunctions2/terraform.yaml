@@ -23,7 +23,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "cloudfunctions2_basic"
         min_version: beta
         primary_resource_id: "function"
-        primary_resource_name: "function"
+        primary_resource_name: fmt.Sprintf(\"tf-test-function%s\", context[\"random_suffix\"])" "function"
         vars:
           bucket_name: "gcf-source"
           function: "test-function"
@@ -42,7 +42,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "cloudfunctions2_full"
         min_version: beta
         primary_resource_id: "function"
-        primary_resource_name: "function"
+        primary_resource_name: fmt.Sprintf(\"tf-test-function%s\", context[\"random_suffix\"])" "function"
         vars:
           bucket_name: "gcf-source"
           service_account: "test-sa"
