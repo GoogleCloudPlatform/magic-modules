@@ -106,7 +106,6 @@ objects:
 
           ~> Make sure that `limit` is in a format that doesn't start with `1/` or contain curly braces.
           E.g. use `/project/user` instead of `1/{project}/{user}`.
-          The format used in the provider differs from format used by the gcloud CLI (due to the feature being in beta).
     properties:
       - !ruby/object:Api::Type::String
         name: 'overrideValue'
@@ -196,7 +195,6 @@ objects:
 
           ~> Make sure that `limit` is in a format that doesn't start with `1/` or contain curly braces.
           E.g. use `/project/user` instead of `1/{project}/{user}`.
-          The format used in the provider differs from format used by the gcloud CLI (due to the feature being in beta).
     properties:
       - !ruby/object:Api::Type::String
         name: 'overrideValue'
