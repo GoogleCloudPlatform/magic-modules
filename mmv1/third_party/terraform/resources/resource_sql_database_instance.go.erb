@@ -62,7 +62,6 @@ var (
 		"settings.0.password_validation_policy.0.reuse_interval",
 		"settings.0.password_validation_policy.0.disallow_username_substring",
 		"settings.0.password_validation_policy.0.password_change_interval",
-		"settings.0.password_validation_policy.0.enable_password_policy",
 	}
 
 	maintenanceWindowKeys = []string{
@@ -514,7 +513,6 @@ is set to true.`,
 									"enable_password_policy": {
 										Type:         schema.TypeBool,
 										Required:     true,
-										AtLeastOneOf: passwordValidationPolicyKeys,
 										Description:  `Whether the password policy is enabled or not.`,
 									},
 								},
