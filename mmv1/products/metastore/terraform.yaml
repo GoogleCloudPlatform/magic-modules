@@ -78,6 +78,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "dataproc_metastore_federation_basic"
         primary_resource_id: "default"
         min_version: beta
-        primary_resource_name: 'fmt.Sprintf("fed%s", context["random_suffix"])'
+        primary_resource_name: 'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
         vars:
-          metastore_federation_name: "fed"
+          metastore_federation_name: "fed-1"
