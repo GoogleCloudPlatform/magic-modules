@@ -36,8 +36,10 @@ objects:
     name: 'Organization'
     base_url: 'organizations'
     create_url: 'organizations?parent=projects/{{project_id}}'
+    delete_url: 'organizations/{{name}}?retention={{retention}}'
     self_link: 'organizations/{{name}}'
     async: !ruby/object:Api::OpAsync
+      actions: ['create']
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
@@ -76,7 +78,6 @@ objects:
           - "MINIMUM"
         default_value: :DELETION_RETENTION_UNSPECIFIED
         required: false
-        input: true
         url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
