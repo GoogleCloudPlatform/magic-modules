@@ -164,7 +164,6 @@ func (e ComputeOperationError) Error() string {
 	buf := bytes.NewBuffer(nil)
 	for _, err := range e.Errors {
 		writeOperationError(buf, err)
-		buf.WriteString("\n")
 	}
 
 	return buf.String()
