@@ -4,7 +4,9 @@ package google
 import (
 	"bytes"
 	"context"
+<% unless version == 'ga' -%>
 	"encoding/json"
+<% end -%>
 	"errors"
 	"fmt"
 	"log"
@@ -167,33 +169,12 @@ func (e ComputeOperationError) Error() string {
 	return buf.String()
 }
 
-func writeOperationError(w io.Writer, opError *compute.OperationErrorErrors) {
-	w.Write([]byte(opError.Message + "\n"))
-
-	var lmMsg string
-	var ei *compute.ErrorInfo
+func writeOperationError(w io.StringWriter, opError *compute.OperationErrorErrors) {
+	w.WriteString(opError.Message + "\n")
 
 	for _, ed := range opError.ErrorDetails {
 		if ed.LocalizedMessage != nil && ed.LocalizedMessage.Message != "" {
-			lmMsg = ed.LocalizedMessage.Message
+			w.WriteString(ed.LocalizedMessage.Message + "\n")
 		}
-
-		if ed.ErrorInfo != nil {
-			ei = ed.ErrorInfo
-		}
-	}
-
-	if lmMsg != "" {
-		w.Write([]byte(lmMsg + "\n"))
-	}
-
-	if ei != nil {
-		if err := json.NewEncoder(w).Encode(ei); err != nil {
-			log.Printf("[WARN] JSON serialization faield for Compute OperationError ErrorInfo: %v", err)
-			return
-		}
-
-		w.Write([]byte("\n"))
 	}
 }
-
