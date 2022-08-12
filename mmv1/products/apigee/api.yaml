@@ -39,7 +39,7 @@ objects:
     delete_url: 'organizations/{{name}}?retention={{retention}}'
     self_link: 'organizations/{{name}}'
     async: !ruby/object:Api::OpAsync
-      actions: ['create']
+      actions: ['create', 'update']
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
