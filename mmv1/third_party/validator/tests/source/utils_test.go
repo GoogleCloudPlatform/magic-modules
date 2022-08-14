@@ -13,13 +13,13 @@ import (
 	"testing"
 
 	"github.com/GoogleCloudPlatform/terraform-validator/converters/google"
-	"github.com/stretchr/testify/require"
+	"github.com/r3labs/diff/v2"
 )
 
 func defaultCompareConverterOutput(t *testing.T, expected []google.Asset, actual []google.Asset, offline bool) {
 	expectedAssets := normalizeAssets(t, expected, offline)
 	actualAssets := normalizeAssets(t, actual, offline)
-	require.ElementsMatch(t, expectedAssets, actualAssets)
+	assertAssetsMatch(t, actualAssets, expectedAssets)
 }
 
 func testConvertCommand(t *testing.T, dir, tfplanName string, jsonName string, offline bool, withProject bool, compare compareConvertOutputFunc) {
@@ -230,4 +230,29 @@ func getTestPrefix() string {
 	}
 
 `, data.Provider["version"], credentials)
+}
+
+func assertAssetsMatch(t *testing.T, actualAssets, expectedAssets []google.Asset) {
+	d, err := diff.NewDiffer(diff.SliceOrdering(false))
+	if err != nil {
+		panic(err)
+	}
+	changes, _ := d.Diff(actualAssets, expectedAssets)
+	if len(changes) == 0 {
+		return
+	}
+	t.Log("[Error] Differences Summary (+++ added,  -+ updated, --- deleted):")
+	for _, i := range changes {
+		t.log("Object %v\n", i.Path)
+		switch i.Type {
+		case 'create':
+			t.Logf("+++ %v\n", i.To)
+		case 'update':
+			t.Logf("--- %v\n", i.From)
+			t.Logf("+++ %v\n", i.To)
+		case 'delete':
+			t.Log("--- %v\n", i.From)
+		}
+	}
+	t.Fail()
 }
