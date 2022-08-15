@@ -616,6 +616,36 @@ objects:
                     required: true
                     description: |-
                       This must match the Name of a Volume.
+            - !ruby/object:Api::Type::NestedObject
+              name: startupProbe
+              min_version: beta
+              description: |-
+                Startup probe of application within the container.
+                All other probes are disabled if a startup probe is provided, until it
+                succeeds. Container will not be added to service endpoints if the probe fails.
+              properties:
+                - !ruby/object:Api::Type::Integer
+                  name: initialDelaySeconds 
+                  description: |-
+                    Number of seconds after the container has started before the probe is
+                    initiated.
+                    Defaults to 0 seconds. Minimum value is 0. Maximum value for liveness probe
+                    is 3600. Maximum value for startup probe is 240.
+                - !ruby/object:Api::Type::Integer
+                  name: timeoutSeconds 
+                  description: |-
+                    Number of seconds after which the probe times out.
+                    Defaults to 1 second. Minimum value is 1. Maximum value is 3600.
+                    Must be smaller than periodSeconds.
+                - !ruby/object:Api::Type::NestedObject
+                  name: tcpSocket 
+                  description: |-
+                    TCPSocket specifies an action involving a TCP port.
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: port
+                      description: |-
+                        Port number to access on the container. Number must be in the range 1 to 65535.
 
         - !ruby/object:Api::Type::Integer
           name: containerConcurrency

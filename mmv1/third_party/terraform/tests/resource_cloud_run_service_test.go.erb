@@ -359,3 +359,84 @@ resource "google_cloud_run_service" "default" {
 }
 `, secretName1, secretName2, name, secretRef, project)
 }
+
+<% unless version == 'ga' -%>
+
+// this test checks that Terraform does not fail with a 409 recreating the same service
+func TestAccCloudRunService_probes(t *testing.T) {
+	t.Parallel()
+
+	project := getTestProjectFromEnv()
+	name := "tftest-cloudrun-" + randString(t, 6)
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithProbe(name, project, "8080"),
+			},
+			{
+				ResourceName:            "google_cloud_run_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "status.0.conditions"},
+			},
+			{
+				Config: " ", // very explicitly add a space, as the test runner fails if this is just ""
+			},
+			{
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithProbe(name, project, "8081"),
+			},
+			{
+				ResourceName:            "google_cloud_run_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "status.0.conditions"},
+			},
+		},
+	})
+}
+
+func testAccCloudRunService_cloudRunServiceUpdateWithProbe(name, project, port string) string {
+	return fmt.Sprintf(`
+resource "google_cloud_run_service" "default" {
+  name     = "%s"
+  location = "us-central1"
+
+  metadata {
+    namespace = "%s"
+    annotations = {
+      generated-by = "magic-modules"
+      "run.googleapis.com/launch-stage" = "ALPHA"
+    }
+  }
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+        ports {
+          container_port = %s
+        }
+        startup_probe {
+          initial_delay_seconds = 0
+          timeout_seconds = 10
+          tcp_socket {
+            port = %s
+          }
+        }
+      }
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      metadata.0.annotations,
+    ]
+  }
+}
+`, name, project, port, port)
+}
+
+<% end -%>

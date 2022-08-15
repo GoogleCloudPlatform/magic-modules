@@ -1,0 +1,33 @@
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
+  location = "us-central1"
+  metadata {
+    annotations = {
+      "run.googleapis.com/launch-stage" = "ALPHA"
+    }
+  }
+
+  template {
+    spec {
+      containers {
+        image = "us-docker.pkg.dev/cloudrun/container/hello"
+        startup_probe {
+          initial_delay_seconds = 0
+          timeout_seconds = 10
+          tcpSocket {
+            port = 8080
+          }
+        }
+      }
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+}

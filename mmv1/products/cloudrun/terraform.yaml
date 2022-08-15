@@ -390,6 +390,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       spec.template.spec.containers.resources.limits: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      spec.template.spec.containers.startupProbe: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       # Terraform autofills the only required field in metadata
       metadata: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
