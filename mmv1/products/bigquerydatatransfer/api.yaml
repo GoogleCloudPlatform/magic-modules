@@ -64,7 +64,6 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'displayName'
-        input: true
         required: true
         description: |
           The user specified display name for the transfer config.
