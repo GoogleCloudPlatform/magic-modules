@@ -1,5 +1,4 @@
 resource "google_project_service" "run_api" {
-  provider = google-beta
   project                    = "<%= ctx[:test_env_vars]['project'] %>"
   service                    = "run.googleapis.com"
   disable_dependent_services = true
@@ -7,29 +6,25 @@ resource "google_project_service" "run_api" {
 }
 
 resource "google_project_service" "iam_api" {
-  provider = google-beta
   project                    = "<%= ctx[:test_env_vars]['project'] %>"
   service                    = "iam.googleapis.com"
   disable_on_destroy         = false
 }
 
 resource "google_project_service" "resource_manager_api" {
-  provider = google-beta
   project                    = "<%= ctx[:test_env_vars]['project'] %>"
   service                    = "cloudresourcemanager.googleapis.com"
   disable_on_destroy         = false
 }
 
 resource "google_project_service" "scheduler_api" {
-  provider = google-beta
   project                    = "<%= ctx[:test_env_vars]['project'] %>"
   service                    = "cloudscheduler.googleapis.com"
   disable_on_destroy         = false
 }
 
-# [START cloudrun_service_scheduled]
+# [START cloudrun_service_scheduled_service]
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
   project  = "<%= ctx[:test_env_vars]['project'] %>"
   name     = "<%= ctx[:vars]['service_name'] %>"
   location = "us-central1"
@@ -52,9 +47,10 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
     google_project_service.run_api
   ]
 }
+# [END cloudrun_service_scheduled_service]
 
+# [START cloudrun_service_scheduled_sa]
 resource "google_service_account" "default" {
-  provider = google-beta
   project      = "<%= ctx[:test_env_vars]['project'] %>"
   account_id   = "<%= ctx[:vars]['sa_name'] %>"
   description  = "Cloud Scheduler service account; used to trigger scheduled Cloud Run jobs."
@@ -65,9 +61,10 @@ resource "google_service_account" "default" {
     google_project_service.iam_api
   ]
 }
+# [END cloudrun_service_scheduled_sa]
 
+# [START cloudrun_service_scheduled_job]
 resource "google_cloud_scheduler_job" "default" {
-  provider = google-beta
   name             = "<%= ctx[:vars]['scheduled_cloud_run_job'] %>"
   description      = "Invoke a Cloud Run container on a schedule."
   schedule         = "*/8 * * * *"
@@ -92,7 +89,9 @@ resource "google_cloud_scheduler_job" "default" {
     google_project_service.scheduler_api
   ]
 }
+# [END cloudrun_service_scheduled_job]
 
+# [START cloudrun_service_scheduled_iam]
 resource "google_cloud_run_service_iam_member" "default" {
   project = "<%= ctx[:test_env_vars]['project'] %>"
   location = google_cloud_run_service.default.location
@@ -100,4 +99,4 @@ resource "google_cloud_run_service_iam_member" "default" {
   role = "roles/run.invoker"
   member = "serviceAccount:${google_service_account.default.email}"
 }
-# [END cloudrun_service_scheduled]
+# [END cloudrun_service_scheduled_iam]

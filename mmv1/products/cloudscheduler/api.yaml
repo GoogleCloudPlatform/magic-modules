@@ -72,6 +72,15 @@ objects:
         required: false
         default_value: 'Etc/UTC'
       - !ruby/object:Api::Type::String
+        name: state
+        description: |
+          State of the job.
+        output: true
+      - !ruby/object:Api::Type::Boolean
+        name: paused
+        description: |
+          Sets the job to a paused state. Jobs default to being enabled when this property is not set.
+      - !ruby/object:Api::Type::String
         name: attemptDeadline
         description: |
           The deadline for job attempts. If the request handler does not respond by this deadline then the request is
