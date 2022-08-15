@@ -163,7 +163,7 @@ comment+="Failed tests: \`$FAILED_TESTS_COUNT\` ${NEWLINE}${NEWLINE}"
 
 if [[ -n $FAILED_TESTS_PATTERN ]]; then
   comment+="#### Action taken ${NEWLINE}"
-  comment+="<details> <summary>Triggering VCR tests in RECORDING mode for the tests that failed during VCR. Click here to see the failed tests</summary> $FAILED_TESTS_PATTERN </details>"
+  comment+="<details> <summary>Triggering VCR tests in RECORDING mode for the tests that failed during VCR. Click here to see the failed tests</summary><blockquote>$FAILED_TESTS_PATTERN </blockquote></details>"
   add_comment "${comment}"
   # RECORDING mode
   export VCR_MODE=RECORDING
