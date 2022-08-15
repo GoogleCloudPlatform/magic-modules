@@ -56,14 +56,6 @@ var (
 		"settings.0.ip_configuration.0.allocated_ip_range",
 	}
 
-	passwordValidationPolicyKeys = []string{
-		"settings.0.password_validation_policy.0.min_length",
-		"settings.0.password_validation_policy.0.complexity",
-		"settings.0.password_validation_policy.0.reuse_interval",
-		"settings.0.password_validation_policy.0.disallow_username_substring",
-		"settings.0.password_validation_policy.0.password_change_interval",
-	}
-
 	maintenanceWindowKeys = []string{
 		"settings.0.maintenance_window.0.day",
 		"settings.0.maintenance_window.0.hour",
@@ -481,33 +473,28 @@ is set to true.`,
 										Type:         schema.TypeInt,
 										Optional:     true,
 										ValidateFunc: validation.IntBetween(0, 2147483647),
-										AtLeastOneOf: passwordValidationPolicyKeys,
 										Description:  `Minimum number of characters allowed.`,
 									},
 									"complexity": {
 										Type:         schema.TypeString,
 										Optional:     true,
 										ValidateFunc: validation.StringInSlice([]string{"COMPLEXITY_DEFAULT", "COMPLEXITY_UNSPECIFIED"}, false),
-										AtLeastOneOf: passwordValidationPolicyKeys,
 										Description:  `Password complexity.`,
 									},
 									"reuse_interval": {
 										Type:         schema.TypeInt,
 										Optional:     true,
 										ValidateFunc: validation.IntBetween(0, 2147483647),
-										AtLeastOneOf: passwordValidationPolicyKeys,
 										Description:  `Number of previous passwords that cannot be reused.`,
 									},
 									"disallow_username_substring": {
 										Type:         schema.TypeBool,
 										Optional:     true,
-										AtLeastOneOf: passwordValidationPolicyKeys,
 										Description:  `Disallow username as a part of the password.`,
 									},
 									"password_change_interval": {
 										Type:         schema.TypeString,
 										Optional:     true,
-										AtLeastOneOf: passwordValidationPolicyKeys,
 										Description:  `Minimum interval after which the password can be changed. This flag is only supported for PostgresSQL.`,
 									},
 									"enable_password_policy": {
