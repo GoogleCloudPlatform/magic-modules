@@ -30,6 +30,7 @@ func TestAccBigtableGCPolicy_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccBigtableGCPolicyExists(
 						t, "google_bigtable_gc_policy.policy"),
+						resource.TestCheckResourceAttr("google_bigtable_gc_policy.policy", "gc_rules", ""),
 				),
 			},
 		},

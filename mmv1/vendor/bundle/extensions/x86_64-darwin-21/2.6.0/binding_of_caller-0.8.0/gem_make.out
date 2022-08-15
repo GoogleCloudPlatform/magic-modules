@@ -1,0 +1,16 @@
+current directory: /Users/phhoang/Dev/GCP/magic-modules/mmv1/vendor/bundle/gems/binding_of_caller-0.8.0/ext/binding_of_caller
+/Users/phhoang/.rvm/rubies/ruby-2.6.0/bin/ruby -I /Users/phhoang/.rvm/rubies/ruby-2.6.0/lib/ruby/site_ruby/2.6.0 -r ./siteconf20220815-11735-1nfriwu.rb extconf.rb
+
+current directory: /Users/phhoang/Dev/GCP/magic-modules/mmv1/vendor/bundle/gems/binding_of_caller-0.8.0/ext/binding_of_caller
+make "DESTDIR=" clean
+make: *** No rule to make target `clean'.  Stop.
+
+current directory: /Users/phhoang/Dev/GCP/magic-modules/mmv1/vendor/bundle/gems/binding_of_caller-0.8.0/ext/binding_of_caller
+make "DESTDIR="
+echo "Nada."
+Nada.
+
+current directory: /Users/phhoang/Dev/GCP/magic-modules/mmv1/vendor/bundle/gems/binding_of_caller-0.8.0/ext/binding_of_caller
+make "DESTDIR=" install
+echo "Nada."
+Nada.

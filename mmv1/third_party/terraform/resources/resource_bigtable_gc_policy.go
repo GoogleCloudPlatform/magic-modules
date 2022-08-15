@@ -226,6 +226,7 @@ func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) er
 
 func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
@@ -256,6 +257,12 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	for _, fi := range ti.FamilyInfos {
 		if fi.Name == name {
 			d.SetId(fi.GCPolicy)
+			log.Printf("[TRACE] Found GC Policy with family info: %v", fi)
+			if gcRuleJsonString, err := json.Marshal(gcPolicyToGCRuleString(fi.FullGCPolicy)); err != nil {
+				return fmt.Errorf("error reading GCPolicy to json: %s", err)
+			} else {
+				d.Set("gc_rules", gcRuleJsonString)
+			}
 			break
 		}
 	}
@@ -265,6 +272,40 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	return nil
+}
+
+func gcPolicyToGCRuleString(gc bigtable.GCPolicy) map[string]interface{} {
+	result := make(map[string]interface{})
+	switch bigtable.GetPolicyType(gc) {
+	case bigtable.PolicyMaxAge:
+		age := gc.(bigtable.MaxAgeGCPolicy).GetDurationString()
+		result["max_age"] = age
+	case bigtable.PolicyMaxVersion:
+		version := gc.(bigtable.MaxVersionsGCPolicy)
+		result["max_version"] = version
+	case bigtable.PolicyUnion:
+		result["mode"] = "union"
+		rules := []interface{}{}
+		for _, c := range gc.(bigtable.UnionGCPolicy).Children {
+			rules = append(rules, gcPolicyToGCRuleString(c))
+		}
+		result["rules"] = rules
+	case bigtable.PolicyIntersection:
+		result["mode"] = "intersection"
+		rules := []interface{}{}
+		for _, c := range gc.(bigtable.IntersectionGCPolicy).Children {
+			rules = append(rules, gcPolicyToGCRuleString(c))
+		}
+		result["rules"] = rules
+	default:
+		break
+	}
+
+	if err := validateNestedPolicy(result, true); err != nil {
+		log.Fatalf("Invalid GCPolicy %v parsed from %v: %s", result, gc, err)
+	}
+
+	return result
 }
 
 func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) error {
