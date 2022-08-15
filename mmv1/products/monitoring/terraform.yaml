@@ -261,6 +261,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project_id: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
+        name: "uptime_check_config_status_code"
+        primary_resource_id: "status_code"
+        vars:
+          display_name: "http-uptime-check"
+        test_env_vars:
+          project_id: :PROJECT_NAME        
+      - !ruby/object:Provider::Terraform::Examples
         name: "uptime_check_config_https"
         primary_resource_id: "https"
         vars:
