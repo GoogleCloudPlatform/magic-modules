@@ -10,7 +10,13 @@ resource "google_monitoring_uptime_check_config" "<%= ctx[:primary_resource_id] 
     body = "Zm9vJTI1M0RiYXI="
 
     accepted_response_status_codes {
-      status_value = 200
+      status_class = "STATUS_CLASS_2XX"
+    }
+    accepted_response_status_codes {
+            status_value = 301
+    }
+    accepted_response_status_codes {
+            status_value = 302
     }
   }
 
