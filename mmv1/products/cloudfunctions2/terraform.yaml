@@ -22,16 +22,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudfunctions2_basic"
         primary_resource_id: "function"
-        primary_resource_name: fmt.Sprintf(\"tf-test-function%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-function-v2%s\", context[\"random_suffix\"])"
         vars:
+          function: "function-v2"
           bucket_name: "gcf-source"
-          function: "test-function"
           zip_path: "function-source.zip"
         test_env_vars:
           project: :PROJECT_NAME
         test_vars_overrides:
           zip_path: "\"./test-fixtures/cloudfunctions2/function-source.zip\""
-          primary_resource_id: "\"function\""
           location: "\"us-central1\""
         # ignore these fields during import step
         ignore_read_extra:
@@ -40,12 +39,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudfunctions2_full"
         primary_resource_id: "function"
-        primary_resource_name: fmt.Sprintf(\"tf-test-function%s\", context[\"random_suffix\"])"
         vars:
           bucket_name: "gcf-source"
-          service_account: "test-sa"
+          service_account: "sa"
           topic: "functions2-topic"
-          function: "test-function"
+          function: "function"
           zip_path: "function-source.zip"
         test_env_vars:
           project: :PROJECT_NAME
@@ -63,8 +61,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           bucket_name_source: "gcf-source-bucket"
           bucket_name_trigger: "gcf-trigger-bucket"
-          service_account: "test-sa"
-          function_name: "test-function"
+          service_account: "sa"
+          function_name: "function"
           zip_path: "function-source.zip"
         test_env_vars:
           project: :PROJECT_NAME
@@ -117,4 +115,3 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       parent_resource_attribute: 'cloud_function'
       method_name_separator: ':'
       import_format: ["projects/{{project}}/locations/{{location}}/functions/{{cloud_function}}", "{{cloud_function}}"]
-      example_config_body: 'templates/terraform/iam/example_config_body/cloudfunctions2_function.tf.erb'
