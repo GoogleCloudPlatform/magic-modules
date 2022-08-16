@@ -247,6 +247,7 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	defer c.Close()
 
 	name := d.Get("table").(string)
+	columnFamily := d.Get("column_family").(string)
 	ti, err := c.TableInfo(ctx, name)
 	if err != nil {
 		log.Printf("[WARN] Removing %s because it's gone", name)
@@ -254,15 +255,16 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 		return nil
 	}
 
+	log.Printf("[TRACE] Table info: %v, family info length: %v", ti, len(ti.FamilyInfos))
+
 	for _, fi := range ti.FamilyInfos {
-		if fi.Name == name {
+		if fi.Name == columnFamily {
 			d.SetId(fi.GCPolicy)
-			log.Printf("[TRACE] Found GC Policy with family info: %v", fi)
-			if gcRuleJsonString, err := json.Marshal(gcPolicyToGCRuleString(fi.FullGCPolicy)); err != nil {
+			gcRuleJsonString, err := json.Marshal(gcPolicyToGCRuleString(fi.FullGCPolicy))
+			if err != nil {
 				return fmt.Errorf("error reading GCPolicy to json: %s", err)
-			} else {
-				d.Set("gc_rules", gcRuleJsonString)
 			}
+			d.Set("gc_rules", gcRuleJsonString)
 			break
 		}
 	}
