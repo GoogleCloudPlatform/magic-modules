@@ -21,6 +21,7 @@ resource "google_compute_subnetwork" "default" {
 resource "google_project_service" "vpc" {
   provider = google-beta
   service = "vpcaccess.googleapis.com"
+  disable_on_destroy = false
 }
 
 resource "google_vpc_access_connector" "default" {
@@ -74,7 +75,7 @@ resource "google_compute_router_nat" "default" {
 }
 # [END cloudrun_service_static_nat]
 
-# [START cloudrun_service_service]
+# [START cloudrun_service_static_service]
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   name     = "<%= ctx[:vars]['cloudrun_static_ip_service'] %>"
@@ -98,4 +99,4 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 }
-# [END cloudrun_service_service]
+# [END cloudrun_service_static_service]

@@ -18,6 +18,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "gkehub_membership_basic"
+        primary_resource_name: "fmt.Sprintf(\"basic%s\", context[\"random_suffix\"])"
         primary_resource_id: "membership"
         vars:
           name: "basic"
