@@ -427,7 +427,7 @@ instance.
 support accessing the [first address in the list in a terraform output](https://github.com/hashicorp/terraform-provider-google/issues/912)
 when the resource is configured with a `count`.
 
-* `available_maintenance_versions`  - The list of all maintenance versions applicable on the instance. This attribute can not be updated.
+* `available_maintenance_versions`  - The list of all maintenance versions applicable on the instance.
 
 * `public_ip_address` - The first public (`PRIMARY`) IPv4 address assigned. This is
 a workaround for an [issue fixed in Terraform 0.12](https://github.com/hashicorp/terraform/issues/17048)
