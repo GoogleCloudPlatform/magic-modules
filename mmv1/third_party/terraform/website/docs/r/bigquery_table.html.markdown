@@ -122,6 +122,9 @@ The following arguments are supported:
     field type, we currently cannot suppress the recurring diff this causes.
     As a workaround, we recommend using the schema as returned by the API.
 
+    ~>**NOTE:** To set external table schema, please use
+    `external_data_configuration.schema` [documented below](#nested_external_data_configuration)
+
 * `time_partitioning` - (Optional) If specified, configures time-based
     partitioning for this table. Structure is [documented below](#nested_time_partitioning).
 
