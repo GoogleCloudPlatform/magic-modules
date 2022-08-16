@@ -70,6 +70,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       hiveMetastoreConfig.configOverrides: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         diff_suppress_func: "dataprocMetastoreServiceOverrideSuppress"
+      hiveMetastoreConfig.endpointProtocol: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
+      releaseChannel: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
   Federation: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     import_format: ["projects/{{project}}/locations/{{location}}/federations/{{federation_id}}"]
