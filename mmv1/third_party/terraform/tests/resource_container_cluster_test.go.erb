@@ -1017,9 +1017,9 @@ func TestAccContainerCluster_withNodeConfigReservationAffinity(t *testing.T) {
 				Config: testAccContainerCluster_withNodeConfigReservationAffinity(clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_config",
-						"reservation_affinity.#", "1"),
+						"node_config.0.reservation_affinity.#", "1"),
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_config",
-						"reservation_affinity.0.consume_reservation_type", "ANY_RESERVATION"),
+						"node_config.0.reservation_affinity.0.consume_reservation_type", "ANY_RESERVATION"),
 				),
 			},
 			{
@@ -1045,15 +1045,15 @@ func TestAccContainerCluster_withNodeConfigReservationAffinitySpecific(t *testin
 				Config: testAccContainerCluster_withNodeConfigReservationAffinitySpecific(clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_config",
-						"reservation_affinity.#", "1"),
+						"node_config.0.reservation_affinity.#", "1"),
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_config",
-						"reservation_affinity.0.consume_reservation_type", "SPECIFIC_RESERVATION"),
+						"node_config.0.reservation_affinity.0.consume_reservation_type", "SPECIFIC_RESERVATION"),
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_config",
-						"reservation_affinity.0.key", "compute.googleapis.com/reservation-name"),
+						"node_config.0.reservation_affinity.0.key", "compute.googleapis.com/reservation-name"),
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_config",
-						"reservation_affinity.0.values.#", "1"),
+						"node_config.0.reservation_affinity.0.values.#", "1"),
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_config",
-						"reservation_affinity.0.values.0", "cud-reservation"),
+						"node_config.0.reservation_affinity.0.values.0", "cud-reservation"),
 				),
 			},
 			{
