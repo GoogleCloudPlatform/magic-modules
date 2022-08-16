@@ -374,7 +374,7 @@ func TestAccCloudRunService_probes(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudRunService_cloudRunServiceUpdateWithProbe(name, project, "8080"),
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithTCPAndHTTPProbe(name, project, "0", "5", "10", "1", "8080", `"/"`),
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
@@ -386,7 +386,7 @@ func TestAccCloudRunService_probes(t *testing.T) {
 				Config: " ", // very explicitly add a space, as the test runner fails if this is just ""
 			},
 			{
-				Config: testAccCloudRunService_cloudRunServiceUpdateWithProbe(name, project, "8081"),
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithTCPAndHTTPProbe(name, project, "5", "1", "3", "2", "8081", `""`),
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
@@ -398,7 +398,7 @@ func TestAccCloudRunService_probes(t *testing.T) {
 	})
 }
 
-func testAccCloudRunService_cloudRunServiceUpdateWithProbe(name, project, port string) string {
+func testAccCloudRunService_cloudRunServiceUpdateWithTCPAndHTTPProbe(name, project, delay, timeout, peroid, failure_threshold, port, path string) string {
 	return fmt.Sprintf(`
 resource "google_cloud_run_service" "default" {
   name     = "%s"
@@ -408,7 +408,7 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "ALPHA"
+      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -420,10 +420,21 @@ resource "google_cloud_run_service" "default" {
           container_port = %s
         }
         startup_probe {
-          initial_delay_seconds = 0
-          timeout_seconds = 10
+          initial_delay_seconds = %s
+          timeout_seconds = %s
           tcp_socket {
             port = %s
+          }
+        }
+        liveness_probe {
+          period_seconds = %s
+          failure_threshold = %s
+          http_get {
+            path = %s
+            http_headers {
+              name = "User-Agent"
+              value = "magic-modules"
+            }
           }
         }
       }
@@ -436,7 +447,7 @@ resource "google_cloud_run_service" "default" {
     ]
   }
 }
-`, name, project, port, port)
+`, name, project, port, delay, timeout, port, peroid, failure_threshold, path)
 }
 
 <% end -%>
