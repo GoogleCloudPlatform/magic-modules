@@ -74,7 +74,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           instance_virtual_display: "instance-virtual-display"
     ### OS Login
       - !ruby/object:Provider::Terraform::Examples
-        name: "os-login"
+        name: "os_login"
         primary_resource_type: "google_compute_instance"
         primary_resource_id: "oslogin_instance"
         vars:
