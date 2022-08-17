@@ -160,7 +160,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'table'
             description: |
-              The name of the table to which to write data, of the form {projectId}.{datasetId}.{tableId}
+              The name of the table to which to write data, of the form {projectId}:{datasetId}.{tableId}
             required: true
           - !ruby/object:Api::Type::Boolean
             name: 'useTopicSchema'
