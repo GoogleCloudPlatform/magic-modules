@@ -112,7 +112,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           topic_name: "example-topic"
           subscription_name: "example-subscription"
       - !ruby/object:Provider::Terraform::Examples
-        name: "pubsub_subscription_bq"
+        name: "pubsub_subscription_push_bq"
         primary_resource_id: "example"
         vars:
           topic_name: "example-topic"
