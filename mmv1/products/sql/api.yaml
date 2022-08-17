@@ -69,22 +69,6 @@ objects:
           - :SECOND_GEN
           - :EXTERNAL
       - !ruby/object:Api::Type::String
-        name: 'maintenanceVersion'
-        output: true
-        description: |
-          The current software version on the instance. This attribute can not
-          be set during creation. Refer to available_maintenance_versions
-          attribute to see what maintenance_versions are available for upgrade.
-          When this attribute gets updated, it will cause an instance restart.
-
-      - !ruby/object:Api::Type::Array
-        name: 'availableMaintenanceVersions'
-        output: true
-        description: |
-          The list of all maintenance versions applicable on the instance. This
-          attribute can not be updated.
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::String
         name: 'connectionName'
         description: |
           Connection name of the Cloud SQL instance used in connection strings.
