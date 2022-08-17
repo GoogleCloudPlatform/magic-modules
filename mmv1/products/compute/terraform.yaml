@@ -1365,13 +1365,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           instance_name: "my-instance"
         primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\", context[\"random_suffix\"])"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "os-login"
-        primary_resource_type: "google_compute_instance"
-        primary_resource_id: "oslogin_instance"
-        vars:
-          oslogin_instance_name: "oslogin-instance-name"
-        skip_docs: true
   InstanceGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   InstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride
