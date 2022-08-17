@@ -37,7 +37,7 @@ resource "google_compute_instance" "full_list_default_1" {
     disk_encryption_key_raw = "test-disk_encryption_key_raw"
     initialize_params {
       # TODO: panic in google.resolveImageImageExists if it is not a global image
-      image = "projects/debian-cloud/global/images/debian-9"
+      image = "projects/debian-cloud/global/images/debian-11"
       size  = 42
       type  = "pd-standard"
     }

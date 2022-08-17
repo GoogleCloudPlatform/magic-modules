@@ -1,8 +1,6 @@
 ---
 subcategory: "Cloud Key Management Service"
-layout: "google"
 page_title: "Google: google_kms_secret_ciphertext"
-sidebar_current: "docs-google-kms-secret-ciphertext"
 description: |-
   Encrypts secret data with Google Cloud KMS and provides access to the ciphertext
 ---
@@ -54,7 +52,7 @@ resource "google_compute_instance" "instance" {
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-9"
+      image = "debian-cloud/debian-11"
     }
   }
 

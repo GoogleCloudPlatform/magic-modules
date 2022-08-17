@@ -1,8 +1,6 @@
 ---
 subcategory: "Cloud Storage"
-layout: "google"
 page_title: "Google: google_storage_bucket"
-sidebar_current: "docs-google-storage-bucket-x"
 description: |-
   Creates a new bucket in Google Cloud Storage.
 ---
@@ -124,6 +122,10 @@ The following arguments are supported:
 * `with_state` - (Optional) Match to live and/or archived objects. Unversioned buckets have only live objects. Supported values include: `"LIVE"`, `"ARCHIVED"`, `"ANY"`.
 
 * `matches_storage_class` - (Optional) [Storage Class](https://cloud.google.com/storage/docs/storage-classes) of objects to satisfy this condition. Supported values include: `STANDARD`, `MULTI_REGIONAL`, `REGIONAL`, `NEARLINE`, `COLDLINE`, `ARCHIVE`, `DURABLE_REDUCED_AVAILABILITY`.
+
+* `matches_prefix` - (Optional) One or more matching name prefixes to satisfy this condition.
+
+* `matches_suffix` - (Optional) One or more matching name suffixes to satisfy this condition.
 
 * `num_newer_versions` - (Optional) Relevant only for versioned objects. The number of newer versions of an object to satisfy this condition.
 

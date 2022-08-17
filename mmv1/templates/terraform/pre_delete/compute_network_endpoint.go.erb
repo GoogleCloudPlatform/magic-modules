@@ -11,7 +11,9 @@ portProp, err := expandNestedComputeNetworkEndpointPort(d.Get("port"), d, config
 if err != nil {
 	return err
 }
-toDelete["port"] = portProp
+if portProp != 0 {
+	toDelete["port"] = portProp
+}
 
 ipAddressProp, err := expandNestedComputeNetworkEndpointIpAddress(d.Get("ip_address"), d, config)
 if err != nil {

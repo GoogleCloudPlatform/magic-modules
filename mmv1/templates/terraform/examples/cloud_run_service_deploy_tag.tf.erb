@@ -1,4 +1,4 @@
-# [START cloud_run_service_deploy_tag]
+# [START cloudrun_service_deploy_tag]
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
   location = "us-central1"
@@ -28,4 +28,4 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
     tag = "tag-name"
   }
 }
-# [END cloud_run_service_deploy_tag]
+# [END cloudrun_service_deploy_tag]

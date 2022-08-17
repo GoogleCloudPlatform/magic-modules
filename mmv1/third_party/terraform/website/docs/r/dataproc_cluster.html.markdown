@@ -1,8 +1,6 @@
 ---
 subcategory: "Dataproc"
-layout: "google"
 page_title: "Google: google_dataproc_cluster"
-sidebar_current: "docs-google-dataproc-cluster"
 description: |-
   Manages a Cloud Dataproc cluster resource.
 ---
@@ -368,10 +366,10 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 * `encryption_config` (Optional) The Customer managed encryption keys settings for the cluster.
    Structure [defined below](#nested_encryption_config).
 
-* `lifecycle_config` (Optional, Beta) The settings for auto deletion cluster schedule.
+* `lifecycle_config` (Optional) The settings for auto deletion cluster schedule.
    Structure [defined below](#nested_lifecycle_config).
 
-* `endpoint_config` (Optional, Beta) The config settings for port access on the cluster.
+* `endpoint_config` (Optional) The config settings for port access on the cluster.
    Structure [defined below](#nested_endpoint_config).
 
 * `metastore_config` (Optional) The config setting for metastore service with the cluster.

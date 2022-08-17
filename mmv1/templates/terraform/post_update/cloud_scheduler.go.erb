@@ -1,0 +1,25 @@
+if d.HasChange("paused") {
+    endpoint := "resume" // Default to enabled
+    logSuccessMsg := "Job state has been set to ENABLED"
+    if paused, pausedOk := d.GetOk("paused"); pausedOk {
+        if paused.(bool) {
+            endpoint = "pause"
+            logSuccessMsg = "Job state has been set to PAUSED"
+        }
+    }
+
+    linkTmpl := fmt.Sprintf("{{CloudSchedulerBasePath}}projects/{{project}}/locations/{{region}}/jobs/{{name}}:%s", endpoint)
+    url, err = replaceVars(d, config, linkTmpl)
+    if err != nil {
+        return err
+    }
+
+    emptyReqBody := make(map[string]interface{})
+
+    _, err = sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, emptyReqBody, d.Timeout(schema.TimeoutUpdate))
+    if err != nil {
+        return fmt.Errorf("Error setting Cloud Scheduler Job status: %s", err)
+    }
+
+    log.Printf("[DEBUG] Finished updating Job %q status: %s", d.Id(), logSuccessMsg)
+}

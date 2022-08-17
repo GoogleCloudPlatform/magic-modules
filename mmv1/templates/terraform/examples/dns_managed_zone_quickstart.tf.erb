@@ -1,14 +1,13 @@
 # [START dns_domain_tutorial]
 # to setup a web-server
 resource "google_compute_instance" "default" {
-  provider     = google-beta
   name         = "<%= ctx[:vars]['dns_compute_instance'] %>"
   machine_type = "g1-small"
   zone         = "us-central1-b"
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-9"
+      image = "debian-cloud/debian-11"
     }
   }
 
@@ -27,7 +26,6 @@ resource "google_compute_instance" "default" {
 
 # to allow http traffic
 resource "google_compute_firewall" "default" {
-  provider = google-beta
   name     = "<%= ctx[:vars]['allow_http_traffic'] %>"
   network  = "default"
   allow {
@@ -39,7 +37,6 @@ resource "google_compute_firewall" "default" {
 
 # to create a DNS zone
 resource "google_dns_managed_zone" "<%= ctx[:primary_resource_id] %>" {
-  provider      = google-beta
   name          = "<%= ctx[:vars]['example_zone_googlecloudexample'] %>"
   dns_name      = "googlecloudexample.com."
   description   = "Example DNS zone"
@@ -48,7 +45,6 @@ resource "google_dns_managed_zone" "<%= ctx[:primary_resource_id] %>" {
 
 # to register web-server's ip address in DNS
 resource "google_dns_record_set" "default" {
-  provider     = google-beta
   name         = google_dns_managed_zone.default.dns_name
   managed_zone = google_dns_managed_zone.default.name
   type         = "A"
