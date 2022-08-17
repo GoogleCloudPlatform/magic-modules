@@ -1,3 +1,5 @@
+# [START compute_terraform-oslogin-example]
+
 # [START compute_enable_oslogin_api]
 resource "google_project_service" "project" {
   service = "oslogin.googleapis.com"
@@ -37,7 +39,6 @@ resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
 
 # [START compute_add_iam_binding_for_oslogin]
 data "google_project" "project" {
-  provider = google-beta
 }
 resource "google_project_iam_member" "os-login-admin-users" {
   project  = data.google_project.project.project_id
@@ -45,3 +46,5 @@ resource "google_project_iam_member" "os-login-admin-users" {
   member   = "serviceAccount:service-${data.google_project.project.number}@compute-system.iam.gserviceaccount.com"
 }
 # [END compute_add_iam_binding_for_oslogin]
+
+# [END compute_terraform-oslogin-example]
