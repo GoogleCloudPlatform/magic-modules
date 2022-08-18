@@ -2,7 +2,8 @@
 
 # [START compute_enable_oslogin_api]
 resource "google_project_service" "project" {
-  service = "oslogin.googleapis.com"
+  service            = "oslogin.googleapis.com"
+  disable_on_destroy = false
 }
 # [END compute_enable_oslogin_api]
 
