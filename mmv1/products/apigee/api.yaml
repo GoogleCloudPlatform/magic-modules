@@ -239,6 +239,7 @@ objects:
     create_url: '{{org_id}}/environments'
     self_link: '{{org_id}}/environments/{{name}}'
     async: !ruby/object:Api::OpAsync
+      actions: ['create', 'delete']
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
