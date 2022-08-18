@@ -354,8 +354,7 @@ func generateBigtableGCPolicy(d *schema.ResourceData) (bigtable.GCPolicy, error)
 func getGCPolicyFromJSON(inputPolicy map[string]interface{}, isTopLevel bool) (bigtable.GCPolicy, error) {
 	policy := []bigtable.GCPolicy{}
 
-	// TODO: change from true to isTopLevel.
-	if err := validateNestedPolicy(inputPolicy, true); err != nil {
+	if err := validateNestedPolicy(inputPolicy, isTopLevel); err != nil {
 		return nil, err
 	}
 
