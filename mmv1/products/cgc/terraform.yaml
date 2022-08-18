@@ -72,7 +72,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "instance_virtual_display"
         vars:
           instance_virtual_display: "instance-virtual-display"
- 
+    ### OS Login
+      - !ruby/object:Provider::Terraform::Examples
+        name: "os_login"
+        primary_resource_type: "google_compute_instance"
+        primary_resource_id: "oslogin_instance"
+        vars:
+          oslogin_instance_name: "oslogin-instance-name"
+        skip_docs: true
+
     # Eventarc
     ### Eventarc Workflows quickstart
       - !ruby/object:Provider::Terraform::Examples
