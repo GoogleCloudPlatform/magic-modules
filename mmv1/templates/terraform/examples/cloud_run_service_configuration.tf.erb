@@ -5,6 +5,7 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['config'] %>"
   location = "us-central1"
 
+  # [START cloudrun_service_configuration_containers]
   template {
     spec {
       containers {
@@ -17,14 +18,18 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
         # Container "entry-point" args
         # https://cloud.google.com/run/docs/configuring/containers#configure-entrypoint
         args = []
+        # [END cloudrun_service_configuration_containers]
 
+        # [START cloudrun_service_configuration_http2]
         # Enable HTTP/2
         # https://cloud.google.com/run/docs/configuring/http2
         ports {
           name           = "h2c"
           container_port = 8080
         }
+        # [END cloudrun_service_configuration_http2]
 
+        # [START cloudrun_service_configuration_env_var]
         # Environment variables
         # https://cloud.google.com/run/docs/configuring/environment-variables
         env {
@@ -35,7 +40,10 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
           name  = "baz"
           value = "quux"
         }
+        # [END cloudrun_service_configuration_env_var]
 
+        # [START cloudrun_service_configuration_limit_memory]
+        # [START cloudrun_service_configuration_limit_cpu]
         resources {
           limits = {
             # CPU usage limit
@@ -47,18 +55,34 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
             memory = "512Mi"
           }
         }
-      }
+        # [END cloudrun_service_configuration_limit_memory]
+        # [END cloudrun_service_configuration_limit_cpu]
 
+        # [START cloudrun_service_configuration_containers]
+      }
+      # [END cloudrun_service_configuration_containers]
+
+      # [START cloudrun_service_configuration_timeout]
       # Timeout
       # https://cloud.google.com/run/docs/configuring/request-timeout
       timeout_seconds = 300
+      # [END cloudrun_service_configuration_timeout]
 
+      # [START cloudrun_service_configuration_concurrency]
       # Maximum concurrent requests
       # https://cloud.google.com/run/docs/configuring/concurrency
       container_concurrency = 80
-    }
+      # [END cloudrun_service_configuration_concurrency]
 
+      # [START cloudrun_service_configuration_containers]
+    }
+    # [END cloudrun_service_configuration_containers]
+
+    # [START cloudrun_service_configuration_max_instances]
+    # [START cloudrun_service_configuration_min_instances]
+    # [START cloudrun_service_configuration_labels]
     metadata {
+      # [END cloudrun_service_configuration_labels]
       annotations = {
 
         # Max instances
@@ -73,15 +97,23 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
         # https://cloud.google.com/run/docs/configuring/cpu-allocation
         "run.googleapis.com/cpu-throttling" = false
       }
+      # [END cloudrun_service_configuration_max_instances]
+      # [END cloudrun_service_configuration_min_instances]
 
+      # [START cloudrun_service_configuration_labels]
       # Labels
       # https://cloud.google.com/run/docs/configuring/labels
       labels = {
         foo : "bar"
         baz : "quux"
       }
+      # [START cloudrun_service_configuration_max_instances]
+      # [START cloudrun_service_configuration_min_instances]
     }
+    # [END cloudrun_service_configuration_labels]
   }
+  # [END cloudrun_service_configuration_max_instances]
+  # [END cloudrun_service_configuration_min_instances]
 
   traffic {
     percent         = 100
