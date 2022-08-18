@@ -107,12 +107,10 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
         foo : "bar"
         baz : "quux"
       }
-      # [END cloudrun_service_configuration_max_instances]
-      # [END cloudrun_service_configuration_min_instances]
+      # [START cloudrun_service_configuration_max_instances]
+      # [START cloudrun_service_configuration_min_instances]
     }
     # [END cloudrun_service_configuration_labels]
-  # [START cloudrun_service_configuration_max_instances]
-  # [START cloudrun_service_configuration_min_instances]
   }
   # [END cloudrun_service_configuration_max_instances]
   # [END cloudrun_service_configuration_min_instances]
