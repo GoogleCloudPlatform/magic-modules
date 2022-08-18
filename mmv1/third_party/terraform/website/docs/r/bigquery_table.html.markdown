@@ -115,6 +115,7 @@ The following arguments are supported:
 * `labels` - (Optional) A mapping of labels to assign to the resource.
 
 * `schema` - (Optional) A JSON schema for the table.
+
     ~>**NOTE:** Because this field expects a JSON string, any changes to the
     string will create a diff, even if the JSON itself hasn't changed.
     If the API returns a different value for the same schema, e.g. it
