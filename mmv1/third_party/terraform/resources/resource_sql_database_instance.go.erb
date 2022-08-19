@@ -871,6 +871,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	if ok {
 		instance.Settings = desiredSettings
 	}
+	instance.Settings.DeletionProtectionEnabled = d.Get("deletion_protection").(bool)
 
 	instance.RootPassword = d.Get("root_password").(string)
 
@@ -1393,6 +1394,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	instance.Settings.SettingsVersion = int64(_settings["version"].(int))
 	// Collation cannot be included in the update request
 	instance.Settings.Collation = ""
+	instance.Settings.DeletionProtectionEnabled = d.Get("deletion_protection").(bool)
 
 	// Lock on the master_instance_name just in case updating any replica
 	// settings causes operations on the master.
