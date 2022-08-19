@@ -111,9 +111,9 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
       # [START cloudrun_service_configuration_min_instances]
     }
     # [END cloudrun_service_configuration_labels]
+    # [END cloudrun_service_configuration_max_instances]
+    # [END cloudrun_service_configuration_min_instances]
   }
-  # [END cloudrun_service_configuration_max_instances]
-  # [END cloudrun_service_configuration_min_instances]
 
   traffic {
     percent         = 100
