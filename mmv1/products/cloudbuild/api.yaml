@@ -27,8 +27,8 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'Trigger'
-    base_url: projects/{{project}}/triggers
-    self_link: projects/{{project}}/triggers/{{id}}
+    base_url: projects/{{project}}/locations/{{location}}/triggers
+    self_link: projects/{{project}}/locations/{{location}}/triggers/{{id}}
     update_verb: :PATCH
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
@@ -36,6 +36,16 @@ objects:
       api: 'https://cloud.google.com/cloud-build/docs/api/reference/rest/v1/projects.triggers'
     description: |
       Configuration for an automated build in response to source repository changes.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        description: |
+          The [Cloud Build location](https://cloud.google.com/build/docs/locations) for the trigger.
+          If not specified, "global" is used.
+        required: false
+        default_value: global
+        input: true
+        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'id'

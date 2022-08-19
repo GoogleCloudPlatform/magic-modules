@@ -19,9 +19,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       note: |
         You can retrieve the email of the Cloud Build Service Account used in jobs by using the `google_project_service_identity` resource.
     # import by default only works with old-style self links ending in a name
-    import_format: ["projects/{{project}}/triggers/{{trigger_id}}"]
-    id_format: 'projects/{{project}}/triggers/{{trigger_id}}'
-    self_link: 'projects/{{project}}/triggers/{{trigger_id}}'
+    import_format:
+      - "projects/{{project}}/triggers/{{trigger_id}}"
+      - "projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}"
+    # For global triggers, the id format is changed to projects/{{project}}/triggers/{{trigger_id}} via code overrides.
+    id_format: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
+    self_link: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudbuild_trigger_filename"
@@ -47,6 +50,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "manual-trigger"
 
     properties:
+      location: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: emptyOrDefaultStringSuppress("global")
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'trigger_id'
       name: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -85,8 +90,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         custom_flatten: templates/terraform/custom_flatten/cloudbuild_approval_required.go.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_read: templates/terraform/pre_read/cloudbuild_trigger.go.erb
+      pre_create: templates/terraform/pre_create/cloudbuild_trigger.go.erb
       post_create: templates/terraform/post_create/cloudbuild_trigger_id.go.erb
       pre_update: templates/terraform/pre_update/cloudbuild_trigger.go.erb
+      pre_delete: templates/terraform/pre_delete/cloudbuild_trigger.go.erb
+      post_import: templates/terraform/post_import/cloudbuild_trigger.go.erb
       constants: templates/terraform/constants/cloudbuild_trigger.erb
       resource_definition: templates/terraform/resource_definition/cloudbuild_trigger.go.erb
 # This is for copying files over
