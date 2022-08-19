@@ -406,7 +406,7 @@ func testAccBigtableGCPolicyExists(t *testing.T, n string) resource.TestCheckFun
 		}
 
 		for _, i := range table.FamilyInfos {
-			if i.Name == rs.Primary.Attributes["column_family"] {
+			if i.Name == rs.Primary.Attributes["column_family"] && rs.Primary.ID != "" {
 				return nil
 			}
 		}
