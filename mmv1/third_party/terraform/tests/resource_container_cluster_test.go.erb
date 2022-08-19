@@ -1053,7 +1053,7 @@ func TestAccContainerCluster_withNodeConfigReservationAffinitySpecific(t *testin
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_config",
 						"node_config.0.reservation_affinity.0.values.#", "1"),
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_config",
-						"node_config.0.reservation_affinity.0.values.0", "cud-reservation"),
+						"node_config.0.reservation_affinity.0.values.0", "gce-reservation"),
 				),
 			},
 			{
