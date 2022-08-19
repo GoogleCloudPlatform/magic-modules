@@ -3918,6 +3918,16 @@ resource "google_container_cluster" "with_node_config" {
 func testAccContainerCluster_withNodeConfigReservationAffinitySpecific(clusterName string) string {
 	return fmt.Sprintf(`
 
+resource "google_project_service" "compute" {
+  service = "compute.googleapis.com"
+}
+
+resource "google_project_service" "container" {
+  service = "container.googleapis.com"
+  depends_on = [google_project_service.compute]
+}
+
+
 resource "google_compute_reservation" "gce_reservation" {
   name = "gce-reservation"
   zone = "us-central1-f"
@@ -3928,6 +3938,9 @@ resource "google_compute_reservation" "gce_reservation" {
       machine_type     = "n1-standard-1"
     }
   }
+
+  specific_reservation_required = true
+  depends_on = [google_project_service.compute]
 }
 
 resource "google_container_cluster" "with_node_config" {
@@ -3954,7 +3967,6 @@ resource "google_container_cluster" "with_node_config" {
       foo = "bar"
     }
     tags             = ["foo", "bar"]
-    preemptible      = true
 
     // Updatable fields
     image_type = "COS_CONTAINERD"
@@ -3967,6 +3979,7 @@ resource "google_container_cluster" "with_node_config" {
       ]
     }
   }
+  depends_on = [google_project_service.container]
 }
 `, clusterName)
 }
