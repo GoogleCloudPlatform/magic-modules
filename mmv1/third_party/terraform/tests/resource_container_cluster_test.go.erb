@@ -3917,13 +3917,26 @@ resource "google_container_cluster" "with_node_config" {
 
 func testAccContainerCluster_withNodeConfigReservationAffinitySpecific(clusterName string) string {
 	return fmt.Sprintf(`
+
+resource "google_compute_reservation" "gce_reservation" {
+  name = "gce-reservation"
+  zone = "us-central1-f"
+
+  specific_reservation {
+    count = 1
+    instance_properties {
+      machine_type     = "n1-standard-1"
+    }
+  }
+}
+
 resource "google_container_cluster" "with_node_config" {
   name               = "%s"
   location           = "us-central1-f"
   initial_node_count = 1
 
   node_config {
-    machine_type    = "e2-medium"
+    machine_type    = "n1-standard-1"
     disk_size_gb    = 15
     disk_type       = "pd-ssd"
     oauth_scopes = [
@@ -3950,7 +3963,7 @@ resource "google_container_cluster" "with_node_config" {
       consume_reservation_type = "SPECIFIC_RESERVATION"
       key = "compute.googleapis.com/reservation-name"
       values = [
-        "cud-reservation"
+        google_compute_reservation.gce_reservation.name
       ]
     }
   }
