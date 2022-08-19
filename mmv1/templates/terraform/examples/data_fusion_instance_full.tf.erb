@@ -15,6 +15,10 @@ resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
   }
   version = "6.3.0"
   dataproc_service_account = data.google_app_engine_default_service_account.default.email
+  # Mark for testing to avoid service networking connection usage that is not cleaned up
+  options = {
+    prober_test_run = "true"
+  }
 }
 
 data "google_app_engine_default_service_account" "default" {
