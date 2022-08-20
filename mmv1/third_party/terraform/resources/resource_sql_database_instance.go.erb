@@ -505,6 +505,13 @@ is set to true.`,
 								},
 							},
 						},
+
+						"deletion_protection_enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     true,
+							Description: `Configuration to protect against accidental instance deletion.`,
+						},
 					},
 				},
 				Description: `The settings to use for the database. The configuration is detailed below.`,
@@ -871,7 +878,6 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	if ok {
 		instance.Settings = desiredSettings
 	}
-	instance.Settings.DeletionProtectionEnabled = d.Get("deletion_protection").(bool)
 
 	instance.RootPassword = d.Get("root_password").(string)
 
@@ -1023,25 +1029,26 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}) *sqladmin.Setti
 	_settings := configured[0].(map[string]interface{})
 	settings := &sqladmin.Settings{
 		// Version is unset in Create but is set during update
-		SettingsVersion:          int64(_settings["version"].(int)),
-		Tier:                     _settings["tier"].(string),
-		ForceSendFields:          []string{"StorageAutoResize"},
-		ActivationPolicy:         _settings["activation_policy"].(string),
-		ActiveDirectoryConfig:    expandActiveDirectoryConfig(_settings["active_directory_config"].([]interface{})),
-		SqlServerAuditConfig:     expandSqlServerAuditConfig(_settings["sql_server_audit_config"].([]interface{})),
-		AvailabilityType:         _settings["availability_type"].(string),
-		Collation:                _settings["collation"].(string),
-		DataDiskSizeGb:           int64(_settings["disk_size"].(int)),
-		DataDiskType:             _settings["disk_type"].(string),
-		PricingPlan:              _settings["pricing_plan"].(string),
-		UserLabels:               convertStringMap(_settings["user_labels"].(map[string]interface{})),
-		BackupConfiguration:      expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
-		DatabaseFlags:            expandDatabaseFlags(_settings["database_flags"].([]interface{})),
-		IpConfiguration:          expandIpConfiguration(_settings["ip_configuration"].([]interface{})),
-		LocationPreference:       expandLocationPreference(_settings["location_preference"].([]interface{})),
-		MaintenanceWindow:        expandMaintenanceWindow(_settings["maintenance_window"].([]interface{})),
-		InsightsConfig:           expandInsightsConfig(_settings["insights_config"].([]interface{})),
-		PasswordValidationPolicy: expandPasswordValidationPolicy(_settings["password_validation_policy"].([]interface{})),
+		SettingsVersion:           int64(_settings["version"].(int)),
+		ActivationPolicy:          _settings["activation_policy"].(string),
+		ActiveDirectoryConfig:     expandActiveDirectoryConfig(_settings["active_directory_config"].([]interface{})),
+		AvailabilityType:          _settings["availability_type"].(string),
+		BackupConfiguration:       expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
+		Collation:                 _settings["collation"].(string),
+		DataDiskSizeGb:            int64(_settings["disk_size"].(int)),
+		DataDiskType:              _settings["disk_type"].(string),
+		DatabaseFlags:             expandDatabaseFlags(_settings["database_flags"].([]interface{})),
+		DeletionProtectionEnabled: _settings["deletion_protection_enabled"].(bool),
+		ForceSendFields:           []string{"StorageAutoResize"},
+		InsightsConfig:            expandInsightsConfig(_settings["insights_config"].([]interface{})),
+		IpConfiguration:           expandIpConfiguration(_settings["ip_configuration"].([]interface{})),
+		LocationPreference:        expandLocationPreference(_settings["location_preference"].([]interface{})),
+		MaintenanceWindow:         expandMaintenanceWindow(_settings["maintenance_window"].([]interface{})),
+		PasswordValidationPolicy:  expandPasswordValidationPolicy(_settings["password_validation_policy"].([]interface{})),
+		PricingPlan:               _settings["pricing_plan"].(string),
+		SqlServerAuditConfig:      expandSqlServerAuditConfig(_settings["sql_server_audit_config"].([]interface{})),
+		Tier:                      _settings["tier"].(string),
+		UserLabels:                convertStringMap(_settings["user_labels"].(map[string]interface{})),
 	}
 
 	resize := _settings["disk_autoresize"].(bool)
@@ -1394,7 +1401,6 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	instance.Settings.SettingsVersion = int64(_settings["version"].(int))
 	// Collation cannot be included in the update request
 	instance.Settings.Collation = ""
-	instance.Settings.DeletionProtectionEnabled = d.Get("deletion_protection").(bool)
 
 	// Lock on the master_instance_name just in case updating any replica
 	// settings causes operations on the master.
@@ -1497,16 +1503,17 @@ func resourceSqlDatabaseInstanceImport(d *schema.ResourceData, meta interface{})
 
 func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 	data := map[string]interface{}{
-		"version":                    settings.SettingsVersion,
-		"tier":                       settings.Tier,
-		"activation_policy":          settings.ActivationPolicy,
-		"availability_type":          settings.AvailabilityType,
-		"collation":                  settings.Collation,
-		"disk_type":                  settings.DataDiskType,
-		"disk_size":                  settings.DataDiskSizeGb,
-		"pricing_plan":               settings.PricingPlan,
-		"user_labels":                settings.UserLabels,
-		"password_validation_policy": settings.PasswordValidationPolicy,
+		"version":                     settings.SettingsVersion,
+		"tier":                        settings.Tier,
+		"activation_policy":           settings.ActivationPolicy,
+		"availability_type":           settings.AvailabilityType,
+		"collation":                   settings.Collation,
+		"deletion_protection_enabled": settings.DeletionProtectionEnabled,
+		"disk_type":                   settings.DataDiskType,
+		"disk_size":                   settings.DataDiskSizeGb,
+		"pricing_plan":                settings.PricingPlan,
+		"user_labels":                 settings.UserLabels,
+		"password_validation_policy":  settings.PasswordValidationPolicy,
 	}
 
 	if settings.ActiveDirectoryConfig != nil {
