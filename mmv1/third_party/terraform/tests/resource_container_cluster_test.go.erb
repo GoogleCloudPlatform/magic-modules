@@ -1034,6 +1034,7 @@ func TestAccContainerCluster_withNodeConfigReservationAffinity(t *testing.T) {
 func TestAccContainerCluster_withNodeConfigReservationAffinitySpecific(t *testing.T) {
 	t.Parallel()
 
+    reservationName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
@@ -1042,7 +1043,7 @@ func TestAccContainerCluster_withNodeConfigReservationAffinitySpecific(t *testin
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withNodeConfigReservationAffinitySpecific(clusterName),
+				Config: testAccContainerCluster_withNodeConfigReservationAffinitySpecific(reservationName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_config",
 						"node_config.0.reservation_affinity.#", "1"),
@@ -3915,7 +3916,7 @@ resource "google_container_cluster" "with_node_config" {
 `, clusterName)
 }
 
-func testAccContainerCluster_withNodeConfigReservationAffinitySpecific(clusterName string) string {
+func testAccContainerCluster_withNodeConfigReservationAffinitySpecific(reservation, clusterName string) string {
 	return fmt.Sprintf(`
 
 resource "google_project_service" "compute" {
@@ -3931,7 +3932,7 @@ resource "google_project_service" "container" {
 
 
 resource "google_compute_reservation" "gce_reservation" {
-  name = "gce-reservation"
+  name = "%s"
   zone = "us-central1-f"
 
   specific_reservation {
@@ -3983,7 +3984,7 @@ resource "google_container_cluster" "with_node_config" {
   }
   depends_on = [google_project_service.container]
 }
-`, clusterName)
+`, reservation, clusterName)
 }
 
 func testAccContainerCluster_withWorkloadMetadataConfig(clusterName string) string {
