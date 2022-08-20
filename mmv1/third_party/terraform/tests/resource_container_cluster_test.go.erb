@@ -1034,7 +1034,7 @@ func TestAccContainerCluster_withNodeConfigReservationAffinity(t *testing.T) {
 func TestAccContainerCluster_withNodeConfigReservationAffinitySpecific(t *testing.T) {
 	t.Parallel()
 
-    reservationName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+    reservationName := fmt.Sprintf("tf-test-reservation-%s", randString(t, 10))
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
@@ -1054,7 +1054,7 @@ func TestAccContainerCluster_withNodeConfigReservationAffinitySpecific(t *testin
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_config",
 						"node_config.0.reservation_affinity.0.values.#", "1"),
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_config",
-						"node_config.0.reservation_affinity.0.values.0", "gce-reservation"),
+						"node_config.0.reservation_affinity.0.values.0", reservationName),
 				),
 			},
 			{
