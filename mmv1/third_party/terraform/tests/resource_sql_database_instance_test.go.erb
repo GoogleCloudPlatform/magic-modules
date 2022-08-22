@@ -383,7 +383,7 @@ func TestAccSqlDatabaseInstance_maintenanceVersion(t *testing.T) {
 					testGoogleSqlDatabaseInstance_basic3, databaseName),
 			},
 			resource.TestStep{
-			ResourceName:      "google_sql_database_instance.instance",
+				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
