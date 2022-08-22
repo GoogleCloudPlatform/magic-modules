@@ -319,7 +319,7 @@ func isVcrEnabled() bool {
 // Can be called when VCR is not enabled, and it will behave as normal
 func vcrTest(t *testing.T, c resource.TestCase) {
 	if isVcrEnabled() {
-		providers := getTestAccProviders(t.Name())
+		providers := getTestAccProviders(t.Name(), c)
 		c.Providers = providers
 		defer closeRecorder(t)
 	} else if isReleaseDiffEnabled() {
