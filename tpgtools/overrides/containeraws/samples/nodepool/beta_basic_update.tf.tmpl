@@ -1,9 +1,11 @@
 data "google_container_aws_versions" "versions" {
+  provider = google-beta
   project = "{{project}}"
   location = "us-west1"
 }
 
 resource "google_container_aws_cluster" "primary" {
+  provider = google-beta
   authorization {
     admin_users {
       username = "{{test_service_account}}"
@@ -83,6 +85,7 @@ resource "google_container_aws_cluster" "primary" {
 }
 
 resource "google_container_aws_node_pool" "primary" {
+  provider = google-beta
   autoscaling {
     max_node_count = 5
     min_node_count = 1
@@ -96,7 +99,7 @@ resource "google_container_aws_node_pool" "primary" {
     }
 
     iam_instance_profile = "{{byo_multicloud_prefix}}-1p-dev-nodepool"
-    instance_type        = "t3.medium"
+    instance_type        = "t3.large"
 
     labels = {
       label-one = "value-one"

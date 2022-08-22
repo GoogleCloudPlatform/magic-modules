@@ -32,6 +32,11 @@ objects:
     update_mask: true
     description: |
       A named resource to which messages are sent by publishers.
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      parent_resource_attribute: 'name'
+      fetch_iam_policy_verb: :POST
+      import_format: ["projects/{{project}}/locations/{{location}}/queues/{{name}}", "{{name}}"]      
     parameters:
       - !ruby/object:Api::Type::Enum
         name: 'status'

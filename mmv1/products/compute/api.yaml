@@ -612,6 +612,11 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      min_version: beta
+      exclude: false
+      parent_resource_attribute: 'name'
+      import_format: ["projects/{{project}}/global/backendBuckets/{{name}}", "{{name}}"]    
     properties:
       - !ruby/object:Api::Type::String
         name: 'bucketName'
@@ -706,6 +711,22 @@ objects:
           send_empty_value: true
           description: |
             Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
+        - !ruby/object:Api::Type::Boolean        
+          name: 'requestCoalescing'
+          send_empty_value: true
+          description: |
+            If true then Cloud CDN will combine multiple concurrent cache fill requests into a small number of requests to the origin.
+        - !ruby/object:Api::Type::Array
+          name: 'bypassCacheOnRequestHeaders'
+          description: |
+            Bypass the cache when the specified request headers are matched - e.g. Pragma or Authorization headers. Up to 5 headers can be specified. The cache is bypassed for all cdnPolicy.cacheMode settings.
+          max_size: 5  
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'headerName'
+                description: |
+                  The header field name to match on when bypassing cache. Values are case-insensitive.
       - !ruby/object:Api::Type::String
         name: 'edgeSecurityPolicy'
         description: |
@@ -872,6 +893,9 @@ objects:
                 For global HTTP(S) or TCP/SSL load balancing, the default is
                 UTILIZATION. Valid values are UTILIZATION, RATE (for HTTP(S))
                 and CONNECTION (for TCP/SSL).
+
+                See the [Backend Services Overview](https://cloud.google.com/load-balancing/docs/backend-service#balancing-mode)
+                for an explanation of load balancing modes.
             - !ruby/object:Api::Type::Double
               name: 'capacityScaler'
               send_empty_value: true
@@ -1878,6 +1902,9 @@ objects:
                 - :CONNECTION
               description: |
                 Specifies the balancing mode for this backend.
+
+                See the [Backend Services Overview](https://cloud.google.com/load-balancing/docs/backend-service#balancing-mode)
+                for an explanation of load balancing modes.
             - !ruby/object:Api::Type::Double
               name: 'capacityScaler'
               description: |
@@ -3495,14 +3522,14 @@ objects:
 
           To create a disk with one of the public operating system images,
           specify the image by its family name. For example, specify
-          family/debian-9 to use the latest Debian 9 image:
+          family/debian-11 to use the latest Debian 11 image:
 
-          projects/debian-cloud/global/images/family/debian-9
+          projects/debian-cloud/global/images/family/debian-11
 
           Alternatively, use a specific version of a public operating system
           image:
 
-          projects/debian-cloud/global/images/debian-9-stretch-vYYYYMMDD
+          projects/debian-cloud/global/images/debian-11-bullseye-vYYYYMMDD
 
           To create a disk with a private image that you created, specify the
           image name in the following format:
@@ -3759,6 +3786,8 @@ objects:
           connection does not need to match both properties for the firewall to
           apply. Only IPv4 is supported. For INGRESS traffic, one of `source_ranges`,
           `source_tags` or `source_service_accounts` is required.
+        conflicts:
+          - destination_ranges
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'sourceServiceAccounts'
@@ -3794,6 +3823,10 @@ objects:
           to match both properties for the firewall to apply. For INGRESS traffic,
           one of `source_ranges`, `source_tags` or `source_service_accounts` is required.
         item_type: Api::Type::String
+        conflicts:
+          - source_service_accounts
+          - destination_ranges
+          - target_service_accounts
       - !ruby/object:Api::Type::Array
         name: 'targetServiceAccounts'
         description: |
@@ -3816,6 +3849,9 @@ objects:
           If no targetTags are specified, the firewall rule applies to all
           instances on the specified network.
         item_type: Api::Type::String
+        conflicts:
+          - source_service_accounts
+          - target_service_accounts
   - !ruby/object:Api::Resource
     name: 'ForwardingRule'
     kind: 'compute#forwardingRule'
@@ -3873,6 +3909,15 @@ objects:
             mirrored even if a PacketMirroring rule applies to them. This
             can only be set to true for load balancers that have their
             loadBalancingScheme set to INTERNAL.
+      - !ruby/object:Api::Type::String
+        name: 'pscConnectionId'
+        description: 'The PSC connection id of the PSC Forwarding Rule.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'pscConnectionStatus'
+        description: 'The PSC connection status of the PSC Forwarding Rule. Possible
+            values: STATUS_UNSPECIFIED, PENDING, ACCEPTED, REJECTED, CLOSED'
+        output: true
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
@@ -8182,7 +8227,6 @@ objects:
         name: 'port'
         description: |
           Port number of network endpoint.
-        required: true
       - !ruby/object:Api::Type::String
         name: 'ipAddress'
         description: |
@@ -8273,7 +8317,10 @@ objects:
           that 1) have the following load balancing schemes: EXTERNAL, EXTERNAL_MANAGED,
           INTERNAL_MANAGED, and INTERNAL_SELF_MANAGED and 2) support the RATE or
           CONNECTION balancing modes.
+
+          Possible values include: GCE_VM_IP, GCE_VM_IP_PORT, and NON_GCP_PRIVATE_IP_PORT.
         values:
+          - :GCE_VM_IP
           - :GCE_VM_IP_PORT
           - :NON_GCP_PRIVATE_IP_PORT
         default_value: :GCE_VM_IP_PORT
@@ -8514,6 +8561,21 @@ objects:
         description: |
           The target service url used to set up private service connection to
           a Google API or a PSC Producer Service Attachment.
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'network'
+        resource: 'Network'
+        imports: 'selfLink'
+        description: |
+          This field is only used for PSC.
+          The URL of the network to which all network endpoints in the NEG belong. Uses
+          "default" project network if unspecified.
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'subnetwork'
+        resource: 'Subnetwork'
+        imports: 'selfLink'
+        description: |
+          This field is only used for PSC.
+          Optional URL of the subnetwork to which all network endpoints in the NEG belong.
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudRun'
         conflicts:
@@ -9311,13 +9373,9 @@ objects:
             api_name: 'IPProtocols'
             description: |
                 Protocols that apply as a filter on mirrored traffic.
-            item_type: !ruby/object:Api::Type::Enum
-              name: ipProtocols
-              description: Possible IP protocols to filter on.
-              values:
-                - tcp
-                - udp
-                - icmp
+            item_type: Api::Type::String
+            name: ipProtocols
+            description: Possible IP protocols including tcp, udp, icmp and esp
           - !ruby/object:Api::Type::Array
             name: cidrRanges
             description: |
@@ -10322,7 +10380,6 @@ objects:
           - !ruby/object:Api::Type::String
             # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
             name: 'kmsKeyName'
-            min_version: beta
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
         input: true
@@ -13471,15 +13528,21 @@ objects:
         name: minPortsPerVm
         description: |
           Minimum number of ports allocated to a VM from this NAT.
+      - !ruby/object:Api::Type::Integer
+        name: maxPortsPerVm
+        description: |
+          Maximum number of ports allocated to a VM from this NAT.
+          This field can only be set when enableDynamicPortAllocation is enabled.
       - !ruby/object:Api::Type::Boolean
         name: enableDynamicPortAllocation
         description: |
           Enable Dynamic Port Allocation.
-          If minPorts is set, minPortsPerVm must be set to a power of two greater than or equal to 32. 
+          If minPortsPerVm is set, minPortsPerVm must be set to a power of two greater than or equal to 32.
           If minPortsPerVm is not set, a minimum of 32 ports will be allocated to a VM from this NAT config.
+          If maxPortsPerVm is set, maxPortsPerVm must be set to a power of two greater than minPortsPerVm.
+          If maxPortsPerVm is not set, a maximum of 65536 ports will be allocated to a VM from this NAT config.
 
           Mutually exclusive with enableEndpointIndependentMapping.
-        default_value: false
       - !ruby/object:Api::Type::Integer
         name: udpIdleTimeoutSec
         description: |
@@ -13855,7 +13918,9 @@ objects:
         'Official Documentation': 'https://cloud.google.com/compute/docs/disks/create-snapshots'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/snapshots'
     iam_policy: !ruby/object:Api::Resource::IamPolicy
-      exclude: true
+      exclude: false
+      parent_resource_attribute: 'name'
+      import_format: ["projects/{{project}}/global/snapshots/{{name}}", "{{name}}"]      
     description: |
       Represents a Persistent Disk Snapshot resource.
 
@@ -15305,7 +15370,9 @@ objects:
           A list of SslCertificate resources that are used to authenticate
           connections between users and the load balancer. At least one SSL
           certificate must be specified.
-        required: true
+        exactly_one_of:
+          - sslCertificates
+          - certificateMap
         update_verb: :POST
         update_url:
           'projects/{{project}}/targetHttpsProxies/{{name}}/setSslCertificates'
@@ -15314,6 +15381,18 @@ objects:
           resource: 'SslCertificate'
           imports: 'selfLink'
           description: 'The SSL certificates used by this TargetHttpsProxy'
+      - !ruby/object:Api::Type::String
+        name: 'certificateMap'
+        description: |
+          A reference to the CertificateMap resource uri that identifies a certificate map 
+          associated with the given target proxy. This field can only be set for global target proxies.
+          Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificateMaps/{resourceName}`.
+        exactly_one_of:
+          - sslCertificates
+          - certificateMap
+        update_verb: :POST
+        update_url:
+          'projects/{{project}}/global/targetHttpsProxies/{{name}}/setCertificateMap'
       - !ruby/object:Api::Type::ResourceRef
         name: 'sslPolicy'
         resource: 'SslPolicy'

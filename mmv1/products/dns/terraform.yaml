@@ -24,9 +24,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           dns_compute_instance: "dns-compute-instance"
           allow_http_traffic: "allow-http-traffic"
           example_zone_googlecloudexample: "example-zone-googlecloudexample"
-        min_version: beta
         ignore_read_extra:
           - "force_destroy"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dns_record_set_basic"
+        primary_resource_id: "parent-zone"
+        skip_docs: true
+        vars:
+          sample_zone: "sample-zone"
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_basic"
         primary_resource_id: "example-zone"

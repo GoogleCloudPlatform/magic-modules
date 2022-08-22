@@ -283,6 +283,10 @@ objects:
         name: 'threadsafe'
         description: |
           Whether multiple requests can be dispatched to this version at once.
+      - !ruby/object:Api::Type::Boolean
+        name: 'appEngineApis'
+        description: |
+          Allows App Engine second generation runtimes to access the legacy bundled services.
       - !ruby/object:Api::Type::String
         name: 'runtimeApiVersion'
         description: |

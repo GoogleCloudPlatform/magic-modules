@@ -92,15 +92,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           {{description}}
 
           ~> **Note:** For `SUBORDINATE` Certificate Authorities, they need to
-          be manually activated (via Cloud Console of `gcloud`) before they can
-          issue certificates.
+          be activated before they can issue certificates.
       config.x509Config: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.erb'
         custom_expand: 'templates/terraform/custom_expand/privateca_certificate_509_config.go.erb'
+      subordinateConfig.certificateAuthority: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareResourceNames'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/privateca_certificate_authority.go.erb'
       resource_definition: 'templates/terraform/resource_definition/privateca_certificate_authority.go.erb'
       decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
+      pre_create: templates/terraform/pre_create/privateca_certificate_authority.go.erb
       post_create: templates/terraform/post_create/privateca_certificate_authority.go.erb
       pre_update: templates/terraform/pre_update/privateca_certificate_authority.go.erb
       pre_delete: templates/terraform/pre_delete/privateca_authority_disable.go.erb
@@ -197,6 +199,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "privateca_quickstart"
         primary_resource_id: "default"
         skip_test: true
+        skip_docs: true
         vars:
           my_ca_pool: "my-ca-pool"
           my_certificate: "my-certificate"

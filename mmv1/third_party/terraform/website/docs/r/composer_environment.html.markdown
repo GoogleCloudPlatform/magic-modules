@@ -1,8 +1,6 @@
 ---
 subcategory: "Cloud Composer"
-layout: "google"
 page_title: "Google: google_composer_environment"
-sidebar_current: "docs-google-composer-environment"
 description: |-
   An environment for running orchestration tasks.
 ---
@@ -306,7 +304,7 @@ The following arguments are supported:
   The configuration settings for the Airflow web server App Engine instance.
 
 * `encryption_config` -
-  (Optional, Cloud Composer 1 only)
+  (Optional)
   The encryption options for the Cloud Composer environment and its
   dependencies.
 
@@ -397,11 +395,10 @@ The following arguments are supported:
 
 * `enable_ip_masq_agent` -
   (Optional)
-  Cloud Composer 1 only)
   Deploys 'ip-masq-agent' daemon set in the GKE cluster and defines
   nonMasqueradeCIDRs equals to pod IP range so IP masquerading is used for
   all destination addresses, except between pods traffic.
-  See the [documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-masquerade-agent).
+  See the [documentation](https://cloud.google.com/composer/docs/enable-ip-masquerade-agent).
 
 <a name="nested_software_config"></a>The `software_config` block supports:
 
@@ -658,6 +655,11 @@ The `config` block supports:
   The configuration used for the Private IP Cloud Composer environment. Structure is documented
   below.
 
+* `encryption_config` -
+  (Optional)
+  The encryption options for the Cloud Composer environment and its
+  dependencies.
+
 * `maintenance_window` -
   (Optional)
   The configuration settings for Cloud Composer maintenance windows.
@@ -714,6 +716,13 @@ The `node_config` block supports:
   Structure is documented below.
   Cannot be updated.
 
+* `enable_ip_masq_agent` -
+  (Optional)
+  IP Masq Agent translates Pod IP addresses to node IP addresses, so that 
+  destinations and services targeted from Airflow DAGs and tasks only receive 
+  packets from node IP addresses instead of Pod IP addresses
+  See the [documentation](https://cloud.google.com/composer/docs/enable-ip-masquerade-agent).
+
 The `software_config` block supports:
 
 * `airflow_config_overrides` -
@@ -769,10 +778,11 @@ The `software_config` block supports:
   version number or 'latest'.
   The Apache Airflow portion of the image version is a full semantic version that points to one of the
   supported Apache Airflow versions, or an alias in the form of only major or major.minor versions specified.
-  **Important**: You can only upgrade in-place between minor or patch versions of Cloud Composer or Apache
-  Airflow. For example, you can upgrade your environment from `composer-1.16.x` to `composer-1.17.x`, or from
-  `airflow-2.1.x` to `airflow-2.2.x`. You cannot upgrade between major Cloud Composer or Apache Airflow
-  versions (from `1.x.x` to `2.x.x`). To do so, create a new environment.
+  **Important**: In-place upgrade is only available using `google-beta` provider. It's because updating the
+  `image_version` is still in beta. Using `google-beta` provider, you can upgrade in-place between minor or
+  patch versions of Cloud Composer or Apache Airflow. For example, you can upgrade your environment from
+  `composer-1.16.x` to `composer-1.17.x`, or from `airflow-2.1.x` to `airflow-2.2.x`. You cannot upgrade between
+  major Cloud Composer or Apache Airflow versions (from `1.x.x` to `2.x.x`). To do so, create a new environment.
 
 
 
@@ -798,11 +808,11 @@ See [documentation](https://cloud.google.com/composer/docs/how-to/managing/confi
   The CIDR block from which IP range for Cloud Composer Network in tenant project will be reserved. Needs to be disjoint from private_cluster_config.master_ipv4_cidr_block and cloud_sql_ipv4_cidr_block.
 
 * `enable_privately_used_public_ips` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  (Optional)
   When enabled, IPs from public (non-RFC1918) ranges can be used for
   `ip_allocation_policy.cluster_ipv4_cidr_block` and `ip_allocation_policy.service_ipv4_cidr_block`.
 
-* `cloud_composer_connection_subnetwork"` -
+* `cloud_composer_connection_subnetwork` -
   (Optional)
   When specified, the environment will use Private Service Connect instead of VPC peerings to connect
   to Cloud SQL in the Tenant Project, and the PSC endpoint in the Customer Project will use an IP
@@ -842,7 +852,15 @@ The `ip_allocation_policy` block supports:
   (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to pick a specific range to use.
   Specify either `services_secondary_range_name` or `services_ipv4_cidr_block` but not both.
 
-The `maintenance_window` block supports:
+<a name="nested_encryption_config_comp_2"></a>The `encryption_config` block supports:
+
+* `kms_key_name` -
+  (Required)
+  Customer-managed Encryption Key available through Google's Key Management Service. It must
+  be the fully qualified resource name,
+  i.e. projects/project-id/locations/location/keyRings/keyring/cryptoKeys/key. Cannot be updated.
+
+<a name="nested_maintenance_window_comp_2"></a>The `maintenance_window` block supports:
 
 * `start_time` -
   (Required)

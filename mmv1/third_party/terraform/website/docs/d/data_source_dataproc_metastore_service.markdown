@@ -1,8 +1,6 @@
 ---
 subcategory: "Dataproc"
-layout: "google"
 page_title: "Google: google_dataproc_metastore_service"
-sidebar_current: "docs-google-datasource-dataproc-metastore-service"
 description: |-
   Get a Dataproc Metastore Service from Google Cloud
 ---
@@ -10,9 +8,6 @@ description: |-
 # google\_dataproc\_metastore\_service
 
 Get a Dataproc Metastore service from Google Cloud by its id and location.
-
-~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 
 ## Example Usage
 

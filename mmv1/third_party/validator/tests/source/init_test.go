@@ -151,7 +151,19 @@ func normalizeAssets(t *testing.T, assets []google.Asset, offline bool) []google
 		// Replace placeholder in names. This allows us to compare generated placeholders
 		// (for example due to "unknown after apply") with the values in the expected
 		// output files.
-		asset.Name = re.ReplaceAllString(asset.Name, fmt.Sprintf("/placeholder-foobar"))
+		asset.Name = re.ReplaceAllString(asset.Name, "/placeholder-foobar")
+		if asset.Resource != nil && asset.Resource.Data != nil {
+			if _, ok := asset.Resource.Data["projectId"]; ok {
+				projectID, _ := asset.Resource.Data["projectId"].(string)
+				if strings.HasPrefix(projectID, "placeholder-") {
+					asset.Resource.Data["projectId"] = "placeholder-foobar"
+				}
+			}
+			if _, ok := asset.Resource.Data["name"]; ok {
+				name, _ := asset.Resource.Data["name"].(string)
+				asset.Resource.Data["name"] = re.ReplaceAllString(name, "/placeholder-foobar")
+			}
+		}
 		ret[i] = asset
 	}
 	return ret

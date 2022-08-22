@@ -14,6 +14,8 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Budget: !ruby/object:Overrides::Terraform::ResourceOverride
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/billing_budget.erb
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         If you are using User ADCs (Application Default Credentials) with this resource,
@@ -54,6 +56,22 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           channel_name: 'Example Notification Channel'
         test_env_vars:
           billing_acct: :BILLING_ACCT
+      - !ruby/object:Provider::Terraform::Examples
+        name: 'billing_budget_customperiod'
+        primary_resource_id: 'budget'
+        vars:
+          display_name: 'Example Billing Budget'
+        test_env_vars:
+          billing_acct: :BILLING_ACCT
+      - !ruby/object:Provider::Terraform::Examples
+        name: 'billing_budget_optional'
+        primary_resource_id: 'budget'
+        skip_docs: true
+        vars:
+          display_name: 'Example Billing Budget'
+          topic_name: "example-topic"
+        test_env_vars:
+          billing_acct: :BILLING_ACCT          
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
@@ -80,8 +98,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       budgetFilter: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         update_mask_fields:
-          - "budgetFilter.projects"
-          - "budgetFilter.labels"
+         - "budgetFilter.projects"
+         - "budgetFilter.labels"
+         - "budgetFilter.calendarPeriod"
+         - "budgetFilter.customPeriod"
+         - "budgetFilter.services"      
       budgetFilter.services: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       budgetFilter.subaccounts: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -92,7 +113,33 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: "templates/terraform/custom_flatten/billing_budget_budget_filter_labels.erb"
       budgetFilter.projects: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
-
+      budgetFilter.calendarPeriod: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'checkValAndDefaultStringSuppress("MONTH", "budget_filter.0.custom_period.0.start_date")'
+        description: |
+          {{description}}
+          Exactly one of `calendar_period`, `custom_period` must be provided.
+      budgetFilter.customPeriod: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          {{description}}
+          Exactly one of `calendar_period`, `custom_period` must be provided.
+      budgetFilter.customPeriod.startDate.year: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(1,9999)'      
+      budgetFilter.customPeriod.startDate.month: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(1,12)'                              
+      budgetFilter.customPeriod.startDate.day: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(1,31)'
+      budgetFilter.customPeriod.endDate.year: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(1,9999)'      
+      budgetFilter.customPeriod.endDate.month: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(1,12)'                              
+      budgetFilter.customPeriod.endDate.day: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(1,31)'   
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

@@ -1,8 +1,6 @@
 ---
 subcategory: "Kubernetes (Container) Engine"
-layout: "google"
 page_title: "Google: google_container_cluster"
-sidebar_current: "docs-google-container-cluster"
 description: |-
   Creates a Google Kubernetes Engine (GKE) cluster.
 ---
@@ -136,6 +134,12 @@ on the current needs of the cluster's workload. See the
 [guide to using Node Auto-Provisioning](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning)
 for more details. Structure is [documented below](#nested_cluster_autoscaling).
 
+* `binary_authorization` - (Optional) Configuration options for the Binary
+  Authorization feature. Structure is [documented below](#nested_binary_authorization).
+
+* `mesh_certificates` - (Optional)
+    Structure is [documented below](#nested_mesh_encryption).
+
 * `database_encryption` - (Optional)
     Structure is [documented below](#nested_database_encryption).
 
@@ -146,8 +150,9 @@ per node in this cluster. This doesn't work on "routes-based" clusters, clusters
 that don't have IP Aliasing enabled. See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/flexible-pod-cidr)
 for more information.
 
-* `enable_binary_authorization` - (Optional) Enable Binary Authorization for this cluster.
+* `enable_binary_authorization` - (DEPRECATED) Enable Binary Authorization for this cluster.
     If enabled, all container images will be validated by Google Binary Authorization.
+    Deprecated in favor of `binary_authorization`.
 
 * `enable_kubernetes_alpha` - (Optional) Whether to enable Kubernetes Alpha features for
     this cluster. Note that when this option is enabled, the cluster cannot be upgraded
@@ -257,6 +262,10 @@ region are guaranteed to support the same version.
     to say "these are the _only_ node pools associated with this cluster", use the
     [google_container_node_pool](container_node_pool.html) resource instead of this property.
 
+* `node_pool_auto_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Node pool configs that apply to auto-provisioned node pools in
+    [autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison) clusters and
+    [node auto-provisioning](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning)-enabled clusters. Structure is [documented below](#nested_node_pool_auto_config).
+
 * `node_version` - (Optional) The Kubernetes version on the nodes. Must either be unset
     or set to the same value as `min_master_version` on create. Defaults to the default
     version set by GKE which is not necessarily the latest version. This only affects
@@ -266,7 +275,7 @@ region are guaranteed to support the same version.
     `version_prefix` field to approximate fuzzy versions in a Terraform-compatible way.
     To update nodes in other node pools, use the `version` attribute on the node pool.
 
-* `notification_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the [cluster upgrade notifications](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-upgrade-notifications) feature. Structure is [documented below](#nested_notification_config).
+* `notification_config` - (Optional) Configuration for the [cluster upgrade notifications](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-upgrade-notifications) feature. Structure is [documented below](#nested_notification_config).
 
 * `confidential_nodes` - Configuration for [Confidential Nodes](https://cloud.google.com/kubernetes-engine/docs/how-to/confidential-gke-nodes) feature. Structure is documented below [documented below](#nested_confidential_nodes).
 
@@ -378,15 +387,15 @@ subnetwork in which the cluster's instances are launched.
 
 * `identity_service_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)). Structure is [documented below](#nested_identity_service_config).
 
-* `dns_cache_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+* `dns_cache_config` - (Optional).
     The status of the NodeLocal DNSCache addon. It is disabled by default.
     Set `enabled = true` to enable.
 
     **Enabling/Disabling NodeLocal DNSCache in an existing cluster is a disruptive operation.
     All cluster nodes running GKE 1.15 and higher are recreated.**
 
-* `gce_persistent_disk_csi_driver_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
-    Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Defaults to disabled; set `enabled = true` to enable.
+* `gce_persistent_disk_csi_driver_config` - (Optional).
+    Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Defaults to disabled; set `enabled = true` to enabled.
 
 * `kalm_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     Configuration for the KALM addon, which manages the lifecycle of k8s. It is disabled by default; Set `enabled = true` to enable.
@@ -410,6 +419,17 @@ addons_config {
   }
 }
 ```
+<a name="nested_binary_authorization"></a>The `binary_authorization` block supports:
+
+* `enabled` - (DEPRECATED) Enable Binary Authorization for this cluster. Deprecated in favor of `evaluation_mode`.
+
+* `evaluation_mode` - (Optional) Mode of operation for Binary Authorization policy evaluation. Valid values are `DISABLED`
+  and `PROJECT_SINGLETON_POLICY_ENFORCE`. `PROJECT_SINGLETON_POLICY_ENFORCE` is functionally equivalent to the
+  deprecated `enable_binary_authorization` parameter being set to `true`.
+
+<a name="nested_mesh_certificates"></a>The `mesh_certificates` block supports:
+
+* `enable_certificates` - (Required) Controls the issuance of workload mTLS certificates. It is enabled by default. Workload Identity is required, see [workload_config](#nested_workload_identity_config).
 
 <a name="nested_database_encryption"></a>The `database_encryption` block supports:
 
@@ -476,6 +496,8 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 * `service_account` - (Optional) The Google Cloud Platform Service Account to be used by the node VMs.
 
+* `boot_disk_kms_key` - (Optional) The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool. This should be of the form projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]. For more information about protecting resources with Cloud KMS Keys please see: https://cloud.google.com/compute/docs/disks/customer-managed-encryption
+
 * `image_type` - (Optional) The default image type used by NAP once a new node pool is being created. Please note that according to the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning#default-image-type) the value must be one of the [COS_CONTAINERD, COS, UBUNTU_CONTAINERD, UBUNTU]. __NOTE__ : COS AND UBUNTU are deprecated as of `GKE 1.24`
 
 <a name="nested_authenticator_groups_config"></a>The `authenticator_groups_config` block supports:
@@ -489,7 +511,7 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 <a name="nested_monitoring_config"></a>The `monitoring_config` block supports:
 
-*  `enable_components` - (Optional) The GKE components exposing metrics. `SYSTEM_COMPONENTS` and in beta provider, both `SYSTEM_COMPONENTS` and `WORKLOADS` are supported. (`WORKLOADS` is deprecated and removed in GKE 1.24.)
+*  `enable_components` - (Optional) The GKE components exposing metrics. Supported values include: `SYSTEM_COMPONENTS`, `APISERVER`, `CONTROLLER_MANAGER`, and `SCHEDULER`. In beta provider, `WORKLOADS` is supported on top of those 4 values. (`WORKLOADS` is deprecated and removed in GKE 1.24.)
 
 *  `managed_prometheus` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for Managed Service for Prometheus. Structure is [documented below](#nested_managed_prometheus).
 
@@ -817,6 +839,22 @@ linux_node_config {
 ```hcl
 workload_identity_config {
   workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+}
+```
+
+<a name="nested_node_pool_auto_config"></a>The `node_pool_auto_config` block supports:
+
+* `network_tags` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - The network tag config for the cluster's automatically provisioned node pools.
+
+The `network_tags` block supports:
+
+* `tags` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - List of network tags applied to auto-provisioned node pools.
+
+```hcl
+node_pool_auto_config {
+  network_tags {
+    tags = ["foo", "bar"]
+  }
 }
 ```
 

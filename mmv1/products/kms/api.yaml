@@ -115,6 +115,7 @@ objects:
           - "ENCRYPT_DECRYPT"
           - "ASYMMETRIC_SIGN"
           - "ASYMMETRIC_DECRYPT"
+          - "MAC"
         default_value: :ENCRYPT_DECRYPT
         input: true
       - !ruby/object:Api::Type::String
@@ -138,7 +139,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'protectionLevel'
             description: |
-              The protection level to use when creating a version based on this template. Possible values include "SOFTWARE", "HSM", "EXTERNAL". Defaults to "SOFTWARE".
+              The protection level to use when creating a version based on this template. Possible values include "SOFTWARE", "HSM", "EXTERNAL", "EXTERNAL_VPC". Defaults to "SOFTWARE".
             input: true
       - !ruby/object:Api::Type::Time
         name: 'nextRotationTime'
