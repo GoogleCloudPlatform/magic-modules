@@ -3284,7 +3284,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   UrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "url_map_basic"
+        name: "url_map_bucket_and_service"
         primary_resource_id: "urlmap"
         vars:
           url_map_name: "urlmap"
