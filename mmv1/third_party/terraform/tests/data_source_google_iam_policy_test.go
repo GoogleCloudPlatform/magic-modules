@@ -70,6 +70,59 @@ func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 			ExpectedBindingCount:     2,
 			ExpectedPolicyDataString: "{\"bindings\":[{\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"description A\",\"expression\":\"expression A\",\"title\":\"title A\"},\"members\":[\"user:a\"],\"role\":\"role/A\"}]}",
 		},
+		"members in equivalent bindings are consolidated": {
+			Bindings: []map[string]interface{}{
+				{
+					"role": "role/A",
+					"members": []interface{}{
+						"user:a",
+					},
+				},
+				{
+					"role": "role/A",
+					"members": []interface{}{
+						"user:b",
+					},
+				},
+			},
+			ExpectedBindingCount:     1,
+			ExpectedPolicyDataString: "{\"bindings\":[{\"members\":[\"user:a\",\"user:b\"],\"role\":\"role/A\"}]}",
+		},
+		// "bindings for the same role with equivalent conditions are consolidated": {
+		// 	Bindings: []map[string]interface{}{
+		// 		{
+		// 			"role": "role/A",
+		// 			"members": []interface{}{
+		// 				"user:a",
+		// 			},
+		// 			"condition": map[string]interface{}{
+		// 				"description": "my description string",
+		// 				"expression":  "my expression string",
+		// 				"title":       "my title string",
+		// 			},
+		// 		},
+		// 		{
+		// 			"role": "role/A",
+		// 			"members": []interface{}{
+		// 				"user:b",
+		// 			},
+		// 			"condition": map[string]interface{}{
+		// 				"description": "my description string",
+		// 				"expression":  "my expression string",
+		// 				"title":       "my title string",
+		// 			},
+		// 		},
+		// 		// Should not be consolidated into the above as there's no condition
+		// 		{
+		// 			"role": "role/A",
+		// 			"members": []interface{}{
+		// 				"user:c",
+		// 			},
+		// 		},
+		// 	},
+		// 	ExpectedBindingCount:     2,
+		// 	ExpectedPolicyDataString: "{\"bindings\":[{\"members\":[\"user:a\",\"user:b\"],\"role\":\"role/A\"}]}",
+		// },
 	}
 
 	for tn, tc := range cases {
