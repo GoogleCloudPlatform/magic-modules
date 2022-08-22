@@ -889,10 +889,6 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		instance.MaintenanceVersion = d.Get("maintenance_version").(string)
 	}
 
-	// MSSQL Server require rootPassword to be set
-	if strings.Contains(instance.DatabaseVersion, "SQLSERVER") {
-		instance.RootPassword = d.Get("root_password").(string)
-	}
 	instance.RootPassword = d.Get("root_password").(string)
 
 	// Modifying a replica during Create can cause problems if the master is
