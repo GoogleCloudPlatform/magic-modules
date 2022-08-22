@@ -11,6 +11,7 @@ import (
 // Tests schema version migration by creating a trigger with an old version of the provider (4.30.0)
 // and then updating it with the current version the provider.
 func TestAccCloudBuildTrigger_migration(t *testing.T) {
+	skipIfVcr(t)
 	t.Parallel()
 	name := fmt.Sprintf("tf-test-%d", randInt(t))
 
