@@ -352,13 +352,13 @@ func TestMaintenanceVersionDiffSuppress(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-        tc := tc
-        t.Run(tn, func(t *testing.T) {
-		t.Parallel()
-		if maintenanceVersionDiffSuppress("version", tc.Old, tc.New, nil) != tc.ShouldSuppress {
-			t.Fatalf("%q => %q expect DiffSuppress to return %t", tc.Old, tc.New, tc.ShouldSuppress)
-		}
-        })
+		tc := tc
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+			if maintenanceVersionDiffSuppress("version", tc.Old, tc.New, nil) != tc.ShouldSuppress {
+				t.Fatalf("%q => %q expect DiffSuppress to return %t", tc.Old, tc.New, tc.ShouldSuppress)
+			}
+		})
 	}
 }
 
