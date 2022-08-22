@@ -4,8 +4,15 @@ import (
 	"fmt"
 	"testing"
 
+	"google3/third_party/golang/google_api/compute/v1/compute"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+)
+
+const (
+	canonicalSslCertificateTemplate = "https://www.googleapis.com/compute/v1/projects/%s/global/sslCertificates/%s"
+	canonicalCertificateMapTemplate = "//certificatemanager.googleapis.com/projects/%s/locations/global/certificateMaps/%s"
 )
 
 func TestAccComputeTargetSslProxy_update(t *testing.T) {
@@ -17,6 +24,9 @@ func TestAccComputeTargetSslProxy_update(t *testing.T) {
 	backend2 := fmt.Sprintf("tssl-test-%s", randString(t, 10))
 	hc := fmt.Sprintf("tssl-test-%s", randString(t, 10))
 
+	resourceSuffix := randString(t, 10)
+	var proxy compute.TargetSslProxy
+
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -25,22 +35,34 @@ func TestAccComputeTargetSslProxy_update(t *testing.T) {
 			{
 				Config: testAccComputeTargetSslProxy_basic1(target, sslPolicy, cert1, backend1, hc),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeTargetSslProxy(
-						t, "google_compute_target_ssl_proxy.foobar", "NONE", cert1),
+					testAccCheckComputeTargetSslProxyExists(
+						t, "google_compute_target_ssl_proxy.foobar", &proxy),
+					testAccCheckComputeTargetSslProxyHeader(t, "NONE", &proxy),
+					testAccCheckComputeTargetSslProxyHasSslCertificate(t, cert1, &proxy),
 				),
 			},
 			{
 				Config: testAccComputeTargetSslProxy_basic2(target, sslPolicy, cert1, cert2, backend1, backend2, hc),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeTargetSslProxy(
-						t, "google_compute_target_ssl_proxy.foobar", "PROXY_V1", cert2),
+					testAccCheckComputeTargetSslProxyExists(
+						t, "google_compute_target_ssl_proxy.foobar", &proxy),
+					testAccCheckComputeTargetSslProxyHeader(t, "PROXY_V1", &proxy),
+					testAccCheckComputeTargetSslProxyHasSslCertificate(t, cert2, &proxy),
+				),
+			},
+			{
+				Config: testAccComputeTargetSslProxy_certificateMap(resourceSuffix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeTargetSslProxyExists(
+						t, "google_compute_target_ssl_proxy.with_certificate_map", &proxy),
+					testAccCheckComputeTargetSslProxyHasCertificateMap(t, "certificatemap-test-"+resourceSuffix, &proxy),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckComputeTargetSslProxy(t *testing.T, n, proxyHeader, sslCert string) resource.TestCheckFunc {
+func testAccCheckComputeTargetSslProxyExists(t *testing.T, n string, proxy *compute.TargetSslProxy) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -64,15 +86,44 @@ func testAccCheckComputeTargetSslProxy(t *testing.T, n, proxyHeader, sslCert str
 			return fmt.Errorf("TargetSslProxy not found")
 		}
 
-		if found.ProxyHeader != proxyHeader {
+		*proxy = *found
+
+		return nil
+	}
+}
+
+func testAccCheckComputeTargetSslProxyHeader(t *testing.T, proxyHeader string, proxy *compute.TargetSslProxy) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if proxy.ProxyHeader != proxyHeader {
 			return fmt.Errorf("Wrong proxy header. Expected '%s', got '%s'", proxyHeader, found.ProxyHeader)
 		}
+		return nil
+	}
+}
 
-		foundCertName := GetResourceNameFromSelfLink(found.SslCertificates[0])
-		if foundCertName != sslCert {
-			return fmt.Errorf("Wrong ssl certificates. Expected '%s', got '%s'", sslCert, foundCertName)
+func testAccCheckComputeTargetSslProxyHasSslCertificate(t *testing.T, cert string, proxy *compute.TargetSslProxy) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := googleProviderConfig(t)
+		certURL := fmt.Sprintf(canonicalSslCertificateTemplate, config.Project, cert)
+
+		for _, sslCertificate := range proxy.SslCertificates {
+			if ConvertSelfLinkToV1(sslCertificate) == certURL {
+				return nil
+			}
 		}
 
+		return fmt.Errorf("Ssl certificate not found: expected'%s'", certURL)
+	}
+}
+
+func testAccCheckComputeTargetSslProxyHasCertificateMap(t *testing.T, certificateMap string, proxy *compute.TargetSslProxy) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := googleProviderConfig(t)
+		wantCertMapURL := fmt.Sprintf(canonicalCertificateMapTemplate, config.Project, certificateMap)
+		gotCertMapURL := ConvertSelfLinkToV1(proxy.CertificateMap)
+		if wantCertMapUrl != gotCertMapUrl {
+			return fmt.Errorf("certificate map not found: got %q, want %q", gotCertMapURL, wantCertMapURL)
+		}
 		return nil
 	}
 }
@@ -168,4 +219,59 @@ resource "google_compute_health_check" "zero" {
   }
 }
 `, target, sslPolicy, sslCert1, sslCert2, backend1, backend2, hc)
+}
+
+func testAccComputeTargetSslProxy_certificateMap(id string) string {
+	return fmt.Sprintf(`
+resource "google_compute_target_ssl_proxy" "with_certificate_map" {
+  description      = "Resource created for Terraform acceptance testing"
+  name             = "ssl-proxy-%s"
+  backend_service  = google_compute_backend_service.foo.self_link
+	certificate_map = "//certificatemanager.googleapis.com/${google_certificate_manager_certificate_map.map.id}"
+}
+
+resource "google_compute_backend_service" "foo" {
+  name          = "backend-service-%s"
+  protocol      = "SSL"
+  health_checks = [google_compute_health_check.zero.self_link]
+}
+
+resource "google_compute_health_check" "zero" {
+  name               = "health-check-%s"
+  check_interval_sec = 1
+  timeout_sec        = 1
+  tcp_health_check {
+    port = "443"
+  }
+}
+
+resource "google_certificate_manager_certificate_map" "map" {
+  name = "certificatemap-test-%s"
+}
+
+resource "google_certificate_manager_certificate_map_entry" "map_entry" {
+  name         = "certificatemapentry-test-%s"
+  map          = google_certificate_manager_certificate_map.map.name
+  certificates = [google_certificate_manager_certificate.certificate.id]
+  matcher      = "PRIMARY"
+}
+
+resource "google_certificate_manager_certificate" "certificate" {
+  name        = "certificate-test-%s"
+  scope       = "DEFAULT"
+  managed {
+    domains = [
+      google_certificate_manager_dns_authorization.instance.domain,
+    ]
+    dns_authorizations = [
+      google_certificate_manager_dns_authorization.instance.id,
+    ]
+  }
+}
+
+resource "google_certificate_manager_dns_authorization" "instance" {
+  name   = "dnsauthorization-test-%s"
+  domain = "mysite.com"
+}
+`, id, id, id, id, id, id, id)
 }
