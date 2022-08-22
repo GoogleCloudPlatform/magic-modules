@@ -637,6 +637,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "storage_object_lifecycle_setting"
         primary_resource_type: "google_storage_bucket"
         primary_resource_id: "auto_expire"
+        ignore_read_extra:
+          - "force_destroy"
         vars:
           example_bucket: "example-bucket"
         min_version: beta
