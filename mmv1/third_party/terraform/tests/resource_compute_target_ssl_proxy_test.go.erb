@@ -1,18 +1,18 @@
+<% autogen_exception -%>
 package google
 
 import (
 	"fmt"
 	"testing"
 
-	"google3/third_party/golang/google_api/compute/v1/compute"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-)
 
-const (
-	canonicalSslCertificateTemplate = "https://www.googleapis.com/compute/v1/projects/%s/global/sslCertificates/%s"
-	canonicalCertificateMapTemplate = "//certificatemanager.googleapis.com/projects/%s/locations/global/certificateMaps/%s"
+<% if version == "ga" -%>
+	"google.golang.org/api/compute/v1"
+<% else -%>
+	compute "google.golang.org/api/compute/v0.beta"
+<% end -%>
 )
 
 func TestAccComputeTargetSslProxy_update(t *testing.T) {
@@ -95,7 +95,7 @@ func testAccCheckComputeTargetSslProxyExists(t *testing.T, n string, proxy *comp
 func testAccCheckComputeTargetSslProxyHeader(t *testing.T, proxyHeader string, proxy *compute.TargetSslProxy) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if proxy.ProxyHeader != proxyHeader {
-			return fmt.Errorf("Wrong proxy header. Expected '%s', got '%s'", proxyHeader, found.ProxyHeader)
+			return fmt.Errorf("Wrong proxy header. Expected '%s', got '%s'", proxyHeader, proxy.ProxyHeader)
 		}
 		return nil
 	}
@@ -121,7 +121,7 @@ func testAccCheckComputeTargetSslProxyHasCertificateMap(t *testing.T, certificat
 		config := googleProviderConfig(t)
 		wantCertMapURL := fmt.Sprintf(canonicalCertificateMapTemplate, config.Project, certificateMap)
 		gotCertMapURL := ConvertSelfLinkToV1(proxy.CertificateMap)
-		if wantCertMapUrl != gotCertMapUrl {
+		if wantCertMapURL != gotCertMapURL {
 			return fmt.Errorf("certificate map not found: got %q, want %q", gotCertMapURL, wantCertMapURL)
 		}
 		return nil
