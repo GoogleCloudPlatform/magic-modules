@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"bitbucket.org/creachadair/stringset"
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	"github.com/golang/glog"
 )
@@ -519,4 +520,20 @@ func (sub *Variable) translateValue(isDocs bool) string {
 func (s Sample) PrimaryResourceName() string {
 	fileParts := strings.Split(*s.PrimaryResource, ".")
 	return fileParts[0]
+}
+
+// This is overbroad, but works for now.
+// This should only look for when a sample has a dependency on multiple *fine-grained*
+// resources, but we don't have a good way to identify fine-grained vs not currently
+func (s Sample) ShouldSkipVcr() bool {
+	uniqueResources := stringset.New()
+	
+	for _, d := range s.DependencyList {
+		if uniqueResources.Contains(d.TerraformResourceType) {
+			return true
+		}
+		uniqueResources.Add(d.TerraformResourceType)
+	}
+	return false
+
 }

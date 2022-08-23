@@ -45,6 +45,9 @@ import (
 
 {{- range $s := $.TestSamples }}
 func TestAcc{{$.PathType}}_{{$s.TestSlug}}(t *testing.T) {
+{{- if $s.ShouldSkipVcr }}
+	skipIfVcr(t)
+{{- end }}
 	t.Parallel()
 
 	context := map[string]interface{} {
