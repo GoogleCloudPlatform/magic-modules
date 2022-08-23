@@ -143,15 +143,13 @@ func dataSourceGoogleIamPolicyRead(d *schema.ResourceData, meta interface{}) err
 		v := v // Avoid reused iteration variables
 		id := v.Role
 		if v.Condition != nil {
-			id += v.Condition.Expression
+			id += fmt.Sprintf("-[%s]-[%s]-[%s]-[%s]", v.Condition.Expression, v.Condition.Title, v.Condition.Description, v.Condition.Location)
 		}
-
 		if val, ok := foundCombos[id]; ok {
 			m := append(val.Members, v.Members...)
 			binding := foundCombos[id]
 			binding.Members = m
 			foundCombos[id] = binding
-
 		} else {
 			foundCombos[id] = v
 		}
@@ -165,9 +163,36 @@ func dataSourceGoogleIamPolicyRead(d *schema.ResourceData, meta interface{}) err
 	}
 	policy.Bindings = dedupBindings
 
-	// Sort bindings by their role name to get simpler diffs as it's what the API does
+	// Sort bindings to get simpler diffs as it's what the API does
 	sort.Slice(policy.Bindings, func(i, j int) bool {
-		return policy.Bindings[i].Role < policy.Bindings[j].Role
+		// Sort bindings by role
+		if policy.Bindings[i].Role < policy.Bindings[j].Role {
+			return true
+		}
+
+		iConditionOk := policy.Bindings[i].Condition != nil
+		jConditionOk := policy.Bindings[j].Condition != nil
+
+		// If both bindings lack conditions we cannot sort
+		if !iConditionOk && !jConditionOk {
+			return false
+		}
+
+		// Sort by presence of a condition on only one binding
+		if !iConditionOk && jConditionOk {
+			return true
+		}
+		if iConditionOk && !jConditionOk {
+			return false
+		}
+
+		// Sort by both bindings' conditions' titles
+		if policy.Bindings[i].Condition.Title < policy.Bindings[j].Condition.Title {
+			return true
+		}
+
+		// Sort by both bindings' conditions' expressions
+		return policy.Bindings[i].Condition.Expression < policy.Bindings[j].Condition.Expression
 	})
 
 	// Sort members within each binding to get simpler diffs as it's what the API does
