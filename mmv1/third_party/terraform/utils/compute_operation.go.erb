@@ -170,12 +170,32 @@ func (e ComputeOperationError) Error() string {
 	return buf.String()
 }
 
+const errMsgSep = "\n\n\n"
+
 func writeOperationError(w io.StringWriter, opError *compute.OperationErrorErrors) {
 	w.WriteString(opError.Message + "\n")
 
+	var lm *compute.LocalizedMessage
+	var links []*compute.HelpLink
+
 	for _, ed := range opError.ErrorDetails {
-		if ed.LocalizedMessage != nil && ed.LocalizedMessage.Message != "" {
-			w.WriteString(ed.LocalizedMessage.Message + "\n")
+		if ed.LocalizedMessage != nil {
+			lm = ed.LocalizedMessage
 		}
+
+		if ed.Help != nil {
+			links = append(links, ed.Help.Links...)
+		}
+	}
+
+	if lm != nil && lm.Message != "" {
+		w.WriteString(errMsgSep)
+		w.WriteString(lm.Message + "\n")
+	}
+
+	for _, link := range links {
+		w.WriteString(errMsgSep)
+		w.WriteString(link.Description + "\n")
+		w.WriteString(link.Url + "\n")
 	}
 }
