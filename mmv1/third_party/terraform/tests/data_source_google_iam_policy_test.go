@@ -9,14 +9,14 @@ import (
 
 func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 	cases := map[string]struct {
-		Bindings                   []map[string]interface{}
+		Bindings                   []interface{}
 		ExpectedPolicyDataString   string
 		ExpectedBindingCount       int
 		ExpectedPolicyBindingCount int
 	}{
 		"members are sorted alphabetically within a single binding": {
-			Bindings: []map[string]interface{}{
-				{
+			Bindings: []interface{}{
+				map[string]interface{}{
 					"role": "role/A",
 					"members": []interface{}{
 						"user:c",
@@ -30,14 +30,14 @@ func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 			ExpectedPolicyDataString:   "{\"bindings\":[{\"members\":[\"user:a\",\"user:b\",\"user:c\"],\"role\":\"role/A\"}]}",
 		},
 		"bindings are sorted by role": {
-			Bindings: []map[string]interface{}{
-				{
+			Bindings: []interface{}{
+				map[string]interface{}{
 					"role": "role/B",
 					"members": []interface{}{
 						"user:a",
 					},
 				},
-				{
+				map[string]interface{}{
 					"role": "role/A",
 					"members": []interface{}{
 						"user:a",
@@ -48,9 +48,48 @@ func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 			ExpectedPolicyBindingCount: 2,
 			ExpectedPolicyDataString:   "{\"bindings\":[{\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"members\":[\"user:a\"],\"role\":\"role/B\"}]}",
 		},
-		"bindings with the same role are sorted by presence of a condition": {
-			Bindings: []map[string]interface{}{
-				{
+		"members in equivalent bindings (with no conditions) are consolidated": {
+			Bindings: []interface{}{
+				map[string]interface{}{
+					"role": "role/A",
+					"members": []interface{}{
+						"user:a",
+					},
+				},
+				map[string]interface{}{
+					"role": "role/A",
+					"members": []interface{}{
+						"user:b",
+					},
+				},
+			},
+			ExpectedBindingCount:       2,
+			ExpectedPolicyBindingCount: 1, // Equivalent bindings combined into one member list
+			ExpectedPolicyDataString:   "{\"bindings\":[{\"members\":[\"user:a\",\"user:b\"],\"role\":\"role/A\"}]}",
+		},
+		"members in equivalent bindings (with equivalent conditions) are consolidated ": {
+			Bindings: []interface{}{
+				// Should not be consolidated into the other bindings as there's no condition
+				map[string]interface{}{
+					"role": "role/A",
+					"members": []interface{}{
+						"user:c",
+					},
+				},
+				map[string]interface{}{
+					"role": "role/A",
+					"members": []interface{}{
+						"user:b",
+					},
+					"condition": []interface{}{
+						map[string]interface{}{
+							"description": "descriptionA",
+							"expression":  "expressionA",
+							"title":       "titleA",
+						},
+					},
+				},
+				map[string]interface{}{
 					"role": "role/A",
 					"members": []interface{}{
 						"user:a",
@@ -63,99 +102,156 @@ func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 						},
 					},
 				},
-				// Binding with no condition should be placed first
-				{
-					"role": "role/A",
-					"members": []interface{}{
-						"user:a",
-					},
-				},
 			},
-			ExpectedBindingCount:       2,
+			ExpectedBindingCount:       3,
 			ExpectedPolicyBindingCount: 2,
-			ExpectedPolicyDataString:   "{\"bindings\":[{\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"descriptionA\",\"expression\":\"expressionA\",\"title\":\"titleA\"},\"members\":[\"user:a\"],\"role\":\"role/A\"}]}",
+			ExpectedPolicyDataString:   "{\"bindings\":[{\"members\":[\"user:c\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"descriptionA\",\"expression\":\"expressionA\",\"title\":\"titleA\"},\"members\":[\"user:a\",\"user:b\"],\"role\":\"role/A\"}]}",
 		},
-		"members in equivalent bindings are consolidated": {
-			Bindings: []map[string]interface{}{
-				{
+		"bindings with the same role are sorted by presence of a condition": {
+			Bindings: []interface{}{
+				map[string]interface{}{
+					"role": "role/A",
+					"members": []interface{}{
+						"user:a",
+					},
+					"condition": []interface{}{
+						map[string]interface{}{
+							"description": "descriptionA",
+							"expression":  "expressionA",
+							"title":       "titleA",
+						},
+					},
+				},
+				// Binding with no condition should be placed first in role/A bindings
+				map[string]interface{}{
 					"role": "role/A",
 					"members": []interface{}{
 						"user:a",
 					},
 				},
-				{
-					"role": "role/A",
+				map[string]interface{}{
+					"role": "role/B",
 					"members": []interface{}{
 						"user:b",
 					},
+					"condition": []interface{}{
+						map[string]interface{}{
+							"description": "descriptionB",
+							"expression":  "expressionB",
+							"title":       "titleB",
+						},
+					},
 				},
 			},
-			ExpectedBindingCount:       2,
-			ExpectedPolicyBindingCount: 1, // Equivalent bindings combined into one member list
-			ExpectedPolicyDataString:   "{\"bindings\":[{\"members\":[\"user:a\",\"user:b\"],\"role\":\"role/A\"}]}",
+			ExpectedBindingCount:       3,
+			ExpectedPolicyBindingCount: 3,
+			ExpectedPolicyDataString:   "{\"bindings\":[{\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"descriptionA\",\"expression\":\"expressionA\",\"title\":\"titleA\"},\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"descriptionB\",\"expression\":\"expressionB\",\"title\":\"titleB\"},\"members\":[\"user:b\"],\"role\":\"role/B\"}]}",
 		},
-		// "bindings for the same role with equivalent conditions are consolidated": {
-		// 	Bindings: []map[string]interface{}{
-		// 		{
-		// 			"role": "role/A",
-		// 			"members": []interface{}{
-		// 				"user:b",
-		// 			},
-		// 			"condition": map[string]interface{}{
-		// 				"description": "my description string",
-		// 				"expression":  "my expression string",
-		// 				"title":       "my title string",
-		// 			},
-		// 		},
-		// 		{
-		// 			"role": "role/A",
-		// 			"members": []interface{}{
-		// 				"user:a",
-		// 			},
-		// 			"condition": map[string]interface{}{
-		// 				"description": "my description string",
-		// 				"expression":  "my expression string",
-		// 				"title":       "my title string",
-		// 			},
-		// 		},
-		// 		// Should not be consolidated into the above as there's no condition
-		// 		{
-		// 			"role": "role/A",
-		// 			"members": []interface{}{
-		// 				"user:c",
-		// 			},
-		// 		},
-		// 	},
-		// 	ExpectedBindingCount:       3,
-		// 	ExpectedPolicyBindingCount: 2,
-		// 	ExpectedPolicyDataString:   "{\"bindings\":[{\"condition\":{\"description\":\"descriptionA\",\"expression\":\"expressionA\",\"title\":\"titleA\"},\"members\":[\"user:a\",\"user:b\"],\"role\":\"role/A\"}]},{\"members\":[\"user:c\"],\"role\":\"role/A\"}]}",
-		// },
+		"bindings on the same role with different conditions are sorted by condition title": {
+			Bindings: []interface{}{
+				map[string]interface{}{
+					"role": "role/A",
+					"members": []interface{}{
+						"user:a",
+					},
+					"condition": []interface{}{
+						map[string]interface{}{
+							"title": "C",
+						},
+					},
+				},
+				map[string]interface{}{
+					"role": "role/A",
+					"members": []interface{}{
+						"user:a",
+					},
+					"condition": []interface{}{
+						map[string]interface{}{
+							"title": "B",
+						},
+					},
+				},
+				map[string]interface{}{
+					"role": "role/A",
+					"members": []interface{}{
+						"user:a",
+					},
+					"condition": []interface{}{
+						map[string]interface{}{
+							"title": "A",
+						},
+					},
+				},
+			},
+			ExpectedBindingCount:       3,
+			ExpectedPolicyBindingCount: 3,
+			ExpectedPolicyDataString:   "{\"bindings\":[{\"condition\":{\"description\":\"\",\"expression\":\"\",\"title\":\"A\"},\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"\",\"expression\":\"\",\"title\":\"B\"},\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"\",\"expression\":\"\",\"title\":\"C\"},\"members\":[\"user:a\"],\"role\":\"role/A\"}]}",
+		},
+		"bindings on the same role with different conditions, with the same title, are next sorted by condition expression": {
+			Bindings: []interface{}{
+				map[string]interface{}{
+					"role": "role/A",
+					"members": []interface{}{
+						"user:a",
+					},
+					"condition": []interface{}{
+						map[string]interface{}{
+							"title":      "same title",
+							"expression": "C",
+						},
+					},
+				},
+				map[string]interface{}{
+					"role": "role/A",
+					"members": []interface{}{
+						"user:a",
+					},
+					"condition": []interface{}{
+						map[string]interface{}{
+							"title":      "same title",
+							"expression": "B",
+						},
+					},
+				},
+				map[string]interface{}{
+					"role": "role/A",
+					"members": []interface{}{
+						"user:a",
+					},
+					"condition": []interface{}{
+						map[string]interface{}{
+							"title":      "same title",
+							"expression": "A",
+						},
+					},
+				},
+			},
+			ExpectedBindingCount:       3,
+			ExpectedPolicyBindingCount: 3,
+			ExpectedPolicyDataString:   "{\"bindings\":[{\"condition\":{\"description\":\"\",\"expression\":\"A\",\"title\":\"same title\"},\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"\",\"expression\":\"B\",\"title\":\"same title\"},\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"\",\"expression\":\"C\",\"title\":\"same title\"},\"members\":[\"user:a\"],\"role\":\"role/A\"}]}",
+		},
 	}
 
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
-			// Arrange - Create schema.ResourceData variable as test input
-			// Need bindings info as slice of empty interfaces
-			bindings := make([]interface{}, len(tc.Bindings))
-			for i, b := range tc.Bindings {
-				bindings[i] = b
-			}
+			// ARRANGE - Create schema.ResourceData variable as test input
 			rawData := map[string]interface{}{
-				"binding":      bindings,
+				"binding":      tc.Bindings,
 				"policy_data":  "",              // Not set
 				"audit_config": []interface{}{}, // Not set
 			}
+			// Note: for TestResourceDataRaw to process rawData ok, test inputs' data types have to be
+			// either primitive types, []interface{} or map[string]interface{}
 			d := schema.TestResourceDataRaw(t, dataSourceGoogleIamPolicy().Schema, rawData)
 
-			// Act - Update resource data using `dataSourceGoogleIamPolicyRead`
+			// ACT - Update resource data using `dataSourceGoogleIamPolicyRead`
 			var meta interface{}
 			err := dataSourceGoogleIamPolicyRead(d, meta)
 			if err != nil {
 				t.Error(err)
 			}
 
-			// Assertions
-
+			// ASSERT
 			policyData := d.Get("policy_data").(string)
 			var jsonObjs interface{}
 			json.Unmarshal([]byte(policyData), &jsonObjs)
