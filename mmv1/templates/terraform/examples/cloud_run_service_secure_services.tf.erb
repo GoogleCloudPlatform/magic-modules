@@ -18,7 +18,7 @@ resource "google_cloud_run_service" "renderer" {
     latest_revision = true
   }
 }
-# [END cloud_run_secure_service_backend]
+# [END cloud_run_secure_services_backend]
 
 # [START cloud_run_secure_services_frontend]
 resource "google_cloud_run_service" "editor" {
