@@ -1,6 +1,5 @@
 # [START cloud_run_secure_services_backend]
 resource "google_cloud_run_service" "renderer" {
-  provider = google-beta
   name     = "<%= ctx[:vars]['renderer'] %>"
   location = "us-central1"
   template {
