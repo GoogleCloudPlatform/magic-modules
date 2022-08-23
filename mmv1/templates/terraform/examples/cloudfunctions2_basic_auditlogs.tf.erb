@@ -41,12 +41,14 @@ resource "google_project_iam_member" "event-receiving" {
   project = "<%= ctx[:test_env_vars]['project'] %>"
   role    = "roles/eventarc.eventReceiver"
   member  = "serviceAccount:${google_service_account.account.email}"
+  depends_on = [google_project_iam_member.invoking]
 }
 
 resource "google_project_iam_member" "artifactregistry-reader" {
   project = "<%= ctx[:test_env_vars]['project'] %>"
   role     = "roles/artifactregistry.reader"
   member   = "serviceAccount:${google_service_account.account.email}"
+  depends_on = [google_project_iam_member.event-receiving]
 }
 
 resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
