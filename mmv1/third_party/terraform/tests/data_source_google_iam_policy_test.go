@@ -135,30 +135,16 @@ func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
 			// Arrange - Create schema.ResourceData variable as test input
+			// Need bindings info as slice of empty interfaces
 			bindings := make([]interface{}, len(tc.Bindings))
-
 			for i, b := range tc.Bindings {
-				// Handle binding conditions, if set
-				if b["condition"] != nil {
-					c := b["condition"].([]interface{})
-					// Avoid adding zero valued condition
-					if len(c) == 1 {
-						conditions := make([]interface{}, len(c))
-						for j, con := range c {
-							conditions[j] = con
-						}
-						b["condition"] = conditions
-					}
-				}
 				bindings[i] = b
 			}
-
 			rawData := map[string]interface{}{
 				"binding":      bindings,
 				"policy_data":  "",              // Not set
 				"audit_config": []interface{}{}, // Not set
 			}
-
 			d := schema.TestResourceDataRaw(t, dataSourceGoogleIamPolicy().Schema, rawData)
 
 			// Act - Update resource data using `dataSourceGoogleIamPolicyRead`
