@@ -122,7 +122,6 @@ func dataSourceGoogleIamPolicyRead(d *schema.ResourceData, meta interface{}) err
 
 	// All binding{} blocks will be converted and stored in an array
 	bindings = make([]*cloudresourcemanager.Binding, bset.Len())
-	policy.Bindings = bindings
 
 	// Convert each config binding into a cloudresourcemanager.Binding
 	for i, v := range bset.List() {
@@ -130,20 +129,51 @@ func dataSourceGoogleIamPolicyRead(d *schema.ResourceData, meta interface{}) err
 		members := convertStringSet(binding["members"].(*schema.Set))
 		condition := expandIamCondition(binding["condition"])
 
-		// Sort members to get simpler diffs as it's what the API does
-		sort.Strings(members)
-
-		policy.Bindings[i] = &cloudresourcemanager.Binding{
+		bindings[i] = &cloudresourcemanager.Binding{
 			Role:      binding["role"].(string),
 			Members:   members,
 			Condition: condition,
 		}
 	}
 
+	// TODO(SarahFrench) improve comments
+	// Collect bindings by combination of role + condition presence + condition expression combinations
+	foundCombos := map[string]*cloudresourcemanager.Binding{}
+	for _, v := range bindings {
+		v := v // Avoid reused iteration variables
+		id := v.Role
+		if v.Condition != nil {
+			id += v.Condition.Expression
+		}
+
+		if val, ok := foundCombos[id]; ok {
+			m := append(val.Members, v.Members...)
+			binding := foundCombos[id]
+			binding.Members = m
+			foundCombos[id] = binding
+
+		} else {
+			foundCombos[id] = v
+		}
+	}
+
+	// Assign deduplicated bindings to the cloudresourcemanager.Policy variable
+	dedupBindings := []*cloudresourcemanager.Binding{}
+	for _, v := range foundCombos {
+		v := v // Avoid reused iteration variables
+		dedupBindings = append(dedupBindings, v)
+	}
+	policy.Bindings = dedupBindings
+
 	// Sort bindings by their role name to get simpler diffs as it's what the API does
-	sort.Slice(bindings, func(i, j int) bool {
-		return bindings[i].Role < bindings[j].Role
+	sort.Slice(policy.Bindings, func(i, j int) bool {
+		return policy.Bindings[i].Role < policy.Bindings[j].Role
 	})
+
+	// Sort members within each binding to get simpler diffs as it's what the API does
+	for i := 0; i < len(policy.Bindings); i++ {
+		sort.Strings(policy.Bindings[i].Members)
+	}
 
 	// Convert each audit_config into a cloudresourcemanager.AuditConfig
 	policy.AuditConfigs = expandAuditConfig(aset)
