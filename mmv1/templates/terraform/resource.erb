@@ -17,6 +17,15 @@
 package google
 
 import (
+
+ "fmt"
+ "log"
+ "reflect"
+<% if updatable?(object, object.root_properties) && object.update_mask -%>
+ "strings"
+<% end -%>
+ "time"
+
 <%- # We list all the v2 imports here, because we run 'goimports' to guess the correct
     # set of imports, which will never guess the major version correctly. -%>
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -28,6 +37,9 @@ import (
   "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
   "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+<% if object.gettable_properties.reject { |p| p.ignore_read }.any? { |prop| prop.flatten_object } -%>
+  "google.golang.org/api/googleapi"
+<% end -%>
 )
 
 <%= lines(compile(pwd + '/' + object.custom_code.constants)) if object.custom_code.constants -%>
@@ -113,7 +125,9 @@ func resource<%= resource_name -%>() *schema.Resource {
             "<%= field.name -%>": {
               Type: <%= tf_type(field) -%>,
               Optional: true,
+            <% unless field.default_value.nil? -%>
               Default:  <%= go_literal(field.default_value) -%>,
+            <% end -%>
             },
 <%        end -%>
 <%      end -%>
@@ -408,11 +422,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
         }
 
         if res == nil {
-            // Nested object not found, spoof a 404 error for poll
-            return nil, &googleapi.Error{
-                Code: 404,
-                Message: "nested object <%= resource_name%> not found",
-            }
+            return nil, fake404("nested", "<%= resource_name%>")
         }
 
     <%  end -%>
@@ -422,11 +432,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
             return nil, err
         }
         if res == nil {
-            // Decoded object not found, spoof a 404 error for poll
-            return nil, &googleapi.Error{
-                Code: 404,
-                Message: "could not find object <%= resource_name%>",
-            }
+            return nil, fake404("decoded", "<%= resource_name%>")
         }
 
     <%  end -%>
@@ -511,11 +517,13 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%- unless object.virtual_fields.empty? -%>
   // Explicitly set virtual fields to default values if unset
 <%-   object.virtual_fields.each do |field| -%>
+    <% unless field.default_value.nil? -%>
     if _, ok := d.GetOkExists("<%= field.name -%>"); !ok {
       if err := d.Set("<%= field.name -%>", <%= go_literal(field.default_value) -%>); err != nil {
       	return fmt.Errorf("Error setting <%= field.name -%>: %s", err)
       }
     }
+    <% end -%>
 <%    end -%>
 <%  end -%>
 <%  if has_project -%>
@@ -956,9 +964,11 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 <%-  unless object.virtual_fields.empty? -%>
     // Explicitly set virtual fields to default values on import
   <%-  object.virtual_fields.each do |field| -%>
+    <% unless field.default_value.nil? -%>
     if err := d.Set("<%= field.name %>", <%= go_literal(field.default_value) -%>); err != nil {
     	return nil, fmt.Errorf("Error setting <%= field.name %>: %s", err)
     }
+    <% end -%>
   <%   end -%>
 <%   end -%>
 <%= lines(compile(pwd + '/' + object.custom_code.post_import)) if object.custom_code.post_import -%>

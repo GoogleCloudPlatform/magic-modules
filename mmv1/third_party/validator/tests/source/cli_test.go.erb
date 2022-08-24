@@ -64,6 +64,11 @@ func TestCLI(t *testing.T) {
 		{name: "sql"},
 		{name: "example_compute_forwarding_rule"},
 		{name: "example_compute_instance"},
+		{name: "example_project_create_empty_project_id"},
+		{name: "example_project_iam_member_empty_project"},
+		{name: "example_storage_bucket"},
+		{name: "example_folder_iam_binding", compareConvertOutput: compareMergedIamBindingOutput},
+		{name: "example_folder_iam_member", compareConvertOutput: compareMergedIamMemberOutput},
 		{name: "example_project_create", constraints: []constraint{alwaysViolate, constraint{name: "project_match_target", wantViolation: false, wantOutputRegex: ""}}},
 		{name: "example_project_update", constraints: []constraint{alwaysViolate, constraint{name: "project_match_target", wantViolation: true, wantOutputRegex: "Constraint GCPAlwaysViolatesConstraintV1.always_violates_project_match_target on resource"}}},
 		{name: "example_project_iam_binding", compareConvertOutput: compareMergedIamBindingOutput},
@@ -141,7 +146,7 @@ func TestCLI(t *testing.T) {
 					if reason, exists := skipCases[t.Name()]; exists {
 						t.Skip(reason)
 					}
-					testConvertCommand(t, dir, c.name, offline, c.compareConvertOutput)
+					testConvertCommand(t, dir, c.name, c.name, offline, true, c.compareConvertOutput)
 				})
 
 				for _, ct := range c.constraints {
@@ -149,13 +154,104 @@ func TestCLI(t *testing.T) {
 						if reason, exists := skipCases[t.Name()]; exists {
 							t.Skip(reason)
 						}
-						testValidateCommand(t, ct.wantViolation, ct.wantOutputRegex, dir, c.name, offline, ct.name)
+						testValidateCommand(t, ct.wantViolation, ct.wantOutputRegex, dir, c.name, offline, true, ct.name)
 					})
 				}
 			})
 		}
 	}
 }
+
+
+// TestCLIWithoutProject tests the "convert" and "validate" subcommand
+// against a generated .tfplan file, and it does not have --project option.
+func TestCLIWithoutProject(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode.")
+		return
+	}
+	// Define the reusable constraints to be use for the test cases.
+	type constraint struct {
+		name            string
+		wantViolation   bool
+		wantOutputRegex string
+	}
+	// Currently, we only test one rule. Moving forward, resource specific rules
+	// should be added to increase the coverage.
+	alwaysViolate := constraint{name: "always_violate", wantViolation: true, wantOutputRegex: "Constraint GCPAlwaysViolatesConstraintV1.always_violates_all on resource"}
+
+	// Test cases for each type of resource is defined here.
+	cases := []struct {
+		name                 string
+		constraints          []constraint
+		compareConvertOutput compareConvertOutputFunc
+	}{
+		{name: "example_project_create_empty_project_id"},
+		{name: "example_storage_bucket"},
+		{name: "example_project_iam_member_empty_project"},
+	}
+
+	for i := range cases {
+		// Allocate a variable to make sure test can run in parallel.
+		c := cases[i]
+		// Add default constraints if not set.
+		if len(c.constraints) == 0 {
+			c.constraints = []constraint{alwaysViolate}
+		}
+
+		// Add default convert comparison func if not set
+		if c.compareConvertOutput == nil {
+			c.compareConvertOutput = compareUnmergedConvertOutput
+		}
+
+		// Test both offline and online mode.
+		for _, offline := range []bool{true, false} {
+			offline := offline
+			t.Run(fmt.Sprintf("v=0.12/tf=%s/offline=%t", c.name, offline), func(t *testing.T) {
+				t.Parallel()
+				// Create a temporary directory for running terraform.
+				dir, err := ioutil.TempDir(tmpDir, "terraform")
+				if err != nil {
+					log.Fatal(err)
+				}
+				defer os.RemoveAll(dir)
+
+				// Generate the <name>.tf and <name>_assets.json files into the temporary directory.
+				generateTestFiles(t, "../testdata/templates", dir, c.name+".tf")
+				generateTestFiles(t, "../testdata/templates", dir, c.name+"_without_default_project.json")
+
+				// Uses glob matching to match generateTestFiles internals.
+				tfstateMatches, err := filepath.Glob(filepath.Join("../testdata/templates", c.name+".tfstate"))
+				if err != nil {
+					t.Fatalf("malformed glob: %v", err)
+				}
+				if tfstateMatches != nil {
+					generateTestFiles(t, "../testdata/templates", dir, c.name+".tfstate")
+					err = os.Rename(
+						filepath.Join(dir, c.name+".tfstate"),
+						filepath.Join(dir, "terraform.tfstate"),
+					)
+					if err != nil {
+						t.Fatalf("renaming tfstate: %v", err)
+					}
+				}
+
+				terraformWorkflow(t, dir, c.name)
+
+				t.Run("cmd=convert", func(t *testing.T) {
+					testConvertCommand(t, dir, c.name, c.name+"_without_default_project", offline, false, c.compareConvertOutput)
+				})
+
+				for _, ct := range c.constraints {
+					t.Run(fmt.Sprintf("cmd=validate/constraint=%s", ct.name), func(t *testing.T) {
+						testValidateCommand(t, ct.wantViolation, ct.wantOutputRegex, dir, c.name, offline, false, ct.name)
+					})
+				}
+			})
+		}
+	}
+}
+
 
 type compareConvertOutputFunc func(t *testing.T, expected []google.Asset, actual []google.Asset, offline bool)
 

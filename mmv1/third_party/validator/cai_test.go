@@ -39,7 +39,7 @@ func TestAssetName(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			r := regexp.MustCompile(c.expectedPattern)
 
-			output, err := assetName(c.data, nil, c.template)
+			output, err := assetName(c.data, &Config{}, c.template)
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -47,10 +47,7 @@ func GetStorageBucketCaiObject(d TerraformResourceData, config *Config) ([]Asset
 }
 
 func GetStorageBucketApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
-	project, err := getProject(d, config)
-	if err != nil {
-		return nil, err
-	}
+	project, _ := getProject(d, config)
 
 	// Get the bucket and location
 	bucket := d.Get("name").(string)

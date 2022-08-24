@@ -36,8 +36,10 @@ objects:
     name: 'Organization'
     base_url: 'organizations'
     create_url: 'organizations?parent=projects/{{project_id}}'
+    delete_url: 'organizations/{{name}}?retention={{retention}}'
     self_link: 'organizations/{{name}}'
     async: !ruby/object:Api::OpAsync
+      actions: ['create', 'update']
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
@@ -63,6 +65,19 @@ objects:
           The project ID associated with the Apigee organization.
         required: true
         input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::Enum
+        name: 'retention'
+        description: |
+          Optional. This setting is applicable only for organizations that are soft-deleted (i.e., BillingType
+          is not EVALUATION). It controls how long Organization data will be retained after the initial delete
+          operation completes. During this period, the Organization may be restored to its last known state.
+          After this period, the Organization will no longer be able to be restored.
+        values:
+          - "DELETION_RETENTION_UNSPECIFIED"
+          - "MINIMUM"
+        default_value: :DELETION_RETENTION_UNSPECIFIED
+        required: false
         url_param_only: true
     properties:
       - !ruby/object:Api::Type::String

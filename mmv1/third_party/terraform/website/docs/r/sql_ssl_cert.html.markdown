@@ -1,8 +1,6 @@
 ---
 subcategory: "Cloud SQL"
-layout: "google"
 page_title: "Google: google_sql_ssl_cert"
-sidebar_current: "docs-google-sql-ssl-cert"
 description: |-
   Creates a new SQL Ssl Cert in Google Cloud SQL.
 ---
@@ -12,7 +10,7 @@ description: |-
 Creates a new Google SQL SSL Cert on a Google SQL Instance. For more information, see the [official documentation](https://cloud.google.com/sql/), or the [JSON API](https://cloud.google.com/sql/docs/mysql/admin-api/v1beta4/sslCerts).
 
 ~> **Note:** All arguments including the private key will be stored in the raw state as plain-text.
-[Read more about sensitive data in state](/language/state/sensitive-data.html).
+[Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
 
 ## Example Usage
 

@@ -5,6 +5,7 @@
   location: region
 - type: EXCLUDE
   field: id
+- type: SKIP_IN_PROVIDER
 - type: CUSTOM_RESOURCE_NAME
   details:
     title: global_forwarding_rule
@@ -106,7 +107,7 @@
   field: ip_address
 - type: CUSTOM_VALIDATION
   details:
-    function: validateGCPName
+    function: validateGCEName
   field: service_label
 - type: DIFF_SUPPRESS_FUNC
   details:
@@ -122,4 +123,7 @@
   field: metadata_filter.filter_label
 - type: EXCLUDE
   field: location
+  location: global
+- type: EXCLUDE
+  field: service_directory_registrations
   location: global

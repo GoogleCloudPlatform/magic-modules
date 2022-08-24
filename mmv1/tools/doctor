@@ -56,15 +56,7 @@ fi
 
 count_in_path "goimports"
 if [ $found -eq 0 ]; then
-    warn "yel" "   goimports not found. Run 'go get golang.org/x/tools/cmd/goimports' to install it."
-else
-    warn "grn" "   found!"
-fi
-
-count_in_path "python"
-if [ $found -eq 0 ]; then
-    warn "yel" "   python not found. See https://docs.python-guide.org/starting/installation/"
-    warn "yel" "   for information on installing it."
+    warn "yel" "   goimports not found. Run 'go install golang.org/x/tools/cmd/goimports@latest' to install it."
 else
     warn "grn" "   found!"
 fi
@@ -77,10 +69,10 @@ else
     warn "grn" "   found!"
 fi
 
-count_in_path "black"
+
+count_in_path "make"
 if [ $found -eq 0 ]; then
-    warn "yel" "   black not found. See https://black.readthedocs.io/en/stable/getting_started.html#installation"
-    warn "yel" "   for information on installing it."
+    warn "yel" "   make not found. See https://www.gnu.org/software/make/ for information on downloading it."
 else
     warn "grn" "   found!"
 fi

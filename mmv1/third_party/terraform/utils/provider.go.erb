@@ -167,7 +167,7 @@ func Provider() *schema.Provider {
 			ContainerCustomEndpointEntryKey:              ContainerCustomEndpointEntry,
 			DataflowCustomEndpointEntryKey:               DataflowCustomEndpointEntry,
 			IamCredentialsCustomEndpointEntryKey:         IamCredentialsCustomEndpointEntry,
-			ResourceManagerV2CustomEndpointEntryKey:      ResourceManagerV2CustomEndpointEntry,
+			ResourceManagerV3CustomEndpointEntryKey:      ResourceManagerV3CustomEndpointEntry,
 			<% unless version == "ga" -%>
 			RuntimeConfigCustomEndpointEntryKey:          RuntimeConfigCustomEndpointEntry,
 			<% end -%>
@@ -178,26 +178,9 @@ func Provider() *schema.Provider {
 			BigtableAdminCustomEndpointEntryKey:          BigtableAdminCustomEndpointEntry,
 
 			// dcl
-			AssuredWorkloadsEndpointEntryKey:                AssuredWorkloadsEndpointEntry,
-			CloudResourceManagerEndpointEntryKey:            CloudResourceManagerEndpointEntry,
-			EventarcEndpointEntryKey:                        EventarcEndpointEntry,
-			FirebaserulesEndpointEntryKey:                   FirebaserulesEndpointEntry,
-			GkeHubFeatureCustomEndpointEntryKey:             GkeHubFeatureCustomEndpointEntry,
-			NetworkConnectivityEndpointEntryKey:             NetworkConnectivityEndpointEntry,
-			OrgPolicyEndpointEntryKey:                       OrgPolicyEndpointEntry,
-			PrivatecaCertificateTemplateEndpointEntryKey:    PrivatecaCertificateTemplateCustomEndpointEntry,
-			RecaptchaEnterpriseEndpointEntryKey:             RecaptchaEnterpriseEndpointEntry,
-			ContainerAwsCustomEndpointEntryKey:              ContainerAwsCustomEndpointEntry,
-			ContainerAzureCustomEndpointEntryKey:            ContainerAzureCustomEndpointEntry,
-			ApikeysEndpointEntryKey:                         ApikeysEndpointEntry,
-
-			<% if version == "private" -%>
-			VmwareEndpointEntryKey:                          VmwareEndpointEntry,
-			RunEndpointEntryKey:                             RunEndpointEntry,
-			<% end -%>
-
-			CloudBuildWorkerPoolEndpointEntryKey:            CloudBuildWorkerPoolEndpointEntry,
-},
+			ContainerAwsCustomEndpointEntryKey:           ContainerAwsCustomEndpointEntry,
+			ContainerAzureCustomEndpointEntryKey:         ContainerAzureCustomEndpointEntry,
+		},
 
 		ProviderMetaSchema: map[string]*schema.Schema{
 			"module_name": {
@@ -260,9 +243,7 @@ func Provider() *schema.Provider {
 			"google_container_engine_versions":                 dataSourceGoogleContainerEngineVersions(),
 			"google_container_registry_image":                  dataSourceGoogleContainerImage(),
 			"google_container_registry_repository":             dataSourceGoogleContainerRepo(),
-			<% unless version == 'ga' -%>
 			"google_dataproc_metastore_service":                dataSourceDataprocMetastoreService(),
-			<% end -%>
 			"google_dns_keys":                                  dataSourceDNSKeys(),
 			"google_dns_managed_zone":                          dataSourceDnsManagedZone(),
 			"google_dns_record_set":                            dataSourceDnsRecordSet(),
@@ -310,6 +291,7 @@ func Provider() *schema.Provider {
 			"google_service_account":                           dataSourceGoogleServiceAccount(),
 			"google_service_account_access_token":              dataSourceGoogleServiceAccountAccessToken(),
 			"google_service_account_id_token":                  dataSourceGoogleServiceAccountIdToken(),
+			"google_service_account_jwt":                       dataSourceGoogleServiceAccountJwt(),
 			"google_service_account_key":                       dataSourceGoogleServiceAccountKey(),
 			"google_sourcerepo_repository":                     dataSourceGoogleSourceRepoRepository(),
 			"google_spanner_instance":                          dataSourceSpannerInstance(),
@@ -323,6 +305,8 @@ func Provider() *schema.Provider {
 			"google_storage_object_signed_url":                 dataSourceGoogleSignedUrl(),
 			"google_storage_project_service_account":           dataSourceGoogleStorageProjectServiceAccount(),
 			"google_storage_transfer_project_service_account":  dataSourceGoogleStorageTransferProjectServiceAccount(),
+			"google_tags_tag_key":                              dataSourceGoogleTagsTagKey(),
+			"google_tags_tag_value":                            dataSourceGoogleTagsTagValue(),
 			"google_tpu_tensorflow_versions":                   dataSourceTpuTensorflowVersions(),
 			"google_redis_instance":                            dataSourceGoogleRedisInstance(),
 			// ####### END datasources ###########
@@ -333,6 +317,8 @@ func Provider() *schema.Provider {
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		return providerConfigure(ctx, d, provider)
 	}
+
+	configureDCLProvider(provider)
 
 	return provider
 }
@@ -393,7 +379,6 @@ end     # products.each do
 				// ####### START handwritten resources ###########
 				"google_app_engine_application":                resourceAppEngineApplication(),
 				"google_bigquery_table":                        resourceBigQueryTable(),
-				"google_bigquery_reservation_assignment":       resourceBigqueryReservationAssignment(),
 				"google_bigtable_gc_policy":                    resourceBigtableGCPolicy(),
 				"google_bigtable_instance":                     resourceBigtableInstance(),
 				"google_bigtable_table":                        resourceBigtableTable(),
@@ -477,44 +462,6 @@ end     # products.each do
 				// ####### END handwritten resources ###########
 			},
 			map[string]*schema.Resource{
-				// ####### START tpgtools resources ###########
-				"google_apikeys_key":                           resourceApikeysKey(),
-				"google_assured_workloads_workload":            resourceAssuredWorkloadsWorkload(),
-				"google_cloudbuild_worker_pool":                resourceCloudbuildWorkerPool(),
-				"google_compute_firewall_policy_association":   resourceComputeFirewallPolicyAssociation(),
-				"google_compute_firewall_policy":               resourceComputeFirewallPolicy(),
-				"google_compute_firewall_policy_rule":          resourceComputeFirewallPolicyRule(),
-				"google_container_aws_cluster":                 resourceContainerAwsCluster(),
-				"google_container_aws_node_pool":               resourceContainerAwsNodePool(),
-				"google_container_azure_client":                resourceContainerAzureClient(),
-				"google_container_azure_cluster":               resourceContainerAzureCluster(),
-				"google_container_azure_node_pool":             resourceContainerAzureNodePool(),
-				"google_dataproc_workflow_template":            resourceDataprocWorkflowTemplate(),
-				"google_eventarc_trigger":                      resourceEventarcTrigger(),
-				"google_firebaserules_release":                 resourceFirebaserulesRelease(),
-				"google_firebaserules_ruleset":                 resourceFirebaserulesRuleset(),
-				<% unless version == 'ga' -%>
-				"google_gke_hub_feature":                       resourceGkeHubFeature(),
-				"google_gke_hub_feature_membership":            resourceGkeHubFeatureMembership(),
-				<% end -%>
-				"google_logging_log_view":                      resourceLoggingLogView(),
-				<% unless version == 'ga' -%>
-				"google_monitoring_monitored_project":          resourceMonitoringMonitoredProject(),
-				<% end -%>
-				"google_network_connectivity_hub":              resourceNetworkConnectivityHub(),
-				"google_network_connectivity_spoke":            resourceNetworkConnectivitySpoke(),
-				"google_org_policy_policy":                     resourceOrgPolicyPolicy(),
-				"google_os_config_os_policy_assignment":        resourceOsConfigOsPolicyAssignment(),
-				"google_privateca_certificate_template":        resourcePrivatecaCertificateTemplate(),
-				"google_recaptcha_enterprise_key":              resourceRecaptchaEnterpriseKey(),
-				<% if version == 'private' -%>
-				"google_vmware_private_cloud":                  resourceVmwarePrivateCloud(),
-				"google_vmware_cluster":                        resourceVmwareCluster(),
-				"google_cloud_run_job":                         resourceRunJob(),
-				<% end -%>
-				// ####### END tpgtools resources ###########
-			},
-			map[string]*schema.Resource{
 				// ####### START non-generated IAM resources ###########
 				"google_bigtable_instance_iam_binding":         ResourceIamBinding(IamBigtableInstanceSchema, NewBigtableInstanceUpdater, BigtableInstanceIdParseFunc),
 				"google_bigtable_instance_iam_member":          ResourceIamMember(IamBigtableInstanceSchema, NewBigtableInstanceUpdater, BigtableInstanceIdParseFunc),
@@ -578,6 +525,7 @@ end     # products.each do
 				"google_service_account_iam_policy":            ResourceIamPolicy(IamServiceAccountSchema, NewServiceAccountIamUpdater, ServiceAccountIdParseFunc),
 				// ####### END non-generated IAM resources ###########
 			},
+			dclResources,
 		)
 }
 
@@ -676,7 +624,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.ContainerBasePath = d.Get(ContainerCustomEndpointEntryKey).(string)
 	config.DataflowBasePath = d.Get(DataflowCustomEndpointEntryKey).(string)
 	config.IamCredentialsBasePath = d.Get(IamCredentialsCustomEndpointEntryKey).(string)
-	config.ResourceManagerV2BasePath = d.Get(ResourceManagerV2CustomEndpointEntryKey).(string)
+	config.ResourceManagerV3BasePath = d.Get(ResourceManagerV3CustomEndpointEntryKey).(string)
 	<% unless version == "ga" -%>
 	config.RuntimeConfigBasePath = d.Get(RuntimeConfigCustomEndpointEntryKey).(string)
 	<% end -%>
@@ -687,18 +635,8 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.BigtableAdminBasePath = d.Get(BigtableAdminCustomEndpointEntryKey).(string)
 
 	// dcl
-	config.ApikeysBasePath = d.Get(ApikeysEndpointEntryKey).(string)
-	config.AssuredWorkloadsBasePath = d.Get(AssuredWorkloadsEndpointEntryKey).(string)
-	config.CloudResourceManagerBasePath = d.Get(CloudResourceManagerEndpointEntryKey).(string)
-	config.EventarcBasePath = d.Get(EventarcEndpointEntryKey).(string)
-	config.FirebaserulesBasePath = d.Get(FirebaserulesEndpointEntryKey).(string)
-	config.GkeHubBasePath = d.Get(GkeHubFeatureCustomEndpointEntryKey).(string)
-	config.NetworkConnectivityBasePath = d.Get(NetworkConnectivityEndpointEntryKey).(string)
-	config.OrgPolicyBasePath = d.Get(OrgPolicyEndpointEntryKey).(string)
-	config.PrivatecaBasePath = d.Get(PrivatecaCertificateTemplateEndpointEntryKey).(string)
-        config.ContainerAwsBasePath = d.Get(ContainerAwsCustomEndpointEntryKey).(string)
-        config.ContainerAzureBasePath = d.Get(ContainerAzureCustomEndpointEntryKey).(string)
-	config.CloudBuildWorkerPoolBasePath = d.Get(CloudBuildWorkerPoolEndpointEntryKey).(string)
+	config.ContainerAwsBasePath = d.Get(ContainerAwsCustomEndpointEntryKey).(string)
+	config.ContainerAzureBasePath = d.Get(ContainerAzureCustomEndpointEntryKey).(string)
 
 	stopCtx, ok := schema.StopContext(ctx)
 	if !ok {
@@ -708,7 +646,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		return nil, diag.FromErr(err)
 	}
 
-	return &config, nil
+	return providerDCLConfigure(d, &config), nil
 }
 
 func validateCredentials(v interface{}, k string) (warnings []string, errors []error) {
@@ -722,7 +660,7 @@ func validateCredentials(v interface{}, k string) (warnings []string, errors []e
 	}
 	if _, err := googleoauth.CredentialsFromJSON(context.Background(), []byte(creds)); err != nil {
 		errors = append(errors,
-			fmt.Errorf("JSON credentials in %q are not valid: %s", creds, err))
+			fmt.Errorf("JSON credentials are not valid: %s", err))
 	}
 
 	return

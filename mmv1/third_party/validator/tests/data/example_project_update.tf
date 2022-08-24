@@ -30,7 +30,7 @@ provider "google" {
 resource "google_project" "my_project" {
   name = "My New Project"
   project_id = "{{.Provider.project}}"
-  org_id  = "{{.OrgID}}"
+  org_id  = "12345"
 
   billing_account = "{{.Project.BillingAccountName}}"
 

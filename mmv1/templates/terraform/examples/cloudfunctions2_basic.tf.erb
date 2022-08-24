@@ -1,26 +1,28 @@
+# [START functions_v2_basic]
+locals {
+  project = "<%= ctx[:test_env_vars]['project'] %>" # Google Cloud Platform Project ID
+}
+
 resource "google_storage_bucket" "bucket" {
-  provider = google-beta
-  name     = "<%= ctx[:vars]['bucket_name'] %>"
+  name     = "${local.project}-<%= ctx[:vars]['bucket_name'] %>"  # Every bucket name must be globally unique
   location = "US"
   uniform_bucket_level_access = true
 }
  
 resource "google_storage_bucket_object" "object" {
-  provider = google-beta
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
-  source = "<%= ctx[:vars]['zip_path'] %>"
+  source = "<%= ctx[:vars]['zip_path'] %>"  # Add path to the zipped function source code
 }
  
 resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
   name = "<%= ctx[:vars]['function'] %>"
   location = "us-central1"
   description = "a new function"
  
   build_config {
-    runtime = "nodejs12"
-    entry_point = "helloHttp"
+    runtime = "nodejs16"
+    entry_point = "helloHttp"  # Set the entry point 
     source {
       storage_source {
         bucket = google_storage_bucket.bucket.name
@@ -35,3 +37,8 @@ resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
     timeout_seconds     = 60
   }
 }
+
+output "function_uri" { 
+  value = google_cloudfunctions2_function.function.service_config[0].uri
+}
+# [END functions_v2_basic]

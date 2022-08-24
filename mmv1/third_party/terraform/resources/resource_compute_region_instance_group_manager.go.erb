@@ -185,7 +185,12 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 				Optional:    true,
 				Default:     "STABLE",
 				ValidateFunc: validation.StringInSlice([]string{"STABLE", "UPDATED"}, false),
+
+				<% if version == "ga" -%>
 				Description: `When used with wait_for_instances specifies the status to wait for. When STABLE is specified this resource will wait until the instances are stable before returning. When UPDATED is set, it will wait for the version target to be reached and any per instance configs to be effective as well as all instances to be stable before returning.`,
+				<% else -%>
+				Description: `When used with wait_for_instances specifies the status to wait for. When STABLE is specified this resource will wait until the instances are stable before returning. When UPDATED is set, it will wait for the version target to be reached and any per instance configs to be effective and all instances configs to be effective as well as all instances to be stable before returning.`,
+				<% end -%>
 			},
 
 			"auto_healing_policies": {
@@ -244,8 +249,15 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 						"minimal_action": {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"RESTART", "REPLACE"}, false),
-							Description:  `Minimal action to be taken on an instance. You can specify either RESTART to restart existing instances or REPLACE to delete and create new instances from the target template. If you specify a RESTART, the Updater will attempt to perform that action only. However, if the Updater determines that the minimal action you specify is not enough to perform the update, it might perform a more disruptive action.`,
+							ValidateFunc: validation.StringInSlice([]string{"REFRESH", "RESTART", "REPLACE"}, false),
+							Description:  `Minimal action to be taken on an instance. You can specify either REFRESH to update without stopping instances, RESTART to restart existing instances or REPLACE to delete and create new instances from the target template. If you specify a REFRESH, the Updater will attempt to perform that action only. However, if the Updater determines that the minimal action you specify is not enough to perform the update, it might perform a more disruptive action.`,
+						},
+
+						"most_disruptive_allowed_action": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"NONE", "REFRESH", "RESTART", "REPLACE"}, false),
+							Description:  `Most disruptive action that is allowed to be taken on an instance. You can specify either NONE to forbid any actions, REFRESH to allow actions that do not need instance restart, RESTART to allow actions that can be applied without instance replacing or REPLACE to allow all possible actions. If the Updater determines that the minimal update action needed is more disruptive than most disruptive allowed action you specify it will not perform the update at all.`,
 						},
 
 						"type": {
@@ -312,7 +324,32 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
-
+			<% unless version == "ga" -%>
+			"all_instances_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: `Specifies configuration that overrides the instance template configuration for the group.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"metadata": {
+							Type:        schema.TypeMap,
+							Optional:    true,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Set:         schema.HashString,
+							Description: `The metadata key-value pairs that you want to patch onto the instance. For more information, see Project and instance metadata,`,
+						},
+						"labels": {
+							Type:        schema.TypeMap,
+							Optional:    true,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Set:         schema.HashString,
+							Description: `The label key-value pairs that you want to patch onto the instance,`,
+						},
+					},
+				},
+			},
+			<% end -%>
 			"stateful_disk": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -361,6 +398,22 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 								},
 							},
 						},
+						<% unless version == "ga" -%>
+						"all_instances_config": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: `Status of all-instances configuration on the group.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"effective": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: `A bit indicating whether this configuration has been applied to all managed instances in the group.`,
+									},
+								},
+							},
+						},
+						<% end -%>
 						"stateful": {
 							Type:        schema.TypeList,
 							Computed:    true,
@@ -424,6 +477,9 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		AutoHealingPolicies: expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})),
 		Versions:            expandVersions(d.Get("version").([]interface{})),
 		UpdatePolicy:        expandRegionUpdatePolicy(d.Get("update_policy").([]interface{})),
+		<% unless version == "ga" -%>
+		AllInstancesConfig:  expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})),
+		<% end -%>
 		DistributionPolicy:  expandDistributionPolicy(d),
 		StatefulPolicy:      expandStatefulPolicy(d.Get("stateful_disk").(*schema.Set).List()),
 		// Force send TargetSize to allow size of 0.
@@ -461,7 +517,11 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 func computeRIGMWaitForInstanceStatus(d *schema.ResourceData, meta interface{}) error {
 	waitForUpdates := d.Get("wait_for_instances_status").(string) == "UPDATED"
 	conf := resource.StateChangeConf{
+		<% if version == "ga" -%>
 		Pending: []string{"creating", "error", "updating per instance configs", "reaching version target"},
+		<% else -%>
+		Pending: []string{"creating", "error", "updating per instance configs", "reaching version target", "updating all instances config"},
+		<% end -%>
 		Target:  []string{"created"},
 		Refresh: waitForInstancesRefreshFunc(getRegionalManager, waitForUpdates, d, meta),
 		Timeout: d.Timeout(schema.TimeoutCreate),
@@ -520,6 +580,14 @@ func waitForInstancesRefreshFunc(f getInstanceManagerFunc, waitForUpdates bool, 
 				if !m.Status.VersionTarget.IsReached {
 					return false, "reaching version target", nil
 				}
+				if !m.Status.VersionTarget.IsReached {
+					return false, "reaching version target", nil
+				}
+				<% unless version == "ga" -%>
+				if !m.Status.AllInstancesConfig.Effective {
+					return false, "updating all instances config", nil
+				}
+				<% end -%>
 			}
 			return true, "created", nil
 		} else {
@@ -595,6 +663,13 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	if err := d.Set("update_policy", flattenRegionUpdatePolicy(manager.UpdatePolicy)); err != nil {
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
 	}
+	<% unless version == "ga" -%>
+	if manager.AllInstancesConfig != nil {
+		if err = d.Set("all_instances_config", flattenAllInstancesConfig(manager.AllInstancesConfig)); err != nil {
+			return fmt.Errorf("Error setting all_instances_config in state: %s", err.Error())
+		}
+	}
+	<% end -%>
 	if err = d.Set("stateful_disk", flattenStatefulPolicy(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_disk in state: %s", err.Error())
 	}
@@ -656,6 +731,18 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		updatedManager.UpdatePolicy = expandRegionUpdatePolicy(d.Get("update_policy").([]interface{}))
 		change = true
 	}
+
+	<% unless version == "ga" -%>
+	if d.HasChange("all_instances_config") {
+		oldAic, newAic := d.GetChange("all_instances_config")
+		if newAic == nil || len(newAic.([]interface{})) == 0 {
+			updatedManager.NullFields = append(updatedManager.NullFields, "AllInstancesConfig")
+		} else {
+			updatedManager.AllInstancesConfig = expandAllInstancesConfig(oldAic.([]interface{}), newAic.([]interface{}))
+		}
+		change = true
+	}
+	<% end -%>
 
 	if d.HasChange("stateful_disk") {
 		updatedManager.StatefulPolicy = expandStatefulPolicy(d.Get("stateful_disk").(*schema.Set).List())
@@ -775,6 +862,12 @@ func expandRegionUpdatePolicy(configured []interface{}) *compute.InstanceGroupMa
 		data := raw.(map[string]interface{})
 
 		updatePolicy.MinimalAction = data["minimal_action"].(string)
+		mostDisruptiveAllowedAction := data["most_disruptive_allowed_action"].(string)
+		if mostDisruptiveAllowedAction != "" {
+			updatePolicy.MostDisruptiveAllowedAction = mostDisruptiveAllowedAction
+		} else {
+			updatePolicy.NullFields = append(updatePolicy.NullFields, "MostDisruptiveAllowedAction")
+		}
 		updatePolicy.Type = data["type"].(string)
 		updatePolicy.InstanceRedistributionType = data["instance_redistribution_type"].(string)
 		updatePolicy.ReplacementMethod = data["replacement_method"].(string)
@@ -838,6 +931,7 @@ func flattenRegionUpdatePolicy(updatePolicy *compute.InstanceGroupManagerUpdateP
 		up["min_ready_sec"] = updatePolicy.MinReadySec
 <% end -%>
 		up["minimal_action"] = updatePolicy.MinimalAction
+		up["most_disruptive_allowed_action"] = updatePolicy.MostDisruptiveAllowedAction
 		up["type"] = updatePolicy.Type
 		up["instance_redistribution_type"] = updatePolicy.InstanceRedistributionType
 		up["replacement_method"] = updatePolicy.ReplacementMethod

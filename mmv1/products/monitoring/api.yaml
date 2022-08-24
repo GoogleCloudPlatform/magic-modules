@@ -347,6 +347,16 @@ objects:
                      The absolute number of time series
                      that must fail the predicate for the
                      condition to be triggered.
+              - !ruby/object:Api::Type::Enum
+                name: evaluationMissingData
+                description: |
+                  A condition control that determines how
+                  metric-threshold conditions are evaluated when
+                  data stops arriving.
+                values:
+                  - :EVALUATION_MISSING_DATA_INACTIVE
+                  - :EVALUATION_MISSING_DATA_ACTIVE
+                  - :EVALUATION_MISSING_DATA_NO_OP
            - !ruby/object:Api::Type::NestedObject
              name: conditionThreshold
              description: |
@@ -734,6 +744,16 @@ objects:
                   resource labels, and metric labels. This
                   field may not exceed 2048 Unicode characters
                   in length.
+              - !ruby/object:Api::Type::Enum
+                name: evaluationMissingData
+                description: |
+                  A condition control that determines how
+                  metric-threshold conditions are evaluated when
+                  data stops arriving.
+                values:
+                  - :EVALUATION_MISSING_DATA_INACTIVE
+                  - :EVALUATION_MISSING_DATA_ACTIVE
+                  - :EVALUATION_MISSING_DATA_NO_OP
            - !ruby/object:Api::Type::String
              name: displayName
              required: true
@@ -1043,6 +1063,16 @@ objects:
       name: displayName
       description: |
         Name used for UI elements listing this Service.
+    - !ruby/object:Api::Type::KeyValuePairs
+      name: 'userLabels'
+      description: |
+        Labels which have been used to annotate the service. Label keys must start
+        with a letter. Label keys and values may contain lowercase letters,
+        numbers, underscores, and dashes. Label keys and values have a maximum
+        length of 63 characters, and must be less than 128 bytes in size. Up to 64
+        label entries may be stored. For labels which do not have a semantic value,
+        the empty string may be supplied for the label value.
+      send_empty_value: true
     - !ruby/object:Api::Type::NestedObject
       name: telemetry
       description: |
@@ -1128,6 +1158,15 @@ objects:
         - WEEK
         - FORTNIGHT
         - MONTH
+    - !ruby/object:Api::Type::KeyValuePairs
+      name: userLabels
+      description: |
+        This field is intended to be used for organizing and identifying the AlertPolicy
+        objects.The field can contain up to 64 entries. Each key and value is limited
+        to 63 Unicode characters or 128 bytes, whichever is smaller. Labels and values
+        can contain only lowercase letters, numerals, underscores, and dashes. Keys
+        must begin with a letter.
+      send_empty_value: true
     - !ruby/object:Api::Type::NestedObject
       name: serviceLevelIndicator
       description: |
@@ -1757,6 +1796,26 @@ objects:
             - :NOT_CONTAINS_STRING
             - :MATCHES_REGEX
             - :NOT_MATCHES_REGEX
+            - :MATCHES_JSON_PATH
+            - :NOT_MATCHES_JSON_PATH
+        - !ruby/object:Api::Type::NestedObject
+          name: jsonPathMatcher
+          description: Information needed to perform a JSONPath content match.
+            Used for `ContentMatcherOption::MATCHES_JSON_PATH` and
+            `ContentMatcherOption::NOT_MATCHES_JSON_PATH`.
+          properties:
+          - !ruby/object:Api::Type::String
+            name: jsonPath
+            description: JSONPath within the response output pointing to the expected
+              `ContentMatcher::content` to match against.
+            required: true
+          - !ruby/object:Api::Type::Enum
+            name: jsonMatcher
+            description: Options to perform JSONPath content matching.
+            default_value: :EXACT_MATCH
+            values:
+              - :EXACT_MATCH
+              - :REGEX_MATCH
     - !ruby/object:Api::Type::Array
       name: selectedRegions
       description: The list of regions from which the check will be run. Some regions
@@ -1765,6 +1824,14 @@ objects:
         message is returned. Not specifying this field will result in uptime checks
         running from all regions.
       item_type: Api::Type::String
+    - !ruby/object:Api::Type::Enum
+      name: checkerType
+      input: true
+      description: The checker type to use for the check. If the monitored resource type 
+        is servicedirectory_service, checkerType must be set to VPC_CHECKERS.
+      values:
+        - :STATIC_IP_CHECKERS
+        - :VPC_CHECKERS
     - !ruby/object:Api::Type::NestedObject
       name: httpCheck
       description: Contains information needed to make an HTTP or HTTPS check.
@@ -1888,6 +1955,24 @@ objects:
           maximum byte size is 1 megabyte. Note - As with all bytes fields JSON
           representations are base64 encoded. e.g. "foo=bar" in URL-encoded form is
           "foo%3Dbar" and in base64 encoding is "Zm9vJTI1M0RiYXI=".
+      - !ruby/object:Api::Type::Array
+        name: acceptedResponseStatusCodes
+        description: If present, the check will only pass if the HTTP response status code is in this set of status codes. If empty, the HTTP status code will only pass if the HTTP status code is 200-299.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+          - !ruby/object:Api::Type::Integer
+            name: statusValue
+            description: A status code to accept.        
+          - !ruby/object:Api::Type::Enum
+            name: statusClass          
+            description: A class of status codes to accept.
+            values:
+              - :STATUS_CLASS_1XX
+              - :STATUS_CLASS_2XX
+              - :STATUS_CLASS_3XX
+              - :STATUS_CLASS_4XX
+              - :STATUS_CLASS_5XX
+              - :STATUS_CLASS_ANY       
     - !ruby/object:Api::Type::NestedObject
       name: tcpCheck
       description: Contains information needed to make a TCP check.
@@ -1933,7 +2018,8 @@ objects:
       input: true
       description: 'The monitored resource (https://cloud.google.com/monitoring/api/resources)
         associated with the configuration. The following monitored resource types are
-        supported for uptime checks:  uptime_url  gce_instance  gae_app  aws_ec2_instance  aws_elb_load_balancer'
+        supported for uptime checks:  uptime_url  gce_instance  gae_app  aws_ec2_instance 
+        aws_elb_load_balancer  k8s_service  servicedirectory_service'
       exactly_one_of:
         - monitored_resource
         - resource_group

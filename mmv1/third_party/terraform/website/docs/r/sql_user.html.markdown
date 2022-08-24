@@ -1,8 +1,6 @@
 ---
 subcategory: "Cloud SQL"
-layout: "google"
 page_title: "Google: google_sql_user"
-sidebar_current: "docs-google-sql-user"
 description: |-
   Creates a new SQL user in Google Cloud SQL.
 ---
@@ -12,7 +10,7 @@ description: |-
 Creates a new Google SQL User on a Google SQL User Instance. For more information, see the [official documentation](https://cloud.google.com/sql/), or the [JSON API](https://cloud.google.com/sql/docs/admin-api/v1beta4/users).
 
 ~> **Note:** All arguments including the username and password will be stored in the raw state as plain-text.
-[Read more about sensitive data in state](/language/state/sensitive-data.html). Passwords will not be retrieved when running
+[Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data). Passwords will not be retrieved when running
 "terraform import".
 
 ## Example Usage

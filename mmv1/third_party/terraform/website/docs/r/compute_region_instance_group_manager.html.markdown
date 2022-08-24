@@ -1,8 +1,6 @@
 ---
 subcategory: "Compute Engine"
-layout: "google"
 page_title: "Google: google_compute_region_instance_group_manager"
-sidebar_current: "docs-google-compute-region_instance-group-manager"
 description: |-
   Manages an Regional Instance Group within GCE.
 ---
@@ -46,6 +44,15 @@ resource "google_compute_region_instance_group_manager" "appserver" {
 
   version {
     instance_template = google_compute_instance_template.appserver.id
+  }
+  
+  all_instances_config {
+    metadata = {
+      metadata_key = "metadata_value"
+    }
+    labels = {
+      label_key = "label_value"
+    }
   }
 
   target_pools = [google_compute_target_pool.appserver.id]
@@ -141,9 +148,12 @@ The following arguments are supported:
 * `auto_healing_policies` - (Optional) The autohealing policies for this managed instance
 group. You can specify only one value. Structure is documented below. For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/creating-groups-of-managed-instances#monitoring_groups).
 
+* `all_instances_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  Properties to set on all instances in the group. After setting
+  allInstancesConfig on the group, you must update the group's instances to
+  apply the configuration.
 
 * `update_policy` - (Optional) The update policy for this managed instance group. Structure is [documented below](#nested_update_policy). For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/updating-managed-instance-groups) and [API](https://cloud.google.com/compute/docs/reference/rest/beta/regionInstanceGroupManagers/patch)
-
 
 * `distribution_policy_zones` - (Optional) The distribution policy for this managed instance
 group. You can specify one or more values. For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/distributing-instances-with-regional-instance-groups#selectingzones).
@@ -158,17 +168,20 @@ group. You can specify one or more values. For more information, see the [offici
 
 ```hcl
 update_policy {
-  type                         = "PROACTIVE"
-  instance_redistribution_type = "PROACTIVE"
-  minimal_action               = "REPLACE"
-  max_surge_percent            = 20
-  max_unavailable_fixed        = 2
-  min_ready_sec                = 50
-  replacement_method           = "RECREATE"
+  type                           = "PROACTIVE"
+  instance_redistribution_type   = "PROACTIVE"
+  minimal_action                 = "REPLACE"
+  most_disruptive_allowed_action = "REPLACE"
+  max_surge_percent              = 20
+  max_unavailable_fixed          = 2
+  min_ready_sec                  = 50
+  replacement_method             = "RECREATE"
 }
 ```
 
-* `minimal_action` - (Required) - Minimal action to be taken on an instance. You can specify either `RESTART` to restart existing instances or `REPLACE` to delete and create new instances from the target template. If you specify a `RESTART`, the Updater will attempt to perform that action only. However, if the Updater determines that the minimal action you specify is not enough to perform the update, it might perform a more disruptive action.
+* `minimal_action` - (Required) - Minimal action to be taken on an instance. You can specify either `REFRESH` to update without stopping instances, `RESTART` to restart existing instances or `REPLACE` to delete and create new instances from the target template. If you specify a `REFRESH`, the Updater will attempt to perform that action only. However, if the Updater determines that the minimal action you specify is not enough to perform the update, it might perform a more disruptive action.
+
+* `most_disruptive_allowed_action` - (Optional) - Most disruptive action that is allowed to be taken on an instance. You can specify either NONE to forbid any actions, REFRESH to allow actions that do not need instance restart, RESTART to allow actions that can be applied without instance replacing or REPLACE to allow all possible actions. If the Updater determines that the minimal update action needed is more disruptive than most disruptive allowed action you specify it will not perform the update at all.
 
 * `type` - (Required) - The type of update process. You can specify either `PROACTIVE` so that the instance group manager proactively executes actions in order to bring instances to their target versions or `OPPORTUNISTIC` so that no action is proactively executed but the update will be performed as part of other actions (for example, resizes or recreateInstances calls).
 
@@ -185,6 +198,25 @@ update_policy {
 * `min_ready_sec` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)), Minimum number of seconds to wait for after a newly created instance becomes available. This value must be from range [0, 3600]
 
 * `replacement_method` - (Optional), The instance replacement method for managed instance groups. Valid values are: "RECREATE", "SUBSTITUTE". If SUBSTITUTE (default), the group replaces VM instances with new instances that have randomly generated names. If RECREATE, instance names are preserved.  You must also set max_unavailable_fixed or max_unavailable_percent to be greater than 0.
+- - -
+
+<a name="nested_all_instances_config"></a>The `all_instances_config` block supports:
+
+```hcl
+all_instances_config {
+  metadata = {
+    metadata_key = "metadata_value"
+  }
+  labels = {
+    label_key = "label_Value"
+  }
+}
+```
+
+* `metadata` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)), The metadata key-value pairs that you want to patch onto the instance. For more information, see [Project and instance metadata](https://cloud.google.com/compute/docs/metadata#project_and_instance_metadata).
+
+* `labels` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)), The label key-value pairs that you want to patch onto the instance.
+
 - - -
 
 <a name="nested_named_port"></a>The `named_port` block supports: (Include a `named_port` block for each named-port required).

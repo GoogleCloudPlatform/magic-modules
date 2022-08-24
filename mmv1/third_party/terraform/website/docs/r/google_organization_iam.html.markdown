@@ -1,8 +1,6 @@
 ---
 subcategory: "Cloud Platform"
-layout: "google"
 page_title: "Google: google_organization_iam"
-sidebar_current: "docs-google-organization-iam"
 description: |-
  Collection of resources to manage IAM policy for a organization.
 ---
@@ -246,3 +244,6 @@ terraform import google_organization_iam_audit_config.my_organization "your-orga
 
 -> **Custom Roles**: If you're importing a IAM resource with a custom role, make sure to use the
  full name of the custom role, e.g. `organizations/{{org_id}}/roles/{{role_id}}`.
+
+-> **Conditional IAM Bindings**: If you're importing a IAM binding with a condition block, make sure
+ to include the title of condition, e.g. `terraform import google_organization_iam_binding.my_organization "your-org-id roles/{{role_id}} condition-title"`

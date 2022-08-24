@@ -30,20 +30,68 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "metadata"
           - "metadata_startup_script"
+    ### SQL Server VM ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_sqlserver_vm_instance"
+        primary_resource_type: "google_compute_instance"
+        primary_resource_id: "sqlserver_vm"
+        vars:
+          vpc_network: "vpc-network"
+          vpc_subnet: "vpc-subnet"
+          sqlserver_vm: "sqlserver-vm"
+          sql_server_1433_3: "sql-server-1433-3"
+        min_version: beta
+    ### Spot VM ###
       - !ruby/object:Provider::Terraform::Examples
         name: "spot_instance_basic"
         primary_resource_type: "google_compute_instance"
         primary_resource_id: "spot_vm_instance"
         vars:
           spot_instance_name: "spot-instance-name"
-#    ### SQL Server VM ###
-#      - !ruby/object:Provider::Terraform::Examples
-#        name: "sql_sqlserver_vm_instance"
-#        primary_resource_id: "default"
-#        primary_resource_type: "google_compute_instance"
-#        vars:
-#          sqlserver_vm: "sqlserver-vm"
-#          sql_server_1433: "sql-server-1433"
+    ### Custom Hostname VM ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "instance_custom_hostname"
+        primary_resource_type: "google_compute_instance"
+        primary_resource_id: "custom_hostname_instance"
+        vars:
+          custom_hostname_instance_name: "custom-hostname-instance-name"
+    ### Compute Reservation Local ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "compute_reservation"
+        primary_resource_type: "google_compute_reservation"
+        primary_resource_id: "gce_reservation_local"
+        vars:
+          gce_reservation_local: "gce-reservation-local"
+        test_env_vars:
+          project: :PROJECT_NAME
+        skip_import_test: true
+    ### Compute Instance Enable Virtual Display
+      - !ruby/object:Provider::Terraform::Examples
+        name: "instance_virtual_display_enabled"
+        primary_resource_type: "google_compute_instance"
+        primary_resource_id: "instance_virtual_display"
+        vars:
+          instance_virtual_display: "instance-virtual-display"
+    ### OS Login
+      - !ruby/object:Provider::Terraform::Examples
+        name: "os_login"
+        primary_resource_type: "google_compute_instance"
+        primary_resource_id: "oslogin_instance"
+        vars:
+          oslogin_instance_name: "oslogin-instance-name"
+        skip_docs: true
+
+    # Eventarc
+    ### Eventarc Workflows quickstart
+      - !ruby/object:Provider::Terraform::Examples
+        name: "eventarc_workflows"
+        primary_resource_type: "google_eventarc_trigger"
+        primary_resource_id: "trigger_pubsub_tf"
+        vars:
+          pubsub_workflow_tf: "pubsub-workflow-tf"
+          trigger_pubsub_workflow_tf: "trigger-pubsub-workflow-tf"
+        min_version: beta
+
     # SQL
     ### When including separate samples for each DB type, add `skip_test: true`
     ### for Postgres and MySQL, but not for SQL Server
@@ -53,9 +101,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "sql_database_instance_sqlserver"
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "instance"
+        # Random provider
+        skip_vcr: true
         vars:
           database_instance_name: "sqlserver-instance"
           deletion_protection: "true"
+          user: "user"
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
@@ -65,9 +116,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "sql_database_instance_postgres"
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "instance"
+        # Random provider
+        skip_vcr: true
         vars:
           database_instance_name: "postgres-instance"
           deletion_protection: "true"
+          user: "user"
         skip_test: true
         test_vars_overrides:
           deletion_protection: "false"
@@ -77,9 +131,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "sql_database_instance_my_sql"
         primary_resource_type: "google_sql_database_instance"
         primary_resource_id: "instance"
+        # Random provider
+        skip_vcr: true
         vars:
           database_instance_name: "mysql-instance"
           deletion_protection: "true"
+          user: "user"
         skip_test: true
         test_vars_overrides:
           deletion_protection: "false"
@@ -423,6 +480,33 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "deletion_protection"
           - "root_password"
+    ### Password Validation Policy ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_mysql_instance_pvp"
+        primary_resource_id: "mysql_pvp_instance_name"
+        primary_resource_type: "google_sql_database_instance"
+        skip_test: true
+        vars:
+          mysql_pvp_instance_name: "mysql-pvp-instance-name"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+          - "root_password"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_postgres_instance_pvp"
+        primary_resource_id: "postgres_pvp_instance_name"
+        primary_resource_type: "google_sql_database_instance"
+        vars:
+          postgres_pvp_instance_name: "postgres-pvp-instance-name"
+          deletion_protection: "true"
+        skip_test: true
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+          - "root_password"
     ### HA ###
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_instance_ha"
@@ -451,6 +535,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           postgres_instance_cmek: "postgres-instance-cmek"
           sqlserver_instance_cmek: "sqlserver-instance-cmek"
           deletion_protection: "true"
+        min_version: beta
         test_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:
@@ -516,6 +601,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "deletion_protection"
           - "root_password"
+    ### Active Directory ###
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_sqlserver_instance_active_directory"
+        primary_resource_type: "google_sql_database_instance"
+        primary_resource_id: "instance_with_ad"
+        vars:
+          private_network: "private-network"
+          private_ip_address: "private-ip-address"
+          database_instance_name: "database-instance-name"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        ignore_read_extra:
+          - "deletion_protection"
+          - "root_password"
+        skip_docs: true
+        skip_test: true # Very similar to other examples
     # Storage
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_new_bucket"
@@ -524,6 +626,38 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           new_bucket: "new-bucket"
           new_object: "new-object"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "storage_make_data_public"
+        primary_resource_type: "google_storage_bucket"
+        primary_resource_id: "default"
+        vars:
+          example_bucket_name: "example-bucket-name"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "storage_pubsub_notifications"
+        primary_resource_type: "google_pubsub_topic"
+        primary_resource_id: "topic"
+        vars:
+          example_bucket_name: "example-bucket-name"
+          your_topic_name: "your_topic_name"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "storage_object_lifecycle_setting"
+        primary_resource_type: "google_storage_bucket"
+        primary_resource_id: "auto_expire"
+        ignore_read_extra:
+          - "force_destroy"
+        vars:
+          example_bucket: "example-bucket"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "storage_static_website"
+        primary_resource_type: "google_storage_bucket"
+        primary_resource_id: "static_website"
+        vars:
+          static_website_bucket: "static-website-bucket"
+          main_page_suffix: "index.html"
+          not_found_page: "404.html"
     properties:
 
 

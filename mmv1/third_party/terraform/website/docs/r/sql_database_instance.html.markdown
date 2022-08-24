@@ -1,8 +1,6 @@
 ---
 subcategory: "Cloud SQL"
-layout: "google"
 page_title: "Google: google_sql_database_instance"
-sidebar_current: "docs-google-sql-database-instance"
 description: |-
   Creates a new SQL database instance in Google Cloud SQL.
 ---
@@ -28,7 +26,7 @@ It is recommended to not set this field (or set it to true) until you're ready t
 ```hcl
 resource "google_sql_database_instance" "main" {
   name             = "main-instance"
-  database_version = "POSTGRES_11"
+  database_version = "POSTGRES_14"
   region           = "us-central1"
 
   settings {
@@ -72,7 +70,7 @@ locals {
 
 resource "google_sql_database_instance" "postgres" {
   name             = "postgres-instance-${random_id.db_name_suffix.hex}"
-  database_version = "POSTGRES_11"
+  database_version = "POSTGRES_14"
 
   settings {
     tier = "db-f1-micro"
@@ -174,7 +172,7 @@ The following arguments are supported:
 * `database_version` - (Required) The MySQL, PostgreSQL or
 SQL Server version to use. Supported values include `MYSQL_5_6`,
 `MYSQL_5_7`, `MYSQL_8_0`, `POSTGRES_9_6`,`POSTGRES_10`, `POSTGRES_11`,
-`POSTGRES_12`, `POSTGRES_13`, `SQLSERVER_2017_STANDARD`,
+`POSTGRES_12`, `POSTGRES_13`, `POSTGRES_14`, `SQLSERVER_2017_STANDARD`,
 `SQLSERVER_2017_ENTERPRISE`, `SQLSERVER_2017_EXPRESS`, `SQLSERVER_2017_WEB`.
 `SQLSERVER_2019_STANDARD`, `SQLSERVER_2019_ENTERPRISE`, `SQLSERVER_2019_EXPRESS`,
 `SQLSERVER_2019_WEB`.
@@ -196,9 +194,9 @@ includes an up-to-date reference of supported versions.
 * `replica_configuration` - (Optional) The configuration for replication. The
     configuration is detailed below. Valid only for MySQL instances.
 
-* `root_password` - (Optional) Initial root password. Required for MS SQL Server, ignored by MySQL and PostgreSQL.
+* `root_password` - (Optional) Initial root password. Required for MS SQL Server.
 
-* `encryption_key_name` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `encryption_key_name` - (Optional)
     The full path to the encryption key used for the CMEK disk encryption.  Setting
     up disk encryption currently requires manual steps outside of Terraform.
     The provided key must be in the same region as the SQL instance.  In order
@@ -238,9 +236,11 @@ The `settings` block supports:
 
 * `collation` - (Optional) The name of server instance collation.
 
-* `disk_autoresize` - (Optional, Default: `true`) Configuration to increase storage size automatically.  Note that future `terraform apply` calls will attempt to resize the disk to the value specified in `disk_size` - if this is set, do not set `disk_size`.
+* `disk_autoresize` - (Optional, Default: `true`) Enables auto-resizing of the storage size. Set to false if you want to set `disk_size`.
 
-* `disk_size` - (Optional, Default: `10`) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased.
+* `disk_autoresize_limit` - (Optional, Default: `0`) The maximum size to which storage capacity can be automatically increased. The default value is 0, which specifies that there is no limit.
+
+* `disk_size` - (Optional, Default: `10`) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. If you want to set this field, set `disk_autoresize` to false.
 
 * `disk_type` - (Optional, Default: `PD_SSD`) The type of data disk: PD_SSD or PD_HDD.
 
@@ -253,6 +253,19 @@ The optional `settings.database_flags` sublist supports:
 * `name` - (Required) Name of the flag.
 
 * `value` - (Required) Value of the flag.
+
+The optional `settings.active_directory_config` subblock supports:
+
+* `domain` - (Required) The domain name for the active directory (e.g., mydomain.com).
+    Can only be used with SQL Server.
+
+The optional `settings.sql_server_audit_config` subblock supports:
+
+* `bucket` - (Required) The name of the destination bucket (e.g., gs://mybucket).
+
+* `upload_interval` - (Optional) How often to upload generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+
+* `retention_interval` - (Optional) How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s". 
 
 The optional `settings.backup_configuration` subblock supports:
 
@@ -313,6 +326,8 @@ The optional `settings.location_preference` subblock supports:
 * `zone` - (Optional) The preferred compute engine
     [zone](https://cloud.google.com/compute/docs/zones?hl=en).
 
+* `secondary_zone` - (Optional) The preferred Compute Engine zone for the secondary/failover.
+
 The optional `settings.maintenance_window` subblock for instances declares a one-hour
 [maintenance window](https://cloud.google.com/sql/docs/instance-settings?hl=en#maintenance-window-2ndgen)
 when an Instance can automatically restart to apply updates. The maintenance window is specified in UTC time. It supports:
@@ -333,6 +348,20 @@ The optional `settings.insights_config` subblock for instances declares [Query I
 * `record_application_tags` - True if Query Insights will record application tags from query when enabled.
 
 * `record_client_address` - True if Query Insights will record client address when enabled.
+
+The optional `settings.password_validation_policy` subblock for instances declares [Password Validation Policy](https://cloud.google.com/sql/docs/postgres/built-in-authentication) configuration. It contains:
+
+* `min_length` - Specifies the minimum number of characters that the password must have.
+
+* `complexity` - Checks if the password is a combination of lowercase, uppercase, numeric, and non-alphanumeric characters.
+
+* `reuse_interval` - Specifies the number of previous passwords that you can't reuse.
+
+* `disallow_username_substring` - Prevents the use of the username in the password.
+
+* `password_change_interval` - Specifies the minimum duration after which you can change the password.
+
+* `enable_password_policy` - Enables or disable the password validation policy.
 
 The optional `replica_configuration` block must have `master_instance_name` set
 to work, cannot be updated, and supports:

@@ -102,6 +102,9 @@ module Provider
       files = retrieve_full_list_of_test_files
       tests = files.map { |file| file.split('.')[0] } | []
       non_defined_tests = tests - retrieve_list_of_manually_defined_tests
+      non_defined_tests = non_defined_tests.reject do |file|
+        file.end_with?('_without_default_project')
+      end
       validate_non_defined_tests(files.to_set, non_defined_tests)
       non_defined_tests
     end
@@ -205,6 +208,8 @@ module Provider
                         'third_party/validator/storage_bucket.go'],
                        ['converters/google/resources/cloudfunctions_function.go',
                         'third_party/validator/cloudfunctions_function.go'],
+                       ['converters/google/resources/dcl.go',
+                        'third_party/validator/dcl.go'],
                        ['converters/google/resources/cloudfunctions_cloud_function.go',
                         'third_party/validator/cloudfunctions_cloud_function.go'],
                        ['converters/google/resources/bigquery_table.go',

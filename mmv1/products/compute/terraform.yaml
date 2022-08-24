@@ -104,7 +104,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
       autoscalingPolicy.minNumReplicas: !ruby/object:Overrides::Terraform::PropertyOverride
         name: minReplicas
         # Even though this field isn't actually required by the API, it makes our
@@ -150,6 +150,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_bucket_basic"
         primary_resource_id: "image_backend"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-image-backend-bucket%s\", context[\"random_suffix\"])"
         vars:
           backend_bucket_name: "image-backend-bucket"
           bucket_name: "image-store-bucket"
@@ -163,6 +164,45 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_bucket_security_policy"
         primary_resource_id: "image_backend"
+        vars:
+          backend_bucket_name: "image-backend-bucket"
+          bucket_name: "image-store-bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_bucket_query_string_whitelist"
+        primary_resource_id: "image_backend"
+        vars:
+          backend_bucket_name: "image-backend-bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_bucket_include_http_headers"
+        primary_resource_id: "image_backend"
+        vars:
+          backend_bucket_name: "image-backend-bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "external_cdn_lb_with_backend_bucket"
+        primary_resource_type: "google_compute_backend_bucket"
+        primary_resource_id: "default"
+        vars:
+          my_bucket: "my-bucket"
+          index_page: "index-page"
+          404_page: "404-page"
+          test_object: "test-object"
+          example_ip: "example-ip"
+          http_lb_forwarding_rule: "http-lb-forwarding-rule"
+          http_lb_proxy: "http-lb-proxy"
+          http_lb: "http-lb"
+          cat_backend_bucket: "cat-backend-bucket"
+        skip_docs: true
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_bucket_bypass_cache"
+        primary_resource_id: "image_backend"
+        skip_docs: true
+        vars:
+          backend_bucket_name: "image-backend-bucket"
+          bucket_name: "image-store-bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_bucket_coalescing"
+        primary_resource_id: "image_backend"
+        skip_docs: true
         vars:
           backend_bucket_name: "image-backend-bucket"
           bucket_name: "image-store-bucket"
@@ -235,6 +275,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           backend_service_name: "backend-service"
           http_health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_cache_include_named_cookies"
+        primary_resource_id: "default"
+        vars:
+          backend_service_name: "backend-service"
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_cache"
         primary_resource_id: "default"
@@ -618,6 +663,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      provisionedIops: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
       sourceImage: !ruby/object:Overrides::Terraform::PropertyOverride
         name: image
         diff_suppress_func: 'diskImageDiffSuppress'
@@ -759,7 +807,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           The name or self_link of the network to attach this firewall to.
@@ -934,7 +982,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: false
       serviceLabel: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
   GlobalAddress: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1063,10 +1111,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           forwarding_rule_name: "global-rule"
           http_proxy_name: "target-proxy"
           network_name: "my-network"
+          internal_network_name: "my-internal-network"
+          subnetwork_name: "my-subnetwork"
           default_backend_service_name: "backend-default"
           hybrid_backend_service_name: "backend-hybrid"
+          internal_backend_service_name": "backend-internal"
           default_neg_name: "default-neg"
           hybrid_neg_name: "hybrid-neg"
+          internal_neg_name: "internal-neg"
           health_check_name: "health-check"
         ignore_read_extra:
           - "port_range"
@@ -1349,8 +1401,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "on_prem"
         vars:
           interconnect_attachment_name: "on-prem-attachment"
-          router_name: "router"
-          network_name: "network"
+          router_name: "router-1"
+          network_name: "network-1"
       - !ruby/object:Provider::Terraform::Examples
         name: "compute_interconnect_attachment_ipsec_encryption"
         primary_resource_id: "ipsec-encrypted-interconnect-attachment"
@@ -1441,6 +1493,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           If set to `true`, default routes (`0.0.0.0/0`) will be deleted
           immediately after network creation. Defaults to `false`.
     properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCEName'
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       # We want this to be the smallest change possible, so exclude this for now.
@@ -1468,6 +1523,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
       mtu: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      internalIpv6Range: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
@@ -1528,7 +1585,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
@@ -1579,7 +1636,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
   RegionNetworkEndpointGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1602,10 +1659,27 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "appengine_neg"
         vars:
           neg_name: "appengine-neg"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_network_endpoint_group_psc"
+        primary_resource_id: "psc_neg"
+        vars:
+          neg_name: "psc-neg"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_network_endpoint_group_psc_service_attachment"
+        primary_resource_id: "psc_neg_service_attachment"
+        vars:
+          neg_name: "psc-neg"
+          network_name: "psc-network"
+          subnetwork_name: "psc-subnetwork"
+          psc_subnetwork_name: "psc-subnetwork-nat"
+          backend_service_name: "psc-backend"
+          forwarding_rule_name: "psc-forwarding-rule"
+          service_attachment_name: "psc-service-attachment"
+          health_check_name: "psc-healthcheck"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
   NetworkPeeringRoutesConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"
     import_format: ["projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"]
@@ -1784,7 +1858,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
       priority: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
@@ -1962,7 +2036,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
       autoscalingPolicy.minNumReplicas: !ruby/object:Overrides::Terraform::PropertyOverride
         name: minReplicas
         # Even though this field isn't actually required by the API, it makes our
@@ -2424,7 +2498,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
       bgp.asn: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateRFC6996Asn'
@@ -2488,6 +2562,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       tcpTransitoryIdleTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+      enableDynamicPortAllocation: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/router_nat.go.erb'
       resource_definition: 'templates/terraform/resource_definition/router_nat.go.erb'
@@ -2587,6 +2663,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "snapshot_basic"
         primary_resource_id: "snapshot"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-snapshot%s\", context[\"random_suffix\"])"
         vars:
           snapshot_name: "my-snapshot"
           disk_name: "debian-disk"
@@ -2712,7 +2789,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.erb'
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
         description: |
           {{description}}
 
@@ -2771,7 +2848,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.erb'
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
         description: |
           {{description}}
 
@@ -2830,6 +2907,36 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_value: :TLS_1_0
       warnings: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+  # Find that Region SSL Policy needs the same custom code as SSL Policy
+  RegionSslPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants:  'templates/terraform/constants/region_ssl_policy.erb'
+      resource_definition: 'templates/terraform/resource_definition/region_ssl_policy.erb'
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      customFeatures: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        send_empty_value: true
+        description: |
+          {{description}}
+          See the [official documentation](https://cloud.google.com/compute/docs/load-balancing/ssl-policies#profilefeaturesupport)
+          for which ciphers are available to use. **Note**: this argument
+          *must* be present when using the `CUSTOM` profile. This argument
+          *must not* be present when using any other profile.
+      enabledFeatures: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      profile: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_value: :COMPATIBLE
+        description: |
+          {{description}}
+          See the [official documentation](https://cloud.google.com/compute/docs/load-balancing/ssl-policies#profilefeaturesupport)
+          for information on what cipher suites each profile provides. If
+          `CUSTOM` is used, the `custom_features` attribute **must be set**.
+      minTlsVersion: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_value: :TLS_1_0
+      warnings: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
   Subnetwork: !ruby/object:Overrides::Terraform::ResourceOverride
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/compute.networkUser'
@@ -2840,7 +2947,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
       secondaryIpRanges: !ruby/object:Overrides::Terraform::PropertyOverride
         name: secondaryIpRange
         unordered_list: true
@@ -2856,7 +2963,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           For more details about this behavior, see [this section](https://www.terraform.io/docs/configuration/attr-as-blocks.html#defining-a-fixed-object-collection-value).
       secondaryIpRanges.rangeName: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
       secondaryIpRanges.ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'
@@ -2912,6 +3019,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           subnetwork_name: "ipv6-test-subnetwork"
           network_name: "ipv6-test-network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "subnetwork_internal_ipv6"
+        primary_resource_id: "subnetwork-internal-ipv6"
+        vars:
+          subnetwork_name: "internal-ipv6-test-subnetwork"
+          network_name: "internal-ipv6-test-network"
   TargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -3085,8 +3198,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "target_vpn_gateway_basic"
         primary_resource_id: "target_gateway"
         vars:
-          target_vpn_gateway_name: "vpn1"
-          network_name: "network1"
+          target_vpn_gateway_name: "vpn-1"
+          network_name: "network-1"
           address_name: "vpn-static-ip"
           esp_forwarding_rule_name: "fr-esp"
           udp500_forwarding_rule_name: "fr-udp500"
@@ -3141,7 +3254,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCPName'
+          function: 'validateGCEName'
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -3164,14 +3277,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_vcr: true
         vars:
           ha_vpn_gateway_name: "ha-vpn"
-          network_name: "network"
+          network_name: "network-1"
           external_gateway_name: "external-gateway"
           global_address_name: "global-address"
           router_name: "ha-vpn-router1"
   UrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "url_map_basic"
+        name: "url_map_bucket_and_service"
         primary_resource_id: "urlmap"
         vars:
           url_map_name: "urlmap"
@@ -3225,6 +3338,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           service_a_backend_service_name: "service-a"
           service_b_backend_service_name: "service-b"
           health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "external_http_lb_mig_backend"
+        primary_resource_id: "default"
+        vars:
+          lb_backend_template: "lb-backend-template"
+          lb_backend_example: "lb-backend-example"
+          fw_allow_health_check: "fw-allow-health-check"
+          lb_ipv4_1: "lb-ipv4-1"
+          http_basic_check: "http-basic-check"
+          web_backend_service: "web-backend-service"
+          web_map_http: "web-map-http"
+          http_lb_proxy: "http-lb-proxy"
+          http_content_rule: "http-content-rule"
+        skip_docs: true
+        skip_test: true # Very similar to external_http_lb_mig_backend_custom_header
+        ignore_read_extra:
+          - "metadata"
+          - "metadata_startup_script"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "map_id"
@@ -3326,9 +3457,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "vpn_tunnel_basic"
         primary_resource_id: "tunnel1"
         vars:
-          vpn_tunnel_name: "tunnel1"
-          target_vpn_gateway_name: "vpn1"
-          network_name: "network1"
+          vpn_tunnel_name: "tunnel-1"
+          target_vpn_gateway_name: "vpn-1"
+          network_name: "network-1"
           address_name: "vpn-static-ip"
           esp_forwarding_rule_name: "fr-esp"
           udp500_forwarding_rule_name: "fr-udp500"
@@ -3339,9 +3470,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "tunnel1"
         min_version: beta
         vars:
-          vpn_tunnel_name: "tunnel1"
-          target_vpn_gateway_name: "vpn1"
-          network_name: "network1"
+          vpn_tunnel_name: "tunnel-1"
+          target_vpn_gateway_name: "vpn-1"
+          network_name: "network-1"
           address_name: "vpn-static-ip"
           esp_forwarding_rule_name: "fr-esp"
           udp500_forwarding_rule_name: "fr-udp500"

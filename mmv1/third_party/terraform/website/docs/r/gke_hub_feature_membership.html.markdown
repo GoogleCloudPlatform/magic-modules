@@ -1,8 +1,6 @@
 ---
 subcategory: "GKEHub"
-layout: "google"
 page_title: "Google: google_gke_hub_feature_membership"
-sidebar_current: "docs-google-gkehub-feature-membership"
 description: |-
   Contains information about a GKEHub Feature Memberships.
 ---
@@ -134,7 +132,10 @@ The following arguments are supported:
     
 * `git` -
   (Optional) Structure is [documented below](#nested_git).
-  
+
+* `prevent_drift` -
+  (Optional)
+  Supported from ACM versions 1.10.0 onwards. Set to true to enable the Config Sync admission webhook to prevent drifts. If set to "false", disables the Config Sync admission webhook and does not prevent drifts.
     
 * `source_format` -
   (Optional)
@@ -142,6 +143,10 @@ The following arguments are supported:
     
 <a name="nested_git"></a>The `git` block supports:
     
+* `gcp_service_account_email` -
+  (Optional)
+  The GCP Service Account Email used for auth when secretType is gcpServiceAccount.
+
 * `https_proxy` -
   (Optional)
   URL for the HTTPS proxy to be used when communicating with the Git repo.
@@ -209,7 +214,16 @@ The following arguments are supported:
 * `template_library_installed` -
   (Optional)
   Installs the default template library along with Policy Controller.
-    
+
+* `mutation_enabled` -
+  (Optional)
+  Enables mutation in policy controller. If true, mutation CRDs, webhook, and controller deployment will be deployed to the cluster.
+
+* `monitoring` -
+  (Optional)
+  Specifies the backends Policy Controller should export metrics to. For example, to specify metrics should be exported to Cloud Monitoring and Prometheus, specify backends: [\"cloudmonitoring\", \"prometheus\"]. Default: [\"cloudmonitoring\", \"prometheus\"]    
+
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:

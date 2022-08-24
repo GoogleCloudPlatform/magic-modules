@@ -3,6 +3,7 @@ package test
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -34,6 +35,12 @@ type testData struct {
 	OrgID    string
 	FolderID string
 	Ancestry string
+}
+
+// testAsset is similar to Asset but with AncestryPath.
+type testAsset struct {
+	google.Asset
+	Ancestry string `json:"ancestry_path"`
 }
 
 // init initializes the variables used for testing. As tests rely on
@@ -135,13 +142,84 @@ func normalizeAssets(t *testing.T, assets []google.Asset, offline bool) []google
 		if !offline {
 			// remove the ancestry as the value of that is dependent on project,
 			// and is not important for the test.
-			asset.Ancestry = ""
+			asset.Ancestors = nil
+			// remove the parent as the value of that is dependent on project.
+			if asset.Resource != nil {
+				asset.Resource.Parent = ""
+			}
 		}
 		// Replace placeholder in names. This allows us to compare generated placeholders
 		// (for example due to "unknown after apply") with the values in the expected
 		// output files.
-		asset.Name = re.ReplaceAllString(asset.Name, fmt.Sprintf("/placeholder-foobar"))
+		asset.Name = re.ReplaceAllString(asset.Name, "/placeholder-foobar")
+		if asset.Resource != nil && asset.Resource.Data != nil {
+			if _, ok := asset.Resource.Data["projectId"]; ok {
+				projectID, _ := asset.Resource.Data["projectId"].(string)
+				if strings.HasPrefix(projectID, "placeholder-") {
+					asset.Resource.Data["projectId"] = "placeholder-foobar"
+				}
+			}
+			if _, ok := asset.Resource.Data["name"]; ok {
+				name, _ := asset.Resource.Data["name"].(string)
+				asset.Resource.Data["name"] = re.ReplaceAllString(name, "/placeholder-foobar")
+			}
+		}
 		ret[i] = asset
 	}
 	return ret
+}
+
+func ancestryPathToAncestors(s string) ([]string, error) {
+	path := formatAncestryPath(s)
+	fragments := strings.Split(path, "/")
+	if len(fragments)%2 != 0 {
+		return nil, fmt.Errorf("unexpected format of ancestry path: %s", s)
+	}
+	ancestors := make([]string, len(fragments)/2)
+	for i := 0; i < len(ancestors); i++ {
+		ancestors[i] = fmt.Sprintf("%s/%s", fragments[i*2], fragments[i*2+1])
+	}
+	for i, j := 0, len(ancestors)-1; i < j; i, j = i+1, j-1 {
+		ancestors[i], ancestors[j] = ancestors[j], ancestors[i]
+	}
+	return ancestors, nil
+}
+
+func formatAncestryPath(s string) string {
+	ret := s
+	for _, r := range []struct {
+		old string
+		new string
+	}{
+		{"organization/", "organizations/"},
+		{"folder/", "folders/"},
+		{"project/", "projects/"},
+	} {
+		ret = strings.ReplaceAll(ret, r.old, r.new)
+	}
+	return ret
+}
+
+func readExpectedTestFile(f string) ([]google.Asset, error) {
+	payload, err := ioutil.ReadFile(f)
+	if err != nil {
+		return nil, fmt.Errorf("cannot open %s, got: %s", f, err)
+	}
+	var want []testAsset
+	if err := json.Unmarshal(payload, &want); err != nil {
+		return nil, fmt.Errorf("cannot unmarshal JSON into assets: %s", err)
+	}
+	for ix := range want {
+		ancestors, err := ancestryPathToAncestors(want[ix].Ancestry)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert to ancestors: %s", err)
+		}
+		want[ix].Ancestors = ancestors
+	}
+
+	ret := make([]google.Asset, len(want))
+	for ix := range want {
+		ret[ix] = want[ix].Asset
+	}
+	return ret, nil
 }

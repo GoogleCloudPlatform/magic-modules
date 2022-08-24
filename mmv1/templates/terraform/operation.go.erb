@@ -3,10 +3,15 @@
   has_project = object.base_url.include?("{{project}}")
 -%>
 <%= lines(autogen_notice(:go, pwd)) -%>
+
 package google
 
 import (
+<% if async.result.resource_inside_response -%>
+  "encoding/json"
+<% end -%>
   "fmt"
+  "time"
 )
 
 type <%= product_name -%>OperationWaiter struct {

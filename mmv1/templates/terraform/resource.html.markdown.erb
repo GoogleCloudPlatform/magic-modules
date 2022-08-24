@@ -50,9 +50,7 @@
 ---
 <%= lines(autogen_notice(:yaml, pwd)) -%>
 subcategory: "<%= tf_subcategory -%>"
-layout: "google"
 page_title: "Google: <%= terraform_name -%>"
-sidebar_current: "docs-<%= terraform_name.gsub("_", "-") -%>"
 description: |-
 <%= indent(object.description.first_sentence, 2) %>
 ---
@@ -93,7 +91,7 @@ To get more information about <%= object.name -%>, see:
 -%>
 
 ~> **Warning:** All arguments including <%= sense_props -%> will be stored in the raw
-state as plain-text. [Read more about sensitive data in state](/language/state/sensitive-data.html).
+state as plain-text. [Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
 <%- end -%>
 
 <%#- We over-generate examples/oics buttons here; they'll all be _valid_ just not necessarily intended for this provider version.

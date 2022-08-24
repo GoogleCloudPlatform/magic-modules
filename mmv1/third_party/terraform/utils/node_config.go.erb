@@ -49,8 +49,7 @@ func schemaNodeConfig() *schema.Schema {
 					Optional:     true,
 					Computed:     true,
 					ForceNew:     true,
-					ValidateFunc: validation.StringInSlice([]string{"pd-standard", "pd-balanced", "pd-ssd"}, false),
-					Description:  `Type of the disk attached to each node.`,
+					Description:  `Type of the disk attached to each node. Such as pd-standard, pd-balanced or pd-ssd`,
 				},
 
 				"guest_accelerator": &schema.Schema{
@@ -194,6 +193,7 @@ func schemaNodeConfig() *schema.Schema {
 				"min_cpu_platform": {
 					Type:     schema.TypeString,
 					Optional: true,
+					Computed: true,
 					ForceNew: true,
 					Description: `Minimum CPU platform to be used by this instance. The instance may be scheduled on the specified or newer CPU platform.`,
 				},
@@ -222,7 +222,6 @@ func schemaNodeConfig() *schema.Schema {
 					Description: `Whether the nodes are created as preemptible VM instances.`,
 				},
 
-<% unless version == 'ga' -%>
 				"spot": {
 					Type:        schema.TypeBool,
 					Optional:    true,
@@ -230,7 +229,6 @@ func schemaNodeConfig() *schema.Schema {
 					Default:     false,
 					Description: `Whether the nodes are created as spot VM instances.`,
 				},
-<% end -%>
 
 				"service_account": {
 					Type:     schema.TypeString,
@@ -537,9 +535,9 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 
 	// Preemptible Is Optional+Default, so it always has a value
 	nc.Preemptible = nodeConfig["preemptible"].(bool)
-<% unless version == 'ga' -%>
+
+	// Spot Is Optional+Default, so it always has a value
 	nc.Spot = nodeConfig["spot"].(bool)
-<% end -%>
 
 	if v, ok := nodeConfig["min_cpu_platform"]; ok {
 		nc.MinCpuPlatform = v.(string)
@@ -685,9 +683,7 @@ func flattenNodeConfig(c *container.NodeConfig) []map[string]interface{} {
 		"labels":                   c.Labels,
 		"tags":                     c.Tags,
 		"preemptible":              c.Preemptible,
-<% unless version == 'ga' -%>
 		"spot":                     c.Spot,
-<% end -%>
 		"min_cpu_platform":         c.MinCpuPlatform,
 		"shielded_instance_config": flattenShieldedInstanceConfig(c.ShieldedInstanceConfig),
 		"taint":                    flattenTaints(c.Taints),

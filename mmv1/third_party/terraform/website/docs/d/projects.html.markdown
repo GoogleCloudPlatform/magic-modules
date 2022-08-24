@@ -1,8 +1,6 @@
 ---
 subcategory: "Cloud Platform"
-layout: "google"
 page_title: "Google: google_projects"
-sidebar_current: "docs-google-datasource-projects"
 description: |-
   Retrieve a set of projects based on a filter.
 ---
@@ -41,4 +39,10 @@ The following attributes are exported:
 <a name="nested_projects"></a>The `projects` block supports:
 
 * `project_id` - The project id of the project.
+* `number` - The numeric identifier of the project.
+* `name` - The optional user-assigned display name of the project.
+* `labels` - A set of key/value label pairs assigned on a project.
+* `lifecycle_state` - The Project lifecycle state.
+* `create_time` - Creation time in RFC3339 UTC "Zulu" format.
+* `parent` - An optional reference to a parent resource.
 
