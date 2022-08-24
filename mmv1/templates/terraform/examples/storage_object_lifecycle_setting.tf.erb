@@ -1,5 +1,6 @@
 # [START storage_create_lifecycle_setting_tf]
 resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
+  provider      = google-beta
   name          = "<%= ctx[:vars]['example_bucket'] %>"
   location      = "US"
   uniform_bucket_level_access = true
