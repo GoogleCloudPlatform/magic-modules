@@ -4,6 +4,6 @@ resource "google_certificate_manager_certificate" "<%= ctx[:primary_resource_id]
   scope       = "EDGE_CACHE"
   self_managed {
     pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
-    pemPrivateKey = file("test-fixtures/certificatemanager/private-key.pem")
+    pem_private_key = file("test-fixtures/certificatemanager/private-key.pem")
   }
 }
