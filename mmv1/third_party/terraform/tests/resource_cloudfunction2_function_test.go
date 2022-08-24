@@ -178,9 +178,9 @@ func TestAccCloudFunctions2Function_fullUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project"       : getTestProjectFromEnv(),
-		"zip_path"      : "./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip",
-		"random_suffix" : randString(t, 10),
+		"project":       getTestProjectFromEnv(),
+		"zip_path":      "./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip",
+		"random_suffix": randString(t, 10),
 	}
 
 	vcrTest(t, resource.TestCase{
@@ -189,7 +189,7 @@ func TestAccCloudFunctions2Function_fullUpdate(t *testing.T) {
 		CheckDestroy: testAccCheckCloudfunctions2functionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-        // Re-use config from the generated tests
+				// Re-use config from the generated tests
 				Config: testAccCloudfunctions2function_cloudfunctions2BasicAuditlogsExample(context),
 			},
 			{
@@ -311,5 +311,3 @@ resource "google_cloudfunctions2_function" "function" {
 }
 # [END functions_v2_basic_auditlogs]`, context)
 }
-
-<% end -%>
