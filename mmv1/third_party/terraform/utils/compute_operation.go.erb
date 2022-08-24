@@ -170,7 +170,7 @@ func (e ComputeOperationError) Error() string {
 	return buf.String()
 }
 
-const errMsgSep = "\n\n\n"
+const errMsgSep = "\n\n"
 
 func writeOperationError(w io.StringWriter, opError *compute.OperationErrorErrors) {
 	w.WriteString(opError.Message + "\n")
