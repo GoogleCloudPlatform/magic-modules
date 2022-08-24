@@ -48,7 +48,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: 'delete_service_on_destroy'
         default_value: false
         description: |
-          If set to `true`, the service will be deleted if it is the last version.    
+          If set to `true`, the service will be deleted if it is the last version.
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/appversion_delete.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/appengine.go.erb
@@ -63,6 +63,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       threadsafe: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+      serviceAccount: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       handlers: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       # instanceClass defaults to a value based on the scaling method
@@ -77,11 +79,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "delete_service_on_destroy"
         vars:
+          project: "appeng-flex"
           project_id: "ae-project"
           bucket_name: "appengine-static-content"
           service_name: "ae-service"
         test_env_vars:
           org_id: :ORG_ID
+          billing_account: :BILLING_ACCT
   FlexibleAppVersion: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["apps/{{project}}/services/{{service}}/versions/{{version_id}}"]
     id_format: "apps/{{project}}/services/{{service}}/versions/{{version_id}}"
@@ -101,7 +105,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: 'delete_service_on_destroy'
         default_value: false
         description: |
-          If set to `true`, the service will be deleted if it is the last version.    
+          If set to `true`, the service will be deleted if it is the last version.
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/appversion_delete.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
@@ -131,6 +135,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       # runtimeApiVersion defaults to a runtime-specific value
       runtimeApiVersion: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      serviceAccount: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       handlers: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true

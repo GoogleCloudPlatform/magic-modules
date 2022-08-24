@@ -293,6 +293,11 @@ objects:
           The version of the API in the given runtime environment.
           Please see the app.yaml reference for valid values at `https://cloud.google.com/appengine/docs/standard/<language>/config/appref`\
           Substitute `<language>` with `python`, `java`, `php`, `ruby`, `go` or `nodejs`.
+      - !ruby/object:Api::Type::String
+        name: 'serviceAccount'
+        description: |
+          The identity that the deployed version will run as. Admin API will use the App Engine Appspot
+          service account as default if this field is neither provided in app.yaml file nor through CLI flag.
       - !ruby/object:Api::Type::Array
         name: 'handlers'
         description: |
@@ -492,7 +497,7 @@ objects:
             - :INBOUND_SERVICE_XMPP_MESSAGE
             - :INBOUND_SERVICE_XMPP_SUBSCRIBE
             - :INBOUND_SERVICE_XMPP_PRESENCE
-            - :INBOUND_SERVICE_CHANNEL_PRESENCE	
+            - :INBOUND_SERVICE_CHANNEL_PRESENCE
             - :INBOUND_SERVICE_WARMUP
       - !ruby/object:Api::Type::String
         name: 'instanceClass'
@@ -670,7 +675,7 @@ objects:
             - :INBOUND_SERVICE_XMPP_MESSAGE
             - :INBOUND_SERVICE_XMPP_SUBSCRIBE
             - :INBOUND_SERVICE_XMPP_PRESENCE
-            - :INBOUND_SERVICE_CHANNEL_PRESENCE	
+            - :INBOUND_SERVICE_CHANNEL_PRESENCE
             - :INBOUND_SERVICE_WARMUP
       - !ruby/object:Api::Type::String
         name: 'instanceClass'
@@ -794,6 +799,11 @@ objects:
           The version of the API in the given runtime environment.
           Please see the app.yaml reference for valid values at `https://cloud.google.com/appengine/docs/standard/<language>/config/appref`\
           Substitute `<language>` with `python`, `java`, `php`, `ruby`, `go` or `nodejs`.
+      - !ruby/object:Api::Type::String
+        name: 'serviceAccount'
+        description: |
+          The identity that the deployed version will run as. Admin API will use the App Engine Appspot
+          service account as default if this field is neither provided in app.yaml file nor through CLI flag.
       - !ruby/object:Api::Type::Array
         name: 'handlers'
         description: |
