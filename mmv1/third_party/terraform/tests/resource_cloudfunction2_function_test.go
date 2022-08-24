@@ -1,6 +1,4 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"testing"
@@ -18,7 +16,7 @@ func TestAccCloudFunctions2Function_update(t *testing.T) {
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
+		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudfunctions2functionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -55,21 +53,18 @@ func TestAccCloudFunctions2Function_update(t *testing.T) {
 func testAccCloudfunctions2function_basic(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_storage_bucket" "bucket" {
-  provider = google-beta
   name     = "tf-test-cloudfunctions2-function-bucket%{random_suffix}"
   location = "US"
   uniform_bucket_level_access = true
 }
  
 resource "google_storage_bucket_object" "object" {
-  provider = google-beta
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
   source = "%{zip_path}"
 }
  
 resource "google_cloudfunctions2_function" "terraform-test2" {
-  provider = google-beta
   name = "tf-test-test-function%{random_suffix}"
   location = "us-central1"
   description = "a new function"
@@ -97,21 +92,18 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
 func testAccCloudFunctions2Function_test_update(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_storage_bucket" "bucket" {
-  provider = google-beta
   name     = "tf-test-cloudfunctions2-function-bucket%{random_suffix}"
   location = "US"
   uniform_bucket_level_access = true
 }
  
 resource "google_storage_bucket_object" "object" {
-  provider = google-beta
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
   source = "%{zip_path}"
 }
  
 resource "google_cloudfunctions2_function" "terraform-test2" {
-  provider = google-beta
   name = "tf-test-test-function%{random_suffix}"
   location = "us-central1"
   description = "an updated function"
@@ -139,21 +131,18 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
 func testAccCloudFunctions2Function_test_redeploy(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_storage_bucket" "bucket" {
-  provider = google-beta
   name     = "tf-test-cloudfunctions2-function-bucket%{random_suffix}"
   location = "US"
   uniform_bucket_level_access = true
 }
  
 resource "google_storage_bucket_object" "object" {
-  provider = google-beta
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
   source = "%{zip_path}"
 }
  
 resource "google_cloudfunctions2_function" "terraform-test2" {
-  provider = google-beta
   name = "tf-test-test-function%{random_suffix}"
   location = "us-west1"
   description = "function test"
