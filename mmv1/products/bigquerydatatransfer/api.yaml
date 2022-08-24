@@ -65,12 +65,14 @@ objects:
         name: 'versionInfo'
         description: |
           Optional OAuth2 authorization code to use with this transfer configuration. This is required only if
-          data_source_id is 'youtube_channel' and new credentials are needed.
+          data_source_id is 'youtube_channel' and new credentials are needed. Note that this should not be set
+          when service_account_name is used to create the transfer config.
       - !ruby/object:Api::Type::String
         name: 'authorizationCode'
         description: |
           Optional version info. This is required only if data_source_id is not 'youtube_channel'
-          and new credentials are needed.
+          and new credentials are needed. Note that this should not be set when serviceAccountName is used to
+          create the transfer config.
     properties:
       - !ruby/object:Api::Type::String
         name: 'displayName'
