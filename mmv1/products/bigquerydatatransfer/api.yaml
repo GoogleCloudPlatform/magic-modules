@@ -160,6 +160,16 @@ objects:
           reingests data for [today-10, today-1], rather than ingesting data for
           just [today-1]. Only valid if the data source supports the feature.
           Set the value to 0 to use the default value.
+      - !ruby/object:Api::Type::String
+        name: 'versionInfo'
+        description: |
+          Optional OAuth2 authorization code to use with this transfer configuration. This is required only if
+          data_source_id is 'youtube_channel' and new credentials are needed.
+      - !ruby/object:Api::Type::String
+        name: 'authorizationCode'
+        description: |
+          Optional version info. This is required only if data_source_id is not 'youtube_channel'
+          and new credentials are needed.
       - !ruby/object:Api::Type::Boolean
         name: 'disabled'
         description: |
