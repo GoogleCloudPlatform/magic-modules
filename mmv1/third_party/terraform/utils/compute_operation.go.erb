@@ -176,15 +176,19 @@ func writeOperationError(w io.StringWriter, opError *compute.OperationErrorError
 	w.WriteString(opError.Message + "\n")
 
 	var lm *compute.LocalizedMessage
-	var links []*compute.HelpLink
+	var link *compute.HelpLink
 
 	for _, ed := range opError.ErrorDetails {
 		if ed.LocalizedMessage != nil {
 			lm = ed.LocalizedMessage
 		}
 
-		if ed.Help != nil {
-			links = append(links, ed.Help.Links...)
+		if link == nil && ed.Help != nil && len(ed.Help.Links) > 0 {
+			link = ed.Help.Links[0]
+		}
+
+		if lm != nil && link != nil {
+			break
 		}
 	}
 
@@ -193,9 +197,15 @@ func writeOperationError(w io.StringWriter, opError *compute.OperationErrorError
 		w.WriteString(lm.Message + "\n")
 	}
 
-	for _, link := range links {
+	if link != nil {
 		w.WriteString(errMsgSep)
-		w.WriteString(link.Description + "\n")
-		w.WriteString(link.Url + "\n")
+
+		if link.Description != "" {
+			w.WriteString(link.Description + "\n")
+		}
+
+		if link.Url != "" {
+			w.WriteString(link.Url + "\n")
+		}
 	}
 }
