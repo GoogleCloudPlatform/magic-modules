@@ -207,6 +207,32 @@ objects:
               Whether the nodes are created as preemptible VM instances. See:
               https://cloud.google.com/compute/docs/instances/preemptible for
               more information about preemptible VM instances.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'reservationAffinity'
+            description: |
+              ReservationAffinity is the configuration of desired reservation which instances could take capacity from.
+            input: true
+            properties:
+              - !ruby/object:Api::Type::Enum
+                name: 'consumeReservationType'
+                description: |
+                  Corresponds to the type of reservation consumption.
+                values:
+                  - "UNSPECIFIED"
+                  - "NO_RESERVATION"
+                  - "ANY_RESERVATION"
+                  - "SPECIFIC_RESERVATION"
+              - !ruby/object:Api::Type::String
+                name: 'key'
+                description: |
+                  Corresponds to the label key of a reservation resource. To target a SPECIFIC_RESERVATION by name,
+                  specify "googleapis.com/reservation-name" as the key and specify the name of your reservation as 
+                  its value.
+              - !ruby/object:Api::Type::Array
+                name: 'values'
+                item_type: Api::Type::String
+                description: |
+                  Corresponds to the label value(s) of reservation resource(s).
           - !ruby/object:Api::Type::Array
             name: 'accelerators'
             description: |
