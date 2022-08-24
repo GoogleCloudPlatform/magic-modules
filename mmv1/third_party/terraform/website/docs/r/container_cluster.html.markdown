@@ -432,7 +432,7 @@ addons_config {
 
 <a name="nested_service_external_ips_config"></a>The `service_external_ips_config` block supports:
 
-* `service_external_ips_config` - (Required) Controls whether external ips specified by a service will be allowed. It is enabled by default.
+* `enabled` - (Required) Controls whether external ips specified by a service will be allowed. It is enabled by default.
 
 <a name="nested_mesh_certificates"></a>The `mesh_certificates` block supports:
 
