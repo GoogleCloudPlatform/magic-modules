@@ -165,9 +165,10 @@ func dataSourceGoogleIamPolicyRead(d *schema.ResourceData, meta interface{}) err
 
 	// Sort bindings to get simpler diffs as it's what the API does
 	sort.Slice(policy.Bindings, func(i, j int) bool {
-		// Sort bindings by role
-		if policy.Bindings[i].Role < policy.Bindings[j].Role {
-			return true
+		// Sort bindings by role, if they're not the same
+		sameRole := policy.Bindings[i].Role == policy.Bindings[j].Role
+		if sameRole == false {
+			return policy.Bindings[i].Role < policy.Bindings[j].Role
 		}
 
 		iConditionOk := policy.Bindings[i].Condition != nil
