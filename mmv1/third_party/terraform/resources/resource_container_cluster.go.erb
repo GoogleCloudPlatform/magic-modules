@@ -1466,6 +1466,15 @@ func resourceContainerCluster() *schema.Resource {
 			   Computed: true,
 			},
 
+<% if version == 'beta' -%>
+			"enable_cost_allocation": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: `Whether to enable GKE cost allocation. When you enable GKE cost allocation, the cluster name and namespace of your GKE workloads appear in the labels field of the billing export to BigQuery. Defaults to false.`,
+				Default:     false,
+			},
+<% end -%>
+
 			"resource_usage_export_config": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -1666,6 +1675,11 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		ResourceLabels: expandStringMap(d, "resource_labels"),
 <% unless version == 'ga' -%>
 		NodePoolAutoConfig: expandNodePoolAutoConfig(d.Get("node_pool_auto_config")),
+<% end -%>
+<% if version == 'beta' -%>
+		CostManagementConfig: &container.CostManagementConfig{
+			Enabled: d.Get("enable_cost_allocation").(bool),
+		},
 <% end -%>
 	}
 
@@ -2046,6 +2060,11 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error setting enable_l4_ilb_subsetting: %s", err)
 	}
 <% end -%>
+	<% if version == 'beta' %>
+	if err := d.Set("enable_cost_allocation", cluster.CostManagementConfig.Enabled); err != nil {
+		return fmt.Errorf("Error setting enable_cost_allocation: %s", err)
+	}
+	<% end -%>
 	if err := d.Set("confidential_nodes", flattenConfidentialNodes(cluster.ConfidentialNodes)); err != nil {
 		return err
 	}
@@ -2455,6 +2474,28 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 <% end -%>
 
+<% if version == "beta" -%>
+	if d.HasChange("enable_cost_allocation") {
+		enabled := d.Get("enable_cost_allocation").(bool)
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredCostManagementConfig: &container.CostManagementConfig{
+					Enabled:         enabled,
+					ForceSendFields: []string{"Enabled"},
+				},
+			},
+		}
+
+		updateF := updateFunc(req, "updating cost management config")
+		// Call update serially.
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s cost management config to %v", d.Id(), enabled)
+	}
+
+<% end -%>
 	if d.HasChange("authenticator_groups_config") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
