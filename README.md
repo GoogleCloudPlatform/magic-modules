@@ -28,16 +28,28 @@ GCP API, we use Magic Modules to preemptively solve issues across each tool by
 encoding our field-tested learnings from other tools in those definitions. In
 effect, an issue solved in one tool will be solved for each other tool.
 
+## Table of Contents
+- [Getting Started with Magic Modules](#getting-started-with-magic-modules)
+   - [Preparing your environment](#preparing-your-environment)
+   - [Preparing Magic Modules / One-time setup](#preparing-magic-modules--one-time-setup)
+   - [Generating the Terraform Providers](#generating-the-terraform-providers)
+   - [Testing](#testing)
+      - [Using released terraform binary with local provider binary](#using-released-terraform-binary-with-local-provider-binary)
+      - [Building terraform binary from source](#building-terraform-binary-from-source)
+   - [Submitting a PR](#submitting-a-PR)
+- [Contributing](#contributing)
+   - [General contributing steps](#general-contributing-steps)
+   - [Detailed contributing guide](#detailed-contributing-guide)
+- [Glossary](#glossary)
+- [Other Resources](#other-resources)
+
 ## Getting Started with Magic Modules
 
 ---
-
-<details><summary><b>Step 1: Preparing your environment</b></summary>
-
+### Preparing your environment
 * Go
   * If you're using a Mac with Homebrew installed, you can follow these
-    instructions to set up Go: [YouTube video](https://www.youtube.com/watch?v=VQVyvulNnzs).
-  * If you're using Cloud Shell, Go is already installed.
+	@@ -46,21 +41,26 @@ To get started, you'll need:
 * Ruby 2.6.0
   * You can use `rbenv` to manage your Ruby version(s).
   * To install `rbenv`, run `sudo apt install rbenv`.
@@ -45,15 +57,14 @@ effect, an issue solved in one tool will be solved for each other tool.
     * For M1 Mac users, run `RUBY_CFLAGS="-Wno-error=implicit-function-declaration" rbenv install 2.6.0`
 * [`Bundler`](https://github.com/bundler/bundler)
   * This can be installed with `gem install bundler`
-* goimports
+* Goimports
   * go install golang.org/x/tools/cmd/goimports / go install golang.org/x/tools/cmd/goimports@latest
-* terraform
+* Terraform
   * [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 * If you are getting "Too many open files" ulimit needs to be raised.
   * Mac OSX: `ulimit -n 1000`
-</details>
 
-<details><summary><b>Step 2: Preparing Magic Modules / One-time setup</b></summary>
+### Preparing Magic Modules / One-time setup
 
 **Important:**
 Compiling Magic Modules can be done directly from the `mmv1` directory within this repository.
@@ -115,9 +126,8 @@ Check for goimports in path...
 Check for git in path...
    found!
 ```
-</details>
 
-<details><summary><b>Step 3: Generating the Terraform Providers</b></summary>
+### Generating the Terraform Providers
 
 Before making any changes, you can compile the Terraform provider you're working
 on by running the following command. If Magic Modules has been installed
@@ -141,13 +151,95 @@ It's worth noting that Magic Modules will only generate new files when run
 locally. The "Magician"- the Magic Modules CI system- handles deletion of old
 files when creating PRs.
 
-</details>
+### Testing
 
-## How to Contribute
+Once you've made changes to resource definition, you can run Magic Modules
+to generate changes to your tool; see
+["Generating the Terraform Providers"](#generating-the-terraform-providers)
+above if you need a refresher. Once it's generated, you should run the
+tool-specific tests as if you were submitting a PR against that tool.
+
+You can run tests in the `{{output_folder}}` you generated the tool in.
+See the following tool-specific documentation for more details on testing that
+tool;
+
+Tool             | Testing Guide
+-----------------|--------------
+terraform        | [`google` provider testing guide](https://github.com/hashicorp/terraform-provider-google/blob/main/.github/CONTRIBUTING.md#tests)
+terraform (beta) | [`google-beta` provider testing guide](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/.github/CONTRIBUTING.md#tests)
+
+Don't worry about testing every tool, only the primary tool you're making
+changes against. The Magic Modules maintainers will ensure your changes work
+against each tool.
+
+If your changes have unintended consequences in another tool, a reviewer will
+instruct you to mark the field excluded or provide specific feedback on what
+changes to make to the tool-specific overrides in order for them to work
+correctly.
+
+#### Using released terraform binary with local provider binary
+
+Setup:
+```bash
+mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google/5.0.0/darwin_amd64
+mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google-beta/5.0.0/darwin_amd64
+ln -s $GOPATH/bin/terraform-provider-google ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google/5.0.0/darwin_amd64/terraform-provider-google_v5.0.0
+ln -s $GOPATH/bin/terraform-provider-google-beta ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google-beta/5.0.0/darwin_amd64/terraform-provider-google-beta_v5.0.0
+```
+
+Once this setup is complete, terraform will automatically use the binaries generated by the `make build` commands in the `terraform-provider-google` and `terraform-provider-google-beta` repositories instead of downloading the latest versions. To undo this, you can run:
+
+```bash
+rm -rf ~/.terraform.d/plugins/registry.terraform.io/hashicorp/
+```
+
+For more information, check out Hashicorp's documentation on the [0.13+ filesystem layout](https://www.terraform.io/upgrade-guides/0-13.html#new-filesystem-layout-for-local-copies-of-providers).
+
+If multiple versions are available in a plugin directory (for example after `terraform providers mirror` is used), Terraform will pick the most up-to-date provider version within version constraints. As such, we recommend using a version that is several major versions ahead for your local copy of the provider, such as `5.0.0`.
+
+#### Building terraform binary from source
+
+If you build the terraform binary from source, it will automatically use the binaries generated by the `make build` commands in the `terraform-provider-google` and `terraform-provider-google-beta` repositories instead of downloading the latest versions.
+
+### Submitting a PR
+
+Before creating a commit, if you've modified any .rb files, make sure you run
+`rake test`! That will run rubocop to ensure that the code you've written will
+pass Travis.
+
+To run rubocop automatically before committing, add a Git pre-commit hook with:
+
+```bash
+cp .github/pre-commit .git/hooks
+```
+
+Once you've created your commit(s), you can submit the code normally as a PR in
+the GitHub UI. The PR template includes some instructions to make sure we
+generate good PR messages for the tools' repo histories.
+
+Once your PR is submitted, one of the Magic Modules maintainers will review it.
+They'll look over the code before running the "Magician", the Magic Modules CI
+system that generates PRs against each tool. Each review pass, your reviewer
+will run the Magician again to update the PRs against the tools.
+
+If there are multiple tools affected, that first reviewer will be the "primary"
+reviewer, and for each other affected tool a maintainer for that specific tool
+will make a pass. The primary reviewer will make it clear which other
+maintainers need to review, and prompt them to review your code; you will
+communicate primarily with the first reviewer.
+
+Even when multiple tools are affected, this will generally be a quick look by
+that maintainer with no changes needing to be made.
+
+Once you've gotten approvals from the primary reviewer and the reviewers for
+any affected tools, the primary reviewer will merge your changes.
+
+
+## Contributing
 
 ---
 
-### General Contribution Steps
+### General contributing steps
 
 
 1. Fork `Magic Modules` repository into your GitHub account if you haven't done before
@@ -185,7 +277,7 @@ files when creating PRs.
 1. After your PR is merged, it will be released to customers in around a week or two
 
 
-### Contribution Guide
+### Detailed contributing guide
 
 Task          |        Section         ||
 --------------|-----------------|---------
@@ -196,90 +288,9 @@ Testing       | [handwritten](./mmv1/third_party/terraform/README.md#testing) | 
 Documentation | [handwritten](./mmv1/third_party/terraform/README.md#documentation) | [mmv1](./mmv1/README.md#documentation) |
 Beta feature  | [handwritten](./mmv1/third_party/terraform/README.md#beta-feature) | [mmv1](./mmv1/README.md#beta-feature) |
 
-### Using released terraform binary with local provider binary
-
-Setup:
-```bash
-mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google/5.0.0/darwin_amd64
-mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google-beta/5.0.0/darwin_amd64
-ln -s $GOPATH/bin/terraform-provider-google ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google/5.0.0/darwin_amd64/terraform-provider-google_v5.0.0
-ln -s $GOPATH/bin/terraform-provider-google-beta ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google-beta/5.0.0/darwin_amd64/terraform-provider-google-beta_v5.0.0
-```
-
-Once this setup is complete, terraform will automatically use the binaries generated by the `make build` commands in the `terraform-provider-google` and `terraform-provider-google-beta` repositories instead of downloading the latest versions. To undo this, you can run:
-
-```bash
-rm -rf ~/.terraform.d/plugins/registry.terraform.io/hashicorp/
-```
-
-For more information, check out Hashicorp's documentation on the [0.13+ filesystem layout](https://www.terraform.io/upgrade-guides/0-13.html#new-filesystem-layout-for-local-copies-of-providers).
-
-If multiple versions are available in a plugin directory (for example after `terraform providers mirror` is used), Terraform will pick the most up-to-date provider version within version constraints. As such, we recommend using a version that is several major versions ahead for your local copy of the provider, such as `5.0.0`.
-
-### Building terraform binary from source
-
-If you build the terraform binary from source, it will automatically use the binaries generated by the `make build` commands in the `terraform-provider-google` and `terraform-provider-google-beta` repositories instead of downloading the latest versions.
-
-### Testing your changes
-
-Once you've made changes to resource definition, you can run Magic Modules
-to generate changes to your tool; see
-["Generating the Terraform Providers"](#generating-the-terraform-providers)
-above if you need a refresher. Once it's generated, you should run the
-tool-specific tests as if you were submitting a PR against that tool.
-
-You can run tests in the `{{output_folder}}` you generated the tool in.
-See the following tool-specific documentation for more details on testing that
-tool;
-
-Tool             | Testing Guide
------------------|--------------
-terraform        | [`google` provider testing guide](https://github.com/hashicorp/terraform-provider-google/blob/main/.github/CONTRIBUTING.md#tests)
-terraform (beta) | [`google-beta` provider testing guide](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/.github/CONTRIBUTING.md#tests)
-
-Don't worry about testing every tool, only the primary tool you're making
-changes against. The Magic Modules maintainers will ensure your changes work
-against each tool.
-
-If your changes have unintended consequences in another tool, a reviewer will
-instruct you to mark the field excluded or provide specific feedback on what
-changes to make to the tool-specific overrides in order for them to work
-correctly.
-
-### Submitting a PR
-
-Before creating a commit, if you've modified any .rb files, make sure you run
-`rake test`! That will run rubocop to ensure that the code you've written will
-pass Travis.
-
-To run rubocop automatically before committing, add a Git pre-commit hook with:
-
-```bash
-cp .github/pre-commit .git/hooks
-```
-
-Once you've created your commit(s), you can submit the code normally as a PR in
-the GitHub UI. The PR template includes some instructions to make sure we
-generate good PR messages for the tools' repo histories.
-
-Once your PR is submitted, one of the Magic Modules maintainers will review it.
-They'll look over the code before running the "Magician", the Magic Modules CI
-system that generates PRs against each tool. Each review pass, your reviewer
-will run the Magician again to update the PRs against the tools.
-
-If there are multiple tools affected, that first reviewer will be the "primary"
-reviewer, and for each other affected tool a maintainer for that specific tool
-will make a pass. The primary reviewer will make it clear which other
-maintainers need to review, and prompt them to review your code; you will
-communicate primarily with the first reviewer.
-
-Even when multiple tools are affected, this will generally be a quick look by
-that maintainer with no changes needing to be made.
-
-Once you've gotten approvals from the primary reviewer and the reviewers for
-any affected tools, the primary reviewer will merge your changes.
-
 ## Glossary
+
+---
 
 The maintainers of the repository will tend to use specific jargon to describe
 concepts related to Magic Modules; here's a quick reference of what some of
@@ -294,6 +305,8 @@ upstream      | A PR created against Magic Modules or the Magic Modules repo
 The Magician  | The Magic Modules CI system that drives the GitHub robot `modular-magician`
 
 ## Other Resources
+
+---
 
 * [Extending Terraform](https://www.terraform.io/plugin)
    * [How Terraform Works](https://www.terraform.io/plugin/how-terraform-works)
