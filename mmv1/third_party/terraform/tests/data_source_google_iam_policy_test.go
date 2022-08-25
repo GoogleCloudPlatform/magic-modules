@@ -80,6 +80,24 @@ func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 			ExpectedFinalBindingCount: 1, // This test combines bindings
 			ExpectedPolicyDataString:  "{\"bindings\":[{\"members\":[\"user:a\",\"user:b\"],\"role\":\"role/A\"}]}",
 		},
+		"exact duplicate bindings are removed before `policy_data` is set": {
+			Bindings: []interface{}{
+				map[string]interface{}{
+					"role": "role/A",
+					"members": []interface{}{
+						"user:a",
+					},
+				},
+				map[string]interface{}{
+					"role": "role/A",
+					"members": []interface{}{
+						"user:a",
+					},
+				},
+			},
+			OriginalBindingCount:      1, // Duplicates are identified and removed before producing the policy_data string
+			ExpectedFinalBindingCount: 1,
+			ExpectedPolicyDataString:  "{\"bindings\":[{\"members\":[\"user:a\"],\"role\":\"role/A\"}]}",
 		},
 		"equivalent bindings (with conditions) are combined into one binding with a larger member list": {
 			Bindings: []interface{}{
@@ -259,6 +277,77 @@ func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 			ExpectedFinalBindingCount: 2,
 			ExpectedPolicyDataString:  "{\"bindings\":[{\"condition\":{\"description\":\"A\",\"expression\":\"same expression\",\"title\":\"same title\"},\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"B\",\"expression\":\"same expression\",\"title\":\"same title\"},\"members\":[\"user:a\"],\"role\":\"role/A\"}]}",
 		},
+		"bindings for different roles and conditions are sorted firstly by role, and within a role block sorting is based on conditions": {
+			Bindings: []interface{}{
+				map[string]interface{}{
+					"role": "role/A",
+					"members": []interface{}{
+						"user:a",
+					},
+					"condition": []interface{}{
+						map[string]interface{}{
+							"expression":  "A",
+							"title":       "A",
+							"description": "A",
+						},
+					},
+				},
+				map[string]interface{}{
+					"role": "role/A",
+					"members": []interface{}{
+						"user:a",
+					},
+				},
+				map[string]interface{}{
+					"role": "role/A",
+					"members": []interface{}{
+						"user:a",
+					},
+					"condition": []interface{}{
+						map[string]interface{}{
+							"expression":  "B",
+							"title":       "B",
+							"description": "B",
+						},
+					},
+				},
+				map[string]interface{}{
+					"role": "role/B",
+					"members": []interface{}{
+						"user:a",
+					},
+					"condition": []interface{}{
+						map[string]interface{}{
+							"expression":  "A",
+							"title":       "A",
+							"description": "A",
+						},
+					},
+				},
+				map[string]interface{}{
+					"role": "role/B",
+					"members": []interface{}{
+						"user:a",
+					},
+				},
+				map[string]interface{}{
+					"role": "role/B",
+					"members": []interface{}{
+						"user:a",
+					},
+					"condition": []interface{}{
+						map[string]interface{}{
+							"expression":  "B",
+							"title":       "B",
+							"description": "B",
+						},
+					},
+				},
+			},
+			OriginalBindingCount:      6,
+			ExpectedFinalBindingCount: 6,
+			ExpectedPolicyDataString:  "{\"bindings\":[{\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"A\",\"expression\":\"A\",\"title\":\"A\"},\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"B\",\"expression\":\"B\",\"title\":\"B\"},\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"members\":[\"user:a\"],\"role\":\"role/B\"},{\"condition\":{\"description\":\"A\",\"expression\":\"A\",\"title\":\"A\"},\"members\":[\"user:a\"],\"role\":\"role/B\"},{\"condition\":{\"description\":\"B\",\"expression\":\"B\",\"title\":\"B\"},\"members\":[\"user:a\"],\"role\":\"role/B\"}]}",
+		},
 	}
 
 	for tn, tc := range cases {
@@ -289,16 +378,16 @@ func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 				t.Errorf("cannot convert the JSON string")
 			}
 			policyDataBindings := objSlice["bindings"].([]interface{})
-			if len(policyDataBindings) != tc.ExpectedPolicyBindingCount {
-				t.Errorf("expected there to be %d bindings in the policy_data string, got: %d", tc.ExpectedPolicyBindingCount, len(policyDataBindings))
+			if len(policyDataBindings) != tc.ExpectedFinalBindingCount {
+				t.Errorf("expected there to be %d bindings in the policy_data string, got: %d", tc.ExpectedFinalBindingCount, len(policyDataBindings))
 			}
 			if policyData != tc.ExpectedPolicyDataString {
 				t.Errorf("expected `policy_data` to be %s, got: %s", tc.ExpectedPolicyDataString, policyData)
 			}
 
 			bset := d.Get("binding").(*schema.Set)
-			if bset.Len() != tc.ExpectedBindingCount {
-				t.Errorf("expected there to be %d bindings in the data source internals, got: %d", tc.ExpectedBindingCount, bset.Len())
+			if bset.Len() != tc.OriginalBindingCount {
+				t.Errorf("expected there to be %d bindings in the data source internals, got: %d", tc.OriginalBindingCount, bset.Len())
 			}
 		})
 	}
