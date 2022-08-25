@@ -45,6 +45,10 @@ effect, an issue solved in one tool will be solved for each other tool.
     * For M1 Mac users, run `RUBY_CFLAGS="-Wno-error=implicit-function-declaration" rbenv install 2.6.0`
 * [`Bundler`](https://github.com/bundler/bundler)
   * This can be installed with `gem install bundler`
+* goimports
+  * go install golang.org/x/tools/cmd/goimports / go install golang.org/x/tools/cmd/goimports@latest
+* terraform
+  * [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 * If you are getting "Too many open files" ulimit needs to be raised.
   * Mac OSX: `ulimit -n 1000`
 </details>
@@ -156,18 +160,29 @@ files when creating PRs.
    * If not, decide which tool you would like to use to implement the resource. (In most cases, generat)
 1. Make the actual code change
    * The [Contribution Guide](#contribution-guide) below will lead you to the detailed instructions on how to make your change, based on the type of the change + the tool used to generate the code
-1. build the providers and test the feature locally. Check [Testing Guidance]() for details on how to run provider test.
-1. refer to the schema table to make sure all correct schema are implemented for the feature
-1. Open a Pull Request refer to the PR creation checklist
-1. wait until the the modules magician to generate downstream diff (which should takes about 15 mins after creating the PR) to make sure all changes are generated correctly in downstream repos
-1. wait for the VCR result
-  If any tests failed during VCR recording mode
-    Check if the failed tests are related (attach photo – build logs for general errors debug logs for each test http calls responses). 
-If they are related, make changes to your PR (strongly suggest testing the PR locally and pushing the commit to the PR only after the tests pass locally, otherwise it may increase review time)
-After you push the new commits and think the PR is ready to review again, re-request the review your assigned reviewer (attach photo to show the re-request button) (if we decide to automatically re-request the reviewer after any new pushes, this step should be removed)
-If you are not able to debug the failed test, leave a comment on Github to let your assigned reviewers know where you are blocked.
-    If you are not able to access the logs, gently ping your assigned reviewers on github to let them know.
-1. If your assigned reviewers does not reply/ review within 48 hours, gently ping them on github
+1. Build the providers and test the feature locally. Check [Testing Guidance]() for details on how to run provider test. (testing the PR locally and pushing the commit to the PR only after the tests pass locally may significantly reduce review cycles)
+1. Refer to the schema table to make sure all correct schema are implemented for the feature
+1. Push your changes to your `magic-modules` repo fork and send a pull request from that branch to the main branch on `magic-modules`. A reviewer will be assigned automatically to your PR.
+1. Wait until the the modules magician to generate downstream diff (which should takes about 15 mins after creating the PR) to make sure all changes are generated correctly in downstream repos
+1. Wait for the VCR result
+   <details><summary>Get to know general workflow for VCR tests</summary>
+
+      1. You submit your change.
+      1. The recorded tests are ran against your changes by the `modular-magician`. Tests will fail if:
+         1. Your PR has changed the HTTP request values sent by the provider
+         1. Your PR does not change the HTTP request values, but fails on the values returned in an old recording
+         1. The recordings are out of sync with the merge-base of your PR, and an unrelated contributor's change has caused a false positive
+      1. The `modular-magician` will leave a message indicating the number of passing and failing VCR tests. If there is a failure, the `modular-magician` user will leave a message indicating the "`Triggering VCR tests in RECORDING mode for the following tests that failed during VCR:`" marking which tests failed.
+         1. If a test does not appear related, it probably isn't!
+      1. The `modular-magician` will kick off a second test run targeting only the failed tests, this time hitting the live GCP APIs. If there are tests that fail at this point, a message stating `Tests failed during RECORDING mode:` will be left indicating the tests.
+         1. If a test that appears to be related to your change has failed here, it's likely your change has introduced an issue. You can view the debug logs for the test by clicking the "view" link beside the test case to attempt to debug what's going wrong.
+         1. If a test appears to be completely unrelated has failed, it's possible that a GCP API has changed in a way that broke the provider or our environment capped on a quota.
+   </details>
+
+   Where possible, take a look at the logs and see if you can figure out what needs to be fixed related to your change.
+   The false positive rate on these tests is extremely high between changes in the API, Cloud Build bugs, and eventual consistency issues in test recordings so we don't expect contributors to wholly interpret the results- that's the responsibility of your reviewer.
+1. If your assigned reviewers does not reply/ review within a week, gently ping them on github
+1. After your PR is merged, it will be released to customers in around a week or two
 
 
 ### Contribution Guide
@@ -180,6 +195,30 @@ IAM resource  | [handwritten](./mmv1/third_party/terraform/README.md#iam-resourc
 Testing       | [handwritten](./mmv1/third_party/terraform/README.md#testing) | [mmv1](./mmv1/README.md#testing) |
 Documentation | [handwritten](./mmv1/third_party/terraform/README.md#documentation) | [mmv1](./mmv1/README.md#documentation) |
 Beta feature  | [handwritten](./mmv1/third_party/terraform/README.md#beta-feature) | [mmv1](./mmv1/README.md#beta-feature) |
+
+### Using released terraform binary with local provider binary
+
+Setup:
+```bash
+mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google/5.0.0/darwin_amd64
+mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google-beta/5.0.0/darwin_amd64
+ln -s $GOPATH/bin/terraform-provider-google ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google/5.0.0/darwin_amd64/terraform-provider-google_v5.0.0
+ln -s $GOPATH/bin/terraform-provider-google-beta ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google-beta/5.0.0/darwin_amd64/terraform-provider-google-beta_v5.0.0
+```
+
+Once this setup is complete, terraform will automatically use the binaries generated by the `make build` commands in the `terraform-provider-google` and `terraform-provider-google-beta` repositories instead of downloading the latest versions. To undo this, you can run:
+
+```bash
+rm -rf ~/.terraform.d/plugins/registry.terraform.io/hashicorp/
+```
+
+For more information, check out Hashicorp's documentation on the [0.13+ filesystem layout](https://www.terraform.io/upgrade-guides/0-13.html#new-filesystem-layout-for-local-copies-of-providers).
+
+If multiple versions are available in a plugin directory (for example after `terraform providers mirror` is used), Terraform will pick the most up-to-date provider version within version constraints. As such, we recommend using a version that is several major versions ahead for your local copy of the provider, such as `5.0.0`.
+
+### Building terraform binary from source
+
+If you build the terraform binary from source, it will automatically use the binaries generated by the `make build` commands in the `terraform-provider-google` and `terraform-provider-google-beta` repositories instead of downloading the latest versions.
 
 ### Testing your changes
 
@@ -253,3 +292,11 @@ provider      | Synonym for tool as referred to inside the codebase
 downstream(s) | A PR created by the Magician against a tool
 upstream      | A PR created against Magic Modules or the Magic Modules repo
 The Magician  | The Magic Modules CI system that drives the GitHub robot `modular-magician`
+
+## Other Resources
+
+* [Extending Terraform](https://www.terraform.io/plugin)
+   * [How Terraform Works](https://www.terraform.io/plugin/how-terraform-works)
+   * [Writing Custom Providers / Calling APIs with Terraform Providers](https://learn.hashicorp.com/collections/terraform/providers?utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS)
+* [Terraform Glossary](https://www.terraform.io/docs/glossary)
+
