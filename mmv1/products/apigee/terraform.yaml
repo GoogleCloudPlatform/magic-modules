@@ -60,6 +60,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       billingType: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      properties: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/apigee_organization.go.erb
       encoder: templates/terraform/encoders/apigee_organization.go.erb
