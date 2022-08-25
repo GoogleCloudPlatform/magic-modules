@@ -94,7 +94,12 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
       annotations = {
         "run.googleapis.com/vpc-access-connector" = google_vpc_access_connector.default.name
         "run.googleapis.com/vpc-access-egress"    = "all-traffic"
-        "run.googleapis.com/ingress"              = "all"
+      }
+    }
+    
+    metadata {
+      annotations = {
+        "run.googleapis.com/ingress" = "all"
       }
     }
   }
