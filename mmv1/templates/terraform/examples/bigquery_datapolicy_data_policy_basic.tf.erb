@@ -16,7 +16,7 @@ resource "google_bigquery_datapolicy_data_policy" "<%= ctx[:primary_resource_id]
   resource "google_data_catalog_taxonomy" "taxonomy" {
     provider = google-beta
     region                 = "us-central1"
-    display_name           =  "taxonomy_display_name"
+    display_name           = "<%= ctx[:vars]['taxonomy'] %>"
     description            = "A collection of policy tags"
     activated_policy_types = ["FINE_GRAINED_ACCESS_CONTROL"]
   }
