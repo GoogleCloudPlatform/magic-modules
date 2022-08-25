@@ -751,6 +751,7 @@ func resourceComputeInstance() *schema.Resource {
 							AtLeastOneOf: []string{"advanced_machine_features.0.enable_nested_virtualization","advanced_machine_features.0.threads_per_core"},
 							Description: `The number of threads per physical core. To disable simultaneous multithreading (SMT) set this to 1. If unset, the maximum number of threads supported per core by the underlying processor is assumed.`,
 						},
+<% unless version == 'ga' -%>
 						"visible_core_count": {
 							Type:        schema.TypeInt,
 							Optional:    true,
@@ -760,6 +761,7 @@ func resourceComputeInstance() *schema.Resource {
 					},
 				},
 			},
+<% end -%>
 			"confidential_instance_config": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
