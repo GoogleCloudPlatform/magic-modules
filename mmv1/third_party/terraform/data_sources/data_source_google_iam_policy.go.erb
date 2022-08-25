@@ -173,26 +173,42 @@ func dataSourceGoogleIamPolicyRead(d *schema.ResourceData, meta interface{}) err
 		iConditionOk := policy.Bindings[i].Condition != nil
 		jConditionOk := policy.Bindings[j].Condition != nil
 
-		// If both bindings lack conditions we cannot sort
-		if !iConditionOk && !jConditionOk {
+		// If both bindings lack conditions we cannot sort them further
+		if (iConditionOk == false) && (jConditionOk == false) {
 			return false
 		}
 
-		// Sort by presence of a condition on only one binding
-		if !iConditionOk && jConditionOk {
+		// Sort by presence of a condition on only one of the two bindings
+		if (iConditionOk == false) && jConditionOk {
 			return true
 		}
-		if iConditionOk && !jConditionOk {
+		if iConditionOk && (jConditionOk == false) {
 			return false
 		}
 
-		// Sort by both bindings' conditions' titles
-		if policy.Bindings[i].Condition.Title < policy.Bindings[j].Condition.Title {
-			return true
+		// At this point both bindings have conditions
+
+		sameExpression := policy.Bindings[i].Condition.Expression == policy.Bindings[j].Condition.Expression
+		sameTitle := policy.Bindings[i].Condition.Title == policy.Bindings[j].Condition.Title
+		sameDescription := policy.Bindings[i].Condition.Description == policy.Bindings[j].Condition.Description
+
+		// Don't sort if conditions are the same
+		if sameExpression && sameTitle && sameDescription {
+			return false
 		}
 
-		// Sort by both bindings' conditions' expressions
-		return policy.Bindings[i].Condition.Expression < policy.Bindings[j].Condition.Expression
+		// Sort by both bindings' conditions' expressions, if they're not equivalent
+		if sameExpression == false {
+			return policy.Bindings[i].Condition.Expression < policy.Bindings[j].Condition.Expression
+		}
+
+		// Sort by both bindings' conditions' titles, if they're not equivalent
+		if sameTitle == false {
+			return policy.Bindings[i].Condition.Title < policy.Bindings[j].Condition.Title
+		}
+
+		// Comparing conditions' descriptions is the last available way to sort
+		return policy.Bindings[i].Condition.Description < policy.Bindings[j].Condition.Description
 	})
 
 	// Sort members within each binding to get simpler diffs as it's what the API does
