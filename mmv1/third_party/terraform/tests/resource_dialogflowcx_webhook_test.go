@@ -64,7 +64,7 @@ func testAccDialogflowCXWebhook_basic(context map[string]interface{}) string {
 	resource "google_dialogflow_cx_webhook" "my_webhook" {
 		parent       = google_dialogflow_cx_agent.agent_entity.id
 		display_name = "MyWebhook"
-	
+		location     = "global"
 		generic_web_service {
 			uri = "https://example.com" 
 		}
@@ -96,6 +96,7 @@ func testAccDialogflowCXWebhook_full(context map[string]interface{}) string {
     
 	resource "google_dialogflow_cx_webhook" "my_webhook" {
 		parent       = google_dialogflow_cx_agent.agent_entity.id
+		location     = "global"
 		display_name = "MyWebhook"
 		timeout      = "20s"
 		disabled     = false
