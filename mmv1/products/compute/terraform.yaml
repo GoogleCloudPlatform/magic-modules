@@ -2228,6 +2228,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RegionUrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        name: "url-map-sample"
+        primary_resource_type: "google_compute_region_backend_service"
+        primary_resource_id: "backend_service"
+        vars:
+          health_check: "health-check"
+          backend_service: "backend-service"
+          lb_target_proxy: "lb-target-proxy"
+          url_map: "url-map"
+        skip_docs: true                                                        
+        skip_test: true
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
         name: "region_url_map_basic"
         primary_resource_id: "regionurlmap"
         vars:
