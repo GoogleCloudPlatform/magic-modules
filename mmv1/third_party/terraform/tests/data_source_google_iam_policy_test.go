@@ -9,10 +9,10 @@ import (
 
 func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 	cases := map[string]struct {
-		Bindings                   []interface{}
-		ExpectedPolicyDataString   string
-		ExpectedBindingCount       int
-		ExpectedPolicyBindingCount int
+		Bindings                  []interface{}
+		OriginalBindingCount      int
+		ExpectedFinalBindingCount int
+		ExpectedPolicyDataString  string
 	}{
 		"members are sorted alphabetically within a single binding": {
 			Bindings: []interface{}{
@@ -25,11 +25,11 @@ func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 					},
 				},
 			},
-			ExpectedBindingCount:       1,
-			ExpectedPolicyBindingCount: 1,
-			ExpectedPolicyDataString:   "{\"bindings\":[{\"members\":[\"user:a\",\"user:b\",\"user:c\"],\"role\":\"role/A\"}]}",
+			OriginalBindingCount:      1,
+			ExpectedFinalBindingCount: 1,
+			ExpectedPolicyDataString:  "{\"bindings\":[{\"members\":[\"user:a\",\"user:b\",\"user:c\"],\"role\":\"role/A\"}]}",
 		},
-		"bindings are sorted by role": {
+		"bindings are sorted by role (regardless of conditions being present)": {
 			Bindings: []interface{}{
 				map[string]interface{}{
 					"role": "role/B",
@@ -42,11 +42,24 @@ func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 					"members": []interface{}{
 						"user:a",
 					},
+					"condition": []interface{}{
+						map[string]interface{}{
+							"description": "descriptionA",
+							"expression":  "expressionA",
+							"title":       "titleA",
+						},
+					},
+				},
+				map[string]interface{}{
+					"role": "role/C",
+					"members": []interface{}{
+						"user:a",
+					},
 				},
 			},
-			ExpectedBindingCount:       2,
-			ExpectedPolicyBindingCount: 2,
-			ExpectedPolicyDataString:   "{\"bindings\":[{\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"members\":[\"user:a\"],\"role\":\"role/B\"}]}",
+			OriginalBindingCount:      3,
+			ExpectedFinalBindingCount: 3,
+			ExpectedPolicyDataString:  "{\"bindings\":[{\"condition\":{\"description\":\"descriptionA\",\"expression\":\"expressionA\",\"title\":\"titleA\"},\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"members\":[\"user:a\"],\"role\":\"role/B\"},{\"members\":[\"user:a\"],\"role\":\"role/C\"}]}",
 		},
 		"equivalent bindings (with no conditions) are combined into one binding with a larger member list": {
 			Bindings: []interface{}{
@@ -63,9 +76,10 @@ func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 					},
 				},
 			},
-			ExpectedBindingCount:       2,
-			ExpectedPolicyBindingCount: 1, // Equivalent bindings combined into one member list
-			ExpectedPolicyDataString:   "{\"bindings\":[{\"members\":[\"user:a\",\"user:b\"],\"role\":\"role/A\"}]}",
+			OriginalBindingCount:      2,
+			ExpectedFinalBindingCount: 1, // This test combines bindings
+			ExpectedPolicyDataString:  "{\"bindings\":[{\"members\":[\"user:a\",\"user:b\"],\"role\":\"role/A\"}]}",
+		},
 		},
 		"equivalent bindings (with conditions) are combined into one binding with a larger member list": {
 			Bindings: []interface{}{
@@ -103,9 +117,9 @@ func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 					},
 				},
 			},
-			ExpectedBindingCount:       3,
-			ExpectedPolicyBindingCount: 2,
-			ExpectedPolicyDataString:   "{\"bindings\":[{\"members\":[\"user:c\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"descriptionA\",\"expression\":\"expressionA\",\"title\":\"titleA\"},\"members\":[\"user:a\",\"user:b\"],\"role\":\"role/A\"}]}",
+			OriginalBindingCount:      3,
+			ExpectedFinalBindingCount: 2, // This test combines bindings
+			ExpectedPolicyDataString:  "{\"bindings\":[{\"members\":[\"user:c\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"descriptionA\",\"expression\":\"expressionA\",\"title\":\"titleA\"},\"members\":[\"user:a\",\"user:b\"],\"role\":\"role/A\"}]}",
 		},
 		"bindings on the same role are sorted to place bindings without conditions first": {
 			Bindings: []interface{}{
@@ -129,9 +143,9 @@ func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 					},
 				},
 			},
-			ExpectedBindingCount:       2,
-			ExpectedPolicyBindingCount: 2,
-			ExpectedPolicyDataString:   "{\"bindings\":[{\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"descriptionA\",\"expression\":\"expressionA\",\"title\":\"titleA\"},\"members\":[\"user:a\"],\"role\":\"role/A\"}]}",
+			OriginalBindingCount:      2,
+			ExpectedFinalBindingCount: 2,
+			ExpectedPolicyDataString:  "{\"bindings\":[{\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"descriptionA\",\"expression\":\"expressionA\",\"title\":\"titleA\"},\"members\":[\"user:a\"],\"role\":\"role/A\"}]}",
 		},
 		"bindings (with conditions) on the same role are first sorted by condition expressions": {
 			Bindings: []interface{}{
@@ -175,9 +189,9 @@ func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 					},
 				},
 			},
-			ExpectedBindingCount:       3,
-			ExpectedPolicyBindingCount: 3,
-			ExpectedPolicyDataString:   "{\"bindings\":[{\"condition\":{\"description\":\"C\",\"expression\":\"A\",\"title\":\"B\"},\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"A\",\"expression\":\"B\",\"title\":\"C\"},\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"B\",\"expression\":\"C\",\"title\":\"A\"},\"members\":[\"user:a\"],\"role\":\"role/A\"}]}",
+			OriginalBindingCount:      3,
+			ExpectedFinalBindingCount: 3,
+			ExpectedPolicyDataString:  "{\"bindings\":[{\"condition\":{\"description\":\"C\",\"expression\":\"A\",\"title\":\"B\"},\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"A\",\"expression\":\"B\",\"title\":\"C\"},\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"B\",\"expression\":\"C\",\"title\":\"A\"},\"members\":[\"user:a\"],\"role\":\"role/A\"}]}",
 		},
 		"bindings (with conditions) on the same role, with matching condition expressions, are next sorted by condition title": {
 			Bindings: []interface{}{
@@ -208,9 +222,9 @@ func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 					},
 				},
 			},
-			ExpectedBindingCount:       2,
-			ExpectedPolicyBindingCount: 2,
-			ExpectedPolicyDataString:   "{\"bindings\":[{\"condition\":{\"description\":\"B\",\"expression\":\"same expression\",\"title\":\"A\"},\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"A\",\"expression\":\"same expression\",\"title\":\"B\"},\"members\":[\"user:a\"],\"role\":\"role/A\"}]}",
+			OriginalBindingCount:      2,
+			ExpectedFinalBindingCount: 2,
+			ExpectedPolicyDataString:  "{\"bindings\":[{\"condition\":{\"description\":\"B\",\"expression\":\"same expression\",\"title\":\"A\"},\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"A\",\"expression\":\"same expression\",\"title\":\"B\"},\"members\":[\"user:a\"],\"role\":\"role/A\"}]}",
 		},
 		"bindings (with conditions) on the same role, with matching condition expressions and titles, are next sorted by condition description": {
 			Bindings: []interface{}{
@@ -241,9 +255,9 @@ func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 					},
 				},
 			},
-			ExpectedBindingCount:       2,
-			ExpectedPolicyBindingCount: 2,
-			ExpectedPolicyDataString:   "{\"bindings\":[{\"condition\":{\"description\":\"A\",\"expression\":\"same expression\",\"title\":\"same title\"},\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"B\",\"expression\":\"same expression\",\"title\":\"same title\"},\"members\":[\"user:a\"],\"role\":\"role/A\"}]}",
+			OriginalBindingCount:      2,
+			ExpectedFinalBindingCount: 2,
+			ExpectedPolicyDataString:  "{\"bindings\":[{\"condition\":{\"description\":\"A\",\"expression\":\"same expression\",\"title\":\"same title\"},\"members\":[\"user:a\"],\"role\":\"role/A\"},{\"condition\":{\"description\":\"B\",\"expression\":\"same expression\",\"title\":\"same title\"},\"members\":[\"user:a\"],\"role\":\"role/A\"}]}",
 		},
 	}
 
