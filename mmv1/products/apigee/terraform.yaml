@@ -188,7 +188,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       delete_minutes: 30
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/apigee_environment.go.erb
-      update_encoder: templates/terraform/update_encoder/apigee_environment.erb
   Envgroup: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     import_format: ["{{org_id}}/envgroups/{{name}}", "{{org_id}}/{{name}}"]
