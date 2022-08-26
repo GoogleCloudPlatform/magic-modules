@@ -46,8 +46,7 @@ objects:
       parent_resource_attribute: "data_policy_id"
       import_format:
         [
-          "projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}",
-          "{{data_policy_id}}",
+          "projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}"
         ]
     properties:
       - !ruby/object:Api::Type::String
