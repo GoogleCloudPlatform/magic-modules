@@ -18,7 +18,7 @@ resource "google_project_service" "service" {
 }
 
 resource "google_service_account" "custom_service_account" {
-  project      = google_project_iam_member.gae_api.project
+  project      = google_project_service.service.project
   account_id   = "<%= ctx[:vars]['account_id'] %>"
   display_name = "Custom Service Account"
 }
