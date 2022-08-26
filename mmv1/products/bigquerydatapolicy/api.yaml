@@ -87,6 +87,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::Enum
             name: "predefinedExpression"
+            required: true
             description: |-
               The available masking rules. Learn more here: https://cloud.google.com/bigquery/docs/column-data-masking-intro#masking_options.
             values:
