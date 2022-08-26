@@ -4017,7 +4017,7 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 			EnableComponents: convertStringArr(enable_components),
 		}
 	}
-<% if version == 'beta' -%>
+<% unless version == 'ga' -%>
 	if v, ok := config["managed_prometheus"]; ok && len(v.([]interface{})) > 0 {
 		managed_prometheus := v.([]interface{})[0].(map[string]interface{})
 		mc.ManagedPrometheusConfig = &container.ManagedPrometheusConfig{
@@ -4645,7 +4645,7 @@ func flattenMonitoringConfig(c *container.MonitoringConfig) []map[string]interfa
 	if c.ComponentConfig != nil {
 		result["enable_components"] = c.ComponentConfig.EnableComponents
 	}
-<% if version == 'beta' -%>
+<% unless version == 'ga' -%>
 	if c.ManagedPrometheusConfig != nil {
 		result["managed_prometheus"] = flattenManagedPrometheusConfig(c.ManagedPrometheusConfig)
 	}
@@ -4653,7 +4653,7 @@ func flattenMonitoringConfig(c *container.MonitoringConfig) []map[string]interfa
 	return []map[string]interface{}{result}
 }
 
-<% if version == 'beta' -%>
+<% unless version == 'ga' -%>
 func flattenManagedPrometheusConfig(c *container.ManagedPrometheusConfig) []map[string]interface{} {
 	return []map[string]interface{}{
 		{
