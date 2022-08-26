@@ -849,6 +849,30 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "port_range"
           - "target"
       - !ruby/object:Provider::Terraform::Examples
+        name: "shared_vpc_internal_http_lb_with_mig_backend"
+        primary_resource_type: "google_compute_forwarding_rule"
+        primary_resource_id: "default"
+        vars:
+          l7_ilb_network: "l7-ilb-network"
+          l7_ilb_proxy_subnet: "l7-ilb-proxy-subnet"
+          l7_ilb_subnet: "l7-ilb-subnet"
+          l7_ilb_fw_allow_iap_hc: "l7-ilb-fw-allow-iap-hc"
+          l7_ilb_fw_allow_ilb_to_backends: "l7-ilb-fw-allow-ilb-to-backends"
+          l7_ilb_forwarding_rule: "l7-ilb-forwarding-rule"
+          l7_ilb_target_http_proxy: "l7-ilb-target-http-proxy"
+          l7_ilb_regional_url_map: "l7-ilb-regional-url-map"
+          l7_ilb_rhc: "l7-ilb-rhc"
+          l7_ilb_backend_service: "l7-ilb-backend-service"
+          l7_ilb_hc: "l7-ilb-hc"
+          l7_ilb_mig_template: "l7-ilb-mig-template"
+          l7_ilb_mig1: "l7-ilb-mig1"
+          l7_ilb_test_vm: "l7-ilb-test-vm"
+        skip_docs: true
+        min_version: beta
+        ignore_read_extra:
+          - "port_range"
+          - "target"
+      - !ruby/object:Provider::Terraform::Examples
         name: "internal_tcp_udp_lb_with_mig_backend"
         primary_resource_id: "google_compute_forwarding_rule"
         vars:
@@ -3566,3 +3590,4 @@ files: !ruby/object:Provider::Config::Files
   # This is usually to add licensing info, autogeneration notices, etc.
   compile:
 <%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>
+
