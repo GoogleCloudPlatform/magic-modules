@@ -1,10 +1,15 @@
+<% autogen_exception -%>
 package google
 
 import (
 	"strings"
 	"testing"
 
+<% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
+<% else -%>
+	compute "google.golang.org/api/compute/v0.beta"
+<% end -%>
 )
 
 var omitAlways = []string{
