@@ -163,7 +163,7 @@ comment+="Failed tests: \`$FAILED_TESTS_COUNT\` ${NEWLINE}${NEWLINE}"
 
 if [[ -n $FAILED_TESTS_PATTERN ]]; then
   comment+="#### Action taken ${NEWLINE}"
-  comment+="<details> <summary>Triggering VCR tests in RECORDING mode for the tests that failed during VCR. Click here to see the failed tests</summary> $FAILED_TESTS_PATTERN </details>"
+  comment+="<details> <summary>Triggering VCR tests in RECORDING mode for the tests that failed during VCR. Click here to see the failed tests</summary><blockquote>$FAILED_TESTS_PATTERN </blockquote></details>"
   add_comment "${comment}"
   # Clear fixtures folder
   rm $VCR_PATH/*
@@ -174,7 +174,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   test_exit_code=0
   for failed_test in $FAILED_TESTS
   do
-      TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run=$failed_test -timeout 90m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > ${failed_test}_recording_test.log & pids+=($!)
+      TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run="${failed_test}$" -timeout 90m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > ${failed_test}_recording_test.log & pids+=($!)
   done
 
   # Check if any process fails 
