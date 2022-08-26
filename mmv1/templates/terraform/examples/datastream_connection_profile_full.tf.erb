@@ -1,0 +1,15 @@
+resource "google_datastream_connection_profile" "<%= ctx[:primary_resource_id] %>" {
+	display_name = "Connection profile"
+
+	gcs_profile {
+		bucket = "my-bucket"
+		root_path = "/path"
+	}
+
+	forward_ssh_connectivity {
+		hostname = "google.com"
+		username = "my-user"
+		port = 8022
+		password = "swordfish"
+	}
+}
