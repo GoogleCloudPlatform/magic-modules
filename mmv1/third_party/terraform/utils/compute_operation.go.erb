@@ -179,7 +179,7 @@ func writeOperationError(w io.StringWriter, opError *compute.OperationErrorError
 	var link *compute.HelpLink
 
 	for _, ed := range opError.ErrorDetails {
-		if ed.LocalizedMessage != nil {
+		if lm == nil && ed.LocalizedMessage != nil {
 			lm = ed.LocalizedMessage
 		}
 
