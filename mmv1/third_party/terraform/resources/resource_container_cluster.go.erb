@@ -93,6 +93,35 @@ func clusterSchemaNodeConfig() *schema.Schema {
 	return nodeConfigSch
 }
 
+<% unless version == 'ga' -%>
+// Defines default nodel pool settings for the entire cluster. These settings are
+// overridden if specified on the specific NodePool object.
+func clusterSchemaNodePoolDefaults() *schema.Schema {
+       return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+                DiffSuppressFunc: emptyOrUnsetBlockDiffSuppress,
+                Description: `The default nodel pool settings for the entire cluster.`,
+                MaxItems: 1,
+                Elem: &schema.Resource{
+                        Schema: map[string]*schema.Schema{
+                                "node_config_defaults": {
+                                        Type:        schema.TypeList,
+                                        Optional:    true,
+					Description: `Subset of NodeConfig message that has defaults.`,
+                                        MaxItems:    1,
+                                        Elem: &schema.Resource{
+                                                Schema: map[string]*schema.Schema{
+                                                        "gcfs_config": schemaGcfsConfig(false),
+                                                },
+                                        },
+                                },
+                        },
+                },
+       }
+}
+<% end -%>
+
 func rfc5545RecurrenceDiffSuppress(k, o, n string, d *schema.ResourceData) bool {
 	// This diff gets applied in the cloud console if you specify
 	// "FREQ=DAILY" in your config and add a maintenance exclusion.
@@ -1021,6 +1050,8 @@ func resourceContainerCluster() *schema.Resource {
 			},
 
 <% unless version == "ga" -%>
+                        "node_pool_defaults": clusterSchemaNodePoolDefaults(),
+
 			"node_pool_auto_config": {
 				Type:             schema.TypeList,
 				Optional:         true,
@@ -1739,6 +1770,12 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.NodeConfig = expandNodeConfig([]interface{}{})
 	}
 
+<% unless version == 'ga' -%>
+        if v, ok := d.GetOk("node_pool_defaults"); ok {
+                cluster.NodePoolDefaults = expandNodePoolDefaults(v)
+        }
+<% end -%>
+
 	if v, ok := d.GetOk("node_config"); ok {
 		cluster.NodeConfig = expandNodeConfig(v)
 	}
@@ -2161,6 +2198,12 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("node_pool_auto_config", flattenNodePoolAutoConfig(cluster.NodePoolAutoConfig)); err != nil {
 		return err
 	}
+<% end -%>
+
+<% unless version == 'ga' -%>
+        if err := d.Set("node_pool_defaults", flattenNodePoolDefaults(cluster.NodePoolDefaults)); err != nil {
+                return err
+        }
 <% end -%>
 
 	return nil
@@ -3992,6 +4035,32 @@ func expandContainerClusterAuthenticatorGroupsConfig(configured interface{}) *co
 		SecurityGroup: config["security_group"].(string),
 	}
 }
+
+<% unless version == 'ga' -%>
+func expandNodePoolDefaults(configured interface{}) *container.NodePoolDefaults {
+        l, ok := configured.([]interface{})
+        if !ok || l == nil || len(l) == 0 || l[0] == nil {
+                return nil
+        }
+        nodePoolDefaults := &container.NodePoolDefaults{}
+        config := l[0].(map[string]interface{})
+        if v, ok := config["node_config_defaults"]; ok && len(v.([]interface{})) > 0 {
+                nodePoolDefaults.NodeConfigDefaults = expandNodeConfigDefaults(v)
+        }
+        return nodePoolDefaults
+}
+
+func flattenNodePoolDefaults(c *container.NodePoolDefaults) []map[string]interface{} {
+        if c == nil {
+		return nil
+	}
+        result := make(map[string]interface{})
+        if c.NodeConfigDefaults != nil && c.NodeConfigDefaults.GcfsConfig != nil {
+                result["node_config_defaults"] = flattenNodeConfigDefaults(c.NodeConfigDefaults)
+        }
+        return []map[string]interface{}{result}
+}
+<% end -%>
 
 <% unless version == 'ga' -%>
 func expandNodePoolAutoConfig(configured interface{}) *container.NodePoolAutoConfig {
