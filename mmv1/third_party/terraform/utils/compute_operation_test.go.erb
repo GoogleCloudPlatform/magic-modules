@@ -13,16 +13,6 @@ import (
 <% end -%>
 )
 
-var omitAlways = []string{
-	"LocalizedMessage2",
-	"Help1Link2 Description",
-	"https://help1.com/link2",
-	"Help2Link1 Description",
-	"https://help2.com/link1",
-	"Help2Link2 Description",
-	"https://help2.com/link2",
-}
-
 const (
 	topLevelMsg             = "Top-level message."
 	localizedMsgTmpl        = "LocalizedMessage%d message"
@@ -66,6 +56,32 @@ func buildOperationError(numLocalizedMsg int, numHelpWithLinks []int) compute.Op
 
 }
 
+func omitAlways(numLocalizedMsg int, numHelpWithLinks []int) []string {
+	var omits []string
+
+	for n := 2; n <= numLocalizedMsg; n++ {
+		omits = append(omits, fmt.Sprintf("LocalizedMessage%d", n))
+	}
+
+	for i := 0; i < len(numHelpWithLinks); i++ {
+		for j := maxLinks(i); j < numHelpWithLinks[i]; j++ {
+			desc, url := formatLink(i+1, j+1)
+			omits = append(omits, desc, url)
+		}
+	}
+
+	return omits
+
+}
+
+func maxLinks(helpIndex int) int {
+	if helpIndex == 0 {
+		return 1
+	}
+
+	return 0
+}
+
 func formatLocalizedMsg(localizedMsgNum int) string {
 	return fmt.Sprintf(localizedMsgTmpl, localizedMsgNum)
 }
@@ -87,7 +103,7 @@ func TestComputeOperationError_Error(t *testing.T) {
 			expectContains: []string{
 				"Top-level",
 			},
-			expectOmits: append(omitAlways, []string{
+			expectOmits: append(omitAlways(0, []int{}), []string{
 				"LocalizedMessage1",
 				"Help1Link1 Description",
 				"https://help1.com/link1",
@@ -100,7 +116,7 @@ func TestComputeOperationError_Error(t *testing.T) {
 				"Top-level",
 				"LocalizedMessage1",
 			},
-			expectOmits: append(omitAlways, []string{
+			expectOmits: append(omitAlways(1, []int{}), []string{
 				"Help1Link1 Description",
 				"https://help1.com/link1",
 			}...),
@@ -114,7 +130,7 @@ func TestComputeOperationError_Error(t *testing.T) {
 				"Help1Link1 Description",
 				"https://help1.com/link1",
 			},
-			expectOmits: append(omitAlways, []string{}...),
+			expectOmits: append(omitAlways(1, []int{1}), []string{}...),
 		},
 		{
 			name:  "WithNoLocalizedMessageAndHelp",
@@ -124,7 +140,7 @@ func TestComputeOperationError_Error(t *testing.T) {
 				"Help1Link1 Description",
 				"https://help1.com/link1",
 			},
-			expectOmits: append(omitAlways, []string{
+			expectOmits: append(omitAlways(0, []int{1}), []string{
 				"LocalizedMessage1",
 			}...),
 		},
@@ -137,7 +153,7 @@ func TestComputeOperationError_Error(t *testing.T) {
 				"Help1Link1 Description",
 				"https://help1.com/link1",
 			},
-			expectOmits: append(omitAlways, []string{}...),
+			expectOmits: append(omitAlways(1, []int{2}), []string{}...),
 		},
 		// The case below should never happen because the server should just send multiple links
 		// but the protobuf defition would allow it, so testing anyway.
@@ -150,7 +166,7 @@ func TestComputeOperationError_Error(t *testing.T) {
 				"Help1Link1 Description",
 				"https://help1.com/link1",
 			},
-			expectOmits: append(omitAlways, []string{}...),
+			expectOmits: append(omitAlways(1, []int{2, 2}), []string{}...),
 		},
 		// This should never happen because the server should never respond with the messages for
 		// two locales at once, but should rather take the locale as input to the API and serve
@@ -165,7 +181,7 @@ func TestComputeOperationError_Error(t *testing.T) {
 				"Help1Link1 Description",
 				"https://help1.com/link1",
 			},
-			expectOmits: append(omitAlways, []string{}...),
+			expectOmits: append(omitAlways(2, []int{1}), []string{}...),
 		},
 	}
 
