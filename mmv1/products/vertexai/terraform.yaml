@@ -39,9 +39,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "featurestore"
         vars:
           name: "terraform"
-          kms_key_name: "kms-key"
+          project: "appeng-flex"
         test_env_vars:
-          kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+          org_id: :ORG_ID
+          billing_account: :BILLING_ACCT
         ignore_read_extra:
           - "force_destroy"
     properties:
@@ -68,9 +69,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "entity"
         vars:
           name: "terraform"
-          kms_key_name: "kms-key"
+          project: "vertex-ai"
         test_env_vars:
-          kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+          org_id: :ORG_ID
+          billing_account: :BILLING_ACCT
     properties:
       etag: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
