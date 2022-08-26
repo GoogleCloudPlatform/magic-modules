@@ -31,7 +31,7 @@ func schemaGcfsConfig(forceNew bool) *schema.Schema {
 		Optional: true,
 		MaxItems: 1,
 		Description: `GCFS configuration for this node.`,
-		ForceNew: true,
+		ForceNew: forceNew,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"enabled": {
