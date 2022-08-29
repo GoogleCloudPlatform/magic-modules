@@ -19,7 +19,7 @@ resource "google_compute_region_health_check" "health-check" {
 # [END cloudloadbalancing_url_map_instance_health_check]
 
 # [START cloudloadbalancing_url_map_instance_region_backend_service]
-resource "google_compute_region_backend_service" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_region_backend_service" "backend-service" {
   connection_draining_timeout_sec = 300
   health_checks                   = [google_compute_region_health_check.health-check.id]
   load_balancing_scheme           = "EXTERNAL_MANAGED"
@@ -42,7 +42,7 @@ resource "google_compute_region_target_http_proxy" "lb-target-proxy" {
 # [END cloudloadbalancing_target_proxy_instance]
 
 # [START cloudloadbalancing_url_map_instance]
-resource "google_compute_region_url_map" "url-map" {
+resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
   default_service = google_compute_region_backend_service.backend-service.id
   name            = "<%= ctx[:vars]['url_map'] %>"
   region          = "us-central1"
