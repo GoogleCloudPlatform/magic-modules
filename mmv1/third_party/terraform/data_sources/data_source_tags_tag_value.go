@@ -3,6 +3,7 @@ package google
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -81,7 +82,9 @@ func dataSourceGoogleTagsTagValueRead(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if tagValueMatch == nil {
-		return fmt.Errorf("tag value with short_name %s not found under parent %s", shortName, parent)
+		log.Printf("[WARN] Returning empty for tag value %s with parent %s because it was not found.", shortName, parent)
+		d.SetId("")
+		return nil
 	}
 
 	d.SetId(tagValueMatch.Name)
