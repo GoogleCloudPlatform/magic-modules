@@ -1,3 +1,4 @@
+# [START cloudloadbalancing_shared_vpc_int_http_gce]
 # VPC network
 resource "google_compute_network" "ilb_network" {
   name                    = "<%= ctx[:vars]['l7_ilb_network'] %>"
@@ -232,4 +233,4 @@ resource "google_compute_instance" "vm-test" {
     ]
   }
 }
-
+# [START cloudloadbalancing_shared_vpc_int_http_gce]
