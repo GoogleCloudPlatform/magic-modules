@@ -44,6 +44,10 @@ objects:
   - !ruby/object:Api::Resource
     name: 'ConnectionProfile'
     base_url: "projects/{{project}}/locations/{{location}}/connectionProfiles"
+    create_url: "projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}"
+    self_link: "projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}"
+    update_verb: :PATCH
+    update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/datastream/docs/create-connection-profiles'
@@ -55,6 +59,20 @@ objects:
         name: 'name'
         output: true
         description: The resource's name.
+      - !ruby/object:Api::Type::String
+        name: connectionProfileId
+        description: |-
+          The connection profile identifier.
+        required: true
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        description: |
+          The name of the location this repository is located in.
+        required: true
+        input: true
+        url_param_only: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: Labels.
@@ -64,9 +82,11 @@ objects:
         description: Display name.
       - !ruby/object:Api::Type::NestedObject
         name: 'oracleProfile'
-        conflicts:
+        exactly_one_of:
+          - oracle_profile
           - gcs_profile
           - mysql_profile
+          - postgresql_profile
         description: |
           Oracle database profile.
         properties:
@@ -100,9 +120,11 @@ objects:
             description: Connection string attributes
       - !ruby/object:Api::Type::NestedObject
         name: 'gcsProfile'
-        conflicts:
+        exactly_one_of:
           - oracle_profile
+          - gcs_profile
           - mysql_profile
+          - postgresql_profile
         description: |
           Cloud Storage bucket profile.
         properties:
@@ -111,15 +133,17 @@ objects:
             required: true
             description: |
               The Cloud Storage bucket name.
-          - !ruby/object:Api::Type::Integer
+          - !ruby/object:Api::Type::String
             name: 'rootPath'
             description: |
               The root path inside the Cloud Storage bucket.
       - !ruby/object:Api::Type::NestedObject
         name: 'mysqlProfile'
-        conflicts:
-          - gcs_profile
+        exactly_one_of:
           - oracle_profile
+          - gcs_profile
+          - mysql_profile
+          - postgresql_profile
         description: |
           MySQL database profile.
         properties:
@@ -185,6 +209,41 @@ objects:
                 output: true
                 description: |
                   Indicates whether the clientKey field is set.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'postgresqlProfile'
+        exactly_one_of:
+          - oracle_profile
+          - gcs_profile
+          - mysql_profile
+          - postgresql_profile
+        description: |
+          PostgreSQL database profile.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'hostname'
+            required: true
+            description: |
+              Hostname for the PostgreSQL connection.
+          - !ruby/object:Api::Type::Integer
+            name: 'port'
+            default_value: 5432
+            description: |
+              Port for the PostgreSQL connection.
+          - !ruby/object:Api::Type::String
+            name: 'username'
+            required: true
+            description: |
+              Username for the PostgreSQL connection.
+          - !ruby/object:Api::Type::String
+            name: 'password'
+            required: true
+            description: |
+              Password for the PostgreSQL connection.
+          - !ruby/object:Api::Type::String
+            name: 'database'
+            required: true
+            description: |
+              Database for the PostgreSQL connection.
       - !ruby/object:Api::Type::NestedObject
         name: 'forwardSshConnectivity'
         description: |
