@@ -14,7 +14,7 @@ resource "google_compute_subnetwork" "proxy_subnet" {
   name          = "<%= ctx[:vars]['l7_ilb_proxy_subnet'] %>"
   provider      = google-beta
   ip_cidr_range = "10.0.0.0/24"
-  region        = "europe-west1"
+  region        = "us-central1"
   purpose       = "INTERNAL_HTTPS_LOAD_BALANCER"
   role          = "ACTIVE"
   network       = google_compute_network.ilb_network.id
@@ -26,7 +26,7 @@ resource "google_compute_subnetwork" "ilb_subnet" {
   name          = "<%= ctx[:vars]['l7_ilb_subnet'] %>"
   provider      = google-beta
   ip_cidr_range = "10.0.1.0/24"
-  region        = "europe-west1"
+  region        = "us-central1"
   network       = google_compute_network.ilb_network.id
   project       = "my-host-project-357412"
 }
@@ -63,7 +63,7 @@ resource "google_compute_firewall" "fw-ilb-to-backends" {
 resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   name                  = "<%= ctx[:vars]['l7_ilb_forwarding_rule'] %>"
   provider              = google-beta
-  region                = "europe-west1"
+  region                = "us-central1"
   depends_on            = [google_compute_subnetwork.proxy_subnet]
   ip_protocol           = "TCP"
   load_balancing_scheme = "INTERNAL_MANAGED"
@@ -79,7 +79,7 @@ resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
 resource "google_compute_region_target_http_proxy" "default" {
   name     = "<%= ctx[:vars]['l7_ilb_target_http_proxy'] %>"
   provider = google-beta
-  region   = "europe-west1"
+  region   = "us-central1"
   url_map  = google_compute_region_url_map.default.id
   project  = "my-service-project-01-358212"
 }
@@ -88,7 +88,7 @@ resource "google_compute_region_target_http_proxy" "default" {
 resource "google_compute_region_url_map" "default" {
   name            = "<%= ctx[:vars]['l7_ilb_regional_url_map'] %>"
   provider        = google-beta
-  region          = "europe-west1"
+  region          = "us-central1"
   default_service = google_compute_region_backend_service.default.id
   project         = "my-service-project-01-358212"
 }
@@ -98,7 +98,7 @@ resource "google_compute_region_health_check" "default" {
   project  = "my-service-project-02-358212"
   name     = "<%= ctx[:vars]['l7_ilb_rhc'] %>"
   provider = google-beta
-  region   = "europe-west1"
+  region   = "us-central1"
   http_health_check {
     port_specification = "USE_SERVING_PORT"
   }
@@ -109,7 +109,7 @@ resource "google_compute_region_backend_service" "default" {
   project               = "my-service-project-02-358212"
   name                  = "<%= ctx[:vars]['l7_ilb_backend_service'] %>"
   provider              = google-beta
-  region                = "europe-west1"
+  region                = "us-central1"
   protocol              = "HTTP"
   load_balancing_scheme = "INTERNAL_MANAGED"
   timeout_sec           = 10
@@ -186,7 +186,7 @@ resource "google_compute_region_instance_group_manager" "mig" {
   project  = "my-service-project-02-358212"
   name     = "<%= ctx[:vars]['l7_ilb_mig1'] %>"
   provider = google-beta
-  region   = "europe-west1"
+  region   = "us-central1"
   version {
     instance_template = google_compute_instance_template.default.id
     name              = "primary"
@@ -218,7 +218,7 @@ resource "google_compute_instance" "vm-test" {
   project      = "my-service-project-02-358212"
   name         = "<%= ctx[:vars]['l7_ilb_test_vm'] %>"
   provider     = google-beta
-  zone         = "europe-west1-b"
+  zone         = "us-central1-b"
   machine_type = "e2-small"
   network_interface {
     network    = google_compute_network.ilb_network.id
