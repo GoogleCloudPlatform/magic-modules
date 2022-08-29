@@ -251,21 +251,22 @@ any affected tools, the primary reviewer will merge your changes.
 
 ### General contributing steps
 
-1. Fork `Magic Modules` repository into your GitHub account if you haven't done before
-1. Check the [issue tracker](https://github.com/hashicorp/terraform-provider-google/issues) to see whether your feature has already been requested
-   * if there's an issue and it's already has a dedicated assignee, it indicates that someone may already work on a solution.
-   * otherwise, you're welcome to work on the issue
-1. Check whether the resource you would like to work on already exists in the providers ([Tpg](https://github.com/hashicorp/terraform-provider-google) / [Tpgb](https://github.com/hashicorp/terraform-provider-google-beta) or [check the website](https://registry.terraform.io/providers/hashicorp/google/latest/docs))
-   * If it exists, check the header of the downstream file to identify the type of tools used to generate the resource.
-  For some resources, the code file, the test file and the documentation file may not be generated via the same tools. (attach photo of the header)
-   * If not, decide which tool you would like to use to implement the resource. (In most cases, generat)
-1. Make the actual code change
-   * The [Contribution Guide](#contribution-guide) below will lead you to the detailed instructions on how to make your change, based on the type of the change + the tool used to generate the code
-1. Build the providers and test the feature locally. Check [Testing Guidance]() for details on how to run provider test. (testing the PR locally and pushing the commit to the PR only after the tests pass locally may significantly reduce review cycles)
-1. Refer to the schema table to make sure all correct schema are implemented for the feature
+1. Fork `Magic Modules` repository into your GitHub account if you haven't done before.
+1. Check the [issue tracker](https://github.com/hashicorp/terraform-provider-google/issues) to see whether your feature has already been requested.
+   * if there's an issue and it's already has a dedicated assignee, it indicates that someone may have already started to work on a solution.
+   * otherwise, you're welcome to work on the issue.
+1. Check whether the resource you would like to work on already exists in the providers ([Tpg](https://github.com/hashicorp/terraform-provider-google) / [Tpgb](https://github.com/hashicorp/terraform-provider-google-beta) or [check the website](https://registry.terraform.io/providers/hashicorp/google/latest/docs)).
+   * If it exists, check the header of the downstream file to identify the type of tools used to generate the resource. For some resources, the code file, the test file and the documentation file may not be generated via the same tools.
+   * If not, decide which tool you would like to use to implement the resource. 
+      * MMv1 is strongly prefered over handwriting the resoruce unless the resource can not be generated in some cases.
+      * Currently, only handwritten datasources are supported.
+1. Make the actual code change.
+   * The [Contribution Guide](#contribution-guide) below will guide you to the detailed instructions on how to make your change, based on the type of the change + the tool used to generate the code.
+1. Build the providers that includes your change. Check [Generating the Terraform Providers](#generating-the-terraform-providers) section for details on how to generate the providers locally.
+1. Test the feature locally. Check [Testing Guidance](#testing) for details on how to run provider test locally. (Testing the PR locally and pushing the commit to the PR only after the tests pass locally may significantly reduce review cycles)
 1. Push your changes to your `magic-modules` repo fork and send a pull request from that branch to the main branch on `magic-modules`. A reviewer will be assigned automatically to your PR.
-1. Wait until the the modules magician to generate downstream diff (which should takes about 15 mins after creating the PR) to make sure all changes are generated correctly in downstream repos
-1. Wait for the VCR result
+1. Wait until the the modules magician to generate downstream diff (which should takes about 15 mins after creating the PR) to make sure all changes are generated correctly in downstream repos.
+1. Wait for the VCR results.
    <details><summary>Get to know general workflow for VCR tests</summary>
 
       1. You submit your change.
@@ -282,8 +283,8 @@ any affected tools, the primary reviewer will merge your changes.
 
    Where possible, take a look at the logs and see if you can figure out what needs to be fixed related to your change.
    The false positive rate on these tests is extremely high between changes in the API, Cloud Build bugs, and eventual consistency issues in test recordings so we don't expect contributors to wholly interpret the results- that's the responsibility of your reviewer.
-1. If your assigned reviewers does not reply/ review within a week, gently ping them on github
-1. After your PR is merged, it will be released to customers in around a week or two
+1. If your assigned reviewers does not reply/ review within a week, gently ping them on github.
+1. After your PR is merged, it will be released to customers in around a week or two.
 
 ---
 
