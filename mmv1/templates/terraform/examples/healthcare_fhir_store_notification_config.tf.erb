@@ -13,8 +13,8 @@ resource "google_healthcare_fhir_store" "default" {
   }
 
   notification_configs {
-    pubsubTopic = "gs://${google_pubsub_topic.topic.name}"
-    sendFullResource = true
+    pubsub_topic = "gs://${google_pubsub_topic.topic.name}"
+    send_full_resource = true
   }
 }
 
