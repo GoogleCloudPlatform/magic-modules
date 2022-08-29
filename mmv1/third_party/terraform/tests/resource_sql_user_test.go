@@ -286,9 +286,8 @@ func TestAccSqlUser_mysqlPasswordPolicy(t *testing.T) {
 
 	instance := fmt.Sprintf("i-%d", randInt(t))
 	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccSqlUserDestroyProducer(t),
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleSqlUser_mysqlPasswordPolicy(instance, "password", false),
@@ -353,7 +352,7 @@ func testGoogleSqlUser_mysqlPasswordPolicy(instance, password string, disabled b
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
   region              = "us-central1"
-  database_version    = "MYSQL_5_7"
+  database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
     tier = "db-f1-micro"
@@ -369,9 +368,9 @@ resource "google_sql_user" "user1" {
     disabled = "%t"
     server_roles = [ "admin" ]  	
   }
-	password_policy {
-		allowed_failed_attempts  = 6
-    password_expiration_duration  =  "30s"
+  password_policy {
+    allowed_failed_attempts  = 6
+    password_expiration_duration  =  "2592000s"
     enable_failed_attempts_check = true
     status {
       locked = true
@@ -386,9 +385,9 @@ resource "google_sql_user" "user2" {
   instance = google_sql_database_instance.instance.name
   host     = "gmail.com"
   password = "hunter2"
-	password_policy {
-		allowed_failed_attempts  = 6
-    password_expiration_duration  =  "30s"
+  password_policy {
+    allowed_failed_attempts  = 6
+    password_expiration_duration  =  "2592000s"
     enable_failed_attempts_check = true
     status {
       locked = true
