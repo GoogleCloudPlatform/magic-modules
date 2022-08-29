@@ -1,19 +1,9 @@
-# project names
-variable "projects" {
-  type = map(string)
-  default = {
-    host-project       = "my-host-project-357412"
-    service-project-01 = "my-service-project-01-358212"
-    service-project-02 = "my-service-project-02-358212"
-  }
-}
-
 # VPC network
 resource "google_compute_network" "ilb_network" {
   name                    = "<%= ctx[:vars]['l7_ilb_network'] %>"
   provider                = google-beta
   auto_create_subnetworks = false
-  project                 = var.projects["host-project"]
+  project                 = "my-host-project-357412"
 }
 
 # proxy-only subnet
@@ -25,7 +15,7 @@ resource "google_compute_subnetwork" "proxy_subnet" {
   purpose       = "INTERNAL_HTTPS_LOAD_BALANCER"
   role          = "ACTIVE"
   network       = google_compute_network.ilb_network.id
-  project       = var.projects["host-project"]
+  project       = "my-host-project-357412"
 }
 
 # backend subnet
@@ -35,12 +25,12 @@ resource "google_compute_subnetwork" "ilb_subnet" {
   ip_cidr_range = "10.0.1.0/24"
   region        = "europe-west1"
   network       = google_compute_network.ilb_network.id
-  project       = var.projects["host-project"]
+  project       = "my-host-project-357412"
 }
 
 # allow all access from IAP and health check ranges
 resource "google_compute_firewall" "fw-iap" {
-  project       = var.projects["host-project"]
+  project       = "my-host-project-357412"
   name          = "<%= ctx[:vars]['l7_ilb_fw_allow_iap_hc'] %>"
   provider      = google-beta
   direction     = "INGRESS"
@@ -53,7 +43,7 @@ resource "google_compute_firewall" "fw-iap" {
 
 # allow http from proxy subnet to backends
 resource "google_compute_firewall" "fw-ilb-to-backends" {
-  project       = var.projects["host-project"]
+  project       = "my-host-project-357412"
   name          = "<%= ctx[:vars]['l7_ilb_fw_allow_ilb_to_backends'] %>"
   provider      = google-beta
   direction     = "INGRESS"
@@ -79,7 +69,7 @@ resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   network               = google_compute_network.ilb_network.id
   subnetwork            = google_compute_subnetwork.ilb_subnet.id
   network_tier          = "PREMIUM"
-  project               = var.projects["service-project-01"]
+  project               = "my-service-project-01-358212"
 }
 
 # HTTP target proxy
@@ -88,7 +78,7 @@ resource "google_compute_region_target_http_proxy" "default" {
   provider = google-beta
   region   = "europe-west1"
   url_map  = google_compute_region_url_map.default.id
-  project  = var.projects["service-project-01"]
+  project  = "my-service-project-01-358212"
 }
 
 # URL map
@@ -97,12 +87,12 @@ resource "google_compute_region_url_map" "default" {
   provider        = google-beta
   region          = "europe-west1"
   default_service = google_compute_region_backend_service.default.id
-  project         = var.projects["service-project-01"]
+  project         = "my-service-project-01-358212"
 }
 
 # regional health check
 resource "google_compute_region_health_check" "default" {
-  project  = var.projects["service-project-02"]
+  project  = "my-service-project-02-358212"
   name     = "<%= ctx[:vars]['l7_ilb_rhc'] %>"
   provider = google-beta
   region   = "europe-west1"
@@ -113,7 +103,7 @@ resource "google_compute_region_health_check" "default" {
 
 # regional backend service
 resource "google_compute_region_backend_service" "default" {
-  project               = var.projects["service-project-02"]
+  project               = "my-service-project-02-358212"
   name                  = "<%= ctx[:vars]['l7_ilb_backend_service'] %>"
   provider              = google-beta
   region                = "europe-west1"
@@ -130,7 +120,7 @@ resource "google_compute_region_backend_service" "default" {
 
 # health check
 resource "google_compute_health_check" "default" {
-  project            = var.projects["service-project-02"]
+  project            = "my-service-project-02-358212"
   name               = "<%= ctx[:vars]['l7_ilb_hc'] %>"
   timeout_sec        = 1
   check_interval_sec = 1
@@ -141,7 +131,7 @@ resource "google_compute_health_check" "default" {
 
 # instance template
 resource "google_compute_instance_template" "default" {
-  project      = var.projects["service-project-02"]
+  project      = "my-service-project-02-358212"
   name         = "<%= ctx[:vars]['l7_ilb_mig_template'] %>"
   provider     = google-beta
   machine_type = "e2-small"
@@ -190,7 +180,7 @@ resource "google_compute_instance_template" "default" {
 
 # MIG
 resource "google_compute_region_instance_group_manager" "mig" {
-  project  = var.projects["service-project-02"]
+  project  = "my-service-project-02-358212"
   name     = "<%= ctx[:vars]['l7_ilb_mig1'] %>"
   provider = google-beta
   region   = "europe-west1"
@@ -207,12 +197,12 @@ resource "google_compute_region_instance_group_manager" "mig" {
 }
 
 data "google_project" "service_project02" {
-  project_id = var.projects["service-project-02"]
+  project_id = "my-service-project-02-358212"
 }
 
 # IAM Role
 resource "google_project_iam_binding" "default" {
-  project = var.projects["host-project"]
+  project = "my-host-project-357412"
   role    = "roles/compute.networkUser"
 
   members = [
@@ -222,7 +212,7 @@ resource "google_project_iam_binding" "default" {
 
 # test instance
 resource "google_compute_instance" "vm-test" {
-  project      = var.projects["service-project-02"]
+  project      = "my-service-project-02-358212"
   name         = "<%= ctx[:vars]['l7_ilb_test_vm'] %>"
   provider     = google-beta
   zone         = "europe-west1-b"
