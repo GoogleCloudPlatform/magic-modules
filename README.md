@@ -266,9 +266,9 @@ any affected tools, the primary reviewer will merge your changes.
    * The [Contribution Guide](#contribution-guide) below will guide you to the detailed instructions on how to make your change, based on the type of the change + the tool used to generate the code.
 1. Build the providers that includes your change. Check [Generating the Terraform Providers](#generating-the-terraform-providers) section for details on how to generate the providers locally.
 1. Test the feature against the providers you generated in the last step locally. Check [Testing Guidance](#testing) for details on how to run provider test locally. (Testing the PR locally and pushing the commit to the PR only after the tests pass locally may significantly reduce review cycles)
-1. Push your changes to your `magic-modules` repo fork and send a pull request from that branch to the main branch on `magic-modules`. A reviewer will be assigned automatically to your PR.
+1. Push your changes to your `magic-modules` repo fork and send a pull request from that branch to the main branch on `magic-modules`. A reviewer will be assigned automatically to your PR. Check [Submitting a PR](#submitting-a-PR) section for details on how to submit a PR.
 1. Wait until the the modules magician to generate downstream diff (which should takes about 15 mins after creating the PR) to make sure all changes are generated correctly in downstream repos.
-1. Wait for the VCR results.
+1. Wait for the VCR test results.
    <details><summary>Get to know general workflow for VCR tests</summary>
 
       1. You submit your change.
