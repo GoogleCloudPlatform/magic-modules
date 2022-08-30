@@ -986,13 +986,27 @@ func TestAccContainerCluster_withNodePoolDefaults(t *testing.T) {
 				ImportStateVerify: true,
 			},
                         {
-                                Config: testAccContainerCluster_withNodePoolDefaults(clusterName),
+                                Config: testAccContainerCluster_withNodePoolDefaults(clusterName, "true"),
                                 Check: resource.ComposeAggregateTestCheckFunc(
                                   resource.TestCheckResourceAttr("google_container_cluster.with_node_pool_defaults",
                                           "node_pool_defaults.0.node_config_defaults.0.gcfs_config.#", "1"),
                                   resource.TestCheckResourceAttr("google_container_cluster.with_node_pool_defaults", 
                                           "node_pool_defaults.0.node_config_defaults.0.gcfs_config.0.enabled", "true"),
 				),
+                        },
+                        {
+                                ResourceName:            "google_container_cluster.with_node_pool_defaults",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                        },
+                        {
+                                Config: testAccContainerCluster_withNodePoolDefaults(clusterName, "false"),
+                                Check: resource.ComposeAggregateTestCheckFunc(
+                                  resource.TestCheckResourceAttr("google_container_cluster.with_node_pool_defaults",
+                                          "node_pool_defaults.0.node_config_defaults.0.gcfs_config.#", "1"),
+                                  resource.TestCheckResourceAttr("google_container_cluster.with_node_pool_defaults",
+                                          "node_pool_defaults.0.node_config_defaults.0.gcfs_config.0.enabled", "false"),
+                                ),
                         },
                         {
                                 ResourceName:            "google_container_cluster.with_node_pool_defaults",
@@ -3872,7 +3886,7 @@ resource "google_container_cluster" "with_node_config" {
 `, clusterName)
 }
 
-func testAccContainerCluster_withNodePoolDefaults(clusterName string) string {
+func testAccContainerCluster_withNodePoolDefaults(clusterName, enabled string) string {
         return fmt.Sprintf(`
 resource "google_container_cluster" "with_node_pool_defaults" {
   name               = "%s"
@@ -3882,12 +3896,12 @@ resource "google_container_cluster" "with_node_pool_defaults" {
   node_pool_defaults {
     node_config_defaults {
       gcfs_config {
-        enabled = "true"
+        enabled = "%s"
       }
     }
   }
 }
-`, clusterName)
+`, clusterName, enabled)
 }
 
 func testAccContainerCluster_withNodeConfigUpdate(clusterName string) string {
