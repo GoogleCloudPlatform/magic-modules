@@ -17,9 +17,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}
     import_format: ["projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}"]
     autogen_async: true
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 20
-      delete_minutes: 20
     properties:
       oracleProfile.password: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
