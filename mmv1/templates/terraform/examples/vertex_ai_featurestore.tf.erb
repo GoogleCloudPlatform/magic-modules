@@ -1,20 +1,3 @@
-resource "google_kms_key_ring" "key_ring" {
-  provider = google-beta
-  name     = "key-ring"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "crypto_key" {
-  provider = google-beta
-  name = "crypto-key"
-  key_ring = google_kms_key_ring.key_ring.id
-  purpose = "ENCRYPT_DECRYPT"
-
-  version_template {
-    algorithm = "GOOGLE_SYMMETRIC_ENCRYPTION"
-  }
-}
-
 resource "google_vertex_ai_featurestore" "featurestore" {
   provider = google-beta
   name     = "<%= ctx[:vars]['name'] %>"
@@ -26,7 +9,7 @@ resource "google_vertex_ai_featurestore" "featurestore" {
     fixed_node_count = 2
   }
   encryption_spec {
-    kms_key_name = google_kms_crypto_key.crypto_key.id
+    kms_key_name = "<%= ctx[:vars]['kms_key_name'] %>"
   }
   force_destroy = true
 }
