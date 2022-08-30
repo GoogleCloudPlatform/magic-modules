@@ -2290,7 +2290,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "target"
           - "ip_address"
       - !ruby/object:Provider::Terraform::Examples
-        name: "regional-external-http-load-balancer"
+        name: "regional_external_http_load_balancer"
         primary_resource_type: "google_compute_region_url_map"
         primary_resource_id: "default"
         vars:
