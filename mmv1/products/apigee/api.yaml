@@ -138,6 +138,21 @@ objects:
           If not specified, a Google-Managed encryption key will be used.
           Valid only when `RuntimeType` is CLOUD. For example: `projects/foo/locations/us/keyRings/bar/cryptoKeys/baz`.
         input: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'properties'
+        description: Properties defined in the Apigee organization profile.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'property'
+            description: List of all properties in the object.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'name'
+                  description: Name of the property.
+                - !ruby/object:Api::Type::String
+                  name: 'value'
+                  description: Value of the property.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Creating an API organization':
