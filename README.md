@@ -49,9 +49,13 @@ effect, an issue solved in one tool will be solved for each other tool.
 ## Getting Started with Magic Modules
 
 ### Preparing your environment
+
+To get started, you'll need:
+
 * Go
   * If you're using a Mac with Homebrew installed, you can follow these
-	@@ -46,21 +41,26 @@ To get started, you'll need:
+    instructions to set up Go: [YouTube video](https://www.youtube.com/watch?v=VQVyvulNnzs).
+  * If you're using Cloud Shell, Go is already installed.
 * Ruby 2.6.0
   * You can use `rbenv` to manage your Ruby version(s).
   * To install `rbenv`, run `sudo apt install rbenv`.
@@ -255,12 +259,12 @@ any affected tools, the primary reviewer will merge your changes.
 1. Check the [issue tracker](https://github.com/hashicorp/terraform-provider-google/issues) to see whether your feature has already been requested.
    * if there's an issue and it's already has a dedicated assignee, it indicates that someone may have already started to work on a solution.
    * otherwise, you're welcome to work on the issue.
-1. Check whether the resource you would like to work on already exists in the providers ([Tpg](https://github.com/hashicorp/terraform-provider-google) / [Tpgb](https://github.com/hashicorp/terraform-provider-google-beta) or [check the website](https://registry.terraform.io/providers/hashicorp/google/latest/docs)).
+1. Check whether the resource you would like to work on already exists in the providers ([`google`](https://github.com/hashicorp/terraform-provider-google) / [`google-beta`](https://github.com/hashicorp/terraform-provider-google-beta) or [check the website](https://registry.terraform.io/providers/hashicorp/google/latest/docs)).
    * If it exists, check the header of the downstream file to identify the type of tools used to generate the resource. For some resources, the code file, the test file and the documentation file may not be generated via the same tools.
       * Generated resources like [`google_compute_address`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address) can be identified by looking in their [`Go source`](https://github.com/hashicorp/terraform-provider-google/blob/main/google/resource_compute_address.go) for an `AUTO GENERATED CODE` header as well as a `Type`. "Generated resources" typically refers to just the `MMv1` type, and `DCL` type resources are considered "DCL-based". (Currently DCL-related contribution are not supported)
       * Handwritten resources like [`google_container_cluster`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster) can be identified if they have source code present under the [`mmv1/third_party/terraform/resources`](./mmv1/third_party/terraform/resources) folder or by the absence of the `AUTO GENERATED CODE header` in their [`Go source`](https://github.com/hashicorp/terraform-provider-google/blob/main/google/resource_container_cluster.go).
    * If not, decide which tool you would like to use to implement the resource. 
-      * MMv1 is strongly prefered over handwriting the resoruce unless the resource can not be generated in some cases.
+      * MMv1 is strongly preferred over handwriting the resource unless the resource can not be generated.
       * Currently, only handwritten datasources are supported.
 1. Make the actual code change.
    * The [Contribution Guide](#contribution-guide) below will guide you to the detailed instructions on how to make your change, based on the type of the change + the tool used to generate the code.
