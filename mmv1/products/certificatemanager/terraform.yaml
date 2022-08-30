@@ -62,10 +62,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         sensitive: true
         # We don't support ignore_read on nested fields
         ignore_read: true
+        custom_flatten: "templates/terraform/custom_flatten/certificate_manager_certificate_self_managed_pem_certificate.go.erb"
       selfManaged.pemPrivateKey: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
         # We don't support ignore_read on nested fields
         ignore_read: true
+        custom_flatten: "templates/terraform/custom_flatten/certificate_manager_certificate_self_managed_pem_private_key.go.erb"
       scope: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'certManagerDefaultScopeDiffSuppress'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
