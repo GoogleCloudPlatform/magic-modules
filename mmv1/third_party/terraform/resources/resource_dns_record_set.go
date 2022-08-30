@@ -91,6 +91,7 @@ func resourceDnsRecordSet() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
+				ValidateFunc: validateRecordNameTrailingDot(),
 				Description: `The DNS name this record set will apply to.`,
 			},
 
@@ -619,4 +620,16 @@ func flattenDnsRecordSetRoutingPolicyGEO(geo *dns.RRSetRoutingPolicyGeoPolicy) [
 		ris = append(ris, ri)
 	}
 	return ris
+}
+
+func validateRecordNameTrailingDot() schema.SchemaValidateFunc {
+	return func(v interface{}, k string) (ws []string, errors []error) {
+		value := v.(string)
+		last1 := value[len(value)-1:]
+		if last1 != "." {
+			errors = append(errors, fmt.Errorf(
+				"%q (%q) doesn't match regexp %q, name field must end with trailing dot, for example test.example.com. (note the trailing dot)", k, value, "."))
+		}
+		return
+	}
 }
