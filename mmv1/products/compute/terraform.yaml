@@ -2290,7 +2290,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "target"
           - "ip_address"
       - !ruby/object:Provider::Terraform::Examples
-        name: "regional_external_http_load_balancer"
+        name: "regional-external-http-load-balancer"
         primary_resource_type: "google_compute_region_url_map"
         primary_resource_id: "default"
         vars:
@@ -2361,6 +2361,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           name: "policy"
       - !ruby/object:Provider::Terraform::Examples
         name: "resource_policy_instance_schedule_policy"
+        primary_resource_id: "hourly"
+        vars:
+          name: "policy"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "resource_policy_snapshot_schedule_chain_name"
         primary_resource_id: "hourly"
         vars:
           name: "policy"
@@ -2688,6 +2693,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           snapshot_name: "my-snapshot"
           disk_name: "debian-disk"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "snapshot_chainname"
+        primary_resource_id: "snapshot"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-snapshot-chainname%s\", context[\"random_suffix\"])"
+        vars:
+          snapshot_name: "my-snapshot"
+          disk_name: "debian-disk"
+          chain_name: 'snapshot-chain'
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'snapshot_id'
