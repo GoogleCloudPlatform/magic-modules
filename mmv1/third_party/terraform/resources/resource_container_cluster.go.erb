@@ -1361,6 +1361,23 @@ func resourceContainerCluster() *schema.Resource {
 			},
 <% end -%>
 
+	"service_external_ips_config": {
+		Type:        schema.TypeList,
+		MaxItems:    1,
+		Optional:    true,
+		Computed:    true,
+		Description: `If set, and enabled=true, services with external ips field will not be blocked`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"enabled": {
+					Type:        schema.TypeBool,
+					Required:    true,
+					Description: `When enabled, services with exterenal ips specified will be allowed.`,
+				},
+			},
+		},
+	},
+
 	"mesh_certificates": {
 			Type:        schema.TypeList,
 			MaxItems:    1,
@@ -1496,6 +1513,25 @@ func resourceContainerCluster() *schema.Resource {
 			   Description: `The desired state of IPv6 connectivity to Google Services. By default, no private IPv6 access to or from Google Services (all access will be via IPv4).`,
 			   Computed: true,
 			},
+
+<% unless version == "ga" -%>
+			"cost_management_config": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Computed:    true,
+				Description: `Cost management configuration for the cluster.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:        schema.TypeBool,
+							Required:    true,
+							Description: `Whether to enable GKE cost allocation. When you enable GKE cost allocation, the cluster name and namespace of your GKE workloads appear in the labels field of the billing export to BigQuery. Defaults to false.`,
+						},
+					},
+				},
+			},
+<% end -%>
 
 			"resource_usage_export_config": {
 				Type:        schema.TypeList,
@@ -1698,6 +1734,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 <% unless version == 'ga' -%>
 		NodePoolAutoConfig: expandNodePoolAutoConfig(d.Get("node_pool_auto_config")),
 <% end -%>
+<% unless version == 'ga' -%>
+		CostManagementConfig: expandCostManagementConfig(d.Get("cost_management_config")),
+<% end -%>
 	}
 
 	v:= d.Get("enable_shielded_nodes")
@@ -1790,6 +1829,10 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 
 	if v, ok := d.GetOk("vertical_pod_autoscaling"); ok {
 		cluster.VerticalPodAutoscaling = expandVerticalPodAutoscaling(v)
+	}
+
+	if v, ok := d.GetOk("service_external_ips_config"); ok {
+		cluster.NetworkConfig.ServiceExternalIpsConfig = expandServiceExternalIpsConfig(v)
 	}
 
 	if v, ok := d.GetOk("mesh_certificates"); ok {
@@ -2083,6 +2126,11 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error setting enable_l4_ilb_subsetting: %s", err)
 	}
 <% end -%>
+<% unless version == 'ga' %>
+	if err := d.Set("cost_management_config", flattenManagementConfig(cluster.CostManagementConfig)); err != nil {
+		return fmt.Errorf("Error setting cost_management_config: %s", err)
+	}
+<% end -%>
 	if err := d.Set("confidential_nodes", flattenConfidentialNodes(cluster.ConfidentialNodes)); err != nil {
 		return err
 	}
@@ -2154,6 +2202,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 <% end -%>
+
+	if err := d.Set("service_external_ips_config", flattenServiceExternalIpsConfig(cluster.NetworkConfig.ServiceExternalIpsConfig)); err != nil {
+		return err
+	}
 
 	if err := d.Set("mesh_certificates", flattenMeshCertificates(cluster.MeshCertificates)); err != nil {
 		return err
@@ -2498,6 +2550,25 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 <% end -%>
 
+<% unless version == 'ga' -%>
+	if d.HasChange("cost_management_config") {
+		c := d.Get("cost_management_config")
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredCostManagementConfig: expandCostManagementConfig(c),
+			},
+		}
+
+		updateF := updateFunc(req, "updating cost management config")
+		// Call update serially.
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s cost management config has been updated", d.Id())
+	}
+
+<% end -%>
 	if d.HasChange("authenticator_groups_config") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -2877,6 +2948,33 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 			log.Printf("[INFO] GKE cluster %s vertical pod autoscaling has been updated", d.Id())
 		}
+	}
+
+	if d.HasChange("service_external_ips_config") {
+		c := d.Get("service_external_ips_config")
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredServiceExternalIpsConfig: expandServiceExternalIpsConfig(c),
+			},
+		}
+
+		updateF := func() error {
+			name := containerClusterFullName(project, location, clusterName)
+			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			if config.UserProjectOverride {
+				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
+			}
+			op, err := clusterUpdateCall.Do()
+			if err != nil {
+				return err
+			}
+			// Wait until it's updated
+			return containerOperationWait(config, op, project, location, "updating GKE cluster service externalips config", userAgent, d.Timeout(schema.TimeoutUpdate))
+		}
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+		log.Printf("[INFO] GKE cluster %s service externalips config  has been updated", d.Id())
 	}
 
 	if d.HasChange("mesh_certificates") {
@@ -3812,6 +3910,18 @@ func expandVerticalPodAutoscaling(configured interface{}) *container.VerticalPod
 	}
 }
 
+func expandServiceExternalIpsConfig(configured interface{}) *container.ServiceExternalIPsConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 {
+		return nil
+	}
+	config := l[0].(map[string]interface{})
+	return &container.ServiceExternalIPsConfig{
+		Enabled: config["enabled"].(bool),
+		ForceSendFields: []string{"Enabled"},
+	}
+}
+
 func expandMeshCertificates(configured interface{}) *container.MeshCertificates {
 	l := configured.([]interface{})
 	if len(l) == 0 {
@@ -3926,6 +4036,22 @@ func expandDefaultMaxPodsConstraint(v interface{}) *container.MaxPodsConstraint 
 		MaxPodsPerNode: int64(v.(int)),
 	}
 }
+
+<% unless version == 'ga' -%>
+func expandCostManagementConfig(configured interface{}) *container.CostManagementConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 {
+		return nil
+	}
+
+	config := l[0].(map[string]interface{})
+	return &container.CostManagementConfig{
+		Enabled:         config["enabled"].(bool),
+		ForceSendFields: []string{"Enabled"},
+	}
+}
+<% end -%>
+
 func expandResourceUsageExportConfig(configured interface{}) *container.ResourceUsageExportConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -3998,7 +4124,7 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 			EnableComponents: convertStringArr(enable_components),
 		}
 	}
-<% if version == 'beta' -%>
+<% unless version == 'ga' -%>
 	if v, ok := config["managed_prometheus"]; ok && len(v.([]interface{})) > 0 {
 		managed_prometheus := v.([]interface{})[0].(map[string]interface{})
 		mc.ManagedPrometheusConfig = &container.ManagedPrometheusConfig{
@@ -4582,6 +4708,17 @@ func flattenResourceUsageExportConfig(c *container.ResourceUsageExportConfig) []
 	}
 }
 
+func flattenServiceExternalIpsConfig(c *container.ServiceExternalIPsConfig) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"enabled": c.Enabled,
+		},
+	}
+}
+
 func flattenMeshCertificates(c *container.MeshCertificates) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -4593,6 +4730,19 @@ func flattenMeshCertificates(c *container.MeshCertificates) []map[string]interfa
 	}
 }
 
+<% unless version == 'ga' -%>
+func flattenManagementConfig(c *container.CostManagementConfig) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"enabled": c.Enabled,
+		},
+	}
+}
+
+<% end -%>
 func flattenDatabaseEncryption(c *container.DatabaseEncryption) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -4639,7 +4789,7 @@ func flattenMonitoringConfig(c *container.MonitoringConfig) []map[string]interfa
 	if c.ComponentConfig != nil {
 		result["enable_components"] = c.ComponentConfig.EnableComponents
 	}
-<% if version == 'beta' -%>
+<% unless version == 'ga' -%>
 	if c.ManagedPrometheusConfig != nil {
 		result["managed_prometheus"] = flattenManagedPrometheusConfig(c.ManagedPrometheusConfig)
 	}
@@ -4647,7 +4797,7 @@ func flattenMonitoringConfig(c *container.MonitoringConfig) []map[string]interfa
 	return []map[string]interface{}{result}
 }
 
-<% if version == 'beta' -%>
+<% unless version == 'ga' -%>
 func flattenManagedPrometheusConfig(c *container.ManagedPrometheusConfig) []map[string]interface{} {
 	return []map[string]interface{}{
 		{
