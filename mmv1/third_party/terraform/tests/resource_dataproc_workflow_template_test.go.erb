@@ -35,13 +35,34 @@ func TestAccDataprocWorkflowTemplate_basic(t *testing.T) {
         ImportStateVerify:       true,
         ResourceName:            "google_dataproc_workflow_template.template",
       },
+    },
+  })
+}
+
+func TestAccDataprocWorkflowTemplate_withShieldedVMs(t *testing.T) {
+  t.Parallel()
+
+  context := map[string]interface{}{
+    "random_suffix": randString(t, 10),
+    "project": getTestProjectFromEnv(),
+    "version": "2.0.35-debian10",
+  }
+
+  vcrTest(t, resource.TestCase{
+    PreCheck:          func() { testAccPreCheck(t) },
+    Providers:         testAccProviders,
+    CheckDestroy:      funcAccTestDataprocWorkflowTemplateCheckDestroy(t),
+    ExternalProviders: map[string]resource.ExternalProvider{
+      "random": {},
+    },
+    Steps: []resource.TestStep{
       {
         Config: testAccDataprocWorkflowTemplate_withShieldedVMs(context),
       },
       {
         ImportState:             true,
         ImportStateVerify:       true,
-        ResourceName:            "google_dataproc_workflow_template.template",
+        ResourceName:            "google_dataproc_workflow_template.shielded_vms_template",
       },
     },
   })
@@ -105,7 +126,7 @@ resource "google_dataproc_workflow_template" "template" {
 
 func testAccDataprocWorkflowTemplate_withShieldedVMs(context map[string]interface{}) string {
   return Nprintf(`
-resource "google_dataproc_workflow_template" "template" {
+resource "google_dataproc_workflow_template" "shielded_vms_template" {
   name = "template%{random_suffix}"
   location = "us-central1"
   placement {
