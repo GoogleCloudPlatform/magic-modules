@@ -1,13 +1,14 @@
 package google
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDatastreamConnectionProfile_update(t *testing.T) {
+	// this test uses the random provider
+	skipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -15,8 +16,11 @@ func TestAccDatastreamConnectionProfile_update(t *testing.T) {
 	}
 
 	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
 		CheckDestroy: testAccCheckDatastreamConnectionProfileDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -63,26 +67,54 @@ resource "google_datastream_connection_profile" "default" {
 `, context)
 }
 
-
 func testAccDatastreamConnectionProfile_update2(context map[string]interface{}, preventDestroy bool) string {
-	lifecycleBlock := ""
+	context["lifecycle_block"] = ""
 	if preventDestroy {
-		lifecycleBlock = `
+		context["lifecycle_block"] = `
 		lifecycle {
 			prevent_destroy = true
 		}`
 	}
-	return fmt.Sprintf(`
+	return Nprintf(`
+resource "google_sql_database_instance" "instance" {
+    name             = "tf-test-my-database-instance%{random_suffix}"
+    database_version = "POSTGRES_14"
+    region           = "us-central1"
+    settings {
+		tier = "db-f1-micro"
+	}
+
+    deletion_protection  = "false"
+}
+
+resource "google_sql_database" "db" {
+    instance = google_sql_database_instance.instance.name
+    name     = "db"
+}
+
+resource "random_password" "pwd" {
+    length = 16
+    special = false
+}
+
+resource "google_sql_user" "user" {
+    name = "user%{random_suffix}"
+    instance = google_sql_database_instance.instance.name
+    password = random_password.pwd.result
+}
+
 resource "google_datastream_connection_profile" "default" {
 	display_name          = "Connection profile"
 	location              = "us-central1"
-	connection_profile_id = "tf-test-my-profile%s"
+	connection_profile_id = "tf-test-my-profile%{random_suffix}"
 
-	gcs_profile {
-		bucket    = "my-other-bucket"
-		root_path = "/path"
+	postgresql_profile {
+		hostname = google_sql_database_instance.instance.public_ip_address
+		username = google_sql_user.user.name
+		password = google_sql_user.user.password
+		database = google_sql_database.db.name
 	}
-	%s
+	%{lifecycle_block}
 }
-`, context["random_suffix"], lifecycleBlock)
+`, context)
 }
