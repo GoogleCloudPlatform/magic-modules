@@ -54,11 +54,7 @@ objects:
       api: 'https://cloud.google.com/datastream/docs/reference/rest/v1/projects.locations.connectionProfiles'
     description: |
       A set of reusable connection configurations to be used as a source or destination for a stream.
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        output: true
-        description: The resource's name.
+    parameters:
       - !ruby/object:Api::Type::String
         name: connectionProfileId
         description: |-
@@ -73,6 +69,11 @@ objects:
         required: true
         input: true
         url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        output: true
+        description: The resource's name.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: Labels.
