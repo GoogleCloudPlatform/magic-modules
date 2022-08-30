@@ -80,6 +80,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           oslogin_instance_name: "oslogin-instance-name"
         skip_docs: true
+    ### Shutdown script
+      - !ruby/object:Provider::Terraform::Examples
+        name: "compute_run_shutdown_scripts"
+        primary_resource_type: "google_compute_instance"
+        primary_resource_id: "shutdown_content_directly"
+        vars:
+          instance_name_1: "instance-name-1"
+          instance_name_2: "instance-name-2"
+        skip_docs: true
 
     # Eventarc
     ### Eventarc Workflows quickstart
