@@ -32,7 +32,7 @@ resource "google_compute_subnetwork" "ilb_subnet" {
 }
 
 # allow all access from IAP and health check ranges
-resource "google_compute_firewall" "fw-iap" {
+resource "google_compute_firewall" "fw_iap" {
   project       = "my-host-project-357412"
   name          = "<%= ctx[:vars]['l7_ilb_fw_allow_iap_hc'] %>"
   provider      = google-beta
@@ -45,7 +45,7 @@ resource "google_compute_firewall" "fw-iap" {
 }
 
 # allow http from proxy subnet to backends
-resource "google_compute_firewall" "fw-ilb-to-backends" {
+resource "google_compute_firewall" "fw_ilb_to_backends" {
   project       = "my-host-project-357412"
   name          = "<%= ctx[:vars]['l7_ilb_fw_allow_ilb_to_backends'] %>"
   provider      = google-beta
@@ -115,7 +115,7 @@ resource "google_compute_region_backend_service" "default" {
   timeout_sec           = 10
   health_checks         = [google_compute_region_health_check.default.id]
   backend {
-    group           = google_compute_region_instance_group_manager.mig.instance_group
+    group           = google_compute_region_instance_group_manager.default.instance_group
     balancing_mode  = "UTILIZATION"
     capacity_scaler = 1.0
   }
@@ -182,9 +182,10 @@ resource "google_compute_instance_template" "default" {
 }
 
 # MIG
-resource "google_compute_region_instance_group_manager" "mig" {
+resource "google_compute_region_instance_group_manager" "default" {
   project  = "my-service-project-02-358212"
   name     = "<%= ctx[:vars]['l7_ilb_mig1'] %>"
+  depends_on            = [google_project_iam_binding.default]
   provider = google-beta
   region   = "us-central1"
   version {
@@ -214,9 +215,10 @@ resource "google_project_iam_binding" "default" {
 }
 
 # test instance
-resource "google_compute_instance" "vm-test" {
+resource "google_compute_instance" "vm_test" {
   project      = "my-service-project-02-358212"
   name         = "<%= ctx[:vars]['l7_ilb_test_vm'] %>"
+  depends_on   = [google_project_iam_binding.default]
   provider     = google-beta
   zone         = "us-central1-b"
   machine_type = "e2-small"
