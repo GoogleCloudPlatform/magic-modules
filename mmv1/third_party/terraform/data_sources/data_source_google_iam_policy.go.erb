@@ -133,7 +133,6 @@ func dataSourceGoogleIamPolicyRead(d *schema.ResourceData, meta interface{}) err
 		if condition != nil {
 			key += fmt.Sprintf("-[%s]-[%s]-[%s]-[%s]", condition.Expression, condition.Title, condition.Description, condition.Location)
 		}
-		key = strconv.Itoa(hashcode(key))
 
 		if val, ok := bindingMap[key]; ok {
 			// Add members to existing cloudresourcemanager.Binding in the map
@@ -160,7 +159,7 @@ func dataSourceGoogleIamPolicyRead(d *schema.ResourceData, meta interface{}) err
 	policy.Bindings = bindings
 
 	// Sort bindings within the list to get simpler diffs, as it's what the API does
-	// Sorting is based on the role affected by the binding and any conditions
+	// Sorting is based on the binding's role + condition fields
 	sort.Slice(policy.Bindings, iamPolicyBindingsLessFunction(policy))
 
 	// Sort members within each binding in the list to get simpler diffs, as it's what the API does
