@@ -316,7 +316,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_docs: true
         vars:
           cloud_run_srv: "cloud-run-srv"
-        min_version: beta
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudrun_custom_domain_mapping"
         primary_resource_id: "default"
