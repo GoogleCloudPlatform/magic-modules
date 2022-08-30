@@ -35,6 +35,14 @@ func TestAccDataprocWorkflowTemplate_basic(t *testing.T) {
         ImportStateVerify:       true,
         ResourceName:            "google_dataproc_workflow_template.template",
       },
+      {
+        Config: testAccDataprocWorkflowTemplate_withShieldedVMs(context),
+      },
+      {
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ResourceName:            "google_dataproc_workflow_template.template",
+      },
     },
   })
 }
