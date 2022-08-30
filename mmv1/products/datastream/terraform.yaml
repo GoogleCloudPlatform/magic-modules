@@ -16,7 +16,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   ConnectionProfile: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}
     import_format: ["projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}"]
-    autogen_async: true
     properties:
       oracleProfile.password: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
