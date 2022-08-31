@@ -94,13 +94,13 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'kmsKeyName'
             description: |
-              Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource. 
+              Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
               Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
             input: true
       - !ruby/object:Api::Type::String
         name: 'metadataSchemaUri'
         required: true
-        input: true 
+        input: true
         description: |
           Points to a YAML file stored on Google Cloud Storage describing additional information about the Dataset. The schema is defined as an OpenAPI 3.0.2 Schema Object. The schema files that can be used here are found in gs://google-cloud-aiplatform/schema/dataset/metadata/.
 # Vertex AI Featurestores
@@ -151,7 +151,7 @@ objects:
         pattern: projects/{{project}}/locations/{{region}}/featurestores/{{name}}
       - !ruby/object:Api::Type::String
         name: 'etag'
-        description: Used to perform consistent read-modify-write updates. 
+        description: Used to perform consistent read-modify-write updates.
         output: true
       - !ruby/object:Api::Type::String
         name: 'createTime'
@@ -177,6 +177,17 @@ objects:
             required: true
             description: |
               The number of nodes for each cluster. The number of nodes will not scale automatically but can be scaled manually by providing different values when updating.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'encryptionSpec'
+        description: |
+           If set, both of the online and offline data storage will be secured by this key.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyName'
+            required: true
+            description: |
+              The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource. Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the compute resource is created.
+
 # Vertex AI Featurestore Entity Type
   - !ruby/object:Api::Resource
     name: FeaturestoreEntitytype
@@ -227,7 +238,7 @@ objects:
         pattern: '{featurestore}}/entityTypes/{{name}}'
       - !ruby/object:Api::Type::String
         name: 'etag'
-        description: Used to perform consistent read-modify-write updates. 
+        description: Used to perform consistent read-modify-write updates.
         output: true
       - !ruby/object:Api::Type::String
         name: 'createTime'
@@ -334,7 +345,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'kmsKeyName'
             description: |
-              Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource. 
+              Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
               Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
             input: true
       - !ruby/object:Api::Type::NestedObject
