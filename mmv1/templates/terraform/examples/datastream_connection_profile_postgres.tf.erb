@@ -5,7 +5,7 @@ resource "google_sql_database_instance" "instance" {
     settings {
         tier = "db-f1-micro"
 
-         ip_configuration {
+        ip_configuration {
 
             // Datastream IPs will vary by region.
             authorized_networks {
