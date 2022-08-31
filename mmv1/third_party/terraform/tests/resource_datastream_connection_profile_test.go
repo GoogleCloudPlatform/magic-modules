@@ -81,8 +81,32 @@ resource "google_sql_database_instance" "instance" {
     database_version = "POSTGRES_14"
     region           = "us-central1"
     settings {
-		tier = "db-f1-micro"
-	}
+      tier = "db-f1-micro"
+
+      ip_configuration {
+
+        // Datastream IPs will vary by region.
+        authorized_networks {
+            value = "34.71.242.81"
+        }
+
+        authorized_networks {
+            value = "34.72.28.29"
+        }
+
+        authorized_networks {
+            value = "34.67.6.157"
+        }
+
+        authorized_networks {
+            value = "34.67.234.134"
+        }
+
+        authorized_networks {
+            value = "34.72.239.218"
+        }
+      }
+    }
 
     deletion_protection  = "false"
 }
@@ -98,7 +122,7 @@ resource "random_password" "pwd" {
 }
 
 resource "google_sql_user" "user" {
-    name = "user%{random_suffix}"
+    name = "user"
     instance = google_sql_database_instance.instance.name
     password = random_password.pwd.result
 }

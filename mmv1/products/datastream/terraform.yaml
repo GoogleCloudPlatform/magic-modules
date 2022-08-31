@@ -63,3 +63,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "forward_ssh_connectivity.0.password"
         vars:
           connection_profile_id: "my-profile"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "datastream_connection_profile_postgres"
+        primary_resource_id: "default"
+        vars:
+          connection_profile_id: "my-profile"
+          database_instance_name: "my-instance"
+          deletion_protection: "true"
+        # This is covered by the update tests.
+        skip_test: true
