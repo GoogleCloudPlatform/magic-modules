@@ -258,7 +258,7 @@ resource "google_certificate_manager_certificate_map" "map1" {
 }
 resource "google_certificate_manager_certificate_map_entry" "map_entry" {
   name         = "certificatemapentry-test-%s"
-  map          = google_certificate_manager_certificate_map.map.name
+  map          = google_certificate_manager_certificate_map.map1.name
   certificates = [google_certificate_manager_certificate.certificate.id]
   matcher      = "PRIMARY"
 }
@@ -317,7 +317,7 @@ resource "google_certificate_manager_certificate_map" "map2" {
 
 resource "google_certificate_manager_certificate_map_entry" "map_entry" {
   name         = "certificatemapentry-test-%s"
-  map          = google_certificate_manager_certificate_map.map.name
+  map          = google_certificate_manager_certificate_map.map1.name
   certificates = [google_certificate_manager_certificate.certificate.id]
   matcher      = "PRIMARY"
 }
