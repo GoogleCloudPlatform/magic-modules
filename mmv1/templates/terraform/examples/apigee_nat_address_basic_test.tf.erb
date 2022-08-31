@@ -58,6 +58,6 @@ resource "google_apigee_instance" "apigee_instance" {
   org_id   = google_apigee_organization.apigee_org.id
 }
 
-resource "google_apigee_nat" "<%= ctx[:primary_resource_id] %>" {
+resource "google_apigee_nat_address" "<%= ctx[:primary_resource_id] %>" {
   instance_id = google_apigee_instance.apigee_instance.id
 }

@@ -70,6 +70,6 @@ resource "google_apigee_instance" "apigee_instance" {
   disk_encryption_key_name = google_kms_crypto_key.apigee_key.id
 }
 
-resource "google_apigee_nat" "apigee-nat" {
+resource "google_apigee_nat_address" "apigee-nat" {
   instance_id = google_apigee_instance.apigee_instance.id
 }
