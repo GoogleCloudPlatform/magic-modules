@@ -51,13 +51,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           cert_name: "self-managed-cert"
         ignore_read_extra:
-          - "self_managed.pem_certificate"
-          - "self_managed.pem_private_key"
+          - "self_managed.0.pem_certificate"
+          - "self_managed.0.pem_private_key"
     properties:
       managed.dnsAuthorizations: !ruby/object:Overrides::Terraform::PropertyOverride
         # We don't support ignore_read on nested fields
         ignore_read: true
         custom_flatten: "templates/terraform/custom_flatten/certificate_manager_certificate_managed_dns_auth.go.erb"
+      selfManaged: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+        ignore_read: true
+        custom_flatten: "templates/terraform/custom_flatten/certificate_manager_certificate_self_managed.go.erb"
       selfManaged.pemCertificate: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
         # We don't support ignore_read on nested fields
