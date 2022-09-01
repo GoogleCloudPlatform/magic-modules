@@ -1,5 +1,5 @@
-<%# The license inside this block applies to this file.
-	# Copyright 2017 Google Inc.
+<%- # the license inside this block applies to this file
+	# Copyright 2022 Google Inc.
 	# Licensed under the Apache License, Version 2.0 (the "License");
 	# you may not use this file except in compliance with the License.
 	# You may obtain a copy of the License at
@@ -12,4 +12,11 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-CustomizeDiff: stepTimeoutCustomizeDiff,
+	// Force legacy id format for global triggers.
+	id = strings.ReplaceAll(id, "/locations//", "/")
+	id = strings.ReplaceAll(id, "/locations/global/", "/")
+	d.SetId(id)
+	if d.Get("location") == "" {
+		// Happens when imported with legacy import format.
+		d.Set("location", "global")
+	}
