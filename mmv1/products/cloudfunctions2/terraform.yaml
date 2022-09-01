@@ -91,6 +91,40 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "build_config.0.source.0.storage_source.0.object"
           - "build_config.0.source.0.storage_source.0.bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudfunctions2_secret_env"
+        primary_resource_id: "function"
+        vars:
+          function: "function-secret"
+          bucket_name: "gcf-source"
+          zip_path: "function-source.zip"
+          secret: "secret"
+        test_env_vars:
+          project: :PROJECT_NAME
+        test_vars_overrides:
+          zip_path: "\"./test-fixtures/cloudfunctions2/function-source.zip\""
+          location: "\"us-central1\""
+        # ignore these fields during import step
+        ignore_read_extra:
+          - "build_config.0.source.0.storage_source.0.object"
+          - "build_config.0.source.0.storage_source.0.bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudfunctions2_secret_volume"
+        primary_resource_id: "function"
+        vars:
+          function: "function-secret"
+          bucket_name: "gcf-source"
+          zip_path: "function-source.zip"
+          secret: "secret"
+        test_env_vars:
+          project: :PROJECT_NAME
+        test_vars_overrides:
+          zip_path: "\"./test-fixtures/cloudfunctions2/function-source.zip\""
+          location: "\"us-central1\""
+        # ignore these fields during import step
+        ignore_read_extra:
+          - "build_config.0.source.0.storage_source.0.object"
+          - "build_config.0.source.0.storage_source.0.bucket"             
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
@@ -105,6 +139,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       serviceConfig.serviceAccountEmail: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      serviceConfig.secretVolumes.versions: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true        
       eventTrigger.pubsubTopic: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       eventTrigger.serviceAccountEmail: !ruby/object:Overrides::Terraform::PropertyOverride

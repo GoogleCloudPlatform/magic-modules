@@ -97,29 +97,31 @@ resource "google_kms_crypto_key_iam_binding" "apigee_sa_keyuser" {
   ]
 }
 
-resource "google_apigee_organization" "<%= ctx[:primary_resource_id] %>" {
+resource "google_apigee_organization" "apigee_org" {
   provider = google-beta
 
-  display_name                         = "apigee-org"
-  description                          = "Terraform-managed Apigee Org"
   analytics_region                     = "us-central1"
   project_id                           = google_project.project.project_id
   authorized_network                   = google_compute_network.apigee_network.id
-  billing_type                         = "EVALUATION"
+  billing_type                         = "PAYG"
   runtime_database_encryption_key_name = google_kms_crypto_key.apigee_key.id
-  properties {
-    property {
-      name = "features.hybrid.enabled"
-      value = "true"
-    }
-    property {
-      name = "features.mart.connect.enabled"
-      value = "true"
-    }
-  }
 
   depends_on = [
     google_service_networking_connection.apigee_vpc_connection,
+    google_project_service.apigee,
     google_kms_crypto_key_iam_binding.apigee_sa_keyuser,
   ]
+}
+
+resource "google_apigee_environment" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+
+  org_id       = google_apigee_organization.apigee_org.id
+  name         = "tf-test%{random_suffix}"
+  description  = "Apigee Environment"
+  display_name = "tf-test%{random_suffix}"
+  node_config {
+    min_node_count = "3"
+    max_node_count = "5"
+  }
 }
