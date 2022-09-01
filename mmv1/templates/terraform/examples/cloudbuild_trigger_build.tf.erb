@@ -1,4 +1,6 @@
 resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
+  location = "global"
+
   trigger_template {
     branch_name = "main"
     repo_name   = "my-repo"
