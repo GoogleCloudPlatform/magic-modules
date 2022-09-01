@@ -3950,6 +3950,7 @@ resource "google_container_cluster" "with_node_config" {
 `, clusterName)
 }
 
+<% unless version == 'ga' -%>
 func testAccContainerCluster_withNodePoolDefaults(clusterName, enabled string) string {
         return fmt.Sprintf(`
 resource "google_container_cluster" "with_node_pool_defaults" {
@@ -3967,6 +3968,7 @@ resource "google_container_cluster" "with_node_pool_defaults" {
 }
 `, clusterName, enabled)
 }
+<% end -%>
 
 func testAccContainerCluster_withNodeConfigUpdate(clusterName string) string {
 	return fmt.Sprintf(`
