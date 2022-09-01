@@ -39,7 +39,7 @@ func TestAccDatastreamConnectionProfile_update(t *testing.T) {
 				ResourceName:            "google_datastream_connection_profile.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"connection_profile_id", "location"},
+				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "postgresql_profile.0.password"},
 			},
 			{
 				// Disable prevent_destroy
