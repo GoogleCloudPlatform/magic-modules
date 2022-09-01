@@ -13,7 +13,7 @@
 
 ---
 !ruby/object:Api::Product
-name: AnalyticsHub
+name: BigqueryAnalyticsHub
 display_name: Bigquery Analytics Hub
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
