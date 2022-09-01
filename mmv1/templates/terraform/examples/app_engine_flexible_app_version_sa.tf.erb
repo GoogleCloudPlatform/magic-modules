@@ -23,6 +23,11 @@ resource "google_project_iam_member" "gae_api" {
   member  = "serviceAccount:service-${google_project.my_project.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
 }
 
+resource "google_service_account" "default" {
+  account_id   = "service-account-id"
+  display_name = "Service Account"
+}
+
 resource "google_app_engine_flexible_app_version" "<%= ctx[:primary_resource_id] %>" {
   version_id = "v1"
   project    = google_project_iam_member.gae_api.project
@@ -50,6 +55,8 @@ resource "google_app_engine_flexible_app_version" "<%= ctx[:primary_resource_id]
   env_variables = {
     port = "8080"
   }
+
+  service_account = google_service_account.default.email
 
   handlers {
     url_regex        = ".*\\/my-path\\/*"
