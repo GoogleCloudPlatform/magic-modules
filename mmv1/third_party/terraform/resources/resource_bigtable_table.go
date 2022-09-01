@@ -133,9 +133,9 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 				// Set a longer timeout as adding column family can be slow. The current timeout
 				// in the Go client is less than one minute. This timeout should not be longer
 				// than the overall timeout.
-				ctxWithDeadline, cancel := context.WithTimeout(ctx, 5*time.Minute)
+				ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Minute)
 				defer cancel() // Always call cancel.
-				if err := c.CreateColumnFamily(ctxWithDeadline, name, v.(string)); err != nil {
+				if err := c.CreateColumnFamily(ctxWithTimeout, name, v.(string)); err != nil {
 					return fmt.Errorf("Error creating column family %s. %s", v, err)
 				}
 			}
