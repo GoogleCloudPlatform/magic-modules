@@ -60,15 +60,14 @@ func testAccDialogflowCXWebhook_basic(context map[string]interface{}) string {
 		avatar_uri = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
 		depends_on = [google_project_iam_member.agent_create]
 	}
-    
+
 	resource "google_dialogflow_cx_webhook" "my_webhook" {
 		parent       = google_dialogflow_cx_agent.agent_entity.id
 		display_name = "MyWebhook"
-		location     = "global"
 		generic_web_service {
-			uri = "https://example.com" 
+			uri = "https://example.com"
 		}
-	} 
+	}
 	`, context)
 }
 
@@ -93,16 +92,15 @@ func testAccDialogflowCXWebhook_full(context map[string]interface{}) string {
 		avatar_uri = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
 		depends_on = [google_project_iam_member.agent_create]
 	}
-    
+
 	resource "google_dialogflow_cx_webhook" "my_webhook" {
 		parent       = google_dialogflow_cx_agent.agent_entity.id
-		location     = "global"
 		display_name = "MyWebhook"
 		timeout      = "20s"
 		disabled     = false
 		generic_web_service {
 			uri = "https://example.com"
 		}
-	} 
+	}
 	`, context)
 }
