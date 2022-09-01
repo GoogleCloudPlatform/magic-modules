@@ -53,6 +53,22 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/filestore.erb
       pre_create: templates/terraform/pre_create/filestore_instance.go.erb
+  Snapshot: !ruby/object:Overrides::Terraform::ResourceOverride
+    mutex: "filestore/{{project}}"
+    error_retry_predicates: ["isNotFilestoreQuotaError"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "filestore_snapshot_basic"
+        primary_resource_id: "snapshot"
+        vars:
+          snapshot_name: "test-snapshot"
+          instance_name: "test-instance-for-snapshot"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "filestore_snapshot_full"
+        primary_resource_id: "snapshot"
+        vars:
+          snapshot_name: "test-snapshot"
+          instance_name: "test-instance-for-snapshot"
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
