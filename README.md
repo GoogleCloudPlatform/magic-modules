@@ -36,7 +36,7 @@ effect, an issue solved in one tool will be solved for each other tool.
    - [Generating the Terraform Providers](#generating-the-terraform-providers)
    - [Testing](#testing)
       - [Using released terraform binary with local provider binary](#using-released-terraform-binary-with-local-provider-binary)
-   - [Submitting a PR](#submitting-a-PR)
+   - [Submitting a PR](#submitting-a-pr)
 - [Contributing](#contributing)
    - [General contributing steps](#general-contributing-steps)
    - [Detailed contributing guide](#detailed-contributing-guide)
