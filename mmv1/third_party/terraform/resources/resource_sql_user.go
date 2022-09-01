@@ -209,24 +209,23 @@ func expandPasswordPolicy(cfg interface{}) (*sqladmin.UserPasswordValidationPoli
 		pp.EnablePasswordVerification = v.(bool)
 	}
 	if v, ok := raw["status"]; ok {
-		pp.Status = expandStatus(v)
+		pp.Status = expandStatus(v.([]interface{}))
 	}
 
 	return pp, nil
 
 }
 
-func expandStatus(cfg interface{}) *sqladmin.PasswordStatus {
-	raw := cfg.([]interface{})[0].(map[string]interface{})
+func expandStatus(configured []interface{}) *sqladmin.PasswordStatus {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
 
-	status := &sqladmin.PasswordStatus{}
-	if v, ok := raw["locked"]; ok {
-		status.Locked = v.(bool)
+	_rc := configured[0].(map[string]interface{})
+	return &sqladmin.PasswordStatus{
+		Locked:                 _rc["locked"].(bool),
+		PasswordExpirationTime: _rc["password_expiration_time"].(string),
 	}
-	if v, ok := raw["password_expiration_time"]; ok {
-		status.PasswordExpirationTime = v.(string)
-	}
-	return status
 }
 
 func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
@@ -377,8 +376,34 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("Error setting server_roles: %s", err)
 		}
 	}
+	if user.PasswordPolicy != nil {
+		if err := d.Set("password_policy", flattenPasswordPolicy(user.PasswordPolicy)); err != nil {
+			return fmt.Errorf("Error setting password_policy: %s", err)
+		}
+	}
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
 	return nil
+}
+
+func flattenPasswordPolicy(passwordPolicy *sqladmin.UserPasswordValidationPolicy) interface{} {
+	data := map[string]interface{}{
+		"allowed_failed_attempts":      passwordPolicy.AllowedFailedAttempts,
+		"password_expiration_duration": passwordPolicy.PasswordExpirationDuration,
+		"enable_failed_attempts_check": passwordPolicy.EnableFailedAttemptsCheck,
+		"enable_password_verification": passwordPolicy.EnablePasswordVerification,
+		"status":                       flattenPasswordStatus(passwordPolicy.Status),
+	}
+
+	return []map[string]interface{}{data}
+}
+
+func flattenPasswordStatus(status *sqladmin.PasswordStatus) interface{} {
+	data := map[string]interface{}{
+		"locked":                   status.Locked,
+		"password_expiration_time": status.PasswordExpirationTime,
+	}
+
+	return []map[string]interface{}{data}
 }
 
 func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
