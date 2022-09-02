@@ -108,12 +108,14 @@ func resourceSqlUser() *schema.Resource {
 			"password_policy": {
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"allowed_failed_attempts": {
 							Type:        schema.TypeInt,
 							Optional:    true,
+							Computed:    true,
 							Description: `Number of failed attempts allowed before the user get locked.`,
 						},
 						"password_expiration_duration": {
@@ -124,17 +126,20 @@ func resourceSqlUser() *schema.Resource {
 						"enable_failed_attempts_check": {
 							Type:        schema.TypeBool,
 							Optional:    true,
+							Computed:    true,
 							Description: `If true, the check that will lock user after too many failed login attempts will be enabled.`,
 						},
 						"status": {
 							Type:     schema.TypeList,
 							Optional: true,
+							Computed: true,
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"locked": {
 										Type:        schema.TypeBool,
 										Optional:    true,
+										Computed:    true,
 										Description: `If true, user does not have login privileges.`,
 									},
 									"password_expiration_time": {
@@ -191,41 +196,40 @@ func expandSqlServerUserDetails(cfg interface{}) (*sqladmin.SqlServerUserDetails
 
 }
 
-func expandPasswordPolicy(cfg interface{}) (*sqladmin.UserPasswordValidationPolicy, error) {
+func expandPasswordPolicy(cfg interface{}) *sqladmin.UserPasswordValidationPolicy {
 	raw := cfg.([]interface{})[0].(map[string]interface{})
 
-	pp := &sqladmin.UserPasswordValidationPolicy{}
+	upvp := &sqladmin.UserPasswordValidationPolicy{}
 
 	if v, ok := raw["allowed_failed_attempts"]; ok {
-		pp.AllowedFailedAttempts = int64(v.(int))
+		upvp.AllowedFailedAttempts = int64(v.(int))
 	}
 	if v, ok := raw["password_expiration_duration"]; ok {
-		pp.PasswordExpirationDuration = v.(string)
+		upvp.PasswordExpirationDuration = v.(string)
 	}
 	if v, ok := raw["enable_failed_attempts_check"]; ok {
-		pp.EnableFailedAttemptsCheck = v.(bool)
+		upvp.EnableFailedAttemptsCheck = v.(bool)
 	}
 	if v, ok := raw["enable_password_verification"]; ok {
-		pp.EnablePasswordVerification = v.(bool)
+		upvp.EnableFailedAttemptsCheck = v.(bool)
 	}
 	if v, ok := raw["status"]; ok {
-		pp.Status = expandStatus(v.([]interface{}))
+		upvp.Status = expandStatus(v)
 	}
 
-	return pp, nil
-
+	return upvp
 }
 
-func expandStatus(configured []interface{}) *sqladmin.PasswordStatus {
-	if len(configured) == 0 || configured[0] == nil {
-		return nil
+func expandStatus(cfg interface{}) *sqladmin.PasswordStatus {
+	raw := cfg.([]interface{})[0].(map[string]interface{})
+	ps := &sqladmin.PasswordStatus{}
+	if v, ok := raw["locked"]; ok {
+		ps.Locked = v.(bool)
 	}
-
-	_rc := configured[0].(map[string]interface{})
-	return &sqladmin.PasswordStatus{
-		Locked:                 _rc["locked"].(bool),
-		PasswordExpirationTime: _rc["password_expiration_time"].(string),
+	if v, ok := raw["password_expiration_time"]; ok {
+		ps.PasswordExpirationTime = v.(string)
 	}
+	return ps
 }
 
 func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
@@ -263,10 +267,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if v, ok := d.GetOk("password_policy"); ok {
-		pp, err := expandPasswordPolicy(v)
-		if err != nil {
-			return err
-		}
+		pp := expandPasswordPolicy(v)
 		user.PasswordPolicy = pp
 	}
 
@@ -436,6 +437,11 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 				return err
 			}
 			user.SqlserverUserDetails = ssud
+		}
+
+		if v, ok := d.GetOk("password_policy"); ok {
+			pp := expandPasswordPolicy(v)
+			user.PasswordPolicy = pp
 		}
 
 		mutexKV.Lock(instanceMutexKey(project, instance))
