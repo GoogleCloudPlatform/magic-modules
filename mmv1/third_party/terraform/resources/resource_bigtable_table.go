@@ -69,6 +69,13 @@ func resourceBigtableTable() *schema.Resource {
 				ForceNew:    true,
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
+
+			"deletion_protection": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Elem:        &schema.Schema{Type: schema.TypeBool},
+				Description: `A Boolean to make the table protected against data loss`,
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -100,18 +107,19 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 	defer c.Close()
 
 	name := d.Get("name").(string)
+	if deletionProtection := d.Get("deletion_protection").(bool)
 	if v, ok := d.GetOk("split_keys"); ok {
 		splitKeys := convertStringArr(v.([]interface{}))
 		// This method may return before the table's creation is complete - we may need to wait until
 		// it exists in the future.
-		err = c.CreatePresplitTable(ctx, name, splitKeys)
+		err = c.CreateTableFromConf(ctx, &TableConf{TableID: name, SplitKeys: splitKeys, DeletionProtection: deletionProtection})
 		if err != nil {
 			return fmt.Errorf("Error creating presplit table. %s", err)
 		}
 	} else {
 		// This method may return before the table's creation is complete - we may need to wait until
 		// it exists in the future.
-		err = c.CreateTable(ctx, name)
+		err = c.CreateTableFromConf(ctx, &TableConf{TableID: name, DeletionProtection: deletionProtection})
 		if err != nil {
 			return fmt.Errorf("Error creating table. %s", err)
 		}
