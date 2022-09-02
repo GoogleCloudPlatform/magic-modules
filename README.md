@@ -1,32 +1,16 @@
+<img src="mmv1/images/magic-modules.svg" alt="Magic Modules Logo" width="300" align="right" />
 
 # Magic Modules
 
-<img src="mmv1/images/magic-modules.svg" alt="Magic Modules Logo" width="300" align="right" />
+Magic Modules is a code generator and CI system that's used to develop the Terraform providers
+for Google Platform, [`google`](https://github.com/hashicorp/terraform-provider-google) (or TPG) and
+[`google-beta`](https://github.com/hashicorp/terraform-provider-google-beta) (or TPGB).
 
-## Overview
-
-Magic Modules is a tool used to autogenerate support in a variety of open source DevOps
-tools for Google Cloud Platform. [GCP "resource"](https://cloud.google.com/docs/overview/#gcp_resources)
-definitions are encoded in a shared data file, and that data is used to fill in
-tool-specific templates across each of the tools Magic Modules
-generates.
-
-Magic Modules generates GCP support for:
-
-* Terraform
-
-In addition, Magic Modules generates support for several companion
-features/tools:
-
-* Terraform Validator
-* Terraform in Cloud Shell
-
-Importantly, Magic Modules *isn't* full code generation. Every change is made
-manually; more than a code generator, Magic Modules is a force multiplier for
-development. While many Magic Modules resources are defined exactly based on the
-GCP API, we use Magic Modules to preemptively solve issues across each tool by
-encoding our field-tested learnings from other tools in those definitions. In
-effect, an issue solved in one tool will be solved for each other tool.
+Magic Modules allows contributors to make changes against a single codebase and develop both
+provider versions simultaneously. After sending a pull request against this repository, the
+`modular-magician` robot user will manage (most of) the heavy lifting from generating a
+complete output, running presubmit tests, and updating the providers following your
+change.
 
 ---
 
