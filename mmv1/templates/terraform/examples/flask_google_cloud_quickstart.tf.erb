@@ -1,5 +1,6 @@
 # [START compute_flask_quickstart_vm]
 # Create a single Compute Engine instance
+# Testing CGC-only change
 resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
   name         = "<%= ctx[:vars]['flask_vm'] %>"
   machine_type = "f1-micro"
