@@ -2234,9 +2234,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           health_check: "health-check"
           backend_service: "backend-service"
-          lb_target_proxy: "lb-target-proxy"
           url_map: "url-map"
-        skip_docs: true
+        skip_docs: true     
       - !ruby/object:Provider::Terraform::Examples
         name: "region_url_map_basic"
         primary_resource_id: "regionurlmap"

@@ -33,14 +33,6 @@ resource "google_compute_region_backend_service" "backend-service" {
 }
 # [END cloudloadbalancing_url_map_instance_region_backend_service]
 
-# [START cloudloadbalancing_target_proxy_instance]
-resource "google_compute_region_target_http_proxy" "lb-target-proxy" {
-  name    = "<%= ctx[:vars]['lb_target_proxy'] %>"
-  region  = "us-central1"
-  url_map = google_compute_region_url_map.url-map.id
-}
-# [END cloudloadbalancing_target_proxy_instance]
-
 # [START cloudloadbalancing_url_map_instance]
 resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
   default_service = google_compute_region_backend_service.backend-service.id
