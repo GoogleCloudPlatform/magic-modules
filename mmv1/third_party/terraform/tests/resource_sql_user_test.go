@@ -286,8 +286,9 @@ func TestAccSqlUser_mysqlPasswordPolicy(t *testing.T) {
 
 	instance := fmt.Sprintf("i-%d", randInt(t))
 	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleSqlUser_mysqlPasswordPolicy(instance, "password", false),
