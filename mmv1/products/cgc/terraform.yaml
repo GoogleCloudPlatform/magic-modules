@@ -658,6 +658,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           static_website_bucket: "static-website-bucket"
           main_page_suffix: "index.html"
           not_found_page: "404.html"
+    ### Composer + Monitoring
+      - !ruby/object:Provider::Terraform::Examples
+        name: "composer_multi_project_monitoring"
+        primary_resource_type: "google_monitoring_dashboard"
+        primary_resource_id: "Composer_Dashboard"
+        vars:
+        skip_docs: true  # Change to false if you want to add sample to https://registry.terraform.io/providers/hashicorp/google/latest/docs
+        min_version: beta
+        # ignore_read_extra:
+        #   - "port_range"
+        #   - "target"
+        #   - "ip_address"
     properties:
 
 
