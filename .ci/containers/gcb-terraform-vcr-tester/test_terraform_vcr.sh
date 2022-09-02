@@ -67,6 +67,7 @@ gcloud auth activate-service-account $GOOGLE_SERVICE_ACCOUNT --key-file=$local_p
 mkdir testlog
 mkdir testlog/replaying
 mkdir testlog/recording
+mkdir testlog/recording_build
 
 export GOOGLE_REGION=us-central1
 export GOOGLE_ZONE=us-central1-a
@@ -174,7 +175,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   test_exit_code=0
   for failed_test in $FAILED_TESTS
   do
-      TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run=$failed_test -timeout 90m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > ${failed_test}_recording_test.log & pids+=($!)
+      TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run="${failed_test}$" -timeout 90m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > testlog/recording_build/${failed_test}_recording_test.log & pids+=($!)
   done
 
   # Check if any process fails 
@@ -188,7 +189,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   # Note: build logs are different from debug logs
   for failed_test in $FAILED_TESTS
   do
-    cat ${failed_test}_recording_test.log >> recording_test.log
+    cat testlog/recording_build/${failed_test}_recording_test.log >> recording_test.log
   done
 
   # store cassettes
@@ -196,6 +197,9 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
 
   # store recording build log
   gsutil -h "Content-Type:text/plain" -q cp recording_test.log gs://ci-vcr-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
+
+  # store recording individual build logs
+  gsutil -h "Content-Type:text/plain" -m -q cp testlog/recording_build/* gs://ci-vcr-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/recording_build/
 
   # store recording test logs
   gsutil -h "Content-Type:text/plain" -m -q cp testlog/recording/* gs://ci-vcr-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording/
@@ -213,8 +217,8 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   fi
 
 
-  RECORDING_FAILED_TESTS=$(grep "^--- FAIL: TestAcc" recording_test.log | awk -v pr_number=$pr_number -v build_id=$build_id '{print "`"$3"`[[view](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/recording/"$3".log)]"}')
-  RECORDING_PASSED_TESTS=$(grep "^--- PASS: TestAcc" recording_test.log | awk -v pr_number=$pr_number -v build_id=$build_id '{print "`"$3"`[[view](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/recording/"$3".log)]"}')
+  RECORDING_FAILED_TESTS=$(grep "^--- FAIL: TestAcc" recording_test.log | awk -v pr_number=$pr_number -v build_id=$build_id '{print "`"$3"`[[Error message](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/build-log/recording_build/"$3"_recording_test.log)] [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/recording/"$3".log)]"}')
+  RECORDING_PASSED_TESTS=$(grep "^--- PASS: TestAcc" recording_test.log | awk -v pr_number=$pr_number -v build_id=$build_id '{print "`"$3"`[[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/recording/"$3".log)]"}')
 
   comment=""
   if [[ -n $RECORDING_PASSED_TESTS ]]; then
