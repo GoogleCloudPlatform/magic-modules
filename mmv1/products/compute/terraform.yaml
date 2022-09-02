@@ -16,18 +16,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Address: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "url_map_sample"
-        primary_resource_type: "google_compute_region_url_map"
-        primary_resource_id: "url_map"
-        vars:
-          health_check: "health-check"
-          backend_service: "backend-service"
-          lb_target_proxy: "lb-target-proxy"
-          url_map: "url-map"
-        skip_docs: true
-        skip_test: true # Similar to other samples
-        min_version: beta
-      - !ruby/object:Provider::Terraform::Examples
         name: "address_basic"
         primary_resource_id: "ip_address"
         vars:
@@ -2249,7 +2237,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           lb_target_proxy: "lb-target-proxy"
           url_map: "url-map"
         skip_docs: true
-        min_version: beta
       - !ruby/object:Provider::Terraform::Examples
         name: "region_url_map_basic"
         primary_resource_id: "regionurlmap"
