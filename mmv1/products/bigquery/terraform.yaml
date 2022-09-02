@@ -179,6 +179,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "etag"
           - "status.0.state"
       - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_job_load_geojson"
+        primary_resource_id: "job"
+        vars:
+          job_id: "job_load"
+        ignore_read_extra:
+          - "etag"
+          - "status.0.state"
+      - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_job_load_table_reference"
         primary_resource_id: "job"
         vars:
