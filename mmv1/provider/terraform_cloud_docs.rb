@@ -28,30 +28,7 @@ module Provider
     end
 
     # Create a directory of examples per resource
-    def generate_resource(pwd, data, _generate_code, generate_docs)
-      return unless generate_docs
-
-      examples = data.object.examples
-
-      examples.each do |example|
-        target_folder = data.output_folder
-        target_folder = File.join(target_folder, example.name)
-        FileUtils.mkpath target_folder
-
-        data.example = example
-
-        File.open(pwd + '/' + example.config_path).each_line do |line|
-          next unless line.include? '# [START'
-
-          Google::LOGGER.info "Found CGC sample #{example.name}"
-          data.generate(pwd,
-                        'templates/terraform/examples/base_configs/cloud_docs_example_file.tf.erb',
-                        File.join(target_folder, 'main.tf'),
-                        self)
-          break
-        end
-      end
-    end
+    def generate_resource(pwd, data, _generate_code, generate_docs) end
 
     # We don't want to generate anything but the resource.
     def generate_resource_tests(pwd, data) end
