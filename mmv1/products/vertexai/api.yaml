@@ -109,14 +109,13 @@ objects:
     base_url: projects/{{project}}/locations/{{region}}/featurestores
     create_url: projects/{{project}}/locations/{{region}}/featurestores?featurestoreId={{name}}
     self_link: 'projects/{{project}}/locations/{{region}}/featurestores/{{name}}'
-    min_version: beta
     update_verb: :PATCH
     update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
           'https://cloud.google.com/vertex-ai/docs'
-      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featurestores'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
@@ -194,14 +193,13 @@ objects:
     base_url: '{{featurestore}}/entityTypes'
     create_url: '{{featurestore}}/entityTypes?entityTypeId={{name}}'
     self_link: '{{featurestore}}/entityTypes/{{name}}'
-    min_version: beta
     update_verb: :PATCH
     update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
           'https://cloud.google.com/vertex-ai/docs'
-      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featurestores.entityTypes'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
