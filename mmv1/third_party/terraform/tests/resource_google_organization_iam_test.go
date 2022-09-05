@@ -318,6 +318,11 @@ resource "google_organization_iam_binding" "foo" {
     description = "Expiring at midnight of 2019-12-31"
     expression  = "request.time < timestamp(\"2020-01-01T00:00:00Z\")"
   }
+  condition {
+    # Description field is intentionally left blank in this block
+    title       = "expires_after_2020_12_31"
+    expression  = "request.time < timestamp(\"2021-01-01T00:00:00Z\")"
+  }
 }
 `, account, role, org, org, conditionTitle)
 }
@@ -353,6 +358,11 @@ resource "google_organization_iam_member" "foo" {
     description = "Expiring at midnight of 2019-12-31"
     expression  = "request.time < timestamp(\"2020-01-01T00:00:00Z\")"
   }
+  condition {
+    # Description field is intentionally left blank in this block
+    title       = "%s"
+    expression  = "request.time < timestamp(\"2021-01-01T00:00:00Z\")"
+  }
 }
-`, account, org, conditionTitle)
+`, account, org, conditionTitle, conditionTitle)
 }
