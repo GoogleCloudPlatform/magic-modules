@@ -26,7 +26,10 @@ func TestAccComputeImageIamPolicy_googleIamPolicyDataSource(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeImageIamPolicy_googleIamPolicyDataSource(context),
-				Check:  resource.TestCheckResourceAttr("data.google_iam_policy.foo", "policy_data", expectedComputedPolicyData),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("data.google_iam_policy.foo", "policy_data", expectedComputedPolicyData),
+					resource.TestCheckResourceAttr("google_compute_image_iam_policy.foo", "policy_data", expectedComputedPolicyData),
+				),
 			},
 		},
 	})
