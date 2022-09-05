@@ -112,6 +112,12 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 				ValidateFunc: validateResourceCloudFunctionsFunctionName,
 			},
 
+			"build_worker_pool": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `Name of the Cloud Build Custom Worker Pool that should be used to build the function.`,
+			},
+
 			"source_archive_bucket": {
 				Type:        schema.TypeString,
 				Optional:    true,
