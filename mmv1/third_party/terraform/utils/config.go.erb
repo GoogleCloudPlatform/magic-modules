@@ -98,9 +98,9 @@ func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 	// - frequent transport spam
 	// - ListenSocket logs from gRPC
 	isTransportSpam := strings.Contains(entry.Message, "transport is closing")
-	grpcRegex := regexp.MustCompile(`\[Server #\d+( ListenSocket #\d+)*\]`) // Match patterns like `[Server #00]` or `[Server #00 ListenSocket #00]`
-	isGrpcLog := grpcRegex.MatchString(entry.Message)
-	if isTransportSpam || isGrpcLog {
+	listenSocketRegex := regexp.MustCompile(`\[Server #\d+( ListenSocket #\d+)*\]`) // Match patterns like `[Server #00]` or `[Server #00 ListenSocket #00]`
+	isListenSocketLog := listenSocketRegex.MatchString(entry.Message)
+	if isTransportSpam || isListenSocketLog {
 		return nil, nil
 	}
 
