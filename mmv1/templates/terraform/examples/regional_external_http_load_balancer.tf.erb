@@ -6,7 +6,7 @@ resource "google_compute_network" "default" {
   auto_create_subnetworks = false
   routing_mode            = "REGIONAL"
 }
-# [END cloudloadbalancing__vpc_network_rllxlb_example]
+# [END cloudloadbalancing_vpc_network_rllxlb_example]
 
 # [START cloudloadbalancing_vpc_subnetwork_rllxlb_example]
 resource "google_compute_subnetwork" "default" {

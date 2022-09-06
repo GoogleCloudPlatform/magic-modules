@@ -110,8 +110,8 @@ func resource<%= resource_name -%>() *schema.Resource {
                 Upgrade: resource<%= "#{resource_name}UpgradeV#{v}" -%>,
                 Version: <%= v -%>,
             },
-        },
 <%        end -%>
+        },
 <%      end -%>
 
 <%=     lines(compile(pwd + '/' + object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>

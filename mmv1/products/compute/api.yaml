@@ -12944,6 +12944,12 @@ objects:
                   - snapshot_schedule_policy.0.snapshot_properties.0.guest_flush
                 description: |
                   Whether to perform a 'guest aware' snapshot.
+              - !ruby/object:Api::Type::String
+                name: 'chainName'
+                description: |
+                  Creates the new snapshot in the snapshot chain labeled with the 
+                  specified name. The chain name must be 1-63 characters long and comply 
+                  with RFC1035.
       - !ruby/object:Api::Type::NestedObject
         name: 'groupPlacementPolicy'
         conflicts:
@@ -14042,6 +14048,15 @@ objects:
         name: 'diskSizeGb'
         description: 'Size of the snapshot, specified in GB.'
         output: true
+      - !ruby/object:Api::Type::String
+        name: 'chainName'
+        description: |
+          Creates the new snapshot in the snapshot chain labeled with the 
+          specified name. The chain name must be 1-63 characters long and 
+          comply with RFC1035. This is an uncommon option only for advanced 
+          service owners who needs to create separate snapshot chains, for 
+          example, for chargeback tracking.  When you describe your snapshot 
+          resource, this field is visible only if it has a non-empty value.
       - !ruby/object:Api::Type::String
         name: 'name'
         required: true
@@ -15927,7 +15942,9 @@ objects:
           A list of SslCertificate resources that are used to authenticate
           connections between users and the load balancer. At least one
           SSL certificate must be specified.
-        required: true
+        exactly_one_of:
+          - sslCertificates
+          - certificateMap
         update_verb: :POST
         update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setSslCertificates'
         item_type: !ruby/object:Api::Type::ResourceRef
@@ -15935,6 +15952,18 @@ objects:
           resource: 'SslCertificate'
           imports: 'selfLink'
           description: 'The SSL certificates used by this TargetSslProxy'
+      - !ruby/object:Api::Type::String
+        name: 'certificateMap'
+        description: |
+          A reference to the CertificateMap resource uri that identifies a certificate map
+          associated with the given target proxy. This field can only be set for global target proxies.
+          Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificateMaps/{resourceName}`.
+        exactly_one_of:
+          - sslCertificates
+          - certificateMap
+        update_verb: :POST
+        update_url:
+          'projects/{{project}}/global/targetSslProxies/{{name}}/setCertificateMap'
       - !ruby/object:Api::Type::ResourceRef
         name: 'sslPolicy'
         resource: 'SslPolicy'
