@@ -1053,10 +1053,10 @@ func TestAccComputeInstance_soleTenantNodeAffinities(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			<%# {
+			{
 				Config: testAccComputeInstance_withoutNodeAffinities(instanceName, templateName, groupName),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}), %>
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
 			{
 				Config: testAccComputeInstance_soleTenantNodeAffinities(instanceName, templateName, groupName),
 			},
@@ -5504,7 +5504,7 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
-<%# func testAccComputeInstance_withoutNodeAffinities(instance, nodeTemplate, nodeGroup string) string {
+func testAccComputeInstance_withoutNodeAffinities(instance, nodeTemplate, nodeGroup string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"
@@ -5514,7 +5514,7 @@ data "google_compute_image" "my_image" {
 resource "google_compute_instance" "foobar" {
   name         = "%s"
   machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
-  zone         = "us-central1-a"
+  zone         = "us-central1-b"
   allow_stopping_for_update = true
 
   boot_disk {
@@ -5543,13 +5543,13 @@ resource "google_compute_node_template" "nodetmpl" {
 
 resource "google_compute_node_group" "nodes" {
   name = "%s"
-  zone = "us-central1-a"
+  zone = "us-central1-b"
 
   size          = 1
   node_template = google_compute_node_template.nodetmpl.self_link
 }
 `, instance, nodeTemplate, nodeGroup)
-} %>
+}
 
 func testAccComputeInstance_soleTenantNodeAffinities(instance, nodeTemplate, nodeGroup string) string {
 	return fmt.Sprintf(`
@@ -5561,7 +5561,7 @@ data "google_compute_image" "my_image" {
 resource "google_compute_instance" "foobar" {
   name         = "%s"
   machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
-  zone         = "us-central1-a"
+  zone         = "us-central1-b"
   allow_stopping_for_update = true
 
   boot_disk {
@@ -5593,6 +5593,7 @@ resource "google_compute_instance" "foobar" {
       values   = [google_compute_node_group.nodes.name]
     }
 
+	on_host_maintenance = "MIGRATE"
     min_node_cpus = 4
   }
 }
@@ -5612,7 +5613,7 @@ resource "google_compute_node_template" "nodetmpl" {
 
 resource "google_compute_node_group" "nodes" {
   name = "%s"
-  zone = "us-central1-a"
+  zone = "us-central1-b"
 
   size          = 1
   node_template = google_compute_node_template.nodetmpl.self_link
@@ -5630,7 +5631,7 @@ data "google_compute_image" "my_image" {
 resource "google_compute_instance" "foobar" {
   name         = "%s"
   machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
-  zone         = "us-central1-a"
+  zone         = "us-central1-b"
   allow_stopping_for_update = true
 
   boot_disk {
@@ -5681,7 +5682,7 @@ resource "google_compute_node_template" "nodetmpl" {
 
 resource "google_compute_node_group" "nodes" {
   name = "%s"
-  zone = "us-central1-a"
+  zone = "us-central1-b"
 
   size          = 1
   node_template = google_compute_node_template.nodetmpl.self_link
@@ -5699,7 +5700,7 @@ data "google_compute_image" "my_image" {
 resource "google_compute_instance" "foobar" {
   name         = "%s"
   machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
-  zone         = "us-central1-a"
+  zone         = "us-central1-b"
   allow_stopping_for_update = true
 
   boot_disk {
@@ -5744,7 +5745,7 @@ resource "google_compute_node_template" "nodetmpl" {
 
 resource "google_compute_node_group" "nodes" {
   name = "%s"
-  zone = "us-central1-a"
+  zone = "us-central1-b"
 
   size          = 1
   node_template = google_compute_node_template.nodetmpl.self_link
