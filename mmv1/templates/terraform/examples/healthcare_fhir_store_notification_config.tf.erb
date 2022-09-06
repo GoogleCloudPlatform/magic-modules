@@ -13,10 +13,23 @@ resource "google_healthcare_fhir_store" "default" {
   }
 
   notification_configs {
-    pubsub_topic = google_pubsub_topic.topic.name
+    pubsub_topic = "${google_pubsub_topic.topic.id}" 
     send_full_resource = true
   }
+  depends_on = [google_pubsub_topic_iam_binding.binding]
 }
+
+// Enable notifications by giving the correct IAM permission to the unique service account.
+data "google_healthcare_project_service_account" "gcs_account" { 
+}
+
+// Create a Pub/Sub topic.
+resource "google_pubsub_topic_iam_binding" "binding" {
+  topic    = google_pubsub_topic.topic.id
+  role     = "roles/pubsub.publisher"
+  members  = ["serviceAccount:${data.google_healthcare_project_service_account.gcs_account.email_address}"]
+}
+
 
 resource "google_pubsub_topic" "topic" {
   name     = "<%= ctx[:vars]['pubsub_topic']%>"
@@ -26,3 +39,5 @@ resource "google_healthcare_dataset" "dataset" {
   name     = "<%= ctx[:vars]['dataset_name'] %>"
   location = "us-central1"
 }
+
+
