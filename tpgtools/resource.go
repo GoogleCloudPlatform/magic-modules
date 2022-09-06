@@ -584,7 +584,7 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	// sweepable, in particular, such as nested resources or fine-grained
 	// resources. Additional special cases can be handled with overrides.
 	res.HasSweeper = true
-	validSweeperParameters := []string{"project", "region", "location", "zone", "billing_account"}
+	validSweeperParameters := []string{"project", "region", "location", "zone", "billingAccount"}
 	if deleteAllInfo, ok := typeFetcher.doc.Paths["deleteAll"]; ok {
 		for _, p := range deleteAllInfo.Parameters {
 			// if any field isn't a standard sweeper parameter, don't make a sweeper
