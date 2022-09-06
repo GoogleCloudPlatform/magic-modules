@@ -260,11 +260,14 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	for _, fi := range ti.FamilyInfos {
 		if fi.Name == columnFamily {
 			d.SetId(fi.GCPolicy)
-			gcRuleJsonString, err := json.Marshal(gcPolicyToGCRuleString(fi.FullGCPolicy))
-			if err != nil {
-				return fmt.Errorf("error reading GCPolicy to json: %s", err)
+			// Only set gc_rules when local copy has the field
+			if d.Get("gc_rules") != "" {
+				gcRuleJsonString, err := json.Marshal(gcPolicyToGCRuleString(fi.FullGCPolicy, true))
+				if err != nil {
+					return fmt.Errorf("error reading GCPolicy to json: %s", err)
+				}
+				d.Set("gc_rules", string(gcRuleJsonString[:]))
 			}
-			d.Set("gc_rules", gcRuleJsonString)
 			break
 		}
 	}
@@ -276,7 +279,7 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func gcPolicyToGCRuleString(gc bigtable.GCPolicy) map[string]interface{} {
+func gcPolicyToGCRuleString(gc bigtable.GCPolicy, isTopLevel bool) map[string]interface{} {
 	result := make(map[string]interface{})
 	switch bigtable.GetPolicyType(gc) {
 	case bigtable.PolicyMaxAge:
@@ -289,21 +292,21 @@ func gcPolicyToGCRuleString(gc bigtable.GCPolicy) map[string]interface{} {
 		result["mode"] = "union"
 		rules := []interface{}{}
 		for _, c := range gc.(bigtable.UnionGCPolicy).Children {
-			rules = append(rules, gcPolicyToGCRuleString(c))
+			rules = append(rules, gcPolicyToGCRuleString(c, false))
 		}
 		result["rules"] = rules
 	case bigtable.PolicyIntersection:
 		result["mode"] = "intersection"
 		rules := []interface{}{}
 		for _, c := range gc.(bigtable.IntersectionGCPolicy).Children {
-			rules = append(rules, gcPolicyToGCRuleString(c))
+			rules = append(rules, gcPolicyToGCRuleString(c, false))
 		}
 		result["rules"] = rules
 	default:
 		break
 	}
 
-	if err := validateNestedPolicy(result, true); err != nil {
+	if err := validateNestedPolicy(result, isTopLevel); err != nil {
 		log.Fatalf("Invalid GCPolicy %v parsed from %v: %s", result, gc, err)
 	}
 
