@@ -212,13 +212,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_flexible_app_version_sa"
-        primary_resource_id: "myapp_sa_v1"
+        primary_resource_id: "myapp_v1"
         ignore_read_extra:
           - "noop_on_destroy"
           - "deployment.0.zip"
         vars:
           bucket_name: "appengine-static-content"
-          project: "appeng-flex-sa"
+          project: "appeng-flx"
         test_env_vars:
           org_id: :ORG_ID
           billing_account: :BILLING_ACCT
