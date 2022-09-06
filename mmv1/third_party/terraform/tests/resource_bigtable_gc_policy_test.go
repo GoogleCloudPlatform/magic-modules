@@ -165,6 +165,35 @@ func TestAccBigtableGCPolicy_gcRulesPolicy(t *testing.T) {
 	})
 }
 
+func TestAccBigtableGCPolicy_updatePolicyGCRulesUpdated(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	skipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	familyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBigtableGCPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigtableGCPolicy_gcRulesCreate(instanceName, tableName, familyName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccBigtableGCPolicyExists(
+						t, "google_bigtable_gc_policy.policy"),
+					testAccBigtableCanUpdatePolicy(
+						t, "google_bigtable_gc_policy.policy", bigtable.MaxVersionsPolicy(2)),
+					resource.TestCheckResourceAttr(
+						 "google_bigtable_gc_policy.policy", testAccBigtableGCPolicy_gcRulesUpdatedRemote(instanceName, tableName, familyName)),
+				),
+			},
+		},
+	})
+}
+
 func TestUnitBigtableGCPolicy_customizeDiff(t *testing.T) {
 	for _, tc := range testUnitBigtableGCPolicyCustomizeDiffTestcases {
 		tc.check(t)
@@ -376,6 +405,40 @@ func testAccCheckBigtableGCPolicyDestroyProducer(t *testing.T) func(s *terraform
 			}
 
 			c.Close()
+		}
+
+		return nil
+	}
+}
+
+func testAccBigtableCanUpdatePolicy(t *testing.T, n string, p bigtable.GCPolicy) resource.TestCheckFunc {
+	var ctx = context.Background()
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+		config := googleProviderConfig(t)
+		c, err := config.BigTableClientFactory(config.userAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
+		if err != nil {
+			return fmt.Errorf("Error starting admin client. %s", err)
+		}
+
+		defer c.Close()
+
+		table, err := c.TableInfo(ctx, rs.Primary.Attributes["table"])
+		if err != nil {
+			return fmt.Errorf("Error retrieving table. Could not find %s in %s.", rs.Primary.Attributes["table"], rs.Primary.Attributes["instance_name"])
+		}
+
+		for _, i := range table.FamilyInfos {
+			if i.Name == rs.Primary.Attributes["column_family"] {
+				return c.SetGCPolicy(ctx, rs.Primary.Attributes["table"], i.Name, p)
+			}
 		}
 
 		return nil
@@ -732,6 +795,39 @@ func testAccBigtableGCPolicy_gcRulesUpdate(instanceName, tableName, family strin
 		column_family = "%s"
 
 		gc_rules = "{\"mode\":\"intersection\", \"rules\":[{\"max_age\":\"16h\"},{\"max_version\":1}]}"
+	}
+`, instanceName, instanceName, tableName, family, family)
+}
+
+func testAccBigtableGCPolicy_gcRulesUpdatedRemote(instanceName, tableName, family string) string {
+	return fmt.Sprintf(`
+	resource "google_bigtable_instance" "instance" {
+		name = "%s"
+
+		cluster {
+			cluster_id = "%s"
+			zone       = "us-central1-b"
+		}
+
+		instance_type = "DEVELOPMENT"
+		deletion_protection = false
+	}
+
+	resource "google_bigtable_table" "table" {
+		name          = "%s"
+		instance_name = google_bigtable_instance.instance.id
+
+		column_family {
+			family = "%s"
+		}
+	}
+
+	resource "google_bigtable_gc_policy" "policy" {
+		instance_name = google_bigtable_instance.instance.id
+		table         = google_bigtable_table.table.name
+		column_family = "%s"
+
+		gc_rules = "{\"rules\":[{\"max_version\":2}]}"
 	}
 `, instanceName, instanceName, tableName, family, family)
 }
