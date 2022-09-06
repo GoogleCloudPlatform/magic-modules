@@ -223,9 +223,7 @@ func TestAccProjectIamBinding_withCondition(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", randInt(t))
 	role := "roles/compute.instanceAdmin"
-	conditionTitle1 := "expires_after_2019_12_31"
-	conditionTitle2 := "expires_after_2020_12_31"
-
+	conditionTitle := "expires_after_2019_12_31"
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
@@ -239,11 +237,11 @@ func TestAccProjectIamBinding_withCondition(t *testing.T) {
 			},
 			// Apply an IAM binding
 			{
-				Config: testAccProjectAssociateBinding_withCondition(pid, pname, org, role, conditionTitle1, conditionTitle2),
+				Config: testAccProjectAssociateBinding_withCondition(pid, pname, org, role, conditionTitle),
 			},
 			{
 				ResourceName:      "google_project_iam_binding.acceptance",
-				ImportStateId:     fmt.Sprintf("%s %s %s", pid, role, conditionTitle1),
+				ImportStateId:     fmt.Sprintf("%s %s %s", pid, role, conditionTitle),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -338,7 +336,7 @@ resource "google_project_iam_binding" "acceptance" {
 }
 
 
-func testAccProjectAssociateBinding_withCondition(pid, name, org, role, conditionTitle1, conditionTitle2 string) string {
+func testAccProjectAssociateBinding_withCondition(pid, name, org, role, conditionTitle string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id = "%s"
@@ -363,9 +361,9 @@ resource "google_project_iam_binding" "acceptance-empty-description" {
   role    = "%s"
   condition {
     # Description field is intentionally left blank in this block
-    title       = "%s"
-    expression  = "request.time < timestamp(\"2020-01-01T00:00:00Z\")"
+    title       = "expires_after_2020_12_31"
+    expression  = "request.time < timestamp(\"2021-01-01T00:00:00Z\")"
   }
 }
-`, pid, name, org, role, conditionTitle1, role, conditionTitle2)
+`, pid, name, org, role, conditionTitle, role)
 }
