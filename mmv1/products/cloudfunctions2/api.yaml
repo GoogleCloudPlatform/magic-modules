@@ -20,6 +20,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://cloudfunctions.googleapis.com/v2beta/
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://cloudfunctions.googleapis.com/v2/    
 apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Cloud Functions API
@@ -27,7 +30,6 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'function'
-    min_version: beta
     base_url: projects/{{project}}/locations/{{location}}/functions
     create_url: projects/{{project}}/locations/{{location}}/functions?functionId={{name}}
     self_link: projects/{{project}}/locations/{{location}}/functions/{{name}}

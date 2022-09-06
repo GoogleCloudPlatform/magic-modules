@@ -109,7 +109,7 @@ objects:
           For instance, it allows any attached subscription to seek to a timestamp
           that is up to messageRetentionDuration in the past. If this field is not
           set, message retention is controlled by settings on individual subscriptions.
-          Cannot be more than 7 days or less than 10 minutes.
+          Cannot be more than 31 days or less than 10 minutes.
   - !ruby/object:Api::Resource
     name: 'Subscription'
     description: |
@@ -160,7 +160,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'table'
             description: |
-              The name of the table to which to write data, of the form {projectId}.{datasetId}.{tableId}
+              The name of the table to which to write data, of the form {projectId}:{datasetId}.{tableId}
             required: true
           - !ruby/object:Api::Type::Boolean
             name: 'useTopicSchema'
