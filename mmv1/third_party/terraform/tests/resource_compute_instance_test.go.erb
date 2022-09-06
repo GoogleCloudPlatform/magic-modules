@@ -1056,19 +1056,19 @@ func TestAccComputeInstance_soleTenantNodeAffinities(t *testing.T) {
 			{
 				Config: testAccComputeInstance_withoutNodeAffinities(instanceName, templateName, groupName),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-central1-b", instanceName, []string{"allow_stopping_for_update"}),
 			{
 				Config: testAccComputeInstance_soleTenantNodeAffinities(instanceName, templateName, groupName),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-central1-b", instanceName, []string{"allow_stopping_for_update"}),
 			{
 				Config: testAccComputeInstance_soleTenantNodeAffinitiesUpdated(instanceName, templateName, groupName),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-central1-b", instanceName, []string{"allow_stopping_for_update"}),
 			{
 				Config: testAccComputeInstance_soleTenantNodeAffinitiesReduced(instanceName, templateName, groupName),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-central1-b", instanceName, []string{"allow_stopping_for_update"}),
 		},
 	})
 }
@@ -5593,7 +5593,6 @@ resource "google_compute_instance" "foobar" {
       values   = [google_compute_node_group.nodes.name]
     }
 
-	on_host_maintenance = "MIGRATE"
     min_node_cpus = 4
   }
 }
