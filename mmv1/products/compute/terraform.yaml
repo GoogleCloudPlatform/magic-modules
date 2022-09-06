@@ -2364,6 +2364,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "hourly"
         vars:
           name: "policy"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "resource_policy_snapshot_schedule_chain_name"
+        primary_resource_id: "hourly"
+        vars:
+          name: "policy"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
@@ -2688,6 +2693,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           snapshot_name: "my-snapshot"
           disk_name: "debian-disk"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "snapshot_chainname"
+        primary_resource_id: "snapshot"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-snapshot-chainname%s\", context[\"random_suffix\"])"
+        vars:
+          snapshot_name: "my-snapshot"
+          disk_name: "debian-disk"
+          chain_name: 'snapshot-chain'
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'snapshot_id'
