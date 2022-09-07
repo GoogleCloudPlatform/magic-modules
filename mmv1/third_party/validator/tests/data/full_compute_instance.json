@@ -28,7 +28,7 @@
             "initializeParams": {
               "diskSizeGb": "42",
               "diskType": "projects/{{.Provider.project}}/zones/us-central1-a/diskTypes/pd-standard",
-              "sourceImage": "projects/debian-cloud/global/images/debian-9"
+              "sourceImage": "projects/debian-cloud/global/images/debian-11"
             },
             "mode": "READ_WRITE",
             "source": "projects/{{.Provider.project}}/zones/us-central1-a/disks/test-source"

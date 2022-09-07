@@ -67,6 +67,7 @@ gcloud auth activate-service-account $GOOGLE_SERVICE_ACCOUNT --key-file=$local_p
 mkdir testlog
 mkdir testlog/replaying
 mkdir testlog/recording
+mkdir testlog/recording_build
 
 export GOOGLE_REGION=us-central1
 export GOOGLE_ZONE=us-central1-a
@@ -163,20 +164,42 @@ comment+="Failed tests: \`$FAILED_TESTS_COUNT\` ${NEWLINE}${NEWLINE}"
 
 if [[ -n $FAILED_TESTS_PATTERN ]]; then
   comment+="#### Action taken ${NEWLINE}"
-  comment+="<details> <summary>Triggering VCR tests in RECORDING mode for the tests that failed during VCR. Click here to see the failed tests</summary> $FAILED_TESTS_PATTERN </details>"
+  comment+="<details> <summary>Triggering VCR tests in RECORDING mode for the tests that failed during VCR. Click here to see the failed tests</summary><blockquote>$FAILED_TESTS_PATTERN </blockquote></details>"
   add_comment "${comment}"
-  # RECORDING mode
-  export VCR_MODE=RECORDING
   # Clear fixtures folder
   rm $VCR_PATH/*
-  TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run=$FAILED_TESTS_PATTERN -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > recording_test.log
-  test_exit_code=$?
+  
+  # RECORDING mode
+  export VCR_MODE=RECORDING
+  FAILED_TESTS=$(grep "^--- FAIL: TestAcc" replaying_test$test_suffix.log | awk '{print $3}')
+  test_exit_code=0
+  for failed_test in $FAILED_TESTS
+  do
+      TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run="${failed_test}$" -timeout 90m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > testlog/recording_build/${failed_test}_recording_test.log & pids+=($!)
+  done
+
+  # Check if any process fails 
+  for pid in ${pids[*]}; do
+    if ! wait $pid; then
+        test_exit_code=1
+    fi
+  done
+
+  # Concatenate recording build logs to one file
+  # Note: build logs are different from debug logs
+  for failed_test in $FAILED_TESTS
+  do
+    cat testlog/recording_build/${failed_test}_recording_test.log >> recording_test.log
+  done
 
   # store cassettes
   gsutil -m -q cp fixtures/* gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-$pr_number/fixtures/
 
   # store recording build log
   gsutil -h "Content-Type:text/plain" -q cp recording_test.log gs://ci-vcr-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/
+
+  # store recording individual build logs
+  gsutil -h "Content-Type:text/plain" -m -q cp testlog/recording_build/* gs://ci-vcr-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/recording_build/
 
   # store recording test logs
   gsutil -h "Content-Type:text/plain" -m -q cp testlog/recording/* gs://ci-vcr-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording/
@@ -194,8 +217,8 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   fi
 
 
-  RECORDING_FAILED_TESTS=$(grep "^--- FAIL: TestAcc" recording_test.log | awk -v pr_number=$pr_number -v build_id=$build_id '{print "`"$3"`[[view](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/recording/"$3".log)]"}')
-  RECORDING_PASSED_TESTS=$(grep "^--- PASS: TestAcc" recording_test.log | awk -v pr_number=$pr_number -v build_id=$build_id '{print "`"$3"`[[view](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/recording/"$3".log)]"}')
+  RECORDING_FAILED_TESTS=$(grep "^--- FAIL: TestAcc" recording_test.log | awk -v pr_number=$pr_number -v build_id=$build_id '{print "`"$3"`[[Error message](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/build-log/recording_build/"$3"_recording_test.log)] [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/recording/"$3".log)]"}')
+  RECORDING_PASSED_TESTS=$(grep "^--- PASS: TestAcc" recording_test.log | awk -v pr_number=$pr_number -v build_id=$build_id '{print "`"$3"`[[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-"pr_number"/artifacts/"build_id"/recording/"$3".log)]"}')
 
   comment=""
   if [[ -n $RECORDING_PASSED_TESTS ]]; then

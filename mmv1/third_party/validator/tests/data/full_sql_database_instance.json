@@ -68,7 +68,8 @@
           },
           "locationPreference": {
             "followGaeApplication": "test-follow_gae_application",
-            "zone": "us-central1-a"
+            "zone": "us-central1-a",
+            "secondaryZone": "us-central1-b"
           },
           "maintenanceWindow": {
             "day": 42,

@@ -1,9 +1,10 @@
 # tpgtools
 
 `tpgtools` is the generator responsible for creating DCL-based resources in the
-Terraform Google Provider (TPG). The DCL provides [OpenAPI schema objects](https://swagger.io/specification/#schema-object)
-to describe the available types, and `tpgtools` uses those to construct
-Terraform resource schemas.
+Terraform Google Provider (TPG). The DCL provides
+[OpenAPI schema objects](https://swagger.io/specification/#schema-object) to
+describe the available types, and `tpgtools` uses those to construct Terraform
+resource schemas.
 
 ## Usage
 
@@ -38,14 +39,14 @@ correspond to the line numbers in the output.
 
 You can specify a version such as `beta` using the `--version`:
 
-
 ```
 go run . --path "api" --overrides "overrides" --output ~/tpg-fork --version "beta"
 ```
 
 ### Accessory Code
 
-To generate accessory code such as `serializarion`, you can specify the `--mode`:
+To generate accessory code such as `serializarion`, you can specify the
+`--mode`:
 
 ```
 go run . --path "api" --overrides "overrides" --output ~/some/dir --mode "serialization"
@@ -53,83 +54,112 @@ go run . --path "api" --overrides "overrides" --output ~/some/dir --mode "serial
 
 ## New Resource Guide
 
-This guide is written to document the process for adding a resource to the Google Terraform Provider (TPG) after it has been added to the [DCL](https://github.com/GoogleCloudPlatform/declarative-resource-client-library).
+This guide is written to document the process for adding a resource to the
+Google Terraform Provider (TPG) after it has been added to the
+[DCL](https://github.com/GoogleCloudPlatform/declarative-resource-client-library).
 
 ### Adding Resource Overrides
 
-Every resource added via tpgtools needs an override file for every version it is available at. This file should be empty, but must exist. A resource available at GA (TPG) must also exist at beta (TPGB) and needs a corresponding override file at beta. These override files are often identical between versions. This file should exist at tpgtools/overrides/$PRODUCT_NAME/$VERSION/$RESOURCE.yaml. For example, [this override](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/tpgtools/overrides/assuredworkloads/beta/workload.yaml) exists for the product assuredworkloads resource workload at beta version.
+Every resource added via tpgtools needs an override file for every version it is
+available at. This file should be empty, but must exist. A resource available at
+GA (TPG) must also exist at beta (TPGB) and needs a corresponding override file
+at beta. These override files are often identical between versions. This file
+should exist at tpgtools/overrides/$PRODUCT_NAME/$VERSION/$RESOURCE.yaml. For
+example,
+[this override](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/tpgtools/overrides/assuredworkloads/beta/workload.yaml)
+exists for the product assuredworkloads resource workload at beta version.
 
-Override files contain information on how the Terraform representation of the resource should be different from the DCL's representation. This could be naming or behavior differences, but for a new resource implemented through tpgtools there should be no differences from the DCL's representation.
+Override files contain information on how the Terraform representation of the
+resource should be different from the DCL's representation. This could be naming
+or behavior differences, but for a new resource implemented through tpgtools
+there should be no differences from the DCL's representation.
 
 ### Adding Samples
 
-Adding samples is essential for generating tests and documentation.
+For a deeper understanding on test anatomy please read the accompanying
+[Tests and Sample Anatomy](#tests-and-sample-anatomy)
 
-Start by copying the relevant samples from the DCL for your new resource. These will be added to
-the [tpgtools/api folder](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/tpgtools/api) under the relevant product.
-These samples can be found under the samples/ folder within the DCL for the resource being added. For example, assured
-workloads can be found [here](https://github.com/GoogleCloudPlatform/declarative-resource-client-library/tree/main/services/google/assuredworkloads/samples).
+#### Create a meta.yaml file
 
-Re-serialize `serialization.go` to enable generating configs from samples by running:
+Create a meta.yaml file in the overrides directory for the resource. For
+example,
+[this meta.yaml](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/tpgtools/overrides/assuredworkloads/samples/workload/meta.yaml)
+file exists for the assured workloads resource. This file will merge with any
+tests. You can customize behavior of the tests and examples generated dcl
+samples data (injections, hiding, ect..). See
+[the section of the meta.yaml file](#the-metayaml-file) for a more detailed
+dive.
+
+#### Adding DCL Tests
+
+Start by copying the relevant samples from the DCL for your new resource. These
+will be added to the
+[tpgtools/api folder](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/tpgtools/api)
+under the relevant product. These samples can be found under the samples/ folder
+within the DCL for the resource being added. For example, assured workloads can
+be found
+[here](https://github.com/GoogleCloudPlatform/declarative-resource-client-library/tree/main/services/google/assuredworkloads/samples).
+
+Re-serialize `serialization.go` to enable generating configs from samples by
+running:
+
 ```
-make upgrade-dcl
 make serialize
 ```
 
-Create a meta.yaml file in the overrides directory for the resource. For example, 
-[this meta.yaml](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/tpgtools/overrides/assuredworkloads/samples/workload/meta.yaml) file exists for the assured workloads resource.
-This file will merge with any tests you customize behavior
-of the tests and examples generated from the samples data (injections, hiding, ect..)
+#### Adding a Non DCL Test
 
-If you need to hide sample from doc or hide a sample from docs you can do so here.
-```
-doc_hide:
-  - basic.tf.tmpl
-  - full.tf.tmpl
-test_hide:
-  - basic_workload.yaml
-```
+In some cases you may need to add a non DCL test when either the current tests
+are insufficient or you want to showcase/test some specific behavior not present
+in the dcl tests.
 
-If you want to add additional rules the following options are currently supported within `meta.yaml`
-```
-ignore_read:
-  - "billing_account"
-  - "kms_settings"
-  - "resource_settings"
-  - "provisioned_resources_parent"
-check:
-  -  deleteAssuredWorkloadProvisionedResources(t)
-extra_dependencies:
-  - "time"
-  - "log"
-  - "strconv"
-  - "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-code_inject:
-  - delete_assured_workload_provisioned_resources.go
-doc_hide:
-  - basic.tf.tmpl # basic_update.tf.tmpl auto hides
-  - full.tf.tmpl
-test_hide:
-  - basic_workload.yaml
+If you need to write tests manually you can add terraform templates to the
+relevant `./overrides/<product>/samples/<resource>` folder.
+
+A terraform template test has the following anatomy.
+
+* `<test-name>.yaml` - this is the test definition
+* `<test-name>.tf.tmpl` - this is the accompanying terraform configuration. A companion to the definition if you will.
+
+The `<test-name>.yaml` test specific configurations. For example it lists the
+variables to replace in the template companion. You can also add additional
+templates as updates. This will act as sequential applies and are useful for
+testing update specific behavior. Make sure any templates added as an update has
+the `_update.tf.tmpl` extension.
+
+The following is an example test definition.
+
+```yaml
+updates:
+- resource: ./basic_update.tf.tmpl
+variables:
+  - name: "name"
+    type: "resource_name"
+  - name: "region"
+    type: "region"
 ```
 
-### Registering New Resources
-
-There are a few files within mmv1 that use Ruby templates to generate shared files for the provider. One of these is provider.go (generated by [provider.go.erb](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/utils/provider.go.erb)) which contains the map of resources to their names within the provider. Currently these need to be updated by hand to add a new resource. There are a couple of other places that need to be modified as well to add endpoint information if the resource being added is part of a new product.
-
-#### Adding to provider.go
-
-Add the resource definition within the `ResourceMapWithErrors` map. There is currently a block of tpgtools resources, so adding to that block is preferred. If this resource is available only at a specific version (beta, private) then add version tags around the resource definition.
-
-Additionally you may need to add a few line to provider.go for the endpoint if this resource is in a new product that doesn't have any other resources currently in the provider. Find the correct lines in the diff on `provider_dcl_endpoints.go` within the provider once it has been generated with the new resource.
+The `<test-name>.tf.tmpl` file is simply a terraform configuration. Any
+replacements should be surrounding by double brackets `{{ }}`. The variable name
+from the test definition will be used to key into and replace these.
 
 ### Adding Documentation
 
-Provided you have added samples for the resource, documentation will be automatically generated based on the resource description in the DCL and examples will be generated from the samples for this resource. If you did not provide samples for the resource, then documentation will need to be written by hand.
+Provided you have added samples for the resource, documentation will be
+automatically generated based on the resource description in the DCL and
+examples will be generated from the samples for this resource. If you did not
+provide samples for the resource, then documentation will need to be written by
+hand.
 
 ### Handwritten Tests
 
-Sometimes you may need to test unusual resource behavior in a way that does not fit well with generated tests. In this circumstance you can write a test file and add it [here](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests). These tests can be used for more granular testing of specific behavior and add custom checks. Tests in these files will not have examples generated for them, so handwritten tests should not be considered a replacement for samples.
+Sometimes you may need to test unusual resource behavior in a way that does not
+fit well with generated tests. In this circumstance you can write a test file
+and add it
+[here](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests).
+These tests can be used for more granular testing of specific behavior and add
+custom checks. Tests in these files will not have examples generated for them,
+so handwritten tests should not be considered a replacement for samples.
 
 ## Development
 
@@ -158,4 +188,74 @@ For example, override entries will look like the following:
   field: lifecycle.rule.condition.age
   details:
     description: Custom description here.
+```
+
+### Tests and Sample Anatomy
+
+Adding samples is essential for generating tests and documentation. In fact
+Documentation won't generate without it!
+
+Tests come from two sources.
+
+* The top level api (`./api`) folder. If you look
+in here you'll see a bunch of yaml files and json files. These are DCL tests!
+Forked from the dcl library.
+* The override folder
+(`./overrides/<product>/samples/<resource>`). This contains `meta.yaml` a file
+used for managing resource-wide test configurations and custom non-dcl tests.
+
+In either case, DCL or non-DCL, every test definition is a yaml file which takes
+in variables.
+
+```yaml
+variables:
+  - name: "name"
+    type: "resource_name"
+  - name: "org_id"
+    type: "org_id"
+```
+
+`type` is inferred from `sample.go`'s translation map to figure out what needs
+to be placed in the field. `name` is used for substitution in the file itself
+and in the case of `resource_name`, actually used to create the value itself.
+
+#### The meta.yaml file
+
+In the `./overrides/<product>/samples/<resource>` a `meta.yaml` file exists
+which controls configuration which applies to multiple tests or hiding/showing
+specific tests.
+
+If you need to hide sample from a doc or disable a sample from the tests you can
+do so here.
+
+```yaml
+doc_hide:
+  - basic.tf.tmpl
+  - full.tf.tmpl
+test_hide:
+  - basic_workload.yaml
+```
+
+If you want to add additional rules the following options are currently supported within `meta.yaml`
+
+```yaml
+ignore_read:
+  - "billing_account"
+  - "kms_settings"
+  - "resource_settings"
+  - "provisioned_resources_parent"
+check:
+  -  deleteAssuredWorkloadProvisionedResources(t)
+extra_dependencies:
+  - "time"
+  - "log"
+  - "strconv"
+  - "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+code_inject:
+  - delete_assured_workload_provisioned_resources.go
+doc_hide:
+  - basic.tf.tmpl # basic_update.tf.tmpl auto hides
+  - full.tf.tmpl
+test_hide:
+  - basic_workload.yaml
 ```

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -17,6 +18,11 @@ func resourceBigtableTable() *schema.Resource {
 
 		Importer: &schema.ResourceImporter{
 			State: resourceBigtableTableImport,
+		},
+
+		// Set a longer timeout for table creation as adding column families can be slow.
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(45 * time.Minute),
 		},
 
 		// ----------------------------------------------------------------------
@@ -124,7 +130,12 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 			column := co.(map[string]interface{})
 
 			if v, ok := column["family"]; ok {
-				if err := c.CreateColumnFamily(ctx, name, v.(string)); err != nil {
+				// Set a longer timeout as adding column family can be slow. The current timeout
+				// in the Go client is less than one minute. This timeout should not be longer
+				// than the overall timeout.
+				ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Minute)
+				defer cancel() // Always call cancel.
+				if err := c.CreateColumnFamily(ctxWithTimeout, name, v.(string)); err != nil {
 					return fmt.Errorf("Error creating column family %s. %s", v, err)
 				}
 			}
@@ -276,7 +287,7 @@ func flattenColumnFamily(families []string) []map[string]interface{} {
 	return result
 }
 
-//TODO(rileykarson): Fix the stored import format after rebasing 3.0.0
+// TODO(rileykarson): Fix the stored import format after rebasing 3.0.0
 func resourceBigtableTableImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
 	if err := parseImportId([]string{

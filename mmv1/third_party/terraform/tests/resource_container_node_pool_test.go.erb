@@ -193,6 +193,70 @@ func TestAccContainerNodePool_withNodeConfig(t *testing.T) {
 	})
 }
 
+func TestAccContainerNodePool_withReservationAffinity(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withReservationAffinity(cluster, np),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.with_reservation_affinity",
+						"node_config.0.reservation_affinity.#", "1"),
+					resource.TestCheckResourceAttr("google_container_node_pool.with_reservation_affinity",
+						"node_config.0.reservation_affinity.0.consume_reservation_type", "ANY_RESERVATION"),
+				),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_reservation_affinity",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccContainerNodePool_withReservationAffinitySpecific(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	reservation := fmt.Sprintf("tf-test-reservation-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withReservationAffinitySpecific(cluster, reservation, np),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.with_reservation_affinity",
+						"node_config.0.reservation_affinity.#", "1"),
+					resource.TestCheckResourceAttr("google_container_node_pool.with_reservation_affinity",
+						"node_config.0.reservation_affinity.0.consume_reservation_type", "SPECIFIC_RESERVATION"),
+					resource.TestCheckResourceAttr("google_container_node_pool.with_reservation_affinity",
+						"node_config.0.reservation_affinity.0.key", "compute.googleapis.com/reservation-name"),
+					resource.TestCheckResourceAttr("google_container_node_pool.with_reservation_affinity",
+						"node_config.0.reservation_affinity.0.values.#", "1"),
+					resource.TestCheckResourceAttr("google_container_node_pool.with_reservation_affinity",
+						"node_config.0.reservation_affinity.0.values.0", reservation),
+				),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_reservation_affinity",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
 
 func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 	t.Parallel()
@@ -572,7 +636,7 @@ func TestAccContainerNodePool_withNodeConfigScopeAlias(t *testing.T) {
 	})
 }
 
-//This test exists to validate a regional node pool *and* and update to it.
+// This test exists to validate a regional node pool *and* and update to it.
 func TestAccContainerNodePool_regionalAutoscaling(t *testing.T) {
 	t.Parallel()
 
@@ -610,6 +674,63 @@ func TestAccContainerNodePool_regionalAutoscaling(t *testing.T) {
 			},
 			resource.TestStep{
 				Config: testAccContainerNodePool_basic(cluster, np),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_container_node_pool.np", "autoscaling.0.min_node_count"),
+					resource.TestCheckNoResourceAttr("google_container_node_pool.np", "autoscaling.0.max_node_count"),
+				),
+			},
+			resource.TestStep{
+				ResourceName:      "google_container_node_pool.np",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// autoscaling.# = 0 is equivalent to no autoscaling at all,
+				// but will still cause an import diff
+				ImportStateVerifyIgnore: []string{"autoscaling.#"},
+			},
+		},
+	})
+}
+
+//This test exists to validate a node pool with total size *and* and update to it.
+func TestAccContainerNodePool_totalSize(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccContainerNodePool_totalSize(cluster, np),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.total_min_node_count", "4"),
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.total_max_node_count", "12"),
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.location_policy", "BALANCED"),
+				),
+			},
+			resource.TestStep{
+				ResourceName:      "google_container_node_pool.np",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			resource.TestStep{
+				Config: testAccContainerNodePool_updateTotalSize(cluster, np),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.total_min_node_count", "2"),
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.total_max_node_count", "22"),
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.location_policy", "ANY"),
+				),
+			},
+			resource.TestStep{
+				ResourceName:      "google_container_node_pool.np",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			resource.TestStep{
+				Config: testAccContainerNodePool_basicTotalSize(cluster, np),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_container_node_pool.np", "autoscaling.0.min_node_count"),
 					resource.TestCheckNoResourceAttr("google_container_node_pool.np", "autoscaling.0.max_node_count"),
@@ -958,7 +1079,6 @@ resource "google_container_cluster" "cluster" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = "1.19"
 }
 
 resource "google_container_node_pool" "np" {
@@ -1007,7 +1127,6 @@ resource "google_container_cluster" "cluster" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = "1.19"
 }
 
 resource "google_container_node_pool" "np" {
@@ -1337,6 +1456,74 @@ resource "google_container_node_pool" "np" {
 `, cluster, np)
 }
 
+func testAccContainerNodePool_totalSize(cluster, np string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1"
+  initial_node_count = 3
+  min_master_version = "1.24"
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "us-central1"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 2
+  autoscaling {
+    total_min_node_count = 4
+    total_max_node_count = 12
+    location_policy      = "BALANCED"
+  }
+}
+`, cluster, np)
+}
+
+func testAccContainerNodePool_updateTotalSize(cluster, np string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1"
+  initial_node_count = 3
+  min_master_version = "1.24"
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "us-central1"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 2
+  autoscaling {
+    total_min_node_count = 2
+    total_max_node_count = 22
+    location_policy      = "ANY"
+  }
+}
+`, cluster, np)
+}
+
+
+func testAccContainerNodePool_basicTotalSize(cluster, np string) string {
+	return fmt.Sprintf(`
+provider "google" {
+  user_project_override = true
+}
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1"
+  initial_node_count = 3
+  min_master_version = "1.24"
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "us-central1"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 2
+}
+`, cluster, np)
+}
+
 func testAccContainerNodePool_autoscaling(cluster, np string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
@@ -1537,6 +1724,88 @@ resource "google_container_node_pool" "np_with_node_config" {
   }
 }
 `, cluster, nodePool)
+}
+
+func testAccContainerNodePool_withReservationAffinity(cluster, np string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+}
+
+resource "google_container_node_pool" "with_reservation_affinity" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    machine_type    = "n1-standard-1"
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+    reservation_affinity {
+      consume_reservation_type = "ANY_RESERVATION"
+    }
+  }
+}
+`, cluster, np)
+}
+
+func testAccContainerNodePool_withReservationAffinitySpecific(cluster, reservation, np string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+}
+
+resource "google_compute_reservation" "gce_reservation" {
+  name = "%s"
+  zone = "us-central1-a"
+
+  specific_reservation {
+    count = 1
+    instance_properties {
+      machine_type     = "n1-standard-1"
+    }
+  }
+
+  specific_reservation_required = true
+}
+
+resource "google_container_node_pool" "with_reservation_affinity" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    machine_type    = "n1-standard-1"
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+    reservation_affinity {
+      consume_reservation_type = "SPECIFIC_RESERVATION"
+      key = "compute.googleapis.com/reservation-name"
+      values = [
+        google_compute_reservation.gce_reservation.name
+      ]
+    }
+  }
+}
+`, cluster, reservation, np)
 }
 
 

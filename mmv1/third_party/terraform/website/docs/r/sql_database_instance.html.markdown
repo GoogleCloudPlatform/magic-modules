@@ -1,8 +1,6 @@
 ---
 subcategory: "Cloud SQL"
-layout: "google"
 page_title: "Google: google_sql_database_instance"
-sidebar_current: "docs-google-sql-database-instance"
 description: |-
   Creates a new SQL database instance in Google Cloud SQL.
 ---
@@ -196,7 +194,7 @@ includes an up-to-date reference of supported versions.
 * `replica_configuration` - (Optional) The configuration for replication. The
     configuration is detailed below. Valid only for MySQL instances.
 
-* `root_password` - (Optional) Initial root password. Required for MS SQL Server, ignored by MySQL and PostgreSQL.
+* `root_password` - (Optional) Initial root password. Required for MS SQL Server.
 
 * `encryption_key_name` - (Optional)
     The full path to the encryption key used for the CMEK disk encryption.  Setting
@@ -240,7 +238,7 @@ The `settings` block supports:
 
 * `disk_autoresize` - (Optional, Default: `true`) Enables auto-resizing of the storage size. Set to false if you want to set `disk_size`.
 
-* `disk_autoresize` - (Optional, Default: `0`) The maximum size to which storage capacity can be automatically increased. The default value is 0, which specifies that there is no limit.
+* `disk_autoresize_limit` - (Optional, Default: `0`) The maximum size to which storage capacity can be automatically increased. The default value is 0, which specifies that there is no limit.
 
 * `disk_size` - (Optional, Default: `10`) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. If you want to set this field, set `disk_autoresize` to false.
 
@@ -350,6 +348,20 @@ The optional `settings.insights_config` subblock for instances declares [Query I
 * `record_application_tags` - True if Query Insights will record application tags from query when enabled.
 
 * `record_client_address` - True if Query Insights will record client address when enabled.
+
+The optional `settings.password_validation_policy` subblock for instances declares [Password Validation Policy](https://cloud.google.com/sql/docs/postgres/built-in-authentication) configuration. It contains:
+
+* `min_length` - Specifies the minimum number of characters that the password must have.
+
+* `complexity` - Checks if the password is a combination of lowercase, uppercase, numeric, and non-alphanumeric characters.
+
+* `reuse_interval` - Specifies the number of previous passwords that you can't reuse.
+
+* `disallow_username_substring` - Prevents the use of the username in the password.
+
+* `password_change_interval` - Specifies the minimum duration after which you can change the password.
+
+* `enable_password_policy` - Enables or disable the password validation policy.
 
 The optional `replica_configuration` block must have `master_instance_name` set
 to work, cannot be updated, and supports:

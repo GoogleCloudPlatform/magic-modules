@@ -1,8 +1,6 @@
 ---
 subcategory: "Compute Engine"
-layout: "google"
 page_title: "Google: google_compute_instance"
-sidebar_current: "docs-google-compute-instance-x"
 description: |-
   Manages a VM instance resource within GCE.
 ---
@@ -31,7 +29,7 @@ resource "google_compute_instance" "default" {
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-9"
+      image = "debian-cloud/debian-11"
     }
   }
 
@@ -373,10 +371,12 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `min_node_cpus` - (Optional) The minimum number of virtual CPUs this instance will consume when running on a sole-tenant node.
 
-* `provisioning_model` - (Optional, Beta) Describe the type of preemptible VM. This field accepts the value `STANDARD` or `SPOT`. If the value is `STANDARD`, there will be no discount. If this   is set to `SPOT`, 
+* `provisioning_model` - (Optional) Describe the type of preemptible VM. This field accepts the value `STANDARD` or `SPOT`. If the value is `STANDARD`, there will be no discount. If this   is set to `SPOT`, 
     `preemptible` should be `true` and `auto_restart` should be
     `false`. For more info about
     `SPOT`, read [here](https://cloud.google.com/compute/docs/instances/spot)
+    
+* `instance_termination_action` - (Optional) Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot) 
 
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
@@ -413,6 +413,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `enable_nested_virtualization` (Optional) Defines whether the instance should have [nested virtualization](#on_host_maintenance)  enabled. Defaults to false.
 
 * `threads_per_core` (Optional) he number of threads per physical core. To disable [simultaneous multithreading (SMT)](https://cloud.google.com/compute/docs/instances/disabling-smt) set this to 1.
+
+* `visible_core_count` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The number of physical cores to expose to an instance. [visible cores info (VC)](https://cloud.google.com/compute/docs/instances/customize-visible-cores).
 
 <a name="nested_reservation_affinity"></a>The `reservation_affinity` block supports:
 

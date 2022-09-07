@@ -15,8 +15,6 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   DnsAuthorization: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
-      warning: |
-        These resources require allow-listing to use, and are not openly available to all Cloud customers. Engage with your Cloud account team to discuss how to onboard.
     autogen_async: true
     import_format: ["projects/{{project}}/locations/global/dnsAuthorizations/{{name}}"]
     examples:
@@ -28,8 +26,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           zone_name: "my-zone"
   Certificate: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
-      warning: |
-        These resources require allow-listing to use, and are not openly available to all Cloud customers. Engage with your Cloud account team to discuss how to onboard.
     autogen_async: true
     import_format: ["projects/{{project}}/locations/global/certificates/{{name}}"]
     examples:
@@ -57,3 +53,40 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'certManagerDefaultScopeDiffSuppress'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/cert_manager.erb
+  CertificateMap: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+    autogen_async: true
+    import_format: ["projects/{{project}}/locations/global/certificateMaps/{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "certificate_manager_certificate_map_basic"
+        primary_resource_id: "default"
+        vars:
+          cert_map_name: "cert-map"
+    properties:
+        labels: !ruby/object:Overrides::Terraform::PropertyOverride
+          default_from_api: true
+  CertificateMapEntry: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+    autogen_async: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "certificate_manager_certificate_map_entry_full"
+        primary_resource_id: "default"
+        vars: 
+          dns_auth_name: "dns-auth"
+          dns_auth_subdomain: "subdomain"
+          dns_auth_name2: "dns-auth2"
+          dns_auth_subdomain2: "subdomain2"
+          cert_map_entry_name: "cert-map-entry"
+    properties:
+        labels: !ruby/object:Overrides::Terraform::PropertyOverride
+          default_from_api: true
+        map: !ruby/object:Overrides::Terraform::PropertyOverride
+          custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
+          custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+        name: !ruby/object:Overrides::Terraform::PropertyOverride
+          custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
+          custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+        certificates: !ruby/object:Overrides::Terraform::PropertyOverride
+          diff_suppress_func: projectNumberDiffSuppress

@@ -18,6 +18,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "gkehub_membership_basic"
+        primary_resource_name: "fmt.Sprintf(\"basic%s\", context[\"random_suffix\"])"
         primary_resource_id: "membership"
         vars:
           name: "basic"
@@ -32,8 +33,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project: :PROJECT_NAME
     # Skip sweeper gen since this is a child resource.
     skip_sweeper: true
-    id_format: "{{name}}"
-    import_format: ["{{%name}}"]
+    id_format: "projects/{{project}}/locations/global/memberships/{{membership_id}}"
+    import_format: ["projects/{{project}}/locations/global/memberships/{{membership_id}}"]
     properties:
       endpoint.gkeCluster.resourceLink: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: suppressGkeHubEndpointSelfLinkDiff

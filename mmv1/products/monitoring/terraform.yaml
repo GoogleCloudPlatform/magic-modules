@@ -25,6 +25,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "alert_policy"
         vars:
           alert_policy_display_name: "My Alert Policy"
+      - !ruby/object:Provider::Terraform::Examples
+        # skipping tests because the API is full of race conditions
+        skip_test: true
+        name: "monitoring_alert_policy_evaluation_missing_data"
+        primary_resource_id: "alert_policy"
+        vars:
+          alert_policy_display_name: "My Alert Policy"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
@@ -56,6 +63,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   NotificationChannel: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
+    delete_url: 'v3/{{name}}?force={{force_delete}}'
     mutex: stackdriver/notifications/{{project}}
     error_retry_predicates: ["isMonitoringConcurrentEditError"]
     examples:
@@ -71,6 +79,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_test: true
         vars:
           display_name: "Sensitive Notification Channel test"
+    virtual_fields:
+      - !ruby/object:Api::Type::Boolean
+        name: 'force_delete'
+        url_param_only: true
+        default_value: false
+        description: |
+          If true, the notification channel will be deleted regardless
+          of its use in alert policies (the policies will be updated
+          to remove the channel). If false, channels that are still
+          referenced by an existing alerting policy will fail to be
+          deleted in a delete operation.
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       resource_definition: templates/terraform/resource_definition/monitoring_notification_channel.erb
       encoder: templates/terraform/encoders/monitoring_notification_channel.go.erb
@@ -253,6 +272,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           display_name: "http-uptime-check"
         test_env_vars:
           project_id: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "uptime_check_config_status_code"
+        primary_resource_id: "status_code"
+        vars:
+          display_name: "http-uptime-check"
+        test_env_vars:
+          project_id: :PROJECT_NAME        
       - !ruby/object:Provider::Terraform::Examples
         name: "uptime_check_config_https"
         primary_resource_id: "https"
