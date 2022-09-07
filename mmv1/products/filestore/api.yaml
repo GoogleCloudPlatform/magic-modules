@@ -268,7 +268,7 @@ objects:
           'https://cloud.google.com/filestore/docs/snapshots'
         'Creating Snapshots':
           'https://cloud.google.com/filestore/docs/create-snapshots'
-      api: 'https://cloud.google.com/filestore/docs/reference/rest/v1/projects.locations.instances.snapshots/create'
+      api: 'https://cloud.google.com/filestore/docs/reference/rest/v1/projects.locations.instances.snapshots'
     parameters:
       - !ruby/object:Api::Type::String
         name: 'location'
