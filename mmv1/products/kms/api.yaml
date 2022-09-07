@@ -163,6 +163,180 @@ objects:
           'https://cloud.google.com/kms/docs/creating-keys#create_a_key'
       api: 'https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys'
   - !ruby/object:Api::Resource
+    name: 'CryptoKeyVersion'
+    base_url: '{{crypto_key}}/cryptoKeyVersions'
+    create_url: '{{crypto_key}}/cryptoKeyVersions?parent={{crypto_key_name}}'
+    self_link: '{{crypto_key}}/cryptoKeyVersions/{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A `CryptoKeyVersion` represents an individual cryptographic key, and the associated key material.
+    parameters: 
+      - !ruby/object:Api::Type::String
+        name: 'cryptoKey'
+        required: true
+        input: true
+        url_param_only: true
+        description: |
+          The name of the cryptoKey associated with the CryptoKeyVersions.
+          Authorization requires the following IAM permission on the specified resource parent:
+          cloud.cryptoKeyVersions.create
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource name for this CryptoKeyVersion in the format projects/*/locations/*/keyRings/*/cryptoKeys/*/cryptoKeyVersions/*.
+        input: true
+        url_param_only: true
+        required: true
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        description: |
+          The current state of the CryptoKeyVersion.
+        values:
+          - :CRYPTO_KEY_VERSION_STATE_UNSPECIFIED
+          - :PENDING_GENERATION
+          - :ENABLED
+          - :DISABLED
+          - :DESTRYOED
+          - :DESTROY_SCHEDULED
+          - :PENDING_IMPORT
+          - :IMPORT_FAILED
+      - !ruby/object:Api::Type::Enum
+        name: 'protectionLevel'
+        output: true
+        description: |
+          The ProtectionLevel describing how crypto operations are performed with this CryptoKeyVersion.
+        values:
+          - :PROTECTION_LEVEL_UNSPECIFIED
+          - :SOFTWARE
+          - :HSM
+          - :EXTERNAL
+          - :EXTERNAL_VPC
+      - !ruby/object:Api::Type::Time
+        name: 'createTime'
+        description: |
+          The time at which this cryptoKeyVersion was created
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'generateTime'
+        description: |
+          The time this CryptoKeyVersion key material was generated
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'destroyTime'
+        description: |
+          The time this cryptoKeyVersion's key material is scheduled for destruction. Only present if state is DESTROY_SCHEDULED.
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'destroyEventTime'
+        description: |
+          The time this cryptoKeyVersion's key material was destroyed. Only present is state is DESTROYED
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'importJob'
+        description: |
+          The name of the ImportJob used in the most recent import of this CryptoKeyVersion. Only present if the underlying key material was imported.
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'importTime'
+        description: |
+          The time at which this CryptoKeyVersion's key material was most recently imported.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'importFailureReason'
+        description: |
+          The root cause of the most recent import failure. Only present if state is IMPORT_FAILED.
+        output: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'reimportEligible'
+        description: | 
+          Whether or not this key version is eligible for reimport, by being specified as a target in ImportCryptoKeyVersionRequest.crypto_key_version.
+        output: true
+      - !ruby/object:Api::Type::Enum
+        name: 'algorithm'
+        description: |
+          The CryptoKeyVersionAlgorithm that this CryptoKeyVersion supports.
+        output: true
+        values: 
+          - :CRYPTO_KEY_VERSION_ALGORITHM_UNSPECIFIED
+          - :GOOGLE_SYMMETRIC_ENCRYPTION
+          - :RSA_SIGN_PSS_2048_SHA256
+          - :RSA_SIGN_PSS_3072_SHA256
+          - :RSA_SIGN_PSS_4096_SHA256
+          - :RSA_SIGN_PSS_4096_SHA512
+          - :RSA_SIGN_PKCS1_2048_SHA256
+          - :RSA_SIGN_PKCS1_3072_SHA256
+          - :RSA_SIGN_PKCS1_4096_SHA256
+          - :RSA_SIGN_PKCS1_4096_SHA512
+          - :RSA_SIGN_RAW_PKCS1_2048
+          - :RSA_SIGN_RAW_PKCS1_3072
+          - :RSA_SIGN_RAW_PKCS1_4096
+          - :RSA_DECRYPT_OAEP_2048_SHA256
+          - :RSA_DECRYPT_OAEP_3072_SHA256
+          - :RSA_DECRYPT_OAEP_4096_SHA256
+          - :RSA_DECRYPT_OAEP_4096_SHA512
+          - :RSA_DECRYPT_OAEP_2048_SHA1
+          - :RSA_DECRYPT_OAEP_3072_SHA1
+          - :RSA_DECRYPT_OAEP_4096_SHA1
+          - :EC_SIGN_P256_SHA256
+          - :EC_SIGN_P384_SHA384
+          - :EC_SIGN_SECP256K1_SHA256
+          - :HMAC_SHA256
+          - :EXTERNAL_SYMMETRIC_ENCRYPTION
+      - !ruby/object:Api::Type::NestedObject
+        name: 'attestation'
+        description: |
+          Statement that was generated and signed by the HSM at key creation time. Use this statement to verify attributes of the key as stored on the HSM, independently of Google.
+          Only provided for key versions with protectionLevel HSM.
+        output: true
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'format'
+            description: |
+              The format of the attestation data.
+            output: true
+            values:
+              - :ATTESTATION_FORMAT_UNSPECIFIED
+              - :CAVIUM_V1_COMPRESSED
+              - :CAVIUM_V2_COMPRESSED
+          - !ruby/object:Api::Type::String
+            name: 'content'
+            description: |
+              The attestation data provided by the HSM when the key operation was performed.
+            output: true
+          - !ruby/object:Api::Type::NestedObject
+            name: 'certChains'
+            description: |
+              The certificate chains needed to validate the attestation
+            output: true
+            properties: 
+              - !ruby/object:Api::Type::String
+                name: 'caviumCerts'
+                description: |
+                  Cavium certificate chain corresponding to the attestation.
+              - !ruby/object:Api::Type::String
+                name: 'googleCardCerts'
+                description: |
+                  Google card certificate chain corresponding to the attestation.
+              - !ruby/object:Api::Type::String
+                name: 'googlePartitionCerts'
+                description: |
+                  Google partition certificate chain corresponding to the attestation.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'externalProtectionLevelOptions'
+            description: |
+              ExternalProtectionLevelOptions stores a group of additional fields for configuring a CryptoKeyVersion that are specific to the EXTERNAL protection level and EXTERNAL_VPC protection levels.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'externalKeyUri'
+                description: |
+                  The URI for an external resource that this CryptoKeyVersion represents.
+              - !ruby/object:Api::Type::String
+                name: 'ekmConnectionKeyPath'
+                description: |
+                  The path to the external key material on the EKM when using EkmConnection e.g., "v0/my/key". Set this field instead of externalKeyUri when using an EkmConnection.
+  - !ruby/object:Api::Resource
     name: 'KeyRingImportJob'
     base_url: '{{key_ring}}/importJobs'
     create_url: '{{key_ring}}/importJobs?importJobId={{import_job_id}}'
