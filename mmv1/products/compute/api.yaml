@@ -7250,7 +7250,7 @@ objects:
     self_link: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
     input: true
     description: |
-      Mange the named ports setting for a managed instance group without
+      Manage the named ports setting for a managed instance group without
       managing the group as whole. This resource is primarily intended for use
       with GKE-generated groups that shouldn't otherwise be managed by other
       tools.
