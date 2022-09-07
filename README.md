@@ -40,8 +40,10 @@ To get started, you'll need:
     instructions to set up Go: [YouTube video](https://www.youtube.com/watch?v=VQVyvulNnzs).
   * If you're using Cloud Shell, Go is already installed.
 * Ruby 2.6.0
-  * You can use `rbenv` to manage your Ruby version(s).
-  * To install `rbenv`, run `sudo apt install rbenv`.
+  * You can use [`rbenv`](https://github.com/rbenv/rbenv) to manage your Ruby version(s).
+  * To install `rbenv`:
+    * Homebrew: run `brew install rbenv ruby-build`
+    * Debian, Ubuntu, and their derivatives: run `sudo apt install rbenv`
   * Then run `rbenv install 2.6.0`. 
     * For M1 Mac users, run `RUBY_CFLAGS="-Wno-error=implicit-function-declaration" rbenv install 2.6.0`
 * [`Bundler`](https://github.com/bundler/bundler)
