@@ -13911,6 +13911,35 @@ objects:
                       description: |
                         CIDR IP address range.
                       item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: 'advancedOptionsConfig'
+        description:
+          Advanced configuration options for this security policy.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'jsonParsing'
+            description: |
+              The JSON parsing behavior for this security policy.
+            values:
+              - :DISABLED
+              - :STANDARD
+          - !ruby/object:Api::Type::NestedObject
+            name: 'jsonCustomConfig'
+            description: |
+              Custom configuration to apply the JSON parsing. Only applicable when JSON parsing is set to STANDARD.
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'contentTypes'
+                description: |
+                  A list of custom Content-Type header values to apply the JSON parsing.
+                item_type: Api::Type::String
+          - !ruby/object:Api::Type::Enum
+            name: 'logLevel'
+            description: |
+              The level of detail to display for WAF logging.
+            values:
+              - :NORMAL
+              - :VERBOSE
   - !ruby/object:Api::Resource
     name: 'Snapshot'
     kind: 'compute#snapshot'
