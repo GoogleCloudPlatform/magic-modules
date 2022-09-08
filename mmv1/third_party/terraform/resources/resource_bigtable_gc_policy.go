@@ -255,22 +255,24 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	for _, fi := range ti.FamilyInfos {
-		if fi.Name == columnFamily {
-			d.SetId(fi.GCPolicy)
-			// Only set `gc_rules`` when the legacy fields are not set. We are not planning to support legacy fields.
-			if d.Get("mode") == "" && d.Get("max_age") == "" && d.Get("max_version") == "" {
-				gcRuleString, err := gcPolicyToGCRuleString(fi.FullGCPolicy, true)
-				if err != nil {
-					return err
-				}
-				gcRuleJsonString, err := json.Marshal(gcRuleString)
-				if err != nil {
-					return fmt.Errorf("Error marshaling GC policy to json: %s", err)
-				}
-				d.Set("gc_rules", string(gcRuleJsonString))
-			}
-			break
+		if fi.Name != columnFamily {
+			continue
 		}
+
+		d.SetId(fi.GCPolicy)
+		// Only set `gc_rules`` when the legacy fields are not set. We are not planning to support legacy fields.
+		if d.Get("mode") == "" && d.Get("max_age") == "" && d.Get("max_version") == "" {
+			gcRuleString, err := gcPolicyToGCRuleString(fi.FullGCPolicy, true)
+			if err != nil {
+				return err
+			}
+			gcRuleJsonString, err := json.Marshal(gcRuleString)
+			if err != nil {
+				return fmt.Errorf("Error marshaling GC policy to json: %s", err)
+			}
+			d.Set("gc_rules", string(gcRuleJsonString))
+		}
+		break
 	}
 
 	if err := d.Set("project", project); err != nil {
@@ -280,6 +282,7 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
+// Recursively convert Bigtable GC policy to JSON format in a map.
 func gcPolicyToGCRuleString(gc bigtable.GCPolicy, topLevel bool) (map[string]interface{}, error) {
 	result := make(map[string]interface{})
 	switch bigtable.GetPolicyType(gc) {
