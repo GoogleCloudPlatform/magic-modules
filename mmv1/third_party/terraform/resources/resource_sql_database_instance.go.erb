@@ -182,6 +182,11 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 								},
 							},
 						},
+						"sql_server_timezone": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      `The timezone to be used by the SQL Server container.`,
+						},
 						"availability_type": {
 							Type:             schema.TypeString,
 							Optional:         true,
@@ -1028,6 +1033,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}) *sqladmin.Setti
 		ActivationPolicy:         _settings["activation_policy"].(string),
 		ActiveDirectoryConfig:    expandActiveDirectoryConfig(_settings["active_directory_config"].([]interface{})),
 		SqlServerAuditConfig:     expandSqlServerAuditConfig(_settings["sql_server_audit_config"].([]interface{})),
+		SqlServerTimezone:        _settings["sql_server_timezone"].(string),
 		AvailabilityType:         _settings["availability_type"].(string),
 		Collation:                _settings["collation"].(string),
 		DataDiskSizeGb:           int64(_settings["disk_size"].(int)),
@@ -1505,6 +1511,7 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 		"pricing_plan":               settings.PricingPlan,
 		"user_labels":                settings.UserLabels,
 		"password_validation_policy": settings.PasswordValidationPolicy,
+		"sql_server_timezone":        settings.sql_server_timezone,
 	}
 
 	if settings.ActiveDirectoryConfig != nil {
