@@ -13,5 +13,8 @@
 	# limitations under the License.
 -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
-	return d.Get("build_config.0.source.0.storage_source.0.object")
+	if _, ok := d.GetOk("build_config.0.source.0.storage_source.0.object"); ok {
+		return d.Get("build_config.0.source.0.storage_source.0.object")
+	}
+	return v
 }
