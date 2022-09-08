@@ -153,66 +153,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           org_id: :ORG_ID
           billing_account: :BILLING_ACCT
-  FlexibleAppVersion: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["apps/{{project}}/services/{{service}}/versions/{{version_id}}"]
-    id_format: "apps/{{project}}/services/{{service}}/versions/{{version_id}}"
-    mutex: "apps/{{project}}"
-    error_retry_predicates: ["isAppEngineRetryableError"]
-    parameters:
-      service: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-        required: false
-    virtual_fields:
-      - !ruby/object:Api::Type::Boolean
-        name: 'noop_on_destroy'
-        default_value: false
-        description: |
-          If set to `true`, the application version will not be deleted.
-      - !ruby/object:Api::Type::Boolean
-        name: 'delete_service_on_destroy'
-        default_value: false
-        description: |
-          If set to `true`, the service will be deleted if it is the last version.
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_delete: templates/terraform/custom_delete/appversion_delete.go.erb
-      test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
-      encoder: templates/terraform/encoders/flex_app_version.go.erb
-    properties:
-      id: !ruby/object:Overrides::Terraform::PropertyOverride
-        name: 'version_id'
-      deployment: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_flatten: templates/terraform/custom_flatten/app_version.go.erb
-      deployment.container: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      entrypoint: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
-      envVariables: !ruby/object:Overrides::Terraform::PropertyOverride
-        description:
-          Environment variables available to the application.  As these are not returned
-          in the API request, Terraform will not detect any changes made outside of the Terraform config.
-        ignore_read: true
-      network.subnetworkName: !ruby/object:Overrides::Terraform::PropertyOverride
-        name: 'subnetwork'
-      betaSettings: !ruby/object:Overrides::Terraform::PropertyOverride
-        # https://issuetracker.google.com/issues/150157861
-        ignore_read: true
-        # default_from_api: true
-      # maxConcurrentRequests defaults to a runtime-specific value
-      automaticScaling.maxConcurrentRequests: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      # runtimeApiVersion defaults to a runtime-specific value
-      runtimeApiVersion: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      serviceAccount: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      handlers: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      inboundServices: !ruby/object:Overrides::Terraform::PropertyOverride
-        is_set: true
-    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_flexible_app_version_sa"
-        primary_resource_id: "myapp_v1"
+        primary_resource_id: "myapp_sa_v1"
         ignore_read_extra:
           - "noop_on_destroy"
           - "deployment.0.zip"
