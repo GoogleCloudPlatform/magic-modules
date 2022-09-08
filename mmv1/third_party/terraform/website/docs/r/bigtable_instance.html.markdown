@@ -117,7 +117,7 @@ Bigtable instances are noted on the [Cloud Bigtable locations page](https://clou
 Required, with a minimum of `1` for a `PRODUCTION` instance. Must be left unset
 for a `DEVELOPMENT` instance.
 
-* `autoscaling_config` - (Optional) Autoscaling config for the cluster, contains the following arguments:
+* `autoscaling_config` - (Optional) [Autoscaling](https://cloud.google.com/bigtable/docs/autoscaling#parameters) config for the cluster, contains the following arguments:
 
   * `min_nodes` - (Required) The minimum number of nodes for autoscaling.
   * `max_nodes` - (Required) The maximum number of nodes for autoscaling.
