@@ -347,8 +347,6 @@ exported:
 
 ## Import
 
-## Import
-
 BigQuery tables imported using any of these accepted formats:
 
 ```
