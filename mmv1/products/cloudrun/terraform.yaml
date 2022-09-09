@@ -404,22 +404,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       spec.template.spec.containers.startupProbe.httpGet.path: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      spec.template.spec.containers.startupProbe.grpc.port: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      spec.template.spec.containers.livenessProbe: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      spec.template.spec.containers.livenessProbe.initialDelaySeconds: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      spec.template.spec.containers.livenessProbe.timeoutSeconds: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      spec.template.spec.containers.livenessProbe.periodSeconds: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      spec.template.spec.containers.livenessProbe.failureThreshold: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      spec.template.spec.containers.livenessProbe.httpGet.path: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      spec.template.spec.containers.livenessProbe.grpc.port: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
       # Terraform autofills the only required field in metadata
       metadata: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
