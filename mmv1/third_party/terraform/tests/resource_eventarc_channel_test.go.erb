@@ -77,7 +77,7 @@ data "google_kms_crypto_key" "key1" {
 }
 
 resource "google_project_service" "eventarcpublishing_service" {
-    project = google_project.test_project.project_id
+    project = data.google_project.test_project.project_id
     service = "eventarcpublishing.googleapis.com"
     disable_dependent_services = true
 }
