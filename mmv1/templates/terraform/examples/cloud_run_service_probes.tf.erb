@@ -24,10 +24,6 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
             port = 8080
           }
         }
-        liveness_probe {
-          failure_threshold = 3
-          httpGet {}
-        }
       }
     }
   }
