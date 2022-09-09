@@ -449,16 +449,17 @@ func TestAccKmsCryptoKeyVersion_basic(t *testing.T) {
 	projectBillingAccount := getTestBillingAccountFromEnv(t)
 	keyRingName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	cryptoKeyVersionName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleKmsCryptoKeyVersion_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
+				Config: testGoogleKmsCryptoKeyVersion_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, cryptoKeyVersionName),
 			},
 			{
-				ResourceName:      "google_kms_crypto_key.crypto_key.cryptoKeyVersion",
+				ResourceName:      "google_kms_crypto_key.crypto_key.crypto_key_version",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -484,16 +485,17 @@ func TestAccKmsCryptoKeyVersion_skipInitialVersion(t *testing.T) {
 	projectBillingAccount := getTestBillingAccountFromEnv(t)
 	keyRingName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	cryptoKeyVersionName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleKmsCryptoKeyVersion_skipInitialVersion(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
+				Config: testGoogleKmsCryptoKeyVersion_skipInitialVersion(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, cryptoKeyVersionName),
 			},
 			{
-				ResourceName:      "google_kms_crypto_key.crypto_key.cryptoKeyVersion",
+				ResourceName:      "google_kms_crypto_key.crypto_key.crypto_key_version",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -714,7 +716,7 @@ resource "google_kms_crypto_key" "crypto_key" {
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }
 
-func testGoogleKmsCryptoKeyVersion_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
+func testGoogleKmsCryptoKeyVersion_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, cryptoKeyVersionName string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
 	name            = "%s"
@@ -743,16 +745,13 @@ resource "google_kms_crypto_key" "crypto_key" {
 }
 
 resource "google_kms_crypto_key_version" "crypto_key_version" {
-	name     = "%s"
-	key_ring = google_kms_key_ring.key_ring.id
-	labels = {
-		key = "value"
-	}
+	name       = "%s"
+	crypto_key = google_kms_crypto_key.crypto_key.id
 }
-`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, cryptoKeyName)
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, cryptoKeyVersionName)
 }
 
-func testGoogleKmsCryptoKeyVersion_skipInitialVersion(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
+func testGoogleKmsCryptoKeyVersion_skipInitialVersion(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, cryptoKeyVersionName string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
 	name            = "%s"
@@ -782,11 +781,8 @@ resource "google_kms_crypto_key" "crypto_key" {
 }
 
 resource "google_kms_crypto_key_version" "crypto_key_version" {
-	name     = "%s"
-	key_ring = google_kms_key_ring.key_ring.id
-	labels = {
-		key = "value"
-	}
+	name       = "%s"
+	crypto_key = google_kms_crypto_key.crypto_key.id
 }
-`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, cryptoKeyName)
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, cryptoKeyVersionName)
 }

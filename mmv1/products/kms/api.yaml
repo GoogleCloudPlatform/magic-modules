@@ -165,7 +165,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'CryptoKeyVersion'
     base_url: '{{crypto_key}}/cryptoKeyVersions'
-    create_url: '{{crypto_key}}/cryptoKeyVersions?parent={{crypto_key_name}}'
+    create_url: '{{crypto_key}}/cryptoKeyVersions'
     self_link: '{{crypto_key}}/cryptoKeyVersions/{{name}}'
     update_verb: :PATCH
     update_mask: true
@@ -179,13 +179,12 @@ objects:
         url_param_only: true
         description: |
           The name of the cryptoKey associated with the CryptoKeyVersions.
-          Authorization requires the following IAM permission on the specified resource parent:
-          cloud.cryptoKeyVersions.create
+          Format: `'projects/{{project}}/locations/{{location}}/keyRings/{{keyring}}/cryptoKeys/{{cryptoKey}}'`
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
-          The resource name for this CryptoKeyVersion in the format projects/*/locations/*/keyRings/*/cryptoKeys/*/cryptoKeyVersions/*.
+          The resource name for this CryptoKeyVersion.
         input: true
         url_param_only: true
         required: true
