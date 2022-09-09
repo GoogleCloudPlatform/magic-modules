@@ -283,6 +283,10 @@ objects:
         name: 'threadsafe'
         description: |
           Whether multiple requests can be dispatched to this version at once.
+      - !ruby/object:Api::Type::Boolean
+        name: 'appEngineApis'
+        description: |
+          Allows App Engine second generation runtimes to access the legacy bundled services.
       - !ruby/object:Api::Type::String
         name: 'runtimeApiVersion'
         description: |
@@ -898,6 +902,11 @@ objects:
         name: 'runtimeMainExecutablePath'
         description: |
           The path or name of the app's main executable.
+      - !ruby/object:Api::Type::String
+          name: 'serviceAccount'
+          description: |
+            The identity that the deployed version will run as. Admin API will use the App Engine Appspot service account as
+            default if this field is neither provided in app.yaml file nor through CLI flag.
       - !ruby/object:Api::Type::NestedObject
         name: 'apiConfig'
         description: |

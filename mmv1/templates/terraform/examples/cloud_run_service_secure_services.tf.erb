@@ -1,4 +1,4 @@
-# [START cloud_run_secure_services_backend]
+# [START cloudrun_secure_services_backend]
 resource "google_cloud_run_service" "renderer" {
   provider = google-beta
   name     = "<%= ctx[:vars]['renderer'] %>"
@@ -18,9 +18,9 @@ resource "google_cloud_run_service" "renderer" {
     latest_revision = true
   }
 }
-# [END cloud_run_secure_service_backend]
+# [END cloudrun_secure_services_backend]
 
-# [START cloud_run_secure_services_frontend]
+# [START cloudrun_secure_services_frontend]
 resource "google_cloud_run_service" "editor" {
   provider = google-beta
   name     = "<%= ctx[:vars]['editor'] %>"
@@ -44,25 +44,25 @@ resource "google_cloud_run_service" "editor" {
     latest_revision = true
   }
 }
-# [END cloud_run_secure_services_frontend]
+# [END cloudrun_secure_services_frontend]
 
-# [START cloud_run_secure_services_backend_identity]
+# [START cloudrun_secure_services_backend_identity]
 resource "google_service_account" "renderer" {
   provider     = google-beta
   account_id   = "renderer-identity"
   display_name = "Service identity of the Renderer (Backend) service."
 }
-# [END cloud_run_secure_services_backend_identity]
+# [END cloudrun_secure_services_backend_identity]
 
-# [START cloud_run_secure_services_frontend_identity]
+# [START cloudrun_secure_services_frontend_identity]
 resource "google_service_account" "editor" {
   provider     = google-beta
   account_id   = "editor-identity"
   display_name = "Service identity of the Editor (Frontend) service."
 }
-# [END cloud_run_secure_services_frontend_identity]
+# [END cloudrun_secure_services_frontend_identity]
 
-# [START cloud_run_secure_services_backend_invoker_access]
+# [START cloudrun_secure_services_backend_invoker_access]
 resource "google_cloud_run_service_iam_member" "editor_invokes_renderer" {
   provider = google-beta
   location = google_cloud_run_service.renderer.location
@@ -70,9 +70,9 @@ resource "google_cloud_run_service_iam_member" "editor_invokes_renderer" {
   role     = "roles/run.invoker"
   member   = "serviceAccount:${google_service_account.editor.email}"
 }
-# [END cloud_run_secure_services_backend_invoker_access]
+# [END cloudrun_secure_services_backend_invoker_access]
 
-# [START cloud_run_secure_services_frontend_access]
+# [START cloudrun_secure_services_frontend_access]
 data "google_iam_policy" "noauth" {
   provider = google-beta
   binding {
@@ -91,7 +91,7 @@ resource "google_cloud_run_service_iam_policy" "noauth" {
 
   policy_data = data.google_iam_policy.noauth.policy_data
 }
-# [END cloud_run_secure_services_frontend_access]
+# [END cloudrun_secure_services_frontend_access]
 
 output "backend_url" {
   value = google_cloud_run_service.renderer.status[0].url

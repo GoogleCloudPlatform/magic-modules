@@ -115,12 +115,16 @@ The following arguments are supported:
 * `labels` - (Optional) A mapping of labels to assign to the resource.
 
 * `schema` - (Optional) A JSON schema for the table.
+
     ~>**NOTE:** Because this field expects a JSON string, any changes to the
     string will create a diff, even if the JSON itself hasn't changed.
     If the API returns a different value for the same schema, e.g. it
     switched the order of values or replaced `STRUCT` field type with `RECORD`
     field type, we currently cannot suppress the recurring diff this causes.
     As a workaround, we recommend using the schema as returned by the API.
+
+    ~>**NOTE:**  When setting `schema` for `external_data_configuration`, please use
+    `external_data_configuration.schema` [documented below](#nested_external_data_configuration).
 
 * `time_partitioning` - (Optional) If specified, configures time-based
     partitioning for this table. Structure is [documented below](#nested_time_partitioning).
@@ -343,8 +347,10 @@ exported:
 
 ## Import
 
-BigQuery tables can be imported using the `project`, `dataset_id`, and `table_id`, e.g.
+BigQuery tables imported using any of these accepted formats:
 
 ```
-$ terraform import google_bigquery_table.default gcp-project/foo/bar
+$ terraform import google_bigquery_table.default projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}
+$ terraform import google_bigquery_table.default {{project}}/{{dataset_id}}/{{table_id}}
+$ terraform import google_bigquery_table.default {{dataset_id}}/{{table_id}}
 ```

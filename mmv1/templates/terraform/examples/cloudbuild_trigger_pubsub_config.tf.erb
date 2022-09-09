@@ -4,6 +4,7 @@ resource "google_pubsub_topic" "mytopic" {
 }
 
 resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
+  location    = "us-central1"
   name        = "pubsub-trigger"
   description = "acceptance test example pubsub build trigger"
 

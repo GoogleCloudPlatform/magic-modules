@@ -47,9 +47,9 @@ objects:
         base_url: '{{op_id}}'
         wait_ms: 1000
         timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 40
-          update_minutes: 40
-          delete_minutes: 40
+          insert_minutes: 60
+          update_minutes: 60
+          delete_minutes: 60
       result: !ruby/object:Api::OpAsync::Result
         path: 'response'
       status: !ruby/object:Api::OpAsync::Status
@@ -219,6 +219,30 @@ objects:
                 required: true
                 description: |
                   A Cloud Storage URI that specifies the path to a krb5.conf file. It is of the form gs://{bucket_name}/path/to/krb5.conf, although the file does not need to be named krb5.conf explicitly.
+          - !ruby/object:Api::Type::Map
+            name: 'auxiliaryVersions'
+            min_version: beta
+            description: |
+                  A mapping of Hive metastore version to the auxiliary version configuration.
+                  When specified, a secondary Hive metastore service is created along with the primary service.
+                  All auxiliary versions must be less than the service's primary version.
+                  The key is the auxiliary service name and it must match the regular expression a-z?.
+                  This means that the first character must be a lowercase letter, and all the following characters must be hyphens, lowercase letters, or digits, except the last character, which cannot be a hyphen.
+            key_name: 'key'
+            key_description: |
+              The auxiliary service name
+            value_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'version'
+                  required: true
+                  description: |
+                    The Hive metastore version of the auxiliary service. It must be less than the primary Hive metastore service's version.
+                - !ruby/object:Api::Type::KeyValuePairs
+                  name: 'configOverrides'
+                  description: |
+                    A mapping of Hive metastore configuration key-value pairs to apply to the auxiliary Hive metastore (configured in hive-site.xml) in addition to the primary version's overrides.
+                    If keys are present in both the auxiliary version's overrides and the primary version's overrides, the value from the auxiliary version's overrides takes precedence.
       - !ruby/object:Api::Type::Enum
         name: 'databaseType'
         input: true
@@ -241,7 +265,24 @@ objects:
         name: 'uid'
         output: true
         description: |
-          The globally unique resource identifier of the metastore service.          
+          The globally unique resource identifier of the metastore service.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'metadataIntegration'
+        min_version: beta
+        description: |
+          The setting that defines how metastore metadata should be integrated with external services and systems.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'dataCatalogConfig'
+            required: true
+            description: |
+              The integration config for the Data Catalog service.
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'enabled'
+                required: true
+                description: |
+                  Defines whether the metastore metadata should be synced to Data Catalog. The default value is to disable syncing metastore metadata to Data Catalog.      
   - !ruby/object:Api::Resource
     name: 'Federation'
     min_version: beta
