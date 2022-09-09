@@ -14,6 +14,5 @@ resource "google_kms_crypto_key" "cryptokey" {
 }
 
 resource "google_kms_crypto_key_version" "<%= ctx[:primary_resource_id] %>" {
-  name       = "crypto-key-version-example"
-  crypto_key = "google_kms_crypto_key.cryptokey.id"
+  crypto_key = google_kms_crypto_key.cryptokey.id
 }

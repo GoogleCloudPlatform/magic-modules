@@ -113,6 +113,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+      state: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       createTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       generateTime: !ruby/object:Overrides::Terraform::PropertyOverride

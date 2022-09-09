@@ -166,7 +166,7 @@ objects:
     name: 'CryptoKeyVersion'
     base_url: '{{crypto_key}}/cryptoKeyVersions'
     create_url: '{{crypto_key}}/cryptoKeyVersions'
-    self_link: '{{crypto_key}}/cryptoKeyVersions/{{name}}'
+    self_link: '{{crypto_key}}/cryptoKeyVersions'
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -185,9 +185,7 @@ objects:
         name: 'name'
         description: |
           The resource name for this CryptoKeyVersion.
-        input: true
-        url_param_only: true
-        required: true
+        output: true
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: |

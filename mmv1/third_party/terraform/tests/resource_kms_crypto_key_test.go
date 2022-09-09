@@ -449,14 +449,13 @@ func TestAccKmsCryptoKeyVersion_basic(t *testing.T) {
 	projectBillingAccount := getTestBillingAccountFromEnv(t)
 	keyRingName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	cryptoKeyVersionName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleKmsCryptoKeyVersion_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, cryptoKeyVersionName),
+				Config: testGoogleKmsCryptoKeyVersion_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
 			},
 			{
 				ResourceName:      "google_kms_crypto_key.crypto_key.crypto_key_version",
@@ -481,32 +480,21 @@ func TestAccKmsCryptoKeyVersion_skipInitialVersion(t *testing.T) {
 
 	projectId := fmt.Sprintf("tf-test-%d", randInt(t))
 	projectOrg := getTestOrgFromEnv(t)
-	location := getTestRegionFromEnv()
 	projectBillingAccount := getTestBillingAccountFromEnv(t)
 	keyRingName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	cryptoKeyVersionName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleKmsCryptoKeyVersion_skipInitialVersion(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, cryptoKeyVersionName),
+				Config: testGoogleKmsCryptoKeyVersion_skipInitialVersion(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
 			},
 			{
 				ResourceName:      "google_kms_crypto_key.crypto_key.crypto_key_version",
 				ImportState:       true,
 				ImportStateVerify: true,
-			},
-			// Use a separate TestStep rather than a CheckDestroy because we need the project to still exist.
-			{
-				Config: testGoogleKmsCryptoKey_removed(projectId, projectOrg, projectBillingAccount, keyRingName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleKmsCryptoKeyWasRemovedFromState("google_kms_crypto_key.crypto_key"),
-					testAccCheckGoogleKmsCryptoKeyVersionsDestroyed(t, projectId, location, keyRingName, cryptoKeyName),
-					testAccCheckGoogleKmsCryptoKeyRotationDisabled(t, projectId, location, keyRingName, cryptoKeyName),
-				),
 			},
 		},
 	})
@@ -716,7 +704,7 @@ resource "google_kms_crypto_key" "crypto_key" {
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }
 
-func testGoogleKmsCryptoKeyVersion_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, cryptoKeyVersionName string) string {
+func testGoogleKmsCryptoKeyVersion_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
 	name            = "%s"
@@ -745,13 +733,12 @@ resource "google_kms_crypto_key" "crypto_key" {
 }
 
 resource "google_kms_crypto_key_version" "crypto_key_version" {
-	name       = "%s"
 	crypto_key = google_kms_crypto_key.crypto_key.id
 }
-`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, cryptoKeyVersionName)
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }
 
-func testGoogleKmsCryptoKeyVersion_skipInitialVersion(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, cryptoKeyVersionName string) string {
+func testGoogleKmsCryptoKeyVersion_skipInitialVersion(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
 	name            = "%s"
@@ -781,8 +768,7 @@ resource "google_kms_crypto_key" "crypto_key" {
 }
 
 resource "google_kms_crypto_key_version" "crypto_key_version" {
-	name       = "%s"
 	crypto_key = google_kms_crypto_key.crypto_key.id
 }
-`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, cryptoKeyVersionName)
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }
