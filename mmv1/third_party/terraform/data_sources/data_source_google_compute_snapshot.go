@@ -71,11 +71,10 @@ func dataSourceGoogleComputeSnapshotRead(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("your filter has returned %d instance snapshot(s). Please refine your filter or set most_recent to return exactly one instance snapshot", len(snapshots.Items))
 
 	}
-	
+
 	return fmt.Errorf("one of name or filter must be set")
 
 }
-
 
 func retrieveSnapshot(d *schema.ResourceData, meta interface{}, project, name string) error {
 	d.SetId("projects/" + project + "/global/snapshots/" + name)
