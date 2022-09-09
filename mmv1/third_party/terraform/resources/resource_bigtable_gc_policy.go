@@ -261,7 +261,9 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 
 		d.SetId(fi.GCPolicy)
 		// Only set `gc_rules`` when the legacy fields are not set. We are not planning to support legacy fields.
-		if d.Get("mode") == "" && d.Get("max_age") == "" && d.Get("max_version") == "" {
+		maxAge := d.Get("max_age")
+		maxVersion := d.Get("max_version")
+		if d.Get("mode") == "" && len(maxAge.([]interface{})) == 0 && len(maxVersion.([]interface{})) == 0 {
 			gcRuleString, err := gcPolicyToGCRuleString(fi.FullGCPolicy, true)
 			if err != nil {
 				return err
