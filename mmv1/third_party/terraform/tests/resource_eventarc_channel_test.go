@@ -12,31 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccEventarcChannel_MinimalChannel(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"project_name":  getTestProjectFromEnv(),
-		"region":        getTestRegionFromEnv(),
-		"random_suffix": randString(t, 10),
-	}
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckEventarcChannelDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccEventarcChannel_MinimalChannel(context),
-			},
-			{
-				ResourceName:      "google_eventarc_channel.primary",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
 func TestAccEventarcChannel_BasicHandWritten(t *testing.T) {
 	t.Parallel()
 
@@ -80,18 +55,6 @@ func TestAccEventarcChannel_BasicHandWritten(t *testing.T) {
 	})
 }
 
-func testAccEventarcChannel_MinimalChannel(context map[string]interface{}) string {
-	return Nprintf(`
-resource "google_eventarc_channel" "primary" {
-  location = "%{region}"
-  name     = "tf-test-channel%{random_suffix}"
-  project  = "%{project_name}"
-}
-
-
-`, context)
-}
-
 func testAccEventarcChannel_BasicHandWritten(context map[string]interface{}) string {
 	return Nprintf(`
 data "google_project" "test_project" {
@@ -102,65 +65,65 @@ data "google_kms_key_ring" "test_key_ring" {
 	name     = "%{key_ring}"
 	location = "us-central1"
 }
-  
+
 data "google_kms_crypto_key" "key1" {
 	name     = "%{key1}"
 	key_ring = data.google_kms_key_ring.test_key_ring.id
 }
 
 resource "google_kms_crypto_key_iam_binding" "key1_binding" {
-    crypto_key_id = data.google_kms_crypto_key.key1.id
-    role      = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  
-    members = [
-    "serviceAccount:service-${data.google_project.test_project.number}@gcp-sa-eventarc.iam.gserviceaccount.com",
-    ]
+	crypto_key_id = data.google_kms_crypto_key.key1.id
+	role      = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+
+	members = [
+	"serviceAccount:service-${data.google_project.test_project.number}@gcp-sa-eventarc.iam.gserviceaccount.com",
+	]
 }
 
 resource "google_eventarc_channel" "primary" {
-  location = "%{region}"
-  name     = "tf-test-name%{random_suffix}"
-  project  = "${data.google_project.test_project.project_id}"
-  crypto_key_name =  "${data.google_kms_crypto_key.key1.id}"
-  third_party_provider = "projects/${data.google_project.test_project.project_id}/locations/%{region}/providers/datadog"
-  depends_on = [google_kms_crypto_key_iam_binding.key1_binding]
+location = "%{region}"
+name     = "tf-test-name%{random_suffix}"
+project  = "${data.google_project.test_project.project_id}"
+crypto_key_name =  "${data.google_kms_crypto_key.key1.id}"
+third_party_provider = "projects/${data.google_project.test_project.project_id}/locations/%{region}/providers/datadog"
+depends_on = [google_kms_crypto_key_iam_binding.key1_binding]
 }
 `, context)
 }
 
 func testAccEventarcChannel_BasicHandWrittenUpdate0(context map[string]interface{}) string {
 	return Nprintf(`
-	data "google_project" "test_project" {
-		project_id  = "%{project_name}"
-	}
+data "google_project" "test_project" {
+	project_id  = "%{project_name}"
+}
 
-	data "google_kms_key_ring" "test_key_ring" {
-		name     = "%{key_ring}"
-		location = "us-central1"
-	}
-	  
-	data "google_kms_crypto_key" "key2" {
-		name     = "%{key2}"
-		key_ring = data.google_kms_key_ring.test_key_ring.id
-	}
+data "google_kms_key_ring" "test_key_ring" {
+	name     = "%{key_ring}"
+	location = "us-central1"
+}
+	
+data "google_kms_crypto_key" "key2" {
+	name     = "%{key2}"
+	key_ring = data.google_kms_key_ring.test_key_ring.id
+}
 
-	resource "google_kms_crypto_key_iam_binding" "key2_binding" {
-		crypto_key_id = data.google_kms_crypto_key.key2.id
-		role      = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-	  
-		members = [
-		"serviceAccount:service-${data.google_project.test_project.number}@gcp-sa-eventarc.iam.gserviceaccount.com",
-		]
-	}
+resource "google_kms_crypto_key_iam_binding" "key2_binding" {
+	crypto_key_id = data.google_kms_crypto_key.key2.id
+	role      = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+	
+	members = [
+	"serviceAccount:service-${data.google_project.test_project.number}@gcp-sa-eventarc.iam.gserviceaccount.com",
+	]
+}
 
-	resource "google_eventarc_channel" "primary" {
-		location = "%{region}"
-		name     = "tf-test-name%{random_suffix}"
-		project  = "${data.google_project.test_project.project_id}"
-		crypto_key_name= "${data.google_kms_crypto_key.key2.id}"
-		third_party_provider = "projects/${data.google_project.test_project.project_id}/locations/%{region}/providers/datadog"
-		depends_on = [google_kms_crypto_key_iam_binding.key2_binding]
-	}
+resource "google_eventarc_channel" "primary" {
+	location = "%{region}"
+	name     = "tf-test-name%{random_suffix}"
+	project  = "${data.google_project.test_project.project_id}"
+	crypto_key_name= "${data.google_kms_crypto_key.key2.id}"
+	third_party_provider = "projects/${data.google_project.test_project.project_id}/locations/%{region}/providers/datadog"
+	depends_on = [google_kms_crypto_key_iam_binding.key2_binding]
+}
 `, context)
 }
 
