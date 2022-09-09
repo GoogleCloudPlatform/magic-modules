@@ -1,0 +1,5 @@
+# meta.yaml
+#
+#
+test_hide:
+  - basic.tf.tmpl
