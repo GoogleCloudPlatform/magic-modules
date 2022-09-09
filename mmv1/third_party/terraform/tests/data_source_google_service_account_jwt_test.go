@@ -101,7 +101,7 @@ func TestAccDataSourceGoogleServiceAccountJwt(t *testing.T) {
 
 	staticTime := time.Now()
 
-	// Override the current time with one that will never change, to compare against later.
+	// Override the current time with one that is set to a static value, to compare against later.
 	dataSourceGoogleServiceAccountJwtNow = func() time.Time {
 		return staticTime
 	}
@@ -111,6 +111,16 @@ func TestAccDataSourceGoogleServiceAccountJwt(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
+				Config: testAccCheckGoogleServiceAccountJwt(targetServiceAccountEmail),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServiceAccountJwtValue(resourceName, targetAudience),
+				),
+			},
+			{
+				PreConfig: func() {
+					// Bump the hardcoded time to ensure terraform responds well to the JWT expiration changing.
+					staticTime = time.Now().Add(10 * time.Second)
+				},
 				Config: testAccCheckGoogleServiceAccountJwt(targetServiceAccountEmail),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServiceAccountJwtValue(resourceName, targetAudience),
