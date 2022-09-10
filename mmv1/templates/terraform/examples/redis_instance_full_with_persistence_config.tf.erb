@@ -3,24 +3,9 @@ resource "google_redis_instance" "<%= ctx[:primary_resource_id] %>" {
   tier           = "STANDARD_HA"
   memory_size_gb = 1
 
-  authorized_network = data.google_compute_network.redis-network.id
-
   persistence_config {
-    persistence_mode = "PERSISTENCE_MODE_UNSPECIFIED"
-    rdb_snapshot_period = "SNAPSHOT_PERIOD_UNSPECIFIED"
-    rdb_snapshot_start_time = "2028-10-02T15:01:23Z"
+    persistence_mode = "RDB"
+    rdb_snapshot_period = "SIX_HOURS"
+    rdb_snapshot_start_time = "2023-10-02T15:01:23Z"
   }
 }
-
-// This example assumes this network already exists.
-// The API creates a tenant network per network authorized for a
-// Redis instance and that network is not deleted when the user-created
-// network (authorized_network) is deleted, so this prevents issues
-// with tenant network quota.
-// If this network hasn't been created and you are using this example in your
-// config, add an additional network resource or change
-// this from "data"to "resource"
-data "google_compute_network" "redis-network" {
-  name = "<%= ctx[:vars]['network_name'] %>"
-}
-
