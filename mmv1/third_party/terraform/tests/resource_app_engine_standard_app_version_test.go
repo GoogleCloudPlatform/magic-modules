@@ -183,7 +183,8 @@ resource "google_app_engine_standard_app_version" "foo" {
   runtime    = "python38"
 
 	vpc_access_connector {
-		name = "${google_vpc_access_connector.bar.id}"
+		name           = "${google_vpc_access_connector.bar.id}"
+    egress_setting = "ALL_TRAFFIC"
   }
 
   entrypoint {
