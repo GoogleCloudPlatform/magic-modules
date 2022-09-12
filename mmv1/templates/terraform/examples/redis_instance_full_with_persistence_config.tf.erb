@@ -2,10 +2,11 @@ resource "google_redis_instance" "<%= ctx[:primary_resource_id] %>" {
   name           = "<%= ctx[:vars]['instance_name'] %>"
   tier           = "STANDARD_HA"
   memory_size_gb = 1
+  location_id             = "us-central1-a"
+  alternative_location_id = "us-central1-f"
 
   persistence_config {
     persistence_mode = "RDB"
-    rdb_snapshot_period = "SIX_HOURS"
-    rdb_snapshot_start_time = "2023-10-02T15:01:23Z"
+    rdb_snapshot_period = "TWELVE_HOURS"
   }
 }
