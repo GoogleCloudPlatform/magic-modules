@@ -400,6 +400,15 @@ func TestAccCloudRunService_probes(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "status.0.conditions"},
 			},
+      {
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithHTTPStartupProbe(name, project, `""`),
+			},
+			{
+				ResourceName:            "google_cloud_run_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "status.0.conditions"},
+			},
 		},
 	})
 }

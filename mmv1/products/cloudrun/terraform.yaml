@@ -332,6 +332,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_docs: true
         vars:
           cloud_run_srv: "cloud-run-srv"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_probes"
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
+        vars:
+          cloud_run_service_name: "cloudrun-srv"
+        test_env_vars:
+          project: :PROJECT_NAME
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'autogenerate_revision_name'
@@ -391,14 +399,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       spec.template.spec.containers.resources.limits: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       spec.template.spec.containers.startupProbe: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      spec.template.spec.containers.startupProbe.initialDelaySeconds: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      spec.template.spec.containers.startupProbe.timeoutSeconds: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      spec.template.spec.containers.startupProbe.periodSeconds: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      spec.template.spec.containers.startupProbe.failureThreshold: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       spec.template.spec.containers.startupProbe.tcpSocket.port: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
