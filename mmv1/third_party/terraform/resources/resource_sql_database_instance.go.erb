@@ -1475,6 +1475,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func maintenanceVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	// Ignore the database version part and only compare the last part of the maintenance version which represents the release date of the version.
 	if old[len(old)-14:] > new[len(old)-14:] {
 		log.Printf("[DEBUG] Maintenance version in configuration [%s] is older than current maintenance version [%s] on instance. Suppressing diff", new, old)
 		return true
