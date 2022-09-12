@@ -312,6 +312,7 @@ is set to true.`,
 							Type:     schema.TypeString,
 							Optional: true,
 							Default: "PD_SSD",
+							DiffSuppressFunc: caseDiffDashSuppress,
 							Description: `The type of data disk: PD_SSD or PD_HDD.`,
 						},
 						"ip_configuration": {
@@ -1835,14 +1836,7 @@ func sqlDatabaseInstanceRestoreFromBackup(d *schema.ResourceData, config *Config
 	return nil
 }
 
-
-// The core logic is to split on a reguar expression provided as an arugment to the function for both old and new value
-// Then convert the arrays back to strings with join back on a space to then set to upper case and compare to see if equal
-func caseDiffWithMultiDelimitSuppress(delimit string) schema.SchemaDiffSuppressFunc {
-	return func(k, old, new string, d *schema.ResourceData) bool {
-		expr := regexp.MustCompile(delimit)
-		postSplitOld := strings.Join(expr.Split(old, -1), " ")
-		postSplitNew := strings.Join(expr.Split(new, -1), " ")
-		return strings.ToUpper(postSplitOld) == strings.ToUpper(postSplitNew)
-	}
+func caseDiffDashSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	postReplaceNew := strings.Replace(new, "-", "_", -1)
+	return strings.ToUpper(postReplaceNew) == strings.ToUpper(old)
 }
