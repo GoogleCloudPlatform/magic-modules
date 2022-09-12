@@ -260,6 +260,12 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 		}
 
 		d.SetId(fi.GCPolicy)
+
+		// No GC Policy.
+		if fi.FullGCPolicy.String() == "" {
+			return nil
+		}
+
 		// Only set `gc_rules`` when the legacy fields are not set. We are not planning to support legacy fields.
 		maxAge := d.Get("max_age")
 		maxVersion := d.Get("max_version")
