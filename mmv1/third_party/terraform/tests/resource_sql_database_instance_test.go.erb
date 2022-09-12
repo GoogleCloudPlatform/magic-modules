@@ -48,6 +48,11 @@ func TestMaintenanceVersionDiffSuppress(t *testing.T) {
 			New:            "MYSQL_5_7_37.R20210508.01_03",
 			ShouldSuppress: true,
 		},
+		"older configuration maintenance version than current version should suppress diff with lexicographically smaller database version": {
+			Old:            "MYSQL_5_8_10.R20220508.01_09",
+			New:            "MYSQL_5_8_7.R20210508.01_03",
+			ShouldSuppress: true,
+		},
 		"newer configuration maintenance version than current version should not suppress diff": {
 			Old:            "MYSQL_5_7_37.R20210508.01_03",
 			New:            "MYSQL_8_0_26.R20220508.01_09",
