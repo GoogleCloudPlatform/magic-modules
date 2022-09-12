@@ -50,11 +50,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'compareResourceNames'
         default_from_api: true
       minThroughput: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(200, 1000)'
       minInstances: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       maxThroughput: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(200, 1000)'
       maxInstances: !ruby/object:Overrides::Terraform::PropertyOverride
