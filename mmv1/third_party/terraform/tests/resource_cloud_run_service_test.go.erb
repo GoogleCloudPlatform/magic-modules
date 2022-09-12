@@ -362,7 +362,6 @@ resource "google_cloud_run_service" "default" {
 
 <% unless version == 'ga' -%>
 
-// this test checks that Terraform does not fail with a 409 recreating the same service
 func TestAccCloudRunService_probes(t *testing.T) {
 	t.Parallel()
 
