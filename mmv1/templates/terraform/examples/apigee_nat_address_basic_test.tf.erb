@@ -53,11 +53,12 @@ resource "google_apigee_organization" "apigee_org" {
 }
 
 resource "google_apigee_instance" "apigee_instance" {
-  name     = "tf-test%{random_suffix}"
+  name     = "apigee-instance"
   location = "us-central1"
   org_id   = google_apigee_organization.apigee_org.id
 }
 
 resource "google_apigee_nat_address" "<%= ctx[:primary_resource_id] %>" {
+  name     = "tf-test%{random_suffix}"
   instance_id = google_apigee_instance.apigee_instance.id
 }
