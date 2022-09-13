@@ -34,42 +34,42 @@ func TestAccDataSourceGoogleCloudFunctions2Function_basic(t *testing.T) {
 
 func testAccDataSourceGoogleCloudFunctions2FunctionConfig(functionName, bucketName, zipFilePath string) string {
 	return fmt.Sprintf(`
-	resource "google_storage_bucket" "bucket" {
-		name     = "%s"
-		location = "US"
-	  }
-	   
-	  resource "google_storage_bucket_object" "object" {
-		name   = "function-source.zip"
-		bucket = google_storage_bucket.bucket.name
-		source = "%s"
-	  }
-	   
-	  resource "google_cloudfunctions2_function" "function_http_v2" {
-		name = "%s"
-		location = "us-central1"
-		description = "a new function"
-	   
-		build_config {
-		  runtime = "nodejs12"
-		  entry_point = "helloHttp"
-		  source {
-			storage_source {
-			  bucket = google_storage_bucket.bucket.name
-			  object = google_storage_bucket_object.object.name
-			}
-		  }
-		}
-	   
-		service_config {
-		  max_instance_count  = 1
-		  available_memory    = "256Mi"
-		  timeout_seconds     = 60
-		}
-	  }
-	  data "google_cloudfunctions2_function" "function_http_v2" {
-		name = google_cloudfunctions2_function.function_http_v2.name
-		location = "us-central1"
-	  }
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "US"
+}
+	
+resource "google_storage_bucket_object" "object" {
+  name   = "function-source.zip"
+  bucket = google_storage_bucket.bucket.name
+  source = "%s"
+}
+
+resource "google_cloudfunctions2_function" "function_http_v2" {
+  name = "%s"
+  location = "us-central1"
+  description = "a new function"
+
+  build_config {
+    runtime = "nodejs12"
+    entry_point = "helloHttp"
+    source {
+      storage_source {
+        bucket = google_storage_bucket.bucket.name
+        object = google_storage_bucket_object.object.name
+      }
+    }
+  }
+
+  service_config {
+    max_instance_count  = 1
+    available_memory    = "256Mi"
+    timeout_seconds     = 60
+  }
+}
+data "google_cloudfunctions2_function" "function_http_v2" {
+  name = google_cloudfunctions2_function.function_http_v2.name
+  location = "us-central1"
+}
 `, bucketName, zipFilePath, functionName)
 }
