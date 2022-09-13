@@ -23,7 +23,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_domain_mapping_basic"
-        primary_resource_id: "default"
         vars:
           cloud_run_service_name: "cloudrun-srv"
         test_env_vars:
@@ -59,7 +58,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
-        `google_cloudrun_service` creates a Managed Google Cloud Run Service. If you need to create
+        `google_cloud_run_service` creates a Managed Google Cloud Run Service. If you need to create
         a Cloud Run Service on Anthos(GKE/VMWare) then you will need to create it using the kubernetes alpha provider.
         Have a look at the Cloud Run Anthos example below.
     id_format: "locations/{{location}}/namespaces/{{project}}/services/{{name}}"
