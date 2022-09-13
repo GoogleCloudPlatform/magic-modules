@@ -237,6 +237,13 @@ objects:
             description: |
               The limit on the minimum number of function instances that may coexist at a
               given time.
+          - !ruby/object:Api::Type::Integer
+            name: 'concurrency'
+            description: |
+              The amount of concurrent requests a single function instance can handle.
+              Defaults to 1. A concurrency value greater than 1 requires a function to have 1
+              or more vCPUs.
+              More info: https://cloud.google.com/functions/docs/configuring/concurrency
           - !ruby/object:Api::Type::String 
             name: 'vpcConnector'
             description: 'The Serverless VPC Access connector that this cloud function can connect to.'
