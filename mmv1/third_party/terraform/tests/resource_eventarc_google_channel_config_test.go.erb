@@ -17,7 +17,33 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccEventarcGoogleChannelConfig_BasicHandWritten(t *testing.T) {
+func TestAccEventarcGoogleChannelConfig_basic(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_name":  getTestProjectFromEnv(),
+		"region":        getTestRegionFromEnv(),
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckEventarcGoogleChannelConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEventarcGoogleChannelConfig_basic(context),
+			},
+			{
+				ResourceName:      "google_eventarc_google_channel_config.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccEventarcGoogleChannelConfig_cryptoKeyUpdate(t *testing.T) {
 	t.Parallel()
 
 	region := getTestRegionFromEnv()
@@ -39,7 +65,7 @@ func TestAccEventarcGoogleChannelConfig_BasicHandWritten(t *testing.T) {
 		CheckDestroy: testAccCheckEventarcGoogleChannelConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEventarcGoogleChannelConfig_HandWritten(context),
+				Config: testAccEventarcGoogleChannelConfig_setCryptoKey(context),
 			},
 			{
 				ResourceName:      "google_eventarc_google_channel_config.primary",
@@ -47,7 +73,7 @@ func TestAccEventarcGoogleChannelConfig_BasicHandWritten(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccEventarcGoogleChannelConfig_BasicHandWrittenUpdate0(context),
+				Config: testAccEventarcGoogleChannelConfig_cryptoKeyUpdate(context),
 			},
 			{
 				ResourceName:      "google_eventarc_google_channel_config.primary",
@@ -58,7 +84,21 @@ func TestAccEventarcGoogleChannelConfig_BasicHandWritten(t *testing.T) {
 	})
 }
 
-func testAccEventarcGoogleChannelConfig_HandWritten(context map[string]interface{}) string {
+func testAccEventarcGoogleChannelConfig_basic(context map[string]interface{}) string {
+	return Nprintf(`
+data "google_project" "test_project" {
+	project_id  = "%{project_name}"
+}
+
+resource "google_eventarc_google_channel_config" "primary" {
+	location = "%{region}"
+	name     = "projects/%{project_name}/locations/%{region}/googleChannelConfig"
+	project  = data.google_project.test_project.project_id
+}
+	`, context)
+}
+
+func testAccEventarcGoogleChannelConfig_setCryptoKey(context map[string]interface{}) string {
 	return Nprintf(`
 data "google_project" "test_project" {
 	project_id  = "%{project_name}"
@@ -70,7 +110,7 @@ data "google_kms_key_ring" "test_key_ring" {
 }
 
 data "google_kms_crypto_key" "key1" {
-	name     = "%{key2}"
+	name     = "%{key1}"
 	key_ring = data.google_kms_key_ring.test_key_ring.id
 }
 
@@ -86,14 +126,14 @@ resource "google_kms_crypto_key_iam_binding" "key1_binding" {
 resource "google_eventarc_google_channel_config" "primary" {
 	location = "%{region}"
 	name     = "projects/%{project_name}/locations/%{region}/googleChannelConfig"
-	project  = "%{project_name}"
+	project  = data.google_project.test_project.project_id
 	crypto_key_name =  "${data.google_kms_crypto_key.key1.id}"
 	depends_on =[google_kms_crypto_key_iam_binding.key1_binding]
 }
 	`, context)
 }
 
-func testAccEventarcGoogleChannelConfig_BasicHandWrittenUpdate0(context map[string]interface{}) string {
+func testAccEventarcGoogleChannelConfig_cryptoKeyUpdate(context map[string]interface{}) string {
 	return Nprintf(`
 data "google_project" "test_project" {
 	project_id  = "%{project_name}"
@@ -121,7 +161,7 @@ resource "google_kms_crypto_key_iam_binding" "key2_binding" {
 resource "google_eventarc_google_channel_config" "primary" {
 	location = "%{region}"
 	name     = "projects/%{project_name}/locations/%{region}/googleChannelConfig"
-	project  = "%{project_name}"
+	project  = data.google_project.test_project.project_id
 	crypto_key_name =  "${data.google_kms_crypto_key.key2.id}"
 	depends_on =[google_kms_crypto_key_iam_binding.key2_binding]
 }
