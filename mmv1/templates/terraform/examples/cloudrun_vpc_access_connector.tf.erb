@@ -20,7 +20,7 @@ resource "google_vpc_access_connector" "<%= ctx[:primary_resource_id] %>" {
   provider      = google-beta
   region        = "us-west1"
   ip_cidr_range = "10.8.0.0/28"
-  max_throughput= 1000
+  max_throughput= 300
   network       = google_compute_network.default.name
   depends_on    = [google_project_service.vpcaccess_api]
 }
