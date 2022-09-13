@@ -187,7 +187,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' || object.iam_policy.iam_conditions_request_type.nil? -%>
+<% unless object.iam_policy.iam_conditions_request_type.nil? -%>
 func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T) {
 	t.Parallel()
 
@@ -481,7 +481,7 @@ resource "<%= resource_ns_iam -%>_binding" "foo" {
 `, context)
 }
 
-<% unless version == 'ga' || object.iam_policy.iam_conditions_request_type.nil? -%>
+<% unless object.iam_policy.iam_conditions_request_type.nil? -%>
 func testAcc<%= resource_name -%>IamBinding_withConditionGenerated(context map[string]interface{}) string {
 	return Nprintf(`
 <%= example.config_test_body(pwd) -%>
