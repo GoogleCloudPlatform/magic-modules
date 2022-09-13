@@ -83,6 +83,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       persistenceConfig.persistenceMode: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      persistenceConfig.rdb_snapshot_start_time: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       alternativeLocationId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       authorizedNetwork: !ruby/object:Overrides::Terraform::PropertyOverride
