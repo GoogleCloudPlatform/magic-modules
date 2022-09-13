@@ -477,13 +477,8 @@ objects:
             required: true
             description: |
               Full Serverless VPC Access Connector name e.g. /projects/my-project/locations/us-central1/connectors/c1.
-          - !ruby/object:Api::Type::Enum
+          - !ruby/object:Api::Type::String
             name: 'egressSetting'
-            required: false
-            values:
-              - :EGRESS_SETTING_UNSPECIFIED
-              - :ALL_TRAFFIC
-              - :PRIVATE_IP_RANGES
             description: |
               The egress setting for the connector, controlling what traffic is diverted through it.
       - !ruby/object:Api::Type::Array
