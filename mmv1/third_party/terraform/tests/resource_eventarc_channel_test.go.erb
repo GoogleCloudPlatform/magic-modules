@@ -25,7 +25,6 @@ func TestAccEventarcChannel_BasicHandWritten(t *testing.T) {
 	key2 := BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-key2")
 
 	context := map[string]interface{}{
-		"billing_acct":  getTestBillingAccountFromEnv(t),
 		"org_id":        getTestOrgFromEnv(t),
 		"region":        region,
 		"project_name":  getTestProjectFromEnv(),
