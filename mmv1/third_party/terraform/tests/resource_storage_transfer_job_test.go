@@ -9,6 +9,7 @@ import (
 )
 
 func TestAccStorageTransferJob_basic(t *testing.T) {
+	t.Parallel()
 
 	testDataSourceBucketName := randString(t, 10)
 	testDataSinkName := randString(t, 10)
@@ -67,6 +68,7 @@ func TestAccStorageTransferJob_basic(t *testing.T) {
 }
 
 func TestAccStorageTransferJob_omitScheduleEndDate(t *testing.T) {
+	t.Parallel()
 
 	testDataSourceBucketName := randString(t, 10)
 	testDataSinkName := randString(t, 10)
@@ -90,6 +92,7 @@ func TestAccStorageTransferJob_omitScheduleEndDate(t *testing.T) {
 }
 
 func TestAccStorageTransferJob_posixSource(t *testing.T) {
+	t.Parallel()
 
 	testDataSinkName := randString(t, 10)
 	testTransferJobDescription := randString(t, 10)
@@ -112,6 +115,7 @@ func TestAccStorageTransferJob_posixSource(t *testing.T) {
 }
 
 func TestAccStorageTransferJob_posixSink(t *testing.T) {
+	t.Parallel()
 
 	testDataSourceName := randString(t, 10)
 	testTransferJobDescription := randString(t, 10)
@@ -134,6 +138,7 @@ func TestAccStorageTransferJob_posixSink(t *testing.T) {
 }
 
 func TestAccStorageTransferJob_transferOptions(t *testing.T) {
+	t.Parallel()
 
 	testDataSourceBucketName := randString(t, 10)
 	testDataSinkName := randString(t, 10)
