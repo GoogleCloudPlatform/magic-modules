@@ -18,7 +18,7 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
           timeout_seconds = 1
           period_seconds = 3
           failure_threshold = 1
-          tcpSocket {
+          tcp_socket {
             port = 8080
           }
         }
