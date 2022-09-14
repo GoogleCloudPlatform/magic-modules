@@ -445,7 +445,6 @@ func TestAccKmsCryptoKeyVersion_basic(t *testing.T) {
 
 	projectId := fmt.Sprintf("tf-test-%d", randInt(t))
 	projectOrg := getTestOrgFromEnv(t)
-	location := getTestRegionFromEnv()
 	projectBillingAccount := getTestBillingAccountFromEnv(t)
 	keyRingName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
@@ -456,20 +455,6 @@ func TestAccKmsCryptoKeyVersion_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKeyVersion_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
-			},
-			{
-				ResourceName:      "google_kms_crypto_key.crypto_key.crypto_key_version",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			// Use a separate TestStep rather than a CheckDestroy because we need the project to still exist.
-			{
-				Config: testGoogleKmsCryptoKey_removed(projectId, projectOrg, projectBillingAccount, keyRingName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleKmsCryptoKeyWasRemovedFromState("google_kms_crypto_key.crypto_key"),
-					testAccCheckGoogleKmsCryptoKeyVersionsDestroyed(t, projectId, location, keyRingName, cryptoKeyName),
-					testAccCheckGoogleKmsCryptoKeyRotationDisabled(t, projectId, location, keyRingName, cryptoKeyName),
-				),
 			},
 		},
 	})
@@ -490,11 +475,6 @@ func TestAccKmsCryptoKeyVersion_skipInitialVersion(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKeyVersion_skipInitialVersion(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
-			},
-			{
-				ResourceName:      "google_kms_crypto_key.crypto_key.crypto_key_version",
-				ImportState:       true,
-				ImportStateVerify: true,
 			},
 		},
 	})

@@ -164,9 +164,9 @@ objects:
       api: 'https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys'
   - !ruby/object:Api::Resource
     name: 'CryptoKeyVersion'
-    base_url: '{{crypto_key}}/cryptoKeyVersions'
+    base_url: '{{crypto_key}}'
     create_url: '{{crypto_key}}/cryptoKeyVersions'
-    self_link: '{{crypto_key}}/cryptoKeyVersions'
+    self_link: '{{crypto_key}}'
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -185,31 +185,31 @@ objects:
         name: 'name'
         description: |
           The resource name for this CryptoKeyVersion.
-        output: true
+        input: true
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: |
           The current state of the CryptoKeyVersion.
         values:
-          - :CRYPTO_KEY_VERSION_STATE_UNSPECIFIED
-          - :PENDING_GENERATION
-          - :ENABLED
-          - :DISABLED
-          - :DESTRYOED
-          - :DESTROY_SCHEDULED
-          - :PENDING_IMPORT
-          - :IMPORT_FAILED
+          - "CRYPTO_KEY_VERSION_STATE_UNSPECIFIED"
+          - "PENDING_GENERATION"
+          - "ENABLED"
+          - "DISABLED"
+          - "DESTRYOED"
+          - "DESTROY_SCHEDULED"
+          - "PENDING_IMPORT"
+          - "IMPORT_FAILED"
       - !ruby/object:Api::Type::Enum
         name: 'protectionLevel'
         output: true
         description: |
           The ProtectionLevel describing how crypto operations are performed with this CryptoKeyVersion.
         values:
-          - :PROTECTION_LEVEL_UNSPECIFIED
-          - :SOFTWARE
-          - :HSM
-          - :EXTERNAL
-          - :EXTERNAL_VPC
+          - "PROTECTION_LEVEL_UNSPECIFIED"
+          - "SOFTWARE"
+          - "HSM"
+          - "EXTERNAL"
+          - "EXTERNAL_VPC"
       - !ruby/object:Api::Type::Time
         name: 'createTime'
         description: |
@@ -256,31 +256,31 @@ objects:
           The CryptoKeyVersionAlgorithm that this CryptoKeyVersion supports.
         output: true
         values: 
-          - :CRYPTO_KEY_VERSION_ALGORITHM_UNSPECIFIED
-          - :GOOGLE_SYMMETRIC_ENCRYPTION
-          - :RSA_SIGN_PSS_2048_SHA256
-          - :RSA_SIGN_PSS_3072_SHA256
-          - :RSA_SIGN_PSS_4096_SHA256
-          - :RSA_SIGN_PSS_4096_SHA512
-          - :RSA_SIGN_PKCS1_2048_SHA256
-          - :RSA_SIGN_PKCS1_3072_SHA256
-          - :RSA_SIGN_PKCS1_4096_SHA256
-          - :RSA_SIGN_PKCS1_4096_SHA512
-          - :RSA_SIGN_RAW_PKCS1_2048
-          - :RSA_SIGN_RAW_PKCS1_3072
-          - :RSA_SIGN_RAW_PKCS1_4096
-          - :RSA_DECRYPT_OAEP_2048_SHA256
-          - :RSA_DECRYPT_OAEP_3072_SHA256
-          - :RSA_DECRYPT_OAEP_4096_SHA256
-          - :RSA_DECRYPT_OAEP_4096_SHA512
-          - :RSA_DECRYPT_OAEP_2048_SHA1
-          - :RSA_DECRYPT_OAEP_3072_SHA1
-          - :RSA_DECRYPT_OAEP_4096_SHA1
-          - :EC_SIGN_P256_SHA256
-          - :EC_SIGN_P384_SHA384
-          - :EC_SIGN_SECP256K1_SHA256
-          - :HMAC_SHA256
-          - :EXTERNAL_SYMMETRIC_ENCRYPTION
+          - "CRYPTO_KEY_VERSION_ALGORITHM_UNSPECIFIED"
+          - "GOOGLE_SYMMETRIC_ENCRYPTION"
+          - "RSA_SIGN_PSS_2048_SHA256"
+          - "RSA_SIGN_PSS_3072_SHA256"
+          - "RSA_SIGN_PSS_4096_SHA256"
+          - "RSA_SIGN_PSS_4096_SHA512"
+          - "RSA_SIGN_PKCS1_2048_SHA256"
+          - "RSA_SIGN_PKCS1_3072_SHA256"
+          - "RSA_SIGN_PKCS1_4096_SHA256"
+          - "RSA_SIGN_PKCS1_4096_SHA512"
+          - "RSA_SIGN_RAW_PKCS1_2048"
+          - "RSA_SIGN_RAW_PKCS1_3072"
+          - "RSA_SIGN_RAW_PKCS1_4096"
+          - "RSA_DECRYPT_OAEP_2048_SHA256"
+          - "RSA_DECRYPT_OAEP_3072_SHA256"
+          - "RSA_DECRYPT_OAEP_4096_SHA256"
+          - "RSA_DECRYPT_OAEP_4096_SHA512"
+          - "RSA_DECRYPT_OAEP_2048_SHA1"
+          - "RSA_DECRYPT_OAEP_3072_SHA1"
+          - "RSA_DECRYPT_OAEP_4096_SHA1"
+          - "EC_SIGN_P256_SHA256"
+          - "EC_SIGN_P384_SHA384"
+          - "EC_SIGN_SECP256K1_SHA256"
+          - "HMAC_SHA256"
+          - "EXTERNAL_SYMMETRIC_ENCRYPTION"
       - !ruby/object:Api::Type::NestedObject
         name: 'attestation'
         description: |
