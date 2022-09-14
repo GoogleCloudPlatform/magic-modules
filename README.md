@@ -15,15 +15,18 @@ change.
 ---
 
 - [Getting Started with Magic Modules](#getting-started-with-magic-modules)
-   - [Preparing your environment](#preparing-your-environment)
-   - [Preparing Magic Modules / One-time setup](#preparing-magic-modules--one-time-setup)
-   - [Generating the Terraform Providers](#generating-the-terraform-providers)
-   - [Testing](#testing)
-      - [Using released terraform binary with local provider binary](#using-released-terraform-binary-with-local-provider-binary)
-   - [Submitting a PR](#submitting-a-pr)
+  - [Preparing your environment](#preparing-your-environment)
+  - [Preparing Magic Modules / One-time setup](#preparing-magic-modules--one-time-setup)
+  - [Generating the Terraform Providers](#generating-the-terraform-providers)
+  - [Testing](#testing)
+    - [Using released terraform binary with local provider binary](#using-released-terraform-binary-with-local-provider-binary)
+  - [Submitting a PR](#submitting-a-pr)
 - [Contributing](#contributing)
-   - [General contributing steps](#general-contributing-steps)
-   - [Detailed contributing guide](#detailed-contributing-guide)
+  - [General contributing steps](#general-contributing-steps)
+  - [Detailed contributing guide](#detailed-contributing-guide)
+  - [VCR Testing](#vcr-testing)
+    - [VCR test workflow in pull requests](#vcr-test-workflow-in-pull-requests)
+    - [Verifying failed recording tests](#verifying-failed-recording-tests)
 - [Glossary](#glossary)
 - [Other Resources](#other-resources)
 
@@ -89,7 +92,7 @@ Magic Modules won't work with old versions of the Terraform provider repos. If
 you're encountering issues with vendoring and paths, make sure both MM and the
 Terraform provider are running on up to date copies of `main`.
 
-Once you've prepared the target folders for the tools, run the following to
+Once you've prepared the target folders for the providers, run the following to
 finish getting Magic Modules set up by installing the Ruby gems it needs to run:
 
 ```bash
@@ -241,7 +244,7 @@ If multiple versions are available in a plugin directory (for example after `ter
 
 Before creating a commit, if you've modified any .rb files, make sure you run
 `rake test`! That will run rubocop to ensure that the code you've written will
-pass Travis.
+pass GitHub checks.
 
 To run rubocop automatically before committing, add a Git pre-commit hook with:
 
@@ -251,24 +254,16 @@ cp .github/pre-commit .git/hooks
 
 Once you've created your commit(s), you can submit the code normally as a PR in
 the GitHub UI. The PR template includes some instructions to make sure we
-generate good PR messages for the tools' repo histories.
+generate good PR messages for the providers' repo histories.
 
-Once your PR is submitted, one of the Magic Modules maintainers will review it.
-They'll look over the code before running the "Magician", the Magic Modules CI
-system that generates PRs against each tool. Each review pass, your reviewer
-will run the Magician again to update the PRs against the tools.
+Once your PR is submitted, the Magic Modules CI ("Magician") will run checks
+and generate comments to update you on the status of your pull request. You
+will be notified on the PR if there are immediate actions you should take.
+Afterwards, one of the Magic Modules maintainers will review.
 
-If there are multiple tools affected, that first reviewer will be the "primary"
-reviewer, and for each other affected tool a maintainer for that specific tool
-will make a pass. The primary reviewer will make it clear which other
-maintainers need to review, and prompt them to review your code; you will
-communicate primarily with the first reviewer.
-
-Even when multiple tools are affected, this will generally be a quick look by
-that maintainer with no changes needing to be made.
-
-Once you've gotten approvals from the primary reviewer and the reviewers for
-any affected tools, the primary reviewer will merge your changes.
+Once your PR has been reviewed and approved, the reviewer will merge your
+PR to the `main` branch. This will also kick off automatic PRs to the 
+downstream provider repositories.
 
 ---
 
@@ -293,40 +288,48 @@ any affected tools, the primary reviewer will merge your changes.
 1. Test the feature against the providers you generated in the last step locally. Check [Testing Guidance](#testing) for details on how to run provider test locally. (Testing the PR locally and pushing the commit to the PR only after the tests pass locally may significantly reduce review cycles)
 1. Push your changes to your `magic-modules` repo fork and send a pull request from that branch to the main branch on `magic-modules`. A reviewer will be assigned automatically to your PR. Check [Submitting a PR](#submitting-a-PR) section for details on how to submit a PR.
 1. Wait until the the modules magician to generate downstream diff (which should takes about 15 mins after creating the PR) to make sure all changes are generated correctly in downstream repos.
-1. Wait for the VCR test results.
-   <details><summary>Get to know general workflow for VCR tests</summary>
-
-      1. You submit your change.
-      1. The recorded tests are ran against your changes by the `modular-magician`. Tests will fail if:
-         1. Your PR has changed the HTTP request values sent by the provider
-         1. Your PR does not change the HTTP request values, but fails on the values returned in an old recording
-         1. The recordings are out of sync with the merge-base of your PR, and an unrelated contributor's change has caused a false positive
-      1. The `modular-magician` will leave a message indicating the number of passing and failing VCR tests. If there is a failure, the `modular-magician` user will leave a message indicating the "`Triggering VCR tests in RECORDING mode for the following tests that failed during VCR:`" marking which tests failed.
-         1. If a test does not appear related, it probably isn't!
-      1. The `modular-magician` will kick off a second test run targeting only the failed tests, this time hitting the live GCP APIs. If there are tests that fail at this point, a message stating `Tests failed during RECORDING mode:` will be left indicating the tests.
-         1. If a test that appears to be related to your change has failed here, it's likely your change has introduced an issue. You can view the debug logs for the test by clicking the "view" link beside the test case to attempt to debug what's going wrong.
-         1. If a test appears to be completely unrelated has failed, it's possible that a GCP API has changed in a way that broke the provider or our environment capped on a quota.
-   </details>
-
-   Where possible, take a look at the logs and see if you can figure out what needs to be fixed related to your change.
-   The false positive rate on these tests is extremely high between changes in the API, Cloud Build bugs, and eventual consistency issues in test recordings so we don't expect contributors to wholly interpret the results- that's the responsibility of your reviewer.
-1. If your assigned reviewers does not reply/ review within a week, gently ping them on github.
-1. After your PR is merged, it will be released to customers in around a week or two.
+2. Wait for the VCR test result. See [VCR Testing](#vcr-testing).
+3. If your assigned reviewers does not reply/ review within a week, gently ping them on github.
+4. After your PR is merged, it will be released to customers in around a week or two.
 
 ---
 
 ### Detailed contributing guide
 
-Task          | Section
---------------|--------------
-Resource      | [handwritten](./mmv1/third_party/terraform/README.md#resource) / [mmv1](./mmv1/README.md#resource)
-Datasource    | [handwritten](./mmv1/third_party/terraform/README.md#datasource) / (only handwritten datasources are supported)
-IAM resource  | [handwritten](./mmv1/third_party/terraform/README.md#iam-resource) / [mmv1](./mmv1/README.md#iam-resource)
-Testing       | [handwritten](./mmv1/third_party/terraform/README.md#testing) / [mmv1](./mmv1/README.md#testing)
-Documentation | [handwritten](./mmv1/third_party/terraform/README.md#documentation) / [mmv1](./mmv1/README.md#documentation)
-Beta feature  | [handwritten](./mmv1/third_party/terraform/README.md#beta-feature) / [mmv1](./mmv1/README.md#beta-feature)
+| Task          | Section                                                                                                         |
+| ------------- | --------------------------------------------------------------------------------------------------------------- |
+| Resource      | [handwritten](./mmv1/third_party/terraform/README.md#resource) / [mmv1](./mmv1/README.md#resource)              |
+| Datasource    | [handwritten](./mmv1/third_party/terraform/README.md#datasource) / (only handwritten datasources are supported) |
+| IAM resource  | [handwritten](./mmv1/third_party/terraform/README.md#iam-resource) / [mmv1](./mmv1/README.md#iam-resource)      |
+| Testing       | [handwritten](./mmv1/third_party/terraform/README.md#testing) / [mmv1](./mmv1/README.md#testing)                |
+| Documentation | [handwritten](./mmv1/third_party/terraform/README.md#documentation) / [mmv1](./mmv1/README.md#documentation)    |
+| Beta feature  | [handwritten](./mmv1/third_party/terraform/README.md#beta-feature) / [mmv1](./mmv1/README.md#beta-feature)      |
 
 ---
+
+### VCR Testing
+   We have many (thousands) of acceptance tests across all resources, several of which are slow to run. VCR testing uses recorded API responses to speed up 
+   the process, and will re-record responses when tests fail or is otherwise appropriate.
+
+#### VCR test workflow in pull requests
+
+   1. You submit your change.
+   2. The recorded tests are ran against your changes by the `modular-magician`. Tests will fail if:
+      1. Your PR has changed the HTTP request values sent by the provider
+      2. Your PR does not change the HTTP request values, but fails on the values returned in an old recording
+      3. The recordings are out of sync with the merge-base of your PR, and an unrelated contributor's change has caused a false positive
+   3. The `modular-magician` will leave a message indicating the number of passing and failing VCR tests. If there is a failure, the `modular-magician` user will leave a message indicating the "`Triggering VCR tests in RECORDING mode for the following tests that failed during VCR:`" marking which tests failed.
+      1. If a test does not appear related, it probably isn't!
+   4. The `modular-magician` will kick off a second test run targeting only the failed tests, this time hitting the live GCP APIs. If there are tests that fail at this point, a message stating `Tests failed during RECORDING mode:` will be left indicating the tests.
+      1. If a test that appears to be related to your change has failed here, it's likely your change has introduced an issue. You can view the debug logs for the test by clicking the "view" link beside the test case to attempt to debug what's going wrong.
+      2. If a test appears to be completely unrelated has failed, it's possible that a GCP API has changed in a way that broke the provider or our environment capped on a quota.
+
+#### Verifying failed recording tests
+
+   RECORDING mode tests results will be posted as a comment by the `modular-magician`. Any failed tests will be reviewed by your reviewer to determine if they are blocking.
+   Where possible, take a look at the logs and see if you can figure out what needs to be fixed related to your change.
+   The false positive rate on these tests is extremely high between changes in the API, Cloud Build bugs, and eventual consistency issues in test recordings so we don't expect contributors to wholly interpret the results- that's the responsibility of your reviewer.
+   In cases where the name of the test is likely related to your change (e.g. you have updated the Compute Instance resource and `TestAccComputeInstance_basic` was reported as failing), you can save an iteration of review by looking into the error before your reviewer does. To do so, it is recommended to follow the [Testing Guidance](#testing)
 
 ## Glossary
 
@@ -334,13 +337,13 @@ The maintainers of the repository will tend to use specific jargon to describe
 concepts related to Magic Modules; here's a quick reference of what some of
 those terms are.
 
-Term          | Definition
---------------|--------------
-tool          | One of the OSS DevOps projects Magic Modules generates GCP support in
-provider      | Synonym for tool as referred to inside the codebase
-downstream(s) | A PR created by the Magician against a tool
-upstream      | A PR created against Magic Modules or the Magic Modules repo
-The Magician  | The Magic Modules CI system that drives the GitHub robot `modular-magician`
+| Term          | Definition                                                                  |
+| ------------- | --------------------------------------------------------------------------- |
+| tool          | One of the OSS DevOps projects Magic Modules generates GCP support in       |
+| provider      | Synonym for tool as referred to inside the codebase                         |
+| downstream(s) | A PR created by the Magician against a tool                                 |
+| upstream      | A PR created against Magic Modules or the Magic Modules repo                |
+| The Magician  | The Magic Modules CI system that drives the GitHub robot `modular-magician` |
 
 ---
 

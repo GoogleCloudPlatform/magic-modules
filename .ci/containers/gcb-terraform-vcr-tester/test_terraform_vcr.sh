@@ -210,6 +210,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   if [[ -n $RECORDING_TESTS_PANIC ]]; then
     comment="The provider crashed while running the VCR tests in RECORDING mode${NEWLINE}"
     comment+="Please fix it to complete your PR${NEWLINE}"
+    comment+="It is recommended to [build the provider](https://github.com/GoogleCloudPlatform/magic-modules#generating-the-terraform-providers) to verify locally.${NEWLINE}"
     comment+="View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/build-log/recording_test.log)"
     add_comment "${comment}"
     update_status "failure"
@@ -231,7 +232,8 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   else
     if [[ $test_exit_code -ne 0 ]]; then
       # check for any uncaught errors in RECORDING mode
-      comment+="Errors occurred during RECORDING mode. Please fix them to complete your PR${NEWLINE}"
+      comment+="Errors occurred during RECORDING mode. Please [verify if they are related](https://github.com/GoogleCloudPlatform/magic-modules#verifying-failed-recording-tests) to your changes and fix them to complete your PR${NEWLINE}"
+      comment+="It is recommended to [build the provider](https://github.com/GoogleCloudPlatform/magic-modules#generating-the-terraform-providers) to verify locally.${NEWLINE}"
     else
       comment+="All tests passed${NEWLINE}"
     fi
