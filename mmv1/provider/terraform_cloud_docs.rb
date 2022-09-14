@@ -16,7 +16,7 @@ require 'provider/terraform'
 module Provider
   # Code generator for Terraform samples meant to be displayed in cloud.google.com
   class TerraformCloudDocs < Provider::Terraform
-    # We don't want *any* static generation, so we override generate to only
+    # We do not want *any* static generation, so we override generate to only
     # generate objects.
     def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
       generate_objects(
