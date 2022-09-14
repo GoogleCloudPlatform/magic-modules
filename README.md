@@ -186,9 +186,8 @@ correctly.
 
 #### Using released terraform binary with local provider binary
 
-After the provider code is generated into the location at `OUTPUT_PATH`, you must still build the code
-to generate the provider binary.
-
+After the provider code is generated into the location at `OUTPUT_PATH`, you need to build the code in your genereated provider
+to compile the provider binary:
 ```bash
 cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
 make build
