@@ -480,6 +480,12 @@ resource "google_cloud_run_service" "default" {
               name = "User-Agent"
               value = "magic-modules"
             }
+            http_headers {
+              name = "empty"
+            }
+            http_headers {
+              value = "empty"
+            }
           }
         }
       }
