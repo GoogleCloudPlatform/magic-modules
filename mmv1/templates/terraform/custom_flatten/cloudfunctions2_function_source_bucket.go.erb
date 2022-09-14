@@ -14,10 +14,15 @@
 # limitations under the License.
 -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
-    // Sets the Resource state according to the ResourceData
+    // This flatten function is shared between the resource and the
+    // datasource. For the resource, if this value (e.g. bucket_name)
+    // is provided then it should be set in the state because the GET
+    // call returns a different value (e.g. gcf-v2-*****).
     if bVal, ok := d.GetOk("build_config.0.source.0.storage_source.0.bucket"); ok {
         return bVal
     }
-    // Sets the Datasource state according to the response as this is a computed value for Datasource
+    // For the datasource, there is no prior value available and hence
+    // it should be set in the state based on the value provided by
+    // GET call.
     return v
 }
