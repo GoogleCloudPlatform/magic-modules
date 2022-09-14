@@ -98,11 +98,6 @@ objects:
 
           "projects/{projectNumber}/global/networks/{network_id}".
       - !ruby/object:Api::Type::String
-        name: "state"
-        output: true
-        description: |
-          The current state of the alloydb cluster.
-      - !ruby/object:Api::Type::String
         name: "displayName"
         description: |
           User-settable and human-readable display name for the Cluster.
@@ -111,11 +106,6 @@ objects:
         output: true
         description: |
           The database engine major version. This is an output-only field and it's populated at the Cluster creation time. This field cannot be changed after cluster creation.
-      - !ruby/object:Api::Type::Boolean
-        name: "reconciling"
-        output: true
-        description: |
-          Set to true if the current state of Cluster does not match the user's intended state, and the service is actively updating the resource to reconcile them. This can happen due to user-triggered updates or system actions like failover or maintenance.
       - !ruby/object:Api::Type::NestedObject
         name: "initialUser"
         input: true
