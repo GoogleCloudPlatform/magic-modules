@@ -169,14 +169,17 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: "weeklySchedule"
             input: true
+            required: true
             description: "Weekly schedule for the Backup."
             properties:
               - !ruby/object:Api::Type::Array
                 name: "daysOfWeek"
+                min_size: 1
                 description: |
                   The days of the week to perform a backup. At least one day of the week must be provided.
                 item_type: !ruby/object:Api::Type::Enum
                   name: "daysOfWeek"
+                  required: true
                   description: |
                     The days of the week to perform a backup. At least one day of the week must be provided.
                   values:
@@ -190,6 +193,7 @@ objects:
                     - :SUNDAY
               - !ruby/object:Api::Type::Array
                 name: "startTimes"
+                required: true
                 description: |
                   The times during the day to start a backup. At least one start time must be provided. The start times are assumed to be in UTC and to be an exact hour (e.g., 04:00:00).
                 item_type: !ruby/object:Api::Type::NestedObject

@@ -13,16 +13,24 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
     backup_window = "1800s"
     enabled       = true
 
+    weekly_schedule {
+      days_of_week = ["MONDAY"]
+
+      start_times {
+        hours = 23
+      }
+    }
+
+    quantity_based_retention {
+      count = 1
+    }
+
     labels = {
       test = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
-    }    
+    }   
   }
 
   labels = {
-    test = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
-  }
-
-  annotations = {
     test = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
   }
 }
