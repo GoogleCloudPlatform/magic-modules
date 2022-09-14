@@ -9,7 +9,7 @@ resource "google_compute_network" "default" {
 # [START appengine_service_static_subnet]
 resource "google_compute_subnetwork" "default" {
   name          = "<%= ctx[:vars]['appengine_static_ip'] %>"
-  ip_cidr_range = "10.124.0.0/28"
+  ip_cidr_range = "10.124.0.16/28"
   network       = google_compute_network.default.id
   region        = "us-central1"
 }
