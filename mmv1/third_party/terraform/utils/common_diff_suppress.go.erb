@@ -130,6 +130,10 @@ func emptyOrUnsetBlockDiffSuppressLogic(k, old, new string, o, n interface{}) bo
 		return false
 	}
 
+	if len(l) == 0 || l[0] == nil {
+		return true
+	}
+
 	contents, ok := l[0].(map[string]interface{})
 	if !ok {
 		return false
