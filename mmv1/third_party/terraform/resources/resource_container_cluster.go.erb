@@ -4205,14 +4205,19 @@ func expandNodePoolDefaults(configured interface{}) *container.NodePoolDefaults 
 }
 
 func flattenNodePoolDefaults(c *container.NodePoolDefaults) []map[string]interface{} {
-        if c == nil {
+	if c == nil {
 		return nil
 	}
-        result := make(map[string]interface{})
-        if c.NodeConfigDefaults != nil && c.NodeConfigDefaults.GcfsConfig != nil {
-                result["node_config_defaults"] = flattenNodeConfigDefaults(c.NodeConfigDefaults)
-        }
-        return []map[string]interface{}{result}
+
+	result := make(map[string]interface{})
+	if c.NodeConfigDefaults != nil && c.NodeConfigDefaults.GcfsConfig != nil {
+			result["node_config_defaults"] = flattenNodeConfigDefaults(c.NodeConfigDefaults)
+	}
+	
+	if len(result) == 0 {
+		return nil
+	}
+	return []map[string]interface{}{result}
 }
 <% end -%>
 
@@ -4844,6 +4849,10 @@ func flattenNodePoolAutoConfig(c *container.NodePoolAutoConfig) []map[string]int
 	result := make(map[string]interface{})
 	if c.NetworkTags != nil {
 		result["network_tags"] = flattenNodePoolAutoConfigNetworkTags(c.NetworkTags)
+	}
+
+	if len(result) == 0 {
+		return nil
 	}
 	return []map[string]interface{}{result}
 }
