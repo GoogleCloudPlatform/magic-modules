@@ -79,16 +79,6 @@ objects:
         output: true
         description: |
           The name of the cluster resource.
-      - !ruby/object:Api::Type::Time
-        name: "createTime"
-        description: |
-          Time the Cluster was created in UTC.
-        output: true
-      - !ruby/object:Api::Type::Time
-        name: "updateTime"
-        description: |
-          Time the Cluster was updated in UTC.
-        output: true
       - !ruby/object:Api::Type::String
         name: "uid"
         output: true
@@ -112,11 +102,6 @@ objects:
         output: true
         description: |
           The current state of the alloydb cluster.
-      - !ruby/object:Api::Type::String
-        name: "selfLink"
-        output: true
-        description: |
-          The selfLink of the alloydb cluster.
       - !ruby/object:Api::Type::String
         name: "displayName"
         description: |
