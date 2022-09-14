@@ -142,6 +142,15 @@ make terraform VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraf
 # Only generate a specific product (plus all common files)
 make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=dataproc
 ```
+`PRODUCT` values correspond to folder names in `mmv1/products` or `tpgtools/overrides` for generated resources.
+
+Handwritten files in `mmv1/third_party` are always compiled. If you are only working on common files or third_party code, you can pass a non-existent `PRODUCT`
+to reduce the generation time.
+
+```bash
+# Only generate common files, including all third_party code
+make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=foo
+```
 
 It's worth noting that Magic Modules will only generate new files when run
 locally. The "Magician"- the Magic Modules CI system- handles deletion of old
@@ -176,6 +185,14 @@ changes to make to the tool-specific overrides in order for them to work
 correctly.
 
 #### Using released terraform binary with local provider binary
+
+After the provider code is generated into the location at `OUTPUT_PATH`, you must still build the code
+to generate the provider binary.
+
+```bash
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+make build
+```
 
 Setup:
 
@@ -251,7 +268,7 @@ any affected tools, the primary reviewer will merge your changes.
       * MMv1 is strongly preferred over handwriting the resource unless the resource can not be generated.
       * Currently, only handwritten datasources are supported.
 1. Make the actual code change.
-   * The [Contribution Guide](#contribution-guide) below will guide you to the detailed instructions on how to make your change, based on the type of the change + the tool used to generate the code.
+   * The [Contribution Guide](#detailed-contributing-guide) below will guide you to the detailed instructions on how to make your change, based on the type of the change + the tool used to generate the code.
 1. Build the providers that includes your change. Check [Generating the Terraform Providers](#generating-the-terraform-providers) section for details on how to generate the providers locally.
 1. Test the feature against the providers you generated in the last step locally. Check [Testing Guidance](#testing) for details on how to run provider test locally. (Testing the PR locally and pushing the commit to the PR only after the tests pass locally may significantly reduce review cycles)
 1. Push your changes to your `magic-modules` repo fork and send a pull request from that branch to the main branch on `magic-modules`. A reviewer will be assigned automatically to your PR. Check [Submitting a PR](#submitting-a-PR) section for details on how to submit a PR.
