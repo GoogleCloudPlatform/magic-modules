@@ -356,6 +356,14 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 	context["service_account"] = sa
 <% end -%>
 
+	// Test should have 2 bindings: one with a description and one without. Any < chars are converted to a unicode character by the API.
+	<% if object.iam_policy.admin_iam_role.nil? -%>
+	expectedPolicyData := Nprintf(`{"bindings":[{"condition":{"description":"%{condition_desc}","expression":"%{condition_expr}","title":"%{condition_title}"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"},{"condition":{"expression":"%{condition_expr}","title":"%{condition_title}-no-description"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"}]}`, context)
+	<% else -%>
+	expectedPolicyData := Nprintf(`{"bindings":[{"condition":{"description":"%{condition_desc}","expression":"%{condition_expr}","title":"%{condition_title}"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"},{"condition":{"expression":"%{condition_expr}","title":"%{condition_title}-no-description"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"},{"members":["%{sa}"],"role":"%{admin_role}"}}]}`, context)
+	<% end -%>
+	expectedPolicyData = strings.Replace(expectedPolicyData, "<", "\\u003c", -1)
+
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
@@ -378,8 +386,26 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 				ResourceName:      "<%= resource_ns_iam -%>_policy.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
+<% if object.iam_policy.iam_conditions_request_type.nil? -%>
 				ImportStateVerify: true,
+<% else -%>
+				// We cannot verify state with ImportStateVerify because the data.google_iam_policy.foo data source causes an issue,
+				// which results in an error referencing the google_iam_policy data source's ID
+				// e.g. Failed state verification, resource with ID 2561318194 not found
+				// ImportStateVerify: true,
+				ImportStateCheck: func(s []*terraform.InstanceState) error {
+					var policy *terraform.InstanceState
+					if len(s) != 1 {
+						return fmt.Errorf("expected 1 state: %#v", s)
+					}
+					policy = s[0]
+					if policy.Attributes["policy_data"] != expectedPolicyData {
+						return fmt.Errorf("expected google_privateca_certificate_template_iam_policy `policy_data` attribute to be %s, got: %s", expectedPolicyData, policy.Attributes["policy_data"])
+					}
+					return nil
+				},
 			},
+<% end -%>
 <% end -%>
 		},
 	})
