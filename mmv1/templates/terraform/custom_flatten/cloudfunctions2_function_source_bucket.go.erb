@@ -16,9 +16,9 @@
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {    
     // This flatten function is shared between the resource and the datasource.
     // TF Input format: {bucket-name}
-	// GET Response format: gcf-v2-sources-{Project-number}-{location}
-	// As TF Input and GET response values have different format, 
-	// we will return TF Input value to prevent state drift.
+    // GET Response format: gcf-v2-sources-{Project-number}-{location}
+    // As TF Input and GET response values have different format, 
+    // we will return TF Input value to prevent state drift.
 
     if bVal, ok := d.GetOk("build_config.0.source.0.storage_source.0.bucket"); ok {
         return bVal
