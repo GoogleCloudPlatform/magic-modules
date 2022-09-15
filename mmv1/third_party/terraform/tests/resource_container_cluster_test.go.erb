@@ -990,7 +990,7 @@ func TestAccContainerCluster_withNodePoolDefaults(t *testing.T) {
                                 Check: resource.ComposeAggregateTestCheckFunc(
                                   resource.TestCheckResourceAttr("google_container_cluster.with_node_pool_defaults",
                                           "node_pool_defaults.0.node_config_defaults.0.gcfs_config.#", "1"),
-                                  resource.TestCheckResourceAttr("google_container_cluster.with_node_pool_defaults", 
+                                  resource.TestCheckResourceAttr("google_container_cluster.with_node_pool_defaults",
                                           "node_pool_defaults.0.node_config_defaults.0.gcfs_config.0.enabled", "true"),
 				),
                         },
@@ -2287,7 +2287,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_basic(clusterName),
+				Config: testAccContainerCluster_basic_1_23_8(clusterName),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -2321,7 +2321,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 			},
 			// Back to basic settings to test setting Prometheus on its own
 			{
-				Config: testAccContainerCluster_basic(clusterName),
+				Config: testAccContainerCluster_basic_1_23_8(clusterName),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -2338,7 +2338,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 			},
 <% end -%>
 			{
-				Config: testAccContainerCluster_basic(clusterName),
+				Config: testAccContainerCluster_basic_1_23_8(clusterName),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -6079,12 +6079,24 @@ resource "google_container_cluster" "primary" {
 `, name)
 }
 
+func testAccContainerCluster_basic_1_23_8(name string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = "1.23.8-gke.1900"
+}
+`, name)
+}
+
 func testAccContainerCluster_withMonitoringConfigEnabled(name string) string {
        return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
+	min_master_version = "1.23.8-gke.1900"
   monitoring_config {
       enable_components = [ "SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER" ]
   }
@@ -6099,6 +6111,7 @@ resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
+	min_master_version = "1.23.8-gke.1900"
   monitoring_config {
          enable_components = [ "SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER", "WORKLOADS" ]
   }
@@ -6112,6 +6125,7 @@ resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
+	min_master_version = "1.23.8-gke.1900"
   monitoring_config {
          enable_components = [ "SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER", "WORKLOADS" ]
          managed_prometheus {
@@ -6128,6 +6142,7 @@ resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
+	min_master_version = "1.23.8-gke.1900"
   monitoring_config {
          managed_prometheus {
                  enabled = true
