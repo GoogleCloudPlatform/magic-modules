@@ -35,6 +35,10 @@ module Overrides
           # i.e. 'google_project' for resourcemanager.Project
           # Use Provider::Terraform::Config.legacy_name to override just
           # product name.
+          # Note: This should not be used for vanity names for new products.
+          # This was added to handle preexisting handwritten resources that
+          # don't match the natural generated name exactly, and to support
+          # services with a mix of handwritten services.
           :legacy_name,
 
           # The Terraform resource id format used when calling #setId(...).
