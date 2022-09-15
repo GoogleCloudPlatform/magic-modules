@@ -2293,6 +2293,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 			{
 				Config: testAccContainerCluster_withMonitoringConfigEnabled(clusterName),
@@ -2302,6 +2303,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 			{
 				Config: testAccContainerCluster_withMonitoringConfigUpdated(clusterName),
@@ -2310,6 +2312,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 			{
 				Config: testAccContainerCluster_withMonitoringConfigPrometheusUpdated(clusterName),
@@ -2318,6 +2321,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 			// Back to basic settings to test setting Prometheus on its own
 			{
@@ -2327,6 +2331,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 			{
 				Config: testAccContainerCluster_withMonitoringConfigPrometheusOnly(clusterName),
@@ -2335,6 +2340,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 <% end -%>
 			{
@@ -2344,6 +2350,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 		},
 	})
