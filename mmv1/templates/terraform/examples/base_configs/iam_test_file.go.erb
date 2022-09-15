@@ -495,7 +495,7 @@ resource "<%= resource_ns_iam -%>_binding" "foo" {
   members = ["user:admin@hashicorptest.com"]
   condition {
     title       = "%{condition_title}"
-    description = "Expiring at midnight of 2019-12-31"
+    description = "%{condition_desc}"
     expression  = "%{condition_expr}"
   }
 }
@@ -524,7 +524,7 @@ resource "<%= resource_ns_iam -%>_binding" "foo2" {
   members = ["user:admin@hashicorptest.com"]
   condition {
     title       = "%{condition_title}"
-    description = "Expiring at midnight of 2019-12-31"
+    description = "%{condition_desc}"
     expression  = "%{condition_expr}"
   }
 }
@@ -544,7 +544,7 @@ resource "<%= resource_ns_iam -%>_member" "foo" {
   member = "user:admin@hashicorptest.com"
   condition {
     title       = "%{condition_title}"
-    description = "Expiring at midnight of 2019-12-31"
+    description = "%{condition_desc}"
     expression  = "%{condition_expr}"
   }
 }
@@ -573,7 +573,7 @@ resource "<%= resource_ns_iam -%>_member" "foo2" {
   member = "user:admin@hashicorptest.com"
   condition {
     title       = "%{condition_title}"
-    description = "Expiring at midnight of 2019-12-31"
+    description = "%{condition_desc}"
     expression  = "%{condition_expr}"
   }
 }
@@ -592,8 +592,17 @@ data "google_iam_policy" "foo" {
     role = "%{role}"
     members = ["user:admin@hashicorptest.com"]
     condition {
+      // Check that lack of description doesn't have non-empty plan after
+      title       = "%{condition_title_no_desc}"
+      expression  = "%{condition_expr_no_desc}"
+    }
+  }
+  binding {
+    role = "%{role}"
+    members = ["user:admin@hashicorptest.com"]
+    condition {
       title       = "%{condition_title}"
-      description = "Expiring at midnight of 2019-12-31"
+      description = "%{condition_desc}"
       expression  = "%{condition_expr}"
     }
   }
