@@ -54,6 +54,7 @@ resource "google_alloydb_cluster" "default" {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
+  # Add labels
   labels = {
 	test = "tf-test-alloydb-cluster%{random_suffix}"
   }
