@@ -38,7 +38,7 @@ module Overrides
           # Note: This should not be used for vanity names for new products.
           # This was added to handle preexisting handwritten resources that
           # don't match the natural generated name exactly, and to support
-          # services with a mix of handwritten services.
+          # services with a mix of handwritten and generated resources.
           :legacy_name,
 
           # The Terraform resource id format used when calling #setId(...).
