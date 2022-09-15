@@ -1,0 +1,40 @@
+resource "google_cloud_run_job" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['cloud_run_job_name'] %>"
+  location = "europe-west2"
+
+  template {
+    spec {
+      template {
+        spec {
+          containers {
+            image   = "europe-west2-docker.pkg.dev/xyz/gke-policy-automation/gke-policy-automation:latest"
+            command = ["/gke-policy", "check"]
+            args    = ["-c", "/etc/secrets/config.yaml"]
+
+            env {
+              name  = "GKE_POLICY_LOG"
+              value = "INFO"
+            }
+
+            volume_mounts {
+              mount_path = "/etc/secrets"
+              name       = "gke-policy-automation-lar-hef-fad"
+            }
+          }
+          volumes {
+            name = "gke-policy-automation-lar-hef-fad"
+
+            secret {
+              secret_name = "gke-policy-automation"
+
+              items {
+                key  = "latest"
+                path = "config.yaml"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

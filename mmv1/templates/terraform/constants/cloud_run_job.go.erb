@@ -1,0 +1,46 @@
+var cloudRunJobGoogleProvidedAnnotations = regexp.MustCompile(`run\.googleapis\.com/(?:(?:creator)|(?:lastModifier))`)
+
+func cloudrunJobAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Suppress diffs for the annotations provided by Google
+	if cloudRunJobGoogleProvidedAnnotations.MatchString(k) && new == "" {
+		return true
+	}
+
+	// Let diff be determined by annotations (above)
+	if strings.Contains(k, "annotations.%") {
+		return true
+	}
+
+	// For other keys, don't suppress diff.
+	return false
+}
+
+var cloudRunJobGoogleProvidedTemplateAnnotations = regexp.MustCompile(`run\.googleapis\.com/execution-environment`)
+
+func cloudrunJobTemplateAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Suppress diffs for the annotations provided by API
+	if cloudRunJobGoogleProvidedTemplateAnnotations.MatchString(k) &&
+		old == "gen2" && new == "" {
+		return true
+	}
+
+	// For other keys, don't suppress diff.
+	return false
+}
+
+var cloudRunJobGoogleProvidedLabels = regexp.MustCompile(`cloud\.googleapis\.com/location$|run.googleapis.com/lastUpdatedTime`)
+
+func cloudrunJobLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Suppress diffs for the labels provided by Google
+	if cloudRunJobGoogleProvidedLabels.MatchString(k) && new == "" {
+		return true
+	}
+
+	// Let diff be determined by labels (above)
+	if strings.Contains(k, "labels.%") {
+		return true
+	}
+
+	// For other keys, don't suppress diff.
+	return false
+}

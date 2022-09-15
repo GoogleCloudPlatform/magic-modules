@@ -235,7 +235,23 @@ objects:
   description: |-
     Job represents the configuration of a single job. A job an immutable resource that references a container image which is run to completion.
   input: true
+  parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description: The location of the job. eg us-central1
+    url_param_only: true
+    required: true
   properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    # This is a convenience field as terraform expects `name` to be a top level property
+    url_param_only: true
+    input: true
+    description: |-
+      Name must be unique within a namespace, within a Cloud Run region.
+      Is required when creating resources. Name is primarily intended
+      for creation idempotence and configuration definition. Cannot be updated.
+      More info: http://kubernetes.io/docs/user-guide/identifiers#names
   - !ruby/object:Api::Type::String
     name: apiVersion
     description: |-
