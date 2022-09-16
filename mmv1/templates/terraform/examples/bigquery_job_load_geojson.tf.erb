@@ -1,3 +1,15 @@
+resource "google_storage_bucket" "bucket" {
+  name     = "${local.project}-<%= ctx[:vars]['bucket_name'] %>"  # Every bucket name must be globally unique
+  location = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "object" {
+  name   = "geojson-data.jsonl"
+  bucket = google_storage_bucket.bucket.name
+  source = "<%= ctx[:vars]['geojson_path'] %>"
+}
+
 resource "google_bigquery_table" "foo" {
   deletion_protection = false
   dataset_id = google_bigquery_dataset.bar.dataset_id
@@ -20,7 +32,7 @@ resource "google_bigquery_job" "<%= ctx[:primary_resource_id] %>" {
 
   load {
     source_uris = [
-      "gs://BUCKET/REPLACE/SAMPLE/DATA.json",
+      "gs://${google_storage_bucket_object.object.bucket}/${google_storage_bucket_object.object.name}"
     ]
 
     destination_table {
