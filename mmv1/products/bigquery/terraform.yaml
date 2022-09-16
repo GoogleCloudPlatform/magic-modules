@@ -184,11 +184,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           job_id: "job_load"
           bucket_name: "bq-geojson-sample"
-          geojson_path: "geojson-data.jsonl"
         test_env_vars:
           project: :PROJECT_NAME
-        test_vars_overrides:
-          geojson_path: "\"./test-fixtures/bigquery/geojson-data.jsonl\""
         ignore_read_extra:
           - "etag"
           - "status.0.state"
