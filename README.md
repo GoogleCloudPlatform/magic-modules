@@ -199,7 +199,7 @@ cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
 TF_LOG=TRACE make testacc TEST=./google-beta TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
 ```
 
-The `TESTARGS` variable is regexp-like, so multiple tests can be run in parallel by specifying a common substring of those tests (for example, `TestAccContainerNodePool` to run all node pool tests). There are 1500+ tests, and running all of them takes over 6 hours and requires a lot of GCP quota.
+The `TESTARGS` variable is regexp-like, so multiple tests can be run in parallel by specifying a common substring of those tests (for example, `TestAccContainerNodePool` to run all node pool tests). There are 2000+ tests, and running all of them takes over 9 hours and requires a lot of GCP quota.
 
 Note: `TF_LOG=TRACE` is optional; it [enables verbose logging](https://www.terraform.io/docs/internals/debugging.html) during tests, including all API request/response cycles. `> output.log` redirects the test output to a file for analysis, which is useful because `TRACE` logging can be extremely verbose.
 
@@ -207,7 +207,7 @@ Tests will use whatever version of the `terraform` binary is found on your path.
 
 #### Using released terraform binary with local provider binary
 
-After the provider code is generated into the location at `OUTPUT_PATH`, you need to build the code in your genereated provider
+After the provider code is generated into the location at `OUTPUT_PATH`, you need to build the code in your generated provider
 to compile the provider binary:
 ```bash
 cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
