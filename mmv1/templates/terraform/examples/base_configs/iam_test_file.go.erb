@@ -606,8 +606,8 @@ data "google_iam_policy" "foo" {
     role = "%{role}"
     members = ["user:admin@hashicorptest.com"]
     condition {
-      // Check that lack of description doesn't cause a non-empty plan after apply
-	  // Relates to issue : https://github.com/hashicorp/terraform-provider-google/issues/8701
+      // Check that lack of description doesn't cause any issues
+      // Relates to issue : https://github.com/hashicorp/terraform-provider-google/issues/8701
       title       = "%{condition_title_no_desc}"
       expression  = "%{condition_expr_no_desc}"
     }
