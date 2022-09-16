@@ -140,9 +140,12 @@ make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terrafor
 make terraform VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
 
 # Only generate a specific product (plus all common files)
-make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=dataproc
+make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=pubsub
+
+# Only generate only a specific resources for a product
+make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=pubsub RESOURCE=Topic
 ```
-`PRODUCT` values correspond to folder names in `mmv1/products` or `tpgtools/overrides` for generated resources.
+The `PRODUCT` variable values correspond to folder names in `mmv1/products` for generated resources. The `RESOURCE` variable value needs to match the name of the resource inside the `api.yaml` file for that product.
 
 Handwritten files in `mmv1/third_party` are always compiled. If you are only working on common files or third_party code, you can pass a non-existent `PRODUCT`
 to reduce the generation time.
@@ -161,28 +164,46 @@ files when creating PRs.
 ### Testing
 
 Once you've made changes to resource definition, you can run Magic Modules
-to generate changes to your tool; see
+to generate changes to your provider; see
 ["Generating the Terraform Providers"](#generating-the-terraform-providers)
 above if you need a refresher. Once it's generated, you should run the
-tool-specific tests as if you were submitting a PR against that tool.
+tests to ensure your change work for the providers.
 
-You can run tests in the `{{output_folder}}` you generated the tool in.
-See the following tool-specific documentation for more details on testing that
-tool;
+Tests generally assume the following environment variables must be set in order to run tests:
 
-Tool             | Testing Guide
------------------|--------------
-terraform        | [`google` provider testing guide](https://github.com/hashicorp/terraform-provider-google/blob/main/.github/CONTRIBUTING.md#tests)
-terraform (beta) | [`google-beta` provider testing guide](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/.github/CONTRIBUTING.md#tests)
+```
+GOOGLE_PROJECT
+GOOGLE_CREDENTIALS|GOOGLE_CLOUD_KEYFILE_JSON|GCLOUD_KEYFILE_JSON|GOOGLE_USE_DEFAULT_CREDENTIALS
+GOOGLE_REGION
+GOOGLE_ZONE
+```
 
-Don't worry about testing every tool, only the primary tool you're making
-changes against. The Magic Modules maintainers will ensure your changes work
-against each tool.
+Note that the credentials you provide must be granted wide permissions on the specified project. These tests provision real resources, and require permission in order to do so. Most developers on the team grant their test service account `roles/editor` or `roles/owner` on their project. Additionally, to ensure that your tests are performed in a region and zone with wide support for GCP features, `GOOGLE_REGION` should be set to `us-central1` and `GOOGLE_ZONE` to `us-central1-a`.
 
-If your changes have unintended consequences in another tool, a reviewer will
-instruct you to mark the field excluded or provide specific feedback on what
-changes to make to the tool-specific overrides in order for them to work
-correctly.
+Additional variable may be required for other tests, and should get flagged when running them by Go skipping the test and flagging in the output it was skipped, with a skip message explaining why. The most typical extra values required are those required for project creation:
+
+```
+GOOGLE_ORG
+GOOGLE_BILLING_ACCOUNT
+```
+
+You can run tests against the provider you generated in the `OUTPUT_PATH` location. When running tests, specify which to run using `TESTARGS`, such as:
+
+```bash
+# for ga provider
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+TF_LOG=TRACE make testacc TEST=./google TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
+
+# for beta provider
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+TF_LOG=TRACE make testacc TEST=./google-beta TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
+```
+
+The `TESTARGS` variable is regexp-like, so multiple tests can be run in parallel by specifying a common substring of those tests (for example, `TestAccContainerNodePool` to run all node pool tests). There are 1500+ tests, and running all of them takes over 6 hours and requires a lot of GCP quota.
+
+Note: `TF_LOG=TRACE` is optional; it [enables verbose logging](https://www.terraform.io/docs/internals/debugging.html) during tests, including all API request/response cycles. `> output.log` redirects the test output to a file for analysis, which is useful because `TRACE` logging can be extremely verbose.
+
+Tests will use whatever version of the `terraform` binary is found on your path. To test with multiple versions of `terraform` core, you must run the tests multiple times with different versions. You can use [`tfenv`](https://github.com/tfutils/tfenv) to manage your system `terraform` versions.
 
 #### Using released terraform binary with local provider binary
 
