@@ -133,8 +133,6 @@ resource "google_eventarc_trigger" "primary" {
 
     depends_on =[google_cloud_run_service.default,google_eventarc_channel.test_channel]
 }
-
-
 `, context)
 }
 
