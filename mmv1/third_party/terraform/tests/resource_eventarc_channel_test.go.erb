@@ -93,7 +93,6 @@ data "google_project" "test_project" {
 resource "google_eventarc_channel" "primary" {
 	location = "%{region}"
 	name     = "tf-test-name%{random_suffix}"
-	project  = data.google_project.test_project.project_id
 	third_party_provider = "projects/${data.google_project.test_project.project_id}/locations/%{region}/providers/datadog"
 }
 `, context)
@@ -128,7 +127,6 @@ resource "google_kms_crypto_key_iam_binding" "key1_binding" {
 resource "google_eventarc_channel" "primary" {
 	location = "%{region}"
 	name     = "tf-test-name%{random_suffix}"
-	project  = data.google_project.test_project.project_id
 	crypto_key_name =  data.google_kms_crypto_key.key1.id
 	third_party_provider = "projects/${data.google_project.test_project.project_id}/locations/%{region}/providers/datadog"
 	depends_on = [google_kms_crypto_key_iam_binding.key1_binding]
@@ -164,7 +162,6 @@ resource "google_kms_crypto_key_iam_binding" "key2_binding" {
 resource "google_eventarc_channel" "primary" {
 	location = "%{region}"
 	name     = "tf-test-name%{random_suffix}"
-	project  = data.google_project.test_project.project_id
 	crypto_key_name= data.google_kms_crypto_key.key2.id
 	third_party_provider = "projects/${data.google_project.test_project.project_id}/locations/%{region}/providers/datadog"
 	depends_on = [google_kms_crypto_key_iam_binding.key2_binding]
