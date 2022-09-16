@@ -335,7 +335,6 @@ resource "google_project_iam_binding" "acceptance" {
 `, pid, name, org, role)
 }
 
-
 func testAccProjectAssociateBinding_withCondition(pid, name, org, role, conditionTitle string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
@@ -354,16 +353,5 @@ resource "google_project_iam_binding" "acceptance" {
     expression  = "request.time < timestamp(\"2020-01-01T00:00:00Z\")"
   }
 }
-
-resource "google_project_iam_binding" "acceptance-empty-description" {
-  project = google_project.acceptance.project_id
-  members = ["user:admin@hashicorptest.com"]
-  role    = "%s"
-  condition {
-    # Description field is intentionally left blank in this block
-    title       = "expires_after_2020_12_31"
-    expression  = "request.time < timestamp(\"2021-01-01T00:00:00Z\")"
-  }
-}
-`, pid, name, org, role, conditionTitle, role)
+`, pid, name, org, role, conditionTitle)
 }

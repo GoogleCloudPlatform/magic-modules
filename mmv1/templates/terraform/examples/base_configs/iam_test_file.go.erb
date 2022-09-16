@@ -381,6 +381,11 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 		Steps: []resource.TestStep{
 			{
 				Config: testAcc<%= resource_name -%>IamPolicy_withConditionGenerated(context),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					// TODO(SarahFrench) - uncomment once https://github.com/GoogleCloudPlatform/magic-modules/pull/6466 merged
+					// resource.TestCheckResourceAttr("data.google_iam_policy.foo", "policy_data", expectedPolicyData),
+					resource.TestCheckResourceAttr("<%= resource_ns_iam -%>_policy.foo", "policy_data", expectedPolicyData),
+				),
 			},
 <% if object.min_version.name == "ga" -%>
 			{
