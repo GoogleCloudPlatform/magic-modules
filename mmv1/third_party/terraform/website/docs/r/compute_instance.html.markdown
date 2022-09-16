@@ -231,6 +231,8 @@ is desired, you will need to modify your state file manually using
     For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
     These images can be referred by family name here.
 
+* `labels` - A set of key/value label pairs assigned to the disk.
+
 <a name="nested_scratch_disk"></a>The `scratch_disk` block supports:
 
 * `interface` - (Required) The disk interface to use for attaching this disk; either SCSI or NVME.
