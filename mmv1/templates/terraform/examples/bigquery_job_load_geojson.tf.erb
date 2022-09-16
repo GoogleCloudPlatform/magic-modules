@@ -1,3 +1,7 @@
+locals {
+  project = "<%= ctx[:test_env_vars]['project'] %>" # Google Cloud Platform Project ID
+}
+
 resource "google_storage_bucket" "bucket" {
   name     = "${local.project}-<%= ctx[:vars]['bucket_name'] %>"  # Every bucket name must be globally unique
   location = "US"
