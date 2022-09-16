@@ -10,6 +10,7 @@ func dataSourceVPCAccessConnector() *schema.Resource {
 
 	dsSchema := datasourceSchemaFromResourceSchema(resourceVPCAccessConnector().Schema)
 	addRequiredFieldsToSchema(dsSchema, "name")
+	addOptionalFieldsToSchema(dsSchema, "project", "region")
 
 	return &schema.Resource{
 		Read:   dataSourceVPCAccessConnectorRead,

@@ -36,6 +36,14 @@ The following arguments are supported:
 
 * `name` - (Required) Name of the resource.
 
+- - -
+
+* `project` - (Optional) The ID of the project in which the resource belongs. If it
+    is not provided, the provider project is used.
+
+* `region` - (Optional) The region in which the resource belongs. If it
+    is not provided, the provider region is used.
+
 ## Attributes Reference
 
 See [google_vpc_access_connector](https://www.terraform.io/docs/providers/google/r/vpc_access_connector.html) resource for details of the available attributes.
