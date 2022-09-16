@@ -340,7 +340,6 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 									"content_types": {
 										Type: schema.TypeSet,
 										Required: true,
-										MinItems: 1,
 										Elem: &schema.Schema{Type: schema.TypeString},
 										Description: `A list of custom Content-Type header values to apply the JSON parsing.`,
 									},
@@ -554,7 +553,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 
 	if d.HasChange("advanced_options_config") {
 		securityPolicy.AdvancedOptionsConfig = expandSecurityPolicyAdvancedOptionsConfig(d.Get("advanced_options_config").([]interface{}))
-		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "AdvancedOptionsConfig", "advancedOptionsConfig.jsonParsing", "advancedOptionsConfig.logLevel")
+		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "AdvancedOptionsConfig", "advancedOptionsConfig.jsonParsing", "advancedOptionsConfig.jsonCustomConfig", "advancedOptionsConfig.logLevel")
 	}
 
 	if d.HasChange("adaptive_protection_config") {
@@ -837,7 +836,8 @@ func flattenSecurityPolicyAdvancedOptionsConfig(conf *compute.SecurityPolicyAdva
 
 func expandSecurityPolicyAdvancedOptionsConfigJsonCustomConfig(configured []interface{}) *compute.SecurityPolicyAdvancedOptionsConfigJsonCustomConfig {
 	if len(configured) == 0 || configured[0] == nil {
-		return nil
+		// If configuration is unset, return an empty JsonCustomConfig; this ensures the ContentTypes list can be cleared
+		return &compute.SecurityPolicyAdvancedOptionsConfigJsonCustomConfig{}
 	}
 
 	data := configured[0].(map[string]interface{})
