@@ -99,6 +99,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           bucket_name: "appengine-static-content"
           service_name: "ae-service"
         min_version: beta
+        skip_test: true
         test_env_vars:
           org_id: :ORG_ID
         skip_docs: true
