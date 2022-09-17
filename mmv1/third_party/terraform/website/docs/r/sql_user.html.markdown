@@ -110,11 +110,11 @@ The optional `password_policy` block is only supported by Mysql. The `password_p
 
 * `enable_password_verification` - (Optional) If true, the user must specify the current password before changing the password. This flag is supported only for MySQL.
 
-The optional `password_policy.status` subblock supports:
+The read only `password_policy.status` subblock supports:
 
-* `locked` - (Optional) If true, user does not have login privileges.
+* `locked` - (read only) If true, user does not have login privileges.
 
-* `password_expiration_time` - (Optional) Password expiration duration with one week grace period.
+* `password_expiration_time` - (read only) Password expiration duration with one week grace period.
 
 ## Attributes Reference
 

@@ -108,52 +108,49 @@ func resourceSqlUser() *schema.Resource {
 			"password_policy": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"allowed_failed_attempts": {
 							Type:        schema.TypeInt,
 							Optional:    true,
-							Computed:    true,
+							Default:     0,
 							Description: `Number of failed attempts allowed before the user get locked.`,
 						},
 						"password_expiration_duration": {
 							Type:        schema.TypeString,
 							Optional:    true,
+							Computed:    true,
 							Description: `Password expiration duration with one week grace period.`,
 						},
 						"enable_failed_attempts_check": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Computed:    true,
+							Default:     false,
 							Description: `If true, the check that will lock user after too many failed login attempts will be enabled.`,
-						},
-						"status": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Computed: true,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"locked": {
-										Type:        schema.TypeBool,
-										Optional:    true,
-										Computed:    true,
-										Description: `If true, user does not have login privileges.`,
-									},
-									"password_expiration_time": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: `Password expiration duration with one week grace period.`,
-									},
-								},
-							},
 						},
 						"enable_password_verification": {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: `If true, the user must specify the current password before changing the password. This flag is supported only for MySQL.`,
+						},
+						"status": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"locked": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: `If true, user does not have login privileges.`,
+									},
+									"password_expiration_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: `Password expiration duration with one week grace period.`,
+									},
+								},
+							},
 						},
 					},
 				},
@@ -211,8 +208,9 @@ func expandPasswordPolicy(cfg interface{}) *sqladmin.UserPasswordValidationPolic
 		upvp.EnableFailedAttemptsCheck = v.(bool)
 	}
 	if v, ok := raw["enable_password_verification"]; ok {
-		upvp.EnableFailedAttemptsCheck = v.(bool)
+		upvp.EnablePasswordVerification = v.(bool)
 	}
+
 	if v, ok := raw["status"]; ok {
 		upvp.Status = expandStatus(v)
 	}
@@ -221,6 +219,9 @@ func expandPasswordPolicy(cfg interface{}) *sqladmin.UserPasswordValidationPolic
 }
 
 func expandStatus(cfg interface{}) *sqladmin.PasswordStatus {
+	if len(cfg.([]interface{})) == 0 || cfg.([]interface{})[0] == nil {
+		return nil
+	}
 	raw := cfg.([]interface{})[0].(map[string]interface{})
 	ps := &sqladmin.PasswordStatus{}
 	if v, ok := raw["locked"]; ok {
@@ -378,7 +379,7 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 	if user.PasswordPolicy != nil {
-		if err := d.Set("password_policy", flattenPasswordPolicy(user.PasswordPolicy)); err != nil {
+		if err := d.Set("password_policy", flattenPasswordPolicy(d)); err != nil {
 			return fmt.Errorf("Error setting password_policy: %s", err)
 		}
 	}
@@ -386,22 +387,22 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func flattenPasswordPolicy(passwordPolicy *sqladmin.UserPasswordValidationPolicy) interface{} {
+func flattenPasswordPolicy(d *schema.ResourceData) interface{} {
 	data := map[string]interface{}{
-		"allowed_failed_attempts":      passwordPolicy.AllowedFailedAttempts,
-		"password_expiration_duration": passwordPolicy.PasswordExpirationDuration,
-		"enable_failed_attempts_check": passwordPolicy.EnableFailedAttemptsCheck,
-		"enable_password_verification": passwordPolicy.EnablePasswordVerification,
-		"status":                       flattenPasswordStatus(passwordPolicy.Status),
+		"allowed_failed_attempts":      d.Get("password_policy.0.allowed_failed_attempts"),
+		"password_expiration_duration": d.Get("password_policy.0.password_expiration_duration"),
+		"enable_failed_attempts_check": d.Get("password_policy.0.enable_failed_attempts_check"),
+		"enable_password_verification": d.Get("password_policy.0.enable_password_verification"),
 	}
 
+	data["status"] = flattenPasswordStatus(d)
 	return []map[string]interface{}{data}
 }
 
-func flattenPasswordStatus(status *sqladmin.PasswordStatus) interface{} {
+func flattenPasswordStatus(d *schema.ResourceData) interface{} {
 	data := map[string]interface{}{
-		"locked":                   status.Locked,
-		"password_expiration_time": status.PasswordExpirationTime,
+		"locked":                   d.Get("password_policy.0.status.0.locked"),
+		"password_expiration_time": d.Get("password_policy.0.status.0.password_expiration_time"),
 	}
 
 	return []map[string]interface{}{data}

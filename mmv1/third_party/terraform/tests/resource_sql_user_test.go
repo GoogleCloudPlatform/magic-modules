@@ -374,11 +374,6 @@ resource "google_sql_user" "user1" {
     allowed_failed_attempts  = 6
     password_expiration_duration  =  "2592000s"
     enable_failed_attempts_check = true
-    status {
-      locked = true
-      password_expiration_time = "2023-07-23T04:06:22.114-07:00"
-    }
-    enable_password_verification = true
   }
 }
 
@@ -389,13 +384,7 @@ resource "google_sql_user" "user2" {
   password = "hunter2"
   password_policy {
     allowed_failed_attempts  = 6
-    password_expiration_duration  =  "2592000s"
     enable_failed_attempts_check = true
-    status {
-      locked = true
-      password_expiration_time = "2023-07-23T04:06:22.114-07:00"
-    }
-    enable_password_verification = true
   }
 }
 `, instance, password, disabled)
