@@ -903,3 +903,89 @@ objects:
 
                         Paths must be absolute and cannot conflict with other volume paths on the same
                         build step or with certain reserved volume paths.
+  - !ruby/object:Api::Resource
+    name: 'GitHubEnterpriseConfig'
+    base_url: projects/{{projectId}}/githubEnterpriseConfigs
+    self_link: projects/{{$projectId}}/githubEnterpriseConfigs/{{configId}}
+    update_verb: :PATCH
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating a GitHub Enterprise trigger': 'https://cloud.google.com/build/docs/automating-builds/github/build-repos-from-github-enterprise#api'
+      api: 'https://cloud.google.com/build/docs/api/reference/rest/v1/projects.githubEnterpriseConfigs'
+    description: |
+      GitHubEnterpriseConfig represents a configuration for a GitHub Enterprise server.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'projectId'
+        description:
+          The ProjectId where the resouce should be creted.
+        input: true  
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The full resource name for the GitHubEnterpriseConfig For example: "projects/{$projectId}/githubEnterpriseConfigs/{$configId}"
+      - !ruby/object:Api::Type::String
+        name: 'hostUrl'
+        description: |
+          The URL of the github enterprise host the configuration is for.
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: 'appId'
+        required: true
+        input: true
+        description: |
+          The GitHub app id of the Cloud Build app on the GitHub Enterprise server.
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        description: |
+          Output only. Time when the installation was associated with the project.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. 
+          Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+        output: true
+      - !ruby/object:Api::Type:String
+        name: 'webhookKey'
+        description: |
+          The key that should be attached to webhook calls to the v1.webhook endpoint.
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'peeredNetwork'
+        description: |
+          The U$RI of the repo (optional). If unspecified, the repo from which the trigger 
+          invocation originated is assumed to be the repo from which to read the specified path.
+          Optional. The network to be used when reaching out to the GitHub Enterprise server.
+          The VPC network must be enabled for private service connection. 
+          This should be set if the GitHub Enterprise server is hosted on-premises and not reachable by public internet.
+          If this field is left empty, no network peering will occur and calls to the GitHub Enterprise server will be made over the public internet.
+          Must be in the format projects/{project}/global/networks/{network}, where {project} is a project number or id and {network} is the name of a VPC network in the project.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'privateKeyName'
+        description: |
+          Names of secrets in Secret Manager.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'privateKeyVersionName'
+            required: true
+            description: |
+              The resource name for the private key secret version.
+          - !ruby/object:Api::Type::String
+            name: 'webhookSecretVersionName'
+            description: |
+              The resource name for the webhook secret secret version in Secret Manager.
+          - !ruby/object:Api::Type::String
+            name: 'oauthSecretVersionName'
+            description: |
+              The resource name for the OAuth secret secret version in Secret Manager.
+          - !ruby/object:Api::Type::String
+            name: 'oauthClientIdVersionName'
+            description: |
+              The resource name for the OAuth client ID secret version in Secret Manager.
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        required: true
+        description: |
+          Name to display for this config.
+      - !ruby/object:Api::Type::String
+        name: 'sslCa'
+        description: |
+          Optional. SSL certificate to use for requests to GitHub Enterprise.
