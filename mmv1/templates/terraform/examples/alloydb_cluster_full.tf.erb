@@ -3,7 +3,6 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
   cluster_id   = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
   location     = "us-central1"
   network      = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  display_name = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
 
   initial_user {
     user     = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
@@ -14,6 +13,10 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
     location      = "us-central1"
     backup_window = "1800s"
     enabled       = true
+
+    encryption_config {
+      kms_key_name = google_kms_crypto_key.crypto_key.id
+    }
 
     weekly_schedule {
       days_of_week = ["MONDAY"]
@@ -32,12 +35,30 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
 
     labels = {
       test = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
-    }   
+    }
   }
 
   labels = {
     test = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
   }
+
+  encryption_config {
+    kms_key_name = google_kms_crypto_key.crypto_key.id
+  }
+
+  depends_on = [google_project_iam_member.encrypt_role]
+}
+
+resource "google_kms_crypto_key" "crypto_key" {
+  provider = google-beta
+  name     = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
+  key_ring = google_kms_key_ring.key_ring.id
+}
+
+resource "google_kms_key_ring" "key_ring" {
+  provider = google-beta
+  name     = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
+  location = "us-central1"
 }
 
 data "google_project" "project" {
@@ -47,4 +68,11 @@ data "google_project" "project" {
 resource "google_compute_network" "default" {
   provider = google-beta
   name = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
-} 
+}
+
+resource "google_project_iam_member" "encrypt_role" {
+  provider = google-beta
+  project = data.google_project.project.project_id
+  role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
+}

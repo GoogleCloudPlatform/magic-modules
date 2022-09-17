@@ -12,4 +12,4 @@ data "google_project" "project" {
 resource "google_compute_network" "default" {
   provider = google-beta
   name = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
-} 
+}
