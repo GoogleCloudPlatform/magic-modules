@@ -1,8 +1,9 @@
 resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
-  provider   = google-beta
-  cluster_id = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
-  location   = "us-central1"
-  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  provider     = google-beta
+  cluster_id   = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
+  location     = "us-central1"
+  network      = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  display_name = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
 
   initial_user {
     user     = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
@@ -18,7 +19,10 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
       days_of_week = ["MONDAY"]
 
       start_times {
-        hours = 23
+        hours   = 23
+        minutes = 0
+        seconds = 0
+        nanos   = 0
       }
     }
 
