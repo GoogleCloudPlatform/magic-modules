@@ -1,0 +1,105 @@
+<%- # the license inside this block applies to this file
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+-%>
+<%
+# TODO: Add YAML autogen notice
+autogen_exception
+-%>
+# Copyright 2019 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: core.cnrm.cloud.google.com/v1alpha1
+kind: ServiceMapping
+metadata:
+  name: <%= product.name.downcase %>.cnrm.cloud.google.com
+  namespace: cnrm-system
+spec:
+  name: <%= product.name %>
+  version: v1beta1
+  serviceHostName: <%= product.name.downcase %>.googleapis.com
+  resources:
+<%
+  product.objects.reject { |r| r.exclude || r.not_in_version?(product.version_obj_or_closest(version)) }.each do |object|
+    if @config.legacy_name.nil?
+     terraform_name = "google_" + (product.name + object.name).underscore
+    else
+     terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore
+    end
+-%>
+    - name: <%= terraform_name %>
+      kind: <%= "#{product.name}#{object.name}" %>
+<% if false %>
+<%-
+    iam_policy = object&.iam_policy
+    unless iam_policy.nil? || iam_policy.exclude
+-%>
+      iamPolicyName: <%= "#{terraform_name}_iam_policy" %>
+<%- end -%>
+<%- end -%>
+<%
+    # idTemplate is an import id fed into the provider, which is (slightly)
+    # distinct from a Terraform id.
+    # Select the first format, which will generally be the long form.
+    id_template = import_id_formats_from_resource(object)[0]
+    name = guess_metadata_mapping_name(object)
+    has_name = !name.nil?
+    has_labels = object.all_user_properties.map(&:name).include?("labels")
+    is_server_generated = is_server_generated_name(name, object) if has_name
+    puts "erb... "+name+"... "+is_server_generated
+-%>
+<%  if !id_template.nil? && id_template != "" -%>
+      idTemplate: "<%= id_template %>"
+<%  end -%>
+      idTemplateCanBeUsedToMatchResourceName: false
+      resourceAvailableInAssetInventory: false
+<%  if has_name || has_labels -%>
+      metadataMapping:
+<%  if has_name -%>
+        name: <%= name %>
+<%  end -%>
+<%  if has_labels -%>
+        labels: labels
+<%  end -%>
+<%  end -%>
+<%  if is_server_generated -%>
+      serverGeneratedIDField: <%= name %>
+<%  end -%>
+<%  if has_name -%>
+      resourceID:
+        targetField: <%= name %>
+<%  end -%>
+<%-
+    references = object.all_user_properties.select { |p| p.is_a?(Api::Type::ResourceRef) }.reject { |p| p.name == 'region' || p.name == 'zone' }
+    unless references.empty?
+-%>
+      resourceReferences:
+<%-   references.each do |property| -%>
+        - key: <%= property.name.camelize(:lower) %>Ref
+          tfField: <%= property.name %>
+          kind: <%= "#{product.name}#{property.resource}" %>
+          required: <%= property.required ? "true" : "false" %>
+<%  end -%>
+<%  end -%>
+<% end -%>

@@ -33,6 +33,7 @@ require 'provider/ansible'
 require 'provider/ansible_devel'
 require 'provider/inspec'
 require 'provider/terraform'
+require 'provider/terraform_kcc'
 require 'provider/terraform_oics'
 require 'provider/terraform_validator'
 require 'pp' if ENV['COMPILER_DEBUG']
@@ -202,7 +203,8 @@ all_product_files.each do |product_name|
     override_providers = {
       'oics' => Provider::TerraformOiCS,
       'validator' => Provider::TerraformValidator,
-      'ansible_devel' => Provider::Ansible::Devel
+      'ansible_devel' => Provider::Ansible::Devel,
+      'kcc' => Provider::TerraformKCC
     }
 
     provider_class = override_providers[force_provider]
