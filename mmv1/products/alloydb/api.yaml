@@ -132,7 +132,6 @@ objects:
               The SSL mode. Specifies client-server SSL/TLS connection behavior.
             default_value: :SSL_MODE_ALLOW
             values:
-              - :SSL_MODE_UNSPECIFIED
               - :SSL_MODE_ALLOW
               - :SSL_MODE_REQUIRE
               - :SSL_MODE_VERIFY_CA
@@ -143,7 +142,6 @@ objects:
             default_value: :CA_SOURCE_MANAGED
             values:
               - :CA_SOURCE_MANAGED
-              - :CA_SOURCE_UNSPECIFIED
       - !ruby/object:Api::Type::NestedObject
         name: "automatedBackupPolicy"
         description: |
@@ -183,7 +181,6 @@ objects:
                   description: |
                     The days of the week to perform a backup. At least one day of the week must be provided.
                   values:
-                    - :DAY_OF_WEEK_UNSPECIFIED
                     - :MONDAY
                     - :TUESDAY
                     - :WEDNESDAY
