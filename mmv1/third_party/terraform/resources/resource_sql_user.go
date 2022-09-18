@@ -192,7 +192,7 @@ func expandSqlServerUserDetails(cfg interface{}) (*sqladmin.SqlServerUserDetails
 
 func expandPasswordPolicy(cfg interface{}) *sqladmin.UserPasswordValidationPolicy {
 	if len(cfg.([]interface{})) == 0 || cfg.([]interface{})[0] == nil {
-		return upvp
+		return nil
 	}
 	raw := cfg.([]interface{})[0].(map[string]interface{})
 
