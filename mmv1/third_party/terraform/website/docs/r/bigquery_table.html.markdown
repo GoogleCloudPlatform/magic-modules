@@ -170,9 +170,8 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     partitioning on an unsupported format will lead to an error, as will providing
     an invalid specification. Structure is [documented below](#nested_hive_partitioning_options).
 
-* `avro_options` (Optional) - (Optional) - Additional options if
-    `source_format` is set to "AVRO".  Structure is
-    [documented below](#nested_avro_options).
+* `avro_options` (Optional) - Additional options if `source_format` is set to  
+    "AVRO".  Structure is [documented below](#nested_avro_options).
 
 
 * `ignore_unknown_values` (Optional) - Indicates if BigQuery should
@@ -268,7 +267,9 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 <a name="nested_avro_options"></a>The `avro_options` block supports:
 
-* `use_avro_logical_types` (Optional) - If is set to true, indicates whether to interpret logical types as the corresponding BigQuery data type (for example, TIMESTAMP), instead of using the raw type (for example, INTEGER).
+* `use_avro_logical_types` (Optional) - If is set to true, indicates whether  
+    to interpret logical types as the corresponding BigQuery data type  
+    (for example, TIMESTAMP), instead of using the raw type (for example, INTEGER).
     
 
 <a name="nested_time_partitioning"></a>The `time_partitioning` block supports:
