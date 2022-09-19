@@ -1,39 +1,35 @@
-# Magic Modules
-
 <img src="mmv1/images/magic-modules.svg" alt="Magic Modules Logo" width="300" align="right" />
 
-## Overview
+# Magic Modules
 
-Magic Modules is a tool used to autogenerate support in a variety of open source DevOps
-tools for Google Cloud Platform. [GCP "resource"](https://cloud.google.com/docs/overview/#gcp_resources)
-definitions are encoded in a shared data file, and that data is used to fill in
-tool-specific templates across each of the tools Magic Modules
-generates.
+Magic Modules is a code generator and CI system that's used to develop the Terraform providers
+for Google Platform, [`google`](https://github.com/hashicorp/terraform-provider-google) (or TPG) and
+[`google-beta`](https://github.com/hashicorp/terraform-provider-google-beta) (or TPGB).
 
-Magic Modules generates GCP support for:
+Magic Modules allows contributors to make changes against a single codebase and develop both
+provider versions simultaneously. After sending a pull request against this repository, the
+`modular-magician` robot user will manage (most of) the heavy lifting from generating a
+complete output, running presubmit tests, and updating the providers following your
+change.
 
-* Terraform
+---
 
-In addition, Magic Modules generates support for several companion
-features/tools:
+- [Getting Started with Magic Modules](#getting-started-with-magic-modules)
+   - [Preparing your environment](#preparing-your-environment)
+   - [Preparing Magic Modules / One-time setup](#preparing-magic-modules--one-time-setup)
+   - [Generating the Terraform Providers](#generating-the-terraform-providers)
+   - [Testing](#testing)
+      - [Using released terraform binary with local provider binary](#using-released-terraform-binary-with-local-provider-binary)
+   - [Submitting a PR](#submitting-a-pr)
+- [Contributing](#contributing)
+   - [General contributing steps](#general-contributing-steps)
+   - [Detailed contributing guide](#detailed-contributing-guide)
+- [Glossary](#glossary)
+- [Other Resources](#other-resources)
 
-* Terraform Validator
-* Terraform in Cloud Shell
-
-Importantly, Magic Modules *isn't* full code generation. Every change is made
-manually; more than a code generator, Magic Modules is a force multiplier for
-development. While many Magic Modules resources are defined exactly based on the
-GCP API, we use Magic Modules to preemptively solve issues across each tool by
-encoding our field-tested learnings from other tools in those definitions. In
-effect, an issue solved in one tool will be solved for each other tool.
+---
 
 ## Getting Started with Magic Modules
-
-You can try out Magic Modules immediately with Open in Cloud Shell below; if
-you're getting set up on a local workstation, this guide serves as a reference
-to help you get it set up.
-
-[![Open in Cloud Shell](http://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/magic-modules&tutorial=mmv1/TUTORIAL.md)
 
 ### Preparing your environment
 
@@ -44,13 +40,22 @@ To get started, you'll need:
     instructions to set up Go: [YouTube video](https://www.youtube.com/watch?v=VQVyvulNnzs).
   * If you're using Cloud Shell, Go is already installed.
 * Ruby 2.6.0
-  * You can use `rbenv` to manage your Ruby version(s).
-  * To install `rbenv`, run `sudo apt install rbenv`.
-  * Then run `rbenv install 2.6.0`.
+  * You can use [`rbenv`](https://github.com/rbenv/rbenv) to manage your Ruby version(s).
+  * To install `rbenv`:
+    * Homebrew: run `brew install rbenv ruby-build`
+    * Debian, Ubuntu, and their derivatives: run `sudo apt install rbenv`
+  * Then run `rbenv install 2.6.0`. 
+    * For M1 Mac users, run `RUBY_CFLAGS="-Wno-error=implicit-function-declaration" rbenv install 2.6.0`
 * [`Bundler`](https://github.com/bundler/bundler)
   * This can be installed with `gem install bundler`
+* Goimports
+  * go install golang.org/x/tools/cmd/goimports / go install golang.org/x/tools/cmd/goimports@latest
+* Terraform
+  * [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 * If you are getting "Too many open files" ulimit needs to be raised.
   * Mac OSX: `ulimit -n 1000`
+
+---
 
 ### Preparing Magic Modules / One-time setup
 
@@ -59,7 +64,6 @@ Compiling Magic Modules can be done directly from the `mmv1` directory within th
 In the future we will add hybrid generation with multiple generators. All the information below
 pertains only to the contents of the `mmv1` directory, and commands should be executed from
 that directory.
-
 
 To get started right away, use the bootstrap script with:
 
@@ -99,7 +103,7 @@ Now, you can verify you're ready with:
 ./tools/doctor
 ```
 
-Expected output:
+<details><summary>Expected output:</summary>
 
 ```
 Check for rbenv in path...
@@ -112,13 +116,12 @@ Check for go in path...
    found!
 Check for goimports in path...
    found!
-Check for python in path...
-   found!
 Check for git in path...
    found!
-Check for black in path...
-   found!
 ```
+</details>
+
+---
 
 ### Generating the Terraform Providers
 
@@ -137,101 +140,102 @@ make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terrafor
 make terraform VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
 
 # Only generate a specific product (plus all common files)
-make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=dataproc
+make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=pubsub
+
+# Only generate only a specific resources for a product
+make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=pubsub RESOURCE=Topic
+```
+The `PRODUCT` variable values correspond to folder names in `mmv1/products` for generated resources. The `RESOURCE` variable value needs to match the name of the resource inside the `api.yaml` file for that product.
+
+Handwritten files in `mmv1/third_party` are always compiled. If you are only working on common files or third_party code, you can pass a non-existent `PRODUCT`
+to reduce the generation time.
+
+```bash
+# Only generate common files, including all third_party code
+make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=foo
 ```
 
 It's worth noting that Magic Modules will only generate new files when run
 locally. The "Magician"- the Magic Modules CI system- handles deletion of old
 files when creating PRs.
 
-#### Generating terraform-validator
+---
 
-You can compile terraform-validator by running the following command.
-If Magic Modules has been installed correctly, you'll get no errors.
-
-```bash
-make validator OUTPUT_PATH="/path/to/your/terraform-validator"
-```
-
-### Making changes to resources
-
-Once again, see the Open in Cloud Shell example above for an interactive example
-of making a Magic Modules change; this section will serve as a reference more
-than a specific example.
-
-Magic Modules mirrors the GCP REST API; there are [products](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/product.rb)
-such as Compute or Container (GKE) that contains [resources](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource.rb),
-[GCP resources](https://cloud.google.com/docs/overview/#gcp_resources) such as
-Compute VM Instances or GKE Clusters.
-
-Products are separate folders under [`products/`], and each folder contains a
-file named `api.yaml` that contains the resources that make up the API
-definition.
-
-Resources are made up of some metadata like their `"name"` in the API such as
-Address or Instance, some additional metadata (see the fields in [resource.rb](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource.rb)),
-and the meat of a resource, its fields. They're represented by `properties` in
-Magic Modules, an array of [types](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/type.rb).
-
-Adding a new field to a resource in Magic Modules is often as easy as adding a
-`type` to the `properties` array for the resource. See [this example](https://github.com/GoogleCloudPlatform/magic-modules/pull/1126/files#diff-fb4f76e7d870258668a3beac48bf164c)
-where a field was added to all the tools (currently only Terraform) that support
-beta fields.
-
-#### Tool-specific overrides
-
-While most small changes won't require fiddling with overrides, each tool has
-"overrides" when it needs to deviate from the definition in `api.yaml`. This is
-often minor differences- the naming of a field, or whether it's required or not.
-
-You can find them under the folder for a product, with the name `{{tool}}.yaml`.
-For example, Terraform's overrides for Cloud SQL are present at `products/sql/terraform.yaml`
-
-You can find a full reference for each tool under `overrides/{{tool}}/resource_override.rb`
-and `overrides/{{tool}}/property_override.rb`, as well as some other tool-specific
-functionality.
-
-#### Making changes to handwritten files
-
-The Google providers for Terraform have a large number of handwritten files,
-written before Magic Modules was used with them. While conversion is ongoing,
-many resources are still managed by hand. You can modify handwritten files
-under the `third_party/terraform` directory.
-
-Features that are only present in certain versions need to be "guarded" by
-wrapping those lines of code in version guards;
-
-```erb
-<% unless version == 'ga' -%>
-  // beta-only code
-<% end -%>
-```
-
-### Testing your changes
+### Testing
 
 Once you've made changes to resource definition, you can run Magic Modules
-to generate changes to your tool; see
+to generate changes to your provider; see
 ["Generating the Terraform Providers"](#generating-the-terraform-providers)
 above if you need a refresher. Once it's generated, you should run the
-tool-specific tests as if you were submitting a PR against that tool.
+tests to ensure your change work for the providers.
 
-You can run tests in the `{{output_folder}}` you generated the tool in.
-See the following tool-specific documentation for more details on testing that
-tool;
+Tests generally assume the following environment variables must be set in order to run tests:
 
-Tool             | Testing Guide
------------------|--------------
-terraform        | [`google` provider testing guide](https://github.com/hashicorp/terraform-provider-google/blob/main/.github/CONTRIBUTING.md#tests)
-terraform (beta) | [`google-beta` provider testing guide](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/.github/CONTRIBUTING.md#tests)
+```
+GOOGLE_PROJECT
+GOOGLE_CREDENTIALS|GOOGLE_CLOUD_KEYFILE_JSON|GCLOUD_KEYFILE_JSON|GOOGLE_USE_DEFAULT_CREDENTIALS
+GOOGLE_REGION
+GOOGLE_ZONE
+```
 
-Don't worry about testing every tool, only the primary tool you're making
-changes against. The Magic Modules maintainers will ensure your changes work
-against each tool.
+Note that the credentials you provide must be granted wide permissions on the specified project. These tests provision real resources, and require permission in order to do so. Most developers on the team grant their test service account `roles/editor` or `roles/owner` on their project. Additionally, to ensure that your tests are performed in a region and zone with wide support for GCP features, `GOOGLE_REGION` should be set to `us-central1` and `GOOGLE_ZONE` to `us-central1-a`.
 
-If your changes have unintended consequences in another tool, a reviewer will
-instruct you to mark the field excluded or provide specific feedback on what
-changes to make to the tool-specific overrides in order for them to work
-correctly.
+Additional variable may be required for other tests, and should get flagged when running them by Go skipping the test and flagging in the output it was skipped, with a skip message explaining why. The most typical extra values required are those required for project creation:
+
+```
+GOOGLE_ORG
+GOOGLE_BILLING_ACCOUNT
+```
+
+You can run tests against the provider you generated in the `OUTPUT_PATH` location. When running tests, specify which to run using `TESTARGS`, such as:
+
+```bash
+# for ga provider
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+TF_LOG=TRACE make testacc TEST=./google TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
+
+# for beta provider
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+TF_LOG=TRACE make testacc TEST=./google-beta TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
+```
+
+The `TESTARGS` variable is regexp-like, so multiple tests can be run in parallel by specifying a common substring of those tests (for example, `TestAccContainerNodePool` to run all node pool tests). There are 2000+ tests, and running all of them takes over 9 hours and requires a lot of GCP quota.
+
+Note: `TF_LOG=TRACE` is optional; it [enables verbose logging](https://www.terraform.io/docs/internals/debugging.html) during tests, including all API request/response cycles. `> output.log` redirects the test output to a file for analysis, which is useful because `TRACE` logging can be extremely verbose.
+
+Tests will use whatever version of the `terraform` binary is found on your path. To test with multiple versions of `terraform` core, you must run the tests multiple times with different versions. You can use [`tfenv`](https://github.com/tfutils/tfenv) to manage your system `terraform` versions.
+
+#### Using released terraform binary with local provider binary
+
+After the provider code is generated into the location at `OUTPUT_PATH`, you need to build the code in your generated provider
+to compile the provider binary:
+```bash
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+make build
+```
+
+Setup:
+
+```bash
+mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google/5.0.0/darwin_arm64
+mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google-beta/5.0.0/darwin_arm64
+ln -s $GOPATH/bin/terraform-provider-google ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google/5.0.0/darwin_arm64/terraform-provider-google_v5.0.0
+ln -s $GOPATH/bin/terraform-provider-google-beta ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google-beta/5.0.0/darwin_arm64/terraform-provider-google-beta_v5.0.0
+```
+
+NOTE: Substitute your machine architecture for `darwin_arm64`, i.e. `darwin_amd64` or `linux_amd64`
+
+Once this setup is complete, terraform will automatically use the binaries generated by the `make build` commands in the `terraform-provider-google` and `terraform-provider-google-beta` repositories instead of downloading the latest versions. To undo this, you can run:
+
+```bash
+rm -rf ~/.terraform.d/plugins/registry.terraform.io/hashicorp/
+```
+
+For more information, check out Hashicorp's documentation on the [0.13+ filesystem layout](https://www.terraform.io/upgrade-guides/0-13.html#new-filesystem-layout-for-local-copies-of-providers).
+
+If multiple versions are available in a plugin directory (for example after `terraform providers mirror` is used), Terraform will pick the most up-to-date provider version within version constraints. As such, we recommend using a version that is several major versions ahead for your local copy of the provider, such as `5.0.0`.
+
+---
 
 ### Submitting a PR
 
@@ -266,6 +270,64 @@ that maintainer with no changes needing to be made.
 Once you've gotten approvals from the primary reviewer and the reviewers for
 any affected tools, the primary reviewer will merge your changes.
 
+---
+
+## Contributing
+
+### General contributing steps
+
+1. Fork `Magic Modules` repository into your GitHub account if you haven't done before.
+1. Check the [issue tracker](https://github.com/hashicorp/terraform-provider-google/issues) to see whether your feature has already been requested.
+   * if there's an issue and it's already has a dedicated assignee, it indicates that someone may have already started to work on a solution.
+   * otherwise, you're welcome to work on the issue.
+1. Check whether the resource you would like to work on already exists in the providers ([`google`](https://github.com/hashicorp/terraform-provider-google) / [`google-beta`](https://github.com/hashicorp/terraform-provider-google-beta) or [check the website](https://registry.terraform.io/providers/hashicorp/google/latest/docs)).
+   * If it exists, check the header of the downstream file to identify the type of tools used to generate the resource. For some resources, the code file, the test file and the documentation file may not be generated via the same tools.
+      * Generated resources like [`google_compute_address`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address) can be identified by looking in their [`Go source`](https://github.com/hashicorp/terraform-provider-google/blob/main/google/resource_compute_address.go) for an `AUTO GENERATED CODE` header as well as a `Type`. "Generated resources" typically refers to just the `MMv1` type, and `DCL` type resources are considered "DCL-based". (Currently DCL-related contribution are not supported)
+      * Handwritten resources like [`google_container_cluster`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster) can be identified if they have source code present under the [`mmv1/third_party/terraform/resources`](./mmv1/third_party/terraform/resources) folder or by the absence of the `AUTO GENERATED CODE header` in their [`Go source`](https://github.com/hashicorp/terraform-provider-google/blob/main/google/resource_container_cluster.go).
+   * If not, decide which tool you would like to use to implement the resource. 
+      * MMv1 is strongly preferred over handwriting the resource unless the resource can not be generated.
+      * Currently, only handwritten datasources are supported.
+1. Make the actual code change.
+   * The [Contribution Guide](#detailed-contributing-guide) below will guide you to the detailed instructions on how to make your change, based on the type of the change + the tool used to generate the code.
+1. Build the providers that includes your change. Check [Generating the Terraform Providers](#generating-the-terraform-providers) section for details on how to generate the providers locally.
+1. Test the feature against the providers you generated in the last step locally. Check [Testing Guidance](#testing) for details on how to run provider test locally. (Testing the PR locally and pushing the commit to the PR only after the tests pass locally may significantly reduce review cycles)
+1. Push your changes to your `magic-modules` repo fork and send a pull request from that branch to the main branch on `magic-modules`. A reviewer will be assigned automatically to your PR. Check [Submitting a PR](#submitting-a-PR) section for details on how to submit a PR.
+1. Wait until the the modules magician to generate downstream diff (which should takes about 15 mins after creating the PR) to make sure all changes are generated correctly in downstream repos.
+1. Wait for the VCR test results.
+   <details><summary>Get to know general workflow for VCR tests</summary>
+
+      1. You submit your change.
+      1. The recorded tests are ran against your changes by the `modular-magician`. Tests will fail if:
+         1. Your PR has changed the HTTP request values sent by the provider
+         1. Your PR does not change the HTTP request values, but fails on the values returned in an old recording
+         1. The recordings are out of sync with the merge-base of your PR, and an unrelated contributor's change has caused a false positive
+      1. The `modular-magician` will leave a message indicating the number of passing and failing VCR tests. If there is a failure, the `modular-magician` user will leave a message indicating the "`Triggering VCR tests in RECORDING mode for the following tests that failed during VCR:`" marking which tests failed.
+         1. If a test does not appear related, it probably isn't!
+      1. The `modular-magician` will kick off a second test run targeting only the failed tests, this time hitting the live GCP APIs. If there are tests that fail at this point, a message stating `Tests failed during RECORDING mode:` will be left indicating the tests.
+         1. If a test that appears to be related to your change has failed here, it's likely your change has introduced an issue. You can view the debug logs for the test by clicking the "view" link beside the test case to attempt to debug what's going wrong.
+         1. If a test appears to be completely unrelated has failed, it's possible that a GCP API has changed in a way that broke the provider or our environment capped on a quota.
+   </details>
+
+   Where possible, take a look at the logs and see if you can figure out what needs to be fixed related to your change.
+   The false positive rate on these tests is extremely high between changes in the API, Cloud Build bugs, and eventual consistency issues in test recordings so we don't expect contributors to wholly interpret the results- that's the responsibility of your reviewer.
+1. If your assigned reviewers does not reply/ review within a week, gently ping them on github.
+1. After your PR is merged, it will be released to customers in around a week or two.
+
+---
+
+### Detailed contributing guide
+
+Task          | Section
+--------------|--------------
+Resource      | [handwritten](./mmv1/third_party/terraform/README.md#resource) / [mmv1](./mmv1/README.md#resource)
+Datasource    | [handwritten](./mmv1/third_party/terraform/README.md#datasource) / (only handwritten datasources are supported)
+IAM resource  | [handwritten](./mmv1/third_party/terraform/README.md#iam-resource) / [mmv1](./mmv1/README.md#iam-resource)
+Testing       | [handwritten](./mmv1/third_party/terraform/README.md#testing) / [mmv1](./mmv1/README.md#testing)
+Documentation | [handwritten](./mmv1/third_party/terraform/README.md#documentation) / [mmv1](./mmv1/README.md#documentation)
+Beta feature  | [handwritten](./mmv1/third_party/terraform/README.md#beta-feature) / [mmv1](./mmv1/README.md#beta-feature)
+
+---
+
 ## Glossary
 
 The maintainers of the repository will tend to use specific jargon to describe
@@ -280,26 +342,11 @@ downstream(s) | A PR created by the Magician against a tool
 upstream      | A PR created against Magic Modules or the Magic Modules repo
 The Magician  | The Magic Modules CI system that drives the GitHub robot `modular-magician`
 
-## Compiling MMv1 + tpgtools
+---
 
-We are currently developing a new generation tool for Terraform called tpgtools.
-This relies on a [declarative client library](https://github.com/GoogleCloudPlatform/declarative-resource-client-library)
-that handles the actuation of GCP resources. We plan to gradually move resources
-from being generated by the existing Magic Modules Ruby code (mmv1) to using
-tpgtools. While we move resources over there will be a period of time when
-both generators are in use. To assist with generation we have a series of `make`
-targets that will run the compilers in tandem to generate the Terraform provider.
+## Other Resources
 
-Sample Usage to compile at beta:
-`make OUTPUT_PATH=/path/to/terraform-provider-google-beta VERSION=beta`
-
-Target single product:
-`make OUTPUT_PATH=/path/to/terraform-provider-google VERSION=ga PRODUCT=compute`
-
-Target single resource
-`make OUTPUT_PATH=/path/to/terraform-provider-google VERSION=ga PRODUCT=compute RESOURCE=image`
-
-For more advanced usage of mmv1 compiler flags, please execute the compiler directly
-from within the mmv1 directory.
-
-For additional logging in the tpgtools compiler set `VERBOSE=true` when executing the `make` command
+* [Extending Terraform](https://www.terraform.io/plugin)
+   * [How Terraform Works](https://www.terraform.io/plugin/how-terraform-works)
+   * [Writing Custom Providers / Calling APIs with Terraform Providers](https://learn.hashicorp.com/collections/terraform/providers?utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS)
+* [Terraform Glossary](https://www.terraform.io/docs/glossary)

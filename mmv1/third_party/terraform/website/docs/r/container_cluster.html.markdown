@@ -137,6 +137,9 @@ for more details. Structure is [documented below](#nested_cluster_autoscaling).
 * `binary_authorization` - (Optional) Configuration options for the Binary
   Authorization feature. Structure is [documented below](#nested_binary_authorization).
 
+* `service_external_ips_config` - (Optional)
+    Structure is [documented below](#nested_service_external_ips_config).
+
 * `mesh_certificates` - (Optional)
     Structure is [documented below](#nested_mesh_encryption).
 
@@ -265,6 +268,8 @@ region are guaranteed to support the same version.
 * `node_pool_auto_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Node pool configs that apply to auto-provisioned node pools in
     [autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison) clusters and
     [node auto-provisioning](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning)-enabled clusters. Structure is [documented below](#nested_node_pool_auto_config).
+
+* `node_pool_defaults` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Default NodePool settings for the entire cluster. These settings are overridden if specified on the specific NodePool object. Structure is [documented below](#nested_node_pool_defaults).
 
 * `node_version` - (Optional) The Kubernetes version on the nodes. Must either be unset
     or set to the same value as `min_master_version` on create. Defaults to the default
@@ -426,6 +431,10 @@ addons_config {
 * `evaluation_mode` - (Optional) Mode of operation for Binary Authorization policy evaluation. Valid values are `DISABLED`
   and `PROJECT_SINGLETON_POLICY_ENFORCE`. `PROJECT_SINGLETON_POLICY_ENFORCE` is functionally equivalent to the
   deprecated `enable_binary_authorization` parameter being set to `true`.
+
+<a name="nested_service_external_ips_config"></a>The `service_external_ips_config` block supports:
+
+* `enabled` - (Required) Controls whether external ips specified by a service will be allowed. It is enabled by default.
 
 <a name="nested_mesh_certificates"></a>The `mesh_certificates` block supports:
 
@@ -859,6 +868,13 @@ node_pool_auto_config {
   }
 }
 ```
+
+<a name="nested_node_pool_defaults"></a>The `node_pool_defaults` block supports:
+* `node_config_defaults` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - Subset of NodeConfig message that has defaults.
+
+The `node_config_defaults` block supports:
+
+* `gcfs_config` (Optional) The default Google Container Filesystem (GCFS) configuration at the cluster level. e.g. enable [image streaming](https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming) across all the node pools within the cluster. Structure is [documented below](#nested_gcfs_config).
 
 <a name="nested_notification_config"></a>The `notification_config` block supports:
 

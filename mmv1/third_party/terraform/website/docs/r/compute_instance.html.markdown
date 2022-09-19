@@ -167,7 +167,7 @@ is desired, you will need to modify your state file manually using
 * `enable_display` - (Optional) Enable [Virtual Displays](https://cloud.google.com/compute/docs/instances/enable-instance-virtual-display#verify_display_driver) on this instance.
 **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
-* `resource_policies` (Optional) -- A list of short names or self_links of resource policies to attach to the instance. Modifying this list will cause the instance to recreate. Currently a max of 1 resource policy is supported.
+* `resource_policies` (Optional) -- A list of self_links of resource policies to attach to the instance. Modifying this list will cause the instance to recreate. Currently a max of 1 resource policy is supported.
 
 * `reservation_affinity` - (Optional) Specifies the reservations that this instance can consume from.
     Structure is [documented below](#nested_reservation_affinity).
@@ -413,6 +413,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `enable_nested_virtualization` (Optional) Defines whether the instance should have [nested virtualization](#on_host_maintenance)  enabled. Defaults to false.
 
 * `threads_per_core` (Optional) he number of threads per physical core. To disable [simultaneous multithreading (SMT)](https://cloud.google.com/compute/docs/instances/disabling-smt) set this to 1.
+
+* `visible_core_count` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The number of physical cores to expose to an instance. [visible cores info (VC)](https://cloud.google.com/compute/docs/instances/customize-visible-cores).
 
 <a name="nested_reservation_affinity"></a>The `reservation_affinity` block supports:
 

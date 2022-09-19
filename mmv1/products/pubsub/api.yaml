@@ -382,7 +382,6 @@ objects:
           may be delivered in any order.
       - !ruby/object:Api::Type::Boolean
         name: 'enableExactlyOnceDelivery'
-        input: true
         description: |
           If `true`, Pub/Sub provides the following guarantees for the delivery
           of a message with a given value of messageId on this Subscriptions':

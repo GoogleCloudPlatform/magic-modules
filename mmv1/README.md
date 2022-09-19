@@ -90,7 +90,8 @@ setting values to `false`, and omit them instead.
 *   `required: true` indicates that a field is required. New top-level fields
     should not be considered required, as that is a breaking change. Subfields
     of newly-added optional fields can be added as required.
-*   `input: true` indicates that a field is immutable, and cannot be updated.
+*   `input: true` indicates that a field can only be set when the API resource is
+    created. Changing the field will force the resource to be recreated.
 *   `output: true` indicates that a field is output-only in the API and cannot
     be configured by the user.
 *   `default_value: {{value}}` adds a default value for the field. This should

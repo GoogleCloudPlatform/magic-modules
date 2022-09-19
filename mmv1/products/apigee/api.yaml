@@ -138,6 +138,21 @@ objects:
           If not specified, a Google-Managed encryption key will be used.
           Valid only when `RuntimeType` is CLOUD. For example: `projects/foo/locations/us/keyRings/bar/cryptoKeys/baz`.
         input: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'properties'
+        description: Properties defined in the Apigee organization profile.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'property'
+            description: List of all properties in the object.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'name'
+                  description: Name of the property.
+                - !ruby/object:Api::Type::String
+                  name: 'value'
+                  description: Value of the property.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Creating an API organization':
@@ -191,7 +206,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'peeringCidrRange'
         description: |
-          The size of the CIDR block range that will be reserved by the instance. For valid values, 
+          The size of the CIDR block range that will be reserved by the instance. For valid values,
           see [CidrRange](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances#CidrRange) on the documentation.
       - !ruby/object:Api::Type::String
         name: 'ipRange'
@@ -253,6 +268,9 @@ objects:
     base_url: 'environments'
     create_url: '{{org_id}}/environments'
     self_link: '{{org_id}}/environments/{{name}}'
+    update_url: '{{org_id}}/environments/{{name}}'
+    update_verb: :PATCH
+    update_mask: true
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
@@ -294,6 +312,7 @@ objects:
         description: |
           The resource ID of the environment.
         required: true
+        input: true
       - !ruby/object:Api::Type::String
         name: 'displayName'
         description: |
@@ -331,6 +350,29 @@ objects:
           - "PROGRAMMABLE"
           - "CONFIGURABLE"
         input: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'nodeConfig'
+        description: |
+          NodeConfig for setting the min/max number of nodes associated with the environment.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'minNodeCount'
+            description: |
+              The minimum total number of gateway nodes that the is reserved for all instances that
+              has the specified environment. If not specified, the default is determined by the
+              recommended minimum number of nodes for that gateway.
+          - !ruby/object:Api::Type::String
+            name: 'maxNodeCount'
+            description: |
+              The maximum total number of gateway nodes that the is reserved for all instances that
+              has the specified environment. If not specified, the default is determined by the
+              recommended maximum number of nodes for that gateway.
+          - !ruby/object:Api::Type::String
+            name: 'currentAggregateNodeCount'
+            description: |
+              The current total number of gateway nodes that each environment currently has across
+              all instances.
+            output: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Creating an environment':
@@ -552,8 +594,69 @@ objects:
         description: |
           Format: projects/*/regions/*/serviceAttachments/*
         required: true
+      - !ruby/object:Api::Type::String
+        name: 'connectionState'
+        description: |
+          State of the endpoint attachment connection to the service attachment.
+        output: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Creating an environment':
           'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
       api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.endpointAttachments/create'
+  - !ruby/object:Api::Resource
+    name: 'NatAddress'
+    base_url: '{{instance_id}}/natAddresses'
+    create_url: '{{instance_id}}/natAddresses'
+    delete_url: '{{instance_id}}/natAddresses/{{name}}'
+    self_link: '{{instance_id}}/natAddresses/{{name}}'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    input: true
+    description: |
+      Apigee NAT (network address translation) address. A NAT address is a static external IP address used for Internet egress traffic. This is not avaible for Apigee hybrid.
+      Apigee NAT addresses are not automatically activated because they might require explicit allow entries on the target systems first. See https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses/activate
+    parameters:
+     - !ruby/object:Api::Type::String
+        name: 'instanceId'
+        description: |
+          The Apigee instance associated with the Apigee environment,
+          in the format `organizations/{{org_name}}/instances/{{instance_name}}`.
+        required: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Resource ID of the NAT address.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'ipAddress'
+        description: |
+          The allocated NAT IP address.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'state'
+        description: |
+          State of the NAT IP address.
+        output: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Provisioning NAT IPs':
+          'https://cloud.google.com/apigee/docs/api-platform/security/nat-provisioning'
+      api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses'
