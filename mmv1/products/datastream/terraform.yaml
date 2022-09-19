@@ -93,6 +93,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       constants: templates/terraform/constants/private_connection.go.erb
       post_create: templates/terraform/post_create/private_connection.go.erb
       post_import: templates/terraform/post_import/private_connection.go.erb
+  Stream: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: projects/{{project}}/locations/{{location}}/streams/{{stream_id}}
+    import_format: ["projects/{{project}}/locations/{{location}}/streams/{{stream_id}}"]
+    properties:
+      sourceConfig.oracleSourceConfig.maxConcurrentCdcTasks: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntAtLeast(0)'
+      sourceConfig.mysqlSourceConfig.maxConcurrentCdcTasks: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntAtLeast(0)'
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
