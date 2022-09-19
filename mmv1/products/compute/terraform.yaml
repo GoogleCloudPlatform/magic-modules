@@ -1654,6 +1654,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "cloudrun_neg"
         vars:
           neg_name: "cloudrun-neg"
+          project: "neg-engpoint-cloudrun"
+          account_id: "my-account"
+          lip_http_name: "neg-lib"
+        test_env_vars:
+          org_id: :ORG_ID
+          billing_account: :BILLING_ACCT
       - !ruby/object:Provider::Terraform::Examples
         name: "region_network_endpoint_group_appengine"
         primary_resource_id: "appengine_neg"
