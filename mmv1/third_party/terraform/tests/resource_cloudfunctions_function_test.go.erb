@@ -254,7 +254,11 @@ func TestAccCloudFunctionsFunction_buildworkerpool(t *testing.T) {
 	funcResourceName := "google_cloudfunctions_function.function"
 	functionName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", randInt(t))
+	location := "us-central1"
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
+	proj := getTestProjectFromEnv()
+
+
 	defer os.Remove(zipFilePath) // clean up
 
 	vcrTest(t, resource.TestCase{
@@ -263,13 +267,14 @@ func TestAccCloudFunctionsFunction_buildworkerpool(t *testing.T) {
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudFunctionsFunction_buildworkerpool(functionName, bucketName, zipFilePath),
+				Config: testAccCloudFunctionsFunction_buildworkerpool(functionName, bucketName, zipFilePath, location),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCloudFunctionsFunctionExists(
 						t, funcResourceName, &function),
-					// TODO
 					resource.TestCheckResourceAttr(funcResourceName,
 						"name", functionName),
+					resource.TestCheckResourceAttr(funcResourceName,
+						"build_worker_pool", fmt.Sprintf("projects/%s/locations/%s/workerPools/pool-%s", proj, location, functionName)),
 				),
 			},
 			{
@@ -862,7 +867,7 @@ resource "google_cloudfunctions_function" "function" {
 `, bucketName, zipFilePath, functionName)
 }
 
-func testAccCloudFunctionsFunction_buildworkerpool(functionName string, bucketName string, zipFilePath string) string {
+func testAccCloudFunctionsFunction_buildworkerpool(functionName string, bucketName string, zipFilePath string, location string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
@@ -877,7 +882,7 @@ resource "google_storage_bucket_object" "archive" {
 
 resource "google_cloudbuild_worker_pool" "pool" {
   name     = "pool-%[3]s"
-  location = "us-central1"
+  location = "%s"
   worker_config {
     disk_size_gb   = 100
     machine_type   = "e2-standard-4"
@@ -896,7 +901,8 @@ resource "google_cloudfunctions_function" "function" {
   trigger_http          = true
   timeout               = 61
   entry_point           = "helloGET"
-}`, bucketName, zipFilePath, functionName)
+  build_worker_pool		= google_cloudbuild_worker_pool.pool.id
+}`, bucketName, zipFilePath, functionName, location)
 }
 
 func testAccCloudFunctionsFunction_pubsub(functionName string, bucketName string,
