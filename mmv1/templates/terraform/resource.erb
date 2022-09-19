@@ -63,12 +63,6 @@ import (
     timeouts ||= Api::Timeouts.new
 -%>
 
-<%  if object.async&.is_a? Api::OpAsync -%>
-    <%  if object.async.include_project -%>
-var project string
-    <%  end -%>
-<% end -%>
-
 func resource<%= resource_name -%>() *schema.Resource {
     return &schema.Resource{
         Create: resource<%= resource_name -%>Create,
@@ -166,6 +160,10 @@ func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff
 <% end -%>
 
 func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
+<%  if object.async&.is_a?(Api::OpAsync) && object.async.include_project -%>
+    var project string
+<% end -%>
+
     config := meta.(*Config)
 <%  if object.custom_code.custom_create -%>
     <%= lines(compile(pwd + '/' + object.custom_code.custom_create))  -%>
@@ -576,6 +574,11 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 
 <% if updatable?(object, object.root_properties) -%>
 func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
+
+<%  if object.async&.is_a?(Api::OpAsync) && object.async.include_project -%>
+    var project string
+<% end -%>
+
     config := meta.(*Config)
     userAgent, err := generateUserAgentString(d, config.userAgent)
     if err != nil {
@@ -835,6 +838,10 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <% end # if updatable? -%>
 
 func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
+<%  if object.async&.is_a?(Api::OpAsync) && object.async.include_project -%>
+    var project string
+<% end -%>
+
 <% if object.skip_delete -%>
     log.Printf("[WARNING] <%= object.__product.name + " " + object.name %> resources" +
     " cannot be deleted from Google Cloud. The resource %s will be removed from Terraform" +
