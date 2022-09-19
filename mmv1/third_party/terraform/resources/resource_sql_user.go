@@ -360,10 +360,12 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	passwordPolicy := flattenPasswordPolicy(user.PasswordPolicy)
-	if len(passwordPolicy.([]map[string]interface{})[0]) != 0 {
-		if err := d.Set("password_policy", passwordPolicy); err != nil {
-			return fmt.Errorf("Error setting password_policy: %s", err)
+	if user.PasswordPolicy != nil {
+		passwordPolicy := flattenPasswordPolicy(user.PasswordPolicy)
+		if len(passwordPolicy.([]map[string]interface{})[0]) != 0 {
+			if err := d.Set("password_policy", passwordPolicy); err != nil {
+				return fmt.Errorf("Error setting password_policy: %s", err)
+			}
 		}
 	}
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
