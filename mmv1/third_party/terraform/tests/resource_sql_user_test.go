@@ -374,6 +374,7 @@ resource "google_sql_user" "user1" {
     allowed_failed_attempts  = 6
     password_expiration_duration  =  "2592000s"
     enable_failed_attempts_check = true
+    enable_password_verification = true
   }
 }
 
