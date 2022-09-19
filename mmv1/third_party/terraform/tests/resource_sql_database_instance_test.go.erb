@@ -397,6 +397,12 @@ func TestAccSqlDatabaseInstance_maintenanceVersion(t *testing.T) {
 			resource.TestStep{
 				Config: fmt.Sprintf(
 					testGoogleSqlDatabaseInstance_maintenanceVersionWithOldVersion, databaseName),
+				ExpectError: regexp.MustCompile(
+					`.*The requested maintenance version is not an available maintenance version to upgrade*`),
+			},
+			resource.TestStep{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_maintenanceVersionWithOldVersion, databaseName),
 			},
 			resource.TestStep{
 				ResourceName:      "google_sql_database_instance.instance",
