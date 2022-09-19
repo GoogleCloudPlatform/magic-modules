@@ -281,9 +281,9 @@ objects:
 # Vertex AI Featurestore Entity Type Feature
   - !ruby/object:Api::Resource
     name: FeaturestoreEntitytypeFeature
-    base_url: 'projects/{{project}}/locations/{{region}}/featurestores/{{featurestore}}/entityTypes/{{entitytype}}/features'
-    create_url: 'projects/{{project}}/locations/{{region}}/featurestores/{{featurestore}}/entityTypes/{{entitytype}}/features?featureId={{name}}'
-    self_link: 'projects/{{project}}/locations/{{region}}/featurestores/{{featurestore}}/entityTypes/{{entitytype}}/features/{{name}}'
+    base_url: '{{entitytype}}/features'
+    create_url: '{{entitytype}}/features?featureId={{name}}'
+    self_link: '{{entitytype}}/features/{{name}}'
     min_version: beta
     update_verb: :PATCH
     update_mask: true
@@ -309,6 +309,7 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: 'error'
         message: 'message'
+      include_project: true
     description: |-
       Feature Metadata information that describes an attribute of an entity type. For example, apple is an entity type, and color is a feature that describes apple.
     parameters:
@@ -324,7 +325,7 @@ objects:
         description: The name of the feature. The feature can be up to 64 characters long and can consist only of ASCII Latin letters A-Z and a-z, underscore(_), and ASCII digits 0-9 starting with a letter. The value will be unique given an entity type.
         input: true
         url_param_only: true
-        pattern: 'projects/{{project}}/locations/{{region}}/featurestores/{{featurestore}}/entityTypes/{{entitytype}}/features/{{name}}'
+        pattern: '{{entitytype}}/features/{{name}}'
       - !ruby/object:Api::Type::String
         name: 'etag'
         description: Used to perform consistent read-modify-write updates.
