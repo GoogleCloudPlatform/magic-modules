@@ -52,3 +52,33 @@ func isRetryableError(topErr error, customPredicates ...RetryErrorPredicateFunc)
 	})
 	return isRetryable
 }
+
+func retryWithPolling(retryFunc func() (interface{}, error), timeout time.Duration, pollInterval time.Duration, errorRetryPredicates ...RetryErrorPredicateFunc) (interface{}, error) {
+	refreshFunc := func() (interface{}, string, error) {
+		result, err := retryFunc()
+		if err == nil {
+			return result, "done", nil
+		}
+
+		// Check if it is a retryable error.
+		if isRetryableError(err, errorRetryPredicates...) {
+			return result, "retrying", nil
+		}
+
+		// The error is not retryable.
+		return result, "done", err
+	}
+	stateChange := &resource.StateChangeConf{
+		Pending: []string{
+			"retrying",
+		},
+		Target: []string{
+			"done",
+		},
+		Refresh:      refreshFunc,
+		Timeout:      timeout,
+		PollInterval: pollInterval,
+	}
+
+	return stateChange.WaitForState()
+}
