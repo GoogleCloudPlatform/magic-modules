@@ -3,9 +3,7 @@
 package google
 
 import (
-<% if object.min_version.name == "ga" -%>
 	"fmt"
-<% end -%>
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -76,26 +74,22 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 			{
 				Config: testAcc<%= resource_name -%>IamBinding_basicGenerated(context),
 			},
-<% if object.min_version.name == "ga" -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_binding.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
 			{
 				// Test Iam Binding update
 				Config: testAcc<%= resource_name -%>IamBinding_updateGenerated(context),
 			},
-<% if object.min_version.name == "ga" -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_binding.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
 		},
 	})
 }
@@ -123,14 +117,12 @@ func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 				// Test Iam Member creation (no update for member, no need to test)
 				Config: testAcc<%= resource_name -%>IamMember_basicGenerated(context),
 			},
-<% if object.min_version.name == "ga" -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_member.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> user:admin@hashicorptest.com"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
 		},
 	})
 }
@@ -164,25 +156,21 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 			{
 				Config: testAcc<%= resource_name -%>IamPolicy_basicGenerated(context),
 			},
-<% if object.min_version.name == "ga" -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_policy.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
 			{
 				Config: testAcc<%= resource_name -%>IamPolicy_emptyBinding(context),
 			},
-<% if object.min_version.name == "ga" -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_policy.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
 		},
 	})
 }
@@ -210,14 +198,12 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T)
 			{
 				Config: testAcc<%= resource_name -%>IamBinding_withConditionGenerated(context),
 			},
-<% if object.min_version.name == "ga" -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_binding.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
 		},
 	})
 }
@@ -246,30 +232,24 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *
 			{
 				Config: testAcc<%= resource_name -%>IamBinding_withAndWithoutConditionGenerated(context),
 			},
-<% if object.min_version.name == "ga" -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_binding.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
-<% if object.min_version.name == "ga" -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_binding.foo2",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
-<% if object.min_version.name == "ga" -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_binding.foo3",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title_no_desc"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
 		},
 	})
 }
@@ -296,14 +276,12 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) 
 			{
 				Config: testAcc<%= resource_name -%>IamMember_withConditionGenerated(context),
 			},
-<% if object.min_version.name == "ga" -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_member.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> user:admin@hashicorptest.com %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
 		},
 	})
 }
@@ -332,30 +310,24 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *t
 			{
 				Config: testAcc<%= resource_name -%>IamMember_withAndWithoutConditionGenerated(context),
 			},
-<% if object.min_version.name == "ga" -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_member.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> user:admin@hashicorptest.com"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
-<% if object.min_version.name == "ga" -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_member.foo2",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> user:admin@hashicorptest.com %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
-<% if object.min_version.name == "ga" -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_member.foo3",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> user:admin@hashicorptest.com %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title_no_desc"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
 		},
 	})
 }
@@ -404,14 +376,12 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 					resource.TestCheckResourceAttrWith("data.google_iam_policy.foo", "policy_data", checkGoogleIamPolicy),
 				),
 			},
-<% if object.min_version.name == "ga" -%>
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_policy.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
 		},
 	})
 }
