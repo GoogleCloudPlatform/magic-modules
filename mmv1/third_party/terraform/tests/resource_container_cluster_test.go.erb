@@ -2319,6 +2319,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 <% if version == 'beta' -%>
 			{
