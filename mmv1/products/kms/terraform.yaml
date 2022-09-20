@@ -112,18 +112,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "example-key"
         skip_test: true
     properties:
-      name: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
       state: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      createTime: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
-      generateTime: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
-      destroyTime: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
-      destroyEventTime: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/kms_crypto_key.erb
   KeyRingImportJob: !ruby/object:Overrides::Terraform::ResourceOverride

@@ -185,17 +185,16 @@ objects:
         name: 'name'
         description: |
           The resource name for this CryptoKeyVersion.
-        input: true
+        output: true
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: |
           The current state of the CryptoKeyVersion.
         values:
-          - "CRYPTO_KEY_VERSION_STATE_UNSPECIFIED"
           - "PENDING_GENERATION"
           - "ENABLED"
           - "DISABLED"
-          - "DESTRYOED"
+          - "DESTROYED"
           - "DESTROY_SCHEDULED"
           - "PENDING_IMPORT"
           - "IMPORT_FAILED"
@@ -221,19 +220,9 @@ objects:
           The time this CryptoKeyVersion key material was generated
         output: true
       - !ruby/object:Api::Type::Time
-        name: 'destroyTime'
-        description: |
-          The time this cryptoKeyVersion's key material is scheduled for destruction. Only present if state is DESTROY_SCHEDULED.
-        output: true
-      - !ruby/object:Api::Type::Time
         name: 'destroyEventTime'
         description: |
           The time this cryptoKeyVersion's key material was destroyed. Only present is state is DESTROYED
-        output: true
-      - !ruby/object:Api::Type::String
-        name: 'importJob'
-        description: |
-          The name of the ImportJob used in the most recent import of this CryptoKeyVersion. Only present if the underlying key material was imported.
         output: true
       - !ruby/object:Api::Type::Time
         name: 'importTime'
@@ -256,7 +245,6 @@ objects:
           The CryptoKeyVersionAlgorithm that this CryptoKeyVersion supports.
         output: true
         values: 
-          - "CRYPTO_KEY_VERSION_ALGORITHM_UNSPECIFIED"
           - "GOOGLE_SYMMETRIC_ENCRYPTION"
           - "RSA_SIGN_PSS_2048_SHA256"
           - "RSA_SIGN_PSS_3072_SHA256"
@@ -294,7 +282,6 @@ objects:
               The format of the attestation data.
             output: true
             values:
-              - :ATTESTATION_FORMAT_UNSPECIFIED
               - :CAVIUM_V1_COMPRESSED
               - :CAVIUM_V2_COMPRESSED
           - !ruby/object:Api::Type::String
@@ -306,7 +293,6 @@ objects:
             name: 'certChains'
             description: |
               The certificate chains needed to validate the attestation
-            output: true
             properties: 
               - !ruby/object:Api::Type::String
                 name: 'caviumCerts'
@@ -333,6 +319,11 @@ objects:
                 name: 'ekmConnectionKeyPath'
                 description: |
                   The path to the external key material on the EKM when using EkmConnection e.g., "v0/my/key". Set this field instead of externalKeyUri when using an EkmConnection.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides: 
+        'Creating a key Version':
+          'https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys.cryptoKeyVersions/create'
+      api: 'https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys.cryptoKeyVersions'
   - !ruby/object:Api::Resource
     name: 'KeyRingImportJob'
     base_url: '{{key_ring}}/importJobs'
