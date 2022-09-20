@@ -916,7 +916,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateToConnectionID(t *tes
 	})
 }
 
-func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdatAllowQuotedNewlines(t *testing.T) {
+func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateAllowQuotedNewlines(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)

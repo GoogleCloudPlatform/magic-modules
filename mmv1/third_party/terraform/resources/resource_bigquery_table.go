@@ -1403,7 +1403,7 @@ func expandCsvOptions(configured interface{}) *bigquery.CsvOptions {
 
 	if v, ok := raw["allow_quoted_newlines"]; ok {
 		opts.AllowQuotedNewlines = v.(bool)
-		opts.ForceSendFields = append(opts.ForceSendFields, "allow_jagged_rows")
+		opts.ForceSendFields = append(opts.ForceSendFields, "allow_quoted_newlines")
 	}
 
 	if v, ok := raw["encoding"]; ok {
