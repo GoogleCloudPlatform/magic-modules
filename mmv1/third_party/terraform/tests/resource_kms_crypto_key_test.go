@@ -480,6 +480,33 @@ func TestAccKmsCryptoKeyVersion_skipInitialVersion(t *testing.T) {
 	})
 }
 
+func TestAccKmsCryptoKeyVersion_patch(t *testing.T) {
+	t.Parallel()
+
+	projectId := fmt.Sprintf("tf-test-%d", randInt(t))
+	projectOrg := getTestOrgFromEnv(t)
+	projectBillingAccount := getTestBillingAccountFromEnv(t)
+	keyRingName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	state := "DISABLED"
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleKmsCryptoKeyVersion_patchInitialize(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
+			},
+			{
+				Config: testGoogleKmsCryptoKeyVersion_patch("true", projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, state),
+			},
+			{
+				Config: testGoogleKmsCryptoKeyVersion_patch("false", projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, state),
+			},
+		},
+	})
+}
+
 // This test runs in its own project, otherwise the test project would start to get filled
 // with undeletable resources
 func testGoogleKmsCryptoKey_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
@@ -751,4 +778,78 @@ resource "google_kms_crypto_key_version" "crypto_key_version" {
 	crypto_key = google_kms_crypto_key.crypto_key.id
 }
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
+}
+func testGoogleKmsCryptoKeyVersion_patchInitialize(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
+	return fmt.Sprintf(`
+resource "google_project" "acceptance" {
+	name            = "%s"
+	project_id      = "%s"
+	org_id          = "%s"
+	billing_account = "%s"
+}
+
+resource "google_project_service" "acceptance" {
+	project = google_project.acceptance.project_id
+	service = "cloudkms.googleapis.com"
+}
+
+resource "google_kms_key_ring" "key_ring" {
+	project  = google_project_service.acceptance.project
+	name     = "%s"
+	location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "crypto_key" {
+	name     = "%s"
+	key_ring = google_kms_key_ring.key_ring.id
+	labels = {
+		key = "value"
+	}
+}
+
+resource "google_kms_crypto_key_version" "crypto_key_version" {
+	crypto_key  = google_kms_crypto_key.crypto_key.id
+	lifecycle {
+		prevent_destroy = true
+	}
+}
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
+}
+
+func testGoogleKmsCryptoKeyVersion_patch(preventDestroy, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, state string) string {
+	return fmt.Sprintf(`
+resource "google_project" "acceptance" {
+	name            = "%s"
+	project_id      = "%s"
+	org_id          = "%s"
+	billing_account = "%s"
+}
+
+resource "google_project_service" "acceptance" {
+	project = google_project.acceptance.project_id
+	service = "cloudkms.googleapis.com"
+}
+
+resource "google_kms_key_ring" "key_ring" {
+	project  = google_project_service.acceptance.project
+	name     = "%s"
+	location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "crypto_key" {
+	name     = "%s"
+	key_ring = google_kms_key_ring.key_ring.id
+	labels = {
+		key = "value"
+	}
+}
+
+resource "google_kms_crypto_key_version" "crypto_key_version" {
+	crypto_key  = google_kms_crypto_key.crypto_key.id
+	lifecycle {
+		prevent_destroy = %s
+	}
+	state = "%s"
+}
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, preventDestroy, state)
 }
