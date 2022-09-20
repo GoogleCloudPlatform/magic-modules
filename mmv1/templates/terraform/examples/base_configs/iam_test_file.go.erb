@@ -262,6 +262,14 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *
 				ImportStateVerify: true,
 			},
 <% end -%>
+<% if object.min_version.name == "ga" -%>
+			{
+				ResourceName:      "<%= resource_ns_iam -%>_binding.foo3",
+				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title_no_desc"]),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+<% end -%>
 		},
 	})
 }
@@ -336,6 +344,14 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *t
 			{
 				ResourceName:      "<%= resource_ns_iam -%>_member.foo2",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> user:admin@hashicorptest.com %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title"]),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+<% end -%>
+<% if object.min_version.name == "ga" -%>
+			{
+				ResourceName:      "<%= resource_ns_iam -%>_member.foo3",
+				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> user:admin@hashicorptest.com %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title_no_desc"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -543,6 +559,21 @@ resource "<%= resource_ns_iam -%>_binding" "foo2" {
     expression  = "%{condition_expr}"
   }
 }
+
+resource "<%= resource_ns_iam -%>_binding" "foo3" {
+<% unless object.min_version.name == "ga" -%>
+  provider = google-beta
+<% end -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
+  role = "%{role}"
+  members = ["user:admin@hashicorptest.com"]
+  condition {
+    # Check that lack of description doesn't cause any issues
+    # Relates to issue : https://github.com/hashicorp/terraform-provider-google/issues/8701
+    title       = "%{condition_title_no_desc}"
+    expression  = "%{condition_expr_no_desc}"
+  }
+}
 `, context)
 }
 
@@ -590,6 +621,21 @@ resource "<%= resource_ns_iam -%>_member" "foo2" {
     title       = "%{condition_title}"
     description = "%{condition_desc}"
     expression  = "%{condition_expr}"
+  }
+}
+
+resource "<%= resource_ns_iam -%>_member" "foo3" {
+<% unless object.min_version.name == "ga" -%>
+  provider = google-beta
+<% end -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
+  role = "%{role}"
+  member = "user:admin@hashicorptest.com"
+  condition {
+    # Check that lack of description doesn't cause any issues
+    # Relates to issue : https://github.com/hashicorp/terraform-provider-google/issues/8701
+    title       = "%{condition_title_no_desc}"
+    expression  = "%{condition_expr_no_desc}"
   }
 }
 `, context)
