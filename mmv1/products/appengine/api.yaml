@@ -477,6 +477,10 @@ objects:
             required: true
             description: |
               Full Serverless VPC Access Connector name e.g. /projects/my-project/locations/us-central1/connectors/c1.
+          - !ruby/object:Api::Type::String
+            name: 'egressSetting'
+            description: |
+              The egress setting for the connector, controlling what traffic is diverted through it.
       - !ruby/object:Api::Type::Array
         name: 'inboundServices'
         description: |
