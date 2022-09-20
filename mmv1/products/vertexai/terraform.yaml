@@ -30,6 +30,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+  Endpoint: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_endpoint_network"
+        primary_resource_id: "endpoint"
+        vars:
+          name: "vertex_ai_endpoint"
+          project: "vertex-ai"
+          address_name: "address-name"
+          network_name: "network-name"
   Featurestore: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: false
     skip_sweeper: true
