@@ -271,14 +271,14 @@ objects:
             description: |
               SSH password.
             conflicts:
-              - forward_ssh_connectivity.private_key
+              - forward_ssh_connectivity.0.private_key
           - !ruby/object:Api::Type::String
             name: 'privateKey'
             input: true
             description: |
               SSH private key.
             conflicts:
-              - forward_ssh_connectivity.private_key
+              - forward_ssh_connectivity.0.password
   - !ruby/object:Api::Resource
     name: 'PrivateConnection'
     base_url: "projects/{{project}}/locations/{{location}}/privateConnections"
