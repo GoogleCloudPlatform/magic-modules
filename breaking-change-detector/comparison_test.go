@@ -181,6 +181,47 @@ var comparisonEngineTestCases = []comparisonEngineTestCase{
 		},
 		expectedViolations: 3,
 	},
+	{
+		name: "removing a subfield",
+		oldResourceMap: map[string]*schema.Resource{
+			"google-x": {
+				Schema: map[string]*schema.Schema{
+					"field-a": {
+						Description: "beep",
+						Optional:    true,
+						Type:        schema.TypeList,
+						MaxItems:    1,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"sub-field-1": {Description: "beep", Optional: true},
+								"sub-field-2": {Description: "beep", Optional: true},
+							},
+						},
+					},
+					"field-b": {Description: "beep", Optional: true},
+				},
+			},
+		},
+		newResourceMap: map[string]*schema.Resource{
+			"google-x": {
+				Schema: map[string]*schema.Schema{
+					"field-a": {
+						Description: "beep",
+						Optional:    true,
+						Type:        schema.TypeList,
+						MaxItems:    1,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"sub-field-1": {Description: "beep", Optional: true},
+							},
+						},
+					},
+					"field-b": {Description: "beep", Optional: true},
+				},
+			},
+		},
+		expectedViolations: 1,
+	},
 }
 
 func (tc *comparisonEngineTestCase) check(t *testing.T) {

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/.ci/breaking-change-detector/rules"
+	"github.com/golang/glog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -47,7 +48,7 @@ func compareResourceSchema(resourceName string, old, new map[string]*schema.Sche
 	newCompressed := flattenSchema(new)
 
 	for _, rule := range rules.ResourceSchemaRules {
-		violatingFields := rule.IsRuleBreak(old, new)
+		violatingFields := rule.IsRuleBreak(oldCompressed, newCompressed)
 		if len(violatingFields) > 0 {
 			for _, fieldName := range violatingFields {
 				newMessage := rule.Message(*providerVersion, resourceName, fieldName)
@@ -119,7 +120,7 @@ func mergeSchemaMaps(map1, map2 map[string]*schema.Schema) map[string]*schema.Sc
 
 	for key, value := range map2 {
 		if _, alreadyExists := merged[key]; alreadyExists {
-			panic("when trying to merge maps key " + key + " was found in both maps")
+			glog.Errorf("error when trying to merge maps key " + key + " was found in both maps.. please ensure the children you are merging up have the prefix on the key names.")
 		}
 		merged[key] = value
 	}
