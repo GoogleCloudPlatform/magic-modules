@@ -82,27 +82,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           service_name: "ae-service"
         test_env_vars:
           org_id: :ORG_ID
-      - !ruby/object:Provider::Terraform::Examples
-        name: "app_engine_standard_app_version_outbound"
-        primary_resource_id: "myapp_v3"
-        ignore_read_extra:
-          - "delete_service_on_destroy"
-        vars:
-          appengine_static_ip_network: "apg-static-ip-network"
-          appengine_static_ip: "apg-static-ip"
-          appengine_static_ip_conn: "apg-conn"
-          appengine_static_ip_router: "apg-static-ip-router"
-          appengine_static_ip_addr: "apg-static-ip-addr"
-          appengine_static_nat: "apg-static-nat"
-          appengine_static_ip_service: "apg-static-ip-service"
-          project_id: "ae-project"
-          bucket_name: "appengine-static-content"
-          service_name: "ae-service"
-        min_version: beta
-        skip_test: true
-        test_env_vars:
-          org_id: :ORG_ID
-        skip_docs: true
   FlexibleAppVersion: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["apps/{{project}}/services/{{service}}/versions/{{version_id}}"]
     id_format: "apps/{{project}}/services/{{service}}/versions/{{version_id}}"
