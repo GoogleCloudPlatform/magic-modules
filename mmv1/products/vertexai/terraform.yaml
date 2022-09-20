@@ -30,6 +30,25 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+  Endpoint: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_endpoint_network"
+        primary_resource_id: "endpoint"
+        vars:
+          name: "vertex_ai_endpoint"
+          project: "vertex-ai"
+          address_name: "address-name"
+          kms_key_name: "kms-name"
+          network_name: "network-name"
+        test_vars_overrides:
+          kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+          network_name: 'BootstrapSharedTestNetwork(t, "vertex")'
+    properties:
+      etag: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   Featurestore: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: false
     skip_sweeper: true
