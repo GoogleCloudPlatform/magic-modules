@@ -1055,7 +1055,7 @@ func resourceContainerCluster() *schema.Resource {
 			"node_pool_auto_config": {
 				Type:             schema.TypeList,
 				Optional:         true,
-				Computed:         true.
+				Computed:         true,
 				MaxItems:         1,
 				Description:      `Node pool configs that apply to all auto-provisioned node pools in autopilot clusters and node auto-provisioning enabled clusters.`,
 				Elem: &schema.Resource{
