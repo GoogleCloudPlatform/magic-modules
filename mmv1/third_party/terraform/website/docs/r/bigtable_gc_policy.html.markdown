@@ -38,9 +38,16 @@ resource "google_bigtable_gc_policy" "policy" {
   table         = google_bigtable_table.table.name
   column_family = "name"
 
-  max_age {
-    duration = "168h"
+
+  gc_rules = <<EOF
+  {
+    "rules": [
+      {
+        "max_age": "168h"
+      }
+    ]
   }
+  EOF
 }
 ```
 
@@ -52,21 +59,23 @@ resource "google_bigtable_gc_policy" "policy" {
   table         = google_bigtable_table.table.name
   column_family = "name"
 
-  mode = "UNION"
-
-  max_age {
-    duration = "168h" # 7 days
+  gc_rules = <<EOF
+  {
+    "mode": "union",
+    "rules": [
+      {
+        "max_age": "168h"
+      },
+      {
+        "max_version": 10
+      }
+    ]
   }
-
-  max_version {
-    number = 10
-  }
+  EOF
 }
 ```
 
-For complex, nested policies, an optional `gc_rules` field are supported. This field
-conflicts with `mode`, `max_age` and `max_version`. This field is a serialized JSON
-string. Example:
+An example of more complex GC policy:
 ```hcl
 resource "google_bigtable_instance" "instance" {
   name = "instance_name"
@@ -95,27 +104,26 @@ resource "google_bigtable_gc_policy" "policy" {
   column_family = "cf1"
 
   gc_rules = <<EOF
-{
-  "mode": "union",
-  "rules": [
-    {
-      "max_age": "10h"
-    },
-    {
-      "mode": "intersection",
-      "rules": [
-        {
-          "max_age": "2h"
-        },
-        {
-          "max_version": 2
-        }
-      ]
-    }
-  ]
-}
-EOF
-
+  {
+    "mode": "union",
+    "rules": [
+      {
+        "max_age": "10h"
+      },
+      {
+        "mode": "intersection",
+        "rules": [
+          {
+            "max_age": "2h"
+          },
+          {
+            "max_version": 2
+          }
+        ]
+      }
+    ]
+  }
+  EOF
 }
 ```
 This is equivalent to running the following `cbt` command:
