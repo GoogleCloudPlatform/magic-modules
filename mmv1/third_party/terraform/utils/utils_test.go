@@ -617,7 +617,7 @@ func TestRetryWithPolling_notRetryable(t *testing.T) {
 
 func TestRetryWithPolling_retriedAndSucceeded(t *testing.T) {
 	retryCount := 0
-	// Retry once and succeed.
+	// Retry once and succeeds.
 	retryFunc := func() (interface{}, error) {
 		retryCount++
 		// Error code of 200 is retryable.
@@ -646,7 +646,7 @@ func TestRetryWithPolling_retriedAndSucceeded(t *testing.T) {
 
 func TestRetryWithPolling_retriedAndFailed(t *testing.T) {
 	retryCount := 0
-	// Retry once and succeed.
+	// Retry once and fails.
 	retryFunc := func() (interface{}, error) {
 		retryCount++
 		// Error code of 200 is retryable.
