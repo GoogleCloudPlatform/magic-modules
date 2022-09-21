@@ -19063,3 +19063,74 @@ objects:
           TargetGrpcProxy; otherwise, the request will fail with error
           412 conditionNotMet. To see the latest fingerprint, make a get()
           request to retrieve the TargetGrpcProxy. A base64-encoded string.
+- !ruby/object:Api::Resource
+    name: 'RegionCommitment'
+    base_url: projects/{{project}}/regions/{{region}}/commitments
+    update_verb: :PATCH
+    update_url: projects/{{project}}/regions/{{region}}/commitments/{{name}}
+    update_mask: true
+    collection_url_key: 'items'
+    has_self_link: false
+    description: |
+      Represents a commitment resource. A commitment ensures that capacity is
+      held in a specific zone even if the reserved VMs are not running.
+
+      Reservations apply only to Compute Engine, Cloud Dataproc, and Google
+      Kubernetes Engine VM usage.Reservations do not apply to `f1-micro` or
+      `g1-small` machine types, preemptible VMs, sole tenant nodes, or other
+      services not listed above
+      like Cloud SQL and Dataflow.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Reserving zonal resources': 'https://cloud.google.com/compute/docs/instances/reserving-zonal-resources'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/reservations'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'name'
+        description: |
+          The region where the commitment is made.
+        required: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        output: true
+        description: |
+          The unique identifier for the resource.
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        input: true
+        description: |
+          Name of the resource. Provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035. Specifically, the name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+      - !ruby/object:Api::Type::String
+        name: 'status'
+        output: true
+        description: |
+          The status of the reservation.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'resources'
+        description: |
+          The amount of memory and vCPU. Memory must be be specified in MB.
+          You must specify both VCPU and MEMORY in the resources section.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'type'
+            values:
+              - :VCPU
+              - :MEMORY
+            description: |
+              Type of the resource. Memory must be be specified in MB.
+          - !ruby/object:Api::Type::Double
+            name: 'amount'
+            description: |
+              Amount of the resource. Memory must be be specified in MB.
+ 
