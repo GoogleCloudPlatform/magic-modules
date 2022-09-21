@@ -155,6 +155,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           backend_bucket_name: "image-backend-bucket"
           bucket_name: "image-store-bucket"
       - !ruby/object:Provider::Terraform::Examples
+        name: "backend_bucket_compression_mode_disabled"
+        primary_resource_id: "image_backend"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-image-backend-bucket%s\", context[\"random_suffix\"])"
+        vars:
+          backend_bucket_name: "image-backend-bucket"
+          bucket_name: "image-store-bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_bucket_compression_mode_automatic"
+        primary_resource_id: "image_backend"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-image-backend-bucket%s\", context[\"random_suffix\"])"
+        vars:
+          backend_bucket_name: "image-backend-bucket"
+          bucket_name: "image-store-bucket"
+      - !ruby/object:Provider::Terraform::Examples
         name: "backend_bucket_full"
         primary_resource_id: "image_backend_full"
         skip_docs: true
@@ -283,6 +297,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_cache"
         primary_resource_id: "default"
+        vars:
+          backend_service_name: "backend-service"
+          http_health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_compression_mode_disabled"
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-backend-service%s\", context[\"random_suffix\"])"
+        vars:
+          backend_service_name: "backend-service"
+          http_health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_compression_mode_automatic"
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-backend-service%s\", context[\"random_suffix\"])"
         vars:
           backend_service_name: "backend-service"
           http_health_check_name: "health-check"

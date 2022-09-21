@@ -727,6 +727,13 @@ objects:
                 name: 'headerName'
                 description: |
                   The header field name to match on when bypassing cache. Values are case-insensitive.
+      - !ruby/object:Api::Type::Enum
+          name: 'compressionMode'
+          description: |
+            The mode of compression to reduce the size of data sent from the Cloud CDN edge to the client.
+          values:
+            - :AUTOMATIC
+            - :DISABLED
       - !ruby/object:Api::Type::String
         name: 'edgeSecurityPolicy'
         description: |
@@ -1089,6 +1096,13 @@ objects:
             description: |
               The maximum number of parallel retries to the backend cluster.
               Defaults to 3.
+      - !ruby/object:Api::Type::Enum
+          name: 'compressionMode'
+          description: |
+            The mode of compression to reduce the size of data sent from the Cloud CDN edge to the client.
+          values:
+            - :AUTOMATIC
+            - :DISABLED
       - !ruby/object:Api::Type::NestedObject
         name: 'consistentHash'
         description: |
