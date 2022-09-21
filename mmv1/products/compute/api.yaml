@@ -19065,6 +19065,7 @@ objects:
           request to retrieve the TargetGrpcProxy. A base64-encoded string.
   - !ruby/object:Api::Resource
     name: 'RegionCommitment'
+    kind: compute#commitment
     base_url: projects/{{project}}/regions/{{region}}/commitments
     update_verb: :PATCH
     update_url: projects/{{project}}/regions/{{region}}/commitments/{{name}}
@@ -19092,7 +19093,7 @@ objects:
         required: true
         input: true
     properties:
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         output: true
         description: |
@@ -19123,6 +19124,9 @@ objects:
         description: |
           A list of commitment amounts for particular resources. 
           Note that VCPU and MEMORY resource commitments must occur together.
+        exactly_one_of:
+          - resources
+          - licenseResource
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::Enum
@@ -19132,7 +19136,7 @@ objects:
                 - :MEMORY
               description: |
                 Type of resource for which this commitment applies. Possible values are VCPU and MEMORY
-            - !ruby/object:Api::Type::Double
+            - !ruby/object:Api::Type::String
               name: 'amount'
               description: |
                 Amount of the resource. Memory must be be specified in MB.
@@ -19142,23 +19146,23 @@ objects:
                 Name of the accelerator type resource. Applicable only when the type is ACCELERATOR.
       - !ruby/object:Api::Type::Enum
         name: 'plan'
+        required: true
         values:
           - :TWELVE_MONTH
           - :THIRTY_SIX_MONTH
         description: |
           The plan for this commitment, which determines duration and discount rate. 
           The currently supported plans are TWELVE_MONTH (1 year), and THIRTY_SIX_MONTH (3 years).
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'type'
-        values:
-          - :MEMORY_OPTIMIZED
-          - :ACCELERATOR_OPTIMIZED
+        required: true
         description: |
           The type of commitment, which affects the discount rate and the eligible resources. 
           Type MEMORY_OPTIMIZED specifies a commitment that will only apply to memory optimized machines. 
           Type ACCELERATOR_OPTIMIZED specifies a commitment that will only apply to accelerator optimized machines.
       - !ruby/object:Api::Type::Enum
         name: 'category'
+        required: true
         values:
           - :MACHINE
           - :LICENSE
@@ -19171,6 +19175,9 @@ objects:
         name: 'licenseResource'
         description: |
           The license specification required as part of a license commitment.
+        exactly_one_of:
+          - resources
+          - licenseResource
         properties:
           - !ruby/object:Api::Type::String
             name: 'license'
