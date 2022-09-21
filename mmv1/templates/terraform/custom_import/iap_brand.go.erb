@@ -22,12 +22,13 @@ if len(nameParts) == 4 {
 if len(nameParts) == 2 {
 	project = nameParts[0] // Different index
 
-	// Set `name` as a 4-part format so Read func produces valid URL
+	// Set `name` (and `id`) as a 4-part format so Read func produces valid URL
 	brand := nameParts[1]
 	name := fmt.Sprintf("projects/%s/brands/%s", project, brand)
 	if err := d.Set("name", name); err != nil {
 		return nil, fmt.Errorf("Error setting name: %s", err)
 	}
+	d.SetId(name)
 }
 
 if err := d.Set("project", project); err != nil {
