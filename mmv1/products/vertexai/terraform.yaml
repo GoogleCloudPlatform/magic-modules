@@ -43,6 +43,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           network_name: "network-name"
         test_vars_overrides:
           kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+          network_name: 'BootstrapSharedTestNetwork(t, "vertex")'
   Featurestore: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: false
     skip_sweeper: true
