@@ -170,8 +170,8 @@ objects:
         name: 'name'
         description: |
           Output only. Identifier of the brand, in the format
-          `projects/{project_number}/brands/{brand_id}`. NOTE: The brand
-          identification corresponds to the project number as only one
+          `projects/{project_number}/brands/{brand_id}` or `projects/{project_id}/brands/{brand_id}`.
+          NOTE: The brand identification corresponds to the project number as only one
           brand per project can be created.
         output: true
     properties:
