@@ -730,7 +730,7 @@ objects:
       - !ruby/object:Api::Type::Enum
           name: 'compressionMode'
           description: |
-            The mode of compression to reduce the size of data sent from the Cloud CDN edge to the client.
+            Compress text responses using Brotli or gzip compression, based on the client's Accept-Encoding header.
           values:
             - :AUTOMATIC
             - :DISABLED
@@ -1099,7 +1099,7 @@ objects:
       - !ruby/object:Api::Type::Enum
           name: 'compressionMode'
           description: |
-            The mode of compression to reduce the size of data sent from the Cloud CDN edge to the client.
+            Compress text responses using Brotli or gzip compression, based on the client's Accept-Encoding header.
           values:
             - :AUTOMATIC
             - :DISABLED
