@@ -97,28 +97,28 @@ func clusterSchemaNodeConfig() *schema.Schema {
 // Defines default nodel pool settings for the entire cluster. These settings are
 // overridden if specified on the specific NodePool object.
 func clusterSchemaNodePoolDefaults() *schema.Schema {
-       return &schema.Schema{
+	return &schema.Schema{
 		Type:        schema.TypeList,
 		Optional:    true,
-                DiffSuppressFunc: emptyOrUnsetBlockDiffSuppress,
-                Description: `The default nodel pool settings for the entire cluster.`,
-                MaxItems: 1,
-                Elem: &schema.Resource{
-                        Schema: map[string]*schema.Schema{
-                                "node_config_defaults": {
-                                        Type:        schema.TypeList,
-                                        Optional:    true,
+		Computed:    true,
+		Description: `The default nodel pool settings for the entire cluster.`,
+		MaxItems: 1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"node_config_defaults": {
+					Type:        schema.TypeList,
+					Optional:    true,
 					Description: `Subset of NodeConfig message that has defaults.`,
-                                        MaxItems:    1,
-                                        Elem: &schema.Resource{
-                                                Schema: map[string]*schema.Schema{
-                                                        "gcfs_config": schemaGcfsConfig(false),
-                                                },
-                                        },
-                                },
-                        },
-                },
-       }
+					MaxItems:    1,
+					Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+									"gcfs_config": schemaGcfsConfig(false),
+							},
+					},
+				},
+			},
+		},
+	}
 }
 <% end -%>
 
@@ -1050,12 +1050,12 @@ func resourceContainerCluster() *schema.Resource {
 			},
 
 <% unless version == "ga" -%>
-                        "node_pool_defaults": clusterSchemaNodePoolDefaults(),
+			"node_pool_defaults": clusterSchemaNodePoolDefaults(),
 
 			"node_pool_auto_config": {
 				Type:             schema.TypeList,
 				Optional:         true,
-				DiffSuppressFunc: emptyOrUnsetBlockDiffSuppress,
+				Computed:         true,
 				MaxItems:         1,
 				Description:      `Node pool configs that apply to all auto-provisioned node pools in autopilot clusters and node auto-provisioning enabled clusters.`,
 				Elem: &schema.Resource{
@@ -4205,14 +4205,16 @@ func expandNodePoolDefaults(configured interface{}) *container.NodePoolDefaults 
 }
 
 func flattenNodePoolDefaults(c *container.NodePoolDefaults) []map[string]interface{} {
-        if c == nil {
+	if c == nil {
 		return nil
 	}
-        result := make(map[string]interface{})
-        if c.NodeConfigDefaults != nil && c.NodeConfigDefaults.GcfsConfig != nil {
-                result["node_config_defaults"] = flattenNodeConfigDefaults(c.NodeConfigDefaults)
-        }
-        return []map[string]interface{}{result}
+
+	result := make(map[string]interface{})
+	if c.NodeConfigDefaults != nil && c.NodeConfigDefaults.GcfsConfig != nil {
+			result["node_config_defaults"] = flattenNodeConfigDefaults(c.NodeConfigDefaults)
+	}
+	
+	return []map[string]interface{}{result}
 }
 <% end -%>
 
@@ -4845,6 +4847,7 @@ func flattenNodePoolAutoConfig(c *container.NodePoolAutoConfig) []map[string]int
 	if c.NetworkTags != nil {
 		result["network_tags"] = flattenNodePoolAutoConfigNetworkTags(c.NetworkTags)
 	}
+
 	return []map[string]interface{}{result}
 }
 
