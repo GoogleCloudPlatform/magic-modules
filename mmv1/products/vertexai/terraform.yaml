@@ -145,6 +145,25 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+  Model: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: 'projects/{{project}}/locations/{{location}}/models/{{name}}'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_model"
+        primary_resource_id: "model"
+        vars:
+          name: "vertex_ai_model"
+          project: "vertex-ai"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      etag: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      versionAliases: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      decoder: templates/terraform/decoders/vertex_model.go.erb
+      encoder: templates/terraform/encoders/wrap_object.go.erb
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

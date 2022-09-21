@@ -1,0 +1,7 @@
+// Model's operation response puts the resource name under "model" instead of "name".
+if model, ok := res["model"].(string); ok {
+  delete(res, "model")
+  res["name"] = model
+}
+
+return res, nil
