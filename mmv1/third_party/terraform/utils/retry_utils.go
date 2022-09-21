@@ -53,6 +53,7 @@ func isRetryableError(topErr error, customPredicates ...RetryErrorPredicateFunc)
 	return isRetryable
 }
 
+// The polling overrides the default backoff logic with max backoff of 10s. The poll interval can be greater than 10s.
 func retryWithPolling(retryFunc func() (interface{}, error), timeout time.Duration, pollInterval time.Duration, errorRetryPredicates ...RetryErrorPredicateFunc) (interface{}, error) {
 	refreshFunc := func() (interface{}, string, error) {
 		result, err := retryFunc()
