@@ -14,24 +14,95 @@ change.
 
 ---
 
-- [Getting Started with Magic Modules](#getting-started-with-magic-modules)
-   - [Preparing your environment](#preparing-your-environment)
-   - [Preparing Magic Modules / One-time setup](#preparing-magic-modules--one-time-setup)
-   - [Generating the Terraform Providers](#generating-the-terraform-providers)
-   - [Testing](#testing)
+- [Magic Modules](#magic-modules)
+  - [Getting Started with Magic Modules](#getting-started-with-magic-modules)
+    - [Cloning Terraform providers](#cloning-terraform-providers)
+    - [Setting up a container-based environment](#setting-up-a-container-based-environment)
+    - [Preparing your environment manually](#preparing-your-environment-manually)
+    - [Generating the Terraform Providers](#generating-the-terraform-providers)
+    - [Testing](#testing)
       - [Using released terraform binary with local provider binary](#using-released-terraform-binary-with-local-provider-binary)
-   - [Submitting a PR](#submitting-a-pr)
-- [Contributing](#contributing)
-   - [General contributing steps](#general-contributing-steps)
-   - [Detailed contributing guide](#detailed-contributing-guide)
-- [Glossary](#glossary)
-- [Other Resources](#other-resources)
+    - [Submitting a PR](#submitting-a-pr)
+  - [Contributing](#contributing)
+    - [General contributing steps](#general-contributing-steps)
+    - [Detailed contributing guide](#detailed-contributing-guide)
+  - [Glossary](#glossary)
+  - [Other Resources](#other-resources)
 
 ---
 
 ## Getting Started with Magic Modules
 
-### Preparing your environment
+### Cloning Terraform providers
+
+If you're generating the Terraform providers (`google` and `google-beta`),
+you'll need to check out the repo(s) you're generating in your GOPATH. For
+example:
+
+```bash
+git clone https://github.com/hashicorp/terraform-provider-google.git $GOPATH/src/github.com/hashicorp/terraform-provider-google
+git clone https://github.com/hashicorp/terraform-provider-google-beta.git $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+```
+
+Or run the following to check them all out:
+
+```bash
+./tools/bootstrap
+```
+
+Magic Modules won't work with old versions of the Terraform provider repos. If
+you're encountering issues with vendoring and paths, make sure both MM and the
+Terraform provider are running on up to date copies of `main`.
+
+### Setting up a container-based environment
+
+*NOTE* this approach is in beta and still collecting feedback. Please file an issue if you encounter challenges, and trying pulling the latest container (see command below) first to see if any recent changes may fix you.
+
+For ease of contribution, we provide containers with the required dependencies for building magic-modules.
+
+You can work with containers with either [Podman](https://podman.io/) or [Docker](https://docker.io/). The rest of this README assumes podman, but any command invocation for `podman` can be replaced with `docker`.
+
+To get started, you can pull the containers locally (as of now only Google employees have access):
+
+```shell
+podman pull gcr.io/graphite-docker-images/magic-modules-dev:latest
+```
+
+Or build it yourself:
+
+```shell
+podman build --format=docker \
+    .ci/containers/downstream-builder/ \
+    -t gcr.io/graphite-docker-images/downstream-builder:latest
+podman build --format=docker \
+    .ci/containers/magic-modules-dev/ \
+    -t gcr.io/graphite-docker-images/magic-modules-dev:latest
+```
+
+The container defaults to running make, and assumes that this repository is mounted to the `/magic-modules` in the container.
+
+Here is an example of how to build Terraform (after [cloning the provider](#cloning-terraform-providers)):
+
+```shell
+podman run --rm \
+  -v $PWD:/magic-modules -v $GOPATH:$GOPATH \
+  -it gcr.io/graphite-docker-images/magic-modules-dev:latest \
+  terraform VERSION=ga \
+  OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google"
+```
+
+Generally, you can replace any reference to `make` in this guide with the following:
+
+```shell
+podman run --rm \
+  -v $PWD:/magic-modules -v $GOPATH:$GOPATH \
+  -it gcr.io/graphite-docker-images/magic-modules-dev:latest
+```
+
+### Preparing your environment manually
+
+It is also possible to set up the magic-modules tooling
+on your local development environment.
 
 To get started, you'll need:
 
@@ -44,58 +115,18 @@ To get started, you'll need:
   * To install `rbenv`:
     * Homebrew: run `brew install rbenv ruby-build`
     * Debian, Ubuntu, and their derivatives: run `sudo apt install rbenv`
-  * Then run `rbenv install 2.6.0`. 
+  * Then run `rbenv install 2.6.0`.
     * For M1 Mac users, run `RUBY_CFLAGS="-Wno-error=implicit-function-declaration" rbenv install 2.6.0`
 * [`Bundler`](https://github.com/bundler/bundler)
   * This can be installed with `gem install bundler`
+* Gems for magic-modules
+  * This can be installed with `cd mmv1 && bundler install`
 * Goimports
   * go install golang.org/x/tools/cmd/goimports / go install golang.org/x/tools/cmd/goimports@latest
 * Terraform
   * [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 * If you are getting "Too many open files" ulimit needs to be raised.
   * Mac OSX: `ulimit -n 1000`
-
----
-
-### Preparing Magic Modules / One-time setup
-
-**Important:**
-Compiling Magic Modules can be done directly from the `mmv1` directory within this repository.
-In the future we will add hybrid generation with multiple generators. All the information below
-pertains only to the contents of the `mmv1` directory, and commands should be executed from
-that directory.
-
-To get started right away, use the bootstrap script with:
-
-```bash
-cd mmv1
-./tools/bootstrap
-```
-
----
-
-Otherwise, follow the manual steps below:
-
-If you're generating the Terraform providers (`google` and `google-beta`),
-you'll need to check out the repo(s) you're generating in your GOPATH. For
-example:
-
-```bash
-git clone https://github.com/hashicorp/terraform-provider-google.git $GOPATH/src/github.com/hashicorp/terraform-provider-google
-git clone https://github.com/hashicorp/terraform-provider-google-beta.git $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-```
-
-Magic Modules won't work with old versions of the Terraform provider repos. If
-you're encountering issues with vendoring and paths, make sure both MM and the
-Terraform provider are running on up to date copies of `main`.
-
-Once you've prepared the target folders for the tools, run the following to
-finish getting Magic Modules set up by installing the Ruby gems it needs to run:
-
-```bash
-cd mmv1
-bundle install
-```
 
 Now, you can verify you're ready with:
 
@@ -243,12 +274,6 @@ Before creating a commit, if you've modified any .rb files, make sure you run
 `rake test`! That will run rubocop to ensure that the code you've written will
 pass Travis.
 
-To run rubocop automatically before committing, add a Git pre-commit hook with:
-
-```bash
-cp .github/pre-commit .git/hooks
-```
-
 Once you've created your commit(s), you can submit the code normally as a PR in
 the GitHub UI. The PR template includes some instructions to make sure we
 generate good PR messages for the tools' repo histories.
@@ -284,7 +309,7 @@ any affected tools, the primary reviewer will merge your changes.
    * If it exists, check the header of the downstream file to identify the type of tools used to generate the resource. For some resources, the code file, the test file and the documentation file may not be generated via the same tools.
       * Generated resources like [`google_compute_address`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address) can be identified by looking in their [`Go source`](https://github.com/hashicorp/terraform-provider-google/blob/main/google/resource_compute_address.go) for an `AUTO GENERATED CODE` header as well as a `Type`. "Generated resources" typically refers to just the `MMv1` type, and `DCL` type resources are considered "DCL-based". (Currently DCL-related contribution are not supported)
       * Handwritten resources like [`google_container_cluster`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster) can be identified if they have source code present under the [`mmv1/third_party/terraform/resources`](./mmv1/third_party/terraform/resources) folder or by the absence of the `AUTO GENERATED CODE header` in their [`Go source`](https://github.com/hashicorp/terraform-provider-google/blob/main/google/resource_container_cluster.go).
-   * If not, decide which tool you would like to use to implement the resource. 
+   * If not, decide which tool you would like to use to implement the resource.
       * MMv1 is strongly preferred over handwriting the resource unless the resource can not be generated.
       * Currently, only handwritten datasources are supported.
 1. Make the actual code change.
