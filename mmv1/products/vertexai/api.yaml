@@ -224,6 +224,11 @@ objects:
       An entity type is a type of object in a system that needs to be modeled and have stored information about. For example, driver is an entity type, and driver0 is an instance of an entity type driver.
     parameters:
       - !ruby/object:Api::Type::String
+        name: region
+        description: The region of the EntityType. eg us-central1
+        url_param_only: true
+        input: true    
+      - !ruby/object:Api::Type::String
         name: featurestore
         description: The name of the Featurestore to use, in the format projects/{project}/locations/{location}/featurestores/{featurestore}.
         url_param_only: true
