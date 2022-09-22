@@ -1,5 +1,38 @@
+resource "google_project" "my_project" {
+  name            = "<%= ctx[:vars]['project_id'] %>"
+  project_id      = "<%= ctx[:vars]['project_id'] %>"
+  org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
+  billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
+}
+
+resource "google_service_account" "custom_service_account" {
+  project      = google_project.my_project.name
+  account_id   = "<%= ctx[:vars]['account_id'] %>"
+  display_name = "Custom Service Account"
+}
+
+resource "google_project_iam_member" "gae_api" {
+  project = google_project.my_project.name
+  role    = "roles/compute.networkUser"
+  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
+}
+
+resource "google_project_iam_member" "logs_writer" {
+  project = google_project.my_project.name
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
+}
+
+resource "google_project_iam_member" "storage_viewer" {
+  project = google_project.my_project.name
+  role    = "roles/storage.objectViewer"
+  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
+}
+
+
 resource "google_app_engine_standard_app_version" "<%= ctx[:primary_resource_id] %>" {
   version_id = "v1"
+  project    = google_project.my_project.name
   service    = "myapp"
   runtime    = "nodejs10"
 
@@ -32,10 +65,12 @@ resource "google_app_engine_standard_app_version" "<%= ctx[:primary_resource_id]
   }
 
   delete_service_on_destroy = true
+  service_account = google_service_account.custom_service_account.email
 }
 
 resource "google_app_engine_standard_app_version" "myapp_v2" {
   version_id      = "v2"
+  project         = google_project.my_project.name
   service         = "myapp"
   runtime         = "nodejs10"
   app_engine_apis = true
@@ -59,9 +94,11 @@ resource "google_app_engine_standard_app_version" "myapp_v2" {
   }
 
   noop_on_destroy = true
+  service_account = google_service_account.custom_service_account.email
 }
 
 resource "google_storage_bucket" "bucket" {
+  project  = google_project.my_project.name
   name     = "<%= ctx[:vars]['bucket_name'] %>"
   location = "US"
 }
