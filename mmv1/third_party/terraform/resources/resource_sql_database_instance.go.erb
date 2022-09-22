@@ -293,7 +293,7 @@ is set to true.`,
 							Type:             schema.TypeBool,
 							Optional:         true,
 							Default:          true,
-							Description:      `Enables auto-resizing of the storage size. Defaults to true. Set to false if you want to set disk_size.`,
+							Description:      `Enables auto-resizing of the storage size. Defaults to true.`,
 						},
 						"disk_autoresize_limit": {
 							Type:             schema.TypeInt,
@@ -306,7 +306,7 @@ is set to true.`,
 							Optional: true,
 							// Default is likely 10gb, but it is undocumented and may change.
 							Computed:    true,
-							Description: `The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. If you want to set this field, set disk_autoresize to false.`,
+							Description: `The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased.`,
 						},
 						"disk_type": {
 							Type:     schema.TypeString,
