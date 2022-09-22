@@ -284,7 +284,7 @@ func TestAccSqlUser_mysqlPasswordPolicy(t *testing.T) {
 	skipIfVcr(t)
 	t.Parallel()
 
-	instance := fmt.Sprintf("i-%d", randInt(t))
+	instance := fmt.Sprintf("tf-test-i%d", randInt(t))
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
