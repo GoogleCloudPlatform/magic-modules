@@ -299,9 +299,9 @@ resource "google_compute_security_policy" "policy" {
 func testAccComputeBackendBucket_withCompressionMode(backendName, storageName, compressionMode string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_bucket" "foobar" {
-  name        = "%s"
-  bucket_name = google_storage_bucket.bucket_one.name
-  enable_cdn  = true
+  name             = "%s"
+  bucket_name      = google_storage_bucket.bucket_one.name
+  enable_cdn       = true
   compression_mode = "%s"
 }
 

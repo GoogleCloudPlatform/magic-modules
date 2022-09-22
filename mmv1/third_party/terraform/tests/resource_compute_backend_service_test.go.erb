@@ -1755,10 +1755,10 @@ resource "google_compute_http_health_check" "zero" {
 func testAccComputeBackendService_withCompressionMode(serviceName, checkName, compressionMode string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
-  name                            = "%s"
-  health_checks                   = [google_compute_http_health_check.zero.self_link]
-  enable_cdn 					  = true
-  compression_mode				  = "%s"
+  name             = "%s"
+  health_checks    = [google_compute_http_health_check.zero.self_link]
+  enable_cdn       = true
+  compression_mode = "%s"
 }
 
 resource "google_compute_http_health_check" "zero" {
