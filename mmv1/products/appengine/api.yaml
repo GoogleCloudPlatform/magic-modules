@@ -282,8 +282,7 @@ objects:
       - !ruby/object:Api::Type::String
           name: 'serviceAccount'
           description: |
-            The identity that the deployed version will run as. Admin API will use the App Engine Appspot service account as
-            default if this field is neither provided in app.yaml file nor through CLI flag.
+            The identity that the deployed version will run as. Admin API will use the App Engine Appspot service account as default if this field is neither provided in app.yaml file nor through CLI flag.
       - !ruby/object:Api::Type::Boolean
         name: 'threadsafe'
         description: |
