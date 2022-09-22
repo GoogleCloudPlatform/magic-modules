@@ -48,7 +48,7 @@ func TestAccSnapshotDatasource_filter(t *testing.T) {
 	})
 }
 
-func TestAccSnapshotDatasource_filter_mostRecent(t *testing.T) {
+func TestAccSnapshotDatasource_filterMostRecent(t *testing.T) {
 	t.Parallel()
 
 	vcrTest(t, resource.TestCase{

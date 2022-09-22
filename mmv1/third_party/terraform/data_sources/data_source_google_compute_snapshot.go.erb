@@ -52,7 +52,6 @@ func dataSourceGoogleComputeSnapshotRead(d *schema.ResourceData, meta interface{
 	}
 
 	if v, ok := d.GetOk("filter"); ok {
-
 		userAgent, err := generateUserAgentString(d, config.userAgent)
 		if err != nil {
 			return err
