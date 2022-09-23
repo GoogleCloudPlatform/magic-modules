@@ -11,10 +11,10 @@ func dataSourceArtifactRegistryRepository() *schema.Resource {
 	dsSchema := datasourceSchemaFromResourceSchema(resourceArtifactRegistryRepository().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "repository_id")
+	addRequiredFieldsToSchema(dsSchema, "repository_id", "location")
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "project", "location")
+	addOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceArtifactRegistryRepositoryRead,
