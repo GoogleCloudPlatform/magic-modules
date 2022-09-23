@@ -65,6 +65,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       handlers: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      serviceAccount: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       # instanceClass defaults to a value based on the scaling method
       instanceClass: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
