@@ -15,7 +15,6 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Site: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ['projects/{{project}}/sites/{{site}}', '{{site}}']
-    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firebasehosting_site_basic"
