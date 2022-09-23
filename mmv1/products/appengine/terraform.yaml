@@ -83,7 +83,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           account_id: "my-account"
         test_env_vars:
           org_id: :ORG_ID
-          billing_account: :BILLING_ACCT
   FlexibleAppVersion: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["apps/{{project}}/services/{{service}}/versions/{{version_id}}"]
     id_format: "apps/{{project}}/services/{{service}}/versions/{{version_id}}"
