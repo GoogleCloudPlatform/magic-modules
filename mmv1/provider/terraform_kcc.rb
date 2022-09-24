@@ -108,10 +108,43 @@ module Provider
       last_import_part.first.gsub('{{', '').gsub('}}', '') if last_import_part.length == 1
     end
 
+    # Still don't cover all the server generated ID cases. How?
     def is_server_generated_name(name, object)
+      has_computed_name_configured = object.custom_code.post_create == 'templates/terraform/post_create/set_computed_name.erb' if object.custom_code.post_create
       camel_case_name = name.camelize(:lower)
-      # Doesn't work
-      !object.all_properties.any?{ |p| p.name == camel_case_name && !p.output }
+      has_output_only_name = object.all_properties.any?{ |p| p.name == camel_case_name && p.output }
+      has_computed_name_configured || has_output_only_name
+    end
+
+    # What about server generated import IDs?
+    def get_container(id_template)
+      container = Array.new()
+      id_template_parts = id_template.split('/')
+
+      projects_field_index = id_template_parts.find_index('projects')
+      project_field_name = id_template_parts[projects_field_index + 1].gsub('{{', '').gsub('}}', '') if !projects_field_index.nil?
+      container += ['project', project_field_name] if !project_field_name.nil? && project_field_name != 'name'
+
+      folders_field_index = id_template_parts.find_index('folders')
+      folder_field_name = id_template_parts[folders_field_index + 1].gsub('{{', '').gsub('}}', '') if !folders_field_index.nil?
+      container += ['folder', folder_field_name] if !folder_field_name.nil? && folder_field_name != 'name'
+
+      organizations_field_index = id_template_parts.find_index('organizations')
+      organization_field_name = id_template_parts[organizations_field_index + 1].gsub('{{', '').gsub('}}', '') if !organizations_field_index.nil?
+      container += ['organization', organization_field_name] if !organization_field_name.nil? && organization_field_name != 'name'
+
+      billing_accounts_field_index = id_template_parts.find_index('billingAccounts')
+      billing_account_field_name = id_template_parts[billing_accounts_field_index + 1].gsub('{{', '').gsub('}}', '') if !billing_accounts_field_index.nil?
+      container += ['billingAccount', billing_account_field_name] if !billing_account_field_name.nil? && billing_account_field_name != 'name'
+
+      raise 'error having more than one container' if container.length > 2
+      return container
+    end
+
+    def get_hierarchical_reference(container)
+      hierarchical_reference = Array.new()
+      hierarchical_reference += [container[0], container[0] + 'Ref'] if container.length == 2
+      return hierarchical_reference
     end
 
     def format_id_template(id_template, object)

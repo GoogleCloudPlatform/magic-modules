@@ -67,16 +67,16 @@ spec:
     has_name = !name.nil?
     has_labels = object.all_user_properties.map(&:name).include?("labels")
     is_server_generated = is_server_generated_name(name, object) if has_name
-    puts "erb... "+name+"... "+is_server_generated
+    # puts "erb... " + name.to_s + "... " + is_server_generated.to_s
 -%>
 <%  if !id_template.nil? && id_template != "" -%>
       idTemplate: "<%= id_template %>"
 <%  end -%>
       idTemplateCanBeUsedToMatchResourceName: false
       resourceAvailableInAssetInventory: false
-<%  if has_name || has_labels -%>
+<%  if has_name && !is_server_generated || has_labels -%>
       metadataMapping:
-<%  if has_name -%>
+<%  if has_name && !is_server_generated -%>
         name: <%= name %>
 <%  end -%>
 <%  if has_labels -%>
@@ -89,6 +89,20 @@ spec:
 <%  if has_name -%>
       resourceID:
         targetField: <%= name %>
+<%  end -%>
+<%
+    container = get_container (id_template)
+    hierarchical_reference = get_hierarchical_reference(container)
+-%>
+<%  if container.length == 2 -%>
+      containers:
+        - type: <%= container[0] %>
+          tfField: <%= container[1] %>
+<%  end -%>
+<%  if hierarchical_reference.length == 2 -%>
+      hierarchicalReferences:
+        - type: <%= hierarchical_reference[0] %>
+          key: <%= hierarchical_reference[1] %>
 <%  end -%>
 <%-
     references = object.all_user_properties.select { |p| p.is_a?(Api::Type::ResourceRef) }.reject { |p| p.name == 'region' || p.name == 'zone' }
