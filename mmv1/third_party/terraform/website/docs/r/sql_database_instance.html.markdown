@@ -184,7 +184,7 @@ includes an up-to-date reference of supported versions.
     created. This is done because after a name is used, it cannot be reused for
     up to [one week](https://cloud.google.com/sql/docs/delete-instance).
 
-* `maintenance_version`  - (Optional) The current software version on the instance. This attribute can not be set during creation. Refer to `available_maintenance_versions attribute` to see what `maintenance_version` are available for upgrade. When this attribute gets updated, it will cause an instance restart. Setting a `maintenance_version` value that is older than the current one on the instance will be ignored.
+* `maintenance_version`  - (Optional) The current software version on the instance. This attribute can not be set during creation. Refer to `available_maintenance_versions` attribute to see what `maintenance_version` are available for upgrade. When this attribute gets updated, it will cause an instance restart. Setting a `maintenance_version` value that is older than the current one on the instance will be ignored.
 
 * `master_instance_name` - (Optional) The name of the existing instance that will
     act as the master in the replication setup. Note, this requires the master to
