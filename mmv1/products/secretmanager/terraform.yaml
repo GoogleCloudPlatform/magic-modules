@@ -46,6 +46,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       constants: templates/terraform/constants/secret_version.go.erb
       custom_import: templates/terraform/custom_import/secret_version.go.erb
       resource_definition: templates/terraform/resource_definition/secret_version.go.erb
+      decoder: templates/terraform/decoders/treat_destroyed_state_as_gone.erb
     properties:
       state: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "enabled"
