@@ -169,10 +169,10 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
-          Output only. Identifier of the brand, in the format
-          `projects/{project_number}/brands/{brand_id}`. NOTE: The brand
-          identification corresponds to the project number as only one
-          brand per project can be created.
+          Output only. Identifier of the brand, in the format `projects/{project_number}/brands/{brand_id}`
+          NOTE: The name can also be expressed as `projects/{project_id}/brands/{brand_id}`, e.g. when importing.
+          NOTE: The brand identification corresponds to the project number as only one
+          brand can be created per project.
         output: true
     properties:
       - !ruby/object:Api::Type::String
