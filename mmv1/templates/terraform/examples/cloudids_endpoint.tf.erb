@@ -1,0 +1,6 @@
+resource "google_cloud_ids_endpoint" "<%= ctx[:primary_resource_id] %>" {
+    name     = "endpoint_example"
+    location = "US"
+    network  = "src-net"
+    severity = "INFORMATIONAL"
+}
