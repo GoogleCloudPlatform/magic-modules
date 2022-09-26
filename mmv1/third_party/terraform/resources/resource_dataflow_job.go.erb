@@ -366,7 +366,6 @@ func resourceDataflowJobRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("service_account_email", optionsMap["serviceAccountEmail"]); err != nil {
 		return fmt.Errorf("Error setting service_account_email: %s", err)
 	}
-
 	if addExper, ok := d.GetOk("additional_experiments"); ok {
 	for _, v := range addExper.(*schema.Set).List() {
 		exper := v.(string)
