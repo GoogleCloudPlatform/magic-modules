@@ -2,5 +2,11 @@ resource "google_firebase_hosting_site" "default" {
   provider = google-beta
   project  = "<%= ctx[:test_env_vars]['project_id'] %>"
   site = "tf-test-site%{random_suffix}"
-  app_id = "<%= ctx[:vars]['appId'] %>"
+}
+
+resource "google_firebase_hosting_site" "with_app" {
+  provider = google-beta
+  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
+  site = "tf-test-site2%{random_suffix}"
+  app_id = "<%= ctx[:vars]['app_id'] %>"
 }

@@ -21,7 +21,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: "beta"
         primary_resource_id: "default"
         vars:
-          appId: "1:298670958947:web:ca57a04393378be6fa4b56"
+          app_id: "1:298670958947:web:ca57a04393378be6fa4b56"
         test_env_vars:
           project_id: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
