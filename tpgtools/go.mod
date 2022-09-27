@@ -23,6 +23,7 @@ require (
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/google/go-cpy v0.0.0-20211218193943-a9c933c06932 // indirect
+
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320 // indirect
 	github.com/hashicorp/go-multierror v1.0.0 // indirect
 	github.com/hashicorp/go-uuid v1.0.1 // indirect
