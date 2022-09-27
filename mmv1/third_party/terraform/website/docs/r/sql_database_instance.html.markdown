@@ -184,6 +184,8 @@ includes an up-to-date reference of supported versions.
     created. This is done because after a name is used, it cannot be reused for
     up to [one week](https://cloud.google.com/sql/docs/delete-instance).
 
+* `maintenance_version`  - (Optional) The current software version on the instance. This attribute can not be set during creation. Refer to `available_maintenance_versions` attribute to see what `maintenance_version` are available for upgrade. When this attribute gets updated, it will cause an instance restart. Setting a `maintenance_version` value that is older than the current one on the instance will be ignored.
+
 * `master_instance_name` - (Optional) The name of the existing instance that will
     act as the master in the replication setup. Note, this requires the master to
     have `binary_log_enabled` set, as well as existing backups.
@@ -206,8 +208,8 @@ includes an up-to-date reference of supported versions.
     That service account needs the `Cloud KMS > Cloud KMS CryptoKey Encrypter/Decrypter` role on your
     key - please see [this step](https://cloud.google.com/sql/docs/mysql/configure-cmek#grantkey).
 
-* `deletion_protection` - (Optional, Default: `true` ) Whether or not to allow Terraform to destroy the instance. Unless this field is set to false
-in Terraform state, a `terraform destroy` or `terraform apply` command that deletes the instance will fail.
+* `deletion_protection` - (Optional) Whether or not to allow Terraform to destroy the instance. Unless this field is set to false
+in Terraform state, a `terraform destroy` or `terraform apply` command that deletes the instance will fail. Defaults to `true`.
 
 * `restore_backup_context` - (optional) The context needed to restore the database to a backup run. This field will
     cause Terraform to trigger the database to restore from the backup run indicated. The configuration is detailed below.
@@ -227,22 +229,22 @@ The `settings` block supports:
 * `activation_policy` - (Optional) This specifies when the instance should be
     active. Can be either `ALWAYS`, `NEVER` or `ON_DEMAND`.
 
-* `availability_type` - (Optional, Default: `ZONAL`) The availability type of the Cloud SQL
+* `availability_type` - (Optional) The availability type of the Cloud SQL
   instance, high availability (`REGIONAL`) or single zone (`ZONAL`).' For all instances, ensure that
   `settings.backup_configuration.enabled` is set to `true`.
   For MySQL instances, ensure that `settings.backup_configuration.binary_log_enabled` is set to `true`.
   For Postgres instances, ensure that `settings.backup_configuration.point_in_time_recovery_enabled`
-  is set to `true`.
+  is set to `true`. Defaults to `ZONAL`.
 
 * `collation` - (Optional) The name of server instance collation.
 
-* `disk_autoresize` - (Optional, Default: `true`) Enables auto-resizing of the storage size. Set to false if you want to set `disk_size`.
+* `disk_autoresize` - (Optional) Enables auto-resizing of the storage size. Defaults to `true`.
 
-* `disk_autoresize_limit` - (Optional, Default: `0`) The maximum size to which storage capacity can be automatically increased. The default value is 0, which specifies that there is no limit.
+* `disk_autoresize_limit` - (Optional) The maximum size to which storage capacity can be automatically increased. The default value is 0, which specifies that there is no limit.
 
-* `disk_size` - (Optional, Default: `10`) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. If you want to set this field, set `disk_autoresize` to false.
+* `disk_size` - (Optional) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. The minimum value is 10GB.
 
-* `disk_type` - (Optional, Default: `PD_SSD`) The type of data disk: PD_SSD or PD_HDD.
+* `disk_type` - (Optional) The type of data disk: PD_SSD or PD_HDD. Defaults to `PD_SSD`.
 
 * `pricing_plan` - (Optional) Pricing plan for this instance, can only be `PER_USE`.
 
@@ -377,8 +379,8 @@ to work, cannot be updated, and supports:
 * `client_key` - (Optional) PEM representation of the replica's private key. The
     corresponding public key in encoded in the `client_certificate`.
 
-* `connect_retry_interval` - (Optional, Default: 60) The number of seconds
-    between connect retries.
+* `connect_retry_interval` - (Optional) The number of seconds
+    between connect retries. MySQL's default is 60 seconds.
 
 * `dump_file_path` - (Optional) Path to a SQL file in GCS from which replica
     instances are created. Format is `gs://bucket/filename`.
@@ -450,6 +452,8 @@ instance.
 * `first_ip_address` - The first IPv4 address of any type assigned. This is to
 support accessing the [first address in the list in a terraform output](https://github.com/hashicorp/terraform-provider-google/issues/912)
 when the resource is configured with a `count`.
+
+* `available_maintenance_versions`  - The list of all maintenance versions applicable on the instance.
 
 * `public_ip_address` - The first public (`PRIMARY`) IPv4 address assigned. This is
 a workaround for an [issue fixed in Terraform 0.12](https://github.com/hashicorp/terraform/issues/17048)

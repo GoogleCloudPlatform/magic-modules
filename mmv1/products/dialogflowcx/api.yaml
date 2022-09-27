@@ -62,7 +62,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'defaultLanguageCode'
         description: |
-         The default language of the agent as a language tag. [See Language Support](https://cloud.google.com/dialogflow/cx/docs/reference/language) 
+         The default language of the agent as a language tag. [See Language Support](https://cloud.google.com/dialogflow/cx/docs/reference/language)
          for a list of the currently supported language codes. This field cannot be updated after creation.
         input: true
         required: true
@@ -143,7 +143,7 @@ objects:
         name: 'name'
         output: true
         description: |
-          The unique identifier of the intent.  
+          The unique identifier of the intent.
           Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/intents/<Intent ID>.
       - !ruby/object:Api::Type::String
         name: 'displayName'
@@ -202,7 +202,7 @@ objects:
               name: 'entityType'
               required: true
               description: |
-                The entity type of the parameter. 
+                The entity type of the parameter.
                 Format: projects/-/locations/-/agents/-/entityTypes/<System Entity Type ID> for system entity types (for example, projects/-/locations/-/agents/-/entityTypes/sys.date), or projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/entityTypes/<Entity Type ID> for developer entity types.
             - !ruby/object:Api::Type::Boolean
               name: 'isList'
@@ -211,7 +211,7 @@ objects:
             - !ruby/object:Api::Type::Boolean
               name: 'redact'
               description: |
-                Indicates whether the parameter content should be redacted in log. If redaction is enabled, the parameter content will be replaced by parameter name during logging. 
+                Indicates whether the parameter content should be redacted in log. If redaction is enabled, the parameter content will be replaced by parameter name during logging.
                 Note: the parameter content is subject to redaction if either parameter level redaction or entity type level redaction is enabled.
       - !ruby/object:Api::Type::Integer
         name: 'priority'
@@ -222,7 +222,7 @@ objects:
       - !ruby/object:Api::Type::Boolean
         name: 'isFallback'
         description: |
-          Indicates whether this is a fallback intent. Currently only default fallback intent is allowed in the agent, which is added upon agent creation. 
+          Indicates whether this is a fallback intent. Currently only default fallback intent is allowed in the agent, which is added upon agent creation.
           Adding training phrases to fallback intent is useful in the case of requests that are mistakenly matched, since training phrases assigned to fallback intents act as negative examples that triggers no-match event.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
@@ -252,7 +252,7 @@ objects:
         url_param_only: true
         input: true
         description: |
-          The agent to create a flow for. 
+          The agent to create a flow for.
           Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
       - !ruby/object:Api::Type::String
         name: 'languageCode'
@@ -269,7 +269,7 @@ objects:
         name: 'name'
         output: true
         description: |
-          The unique identifier of the flow. 
+          The unique identifier of the flow.
           Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
       - !ruby/object:Api::Type::String
         name: 'displayName'
@@ -286,7 +286,7 @@ objects:
           A flow's transition routes serve two purposes:
           They are responsible for matching the user's first utterances in the flow.
           They are inherited by every page's [transition routes][Page.transition_routes] and can support use cases such as the user saying "help" or "can I talk to a human?", which can be handled in a common way regardless of the current page. Transition routes defined in the page have higher priority than those defined in the flow.
-            
+
           TransitionRoutes are evalauted in the following order:
             TransitionRoutes with intent specified.
             TransitionRoutes with only condition specified.
@@ -301,7 +301,7 @@ objects:
             - !ruby/object:Api::Type::String
               name: 'intent'
               description: |
-                The unique identifier of an Intent. 
+                The unique identifier of an Intent.
                 Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/intents/<Intent ID>. Indicates that the transition can only happen when the given intent is matched. At least one of intent or condition must be specified. When both intent and condition are specified, the transition can only happen when both are fulfilled.
             - !ruby/object:Api::Type::String
               name: 'condition'
@@ -349,12 +349,12 @@ objects:
             - !ruby/object:Api::Type::String
               name: 'targetPage'
               description: |
-                The target page to transition to. 
+                The target page to transition to.
                 Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
             - !ruby/object:Api::Type::String
               name: 'targetFlow'
               description: |
-                The target flow to transition to. 
+                The target flow to transition to.
                 Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
       - !ruby/object:Api::Type::Array
         name: 'eventHandlers'
@@ -415,12 +415,12 @@ objects:
             - !ruby/object:Api::Type::String
               name: 'targetPage'
               description: |
-                The target page to transition to. 
+                The target page to transition to.
                 Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
             - !ruby/object:Api::Type::String
               name: 'targetFlow'
               description: |
-                The target flow to transition to. 
+                The target flow to transition to.
                 Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
       - !ruby/object:Api::Type::Array
         name: 'transitionRouteGroups'
@@ -447,7 +447,7 @@ objects:
           - !ruby/object:Api::Type::Double
             name: 'classificationThreshold'
             description: |
-              To filter out false positive results and still get variety in matched natural language inputs for your agent, you can tune the machine learning classification threshold. 
+              To filter out false positive results and still get variety in matched natural language inputs for your agent, you can tune the machine learning classification threshold.
               If the returned score value is less than the threshold value, then a no-match event will be triggered. The score values range from 0.0 (completely uncertain) to 1.0 (completely certain). If set to 0.0, the default of 0.3 is used.
           - !ruby/object:Api::Type::Enum
             name: 'modelTrainingMode'
@@ -498,7 +498,7 @@ objects:
         url_param_only: true
         input: true
         description: |
-          The Flow to create an Version for. 
+          The Flow to create an Version for.
           Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
     properties:
       - !ruby/object:Api::Type::String
@@ -533,7 +533,7 @@ objects:
           - !ruby/object:Api::Type::Double
             name: 'classificationThreshold'
             description: |
-              To filter out false positive results and still get variety in matched natural language inputs for your agent, you can tune the machine learning classification threshold. If the returned score value is less than the threshold value, then a no-match event will be triggered. 
+              To filter out false positive results and still get variety in matched natural language inputs for your agent, you can tune the machine learning classification threshold. If the returned score value is less than the threshold value, then a no-match event will be triggered.
               The score values range from 0.0 (completely uncertain) to 1.0 (completely certain). If set to 0.0, the default of 0.3 is used.
           - !ruby/object:Api::Type::Enum
             name: 'modelTrainingMode'
@@ -578,7 +578,7 @@ objects:
         url_param_only: true
         input: true
         description: |
-          The flow to create a page for. 
+          The flow to create a page for.
           Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
       - !ruby/object:Api::Type::String
         name: 'languageCode'
@@ -602,7 +602,7 @@ objects:
         name: 'name'
         output: true
         description: |
-          The unique identifier of the page. 
+          The unique identifier of the page.
           Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
       - !ruby/object:Api::Type::String
         name: 'displayName'
@@ -665,12 +665,12 @@ objects:
                 - !ruby/object:Api::Type::Boolean
                   name: 'required'
                   description: |
-                    Indicates whether the parameter is required. Optional parameters will not trigger prompts; however, they are filled if the user specifies them. 
+                    Indicates whether the parameter is required. Optional parameters will not trigger prompts; however, they are filled if the user specifies them.
                     Required parameters must be filled before form filling concludes.
                 - !ruby/object:Api::Type::String
                   name: 'entityType'
                   description: |
-                    The entity type of the parameter. 
+                    The entity type of the parameter.
                     Format: projects/-/locations/-/agents/-/entityTypes/<System Entity Type ID> for system entity types (for example, projects/-/locations/-/agents/-/entityTypes/sys.date), or projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/entityTypes/<Entity Type ID> for developer entity types.
                 - !ruby/object:Api::Type::Boolean
                   name: 'isList'
@@ -722,7 +722,7 @@ objects:
                 - !ruby/object:Api::Type::Boolean
                   name: 'redact'
                   description: |
-                    Indicates whether the parameter content should be redacted in log. 
+                    Indicates whether the parameter content should be redacted in log.
                     If redaction is enabled, the parameter content will be replaced by parameter name during logging. Note: the parameter content is subject to redaction if either parameter level redaction or entity type level redaction is enabled.
       - !ruby/object:Api::Type::Array
         name: 'transitionRouteGroups'
@@ -731,7 +731,7 @@ objects:
           If multiple transition routes within a page scope refer to the same intent, then the precedence order is: page's transition route -> page's transition route group -> flow's transition routes.
           If multiple transition route groups within a page contain the same intent, then the first group in the ordered list takes precedence.
           Format:projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/transitionRouteGroups/<TransitionRouteGroup ID>.
-        item_type: Api::Type::String      
+        item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'transitionRoutes'
         description: |
@@ -753,7 +753,7 @@ objects:
             - !ruby/object:Api::Type::String
               name: 'intent'
               description: |
-                The unique identifier of an Intent. 
+                The unique identifier of an Intent.
                 Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/intents/<Intent ID>. Indicates that the transition can only happen when the given intent is matched. At least one of intent or condition must be specified. When both intent and condition are specified, the transition can only happen when both are fulfilled.
             - !ruby/object:Api::Type::String
               name: 'condition'
@@ -801,12 +801,12 @@ objects:
             - !ruby/object:Api::Type::String
               name: 'targetPage'
               description: |
-                The target page to transition to. 
+                The target page to transition to.
                 Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
             - !ruby/object:Api::Type::String
               name: 'targetFlow'
               description: |
-                The target flow to transition to. 
+                The target flow to transition to.
                 Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
       - !ruby/object:Api::Type::Array
         name: 'eventHandlers'
@@ -864,12 +864,12 @@ objects:
             - !ruby/object:Api::Type::String
               name: 'targetPage'
               description: |
-                The target page to transition to. 
+                The target page to transition to.
                 Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
             - !ruby/object:Api::Type::String
               name: 'targetFlow'
               description: |
-                The target flow to transition to. 
+                The target flow to transition to.
                 Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
   - !ruby/object:Api::Resource
     name: 'EntityType'
@@ -877,7 +877,7 @@ objects:
     update_verb: :PATCH
     update_mask: true
     description: |
-      Entities are extracted from user input and represent parameters that are meaningful to your application. 
+      Entities are extracted from user input and represent parameters that are meaningful to your application.
       For example, a date range, a proper name such as a geographic location or landmark, and so on. Entities represent actionable data for your application.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
@@ -890,7 +890,7 @@ objects:
         url_param_only: true
         input: true
         description: |
-          The agent to create a entity type for. 
+          The agent to create a entity type for.
           Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
       - !ruby/object:Api::Type::String
         name: 'languageCode'
@@ -957,7 +957,7 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'excludedPhrases'
         description: |
-          Collection of exceptional words and phrases that shouldn't be matched. For example, if you have a size entity type with entry giant(an adjective), you might consider adding giants(a noun) as an exclusion. 
+          Collection of exceptional words and phrases that shouldn't be matched. For example, if you have a size entity type with entry giant(an adjective), you might consider adding giants(a noun) as an exclusion.
           If the kind of entity type is KIND_MAP, then the phrases specified by entities and excluded phrases should be mutually exclusive.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
@@ -972,7 +972,7 @@ objects:
       - !ruby/object:Api::Type::Boolean
         name: 'redact'
         description: |
-          Indicates whether parameters of the entity type should be redacted in log. If redaction is enabled, page parameters and intent parameters referring to the entity type will be replaced by parameter name when logging.    
+          Indicates whether parameters of the entity type should be redacted in log. If redaction is enabled, page parameters and intent parameters referring to the entity type will be replaced by parameter name when logging.
   - !ruby/object:Api::Resource
     name: 'Environment'
     base_url: "{{parent}}/environments"
@@ -980,7 +980,7 @@ objects:
     update_mask: true
     description: |
       Represents an environment for an agent. You can create multiple versions of your agent and publish them to separate environments.
-      When you edit an agent, you are editing the draft agent. At any point, you can save the draft agent as an agent version, which is an immutable snapshot of your agent. 
+      When you edit an agent, you are editing the draft agent. At any point, you can save the draft agent as an agent version, which is an immutable snapshot of your agent.
       When you save the draft agent, it is published to the default environment. When you create agent versions, you can publish them to custom environments. You can create a variety of custom environments for testing, development, production, etc.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
@@ -1014,7 +1014,7 @@ objects:
         url_param_only: true
         input: true
         description: |
-          The Agent to create an Environment for. 
+          The Agent to create an Environment for.
           Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
     properties:
       - !ruby/object:Api::Type::String
@@ -1047,3 +1047,111 @@ objects:
         name: 'updateTime'
         output: true
         description: 'Update time of this environment. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".'
+  - !ruby/object:Api::Resource
+    name: 'Webhook'
+    base_url: "{{parent}}/webhooks"
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Webhooks host the developer's business logic. During a session, webhooks allow the developer to use the data extracted by Dialogflow's natural language processing to generate dynamic responses, validate collected data, or trigger actions on the backend.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/dialogflow/cx/docs'
+      api: 'https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.webhooks'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: parent
+        url_param_only: true
+        input: true
+        description: |
+          The agent to create a webhook for.
+          Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        output: true
+        description: |
+          The unique identifier of the webhook.
+          Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/webhooks/<Webhook ID>.
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: |
+          The human-readable name of the webhook, unique within the agent.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'timeout'
+        description: |
+          Webhook execution timeout.
+      - !ruby/object:Api::Type::Boolean
+        name: 'disabled'
+        description: |
+         Indicates whether the webhook is disabled.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'genericWebService'
+        description: |
+          Configuration for a generic web service.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'uri'
+            description: |
+              Whether to use speech adaptation for speech recognition.
+            required: true
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: 'requestHeaders'
+            description: |
+              The HTTP request headers to send together with webhook requests.
+            input: true
+          - !ruby/object:Api::Type::Array
+            name: 'allowedCaCerts'
+            description: |
+              Specifies a list of allowed custom CA certificates (in DER format) for HTTPS verification.
+            item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: 'serviceDirectory'
+        description: |
+          Configuration for a Service Directory service.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'service'
+            description: |
+              The name of Service Directory service.
+            required: true
+          - !ruby/object:Api::Type::NestedObject
+            name: 'genericWebService'
+            description: |
+              The name of Service Directory service.
+            required: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'uri'
+                description: |
+                  Whether to use speech adaptation for speech recognition.
+                required: true
+              - !ruby/object:Api::Type::KeyValuePairs
+                name: 'requestHeaders'
+                description: |
+                  The HTTP request headers to send together with webhook requests.
+                input: true
+              - !ruby/object:Api::Type::Array
+                name: 'allowedCaCerts'
+                description: |
+                  Specifies a list of allowed custom CA certificates (in DER format) for HTTPS verification.
+                item_type: Api::Type::String
+      - !ruby/object:Api::Type::String
+        name: 'startFlow'
+        output: true
+        description: |
+         Name of the start flow in this agent. A start flow will be automatically created when the agent is created, and can only be deleted by deleting the agent. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
+      - !ruby/object:Api::Type::String
+        name: 'securitySettings'
+        description: |
+         Name of the SecuritySettings reference for the agent. Format: projects/<Project ID>/locations/<Location ID>/securitySettings/<Security Settings ID>.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableStackdriverLogging'
+        description: |
+         Determines whether this agent should log conversation queries.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableSpellCorrection'
+        description: |
+         Indicates if automatic spell correction is enabled in detect intent requests.
