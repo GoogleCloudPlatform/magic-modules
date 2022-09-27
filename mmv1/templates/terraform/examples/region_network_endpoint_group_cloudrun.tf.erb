@@ -1,10 +1,3 @@
-resource "google_project" "neg_project" {
-  name = "<%= ctx[:vars]['project'] %>"
-  project_id = "<%= ctx[:vars]['project'] %>"
-  org_id = "<%= ctx[:test_env_vars]['org_id'] %>"
-  billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
-}
-
 // Cloud Run Example
 resource "google_compute_region_network_endpoint_group" "<%= ctx[:primary_resource_id] %>" {
   name                  = "<%= ctx[:vars]['neg_name'] %>"
@@ -30,31 +23,5 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   traffic {
     percent         = 100
     latest_revision = true
-  }
-}
-
-data "google_compute_region_network_endpoint_group" "neg_sample" {
-  name = "neg_cloudrun_sample"
-}
-
-module "lb-http" {
-  source            = "GoogleCloudPlatform/lb-http/google//modules/serverless_negs"
-  version           = "~> 4.4"
-
-  project           = google_project.neg_project.project_id
-  name              = "<%= ctx[:vars]['lip_http_name'] %>"
-
-  ssl                             = true
-  managed_ssl_certificate_domains = ["google-domain.com"]
-  https_redirect                  = true
-  backends = {
-    default = {
-      groups = [
-        {
-          # Your serverless service should have a NEG created that's referenced here.
-          group = data.google_compute_region_network_endpoint_group.neg_sample.id
-        }
-      ]
-    }
   }
 }
