@@ -14,7 +14,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Site: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ['projects/{{project}}/sites/{{site}}', '{{site}}']
+    import_format: ['projects/{{project}}/sites/{{site}}', 'sites/{{site}}', '{{site}}']
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firebasehosting_site_basic"

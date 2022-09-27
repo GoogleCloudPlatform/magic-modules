@@ -24,7 +24,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Site'
     min_version: beta
-    base_url: projects/{{project}}/sites/{{site}}
+    base_url: projects/{{project}}/sites
     self_link: "{{name}}"
     create_url: projects/{{project}}/sites?siteId={{site}}
     update_verb: :PATCH
@@ -61,3 +61,7 @@ objects:
         description: |
           Optional. The [ID of a Web App](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.webApps#WebApp.FIELDS.app_id)
           associated with the Hosting site.
+      - !ruby/object:Api::Type::String
+        name: defaultUrl
+        output: true
+        description: The default URL for the site in the form of https://{name}.web.app
