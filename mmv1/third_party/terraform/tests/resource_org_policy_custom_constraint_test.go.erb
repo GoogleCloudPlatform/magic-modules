@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package google
+<% unless version == 'ga' -%>
 
 import (
 	"testing"
@@ -96,3 +98,5 @@ resource "google_org_policy_custom_constraint" "constraint" {
 }
 `, context)
 }
+
+<% end -%>
