@@ -147,6 +147,28 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       encoder: templates/terraform/encoders/monitoring_service.go.erb
 
+  GenericService: !ruby/object:Overrides::Terraform::ResourceOverride
+    legacy_name: 'google_monitoring_service'
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
+    error_retry_predicates: ["isMonitoringConcurrentEditError"]
+    properties:
+      serviceId: !ruby/object:Overrides::Terraform::PropertyOverride
+        api_name: 'name'
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+        default_from_api: true
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[a-z0-9\-]+$'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "monitoring_service_example"
+        primary_resource_id: "my_service"
+        vars:
+          service_id: "my-service"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      encoder: templates/terraform/encoders/monitoring_service_generic.go.erb
+
   Slo: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
