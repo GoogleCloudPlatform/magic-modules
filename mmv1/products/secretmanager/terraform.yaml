@@ -62,6 +62,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: secret_data
         sensitive: true
         custom_expand: templates/terraform/custom_expand/base64.go.erb
+      version: !ruby/object:Overrides::Terraform::PropertyOverride        
+        name: "version"
+        output: true
+        custom_flatten: templates/terraform/custom_flatten/secret_version_version.go.erb
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
