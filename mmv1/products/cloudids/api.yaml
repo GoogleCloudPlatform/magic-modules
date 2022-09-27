@@ -17,7 +17,7 @@ display_name: Cloud Intrusion Detection Service
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://ids.googleapis.com/
+    base_url: https://ids.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloudids
 apis_required:
@@ -38,12 +38,15 @@ objects:
     parameters:
       - !ruby/object:Api::Type::String
         name: 'location'
+        required: true
+        url_param_only: true
         description: |
           The location for the endpoint.
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
-        output: true
+        required: true
+        input: true
         description: |
           Name of the endpoint in the format projects/{project_id}/locations/{locationId}/endpoints/{endpointId}.
       - !ruby/object:Api::Type::String
