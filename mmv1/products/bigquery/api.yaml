@@ -803,6 +803,12 @@ objects:
                   For orc, specify "ORC". [Beta] For Bigtable, specify "BIGTABLE".
                   The default value is CSV.
                 default_value: 'CSV'
+              - !ruby/object:Api::Type::String
+                name: 'jsonExtension'
+                description: |
+                  If sourceFormat is set to newline-delimited JSON, indicates whether it should be processed as a JSON variant such as GeoJSON.
+                  For a sourceFormat other than JSON, omit this field. If the sourceFormat is newline-delimited JSON: - for newline-delimited
+                  GeoJSON: set to GEOJSON.
               - !ruby/object:Api::Type::Boolean
                 name: 'allowJaggedRows'
                 description: |

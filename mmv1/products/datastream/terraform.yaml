@@ -72,3 +72,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "true"
         # This is covered by the update tests.
         skip_test: true
+  PrivateConnection: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}
+    import_format: ["projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "datastream_private_connection_full"
+        primary_resource_id: "default"
+        vars:
+          private_connection_id: "my-connection"
+          network_name: "my-network"
