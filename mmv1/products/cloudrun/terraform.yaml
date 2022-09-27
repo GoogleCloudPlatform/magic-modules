@@ -402,6 +402,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       spec.template.spec.containers.startupProbe: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       spec.template.spec.containers.startupProbe.tcpSocket.port: !ruby/object:Overrides::Terraform::PropertyOverride
+        # when port is not specified, container.ports[0].port is a possible default value 
         default_from_api: true
       spec.template.spec.containers.startupProbe.httpGet.path: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
