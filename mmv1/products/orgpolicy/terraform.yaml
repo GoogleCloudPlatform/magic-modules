@@ -19,6 +19,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["{{%name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
         name: "org_policy_custom_constraint"
         primary_resource_id: "constraint"
         test_env_vars:
