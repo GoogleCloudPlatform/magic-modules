@@ -21,7 +21,6 @@ resource "google_vertex_ai_featurestore_entitytype" "entity" {
   monitoring_config {
     snapshot_analysis {
       disabled = false
-      monitoring_interval = "86400s"
     }
   }
 }

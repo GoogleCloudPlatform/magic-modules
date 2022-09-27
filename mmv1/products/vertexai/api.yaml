@@ -269,12 +269,6 @@ objects:
                 default_value: false
                 description: |
                   The monitoring schedule for snapshot analysis. For EntityType-level config: unset / disabled = true indicates disabled by default for Features under it; otherwise by default enable snapshot analysis monitoring with monitoringInterval for Features under it.
-              - !ruby/object:Api::Type::String
-                name: 'monitoringInterval'
-                description: |
-                  Configuration of the snapshot analysis based monitoring pipeline running interval. The value is rolled up to full day.
-
-                  A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
 # Vertex ML Metadata
   - !ruby/object:Api::Resource
     name: MetadataStore
