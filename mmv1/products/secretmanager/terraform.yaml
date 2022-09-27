@@ -64,7 +64,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       version: !ruby/object:Overrides::Terraform::PropertyOverride        
         name: "version"
         output: true
-        input: true
         custom_flatten: templates/terraform/custom_flatten/secret_version_version.go.erb
 
 # This is for copying files over
