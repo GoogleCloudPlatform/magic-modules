@@ -31,7 +31,7 @@ func TestCloudIdsEndpoint_basic(t *testing.T) {
 }
 
 func testCloudIds_basic(context map[string]interface{}) string {
-    return Nprintf(`
+	return Nprintf(`
 resource "google_compute_network" "default" {
 	name = "tf-test-my-network%{random_suffix}"
 }
@@ -52,7 +52,7 @@ resource "google_cloud_ids_endpoint" "endpoint" {
 	name     = "cloud-ids-test-%{random_suffix}"
 	location = "us-central1-f"
 	network  = google_compute_network.default.id
-    severity = "INFORMATIONAL"
+	severity = "INFORMATIONAL"
 	depends_on = [google_service_networking_connection.private_service_connection]
 }
 `, context)
