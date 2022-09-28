@@ -22,7 +22,7 @@ func TestCloudIdsEndpoint_basic(t *testing.T) {
 				Config: testCloudIds_basic(context),
 			},
 			{
-				ResourceName:      "google_cloud_ids_endpoint.terraform-test",
+				ResourceName:      "google_cloud_ids_endpoint.endpoint",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -32,11 +32,28 @@ func TestCloudIdsEndpoint_basic(t *testing.T) {
 
 func testCloudIds_basic(context map[string]interface{}) string {
     return Nprintf(`
+resource "google_compute_network" "default" {
+	name = "tf-test-my-network%{random_suffix}"
+}
+resource "google_compute_global_address" "service_range" {
+	name          = "address"
+	purpose       = "VPC_PEERING"
+	address_type  = "INTERNAL"
+	prefix_length = 16
+	network       = google_compute_network.default.id
+}
+resource "google_service_networking_connection" "private_service_connection" {
+	network                 = google_compute_network.default.id
+	service                 = "servicenetworking.googleapis.com"
+	reserved_peering_ranges = [google_compute_global_address.service_range.name]
+}
+  
 resource "google_cloud_ids_endpoint" "endpoint" {
 	name     = "cloud-ids-test-%{random_suffix}"
 	location = "us-central1-f"
-	network  = "src-net"
+	network  = google_compute_network.default.id
     severity = "INFORMATIONAL"
+	depends_on = [google_service_networking_connection.private_service_connection]
 }
 `, context)
 }

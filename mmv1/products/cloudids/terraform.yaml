@@ -17,6 +17,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
     base_url: projects/{{project}}/locations/{{location}}/endpoints
     import_format: ["projects/{{project}}/locations/{{location}}/endpoints/{{name}}"]
+    autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudids_endpoint"
