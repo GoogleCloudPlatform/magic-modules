@@ -1054,34 +1054,10 @@ func TestLabelDiffSuppress(t *testing.T) {
 		},
 	}
 	for tn, tc := range cases {
-		if testLabelDiffSuppress(tc.K, tc.Old, tc.New) != tc.ExpectDiffSuppress {
+		if resourceDataplexLabelDiffSuppress(tc.K, tc.Old, tc.New) != tc.ExpectDiffSuppress {
 			t.Errorf("bad: %s, %q: %q => %q expect DiffSuppress to return %t", tn, tc.K, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
-}
-
-var googleProvidedLabels = []string{
-	"goog-dataplex-asset-id",
-	"goog-dataplex-lake-id",
-	"goog-dataplex-project-id",
-	"goog-dataplex-zone-id",
-}
-
-func testLabelDiffSuppress(k, old, new string) bool {
-	// Suppress diffs for the labels provided by Google
-	for _, label := range googleProvidedLabels {
-		if strings.Contains(k, label) && new == "" {
-			return true
-		}
-	}
-
-	// Let diff be determined by labels (above)
-	if strings.Contains(k, "labels.%") {
-		return true
-	}
-
-	// For other keys, don't suppress diff.
-	return false
 }
 
 func testAccCheckStorageBucketExists(t *testing.T, n string, bucketName string, bucket *storage.Bucket) resource.TestCheckFunc {
