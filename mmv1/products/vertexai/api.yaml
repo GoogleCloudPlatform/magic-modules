@@ -347,22 +347,11 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: Description of the feature.
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'valueType'
         description: |
-          Type of Feature value. Immutable.
+          Type of Feature value. Immutable. https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes.features#ValueType
         required: true
-        values:
-          - VALUE_TYPE_UNSPECIFIED
-          - BOOL
-          - BOOL_ARRAY
-          - DOUBLE
-          - DOUBLE_ARRAY
-          - INT64
-          - INT64_ARRAY
-          - STRING
-          - STRING_ARRAY
-          - BYTES
 # Vertex ML Metadata
   - !ruby/object:Api::Resource
     name: MetadataStore
