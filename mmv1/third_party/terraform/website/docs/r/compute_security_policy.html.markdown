@@ -67,7 +67,7 @@ The following arguments are supported:
 
 * `adaptive_protection_config` - (Optional) Configuration for [Google Cloud Armor Adaptive Protection](https://cloud.google.com/armor/docs/adaptive-protection-overview?hl=en). Structure is [documented below](#nested_adaptive_protection_config).
 
-* `type` - The type indicates the intended use of the security policy.
+* `type` - The type indicates the intended use of the security policy. This field can be set only at resource creation time.
   * CLOUD_ARMOR - Cloud Armor backend security policies can be configured to filter incoming HTTP requests targeting backend services.
     They filter requests before they hit the origin servers.
   * CLOUD_ARMOR_EDGE - Cloud Armor edge security policies can be configured to filter incoming HTTP requests targeting backend services
