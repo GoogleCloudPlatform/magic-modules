@@ -573,7 +573,6 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 
 <% if updatable?(object, object.root_properties) -%>
 func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
-
 <%  if object.async&.is_a?(Api::OpAsync) && object.async.include_project -%>
     var project string
 <% end -%>
