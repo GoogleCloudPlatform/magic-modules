@@ -89,6 +89,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "trigger_pubsub_tf"
         vars:
           pubsub_workflow_tf: "pubsub-workflow-tf"
+          service_account: "eventarc-sa"
           trigger_pubsub_workflow_tf: "trigger-pubsub-workflow-tf"
         min_version: beta
 

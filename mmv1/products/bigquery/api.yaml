@@ -691,11 +691,11 @@ objects:
                 name: 'sourceUris'
                 description: |
                   The fully-qualified URIs that point to your data in Google Cloud.
-                  For Google Cloud Storage URIs: Each URI can contain one '*' wildcard character
+                  For Google Cloud Storage URIs: Each URI can contain one '\*' wildcard character
                   and it must come after the 'bucket' name. Size limits related to load jobs apply
                   to external data sources. For Google Cloud Bigtable URIs: Exactly one URI can be
                   specified and it has be a fully specified and valid HTTPS URL for a Google Cloud Bigtable table.
-                  For Google Cloud Datastore backups: Exactly one URI can be specified. Also, the '*' wildcard character is not allowed.
+                  For Google Cloud Datastore backups: Exactly one URI can be specified. Also, the '\*' wildcard character is not allowed.
                 item_type: Api::Type::String
                 required: true
               - !ruby/object:Api::Type::NestedObject
@@ -803,6 +803,12 @@ objects:
                   For orc, specify "ORC". [Beta] For Bigtable, specify "BIGTABLE".
                   The default value is CSV.
                 default_value: 'CSV'
+              - !ruby/object:Api::Type::String
+                name: 'jsonExtension'
+                description: |
+                  If sourceFormat is set to newline-delimited JSON, indicates whether it should be processed as a JSON variant such as GeoJSON.
+                  For a sourceFormat other than JSON, omit this field. If the sourceFormat is newline-delimited JSON: - for newline-delimited
+                  GeoJSON: set to GEOJSON.
               - !ruby/object:Api::Type::Boolean
                 name: 'allowJaggedRows'
                 description: |
@@ -1394,13 +1400,13 @@ objects:
             name: 'sourceUris'
             description: |
               The fully-qualified URIs that point to your data in Google Cloud.
-              For Google Cloud Storage URIs: Each URI can contain one '*'
+              For Google Cloud Storage URIs: Each URI can contain one '\*'
               wildcard character and it must come after the 'bucket' name. Size
               limits related to load jobs apply to external data sources. For
               Google Cloud Bigtable URIs: Exactly one URI can be specified and it
               has be a fully specified and valid HTTPS URL for a Google Cloud
               Bigtable table. For Google Cloud Datastore backups, exactly one
-              URI can be specified. Also, the '*' wildcard character is not
+              URI can be specified. Also, the '\*' wildcard character is not
               allowed.
             item_type: Api::Type::String
           - !ruby/object:Api::Type::NestedObject
