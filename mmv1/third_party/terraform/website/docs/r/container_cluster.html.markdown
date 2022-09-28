@@ -265,6 +265,23 @@ region are guaranteed to support the same version.
     to say "these are the _only_ node pools associated with this cluster", use the
     [google_container_node_pool](container_node_pool.html) resource instead of this property.
 
+    In case of [autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison) cluster,
+    you may use this block to assign custom service account and/or oauth scopes as follows:
+
+```hcl
+node_pool {
+  name               = "default-pool"
+  initial_node_count = 1
+
+  node_config {
+    service_account = "service-account-name@project-id.iam.gserviceaccount.com"
+    oauth_scopes    = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+  }
+}
+```
+
 * `node_pool_auto_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Node pool configs that apply to auto-provisioned node pools in
     [autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison) clusters and
     [node auto-provisioning](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning)-enabled clusters. Structure is [documented below](#nested_node_pool_auto_config).
