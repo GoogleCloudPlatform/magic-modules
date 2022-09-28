@@ -444,9 +444,12 @@ objects:
               Source connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
           - !ruby/object:Api::Type::NestedObject
             name: 'oracleSourceConfig'
-            conflicts:
-              - source_config.mysql_source_config
-              - source_config.postgresql_source_config
+            allow_empty_object: true
+            send_empty_value: true
+            exactly_one_of:
+              - source_config.0.oracle_source_config
+              - source_config.0.mysql_source_config
+              - source_config.0.postgresql_source_config
             description: |
               Oracle data source configuration.
             properties:
@@ -614,14 +617,18 @@ objects:
                                         The ordinal position of the column in the table.
               - !ruby/object:Api::Type::Integer
                 name: 'maxConcurrentCdcTasks'
+                send_empty_value: true
                 description: |
                   Maximum number of concurrent CDC tasks. The number should be non negative.
                   If not set (or set to 0), the system's default value will be used.
           - !ruby/object:Api::Type::NestedObject
             name: 'mysqlSourceConfig'
-            conflicts:
-              - source_config.oracle_source_config
-              - source_config.postgresql_source_config
+            allow_empty_object: true
+            send_empty_value: true
+            exactly_one_of:
+              - source_config.0.oracle_source_config
+              - source_config.0.mysql_source_config
+              - source_config.0.postgresql_source_config
             description: |
               MySQL data source configuration.
             properties:
@@ -775,14 +782,16 @@ objects:
                                         The ordinal position of the column in the table.
               - !ruby/object:Api::Type::Integer
                 name: 'maxConcurrentCdcTasks'
+                send_empty_value: true
                 description: |
                   Maximum number of concurrent CDC tasks. The number should be non negative.
                   If not set (or set to 0), the system's default value will be used.
           - !ruby/object:Api::Type::NestedObject
             name: 'postgresqlSourceConfig'
-            conflicts:
-              - source_config.oracle_source_config
-              - source_config.mysql_source_config
+            exactly_one_of:
+              - source_config.0.oracle_source_config
+              - source_config.0.mysql_source_config
+              - source_config.0.postgresql_source_config
             description: |
               PostgreSQL data source configuration.
             properties:
@@ -963,6 +972,7 @@ objects:
               Destination connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
           - !ruby/object:Api::Type::NestedObject
             name: 'gcsDestinationConfig'
+            required: true
             description: |
               A configuration for how data should be loaded to Cloud Storage.
             properties:
@@ -981,6 +991,9 @@ objects:
                   A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s". Defaults to 900s.
               - !ruby/object:Api::Type::NestedObject
                 name: 'jsonFileFormat'
+                required: true
+                allow_empty_object: true
+                send_empty_value: true
                 description: |
                   JSON file format configuration.
                 properties:
@@ -1000,14 +1013,17 @@ objects:
                       - GZIP
       - !ruby/object:Api::Type::NestedObject
         name: 'backfillAll'
+        required: true
+        allow_empty_object: true
+        send_empty_value: true
         description: |
           Backfill strategy to automatically backfill the Stream's objects. Specific objects can be excluded.
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'oracleExcludedObjects'
             conflicts:
-              - backfill_all.mysql_excluded_objects
-              - backfill_all.postgresql_excluded_objects
+              - backfill_all.0.mysql_excluded_objects
+              - backfill_all.0.postgresql_excluded_objects
             description: |
               Oracle data source objects to avoid backfilling.
             properties:
@@ -1092,8 +1108,8 @@ objects:
             description: |
               MySQL data source objects to avoid backfilling.
             conflicts:
-              - backfill_all.oracle_excluded_objects
-              - backfill_all.postgresql_excluded_objects
+              - backfill_all.0.oracle_excluded_objects
+              - backfill_all.0.postgresql_excluded_objects
             properties:
               - !ruby/object:Api::Type::Array
                 name: 'mysqlDatabases'
@@ -1167,8 +1183,8 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: 'postgresqlExcludedObjects'
             conflicts:
-              - backfill_all.oracle_excluded_objects
-              - backfill_all.mysql_excluded_objects
+              - backfill_all.0.oracle_excluded_objects
+              - backfill_all.0.mysql_excluded_objects
             description: |
               PostgreSQL data source objects to avoid backfilling.
             properties:
