@@ -1,4 +1,6 @@
 resource "google_org_policy_custom_constraint" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+
   name         = "organizations/%{org_id}/customConstraints/custom.disableGkeAutoUpgrade"
   parent       = "organizations/%{org_id}"
   display_name = "Disable GKE auto upgrade"
