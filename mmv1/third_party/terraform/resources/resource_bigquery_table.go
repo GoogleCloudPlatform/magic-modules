@@ -596,11 +596,8 @@ func resourceBigQueryTable() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"use_avro_logical_types": {
 										Type:        schema.TypeBool,
-										Optional:    true,
+										Required:    true,
 										Description: `If sourceFormat is set to "AVRO", indicates whether to interpret logical types as the corresponding BigQuery data type (for example, TIMESTAMP), instead of using the raw type (for example, INTEGER).`,
-										AtLeastOneOf: []string{
-											"external_data_configuration.0.avro_options.0.use_avro_logical_types",
-										},
 									},
 								},
 							},
