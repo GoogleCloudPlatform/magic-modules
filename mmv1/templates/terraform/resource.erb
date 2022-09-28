@@ -163,7 +163,6 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%  if object.async&.is_a?(Api::OpAsync) && object.async.include_project -%>
     var project string
 <% end -%>
-
     config := meta.(*Config)
 <%  if object.custom_code.custom_create -%>
     <%= lines(compile(pwd + '/' + object.custom_code.custom_create))  -%>
@@ -578,7 +577,6 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%  if object.async&.is_a?(Api::OpAsync) && object.async.include_project -%>
     var project string
 <% end -%>
-
     config := meta.(*Config)
     userAgent, err := generateUserAgentString(d, config.userAgent)
     if err != nil {
@@ -841,7 +839,6 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%  if object.async&.is_a?(Api::OpAsync) && object.async.include_project -%>
     var project string
 <% end -%>
-
 <% if object.skip_delete -%>
     log.Printf("[WARNING] <%= object.__product.name + " " + object.name %> resources" +
     " cannot be deleted from Google Cloud. The resource %s will be removed from Terraform" +
