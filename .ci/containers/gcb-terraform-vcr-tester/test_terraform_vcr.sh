@@ -228,11 +228,11 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
 
   if [[ -n $RECORDING_FAILED_TESTS ]]; then
     comment+="Tests failed during RECORDING mode:${NEWLINE} $RECORDING_FAILED_TESTS ${NEWLINE}${NEWLINE}"
-    comment+="Please fix these to complete your PR${NEWLINE}"
+    comment+="Please [verify if they are related](https://github.com/GoogleCloudPlatform/magic-modules#verifying-failed-recording-tests) to your changes and fix them to complete your PR${NEWLINE}"
   else
     if [[ $test_exit_code -ne 0 ]]; then
       # check for any uncaught errors in RECORDING mode
-      comment+="Errors occurred during RECORDING mode. Please [verify if they are related](https://github.com/GoogleCloudPlatform/magic-modules#verifying-failed-recording-tests) to your changes and fix them to complete your PR${NEWLINE}"
+      comment+="Errors occurred during RECORDING mode.${NEWLINE}"
       comment+="It is recommended to [build the provider](https://github.com/GoogleCloudPlatform/magic-modules#generating-the-terraform-providers) to verify locally.${NEWLINE}"
     else
       comment+="All tests passed${NEWLINE}"
