@@ -168,6 +168,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: templates/terraform/decoders/vertex_model.go.erb
       encoder: templates/terraform/encoders/wrap_object.go.erb
   ModelDeployment: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{project}}/{{location}}/{{endpoint}}/{{model}}"
+    import_format: ["{{project}}/{{location}}/{{endpoint}}/{{%model}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "vertex_ai_model_deployment"
@@ -175,8 +177,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: "vertex_ai_model_deployment"
           project: "vertex-ai"
+    properties:
+      model: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/vertex_model_deployment.go.erb
+      pre_delete: templates/terraform/pre_delete/vertex_ai_undeploy_model.go.erb
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

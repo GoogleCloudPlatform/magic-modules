@@ -861,6 +861,7 @@ objects:
                 input: true
               - !ruby/object:Api::Type::String
                 name: deployedModelId
+                api_name: id
                 description: Immutable. An ID of a DeployedModel in the above Endpoint.
                 input: true
       - !ruby/object:Api::Type::String
@@ -886,9 +887,9 @@ objects:
     name: 'ModelDeployment'
     base_url: projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}
     create_url: projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}:deployModel
+    delete_url: projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}:undeployModel
+    delete_verb: :POST
     self_link: projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}
-    identity:
-      - model
     nested_query: !ruby/object:Api::Resource::NestedQuery
       keys:
         - deployedModels
@@ -932,15 +933,14 @@ objects:
         url_param_only: true
         input: true
     properties:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::String
         name: model
-        resource: Model
-        imports: name
         description: The name of the model to deploy
         required: true
         input: true
       - !ruby/object:Api::Type::String
         name: deployedModelId
+        api_name: id
         description: The deployed ID of the model in the endpoint
         output: true
       - !ruby/object:Api::Type::NestedObject
