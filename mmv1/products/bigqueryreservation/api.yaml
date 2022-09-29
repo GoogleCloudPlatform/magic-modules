@@ -72,6 +72,7 @@ objects:
           capacity specified above at most.
       - !ruby/object:Api::Type::Integer
         name: 'concurrency'
+        default_value: 0
         description: |
           Maximum number of queries that are allowed to run concurrently in this reservation. This is a soft limit due to asynchronous nature of the system and various optimizations for small queries. Default value is 0 which means that concurrency will be automatically set based on the reservation size.
       - !ruby/object:Api::Type::Boolean
