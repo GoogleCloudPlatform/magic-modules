@@ -22,8 +22,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         test_env_vars:
           project_id: :PROJECT_NAME
-        test_vars_overrides:
-          app_id: '"1:298670958947:web:ca57a04393378be6fa4b56"'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
 # This is for copying files over

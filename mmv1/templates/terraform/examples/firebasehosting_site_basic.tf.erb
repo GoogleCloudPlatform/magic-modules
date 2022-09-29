@@ -1,3 +1,9 @@
+resource "google_firebase_web_app" "default" {
+	provider = google-beta
+  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
+	display_name = "Test web app for Firebase Hosting"
+}
+
 resource "google_firebase_hosting_site" "default" {
   provider = google-beta
   project  = "<%= ctx[:test_env_vars]['project_id'] %>"
@@ -8,5 +14,5 @@ resource "google_firebase_hosting_site" "with_app" {
   provider = google-beta
   project  = "<%= ctx[:test_env_vars]['project_id'] %>"
   site = "tf-test-site2%{random_suffix}"
-  app_id = "<%= ctx[:vars]['app_id'] %>"
+  app_id = google_firebase_web_app.default.app_id
 }
