@@ -1376,6 +1376,7 @@ resource "google_sql_database_instance" "instance" {
 
 var testGoogleSqlDatabaseInstance_basic3_update = `
 resource "google_sql_database_instance" "instance" {
+  name                = "%s"
   region              = "us-central1"
   database_version    = "MYSQL_8_0"
   deletion_protection = false
