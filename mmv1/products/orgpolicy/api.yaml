@@ -28,8 +28,8 @@ objects:
   - !ruby/object:Api::Resource
     name: 'CustomConstraint'
     create_url: '{{parent}}/customConstraints'
-    self_link: '{{name}}'
-    base_url: '{{name}}'
+    self_link: '{{parent}}/customConstraints/{{name}}'
+    base_url: '{{parent}}/customConstraints/{{name}}'
     update_verb: :PATCH
     min_version: beta
     references: !ruby/object:Api::Resource::ReferenceLinks

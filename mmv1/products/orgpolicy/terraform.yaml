@@ -14,16 +14,21 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   CustomConstraint: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: '{{parent}}/customConstraints/{{name}}'
+    import_format: ["{{%parent}}/customConstraints/{{name}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       update_encoder: 'templates/terraform/update_encoder/org_policy_custom_constraint.go.erb'
-    import_format: ["{{%name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         min_version: beta
-        name: "org_policy_custom_constraint"
+        name: "org_policy_custom_constraint_basic"
         primary_resource_id: "constraint"
         test_env_vars:
           org_id: :ORG_ID
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
