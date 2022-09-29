@@ -881,3 +881,92 @@ objects:
             required: true
             input: true
 
+# Vertex AI Model Deployment
+  - !ruby/object:Api::Resource
+    name: 'ModelDeployment'
+    base_url: projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}
+    create_url: projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}:deployModel
+    self_link: projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}
+    identity:
+      - model
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      keys:
+        - deployedModels
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/vertex-ai/docs'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.endpoints#DeployedModel'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    input: true
+    description: |
+      A deployment of a Model. Endpoints contain one or more DeployedModels.
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: endpoint
+        resource: Endpoint
+        imports: name
+        description: The name of the endpoint to deploy to
+        url_param_only: true
+        required: true
+        input: true
+      - !ruby/object:Api::Type::String
+        name: location
+        description: The location of the endpoint
+        url_param_only: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::ResourceRef
+        name: model
+        resource: Model
+        imports: name
+        description: The name of the model to deploy
+        required: true
+        input: true
+      - !ruby/object:Api::Type::String
+        name: deployedModelId
+        description: The deployed ID of the model in the endpoint
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: dedicatedResources
+        description: A description of resources that are dedicated to the DeployedModel, and that need a higher degree of manual configuration.
+        required: true
+        input: true
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: machineSpec
+            description: Required. Immutable. The specification of a single machine used by the prediction.
+            required: true
+            input: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: machineType
+                description: 'Immutable. The type of the machine. See the [list of machine types supported for prediction](https://cloud.google.com/vertex-ai/docs/predictions/configure-compute#machine-types) See the [list of machine types supported for custom training](https://cloud.google.com/vertex-ai/docs/training/configure-compute#machine-types). For DeployedModel this field is optional, and the default value is `n1-standard-2`. For BatchPredictionJob or as part of WorkerPoolSpec this field is required. TODO(rsurowka): Try to better unify the required vs optional.'
+                required: true
+                input: true
+          - !ruby/object:Api::Type::Integer
+            name: minReplicaCount
+            description: Required. Immutable. The minimum number of machine replicas this DeployedModel will be always deployed on. This value must be greater than or equal to 1. If traffic against the DeployedModel increases, it may dynamically be deployed onto more replicas, and as traffic decreases, some of these extra replicas may be freed.
+            required: true
+            input: true
+          - !ruby/object:Api::Type::Integer
+            name: maxReplicaCount
+            description: Immutable. The maximum number of replicas this DeployedModel may be deployed on when the traffic against it increases. If the requested value is too large, the deployment will error, but if deployment succeeds then the ability to scale the model to that many replicas is guaranteed (barring service outages). If traffic against the DeployedModel increases beyond what its replicas at maximum may handle, a portion of the traffic will be dropped. If this value is not provided, will use min_replica_count as the default value. The value of this field impacts the charge against Vertex CPU and GPU quotas. Specifically, you will be charged for max_replica_count * number of cores in the selected machine type) and (max_replica_count * number of GPUs per replica in the selected machine type).
+            input: true
+

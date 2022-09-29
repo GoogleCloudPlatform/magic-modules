@@ -167,6 +167,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: templates/terraform/decoders/vertex_model.go.erb
       encoder: templates/terraform/encoders/wrap_object.go.erb
+  ModelDeployment: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_model_deployment"
+        primary_resource_id: "model_deployment"
+        vars:
+          name: "vertex_ai_model_deployment"
+          project: "vertex-ai"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/vertex_model_deployment.go.erb
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
