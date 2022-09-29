@@ -668,6 +668,7 @@ objects:
                       name: path
                       description: |-
                         Path to access on the HTTP server.
+                      default_value: "/"
                     - !ruby/object:Api::Type::Array
                       name: httpHeaders
                       description: |-
@@ -678,10 +679,12 @@ objects:
                             name: name
                             description: |-
                               The header field name.
+                            default_value: ""
                           - !ruby/object:Api::Type::String
                             name: value
                             description: |-
                               The header field value.
+                            default_value: ""
 
         - !ruby/object:Api::Type::Integer
           name: containerConcurrency

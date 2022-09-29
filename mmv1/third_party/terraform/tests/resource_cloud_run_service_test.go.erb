@@ -391,7 +391,7 @@ func TestAccCloudRunService_probes(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "status.0.conditions"},
 			},
       {
-				Config: testAccCloudRunService_cloudRunServiceUpdateWithHTTPStartupProbe(name, project, `"/"`),
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithHTTPStartupProbe(name, project, ""),
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
@@ -400,7 +400,7 @@ func TestAccCloudRunService_probes(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "status.0.conditions"},
 			},
       {
-				Config: testAccCloudRunService_cloudRunServiceUpdateWithHTTPStartupProbe(name, project, `""`),
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithHTTPStartupProbe(name, project, "/"),
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
@@ -475,16 +475,13 @@ resource "google_cloud_run_service" "default" {
         image = "gcr.io/cloudrun/hello"
         startup_probe {
           http_get {
-            path = %s
+            path = "%s"
             http_headers {
               name = "User-Agent"
               value = "magic-modules"
             }
             http_headers {
-              name = "empty"
-            }
-            http_headers {
-              value = "empty"
+              name = ""
             }
           }
         }
