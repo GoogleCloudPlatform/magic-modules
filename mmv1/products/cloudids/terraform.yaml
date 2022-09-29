@@ -22,7 +22,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudids_endpoint"
         primary_resource_id: "example-endpoint"
-        skip_test: true
     properties:
       location: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
