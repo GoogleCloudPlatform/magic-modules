@@ -24,6 +24,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: 'beta'
         primary_resource_id: "default"
         vars:
+          display_name: "Project Display Name Basic"
           instance_name: "memory-cache"
         test_env_vars:
           org_id: :ORG_ID
