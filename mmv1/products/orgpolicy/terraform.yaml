@@ -25,6 +25,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "constraint"
         test_env_vars:
           org_id: :ORG_ID
+      - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
+        name: "org_policy_custom_constraint_full"
+        primary_resource_id: "constraint"
+        test_env_vars:
+          org_id: :ORG_TARGET
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
