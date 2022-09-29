@@ -57,7 +57,7 @@ objects:
           'https://firebase.google.com/'
       api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects'
     properties:
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Integer
         name: projectNumber
         output: true
         description: |
