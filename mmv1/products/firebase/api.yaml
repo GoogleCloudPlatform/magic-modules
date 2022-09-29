@@ -158,10 +158,3 @@ objects:
         description: |
           The URLs where the `WebApp` is hosted.
         item_type: Api::Type::String
-      - !ruby/object:Api::Type::String
-        name: appKeyId
-        output: true
-        description: |
-          Immutable. The globally unique, Firebase-assigned identifier for the `WebApp`.
-
-          This identifier should be treated as an opaque token, as the data format is not specified.
