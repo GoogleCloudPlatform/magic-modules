@@ -103,9 +103,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       {{description}}
 
       Destroying a cryptoKeyVersion will not delete the resource from the project.
-    id_format: "{{crypto_key}}"
+    id_format: "{{name}}"
     import_format: ["{{crypto_key}}"]
-    skip_delete: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "kms_crypto_key_version_basic"

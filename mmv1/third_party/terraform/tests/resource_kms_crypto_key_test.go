@@ -456,6 +456,11 @@ func TestAccKmsCryptoKeyVersion_basic(t *testing.T) {
 			{
 				Config: testGoogleKmsCryptoKeyVersion_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
 			},
+			{
+				ResourceName:      "google_kms_crypto_key_version.crypto_key_version",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
