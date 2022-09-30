@@ -3507,6 +3507,25 @@ objects:
         deprecation_message: This field is no longer in use, disk interfaces will be automatically determined on attachment. To resolve this issue, remove this field from your config.
         description: |
           Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
+      - !ruby/object:Api::Type::String
+        name: 'sourceDisk'
+        description: |
+          The source disk used to create this disk. You can provide this as a partial or full URL to the resource.
+          For example, the following are valid values:
+
+          * https://www.googleapis.com/compute/v1/projects/project/zones/zone/disks/disk
+          * https://www.googleapis.com/compute/v1/projects/project/regions/region/disks/disk
+          * projects/project/zones/zone/disks/disk
+          * projects/project/regions/region/disks/disk
+          * zones/zone/disks/disk
+          * regions/region/disks/disk
+      - !ruby/object:Api::Type::String
+        name: 'sourceDiskId'
+        description: |
+          The ID value of the disk used to create this image. This value may
+          be used to determine whether the image was taken from the current
+          or a previous instance of a given disk name.
+        output: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'type'
         resource: 'DiskType'
@@ -10542,6 +10561,25 @@ objects:
         deprecation_message: This field is no longer in use, disk interfaces will be automatically determined on attachment. To resolve this issue, remove this field from your config.
         description: |
           Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
+      - !ruby/object:Api::Type::String
+        name: 'sourceDisk'
+        description: |
+          The source disk used to create this disk. You can provide this as a partial or full URL to the resource.
+          For example, the following are valid values:
+
+          * https://www.googleapis.com/compute/v1/projects/project/zones/zone/disks/disk
+          * https://www.googleapis.com/compute/v1/projects/project/regions/region/disks/disk
+          * projects/project/zones/zone/disks/disk
+          * projects/project/regions/region/disks/disk
+          * zones/zone/disks/disk
+          * regions/region/disks/disk
+      - !ruby/object:Api::Type::String
+        name: 'sourceDiskId'
+        description: |
+          The ID value of the disk used to create this image. This value may
+          be used to determine whether the image was taken from the current
+          or a previous instance of a given disk name.
+        output: true
   - !ruby/object:Api::Resource
     name: 'RegionUrlMap'
     kind: 'compute#urlMap'
