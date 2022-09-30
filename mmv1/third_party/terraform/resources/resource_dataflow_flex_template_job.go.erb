@@ -133,7 +133,7 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 	//adding wait time for setting all the parameters into state file
 	err = waitForDataflowJobState(d, config, job.Id, userAgent, d.Timeout(schema.TimeoutUpdate), "JOB_STATE_RUNNING")
 	if err != nil {
-		return fmt.Errorf("Error waiting for job with job ID %q to be running: %s", d.Id(), err)
+		return fmt.Errorf("Error waiting for job with job ID %q to be running: %s", job.Id, err)
 	}
 
 	d.SetId(job.Id)
