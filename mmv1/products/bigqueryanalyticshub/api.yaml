@@ -187,30 +187,10 @@ objects:
         name: 'categories'
         description: |
           Categories of the listing. Up to two categories are allowed.
-        item_type: !ruby/object:Api::Type::Enum
+        item_type: !ruby/object:Api::Type::String
           name: 'categories'
           description: |
             Categories of the listing. Up to two categories are allowed.
-          values:
-            - :CATEGORY_OTHERS
-            - :CATEGORY_ADVERTISING_AND_MARKETING
-            - :CATEGORY_COMMERCE
-            - :CATEGORY_CLIMATE_AND_ENVIRONMENT
-            - :CATEGORY_DEMOGRAPHICS
-            - :CATEGORY_ECONOMICS
-            - :CATEGORY_EDUCATION
-            - :CATEGORY_ENERGY
-            - :CATEGORY_FINANCIAL
-            - :CATEGORY_GAMING
-            - :CATEGORY_GEOSPATIAL
-            - :CATEGORY_HEALTHCARE_AND_LIFE_SCIENCE
-            - :CATEGORY_MEDIA
-            - :CATEGORY_PUBLIC_SECTOR
-            - :CATEGORY_RETAIL
-            - :CATEGORY_SPORTS
-            - :CATEGORY_SCIENCE_AND_RESEARCH
-            - :CATEGORY_TRANSPORTATION_AND_LOGISTICS
-            - :CATEGORY_TRAVEL_AND_TOURISM
       - !ruby/object:Api::Type::NestedObject
         name: bigqueryDataset
         description: Shared dataset i.e. BigQuery dataset source.
