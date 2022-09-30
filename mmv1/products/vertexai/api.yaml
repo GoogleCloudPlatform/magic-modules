@@ -285,7 +285,6 @@ objects:
     base_url: '{{entitytype}}/features'
     create_url: '{{entitytype}}/features?featureId={{name}}'
     self_link: '{{entitytype}}/features/{{name}}'
-    min_version: beta
     update_verb: :PATCH
     update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
