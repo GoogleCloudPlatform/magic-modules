@@ -27,9 +27,8 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'CustomConstraint'
-    create_url: '{{parent}}/customConstraints'
     self_link: '{{parent}}/customConstraints/{{name}}'
-    base_url: '{{parent}}/customConstraints/{{name}}'
+    base_url: '{{parent}}/customConstraints'
     update_verb: :PATCH
     min_version: beta
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -45,7 +44,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: parent
         description: |
-          The parent of the resource.
+          The parent of the resource, an organization. Format should be `organizations/{organization_id}`.
         input: true
         url_param_only: true
         required: true
@@ -55,7 +54,7 @@ objects:
         required: true
         input: true
         description: |
-          Immutable. The name of the custom constraint. This is unique within the organization. Format of the name should be `organizations/{organization_id}/customConstraints/{custom_constraint_id}`.
+          Immutable. The name of the custom constraint. This is unique within the organization.
       - !ruby/object:Api::Type::String
         name: 'displayName'
         description: |
