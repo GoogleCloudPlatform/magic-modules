@@ -57,6 +57,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - project
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
+  AndroidApp: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ['{{project}} {{name}}']
+    autogen_async: true
+    skip_delete: true #currently only able to delete a androidapp through the Firebase Admin console
+    skip_sweeper: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebase_andoid_app_basic"
+        min_version: "beta"
+        primary_resource_id: "basic"
+        vars:
+          display_name: "Display Name Basic"
+        test_env_vars:
+          org_id: :ORG_ID
+        ignore_read_extra:
+          - project
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
