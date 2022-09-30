@@ -57,7 +57,7 @@ objects:
           'https://firebase.google.com/'
       api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects'
     properties:
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: projectNumber
         output: true
         description: |
@@ -87,7 +87,7 @@ objects:
         name: resources
         output: true
         description: |
-          The default Firebase resources associated with the Project.
+          The default Firebase resources associated with the Project. This field will be deprecated.
         properties:
           - !ruby/object:Api::Type::String
             name: hostingSite
