@@ -669,7 +669,7 @@ objects:
                     - !ruby/object:Api::Type::String
                       name: path
                       description: |-
-                        Path to access on the HTTP server.
+                        Path to access on the HTTP server. If set, it should not be empty string.
                       default_value: "/"
                     - !ruby/object:Api::Type::Array
                       name: httpHeaders
