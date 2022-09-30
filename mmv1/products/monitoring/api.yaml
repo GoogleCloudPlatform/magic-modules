@@ -1089,7 +1089,7 @@ objects:
     name: GenericService
     base_url: v3/projects/{{project}}/services
     create_url: v3/projects/{{project}}/services?serviceId={{service_id}}
-    self_link: "v3/{{name}}"
+    self_link: "v3/projects/{{project}}/services/{{service_id}}"
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -1155,15 +1155,11 @@ objects:
           description: |
             The type of service that this basic service defines, e.g. 
             APP_ENGINE service type
-          # BasicService info can be set on creation but is then immutable.
-          input: true
         - !ruby/object:Api::Type::KeyValuePairs
           name: serviceLabels
           description: |
             Labels that specify the resource that emits the monitoring data 
             which is used for SLO reporting of this `Service`.
-          # BasicService info can be set on creation but is then immutable.
-          input: true
 
 
   - !ruby/object:Api::Resource
