@@ -190,7 +190,7 @@ objects:
         description: |
           The fully qualified resource name of the App, for example:
 
-          projects/projectId/webApps/appId
+          projects/projectId/androidApps/appId
         output: true
       - !ruby/object:Api::Type::String
         name: displayName
@@ -207,6 +207,6 @@ objects:
       - !ruby/object:Api::Type::String
         name: packageName
         description: |
-          Immutable. The canonical package name of the Android app as
-          would appear in the Google Play Developer Console.
+          Immutable. The canonical package name of the Android app as would appear in the Google Play
+          Developer Console.
         output: true
