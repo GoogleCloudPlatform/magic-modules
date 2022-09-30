@@ -176,20 +176,10 @@ objects:
                         name: machineType
                         description: 'The type of the machine. See the [list of machine types supported for prediction](https://cloud.google.com/vertex-ai/docs/predictions/configure-compute#machine-types) See the [list of machine types supported for custom training](https://cloud.google.com/vertex-ai/docs/training/configure-compute#machine-types). For DeployedModel this field is optional, and the default value is `n1-standard-2`. For BatchPredictionJob or as part of WorkerPoolSpec this field is required. TODO(rsurowka): Try to better unify the required vs optional.'
                         output: true
-                      - !ruby/object:Api::Type::Enum
+                      - !ruby/object:Api::Type::String
                         name: acceleratorType
-                        description: The type of accelerator(s) that may be attached to the machine as per accelerator_count.
+                        description: The type of accelerator(s) that may be attached to the machine as per accelerator_count. See possible values [here](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/MachineSpec#AcceleratorType).
                         output: true
-                        values:
-                          - :ACCELERATOR_TYPE_UNSPECIFIED
-                          - :NVIDIA_TESLA_K80
-                          - :NVIDIA_TESLA_P100
-                          - :NVIDIA_TESLA_V100
-                          - :NVIDIA_TESLA_P4
-                          - :NVIDIA_TESLA_T4
-                          - :NVIDIA_TESLA_A100
-                          - :TPU_V2
-                          - :TPU_V3
                       - !ruby/object:Api::Type::Integer
                         name: acceleratorCount
                         description: The number of accelerators to attach to the machine.
