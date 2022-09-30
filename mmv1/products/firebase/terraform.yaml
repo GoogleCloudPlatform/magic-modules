@@ -64,7 +64,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "firebase_andoid_app_basic"
+        name: "firebase_android_app_basic"
         min_version: "beta"
         primary_resource_id: "basic"
         vars:
