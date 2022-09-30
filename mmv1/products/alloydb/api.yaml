@@ -87,9 +87,6 @@ objects:
       - !ruby/object:Api::Type::KeyValuePairs
         name: "labels"
         description: "User-defined labels for the alloydb cluster."
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: "annotations"
-        description: "Annotations to allow client tools to store small amount of arbitrary data. This is distinct from labels."
       - !ruby/object:Api::Type::String
         name: "network"
         required: true
@@ -121,27 +118,6 @@ objects:
             description: |
               The initial password for the user.
             required: true
-      - !ruby/object:Api::Type::NestedObject
-        name: "sslConfig"
-        description: |
-          SSL configuration for this AlloyDB Cluster.
-        properties:
-          - !ruby/object:Api::Type::Enum
-            name: "sslMode"
-            description: |
-              The SSL mode. Specifies client-server SSL/TLS connection behavior.
-            default_value: :SSL_MODE_ALLOW
-            values:
-              - :SSL_MODE_ALLOW
-              - :SSL_MODE_REQUIRE
-              - :SSL_MODE_VERIFY_CA
-          - !ruby/object:Api::Type::Enum
-            name: "caSource"
-            description: |
-              The Certificate Authority (CA) source.
-            default_value: :CA_SOURCE_MANAGED
-            values:
-              - :CA_SOURCE_MANAGED
       - !ruby/object:Api::Type::NestedObject
         name: "automatedBackupPolicy"
         description: |
