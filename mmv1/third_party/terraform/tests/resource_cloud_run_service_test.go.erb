@@ -373,7 +373,7 @@ func TestAccCloudRunService_probes(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudRunService_cloudRunServiceUpdateWithTCPStartupProbe(name, project, "0", "5", "10", "1"),
+				Config: testAccCloudRunService_cloudRunServiceWithEmptyTCPStartupProbe(name, project),
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
@@ -391,7 +391,7 @@ func TestAccCloudRunService_probes(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "status.0.conditions"},
 			},
       {
-				Config: testAccCloudRunService_cloudRunServiceUpdateWithHTTPStartupProbe(name, project, ""),
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithEmptyHTTPStartupProbe(name, project),
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
@@ -400,7 +400,7 @@ func TestAccCloudRunService_probes(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "status.0.conditions"},
 			},
       {
-				Config: testAccCloudRunService_cloudRunServiceUpdateWithHTTPStartupProbe(name, project, "/"),
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithHTTPStartupProbe(name, project),
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
@@ -410,6 +410,43 @@ func TestAccCloudRunService_probes(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccCloudRunService_cloudRunServiceWithEmptyTCPStartupProbe(name, project string) string {
+	return fmt.Sprintf(`
+resource "google_cloud_run_service" "default" {
+  name     = "%s"
+  location = "us-central1"
+
+  metadata {
+    namespace = "%s"
+    annotations = {
+      generated-by = "magic-modules"
+      "run.googleapis.com/launch-stage" = "BETA"
+    }
+  }
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+        ports {
+          container_port = 8080
+        }
+        startup_probe {
+          tcp_socket {}
+        }
+      }
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      metadata.0.annotations,
+    ]
+  }
+}
+`, name, project)
 }
 
 func testAccCloudRunService_cloudRunServiceUpdateWithTCPStartupProbe(name, project, delay, timeout, peroid, failure_threshold string) string {
@@ -455,7 +492,41 @@ resource "google_cloud_run_service" "default" {
 `, name, project, delay, peroid, timeout, failure_threshold)
 }
 
-func testAccCloudRunService_cloudRunServiceUpdateWithHTTPStartupProbe(name, project, path string) string {
+func testAccCloudRunService_cloudRunServiceUpdateWithEmptyHTTPStartupProbe(name, project string) string {
+	return fmt.Sprintf(`
+resource "google_cloud_run_service" "default" {
+  name     = "%s"
+  location = "us-central1"
+
+  metadata {
+    namespace = "%s"
+    annotations = {
+      generated-by = "magic-modules"
+      "run.googleapis.com/launch-stage" = "BETA"
+    }
+  }
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+        startup_probe {
+          http_get {}
+        }
+      }
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      metadata.0.annotations,
+    ]
+  }
+}
+`, name, project)
+}
+
+func testAccCloudRunService_cloudRunServiceUpdateWithHTTPStartupProbe(name, project string) string {
 	return fmt.Sprintf(`
 resource "google_cloud_run_service" "default" {
   name     = "%s"
@@ -475,13 +546,16 @@ resource "google_cloud_run_service" "default" {
         image = "gcr.io/cloudrun/hello"
         startup_probe {
           http_get {
-            path = "%s"
+            path = "/some-path"
             http_headers {
               name = "User-Agent"
               value = "magic-modules"
             }
             http_headers {
-              name = ""
+              name = "Some-Name"
+            }
+            http_headers {
+              value = "Some-Value"
             }
           }
         }
@@ -495,7 +569,7 @@ resource "google_cloud_run_service" "default" {
     ]
   }
 }
-`, name, project, path)
+`, name, project)
 }
 
 <% end -%>

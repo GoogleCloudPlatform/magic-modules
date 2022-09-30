@@ -654,6 +654,7 @@ objects:
                   name: tcpSocket 
                   description: |-
                     TcpSocket speficies an action involving a TCP port.
+                  send_empty_value: true
                   properties:
                     - !ruby/object:Api::Type::Integer
                       name: port
@@ -662,7 +663,8 @@ objects:
                 - !ruby/object:Api::Type::NestedObject
                   name: httpGet 
                   description: |-
-                    HttpGet specifies the http request to perform..
+                    HttpGet specifies the http request to perform.
+                  send_empty_value: true
                   properties:
                     - !ruby/object:Api::Type::String
                       name: path
@@ -680,11 +682,13 @@ objects:
                             description: |-
                               The header field name.
                             default_value: ""
+                            send_empty_value: true
                           - !ruby/object:Api::Type::String
                             name: value
                             description: |-
                               The header field value.
                             default_value: ""
+                            send_empty_value: true
 
         - !ruby/object:Api::Type::Integer
           name: containerConcurrency
