@@ -292,7 +292,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/vertex-ai/docs'
-      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featurestores.entityTypes.features'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes.features'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
