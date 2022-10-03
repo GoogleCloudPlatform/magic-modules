@@ -421,7 +421,7 @@ func testAccMonitoringSlo_genericService(t *testing.T) {
 		CheckDestroy: testAccCheckMonitoringSloDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMonitoringSlo_genericService(randomSuffix),
+				Config: testAccMonitoringSlo_generic(randomSuffix),
 			},
 			{
 				ResourceName:      "google_monitoring_slo.primary",
