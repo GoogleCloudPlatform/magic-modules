@@ -26,6 +26,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           instance_name: "my-instance"
       - !ruby/object:Provider::Terraform::Examples
+        name: "data_fusion_instance_enterprise"
+        primary_resource_id: "enterprise_instance"
+        vars:
+          instance_name: "my-instance"
+      - !ruby/object:Provider::Terraform::Examples
         name: "data_fusion_instance_full"
         primary_resource_id: "extended_instance"
         vars:
