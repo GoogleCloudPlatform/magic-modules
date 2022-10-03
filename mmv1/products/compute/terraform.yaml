@@ -735,7 +735,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_name: "fmt.Sprintf(\"tf-test-test-disk%s\", context[\"random_suffix\"])"
         vars:
           disk_name: "test-disk"
-    iam_policy: !ruby/object:Api::Resource::IamPolicy
+    iam_policy: !auby/object:Api::Resource::IamPolicy
       method_name_separator: '/'
       fetch_iam_policy_verb: :GET
       parent_resource_attribute: 'name'
