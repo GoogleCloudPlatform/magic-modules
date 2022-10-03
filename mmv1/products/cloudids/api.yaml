@@ -48,6 +48,7 @@ objects:
     create_url: 'projects/{{project}}/locations/{{location}}/endpoints?endpointId={{name}}'
     self_link: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
     create_verb: :POST
+    input: true
     description: |
       Cloud IDS is an intrusion detection service that provides threat detection for intrusions, malware, spyware, and command-and-control attacks on your network.
     references: !ruby/object:Api::Resource::ReferenceLinks
