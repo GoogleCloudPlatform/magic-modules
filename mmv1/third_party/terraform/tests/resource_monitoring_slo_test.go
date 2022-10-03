@@ -410,6 +410,28 @@ func TestAccMonitoringSlo_windowBasedMetricSumRangeSlis(t *testing.T) {
 	})
 }
 
+func testAccMonitoringSlo_genericService(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := randString(t, 10)
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckMonitoringSloDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMonitoringSlo_genericService(randomSuffix),
+			},
+			{
+				ResourceName:      "google_monitoring_slo.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccMonitoringSlo_basic() string {
 	return `
 data "google_monitoring_app_engine_service" "ae" {
@@ -455,6 +477,34 @@ resource "google_monitoring_slo" "primary" {
   }
 }
 `
+}
+
+func testAccMonitoringSlo_generic(randSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_monitoring_service" "srv" {
+	service_id = "tf-test-srv-%s"
+	display_name = "My Basic CloudEnpoints Service"
+	basic_service {
+		service_type  = "CLOUD_ENDPOINTS"
+		service_labels = {
+			service = "another-endpoint"
+		}
+	}
+}
+	  
+	
+resource "google_monitoring_slo" "primary" {
+	service = google_monitoring_service.srv.service_id
+	
+	goal = 0.9
+	rolling_period_days = 1
+	
+	basic_sli {
+		availability {
+		}
+	}
+}
+`, randSuffix)
 }
 
 func testAccMonitoringSlo_availabilitySli() string {

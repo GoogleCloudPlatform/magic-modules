@@ -1109,6 +1109,7 @@ objects:
         An optional service ID to use. If not given, the server will generate a
         service ID.
       input: true
+      required: true
     properties:
     - !ruby/object:Api::Type::String
       name: name
