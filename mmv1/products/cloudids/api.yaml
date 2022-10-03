@@ -22,7 +22,7 @@ scopes:
   - https://www.googleapis.com/auth/cloudids
 apis_required:
   - !ruby/object:Api::Product::ApiReference
-    name: Cloud Key Management Service (KMS) API
+    name: Cloud Intrusion Detection Service (IDS) API
     url: https://console.cloud.google.com/apis/library/ids.googleapis.com/
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -57,6 +57,7 @@ objects:
         name: 'location'
         required: true
         url_param_only: true
+        input: true
         description: |
           The location for the endpoint.
     properties:
@@ -79,6 +80,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'network'
         required: true
+        input: true
         description: |
           Name of the VPC network that is connected to the IDS endpoint. This can either contain the VPC network name itself (like "src-net") or the full URL to the network (like "projects/{project_id}/global/networks/src-net").
       - !ruby/object:Api::Type::String

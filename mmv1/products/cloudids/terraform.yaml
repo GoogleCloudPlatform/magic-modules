@@ -22,6 +22,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudids_endpoint"
         primary_resource_id: "example-endpoint"
+        #Skip_test set to true since the example is identical to what's in the _test.go file.
         skip_test: true
     properties:
       location: !ruby/object:Overrides::Terraform::PropertyOverride
