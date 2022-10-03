@@ -160,7 +160,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           service_id: "my-service"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
-      encoder: templates/terraform/encoders/monitoring_service_generic.go.erb
 
   Slo: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"

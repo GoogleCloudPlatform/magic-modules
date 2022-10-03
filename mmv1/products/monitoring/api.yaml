@@ -1110,6 +1110,7 @@ objects:
         service ID.
       input: true
       required: true
+      url_param_only: true
     properties:
     - !ruby/object:Api::Type::String
       name: name
@@ -1158,6 +1159,7 @@ objects:
             APP_ENGINE service type
         - !ruby/object:Api::Type::KeyValuePairs
           name: serviceLabels
+          input: true
           description: |
             Labels that specify the resource that emits the monitoring data 
             which is used for SLO reporting of this `Service`.
