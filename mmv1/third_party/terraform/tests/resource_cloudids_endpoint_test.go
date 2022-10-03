@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestCloudIdsEndpoint_basic(t *testing.T) {
+func TestAccCloudIdsEndpoint_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
