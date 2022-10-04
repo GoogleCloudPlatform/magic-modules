@@ -3928,10 +3928,10 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 	config := l[0].(map[string]interface{})
 
 	npd := &container.AutoprovisioningNodePoolDefaults{
-		OauthScopes:    convertStringArr(config["oauth_scopes"].([]interface{})),
-		ServiceAccount: config["service_account"].(string),
-		ImageType:      config["image_type"].(string),
-		BootDiskKmsKey: config["boot_disk_kms_key"].(string),
+		OauthScopes:            convertStringArr(config["oauth_scopes"].([]interface{})),
+		ServiceAccount:         config["service_account"].(string),
+		ImageType:              config["image_type"].(string),
+		BootDiskKmsKey:         config["boot_disk_kms_key"].(string),
 		DiskSizeGb:             int64(config["disk_size_gb"].(int)),
 		DiskType:               config["disk_type"].(string),
 		Management:             expandManagement(config["management"]),
@@ -5020,6 +5020,9 @@ func flattenUpgradeOptions(a *container.AutoUpgradeOptions) []map[string]interfa
 }
 
 func flattenShieldedInstanceConfigContainerCluster(a *container.ShieldedInstanceConfig) []map[string]interface{} {
+	if a == null {
+		return nil
+	}
 	r := make(map[string]interface{})
 	r["enable_secure_boot"] = a.EnableSecureBoot
 	r["enable_integrity_monitoring"] = a.EnableIntegrityMonitoring
