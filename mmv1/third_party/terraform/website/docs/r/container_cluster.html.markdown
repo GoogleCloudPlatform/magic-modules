@@ -843,7 +843,7 @@ linux_node_config {
 
 * `gpu_partition_size` (Optional) - Size of partitions to create on the GPU. Valid values are described in the NVIDIA mig [user guide](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/#partitioning).
 
-* `gpu_sharing_config` (Optional) - The configuration for GPU sharing options. Structure is [documented below](#nested_gpu_sharing_config).
+* `gpu_sharing_config` (Optional) - Configuration for GPU sharing. Structure is [documented below](#nested_gpu_sharing_config).
 
 <a name="nested_gpu_sharing_config"></a>The `gpu_sharing_config` block supports:
 
@@ -851,7 +851,7 @@ linux_node_config {
     Accepted values are:
     * `"TIME_SHARING"`: Allow multiple containers to have [time-shared](https://cloud.google.com/kubernetes-engine/docs/concepts/timesharing-gpus) access to a single GPU device. 
 
-* `max_shared_clients_per_gpu` (Required) - The max number of containers that can share a GPU. 
+* `max_shared_clients_per_gpu` (Required) - The maximum number of containers that can share a GPU. 
 
 <a name="nested_workload_identity_config"></a> The `workload_identity_config` block supports:
 

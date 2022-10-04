@@ -108,20 +108,20 @@ func schemaNodeConfig() *schema.Schema {
 								Optional:     true,
 								ForceNew:     true,
 								ConfigMode: schema.SchemaConfigModeAttr,
-								Description:  `The configuration for GPU sharing options.`,
+								Description:  `Configuration for GPU sharing.`,
 								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
 										"gpu_sharing_strategy": &schema.Schema{
 											Type:        schema.TypeString,
 											Required:    true,
 											ForceNew:    true,
-											Description: `The type of GPU sharing strategy to enable on the GPU node. Possible value is TIME_SHARING`,
+											Description: `The type of GPU sharing strategy to enable on the GPU node. Possible values are described in the API package (https://pkg.go.dev/google.golang.org/api/container/v1#GPUSharingConfig)`,
 										},
 										"max_shared_clients_per_gpu": &schema.Schema{
 											Type:        schema.TypeInt,
 											Required:    true,
 											ForceNew:    true,
-											Description: `The max number of containers that can share a GPU.`,
+											Description: `The maximum number of containers that can share a GPU.`,
 										},
 									},
 								},
@@ -521,13 +521,11 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 				GpuPartitionSize: data["gpu_partition_size"].(string),
 			}
 
-			if v, ok := data["gpu_sharing_config"]; ok {
-				if len(v.([]interface{})) > 0 {
-					gpuSharingConfig := data["gpu_sharing_config"].([]interface{})[0].(map[string]interface{})
-					guestAcceleratorConfig.GpuSharingConfig = &container.GPUSharingConfig{
-						GpuSharingStrategy: gpuSharingConfig["gpu_sharing_strategy"].(string),
-						MaxSharedClientsPerGpu: int64(gpuSharingConfig["max_shared_clients_per_gpu"].(int)),
-					}
+			if v, ok := data["gpu_sharing_config"]; ok && len(v.([]interface{})) > 0 {
+				gpuSharingConfig := data["gpu_sharing_config"].([]interface{})[0].(map[string]interface{})
+				guestAcceleratorConfig.GpuSharingConfig = &container.GPUSharingConfig{
+					GpuSharingStrategy: gpuSharingConfig["gpu_sharing_strategy"].(string),
+					MaxSharedClientsPerGpu: int64(gpuSharingConfig["max_shared_clients_per_gpu"].(int)),
 				}
 			}
 
