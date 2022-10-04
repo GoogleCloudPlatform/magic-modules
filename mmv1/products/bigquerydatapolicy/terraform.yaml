@@ -18,7 +18,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}
     import_format:
       [
-        "projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}"
+        "projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}",
+        "{{project}}/{{location}}/{{data_policy_id}}",
+         "{{location}}/{{data_policy_id}}"
       ]
     examples:
       - !ruby/object:Provider::Terraform::Examples
