@@ -190,7 +190,6 @@ curl \
   -H "Accept: application/vnd.github.v3+json" \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$COMMIT_SHA" \
   -d "$BREAKINGSTATE_BODY"
-fi
 
 curl -H "Authorization: token ${GITHUB_TOKEN}" \
       -d "$(jq -r --arg diffs "$MESSAGE" -n "{body: \$diffs}")" \
