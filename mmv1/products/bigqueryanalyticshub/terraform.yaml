@@ -27,7 +27,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           description: "example data exchange"
   Listing: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}
-    import_format: ["projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}", "{{listing_id}}"]
+    import_format: ["projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_analyticshub_listing_basic"

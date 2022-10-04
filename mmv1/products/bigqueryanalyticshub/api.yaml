@@ -169,6 +169,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'name'
+            required: true
             description: Name of the data provider.
           - !ruby/object:Api::Type::String
             name: 'primaryContact'
@@ -179,6 +180,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'name'
+            required: true
             description: Name of the listing publisher.
           - !ruby/object:Api::Type::String
             name: 'primaryContact'
@@ -187,10 +189,7 @@ objects:
         name: 'categories'
         description: |
           Categories of the listing. Up to two categories are allowed.
-        item_type: !ruby/object:Api::Type::String
-          name: 'categories'
-          description: |
-            Categories of the listing. Up to two categories are allowed.
+        item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: bigqueryDataset
         description: Shared dataset i.e. BigQuery dataset source.
