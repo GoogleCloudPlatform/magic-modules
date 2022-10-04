@@ -1,0 +1,23 @@
+name: Add comment
+on:
+  pull_request:
+    types:
+      - labeled
+jobs:
+  add-comment:
+    if: github.event.label.id == '4598495472'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      statuses: write
+    steps:
+    - uses: actions/checkout@v2
+    - name: Allow breaking change to merged
+      uses: Sibz/github-status-action@v1
+      with: 
+        authToken: ${{secrets.GITHUB_TOKEN}}
+        context: 'terraform-provider-breaking-change-test'
+        description: 'terraform-provider-breaking-change-test'
+        state: 'success'
+        sha: ${{github.event.pull_request.head.sha || github.sha}}
+
