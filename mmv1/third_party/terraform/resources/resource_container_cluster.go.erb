@@ -5020,7 +5020,7 @@ func flattenUpgradeOptions(a *container.AutoUpgradeOptions) []map[string]interfa
 }
 
 func flattenShieldedInstanceConfigContainerCluster(a *container.ShieldedInstanceConfig) []map[string]interface{} {
-	if a == null {
+	if a == nil {
 		return nil
 	}
 	r := make(map[string]interface{})
