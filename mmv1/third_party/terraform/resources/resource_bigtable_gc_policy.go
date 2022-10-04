@@ -209,6 +209,9 @@ func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) er
 	// The default create timeout is 20 minutes.
 	timeout := d.Timeout(schema.TimeoutCreate)
 	pollInterval := time.Duration(30) * time.Second
+	// Mutations to gc policies can only happen one-at-a-time and take some amount of time.
+	// Use a fixed polling rate of 30s based on the RetryInfo returned by the server rather than
+	// the standard up-to-10s exponential backoff for those operations.
 	_, err = retryWithPolling(retryFunc, timeout, pollInterval, isBigTableRetryableError)
 	if err != nil {
 		return err
