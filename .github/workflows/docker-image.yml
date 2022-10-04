@@ -5,7 +5,7 @@ on:
       - labeled
 jobs:
   add-comment:
-    if: github.event.label.id == '4598495472' # The unique identifier for the override-breaking change label.. used in place of name so the name can be modified without breaking usage
+    if: github.event.label.id == '4598495472' # The unique identifier for the override-breaking-change label.. used in place of name so the name can be modified without breaking usage
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
