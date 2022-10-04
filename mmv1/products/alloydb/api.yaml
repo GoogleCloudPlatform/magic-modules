@@ -132,16 +132,7 @@ objects:
 
               The backup window must be at least 5 minutes long. There is no upper bound on the window. If not set, it will default to 1 hour.
 
-              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
-          - !ruby/object:Api::Type::NestedObject
-            name: "encryptionConfig"
-            description: |
-              The encryption config can be specified to encrypt the backups with a customer-managed encryption key (CMEK). When this field is not specified, the backup will then use default encryption scheme to protect the user data.
-            properties:
-              - !ruby/object:Api::Type::String
-                name: "kmsKeyName"
-                description: |
-                  The fully-qualified resource name of the KMS key. Each Cloud KMS key is regionalized and has the following format: projects/[PROJECT]/locations/[REGION]/keyRings/[RING]/cryptoKeys/[KEY_NAME]              
+              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".          
           - !ruby/object:Api::Type::String
             name: "location"
             description: |
@@ -223,15 +214,6 @@ objects:
             name: "enabled"
             description: |
               Whether automated automated backups are enabled.
-      - !ruby/object:Api::Type::NestedObject
-        name: "encryptionConfig"
-        description: |
-          The encryption config can be specified to encrypt the data disks and other persistent data resources of a cluster with a customer-managed encryption key (CMEK). When this field is not specified, the cluster will then use default encryption scheme to protect the user data.
-        properties:
-          - !ruby/object:Api::Type::String
-            name: "kmsKeyName"
-            description: |
-              The fully-qualified resource name of the KMS key. Each Cloud KMS key is regionalized and has the following format: projects/[PROJECT]/locations/[REGION]/keyRings/[RING]/cryptoKeys/[KEY_NAME]
       - !ruby/object:Api::Type::NestedObject
         name: "backupSource"
         output: true
