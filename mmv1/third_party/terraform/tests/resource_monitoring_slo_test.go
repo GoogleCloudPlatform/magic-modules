@@ -427,8 +427,6 @@ func testAccMonitoringSlo_genericService(t *testing.T) {
 				ResourceName:      "google_monitoring_slo.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
-				// Ignore input-only field for import
-				ImportStateVerifyIgnore: []string{"service"},
 			},
 		},
 	})
