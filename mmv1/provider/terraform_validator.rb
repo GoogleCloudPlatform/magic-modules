@@ -168,7 +168,9 @@ module Provider
                           ['converters/google/resources/metadata.go',
                            'third_party/terraform/utils/metadata.go.erb'],
                           ['converters/google/resources/compute_instance.go',
-                           'third_party/validator/compute_instance.go.erb']
+                           'third_party/validator/compute_instance.go.erb'],
+                          ['converters/google/resources/gkeonprem_operation.go',
+                           'third_party/terraform/utils/gkeonprem_operation.go.erb']
                         ],
                         file_template)
     end
