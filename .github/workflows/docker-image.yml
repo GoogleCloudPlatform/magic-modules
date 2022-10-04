@@ -1,4 +1,4 @@
-name: Add comment
+name: Update Breaking Change Status
 on:
   pull_request:
     types:
