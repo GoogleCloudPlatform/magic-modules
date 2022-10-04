@@ -94,7 +94,12 @@ module Overrides
           :read_error_transform,
 
           # If true, only generate tests and cgc samples
-          :cgc_only
+          :cgc_only,
+
+          # If true, resources that failed creation will be marked as tainted. As a consequence
+          # these resources will be deleted and recreated on the next apply call. This pattern
+          # is preferred over deleting the resource directly in post_create_failure hooks.
+          :taint_resource_on_failed_create
         ]
       end
 
@@ -130,6 +135,7 @@ module Overrides
         check :supports_indirect_user_project_override, type: :boolean, default: false
         check :read_error_transform, type: String
         check :cgc_only, type: :boolean, default: false
+        check :taint_resource_on_failed_create, type: :boolean, default: false
       end
 
       def apply(resource)
