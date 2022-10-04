@@ -47,10 +47,3 @@ resource "google_compute_network" "default" {
   provider = google-beta
   name = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
 }
-
-resource "google_project_iam_member" "encrypt_role" {
-  provider = google-beta
-  project = data.google_project.project.project_id
-  role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
-}
