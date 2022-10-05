@@ -41,8 +41,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   WebApp: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ['{{project}} {{name}}']
     autogen_async: true
-    skip_delete: true #currently only able to delete a webapp through the Firebase Admin console
-    skip_sweeper: true
+    skip_sweeper: true # handwritten sweeper to hard-delete
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firebase_web_app_basic"

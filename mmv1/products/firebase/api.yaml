@@ -107,6 +107,8 @@ objects:
     self_link: '{{name}}'
     update_verb: :PATCH
     update_mask: true
+    delete_verb: :POST
+    delete_url: 'projects/{{project}}/webApps/{{appId}}:remove'
     description: |
       A Google Cloud Firebase web application instance
     references: !ruby/object:Api::Resource::ReferenceLinks
