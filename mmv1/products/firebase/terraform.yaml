@@ -58,9 +58,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
   AppleApp: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ['{{project}} {{name}}']
+    import_format: ["projects/{{project}}/iosApps/{{appId}}", "iosApps/{{appId}}", "{{appId}}"]
     autogen_async: true
-    skip_delete: true #currently only able to delete a appleapp through the Firebase Admin console
     skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -73,6 +72,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           team_id: "Team ID Basic"
         test_env_vars:
           org_id: :ORG_ID
+          project_id: :PROJECT_NAME
+        test_vars_overrides:
+          bundle_id: '"apple.app." + randString(t, 5)'
         ignore_read_extra:
           - project
     custom_code: !ruby/object:Provider::Terraform::CustomCode

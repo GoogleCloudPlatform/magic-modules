@@ -164,7 +164,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
-          'https://firebase.google.com/'
+          'https://firebase.google.com/docs/ios/setup'
       api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.iosApps'
     async: !ruby/object:Api::OpAsync
       actions: ["create"]
@@ -206,7 +206,6 @@ objects:
         name: bundleId
         description: |
           Immutable. The canonical bundle ID of the Apple app as it would appear in the Apple AppStore.
-        output: true
       - !ruby/object:Api::Type::String
         name: appStoreId
         description: |
