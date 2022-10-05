@@ -1296,15 +1296,6 @@ func TestAccSqlDatabaseInstance_Timezone(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
 			},
-			{
-				Config: testGoogleSqlDatabaseInstance_Timezone(networkName, addressName, databaseName, rootPassword, "Eastern Standard Time"),
-			},
-			{
-				ResourceName:      "google_sql_database_instance.instance",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
-			},
 		},
 	})
 }
