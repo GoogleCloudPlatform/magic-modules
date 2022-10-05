@@ -81,3 +81,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_name: 'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
         vars:
           metastore_federation_name: "fed-1"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dataproc_metastore_federation_bigquery"
+        primary_resource_id: "default"
+        min_version: beta
+        primary_resource_name: 'fmt.Sprintf("tf-test-metastore-fed-bq%s", context["random_suffix"])'
+        vars:
+          metastore_federation_name: "fed-2"          
