@@ -19,7 +19,7 @@ const (
 	RegionRegex          = "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?"
 	SubnetworkRegex      = "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?"
 
-	SubnetworkLinkRegex = "projects/(" + ProjectRegex + ")/regions/(" + RegionRegex + ")/subnetworks/(" + SubnetworkRegex + ")$"
+	SubnetworkLinkRegex = "^projects/(" + ProjectRegex + ")/regions/(" + RegionRegex + ")/subnetworks/(" + SubnetworkRegex + ")$"
 
 	RFC1035NameTemplate = "[a-z](?:[-a-z0-9]{%d,%d}[a-z0-9])"
 	CloudIoTIdRegex     = "^[a-zA-Z][-a-zA-Z0-9._+~%]{2,254}$"
@@ -39,7 +39,7 @@ var (
 	// 4 and 28 since the first and last character are excluded.
 	ServiceAccountNameRegex = fmt.Sprintf(RFC1035NameTemplate, 4, 28)
 
-	ServiceAccountLinkRegexPrefix = "projects/" + ProjectRegexWildCard + "/serviceAccounts/"
+	ServiceAccountLinkRegexPrefix = "^projects/" + ProjectRegexWildCard + "/serviceAccounts/"
 	PossibleServiceAccountNames   = []string{
 		ServiceDefaultAccountNameRegex,
 		ComputeServiceAccountNameRegex,

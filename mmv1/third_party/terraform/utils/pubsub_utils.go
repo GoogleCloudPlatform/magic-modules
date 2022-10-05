@@ -5,7 +5,7 @@ import (
 	"regexp"
 )
 
-const PubsubTopicRegex = "projects\\/.*\\/topics\\/.*"
+const PubsubTopicRegex = "^projects\\/.*\\/topics\\/.*"
 
 func getComputedSubscriptionName(project, subscription string) string {
 	match, _ := regexp.MatchString("projects\\/.*\\/subscriptions\\/.*", subscription)
