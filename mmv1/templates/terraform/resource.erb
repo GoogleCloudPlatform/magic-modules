@@ -63,12 +63,6 @@ import (
     timeouts ||= Api::Timeouts.new
 -%>
 
-<%  if object.async&.is_a? Api::OpAsync -%>
-    <%  if object.async.include_project -%>
-var project string
-    <%  end -%>
-<% end -%>
-
 func resource<%= resource_name -%>() *schema.Resource {
     return &schema.Resource{
         Create: resource<%= resource_name -%>Create,
