@@ -5034,6 +5034,9 @@ func flattenShieldedInstanceConfigContainerCluster(a *container.ShieldedInstance
 }
 
 func flattenUpgradeSettings(a *container.UpgradeSettings) []map[string]interface{} {
+	if a == nil {
+		return nil
+	}
 	r := make(map[string]interface{})
 	r["max_surge"] = a.MaxSurge
 	r["max_unavailable"] = a.MaxUnavailable
@@ -5056,6 +5059,10 @@ func flattenBlueGreenSettings(a *container.BlueGreenSettings) []map[string]inter
 }
 
 func flattenStandardRolloutPolicy(a *container.StandardRolloutPolicy) []map[string]interface{} {
+	if a == nil {
+		return nil
+	}
+
 	r := make(map[string]interface{})
 	r["batch_percentage"] = a.BatchPercentage
 	r["batch_node_count"] = a.BatchNodeCount
