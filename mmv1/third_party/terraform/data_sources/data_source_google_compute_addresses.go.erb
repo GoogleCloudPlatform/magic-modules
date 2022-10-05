@@ -28,7 +28,7 @@ func dataSourceGoogleComputeAddresses() *schema.Resource {
 						"name": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: `THe name of the IP address.`,
+							Description: `The name of the IP address.`,
 						},
 						"address": {
 							Type:        schema.TypeString,
@@ -63,7 +63,8 @@ func dataSourceGoogleComputeAddresses() *schema.Resource {
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
-							Computed: true,
+                            Description: `Labels attached to this address`,
+							Computed:    true,
 						},
 <% end -%>
 					},
@@ -98,14 +99,16 @@ AND (scheduling.automaticRestart = true) """`,
 			},
 
 			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `Region that should be considered to search addresses. All regions are considered if missing.`,
 			},
 
 			"project": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Optional: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Optional:    true,
+				Description: `The google project in which addresses are listed. Defaults to provider's configuration if missing.`,
 			},
 		},
 	}
