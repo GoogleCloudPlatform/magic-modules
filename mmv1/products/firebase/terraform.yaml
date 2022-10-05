@@ -68,13 +68,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "basic"
         vars:
           display_name: "Display Name Basic"
-          app_store_id: "App Store ID Basic"
-          team_id: "Team ID Basic"
         test_env_vars:
           org_id: :ORG_ID
           project_id: :PROJECT_NAME
         test_vars_overrides:
           bundle_id: '"apple.app." + randString(t, 5)'
+          app_store_id: 'randInt(t)'
+          team_id: "9987654321" # Has to be a 10-digit number.
         ignore_read_extra:
           - project
     custom_code: !ruby/object:Provider::Terraform::CustomCode
