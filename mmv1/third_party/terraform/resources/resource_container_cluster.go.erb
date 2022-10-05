@@ -4999,6 +4999,9 @@ func flattenAutoProvisioningDefaults(a *container.AutoprovisioningNodePoolDefaul
 }
 
 func flattenManagement(a *container.NodeManagement) []map[string]interface{} {
+	if a == nil {
+		return nil
+	}
 	r := make(map[string]interface{})
 	r["auto_upgrade"] = a.AutoUpgrade
 	r["auto_repair"] = a.AutoRepair
