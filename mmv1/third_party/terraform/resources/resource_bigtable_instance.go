@@ -201,6 +201,13 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
+	// Check that num_nodes and autoscaling_config can't be both set.
+	for _, cluster := range conf.Clusters {
+		if cluster.NumNodes > 0 && cluster.AutoscalingConfig != nil {
+			return fmt.Errorf("Creating instance: only one of num_nodes or autoscaling_config can be set.")
+		}
+	}
+
 	c, err := config.BigTableClientFactory(userAgent).NewInstanceAdminClient(project)
 	if err != nil {
 		return fmt.Errorf("Error starting instance admin client. %s", err)
