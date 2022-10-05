@@ -1571,7 +1571,7 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 		"pricing_plan":               settings.PricingPlan,
 		"user_labels":                settings.UserLabels,
 		"password_validation_policy": settings.PasswordValidationPolicy,
-		"time_zone":        					settings.TimeZone,
+		"time_zone":                  settings.TimeZone,
 	}
 
 	if settings.ActiveDirectoryConfig != nil {
