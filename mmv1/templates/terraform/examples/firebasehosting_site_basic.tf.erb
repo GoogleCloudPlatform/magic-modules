@@ -1,7 +1,7 @@
 resource "google_firebase_web_app" "default" {
-	provider = google-beta
+  provider = google-beta
   project  = "<%= ctx[:test_env_vars]['project_id'] %>"
-	display_name = "Test web app for Firebase Hosting"
+  display_name = "Test web app for Firebase Hosting"
 }
 
 resource "google_firebase_hosting_site" "default" {
