@@ -149,8 +149,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
 
   GenericService: !ruby/object:Overrides::Terraform::ResourceOverride
     legacy_name: 'google_monitoring_service'
-    id_format: "projects/{{project}}/services/{{name}}"
-    import_format: ["{{name}}"]
+    id_format: "projects/{{project}}/services/{{service_id}}"
+    import_format: ["projects/{{project}}/services/{{service_id}}"]
     error_retry_predicates: ["isMonitoringConcurrentEditError"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
