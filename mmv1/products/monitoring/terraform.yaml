@@ -158,8 +158,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "my_service"
         vars:
           service_id: "my-service"
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/self_link_as_name.erb
 
   Slo: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
