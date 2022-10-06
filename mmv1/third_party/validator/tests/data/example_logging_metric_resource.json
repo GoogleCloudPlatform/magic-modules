@@ -1,7 +1,8 @@
 [
     {
-        "name": "//logging.googleapis.com/projects/placeholder-BpLnfgDs/metrics/my-test",
+        "name": "//logging.googleapis.com/projects/placeholder-BpLnfgDs/metrics/my-test/metric",
         "asset_type": "logging.googleapis.com/Metric",
+        "ancestry_path": "organization/{{.OrgID}}",
         "resource": {
             "version": "v2",
             "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/logging/v2/rest",
