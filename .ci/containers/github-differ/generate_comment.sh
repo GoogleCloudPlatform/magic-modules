@@ -149,7 +149,7 @@ if ! git diff --exit-code --quiet origin/$OLD_BRANCH origin/$NEW_BRANCH; then
 fi
 popd
 
-MESSAGE="Hi there, I'm the Modular magician. I've detected the following information about your changes - !${NEWLINE}${NEWLINE}"
+MESSAGE="Hi there, I'm the Modular magician. I've detected the following information about your changes:${NEWLINE}${NEWLINE}"
 
 BREAKINGSTATE="success"
 if [ -n "$BREAKINGCHANGES" ]; then
