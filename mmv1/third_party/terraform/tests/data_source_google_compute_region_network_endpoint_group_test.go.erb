@@ -26,6 +26,7 @@ func TestAccDataSourceRegionNetworkEndpointGroup(t *testing.T) {
 					resource.TestCheckResourceAttr("data.google_compute_region_network_endpoint_group.data_source", "name", rnegName),
 					resource.TestCheckResourceAttr("data.google_compute_region_network_endpoint_group.data_source", "project", getTestProjectFromEnv()),
 					resource.TestCheckResourceAttrSet("data.google_compute_region_network_endpoint_group.data_source", "self_link"),
+					resource.TestCheckResourceAttrSet("data.google_compute_region_network_endpoint_group.data_source", "network_endpoint_type"),
 					resource.TestCheckResourceAttr("data.google_compute_region_network_endpoint_group.data_source", "region", "us-central1")),
 			},
 		},
