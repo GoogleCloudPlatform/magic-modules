@@ -20,5 +20,11 @@ resource "google_sql_user" "user" {
     name = "user"
     instance = google_sql_database_instance.instance.name
     password = random_password.pwd.result
+    password_policy {
+      allowed_failed_attempts  = 6
+      password_expiration_duration  =  "2592000s"
+      enable_failed_attempts_check = true
+      enable_password_verification = true
+  }
 }
 # [END cloud_sql_mysql_instance_user]

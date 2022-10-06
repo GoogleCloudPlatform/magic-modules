@@ -277,6 +277,81 @@ objects:
                   Configuration of the snapshot analysis based monitoring pipeline running interval. The value is rolled up to full day.
 
                   A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+
+# Vertex AI Featurestore Entity Type Feature
+  - !ruby/object:Api::Resource
+    name: FeaturestoreEntitytypeFeature
+    base_url: '{{entitytype}}/features'
+    create_url: '{{entitytype}}/features?featureId={{name}}'
+    self_link: '{{entitytype}}/features/{{name}}'
+    min_version: beta
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/vertex-ai/docs'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featurestores.entityTypes.features'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+      include_project: true
+    description: |-
+      Feature Metadata information that describes an attribute of an entity type. For example, apple is an entity type, and color is a feature that describes apple.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: entitytype
+        description: The name of the Featurestore to use, in the format projects/{project}/locations/{location}/featurestores/{featurestore}/entityTypes/{entitytype}.
+        url_param_only: true
+        input: true
+        required: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The name of the feature. The feature can be up to 64 characters long and can consist only of ASCII Latin letters A-Z and a-z, underscore(_), and ASCII digits 0-9 starting with a letter. The value will be unique given an entity type.
+        input: true
+        url_param_only: true
+        pattern: '{{entitytype}}/features/{{name}}'
+      - !ruby/object:Api::Type::String
+        name: 'etag'
+        description: Used to perform consistent read-modify-write updates.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          The timestamp of when the entity type was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: |
+           The timestamp when the entity type was most recently updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          A set of key/value label pairs to assign to the feature.
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: Description of the feature.
+      - !ruby/object:Api::Type::String
+        name: 'valueType'
+        description: |
+          Type of Feature value. Immutable. https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes.features#ValueType
+        required: true
 # Vertex ML Metadata
   - !ruby/object:Api::Resource
     name: MetadataStore

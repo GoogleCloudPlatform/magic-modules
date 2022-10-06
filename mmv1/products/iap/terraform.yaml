@@ -190,7 +190,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       Destroying a Terraform-managed Brand will remove it from state 
       but *will not delete it from Google Cloud.*
     id_format: '{{name}}'
-    import_format: ['{{name}}']
+    import_format: ["projects/{{project_number}}/brands/{{brand_id}}", "projects/{{project_id}}/brands/{{brand_id}}"]
     skip_delete: true
     examples:
       - !ruby/object:Provider::Terraform::Examples

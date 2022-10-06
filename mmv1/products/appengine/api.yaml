@@ -279,6 +279,10 @@ objects:
         description: |
           Desired runtime. Example python27.
         required: true
+      - !ruby/object:Api::Type::String
+          name: 'serviceAccount'
+          description: |
+            The identity that the deployed version will run as. Admin API will use the App Engine Appspot service account as default if this field is neither provided in app.yaml file nor through CLI flag.
       - !ruby/object:Api::Type::Boolean
         name: 'threadsafe'
         description: |
@@ -477,6 +481,10 @@ objects:
             required: true
             description: |
               Full Serverless VPC Access Connector name e.g. /projects/my-project/locations/us-central1/connectors/c1.
+          - !ruby/object:Api::Type::String
+            name: 'egressSetting'
+            description: |
+              The egress setting for the connector, controlling what traffic is diverted through it.
       - !ruby/object:Api::Type::Array
         name: 'inboundServices'
         description: |

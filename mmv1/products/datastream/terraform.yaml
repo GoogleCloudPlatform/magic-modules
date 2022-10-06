@@ -56,6 +56,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           connection_profile_id: "my-profile"
       - !ruby/object:Provider::Terraform::Examples
+        name: "datastream_connection_profile_bigquery"
+        primary_resource_id: "default"
+        vars:
+          connection_profile_id: "my-profile"
+      - !ruby/object:Provider::Terraform::Examples
         name: "datastream_connection_profile_full"
         primary_resource_id: "default"
         # Workaround for https://github.com/hashicorp/terraform-provider-google/issues/12410
@@ -72,3 +77,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "true"
         # This is covered by the update tests.
         skip_test: true
+  PrivateConnection: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}
+    import_format: ["projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "datastream_private_connection_full"
+        primary_resource_id: "default"
+        vars:
+          private_connection_id: "my-connection"
+          network_name: "my-network"
