@@ -481,6 +481,11 @@ func TestAccKmsCryptoKeyVersion_skipInitialVersion(t *testing.T) {
 			{
 				Config: testGoogleKmsCryptoKeyVersion_skipInitialVersion(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
 			},
+			{
+				ResourceName:      "google_kms_crypto_key_version.crypto_key_version",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
