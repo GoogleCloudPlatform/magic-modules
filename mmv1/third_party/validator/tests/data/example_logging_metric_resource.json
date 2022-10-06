@@ -1,13 +1,13 @@
 [
     {
-        "name": "//logging.googleapis.com/projects/placeholder-BpLnfgDs/metrics/my-test/metric",
+        "name": "//logging.googleapis.com/projects/studies-349913/metrics/my-test/metric",
         "asset_type": "logging.googleapis.com/Metric",
-        "ancestry_path": "organization/{{.OrgID}}",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
         "resource": {
             "version": "v2",
             "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/logging/v2/rest",
             "discovery_name": "Metric",
-            "parent": "//cloudresourcemanager.googleapis.com/organizations/{{.OrgID}}",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
             "data": {
                 "bucketOptions": {
                     "linearBuckets": {
@@ -44,6 +44,8 @@
             }
         },
         "ancestors": [
+            "projects/{{.Provider.project}}",
+            "folders/{{.FolderID}}",
             "organizations/{{.OrgID}}"
         ]
     }

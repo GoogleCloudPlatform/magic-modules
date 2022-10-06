@@ -182,18 +182,6 @@
         }
     ],
     "configuration": {
-        "provider_config": {
-            "google": {
-                "name": "google",
-                "version_constraint": "~\u003e 4.39.0",
-                "expressions": {
-                    "credentials": {},
-                    "project": {
-                        "constant_value": "studies-349913"
-                    }
-                }
-            }
-        },
         "root_module": {
             "resources": [
                 {
