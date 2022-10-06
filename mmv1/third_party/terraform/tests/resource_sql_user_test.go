@@ -257,7 +257,7 @@ func TestAccSqlUser_mysqlPasswordPolicy(t *testing.T) {
 		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlUser_mysqlPasswordPolicy(instance, "password", false),
+				Config: testGoogleSqlUser_mysqlPasswordPolicy(instance, "password"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user2"),
@@ -265,7 +265,7 @@ func TestAccSqlUser_mysqlPasswordPolicy(t *testing.T) {
 			},
 			{
 				// Update password
-				Config: testGoogleSqlUser_mysqlPasswordPolicy(instance, "new_password", false),
+				Config: testGoogleSqlUser_mysqlPasswordPolicy(instance, "new_password"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user2"),
@@ -310,7 +310,7 @@ resource "google_sql_user" "user2" {
 `, instance, password)
 }
 
-func testGoogleSqlUser_mysqlPasswordPolicy(instance, password string, disabled bool) string {
+func testGoogleSqlUser_mysqlPasswordPolicy(instance, password string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
@@ -327,10 +327,7 @@ resource "google_sql_user" "user1" {
   instance = google_sql_database_instance.instance.name
   host     = "google.com"
   password = "%s"
-  sql_server_user_details {
-    disabled = "%t"
-    server_roles = [ "admin" ]  	
-  }
+
   password_policy {
     allowed_failed_attempts  = 6
     password_expiration_duration  =  "2592000s"
@@ -349,7 +346,7 @@ resource "google_sql_user" "user2" {
     enable_failed_attempts_check = true
   }
 }
-`, instance, password, disabled)
+`, instance, password)
 }
 
 func testGoogleSqlUser_postgres(instance, password string) string {
