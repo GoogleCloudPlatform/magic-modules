@@ -41,7 +41,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   WebApp: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ['{{project}} {{name}}']
     autogen_async: true
-    skip_sweeper: true # handwritten sweeper to hard-delete
+    skip_sweeper: true # Skip sweeper generation and use hard-delete in hand-written sweeper
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firebase_web_app_basic"
