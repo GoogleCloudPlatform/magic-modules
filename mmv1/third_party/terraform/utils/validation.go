@@ -43,7 +43,7 @@ var (
 	// 4 and 28 since the first and last character are excluded.
 	ServiceAccountNameRegex = fmt.Sprintf(RFC1035NameTemplate, 4, 28)
 
-	ServiceAccountLinkRegexPrefix = "^(?:http(?:s)?://.+/)?projects/" + ProjectRegexWildCard + "/serviceAccounts/"
+	ServiceAccountLinkRegexPrefix = "projects/" + ProjectRegexWildCard + "/serviceAccounts/"
 	PossibleServiceAccountNames   = []string{
 		ServiceDefaultAccountNameRegex,
 		ComputeServiceAccountNameRegex,
