@@ -1,10 +1,10 @@
-name: Update Breaking Change Status
+name: update-breaking-change-status
 on:
   pull_request:
     types:
       - labeled
 jobs:
-  add-comment:
+  update-breaking-change-status:
     if: github.event.label.id == '4598495472' # The unique identifier for the override-breaking-change label.. used in place of name so the name can be modified without breaking usage
     runs-on: ubuntu-latest
     permissions:
@@ -12,12 +12,13 @@ jobs:
       statuses: write
     steps:
     - uses: actions/checkout@v2
-    - name: Allow breaking change to merged
-      uses: Sibz/github-status-action@v1
-      with: 
-        authToken: ${{secrets.GITHUB_TOKEN}}
-        context: 'terraform-provider-breaking-change-test'
-        description: 'terraform-provider-breaking-change-test'
-        state: 'success'
-        sha: ${{github.event.pull_request.head.sha || github.sha}}
+    - run: | 
+        curl -X POST -H "Authorization: token ${{secrets.GITHUB_TOKEN}}" \
+        -H "Accept: application/vnd.github.v3+json" \
+        "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/${{github.event.pull_request.head.sha || github.sha}}" \
+        -d '{
+        "context": "terraform-provider-breaking-change-test",
+        "target_url": "https://console.cloud.google.com/cloud-build/builds",
+        "state": "success"
+        }'
 
