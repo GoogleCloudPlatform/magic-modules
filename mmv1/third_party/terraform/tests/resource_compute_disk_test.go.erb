@@ -543,34 +543,6 @@ func TestAccComputeDisk_pdExtremeImplicitProvisionedIops(t *testing.T) {
 	})
 }
 
-func TestAccComputeDisk_cloneDisk(t *testing.T) {
-	t.Parallel()
-	pid := getTestProjectFromEnv()
-	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-
-	var disk compute.Disk
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRegionDiskDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeDisk_diskClone(diskName, "self_link"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeDiskExists(
-						t, "google_compute_disk.disk-clone", pid, &disk),
-				),
-			},
-			{
-				ResourceName:      "google_compute_disk.disk-clone",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 <% unless version == 'ga' -%>
 func TestAccComputeDisk_resourcePolicies(t *testing.T) {
 	t.Parallel()
@@ -663,6 +635,34 @@ func testAccCheckEncryptionKey(t *testing.T, n string, disk *compute.Disk) resou
 		}
 		return nil
 	}
+}
+
+func TestAccComputeDisk_cloneDisk(t *testing.T) {
+	t.Parallel()
+	pid := getTestProjectFromEnv()
+	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+
+	var disk compute.Disk
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeDiskDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeDisk_diskClone(diskName, "self_link"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeDiskExists(
+						t, "google_compute_disk.disk-clone", pid, &disk),
+				),
+			},
+			{
+				ResourceName:      "google_compute_disk.disk-clone",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }
 
 func testAccComputeDisk_basic(diskName string) string {
