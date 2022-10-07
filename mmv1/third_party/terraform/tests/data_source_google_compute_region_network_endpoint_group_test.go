@@ -7,10 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataSourceRegionNetworkEndpointGroup(t *testing.T) {
+func TestAccDataSourceRegionNetworkEndpointGroup_basic(t *testing.T) {
 	t.Parallel()
-	poolName := "tf-test-pool-" + randString(t, 6)
-	dataSourceName := "tf-test-ds-" + randString(t, 6)
+	region := "us-central1"
 	rnegName := "tf-test-rneg" + randString(t, 6)
 
 	vcrTest(t, resource.TestCase{
@@ -18,63 +17,44 @@ func TestAccDataSourceRegionNetworkEndpointGroup(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceRegionNetworkEndpointGroup_basic(poolName, rnegName, dataSourceName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_compute_region_network_endpoint_group.data_source", "name", rnegName),
-					resource.TestCheckResourceAttr("data.google_compute_region_network_endpoint_group.data_source", "project", getTestProjectFromEnv()),
-					resource.TestCheckResourceAttrSet("data.google_compute_region_network_endpoint_group.data_source", "self_link"),
-					resource.TestCheckResourceAttrSet("data.google_compute_region_network_endpoint_group.data_source", "network_endpoint_type"),
-					resource.TestCheckResourceAttr("data.google_compute_region_network_endpoint_group.data_source", "region", "us-central1")),
+				Config: testAccDataSourceRegionNetworkEndpointGroup_basic(rnegName, region),
+				Check:  checkDataSourceStateMatchesResourceStateWithIgnores("data.google_compute_region_network_endpoint_group.data_source", "google_compute_instance_template.default", map[string]struct{}{"name": {}, "region": {}, "self_link": {}}),
 			},
 		},
 	})
 }
 
-func testAccDataSourceRegionNetworkEndpointGroup_basic(poolName string, rigName string, dataSourceName string) string {
+func testAccDataSourceRegionNetworkEndpointGroup_basic(rnegName string, region string) string {
 	return fmt.Sprintf(`
-resource "google_compute_target_pool" "default" {
-  name = "%s"
-}
-
-data "google_compute_image" "debian" {
-  project = "debian-cloud"
-  name    = "debian-11-bullseye-v20220719"
-}
-
-resource "google_compute_instance_template" "default" {
-  machine_type = "e2-medium"
-  disk {
-    source_image = data.google_compute_image.debian.self_link
-  }
-  network_interface {
-    access_config {
+  // Cloud Run Example
+  resource "google_compute_region_network_endpoint_group" "cloudrun_neg" {
+    name                  = "%{rnegName}"
+    network_endpoint_type = "SERVERLESS"
+    region                = "%{region}"
+    cloud_run {
+      service = google_cloud_run_service.cloudrun_neg.name
     }
-    network = "default"
   }
-}
 
-resource "google_compute_region_instance_group_manager" "default" {
-  name               = "%s"
-  base_instance_name = "foo"
-  version {
-    instance_template = google_compute_instance_template.default.self_link
-    name              = "primary"
-  }
-  region       = "us-central1"
-  target_pools = [google_compute_target_pool.default.self_link]
-  target_size  = 1
+  resource "google_cloud_run_service" "cloudrun_neg" {
+    name     = "cloudrun-neg"
+    location = "us-central1"
 
-  named_port {
-    name = "web"
-    port = 80
-  }
-  wait_for_instances = true
-}
+    template {
+      spec {
+        containers {
+          image = "us-docker.pkg.dev/cloudrun/container/hello"
+        }
+      }
+    }
+
+    traffic {
+      percent         = 100
+      latest_revision = true
+    }
 
 data "google_compute_region_network_endpoint_group" "data_source" {
-    name = "%s"
-    self_link = google_compute_region_instance_group_manager.default.instance_group
-    region       = "us-central1"
+    self_link = google_compute_region_network_endpoint_group.cloudrun_neg.instance_group
 }
-`, poolName, rigName, dataSourceName)
+`, map[string]interface{}{"rnegName": rnegName, "region": region})
 }

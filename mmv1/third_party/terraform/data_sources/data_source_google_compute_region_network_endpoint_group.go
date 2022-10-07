@@ -12,8 +12,8 @@ func dataSourceGoogleComputeRegionNetworkEndpointGroup() *schema.Resource {
 	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeRegionNetworkEndpointGroup().Schema)
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "name")
-	addOptionalFieldsToSchema(dsSchema, "region")
+	addRequiredFieldsToSchema(dsSchema, "name")
+	addRequiredFieldsToSchema(dsSchema, "region")
 	addOptionalFieldsToSchema(dsSchema, "project")
 	addOptionalFieldsToSchema(dsSchema, "self_link")
 
@@ -34,6 +34,7 @@ func dataSourceComputeRegionNetworkEndpointGroupRead(d *schema.ResourceData, met
 		if err != nil {
 			return err
 		}
+
 		d.SetId(fmt.Sprintf("projects/%s/regions/%s/networkEndpointGroups/%s", project, region, name.(string)))
 	} else if selfLink, ok := d.GetOk("self_link"); ok {
 		parsed, err := ParseNetworkEndpointGroupRegionalFieldValue(selfLink.(string), d, config)
