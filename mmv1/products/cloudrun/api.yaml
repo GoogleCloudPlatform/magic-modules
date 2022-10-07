@@ -681,8 +681,7 @@ objects:
                             name: name
                             description: |-
                               The header field name.
-                            default_value: ""
-                            send_empty_value: true
+                            required: true
                           - !ruby/object:Api::Type::String
                             name: value
                             description: |-
