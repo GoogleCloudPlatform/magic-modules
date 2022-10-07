@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -9,12 +8,10 @@ import (
 )
 
 func TestAccDataSourceRegionNetworkEndpointGroup(t *testing.T) {
-	// Randomness in instance template
-	skipIfVcr(t)
 	t.Parallel()
 	poolName := "tf-test-pool-" + randString(t, 6)
-  dataSourceName := "tf-test-ds-" + randString(t, 6)
-  rnegName := "tf-test-rneg" + randString(t, 6)
+	dataSourceName := "tf-test-ds-" + randString(t, 6)
+	rnegName := "tf-test-rneg" + randString(t, 6)
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
