@@ -238,7 +238,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%  end -%>
 
 <%  if object.supports_indirect_user_project_override -%>
-    if parts := regexp.MustCompile(`^projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+    if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
         billingProject = parts[1]
     }
 <%  end -%>
@@ -396,7 +396,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
 <%  end -%>
 
 <%  if object.supports_indirect_user_project_override -%>
-        if parts := regexp.MustCompile(`^projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+        if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
             billingProject = parts[1]
         }
 <%  end -%>
@@ -465,7 +465,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  end -%>
 
 <%  if object.supports_indirect_user_project_override -%>
-    if parts := regexp.MustCompile(`^projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+    if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
         billingProject = parts[1]
     }
 <%  end -%>
@@ -650,7 +650,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     }
 <%  end -%>
 <%  if object.supports_indirect_user_project_override -%>
-     if parts := regexp.MustCompile(`^projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
         billingProject = parts[1]
     }
 <%  end -%>
@@ -712,7 +712,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             return err
         }
 <%         if object.supports_indirect_user_project_override -%>
-        if parts := regexp.MustCompile(`^projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+        if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
             billingProject = parts[1]
         }
 <%         end -%>
@@ -787,7 +787,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             return err
         }
 <%      if object.supports_indirect_user_project_override -%>
-        if parts := regexp.MustCompile(`^projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+        if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
             billingProject = parts[1]
         }
 <%      end -%>
@@ -895,7 +895,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%  end -%>
 <%  if object.supports_indirect_user_project_override -%>
 
-    if parts := regexp.MustCompile(`^projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+    if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
         billingProject = parts[1]
     }
 
