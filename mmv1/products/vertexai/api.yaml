@@ -271,7 +271,6 @@ objects:
                   The monitoring schedule for snapshot analysis. For EntityType-level config: unset / disabled = true indicates disabled by default for Features under it; otherwise by default enable snapshot analysis monitoring with monitoringInterval for Features under it.
               - !ruby/object:Api::Type::String
                 name: 'monitoringInterval'
-                default_value: "0s"
                 min_version: beta
                 description: |
                   This item is deprecated!
