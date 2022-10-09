@@ -160,7 +160,7 @@ objects:
     update_verb: :PATCH
     delete_verb: :POST
     delete_url: 'projects/{{project}}/iosApps/{{appId}}:remove'
-    update_mask: true'
+    update_mask: true
     description: |
       A Google Cloud Firebase Apple application instance
     references: !ruby/object:Api::Resource::ReferenceLinks
