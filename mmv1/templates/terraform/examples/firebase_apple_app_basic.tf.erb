@@ -1,7 +1,7 @@
 resource "google_firebase_apple_app" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   project = "<%= ctx[:test_env_vars]['project_id'] %>"
-  display_name = "<%= ctx[:vars]['display_names'] %>"
+  display_name = "<%= ctx[:vars]['display_name'] %>"
   bundle_id = "<%= ctx[:vars]['bundle_id'] %>"
   app_store_id = "<%= ctx[:vars]['app_store_id'] %>"
   team_id = "<%= ctx[:vars]['team_id'] %>"
