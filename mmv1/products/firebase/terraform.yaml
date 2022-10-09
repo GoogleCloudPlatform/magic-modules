@@ -58,10 +58,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
   AndroidApp: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ['{{project}} {{name}}']
+    import_format: ["projects/{{project}}/androidApps/{{appId}}", "androidApps/{{appId}}", "{{appId}}"]
     autogen_async: true
-    skip_delete: true #currently only able to delete a androidapp through the Firebase Admin console
-    skip_sweeper: true
+    skip_sweeper: true # Skip sweeper generation and use hard-delete in hand-written sweeper
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firebase_android_app_basic"
@@ -71,6 +70,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           display_name: "Display Name Basic"
         test_env_vars:
           org_id: :ORG_ID
+          project_id: :PROJECT_NAME
+        test_vars_overrides:
+          package_name: '"android.package." + randString(t, 5)'
         ignore_read_extra:
           - project
     custom_code: !ruby/object:Provider::Terraform::CustomCode
