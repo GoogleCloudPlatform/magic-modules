@@ -158,7 +158,9 @@ objects:
     base_url: projects/{{project}}/iosApps
     self_link: '{{name}}'
     update_verb: :PATCH
-    update_mask: true
+    delete_verb: :POST
+    delete_url: 'projects/{{project}}/iosApps/{{appId}}:remove'
+    update_mask: true'
     description: |
       A Google Cloud Firebase Apple application instance
     references: !ruby/object:Api::Resource::ReferenceLinks

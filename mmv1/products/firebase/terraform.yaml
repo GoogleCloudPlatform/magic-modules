@@ -60,7 +60,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   AppleApp: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/iosApps/{{appId}}", "iosApps/{{appId}}", "{{appId}}"]
     autogen_async: true
-    skip_sweeper: true
+    skip_sweeper: true # Skip sweeper generation and use hard-delete in hand-written sweeper
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firebase_apple_app_basic"
