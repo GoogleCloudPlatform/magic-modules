@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package google
+<% unless version == 'ga' -%>
 
 import (
 	"testing"
@@ -65,3 +67,4 @@ resource "google_bigquery_dataset" "listing" {
 }
 `, context)
 }
+<% end -%>
