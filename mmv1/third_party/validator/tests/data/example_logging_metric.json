@@ -1,6 +1,6 @@
 [
     {
-        "name": "//logging.googleapis.com/projects/studies-349913/metrics/my-test/metric",
+        "name": "//logging.googleapis.com/projects/{{.Provider.project}}/metrics/my-test/metric",
         "asset_type": "logging.googleapis.com/Metric",
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
         "resource": {
@@ -44,8 +44,6 @@
             }
         },
         "ancestors": [
-            "projects/{{.Provider.project}}",
-            "folders/{{.FolderID}}",
             "organizations/{{.OrgID}}"
         ]
     }
