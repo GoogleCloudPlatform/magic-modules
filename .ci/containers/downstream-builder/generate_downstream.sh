@@ -161,7 +161,9 @@ else
         pushd ../
         make tpgtools OUTPUT_PATH=$LOCAL_PATH VERSION=$VERSION
         pushd ./tools/breaking-change-detector
+        set +e
         go run . -docs -providerFolder="${LOCAL_PATH}/.github/"
+        set -e
         popd
         popd
     fi
