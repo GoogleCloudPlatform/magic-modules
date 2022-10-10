@@ -104,6 +104,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
 
       Destroying a cryptoKeyVersion will not delete the resource from the project.
     id_format: "{{name}}"
+    import_format: ["{{crypto_key}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "kms_crypto_key_version_basic"
@@ -113,6 +114,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       state: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_delete: templates/terraform/custom_delete/kms_crypto_key.erb
       custom_import: templates/terraform/custom_import/kms_crypto_key_version.go.erb
   KeyRingImportJob: !ruby/object:Overrides::Terraform::ResourceOverride
     description: |
