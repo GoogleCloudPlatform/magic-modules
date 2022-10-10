@@ -410,7 +410,7 @@ func TestAccMonitoringSlo_windowBasedMetricSumRangeSlis(t *testing.T) {
 	})
 }
 
-func testAccMonitoringSlo_genericService(t *testing.T) {
+func TestAccMonitoringSlo_genericService(t *testing.T) {
 	t.Parallel()
 
 	randomSuffix := randString(t, 10)
