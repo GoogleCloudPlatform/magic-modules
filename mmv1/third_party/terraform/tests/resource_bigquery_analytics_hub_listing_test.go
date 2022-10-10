@@ -22,10 +22,9 @@ func TestAccBigqueryAnalyticsHubListing_bigqueryAnalyticshubListingUpdate(t *tes
 				Config: testAccBigqueryAnalyticsHubListing_bigqueryAnalyticshubListingBasicExample(context),
 			},
 			{
-				ResourceName:            "google_bigquery_analytics_hub_listing.listing",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"data_exchange_id", "listing_id", "location"},
+				ResourceName:      "google_bigquery_analytics_hub_listing.listing",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccBigqueryAnalyticsHubListing_bigqueryAnalyticshubListingUpdate(context),
