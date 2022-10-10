@@ -83,6 +83,19 @@ resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
       ]
       max_age = 60
     }
+    fault_injection_policy {
+      delay {
+        fixedDelay {
+          seconds = 0
+          nanos = 500
+        }
+        percentage = 0.5
+      }
+      abort {
+        http_status = 500
+        percentage = 0.5
+      }
+    }
   }
 
   host_rule {
