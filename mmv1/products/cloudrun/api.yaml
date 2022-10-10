@@ -651,7 +651,10 @@ objects:
                     having succeeded. Defaults to 3. Minimum value is 1.
                   default_value: 3
                 - !ruby/object:Api::Type::NestedObject
-                  name: tcpSocket 
+                  name: tcpSocket
+                  exactly_one_of:
+                    - http_get
+                    - tcp_socket
                   description: |-
                     TcpSocket speficies an action involving a TCP port.
                   send_empty_value: true
@@ -661,7 +664,10 @@ objects:
                       description: |-
                         Port number to access on the container. Number must be in the range 1 to 65535.
                 - !ruby/object:Api::Type::NestedObject
-                  name: httpGet 
+                  name: httpGet
+                  exactly_one_of:
+                    - http_get
+                    - tcp_socket
                   description: |-
                     HttpGet specifies the http request to perform.
                   send_empty_value: true
