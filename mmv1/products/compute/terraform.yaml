@@ -2353,6 +2353,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pathMatchers.pathRules.urlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
         required: true
         description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
+      defaultRouteAction.urlRewrite.pathPrefixRewrite: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(1, 1024)'
+      defaultRouteAction.urlRewrite.hostRewrite: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(1, 255)'
+      defaultRouteAction.urlRewrite.timeout.nanos: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0, 999999999)'
       defaultRouteAction.retryPolicy.numRetries: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntAtLeast(1)'

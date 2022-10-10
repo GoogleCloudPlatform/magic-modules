@@ -12109,6 +12109,38 @@ objects:
                               The default value is false.
                             default_value: false
           - !ruby/object:Api::Type::NestedObject
+            name: 'urlRewrite'
+            description : |
+              The spec to modify the URL of the request, before forwarding the request to the matched service.
+              urlRewrite is the only action supported in UrlMaps for external HTTP(S) load balancers.
+              Not supported when the URL map is bound to a target gRPC proxy that has the validateForProxyless field set to true.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'pathPrefixRewrite'
+                description: |
+                  Before forwarding the request to the selected backend service, the matching portion of the request's path is replaced by pathPrefixRewrite.
+                  The value must be from 1 to 1024 characters.
+              - !ruby/object:Api::Type::String
+                name: 'hostRewrite'
+                description: |
+                  Before forwarding the request to the selected service, the request's host header is replaced with contents of hostRewrite.
+                  The value must be from 1 to 255 characters.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'timeout'
+                description: |
+                  Specifies the timeout for the selected route. Timeout is computed from the time the request has been fully processed (known as end-of-stream) up until the response has been processed. Timeout includes all retries.
+                  If not specified, this field uses the largest timeout among all backend services associated with the route.
+                  Not supported when the URL map is bound to a target gRPC proxy that has validateForProxyless field set to true.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'seconds'
+                    description: |
+                      Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive. Note: these bounds are computed from: 60 sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years
+                  - !ruby/object:Api::Type::Integer
+                    name: 'nanos'
+                    description: |
+                      Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
+          - !ruby/object:Api::Type::NestedObject
             name: 'retryPolicy'
             description : |
               Specifies the retry policy associated with this route.
