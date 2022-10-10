@@ -10597,10 +10597,10 @@ objects:
         output: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'defaultService'
-        # TODO: add defaultRouteAction.weightedBackendService here once they are supported.
         exactly_one_of:
           - default_service
           - default_url_redirect
+          - default_route_action.0.weighted_backend_services
         resource: 'RegionBackendService'
         imports: 'selfLink'
         description: |
@@ -11914,10 +11914,10 @@ objects:
                 should be mapped to.
       - !ruby/object:Api::Type::NestedObject
         name: 'defaultUrlRedirect'
-        # TODO: add defaultRouteAction.weightedBackendService here once they are supported.
         exactly_one_of:
           - default_service
           - default_url_redirect
+          - default_route_action.0.weighted_backend_services
         description: |
           When none of the specified hostRules match, the request is redirected to a URL specified
           by defaultUrlRedirect. If defaultUrlRedirect is specified, defaultService or
@@ -11981,6 +11981,91 @@ objects:
               If set to true, any accompanying query portion of the original URL is removed prior
               to redirecting the request. If set to false, the query portion of the original URL is
               retained.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'defaultRouteAction'
+        description: |
+          defaultRouteAction takes effect when none of the hostRules match. The load balancer performs advanced routing actions, such as URL rewrites and header transformations, before forwarding the request to the selected backend. If defaultRouteAction specifies any weightedBackendServices, defaultService must not be set. Conversely if defaultService is set, defaultRouteAction cannot contain any weightedBackendServices.
+          Only one of defaultRouteAction or defaultUrlRedirect must be set.
+          URL maps for Classic external HTTP(S) load balancers only support the urlRewrite action within defaultRouteAction.
+          defaultRouteAction has no effect when the URL map is bound to a target gRPC proxy that has the validateForProxyless field set to true.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'weightedBackendServices'
+            description : |
+              A list of weighted backend services to send traffic to when a route match occurs. The weights determine the fraction of traffic that flows to their corresponding backend service. If all traffic needs to go to a single backend service, there must be one weightedBackendService with weight set to a non-zero number.
+              After a backend service is identified and before forwarding the request to the backend service, advanced routing actions such as URL rewrites and header transformations are applied depending on additional settings specified in this HttpRouteAction.
+            exactly_one_of:
+              - default_service
+              - default_url_redirect
+              - default_route_action.0.weighted_backend_services
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::ResourceRef
+                  name: 'backendService'
+                  resource: 'RegionBackendService'
+                  imports: 'selfLink'
+                  description: |
+                    The full or partial URL to the default BackendService resource. Before forwarding the request to backendService, the load balancer applies any relevant headerActions specified as part of this backendServiceWeight.
+                - !ruby/object:Api::Type::Integer
+                  name: 'weight'
+                  description: |
+                    Specifies the fraction of traffic sent to a backend service, computed as weight / (sum of all weightedBackendService weights in routeAction) .
+                    The selection of a backend service is determined only for new traffic. Once a user's request has been directed to a backend service, subsequent requests are sent to the same backend service as determined by the backend service's session affinity policy.
+                    The value must be from 0 to 1000.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'headerAction'
+                  description: |
+                    Specifies changes to request and response headers that need to take effect for the selected backendService.
+                    headerAction specified here take effect before headerAction in the enclosing HttpRouteRule, PathMatcher and UrlMap.
+                    headerAction is not supported for load balancers that have their loadBalancingScheme set to EXTERNAL.
+                    Not supported when the URL map is bound to a target gRPC proxy that has validateForProxyless field set to true.
+                  properties:
+                    - !ruby/object:Api::Type::Array
+                      name: 'requestHeadersToRemove'
+                      item_type: Api::Type::String
+                      description: |
+                        A list of header names for headers that need to be removed from the request before forwarding the request to the backendService.
+                    - !ruby/object:Api::Type::Array
+                      name: 'requestHeadersToAdd'
+                      description: |
+                        Headers to add to a matching request before forwarding the request to the backendService.
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: 'headerName'
+                            description: 'The name of the header.'
+                          - !ruby/object:Api::Type::String
+                            name: 'headerValue'
+                            description: 'The value of the header to add.'
+                          - !ruby/object:Api::Type::Boolean
+                            name: 'replace'
+                            description: |
+                              If false, headerValue is appended to any values that already exist for the header. If true, headerValue is set for the header, discarding any values that were set for that header.
+                              The default value is false.
+                            default_value: false
+                    - !ruby/object:Api::Type::Array
+                      name: 'responseHeadersToRemove'
+                      item_type: Api::Type::String
+                      description: |
+                        A list of header names for headers that need to be removed from the response before sending the response back to the client.
+                    - !ruby/object:Api::Type::Array
+                      name: 'responseHeadersToAdd'
+                      description: |
+                        Headers to add the response before sending the response back to the client.
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: 'headerName'
+                            description: 'The name of the header.'
+                          - !ruby/object:Api::Type::String
+                            name: 'headerValue'
+                            description: 'The value of the header to add.'
+                          - !ruby/object:Api::Type::Boolean
+                            name: 'replace'
+                            description: |
+                              If false, headerValue is appended to any values that already exist for the header. If true, headerValue is set for the header, discarding any values that were set for that header.
+                              The default value is false.
+                            default_value: false
   - !ruby/object:Api::Resource
     name: 'RegionHealthCheck'
     kind: 'compute#healthCheck'
