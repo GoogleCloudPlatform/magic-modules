@@ -65,6 +65,24 @@ resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
         response_headers_to_remove = ["buzz"]
       }
     }
+    cors_policy {
+      disabled = false
+      allow_credentials = true
+      allow_headers = [
+        "foobar"
+      ]
+      allow_methods = [
+        "GET",
+        "POST",
+      ]
+      allow_origins = [
+        "example.com"
+      ]
+      expose_headers = [
+        "foobar"
+      ]
+      max_age = 60
+    }
   }
 
   host_rule {
