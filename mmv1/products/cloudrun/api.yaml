@@ -652,11 +652,11 @@ objects:
                   default_value: 3
                 - !ruby/object:Api::Type::NestedObject
                   name: tcpSocket
-                  exactly_one_of:
-                    - http_get
-                    - tcp_socket
                   description: |-
                     TcpSocket speficies an action involving a TCP port.
+                  exactly_one_of:
+                    - tcp_socket
+                    - http_get
                   send_empty_value: true
                   properties:
                     - !ruby/object:Api::Type::Integer
@@ -665,11 +665,11 @@ objects:
                         Port number to access on the container. Number must be in the range 1 to 65535.
                 - !ruby/object:Api::Type::NestedObject
                   name: httpGet
-                  exactly_one_of:
-                    - http_get
-                    - tcp_socket
                   description: |-
                     HttpGet specifies the http request to perform.
+                  exactly_one_of:
+                    - tcp_socket
+                    - http_get
                   send_empty_value: true
                   properties:
                     - !ruby/object:Api::Type::String
