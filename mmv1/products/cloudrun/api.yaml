@@ -655,8 +655,8 @@ objects:
                   description: |-
                     TcpSocket specifies an action involving a TCP port.
                   exactly_one_of:
-                    - tcp_socket
-                    - http_get
+                    - template.0.spec.0.containers.0.startup_probe.0.tcp_socket
+                    - template.0.spec.0.containers.0.startup_probe.0.http_get
                   send_empty_value: true
                   properties:
                     - !ruby/object:Api::Type::Integer
@@ -668,8 +668,8 @@ objects:
                   description: |-
                     HttpGet specifies the http request to perform.
                   exactly_one_of:
-                    - tcp_socket
-                    - http_get
+                    - template.0.spec.0.containers.0.startup_probe.0.tcp_socket
+                    - template.0.spec.0.containers.0.startup_probe.0.http_get
                   send_empty_value: true
                   properties:
                     - !ruby/object:Api::Type::String
