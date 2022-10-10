@@ -332,6 +332,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_docs: true
         vars:
           cloud_run_srv: "cloud-run-srv"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_probes"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          cloud_run_service_name: "cloudrun-srv"
+        test_env_vars:
+          project: :PROJECT_NAME
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'autogenerate_revision_name'
@@ -389,6 +397,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       spec.template.spec.containers.resources: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       spec.template.spec.containers.resources.limits: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      spec.template.spec.containers.startupProbe: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      spec.template.spec.containers.startupProbe.tcpSocket.port: !ruby/object:Overrides::Terraform::PropertyOverride
+        # when port is not specified, container.ports[0].port is a possible default value 
         default_from_api: true
       # Terraform autofills the only required field in metadata
       metadata: !ruby/object:Overrides::Terraform::PropertyOverride
