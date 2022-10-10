@@ -12233,6 +12233,56 @@ objects:
                   The full or partial URL to the RegionBackendService resource being mirrored to.
                   The backend service configured for a mirroring policy must reference backends that are of the same type as the original backend service matched in the URL map.
                   Serverless NEG backends are not currently supported as a mirrored backend service.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'corsPolicy'
+            description: |
+              The specification for allowing client side cross-origin requests. Please see
+              [W3C Recommendation for Cross Origin Resource Sharing](https://www.w3.org/TR/cors/)
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'allowOrigins'
+                description: |
+                  Specifies the list of origins that will be allowed to do CORS requests.
+                  An origin is allowed if it matches either an item in allowOrigins or an item in allowOriginRegexes.
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::Array
+                name: 'allowOriginRegexes'
+                description: |
+                  Specifies the regualar expression patterns that match allowed origins. For regular expression grammar
+                  please see en.cppreference.com/w/cpp/regex/ecmascript
+                  An origin is allowed if it matches either an item in allowOrigins or an item in allowOriginRegexes.
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::Array
+                name: 'allowMethods'
+                description: |
+                  Specifies the content for the Access-Control-Allow-Methods header.
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::Array
+                name: 'allowHeaders'
+                description: |
+                  Specifies the content for the Access-Control-Allow-Headers header.
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::Array
+                name: 'exposeHeaders'
+                description: |
+                  Specifies the content for the Access-Control-Expose-Headers header.
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::Integer
+                name: 'maxAge'
+                description: |
+                  Specifies how long results of a preflight request can be cached in seconds.
+                  This translates to the Access-Control-Max-Age header.
+              - !ruby/object:Api::Type::Boolean
+                name: 'allowCredentials'
+                description: |
+                  In response to a preflight request, setting this to true indicates that the actual request can include user credentials. This field translates to the Access-Control-Allow-Credentials header.
+                  Default is false.
+                default_value: false
+              - !ruby/object:Api::Type::Boolean
+                name: 'disabled'
+                description: |
+                  If true, the setting specifies the CORS policy is disabled. The default value of false, which indicates that the CORS policy is in effect.
+                default_value: false
   - !ruby/object:Api::Resource
     name: 'RegionHealthCheck'
     kind: 'compute#healthCheck'
