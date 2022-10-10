@@ -12110,6 +12110,19 @@ objects:
                     description: |
                       Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are
                       represented with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'requestMirrorPolicy'
+            description: |
+              Specifies the policy on how requests intended for the route's backends are shadowed to a separate mirrored backend service.
+              Loadbalancer does not wait for responses from the shadow service. Prior to sending traffic to the shadow service,
+              the host / authority header is suffixed with -shadow.
+            properties:
+              - !ruby/object:Api::Type::ResourceRef
+                name: 'backendService'
+                resource: 'RegionBackendService'
+                imports: 'selfLink'
+                description: |
+                  The full or partial URL to the RegionBackendService resource being mirrored to.
   - !ruby/object:Api::Resource
     name: 'RegionHealthCheck'
     kind: 'compute#healthCheck'

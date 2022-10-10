@@ -16,6 +16,9 @@ resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
         nanos = 500
       }
     }
+    request_mirror_policy {
+      backend_service = google_compute_region_backend_service.home.id
+    }
     weighted_backend_services {
       backend_service = google_compute_region_backend_service.home.id
       weight = 200
