@@ -653,7 +653,7 @@ objects:
                 - !ruby/object:Api::Type::NestedObject
                   name: tcpSocket
                   description: |-
-                    TcpSocket speficies an action involving a TCP port.
+                    TcpSocket specifies an action involving a TCP port.
                   exactly_one_of:
                     - tcp_socket
                     - http_get
