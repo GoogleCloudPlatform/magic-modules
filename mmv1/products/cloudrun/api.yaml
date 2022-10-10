@@ -653,7 +653,7 @@ objects:
                 - !ruby/object:Api::Type::NestedObject
                   name: tcpSocket 
                   description: |-
-                    TcpSocket speficies an action involving a TCP port.
+                    TcpSocket specifies an action involving a TCP port.
                   send_empty_value: true
                   properties:
                     - !ruby/object:Api::Type::Integer
