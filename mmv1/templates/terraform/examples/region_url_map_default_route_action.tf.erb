@@ -5,6 +5,17 @@ resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
   description = "a description"
 
   default_route_action {
+    retry_policy {
+      retry_conditions = [
+        "5xx",
+        "gateway-error",
+      ]
+      num_retries = 3
+      per_try_timeout {
+        seconds = 0
+        nanos = 500
+      }
+    }
     weighted_backend_services {
       backend_service = google_compute_region_backend_service.home.id
       weight = 200
