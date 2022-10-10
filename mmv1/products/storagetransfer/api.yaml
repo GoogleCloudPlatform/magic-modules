@@ -1,0 +1,77 @@
+# Copyright 2022 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: StorageTransfer
+display_name: Storage Transfer Service
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://storagetransfer.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Storage Transfer API
+    url: https://console.cloud.google.com/apis/library/storagetransfer.googleapis.com/
+objects:
+  - !ruby/object:Api::Resource
+    name: 'AgentPool'
+    description: 'Represents an On-Premises Agent pool.'
+    base_url: 'projects/{{project}}/agentPools'
+    self_link: 'projects/{{project}}/agentPools/{{name}}'
+    create_url: 'projects/{{project}}/agentPools?agentPoolId={{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/storage-transfer/docs/on-prem-agent-pools'
+      api: 'https://cloud.google.com/storage-transfer/docs/reference/rest/v1/projects.agentPools'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The ID of the agent pool to create.
+
+          The agentPoolId must meet the following requirements:
+          * Length of 128 characters or less.
+          * Not start with the string goog.
+          * Start with a lowercase ASCII character, followed by:
+            * Zero or more: lowercase Latin alphabet characters, numerals, hyphens (-), periods (.), underscores (_), or tildes (~).
+            * One or more numerals or lowercase ASCII characters.
+
+          As expressed by the regular expression: ^(?!goog)[a-z]([a-z0-9-._~]*[a-z0-9])?$.
+        input: true
+        required: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: 'Specifies the client-specified AgentPool description.'
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        description: 'Specifies the state of the AgentPool.'
+        output: true
+        values:
+          - :CREATING
+          - :CREATED
+          - :DELETING
+      - !ruby/object:Api::Type::NestedObject
+        name: 'bandwidthLimit'
+        description: |
+          Specifies the bandwidth limit details. If this field is unspecified, the default value is set as 'No Limit'.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'limitMbps'
+            description: 'Bandwidth rate in megabytes per second, distributed across all the agents in the pool.'
+            required: true
