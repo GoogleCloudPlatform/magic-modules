@@ -65,6 +65,11 @@ resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
         response_headers_to_remove = ["buzz"]
       }
     }
+    url_rewrite {
+      host_rewrite = "A replacement header"
+      path_prefix_rewrite = "A replacement path"
+
+    }
     cors_policy {
       disabled = false
       allow_credentials = true
@@ -85,7 +90,7 @@ resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
     }
     fault_injection_policy {
       delay {
-        fixedDelay {
+        fixed_delay {
           seconds = 0
           nanos = 500
         }
