@@ -80,3 +80,55 @@ objects:
         description: |
           Applicable only for reservations located within one of the BigQuery multi-regions (US or EU).
           If set to true, this reservation is placed in the organization's secondary region which is designated for disaster recovery purposes. If false, this reservation is placed in the organization's default region.
+  - !ruby/object:Api::Resource
+    name: 'CapacityCommitment'
+    base_url: projects/{{project}}/locations/{{location}}/capacityCommitments
+    create_url: projects/{{project}}/locations/{{location}}/capacityCommitments?capacityCommitmentId={{capacityCommitmentId}}
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Capacity commitment is a way to purchase compute capacity for BigQuery jobs (in the form of slots) with some committed period of usage.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        "Capacity commitment plans": "https://cloud.google.com/bigquery/docs/reservations-details"
+      api: "https://cloud.google.com/bigquery/docs/reference/reservations/rest/v1/projects.locations.capacityCommitments/create"
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        url_param_only: true
+        input: true
+        description: |
+          The geographic location where the capacity commitment should reside.
+          Examples: US, EU, asia-northeast1.
+      - !ruby/object:Api::Type::String
+        name: 'capacityCommitmentId'
+        url_param_only: true
+        input: true
+        required: true
+        description: |
+          The name of the capacity commitment. This field must only contain alphanumeric characters or dash.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enforceSingleAdminProjectPerOrg'
+        url_param_only: true
+        input: true
+        description: |
+          If true, fail the request if another project in the organization has a capacity commitment.
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: 'slotCount'
+        required: true
+        description: |
+          Number of slots in this commitment.
+      - !ruby/object:Api::Type::String
+        name: 'plan'
+        description: |
+          Capacity commitment commitment plan.
+      - !ruby/object:Api::Type::String
+        name: 'renewalPlan'
+        description: |
+          The plan this capacity commitment is converted to after commitmentEndTime passes. Once the plan is changed, committed period is extended according to commitment plan. Only applicable for ANNUAL and TRIAL commitments.
+      - !ruby/object:Api::Type::Boolean
+        name: 'multiRegionAuxiliary'
+        description: |
+          Applicable only for commitments located within one of the BigQuery multi-regions (US or EU).
+          If set to true, this commitment is placed in the organization's secondary region which is designated for disaster recovery purposes. If false, this commitment is placed in the organization's default region.
