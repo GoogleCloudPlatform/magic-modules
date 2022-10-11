@@ -26,5 +26,5 @@ variables:
   type: project
 - name: region
   type: region
-- name: resource_name
+- name: pipeline
   type: resource_name
