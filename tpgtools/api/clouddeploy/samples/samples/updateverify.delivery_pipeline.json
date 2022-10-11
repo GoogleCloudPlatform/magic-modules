@@ -1,0 +1,35 @@
+{
+  "name": "{{pipeline}}",
+  "location": "{{region}}",
+  "project": "{{project}}",
+
+  "description": "updated description",
+  "annotations": {
+    "my_second_annotation": "updated-example-annotation-2",
+    "my_third_annotation": "example-annotation-3"
+  },
+  "labels": {
+    "my_second_label": "updated-example-label-2",
+    "my_third_label": "example-label-3"
+  },
+  "serialPipeline": {
+    "stages": [
+      {
+        "targetId": "example-target-two",
+        "profiles": ["new-example-profile"],
+        "strategy" : {
+          "standard" :  {
+            "verify": true
+          }
+        }
+      },
+      {
+        "targetId": "example-target-three",
+        "profiles": [
+          "example-profile-four",
+          "example-profile-five"
+        ]
+      }
+    ]
+  }
+}
