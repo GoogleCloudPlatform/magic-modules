@@ -101,6 +101,8 @@ The following arguments are supported:
 
 * `uniform_bucket_level_access` - (Optional, Default: false) Enables [Uniform bucket-level access](https://cloud.google.com/storage/docs/uniform-bucket-level-access) access to a bucket.
 
+* `public_access_prevention` - (Optional, Default: false) Prevents public access to a bucket. See [public access protection](https://cloud.google.com/storage/docs/public-access-prevention).
+
 * `custom_placement_config` - (Optional) The bucket's custom location configuration, which specifies the individual regions that comprise a dual-region bucket. If the bucket is designated a single or multi-region, the parameters are empty. Structure is [documented below](#nested_custom_placement_config).
 
 <a name="nested_lifecycle_rule"></a>The `lifecycle_rule` block supports:
