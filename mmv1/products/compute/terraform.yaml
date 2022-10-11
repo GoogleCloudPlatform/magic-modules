@@ -2359,7 +2359,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       defaultRouteAction.urlRewrite.hostRewrite: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.StringLenBetween(1, 255)'
-      defaultRouteAction.urlRewrite.timeout.nanos: !ruby/object:Overrides::Terraform::PropertyOverride
+      defaultRouteAction.timeout.nanos: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(0, 999999999)'
       defaultRouteAction.retryPolicy.numRetries: !ruby/object:Overrides::Terraform::PropertyOverride

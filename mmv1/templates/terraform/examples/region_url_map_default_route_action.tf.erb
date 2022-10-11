@@ -96,6 +96,10 @@ resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
         percentage = 0.5
       }
     }
+    timeout {
+      seconds = 0
+      nanos = 500
+    }
   }
 
   host_rule {
