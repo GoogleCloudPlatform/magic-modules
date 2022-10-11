@@ -23,6 +23,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "reservation"
         vars:
           name: 'my-reservation'
+  CapacityCommitment: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_reservation_capacity_commitment_basic"
+        primary_resource_id: "commitment"
+        vars:
+          name: 'my-commitment'          
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
