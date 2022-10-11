@@ -61,6 +61,7 @@ module Overrides
           :virtual_fields,
 
           # TODO(alexstephen): Deprecate once all resources using autogen async.
+          # If true, generates product operation handling logic.
           :autogen_async,
 
           # If true, resource is not importable
