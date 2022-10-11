@@ -22,6 +22,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         test_env_vars:
           project_id: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebasehosting_site_full"
+        min_version: "beta"
+        primary_resource_id: "full"
+        test_env_vars:
+          project_id: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
 # This is for copying files over
