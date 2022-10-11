@@ -67,7 +67,6 @@ spec:
     has_name = !name.nil?
     has_labels = object.all_user_properties.map(&:name).include?("labels")
     is_server_generated = is_server_generated_name(name, object) if has_name
-    # puts "erb... " + name.to_s + "... " + is_server_generated.to_s
 -%>
 <%  if !id_template.nil? && id_template != "" -%>
       idTemplate: "<%= id_template %>"

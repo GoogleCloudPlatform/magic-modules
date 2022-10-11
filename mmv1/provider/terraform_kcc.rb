@@ -30,13 +30,15 @@ module Provider
     # externally injected values (env vars), and that don't match the current
     # product version.
     def generate_resource(pwd, data, _generate_code, _generate_docs)
+#       puts data.to_yaml
+      kind = data.product.name + data.name
       examples = data.object.examples
                      .reject(&:skip_test)
                      .reject { |e| !e.test_env_vars.nil? && e.test_env_vars.any? }
                      .reject { |e| @version < @api.version_obj_or_closest(e.min_version) }
 
       examples.each do |example|
-        target_folder = File.join(data.output_folder, 'samples', example.name)
+        target_folder = File.join('samples', kind + '-' + example.name)
         FileUtils.mkpath target_folder
 
         data.example = example
@@ -52,7 +54,9 @@ module Provider
 
     def generate_resource_tests(pwd, data) end
 
-    def generate_iam_policy(pwd, data, generate_code, generate_docs) end
+    def generate_resource_sweepers(pwd, data) end
+
+    def generate_iam_policy(pwd, data, generate_code, generate_docs)end
 
     def compile_product_files(output_folder)
       file_template = ProductFileTemplate.new(
@@ -72,21 +76,7 @@ module Provider
                         file_template)
     end
 
-    def compile_common_files(output_folder, products, _common_compile_file)
-      Google::LOGGER.info 'Compiling common files.'
-      file_template = ProviderFileTemplate.new(
-        output_folder,
-        @target_version_name,
-        build_env,
-        products
-      )
-      compile_file_list(output_folder, [
-                          [
-                            'common/resources.go',
-                            'templates/kcc/controller_resources.go.erb'
-                          ]
-                        ], file_template)
-    end
+    def compile_common_files(output_folder, products, _common_compile_file) end
 
     def copy_common_files(output_folder, generate_code, generate_docs) end
 
