@@ -457,9 +457,9 @@ func TestAccKmsCryptoKeyVersion_basic(t *testing.T) {
 				Config: testGoogleKmsCryptoKeyVersion_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
 			},
 			{
-				ResourceName:      "google_kms_crypto_key_version.crypto_key_version",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_kms_crypto_key_version.crypto_key_version",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"crypto_key"},
 			},
 		},
@@ -483,9 +483,9 @@ func TestAccKmsCryptoKeyVersion_skipInitialVersion(t *testing.T) {
 				Config: testGoogleKmsCryptoKeyVersion_skipInitialVersion(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
 			},
 			{
-				ResourceName:      "google_kms_crypto_key_version.crypto_key_version",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_kms_crypto_key_version.crypto_key_version",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"crypto_key"},
 			},
 		},
@@ -510,9 +510,9 @@ func TestAccKmsCryptoKeyVersion_patch(t *testing.T) {
 				Config: testGoogleKmsCryptoKeyVersion_patchInitialize(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
 			},
 			{
-				ResourceName:      "google_kms_crypto_key_version.crypto_key_version",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_kms_crypto_key_version.crypto_key_version",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"crypto_key"},
 			},
 			{
