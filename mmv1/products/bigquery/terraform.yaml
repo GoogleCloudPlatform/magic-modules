@@ -41,6 +41,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           private: "private"
           public: "public"
           account_name: "bqowner"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_dataset_authorized_routine"
+        primary_resource_id: "dataset"
+        vars:
+          private: "private"
+          public: "public"
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'delete_contents_on_destroy'
@@ -104,6 +110,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           table_id: "example_table"
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_dataset_access_authorized_dataset"
+        skip_test: true  # not importable
+        primary_resource_id: "access"
+        vars:
+          private: "private"
+          public: "public"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_dataset_access_authorized_routine"
         skip_test: true  # not importable
         primary_resource_id: "access"
         vars:
