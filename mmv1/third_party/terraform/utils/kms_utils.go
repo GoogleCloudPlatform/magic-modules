@@ -139,8 +139,7 @@ func parseKmsCryptoKeyId(id string, config *Config) (*kmsCryptoKeyId, error) {
 	cryptoKeyIdRegex := regexp.MustCompile("^(" + ProjectRegex + ")/([a-z0-9-])+/([a-zA-Z0-9_-]{1,63})/([a-zA-Z0-9_-]{1,63})$")
 	cryptoKeyIdWithoutProjectRegex := regexp.MustCompile("^([a-z0-9-])+/([a-zA-Z0-9_-]{1,63})/([a-zA-Z0-9_-]{1,63})$")
 	cryptoKeyRelativeLinkRegex := regexp.MustCompile("^projects/(" + ProjectRegex + ")/locations/([a-z0-9-]+)/keyRings/([a-zA-Z0-9_-]{1,63})/cryptoKeys/([a-zA-Z0-9_-]{1,63})$")
-	cryptoKeyVersionRelativeLinkRegex := regexp.MustCompile("^projects/(" + ProjectRegex + ")/locations/([a-z0-9-]+)/keyRings/([a-zA-Z0-9_-]{1,63})/cryptoKeys/([a-zA-Z0-9_-]{1,63})/cryptoKeyVersions/([a-zA-Z0-9_-]{1,63})$")
-
+	
 	if cryptoKeyIdRegex.MatchString(id) {
 		return &kmsCryptoKeyId{
 			KeyRingId: kmsKeyRingId{
@@ -178,32 +177,10 @@ func parseKmsCryptoKeyId(id string, config *Config) (*kmsCryptoKeyId, error) {
 		}, nil
 	}
 
-	if parts := cryptoKeyVersionRelativeLinkRegex.FindStringSubmatch(id); parts != nil {
-		return &kmsCryptoKeyId{
-			KeyRingId: kmsKeyRingId{
-				Project:  parts[1],
-				Location: parts[2],
-				Name:     parts[3],
-			},
-			Name: parts[4],
-		}, nil
-	}
 	return nil, fmt.Errorf("Invalid CryptoKey id format, expecting `{projectId}/{locationId}/{KeyringName}/{cryptoKeyName}` or `{locationId}/{keyRingName}/{cryptoKeyName}, got id: %s`", id)
 }
 func parseKmsCryptoKeyVersionId(id string, config *Config) (*kmsCryptoKeyVersionId, error) {
-	cryptoKeyRelativeLinkRegex := regexp.MustCompile("^projects/(" + ProjectRegex + ")/locations/([a-z0-9-]+)/keyRings/([a-zA-Z0-9_-]{1,63})/cryptoKeys/([a-zA-Z0-9_-]{1,63})$")
 	cryptoKeyVersionRelativeLinkRegex := regexp.MustCompile("^projects/(" + ProjectRegex + ")/locations/([a-z0-9-]+)/keyRings/([a-zA-Z0-9_-]{1,63})/cryptoKeys/([a-zA-Z0-9_-]{1,63})/cryptoKeyVersions/([a-zA-Z0-9_-]{1,63})$")
-
-	if parts := cryptoKeyRelativeLinkRegex.FindStringSubmatch(id); parts != nil {
-		return &kmsCryptoKeyVersionId{
-			KeyRingId: kmsKeyRingId{
-				Project:  parts[1],
-				Location: parts[2],
-				Name:     parts[3],
-			},
-			Name: "projects/" + parts[1] + "/locations/" + parts[2] + "/keyRings/" + parts[3] + "/cryptoKeys/" + parts[4],
-		}, nil
-	}
 
 	if parts := cryptoKeyVersionRelativeLinkRegex.FindStringSubmatch(id); parts != nil {
 		return &kmsCryptoKeyVersionId{
