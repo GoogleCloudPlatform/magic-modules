@@ -1854,7 +1854,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           mirroring_name: "my-mirroring"
           ilb_rule_name: "my-ilb"
           network_name: "my-network"
-        cloud_docs_region_tag: compute_vm_packet_mirror
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
