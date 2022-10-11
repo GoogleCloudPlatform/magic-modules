@@ -508,7 +508,7 @@ resource "google_cloud_run_service" "default" {
     ]
   }
 }
-`, name, project, delay, peroid, timeout, failure_threshold)
+`, name, project, delay, peroid, timeout, failure_threshold, delay, peroid, timeout, failure_threshold)
 }
 
 func testAccCloudRunService_cloudRunServiceUpdateWithEmptyHTTPStartupProbe(name, project string) string {
