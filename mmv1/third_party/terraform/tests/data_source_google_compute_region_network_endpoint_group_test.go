@@ -1,7 +1,6 @@
 package google
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -9,37 +8,39 @@ import (
 
 func TestAccDataSourceRegionNetworkEndpointGroup_basic(t *testing.T) {
 	t.Parallel()
-	region := "us-central1"
-	rnegName := "tf-test-rneg" + randString(t, 6)
+	context := map[string]interface{}{
+		"project":       getTestProjectFromEnv(),
+		"region":        "us-central1",
+		"random_suffix": randString(t, 10),
+	}
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceRegionNetworkEndpointGroup_basic(rnegName, region),
-				Check:  checkDataSourceStateMatchesResourceStateWithIgnores("data.google_compute_region_network_endpoint_group.data_source", "google_compute_instance_template.default", map[string]struct{}{"name": {}, "region": {}, "self_link": {}}),
+				Config: testAccDataSourceRegionNetworkEndpointGroup_basic(context),
+				Check:  checkDataSourceStateMatchesResourceStateWithIgnores("data.google_compute_region_network_endpoint_group.cloudrun_neg", "google_compute_region_network_endpoint_group.cloudrun_neg", map[string]struct{}{"name": {}, "region": {}}),
 			},
 		},
 	})
 }
 
-func testAccDataSourceRegionNetworkEndpointGroup_basic(rnegName string, region string) string {
-	return fmt.Sprintf(`
-  // Cloud Run Example
+func testAccDataSourceRegionNetworkEndpointGroup_basic(context map[string]interface{}) string {
+	return Nprintf(`
   resource "google_compute_region_network_endpoint_group" "cloudrun_neg" {
-    name                  = "%{rnegName}"
+    name                  = "cloud-run-rneg-%{random_suffix}"
     network_endpoint_type = "SERVERLESS"
     region                = "%{region}"
+    project     = "%{project}"
     cloud_run {
       service = google_cloud_run_service.cloudrun_neg.name
     }
   }
 
   resource "google_cloud_run_service" "cloudrun_neg" {
-    name     = "cloudrun-neg"
+    name     = "tf-test-cloudrun-neg%{random_suffix}"
     location = "us-central1"
-
     template {
       spec {
         containers {
@@ -52,9 +53,11 @@ func testAccDataSourceRegionNetworkEndpointGroup_basic(rnegName string, region s
       percent         = 100
       latest_revision = true
     }
+  }
 
-data "google_compute_region_network_endpoint_group" "data_source" {
-    self_link = google_compute_region_network_endpoint_group.cloudrun_neg.instance_group
-}
-`, map[string]interface{}{"rnegName": rnegName, "region": region})
+  data "google_compute_region_network_endpoint_group" "cloudrun_neg" {
+      name = google_compute_region_network_endpoint_group.cloudrun_neg.name
+      region = "%{region}"
+  }
+`, context)
 }
