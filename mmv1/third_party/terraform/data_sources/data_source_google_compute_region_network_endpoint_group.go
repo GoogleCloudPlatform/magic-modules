@@ -11,9 +11,8 @@ func dataSourceGoogleComputeRegionNetworkEndpointGroup() *schema.Resource {
 	// Generate datasource schema from resource
 	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeRegionNetworkEndpointGroup().Schema)
 
-	// Set 'Optional' schema elements
-	addRequiredFieldsToSchema(dsSchema, "name")
-	addRequiredFieldsToSchema(dsSchema, "region")
+	addOptionalFieldsToSchema(dsSchema, "name")
+	addOptionalFieldsToSchema(dsSchema, "region")
 	addOptionalFieldsToSchema(dsSchema, "project")
 	addOptionalFieldsToSchema(dsSchema, "self_link")
 
