@@ -117,7 +117,7 @@ objects:
           'https://firebase.google.com/'
       api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.webApps'
     async: !ruby/object:Api::OpAsync
-      actions: ["create"]
+      actions: ["create", "delete"]
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
