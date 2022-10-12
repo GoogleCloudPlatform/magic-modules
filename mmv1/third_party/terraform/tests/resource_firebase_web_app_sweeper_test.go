@@ -91,7 +91,7 @@ func testSweepFirebaseWebApp(region string) error {
 			continue
 		}
 		// immediate=true skips soft-delete
-		deleteTemplate := "https://firebase.googleapis.com/v1beta1/projects/{{project}}/webApps/{{appId}}:remove?immediate=true"
+		deleteTemplate := "https://firebase.googleapis.com/v1beta1/{{name}}:remove?immediate=true"
 		deleteUrl, err := replaceVars(d, config, deleteTemplate)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] error preparing delete url: %s", err)
