@@ -107,6 +107,7 @@ objects:
         name: 'enableRbac'
         description: |
           Option to enable granular role-based access control.
+        input: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
