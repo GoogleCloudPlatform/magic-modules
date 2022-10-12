@@ -722,6 +722,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           to allow for updating the resource policy attached to the disk.
       interface: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'alwaysDiffSuppress'
+      sourceDisk: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'sourceDiskDiffSupress'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       constants: templates/terraform/constants/disk.erb
@@ -2103,6 +2105,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         sensitive: true
       interface: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'alwaysDiffSuppress'
+      sourceDisk: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'sourceDiskDiffSupress'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       encoder: templates/terraform/encoders/disk.erb
