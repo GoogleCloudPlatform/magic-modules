@@ -867,7 +867,6 @@ func TestAccStorageBucket_encryption(t *testing.T) {
 	})
 }
 
-<% unless version == "ga" -%>
 func TestAccStorageBucket_publicAccessPrevention(t *testing.T) {
 	t.Parallel()
 
@@ -875,7 +874,7 @@ func TestAccStorageBucket_publicAccessPrevention(t *testing.T) {
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageBucket_publicAccessPrevention(bucketName, "enforced"),
@@ -889,7 +888,6 @@ func TestAccStorageBucket_publicAccessPrevention(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccStorageBucket_uniformBucketAccessOnly(t *testing.T) {
 	t.Parallel()
@@ -1810,11 +1808,9 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName, enabled)
 }
 
-<% unless version == "ga" -%>
 func testAccStorageBucket_publicAccessPrevention(bucketName string, prevention string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  provider                  = google-beta
   name                      = "%s"
   location                  = "US"
   public_access_prevention  = "%s"
@@ -1822,7 +1818,6 @@ resource "google_storage_bucket" "bucket" {
 }
 `, bucketName, prevention)
 }
-<% end -%>
 
 func testAccStorageBucket_encryption(context map[string]interface{}) string {
 	return Nprintf(`

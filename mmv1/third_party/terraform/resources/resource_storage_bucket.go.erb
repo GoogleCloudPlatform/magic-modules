@@ -387,14 +387,12 @@ func resourceStorageBucket() *schema.Resource {
 				},
 				Description: `The bucket's custom location configuration, which specifies the individual regions that comprise a dual-region bucket. If the bucket is designated a single or multi-region, the parameters are empty.`,
 			},
-<% unless version == "ga" -%>
 			"public_access_prevention": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
 				Description: `Prevents public access to a bucket.`,
 			},
-<% end -%>
 		},
 		UseJSONNumber: true,
 	}
@@ -659,7 +657,7 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	if d.HasChange("uniform_bucket_level_access")<% unless version == "ga" -%> || d.HasChange("public_access_prevention")<% end -%> {
+	if d.HasChange("uniform_bucket_level_access") || d.HasChange("public_access_prevention") {
 		sb.IamConfiguration = expandIamConfiguration(d)
 	}
 
@@ -1151,11 +1149,9 @@ func expandIamConfiguration(d *schema.ResourceData) *storage.BucketIamConfigurat
 		},
 	}
 
-<% unless version == "ga" -%>
 	if v, ok := d.GetOk("public_access_prevention"); ok {
 		cfg.PublicAccessPrevention = v.(string)
 	}
-<% end -%>
 
 	return cfg
 }
@@ -1521,13 +1517,11 @@ func setStorageBucket(d *schema.ResourceData, config *Config, res *storage.Bucke
 		}
 	}
 
-<% unless version == "ga" -%>
 	if res.IamConfiguration != nil && res.IamConfiguration.PublicAccessPrevention != "" {
 		if err := d.Set("public_access_prevention", res.IamConfiguration.PublicAccessPrevention); err != nil {
 			return fmt.Errorf("Error setting public_access_prevention: %s", err)
 		}
 	}
-<% end -%>
 
 	if res.Billing == nil {
 		if err := d.Set("requester_pays", nil); err != nil {
