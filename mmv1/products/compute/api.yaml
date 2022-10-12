@@ -3513,12 +3513,12 @@ objects:
           The source disk used to create this disk. You can provide this as a partial or full URL to the resource.
           For example, the following are valid values:
 
-          * https://www.googleapis.com/compute/v1/projects/project/zones/zone/disks/disk
-          * https://www.googleapis.com/compute/v1/projects/project/regions/region/disks/disk
-          * projects/project/zones/zone/disks/disk
-          * projects/project/regions/region/disks/disk
-          * zones/zone/disks/disk
-          * regions/region/disks/disk
+          * https://www.googleapis.com/compute/v1/projects/{project}/zones/{zone}/disks/{disk}
+          * https://www.googleapis.com/compute/v1/projects/{project}/regions/{region}/disks/{disk}
+          * projects/{project}/zones/{zone}/disks/{disk}
+          * projects/{project}/regions/{region}/disks/{disk}
+          * zones/{zone}/disks/{disk}
+          * regions/{region}/disks/{disk}
       - !ruby/object:Api::Type::String
         name: 'sourceDiskId'
         description: |
@@ -10567,12 +10567,12 @@ objects:
           The source disk used to create this disk. You can provide this as a partial or full URL to the resource.
           For example, the following are valid values:
 
-          * https://www.googleapis.com/compute/v1/projects/project/zones/zone/disks/disk
-          * https://www.googleapis.com/compute/v1/projects/project/regions/region/disks/disk
-          * projects/project/zones/zone/disks/disk
-          * projects/project/regions/region/disks/disk
-          * zones/zone/disks/disk
-          * regions/region/disks/disk
+          * https://www.googleapis.com/compute/v1/projects/{project}/zones/{zone}/disks/{disk}
+          * https://www.googleapis.com/compute/v1/projects/{project}/regions/{region}/disks/{disk}
+          * projects/{project}/zones/{zone}/disks/{disk}
+          * projects/{project}/regions/{region}/disks/{disk}
+          * zones/{zone}/disks/{disk}
+          * regions/{region}/disks/{disk}
       - !ruby/object:Api::Type::String
         name: 'sourceDiskId'
         description: |
