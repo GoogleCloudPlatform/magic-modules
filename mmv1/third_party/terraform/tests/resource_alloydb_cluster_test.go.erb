@@ -38,6 +38,9 @@ func TestAccAlloydbCluster_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
 			},
+			{
+				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
+			},			
 		},
 	})
 }
