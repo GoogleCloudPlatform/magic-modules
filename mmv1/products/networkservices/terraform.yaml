@@ -80,6 +80,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           bucket_name: "my-bucket"
           origin_name: "my-origin"
           origin_google: "origin-google"
+          origin_v4auth: "origin-v4auth"
+          access_key_id: "ACCESSKEY12345"
           service_name: "my-service"
     properties:
       disableQuic: !ruby/object:Overrides::Terraform::PropertyOverride

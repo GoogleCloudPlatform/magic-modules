@@ -4,6 +4,20 @@ resource "google_storage_bucket" "dest" {
   force_destroy = true
 }
 
+resource "google_secret_manager_secret" "secret-basic" {
+  secret_id = "secret-version"
+
+  replication {
+    automatic = true
+  }
+}
+
+resource "google_secret_manager_secret_version" "secret-version-basic" {
+  secret = google_secret_manager_secret.secret-basic.id
+
+  secret_data = "secret-data"
+}
+
 resource "google_network_services_edge_cache_origin" "google" {
   name                 = "<%= ctx[:vars]['origin_google'] %>"
   origin_address       = "google.com"
@@ -11,6 +25,21 @@ resource "google_network_services_edge_cache_origin" "google" {
   max_attempts         = 2
   timeout {
     connect_timeout = "10s"
+  }
+}
+
+resource "google_network_services_edge_cache_origin" "v4auth" {
+  name                 = "<%= ctx[:vars]['origin_v4auth'] %>"
+  origin_address       = google_storage_bucket.dest.url
+  description          = "The default bucket for V4 authentication"
+  max_attempts         = 2
+  timeout {
+    connect_timeout = "10s"
+  }
+  aws_v4_authentication {
+    access_key_id = "<%= ctx[:vars]['access_key_id'] %>"
+    secret_access_key_version = google_secret_manager_secret_version.secret-version-basic.id
+    origin_region = google_storage_bucket.dest.location
   }
 }
 
