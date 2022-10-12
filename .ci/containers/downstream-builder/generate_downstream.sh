@@ -33,7 +33,7 @@ function clone_repo() {
         UPSTREAM_OWNER=terraform-google-modules
         GH_REPO=docs-examples
         LOCAL_PATH=$GOPATH/src/github.com/terraform-google-modules/docs-examples
-    elif [ "$REPO" == "tf-cloud-docs"]; then
+    elif [ "$REPO" == "tf-cloud-docs" ]; then
         # backwards-compatability
         echo "$REPO is no longer available."
         exit 0
