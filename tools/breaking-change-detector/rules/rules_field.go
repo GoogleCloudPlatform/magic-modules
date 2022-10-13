@@ -32,7 +32,7 @@ var FieldRules = []FieldRule{
 
 var fieldRule_ChangingFieldDataFormat = FieldRule{
 	name:       "Changing field data format",
-	definition: "Modification of the data format (either by the api or manually) will cause a diff with any sequential plans if that field is not Computed. Thus resulting in a breakage. Api breaking changes are out of scope with respect to provider responsibility but we may make changes in response to breakages in some instances to provide more customer stability.",
+	definition: "Modification of the data format (either by the API or manually) will cause a diff in subsequent plans if that field is not Computed. This results in a breakage. API breaking changes are out of scope with respect to provider responsibility but we may make changes in response to API breakages in some instances to provide more customer stability.",
 	identifier: "field-changing-type",
 }
 
