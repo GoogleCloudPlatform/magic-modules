@@ -38,7 +38,7 @@ var fieldRule_ChangingFieldDataFormat = FieldRule{
 
 var fieldRule_ChangingType = FieldRule{
 	name:        "Changing Field Type",
-	definition:  "While Certain Field Type migrations may be supported at a technical level it's a practice that we highly discourage. We see little value for these transitions vs the risk they impose.",
+	definition:  "While certain Field Type migrations may be supported at a technical level, it's a practice that we highly discourage. We see little value for these transitions vs the risk they impose.",
 	message:     "Field {{field}} changed from {{oldType}} to {{newType}} on {{resource}}",
 	identifier:  "field-changing-type",
 	isRuleBreak: fieldRule_ChangingType_func,
