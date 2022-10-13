@@ -89,6 +89,10 @@ func newFolderIamAsset(
 }
 
 func FetchFolderIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+	if _, ok := d.GetOk("folder"); !ok {
+		return Asset{}, ErrEmptyIdentityField
+	}
+
 	return fetchIamPolicy(
 		NewFolderIamUpdater,
 		d,

@@ -30,7 +30,7 @@ func main() {
 }
 
 func validateParameters() {
-	if *providerFolder != "" && *docMode {
+	if *providerFolder != "" && !*docMode {
 		glog.Exitln("parameter -docs must be set when specifying -providerFolder")
 	}
 	if *providerVersion != "google" && *providerVersion != "google-beta" {
