@@ -81,7 +81,7 @@ objects:
           Applicable only for reservations located within one of the BigQuery multi-regions (US or EU).
           If set to true, this reservation is placed in the organization's secondary region which is designated for disaster recovery purposes. If false, this reservation is placed in the organization's default region.
   - !ruby/object:Api::Resource
-    name: 'CapacityCommitment'
+    name: 'ReservationCapacityCommitment'
     base_url: projects/{{project}}/locations/{{location}}/capacityCommitments
     create_url: projects/{{project}}/locations/{{location}}/capacityCommitments?capacityCommitmentId={{capacityCommitmentId}}
     update_verb: :PATCH
@@ -121,6 +121,7 @@ objects:
           Number of slots in this commitment.
       - !ruby/object:Api::Type::String
         name: 'plan'
+        required: true
         description: |
           Capacity commitment commitment plan.
       - !ruby/object:Api::Type::String
