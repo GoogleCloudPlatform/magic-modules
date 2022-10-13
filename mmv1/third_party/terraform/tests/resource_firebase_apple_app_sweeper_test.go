@@ -93,7 +93,7 @@ func testSweepFirebaseAppleApp(region string) error {
 
 		body := make(map[string]interface{})
 		body["immediate"] = true
-		deleteTemplate := "https://firebase.googleapis.com/v1beta1/projects/{{project}}/iosApps/{{appId}}:remove"
+		deleteTemplate := "https://firebase.googleapis.com/v1beta1/projects/{{project}}/iosApps/{{app_id}}:remove"
 		deleteUrl, err := replaceVars(d, config, deleteTemplate)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] error preparing delete url: %s", err)
