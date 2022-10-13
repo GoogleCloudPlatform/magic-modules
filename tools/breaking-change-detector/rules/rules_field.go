@@ -86,7 +86,7 @@ func fieldRule_BecomingRequired_func(old, new *schema.Schema, mc MessageContext)
 
 var fieldRule_BecomingComputedOnly = FieldRule{
 	name:        "Becoming a Computed only Field",
-	definition:  "While a field can go from Optional to Optional+Computed it cannot go from Required or Optional to only Computed. This transition would effectively make the field read-only thus breaking modules in sequential plan or applies where this field is defined in a configuration.",
+	definition:  "While a field can go from Optional to Optional+Computed it cannot go from Required or Optional to only Computed. This transition would effectively make the field read-only thus breaking configs in sequential plan or applies where this field is defined in a configuration.",
 	message:     "Field {{field}} became Computed only on {{resource}}",
 	identifier:  "field-becoming-computed",
 	isRuleBreak: fieldRule_BecomingComputedOnly_func,
