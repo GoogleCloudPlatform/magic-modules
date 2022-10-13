@@ -2,7 +2,7 @@
 
 	project, err := getProject(d, config)
 	if err != nil {
-		return fmt.Errorf("Error fetching project for WebApp: %s", err)
+		return fmt.Errorf("Error fetching project for App: %s", err)
 	}
 	billingProject = project
 
@@ -11,7 +11,7 @@
 		return err
 	}
 
-	log.Printf("[DEBUG] Deleting WebApp %q", d.Id())
+	log.Printf("[DEBUG] Deleting App %q", d.Id())
 
 	// err == nil indicates that the billing_project value was found
 	if bp, err := getBillingProject(d, config); err == nil {
@@ -27,16 +27,16 @@
 
 	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
-		return handleNotFoundError(err, d, "WebApp")
+		return handleNotFoundError(err, d, "App")
 	}
 
 	err = firebaseOperationWaitTime(
-		config, res, project, "Deleting WebApp", userAgent,
+		config, res, project, "Deleting App", userAgent,
 		d.Timeout(schema.TimeoutDelete))
 
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[DEBUG] Finished deleting WebApp %q: %#v", d.Id(), res)
+	log.Printf("[DEBUG] Finished deleting App %q: %#v", d.Id(), res)
 	return nil
