@@ -695,8 +695,22 @@ func (r Resource) getSamples(docs bool) []Sample {
 	var hideList []string
 	if docs {
 		hideList = r.Samples[0].DocHide
+		if len(r.Samples[0].DocHideConditional) > 0 {
+			for _, dochidec := range r.Samples[0].DocHideConditional {
+				if r.location == dochidec.Location {
+					hideList = append (hideList, dochidec.Name)
+				}
+			}
+		}
 	} else {
 		hideList = r.Samples[0].Testhide
+                if len(r.Samples[0].TestHideConditional) > 0 {
+                        for _, testhidec := range r.Samples[0].TestHideConditional {
+                                if r.location == testhidec.Location {
+                                        hideList = append (hideList, testhidec.Name)
+                                }
+                        }
+                }
 	}
 	for _, sample := range r.Samples {
 		shouldhide := false
@@ -806,7 +820,9 @@ func (r *Resource) loadDCLSamples() []Sample {
 	sampleAccessoryFolder := r.getSampleAccessoryFolder()
 	packagePath := r.productMetadata.PackagePath
 	version := r.versionMetadata.V
-	resourceType := r.DCLTitle()
+	// Switching to Name to handle instances of custom resource names in overrides
+//	resourceType := r.Name()
+        resourceType := r.DCLTitle()
 	sampleFriendlyMetaPath := path.Join(string(sampleAccessoryFolder), "meta.yaml")
 	samples := []Sample{}
 
@@ -864,6 +880,8 @@ func (r *Resource) loadDCLSamples() []Sample {
 
 		if !versionMatch {
 			continue
+		// because of Name being in snake case, have to convert it to TitleCase
+		//} else if !strings.EqualFold(primaryResourceName.titlecase(), snakeToTitleCase(resourceType).titlecase()) {
 		} else if !strings.EqualFold(primaryResourceName.titlecase(), resourceType.titlecase()) {
 			// This scenario will occur for product folders with multiple resources
 			continue
