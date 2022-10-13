@@ -623,6 +623,8 @@ objects:
                 Startup probe of application within the container.
                 All other probes are disabled if a startup probe is provided, until it
                 succeeds. Container will not be added to service endpoints if the probe fails.
+                More info:
+                https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
               properties:
                 - !ruby/object:Api::Type::Integer
                   name: initialDelaySeconds 
@@ -658,6 +660,7 @@ objects:
                     - template.0.spec.0.containers.0.startup_probe.0.tcp_socket
                     - template.0.spec.0.containers.0.startup_probe.0.http_get
                   send_empty_value: true
+                  allow_empty_object: true
                   properties:
                     - !ruby/object:Api::Type::Integer
                       name: port
@@ -671,6 +674,7 @@ objects:
                     - template.0.spec.0.containers.0.startup_probe.0.tcp_socket
                     - template.0.spec.0.containers.0.startup_probe.0.http_get
                   send_empty_value: true
+                  allow_empty_object: true
                   properties:
                     - !ruby/object:Api::Type::String
                       name: path
@@ -732,6 +736,7 @@ objects:
                   description: |-
                     HttpGet specifies the http request to perform.
                   send_empty_value: true
+                  allow_empty_object: true
                   properties:
                     - !ruby/object:Api::Type::String
                       name: path
