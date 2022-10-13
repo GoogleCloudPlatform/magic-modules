@@ -317,6 +317,52 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				Description: `When used with wait_for_instances specifies the status to wait for. When STABLE is specified this resource will wait until the instances are stable before returning. When UPDATED is set, it will wait for the version target to be reached and any per instance configs to be effective and all instances configs to be effective as well as all instances to be stable before returning.`,
 				<% end -%>
 			},
+			<% unless version == "ga" -%>
+			"stateful_internal_ip": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: `External IPs considered stateful by the instance group. `,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"interface_name": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Default:     "nic0",
+							Description: `The network interface name`,
+						},
+						"delete_rule": {
+							Type:         schema.TypeString,
+							Default:      "NEVER",
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"NEVER", "ON_PERMANENT_INSTANCE_DELETION"}, true),
+							Description:  `A value that prescribes what should happen to an associated static Address resource when a VM instance is permanently deleted. The available options are NEVER and ON_PERMANENT_INSTANCE_DELETION. NEVER - detach the IP when the VM is deleted, but do not delete the address resource. ON_PERMANENT_INSTANCE_DELETION will delete the stateful address when the VM is permanently deleted from the instance group. The default is NEVER.`,
+						},
+					},
+				},
+			},
+			"stateful_external_ip": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: `External IPs considered stateful by the instance group. `,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"interface_name": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Default:     "nic0",
+							Description: `The network interface name`,
+						},
+						"delete_rule": {
+							Type:         schema.TypeString,
+							Default:      "NEVER",
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"NEVER", "ON_PERMANENT_INSTANCE_DELETION"}, true),
+							Description:  `A value that prescribes what should happen to an associated static Address resource when a VM instance is permanently deleted. The available options are NEVER and ON_PERMANENT_INSTANCE_DELETION. NEVER - detach the IP when the VM is deleted, but do not delete the address resource. ON_PERMANENT_INSTANCE_DELETION will delete the stateful address when the VM is permanently deleted from the instance group. The default is NEVER.`,
+						},
+					},
+				},
+			},
+			<% end -%>
 			"stateful_disk": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -478,7 +524,7 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
     <% unless version == "ga" -%>
 		AllInstancesConfig:  expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})),
 		<% end -%>
-		StatefulPolicy:      expandStatefulPolicy(d.Get("stateful_disk").(*schema.Set).List()),
+		StatefulPolicy:      expandStatefulPolicy(d),
 		// Force send TargetSize to allow a value of 0.
 		ForceSendFields: []string{"TargetSize"},
 	}
@@ -666,6 +712,14 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err = d.Set("stateful_disk", flattenStatefulPolicy(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_disk in state: %s", err.Error())
 	}
+	<% unless version == "ga" -%>
+	if err = d.Set("stateful_internal_ip", flattenStatefulPolicyStatefulInternalIps(manager.StatefulPolicy)); err != nil {
+		return fmt.Errorf("Error setting stateful_internal_ip in state: %s", err.Error())
+	}
+	if err = d.Set("stateful_external_ip", flattenStatefulPolicyStatefulExternalIps(manager.StatefulPolicy)); err != nil {
+		return fmt.Errorf("Error setting stateful_external_ip in state: %s", err.Error())
+	}
+	<% end -%>
 	if err := d.Set("fingerprint", manager.Fingerprint); err != nil {
 		return fmt.Errorf("Error setting fingerprint: %s", err)
 	}
@@ -770,7 +824,7 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 	<% end -%>
 
 	if d.HasChange("stateful_disk") {
-		updatedManager.StatefulPolicy = expandStatefulPolicy(d.Get("stateful_disk").(*schema.Set).List())
+		updatedManager.StatefulPolicy = expandStatefulPolicy(d)
 		change = true
 	}
 
@@ -942,20 +996,77 @@ func expandAutoHealingPolicies(configured []interface{}) []*compute.InstanceGrou
 	return autoHealingPolicies
 }
 
-func expandStatefulPolicy(configured []interface{}) *compute.StatefulPolicy {
+func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
+	preservedState := &compute.StatefulPolicyPreservedState{
+	}
+	stateful_disks := d.Get("stateful_disk").(*schema.Set).List()
 	disks := make(map[string]compute.StatefulPolicyPreservedStateDiskDevice)
-	for _, raw := range configured {
+	for _, raw := range stateful_disks {
 		data := raw.(map[string]interface{})
 		disk := compute.StatefulPolicyPreservedStateDiskDevice{
 			AutoDelete: data["delete_rule"].(string),
 		}
 		disks[data["device_name"].(string)] = disk
 	}
-	if len(disks) > 0 {
-		return &compute.StatefulPolicy{PreservedState: &compute.StatefulPolicyPreservedState{Disks: disks}}
+	preservedState.Disks = disks
+	var change bool
+	change = false
+	<% unless version == "ga" -%>
+	if d.HasChange("stateful_internal_ip") {
+		oldInternalIps, newInternalIps := d.GetChange("stateful_internal_ip")
+		if len(newInternalIps.(*schema.Set).List()) == 0 {
+			preservedState.NullFields = append(preservedState.NullFields, "internalIPs")
+		} else {
+			preservedState.InternalIPs = expandStatefulIps(oldInternalIps.(*schema.Set).List(), newInternalIps.(*schema.Set).List(), preservedState, "InternalIPs.%s")
+		}
+		change = true
+	}
+	if d.HasChange("stateful_external_ip") {
+		oldExternalIps, newExternalIps := d.GetChange("stateful_external_ip")
+		if len(newExternalIps.(*schema.Set).List()) == 0 {
+			preservedState.NullFields = append(preservedState.NullFields, "externalIPs")
+		} else {
+			preservedState.ExternalIPs = expandStatefulIps(oldExternalIps.(*schema.Set).List(), newExternalIps.(*schema.Set).List(), preservedState, "ExternalIPs.%s")
+		}
+		change = true
+	}
+	<% end -%>
+	if len(disks) > 0 || change {
+		statefulPolicy := &compute.StatefulPolicy{PreservedState: preservedState}
+		statefulPolicy.ForceSendFields = append(statefulPolicy.ForceSendFields, "PreservedState")
+		return statefulPolicy
 	}
 	return nil
 }
+
+<% unless version == "ga" -%>
+func expandStatefulIps(old []interface{}, new []interface{}, preservedState *compute.StatefulPolicyPreservedState, prefix string) map[string]compute.StatefulPolicyPreservedStateNetworkIp {
+	statefulIpsMap :=	make(map[string]compute.StatefulPolicyPreservedStateNetworkIp)
+
+	for _, raw := range new {
+		data := raw.(map[string]interface{})
+		networkIp := compute.StatefulPolicyPreservedStateNetworkIp{
+			AutoDelete: data["delete_rule"].(string),
+		}
+		statefulIpsMap[data["interface_name"].(string)] = networkIp
+	}
+
+	if len(statefulIpsMap) > 0 {
+		for _, raw := range old {
+			data := raw.(map[string]interface{})
+			k := data["interface_name"].(string)
+			if _, exist := statefulIpsMap[k]; !exist {
+				log.Printf("[aaaskubis] Removing %s: %s", prefix, k)
+
+				statefulIpsMap[k] = compute.StatefulPolicyPreservedStateNetworkIp{}
+				preservedState.NullFields = append(preservedState.NullFields, fmt.Sprintf(prefix, k))
+			}
+		}
+	}
+	log.Printf("[aaaskubis] statefulIpsMap: %s", statefulIpsMap)
+	return statefulIpsMap
+}
+<% end -%>
 
 func expandVersions(configured []interface{}) []*compute.InstanceGroupManagerVersion {
 	versions := make([]*compute.InstanceGroupManagerVersion, 0, len(configured))
@@ -1065,6 +1176,38 @@ func flattenStatefulPolicy(statefulPolicy *compute.StatefulPolicy) []map[string]
 		data := map[string]interface{}{
 			"device_name": deviceName,
 			"delete_rule": disk.AutoDelete,
+		}
+
+		result = append(result, data)
+	}
+	return result
+}
+
+func flattenStatefulPolicyStatefulInternalIps(statefulPolicy *compute.StatefulPolicy) []map[string]interface{} {
+	if statefulPolicy == nil || statefulPolicy.PreservedState == nil || statefulPolicy.PreservedState.InternalIPs == nil {
+		return make([]map[string]interface{}, 0, 0)
+	}
+	result := make([]map[string]interface{}, 0, len(statefulPolicy.PreservedState.InternalIPs))
+	for interfaceName, internalIp := range statefulPolicy.PreservedState.InternalIPs {
+		data := map[string]interface{}{
+			"interface_name": interfaceName,
+			"delete_rule": internalIp.AutoDelete,
+		}
+
+		result = append(result, data)
+	}
+	return result
+}
+
+func flattenStatefulPolicyStatefulExternalIps(statefulPolicy *compute.StatefulPolicy) []map[string]interface{} {
+	if statefulPolicy == nil || statefulPolicy.PreservedState == nil || statefulPolicy.PreservedState.ExternalIPs == nil {
+		return make([]map[string]interface{}, 0, 0)
+	}
+	result := make([]map[string]interface{}, 0, len(statefulPolicy.PreservedState.ExternalIPs))
+	for interfaceName, externalIp := range statefulPolicy.PreservedState.ExternalIPs {
+		data := map[string]interface{}{
+			"interface_name": interfaceName,
+			"delete_rule": externalIp.AutoDelete,
 		}
 
 		result = append(result, data)
