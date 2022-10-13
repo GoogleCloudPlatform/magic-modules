@@ -820,8 +820,6 @@ func (r *Resource) loadDCLSamples() []Sample {
 	sampleAccessoryFolder := r.getSampleAccessoryFolder()
 	packagePath := r.productMetadata.PackagePath
 	version := r.versionMetadata.V
-	// Switching to Name to handle instances of custom resource names in overrides
-//	resourceType := r.Name()
         resourceType := r.DCLTitle()
 	sampleFriendlyMetaPath := path.Join(string(sampleAccessoryFolder), "meta.yaml")
 	samples := []Sample{}
@@ -880,8 +878,6 @@ func (r *Resource) loadDCLSamples() []Sample {
 
 		if !versionMatch {
 			continue
-		// because of Name being in snake case, have to convert it to TitleCase
-		//} else if !strings.EqualFold(primaryResourceName.titlecase(), snakeToTitleCase(resourceType).titlecase()) {
 		} else if !strings.EqualFold(primaryResourceName.titlecase(), resourceType.titlecase()) {
 			// This scenario will occur for product folders with multiple resources
 			continue
