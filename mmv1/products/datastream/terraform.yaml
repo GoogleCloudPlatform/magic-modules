@@ -56,6 +56,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           connection_profile_id: "my-profile"
       - !ruby/object:Provider::Terraform::Examples
+        name: "datastream_connection_profile_bigquery"
+        primary_resource_id: "default"
+        vars:
+          connection_profile_id: "my-profile"
+      - !ruby/object:Provider::Terraform::Examples
         name: "datastream_connection_profile_full"
         primary_resource_id: "default"
         # Workaround for https://github.com/hashicorp/terraform-provider-google/issues/12410

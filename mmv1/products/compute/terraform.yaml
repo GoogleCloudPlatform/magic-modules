@@ -722,6 +722,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           to allow for updating the resource policy attached to the disk.
       interface: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'alwaysDiffSuppress'
+      sourceDisk: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'sourceDiskDiffSupress'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       constants: templates/terraform/constants/disk.erb
@@ -1854,7 +1856,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           mirroring_name: "my-mirroring"
           ilb_rule_name: "my-ilb"
           network_name: "my-network"
-        cloud_docs_region_tag: compute_vm_packet_mirror
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
@@ -2104,6 +2105,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         sensitive: true
       interface: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'alwaysDiffSuppress'
+      sourceDisk: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'sourceDiskDiffSupress'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       encoder: templates/terraform/encoders/disk.erb
@@ -3221,6 +3224,27 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_value: :NONE
       proxyBind: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+  RegionTargetTcpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_target_tcp_proxy_basic"
+        primary_resource_id: "default"
+        vars:
+          region_target_tcp_proxy_name: "test-proxy"
+          region_backend_service_name: "backend-service"
+          health_check_name: "health-check"
+    properties:
+      service: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: backendService
+      proxyBind: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        required: false
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        description: |
+          The Region in which the created target TCP proxy should reside.
+          If it is not provided, the provider region is used.
   TargetVpnGateway: !ruby/object:Overrides::Terraform::ResourceOverride
     name: 'VpnGateway'
     docs: !ruby/object:Provider::Terraform::Docs

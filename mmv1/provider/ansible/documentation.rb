@@ -49,7 +49,7 @@ module Provider
             'type' => python_type(prop),
             'aliases' => prop.aliases,
             'suboptions' => (
-                if prop.nested_properties?
+                if !prop.nested_properties.nil? && !prop.nested_properties.empty?
                   prop.nested_properties.reject(&:output).map { |p| documentation_for_property(p) }
                                         .reduce({}, :merge)
                 end
@@ -76,7 +76,7 @@ module Provider
             'returned' => 'success',
             'type' => type,
             'contains' => (
-              if prop.nested_properties?
+              if !prop.nested_properties.nil? && !prop.nested_properties.empty?
                 prop.nested_properties.map { |p| returns_for_property(p) }
                                       .reduce({}, :merge)
               end
