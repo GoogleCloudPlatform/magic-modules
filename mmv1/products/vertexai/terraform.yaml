@@ -13,6 +13,7 @@
 
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
+  # Vertex AI Dataset
   Dataset: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: false
     id_format: '{{name}}'
@@ -30,6 +31,28 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+  # Vertex AI Endpoint
+  Endpoint: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: false
+    skip_sweeper: true
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 6
+      update_minutes: 6
+      delete_minutes: 10
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_endpoint"
+        primary_resource_id: "endpoint"
+        vars:
+          name: "example-endpoint"
+    properties:
+      labels: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      etag: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+  # Vertex AI Featurestore
   Featurestore: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: false
     skip_sweeper: true
@@ -62,6 +85,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: 'force_destroy'
         description: 'If set to true, any EntityTypes and Features for this Featurestore will also be deleted'
         default_value: false
+  # Vertex AI Featurestore Entity Type
   FeaturestoreEntitytype: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{%featurestore}}/entityTypes/{{name}}"]
     autogen_async: false
