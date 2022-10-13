@@ -1,5 +1,5 @@
 resource "google_sourcerepo_repository" "git_repository" {
-  name = "<%= ctx[:vars]['repository_name'] %>"
+  name = "<%= ctx[:vars]['git_repository_name'] %>"
 }
 
 resource "google_secret_manager_secret" "secret" {
