@@ -1,0 +1,13 @@
+- type: CUSTOM_RESOURCE_NAME
+  details:
+    title: regional_network_firewall_policy
+  location: region
+- type: EXCLUDE
+  field: location
+  location: global
+- type: EXCLUDE
+  field: region
+- type: CUSTOM_NAME
+  details:
+    name: region
+  field: location

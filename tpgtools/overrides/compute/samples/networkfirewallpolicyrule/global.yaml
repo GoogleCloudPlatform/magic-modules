@@ -1,0 +1,16 @@
+updates:
+variables:
+- name: association
+  type: resource_name
+- name: policy
+  type: resource_name
+- name: tagkey 
+  type: resource_name
+- name: tagvalue
+  type: resource_name
+- name: project
+  type: project
+- name: network
+  type: resource_name
+- name: org_id 
+  type: org_id

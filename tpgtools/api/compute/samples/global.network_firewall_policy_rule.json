@@ -1,0 +1,22 @@
+{
+  "priority": 9000,
+  "project": "{{project}}",
+  "location": "global",
+  "firewallPolicy": "projects/{{project}}/global/firewallPolicies/policy_name",
+  "description": "sample global policy rule",
+  "name": "rule9000-allow-probe",
+  "match": {
+    "layer4Configs": [
+      {
+        "ipProtocol": "tcp",
+        "ports": ["123"]
+      }
+    ],
+    "destIPRanges": ["10.100.0.1/32"]
+  },
+  "enableLogging" : false,
+  "targetSecureTags": [{"name": "tagValues/12345"}],
+  "action": "deny",
+  "direction": "EGRESS",
+  "disabled" : false
+}

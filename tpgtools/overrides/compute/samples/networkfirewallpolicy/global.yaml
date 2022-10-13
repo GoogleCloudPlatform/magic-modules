@@ -1,0 +1,6 @@
+updates:
+variables:
+- name: policy
+  type: resource_name
+- name: project
+  type: project
