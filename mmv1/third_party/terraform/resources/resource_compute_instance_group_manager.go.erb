@@ -321,6 +321,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 			"stateful_internal_ip": {
 				Type:        schema.TypeSet,
 				Optional:    true,
+				Computed:    true,
 				Description: `External IPs considered stateful by the instance group. `,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -343,6 +344,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 			"stateful_external_ip": {
 				Type:        schema.TypeSet,
 				Optional:    true,
+				Computed:    true,
 				Description: `External IPs considered stateful by the instance group. `,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -366,6 +368,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 			"stateful_disk": {
 				Type:        schema.TypeSet,
 				Optional:    true,
+				Computed:    true,
 				Description: `Disks created on the instances that will be preserved on instance delete, update, etc.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
