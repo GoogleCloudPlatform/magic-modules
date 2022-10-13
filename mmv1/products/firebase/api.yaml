@@ -134,6 +134,16 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: 'error'
         message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'deletion_policy'
+        description: |
+          Optional. Set to `ABANDON` to soft-delete the WebApp. Soft-deleted WebApps are recoverable
+          within 30 days using [projects.webApps.undelete](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.webApps/undelete).
+          Set to `DELETE` to immediately delete the WebApp. Default to `DELETE`
+        input: true
+        url_param_only: true
+        default_value: DELETE
     properties:
       - !ruby/object:Api::Type::String
         name: name
