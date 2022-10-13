@@ -145,7 +145,7 @@ func fieldRule_DefaultModification_func(old, new *schema.Schema, mc MessageConte
 
 var fieldRule_GrowingMin = FieldRule{
 	name:        "Growing Minimum Items",
-	definition:  "MinItems cannot grow larger. Otherwise existing terraform configurations that don't satisfy this rule will break.",
+	definition:  "MinItems cannot grow. Otherwise existing terraform configurations that don't satisfy this rule will break.",
 	message:     "Field {{field}} MinItems went from {{oldMin}} to {{newMin}} on {{resource}}",
 	identifier:  "field-certain-min-max",
 	isRuleBreak: fieldRule_GrowingMin_func,
@@ -165,7 +165,7 @@ func fieldRule_GrowingMin_func(old, new *schema.Schema, mc MessageContext) strin
 
 var fieldRule_ShrinkingMax = FieldRule{
 	name:        "Shrinking Maximum Items",
-	definition:  "MaxItems cannot grow larger. Otherwise existing terraform configurations that don't satisfy this rule will break.",
+	definition:  "MaxItems cannot shrink. Otherwise existing terraform configurations that don't satisfy this rule will break.",
 	message:     "Field {{field}} MinItems went from {{oldMax}} to {{newMax}} on {{resource}}",
 	identifier:  "field-certain-min-max",
 	isRuleBreak: fieldRule_ShrinkingMax_func,
