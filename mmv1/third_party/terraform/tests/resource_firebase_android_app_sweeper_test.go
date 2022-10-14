@@ -91,7 +91,7 @@ func testSweepFirebaseAndroidApp(region string) error {
 			continue
 		}
 
-		deleteTemplate := "https://firebase.googleapis.com/v1beta1/projects/{{project}}/androidApps/{{appId}}:remove?immediate=true"
+		deleteTemplate := "https://firebase.googleapis.com/v1beta1/{{name}}:remove"
 		deleteUrl, err := replaceVars(d, config, deleteTemplate)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] error preparing delete url: %s", err)
@@ -99,8 +99,11 @@ func testSweepFirebaseAndroidApp(region string) error {
 		}
 		deleteUrl = deleteUrl + name
 
+		body := make(map[string]interface{})
+		body["immediate"] = true
+
 		// Don't wait on operations as we may have a lot to delete
-		_, err = sendRequest(config, "DELETE", config.Project, deleteUrl, config.userAgent, nil)
+		_, err = sendRequest(config, "DELETE", config.Project, deleteUrl, config.userAgent, body)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", deleteUrl, err)
 		} else {

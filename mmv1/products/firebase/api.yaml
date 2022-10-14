@@ -157,9 +157,9 @@ objects:
     base_url: projects/{{project}}/androidApps
     self_link: '{{name}}'
     update_verb: :PATCH
-    delete_verb: :POST
-    delete_url: 'projects/{{project}}/androidApps/{{appId}}:remove'
     update_mask: true
+    delete_verb: :POST
+    delete_url: '{{name}}:remove'
     description: |
       A Google Cloud Firebase Android application instance
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -168,7 +168,7 @@ objects:
           'https://firebase.google.com/docs/android/setup'
       api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.androidApps'
     async: !ruby/object:Api::OpAsync
-      actions: ["create"]
+      actions: ["create", "delete"]
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
@@ -185,6 +185,16 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: 'error'
         message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'deletion_policy'
+        description: |
+          Optional. Set to `ABANDON` to soft-delete the AndroidApp. Soft-deleted AndroidApps are recoverable
+          within 30 days using [projects.androidApps.undelete](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.androidApps/undelete).
+          Set to `DELETE` to immediately delete the AndroidApp. Default to `DELETE`
+        input: true
+        url_param_only: true
+        default_value: DELETE
     properties:
       - !ruby/object:Api::Type::String
         name: name
