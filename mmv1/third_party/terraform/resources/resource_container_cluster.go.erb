@@ -3604,7 +3604,7 @@ func expandIPAllocationPolicy(configured interface{}, networkingMode string) (*c
 		}
 		return &container.IPAllocationPolicy{
 			UseIpAliases:    false,
-			UseRoutes:       networkingMode == "ROUTES",
+			UseRoutes:       true,
 			ForceSendFields: []string{"UseIpAliases"},
 		}, nil
 	}
@@ -5074,6 +5074,9 @@ func validatePrivateClusterConfig(cluster *container.Cluster) error {
 func containerClusterAutopilotCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	if d.HasChange("enable_autopilot") && d.Get("enable_autopilot").(bool) {
 		if err := d.SetNew("enable_intranode_visibility", true); err != nil {
+			return err
+		}
+		if err := d.SetNew("networking_mode", "VPC_NATIVE"); err != nil {
 			return err
 		}
 	}
