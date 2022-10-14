@@ -1059,14 +1059,11 @@ func expandStatefulIps(old []interface{}, new []interface{}, preservedState *com
 			data := raw.(map[string]interface{})
 			k := data["interface_name"].(string)
 			if _, exist := statefulIpsMap[k]; !exist {
-				log.Printf("[aaaskubis] Removing %s: %s", prefix, k)
-
 				statefulIpsMap[k] = compute.StatefulPolicyPreservedStateNetworkIp{}
 				preservedState.NullFields = append(preservedState.NullFields, fmt.Sprintf(prefix, k))
 			}
 		}
 	}
-	log.Printf("[aaaskubis] statefulIpsMap: %s", statefulIpsMap)
 	return statefulIpsMap
 }
 <% end -%>
