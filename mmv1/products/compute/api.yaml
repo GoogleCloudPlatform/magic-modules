@@ -612,6 +612,11 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      min_version: beta
+      exclude: false
+      parent_resource_attribute: 'name'
+      import_format: ["projects/{{project}}/global/backendBuckets/{{name}}", "{{name}}"]    
     properties:
       - !ruby/object:Api::Type::String
         name: 'bucketName'
@@ -706,6 +711,29 @@ objects:
           send_empty_value: true
           description: |
             Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
+        - !ruby/object:Api::Type::Boolean        
+          name: 'requestCoalescing'
+          send_empty_value: true
+          description: |
+            If true then Cloud CDN will combine multiple concurrent cache fill requests into a small number of requests to the origin.
+        - !ruby/object:Api::Type::Array
+          name: 'bypassCacheOnRequestHeaders'
+          description: |
+            Bypass the cache when the specified request headers are matched - e.g. Pragma or Authorization headers. Up to 5 headers can be specified. The cache is bypassed for all cdnPolicy.cacheMode settings.
+          max_size: 5  
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'headerName'
+                description: |
+                  The header field name to match on when bypassing cache. Values are case-insensitive.
+      - !ruby/object:Api::Type::Enum
+          name: 'compressionMode'
+          description: |
+            Compress text responses using Brotli or gzip compression, based on the client's Accept-Encoding header.
+          values:
+            - :AUTOMATIC
+            - :DISABLED
       - !ruby/object:Api::Type::String
         name: 'edgeSecurityPolicy'
         description: |
@@ -1068,6 +1096,13 @@ objects:
             description: |
               The maximum number of parallel retries to the backend cluster.
               Defaults to 3.
+      - !ruby/object:Api::Type::Enum
+          name: 'compressionMode'
+          description: |
+            Compress text responses using Brotli or gzip compression, based on the client's Accept-Encoding header.
+          values:
+            - :AUTOMATIC
+            - :DISABLED
       - !ruby/object:Api::Type::NestedObject
         name: 'consistentHash'
         description: |
@@ -3486,6 +3521,25 @@ objects:
         deprecation_message: This field is no longer in use, disk interfaces will be automatically determined on attachment. To resolve this issue, remove this field from your config.
         description: |
           Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
+      - !ruby/object:Api::Type::String
+        name: 'sourceDisk'
+        description: |
+          The source disk used to create this disk. You can provide this as a partial or full URL to the resource.
+          For example, the following are valid values:
+
+          * https://www.googleapis.com/compute/v1/projects/{project}/zones/{zone}/disks/{disk}
+          * https://www.googleapis.com/compute/v1/projects/{project}/regions/{region}/disks/{disk}
+          * projects/{project}/zones/{zone}/disks/{disk}
+          * projects/{project}/regions/{region}/disks/{disk}
+          * zones/{zone}/disks/{disk}
+          * regions/{region}/disks/{disk}
+      - !ruby/object:Api::Type::String
+        name: 'sourceDiskId'
+        description: |
+          The ID value of the disk used to create this image. This value may
+          be used to determine whether the image was taken from the current
+          or a previous instance of a given disk name.
+        output: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'type'
         resource: 'DiskType'
@@ -3501,14 +3555,14 @@ objects:
 
           To create a disk with one of the public operating system images,
           specify the image by its family name. For example, specify
-          family/debian-9 to use the latest Debian 9 image:
+          family/debian-11 to use the latest Debian 11 image:
 
-          projects/debian-cloud/global/images/family/debian-9
+          projects/debian-cloud/global/images/family/debian-11
 
           Alternatively, use a specific version of a public operating system
           image:
 
-          projects/debian-cloud/global/images/debian-9-stretch-vYYYYMMDD
+          projects/debian-cloud/global/images/debian-11-bullseye-vYYYYMMDD
 
           To create a disk with a private image that you created, specify the
           image name in the following format:
@@ -3765,6 +3819,8 @@ objects:
           connection does not need to match both properties for the firewall to
           apply. Only IPv4 is supported. For INGRESS traffic, one of `source_ranges`,
           `source_tags` or `source_service_accounts` is required.
+        conflicts:
+          - destination_ranges
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'sourceServiceAccounts'
@@ -3800,6 +3856,10 @@ objects:
           to match both properties for the firewall to apply. For INGRESS traffic,
           one of `source_ranges`, `source_tags` or `source_service_accounts` is required.
         item_type: Api::Type::String
+        conflicts:
+          - source_service_accounts
+          - destination_ranges
+          - target_service_accounts
       - !ruby/object:Api::Type::Array
         name: 'targetServiceAccounts'
         description: |
@@ -3822,6 +3882,9 @@ objects:
           If no targetTags are specified, the firewall rule applies to all
           instances on the specified network.
         item_type: Api::Type::String
+        conflicts:
+          - source_service_accounts
+          - target_service_accounts
   - !ruby/object:Api::Resource
     name: 'ForwardingRule'
     kind: 'compute#forwardingRule'
@@ -8197,7 +8260,6 @@ objects:
         name: 'port'
         description: |
           Port number of network endpoint.
-        required: true
       - !ruby/object:Api::Type::String
         name: 'ipAddress'
         description: |
@@ -8532,6 +8594,21 @@ objects:
         description: |
           The target service url used to set up private service connection to
           a Google API or a PSC Producer Service Attachment.
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'network'
+        resource: 'Network'
+        imports: 'selfLink'
+        description: |
+          This field is only used for PSC.
+          The URL of the network to which all network endpoints in the NEG belong. Uses
+          "default" project network if unspecified.
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'subnetwork'
+        resource: 'Subnetwork'
+        imports: 'selfLink'
+        description: |
+          This field is only used for PSC.
+          Optional URL of the subnetwork to which all network endpoints in the NEG belong.
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudRun'
         conflicts:
@@ -9329,13 +9406,9 @@ objects:
             api_name: 'IPProtocols'
             description: |
                 Protocols that apply as a filter on mirrored traffic.
-            item_type: !ruby/object:Api::Type::Enum
-              name: ipProtocols
-              description: Possible IP protocols to filter on.
-              values:
-                - tcp
-                - udp
-                - icmp
+            item_type: Api::Type::String
+            name: ipProtocols
+            description: Possible IP protocols including tcp, udp, icmp and esp
           - !ruby/object:Api::Type::Array
             name: cidrRanges
             description: |
@@ -10502,6 +10575,25 @@ objects:
         deprecation_message: This field is no longer in use, disk interfaces will be automatically determined on attachment. To resolve this issue, remove this field from your config.
         description: |
           Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
+      - !ruby/object:Api::Type::String
+        name: 'sourceDisk'
+        description: |
+          The source disk used to create this disk. You can provide this as a partial or full URL to the resource.
+          For example, the following are valid values:
+
+          * https://www.googleapis.com/compute/v1/projects/{project}/zones/{zone}/disks/{disk}
+          * https://www.googleapis.com/compute/v1/projects/{project}/regions/{region}/disks/{disk}
+          * projects/{project}/zones/{zone}/disks/{disk}
+          * projects/{project}/regions/{region}/disks/{disk}
+          * zones/{zone}/disks/{disk}
+          * regions/{region}/disks/{disk}
+      - !ruby/object:Api::Type::String
+        name: 'sourceDiskId'
+        description: |
+          The ID value of the disk used to create this image. This value may
+          be used to determine whether the image was taken from the current
+          or a previous instance of a given disk name.
+        output: true
   - !ruby/object:Api::Resource
     name: 'RegionUrlMap'
     kind: 'compute#urlMap'
@@ -12904,6 +12996,12 @@ objects:
                   - snapshot_schedule_policy.0.snapshot_properties.0.guest_flush
                 description: |
                   Whether to perform a 'guest aware' snapshot.
+              - !ruby/object:Api::Type::String
+                name: 'chainName'
+                description: |
+                  Creates the new snapshot in the snapshot chain labeled with the 
+                  specified name. The chain name must be 1-63 characters long and comply 
+                  with RFC1035.
       - !ruby/object:Api::Type::NestedObject
         name: 'groupPlacementPolicy'
         conflicts:
@@ -14002,6 +14100,15 @@ objects:
         name: 'diskSizeGb'
         description: 'Size of the snapshot, specified in GB.'
         output: true
+      - !ruby/object:Api::Type::String
+        name: 'chainName'
+        description: |
+          Creates the new snapshot in the snapshot chain labeled with the 
+          specified name. The chain name must be 1-63 characters long and 
+          comply with RFC1035. This is an uncommon option only for advanced 
+          service owners who needs to create separate snapshot chains, for 
+          example, for chargeback tracking.  When you describe your snapshot 
+          resource, this field is visible only if it has a non-empty value.
       - !ruby/object:Api::Type::String
         name: 'name'
         required: true
@@ -15330,7 +15437,9 @@ objects:
           A list of SslCertificate resources that are used to authenticate
           connections between users and the load balancer. At least one SSL
           certificate must be specified.
-        required: true
+        exactly_one_of:
+          - sslCertificates
+          - certificateMap
         update_verb: :POST
         update_url:
           'projects/{{project}}/targetHttpsProxies/{{name}}/setSslCertificates'
@@ -15339,6 +15448,18 @@ objects:
           resource: 'SslCertificate'
           imports: 'selfLink'
           description: 'The SSL certificates used by this TargetHttpsProxy'
+      - !ruby/object:Api::Type::String
+        name: 'certificateMap'
+        description: |
+          A reference to the CertificateMap resource uri that identifies a certificate map 
+          associated with the given target proxy. This field can only be set for global target proxies.
+          Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificateMaps/{resourceName}`.
+        exactly_one_of:
+          - sslCertificates
+          - certificateMap
+        update_verb: :POST
+        update_url:
+          'projects/{{project}}/global/targetHttpsProxies/{{name}}/setCertificateMap'
       - !ruby/object:Api::Type::ResourceRef
         name: 'sslPolicy'
         resource: 'SslPolicy'
@@ -15367,9 +15488,7 @@ objects:
           this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
   - !ruby/object:Api::Resource
     name: 'RegionTargetHttpProxy'
-    kind: 'compute#targetHttpProxy'
     base_url: projects/{{project}}/regions/{{region}}/targetHttpProxies
-    collection_url_key: 'items'
     has_self_link: true
     input: true
     description: |
@@ -15442,9 +15561,7 @@ objects:
         update_url: 'projects/{{project}}/regions/{{region}}/targetHttpProxies/{{name}}/setUrlMap'
   - !ruby/object:Api::Resource
     name: 'RegionTargetHttpsProxy'
-    kind: 'compute#targetHttpsProxy'
     base_url: projects/{{project}}/regions/{{region}}/targetHttpsProxies
-    collection_url_key: 'items'
     has_self_link: true
     input: true
     description: |
@@ -15564,6 +15681,95 @@ objects:
         required: true
         update_verb: :POST
         update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setUrlMap'
+  - !ruby/object:Api::Resource
+    name: 'RegionTargetTcpProxy'
+    base_url: projects/{{project}}/regions/{{region}}/targetTcpProxies
+    has_self_link: true
+    input: true
+    description: |
+      Represents a RegionTargetTcpProxy resource, which is used by one or more
+      forwarding rules to route incoming TCP requests to a regional TCP proxy load
+      balancer.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/load-balancing/docs/tcp/internal-proxy'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/targetTcpProxies'
+    min_version: beta
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'name'
+        required: true
+        input: true
+        description: |
+          The region where the regional proxy resides.
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional description of this resource.'
+        input: true
+      - !ruby/object:Api::Type::Integer
+        name: 'proxyId'
+        api_name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource. Provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035. Specifically, the name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+        input: true
+        required: true
+      - !ruby/object:Api::Type::Enum
+        name: 'proxyHeader'
+        description: |
+          Specifies the type of proxy header to append before sending data to
+          the backend.
+        values:
+          - :NONE
+          - :PROXY_V1
+        default_value: :NONE
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'service'
+        resource: 'RegionBackendService'
+        imports: 'selfLink'
+        description: |
+          A reference to the BackendService resource.
+        required: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'proxyBind'
+        description: |
+          This field only applies when the forwarding rule that references
+          this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
   - !ruby/object:Api::Resource
     name: 'TargetInstance'
     kind: 'compute#targetInstance'
@@ -15873,7 +16079,9 @@ objects:
           A list of SslCertificate resources that are used to authenticate
           connections between users and the load balancer. At least one
           SSL certificate must be specified.
-        required: true
+        exactly_one_of:
+          - sslCertificates
+          - certificateMap
         update_verb: :POST
         update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setSslCertificates'
         item_type: !ruby/object:Api::Type::ResourceRef
@@ -15881,6 +16089,18 @@ objects:
           resource: 'SslCertificate'
           imports: 'selfLink'
           description: 'The SSL certificates used by this TargetSslProxy'
+      - !ruby/object:Api::Type::String
+        name: 'certificateMap'
+        description: |
+          A reference to the CertificateMap resource uri that identifies a certificate map
+          associated with the given target proxy. This field can only be set for global target proxies.
+          Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificateMaps/{resourceName}`.
+        exactly_one_of:
+          - sslCertificates
+          - certificateMap
+        update_verb: :POST
+        update_url:
+          'projects/{{project}}/global/targetSslProxies/{{name}}/setCertificateMap'
       - !ruby/object:Api::Type::ResourceRef
         name: 'sslPolicy'
         resource: 'SslPolicy'

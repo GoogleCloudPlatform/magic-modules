@@ -347,6 +347,16 @@ objects:
                      The absolute number of time series
                      that must fail the predicate for the
                      condition to be triggered.
+              - !ruby/object:Api::Type::Enum
+                name: evaluationMissingData
+                description: |
+                  A condition control that determines how
+                  metric-threshold conditions are evaluated when
+                  data stops arriving.
+                values:
+                  - :EVALUATION_MISSING_DATA_INACTIVE
+                  - :EVALUATION_MISSING_DATA_ACTIVE
+                  - :EVALUATION_MISSING_DATA_NO_OP
            - !ruby/object:Api::Type::NestedObject
              name: conditionThreshold
              description: |
@@ -734,6 +744,16 @@ objects:
                   resource labels, and metric labels. This
                   field may not exceed 2048 Unicode characters
                   in length.
+              - !ruby/object:Api::Type::Enum
+                name: evaluationMissingData
+                description: |
+                  A condition control that determines how
+                  metric-threshold conditions are evaluated when
+                  data stops arriving.
+                values:
+                  - :EVALUATION_MISSING_DATA_INACTIVE
+                  - :EVALUATION_MISSING_DATA_ACTIVE
+                  - :EVALUATION_MISSING_DATA_NO_OP
            - !ruby/object:Api::Type::String
              name: displayName
              required: true
@@ -1935,6 +1955,24 @@ objects:
           maximum byte size is 1 megabyte. Note - As with all bytes fields JSON
           representations are base64 encoded. e.g. "foo=bar" in URL-encoded form is
           "foo%3Dbar" and in base64 encoding is "Zm9vJTI1M0RiYXI=".
+      - !ruby/object:Api::Type::Array
+        name: acceptedResponseStatusCodes
+        description: If present, the check will only pass if the HTTP response status code is in this set of status codes. If empty, the HTTP status code will only pass if the HTTP status code is 200-299.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+          - !ruby/object:Api::Type::Integer
+            name: statusValue
+            description: A status code to accept.        
+          - !ruby/object:Api::Type::Enum
+            name: statusClass          
+            description: A class of status codes to accept.
+            values:
+              - :STATUS_CLASS_1XX
+              - :STATUS_CLASS_2XX
+              - :STATUS_CLASS_3XX
+              - :STATUS_CLASS_4XX
+              - :STATUS_CLASS_5XX
+              - :STATUS_CLASS_ANY       
     - !ruby/object:Api::Type::NestedObject
       name: tcpCheck
       description: Contains information needed to make a TCP check.

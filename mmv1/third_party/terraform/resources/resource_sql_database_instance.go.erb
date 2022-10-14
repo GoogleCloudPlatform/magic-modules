@@ -18,7 +18,8 @@ import (
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
-const privateNetworkLinkRegex = "projects/(" + ProjectRegex + ")/global/networks/((?:[a-z](?:[-a-z0-9]*[a-z0-9])?))$"
+// Match fully-qualified or relative URLs
+const privateNetworkLinkRegex = "^(?:http(?:s)?://.+/)?projects/(" + ProjectRegex + ")/global/networks/((?:[a-z](?:[-a-z0-9]*[a-z0-9])?))$"
 
 var sqlDatabaseAuthorizedNetWorkSchemaElem *schema.Resource = &schema.Resource{
 	Schema: map[string]*schema.Schema{
@@ -118,7 +119,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 				Type:        schema.TypeBool,
 				Default:     true,
 				Optional:    true,
-				Description: `Used to block Terraform from deleting a SQL Instance.`,
+				Description: `Used to block Terraform from deleting a SQL Instance. Defaults to true.`,
 			},
 			"settings": {
 				Type:     schema.TypeList,
@@ -182,6 +183,12 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 								},
 							},
 						},
+						"time_zone": {
+							Type:             schema.TypeString,
+							ForceNew:         true,
+							Optional:         true,
+							Description:      `The timezone to be used by the database engine (supported only for SQL Server), in SQL Server timezone format.`,
+						},
 						"availability_type": {
 							Type:             schema.TypeString,
 							Optional:         true,
@@ -192,7 +199,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 settings.backup_configuration.enabled is set to true.
 For MySQL instances, ensure that settings.backup_configuration.binary_log_enabled is set to true.
 For Postgres instances, ensure that settings.backup_configuration.point_in_time_recovery_enabled
-is set to true.`,
+is set to true. Defaults to ZONAL.`,
 						},
 						"backup_configuration": {
 							Type:     schema.TypeList,
@@ -268,6 +275,7 @@ is set to true.`,
 						"collation": {
 							Type:             schema.TypeString,
 							Optional:         true,
+							ForceNew:         true,
 							Description:      `The name of server instance collation.`,
 						},
 						"database_flags": {
@@ -292,7 +300,7 @@ is set to true.`,
 							Type:             schema.TypeBool,
 							Optional:         true,
 							Default:          true,
-							Description:      `Enables auto-resizing of the storage size. Defaults to true. Set to false if you want to set disk_size.`,
+							Description:      `Enables auto-resizing of the storage size. Defaults to true.`,
 						},
 						"disk_autoresize_limit": {
 							Type:             schema.TypeInt,
@@ -305,13 +313,14 @@ is set to true.`,
 							Optional: true,
 							// Default is likely 10gb, but it is undocumented and may change.
 							Computed:    true,
-							Description: `The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. If you want to set this field, set disk_autoresize to false.`,
+							Description: `The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. The minimum value is 10GB.`,
 						},
 						"disk_type": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Default: "PD_SSD",
-							Description: `The type of data disk: PD_SSD or PD_HDD.`,
+							DiffSuppressFunc: caseDiffDashSuppress,
+							Description: `The type of data disk: PD_SSD or PD_HDD. Defaults to PD_SSD.`,
 						},
 						"ip_configuration": {
 							Type:     schema.TypeList,
@@ -462,6 +471,48 @@ is set to true.`,
 							},
 							Description: `Configuration of Query Insights.`,
 						},
+						"password_validation_policy": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"min_length": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										ValidateFunc: validation.IntBetween(0, 2147483647),
+										Description:  `Minimum number of characters allowed.`,
+									},
+									"complexity": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										ValidateFunc: validation.StringInSlice([]string{"COMPLEXITY_DEFAULT", "COMPLEXITY_UNSPECIFIED"}, false),
+										Description:  `Password complexity.`,
+									},
+									"reuse_interval": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										ValidateFunc: validation.IntBetween(0, 2147483647),
+										Description:  `Number of previous passwords that cannot be reused.`,
+									},
+									"disallow_username_substring": {
+										Type:         schema.TypeBool,
+										Optional:     true,
+										Description:  `Disallow username as a part of the password.`,
+									},
+									"password_change_interval": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										Description:  `Minimum interval after which the password can be changed. This flag is only supported for PostgresSQL.`,
+									},
+									"enable_password_policy": {
+										Type:         schema.TypeBool,
+										Required:     true,
+										Description:  `Whether the password policy is enabled or not.`,
+									},
+								},
+							},
+						},
 					},
 				},
 				Description: `The settings to use for the database. The configuration is detailed below.`,
@@ -472,11 +523,24 @@ is set to true.`,
 				Computed:    true,
 				Description: `The connection name of the instance to be used in connection strings. For example, when connecting with Cloud SQL Proxy.`,
 			},
-
+			"maintenance_version": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Optional:    true,
+				Description: `Maintenance version.`,
+				DiffSuppressFunc: maintenanceVersionDiffSuppress,
+			},
+			"available_maintenance_versions": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: `Available Maintenance versions.`,
+			},
 			"database_version": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
 				Description: `The MySQL, PostgreSQL or SQL Server (beta) version to use. Supported values include MYSQL_5_6, MYSQL_5_7, MYSQL_8_0, POSTGRES_9_6, POSTGRES_10, POSTGRES_11, POSTGRES_12, POSTGRES_13, POSTGRES_14, SQLSERVER_2017_STANDARD, SQLSERVER_2017_ENTERPRISE, SQLSERVER_2017_EXPRESS, SQLSERVER_2017_WEB. Database Version Policies includes an up-to-date reference of supported versions.`,
 			},
 
@@ -493,9 +557,8 @@ is set to true.`,
 				Optional:    true,
 				ForceNew:    true,
 				Sensitive:   true,
-				Description: `Initial root password. Required for MS SQL Server, ignored by MySQL and PostgreSQL.`,
+				Description: `Initial root password. Required for MS SQL Server.`,
 			},
-
 			"ip_address": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -593,7 +656,7 @@ is set to true.`,
 							Optional:     true,
 							ForceNew:     true,
 							AtLeastOneOf: replicaConfigurationKeys,
-							Description:  `The number of seconds between connect retries.`,
+							Description:  `The number of seconds between connect retries. MySQL's default is 60 seconds.`,
 						},
 						"dump_file_path": {
 							Type:         schema.TypeString,
@@ -734,11 +797,11 @@ is set to true.`,
 							Type:             schema.TypeString,
 							Optional:         true,
 							DiffSuppressFunc: timestampDiffSuppress(time.RFC3339Nano),
-							Description:  `The timestamp of the point in time that should be restored.`,
+							Description:      `The timestamp of the point in time that should be restored.`,
 						},
 						"allocated_ip_range": {
-							Type:             schema.TypeString,
-							Optional:         true,
+							Type:         schema.TypeString,
+							Optional:     true,
 							Description:  `The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the cloned instance ip will be created in the allocated range. The range name must comply with [RFC 1035](https://tools.ietf.org/html/rfc1035). Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.`,
 						},
 					},
@@ -803,7 +866,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	if err := d.Set("name", name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
-
+	
 	// SQL Instances that fail to create are expensive- see https://github.com/hashicorp/terraform-provider-google/issues/7154
 	// We can fail fast to stop instance names from getting reserved.
 	network := d.Get("settings.0.ip_configuration.0.private_network").(string)
@@ -824,16 +887,17 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 
 	cloneContext, cloneSource := expandCloneContext(d.Get("clone").([]interface{}))
 
-    s, ok := d.GetOk("settings")
+    	s, ok := d.GetOk("settings")
 	desiredSettings := expandSqlDatabaseInstanceSettings(s.([]interface{}))
 	if ok {
 		instance.Settings = desiredSettings
 	}
 
-	// MSSQL Server require rootPassword to be set
-	if strings.Contains(instance.DatabaseVersion, "SQLSERVER") {
-		instance.RootPassword = d.Get("root_password").(string)
+	if _, ok := d.GetOk("maintenance_version"); ok {
+		instance.MaintenanceVersion = d.Get("maintenance_version").(string)
 	}
+
+	instance.RootPassword = d.Get("root_password").(string)
 
 	// Modifying a replica during Create can cause problems if the master is
 	// modified at the same time. Lock the master until we're done in order
@@ -983,24 +1047,26 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}) *sqladmin.Setti
 	_settings := configured[0].(map[string]interface{})
 	settings := &sqladmin.Settings{
 		// Version is unset in Create but is set during update
-		SettingsVersion:             int64(_settings["version"].(int)),
-		Tier:                        _settings["tier"].(string),
-		ForceSendFields:             []string{"StorageAutoResize"},
-		ActivationPolicy:            _settings["activation_policy"].(string),
-		ActiveDirectoryConfig:       expandActiveDirectoryConfig(_settings["active_directory_config"].([]interface{})),
-		SqlServerAuditConfig: 	     expandSqlServerAuditConfig(_settings["sql_server_audit_config"].([]interface{})),
-		AvailabilityType:            _settings["availability_type"].(string),
-		Collation:                   _settings["collation"].(string),
-		DataDiskSizeGb:              int64(_settings["disk_size"].(int)),
-		DataDiskType:                _settings["disk_type"].(string),
-		PricingPlan:                 _settings["pricing_plan"].(string),
-		UserLabels:                  convertStringMap(_settings["user_labels"].(map[string]interface{})),
-		BackupConfiguration:         expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
-		DatabaseFlags:               expandDatabaseFlags(_settings["database_flags"].([]interface{})),
-		IpConfiguration:             expandIpConfiguration(_settings["ip_configuration"].([]interface{})),
-		LocationPreference:          expandLocationPreference(_settings["location_preference"].([]interface{})),
-		MaintenanceWindow:           expandMaintenanceWindow(_settings["maintenance_window"].([]interface{})),
-		InsightsConfig:              expandInsightsConfig(_settings["insights_config"].([]interface{})),
+		SettingsVersion:          int64(_settings["version"].(int)),
+		Tier:                     _settings["tier"].(string),
+		ForceSendFields:          []string{"StorageAutoResize"},
+		ActivationPolicy:         _settings["activation_policy"].(string),
+		ActiveDirectoryConfig:    expandActiveDirectoryConfig(_settings["active_directory_config"].([]interface{})),
+		SqlServerAuditConfig:     expandSqlServerAuditConfig(_settings["sql_server_audit_config"].([]interface{})),
+		TimeZone:                 _settings["time_zone"].(string),
+		AvailabilityType:         _settings["availability_type"].(string),
+		Collation:                _settings["collation"].(string),
+		DataDiskSizeGb:           int64(_settings["disk_size"].(int)),
+		DataDiskType:             _settings["disk_type"].(string),
+		PricingPlan:              _settings["pricing_plan"].(string),
+		UserLabels:               convertStringMap(_settings["user_labels"].(map[string]interface{})),
+		BackupConfiguration:      expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
+		DatabaseFlags:            expandDatabaseFlags(_settings["database_flags"].([]interface{})),
+		IpConfiguration:          expandIpConfiguration(_settings["ip_configuration"].([]interface{})),
+		LocationPreference:       expandLocationPreference(_settings["location_preference"].([]interface{})),
+		MaintenanceWindow:        expandMaintenanceWindow(_settings["maintenance_window"].([]interface{})),
+		InsightsConfig:           expandInsightsConfig(_settings["insights_config"].([]interface{})),
+		PasswordValidationPolicy: expandPasswordValidationPolicy(_settings["password_validation_policy"].([]interface{})),
 	}
 
 	resize := _settings["disk_autoresize"].(bool)
@@ -1192,6 +1258,22 @@ func expandInsightsConfig(configured []interface{}) *sqladmin.InsightsConfig {
 	}
 }
 
+func expandPasswordValidationPolicy(configured []interface{}) *sqladmin.PasswordValidationPolicy {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+
+	_passwordValidationPolicy := configured[0].(map[string]interface{})
+	return &sqladmin.PasswordValidationPolicy{
+		MinLength:                 int64(_passwordValidationPolicy["min_length"].(int)),
+		Complexity:                _passwordValidationPolicy["complexity"].(string),
+		ReuseInterval:             int64(_passwordValidationPolicy["reuse_interval"].(int)),
+		DisallowUsernameSubstring: _passwordValidationPolicy["disallow_username_substring"].(bool),
+		PasswordChangeInterval:    _passwordValidationPolicy["password_change_interval"].(string),
+		EnablePasswordPolicy:      _passwordValidationPolicy["enable_password_policy"].(bool),
+	}
+}
+
 func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
@@ -1224,6 +1306,12 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	}
 	if err := d.Set("connection_name", instance.ConnectionName); err != nil {
 		return fmt.Errorf("Error setting connection_name: %s", err)
+	}
+	if err := d.Set("maintenance_version", instance.MaintenanceVersion); err != nil {
+		return fmt.Errorf("Error setting maintenance_version: %s", err)
+	}
+	if err := d.Set("available_maintenance_versions", instance.AvailableMaintenanceVersions); err != nil {
+		return fmt.Errorf("Error setting available_maintenance_version: %s", err)
 	}
 	if err := d.Set("service_account_email_address", instance.ServiceAccountEmailAddress); err != nil {
 		return fmt.Errorf("Error setting service_account_email_address: %s", err)
@@ -1301,11 +1389,68 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return err
 	}
-
-	// Update only updates the settings, so they are all we need to set.
-	instance := &sqladmin.DatabaseInstance{
-		Settings: expandSqlDatabaseInstanceSettings(d.Get("settings").([]interface{})),
+	var maintenance_version string
+	if v, ok := d.GetOk("maintenance_version"); ok {
+		maintenance_version = v.(string)
 	}
+
+	desiredSetting := d.Get("settings")
+	var op *sqladmin.Operation
+	var instance *sqladmin.DatabaseInstance
+	
+	// Check if the database version is being updated, because patching database version is an atomic operation and can not be
+	// performed with other fields, we first patch database version before updating the rest of the fields.
+	if v, ok := d.GetOk("database_version"); ok {
+		instance = &sqladmin.DatabaseInstance{DatabaseVersion: v.(string)}
+		err = retryTimeDuration(func() (rerr error) {
+			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+			return rerr
+		}, d.Timeout(schema.TimeoutUpdate), isSqlOperationInProgressError)
+		if err != nil {
+			return fmt.Errorf("Error, failed to patch instance settings for %s: %s", instance.Name, err)
+		}
+		err = sqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return err
+		}
+		err = resourceSqlDatabaseInstanceRead(d, meta)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Check if the maintenance version is being updated, because patching maintenance version is an atomic operation and can not be
+	// performed with other fields, we first patch maintenance version before updating the rest of the fields.
+	if d.HasChange("maintenance_version") {
+		instance = &sqladmin.DatabaseInstance{MaintenanceVersion: maintenance_version}
+		err = retryTimeDuration(func() (rerr error) {
+			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+			return rerr
+		}, d.Timeout(schema.TimeoutUpdate), isSqlOperationInProgressError)
+		if err != nil {
+			return fmt.Errorf("Error, failed to patch instance settings for %s: %s", instance.Name, err)
+		}
+		err = sqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return err
+		}
+		err = resourceSqlDatabaseInstanceRead(d, meta)
+		if err != nil {
+			return err
+                }
+        }
+
+	s := d.Get("settings")
+	instance = &sqladmin.DatabaseInstance{
+		Settings: expandSqlDatabaseInstanceSettings(desiredSetting.([]interface{})),
+	}
+	_settings := s.([]interface{})[0].(map[string]interface{})
+	// Instance.Patch operation on completion updates the settings proto version by +8. As terraform does not know this it tries
+	// to make an update call with the proto version before patch and fails. To resolve this issue we update the setting version
+	// before making the update call.
+	instance.Settings.SettingsVersion = int64(_settings["version"].(int))
+	// Collation cannot be included in the update request
+	instance.Settings.Collation = ""
 
 	// Lock on the master_instance_name just in case updating any replica
 	// settings causes operations on the master.
@@ -1314,7 +1459,6 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		defer mutexKV.Unlock(instanceMutexKey(project, v.(string)))
 	}
 
-	var op *sqladmin.Operation
 	err = retryTimeDuration(func() (rerr error) {
 		op, rerr = config.NewSqlAdminClient(userAgent).Instances.Update(project, d.Get("name").(string), instance).Do()
 		return rerr
@@ -1339,6 +1483,16 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	}
 
 	return resourceSqlDatabaseInstanceRead(d, meta)
+}
+
+func maintenanceVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	// Ignore the database version part and only compare the last part of the maintenance version which represents the release date of the version.
+	if len(old) > 14 && len(new) > 14 && old[len(old)-14:] >= new[len(new)-14:] {
+		log.Printf("[DEBUG] Maintenance version in configuration [%s] is older than current maintenance version [%s] on instance. Suppressing diff", new, old)
+		return true
+	} else {
+		return false
+	}
 }
 
 func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{}) error {
@@ -1409,15 +1563,17 @@ func resourceSqlDatabaseInstanceImport(d *schema.ResourceData, meta interface{})
 
 func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 	data := map[string]interface{}{
-		"version":                     settings.SettingsVersion,
-		"tier":                        settings.Tier,
-		"activation_policy":           settings.ActivationPolicy,
-		"availability_type":           settings.AvailabilityType,
-		"collation":                   settings.Collation,
-		"disk_type":                   settings.DataDiskType,
-		"disk_size":                   settings.DataDiskSizeGb,
-		"pricing_plan":                settings.PricingPlan,
-		"user_labels":                 settings.UserLabels,
+		"version":                    settings.SettingsVersion,
+		"tier":                       settings.Tier,
+		"activation_policy":          settings.ActivationPolicy,
+		"availability_type":          settings.AvailabilityType,
+		"collation":                  settings.Collation,
+		"disk_type":                  settings.DataDiskType,
+		"disk_size":                  settings.DataDiskSizeGb,
+		"pricing_plan":               settings.PricingPlan,
+		"user_labels":                settings.UserLabels,
+		"password_validation_policy": settings.PasswordValidationPolicy,
+		"time_zone":                  settings.TimeZone,
 	}
 
 	if settings.ActiveDirectoryConfig != nil {
@@ -1457,6 +1613,10 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 
 	if settings.UserLabels != nil {
 		data["user_labels"] = settings.UserLabels
+	}
+
+	if settings.PasswordValidationPolicy != nil {
+		data["password_validation_policy"] = flattenPasswordValidationPolicy(settings.PasswordValidationPolicy)
 	}
 
 	return []map[string]interface{}{data}
@@ -1653,6 +1813,19 @@ func flattenInsightsConfig(insightsConfig *sqladmin.InsightsConfig) interface{} 
 	return []map[string]interface{}{data}
 }
 
+func flattenPasswordValidationPolicy(passwordValidationPolicy *sqladmin.PasswordValidationPolicy) interface{} {
+	data := map[string]interface{}{
+		"min_length":                  passwordValidationPolicy.MinLength,
+		"complexity":                  passwordValidationPolicy.Complexity,
+		"reuse_interval":              passwordValidationPolicy.ReuseInterval,
+		"disallow_username_substring": passwordValidationPolicy.DisallowUsernameSubstring,
+		"password_change_interval":    passwordValidationPolicy.PasswordChangeInterval,
+		"enable_password_policy":      passwordValidationPolicy.EnablePasswordPolicy,
+	}
+	return []map[string]interface{}{data}
+}
+
+
 func instanceMutexKey(project, instance_name string) string {
 	return fmt.Sprintf("google-sql-database-instance-%s-%s", project, instance_name)
 }
@@ -1729,4 +1902,9 @@ func sqlDatabaseInstanceRestoreFromBackup(d *schema.ResourceData, config *Config
 	}
 
 	return nil
+}
+
+func caseDiffDashSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	postReplaceNew := strings.Replace(new, "-", "_", -1)
+	return strings.ToUpper(postReplaceNew) == strings.ToUpper(old)
 }

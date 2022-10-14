@@ -44,6 +44,7 @@ const (
 	PreCreate                          = "PRE_CREATE_FUNCTION"
 	PostCreate                         = "POST_CREATE_FUNCTION"
 	PreDelete                          = "PRE_DELETE_FUNCTION"
+	SkipInProvider                     = "SKIP_IN_PROVIDER"
 	CustomResourceName                 = "CUSTOM_RESOURCE_NAME"
 	NoSweeper                          = "NO_SWEEPER"
 	CustomImport                       = "CUSTOM_IMPORT_FUNCTION"
@@ -52,7 +53,6 @@ const (
 	SerializationOnly                  = "SERIALIZATION_ONLY"
 	CustomSerializer                   = "CUSTOM_SERIALIZER"
 	TerraformProductName               = "CUSTOM_TERRAFORM_PRODUCT_NAME"
-	UseDCLID                           = "USE_DCL_ID"
 	CustomTimeout                      = "CUSTOM_TIMEOUT"
 )
 

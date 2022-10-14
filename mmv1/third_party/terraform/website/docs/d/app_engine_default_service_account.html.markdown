@@ -1,8 +1,6 @@
 ---
 subcategory: "App Engine"
-layout: "google"
 page_title: "Google: google_app_engine_default_service_account"
-sidebar_current: "docs-google-datasource-app_engine-default-service-account"
 description: |-
   Retrieve the default App Engine service account used in this project
 ---
@@ -40,3 +38,5 @@ The following attributes are exported:
 * `name` - The fully-qualified name of the service account.
 
 * `display_name` - The display name for the service account.
+
+* `member` - The Identity of the service account in the form `serviceAccount:{email}`. This value is often used to refer to the service account in order to grant IAM permissions.

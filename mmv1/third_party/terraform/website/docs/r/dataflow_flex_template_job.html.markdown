@@ -1,8 +1,6 @@
 ---
 subcategory: "Dataflow"
-layout: "google"
 page_title: "Google: google_dataflow_flex_template_job"
-sidebar_current: "docs-google-dataflow-flex-template-job"
 description: |-
   Creates a job in Dataflow based on a Flex Template.
 ---
@@ -97,8 +95,7 @@ such as `serviceAccount`, `workerMachineType`, etc can be specified here.
 
 * `labels` - (Optional) User labels to be specified for the job. Keys and values
 should follow the restrictions specified in the [labeling restrictions](https://cloud.google.com/compute/docs/labeling-resources#restrictions)
-page. **Note**: This field is marked as deprecated in Terraform as the API does not currently
-support adding labels.
+page. 
 **NOTE**: Google-provided Dataflow templates often provide default labels
 that begin with `goog-dataflow-provided`. Unless explicitly set in config, these
 labels will be ignored to prevent diffs on re-apply.

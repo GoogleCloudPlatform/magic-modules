@@ -24,7 +24,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           dns_compute_instance: "dns-compute-instance"
           allow_http_traffic: "allow-http-traffic"
           example_zone_googlecloudexample: "example-zone-googlecloudexample"
-        min_version: beta
         ignore_read_extra:
           - "force_destroy"
       - !ruby/object:Provider::Terraform::Examples
@@ -68,6 +67,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           zone_name: "peering-zone"
           network_name: "network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dns_managed_zone_cloud_logging"
+        primary_resource_id: "cloud-logging-enabled-zone"
+        vars:
+          zone_name: "cloud-logging-enabled-zone"
     properties:
       description: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
@@ -146,6 +150,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       reverseLookup: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/object_to_bool.go.erb
         custom_expand: templates/terraform/custom_expand/bool_to_object.go.erb
+      cloudLoggingConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'force_destroy'

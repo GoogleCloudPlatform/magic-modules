@@ -19,7 +19,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dataproc_metastore_service_basic"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-metastore-srv%s\", context[\"random_suffix\"])"
+        primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
         primary_resource_id: "default"
         vars:
           metastore_service_name: "metastore-srv"
@@ -45,7 +45,21 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_docs: true
         primary_resource_id: "endpoint"
         vars:
-          metastore_service_name: "metastore-endpoint"          
+          metastore_service_name: "metastore-endpoint"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dataproc_metastore_service_aux"
+        min_version: beta
+        skip_docs: true
+        primary_resource_id: "aux"
+        vars:
+          metastore_service_name: "metastore-aux"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dataproc_metastore_service_metadata"
+        min_version: beta
+        skip_docs: true
+        primary_resource_id: "metadata"
+        vars:
+          metastore_service_name: "metastore-metadata"          
     properties:
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -55,4 +69,22 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       hiveMetastoreConfig.configOverrides: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-        diff_suppress_func: 'dataprocMetastoreServiceOverrideSuppress'
+        diff_suppress_func: "dataprocMetastoreServiceOverrideSuppress"
+  Federation: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    import_format: ["projects/{{project}}/locations/{{location}}/federations/{{federation_id}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dataproc_metastore_federation_basic"
+        primary_resource_id: "default"
+        min_version: beta
+        primary_resource_name: 'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
+        vars:
+          metastore_federation_name: "fed-1"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dataproc_metastore_federation_bigquery"
+        primary_resource_id: "default"
+        min_version: beta
+        primary_resource_name: 'fmt.Sprintf("tf-test-metastore-fed-bq%s", context["random_suffix"])'
+        vars:
+          metastore_federation_name: "fed-2"          

@@ -1,8 +1,6 @@
 ---
 subcategory: "Cloud Platform"
-layout: "google"
 page_title: "Google: google_service_account"
-sidebar_current: "docs-google-service-account-x"
 description: |-
  Allows management of a Google Cloud Platform service account.
 ---
@@ -68,6 +66,8 @@ exported:
 * `name` - The fully-qualified name of the service account.
 
 * `unique_id` - The unique id of the service account.
+
+* `member` - The Identity of the service account in the form `serviceAccount:{email}`. This value is often used to refer to the service account in order to grant IAM permissions.
 
 ## Timeouts
 

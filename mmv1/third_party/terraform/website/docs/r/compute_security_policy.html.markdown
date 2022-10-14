@@ -1,8 +1,6 @@
 ---
 subcategory: "Compute Engine"
-layout: "google"
 page_title: "Google: google_compute_security_policy"
-sidebar_current: "docs-google-compute-security-policy"
 description: |-
   Creates a Security Policy resource for Google Compute Engine.
 ---
@@ -65,6 +63,18 @@ The following arguments are supported:
     security policy, a default rule with action "allow" will be added. Structure is [documented below](#nested_rule).
 
 * `advanced_options_config` - (Optional) [Advanced Configuration Options](https://cloud.google.com/armor/docs/security-policy-overview#json-parsing).
+    Structure is [documented below](#nested_advanced_options_config).
+
+* `adaptive_protection_config` - (Optional) Configuration for [Google Cloud Armor Adaptive Protection](https://cloud.google.com/armor/docs/adaptive-protection-overview?hl=en). Structure is [documented below](#nested_adaptive_protection_config).
+
+* `type` - The type indicates the intended use of the security policy. This field can be set only at resource creation time.
+  * CLOUD_ARMOR - Cloud Armor backend security policies can be configured to filter incoming HTTP requests targeting backend services.
+    They filter requests before they hit the origin servers.
+  * CLOUD_ARMOR_EDGE - Cloud Armor edge security policies can be configured to filter incoming HTTP requests targeting backend services
+    (including Cloud CDN-enabled) as well as backend buckets (Cloud Storage).
+    They filter requests before the request is served from Google's cache.
+  * CLOUD_ARMOR_INTERNAL_SERVICE - Cloud Armor internal service policies can be configured to filter HTTP requests targeting services 
+    managed by Traffic Director in a service mesh. They filter requests before the request is served from the application.
 
 <a name="nested_advanced_options_config"></a>The `advanced_options_config` block supports:
 
@@ -72,18 +82,19 @@ The following arguments are supported:
   * DISABLED - Don't parse JSON payloads in POST bodies.
   * STANDARD - Parse JSON payloads in POST bodies.
 
+* `json_custom_config` - Custom configuration to apply the JSON parsing. Only applicable when
+    `json_parsing` is set to `STANDARD`. Structure is [documented below](#nested_json_custom_config).
+
 * `log_level` - Log level to use. Defaults to `NORMAL`.
   * NORMAL - Normal log level.
   * VERBOSE - Verbose log level.
 
-* `adaptive_protection_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for [Google Cloud Armor Adaptive Protection](https://cloud.google.com/armor/docs/adaptive-protection-overview?hl=en). Structure is [documented below](#nested_adaptive_protection_config).
+<a name="nested_json_custom_config"></a>The `json_custom_config` block supports:
 
-* `type` - The type indicates the intended use of the security policy.
-  * CLOUD_ARMOR - Cloud Armor backend security policies can be configured to filter incoming HTTP requests targeting backend services.
-    They filter requests before they hit the origin servers.
-  * CLOUD_ARMOR_EDGE - Cloud Armor edge security policies can be configured to filter incoming HTTP requests targeting backend services
-    (including Cloud CDN-enabled) as well as backend buckets (Cloud Storage).
-    They filter requests before the request is served from Google's cache.
+* `content_types` - A list of custom Content-Type header values to apply the JSON parsing. The
+    format of the Content-Type header values is defined in
+    [RFC 1341](https://www.ietf.org/rfc/rfc1341.txt). When configuring a custom Content-Type header
+    value, only the type/subtype needs to be specified, and the parameters should be excluded.
 
 <a name="nested_rule"></a>The `rule` block supports:
 
@@ -105,10 +116,10 @@ The following arguments are supported:
 * `preview` - (Optional) When set to true, the `action` specified above is not enforced.
     Stackdriver logs for requests that trigger a preview action are annotated as such.
 
-* `rate_limit_options` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
-    Must be specified if the `action` is "rate_based_bad" or "throttle". Cannot be specified for other actions. Structure is [documented below](#nested_rate_limit_options).
+* `rate_limit_options` - (Optional)
+    Must be specified if the `action` is "rate_based_ban" or "throttle". Cannot be specified for other actions. Structure is [documented below](#nested_rate_limit_options).
 
-* `redirect_options` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `redirect_options` - (Optional)
     Can be specified if the `action` is "redirect". Cannot be specified for other actions. Structure is [documented below](#nested_redirect_options).
 
 <a name="nested_match"></a>The `match` block supports:
@@ -179,13 +190,13 @@ The following arguments are supported:
 
 <a name="nested_adaptive_protection_config"></a>The `adaptive_protection_config` block supports:
 
-* `layer_7_ddos_defense_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for [Google Cloud Armor Adaptive Protection Layer 7 DDoS Defense](https://cloud.google.com/armor/docs/adaptive-protection-overview?hl=en). Structure is [documented below](#nested_layer_7_ddos_defense_config).
+* `layer_7_ddos_defense_config` - (Optional) Configuration for [Google Cloud Armor Adaptive Protection Layer 7 DDoS Defense](https://cloud.google.com/armor/docs/adaptive-protection-overview?hl=en). Structure is [documented below](#nested_layer_7_ddos_defense_config).
 
 <a name="nested_layer_7_ddos_defense_config"></a>The `layer_7_ddos_defense_config` block supports:
 
-* `enable` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) If set to true, enables CAAP for L7 DDoS detection.
+* `enable` - (Optional) If set to true, enables CAAP for L7 DDoS detection.
 
-* `rule_visibility` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Rule visibility can be one of the following: STANDARD - opaque rules. (default) PREMIUM - transparent rules.
+* `rule_visibility` - (Optional) Rule visibility can be one of the following: STANDARD - opaque rules. (default) PREMIUM - transparent rules.
 
 ## Attributes Reference
 

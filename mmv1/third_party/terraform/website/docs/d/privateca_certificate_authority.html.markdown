@@ -1,14 +1,12 @@
 ---
 subcategory: "Certificate Authority Service"
-layout: "google"
 page_title: "Google: google_privateca_certificate_authority"
-sidebar_current: "docs-google-datasource-privateca-certificate-authority"
 description: |-
   Contains the data that describes a Certificate Authority
 ---
 # google_privateca_certificate_authority
 
-Get info about a Google Cloud IAP Client.
+Get info about a Google CAS Certificate Authority.
 
 ## Example Usage
 
@@ -44,4 +42,4 @@ The following arguments are supported:
 
 See [google_privateca_certificate_authority](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/privateca_certificate_authority) resource for details of the available attributes.
 
-* `pem_csr` - The PEM-encoded signed certificate signing request (CSR). This is only set on subordinate certificate authorities.
+* `pem_csr` - The PEM-encoded signed certificate signing request (CSR). This is only set on subordinate certificate authorities that are awaiting user activation.

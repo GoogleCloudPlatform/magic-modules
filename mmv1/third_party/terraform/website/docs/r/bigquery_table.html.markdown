@@ -1,8 +1,6 @@
 ---
 subcategory: "BigQuery"
-layout: "google"
 page_title: "Google: google_bigquery_table"
-sidebar_current: "docs-google-bigquery-table"
 description: |-
   Creates a table resource in a dataset for Google BigQuery.
 ---
@@ -117,12 +115,16 @@ The following arguments are supported:
 * `labels` - (Optional) A mapping of labels to assign to the resource.
 
 * `schema` - (Optional) A JSON schema for the table.
+
     ~>**NOTE:** Because this field expects a JSON string, any changes to the
     string will create a diff, even if the JSON itself hasn't changed.
     If the API returns a different value for the same schema, e.g. it
     switched the order of values or replaced `STRUCT` field type with `RECORD`
     field type, we currently cannot suppress the recurring diff this causes.
     As a workaround, we recommend using the schema as returned by the API.
+
+    ~>**NOTE:**  When setting `schema` for `external_data_configuration`, please use
+    `external_data_configuration.schema` [documented below](#nested_external_data_configuration).
 
 * `time_partitioning` - (Optional) If specified, configures time-based
     partitioning for this table. Structure is [documented below](#nested_time_partitioning).
@@ -167,6 +169,10 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     support. Not all storage formats support hive partitioning -- requesting hive
     partitioning on an unsupported format will lead to an error, as will providing
     an invalid specification. Structure is [documented below](#nested_hive_partitioning_options).
+
+* `avro_options` (Optional) - Additional options if `source_format` is set to  
+    "AVRO".  Structure is [documented below](#nested_avro_options).
+
 
 * `ignore_unknown_values` (Optional) - Indicates if BigQuery should
     allow extra values that are not represented in the table schema.
@@ -259,6 +265,13 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     can be either of `gs://bucket/path_to_table` or `gs://bucket/path_to_table/`.
     Note that when `mode` is set to `CUSTOM`, you must encode the partition key schema within the `source_uri_prefix` by setting `source_uri_prefix` to `gs://bucket/path_to_table/{key1:TYPE1}/{key2:TYPE2}/{key3:TYPE3}`.
 
+<a name="nested_avro_options"></a>The `avro_options` block supports:
+
+* `use_avro_logical_types` (Optional) - If is set to true, indicates whether  
+    to interpret logical types as the corresponding BigQuery data type  
+    (for example, TIMESTAMP), instead of using the raw type (for example, INTEGER).
+    
+
 <a name="nested_time_partitioning"></a>The `time_partitioning` block supports:
 
 * `expiration_ms` -  (Optional) Number of milliseconds for which to keep the
@@ -345,8 +358,10 @@ exported:
 
 ## Import
 
-BigQuery tables can be imported using the `project`, `dataset_id`, and `table_id`, e.g.
+BigQuery tables imported using any of these accepted formats:
 
 ```
-$ terraform import google_bigquery_table.default gcp-project/foo/bar
+$ terraform import google_bigquery_table.default projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}
+$ terraform import google_bigquery_table.default {{project}}/{{dataset_id}}/{{table_id}}
+$ terraform import google_bigquery_table.default {{dataset_id}}/{{table_id}}
 ```

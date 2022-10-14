@@ -8,9 +8,12 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"time"
 
 	"google.golang.org/api/googleapi"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
@@ -97,7 +100,7 @@ func isConnectionResetNetworkError(err error) (bool, string) {
 // Retry 409s because some APIs like Cloud SQL throw a 409 if concurrent calls
 // are being made.
 //
-//The only way right now to determine it is a retryable 409 due to
+// The only way right now to determine it is a retryable 409 due to
 // concurrent calls is to look at the contents of the error message.
 // See https://github.com/hashicorp/terraform-provider-google/issues/3279
 func is409OperationInProgressError(err error) (bool, string) {
@@ -408,13 +411,38 @@ func iamServiceAccountNotFound(err error) (bool, string) {
 	return false, ""
 }
 
-// Big Table uses gRPC and thus does not return errors of type *googleapi.Error.
+// Bigtable uses gRPC and thus does not return errors of type *googleapi.Error.
 // Instead the errors returned are *status.Error. See the types of codes returned
 // here (https://pkg.go.dev/google.golang.org/grpc/codes#Code).
 func isBigTableRetryableError(err error) (bool, string) {
-	statusCode := status.Code(err)
-	if statusCode.String() == "FailedPrecondition" {
-		return true, "Waiting for table to be in a valid state"
+	// The error is retryable if the error code is not OK and has a retry delay.
+	// The retry delay is currently not used.
+	if errorStatus, ok := status.FromError(err); ok && errorStatus.Code() != codes.OK {
+		var retryDelayDuration time.Duration
+		for _, detail := range errorStatus.Details() {
+			retryInfo, ok := detail.(*errdetails.RetryInfo)
+			if !ok {
+				continue
+			}
+			retryDelay := retryInfo.GetRetryDelay()
+			retryDelayDuration = time.Duration(retryDelay.Seconds)*time.Second + time.Duration(retryDelay.Nanos)*time.Nanosecond
+			break
+		}
+		if retryDelayDuration != 0 {
+			// TODO: Consider sleep for `retryDelayDuration` before retrying.
+			return true, "Bigtable operation failed with a retryable error, will retry"
+		}
+	}
+
+	return false, ""
+}
+
+// Concurrent Apigee operations can fail with a 400 error
+func isApigeeRetryableError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 400 && strings.Contains(strings.ToLower(gerr.Body), "the resource is locked by another operation") {
+			return true, "Waiting for other concurrent operations to finish"
+		}
 	}
 
 	return false, ""

@@ -1,8 +1,6 @@
 ---
 subcategory: "Cloud Storage"
-layout: "google"
 page_title: "Google: google_storage_bucket"
-sidebar_current: "docs-google-storage-bucket-x"
 description: |-
   Creates a new bucket in Google Cloud Storage.
 ---
@@ -62,19 +60,32 @@ resource "google_storage_bucket" "auto-expire" {
   }
 }
 ```
+
+## Example Usage - Enabling public access prevention
+
+```hcl
+resource "google_storage_bucket" "auto-expire" {
+  name          = "no-public-access-bucket"
+  location      = "US"
+  force_destroy = true
+
+  public_access_prevention = "enforced"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
 * `name` - (Required) The name of the bucket.
 
+* `location` - (Required) The [GCS location](https://cloud.google.com/storage/docs/bucket-locations).
+
 - - -
 
 * `force_destroy` - (Optional, Default: false) When deleting a bucket, this
     boolean option will delete all contained objects. If you try to delete a
     bucket that contains objects, Terraform will fail that run.
-
-* `location` - (Required) The [GCS location](https://cloud.google.com/storage/docs/bucket-locations)
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
@@ -103,6 +114,10 @@ The following arguments are supported:
 
 * `uniform_bucket_level_access` - (Optional, Default: false) Enables [Uniform bucket-level access](https://cloud.google.com/storage/docs/uniform-bucket-level-access) access to a bucket.
 
+* `public_access_prevention` - (Optional) Prevents public access to a bucket. Acceptable values are "inherited" or "enforced". If "inherited", the bucket uses [public access prevention](https://cloud.google.com/storage/docs/public-access-prevention). only if the bucket is subject to the public access prevention organization policy constraint. Defaults to "inherited".
+
+* `custom_placement_config` - (Optional) The bucket's custom location configuration, which specifies the individual regions that comprise a dual-region bucket. If the bucket is designated a single or multi-region, the parameters are empty. Structure is [documented below](#nested_custom_placement_config).
+
 <a name="nested_lifecycle_rule"></a>The `lifecycle_rule` block supports:
 
 * `action` - (Required) The Lifecycle Rule's action configuration. A single block of this type is supported. Structure is [documented below](#nested_action).
@@ -124,6 +139,10 @@ The following arguments are supported:
 * `with_state` - (Optional) Match to live and/or archived objects. Unversioned buckets have only live objects. Supported values include: `"LIVE"`, `"ARCHIVED"`, `"ANY"`.
 
 * `matches_storage_class` - (Optional) [Storage Class](https://cloud.google.com/storage/docs/storage-classes) of objects to satisfy this condition. Supported values include: `STANDARD`, `MULTI_REGIONAL`, `REGIONAL`, `NEARLINE`, `COLDLINE`, `ARCHIVE`, `DURABLE_REDUCED_AVAILABILITY`.
+
+* `matches_prefix` - (Optional) One or more matching name prefixes to satisfy this condition.
+
+* `matches_suffix` - (Optional) One or more matching name suffixes to satisfy this condition.
 
 * `num_newer_versions` - (Optional) Relevant only for versioned objects. The number of newer versions of an object to satisfy this condition.
 
@@ -186,6 +205,10 @@ The following arguments are supported:
   This data source calls an API which creates the account if required, ensuring your Terraform applies cleanly and repeatedly irrespective of the
   state of the project.
   You should take care for race conditions when the same Terraform manages IAM policy on the Cloud KMS crypto key. See the data source page for more details.
+
+<a name="nested_custom_placement_config"></a>The `custom_placement_config` block supports:
+
+* `data_locations` - (Required) The list of individual regions that comprise a dual-region bucket. See [Cloud Storage bucket locations](https://cloud.google.com/storage/docs/dual-regions#availability) for a list of acceptable regions. **Note**: If any of the data_locations changes, it will [recreate the bucket](https://cloud.google.com/storage/docs/locations#key-concepts).
 
 ## Attributes Reference
 

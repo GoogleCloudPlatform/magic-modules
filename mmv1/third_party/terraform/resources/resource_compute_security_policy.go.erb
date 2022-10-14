@@ -40,7 +40,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validateGCPName,
+				ValidateFunc: validateGCEName,
 				Description:  `The name of the security policy.`,
 			},
 
@@ -63,6 +63,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: `The type indicates the intended use of the security policy. CLOUD_ARMOR - Cloud Armor backend security policies can be configured to filter incoming HTTP requests targeting backend services. They filter requests before they hit the origin servers. CLOUD_ARMOR_EDGE - Cloud Armor edge security policies can be configured to filter incoming HTTP requests targeting backend services (including Cloud CDN-enabled) as well as backend buckets (Cloud Storage). They filter requests before the request is served from Google's cache.`,
+				ValidateFunc: validation.StringInSlice([]string{"CLOUD_ARMOR", "CLOUD_ARMOR_EDGE", "CLOUD_ARMOR_INTERNAL_SERVICE"}, false),
 			},
 
 			"rule": {
@@ -163,7 +164,6 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 							Description: `When set to true, the action specified above is not enforced. Stackdriver logs for requests that trigger a preview action are annotated as such.`,
 						},
 
-					<% unless version == 'ga' -%>
 						"rate_limit_options": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -212,6 +212,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 										Optional:     true,
 										Default:      "ALL",
 										Description:  `Determines the key to enforce the rateLimitThreshold on`,
+										ValidateFunc: validation.StringInSlice([]string{"ALL", "IP", "HTTP_HEADER", "XFF_IP", "HTTP_COOKIE"}, false),
 									},
 
 									"enforce_on_key_name": {
@@ -296,7 +297,6 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 							},
 							Description: `Parameters defining the redirect action. Cannot be specified for any other actions.`,
 						},
-					<% end -%>
 					},
 				},
 				Description: `The set of rules that belong to this policy. There must always be a default rule (rule with priority 2147483647 and match "*"). If no rules are provided when creating a security policy, a default rule with action "allow" will be added.`,
@@ -324,23 +324,39 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"json_parsing": {
 							Type: schema.TypeString,
-								Optional: true,
-								Computed: true,
-								ValidateFunc: validation.StringInSlice([]string{"DISABLED", "STANDARD"}, false),
-								Description: `JSON body parsing. Supported values include: "DISABLED", "STANDARD".`,
+							Optional: true,
+							Computed: true,
+							ValidateFunc: validation.StringInSlice([]string{"DISABLED", "STANDARD"}, false),
+							Description: `JSON body parsing. Supported values include: "DISABLED", "STANDARD".`,
+						},
+						"json_custom_config": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							Description: `Custom configuration to apply the JSON parsing. Only applicable when JSON parsing is set to STANDARD.`,
+							MaxItems:    1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"content_types": {
+										Type: schema.TypeSet,
+										Required: true,
+										Elem: &schema.Schema{Type: schema.TypeString},
+										Description: `A list of custom Content-Type header values to apply the JSON parsing.`,
+									},
+								},
+							},
 						},
 						"log_level": {
 							Type: schema.TypeString,
-								Optional: true,
-								Computed: true,
-								ValidateFunc: validation.StringInSlice([]string{"NORMAL", "VERBOSE"}, false),
-								Description: `Logging level. Supported values include: "NORMAL", "VERBOSE".`,
+							Optional: true,
+							Computed: true,
+							ValidateFunc: validation.StringInSlice([]string{"NORMAL", "VERBOSE"}, false),
+							Description: `Logging level. Supported values include: "NORMAL", "VERBOSE".`,
 						},
 					},
 				},
 			},
 
-		<%- unless version == 'ga' -%>
 			"adaptive_protection_config": {
 				Type: schema.TypeList,
 				Optional: true,
@@ -373,7 +389,6 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 					},
 				},
 			},
-	<% end -%>
 		},
 
 		UseJSONNumber: true,
@@ -426,19 +441,13 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 		securityPolicy.AdvancedOptionsConfig = expandSecurityPolicyAdvancedOptionsConfig(v.([]interface{}))
 	}
 
-<% unless version == 'ga' -%>
 	if v, ok := d.GetOk("adaptive_protection_config"); ok{
 		securityPolicy.AdaptiveProtectionConfig = expandSecurityPolicyAdaptiveProtectionConfig(v.([]interface{}))
 	}
-<% end -%>
 
 	log.Printf("[DEBUG] SecurityPolicy insert request: %#v", securityPolicy)
 
-<% if version == 'ga' -%>
 	client := config.NewComputeClient(userAgent)
-<% else -%>
-	client := config.NewComputeClient(userAgent)
-<% end -%>
 
 	op, err := client.SecurityPolicies.Insert(project, securityPolicy).Do()
 
@@ -474,11 +483,7 @@ func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{})
 
 	sp := d.Get("name").(string)
 
-<% if version == 'ga' -%>
 	client := config.NewComputeClient(userAgent)
-<% else -%>
-	client := config.NewComputeClient(userAgent)
-<% end -%>
 
 	securityPolicy, err := client.SecurityPolicies.Get(project, sp).Do()
 	if err != nil {
@@ -510,11 +515,9 @@ func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error setting advanced_options_config: %s", err)
 	}
 
-<% unless version == 'ga' -%>
 	if err := d.Set("adaptive_protection_config", flattenSecurityPolicyAdaptiveProtectionConfig(securityPolicy.AdaptiveProtectionConfig)); err != nil {
 		return fmt.Errorf("Error setting adaptive_protection_config: %s", err)
 	}
-<% end -%>
 
 	return nil
 }
@@ -550,7 +553,12 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 
 	if d.HasChange("advanced_options_config") {
 		securityPolicy.AdvancedOptionsConfig = expandSecurityPolicyAdvancedOptionsConfig(d.Get("advanced_options_config").([]interface{}))
-		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "AdvancedOptionsConfig", "advancedOptionsConfig.jsonParsing", "advancedOptionsConfig.logLevel")
+		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "AdvancedOptionsConfig", "advancedOptionsConfig.jsonParsing", "advancedOptionsConfig.jsonCustomConfig", "advancedOptionsConfig.logLevel")
+	}
+
+	if d.HasChange("adaptive_protection_config") {
+		securityPolicy.AdaptiveProtectionConfig = expandSecurityPolicyAdaptiveProtectionConfig(d.Get("adaptive_protection_config").([]interface{}))
+		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "AdaptiveProtectionConfig", "adaptiveProtectionConfig.layer7DdosDefenseConfig.enable", "adaptiveProtectionConfig.layer7DdosDefenseConfig.ruleVisibility")
 	}
 
 	if len(securityPolicy.ForceSendFields) > 0 {
@@ -661,11 +669,7 @@ func resourceComputeSecurityPolicyDelete(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-<% if version == 'ga' -%>
 	client := config.NewComputeClient(userAgent)
-<% else -%>
-	client := config.NewComputeClient(userAgent)
-<% end -%>
 
 	// Delete the SecurityPolicy
 	op, err := client.SecurityPolicies.Delete(project, d.Get("name").(string)).Do()
@@ -698,10 +702,8 @@ func expandSecurityPolicyRule(raw interface{}) *compute.SecurityPolicyRule {
 		Action:          	data["action"].(string),
 		Preview:         	data["preview"].(bool),
 		Match:           	expandSecurityPolicyMatch(data["match"].([]interface{})),
-	<% unless version == 'ga' -%>
 		RateLimitOptions:	expandSecurityPolicyRuleRateLimitOptions(data["rate_limit_options"].([]interface{})),
 		RedirectOptions:        expandSecurityPolicyRuleRedirectOptions(data["redirect_options"].([]interface{})),
-	<% end -%>
 		ForceSendFields: 	[]string{"Description", "Preview"},
 	}
 }
@@ -754,10 +756,8 @@ func flattenSecurityPolicyRules(rules []*compute.SecurityPolicyRule) []map[strin
 			"action":      		rule.Action,
 			"preview":     		rule.Preview,
 			"match":       		flattenMatch(rule.Match),
-		<% unless version == 'ga' -%>
 			"rate_limit_options":	flattenSecurityPolicyRuleRateLimitOptions(rule.RateLimitOptions),
 			"redirect_options":     flattenSecurityPolicyRedirectOptions(rule.RedirectOptions),
-		<% end -%>
 		}
 
 		rulesSchema = append(rulesSchema, data)
@@ -814,8 +814,9 @@ func expandSecurityPolicyAdvancedOptionsConfig(configured []interface{}) *comput
 
 	data := configured[0].(map[string]interface{})
 	return &compute.SecurityPolicyAdvancedOptionsConfig{
-		JsonParsing: data["json_parsing"].(string),
-		LogLevel: data["log_level"].(string),
+		JsonParsing:      data["json_parsing"].(string),
+		JsonCustomConfig: expandSecurityPolicyAdvancedOptionsConfigJsonCustomConfig(data["json_custom_config"].([]interface{})),
+		LogLevel:         data["log_level"].(string),
 	}
 }
 
@@ -825,14 +826,38 @@ func flattenSecurityPolicyAdvancedOptionsConfig(conf *compute.SecurityPolicyAdva
 	}
 
 	data := map[string]interface{}{
-		"json_parsing": conf.JsonParsing,
-		"log_level": conf.LogLevel,
+		"json_parsing":       conf.JsonParsing,
+		"json_custom_config": flattenSecurityPolicyAdvancedOptionsConfigJsonCustomConfig(conf.JsonCustomConfig),
+		"log_level":          conf.LogLevel,
 	}
 
 	return []map[string]interface{}{data}
 }
 
-<% unless version == 'ga' -%>
+func expandSecurityPolicyAdvancedOptionsConfigJsonCustomConfig(configured []interface{}) *compute.SecurityPolicyAdvancedOptionsConfigJsonCustomConfig {
+	if len(configured) == 0 || configured[0] == nil {
+		// If configuration is unset, return an empty JsonCustomConfig; this ensures the ContentTypes list can be cleared
+		return &compute.SecurityPolicyAdvancedOptionsConfigJsonCustomConfig{}
+	}
+
+	data := configured[0].(map[string]interface{})
+	return &compute.SecurityPolicyAdvancedOptionsConfigJsonCustomConfig{
+		ContentTypes: convertStringArr(data["content_types"].(*schema.Set).List()),
+	}
+}
+
+func flattenSecurityPolicyAdvancedOptionsConfigJsonCustomConfig(conf *compute.SecurityPolicyAdvancedOptionsConfigJsonCustomConfig) []map[string]interface{} {
+	if conf == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{
+		"content_types": schema.NewSet(schema.HashString, convertStringArrToInterface(conf.ContentTypes)),
+	}
+
+	return []map[string]interface{}{data}
+}
+
 func expandSecurityPolicyAdaptiveProtectionConfig(configured []interface{}) *compute.SecurityPolicyAdaptiveProtectionConfig {
 	if len(configured) == 0 || configured[0] == nil {
 		return nil
@@ -853,6 +878,7 @@ func expandLayer7DdosDefenseConfig(configured []interface{}) *compute.SecurityPo
 	return &compute.SecurityPolicyAdaptiveProtectionConfigLayer7DdosDefenseConfig{
 		Enable: data["enable"].(bool),
 		RuleVisibility: data["rule_visibility"].(string),
+		ForceSendFields: []string{"Enable"},
 	}
 }
 
@@ -880,9 +906,7 @@ func flattenLayer7DdosDefenseConfig(conf *compute.SecurityPolicyAdaptiveProtecti
 
 	return []map[string]interface{}{data}
 }
-<% end -%>
 
-<% unless version == 'ga' -%>
 func expandSecurityPolicyRuleRateLimitOptions(configured []interface{}) *compute.SecurityPolicyRuleRateLimitOptions {
 	if len(configured) == 0 || configured[0] == nil {
 		return nil
@@ -969,7 +993,6 @@ func flattenSecurityPolicyRedirectOptions(conf *compute.SecurityPolicyRuleRedire
 
 	return []map[string]interface{}{data}
 }
-<% end -%>
 
 func resourceSecurityPolicyStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)

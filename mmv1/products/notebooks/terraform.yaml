@@ -80,7 +80,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       noRemoveDataDisk: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       dataDiskType: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'emptyOrDefaultStringSuppress("DISK_TYPE_UNSPECIFIED")'
+        ignore_read: true
       diskEncryption: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'emptyOrDefaultStringSuppress("DISK_ENCRYPTION_UNSPECIFIED")'
       instanceOwners: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -136,6 +136,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         region_override: "us-central1"
         vars:
           runtime_name: "notebooks-runtime-container"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "notebook_runtime_kernels"
+        primary_resource_id: "runtime_container"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime-container%s\", context[\"random_suffix\"])"
+        region_override: "us-central1"
+        vars:
+          runtime_name: "notebooks-runtime-kernel"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "notebook_runtime_script"
+        primary_resource_id: "runtime_container"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime-container%s\", context[\"random_suffix\"])"
+        region_override: "us-central1"
+        vars:
+          runtime_name: "notebooks-runtime-script"           
     description: |
       {{description}}
 
@@ -164,6 +178,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       softwareConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         # API returns default idleShutdown (true) and default idleShutdownTimeout (180).
         default_from_api: true
+        update_mask_fields:
+          - "softwareConfig.idleShutdown"
+          - "softwareConfig.idleShutdownTimeout"
+          - "softwareConfig.customGpuDriverPath"
+          - "softwareConfig.postStartupScript"
   Location: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
