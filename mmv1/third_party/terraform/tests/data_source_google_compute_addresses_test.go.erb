@@ -65,9 +65,11 @@ resource "google_compute_address" "address" {
 
   region = local.region
   name = "${local.address_name}-${local.region}-${count.index}"
+<% unless version == 'ga' -%>
   labels = {
 	mykey = "myvalue"
   }
+<% end -%>
 }
 
 resource "google_compute_address" "address_region_bis" {
@@ -75,9 +77,11 @@ resource "google_compute_address" "address_region_bis" {
 
   region = local.region_bis
   name = "${local.address_name}-${local.region_bis}-${count.index}"
+<% unless version == 'ga' -%>
   labels = {
 	mykey = "myvalue"
   }
+<% end -%>
 }
 
 data "google_compute_addresses" "regional_addresses" {
