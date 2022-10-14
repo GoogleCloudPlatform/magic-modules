@@ -159,7 +159,7 @@ objects:
     self_link: '{{name}}'
     update_verb: :PATCH
     delete_verb: :POST
-    delete_url: 'projects/{{project}}/iosApps/{{appId}}:remove'
+    delete_url: 'projects/{{project}}/iosApps/{{app_id}}:remove'
     update_mask: true
     description: |
       A Google Cloud Firebase Apple application instance
@@ -169,7 +169,7 @@ objects:
           'https://firebase.google.com/docs/ios/setup'
       api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.iosApps'
     async: !ruby/object:Api::OpAsync
-      actions: ["create"]
+      actions: ["create", "delete"]
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
@@ -186,6 +186,16 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: 'error'
         message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'deletion_policy'
+        description: |
+          Optional. Set to `ABANDON` to soft-delete the AppleApp. Soft-deleted AppleApps are recoverable
+          within 30 days using [projects.iosApps.undelete](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.iosApps/undelete).
+          Set to `DELETE` to immediately delete the AppleApp. Default to `DELETE`
+        input: true
+        url_param_only: true
+        default_value: DELETE
     properties:
       - !ruby/object:Api::Type::String
         name: name
