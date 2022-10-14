@@ -13,3 +13,7 @@
     name: region
   field: location
   location: region
+- type: CUSTOM_ID
+  details:
+    id: projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/{{priority}}
+  location: region
