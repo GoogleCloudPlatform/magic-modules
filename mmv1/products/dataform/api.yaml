@@ -24,12 +24,10 @@ objects:
 # Dataform Repository
   - !ruby/object:Api::Resource
     name: Repository
-    base_url: projects/{{project}}/locations/{{location}}/repositories
-    self_link: projects/{{project}}/locations/{{location}}/repositories/{{name}}
-    create_url: projects/{{project}}/locations/{{location}}/repositories?repositoryId={{name}}
+    base_url: projects/{{project}}/locations/{{region}}/repositories
+    create_url: projects/{{project}}/locations/{{region}}/repositories?repositoryId={{name}}
     create_verb: :POST
     update_verb: :PATCH
-    update_mask: true
     min_version: beta
     description: |-
       A resource represents a Dataform Git repository
@@ -37,12 +35,18 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/dataform/docs/'
       api: 'https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'region'
+        description: 'A reference to the region'
+        input: true
+        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: The repository's name.
-        output: true
-        pattern: projects/{{project}}/locations/{{location}}/repositories/{{name}}
+        input: true
+        required: true
       - !ruby/object:Api::Type::NestedObject
         name: 'gitRemoteSettings'
         description: Optional. If set, configures this repository to be linked to a Git remote.

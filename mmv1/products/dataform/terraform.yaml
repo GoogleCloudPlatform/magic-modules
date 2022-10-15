@@ -14,19 +14,21 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Repository:  !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: projects/{{project}}/locations/{{location}}/repositories/{{name}}
-    base_url: projects/{{project}}/locations/{{location}}/repositories
-    import_format: ["projects/{{project}}/locations/{{location}}/repositories/{{name}}"]
+    id_format: projects/{{project}}/locations/{{region}}/repositories/{{name}}
+    base_url: projects/{{project}}/locations/{{region}}/repositories
+    import_format: ["projects/{{project}}/locations/{{region}}/repositories/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: 'dataform_repository'
-        skip_import_test: true
         primary_resource_id: dataform_respository
         min_version: beta
         vars:
           git_repository_name: "my/repository"
+          dataform_repository_name: "dataform_repository"
           data: secret-data
-          default_branch: main
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
