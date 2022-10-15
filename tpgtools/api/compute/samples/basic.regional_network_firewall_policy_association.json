@@ -1,8 +1,0 @@
-{
-  "name": "{{association}}",
-  "attachmentTarget": "projects/{{project}}/global/networks/network_name",
-  "firewallPolicy": "{{ref:basic.regional_network_firewall_policy.json:name}}",
-  "project": "{{project}}",
-  "location": "{{region}}"
-  
-}

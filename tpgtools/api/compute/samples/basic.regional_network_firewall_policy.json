@@ -1,6 +1,0 @@
-{
-  "name": "{{policy}}-create",
-  "project": "{{project}}",
-  "location": "{{region}}",
-  "description": "Sample regional network firewall policy"
-}

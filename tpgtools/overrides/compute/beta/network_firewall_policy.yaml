@@ -1,6 +1,6 @@
 - type: CUSTOM_RESOURCE_NAME
   details:
-    title: regional_network_firewall_policy
+    title: region_network_firewall_policy
   location: region
 - type: EXCLUDE
   field: location
