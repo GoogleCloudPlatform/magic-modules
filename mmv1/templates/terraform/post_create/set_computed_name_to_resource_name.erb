@@ -11,7 +11,7 @@ if !ok {
 		return fmt.Errorf("Create response didn't contain critical fields. Create may not have succeeded.")
 	}
 }
-if err := d.Set("name", GetResourceNameFromSelfLink(name.(string)); err != nil {
+if err := d.Set("name", GetResourceNameFromSelfLink(name.(string))); err != nil {
 	return fmt.Errorf("Error setting name: %s", err)
 }
 d.SetId(name.(string))
