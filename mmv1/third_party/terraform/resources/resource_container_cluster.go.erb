@@ -1547,7 +1547,6 @@ func resourceContainerCluster() *schema.Resource {
 			   Computed: true,
 			},
 
-<% unless version == "ga" -%>
 			"cost_management_config": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -1564,7 +1563,6 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 
 			"resource_usage_export_config": {
 				Type:        schema.TypeList,
@@ -1767,9 +1765,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 <% unless version == 'ga' -%>
 		NodePoolAutoConfig: expandNodePoolAutoConfig(d.Get("node_pool_auto_config")),
 <% end -%>
-<% unless version == 'ga' -%>
 		CostManagementConfig: expandCostManagementConfig(d.Get("cost_management_config")),
-<% end -%>
 	}
 
 	v:= d.Get("enable_shielded_nodes")
@@ -2159,11 +2155,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error setting enable_l4_ilb_subsetting: %s", err)
 	}
 <% end -%>
-<% unless version == 'ga' %>
 	if err := d.Set("cost_management_config", flattenManagementConfig(cluster.CostManagementConfig)); err != nil {
 		return fmt.Errorf("Error setting cost_management_config: %s", err)
 	}
-<% end -%>
 	if err := d.Set("confidential_nodes", flattenConfidentialNodes(cluster.ConfidentialNodes)); err != nil {
 		return err
 	}
@@ -2583,7 +2577,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 <% end -%>
 
-<% unless version == 'ga' -%>
 	if d.HasChange("cost_management_config") {
 		c := d.Get("cost_management_config")
 		req := &container.UpdateClusterRequest{
@@ -2601,7 +2594,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s cost management config has been updated", d.Id())
 	}
 
-<% end -%>
 	if d.HasChange("authenticator_groups_config") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -4105,7 +4097,6 @@ func expandDefaultMaxPodsConstraint(v interface{}) *container.MaxPodsConstraint 
 	}
 }
 
-<% unless version == 'ga' -%>
 func expandCostManagementConfig(configured interface{}) *container.CostManagementConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 {
@@ -4118,7 +4109,6 @@ func expandCostManagementConfig(configured interface{}) *container.CostManagemen
 		ForceSendFields: []string{"Enabled"},
 	}
 }
-<% end -%>
 
 func expandResourceUsageExportConfig(configured interface{}) *container.ResourceUsageExportConfig {
 	l := configured.([]interface{})
@@ -4828,7 +4818,6 @@ func flattenMeshCertificates(c *container.MeshCertificates) []map[string]interfa
 	}
 }
 
-<% unless version == 'ga' -%>
 func flattenManagementConfig(c *container.CostManagementConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -4840,7 +4829,6 @@ func flattenManagementConfig(c *container.CostManagementConfig) []map[string]int
 	}
 }
 
-<% end -%>
 func flattenDatabaseEncryption(c *container.DatabaseEncryption) []map[string]interface{} {
 	if c == nil {
 		return nil
