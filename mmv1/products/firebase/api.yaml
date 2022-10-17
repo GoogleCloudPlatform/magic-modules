@@ -138,12 +138,12 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'deletion_policy'
         description: |
-          Optional. Set to `ABANDON` to soft-delete the WebApp. Soft-deleted WebApps are recoverable
-          within 30 days using [projects.webApps.undelete](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.webApps/undelete).
-          Set to `DELETE` to immediately delete the WebApp. Default to `DELETE`
+          (Optional) Set to `ABANDON` to allow the WebApp to be untracked from terraform state
+          rather than deleted upon `terraform destroy`. This is useful becaue the WebApp may be 
+          serving traffic. Set to `DELETE` to delete the WebApp. Default to `ABANDON`
         input: true
         url_param_only: true
-        default_value: DELETE
+        default_value: ABANDON
     properties:
       - !ruby/object:Api::Type::String
         name: name
