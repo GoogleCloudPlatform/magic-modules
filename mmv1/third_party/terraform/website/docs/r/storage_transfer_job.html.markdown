@@ -128,6 +128,9 @@ The following arguments are supported:
 
 * `notification_config` - (Optional) Notification configuration. This is not supported for transfers involving PosixFilesystem. Structure [documented below](#nested_notification_config).
 
+* `logging_config` - (Optional) Logging configuration. Structure [documented below](#nested_logging_config).
+
+
 <a name="nested_transfer_spec"></a>The `transfer_spec` block supports:
 
 * `gcs_data_sink` - (Optional) A Google Cloud Storage data sink. Structure [documented below](#nested_gcs_data_sink).
@@ -257,6 +260,17 @@ The `azure_credentials` block supports:
 * `event_types` - (Optional) Event types for which a notification is desired. If empty, send notifications for all event types. The valid types are "TRANSFER_OPERATION_SUCCESS", "TRANSFER_OPERATION_FAILED", "TRANSFER_OPERATION_ABORTED".
 
 * `payload_format` - (Required) The desired format of the notification message payloads. One of "NONE" or "JSON".
+
+<a name="nested_logging_config"></a>The `loggin_config` block supports:
+
+* `log_actions` - (Optional) A list of actions to be logged. If empty, no logs are generated. Not supported for transfers with PosixFilesystem data sources; use enableOnpremGcsTransferLogs instead. 
+Each action may be one of `FIND`, `DELETE`, and `COPY`.
+
+* `log_action_states` - (Optional) A list of loggable action states. If empty, no logs are generated. Not supported for transfers with PosixFilesystem data sources; use enableOnpremGcsTransferLogs instead.
+Each action state may be one of `SUCCEEDED`, and `FAILED`.
+
+* `enable_on_prem_gcs_transfer` - (Optional) For transfers with a PosixFilesystem source, this option enables the Cloud Storage transfer logs for this transfer. 
+Defaults to false.
 
 ## Attributes Reference
 
