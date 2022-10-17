@@ -105,6 +105,17 @@ resource "google_storage_transfer_job" "s3-bucket-nightly-backup" {
     payload_format = "JSON"
   }
 
+  logging_config {
+    log_actions       = [
+      "COPY",
+      "DELETE"
+    ]
+    log_action_states = [
+      "SUCCEEDED",
+      "FAILED"
+    ]
+  }
+
   depends_on = [google_storage_bucket_iam_member.s3-backup-bucket, google_pubsub_topic_iam_member.notification_config]
 }
 ```
