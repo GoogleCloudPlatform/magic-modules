@@ -14750,17 +14750,17 @@ objects:
         send_empty_value: true
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
-          - !ruby/object:Api::Type::String
-            name: 'projectIdOrNum'
-            required: true
-            description: |
-              A project that is allowed to connect to this service attachment.
-          - !ruby/object:Api::Type::Integer
-            name: 'connectionLimit'
-            required: true
-            description: |
-              The number of consumer forwarding rules the consumer project can
-              create.
+            - !ruby/object:Api::Type::String
+              name: 'projectIdOrNum'
+              required: true
+              description: |
+                A project that is allowed to connect to this service attachment.
+            - !ruby/object:Api::Type::Integer
+              name: 'connectionLimit'
+              required: true
+              description: |
+                The number of consumer forwarding rules the consumer project can
+                create.
   - !ruby/object:Api::Resource
     name: 'SslPolicy'
     kind: 'compute#sslPolicy'
