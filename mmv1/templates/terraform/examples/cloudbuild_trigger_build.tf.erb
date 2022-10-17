@@ -16,7 +16,7 @@ resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
 
     step {
       name   = "ubuntu"
-      script = "echo hello" # using `script` field
+      script = "echo hello" # using script field
     }
     
     source {
