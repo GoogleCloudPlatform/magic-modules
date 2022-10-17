@@ -313,6 +313,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           backend_service_name: "backend-service"
           health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_coalescing"
+        primary_resource_id: "default"
+        skip_docs: true
+        vars:
+          backend_service_name: "backend-service"
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       method_name_separator: '/'
       fetch_iam_policy_verb: :GET
@@ -463,6 +469,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           region_backend_service_name: "region-service"
           health_check_name: "rbs-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_backend_service_coalescing"
+        primary_resource_id: "default"
+        skip_docs: true
+        vars:
+          region_backend_service_name: "region-service"
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       method_name_separator: '/'
       fetch_iam_policy_verb: :GET

@@ -1342,6 +1342,11 @@ objects:
                   description: |
                     The TTL (in seconds) for which to cache responses with the corresponding status code. The maximum allowed value is 1800s
                     (30 minutes), noting that infrequently accessed objects may be evicted from the cache before the defined TTL.
+          - !ruby/object:Api::Type::Boolean
+            name: 'requestCoalescing'
+            send_empty_value: true
+            description: |
+              If true then Cloud CDN will combine multiple concurrent cache fill requests into a small number of requests to the origin.
           - !ruby/object:Api::Type::Enum
             name: 'cacheMode'
             description: |
@@ -2372,6 +2377,11 @@ objects:
                   description: |
                     The TTL (in seconds) for which to cache responses with the corresponding status code. The maximum allowed value is 1800s
                     (30 minutes), noting that infrequently accessed objects may be evicted from the cache before the defined TTL.
+          - !ruby/object:Api::Type::Boolean
+            name: 'requestCoalescing'
+            send_empty_value: true
+            description: |
+              If true then Cloud CDN will combine multiple concurrent cache fill requests into a small number of requests to the origin.
           - !ruby/object:Api::Type::Enum
             name: 'cacheMode'
             description: |

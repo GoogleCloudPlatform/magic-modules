@@ -1,0 +1,8 @@
+resource "google_compute_region_backend_service" "<%= ctx[:primary_resource_id] %>" {
+  name        = "<%= ctx[:vars]['region_backend_service_name'] %>"
+  description = "Coalescing Activated"
+  enable_cdn  = true
+  cdn_policy {
+    request_coalescing = true
+  }
+}
