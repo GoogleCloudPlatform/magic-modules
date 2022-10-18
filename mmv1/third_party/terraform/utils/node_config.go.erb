@@ -107,7 +107,6 @@ func schemaNodeConfig() *schema.Schema {
 								MaxItems:     1,
 								Optional:     true,
 								ForceNew:     true,
-								ConfigMode: schema.SchemaConfigModeAttr,
 								Description:  `Configuration for GPU sharing.`,
 								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
