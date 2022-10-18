@@ -185,7 +185,7 @@ module Provider
     # per resource. The resource.erb template forms the basis of a single
     # GCP Resource on Terraform.
     def generate_resource(pwd, data, generate_code, generate_docs)
-      if generate_code && !data.object.cgc_only
+      if generate_code
         FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
         data.generate(pwd,
                       '/templates/terraform/resource.erb',
@@ -199,8 +199,6 @@ module Provider
     end
 
     def generate_documentation(pwd, data)
-      return if data.object.cgc_only
-
       target_folder = data.output_folder
       target_folder = File.join(target_folder, 'website', 'docs', 'r')
       FileUtils.mkpath target_folder
@@ -231,8 +229,7 @@ module Provider
                 data.object.custom_code.custom_delete ||
                 data.object.custom_code.pre_delete ||
                 data.object.custom_code.post_delete ||
-                data.object.skip_delete ||
-                data.object.cgc_only
+                data.object.skip_delete
 
       file_name =
         "#{folder_name(data.version)}/resource_#{full_resource_name(data)}_sweeper_test.go"
@@ -250,8 +247,6 @@ module Provider
       data = build_object_data(pwd, @api.objects.first, output_folder, @target_version_name)
 
       data.object = @api.objects.select(&:autogen_async).first
-
-      return if data.object.cgc_only
 
       data.async = data.object.async
       FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))

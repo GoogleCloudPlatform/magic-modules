@@ -1,3 +1,12 @@
+	// Handwritten
+	obj := make(map[string]interface{})
+	if d.Get("deletion_policy") == "DELETE" {
+		obj["immediate"] = true
+	} else {
+		fmt.Printf("Skip deleting App %q due to deletion_policy: %q\n", d.Id(), d.Get("deletion_policy"))
+		return nil
+	}
+	// End of Handwritten
 	billingProject := ""
 
 	project, err := getProject(d, config)
@@ -17,13 +26,6 @@
 	if bp, err := getBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-
-	// Handwritten
-	obj := make(map[string]interface{})
-	if d.Get("deletion_policy") == "DELETE" {
-		obj["immediate"] = true
-	}
-	// End of Handwritten
 
 	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
