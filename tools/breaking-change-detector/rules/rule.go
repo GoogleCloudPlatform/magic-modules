@@ -7,6 +7,7 @@ type Rule interface {
 	Name() string
 	Definition() string
 	Identifier() string
+	Undetectable() bool
 }
 
 // RuleCategory holds documentation and
@@ -23,22 +24,17 @@ type Rules struct {
 	Categories []RuleCategory
 }
 
-var fieldRules RuleCategory = RuleCategory{
-	Name:       "",
-	Definition: "",
-}
-
 // GetRules returns a list of all rules for
 // documentation generation
 func GetRules() *Rules {
 	categories := []RuleCategory{
 		{
-			Name:       "Provider Level Breakages",
-			Definition: "Top level behavior such as provider configuration changes and authentication.",
-			Rules:      nil,
+			Name:       "Provider Configuration Level Breakages",
+			Definition: "Top level behavior such as provider configuration and authentication changes.",
+			Rules:      providerConfigRulesToRuleArray(ProviderConfigRules),
 		},
 		{
-			Name:       "Resource Inventory Level Breakages",
+			Name:       "Resource List Level Breakages",
 			Definition: "Resource/datasource naming conventions and entry differences.",
 			Rules:      resourceInventoryRulesToRuleArray(ResourceInventoryRules),
 		},
