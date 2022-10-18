@@ -184,7 +184,7 @@ func testAccBigqueryDataTransferConfig_force_new_update_params(t *testing.T) {
 				ResourceName:            "google_bigquery_data_transfer_config.update_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"project"},
 			},
 			{
 				Config: testAccBigqueryDataTransferConfig_update_params_force_new(random_suffix, "new", "old"),
@@ -193,7 +193,7 @@ func testAccBigqueryDataTransferConfig_force_new_update_params(t *testing.T) {
 				ResourceName:            "google_bigquery_data_transfer_config.update_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"project"},
 			},
 			{
 				Config: testAccBigqueryDataTransferConfig_update_params_force_new(random_suffix, "new", "new"),
@@ -202,7 +202,7 @@ func testAccBigqueryDataTransferConfig_force_new_update_params(t *testing.T) {
 				ResourceName:            "google_bigquery_data_transfer_config.update_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"project"},
 			},
 		},
 	})
