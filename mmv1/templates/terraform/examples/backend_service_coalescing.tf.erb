@@ -4,5 +4,6 @@ resource "google_compute_backend_service" "<%= ctx[:primary_resource_id] %>" {
   enable_cdn  = true
   cdn_policy {
     request_coalescing = true
+    signed_url_cache_max_age_sec = 7200
   }
 }
