@@ -416,7 +416,7 @@ resource "google_bigquery_dataset" "dataset" {
   dataset_id       = "tf_test_%s"
   friendly_name    = "foo"
   description      = "bar"
-  location         = "US"
+  location         = "us"
 }
 
 resource "google_bigquery_data_transfer_config" "update_config" {
