@@ -169,7 +169,8 @@ objects:
         output: true
         description: |
           The URLs where the `WebApp` is hosted.
-        item_type: Api::Type::String  - !ruby/object:Api::Resource
+        item_type: Api::Type::String 
+  - !ruby/object:Api::Resource
     name: 'AppleApp'
     min_version: beta
     base_url: projects/{{project}}/iosApps
