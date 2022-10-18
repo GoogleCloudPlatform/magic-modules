@@ -100,7 +100,6 @@ func clusterSchemaNodeConfig() *schema.Schema {
 	return nodeConfigSch
 }
 
-<% unless version == 'ga' -%>
 // Defines default nodel pool settings for the entire cluster. These settings are
 // overridden if specified on the specific NodePool object.
 func clusterSchemaNodePoolDefaults() *schema.Schema {
@@ -118,16 +117,18 @@ func clusterSchemaNodePoolDefaults() *schema.Schema {
 					Description: `Subset of NodeConfig message that has defaults.`,
 					MaxItems:    1,
 					Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-									"gcfs_config": schemaGcfsConfig(false),
-							},
+						Schema: map[string]*schema.Schema{
+<% unless version == 'ga' -%>
+							"gcfs_config": schemaGcfsConfig(false),
+<% end -%>
+							"logging_variant": schemaLoggingVariant(),
+						},
 					},
 				},
 			},
 		},
 	}
 }
-<% end -%>
 
 func rfc5545RecurrenceDiffSuppress(k, o, n string, d *schema.ResourceData) bool {
 	// This diff gets applied in the cloud console if you specify
@@ -1164,9 +1165,9 @@ func resourceContainerCluster() *schema.Resource {
 				ConflictsWith: []string{"enable_autopilot"},
 			},
 
-<% unless version == "ga" -%>
 			"node_pool_defaults": clusterSchemaNodePoolDefaults(),
 
+<% unless version == "ga" -%>
 			"node_pool_auto_config": {
 				Type:             schema.TypeList,
 				Optional:         true,
@@ -1917,11 +1918,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.NodeConfig = expandNodeConfig([]interface{}{})
 	}
 
-<% unless version == 'ga' -%>
         if v, ok := d.GetOk("node_pool_defaults"); ok {
                 cluster.NodePoolDefaults = expandNodePoolDefaults(v)
         }
-<% end -%>
 
 	if v, ok := d.GetOk("node_config"); ok {
 		cluster.NodeConfig = expandNodeConfig(v)
@@ -2356,11 +2355,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 <% end -%>
 
-<% unless version == 'ga' -%>
         if err := d.Set("node_pool_defaults", flattenNodePoolDefaults(cluster.NodePoolDefaults)); err != nil {
                 return err
         }
-<% end -%>
 
 	return nil
 }
@@ -3315,6 +3312,29 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			return err
 		}
 		log.Printf("[INFO] GKE cluster %s resource usage export config has been updated", d.Id())
+	}
+
+	if d.HasChange("node_pool_defaults") && d.HasChange("node_pool_defaults.0.node_config_defaults.0.logging_variant") {
+		if v, ok := d.GetOk("node_pool_defaults.0.node_config_defaults.0.logging_variant"); ok {
+			loggingVariant := v.(string)
+			req := &container.UpdateClusterRequest{
+				Update: &container.ClusterUpdate{
+					DesiredNodePoolLoggingConfig: &container.NodePoolLoggingConfig{
+						VariantConfig: &container.LoggingVariantConfig{
+							Variant: loggingVariant,
+						},
+					},
+				},
+			}
+
+			updateF := updateFunc(req, "updating GKE cluster desired node pool logging configuration defaults.")
+			// Call update serially.
+			if err := lockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] GKE cluster %s node pool logging configuration defaults have been updated", d.Id())
+		}
 	}
 
 <% unless version == 'ga' -%>
@@ -4344,7 +4364,6 @@ func expandContainerClusterAuthenticatorGroupsConfig(configured interface{}) *co
 	}
 }
 
-<% unless version == 'ga' -%>
 func expandNodePoolDefaults(configured interface{}) *container.NodePoolDefaults {
         l, ok := configured.([]interface{})
         if !ok || l == nil || len(l) == 0 || l[0] == nil {
@@ -4364,13 +4383,12 @@ func flattenNodePoolDefaults(c *container.NodePoolDefaults) []map[string]interfa
 	}
 
 	result := make(map[string]interface{})
-	if c.NodeConfigDefaults != nil && c.NodeConfigDefaults.GcfsConfig != nil {
-			result["node_config_defaults"] = flattenNodeConfigDefaults(c.NodeConfigDefaults)
+	if c.NodeConfigDefaults != nil {
+		result["node_config_defaults"] = flattenNodeConfigDefaults(c.NodeConfigDefaults)
 	}
 
 	return []map[string]interface{}{result}
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func expandNodePoolAutoConfig(configured interface{}) *container.NodePoolAutoConfig {
