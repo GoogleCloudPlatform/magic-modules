@@ -545,7 +545,7 @@ resource "google_dns_record_set" "foobar" {
           ip_address         = google_compute_forwarding_rule.default.ip_address
           port               = "80"
           ip_protocol        = "tcp"
-          network_url        = "https://www.googleapis.com/compute/v1/${google_compute_network.default.id}"
+          network_url        = google_compute_network.default.id
           project            = google_compute_forwarding_rule.default.project
           region             = google_compute_forwarding_rule.default.region
         }
@@ -611,7 +611,7 @@ resource "google_dns_record_set" "foobar" {
           ip_address         = google_compute_forwarding_rule.default.ip_address
           port               = "80"
           ip_protocol        = "tcp"
-          network_url        = "https://www.googleapis.com/compute/v1/${google_compute_network.default.id}"
+          network_url        = google_compute_network.default.id
           project            = google_compute_forwarding_rule.default.project
           region             = google_compute_forwarding_rule.default.region
         }
@@ -666,7 +666,7 @@ resource "google_dns_record_set" "foobar" {
           ip_address         = google_compute_forwarding_rule.default.ip_address
           port               = "80"
           ip_protocol        = "tcp"
-          network_url        = "https://www.googleapis.com/compute/v1/${google_compute_network.default.id}"
+          network_url        = google_compute_network.default.id
           project            = google_compute_forwarding_rule.default.project
           region             = google_compute_forwarding_rule.default.region
         }
