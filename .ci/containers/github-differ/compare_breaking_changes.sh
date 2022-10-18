@@ -11,10 +11,13 @@
 tpgUnique=""
 newline=$'\n'
 
-while IFS1= read -r tpgi; do
+# This while loop itterates over each individual
+# line of TPG_BREAKING. The input to the while loop
+# is through the <<< at the conclusion of the loop.
+while read -r tpgi; do
   simpleTPG=$(sed 's/-.*//' <<< "$tpgi")
   found="false"
-  while IFS1= read -r tpgbi; do
+  while read -r tpgbi; do
     simpleTPGB=$(sed 's/-.*//' <<< "$tpgbi")
     if [ "$simpleTPG" == "$simpleTPGB" ]; then
       found="true"
