@@ -40,5 +40,6 @@
 		return err
 	}
 
-	log.Printf("[DEBUG] Finished deleting App %q: %#v", d.Id(), res)
+        log.Printf("[DEBUG] Finished deleting App %q: %#v", d.Id(), res)
+        time.Sleep(5 * time.Second)
 	return nil

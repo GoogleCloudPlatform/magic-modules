@@ -191,8 +191,6 @@ objects:
         path: 'name'
         base_url: '{{op_id}}'
         wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          delete_minutes: 1
       result: !ruby/object:Api::OpAsync::Result
         path: 'response'
         resource_inside_response: true
