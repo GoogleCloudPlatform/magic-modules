@@ -8,11 +8,11 @@ jobs:
     if: github.event.label.id == '4598495472' # The unique identifier for the override-breaking-change label.. used in place of name so the name can be modified without breaking usage
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: read
+      pull-requests: write
       statuses: write
     steps:
     - uses: actions/checkout@v2
-    - run: | 
+    - run: |
         curl -X POST -H "Authorization: token ${{secrets.GITHUB_TOKEN}}" \
         -H "Accept: application/vnd.github.v3+json" \
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/${{github.event.pull_request.head.sha || github.sha}}" \
