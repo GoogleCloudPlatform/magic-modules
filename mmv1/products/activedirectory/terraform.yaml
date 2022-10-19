@@ -30,6 +30,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "active_directory_domain_basic"
         primary_resource_id: "ad-domain"
+        primary_resource_name: 'fmt.Sprintf("tfgen%s", context["random_suffix"])'
         vars:
           name: "myorg"
           # the part of the domain before the first "." must be <15 chars, and
