@@ -80,6 +80,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       custom_delete: templates/terraform/custom_delete/firebase_app_deletion_policy.erb
+      post_delete: templates/terraform/post_delete/sleep.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
