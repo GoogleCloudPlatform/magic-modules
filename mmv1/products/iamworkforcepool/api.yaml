@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: IAMWorkforce
+name: IAMWorkforcePool
 display_name: Cloud IAM
 versions:
   - !ruby/object:Api::Product::Version

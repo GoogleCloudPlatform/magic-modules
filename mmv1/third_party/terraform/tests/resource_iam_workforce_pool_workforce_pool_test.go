@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAccIAMWorkforceWorkforcePool_full(t *testing.T) {
+func TestAccIAMWorkforcePoolWorkforcePool_full(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -16,10 +16,10 @@ func TestAccIAMWorkforceWorkforcePool_full(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIAMWorkforceWorkforcePoolDestroyProducer(t),
+		CheckDestroy: testAccCheckIAMWorkforcePoolWorkforcePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIAMWorkforceWorkforcePool_full(context),
+				Config: testAccIAMWorkforcePoolWorkforcePool_full(context),
 			},
 			{
 				ResourceName:      "google_iam_workforce_pool.my_pool",
@@ -27,7 +27,7 @@ func TestAccIAMWorkforceWorkforcePool_full(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccIAMWorkforceWorkforcePool_update(context),
+				Config: testAccIAMWorkforcePoolWorkforcePool_update(context),
 			},
 			{
 				ResourceName:      "google_iam_workforce_pool.my_pool",
@@ -38,7 +38,7 @@ func TestAccIAMWorkforceWorkforcePool_full(t *testing.T) {
 	})
 }
 
-func TestAccIAMWorkforceWorkforcePool_minimal(t *testing.T) {
+func TestAccIAMWorkforcePoolWorkforcePool_minimal(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -49,10 +49,10 @@ func TestAccIAMWorkforceWorkforcePool_minimal(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIAMWorkforceWorkforcePoolDestroyProducer(t),
+		CheckDestroy: testAccCheckIAMWorkforcePoolWorkforcePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIAMWorkforceWorkforcePool_minimal(context),
+				Config: testAccIAMWorkforcePoolWorkforcePool_minimal(context),
 			},
 			{
 				ResourceName:      "google_iam_workforce_pool.my_pool",
@@ -60,7 +60,7 @@ func TestAccIAMWorkforceWorkforcePool_minimal(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccIAMWorkforceWorkforcePool_update(context),
+				Config: testAccIAMWorkforcePoolWorkforcePool_update(context),
 			},
 			{
 				ResourceName:      "google_iam_workforce_pool.my_pool",
@@ -71,7 +71,7 @@ func TestAccIAMWorkforceWorkforcePool_minimal(t *testing.T) {
 	})
 }
 
-func testAccIAMWorkforceWorkforcePool_full(context map[string]interface{}) string {
+func testAccIAMWorkforcePoolWorkforcePool_full(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_iam_workforce_pool" "my_pool" {
   workforce_pool_id = "my-pool-%{random_suffix}"
@@ -85,7 +85,7 @@ resource "google_iam_workforce_pool" "my_pool" {
 `, context)
 }
 
-func testAccIAMWorkforceWorkforcePool_minimal(context map[string]interface{}) string {
+func testAccIAMWorkforcePoolWorkforcePool_minimal(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_iam_workforce_pool" "my_pool" {
   workforce_pool_id = "my-pool-%{random_suffix}"
@@ -95,7 +95,7 @@ resource "google_iam_workforce_pool" "my_pool" {
 `, context)
 }
 
-func testAccIAMWorkforceWorkforcePool_update(context map[string]interface{}) string {
+func testAccIAMWorkforcePoolWorkforcePool_update(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_iam_workforce_pool" "my_pool" {
   workforce_pool_id = "my-pool-%{random_suffix}"

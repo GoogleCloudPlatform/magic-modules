@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestValidateIAMWorkforceWorkforcePoolId(t *testing.T) {
+func TestValidateIAMWorkforcePoolWorkforcePoolId(t *testing.T) {
 	x := []StringValidationTestCase{
 		// No errors
 		{TestName: "with numbers", Value: "foobar123"},
