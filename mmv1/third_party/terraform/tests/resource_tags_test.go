@@ -783,6 +783,9 @@ func testAccTagsLocationTagBinding_locationTagBindingbasic(t *testing.T) {
 		"org_id":        getTestOrgFromEnv(t),
 		"project_id":    "tf-test-" + randString(t, 10),
 		"random_suffix": randString(t, 10),
+
+		"key_short_name":   "tf-test-key-" + randString(t, 10),
+		"value_short_name": "tf-test-value-" + randString(t, 10),
 	}
 
 	vcrTest(t, resource.TestCase{
