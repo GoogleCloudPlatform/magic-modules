@@ -41,30 +41,6 @@ func TestAccTags(t *testing.T) {
 	}
 }
 
-func testAccTagsLocationTagBinding_locationTagBindingbasic(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"org_id":        getTestOrgFromEnv(t),
-		"project_id":    "tf-test-" + randString(t, 10),
-		"random_suffix": randString(t, 10),
-	}
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-		},
-		CheckDestroy: testAccCheckTagsTagBindingDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccTagsLocationTagBinding_locationTagBindingBasicExample(context),
-			},
-		},
-	})
-}
-
 func testAccTagsTagKey_tagKeyBasic(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":        getTestOrgFromEnv(t),
@@ -401,34 +377,6 @@ resource "google_tags_tag_value" "value" {
 resource "google_tags_tag_binding" "binding" {
 	parent = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
 	tag_value = "tagValues/${google_tags_tag_value.value.name}"
-}
-`, context)
-}
-
-func testAccTagsLocationTagBinding_locationTagBindingBasicExample(context map[string]interface{}) string {
-	return Nprintf(`
-resource "google_project" "project" {
-	project_id = "%{project_id}"
-	name       = "%{project_id}"
-	org_id     = "%{org_id}"
-}
-
-resource "google_tags_tag_key" "key" {
-	parent = "organizations/%{org_id}"
-	short_name = "keyname%{random_suffix}"
-	description = "For a certain set of resources."
-}
-
-resource "google_tags_tag_value" "value" {
-	parent = "tagKeys/${google_tags_tag_key.key.name}"
-	short_name = "foo%{random_suffix}"
-	description = "For foo%{random_suffix} resources."
-}
-
-resource "google_tags_location_tag_binding" "binding" {
-	parent = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
-	tag_value = "tagValues/${google_tags_tag_value.value.name}"
-	location = "us-central1"
 }
 `, context)
 }
@@ -824,6 +772,64 @@ resource "google_tags_tag_value_iam_binding" "foo" {
   tag_value = google_tags_tag_value.value.name
   role = "%{role}"
   members = ["user:admin@hashicorptest.com", "user:gterraformtest1@gmail.com"]
+}
+`, context)
+}
+
+func testAccTagsLocationTagBinding_locationTagBindingbasic(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        getTestOrgFromEnv(t),
+		"project_id":    "tf-test-" + randString(t, 10),
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
+		CheckDestroy: testAccCheckTagsTagBindingDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsLocationTagBinding_locationTagBindingBasicExample(context),
+			},
+		},
+	})
+}
+
+func testAccTagsLocationTagBinding_locationTagBindingBasicExample(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_project" "project" {
+	project_id = "%{project_id}"
+	name       = "%{project_id}"
+	org_id     = "%{org_id}"
+}
+
+resource "google_tags_tag_key" "key" {
+	parent = "organizations/%{org_id}"
+	short_name = "keyname%{random_suffix}"
+	description = "For a certain set of resources."
+}
+
+resource "google_sql_database_instance" "main" {
+	name             = "tf-test-main-instance"
+	database_version = "POSTGRES_14"
+	region           = "us-central1"
+	deletion_protection = false
+	settings {
+	  # Second-generation instance tiers are based on the machine
+	  # type. See argument reference below.
+	  tier = "db-f1-micro"
+	}
+}
+
+resource "google_tags_location_tag_binding" "binding" {
+	parent = "//sqladmin.googleapis.com/projects/${google_project.project.number}/instances/${google_sql_database_instance.main.id}"
+	tag_value = "tagValues/${google_tags_tag_value.value.name}"
+	location = "us-central1"
 }
 `, context)
 }
