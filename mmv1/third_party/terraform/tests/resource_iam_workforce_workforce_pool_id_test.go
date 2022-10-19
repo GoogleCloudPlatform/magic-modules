@@ -1,8 +1,8 @@
 package google
 
 import (
-    "testing"
 	"strings"
+	"testing"
 )
 
 func TestValidateIAMWorkforceWorkforcePoolId(t *testing.T) {

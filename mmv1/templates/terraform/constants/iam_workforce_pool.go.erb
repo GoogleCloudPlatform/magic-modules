@@ -28,7 +28,7 @@ func validateWorkforcePoolId(v interface{}, k string) (ws []string, errors []err
             "%q cannot be greater than 63 characters", k))
     }
 
-    if value[0] < 'a' || 'z' < value[0] {
+    if len(value) > 0 && (value[0] < 'a' || 'z' < value[0]) {
         errors = append(errors, fmt.Errorf(
             "%q must start with a lowercase letter", k))
     }

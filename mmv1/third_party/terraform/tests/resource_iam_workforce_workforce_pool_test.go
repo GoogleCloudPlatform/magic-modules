@@ -1,21 +1,21 @@
 package google
 
 import (
-	"testing"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"testing"
 )
 
 func TestAccIAMWorkforceWorkforcePool_full(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-    	"org_id":          getTestOrgFromEnv(t),
-    	"random_suffix":   randString(t, 10),
-    }
+		"org_id":        getTestOrgFromEnv(t),
+		"random_suffix": randString(t, 10),
+	}
 
 	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIAMWorkforceWorkforcePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -42,13 +42,13 @@ func TestAccIAMWorkforceWorkforcePool_minimal(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-        "org_id":          getTestOrgFromEnv(t),
-        "random_suffix":   randString(t, 10),
-    }
+		"org_id":        getTestOrgFromEnv(t),
+		"random_suffix": randString(t, 10),
+	}
 
 	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIAMWorkforceWorkforcePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
