@@ -14,17 +14,19 @@ import (
 
 func TestAccTags(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"tagKeyBasic":        testAccTagsTagKey_tagKeyBasic,
-		"tagKeyUpdate":       testAccTagsTagKey_tagKeyUpdate,
-		"tagKeyIamBinding":   testAccTagsTagKeyIamBinding,
-		"tagKeyIamMember":    testAccTagsTagKeyIamMember,
-		"tagKeyIamPolicy":    testAccTagsTagKeyIamPolicy,
-		"tagValueBasic":      testAccTagsTagValue_tagValueBasic,
-		"tagValueUpdate":     testAccTagsTagValue_tagValueUpdate,
-		"tagBindingBasic":    testAccTagsTagBinding_tagBindingBasic,
-		"tagValueIamBinding": testAccTagsTagValueIamBinding,
-		"tagValueIamMember":  testAccTagsTagValueIamMember,
-		"tagValueIamPolicy":  testAccTagsTagValueIamPolicy,
+		"tagKeyBasic":                       testAccTagsTagKey_tagKeyBasic,
+		"tagKeyBasicWithPurposeGceFirewall": testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewall,
+		"tagKeyUpdate":                      testAccTagsTagKey_tagKeyUpdate,
+		"tagKeyIamBinding":                  testAccTagsTagKeyIamBinding,
+		"tagKeyIamMember":                   testAccTagsTagKeyIamMember,
+		"tagKeyIamPolicy":                   testAccTagsTagKeyIamPolicy,
+		"tagValueBasic":                     testAccTagsTagValue_tagValueBasic,
+		"tagValueUpdate":                    testAccTagsTagValue_tagValueUpdate,
+		"tagBindingBasic":                   testAccTagsTagBinding_tagBindingBasic,
+		"tagsLocationTagBindingBasic":       testAccTagsLocationTagBinding_locationTagBindingbasic,
+		"tagValueIamBinding":                testAccTagsTagValueIamBinding,
+		"tagValueIamMember":                 testAccTagsTagValueIamMember,
+		"tagValueIamPolicy":                 testAccTagsTagValueIamPolicy,
 	}
 
 	for name, tc := range testCases {
@@ -37,6 +39,30 @@ func TestAccTags(t *testing.T) {
 			tc(t)
 		})
 	}
+}
+
+func testAccTagsLocationTagBinding_locationTagBindingbasic(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        getTestOrgFromEnv(t),
+		"project_id":    "tf-test-" + randString(t, 10),
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
+		CheckDestroy: testAccCheckTagsTagBindingDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsLocationTagBinding_locationTagBindingBasicExample(context),
+			},
+		},
+	})
 }
 
 func testAccTagsTagKey_tagKeyBasic(t *testing.T) {
@@ -65,6 +91,44 @@ resource "google_tags_tag_key" "key" {
   short_name = "foo%{random_suffix}"
   description = "For foo%{random_suffix} resources."
 }
+`, context)
+}
+
+func testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewall(t *testing.T) {
+	context := map[string]interface{}{
+		"org_id":        getTestOrgFromEnv(t),
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckTagsTagKeyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewallExample(context),
+			},
+		},
+	})
+}
+
+func testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewallExample(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_compute_network" "tag_network" {
+	name = "vpc-%{random_suffix}"
+	auto_create_subnetworks = false
+}
+
+resource "google_tags_tag_key" "key" {
+	  parent = "organizations/%{org_id}"
+	  short_name = "foo%{random_suffix}"
+	  description = "For foo%{random_suffix} resources."
+	  purpose = "GCE_FIREWALL"
+	  # purpose_data expects either a selfLinkWithId (not a property of google_compute_network) or the format <project-name>/<vpc-name>.
+	  # selfLink is not sufficient and will result in an error, so we build a string to match the second option.
+	  purpose_data = {network = "${google_compute_network.tag_network.project}/${google_compute_network.tag_network.name}"}
+	}
+
 `, context)
 }
 
@@ -337,6 +401,34 @@ resource "google_tags_tag_value" "value" {
 resource "google_tags_tag_binding" "binding" {
 	parent = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
 	tag_value = "tagValues/${google_tags_tag_value.value.name}"
+}
+`, context)
+}
+
+func testAccTagsLocationTagBinding_locationTagBindingBasicExample(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_project" "project" {
+	project_id = "%{project_id}"
+	name       = "%{project_id}"
+	org_id     = "%{org_id}"
+}
+
+resource "google_tags_tag_key" "key" {
+	parent = "organizations/%{org_id}"
+	short_name = "keyname%{random_suffix}"
+	description = "For a certain set of resources."
+}
+
+resource "google_tags_tag_value" "value" {
+	parent = "tagKeys/${google_tags_tag_key.key.name}"
+	short_name = "foo%{random_suffix}"
+	description = "For foo%{random_suffix} resources."
+}
+
+resource "google_tags_location_tag_binding" "binding" {
+	parent = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
+	tag_value = "tagValues/${google_tags_tag_value.value.name}"
+	location = "us-central1"
 }
 `, context)
 }

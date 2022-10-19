@@ -160,7 +160,6 @@ objects:
   - !ruby/object:Api::Resource
     name: 'TagBinding'
     base_url: tagBindings
-    create_url: https://{{location}}-cloudresourcemanager.googleapis.com/
     self_link: "tagBindings/?parent={{parent}}&pageSize=300"
     delete_url: "tagBindings/{{name}}"
     nested_query: !ruby/object:Api::Resource::NestedQuery
@@ -173,12 +172,6 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
       api: 'https://cloud.google.com/resource-manager/reference/rest/v3/tagBindings'
-    parameters:
-    - !ruby/object:Api::Type::String
-      name: location
-      description: The location of the cloud run instance. eg us-central1
-      url_param_only: true
-      required: true   
     properties:
       - !ruby/object:Api::Type::String
         name: name
