@@ -61,6 +61,7 @@ resource "google_data_fusion_instance" "foobar" {
   type                          = "DEVELOPER"
   enable_stackdriver_monitoring = true
   enable_stackdriver_logging    = true
+  enable_rbac                   = true
 
   labels = {
     label1 = "value1"
