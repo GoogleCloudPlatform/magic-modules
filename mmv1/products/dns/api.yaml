@@ -276,6 +276,14 @@ objects:
                 description: |
                   The fully qualified URL of the service directory namespace that should be
                   associated with the zone. Ignored for `public` visibility zones.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'cloudLoggingConfig'
+        description: 'Cloud logging configuration'
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enableLogging'
+            required: true
+            description: 'If set, enable query logging for this ManagedZone. False by default, making logging opt-in.'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Managing Zones':

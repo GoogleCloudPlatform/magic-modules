@@ -98,7 +98,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 <%     if property.is_set -%>
   v = v.(*schema.Set).List()
 <%     end -%>
-<%     if property.nested_properties? -%>
+<%     if !property.nested_properties.nil? -%>
   l := v.([]interface{})
 <%       if property.is_a?(Api::Type::Array) -%>
   req := make([]interface{}, 0, len(l))
@@ -106,6 +106,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
     if raw == nil {
       continue
     }
+    original := raw.(map[string]interface{})
 <%       else -%>
 <%         if property.allow_empty_object -%>
   if len(l) == 0 {
@@ -116,14 +117,16 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
     transformed := make(map[string]interface{})
     return transformed, nil
   }
-<%       else -%>
+<%         else -%>
   if len(l) == 0 || l[0] == nil {
     return nil, nil
   }
 <%         end -%>
+<%         if !property.nested_properties.empty? -%>
   raw := l[0]
+  original := raw.(map[string]interface{})
+<%         end -%>
 <%       end -%>
-    original := raw.(map[string]interface{})
     transformed := make(map[string]interface{})
 
 <%       property.nested_properties.each do |prop| -%>
@@ -183,7 +186,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 }
 <%   end # tf_types.include?(property.class) -%>
 
-<% if property.nested_properties? -%>
+<% if !property.nested_properties.nil? -%>
 <%   property.nested_properties.each do |prop| -%>
 <%# Map is a map from {key -> object} in the API, but Terraform can't represent that
 so we treat the key as a property of the object in Terraform schema. %>
