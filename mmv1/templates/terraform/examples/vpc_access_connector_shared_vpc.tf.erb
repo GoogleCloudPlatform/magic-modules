@@ -1,5 +1,4 @@
 resource "google_vpc_access_connector" "connector" {
-  provider      = google-beta
   name          = "<%= ctx[:vars]['name'] %>"
   subnet {
     name = google_compute_subnetwork.custom_test.name
@@ -8,7 +7,6 @@ resource "google_vpc_access_connector" "connector" {
 }
 
 resource "google_compute_subnetwork" "custom_test" {
-  provider      = google-beta
   name          = "<%= ctx[:vars]['name'] %>"
   ip_cidr_range = "10.2.0.0/28"
   region        = "us-central1"
@@ -16,7 +14,6 @@ resource "google_compute_subnetwork" "custom_test" {
 }
 
 resource "google_compute_network" "custom_test" {
-  provider                = google-beta
   name                    = "<%= ctx[:vars]['name'] %>"
   auto_create_subnetworks = false
 }
