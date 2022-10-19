@@ -507,6 +507,10 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 * `boot_disk_kms_key` - (Optional) The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool. This should be of the form projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]. For more information about protecting resources with Cloud KMS Keys please see: https://cloud.google.com/compute/docs/disks/customer-managed-encryption
 
+* `disk_size` - (Optional) Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB. Defaults to `100`
+
+* `disk_type` - (Optional) Type of the disk attached to each node (e.g. 'pd-standard', 'pd-ssd' or 'pd-balanced'). Defaults to `pd-standard`
+
 * `image_type` - (Optional) The default image type used by NAP once a new node pool is being created. Please note that according to the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning#default-image-type) the value must be one of the [COS_CONTAINERD, COS, UBUNTU_CONTAINERD, UBUNTU]. __NOTE__ : COS AND UBUNTU are deprecated as of `GKE 1.24`
 
 <a name="nested_authenticator_groups_config"></a>The `authenticator_groups_config` block supports:
@@ -843,6 +847,16 @@ linux_node_config {
 
 * `gpu_partition_size` (Optional) - Size of partitions to create on the GPU. Valid values are described in the NVIDIA mig [user guide](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/#partitioning).
 
+* `gpu_sharing_config` (Optional) - Configuration for GPU sharing. Structure is [documented below](#nested_gpu_sharing_config).
+
+<a name="nested_gpu_sharing_config"></a>The `gpu_sharing_config` block supports:
+
+* `gpu_sharing_strategy` (Required) - The type of GPU sharing strategy to enable on the GPU node. 
+    Accepted values are:
+    * `"TIME_SHARING"`: Allow multiple containers to have [time-shared](https://cloud.google.com/kubernetes-engine/docs/concepts/timesharing-gpus) access to a single GPU device. 
+
+* `max_shared_clients_per_gpu` (Required) - The maximum number of containers that can share a GPU. 
+
 <a name="nested_workload_identity_config"></a> The `workload_identity_config` block supports:
 
 * `workload_pool` (Optional) - The workload pool to attach all Kubernetes service accounts to.
@@ -886,6 +900,8 @@ The `pubsub` block supports:
 
 * `topic` (Optional) - The pubsub topic to push upgrade notifications to. Must be in the same project as the cluster. Must be in the format: `projects/{project}/topics/{topic}`.
 
+* `filter` (Optional) - Choose what type of notifications you want to receive. If no filters are applied, you'll receive all notification types. Structure is [documented below](#nested_notification_filter).
+
 ```hcl
 notification_config {
   pubsub {
@@ -894,6 +910,10 @@ notification_config {
   }
 }
 ```
+
+<a name="nested_notification_filter"></a> The `filter` block supports:
+
+* `event_type` (Optional) - Can be used to filter what notifications are sent. Accepted values are `UPGRADE_AVAILABLE_EVENT`, `UPGRADE_EVENT` and `SECURITY_BULLETIN_EVENT`. See [Filtering notifications](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-notifications#filtering) for more details.
 
 <a name="nested_confidential_nodes"></a> The `confidential_nodes` block supports:
 

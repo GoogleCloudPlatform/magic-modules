@@ -147,27 +147,15 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
-      secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged"]
-      args:
-          - 'head'
-          - 'tf-cloud-docs'
-          - 'beta'
-          - $_PR_NUMBER
-
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
-      secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged"]
-      args:
-          - 'base'
-          - 'tf-cloud-docs'
-          - 'beta'
-          - $_PR_NUMBER
-
     - name: 'gcr.io/graphite-docker-images/github-differ'
       id: diff
       secretEnv: ["GITHUB_TOKEN"]
+      env:
+        - BUILD_ID=$BUILD_ID
+        - PROJECT_ID=$PROJECT_ID
+        - BUILD_STEP="19"
+        - COMMIT_SHA=$COMMIT_SHA
+        - PR_NUMBER=$_PR_NUMBER
       args:
           - $_PR_NUMBER
 
