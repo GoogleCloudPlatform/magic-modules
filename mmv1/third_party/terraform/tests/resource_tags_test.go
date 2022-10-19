@@ -814,6 +814,12 @@ resource "google_tags_tag_key" "key" {
 	description = "For a certain set of resources."
 }
 
+resource "google_tags_tag_value" "value" {
+	parent = "tagKeys/${google_tags_tag_key.key.name}"
+	short_name = "%{value_short_name}"
+	description = "For %{value_short_name} resources."
+}
+
 resource "google_sql_database_instance" "main" {
 	name             = "tf-test-main-instance"
 	database_version = "POSTGRES_14"
