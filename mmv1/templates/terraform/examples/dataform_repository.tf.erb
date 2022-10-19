@@ -1,0 +1,31 @@
+resource "google_sourcerepo_repository" "git_repository" {
+  provider = google-beta
+  name = "<%= ctx[:vars]['git_repository_name'] %>"
+}
+
+resource "google_secret_manager_secret" "secret" {
+  provider = google-beta
+  secret_id = "secret"
+
+  replication {
+    automatic = true
+  }
+}
+
+resource "google_secret_manager_secret_version" "secret_version" {
+  provider = google-beta
+  secret = google_secret_manager_secret.secret.id
+
+  secret_data = "<%= ctx[:vars]['data'] %>"
+}
+
+resource "google_dataform_repository" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+  name = "<%= ctx[:vars]['dataform_repository_name'] %>"
+
+  git_remote_settings {
+      url = google_sourcerepo_repository.git_repository.url
+      default_branch = "main"
+      authentication_token_secret_version = google_secret_manager_secret_version.secret_version.id
+  }
+}
