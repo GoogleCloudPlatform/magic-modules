@@ -14,7 +14,7 @@ resource "google_datastream_private_connection" "private_connection" {
 }
 
 resource "google_compute_network" "default" {
-  name = "<%= ctx[:vars]['network_name'] %>"
+	name = "<%= ctx[:vars]['network_name'] %>"
 }
 
 resource "google_datastream_connection_profile" "<%= ctx[:primary_resource_id] %>" {
