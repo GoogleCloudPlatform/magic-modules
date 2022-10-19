@@ -167,7 +167,7 @@ fi
 #;region=global/${BUILD_ID};step=19?project=${PROJECT_ID}"
 BREAKINGSTATE_BODY=$( jq -n \
 	--arg context "terraform-provider-breaking-change-test" \
-	--arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${BUILD_ID};step=${BUILD_STEP}?project=${PROJECT_ID}"" \
+	--arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${BUILD_ID};step=${BUILD_STEP}?project=${PROJECT_ID}" \
 	--arg breakingstate "${BREAKINGSTATE}" \
 	'{context: $context, target_url: $target_url, state: $breakingstate}')
 
