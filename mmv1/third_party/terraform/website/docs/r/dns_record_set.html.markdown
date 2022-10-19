@@ -197,7 +197,7 @@ resource "google_dns_record_set" "a" {
           ip_address         = google_compute_forwarding_rule.prod.ip_address
           port               = "80"
           ip_protocol        = "tcp"
-          network_url        = "https://www.googleapis.com/compute/v1/${google_compute_network.prod.id}"
+          network_url        = google_compute_network.prod.id
           project            = google_compute_forwarding_rule.prod.project
           region             = google_compute_forwarding_rule.prod.region
         }
@@ -324,7 +324,7 @@ The following arguments are supported:
 
 * `ip_protocol` - (Required) The configured IP protocol of the load balancer. This value is case-sensitive. Possible values: ["tcp", "udp"]
 
-* `network_url` - (Required) The fully qualified url of the network in which the load balancer belongs. This should be formatted like `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`.
+* `network_url` - (Required) The fully qualified url of the network in which the load balancer belongs. This should be formatted like `projects/{project}/global/networks/{network}` or `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`.
 
 * `project` - (Required) The ID of the project in which the load balancer belongs.
 
