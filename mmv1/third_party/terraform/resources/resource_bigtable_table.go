@@ -76,6 +76,13 @@ func resourceBigtableTable() *schema.Resource {
 				ForceNew:    true,
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
+
+			"deletion_protection": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Elem:        &schema.Schema{Type: schema.TypeBool},
+				Description: `A Boolean to make the table protected against data loss i.e. when set to true, deleting the table, the column families in the table, and the instance containing the table would be prohibited.`,
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -108,6 +115,16 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 
 	tableId := d.Get("name").(string)
 	tblConf := bigtable.TableConf{TableID: tableId}
+
+	// DeletionProtection can be none, protectec or unprotected
+	// Check if deletion protection is given
+	if value, exists := d.GetOk("deletion_protection"); exists {
+		if value == bigtable.DeletionProtection.Protected {
+			tblConf.DeletionProtection = true
+		} else {
+			tblConf.DeletionProtection = false
+		}
+	}
 
 	// Set the split keys if given.
 	if v, ok := d.GetOk("split_keys"); ok {
@@ -185,6 +202,18 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error setting column_family: %s", err)
 	}
 
+	// DeletionProtection can be none, protectec or unprotected
+	// Check if table deletion protection has a value except for none
+	deletionProtection := table.DeletionProtection
+	if deletionProtection == bigtable.DeletionProtection.Protected {
+		if err := d.Set("deletion_protection", true); err != nil {
+			return fmt.Errorf("Error setting deletion_protection: %s", err)
+		}
+	} else if deletionProtection == bigtable.DeletionProtection.Unprotected {
+		if err := d.Set("deletion_protection", false); err != nil {
+			return fmt.Errorf("Error setting deletion_protection: %s", err)
+		}
+	}
 	return nil
 }
 
@@ -226,6 +255,7 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	// Remove column families that are in old but not in new
+	// Error while deleting column families, might be because of enabled deletion protection bit
 	for _, old := range oSet.Difference(nSet).List() {
 		column := old.(map[string]interface{})
 
@@ -233,6 +263,20 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 			log.Printf("[DEBUG] removing column family %q", v)
 			if err := c.DeleteColumnFamily(ctx, name, v.(string)); err != nil {
 				return fmt.Errorf("Error deleting column family %q: %s", v, err)
+			}
+		}
+	}
+
+	// DeletionProtection can be none, protected or unprotected
+	// Check if deletion protection is given to update
+	if value, exists := d.GetOk("deletion_protection"); exists {
+		if value == bigtable.DeletionProtection.Protected {
+			if err := c.UpdateTableWithDeletionProtection(ctx, name, true); err != nil {
+				return fmt.Errorf("Error updating deletion protection in table %v: %s", name, err)
+			}
+		} else {
+			if err := c.UpdateTableWithDeletionProtection(ctx, name, false); err != nil {
+				return fmt.Errorf("Error updating deletion protection in table %v: %s", name, err)
 			}
 		}
 	}
