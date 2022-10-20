@@ -266,6 +266,8 @@ objects:
         name: 'forwardSshConnectivity'
         description: |
           Forward SSH tunnel connectivity.
+        conflicts:
+          - private_connectivity
         properties:
           - !ruby/object:Api::Type::String
             name: 'hostname'
@@ -296,6 +298,18 @@ objects:
               SSH private key.
             conflicts:
               - forward_ssh_connectivity.0.password
+      - !ruby/object:Api::Type::NestedObject
+        name: 'privateConnectivity'
+        description: |
+          Private connectivity.
+        conflicts:
+          - forward_ssh_connectivity
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'privateConnection'
+            required: true
+            description: |
+              A reference to a private connection resource. Format: `projects/{project}/locations/{location}/privateConnections/{name}`
   - !ruby/object:Api::Resource
     name: 'PrivateConnection'
     base_url: "projects/{{project}}/locations/{{location}}/privateConnections"
