@@ -40,6 +40,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: "vertex_ai_endpoint"
           project: "vertex-ai"
+          endpoint_name: "endpoint-name"
           address_name: "address-name"
           kms_key_name: "kms-name"
           network_name: "network-name"

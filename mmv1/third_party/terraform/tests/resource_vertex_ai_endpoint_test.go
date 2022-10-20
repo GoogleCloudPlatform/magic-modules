@@ -27,6 +27,7 @@ func TestAccVertexAIEndpoint_vertexAiEndpointNetwork(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"endpoint_name": fmt.Sprint(randInt(t) % 9999999999),
 		"kms_key_name":  BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
 		"network_name":  BootstrapSharedTestNetwork(t, "vertex"),
 		"random_suffix": randString(t, 10),
@@ -62,6 +63,7 @@ func TestAccVertexAIEndpoint_vertexAiEndpointNetwork(t *testing.T) {
 func testAccVertexAIEndpoint_vertexAiEndpointNetwork(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_vertex_ai_endpoint" "endpoint" {
+  name         = "%{endpoint_name}"
   display_name = "sample-endpoint"
   description  = "A sample vertex endpoint"
   location     = "us-central1"
@@ -108,6 +110,7 @@ data "google_project" "project" {}
 func testAccVertexAIEndpoint_vertexAiEndpointNetworkUpdate(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_vertex_ai_endpoint" "endpoint" {
+  name         = "%{endpoint_name}"
   display_name = "new-sample-endpoint"
   description  = "An updated sample vertex endpoint"
   location     = "us-central1"

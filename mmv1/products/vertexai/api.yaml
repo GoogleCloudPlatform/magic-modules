@@ -111,7 +111,7 @@ objects:
   - !ruby/object:Api::Resource
     name: Endpoint
     base_url: projects/{{project}}/locations/{{location}}/endpoints
-    create_url: projects/{{project}}/locations/{{location}}/endpoints
+    create_url: projects/{{project}}/locations/{{location}}/endpoints?endpointId={{name}}
     self_link: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
     update_verb: :PATCH
     update_mask: true
@@ -151,8 +151,7 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: name
-        description: Output only. The resource name of the Endpoint.
-        output: true
+        description: The resource name of the Endpoint.
       - !ruby/object:Api::Type::String
         name: displayName
         description: Required. The display name of the Endpoint. The name can be up to 128 characters long and can consist of any UTF-8 characters.
