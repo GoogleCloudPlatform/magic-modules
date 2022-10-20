@@ -111,7 +111,7 @@ objects:
       method_name_separator: ':'
       fetch_iam_policy_verb: :POST
       parent_resource_attribute: 'listing_id'
-      import_format: ["projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}", "{{listing_id}}"]    
+      import_format: ["projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}", "{{listing_id}}"]
     properties:
       - !ruby/object:Api::Type::String
         name: name
