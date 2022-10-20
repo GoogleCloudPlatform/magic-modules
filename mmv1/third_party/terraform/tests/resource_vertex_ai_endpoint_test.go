@@ -24,6 +24,8 @@ import (
 )
 
 func TestAccVertexAIEndpoint_vertexAiEndpointNetwork(t *testing.T) {
+	t.Skip("Skip this test until b/254073292 is resolved")
+
 	t.Parallel()
 
 	context := map[string]interface{}{
