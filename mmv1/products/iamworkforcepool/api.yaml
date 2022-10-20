@@ -16,7 +16,7 @@ name: IAMWorkforcePool
 display_name: Cloud IAM
 versions:
   - !ruby/object:Api::Product::Version
-    name: ga
+    name: beta
     base_url: https://iam.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/iam
