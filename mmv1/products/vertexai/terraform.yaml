@@ -81,8 +81,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 
     properties:
-      region: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true    
       etag: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
