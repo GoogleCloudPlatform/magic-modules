@@ -84,6 +84,7 @@ objects:
         description: |
           Immutable. The resource name of the parent. Format: `organizations/{org-id}`.
         required: true
+        input: true
       - !ruby/object:Api::Type::String
         name: 'displayName'
         description: A user-specified display name of the pool in Google Cloud Console. Cannot exceed 32 characters.
