@@ -15,5 +15,11 @@
   "requireApproval": false,
   "run": {
     "location": "projects/{{project}}/locations/{{region}}"
-  }
+  },
+  "executionConfigs": [
+    {
+      "usages": ["RENDER", "DEPLOY"],
+      "executionTimeout": "3600s"
+    }
+  ]
 }
