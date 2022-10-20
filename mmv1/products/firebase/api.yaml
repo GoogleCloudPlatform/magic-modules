@@ -208,7 +208,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'deletion_policy'
         description: |
-          Set to `ABANDON` to allow the AppleApp to be untracked from terraform state
+          (Optional) Set to `ABANDON` to allow the AppleApp to be untracked from terraform state
           rather than deleted upon `terraform destroy`. This is useful because the AppleApp may be
           serving traffic. Set to `DELETE` to delete the AppleApp. Default to `DELETE`.
         input: true
