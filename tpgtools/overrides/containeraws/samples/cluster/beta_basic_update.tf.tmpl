@@ -59,7 +59,7 @@ resource "google_container_aws_cluster" "primary" {
     }
 
     tags = {
-      owner = "{{test_service_account}}"
+       owner = "updated-{{test_service_account}}"
     }
 
     instance_placement {
@@ -90,6 +90,12 @@ resource "google_container_aws_cluster" "primary" {
   logging_config {
     component_config {
       enable_components = ["SYSTEM_COMPONENTS", "WORKLOADS"]
+    }
+  }
+
+  monitoring_config {
+    managed_prometheus_config {
+      enabled = false
     }
   }
 }
