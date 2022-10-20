@@ -1,4 +1,7 @@
+<% autogen_exception -%>
 package google
+
+<% unless version == 'ga' -%>
 
 import (
 	"strings"
@@ -30,3 +33,5 @@ func TestValidateIAMWorkforcePoolWorkforcePoolId(t *testing.T) {
 		t.Errorf("Failed to validate WorkforcePool names: %v", es)
 	}
 }
+
+<% end -%>

@@ -48,6 +48,7 @@ objects:
     create_url: locations/{{location}}/workforcePools?workforcePoolId={{workforce_pool_id}}
     update_verb: :PATCH
     update_mask: true
+    min_version: beta
     description: |
       Represents a collection of external workforces. Provides namespaces for
       federated users that can be referenced in IAM policies.

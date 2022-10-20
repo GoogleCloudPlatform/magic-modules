@@ -20,6 +20,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "iam_workforce_pool_basic"
+        min_version: beta
         primary_resource_id: "example"
         vars:
           workforce_pool_id: "example-pool"
@@ -27,6 +28,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
       - !ruby/object:Provider::Terraform::Examples
         name: "iam_workforce_pool_full"
+        min_version: beta
         primary_resource_id: "example"
         vars:
           workforce_pool_id: "example-pool"
