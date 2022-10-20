@@ -152,6 +152,9 @@ objects:
       - !ruby/object:Api::Type::String
         name: name
         description: The resource name of the Endpoint.
+        url_param_only: true
+        required: true
+        input: true
       - !ruby/object:Api::Type::String
         name: displayName
         description: Required. The display name of the Endpoint. The name can be up to 128 characters long and can consist of any UTF-8 characters.
