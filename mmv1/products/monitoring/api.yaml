@@ -1149,6 +1149,8 @@ objects:
       name: basicService
       description: |
         A well-known service type, defined by its service type and service labels.
+        Valid values are described at
+        https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/api/api-structures#basic-svc-w-basic-sli
       # BasicService info can be set on creation but is then immutable.
       input: true
       properties:
