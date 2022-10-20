@@ -207,9 +207,9 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'deletion_policy'
         description: |
-          Optional. Set to `ABANDON` to soft-delete the AndroidApp. Soft-deleted AndroidApps are recoverable
-          within 30 days using [projects.androidApps.undelete](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.androidApps/undelete).
-          Set to `DELETE` to immediately delete the AndroidApp. Default to `DELETE`
+          (Optional) Set to `ABANDON` to allow the AndroidApp to be untracked from terraform state
+          rather than deleted upon `terraform destroy`. This is useful because the AndroidApp may be
+          serving traffic. Set to `DELETE` to delete the AppleApp. Default to `DELETE`.
         input: true
         url_param_only: true
         default_value: DELETE
