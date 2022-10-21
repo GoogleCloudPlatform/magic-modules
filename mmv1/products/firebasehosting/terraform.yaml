@@ -14,22 +14,24 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Site: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ['projects/{{project}}/sites/{{site}}', 'sites/{{site}}', '{{site}}']
+    import_format: ['projects/{{project}}/sites/{{site_id}}', 'sites/{{site_id}}', '{{site_id}}']
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firebasehosting_site_basic"
         min_version: "beta"
         primary_resource_id: "default"
+        vars:
+          site_id: site-no-app
         test_env_vars:
           project_id: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
         name: "firebasehosting_site_full"
         min_version: "beta"
         primary_resource_id: "full"
+        vars:
+          site_id: site-with-app
         test_env_vars:
           project_id: :PROJECT_NAME
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/self_link_as_name.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

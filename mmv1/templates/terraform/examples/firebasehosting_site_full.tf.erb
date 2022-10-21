@@ -8,6 +8,6 @@ resource "google_firebase_web_app" "default" {
 resource "google_firebase_hosting_site" "full" {
   provider = google-beta
   project  = "<%= ctx[:test_env_vars]['project_id'] %>"
-  site = "tf-test-site2%{random_suffix}"
+  site_id = "<%= ctx[:vars]['site_id'] %>"
   app_id = google_firebase_web_app.default.app_id
 }

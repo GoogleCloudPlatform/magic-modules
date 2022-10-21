@@ -25,8 +25,8 @@ objects:
     name: 'Site'
     min_version: beta
     base_url: projects/{{project}}/sites
-    self_link: "{{name}}"
-    create_url: projects/{{project}}/sites?siteId={{site}}
+    self_link: projects/{{project}}/sites/{{site_id}}
+    create_url: projects/{{project}}/sites?siteId={{site_id}}
     update_verb: :PATCH
     update_mask: true
     description: 'A `Site` represents a Firebase Hosting site.'
@@ -37,7 +37,7 @@ objects:
       api: 'https://firebase.google.com/docs/reference/hosting/rest/v1beta1/projects.sites'
     parameters:
       - !ruby/object:Api::Type::String
-        name: 'site'
+        name: 'site_id'
         description: |
           Required. Immutable. A globally unique identifier for the Hosting site. This identifier is
           used to construct the Firebase-provisioned subdomains for the site, so it must also be a valid

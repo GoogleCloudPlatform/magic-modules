@@ -14,6 +14,7 @@ func TestAccFirebaseHostingSite_firebasehostingSiteUpdate(t *testing.T) {
 	context := map[string]interface{}{
 		"project_id":    getTestProjectFromEnv(),
 		"random_suffix": randString(t, 10),
+		"site_id":       "tf-test-site-update-app",
 	}
 
 	vcrTest(t, resource.TestCase{
@@ -28,7 +29,7 @@ func TestAccFirebaseHostingSite_firebasehostingSiteUpdate(t *testing.T) {
 				ResourceName:            "google_firebase_hosting_site.update",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"site"},
+				ImportStateVerifyIgnore: []string{"site_id"},
 			},
 			{
 				Config: testAccFirebaseHostingSite_firebasehostingSiteAfterUpdate(context),
@@ -37,7 +38,7 @@ func TestAccFirebaseHostingSite_firebasehostingSiteUpdate(t *testing.T) {
 				ResourceName:            "google_firebase_hosting_site.update",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"site"},
+				ImportStateVerifyIgnore: []string{"site_id"},
 			},
 		},
 	})
@@ -55,7 +56,7 @@ resource "google_firebase_web_app" "before" {
 resource "google_firebase_hosting_site" "update" {
   provider = google-beta
   project  = "%{project_id}"
-  site = "tf-test-site2%{random_suffix}"
+  site_id = "%{site_id}%{random_suffix}"
   app_id = google_firebase_web_app.before.app_id
 }
 `, context)
@@ -73,7 +74,7 @@ resource "google_firebase_web_app" "after" {
 resource "google_firebase_hosting_site" "update" {
   provider = google-beta
   project  = "%{project_id}"
-  site = "tf-test-site2%{random_suffix}"
+  site_id = "%{site_id}%{random_suffix}"
   app_id = google_firebase_web_app.after.app_id
 }
 `, context)
