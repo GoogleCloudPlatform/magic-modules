@@ -181,7 +181,7 @@ func resourceStorageTransferJob() *schema.Resource {
 						"log_actions": {
 							Type:          schema.TypeList,
 							Optional:      true,
-							ConflictsWith: []string{"logging_config.enable_on_prem_gcs_transfer_logs"},
+							ConflictsWith: []string{"logging_config.0.enable_on_prem_gcs_transfer_logs"},
 							Elem: &schema.Schema{
 								Type:         schema.TypeString,
 								ValidateFunc: validation.StringInSlice([]string{"FIND", "DELETE", "COPY"}, false),
@@ -191,7 +191,7 @@ func resourceStorageTransferJob() *schema.Resource {
 						"log_action_states": {
 							Type:          schema.TypeList,
 							Optional:      true,
-							ConflictsWith: []string{"logging_config.enable_on_prem_gcs_transfer_logs"},
+							ConflictsWith: []string{"logging_config.0.enable_on_prem_gcs_transfer_logs"},
 							Elem: &schema.Schema{
 								Type:         schema.TypeString,
 								ValidateFunc: validation.StringInSlice([]string{"SUCCEEDED", "FAILED"}, false),
@@ -201,7 +201,7 @@ func resourceStorageTransferJob() *schema.Resource {
 						"enable_on_prem_gcs_transfer_logs": {
 							Type:          schema.TypeBool,
 							Optional:      true,
-							ConflictsWith: []string{"logging_config.log_actions,logging_config.log_action_states"},
+							ConflictsWith: []string{"logging_config.0.log_actions", "logging_config.0.log_action_states"},
 							Description:   `For transfers with a PosixFilesystem source, this option enables the Cloud Storage transfer logs for this transfer.`,
 						},
 					},
