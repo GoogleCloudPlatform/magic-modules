@@ -62,6 +62,21 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: 'force_destroy'
         description: 'If set to true, any EntityTypes and Features for this Featurestore will also be deleted'
         default_value: false
+  Index: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: false
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_index"
+        primary_resource_id: "index"
+        vars:
+          name: "terraform"
+          display_name: "test-index"
+          bucket_name: "vertex-ai-index-test"
+        test_env_vars:
+          project: :PROJECT_NAME
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   FeaturestoreEntitytype: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{%featurestore}}/entityTypes/{{name}}"]
     autogen_async: false
