@@ -818,7 +818,7 @@ resource "google_tags_tag_key" "key" {
 }
 
 resource "google_tags_tag_value" "value" {
-	parent = "tagKeys/${google_tags_tag_key.key.name}"
+	parent = google_tags_tag_key.key.id
 	short_name = "foo%{random_suffix}"
 	description = "For foo%{random_suffix} resources."
 }
@@ -837,7 +837,7 @@ resource "google_sql_database_instance" "main" {
 
 resource "google_tags_location_tag_binding" "binding" {
 	parent = "//sqladmin.googleapis.com/projects/${google_project.project.number}/instances/${google_sql_database_instance.main.id}"
-	tag_value = "tagValues/${google_tags_tag_value.value.name}"
+	tag_value = google_tags_tag_value.value.id
 	location = "us-central1"
 }
 `, context)
