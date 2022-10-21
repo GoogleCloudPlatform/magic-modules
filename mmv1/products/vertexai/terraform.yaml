@@ -64,6 +64,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_value: false
   Index: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: false
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "vertex_ai_index"
