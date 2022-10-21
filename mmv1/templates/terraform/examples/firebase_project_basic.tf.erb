@@ -9,7 +9,4 @@ resource "google_project" "default" {
 resource "google_firebase_project" "default" {
   provider = google-beta
   project  = google_project.default.project_id
-  annotations = {
-    example_key = "example_value"
-  }
 }
