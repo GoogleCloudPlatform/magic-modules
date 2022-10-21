@@ -47,6 +47,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           private: "private"
           public: "public"
+        test_env_vars:
+          service_account: :SERVICE_ACCT
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'delete_contents_on_destroy'
