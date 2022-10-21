@@ -57,6 +57,27 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       custom_delete: templates/terraform/custom_delete/firebase_app_deletion_policy.erb
+  AndroidApp: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["projects/{{project}}/androidApps/{{appId}}", "androidApps/{{appId}}", "{{appId}}"]
+    autogen_async: true
+    skip_sweeper: true # Skip sweeper generation and use hard-delete in hand-written sweeper
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebase_android_app_basic"
+        min_version: "beta"
+        primary_resource_id: "basic"
+        vars:
+          display_name: "Display Name Basic"
+        test_env_vars:
+          org_id: :ORG_ID
+          project_id: :PROJECT_NAME
+        test_vars_overrides:
+          package_name: '"android.package." + randString(t, 5)'
+        ignore_read_extra:
+          - project
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      custom_delete: templates/terraform/custom_delete/firebase_app_deletion_policy.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
