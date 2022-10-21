@@ -132,12 +132,8 @@ objects:
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
       method_name_separator: ":"
-      parent_resource_attribute: "domain_name"
-      import_format:
-        [
-          "projects/{{project}}/locations/global/domains/{{domain_name}}",
-          "{{domain_name}}"
-        ]    
+      parent_resource_attribute: "name"
+      import_format: ["projects/{{project}}/locations/global/domains/{{domain_name}}"]
     parameters:
       - !ruby/object:Api::Type::String
         name: domainName
@@ -170,6 +166,7 @@ objects:
           Ranges must be unique and non-overlapping with existing subnets in authorizedNetworks
       - !ruby/object:Api::Type::Array
         name: 'locations'
+        max_size: 4
         required: true
         item_type: Api::Type::String
         description: |

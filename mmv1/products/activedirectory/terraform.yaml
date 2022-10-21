@@ -15,7 +15,7 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Domain: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
-    import_format: ["{{name}}"]
+    import_format: ["projects/{{project}}/locations/global/domains/{{domain_name}}", "{{name}}"]
     autogen_async: true
     properties:
       authorizedNetworks: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -38,7 +38,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           # 'tfgen' is the only option here.
           domain_name: tfgen
         # skip the test until Active Directory setup issue got resolved
-        skip_test: true
   DomainTrust: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/locations/global/domains/{{domain}}/{{target_domain_name}}"
     import_format: ["projects/{{project}}/locations/global/domains/{{domain}}/{{target_domain_name}}"]
