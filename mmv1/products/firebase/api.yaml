@@ -209,7 +209,7 @@ objects:
         description: |
           (Optional) Set to `ABANDON` to allow the AndroidApp to be untracked from terraform state
           rather than deleted upon `terraform destroy`. This is useful because the AndroidApp may be
-          serving traffic. Set to `DELETE` to delete the AppleApp. Default to `DELETE`.
+          serving traffic. Set to `DELETE` to delete the AndroidApp. Default to `DELETE`.
         input: true
         url_param_only: true
         default_value: DELETE
