@@ -151,7 +151,7 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: name
-        description: The resource name of the Endpoint.
+        description: The resource name of the Endpoint. The name must be numeric with no leading zeros and can be at most 10 digits.
         url_param_only: true
         required: true
         input: true
@@ -164,11 +164,11 @@ objects:
         description: The description of the Endpoint.
       - !ruby/object:Api::Type::Array
         name: deployedModels
-        description: Output only. The models deployed in this Endpoint. To add or remove DeployedModels use EndpointService.DeployModel and EndpointService.UndeployModel respectively.
+        description: Output only. The models deployed in this Endpoint. To add or remove DeployedModels use EndpointService.DeployModel and EndpointService.UndeployModel respectively. Models can also be deployed and undeployed using the [Cloud Console](https://console.cloud.google.com/vertex-ai/).
         output: true
         item_type: !ruby/object:Api::Type::NestedObject
           name: deployedModels
-          description: Output only. The models deployed in this Endpoint. To add or remove DeployedModels use EndpointService.DeployModel and EndpointService.UndeployModel respectively.
+          description: Output only. The models deployed in this Endpoint. To add or remove DeployedModels use EndpointService.DeployModel and EndpointService.UndeployModel respectively. Models can also be deployed and undeployed using the [Cloud Console](https://console.cloud.google.com/vertex-ai/).
           properties:
               - !ruby/object:Api::Type::NestedObject
                 name: dedicatedResources
