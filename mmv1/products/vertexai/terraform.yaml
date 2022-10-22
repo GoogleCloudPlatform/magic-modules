@@ -73,7 +73,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "vertex_ai_index"
         primary_resource_id: "index"
         vars:
-          name: "terraform"
           display_name: "test-index"
           bucket_name: "vertex-ai-index-test"
         test_env_vars:

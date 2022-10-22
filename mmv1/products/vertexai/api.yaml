@@ -471,9 +471,8 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
-        description: The resource name of the Index.
-        input: true
-        required: true
+        description: The resource name of the Index. This value is set by Google.
+        output: true
       - !ruby/object:Api::Type::String
         name: 'displayName'
         description: The display name of the Index. The name can be up to 128 characters long and can be consist of any UTF-8 characters.
@@ -481,14 +480,16 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: The description of the Index.
-        # Please take a look at the following link for the original definition:
+        # Please take a look at the following links for the original definition:
         # https://cloud.google.com/vertex-ai/docs/matching-engine/create-manage-index#create_index-drest
+        # https://cloud.google.com/vertex-ai/docs/matching-engine/configuring-indexes
       - !ruby/object:Api::Type::NestedObject
         name: "metadata"
         description: An additional information about the Index
         properties:
           - !ruby/object:Api::Type::String
             name: 'contentsDeltaUri'
+            input: true
             description: |-
               Allows inserting, updating  or deleting the contents of the Matching Engine Index.
               The string must be a valid Cloud Storage directory path. If this

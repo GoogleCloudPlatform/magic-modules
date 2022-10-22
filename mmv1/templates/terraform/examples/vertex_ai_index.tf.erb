@@ -16,7 +16,6 @@ EOF
 }
 
 resource "google_vertex_ai_index" "index" {
-  name = "<%= ctx[:vars]['name'] %>"
   labels = {
     foo = "bar"
   }
