@@ -448,7 +448,6 @@ func resourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: `Per-cluster configuration of Node Auto-Provisioning with Cluster Autoscaler to automatically adjust the size of the cluster and create/delete node pools based on the current needs of the cluster's workload. See the guide to using Node Auto-Provisioning for more details.`,
-				ConflictsWith: []string{"enable_autopilot"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
@@ -460,6 +459,7 @@ func resourceContainerCluster() *schema.Resource {
 							Type:        schema.TypeList,
 							Optional:    true,
 							Description: `Global constraints for machine resources in the cluster. Configuring the cpu and memory types is required if node auto-provisioning is enabled. These limits will apply to node pool autoscaling in addition to node auto-provisioning.`,
+                            ConflictsWith: []string{"enable_autopilot"},
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"resource_type": {
@@ -508,6 +508,7 @@ func resourceContainerCluster() *schema.Resource {
 										Default:     100,
 										Description: `Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.`,
 										ValidateFunc: validation.IntAtLeast(10),
+                                        ConflictsWith: []string{"enable_autopilot"},
 									},
 									"disk_type": {
 										Type:        schema.TypeString,
@@ -515,6 +516,7 @@ func resourceContainerCluster() *schema.Resource {
 										Default:     "pd-standard",
 										Description: `Type of the disk attached to each node.`,
 										ValidateFunc: validation.StringInSlice([]string{"pd-standard", "pd-ssd", "pd-balanced"}, false),
+                                        ConflictsWith: []string{"enable_autopilot"},
 									},
 									"image_type": {
 										Type:        schema.TypeString,
@@ -522,6 +524,7 @@ func resourceContainerCluster() *schema.Resource {
 										Default:     "COS_CONTAINERD",
 										Description: `The default image type used by NAP once a new node pool is being created.`,
 										ValidateFunc: validation.StringInSlice([]string{"COS_CONTAINERD", "COS", "UBUNTU_CONTAINERD", "UBUNTU"}, false),
+                                        ConflictsWith: []string{"enable_autopilot"},
 									},
 									<% unless version == 'ga' -%>
 									"min_cpu_platform": {
@@ -529,6 +532,7 @@ func resourceContainerCluster() *schema.Resource {
 										Optional:         true,
 										DiffSuppressFunc: emptyOrDefaultStringSuppress("automatic"),
 										Description:      `Minimum CPU platform to be used by this instance. The instance may be scheduled on the specified or newer CPU platform. Applicable values are the friendly names of CPU platforms, such as Intel Haswell.`,
+                                        ConflictsWith: []string{"enable_autopilot"},
 									},
 									<% end -%>
 									"boot_disk_kms_key": {
@@ -536,6 +540,7 @@ func resourceContainerCluster() *schema.Resource {
 										Optional:    true,
 										ForceNew:    true,
 										Description: `The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool.`,
+                                        ConflictsWith: []string{"enable_autopilot"},
 									},
 								},
 							},
@@ -547,6 +552,7 @@ func resourceContainerCluster() *schema.Resource {
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"BALANCED", "OPTIMIZE_UTILIZATION"}, false),
 							Description:  `Configuration options for the Autoscaling profile feature, which lets you choose whether the cluster autoscaler should optimize for resource utilization or resource availability when deciding to remove nodes from a cluster. Can be BALANCED or OPTIMIZE_UTILIZATION. Defaults to BALANCED.`,
+                            ConflictsWith: []string{"enable_autopilot"},
 						},
 						<% end -%>
 					},
