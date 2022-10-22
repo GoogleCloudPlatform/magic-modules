@@ -80,6 +80,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      metadata.contentsDeltaUri: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_contents_delta_uri.go.erb
   FeaturestoreEntitytype: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{%featurestore}}/entityTypes/{{name}}"]
     autogen_async: false

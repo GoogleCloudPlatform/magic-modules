@@ -484,7 +484,7 @@ objects:
         # https://cloud.google.com/vertex-ai/docs/matching-engine/create-manage-index#create_index-drest
         # https://cloud.google.com/vertex-ai/docs/matching-engine/configuring-indexes
       - !ruby/object:Api::Type::NestedObject
-        name: "metadata"
+        name: 'metadata'
         description: An additional information about the Index
         properties:
           - !ruby/object:Api::Type::String
