@@ -15,12 +15,12 @@ and [API](https://cloud.google.com/compute/docs/reference/latest/instanceGroupMa
 
 ```hcl
 data "google_compute_instance_group_manager" "igm1" {
-  name = "k8s1-abcdef01-myns-mysvc-8080-4b6bac43"
+  name = "my-igm"
   zone = "us-central1-a"
 }
 
 data "google_compute_instance_group_manager" "igm2" {
-  self_link = "https://www.googleapis.com/compute/v1/projects/myproject/zones/us-central1-a/instanceGroupManagers/k8s1-abcdef01-myns-mysvc-8080-4b6bac43"
+  self_link = "https://www.googleapis.com/compute/v1/projects/myproject/zones/us-central1-a/instanceGroupManagers/my-igm"
 }
 ```
 
