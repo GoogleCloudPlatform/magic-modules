@@ -119,7 +119,7 @@ func resource<%= resource_name -%>() *schema.Resource {
             "<%= field.name -%>": {
               Type: <%= tf_type(field) -%>,
               Optional: true,
-              <% unless field.default_value.nil? -%>
+            <% unless field.default_value.nil? -%>
               Default:  <%= go_literal(field.default_value) -%>,
             <% end -%>
               Description: `<%= field.description.strip.gsub("`", "'") -%>`,
