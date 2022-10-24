@@ -58,7 +58,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Api::Type::String
         name: 'deletion_policy'
         description: |
-          (Optional) Set to `ABANDON` to allow the WebApp to be untracked from terraform state
+          Set to `ABANDON` to allow the WebApp to be untracked from terraform state
           rather than deleted upon `terraform destroy`. This is useful becaue the WebApp may be
           serving traffic. Set to `DELETE` to delete the WebApp. Default to `ABANDON`
         default_value: ABANDON
