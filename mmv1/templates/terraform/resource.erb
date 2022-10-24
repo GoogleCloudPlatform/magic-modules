@@ -119,10 +119,11 @@ func resource<%= resource_name -%>() *schema.Resource {
             "<%= field.name -%>": {
               Type: <%= tf_type(field) -%>,
               Optional: true,
-            <% unless field.default_value.nil? -%>
+              <% unless field.default_value.nil? -%>
               Default:  <%= go_literal(field.default_value) -%>,
             <% end -%>
-            },
+              Description: `<%= field.description.strip.gsub("`", "'") -%>`,
+          },
 <%        end -%>
 <%      end -%>
 <%=     lines(compile(pwd + '/' + object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
@@ -287,7 +288,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <% unless object.taint_resource_on_failed_create -%>
         // The resource didn't actually create
         d.SetId("")
-<%  end -%>         
+<%  end -%>
         return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
     }
 
