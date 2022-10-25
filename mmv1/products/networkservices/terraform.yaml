@@ -45,6 +45,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           resource_name_2: "my-fallback"
         ignore_read_extra:
          - "timeout"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "network_services_edge_cache_origin_v4auth"
+        primary_resource_id: "default"
+        vars:
+          resource_name: "my-origin"
+          access_key_id: "ACCESSKEYID"
+        ignore_read_extra:
+         - "timeout"
     properties:
       failoverOrigin: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareResourceNames'
@@ -80,8 +88,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           bucket_name: "my-bucket"
           origin_name: "my-origin"
           origin_google: "origin-google"
-          origin_v4auth: "origin-v4auth"
-          access_key_id: "ACCESSKEY12345"
           service_name: "my-service"
     properties:
       disableQuic: !ruby/object:Overrides::Terraform::PropertyOverride
