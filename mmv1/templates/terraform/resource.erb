@@ -288,7 +288,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <% unless object.taint_resource_on_failed_create -%>
         // The resource didn't actually create
         d.SetId("")
-<%  end -%>.        
+<%  end -%>        
         return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
     }
 
