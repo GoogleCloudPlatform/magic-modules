@@ -33,7 +33,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
-          'https://firebase.google.com/'
+          'https://firebase.google.com/docs/hosting'
       api: 'https://firebase.google.com/docs/reference/hosting/rest/v1beta1/projects.sites'
     parameters:
       - !ruby/object:Api::Type::String
