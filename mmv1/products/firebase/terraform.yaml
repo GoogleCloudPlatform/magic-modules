@@ -54,6 +54,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
         ignore_read_extra:
           - project
+          - deletion_policy
     virtual_fields:
       - !ruby/object:Api::Type::String
         name: 'deletion_policy'
