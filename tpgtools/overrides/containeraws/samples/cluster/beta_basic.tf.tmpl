@@ -92,5 +92,10 @@ resource "google_container_aws_cluster" "primary" {
       enable_components = ["SYSTEM_COMPONENTS", "WORKLOADS"]
     }
   }
+  monitoring_config {
+    managed_prometheus_config { 
+      enabled = false
+    }
+  }
 }
-
+        
