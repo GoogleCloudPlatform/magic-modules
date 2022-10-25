@@ -305,7 +305,7 @@ resource "google_compute_router_interface" "foobar_int2" {
   name                = "%s-int2"
   router              = google_compute_router.foobar.name
   region              = google_compute_router.foobar.region
-  ip_range 					  = "169.254.4.1/30"
+  ip_range            = "169.254.4.1/30"
   redundant_interface = google_compute_router_interface.foobar_int1.name
 }
 `, routerName, routerName, routerName, routerName, routerName)
