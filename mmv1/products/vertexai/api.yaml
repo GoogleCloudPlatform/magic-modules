@@ -200,6 +200,14 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/vertex-ai/docs'
       api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
+      parent_resource_type: entitytype
+      parent_resource_attribute: entitytype
+      import_format: ['{{name}}']
+      example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_featurestore_entitytype.tf.erb'
+      min_version: beta
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
