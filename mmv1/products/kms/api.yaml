@@ -200,52 +200,21 @@ objects:
           - "DESTROY_SCHEDULED"
           - "PENDING_IMPORT"
           - "IMPORT_FAILED"
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'protectionLevel'
         output: true
         description: |
           The ProtectionLevel describing how crypto operations are performed with this CryptoKeyVersion.
-        values:
-          - "PROTECTION_LEVEL_UNSPECIFIED"
-          - "SOFTWARE"
-          - "HSM"
-          - "EXTERNAL"
-          - "EXTERNAL_VPC"
       - !ruby/object:Api::Type::Time
         name: 'generateTime'
         description: |
           The time this CryptoKeyVersion key material was generated
         output: true
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'algorithm'
         description: |
           The CryptoKeyVersionAlgorithm that this CryptoKeyVersion supports.
         output: true
-        values: 
-          - "GOOGLE_SYMMETRIC_ENCRYPTION"
-          - "RSA_SIGN_PSS_2048_SHA256"
-          - "RSA_SIGN_PSS_3072_SHA256"
-          - "RSA_SIGN_PSS_4096_SHA256"
-          - "RSA_SIGN_PSS_4096_SHA512"
-          - "RSA_SIGN_PKCS1_2048_SHA256"
-          - "RSA_SIGN_PKCS1_3072_SHA256"
-          - "RSA_SIGN_PKCS1_4096_SHA256"
-          - "RSA_SIGN_PKCS1_4096_SHA512"
-          - "RSA_SIGN_RAW_PKCS1_2048"
-          - "RSA_SIGN_RAW_PKCS1_3072"
-          - "RSA_SIGN_RAW_PKCS1_4096"
-          - "RSA_DECRYPT_OAEP_2048_SHA256"
-          - "RSA_DECRYPT_OAEP_3072_SHA256"
-          - "RSA_DECRYPT_OAEP_4096_SHA256"
-          - "RSA_DECRYPT_OAEP_4096_SHA512"
-          - "RSA_DECRYPT_OAEP_2048_SHA1"
-          - "RSA_DECRYPT_OAEP_3072_SHA1"
-          - "RSA_DECRYPT_OAEP_4096_SHA1"
-          - "EC_SIGN_P256_SHA256"
-          - "EC_SIGN_P384_SHA384"
-          - "EC_SIGN_SECP256K1_SHA256"
-          - "HMAC_SHA256"
-          - "EXTERNAL_SYMMETRIC_ENCRYPTION"
       - !ruby/object:Api::Type::NestedObject
         name: 'attestation'
         description: |
@@ -253,14 +222,11 @@ objects:
           Only provided for key versions with protectionLevel HSM.
         output: true
         properties:
-          - !ruby/object:Api::Type::Enum
+          - !ruby/object:Api::Type::String
             name: 'format'
             description: |
               The format of the attestation data.
             output: true
-            values:
-              - :CAVIUM_V1_COMPRESSED
-              - :CAVIUM_V2_COMPRESSED
           - !ruby/object:Api::Type::String
             name: 'content'
             description: |

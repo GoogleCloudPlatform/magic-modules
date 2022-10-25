@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -77,17 +78,25 @@ type kmsCryptoKeyId struct {
 	Name      string
 }
 
-type kmsCryptoKeyVersionId struct {
-	KeyRingId kmsKeyRingId
-	Name      string
-}
-
 func (s *kmsCryptoKeyId) cryptoKeyId() string {
 	return fmt.Sprintf("%s/cryptoKeys/%s", s.KeyRingId.keyRingId(), s.Name)
 }
 
 func (s *kmsCryptoKeyId) terraformId() string {
 	return fmt.Sprintf("%s/%s", s.KeyRingId.terraformId(), s.Name)
+}
+
+type kmsCryptoKeyVersionId struct {
+	CryptoKeyId kmsCryptoKeyId
+	Name        string
+}
+
+func (s *kmsCryptoKeyVersionId) cryptoKeyVersionId() string {
+	return fmt.Sprintf(s.Name)
+}
+
+func (s *kmsCryptoKeyVersionId) terraformId() string {
+	return fmt.Sprintf("%s/%s", s.CryptoKeyId.terraformId(), s.Name)
 }
 
 func validateKmsCryptoKeyRotationPeriod(value interface{}, _ string) (ws []string, errors []error) {
@@ -184,10 +193,13 @@ func parseKmsCryptoKeyVersionId(id string, config *Config) (*kmsCryptoKeyVersion
 
 	if parts := cryptoKeyVersionRelativeLinkRegex.FindStringSubmatch(id); parts != nil {
 		return &kmsCryptoKeyVersionId{
-			KeyRingId: kmsKeyRingId{
-				Project:  parts[1],
-				Location: parts[2],
-				Name:     parts[3],
+			CryptoKeyId: kmsCryptoKeyId{
+				KeyRingId: kmsKeyRingId{
+					Project:  parts[1],
+					Location: parts[2],
+					Name:     parts[3],
+				},
+				Name: parts[4],
 			},
 			Name: "projects/" + parts[1] + "/locations/" + parts[2] + "/keyRings/" + parts[3] + "/cryptoKeys/" + parts[4] + "/cryptoKeyVersions/" + parts[5],
 		}, nil
@@ -221,6 +233,22 @@ func clearCryptoKeyVersions(cryptoKeyId *kmsCryptoKeyId, userAgent string, confi
 		}
 	}
 
+	return nil
+}
+
+func deleteCryptoKeyVersions(cryptoKeyVersionId *kmsCryptoKeyVersionId, d *schema.ResourceData, userAgent string, config *Config) error {
+	versionsClient := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions
+
+	versions := versionsClient.List(cryptoKeyVersionId.cryptoKeyVersionId())
+	if config.UserProjectOverride {
+		versions.Header().Set("X-Goog-User-Project", cryptoKeyVersionId.CryptoKeyId.KeyRingId.Project)
+	}
+	versionsResponse, err := versions.Do()
+
+	if err != nil {
+		return handleNotFoundError(err, d, fmt.Sprintf("ID %s", cryptoKeyVersionId.cryptoKeyVersionId()))
+	}
+	log.Print(versionsResponse)
 	return nil
 }
 
