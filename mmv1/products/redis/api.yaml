@@ -160,7 +160,7 @@ objects:
               - :RDB
           - !ruby/object:Api::Type::Enum
             name: 'rdbSnapshotPeriod'
-            required: true
+            required: false
             description: |
               Optional. Available snapshot periods for scheduling.
 
