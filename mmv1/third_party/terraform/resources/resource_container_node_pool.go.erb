@@ -876,21 +876,31 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 		upgradeSettingsConfig := v.([]interface{})[0].(map[string]interface{})
 		np.UpgradeSettings = &container.UpgradeSettings{}
 
+		if v, ok := upgradeSettingsConfig["strategy"]; ok {
+			np.UpgradeSettings.Strategy = v.(string)
+		}
+
 		if v, ok := upgradeSettingsConfig["max_surge"]; ok {
+			if np.UpgradeSettings.Strategy != "SURGE" {
+				return nil, fmt.Errorf("Surge upgrade settings may not be changed when surge strategy is not enabled")
+			}
 			np.UpgradeSettings.MaxSurge = int64(v.(int))
 		}
 
 		if v, ok := upgradeSettingsConfig["max_unavailable"]; ok {
+			if np.UpgradeSettings.Strategy != "SURGE" {
+				return nil, fmt.Errorf("Surge upgrade settings may not be changed when surge strategy is not enabled")
+			}
 			np.UpgradeSettings.MaxUnavailable = int64(v.(int))
-		}
-
-		if v, ok := upgradeSettingsConfig["strategy"]; ok {
-			np.UpgradeSettings.Strategy = v.(string)
 		}
 
 		if v, ok := upgradeSettingsConfig["blue_green_settings"]; ok && len(v.([]interface{})) > 0 {
 			blueGreenSettingsConfig := v.([]interface{})[0].(map[string]interface{})
 			np.UpgradeSettings.BlueGreenSettings = &container.BlueGreenSettings{}
+
+			if np.UpgradeSettings.Strategy != "BLUE_GREEN" {
+				return nil, fmt.Errorf("Blue-green upgrade settings may not be changed when blue-green strategy is not enabled")
+			}
 
 			if v, ok := blueGreenSettingsConfig["node_pool_soak_duration"]; ok {
 				np.UpgradeSettings.BlueGreenSettings.NodePoolSoakDuration = v.(string)
@@ -1486,14 +1496,31 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			upgradeSettingsConfig := v.([]interface{})[0].(map[string]interface{})
 			upgradeSettings.Strategy = upgradeSettingsConfig["strategy"].(string)
 
-			if upgradeSettings.Strategy == "SURGE" {
-				upgradeSettings.MaxSurge = int64(upgradeSettingsConfig["max_surge"].(int))
-				upgradeSettings.MaxUnavailable = int64(upgradeSettingsConfig["max_unavailable"].(int))
+			if d.HasChange(prefix + "upgrade_settings.0.max_surge") {
+				if upgradeSettings.Strategy != "SURGE" {
+					return fmt.Errorf("%v Surge upgrade settings may not be changed when surge strategy is not enabled", v)
+				}
+				if v, ok := upgradeSettingsConfig["max_surge"]; ok {
+					upgradeSettings.MaxSurge = int64(v.(int))
+				}
 			}
 
-			if v, ok := upgradeSettingsConfig["blue_green_settings"]; ok && len(v.([]interface{})) > 0 {
+			if d.HasChange(prefix + "upgrade_settings.0.max_unavailable") {
+				if upgradeSettings.Strategy != "SURGE" {
+					return fmt.Errorf("%v Surge upgrade settings may not be changed when surge strategy is not enabled", v)
+				}
+				if v, ok := upgradeSettingsConfig["max_unavailable"]; ok {
+					upgradeSettings.MaxUnavailable = int64(v.(int))
+				}
+			}
+
+			if d.HasChange(prefix + "upgrade_settings.0.blue_green_settings") {
+				if upgradeSettings.Strategy != "BLUE_GREEN" {
+					return fmt.Errorf("Blue-green upgrade settings may not be changed when blue-green strategy is not enabled")
+				}
+
 				blueGreenSettings := &container.BlueGreenSettings{}
-				blueGreenSettingsConfig := v.([]interface{})[0].(map[string]interface{})
+				blueGreenSettingsConfig := upgradeSettingsConfig["blue_green_settings"].([]interface{})[0].(map[string]interface{})
 				blueGreenSettings.NodePoolSoakDuration = blueGreenSettingsConfig["node_pool_soak_duration"].(string)
 
 				if v, ok := blueGreenSettingsConfig["standard_rollout_policy"]; ok && len(v.([]interface{})) > 0 {

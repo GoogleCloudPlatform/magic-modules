@@ -2231,8 +2231,6 @@ func makeUpgradeSettings(maxSurge int, maxUnavailable int, strategy string, node
 	if strategy == "BLUE_GREEN" {
 		return fmt.Sprintf(`
 upgrade_settings {
-	max_surge = 0
-	max_unavailable = 0
 	strategy = "%s"
 	blue_green_settings {
 		node_pool_soak_duration = "%s"
