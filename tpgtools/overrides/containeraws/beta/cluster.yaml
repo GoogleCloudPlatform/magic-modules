@@ -1,0 +1,4 @@
+- type: DIFF_SUPPRESS_FUNC
+  details:
+    diffsuppressfunc: emptyOrDefaultStringSuppress("false")
+  field: monitoring_config.managed_prometheus_config.enabled
