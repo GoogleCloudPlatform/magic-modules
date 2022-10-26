@@ -89,11 +89,11 @@ func newSpannerDatabaseIamAsset(
 
 func FetchSpannerDatabaseIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
 	// Check if the identity field returns a value
-	if _, ok := d.GetOk("{{instance}}"); !ok {
+	if _, ok := d.GetOk("instance"); !ok {
 		return Asset{}, ErrEmptyIdentityField
 	}
 
-	if _, ok := d.GetOk("{{database}}"); !ok {
+	if _, ok := d.GetOk("database"); !ok {
 		return Asset{}, ErrEmptyIdentityField
 	}
 
