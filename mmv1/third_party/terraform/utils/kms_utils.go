@@ -2,7 +2,6 @@ package google
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -238,17 +237,19 @@ func clearCryptoKeyVersions(cryptoKeyId *kmsCryptoKeyId, userAgent string, confi
 
 func deleteCryptoKeyVersions(cryptoKeyVersionId *kmsCryptoKeyVersionId, d *schema.ResourceData, userAgent string, config *Config) error {
 	versionsClient := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions
-
-	versions := versionsClient.List(cryptoKeyVersionId.cryptoKeyVersionId())
+	request := &cloudkms.DestroyCryptoKeyVersionRequest{}
+	destroyCall := versionsClient.Destroy(cryptoKeyVersionId.Name, request)
 	if config.UserProjectOverride {
-		versions.Header().Set("X-Goog-User-Project", cryptoKeyVersionId.CryptoKeyId.KeyRingId.Project)
+		destroyCall.Header().Set("X-Goog-User-Project", cryptoKeyVersionId.CryptoKeyId.KeyRingId.Project)
 	}
-	versionsResponse, err := versions.Do()
-
+	response, err := destroyCall.Do()
+	if response.State == "DESTROY_SCHEDULED" {
+		return handleNotFoundError(err, d, fmt.Sprintf("ID %s", cryptoKeyVersionId.Name))
+	}
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("ID %s", cryptoKeyVersionId.cryptoKeyVersionId()))
+		return handleNotFoundError(err, d, fmt.Sprintf("ID %s", cryptoKeyVersionId.Name))
 	}
-	log.Print(versionsResponse)
+
 	return nil
 }
 

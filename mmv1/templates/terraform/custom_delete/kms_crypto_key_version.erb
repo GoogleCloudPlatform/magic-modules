@@ -7,7 +7,7 @@
         return nil
     }
     if err := deleteCryptoKeyVersions(cryptoKeyVersionId, d, userAgent, config); err != nil { 
-        return err
+        return nil
     }
     d.SetId("")
 	return nil

@@ -8,9 +8,9 @@
 and all its CryptoKeyVersions will be destroyed, but it will still be present in the project.`, cryptoKeyId.cryptoKeyId())
 
 	// Delete all versions of the key
-	if err := clearCryptoKeyVersions(cryptoKeyId, userAgent, config); err != nil {
-		return err
-	}
+	//if err := clearCryptoKeyVersions(cryptoKeyId, userAgent, config); err != nil {
+	//	return err
+	//}
 
 	// Make sure automatic key rotation is disabled if set
 	if d.Get("rotation_period") != "" {
