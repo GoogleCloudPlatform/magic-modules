@@ -19,9 +19,10 @@ examples:
     vars:
       name: "vertex_ai_model"
       project: "vertex-ai"
+      model_name: "model-name"
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/vertex_model.go.erb
-  encoder: templates/terraform/encoders/wrap_object.go.erb
+  encoder: templates/terraform/encoders/vertex_model.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: location
@@ -33,7 +34,8 @@ properties:
   - !ruby/object:Api::Type::String
     name: name
     description: The resource name of the Model.
-    output: true
+    required: true
+    input: true
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: versionId

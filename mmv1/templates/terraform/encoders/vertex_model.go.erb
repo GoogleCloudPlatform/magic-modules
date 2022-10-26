@@ -1,0 +1,7 @@
+	newObj := make(map[string]interface{})
+	if name, ok := obj["name"]; ok {
+		newObj["modelId"] = name
+		delete(obj, "name")
+	}
+	newObj["model"] = obj
+	return newObj, nil
