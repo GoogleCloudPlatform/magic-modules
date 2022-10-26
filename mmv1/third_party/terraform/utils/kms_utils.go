@@ -243,10 +243,10 @@ func deleteCryptoKeyVersions(cryptoKeyVersionId *kmsCryptoKeyVersionId, d *schem
 		destroyCall.Header().Set("X-Goog-User-Project", cryptoKeyVersionId.CryptoKeyId.KeyRingId.Project)
 	}
 	response, err := destroyCall.Do()
-	if response.State == "DESTROY_SCHEDULED" {
+	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("ID %s", cryptoKeyVersionId.Name))
 	}
-	if err != nil {
+	if response.State == "DESTROY_SCHEDULED" {
 		return handleNotFoundError(err, d, fmt.Sprintf("ID %s", cryptoKeyVersionId.Name))
 	}
 
