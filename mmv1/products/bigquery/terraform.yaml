@@ -43,10 +43,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           account_name: "bqowner"
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_dataset_authorized_routine"
-        primary_resource_id: "dataset"
+        primary_resource_id: "private"
         vars:
-          private: "private"
-          public: "public"
+          private_dataset: "private-dataset"
+          public_dataset: "public-dataset"
+          public_routine: "public-routine"
         test_env_vars:
           service_account: :SERVICE_ACCT
     virtual_fields:
@@ -120,10 +121,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_dataset_access_authorized_routine"
         skip_test: true  # not importable
-        primary_resource_id: "access"
+        primary_resource_type: "google_bigquery_dataset_access"
+        primary_resource_id: "authorized_routine"
         vars:
-          private: "private"
-          public: "public"
+          private_dataset: "private-dataset"
+          public_dataset: "public-dataset"
+          public_routine: "public-routine"
     properties:
       datasetId: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
