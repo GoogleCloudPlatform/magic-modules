@@ -27,16 +27,22 @@ import (
 var (
 	instanceGroupManagerURL = regexp.MustCompile(fmt.Sprintf("projects/(%s)/zones/([a-z0-9-]*)/instanceGroupManagers/([^/]*)", ProjectRegex))
 
-	networkConfig = &schema.Resource{
+	masterAuthorizedNetworksConfig = &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"cidr_blocks": {
 				Type: schema.TypeSet,
-				// Despite being the only entry in a nested block, this should be kept
-				// Optional. Expressing the parent with no entries and omitting the
+				// This should be kept Optional. Expressing the
+				// parent with no entries and omitting the
 				// parent entirely are semantically different.
 				Optional: true,
 				Elem:     cidrBlockConfig,
 				Description: `External networks that can access the Kubernetes cluster master through HTTPS.`,
+			},
+			"gcp_public_cidrs_access_enabled": {
+				Type: schema.TypeBool,
+				Optional: true,
+				Computed: true,
+				Description: `Whether master is accessbile via Google Compute Engine Public IP addresses.`,
 			},
 		},
 	}
@@ -1041,8 +1047,9 @@ func resourceContainerCluster() *schema.Resource {
 			"master_authorized_networks_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				MaxItems:    1,
-				Elem:        networkConfig,
+				Elem:        masterAuthorizedNetworksConfig,
 				Description: `The desired configuration options for master authorized networks. Omit the nested cidr_blocks attribute to disallow external access (except the cluster node IPs, which GKE automatically whitelists).`,
 			},
 
@@ -1751,7 +1758,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		Name:                           clusterName,
 		InitialNodeCount:               int64(d.Get("initial_node_count").(int)),
 		MaintenancePolicy:              expandMaintenancePolicy(d, meta),
-		MasterAuthorizedNetworksConfig: expandMasterAuthorizedNetworksConfig(d.Get("master_authorized_networks_config")),
+		MasterAuthorizedNetworksConfig: expandMasterAuthorizedNetworksConfig(d.Get("master_authorized_networks_config"), d),
 		InitialClusterVersion:          d.Get("min_master_version").(string),
 		ClusterIpv4Cidr:                d.Get("cluster_ipv4_cidr").(string),
 		Description:                    d.Get("description").(string),
@@ -2369,7 +2376,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		c := d.Get("master_authorized_networks_config")
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
-				DesiredMasterAuthorizedNetworksConfig: expandMasterAuthorizedNetworksConfig(c),
+				DesiredMasterAuthorizedNetworksConfig: expandMasterAuthorizedNetworksConfig(c, d),
 			},
 		}
 
@@ -3929,7 +3936,7 @@ func expandMasterAuth(configured interface{}) *container.MasterAuth {
 	return result
 }
 
-func expandMasterAuthorizedNetworksConfig(configured interface{}) *container.MasterAuthorizedNetworksConfig {
+func expandMasterAuthorizedNetworksConfig(configured interface{}, d *schema.ResourceData) *container.MasterAuthorizedNetworksConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 {
 		return &container.MasterAuthorizedNetworksConfig{
@@ -3950,6 +3957,10 @@ func expandMasterAuthorizedNetworksConfig(configured interface{}) *container.Mas
 					DisplayName: cidrBlock["display_name"].(string),
 				})
 			}
+		}
+		if v, ok := d.GetOkExists("master_authorized_networks_config.0.gcp_public_cidrs_access_enabled"); ok {
+			result.GcpPublicCidrsAccessEnabled = v.(bool)
+			result.ForceSendFields = []string{"GcpPublicCidrsAccessEnabled"}
 		}
 	}
 	return result
@@ -4780,7 +4791,7 @@ func flattenAutoProvisioningDefaults(a *container.AutoprovisioningNodePoolDefaul
 }
 
 func flattenMasterAuthorizedNetworksConfig(c *container.MasterAuthorizedNetworksConfig) []map[string]interface{} {
-	if c == nil || !c.Enabled {
+	if c == nil {
 		return nil
 	}
 	result := make(map[string]interface{})
@@ -4794,6 +4805,7 @@ func flattenMasterAuthorizedNetworksConfig(c *container.MasterAuthorizedNetworks
 		}
 		result["cidr_blocks"] = schema.NewSet(schema.HashResource(cidrBlockConfig), cidrBlocks)
 	}
+	result["gcp_public_cidrs_access_enabled"] = c.GcpPublicCidrsAccessEnabled
 	return []map[string]interface{}{result}
 }
 
