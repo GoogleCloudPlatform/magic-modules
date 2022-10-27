@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/googleapi"
@@ -558,4 +559,40 @@ func checkGoogleIamPolicy(value string) error {
 		return fmt.Errorf("found an empty description field (should be omitted) in google_iam_policy data source: %s", value)
 	}
 	return nil
+}
+
+// Gets cluster hash from fully-qualified cluster name.
+func getClusterHash(npInfo *NodePoolInformation, userAgent string, config *Config) (string, error) {
+	getClusterCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(npInfo.parent())
+	if config.UserProjectOverride {
+		getClusterCall.Header().Add("X-Goog-User-Project", npInfo.project)
+	}
+	res, err := getClusterCall.Do()
+	if err != nil {
+		return "", err
+	}
+	return res.Id, nil
+}
+
+// Gets nodepool-level lock key. Guarantees uniqueness by using
+// the cluster hash (globally unique) and nodepool name (unique
+// within a cluster).
+func nodePoolLockKey(clusterHash string, npName string) string {
+	return fmt.Sprintf("clusters/%s/nodePools/%s", clusterHash, npName)
+}
+
+// Retries an operation while the canonical error code is FAILED_PRECONDTION
+// which indicates there is an incompatible operation already running on the
+// cluster. This error can be safely retried until the incompatible operation
+// completes, and the newly requested operation can begin.
+func retryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f func() error) error {
+	return resource.Retry(timeout, func() *resource.RetryError {
+		if err := lockedCall(lockKey, f); err != nil {
+			if isFailedPreconditionError(err) {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
 }
