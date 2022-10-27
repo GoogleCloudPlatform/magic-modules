@@ -8,7 +8,7 @@
 and all its CryptoKeyVersions will be destroyed, but it will still be present in the project.`, cryptoKeyId.cryptoKeyId())
 
 	// Delete all versions of the key
-	if err := clearCryptoKeyVersions(cryptoKeyId, d, userAgent, config); err != nil {
+	if err := clearCryptoKeyVersions(cryptoKeyId, userAgent, config); err != nil {
 		return err
 	}
 

@@ -206,7 +206,7 @@ func parseKmsCryptoKeyVersionId(id string, config *Config) (*kmsCryptoKeyVersion
 	return nil, fmt.Errorf("Invalid CryptoKeyVersion id format, expecting `{projectId}/{locationId}/{KeyringName}/{cryptoKeyName}/{cryptoKeyVersion}` or `{locationId}/{keyRingName}/{cryptoKeyName}/{cryptoKeyVersion}, got id: %s`", id)
 }
 
-func clearCryptoKeyVersions(cryptoKeyId *kmsCryptoKeyId, d *schema.ResourceData, userAgent string, config *Config) error {
+func clearCryptoKeyVersions(cryptoKeyId *kmsCryptoKeyId, userAgent string, config *Config) error {
 	versionsClient := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions
 
 	listCall := versionsClient.List(cryptoKeyId.cryptoKeyId())
@@ -220,15 +220,18 @@ func clearCryptoKeyVersions(cryptoKeyId *kmsCryptoKeyId, d *schema.ResourceData,
 	}
 
 	for _, version := range versionsResponse.CryptoKeyVersions {
-		request := &cloudkms.DestroyCryptoKeyVersionRequest{}
-		destroyCall := versionsClient.Destroy(version.Name, request)
-		if config.UserProjectOverride {
-			destroyCall.Header().Set("X-Goog-User-Project", cryptoKeyId.KeyRingId.Project)
-		}
-		_, err = destroyCall.Do()
+		// skip the versions that have been destroyed earlier
+		if version.State == "ENABLED" {
+			request := &cloudkms.DestroyCryptoKeyVersionRequest{}
+			destroyCall := versionsClient.Destroy(version.Name, request)
+			if config.UserProjectOverride {
+				destroyCall.Header().Set("X-Goog-User-Project", cryptoKeyId.KeyRingId.Project)
+			}
+			_, err = destroyCall.Do()
 
-		if err != nil {
-			return nil
+			if err != nil {
+				return err
+			}
 		}
 	}
 
