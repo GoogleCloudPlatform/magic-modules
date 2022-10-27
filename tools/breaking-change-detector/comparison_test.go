@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -222,10 +223,121 @@ var comparisonEngineTestCases = []comparisonEngineTestCase{
 		},
 		expectedViolations: 1,
 	},
+	{
+		name: "subfield max shrinking",
+		oldResourceMap: map[string]*schema.Resource{
+			"google-x": {
+				Schema: map[string]*schema.Schema{
+					"field-a": {
+						Description: "beep",
+						Optional:    true,
+						Type:        schema.TypeList,
+						MaxItems:    1,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"sub-field-1": {Description: "beep", Optional: true, MaxItems: 100},
+							},
+						},
+					},
+					"field-b": {Description: "beep", Optional: true},
+				},
+			},
+		},
+		newResourceMap: map[string]*schema.Resource{
+			"google-x": {
+				Schema: map[string]*schema.Schema{
+					"field-a": {
+						Description: "beep",
+						Optional:    true,
+						Type:        schema.TypeList,
+						MaxItems:    1,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"sub-field-1": {Description: "beep", Optional: true, MaxItems: 25},
+							},
+						},
+					},
+					"field-b": {Description: "beep", Optional: true},
+				},
+			},
+		},
+		expectedViolations: 1,
+	},
+	{
+		name: "subfield max shrinking",
+		oldResourceMap: map[string]*schema.Resource{
+			"google-x": {
+				Schema: map[string]*schema.Schema{
+					"field-a": {
+						Description: "beep",
+						Optional:    true,
+						Type:        schema.TypeList,
+						MaxItems:    1,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"sub-field-1": {Description: "beep", Optional: true, MaxItems: 100},
+							},
+						},
+					},
+					"field-b": {Description: "beep", Optional: true},
+				},
+			},
+		},
+		newResourceMap: map[string]*schema.Resource{
+			"google-x": {
+				Schema: map[string]*schema.Schema{
+					"field-a": {
+						Description: "beep",
+						Optional:    true,
+						Type:        schema.TypeList,
+						MaxItems:    1,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"sub-field-1": {Description: "beep", Optional: true, MaxItems: 25},
+							},
+						},
+					},
+					"field-b": {Description: "beep", Optional: true},
+				},
+			},
+		},
+		expectedViolations: 1,
+	},
+	{
+		name: "min growing",
+		oldResourceMap: map[string]*schema.Resource{
+			"google-x": {
+				Schema: map[string]*schema.Schema{
+					"field-a": {
+						Description: "beep",
+						Optional:    true,
+						MinItems:    1,
+					},
+				},
+			},
+		},
+		newResourceMap: map[string]*schema.Resource{
+			"google-x": {
+				Schema: map[string]*schema.Schema{
+					"field-a": {
+						Description: "beep",
+						Optional:    true,
+						MinItems:    4,
+					},
+				},
+			},
+		},
+		expectedViolations: 1,
+	},
 }
 
 func (tc *comparisonEngineTestCase) check(t *testing.T) {
 	violations := compareResourceMaps(tc.oldResourceMap, tc.newResourceMap)
+	for _, v := range violations {
+		if strings.Contains(v, "{{") || strings.Contains(v, "}}") {
+			t.Errorf("Test `%s` failed: found unreplaced characters in string - %s", tc.name, v)
+		}
+	}
 	if tc.expectedViolations != len(violations) {
 		t.Errorf("Test `%s` failed: expected %d violations, got %d", tc.name, tc.expectedViolations, len(violations))
 	}

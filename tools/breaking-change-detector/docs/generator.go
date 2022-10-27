@@ -7,6 +7,7 @@ import (
 	"path"
 	"text/template"
 
+	"github.com/GoogleCloudPlatform/magic-modules/.ci/breaking-change-detector/constants"
 	"github.com/GoogleCloudPlatform/magic-modules/.ci/breaking-change-detector/rules"
 	"github.com/golang/glog"
 )
@@ -26,7 +27,7 @@ func Generate(outputPath string) {
 	if outputPath == "" {
 		fmt.Printf("%v", contents.String())
 	} else {
-		outName := "breaking-changes.md"
+		outName := constants.BreakingChangeFileName
 		err := os.WriteFile(path.Join(outputPath, outName), contents.Bytes(), 0644)
 		if err != nil {
 			glog.Exit(err)

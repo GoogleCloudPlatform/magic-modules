@@ -1,4 +1,5 @@
 resource "google_vertex_ai_endpoint" "<%= ctx[:primary_resource_id] %>" {
+  name         = "<%= ctx[:vars]['endpoint_name'] %>"
   display_name = "sample-endpoint"
   description  = "A sample vertex endpoint"
   location     = "us-central1"
