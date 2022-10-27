@@ -50,7 +50,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           resource_name: "my-origin"
-          access_key_id: "ACCESSKEYID"
+          secret_name: "secret-name"
         ignore_read_extra:
          - "timeout"
     properties:
