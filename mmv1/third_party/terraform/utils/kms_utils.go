@@ -206,7 +206,7 @@ func parseKmsCryptoKeyVersionId(id string, config *Config) (*kmsCryptoKeyVersion
 	return nil, fmt.Errorf("Invalid CryptoKeyVersion id format, expecting `{projectId}/{locationId}/{KeyringName}/{cryptoKeyName}/{cryptoKeyVersion}` or `{locationId}/{keyRingName}/{cryptoKeyName}/{cryptoKeyVersion}, got id: %s`", id)
 }
 
-func clearCryptoKeyVersions(cryptoKeyId *kmsCryptoKeyId, userAgent string, config *Config) error {
+func clearCryptoKeyVersions(cryptoKeyId *kmsCryptoKeyId, d *schema.ResourceData, userAgent string, config *Config) error {
 	versionsClient := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions
 
 	listCall := versionsClient.List(cryptoKeyId.cryptoKeyId())
@@ -228,7 +228,7 @@ func clearCryptoKeyVersions(cryptoKeyId *kmsCryptoKeyId, userAgent string, confi
 		_, err = destroyCall.Do()
 
 		if err != nil {
-			return err
+			return nil
 		}
 	}
 
