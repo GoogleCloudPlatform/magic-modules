@@ -99,7 +99,6 @@ objects:
         description: |
           Machine type of VM Instance underlying connector. Default is e2-micro
         default_value: e2-micro
-        min_version: beta
       - !ruby/object:Api::Type::Integer
         name: minThroughput
         description: |
@@ -109,12 +108,10 @@ objects:
         name: minInstances
         description: |
           Minimum value of instances in autoscaling group underlying the connector.
-        min_version: beta
       - !ruby/object:Api::Type::Integer
         name: maxInstances
         description: |
           Maximum value of instances in autoscaling group underlying the connector.
-        min_version: beta
       - !ruby/object:Api::Type::Integer
         name: maxThroughput
         # The API documentation says this will default to 200, but when I tried that I got an error that the minimum
@@ -131,7 +128,6 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'subnet'
         input: true
-        min_version: beta
         description: |
           The subnet in which to house the connector
         properties:
@@ -144,10 +140,8 @@ objects:
               - network
               - subnet.0.name
             input: true
-            min_version: beta
           - !ruby/object:Api::Type::String
             name: 'projectId'
             description: |
               Project in which the subnet exists. If not set, this project is assumed to be the project for which the connector create request was issued.
             input: true
-            min_version: beta

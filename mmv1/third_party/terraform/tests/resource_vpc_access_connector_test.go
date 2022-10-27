@@ -1,6 +1,4 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"testing"
@@ -17,16 +15,16 @@ func TestAccVPCAccessConnector_vpcAccessConnectorThroughput(t *testing.T) {
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
+		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckVPCAccessConnectorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVPCAccessConnector_vpcAccessConnectorThroughput(context),
 			},
 			{
-				ResourceName:            "google_vpc_access_connector.connector",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_vpc_access_connector.connector",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -35,7 +33,6 @@ func TestAccVPCAccessConnector_vpcAccessConnectorThroughput(t *testing.T) {
 func testAccVPCAccessConnector_vpcAccessConnectorThroughput(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_vpc_access_connector" "connector" {
-  provider      = google-beta
   name          = "tf-test-vpc-con%{random_suffix}"
   subnet {
     name = google_compute_subnetwork.custom_test.name
@@ -47,7 +44,6 @@ resource "google_vpc_access_connector" "connector" {
 }
 
 resource "google_compute_subnetwork" "custom_test" {
-  provider      = google-beta
   name          = "tf-test-vpc-con%{random_suffix}"
   ip_cidr_range = "10.2.0.0/28"
   region        = "us-central1"
@@ -55,11 +51,8 @@ resource "google_compute_subnetwork" "custom_test" {
 }
 
 resource "google_compute_network" "custom_test" {
-  provider                = google-beta
   name                    = "tf-test-vpc-con%{random_suffix}"
   auto_create_subnetworks = false
 }
 `, context)
 }
-
-<% end -%>
