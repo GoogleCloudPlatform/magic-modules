@@ -588,7 +588,7 @@ func nodePoolLockKey(clusterHash string, npName string) string {
 func retryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f func() error) error {
 	return resource.Retry(timeout, func() *resource.RetryError {
 		if err := lockedCall(lockKey, f); err != nil {
-			if retry, _ := isFailedPreconditionError(err); retry {
+			if isFailedPreconditionError(err) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
