@@ -1,0 +1,60 @@
+func jobRevisionNameCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
+	autogen := diff.Get("autogenerate_revision_name").(bool)
+	if autogen && diff.HasChange("template.0.metadata.0.name") {
+		return fmt.Errorf("google_cloud_run_job: `template.metadata.name` cannot be set while `autogenerate_revision_name` is true. Please remove the field or set `autogenerate_revision_name` to false.")
+	}
+
+	return nil
+}
+
+var cloudRunJobGoogleProvidedAnnotations = regexp.MustCompile(`serving\.knative\.dev/(?:(?:creator)|(?:lastModifier))$|run\.googleapis\.com/(?:(?:ingress-status))$|cloud\.googleapis\.com/(?:(?:location))`)
+
+func cloudrunJobAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Suppress diffs for the annotations provided by Google
+	if cloudRunJobGoogleProvidedAnnotations.MatchString(k) && new == "" {
+		return true
+	}
+
+	// Let diff be determined by annotations (above)
+	if strings.Contains(k, "annotations.%") {
+		return true
+	}
+
+	// For other keys, don't suppress diff.
+	return false
+}
+
+var cloudRunJobGoogleProvidedTemplateAnnotations = regexp.MustCompile(`template\.0\.metadata\.0\.annotations\.run\.googleapis\.com/sandbox`)
+var cloudRunJobGoogleProvidedTemplateAnnotations_autoscaling_maxscale = regexp.MustCompile(`template\.0\.metadata\.0\.annotations\.autoscaling\.knative\.dev/maxScale`)
+
+func cloudrunJobTemplateAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Suppress diffs for the annotations provided by API
+	if cloudRunJobGoogleProvidedTemplateAnnotations.MatchString(k) &&
+		old == "gvisor" && new == "" {
+		return true
+	}
+
+	if cloudRunJobGoogleProvidedTemplateAnnotations_autoscaling_maxscale.MatchString(k) && new == "" {
+		return true
+	}
+
+	// For other keys, don't suppress diff.
+	return false
+}
+
+var cloudRunJobGoogleProvidedLabels = regexp.MustCompile(`cloud\.googleapis\.com/(?:(?:location))`)
+
+func cloudrunJobLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Suppress diffs for the labels provided by Google
+	if cloudRunJobGoogleProvidedLabels.MatchString(k) && new == "" {
+		return true
+	}
+
+	// Let diff be determined by labels (above)
+	if strings.Contains(k, "labels.%") {
+		return true
+	}
+
+	// For other keys, don't suppress diff.
+	return false
+}
