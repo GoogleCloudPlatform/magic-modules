@@ -30,19 +30,17 @@ module Provider
     # externally injected values (env vars), and that don't match the current
     # product version.
     def generate_resource(pwd, data, _generate_code, _generate_docs)
-#       puts data.to_yaml
       kind = data.product.name + data.name
+      # TODO: support skip_test tests in a separate output subfolder.
       examples = data.object.examples
                      .reject(&:skip_test)
                      .reject { |e| !e.test_env_vars.nil? && e.test_env_vars.any? }
                      .reject { |e| @version < @api.version_obj_or_closest(e.min_version) }
 
       examples.each do |example|
-        target_folder = File.join('samples', kind + '-' + example.name)
+        target_folder = File.join('samples', data.product.name + "-" + kind + '-' + example.name)
         FileUtils.mkpath target_folder
-
         data.example = example
-
         data.generate(
           pwd,
           'templates/kcc/samples/sample.tf.erb',
@@ -98,7 +96,7 @@ module Provider
       last_import_part.first.gsub('{{', '').gsub('}}', '') if last_import_part.length == 1
     end
 
-    # Still don't cover all the server generated ID cases. How?
+    # TODO: Incrementally cover all the server generated ID cases.
     def is_server_generated_name(name, object)
       has_computed_name_configured = object.custom_code.post_create == 'templates/terraform/post_create/set_computed_name.erb' if object.custom_code.post_create
       camel_case_name = name.camelize(:lower)
@@ -106,10 +104,37 @@ module Provider
       has_computed_name_configured || has_output_only_name
     end
 
-    # What about server generated import IDs?
-    def get_container(id_template)
+    def supports_conditions(iam_policy)
+      request_type = iam_policy.iam_conditions_request_type
+      valid_request_types = ['QUERY_PARAM', 'QUERY_PARAM_NESTED', 'REQUEST_BODY']
+      return valid_request_types.include?(request_type.to_s)
+    end
+
+    def get_resource_id_value_template(id_template, is_server_generated_name, object)
+      return nil if !is_server_generated_name
+
+      if id_template.split('/').length == 1 && object.base_url != id_template
+        raw_value_template = object.base_url
+      end
+      return nil if raw_value_template == nil
+
+      value_template = raw_value_template + '/{{value}}'
+    end
+
+    def get_container(id_template, is_server_generated_name, object)
+      container = get_container_from_template(id_template)
+      raise 'error having more than one container' if container.length > 2
+      if container.length == 0 && is_server_generated_name
+        value_template = get_resource_id_value_template(id_template, is_server_generated_name, object)
+        container = get_container_from_template(value_template) if value_template != nil
+        raise 'error having more than one container' if container.length > 2
+      end
+      return container
+    end
+
+    def get_container_from_template(template)
       container = Array.new()
-      id_template_parts = id_template.split('/')
+      id_template_parts = template.split('/')
 
       projects_field_index = id_template_parts.find_index('projects')
       project_field_name = id_template_parts[projects_field_index + 1].gsub('{{', '').gsub('}}', '') if !projects_field_index.nil?
@@ -127,7 +152,6 @@ module Provider
       billing_account_field_name = id_template_parts[billing_accounts_field_index + 1].gsub('{{', '').gsub('}}', '') if !billing_accounts_field_index.nil?
       container += ['billingAccount', billing_account_field_name] if !billing_account_field_name.nil? && billing_account_field_name != 'name'
 
-      raise 'error having more than one container' if container.length > 2
       return container
     end
 
