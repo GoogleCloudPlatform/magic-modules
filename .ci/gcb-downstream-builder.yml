@@ -10,9 +10,20 @@ steps:
             '--cache-from', 'gcr.io/$PROJECT_ID/downstream-builder:latest',
             './.ci/containers/downstream-builder'
         ]
-# the downstream-builder takes around 15 minutes to build
+# build the magic-modules-dev container which builds on downsream-builder.
+- name: 'gcr.io/cloud-builders/docker'
+  args: [
+            'build',
+            '-t', 'gcr.io/$PROJECT_ID/magic-modules-dev:latest',
+            '--cache-from', 'gcr.io/$PROJECT_ID/magic-modules-dev:latest',
+            './.ci/containers/magic-modules-dev'
+        ]
+# the downstream-builder + magic-modules-dev takes around 15 minutes to build
 timeout: "14400s"
 options:
     machineType: 'N1_HIGHCPU_32'
 # note: this container is also used for the run-rake-tests build
-images: ['gcr.io/$PROJECT_ID/downstream-builder:latest']
+images: [
+  'gcr.io/$PROJECT_ID/downstream-builder:latest',
+  'gcr.io/$PROJECT_ID/magic-modules-dev:latest'
+]

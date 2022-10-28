@@ -36,7 +36,13 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/security-command-center/docs'
-      api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1beta1/organizations.sources'
+      api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/organizations.sources'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
+      parent_resource_attribute: 'source'
+      base_url: organizations/{{organization}}/sources/{{source}}
+      import_format: ["organizations/{{organization}}/sources/{{source}}", "{{source}}"]
     parameters:
       - !ruby/object:Api::Type::String
         name: organization

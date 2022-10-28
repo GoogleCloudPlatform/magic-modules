@@ -76,5 +76,14 @@ func (rm ResourceInventoryRule) Message(version, resource string) string {
 // IsRuleBreak - compares resource entries and returns
 // a list of resources violating the rule
 func (rm ResourceInventoryRule) IsRuleBreak(old, new map[string]*schema.Resource) []string {
+	if rm.isRuleBreak == nil {
+		return []string{}
+	}
 	return rm.isRuleBreak(old, new)
+}
+
+// Undetectable - informs if there are functions in place
+// to detect this rule.
+func (rm ResourceInventoryRule) Undetectable() bool {
+	return rm.isRuleBreak == nil
 }
