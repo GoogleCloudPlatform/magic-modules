@@ -562,10 +562,10 @@ func checkGoogleIamPolicy(value string) error {
 }
 
 // Gets cluster hash from fully-qualified cluster name.
-func getClusterHash(npInfo *NodePoolInformation, userAgent string, config *Config) (string, error) {
-	getClusterCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(npInfo.parent())
+func getClusterHash(clusterFQN string, project string, userAgent string, config *Config) (string, error) {
+	getClusterCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(clusterFQN)
 	if config.UserProjectOverride {
-		getClusterCall.Header().Add("X-Goog-User-Project", npInfo.project)
+		getClusterCall.Header().Add("X-Goog-User-Project", project)
 	}
 	res, err := getClusterCall.Do()
 	if err != nil {

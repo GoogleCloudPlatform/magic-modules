@@ -382,7 +382,7 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 	mutexKV.Lock(nodePoolInfo.lockKey())
 	defer mutexKV.Unlock(nodePoolInfo.lockKey())
 <% else -%>
-	clusterHash, err := getClusterHash(nodePoolInfo, userAgent, config)
+	clusterHash, err := getClusterHash(nodePoolInfo.parent(), nodePoolInfo.project, userAgent, config)
 	if err != nil {
 			return err
 	}
@@ -646,7 +646,7 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 	mutexKV.Lock(nodePoolInfo.lockKey())
 	defer mutexKV.Unlock(nodePoolInfo.lockKey())
 <% else -%>
-	clusterHash, err := getClusterHash(nodePoolInfo, userAgent, config)
+	clusterHash, err := getClusterHash(nodePoolInfo.parent(), nodePoolInfo.project, userAgent, config)
 	if err != nil {
 			return err
 	}
@@ -1026,7 +1026,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 <% if version == "ga" -%>
 	lockKey := nodePoolInfo.lockKey()
 <% else -%>
-	clusterHash, err := getClusterHash(nodePoolInfo, userAgent, config)
+	clusterHash, err := getClusterHash(nodePoolInfo.parent(), nodePoolInfo.project, userAgent, config)
 	if err != nil {
 			return err
 	}
