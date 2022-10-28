@@ -2944,7 +2944,6 @@ func TestAccContainerCluster_withMeshCertificatesConfig(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withCostManagementConfig(t *testing.T) {
 	t.Parallel()
 
@@ -2976,7 +2975,6 @@ func TestAccContainerCluster_withCostManagementConfig(t *testing.T) {
 	})
 }
 
-<% end -%>
 func TestAccContainerCluster_withDatabaseEncryption(t *testing.T) {
 	t.Parallel()
 
@@ -6055,7 +6053,6 @@ func testAccContainerCluster_updateMeshCertificatesConfig(projectID string, clus
 	}`, projectID, clusterName, enabled)
 }
 
-<% unless version == 'ga' -%>
 func testAccContainerCluster_updateCostManagementConfig(projectID string, clusterName string, enabled bool) string {
 	return fmt.Sprintf(`
 	data "google_project" "project" {
@@ -6072,7 +6069,6 @@ func testAccContainerCluster_updateCostManagementConfig(projectID string, cluste
 	}`, projectID, clusterName, enabled)
 }
 
-<% end -%>
 func testAccContainerCluster_withDatabaseEncryption(clusterName string, kmsData bootstrappedKMS) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
