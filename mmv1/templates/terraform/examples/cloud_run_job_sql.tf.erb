@@ -12,6 +12,25 @@ resource "google_cloud_run_job" "<%= ctx[:primary_resource_id] %>" {
 
   template {
     spec {
+      template {
+        spec {
+          containers {
+            image = "us-docker.pkg.dev/cloudrun/container/hello"
+          }
+        }
+      }
+    }
+    metadata {
+      annotations = {
+        "autoscaling.knative.dev/maxScale"      = "1000"
+        "run.googleapis.com/cloudsql-instances" = google_sql_database_instance.instance.connection_name
+        "run.googleapis.com/client-name"        = "terraform"
+      }
+    }
+  }
+
+  template {
+    spec {
       containers {
         image = "us-docker.pkg.dev/cloudrun/container/hello"
       }

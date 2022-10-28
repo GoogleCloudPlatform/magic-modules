@@ -11,8 +11,12 @@ resource "google_cloud_run_job" "<%= ctx[:primary_resource_id] %>" {
   }
   template {
     spec {
-      containers {
-        image = "us-docker.pkg.dev/cloudrun/container/hello"
+      template {
+        spec {
+          containers {
+            image = "us-docker.pkg.dev/cloudrun/container/hello"
+          }
+        }
       }
     }
   }
