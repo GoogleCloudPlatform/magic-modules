@@ -65,14 +65,6 @@ objects:
           for the Project. Use this identifier when configuring integrations and/or
           making API calls to Firebase or third-party services.
       - !ruby/object:Api::Type::String
-        name: projecId
-        output: true
-        description: |
-          Immutable. A user-assigned unique identifier for the Project.
-          This identifier may appear in URLs or names for some Firebase resources
-          associated with the Project, but it should generally be treated as a convenience
-          alias to reference the Project.
-      - !ruby/object:Api::Type::String
         name: displayName
         output: true
         description: |
