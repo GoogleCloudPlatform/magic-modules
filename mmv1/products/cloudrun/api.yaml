@@ -1055,6 +1055,7 @@ objects:
     description: This is always set to Job
   - !ruby/object:Api::Type::NestedObject
     name: spec
+    min_version: beta
     required: true
     description: Spec holds the desired state of the Service (from the client).
     properties:
@@ -1685,6 +1686,7 @@ objects:
   - !ruby/object:Api::Type::NestedObject
     name: metadata
     required: true
+    min_version: beta
     description: |-
       Metadata associated with this Service, including name, namespace, labels,
       and annotations.

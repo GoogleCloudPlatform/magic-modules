@@ -6,6 +6,7 @@ resource "google_cloud_run_job" "<%= ctx[:primary_resource_id] %>" {
   metadata {
     annotations = {
       "run.googleapis.com/launch-stage" = "BETA"
+      generated-by = "magic-modules"
     }
   }
 

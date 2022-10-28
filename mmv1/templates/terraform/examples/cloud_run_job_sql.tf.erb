@@ -1,6 +1,14 @@
 resource "google_cloud_run_job" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['cloud_run_job_name'] %>"
   location = "us-central1"
+  provider = google-beta
+
+  metadata {
+    annotations = {
+      "run.googleapis.com/launch-stage" = "BETA"
+      generated-by = "magic-modules"
+    }
+  }
 
   template {
     spec {
