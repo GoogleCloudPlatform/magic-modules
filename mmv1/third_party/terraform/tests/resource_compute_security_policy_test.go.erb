@@ -497,14 +497,16 @@ resource "google_compute_security_policy" "policy" {
 					operator = "EQUALS_ANY"
 				}
 				request_header {
-					value = "Referer"
+					operator = "EQUALS"
+					value    = "Referer"
 				}
 				request_uri {
 					operator = "STARTS_WITH"
 					value    = "/admin"
 				}
 				request_query_param {
-					value = "password"
+					operator = "EQUALS"
+					value    = "password"
 				}
 				request_query_param {
 					operator = "STARTS_WITH"
@@ -573,7 +575,8 @@ resource "google_compute_security_policy" "policy" {
 					value    = "freeform"
 				}
 				request_query_param {
-					value = "description"
+					operator = "EQUALS"
+					value    = "description"
 				}
 				target_rule_set = "xss-stable"
 				target_rule_ids = [
