@@ -1142,11 +1142,18 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 					"updating GKE node pool tags", userAgent,
 					timeout)
 			}
-	
+
+
+<% if version == "ga" -%>
 			// Call update serially.
 			if err := lockedCall(lockKey, updateF); err != nil {
 				return err
 			}
+<% else -%>
+			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
+					return err
+			}
+<% end -%>
 	
 			log.Printf("[INFO] Updated tags for node pool %s", name)
 		}
