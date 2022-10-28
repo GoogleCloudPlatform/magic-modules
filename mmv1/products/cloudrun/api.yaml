@@ -1152,13 +1152,11 @@ objects:
           name: parallelism
           description: |-
             Specifies the maximum desired number of tasks the execution should run at given time.
-            output: true
         - !ruby/object:Api::Type::Integer
           name: taskCount
           description: |-
             Specifies the desired number of tasks the execution should run. 
             Setting to 1 means that parallelism is limited to 1 and the success of that task signals the success of the execution.
-          output: true
         - !ruby/object:Api::Type::NestedObject
           name: template
           required: true
@@ -1175,17 +1173,14 @@ objects:
               description: |-
                 Duration in seconds the task may be active before the system will actively try to mark it failed and kill associated containers. 
                 This applies per attempt of a task, meaning each retry can run for the full timeout.
-              output: true
             - !ruby/object:Api::Type::String
               name: serviceAccountName
               description: |-
                 Email address of the IAM service account associated with the task of a job execution. 
                 The service account represents the identity of the running task, and determines what permissions the task has.
-              output: true
             - !ruby/object:Api::Type::Integer
               name: maxRetries
               description: Number of retries allowed per task, before marking this job failed.
-              output: true
             - !ruby/object:Api::Type::Array
               name: containers
               update_verb: :PUT
