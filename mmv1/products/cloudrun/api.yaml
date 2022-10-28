@@ -1028,7 +1028,7 @@ objects:
     method_name_separator: ':'
     parent_resource_attribute: 'job'
     base_url: v1/projects/{{project}}/locations/{{location}}/jobs/{{job}}
-    import_format: ["projects/{{project}}/locations/{{location}}/services/{{job}}", "{{job}}"]
+    import_format: ["projects/{{project}}/locations/{{location}}/jobs/{{job}}", "{{job}}"]
   parameters:
   - !ruby/object:Api::Type::String
     name: location
