@@ -2,6 +2,7 @@
   {
     "name": "https://file.googleapis.com/ga/{parent=projects/*/locations/*}/backups",
     "description": "A backup of the filestore myfiletore",
+    "location": "us-central1-b",
     "state": "READY",
     "createTime":"2014-10-02T15:01:23Z",
     "labels": {

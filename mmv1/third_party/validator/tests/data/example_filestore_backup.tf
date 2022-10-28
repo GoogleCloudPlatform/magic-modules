@@ -27,16 +27,15 @@ provider "google" {
   {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
 }
 
-resource "google_filstore_backup" "test" {
-  location = google_filestore_instance.test.location
+resource "google_filstore_backup" "backup" {
+  location = "us-central1"
   description = "This is a filestore backup for the test instance"
-  labels = {
+  labels {
     "files": "json",
     "otherLabel": "label2"
-    }
-  sourceInstance = google_filestore_instance.test.name
-  sourceInstanceTier = google_filestore_instance.test.tier
-  sourceFileShare = google_filestore_instance.file_shares.name
+  }
+  source_instance = google_filestore_instance.test.id
+  source_file_share = "share1"
 }
 
 
