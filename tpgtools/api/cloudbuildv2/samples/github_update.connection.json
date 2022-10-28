@@ -1,0 +1,16 @@
+{
+  "name": "{{connection}}",
+  "githubConfig": {
+    "appInstallationId": 236578,
+    "authorizerCredential": {
+      "oauthTokenSecretVersion": "projects/1033762898806/secrets/gcbrepos-dcltest-github-token/versions/2"
+    }
+  },
+  "project": "{{project}}",
+  "location": "{{region}}",
+  "annotations": {
+    "somekey": "somevalue",
+    "otherkey": "othervalue"
+  },
+  "disabled": false
+}

@@ -1,0 +1,13 @@
+{
+  "name": "{{connection}}",
+  "githubEnterpriseConfig": {
+    "hostUri": "https://ghe.proctor-staging-test.com",
+    "privateKeySecretVersion":"projects/1033762898806/secrets/gcbrepos-dcltest-private-key/versions/1",
+    "webhookSecretSecretVersion":"projects/1033762898806/secrets/gcbrepos-dcltest-webhook-secret/versions/1",
+    "appId":516,
+    "appSlug":"myapp",
+    "appInstallationId": 243
+  },
+  "project": "{{project}}",
+  "location": "{{region}}"
+}

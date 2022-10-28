@@ -1,0 +1,10 @@
+test_hide:
+- github.yaml
+- github.tf.tmpl
+doc_hide:
+- github_connection.yaml
+- github_update_connection.yaml
+- ghe_complete_connection.yaml
+- ghe_connection.yaml
+- ghe_priv_connection.yaml
+- ghe_priv_update_connection.yaml

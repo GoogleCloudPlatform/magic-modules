@@ -1,0 +1,5 @@
+{
+  "connection": "projects/{{project}}/locations/{{region}}/connections/{{ref:github_update.connection.json:name}}",
+  "name": "{{repository}}",
+  "remoteUri": "https://github.com/proctor-eng/test2.git"
+}
