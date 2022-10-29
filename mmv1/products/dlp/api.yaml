@@ -288,7 +288,7 @@ objects:
                         required: true
                         description: |
                           The name of the table.
-                  - !ruby/object:Api::Type::String
+                  - !ruby/object:Api::Type::Integer
                     name: 'rowsLimit'
                     description: |
                       Max number of rows to scan. If the table has more rows than this value, the rest of the rows are omitted. 
