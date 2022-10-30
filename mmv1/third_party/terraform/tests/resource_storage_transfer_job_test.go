@@ -718,6 +718,10 @@ resource "google_storage_transfer_job" "transfer_job" {
     }
   }
 
+  logging_config {
+    enable_on_prem_gcs_transfer_logs = false
+  }
+
   depends_on = [
     google_storage_bucket_iam_member.data_source,
     google_project_iam_member.pubsub
