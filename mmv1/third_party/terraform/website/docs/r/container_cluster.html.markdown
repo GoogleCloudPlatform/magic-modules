@@ -517,10 +517,6 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 * `image_type` - (Optional) The default image type used by NAP once a new node pool is being created. Please note that according to the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning#default-image-type) the value must be one of the [COS_CONTAINERD, COS, UBUNTU_CONTAINERD, UBUNTU]. __NOTE__ : COS AND UBUNTU are deprecated as of `GKE 1.24`
 
-* `disk_size_gb` - (Optional) Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB. If unspecified, the default disk size is 100GB.
-
-* `disk_type` - (Optional) Type of the disk attached to each node (e.g. 'pd-standard', 'pd-ssd' or 'pd-balanced'). If unspecified, the default disk type is 'pd-standard'.
-
 * `management` - (Optional) NodeManagement configuration for this NodePool. Structure is [documented below](#nested_management).
 
 * `shielded_instance_config` - (Optional) A set of Shielded Instance options. Structure is [documented below.](#nested_shielded_instance_config)

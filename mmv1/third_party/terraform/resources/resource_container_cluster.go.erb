@@ -536,22 +536,6 @@ func resourceContainerCluster() *schema.Resource {
 										ForceNew:    true,
 										Description: `The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool.`,
 									},
-									"disk_size_gb": {
-										Type:         schema.TypeInt,
-										Optional:     true,
-										Default:      100,
-										ForceNew:     true,
-										ValidateFunc: validation.IntAtLeast(10),
-										Description:  `Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.`,
-									},
-									"disk_type": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										ForceNew:     true,
-										Default:      "pd-standard",
-										Description:  `Type of the disk attached to each node (e.g. 'pd-standard', 'pd-ssd' or 'pd-balanced').`,
-										ValidateFunc: validation.StringInSlice([]string{"pd-standard", "pd-ssd", "pd-balanced"}, false),
-									},
 									"management": {
 										Type:        schema.TypeList,
 										Optional:    true,
@@ -4996,8 +4980,6 @@ func flattenAutoProvisioningDefaults(a *container.AutoprovisioningNodePoolDefaul
 	r["image_type"] = a.ImageType
 	r["min_cpu_platform"] = a.MinCpuPlatform
 	r["boot_disk_kms_key"] = a.BootDiskKmsKey
-	r["disk_size_gb"] = a.DiskSizeGb
-	r["disk_type"] = a.DiskType
 	r["management"] = flattenManagement(a.Management)
 	r["shielded_instance_config"] = flattenShieldedInstanceConfigContainerCluster(a.ShieldedInstanceConfig)
 	r["upgrade_settings"] = flattenUpgradeSettings(a.UpgradeSettings)
