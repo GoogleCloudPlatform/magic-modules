@@ -3923,7 +3923,7 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 		ServiceAccount:         config["service_account"].(string),
 		ImageType:              config["image_type"].(string),
 		BootDiskKmsKey:         config["boot_disk_kms_key"].(string),
-		DiskSizeGb:             int64(config["disk_size_gb"].(int)),
+		DiskSizeGb:             int64(config["disk_size"].(int)),
 		DiskType:               config["disk_type"].(string),
 		Management:             expandManagement(config["management"]),
 		ShieldedInstanceConfig: expandShieldedInstanceConfig(config["shielded_instance_config"]),
