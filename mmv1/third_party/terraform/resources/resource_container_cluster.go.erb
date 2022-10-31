@@ -1382,7 +1382,7 @@ func resourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"enable_private_endpoint": {
 							Type:             schema.TypeBool,
-							Required:         true,
+							Optional:         true,
 							ForceNew:         true,
 							DiffSuppressFunc: containerClusterPrivateClusterConfigSuppress,
 							Description:      `When true, the cluster's private endpoint is used as the cluster endpoint and access through the public endpoint is disabled. When false, either endpoint can be used. This field only applies to private clusters, when enable_private_nodes is true.`,
@@ -1411,6 +1411,13 @@ func resourceContainerCluster() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: `The internal IP address of this cluster's master endpoint.`,
+						},
+						"private_endpoint_subnetwork": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ForceNew:         true,
+							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							Description: `Subnetwork in cluster's network where master's endpoint will be provisioned.`,
 						},
 						"public_endpoint": {
 							Type:        schema.TypeString,
@@ -4121,11 +4128,12 @@ func expandPrivateClusterConfig(configured interface{}) *container.PrivateCluste
 	}
 	config := l[0].(map[string]interface{})
 	return &container.PrivateClusterConfig{
-		EnablePrivateEndpoint:    config["enable_private_endpoint"].(bool),
-		EnablePrivateNodes:       config["enable_private_nodes"].(bool),
-		MasterIpv4CidrBlock:      config["master_ipv4_cidr_block"].(string),
-		MasterGlobalAccessConfig: expandPrivateClusterConfigMasterGlobalAccessConfig(config["master_global_access_config"]),
-		ForceSendFields:          []string{"EnablePrivateEndpoint", "EnablePrivateNodes", "MasterIpv4CidrBlock", "MasterGlobalAccessConfig"},
+		EnablePrivateEndpoint:      config["enable_private_endpoint"].(bool),
+		EnablePrivateNodes:         config["enable_private_nodes"].(bool),
+		MasterIpv4CidrBlock:        config["master_ipv4_cidr_block"].(string),
+		MasterGlobalAccessConfig:   expandPrivateClusterConfigMasterGlobalAccessConfig(config["master_global_access_config"]),
+		PrivateEndpointSubnetwork:  config["private_endpoint_subnetwork"].(string),
+		ForceSendFields:            []string{"EnablePrivateEndpoint", "EnablePrivateNodes", "MasterIpv4CidrBlock", "MasterGlobalAccessConfig"},
 	}
 }
 
@@ -4675,6 +4683,7 @@ func flattenPrivateClusterConfig(c *container.PrivateClusterConfig) []map[string
 			"master_global_access_config": flattenPrivateClusterConfigMasterGlobalAccessConfig(c.MasterGlobalAccessConfig),
 			"peering_name":                c.PeeringName,
 			"private_endpoint":            c.PrivateEndpoint,
+			"private_endpoint_subnetwork": c.PrivateEndpointSubnetwork,
 			"public_endpoint":             c.PublicEndpoint,
 		},
 	}
@@ -5253,12 +5262,15 @@ func containerClusterPrivateClusterConfigSuppress(k, old, new string, d *schema.
 	o, n = d.GetChange("private_cluster_config.0.enable_private_nodes")
 	suppressNodes := !o.(bool) && !n.(bool)
 
+	// Do not suppress diffs when private_endpoint_subnetwork is configured
+	_, hasSubnet := d.GetOk("private_cluster_config.0.private_endpoint_subnetwork")
+
 	if k == "private_cluster_config.0.enable_private_endpoint" {
-		return suppressEndpoint
+		return suppressEndpoint && !hasSubnet
 	} else if k == "private_cluster_config.0.enable_private_nodes" {
-		return suppressNodes
+		return suppressNodes && !hasSubnet
 	} else if k == "private_cluster_config.#" {
-		return suppressEndpoint && suppressNodes
+		return suppressEndpoint && suppressNodes && !hasSubnet
 	}
 	return false
 }

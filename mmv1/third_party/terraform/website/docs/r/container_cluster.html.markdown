@@ -989,6 +989,8 @@ In addition, the `private_cluster_config` allows access to the following read-on
 
 * `private_endpoint` - The internal IP address of this cluster's master endpoint.
 
+* `private_endpoint_subnetwork` - Subnetwork in cluster's network where master's endpoint will be provisioned.
+
 * `public_endpoint` - The external IP address of this cluster's master endpoint.
 
 !> The Google provider is unable to validate certain configurations of
