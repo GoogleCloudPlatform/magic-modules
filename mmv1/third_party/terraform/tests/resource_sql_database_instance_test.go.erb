@@ -1457,7 +1457,7 @@ resource "google_compute_global_address" "foobar" {
   name          = "%s"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
-  prefix_length = 16
+  prefix_length = 24
   network       = data.google_compute_network.servicenet.self_link
 }
 
@@ -1547,7 +1547,7 @@ resource "google_compute_global_address" "foobar" {
   name          = "%s"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
-  prefix_length = 16
+  prefix_length = 24
   network       = data.google_compute_network.servicenet.self_link
 }
 
@@ -1643,7 +1643,7 @@ resource "google_compute_global_address" "foobar" {
   name          = "%s"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
-  prefix_length = 16
+  prefix_length = 24
   network       = data.google_compute_network.servicenet.self_link
 }
 
