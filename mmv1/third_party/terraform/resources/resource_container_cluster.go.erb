@@ -766,7 +766,6 @@ func resourceContainerCluster() *schema.Resource {
 			"authenticator_groups_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Computed:    true,
 				MaxItems:    1,
 				Description: `Configuration for the Google Groups for GKE feature.`,
 				Elem: &schema.Resource{
@@ -775,6 +774,12 @@ func resourceContainerCluster() *schema.Resource {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: `The name of the RBAC security group for use with Google security groups in Kubernetes RBAC. Group name must be in format gke-security-groups@yourdomain.com.`,
+						},
+						"enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     true,
+							Description: `Whether this cluster should return group membership lookups during authentication using a group of security groups.`,
 						},
 					},
 				},
@@ -3931,13 +3936,13 @@ func expandAuthenticatorGroupsConfig(configured interface{}) *container.Authenti
 	if len(l) == 0 {
 		return nil
 	}
-	result := &container.AuthenticatorGroupsConfig{}
+
 	config := l[0].(map[string]interface{})
-	if securityGroup, ok := config["security_group"]; ok {
-		result.Enabled = true
-		result.SecurityGroup = securityGroup.(string)
+	return &container.AuthenticatorGroupsConfig{
+		SecurityGroup:   config["security_group"].(string),
+		Enabled:         config["enabled"].(bool),
+		ForceSendFields: []string{"SecurityGroup", "Enabled"},
 	}
-	return result
 }
 
 func expandNotificationConfig(configured interface{}) *container.NotificationConfig {
@@ -4355,12 +4360,17 @@ func expandContainerClusterTpuConfig(configured interface{}) *container.TpuConfi
 func expandContainerClusterAuthenticatorGroupsConfig(configured interface{}) *container.AuthenticatorGroupsConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
-		return nil
+		return &container.AuthenticatorGroupsConfig{
+			Enabled:         false,
+			ForceSendFields: []string{"Enabled"},
+		}
 	}
 
 	config := l[0].(map[string]interface{})
 	return &container.AuthenticatorGroupsConfig{
-		SecurityGroup: config["security_group"].(string),
+		SecurityGroup:   config["security_group"].(string),
+		Enabled:         config["enabled"].(bool),
+		ForceSendFields: []string{"SecurityGroup", "Enabled"},
 	}
 }
 
@@ -4614,6 +4624,7 @@ func flattenAuthenticatorGroupsConfig(c *container.AuthenticatorGroupsConfig) []
 	return []map[string]interface{}{
 		{
 			"security_group": c.SecurityGroup,
+			"enabled":        c.Enabled,
 		},
 	}
 }
