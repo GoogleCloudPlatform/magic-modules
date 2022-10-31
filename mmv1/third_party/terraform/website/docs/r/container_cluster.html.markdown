@@ -320,6 +320,10 @@ channel. Structure is [documented below](#nested_release_channel).
 
 * `resource_labels` - (Optional) The GCE resource labels (a map of key/value pairs) to be applied to the cluster.
 
+* `cost_management_config` - (Optional) Configuration for the
+    [Cost Allocation](https://cloud.google.com/kubernetes-engine/docs/how-to/cost-allocations) feature.
+    Structure is [documented below](#nested_cost_management_config).
+
 * `resource_usage_export_config` - (Optional) Configuration for the
     [ResourceUsageExportConfig](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-usage-metering) feature.
     Structure is [documented below](#nested_resource_usage_export_config).
@@ -506,6 +510,10 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 * `service_account` - (Optional) The Google Cloud Platform Service Account to be used by the node VMs.
 
 * `boot_disk_kms_key` - (Optional) The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool. This should be of the form projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]. For more information about protecting resources with Cloud KMS Keys please see: https://cloud.google.com/compute/docs/disks/customer-managed-encryption
+
+* `disk_size` - (Optional) Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB. Defaults to `100`
+
+* `disk_type` - (Optional) Type of the disk attached to each node (e.g. 'pd-standard', 'pd-ssd' or 'pd-balanced'). Defaults to `pd-standard`
 
 * `image_type` - (Optional) The default image type used by NAP once a new node pool is being created. Please note that according to the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning#default-image-type) the value must be one of the [COS_CONTAINERD, COS, UBUNTU_CONTAINERD, UBUNTU]. __NOTE__ : COS AND UBUNTU are deprecated as of `GKE 1.24`
 
@@ -891,6 +899,16 @@ linux_node_config {
 
 * `gpu_partition_size` (Optional) - Size of partitions to create on the GPU. Valid values are described in the NVIDIA mig [user guide](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/#partitioning).
 
+* `gpu_sharing_config` (Optional) - Configuration for GPU sharing. Structure is [documented below](#nested_gpu_sharing_config).
+
+<a name="nested_gpu_sharing_config"></a>The `gpu_sharing_config` block supports:
+
+* `gpu_sharing_strategy` (Required) - The type of GPU sharing strategy to enable on the GPU node. 
+    Accepted values are:
+    * `"TIME_SHARING"`: Allow multiple containers to have [time-shared](https://cloud.google.com/kubernetes-engine/docs/concepts/timesharing-gpus) access to a single GPU device. 
+
+* `max_shared_clients_per_gpu` (Required) - The maximum number of containers that can share a GPU. 
+
 <a name="nested_workload_identity_config"></a> The `workload_identity_config` block supports:
 
 * `workload_pool` (Optional) - The workload pool to attach all Kubernetes service accounts to.
@@ -1027,6 +1045,10 @@ not.
     * RAPID: Weekly upgrade cadence; Early testers and developers who requires new features.
     * REGULAR: Multiple per month upgrade cadence; Production users who need features not yet offered in the Stable channel.
     * STABLE: Every few months upgrade cadence; Production users who need stability above all else, and for whom frequent upgrades are too risky.
+
+<a name="nested_cost_management_config"></a>The `cost_management_config` block supports:
+
+* `enabled` (Optional) - Whether to enable the [cost allocation](https://cloud.google.com/kubernetes-engine/docs/how-to/cost-allocations) feature.
 
 <a name="nested_resource_usage_export_config"></a>The `resource_usage_export_config` block supports:
 

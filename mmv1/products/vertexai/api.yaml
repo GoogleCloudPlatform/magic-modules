@@ -37,6 +37,9 @@ objects:
           'https://cloud.google.com/vertex-ai/docs'
       api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.datasets'
     async: !ruby/object:Api::OpAsync
+      actions:
+        - create
+        - delete
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
@@ -96,7 +99,6 @@ objects:
             description: |
               Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
               Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
-            required: true
             input: true
       - !ruby/object:Api::Type::String
         name: 'metadataSchemaUri'
@@ -109,7 +111,7 @@ objects:
   - !ruby/object:Api::Resource
     name: Endpoint
     base_url: projects/{{project}}/locations/{{location}}/endpoints
-    create_url: projects/{{project}}/locations/{{location}}/endpoints
+    create_url: projects/{{project}}/locations/{{location}}/endpoints?endpointId={{name}}
     self_link: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
     update_verb: :PATCH
     update_mask: true
@@ -119,6 +121,9 @@ objects:
           'https://cloud.google.com/vertex-ai/docs'
       api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.endpoints'
     async: !ruby/object:Api::OpAsync
+      actions:
+        - create
+        - delete
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
@@ -141,12 +146,15 @@ objects:
         name: location
         description: The location for the resource
         url_param_only: true
+        required: true
         input: true
     properties:
       - !ruby/object:Api::Type::String
         name: name
-        description: Output only. The resource name of the Endpoint.
-        output: true
+        description: The resource name of the Endpoint. The name must be numeric with no leading zeros and can be at most 10 digits.
+        url_param_only: true
+        required: true
+        input: true
       - !ruby/object:Api::Type::String
         name: displayName
         description: Required. The display name of the Endpoint. The name can be up to 128 characters long and can consist of any UTF-8 characters.
@@ -156,11 +164,11 @@ objects:
         description: The description of the Endpoint.
       - !ruby/object:Api::Type::Array
         name: deployedModels
-        description: Output only. The models deployed in this Endpoint. To add or remove DeployedModels use EndpointService.DeployModel and EndpointService.UndeployModel respectively.
+        description: Output only. The models deployed in this Endpoint. To add or remove DeployedModels use EndpointService.DeployModel and EndpointService.UndeployModel respectively. Models can also be deployed and undeployed using the [Cloud Console](https://console.cloud.google.com/vertex-ai/).
         output: true
         item_type: !ruby/object:Api::Type::NestedObject
           name: deployedModels
-          description: Output only. The models deployed in this Endpoint. To add or remove DeployedModels use EndpointService.DeployModel and EndpointService.UndeployModel respectively.
+          description: Output only. The models deployed in this Endpoint. To add or remove DeployedModels use EndpointService.DeployModel and EndpointService.UndeployModel respectively. Models can also be deployed and undeployed using the [Cloud Console](https://console.cloud.google.com/vertex-ai/).
           properties:
               - !ruby/object:Api::Type::NestedObject
                 name: dedicatedResources
@@ -318,14 +326,20 @@ objects:
     base_url: projects/{{project}}/locations/{{region}}/featurestores
     create_url: projects/{{project}}/locations/{{region}}/featurestores?featurestoreId={{name}}
     self_link: 'projects/{{project}}/locations/{{region}}/featurestores/{{name}}'
-    min_version: beta
     update_verb: :PATCH
     update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
           'https://cloud.google.com/vertex-ai/docs'
-      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featurestores'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
+      parent_resource_attribute: featurestore
+      import_format: ['projects/{{project}}/locations/{{region}}/featurestores/{{name}}']
+      example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_featurestore.tf.erb'
+      min_version: beta
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
@@ -403,15 +417,17 @@ objects:
     base_url: '{{featurestore}}/entityTypes'
     create_url: '{{featurestore}}/entityTypes?entityTypeId={{name}}'
     self_link: '{{featurestore}}/entityTypes/{{name}}'
-    min_version: beta
     update_verb: :PATCH
     update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
           'https://cloud.google.com/vertex-ai/docs'
-      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featurestores.entityTypes'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes'
     async: !ruby/object:Api::OpAsync
+      actions:
+        - create
+        - delete
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
@@ -482,6 +498,8 @@ objects:
                   The monitoring schedule for snapshot analysis. For EntityType-level config: unset / disabled = true indicates disabled by default for Features under it; otherwise by default enable snapshot analysis monitoring with monitoringInterval for Features under it.
               - !ruby/object:Api::Type::String
                 name: 'monitoringInterval'
+                min_version: beta
+                deprecation_message: This field is unavailable in the GA provider and will be removed from the beta provider in a future release.
                 description: |
                   Configuration of the snapshot analysis based monitoring pipeline running interval. The value is rolled up to full day.
 
@@ -493,15 +511,17 @@ objects:
     base_url: '{{entitytype}}/features'
     create_url: '{{entitytype}}/features?featureId={{name}}'
     self_link: '{{entitytype}}/features/{{name}}'
-    min_version: beta
     update_verb: :PATCH
     update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
           'https://cloud.google.com/vertex-ai/docs'
-      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featurestores.entityTypes.features'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes.features'
     async: !ruby/object:Api::OpAsync
+      actions:
+        - create
+        - delete
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
@@ -631,7 +651,6 @@ objects:
             description: |
               Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
               Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
-            required: true
             input: true
       - !ruby/object:Api::Type::NestedObject
         name: 'state'
