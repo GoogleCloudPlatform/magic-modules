@@ -8,9 +8,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
-func TestAccTags(t *testing.T) {
+
+func TestAccTagsLocation(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"tagsLocationTagBindingBasic":       testAccTagsLocationTagBinding_locationTagBindingbasic,
+		"tagsLocationTagBindingBasic": testAccTagsLocationTagBinding_locationTagBindingbasic,
 	}
 
 	for name, tc := range testCases {
@@ -59,16 +60,19 @@ resource "google_project" "project" {
 	name       = "%{project_id}"
 	org_id     = "%{org_id}"
 }
+
 resource "google_tags_tag_key" "key" {
 	parent = "organizations/%{org_id}"
 	short_name = "keyname%{random_suffix}"
 	description = "For a certain set of resources."
 }
+
 resource "google_tags_tag_value" "value" {
 	parent = google_tags_tag_key.key.id
 	short_name = "foo%{random_suffix}"
 	description = "For foo%{random_suffix} resources."
 }
+
 resource "google_sql_database_instance" "main" {
 	name             = "tf-test-main-instance"
 	database_version = "POSTGRES_14"
@@ -88,7 +92,6 @@ resource "google_tags_location_tag_binding" "binding" {
 `, context)
 }
 
-
 func testAccCheckTagsLocationTagBindingDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
@@ -99,7 +102,6 @@ func testAccCheckTagsLocationTagBindingDestroyProducer(t *testing.T) func(s *ter
 				continue
 			}
 
-			
 			config := googleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{TagsLocationBasePath}}{{name}}")
@@ -115,7 +117,7 @@ func testAccCheckTagsLocationTagBindingDestroyProducer(t *testing.T) func(s *ter
 
 			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
 			if err == nil {
-				return fmt.Errorf("TagsTagBinding still exists at %s", url)
+				return fmt.Errorf("TagsLocationTagBinding still exists at %s", url)
 			}
 		}
 
