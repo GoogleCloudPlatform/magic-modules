@@ -2726,6 +2726,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           router_name: "my-router"
           peer_name: "my-router-peer"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "router_peer_router_appliance"
+        primary_resource_id: "peer"
+        vars:
+          router_name: "my-router"
+          peer_name: "my-router-peer"
     properties:
       advertiseMode: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
