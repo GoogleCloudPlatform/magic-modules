@@ -783,9 +783,6 @@ func testAccTagsLocationTagBinding_locationTagBindingbasic(t *testing.T) {
 		"org_id":        getTestOrgFromEnv(t),
 		"project_id":    "tf-test-" + randString(t, 10),
 		"random_suffix": randString(t, 10),
-
-		"key_short_name":   "tf-test-key-" + randString(t, 10),
-		"value_short_name": "tf-test-value-" + randString(t, 10),
 	}
 
 	vcrTest(t, resource.TestCase{
@@ -794,7 +791,7 @@ func testAccTagsLocationTagBinding_locationTagBindingbasic(t *testing.T) {
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 		},
-		CheckDestroy: testAccCheckTagsTagBindingDestroyProducer(t),
+		CheckDestroy: testAccCheckTagsLocationTagBindingDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccTagsLocationTagBinding_locationTagBindingBasicExample(context),
@@ -818,7 +815,7 @@ resource "google_tags_tag_key" "key" {
 }
 
 resource "google_tags_tag_value" "value" {
-	parent = google_tags_tag_key.key.id
+	parent = "tagKeys/${google_tags_tag_key.key.name}"
 	short_name = "foo%{random_suffix}"
 	description = "For foo%{random_suffix} resources."
 }
@@ -837,8 +834,41 @@ resource "google_sql_database_instance" "main" {
 
 resource "google_tags_location_tag_binding" "binding" {
 	parent = "//sqladmin.googleapis.com/projects/${google_project.project.number}/instances/${google_sql_database_instance.main.id}"
-	tag_value = google_tags_tag_value.value.id
+	tag_value = "tagValues/${google_tags_tag_value.value.name}"
 	location = "us-central1"
 }
 `, context)
+}
+
+func testAccCheckTagsLocationTagBindingDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_tags_location_tag_binding" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := googleProviderConfig(t)
+
+			url, err := replaceVarsForTest(config, rs, "{{TagsLocationBasePath}}{{name}}")
+			if err != nil {
+				return err
+			}
+
+			billingProject := ""
+
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+
+			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			if err == nil {
+				return fmt.Errorf("TagsTagBinding still exists at %s", url)
+			}
+		}
+
+		return nil
+	}
 }
