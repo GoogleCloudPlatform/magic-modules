@@ -783,6 +783,9 @@ func testAccTagsLocationTagBinding_locationTagBindingbasic(t *testing.T) {
 		"org_id":        getTestOrgFromEnv(t),
 		"project_id":    "tf-test-" + randString(t, 10),
 		"random_suffix": randString(t, 10),
+
+		"key_short_name":   "tf-test-key-" + randString(t, 10),
+		"value_short_name": "tf-test-value-" + randString(t, 10),
 	}
 
 	vcrTest(t, resource.TestCase{
@@ -810,13 +813,13 @@ resource "google_project" "project" {
 
 resource "google_tags_tag_key" "key" {
 	parent = "organizations/%{org_id}"
-	short_name = "keyname%{random_suffix}"
+	short_name = "%{key_short_name}"
 	description = "For a certain set of resources."
 }
 
 resource "google_tags_tag_value" "value" {
-	parent = "tagKeys/${google_tags_tag_key.key.name}"
-	short_name = "foo%{random_suffix}"
+	parent = google_tags_tag_key.key.id
+	short_name = "%{value_short_name}"
 	description = "For foo%{random_suffix} resources."
 }
 
@@ -834,7 +837,7 @@ resource "google_sql_database_instance" "main" {
 
 resource "google_tags_location_tag_binding" "binding" {
 	parent = "//sqladmin.googleapis.com/projects/${google_project.project.number}/instances/${google_sql_database_instance.main.id}"
-	tag_value = "tagValues/${google_tags_tag_value.value.name}"
+	tag_value = google_tags_tag_value.value.id
 	location = "us-central1"
 }
 `, context)
