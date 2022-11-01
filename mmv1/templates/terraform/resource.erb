@@ -122,6 +122,7 @@ func resource<%= resource_name -%>() *schema.Resource {
             <% unless field.default_value.nil? -%>
               Default:  <%= go_literal(field.default_value) -%>,
             <% end -%>
+              Description: `<%= field.description.strip.gsub("`", "'") -%>`,
             },
 <%        end -%>
 <%      end -%>
