@@ -766,6 +766,7 @@ func resourceContainerCluster() *schema.Resource {
 			"authenticator_groups_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				MaxItems:    1,
 				Description: `Configuration for the Google Groups for GKE feature.`,
 				Elem: &schema.Resource{
