@@ -27,6 +27,7 @@ func TestAccTags(t *testing.T) {
 		"tagValueIamBinding":                testAccTagsTagValueIamBinding,
 		"tagValueIamMember":                 testAccTagsTagValueIamMember,
 		"tagValueIamPolicy":                 testAccTagsTagValueIamPolicy,
+		"tagLocationBinding":                testAccTagsLocationTagBinding_locationTagBindingbasic,
 	}
 
 	for name, tc := range testCases {
@@ -776,7 +777,6 @@ resource "google_tags_tag_value_iam_binding" "foo" {
 `, context)
 }
 
-<% unless version == 'ga' -%>
 func testAccTagsLocationTagBinding_locationTagBindingbasic(t *testing.T) {
 	t.Parallel()
 
@@ -800,9 +800,7 @@ func testAccTagsLocationTagBinding_locationTagBindingbasic(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
-<% unless version == 'ga' -%>
 func testAccTagsLocationTagBinding_locationTagBindingBasicExample(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_project" "project" {
@@ -842,9 +840,7 @@ resource "google_tags_location_tag_binding" "binding" {
 }
 `, context)
 }
-<% end -%>
 
-<% unless version == 'ga' -%>
 func testAccCheckTagsLocationTagBindingDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
@@ -877,4 +873,3 @@ func testAccCheckTagsLocationTagBindingDestroyProducer(t *testing.T) func(s *ter
 		return nil
 	}
 }
-<% end -%>
