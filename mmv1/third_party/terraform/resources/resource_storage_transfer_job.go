@@ -1184,7 +1184,6 @@ func expandTransferJobNotificationConfig(notificationConfigs []interface{}) *sto
 		apiData.EventTypes = convertStringArr(notificationConfig["event_types"].(*schema.Set).List())
 	}
 
-	log.Printf("[DEBUG] apiData: %v\n\n", apiData)
 	return apiData
 }
 
@@ -1217,7 +1216,6 @@ func expandTransferJobLoggingConfig(loggingConfigs []interface{}) *storagetransf
 		EnableOnpremGcsTransferLogs: loggingConfig["enable_on_prem_gcs_transfer_logs"].(bool),
 	}
 
-	log.Printf("[DEBUG] apiData: %v\n\n", apiData)
 	return apiData
 }
 
