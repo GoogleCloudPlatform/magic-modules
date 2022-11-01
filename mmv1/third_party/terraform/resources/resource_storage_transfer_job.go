@@ -1211,21 +1211,9 @@ func expandTransferJobLoggingConfig(loggingConfigs []interface{}) *storagetransf
 	}
 
 	loggingConfig := loggingConfigs[0].(map[string]interface{})
-	logActionsInterface := loggingConfig["log_actions"].([]interface{})
-	logActions := make([]string, len(logActionsInterface))
-	for i, v := range logActionsInterface {
-		logActions[i] = fmt.Sprint(v)
-	}
-
-	LogActionStatesInterface := loggingConfig["log_action_states"].([]interface{})
-	LogActionStates := make([]string, len(LogActionStatesInterface))
-	for i, v := range LogActionStatesInterface {
-		LogActionStates[i] = fmt.Sprint(v)
-	}
-
 	var apiData = &storagetransfer.LoggingConfig{
-		LogActions:                  logActions,
-		LogActionStates:             LogActionStates,
+		LogActions:                  convertStringArr(loggingConfig["log_actions"].([]interface{})),
+		LogActionStates:             convertStringArr(loggingConfig["log_action_states"].([]interface{})),
 		EnableOnpremGcsTransferLogs: loggingConfig["enable_on_prem_gcs_transfer_logs"].(bool),
 	}
 
