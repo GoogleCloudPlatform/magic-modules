@@ -1,0 +1,104 @@
+<% autogen_exception -%>
+package test
+
+import (
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"testing"
+
+	crmv1 "google.golang.org/api/cloudresourcemanager/v1"
+
+	resources "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources"
+	"github.com/GoogleCloudPlatform/terraform-validator/tfdata"
+	"github.com/GoogleCloudPlatform/terraform-validator/tfplan"
+	provider "github.com/hashicorp/terraform-provider-google/google"
+)
+
+func TestIAMFetchFullResource(t *testing.T) {
+	cases := []struct {
+		name string
+	}{
+	<% @tests.each do |test| -%>
+  <% if test.end_with?("iam_binding") || test.end_with?("iam_member") -%>
+		  {name: "<%= test -%>"},
+  <% end -%>
+	<% end -%>
+	}
+
+	converters := resources.ResourceConverters()
+	schema := provider.Provider()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var payload []byte
+		var err error
+		if strings.Contains(r.URL.String(), "dataset") {
+			obj := map[string][]interface{}{
+				"access": {&crmv1.Policy{}},
+			}
+			payload, err = json.Marshal(obj)
+		} else {
+			payload, err = (&crmv1.Policy{}).MarshalJSON()
+		}
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(fmt.Sprintf("failed to MarshalJSON: %s", err)))
+			return
+		}
+		w.Write(payload)
+	}))
+
+	// Using Cleanup instead of defer because t.Parallel() does not block t.Run.
+	t.Cleanup(func() {
+		server.Close()
+	})
+
+	cfg := resources.NewTestConfig(server)
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Create a temporary directory for generating tfplan.json from template.
+			dir, err := ioutil.TempDir(tmpDir, "terraform")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer os.RemoveAll(dir)
+
+			generateTestFiles(t, "../testdata/templates", dir, c.name+".tfplan.json")
+			path := filepath.Join(dir, c.name+".tfplan.json")
+
+			data, err := ioutil.ReadFile(path)
+			if err != nil {
+				t.Fatalf("opening JSON plan file: %s", err)
+			}
+			changes, err := tfplan.ReadResourceChanges(data)
+			if err != nil {
+				t.Fatalf("ReadResourceChanges failed: %s", err)
+			}
+
+			for _, rc := range changes {
+				resource := schema.ResourcesMap[rc.Type]
+				rd := tfdata.NewFakeResourceData(
+					rc.Type,
+					resource.Schema,
+					rc.Change.After.(map[string]interface{}),
+				)
+				for _, converter := range converters[rd.Kind()] {
+					if converter.FetchFullResource == nil {
+						continue
+					}
+					_, err := converter.FetchFullResource(rd, cfg)
+					if err != nil {
+						t.Errorf("FetchFullResource() = %s, want = nil", err)
+					}
+				}
+			}
+
+		})
+	}
+}
