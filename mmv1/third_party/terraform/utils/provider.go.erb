@@ -176,8 +176,9 @@ func Provider() *schema.Provider {
 			ServiceUsageCustomEndpointEntryKey:           ServiceUsageCustomEndpointEntry,
 			StorageTransferCustomEndpointEntryKey:        StorageTransferCustomEndpointEntry,
 			BigtableAdminCustomEndpointEntryKey:          BigtableAdminCustomEndpointEntry,
+			<% unless version == "ga" -%>
 			TagsLocationCustomEndpointEntryKey:           TageLocationCustomEndpointEntry,
-
+			<% end -%>
 			// dcl
 			ContainerAwsCustomEndpointEntryKey:           ContainerAwsCustomEndpointEntry,
 			ContainerAzureCustomEndpointEntryKey:         ContainerAzureCustomEndpointEntry,
@@ -465,7 +466,9 @@ end     # products.each do
 				"google_storage_default_object_acl":            resourceStorageDefaultObjectAcl(),
 				"google_storage_notification":                  resourceStorageNotification(),
 				"google_storage_transfer_job":                  resourceStorageTransferJob(),
+				<% unless version == 'ga' -%>
 				"google_tags_location_tag_binding":             resourceTagsLocationTagBinding(),
+				<% end -%>
 				// ####### END handwritten resources ###########
 			},
 			map[string]*schema.Resource{
@@ -640,8 +643,10 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.ServiceUsageBasePath = d.Get(ServiceUsageCustomEndpointEntryKey).(string)
 	config.StorageTransferBasePath = d.Get(StorageTransferCustomEndpointEntryKey).(string)
 	config.BigtableAdminBasePath = d.Get(BigtableAdminCustomEndpointEntryKey).(string)
+	<% unless version == "ga" -%>
 	config.TagsLocationBasePath = d.Get(TagsLocationCustomEndpointEntryKey).(string)
-
+	<% end -%>
+	
 	// dcl
 	config.ContainerAwsBasePath = d.Get(ContainerAwsCustomEndpointEntryKey).(string)
 	config.ContainerAzureBasePath = d.Get(ContainerAzureCustomEndpointEntryKey).(string)
