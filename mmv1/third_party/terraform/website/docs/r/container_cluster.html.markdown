@@ -523,7 +523,7 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 <a name="nested_logging_config"></a>The `logging_config` block supports:
 
-*  `enable_components` - (Optional) The GKE components exposing logs. Supported values include:
+*  `enable_components` - (Required) The GKE components exposing logs. Supported values include:
 `SYSTEM_COMPONENTS`, `APISERVER`, `CONTROLLER_MANAGER`, `SCHEDULER`, and `WORKLOADS`.
 
 <a name="nested_monitoring_config"></a>The `monitoring_config` block supports:
