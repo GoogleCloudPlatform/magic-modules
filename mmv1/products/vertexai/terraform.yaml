@@ -13,6 +13,19 @@
 
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Tensorboard: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude_import: true
+    skip_sweeper: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_tensorboard"
+        skip_import_test: true
+        primary_resource_id: "tensorboard"
+        vars:
+          display_name: "terraform"
+    properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   Dataset: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: false
     id_format: '{{name}}'
