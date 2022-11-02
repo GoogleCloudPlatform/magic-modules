@@ -870,6 +870,8 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(t
 }
 
 func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(t *testing.T) {
+	// Service Networking
+	skipIfVcr(t)
 	t.Parallel()
 
 	databaseName := "tf-test-" + randString(t, 10)
@@ -1506,7 +1508,7 @@ resource "google_compute_global_address" "foobar" {
   name          = "%s"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
-  prefix_length = 24
+  prefix_length = 16
   network       = data.google_compute_network.servicenet.self_link
 }
 
@@ -1682,7 +1684,7 @@ resource "google_compute_global_address" "foobar" {
   name          = "%s"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
-  prefix_length = 24
+  prefix_length = 16
   network       = data.google_compute_network.servicenet.self_link
 }
 
