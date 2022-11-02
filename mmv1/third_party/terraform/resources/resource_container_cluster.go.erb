@@ -538,23 +538,31 @@ func resourceContainerCluster() *schema.Resource {
 										Description: `The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool.`,
 									},
 									"shielded_instance_config": &schema.Schema{
-										Type:     schema.TypeList,
-										Optional: true,
+										Type:        schema.TypeList,
+										Optional:    true,
 										Description: `Shielded Instance options.`,
-										MaxItems: 1,
+										MaxItems:    1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"enable_secure_boot": {
-													Type:     schema.TypeBool,
-													Optional: true,
-													Default:  false,
-													Description: `Defines whether the instance has Secure Boot enabled.`,
+													Type:         schema.TypeBool,
+													Optional:     true,
+													Default:      false,
+													Description:  `Defines whether the instance has Secure Boot enabled.`,
+													AtLeastOneOf: []string{
+														"cluster_autoscaling.0.auto_provisioning_defaults.0.shielded_instance_config.0.enable_secure_boot",
+														"cluster_autoscaling.0.auto_provisioning_defaults.0.shielded_instance_config.0.enable_integrity_monitoring",
+													},
 												},
 												"enable_integrity_monitoring": {
-													Type:     schema.TypeBool,
-													Optional: true,
-													Default:  true,
-													Description: `Defines whether the instance has integrity monitoring enabled.`,
+													Type:         schema.TypeBool,
+													Optional:     true,
+													Default:      true,
+													Description:  `Defines whether the instance has integrity monitoring enabled.`,
+													AtLeastOneOf: []string{
+														"cluster_autoscaling.0.auto_provisioning_defaults.0.shielded_instance_config.0.enable_secure_boot",
+														"cluster_autoscaling.0.auto_provisioning_defaults.0.shielded_instance_config.0.enable_integrity_monitoring",
+													},
 												},
 											},
 										},
