@@ -29,8 +29,8 @@ resource "google_data_loss_prevention_job_trigger" "<%= ctx[:primary_resource_id
 				    table_id = "table_to_scan"
 				}
 
-				rowsLimitPercent = 50
-				sampleMethod = "RANDOM_START"
+				rows_limit_percent = 50
+				sample_method = "RANDOM_START"
 			}
 		}
 	}
