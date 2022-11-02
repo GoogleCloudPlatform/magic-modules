@@ -1,0 +1,20 @@
+
+	config := meta.(*Config)
+
+	cryptoKeyVersionId, err := parseKmsCryptoKeyVersionId(d.Id(), config)
+	if err != nil {
+		return nil, err
+	}
+	if err := d.Set("crypto_key", cryptoKeyVersionId.CryptoKeyId.cryptoKeyId()); err != nil {
+		return nil, fmt.Errorf("Error setting key_ring: %s", err)
+	}
+	if err := d.Set("name", cryptoKeyVersionId.Name); err != nil {
+		return nil, fmt.Errorf("Error setting name: %s", err)
+	}
+	id, err := replaceVars(d, config, "<%= id_format(object) -%>")
+	if err != nil {
+		return nil, fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+
+	return []*schema.ResourceData{d}, nil
