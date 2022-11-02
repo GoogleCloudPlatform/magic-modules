@@ -521,8 +521,6 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 * `shielded_instance_config` - (Optional) A set of Shielded Instance options. Structure is [documented below.](#nested_shielded_instance_config)
 
-* `upgrade_settings` - (Optional) Specifies the upgrade settings for NAP created node pools. Structure is [documented below](#nested_upgrade_settings).
-
 <a name="nested_management"></a>The `management` block supports:
 
 * `auto_upgrade` - (Optional) Specifies whether node auto-upgrade is enabled for the node pool. If enabled, node auto-upgrade helps keep the nodes in your node pool up to date with the latest release version of Kubernetes.
@@ -536,30 +534,6 @@ This block also contains several computed attributes, documented below.
 * `enable_secure_boot` - (Optional) Defines whether the instance has Secure Boot enabled. Secure Boot helps ensure that the system only runs authentic software by verifying the digital signature of all boot components, and halting the boot process if signature verification fails.
 
 * `enable_integrity_monitoring` - (Optional) Defines whether the instance has integrity monitoring enabled. Enables monitoring and attestation of the boot integrity of the instance. The attestation is performed against the integrity policy baseline. This baseline is initially derived from the implicitly trusted boot image when the instance is created.
-
-<a name="nested_upgrade_settings"></a>The `upgrade_settings` block supports:
-
-* `strategy` - (Optional) Strategy used for node pool update. Strategy can only be one of BLUE_GREEN or SURGE. The default is value is SURGE.
-
-* `max_surge` - (Optional) The maximum number of nodes that can be created beyond the current size of the node pool during the upgrade process. To be used when strategy is set to SURGE. Default is 0.
-
-* `max_unavailable` - (Optional) The maximum number of nodes that can be simultaneously unavailable during the upgrade process. To be used when strategy is set to SURGE. Default is 0.
-
-* `blue_green_settings` - (Optional) Settings for blue-green upgrade strategy. To be specified when strategy is set to BLUE_GREEN. Structure is [documented below](#nested_blue_green_settings).
-
-<a name="nested_blue_green_settings"></a>The `blue_green_settings` block supports:
-
-* `node_pool_soak_duration` - (Optional) Time needed after draining entire blue pool. After this period, blue pool will be cleaned up. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
-
-* `standard_rollout_policy`: (Optional) Standard policy for the blue-green upgrade. To be specified when strategy is set to BLUE_GREEN. Structure is [documented below](#nested_standard_rollout_policy).
-
-<a name="nested_standard_rollout_policy"></a>The `standard_rollout_policy` block supports:
-
-* `batch_percentage`: (Optional) Percentage of the bool pool nodes to drain in a batch. The range of this field should be (0.0, 1.0). Only one of the batch_percentage or batch_node_count can be specified.
-
-* `batch_node_count` - (Optional) Number of blue nodes to drain in a batch. Only one of the batch_percentage or batch_node_count can be specified.
-
-* `batch_soak_duration` - (Optional) Soak time after each batch gets drained. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".`,
 
 <a name="nested_authenticator_groups_config"></a>The `authenticator_groups_config` block supports:
 
