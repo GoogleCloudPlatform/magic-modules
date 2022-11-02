@@ -9,7 +9,7 @@
       "files": "json",
       "otherLabel": "label2"
     },
-    "capacityGb": 2660,
+    "capacityGb": 1024,
     "storageBytes": 12321654621,
     "sourceInstance": "//file.googleapis.com/projects/{{.Provider.project}}/locations/us-central1-b/instances/test-instance",
     "sourceFileShare": "share1",

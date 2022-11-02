@@ -337,9 +337,9 @@ objects:
         output: true
   - !ruby/object:Api::Resource
     name: 'Backup'
-    create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/backups?backupId={{name}}
-    self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/backups/{{name}}
-    base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/backups
+    create_url: projects/{{project}}/locations/{{location}}/backups?backupId={{name}}
+    self_link: projects/{{project}}/locations/{{location}}/backups/{{name}}
+    base_url: projects/{{project}}/locations/{{location}}/backups
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -359,13 +359,6 @@ objects:
         input: true
         required: true
         url_param_only: true
-      - !ruby/object:Api::Type::String
-        name: 'instance'
-        description: |
-          The resource name of the filestore instance.
-        input: true
-        required: true
-        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -381,7 +374,7 @@ objects:
         required: true
         input: true
         url_param_only: true
-        pattern: projects/{{project}}/locations/{{location}}/instances/{{instance}}/snapshots/{{name}}
+        pattern: projects/{{project}}/locations/{{location}}/backups/{{backupId}}
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |

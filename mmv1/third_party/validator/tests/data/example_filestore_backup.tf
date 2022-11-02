@@ -31,10 +31,10 @@ resource "google_filstore_backup" "backup" {
   location = "us-central1"
   description = "This is a filestore backup for the test instance"
   labels {
-    "files": "json",
-    "otherLabel": "label2"
+    files: "json"
+    otherLabel: "label2"
   }
-  source_instance = google_filestore_instance.test.id
+  source_instance = google_filestore_instance.test.name
   source_file_share = "share1"
 }
 
@@ -45,7 +45,7 @@ resource "google_filestore_instance" "test" {
   tier = "BASIC_SSD"
 
   file_shares {
-    capacity_gb = 2660
+    capacity_gb = 1024
     name        = "share1"
   }
 
