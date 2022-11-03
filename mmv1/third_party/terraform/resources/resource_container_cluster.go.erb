@@ -502,6 +502,20 @@ func resourceContainerCluster() *schema.Resource {
 										Default:     "default",
 										Description: `The Google Cloud Platform Service Account to be used by the node VMs.`,
 									},
+									"disk_size": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Default:     100,
+										Description: `Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.`,
+										ValidateFunc: validation.IntAtLeast(10),
+									},
+									"disk_type": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Default:     "pd-standard",
+										Description: `Type of the disk attached to each node.`,
+										ValidateFunc: validation.StringInSlice([]string{"pd-standard", "pd-ssd", "pd-balanced"}, false),
+									},
 									"image_type": {
 										Type:        schema.TypeString,
 										Optional:    true,
@@ -522,6 +536,36 @@ func resourceContainerCluster() *schema.Resource {
 										Optional:    true,
 										ForceNew:    true,
 										Description: `The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool.`,
+									},
+									"shielded_instance_config": &schema.Schema{
+										Type:        schema.TypeList,
+										Optional:    true,
+										Description: `Shielded Instance options.`,
+										MaxItems:    1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"enable_secure_boot": {
+													Type:         schema.TypeBool,
+													Optional:     true,
+													Default:      false,
+													Description:  `Defines whether the instance has Secure Boot enabled.`,
+													AtLeastOneOf: []string{
+														"cluster_autoscaling.0.auto_provisioning_defaults.0.shielded_instance_config.0.enable_secure_boot",
+														"cluster_autoscaling.0.auto_provisioning_defaults.0.shielded_instance_config.0.enable_integrity_monitoring",
+													},
+												},
+												"enable_integrity_monitoring": {
+													Type:         schema.TypeBool,
+													Optional:     true,
+													Default:      true,
+													Description:  `Defines whether the instance has integrity monitoring enabled.`,
+													AtLeastOneOf: []string{
+														"cluster_autoscaling.0.auto_provisioning_defaults.0.shielded_instance_config.0.enable_secure_boot",
+														"cluster_autoscaling.0.auto_provisioning_defaults.0.shielded_instance_config.0.enable_integrity_monitoring",
+													},
+												},
+											},
+										},
 									},
 								},
 							},
@@ -1505,6 +1549,7 @@ func resourceContainerCluster() *schema.Resource {
 			"datapath_provider": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				ForceNew:         true,
 				Computed:         true,
 				Description:      `The desired datapath provider for this cluster. By default, uses the IPTables-based kube-proxy implementation.`,
 				ValidateFunc:     validation.StringInSlice([]string{"DATAPATH_PROVIDER_UNSPECIFIED", "LEGACY_DATAPATH", "ADVANCED_DATAPATH"}, false),
@@ -1533,7 +1578,6 @@ func resourceContainerCluster() *schema.Resource {
 			   Computed: true,
 			},
 
-<% unless version == "ga" -%>
 			"cost_management_config": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -1550,7 +1594,6 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 
 			"resource_usage_export_config": {
 				Type:        schema.TypeList,
@@ -1753,9 +1796,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 <% unless version == 'ga' -%>
 		NodePoolAutoConfig: expandNodePoolAutoConfig(d.Get("node_pool_auto_config")),
 <% end -%>
-<% unless version == 'ga' -%>
 		CostManagementConfig: expandCostManagementConfig(d.Get("cost_management_config")),
-<% end -%>
 	}
 
 	v:= d.Get("enable_shielded_nodes")
@@ -2145,11 +2186,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error setting enable_l4_ilb_subsetting: %s", err)
 	}
 <% end -%>
-<% unless version == 'ga' %>
 	if err := d.Set("cost_management_config", flattenManagementConfig(cluster.CostManagementConfig)); err != nil {
 		return fmt.Errorf("Error setting cost_management_config: %s", err)
 	}
-<% end -%>
 	if err := d.Set("confidential_nodes", flattenConfidentialNodes(cluster.ConfidentialNodes)); err != nil {
 		return err
 	}
@@ -2569,7 +2608,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 <% end -%>
 
-<% unless version == 'ga' -%>
 	if d.HasChange("cost_management_config") {
 		c := d.Get("cost_management_config")
 		req := &container.UpdateClusterRequest{
@@ -2587,7 +2625,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s cost management config has been updated", d.Id())
 	}
 
-<% end -%>
 	if d.HasChange("authenticator_groups_config") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -3764,8 +3801,18 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 	npd := &container.AutoprovisioningNodePoolDefaults{
 		OauthScopes:    convertStringArr(config["oauth_scopes"].([]interface{})),
 		ServiceAccount: config["service_account"].(string),
+		DiskSizeGb:     int64(config["disk_size"].(int)),
+		DiskType:       config["disk_type"].(string),
 		ImageType:      config["image_type"].(string),
 		BootDiskKmsKey: config["boot_disk_kms_key"].(string),
+	}
+
+	if v, ok := config["shielded_instance_config"]; ok && len(v.([]interface{})) > 0 {
+		conf := v.([]interface{})[0].(map[string]interface{})
+		npd.ShieldedInstanceConfig = &container.ShieldedInstanceConfig{
+			EnableSecureBoot:          conf["enable_secure_boot"].(bool),
+			EnableIntegrityMonitoring: conf["enable_integrity_monitoring"].(bool),
+		}
 	}
 
 <% unless version == 'ga' -%>
@@ -4089,7 +4136,6 @@ func expandDefaultMaxPodsConstraint(v interface{}) *container.MaxPodsConstraint 
 	}
 }
 
-<% unless version == 'ga' -%>
 func expandCostManagementConfig(configured interface{}) *container.CostManagementConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 {
@@ -4102,7 +4148,6 @@ func expandCostManagementConfig(configured interface{}) *container.CostManagemen
 		ForceSendFields: []string{"Enabled"},
 	}
 }
-<% end -%>
 
 func expandResourceUsageExportConfig(configured interface{}) *container.ResourceUsageExportConfig {
 	l := configured.([]interface{})
@@ -4242,7 +4287,7 @@ func flattenNodePoolDefaults(c *container.NodePoolDefaults) []map[string]interfa
 	if c.NodeConfigDefaults != nil && c.NodeConfigDefaults.GcfsConfig != nil {
 			result["node_config_defaults"] = flattenNodeConfigDefaults(c.NodeConfigDefaults)
 	}
-	
+
 	return []map[string]interface{}{result}
 }
 <% end -%>
@@ -4722,11 +4767,14 @@ func flattenAutoProvisioningDefaults(a *container.AutoprovisioningNodePoolDefaul
 	r := make(map[string]interface{})
 	r["oauth_scopes"] = a.OauthScopes
 	r["service_account"] = a.ServiceAccount
+	r["disk_size"] = a.DiskSizeGb
+	r["disk_type"] = a.DiskType
 	r["image_type"] = a.ImageType
 	<% unless version == 'ga' -%>
 	r["min_cpu_platform"] = a.MinCpuPlatform
 	<% end -%>
 	r["boot_disk_kms_key"] = a.BootDiskKmsKey
+	r["shielded_instance_config"] = flattenShieldedInstanceConfig(a.ShieldedInstanceConfig)
 
 	return []map[string]interface{}{r}
 }
@@ -4810,7 +4858,6 @@ func flattenMeshCertificates(c *container.MeshCertificates) []map[string]interfa
 	}
 }
 
-<% unless version == 'ga' -%>
 func flattenManagementConfig(c *container.CostManagementConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -4822,7 +4869,6 @@ func flattenManagementConfig(c *container.CostManagementConfig) []map[string]int
 	}
 }
 
-<% end -%>
 func flattenDatabaseEncryption(c *container.DatabaseEncryption) []map[string]interface{} {
 	if c == nil {
 		return nil
