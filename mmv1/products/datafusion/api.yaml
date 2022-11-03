@@ -50,7 +50,6 @@ objects:
     base_url: "projects/{{project}}/locations/{{region}}/instances"
     create_url: projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}
     update_verb: :PATCH
-    update_mask: true 
     description: |
       Represents a Data Fusion instance.
     references: !ruby/object:Api::Resource::ReferenceLinks
