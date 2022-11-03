@@ -758,6 +758,9 @@ objects:
                   name: httpGet
                   description: |-
                     HttpGet specifies the http request to perform.
+                  exactly_one_of:
+                    - template.0.spec.0.containers.0.liveness_probe.0.http_get
+                    - template.0.spec.0.containers.0.liveness_probe.0.grpc
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
