@@ -109,7 +109,7 @@ var schemaBlueGreenSettings = &schema.Schema{
 						"batch_soak_duration": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Default:     "0s",
+							Computed:	 true,
 							Description: `Soak time after each batch gets drained.`,
 						},
 					},
@@ -118,7 +118,7 @@ var schemaBlueGreenSettings = &schema.Schema{
 			"node_pool_soak_duration": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "3600s",
+				Computed:    true,
 				Description: `Time needed after draining entire blue pool. After this period, blue pool will be cleaned up.`,
 			},
 		},
