@@ -96,12 +96,14 @@ var schemaBlueGreenSettings = &schema.Schema{
 						"batch_percentage": {
 							Type:         schema.TypeFloat,
 							Optional:     true,
+							Computed:	  true,
 							Description:  `Percentage of the blue pool nodes to drain in a batch.`,
 							ValidateFunc: validation.FloatBetween(0.0, 1.0),
 						},
 						"batch_node_count": {
 							Type:        schema.TypeInt,
 							Optional:    true,
+							Computed:    true,
 							Description: `Number of blue nodes to drain in a batch.`,
 						},
 						"batch_soak_duration": {
