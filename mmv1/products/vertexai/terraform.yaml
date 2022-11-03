@@ -89,6 +89,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pre_create: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
       pre_update: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
       pre_delete: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/vertex_ai_featurestore_entitytype.go.erb
+      encoder: templates/terraform/encoders/vertex_ai_featurestore_entitytype.go.erb
   MetadataStore: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: false
     id_format: '{{name}}'
