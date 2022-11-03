@@ -131,16 +131,6 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: 'error'
         message: 'message'
-    parameters:
-      - !ruby/object:Api::Type::String
-        name: 'deletion_policy'
-        description: |
-          (Optional) Set to `ABANDON` to allow the WebApp to be untracked from terraform state
-          rather than deleted upon `terraform destroy`. This is useful becaue the WebApp may be 
-          serving traffic. Set to `DELETE` to delete the WebApp. Default to `ABANDON`
-        input: true
-        url_param_only: true
-        default_value: ABANDON
     properties:
       - !ruby/object:Api::Type::String
         name: name
