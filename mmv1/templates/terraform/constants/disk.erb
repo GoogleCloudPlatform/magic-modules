@@ -132,6 +132,16 @@ func diskImageFamilyEquals(imageName, familyName string) bool {
 		}
 	}
 
+	// We have to check for amd64 because of cases like:
+	// image name: ubuntu-2210-kinetic-amd64-v20221022, family name: ubuntu-2210 (should not suppress)
+	if strings.Contains(imageName, strings.TrimSuffix(familyName, "-amd64")) {
+		if strings.Contains(imageName, "-amd64") {
+			return strings.HasSuffix(familyName, "-amd64")
+		} else {
+			return !strings.HasSuffix(familyName, "-amd64")
+		}
+	}
+
 	if suppressCanonicalFamilyDiff(imageName, familyName) {
 		return true
 	}
