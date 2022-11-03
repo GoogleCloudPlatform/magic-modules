@@ -5,11 +5,12 @@
 		return nil, err
 	}
 
-	if v, ok := d.GetOk("featurestore"); ok {
-		re := regexp.MustCompile("projects/(.+)/locations/(.+)/featurestores/(.+)$")
-		if parts := re.FindStringSubmatch(v.(string)); parts != nil {
-			d.Set("region", parts[2])
-		}
+	name := d.Get("name").(string)
+	re := regexp.MustCompile("projects/(.+)/locations/(.+)/featurestores/(.+)$")
+
+	parts := re.FindStringSubmatch(name)
+	if err := d.Set("region", parts[2]); err != nil {
+		return nil, fmt.Errorf("Error setting region: %s", err)
 	}
 
 	return []*schema.ResourceData{d}, nil
