@@ -15490,9 +15490,6 @@ objects:
           A list of SslCertificate resources that are used to authenticate
           connections between users and the load balancer. At least one SSL
           certificate must be specified.
-        exactly_one_of:
-          - sslCertificates
-          - certificateMap
         update_verb: :POST
         update_url:
           'projects/{{project}}/targetHttpsProxies/{{name}}/setSslCertificates'
@@ -15507,9 +15504,6 @@ objects:
           A reference to the CertificateMap resource uri that identifies a certificate map 
           associated with the given target proxy. This field can only be set for global target proxies.
           Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificateMaps/{resourceName}`.
-        exactly_one_of:
-          - sslCertificates
-          - certificateMap
         update_verb: :POST
         update_url:
           'projects/{{project}}/global/targetHttpsProxies/{{name}}/setCertificateMap'
