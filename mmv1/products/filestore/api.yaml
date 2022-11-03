@@ -144,6 +144,12 @@ objects:
                 File share capacity in GiB. This must be at least 1024 GiB
                 for the standard tier, or 2560 GiB for the premium tier.
               required: true
+            - !ruby/object:Api::Type::String
+              name: 'sourceBackup'
+              description: |
+                The resource name of the backup, in the format
+                projects/{projectId}/locations/{locationId}/backups/{backupId},
+                that this file share has been restored from.
             - !ruby/object:Api::Type::Array
               name: 'nfsExportOptions'
               description: |
@@ -188,13 +194,6 @@ objects:
                       An integer representing the anonymous group id with a default value of 65534.
                       Anon_gid may only be set with squashMode of ROOT_SQUASH. An error will be returned
                       if this field is specified for other squashMode settings.
-            - !ruby/object:Api::Type::String
-              name: 'sourceBackup'
-              description: |
-                The resource name of the backup, in the format
-                projects/{projectId}/locations/{locationId}/backups/{backupId},
-                that this file share has been restored from.
-              required: false
               input: true
       - !ruby/object:Api::Type::Array
         name: 'networks'
@@ -426,7 +425,6 @@ objects:
         description: |
           The service tier of the source Cloud Filestore instance that this backup is created from.
         values:
-          - :TIER_UNSPECIFIED
           - :STANDARD
           - :PREMIUM
           - :BASIC_HDD
