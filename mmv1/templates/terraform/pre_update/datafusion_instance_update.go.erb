@@ -14,6 +14,14 @@
 -%>
 updateMask := []string{}
 
+if d.HasChange("enable_stackdriver_logging") {
+	updateMask = append(updateMask, "enableStackdriverLogging")
+}
+
+if d.HasChange("enable_stackdriver_monitoring") {
+	updateMask = append(updateMask, "enableStackdriverMonitoring")
+}
+
 if d.HasChange("enable_rbac") {
     updateMask = append(updateMask, "enableRbac")
 }
