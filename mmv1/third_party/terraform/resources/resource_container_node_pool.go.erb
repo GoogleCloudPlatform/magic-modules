@@ -83,11 +83,13 @@ var schemaBlueGreenSettings = &schema.Schema{
 	Type:     schema.TypeList,
 	Optional: true,
 	Computed: true,
+	MaxItems: 1,
 	Elem: &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"standard_rollout_policy": {
 				Type:        schema.TypeList,
 				Required:    true,
+				MaxItems:    1,
 				Description: `Standard rollout policy is the default policy for blue-green.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
