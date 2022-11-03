@@ -56,6 +56,7 @@ module Overrides
 
         validator = Overrides::Validator.new(api, overrides)
         validator.run
+
         build_product(api, overrides, resource: res_override_class, property: prop_override_class)
       end
 
@@ -131,7 +132,7 @@ module Overrides
         new_prop = build_primitive_property(old_property,
                                             property_overrides["#{prefix}#{old_property.name}"],
                                             override_classes)
-        if old_property.nested_properties?
+        unless old_property.nested_properties.nil?
           new_props = old_property.nested_properties.map do |p|
             build_property(p, property_overrides, override_classes,
                            "#{prefix}#{old_property.name}.")

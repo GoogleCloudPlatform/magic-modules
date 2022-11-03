@@ -1,5 +1,4 @@
 resource "google_vertex_ai_featurestore" "featurestore" {
-  provider = google-beta
   name     = "<%= ctx[:vars]['name'] %>"
   labels = {
     foo = "bar"

@@ -27,6 +27,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           dataset_id: "example_dataset"
           account_name: "bqowner"
       - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_dataset_with_max_time_travel_hours"
+        primary_resource_id: "dataset"
+        skip_docs: true
+        vars:
+          dataset_id: "example_dataset"
+          account_name: "bqowner"
+      - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_dataset_cmek"
         skip_test: true
         primary_resource_id: "dataset"
