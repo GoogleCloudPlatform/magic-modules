@@ -471,7 +471,7 @@ is set to true. Defaults to ZONAL.`,
 									"query_plans_per_minute": {
 										Type:         schema.TypeInt,
 										Optional:     true,
-										Default:      5,
+										Computed:     true,
 										ValidateFunc: validation.IntBetween(0, 20),
 										AtLeastOneOf: insightsConfigKeys,
 										Description:  `Number of query execution plans captured by Insights per minute for all queries combined. Between 0 and 20. Default to 5.`,
