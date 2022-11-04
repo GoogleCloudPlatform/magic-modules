@@ -297,7 +297,9 @@ objects:
               properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: 'saveFindings'
-                  required: true
+                  exactly_one_of:
+                    - save_findings
+                    - pub_sub
                   description: |
                     Schedule for triggered jobs
                   properties:
@@ -345,6 +347,19 @@ objects:
                             - :DATASTORE_COLUMNS
                             - :BIG_QUERY_COLUMNS
                             - :ALL_COLUMNS
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'pubSub'
+                  exactly_one_of:
+                    - save_findings
+                    - pub_sub
+                  description: |
+                    Publish a message into a given Pub/Sub topic when the job completes.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'topic'
+                      required: true
+                      description: |
+                        Cloud Pub/Sub topic to send notifications to.
   - !ruby/object:Api::Resource
     name: 'InspectTemplate'
     create_url:  "{{parent}}/inspectTemplates"
