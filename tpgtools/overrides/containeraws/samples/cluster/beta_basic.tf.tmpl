@@ -93,10 +93,5 @@ resource "google_container_aws_cluster" "primary" {
     }
   }
 
-  monitoring_config {
-    managed_prometheus_config {
-      enabled = false
-    }
-  }
 }
 
