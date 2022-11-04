@@ -1,14 +1,21 @@
 config := meta.(*Config)
-
-// current import_formats can't import fields with forward slashes in their value
-if err := parseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
+if err := parseImportId([]string{
+	"(?P<featurestore>.+)/entityTypes/(?P<name>[^/]+)",
+}, d, config); err != nil {
 	return nil, err
 }
 
-name := d.Get("name").(string)
+// Replace import id for the resource id
+id, err := replaceVars(d, config, "{{featurestore}}/entityTypes/{{name}}")
+if err != nil {
+	return nil, fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+featurestore := d.Get("featurestore").(string)
 
 re := regexp.MustCompile("^projects/(.+)/locations/(.+)/featurestores/(.+)$")
-if parts := re.FindStringSubmatch(name); parts != nil {
+if parts := re.FindStringSubmatch(featurestore); parts != nil {
 	d.Set("region", parts[2])
 }
 
