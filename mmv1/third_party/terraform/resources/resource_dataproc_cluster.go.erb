@@ -638,6 +638,35 @@ func resourceDataprocCluster() *schema.Resource {
 											},
 										},
 									},
+									"reservation_affinity": {
+										Type:         schema.TypeList,
+										Optional:     true,
+										AtLeastOneOf: gceClusterConfigKeys,
+										Computed:     true,
+										MaxItems:     1,
+										Description:  `Reservation Affinity for consuming Zonal reservation.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"consume_reservation_tyoe": {
+													Type:         schema.TypeEnum,
+													Optional:     true,
+													Default:      false,
+													AtLeastOneOf: schieldedInstanceConfigKeys,
+													ForceNew:     true,
+													Description:  `Defines whether instances have Secure Boot enabled.`,
+												},
+												"key": {
+													Type:         schema.String,
+													Optional:     true,
+													Default:      '',
+													AtLeastOneOf: schieldedInstanceConfigKeys,
+													ForceNew:     true,
+													Description:  `Corresponds to the label key of reservation resource.`,
+
+												},
+											},
+										},
+									},
 								},
 							},
 						},
