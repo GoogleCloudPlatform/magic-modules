@@ -37,16 +37,16 @@ func datasourceContainerClusterRead(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	Id := containerClusterFullName(project, location, clusterName)
+	id := containerClusterFullName(project, location, clusterName)
 
-	d.SetId(Id)
+	d.SetId(id)
 
 	if err := resourceContainerClusterRead(d, meta); err != nil {
 		return err
 	}
 
 	if d.Id() == "" {
-		return fmt.Errorf("%s not found", Id)
+		return fmt.Errorf("%s not found", id)
 	}
 
 	return nil
