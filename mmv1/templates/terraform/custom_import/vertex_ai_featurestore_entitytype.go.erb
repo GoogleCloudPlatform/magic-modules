@@ -1,17 +1,15 @@
-	config := meta.(*Config)
+config := meta.(*Config)
 
-	if err := parseImportId([]string{
-		"projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/featurestores/(?P<featurestore>[^/]+)/entityTypes/(?P<name>[^/]*)",
-		"(?P<project>[^/]+)/(?P<location>[^/]+)/(?P<featurestore>[^/]+)/(?P<name>[^/]+)",
-		"(?P<name>[^/]+)",
-	}, d, config); err != nil {
-		return nil, err
-	}
+// current import_formats can't import fields with forward slashes in their value
+if err := parseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
+	return nil, err
+}
 
-	location := d.Get("location").(string)
+name := d.Get("name").(string)
 
-	if err := d.Set("region", location); err != nil {
-		return nil, fmt.Errorf("Error setting region: %s", err)
-	}
+re := regexp.MustCompile("^projects/(.+)/locations/(.+)/featurestores/(.+)$")
+if parts := re.FindStringSubmatch(name); parts != nil {
+	d.Set("region", parts[2])
+}
 
-	return []*schema.ResourceData{d}, nil
+return []*schema.ResourceData{d}, nil
