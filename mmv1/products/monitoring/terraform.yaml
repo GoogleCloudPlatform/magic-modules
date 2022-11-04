@@ -155,6 +155,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       encoder: templates/terraform/encoders/monitoring_service.go.erb
 
+  GenericService: !ruby/object:Overrides::Terraform::ResourceOverride
+    legacy_name: 'google_monitoring_service'
+    id_format: "projects/{{project}}/services/{{service_id}}"
+    import_format: ["projects/{{project}}/services/{{service_id}}"]
+    error_retry_predicates: ["isMonitoringConcurrentEditError"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "monitoring_service_example"
+        primary_resource_id: "my_service"
+        vars:
+          service_id: "my-service"
+
   Slo: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
