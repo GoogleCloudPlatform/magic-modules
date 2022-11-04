@@ -20,17 +20,45 @@ resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
       backend_service = google_compute_region_backend_service.home.id
     }
     weighted_backend_services {
-      backend_service = google_compute_region_backend_service.home.id
+      backend_service = google_compute_region_backend_service.login.id
       weight = 200
       header_action {
         request_headers_to_add {
-          header_name = "foo-request"
+          header_name = "foo-request-1"
           header_value = "bar"
           replace = true
         }
         request_headers_to_remove = ["fizz"]
         response_headers_to_add {
-          header_name = "foo-response"
+          header_name = "foo-response-1"
+          header_value = "bar"
+          replace = true
+        }
+        response_headers_to_remove = ["buzz"]
+      }
+    }
+    weighted_backend_services {
+      backend_service = google_compute_region_backend_service.home.id
+      weight = 100
+      header_action {
+        request_headers_to_add {
+          header_name = "foo-request-1"
+          header_value = "bar"
+          replace = true
+        }
+        request_headers_to_add {
+          header_name = "foo-request-2"
+          header_value = "bar"
+          replace = true
+        }
+        request_headers_to_remove = ["fizz"]
+        response_headers_to_add {
+          header_name = "foo-response-2"
+          header_value = "bar"
+          replace = true
+        }
+        response_headers_to_add {
+          header_name = "foo-response-1"
           header_value = "bar"
           replace = true
         }
