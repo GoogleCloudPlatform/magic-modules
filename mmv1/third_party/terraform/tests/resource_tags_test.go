@@ -791,7 +791,7 @@ func testAccTagsLocationTagBinding_locationTagBindingbasic(t *testing.T) {
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 		},
-		CheckDestroy: testAccCheckTagsTagBindingDestroyProducer(t),
+		CheckDestroy: testAccCheckTagsLocationTagBindingDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccTagsLocationTagBinding_locationTagBindingBasicExample(context),
