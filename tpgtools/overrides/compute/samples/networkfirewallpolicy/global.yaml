@@ -1,4 +1,5 @@
 updates:
+- resource: ./global_update.tf.tmpl
 variables:
 - name: policy
   type: resource_name
