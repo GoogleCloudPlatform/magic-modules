@@ -21,6 +21,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://analyticshub.googleapis.com/v1beta1/
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://analyticshub.googleapis.com/v1/    
 apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Bigquery Analytics Hub API
@@ -28,7 +31,6 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: "DataExchange"
-    min_version: beta
     base_url: projects/{{project}}/locations/{{location}}/dataExchanges
     create_url: projects/{{project}}/locations/{{location}}/dataExchanges?data_exchange_id={{data_exchange_id}}
     self_link: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}
@@ -38,7 +40,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         "Official Documentation": "https://cloud.google.com/bigquery/docs/analytics-hub-introduction"
-      api: "https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1beta1/projects.locations.dataExchanges"
+      api: "https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.dataExchanges"
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
       method_name_separator: ':'
@@ -94,7 +96,6 @@ objects:
           Base64 encoded image representing the data exchange.
   - !ruby/object:Api::Resource
     name: "Listing"
-    min_version: beta
     base_url: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings
     create_url: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings?listing_id={{listing_id}}
     self_link: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}
@@ -104,7 +105,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         "Official Documentation": "https://cloud.google.com/bigquery/docs/analytics-hub-introduction"
-      api: "https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1beta1/projects.locations.dataExchanges.listings"
+      api: "https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.dataExchanges.listings"
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
       method_name_separator: ':'
