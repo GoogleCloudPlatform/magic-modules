@@ -121,6 +121,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_create: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
       pre_delete: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
+      custom_import: templates/terraform/custom_import/vertex_ai_featurestore_entitytype.go.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/vertex_ai_featurestore_entitytype.go.erb
+      encoder: templates/terraform/encoders/vertex_ai_featurestore_entitytype.go.erb
   FeaturestoreEntitytypeFeature:  !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{%entitytype}}/features/{{name}}"]
     autogen_async: false
