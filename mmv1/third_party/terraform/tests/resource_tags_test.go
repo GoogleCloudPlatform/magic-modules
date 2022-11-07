@@ -23,10 +23,10 @@ func TestAccTags(t *testing.T) {
 		"tagValueBasic":                     testAccTagsTagValue_tagValueBasic,
 		"tagValueUpdate":                    testAccTagsTagValue_tagValueUpdate,
 		"tagBindingBasic":                   testAccTagsTagBinding_tagBindingBasic,
+		"tagsLocationTagBindingBasic":       testAccTagsLocationTagBinding_locationTagBindingbasic,
 		"tagValueIamBinding":                testAccTagsTagValueIamBinding,
 		"tagValueIamMember":                 testAccTagsTagValueIamMember,
 		"tagValueIamPolicy":                 testAccTagsTagValueIamPolicy,
-		"tagLocationBinding":                testAccTagsLocationTagBinding_locationTagBindingbasic,
 	}
 
 	for name, tc := range testCases {
@@ -843,7 +843,6 @@ resource "google_tags_location_tag_binding" "binding" {
 	tag_value = "tagValues/${google_tags_tag_value.value.name}"
 	location = "us-central1"
 }
-
 `, context)
 }
 
@@ -854,7 +853,7 @@ func testAccCheckTagsLocationTagBindingDestroyProducer(t *testing.T) func(s *ter
 				continue
 			}
 			if strings.HasPrefix(name, "data.") {
-				continue	
+				continue
 			}
 
 			config := googleProviderConfig(t)
