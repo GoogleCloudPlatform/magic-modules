@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -821,23 +820,30 @@ resource "google_tags_tag_value" "value" {
 	description = "For foo%{random_suffix} resources."
 }
 
-resource "google_sql_database_instance" "main" {
-	name             = "tf-test-main-instance"
-	database_version = "POSTGRES_14"
-	region           = "us-central1"
-	deletion_protection = false
-	settings {
-	  # Second-generation instance tiers are based on the machine
-	  # type. See argument reference below.
-	  tier = "db-f1-micro"
+resource "google_cloud_run_service" "default" {
+	name     = "cloudrun-srv"
+	location = "us-central1"
+  
+	template {
+	  spec {
+		containers {
+		  image = "us-docker.pkg.dev/cloudrun/container/hello"
+		}
+	  }
+	}
+  
+	traffic {
+	  percent         = 100
+	  latest_revision = true
 	}
 }
 
 resource "google_tags_location_tag_binding" "binding" {
-	parent = "//sqladmin.googleapis.com/projects/${google_project.project.number}/instances/${google_sql_database_instance.main.id}"
+	parent = "//run.googleapis.com/projects/crest-359621/locations/us-central1/services/${google_cloud_run_service.default.name}"
 	tag_value = "tagValues/${google_tags_tag_value.value.name}"
 	location = "us-central1"
 }
+
 `, context)
 }
 
