@@ -101,6 +101,8 @@ func TestAccBigQueryDatasetAccess_authorizedDataset(t *testing.T) {
 }
 
 func TestAccBigQueryDatasetAccess_authorizedRoutine(t *testing.T) {
+	// Multiple fine-grained resources
+	skipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -110,28 +112,25 @@ func TestAccBigQueryDatasetAccess_authorizedRoutine(t *testing.T) {
 	}
 
 	expected := map[string]interface{}{
-		"dataset": map[string]interface{}{
-			"routine": map[string]interface{}{
-				"projectId": getTestProjectFromEnv(),
-				"datasetId": context["public_dataset"],
-				"routineId": context["public_routine"],
-			},
-			"targetTypes": []interface{}{"VIEWS"},
+		"routine": map[string]interface{}{
+			"projectId": getTestProjectFromEnv(),
+			"datasetId": context["public_dataset"],
+			"routineId": context["public_routine"],
 		},
 	}
 
 	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigQueryDatasetAccessDestroyProducer(t),
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryDatasetAccess_authorizedRoutine(context),
-				Check:  testAccCheckBigQueryDatasetAccessPresent(t, "google_bigquery_dataset.private_dataset", expected),
+				Check:  testAccCheckBigQueryDatasetAccessPresent(t, "google_bigquery_dataset.private", expected),
 			},
 			{
-				Config: testAccBigQueryDatasetAccess_destroy(context["private_dataset"], "private_dataset"),
-				Check:  testAccCheckBigQueryDatasetAccessAbsent(t, "google_bigquery_dataset.private_dataset", expected),
+				// Destroy step instead of CheckDestroy so we can check the access is removed without deleting the dataset
+				Config: testAccBigQueryDatasetAccess_destroy(context["private_dataset"].(string), "private_dataset"),
+				Check:  testAccCheckBigQueryDatasetAccessAbsent(t, "google_bigquery_dataset.private", expected),
 			},
 		},
 	})
