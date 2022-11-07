@@ -45,7 +45,7 @@ func TestAccIAMWorkforcePoolWorkforcePoolProvider_oidc(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			{
+            {
 			    Config: testAccIAMWorkforcePoolWorkforcePoolProvider_destroy(context),
 			    Check: resource.ComposeTestCheckFunc(
 			            testAccCheckIAMWorkforcePoolWorkforcePoolProviderDestroyProducer(t),
