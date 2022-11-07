@@ -821,7 +821,7 @@ resource "google_tags_tag_value" "value" {
 }
 
 resource "google_cloud_run_service" "default" {
-	name     = "cloudrun-srv"
+	name     = "tf-test-cloudrun-srv"
 	location = "us-central1"
   
 	template {
