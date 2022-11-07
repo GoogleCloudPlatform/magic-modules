@@ -33,13 +33,13 @@ module GoogleInSpec
   module <%= product_ns %>
     module Property
       class <%= class_name -%>
-<% if property.nested_properties? -%>
+<% if !property.nested_properties.nil? -%>
 <% property.nested_properties.each do |prop| -%>
 
         attr_reader :<%= prop.out_name %>
 <% end # property.nested_properties.each -%>
 
-<% end # if property.nested_properties? -%>
+<% end # !property.nested_properties.nil? -%>
         def initialize(args = nil, parent_identifier = nil)
           return if args.nil?
           @parent_identifier = parent_identifier

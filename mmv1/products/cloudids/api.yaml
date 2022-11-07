@@ -1,0 +1,111 @@
+# Copyright 2022 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: CloudIds
+display_name: Cloud Intrusion Detection Service
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://ids.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloudids
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Cloud Intrusion Detection Service (IDS) API
+    url: https://console.cloud.google.com/apis/library/ids.googleapis.com/
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 2000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Endpoint'
+    base_url: 'projects/{{project}}/locations/{{location}}/endpoints'
+    create_url: 'projects/{{project}}/locations/{{location}}/endpoints?endpointId={{name}}'
+    self_link: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
+    create_verb: :POST
+    input: true
+    description: |
+      Cloud IDS is an intrusion detection service that provides threat detection for intrusions, malware, spyware, and command-and-control attacks on your network.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      api: 'https://cloud.google.com/intrusion-detection-system/docs/configuring-ids'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        required: true
+        url_param_only: true
+        input: true
+        description: |
+          The location for the endpoint.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        input: true
+        description: |
+          Name of the endpoint in the format projects/{project_id}/locations/{locationId}/endpoints/{endpointId}.
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          Creation timestamp in RFC 3339 text format.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: |
+          Last update timestamp in RFC 3339 text format.
+      - !ruby/object:Api::Type::String
+        name: 'network'
+        required: true
+        input: true
+        description: |
+          Name of the VPC network that is connected to the IDS endpoint. This can either contain the VPC network name itself (like "src-net") or the full URL to the network (like "projects/{project_id}/global/networks/src-net").
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of the endpoint.
+      - !ruby/object:Api::Type::String
+        name: 'endpointForwardingRule'
+        output: true
+        description: |
+          URL of the endpoint's network address to which traffic is to be sent by Packet Mirroring.
+      - !ruby/object:Api::Type::String
+        name: 'endpointIp'
+        output: true
+        description: |
+          Internal IP address of the endpoint's network entry point.
+      - !ruby/object:Api::Type::Enum
+        name: 'severity'
+        required: true
+        description: |
+          The minimum alert severity level that is reported by the endpoint.
+        values:
+          - :INFORMATIONAL
+          - :LOW
+          - :MEDIUM
+          - :HIGH
+          - :CRITICAL
