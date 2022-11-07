@@ -558,6 +558,41 @@ objects:
                 description: |
                   The Cloud KMS key name to use for PD disk encryption for all instances in the cluster.
           - !ruby/object:Api::Type::NestedObject
+            name: 'metricConfig'
+            description: |
+              Dataproc metric config.
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'metrics'
+                description: |
+                  Dataproc metric config.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::Enum
+                      name: 'metricSource'
+                      description: |
+                        A source for the collection of Dataproc OSS metrics.
+
+                        See available OSS metrics:
+                        https://cloud.google.com//dataproc/docs/guides/monitoring#available_oss_metrics
+                      values:
+                      - :METRIC_SOURCE_UNSPECIFIED
+                      - :MONITORING_AGENT_DEFAULTS
+                      - :HDFS
+                      - :SPARK
+                      - :YARN
+                      - :SPARK_HISTORY_SERVER
+                      - :HIVESERVER2
+                    - !ruby/object:Api::Type::Array
+                      name: 'metricOverrides'
+                      output: true
+                      item_type: Api::Type::String                      
+                      description: |
+                        Specify one or more available OSS metrics to
+                        collect for the metric course (for the SPARK
+                        metric source, any Spark metric can be
+                        specified).
+          - !ruby/object:Api::Type::NestedObject
             name: 'securityConfig'
             description: |
               Kerberos config holder.
