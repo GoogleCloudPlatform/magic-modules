@@ -1,0 +1,13 @@
+resource "google_firebase_hosting_site" "default" {
+  provider = google-beta
+  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
+  site_id = "<%= ctx[:vars]['site_id'] %>"
+}
+
+resource "google_firebase_hosting_site_config" "default" {
+  provider = google-beta
+  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
+  site_id = "<%= ctx[:vars]['site_id'] %>"
+
+  depends_on = [google_firebase_hosting_site.default]
+}

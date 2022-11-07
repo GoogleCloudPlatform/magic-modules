@@ -32,6 +32,27 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           site_id: site-with-app
         test_env_vars:
           project_id: :PROJECT_NAME
+  SiteConfig: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ['projects/{{project}}/sites/{{site_id}}/config', 'sites/{{site_id}}/config', '{{site_id}}/config']
+    skip_delete: true # SiteConfig is a singleton child of Site
+    skip_sweeper: true # no sweeper
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebasehosting_siteconfig_basic"
+        min_version: "beta"
+        primary_resource_id: "default"
+        vars:
+          site_id: site-config
+        test_env_vars:
+          project_id: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebasehosting_siteconfig_full"
+        min_version: "beta"
+        primary_resource_id: "full"
+        vars:
+          site_id: site-config-full
+        test_env_vars:
+          project_id: :PROJECT_NAME
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

@@ -1,0 +1,15 @@
+resource "google_firebase_hosting_site" "default" {
+  provider = google-beta
+  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
+  site_id = "<%= ctx[:vars]['site_id'] %>"
+}
+
+resource "google_firebase_hosting_site_config" "full" {
+  provider = google-beta
+  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
+  site_id = "<%= ctx[:vars]['site_id'] %>"
+  max_versions = 100
+  cloud_logging_enabled = true
+
+  depends_on = [google_firebase_hosting_site.default]
+}

@@ -65,3 +65,36 @@ objects:
         name: defaultUrl
         output: true
         description: The default URL for the site in the form of https://{name}.web.app
+  - !ruby/object:Api::Resource
+    name: 'SiteConfig'
+    min_version: beta
+    base_url: projects/{{project}}/sites/{{site_id}}
+    self_link: sites/{{site_id}}/config
+    create_url: sites/{{site_id}}/config?update_mask=maxVersions,cloudLoggingEnabled # SiteConfig is created as part of Site creation, treat as an update
+    create_verb: :PATCH
+    update_verb: :PATCH
+    update_mask: true
+    description: | 
+      A `SiteConfig` contains metadata associated with a specific site that
+      controls Firebase Hosting serving behavior
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: site_id
+        description: |
+          Required. Immutable. A globally unique identifier for the Hosting site. This identifier is
+          used to construct the Firebase-provisioned subdomains for the site, so it must also be a valid
+          domain name label.
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: maxVersions
+        description: |
+          The number of FINALIZED versions that will be held for a site before automatic deletion. When a new
+          version is deployed, content for versions in storage in excess of this number will be deleted, and
+          will no longer be billed for storage usage. Oldest versions will be deleted first; Default is 100
+        default_value: 100
+      - !ruby/object:Api::Type::Boolean
+        name: cloudLoggingEnabled
+        description: |
+          Whether or not web requests made by site visitors are logged via Cloud Logging.
